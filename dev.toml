@@ -5,17 +5,16 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "background_assistant_dev"
+name = "frontengine_dev"
 version = "0.0.1"
 authors = [
-    { name = "JE-Chen", email = "zenmailman@gmail.com" },
+    { name = "JE-Chen", email = "jechenmailman@gmail.com" },
 ]
 description = ""
-readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.8"
 license = { text = "MIT" }
 classifiers = [
-    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
     "Development Status :: 2 - Pre-Alpha",
     "Environment :: Win32 (MS Windows)",
     "Environment :: MacOS X",
@@ -25,7 +24,16 @@ classifiers = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/JE-Chen/Integration-testing-environment"
+Homepage = ""
+Documentation = ""
+Code = ""
+
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
+
+[tool.setuptools]
+license-files = ["LICENSE"]
 
 [tool.setuptools.packages]
 find = { namespaces = false }
