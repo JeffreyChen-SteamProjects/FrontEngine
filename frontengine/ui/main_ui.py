@@ -1,9 +1,8 @@
 import sys
 
-from PySide6.QtGui import Qt
 from PySide6.QtWidgets import QMainWindow, QApplication, QGridLayout
 
-from frontengine.ui.main_widget import MainWidget
+from frontengine.show.text.draw_text import TextWidget
 
 
 class FrontEngineMainUI(QMainWindow):
@@ -12,8 +11,8 @@ class FrontEngineMainUI(QMainWindow):
         super().__init__()
         self.grid_layout = QGridLayout(self)
         self.grid_layout.setContentsMargins(0, 0, 0, 0)
-        self.main_widget = MainWidget()
-        self.main_widget.showMaximized()
+        self.test_widget = TextWidget()
+        self.test_widget.showMaximized()
 
 
 def start_front_engine():
