@@ -1,8 +1,8 @@
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QWidget
+from PySide6.QtWebEngineWidgets import QWebEngineView
 
 
-class WebWidget(QWidget):
+class WebWidget(QWebEngineView):
 
     def __init__(self):
         super().__init__()
@@ -12,3 +12,5 @@ class WebWidget(QWidget):
             Qt.WindowType.WindowStaysOnTopHint
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.load("http://qt-project.org/")
+        self.setWindowOpacity(0.2)

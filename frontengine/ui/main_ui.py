@@ -2,7 +2,7 @@ import sys
 
 from PySide6.QtWidgets import QMainWindow, QApplication, QGridLayout
 
-from frontengine.show.text.draw_text import TextWidget
+from frontengine.show.web.webview import WebWidget
 
 
 class FrontEngineMainUI(QMainWindow):
@@ -11,7 +11,7 @@ class FrontEngineMainUI(QMainWindow):
         super().__init__()
         self.grid_layout = QGridLayout(self)
         self.grid_layout.setContentsMargins(0, 0, 0, 0)
-        self.test_widget = TextWidget()
+        self.test_widget = WebWidget()
         self.test_widget.showMaximized()
 
 
