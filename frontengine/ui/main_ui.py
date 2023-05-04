@@ -2,7 +2,7 @@ import sys
 
 from PySide6.QtWidgets import QMainWindow, QApplication, QGridLayout
 
-from frontengine.show.web.webview import WebWidget
+from frontengine.show.gif.paint_gif import GifWidget
 
 
 class FrontEngineMainUI(QMainWindow):
@@ -11,7 +11,7 @@ class FrontEngineMainUI(QMainWindow):
         super().__init__()
         self.grid_layout = QGridLayout(self)
         self.grid_layout.setContentsMargins(0, 0, 0, 0)
-        self.test_widget = WebWidget()
+        self.test_widget = GifWidget()
         self.test_widget.showMaximized()
 
 
