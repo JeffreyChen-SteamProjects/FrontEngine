@@ -3,7 +3,7 @@ from pathlib import Path
 
 from PySide6.QtCore import Qt, QRect
 from PySide6.QtGui import QMovie, QPainter
-from PySide6.QtWidgets import QWidget, QLabel, QGridLayout
+from PySide6.QtWidgets import QWidget, QLabel
 
 
 class GifWidget(QWidget):
@@ -17,7 +17,7 @@ class GifWidget(QWidget):
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.gif_label = QLabel()
-        self.gif_label.setWindowOpacity(0.9)
+        self.gif_label.setWindowOpacity(0.2)
         self.gif_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.gif_path = Path(os.getcwd() + "/test.gif")
         self.movie = QMovie(str(self.gif_path))
