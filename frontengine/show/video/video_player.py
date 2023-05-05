@@ -22,5 +22,7 @@ class VideoWidget(QVideoWidget):
         self.video_file_path = Path(os.getcwd() + "/test_mp4.mp4")
         self.media_player.setSource(QUrl.fromLocalFile(str(self.video_file_path)))
         self.media_player.setVideoOutput(self)
+        self.media_player.setPlaybackRate(1)
+        self.media_player.audioOutput().setVolume(100)
         self.media_player.play()
 

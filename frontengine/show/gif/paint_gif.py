@@ -17,7 +17,6 @@ class GifWidget(QWidget):
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.gif_label = QLabel()
-        self.gif_label.setWindowOpacity(0.2)
         self.gif_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.gif_path = Path(os.getcwd() + "/test.gif")
         self.movie = QMovie(str(self.gif_path))

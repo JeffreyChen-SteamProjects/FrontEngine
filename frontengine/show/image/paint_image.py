@@ -15,7 +15,7 @@ class ImageWidget(QWidget):
             Qt.WindowType.FramelessWindowHint |
             Qt.WindowType.WindowStaysOnTopHint
         )
-        self.image_path = Path(os.getcwd() + "/test_using_melting.png")
+        self.image_path = Path(os.getcwd() + "/tt.jpg")
         self.image = QImage(str(self.image_path))
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
 

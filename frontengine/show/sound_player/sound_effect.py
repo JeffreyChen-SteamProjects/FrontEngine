@@ -19,6 +19,7 @@ class SoundEffectWidget(QWidget):
         self.sound_player = QSoundEffect()
         self.sound_file_path = Path(os.getcwd() + "/wav_test.wav")
         self.sound_player.setSource(QUrl.fromLocalFile(str(self.sound_file_path)))
+        self.sound_player.setVolume(100)
         self.sound_player.play()
         print(self.sound_player.isPlaying())
 
