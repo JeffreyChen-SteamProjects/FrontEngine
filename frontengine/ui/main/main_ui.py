@@ -40,9 +40,6 @@ class FrontEngineMainUI(QMainWindow):
         self.tab_widget.addTab(self.text_setting_ui, "Text")
         self.setCentralWidget(self.tab_widget)
 
-    def startup_setting(self):
-        pass
-
 
 def start_front_engine():
     new_editor = QApplication(sys.argv)
