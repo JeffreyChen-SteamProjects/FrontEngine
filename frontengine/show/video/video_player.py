@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 
 from PySide6.QtCore import Qt, QUrl
+from PySide6.QtGui import QIcon
 from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PySide6.QtMultimediaWidgets import QVideoWidget
 from PySide6.QtWidgets import QMessageBox
@@ -40,6 +41,8 @@ class VideoWidget(QVideoWidget):
         self.setWindowTitle("Video")
         # Set Icon
         self.icon_path = Path(os.getcwd() + "/je_driver_icon.ico")
+        if self.icon_path.exists() and self.icon_path.is_file():
+            self.setWindowIcon(QIcon(str(self.icon_path)))
 
     def closeEvent(self, event):
         self.media_player.stop()

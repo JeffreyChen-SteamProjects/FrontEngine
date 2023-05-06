@@ -1,7 +1,9 @@
+import os
 import sys
+from pathlib import Path
 
-from PySide6.QtGui import QImage
-from PySide6.QtWidgets import QMainWindow, QApplication, QGridLayout, QTabWidget
+from PySide6.QtGui import QImage, QIcon
+from PySide6.QtWidgets import QMainWindow, QApplication, QGridLayout, QTabWidget, QSystemTrayIcon
 from qt_material import apply_stylesheet
 
 from frontengine.ui.setting.gif.gif_setting_ui import GIFSettingUI
@@ -17,11 +19,15 @@ class FrontEngineMainUI(QMainWindow):
     def __init__(self):
         super().__init__()
         # User setting
+        self.id = "FrontEngine"
         self.audio_device = None
         self.screen_device = None
         self.play_volume = None
         self.play_rate = None
         self.opacity = None
+        if sys.platform in ["win32", "cygwin", "msys"]:
+            from ctypes import windll
+            windll.shell32.SetCurrentProcessExplicitAppUserModelID(self.id)
         # Init setting ui
         self.setWindowTitle("FrontEngine")
         self.grid_layout = QGridLayout(self)
@@ -40,6 +46,12 @@ class FrontEngineMainUI(QMainWindow):
         self.tab_widget.addTab(self.sound_player_setting_ui, "Sound")
         self.tab_widget.addTab(self.text_setting_ui, "Text")
         self.setCentralWidget(self.tab_widget)
+        self.icon_path = Path(os.getcwd() + "/je_driver_icon.ico")
+        self.icon = QIcon(str(self.icon_path))
+        if self.icon.isNull() is False:
+            self.setWindowIcon(self.icon)
+            self.system_icon = QSystemTrayIcon()
+            self.system_icon.setIcon(self.icon)
 
 
 def start_front_engine():
