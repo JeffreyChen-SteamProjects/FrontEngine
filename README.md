@@ -25,6 +25,9 @@
 ## Features
 
 ---
+
+* GIFs need time to load please, wait.
+
 * Video
 
 ![Video](gifs/video.gif)
