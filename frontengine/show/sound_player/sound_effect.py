@@ -28,6 +28,8 @@ class SoundEffectWidget(QWidget):
             message_box.show()
         # Window setting
         self.setWindowTitle("Sound Wave")
+        # Set Icon
+        self.icon_path = Path(os.getcwd() + "/je_driver_icon.ico")
 
     def close(self):
         super().close()

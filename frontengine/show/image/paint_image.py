@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 from PySide6.QtCore import Qt, QRect
@@ -25,6 +26,8 @@ class ImageWidget(QWidget):
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         # Window setting
         self.setWindowTitle("Image")
+        # Set Icon
+        self.icon_path = Path(os.getcwd() + "/je_driver_icon.ico")
 
     def paintEvent(self, event) -> None:
         painter = QPainter(self)
