@@ -33,6 +33,7 @@ class VideoWidget(QVideoWidget):
             self.media_player.setAudioOutput(self.audioOutput)
             self.media_player.setPlaybackRate(play_rate)
             self.media_player.audioOutput().setVolume(volume)
+            self.media_player.setLoops(-1)
             self.media_player.play()
         else:
             message_box = QMessageBox(self)
@@ -45,4 +46,5 @@ class VideoWidget(QVideoWidget):
             self.setWindowIcon(QIcon(str(self.icon_path)))
 
     def closeEvent(self, event):
+        super().closeEvent(event)
         self.media_player.stop()

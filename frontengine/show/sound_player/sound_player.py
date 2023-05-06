@@ -25,6 +25,7 @@ class SoundPlayer(QWidget):
             self.media_player_audio = self.media_player.audioOutput()
             self.media_player.setSource(QUrl.fromLocalFile(str(self.sound_path)))
             self.media_player_audio.setVolume(volume)
+            self.media_player.setLoops(-1)
             self.media_player.play()
         else:
             message_box = QMessageBox(self)
@@ -39,4 +40,8 @@ class SoundPlayer(QWidget):
 
     def close(self):
         super().close()
+        self.media_player.stop()
+
+    def closeEvent(self, event):
+        super().closeEvent(event)
         self.media_player.stop()

@@ -22,6 +22,8 @@ class SoundEffectWidget(QWidget):
         if self.sound_path.exists() and self.sound_path.is_file():
             self.sound_player.setSource(QUrl.fromLocalFile(str(self.sound_path)))
             self.sound_player.setVolume(volume)
+            # -2 means loop forever
+            self.sound_player.setLoopCount(-2)
             self.sound_player.play()
         else:
             message_box = QMessageBox(self)
@@ -38,3 +40,6 @@ class SoundEffectWidget(QWidget):
         super().close()
         self.sound_player.stop()
 
+    def closeEvent(self, event):
+        super().closeEvent(event)
+        self.sound_player.stop()
