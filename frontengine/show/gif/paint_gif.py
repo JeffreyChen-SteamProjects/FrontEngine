@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 
 from PySide6.QtCore import Qt, QRect
-from PySide6.QtGui import QMovie, QPainter
+from PySide6.QtGui import QMovie, QPainter, QIcon
 from PySide6.QtWidgets import QWidget, QLabel, QMessageBox
 
 
@@ -34,6 +34,8 @@ class GifWidget(QWidget):
         self.setWindowTitle("GIF AND WEBP")
         # Set Icon
         self.icon_path = Path(os.getcwd() + "/je_driver_icon.ico")
+        if self.icon_path.exists() and self.icon_path.is_file():
+            self.setWindowIcon(QIcon(str(self.icon_path)))
 
     def paintEvent(self, event) -> None:
         current_gif_frame = self.movie.currentPixmap()

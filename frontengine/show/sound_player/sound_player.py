@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 
 from PySide6.QtCore import Qt, QUrl
+from PySide6.QtGui import QIcon
 from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PySide6.QtWidgets import QWidget, QMessageBox
 
@@ -24,6 +25,7 @@ class SoundPlayer(QWidget):
             self.media_player_audio = self.media_player.audioOutput()
             self.media_player.setSource(QUrl.fromLocalFile(str(self.sound_path)))
             self.media_player_audio.setVolume(volume)
+            self.media_player.setLoops(-1)
             self.media_player.play()
         else:
             message_box = QMessageBox(self)
@@ -33,7 +35,13 @@ class SoundPlayer(QWidget):
         self.setWindowTitle("Sound")
         # Set Icon
         self.icon_path = Path(os.getcwd() + "/je_driver_icon.ico")
+        if self.icon_path.exists() and self.icon_path.is_file():
+            self.setWindowIcon(QIcon(str(self.icon_path)))
 
     def close(self):
         super().close()
+        self.media_player.stop()
+
+    def closeEvent(self, event):
+        super().closeEvent(event)
         self.media_player.stop()
