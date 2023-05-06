@@ -49,5 +49,3 @@ def start_front_engine():
     window.showMaximized()
     sys.exit(new_editor.exec())
 
-
-start_front_engine()
