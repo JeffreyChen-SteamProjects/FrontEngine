@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "frontengine"
-version = "0.0.1"
+version = "0.0.3"
 authors = [
     { name = "JE-Chen", email = "jechenmailman@gmail.com" },
 ]
@@ -14,12 +14,9 @@ dependencies = [
     "PySide6",
     "qt-material",
 ]
-description = ""
+description = "FrontEngine is a tool allow you set Video or Image or GIF front of all window"
 requires-python = ">=3.8"
 license = { text = "MIT" }
-dependencies = [
-    "Pyside6"
-]
 classifiers = [
     "Programming Language :: Python :: 3.7",
     "Development Status :: 2 - Pre-Alpha",
@@ -31,9 +28,8 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = ""
-Documentation = ""
-Code = ""
+Homepage = "https://github.com/Intergration-Automation-Testing/FrontEngine"
+Code = "https://github.com/Intergration-Automation-Testing/FrontEngine"
 
 [project.readme]
 file = "README.md"
