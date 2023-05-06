@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 from PySide6.QtCore import Qt, QUrl
@@ -37,6 +38,8 @@ class VideoWidget(QVideoWidget):
             message_box.setText("Video error")
             message_box.show()
         self.setWindowTitle("Video")
+        # Set Icon
+        self.icon_path = Path(os.getcwd() + "/je_driver_icon.ico")
 
     def closeEvent(self, event):
         self.media_player.stop()

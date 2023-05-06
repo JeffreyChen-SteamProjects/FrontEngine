@@ -1,3 +1,6 @@
+import os
+from pathlib import Path
+
 from PySide6.QtCore import Qt, QRect
 from PySide6.QtGui import QPainter, QFontDatabase
 from PySide6.QtWidgets import QWidget
@@ -18,6 +21,8 @@ class TextWidget(QWidget):
         self.opacity = opacity
         self.draw_font = QFontDatabase.font(self.font().family(), "", self.font_size)
         self.setWindowTitle("Text")
+        # Set Icon
+        self.icon_path = Path(os.getcwd() + "/je_driver_icon.ico")
 
     def paintEvent(self, event) -> None:
         painter = QPainter(self)

@@ -32,6 +32,8 @@ class GifWidget(QWidget):
             message_box.show()
         # Window setting
         self.setWindowTitle("GIF AND WEBP")
+        # Set Icon
+        self.icon_path = Path(os.getcwd() + "/je_driver_icon.ico")
 
     def paintEvent(self, event) -> None:
         current_gif_frame = self.movie.currentPixmap()
