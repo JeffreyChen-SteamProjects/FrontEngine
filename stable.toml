@@ -10,6 +10,10 @@ version = "0.0.1"
 authors = [
     { name = "JE-Chen", email = "jechenmailman@gmail.com" },
 ]
+dependencies = [
+    "PySide6",
+    "qt-material",
+]
 description = ""
 requires-python = ">=3.8"
 license = { text = "MIT" }

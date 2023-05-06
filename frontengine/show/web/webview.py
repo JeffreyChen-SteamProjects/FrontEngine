@@ -4,7 +4,7 @@ from PySide6.QtWebEngineWidgets import QWebEngineView
 
 class WebWidget(QWebEngineView):
 
-    def __init__(self):
+    def __init__(self, url: str, opacity: float = 0.2):
         super().__init__()
         self.setWindowFlag(
             Qt.WindowType.WindowTransparentForInput |
@@ -12,5 +12,5 @@ class WebWidget(QWebEngineView):
             Qt.WindowType.WindowStaysOnTopHint
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        self.load("http://qt-project.org/")
-        self.setWindowOpacity(0.2)
+        self.load(url)
+        self.setWindowOpacity(opacity)
