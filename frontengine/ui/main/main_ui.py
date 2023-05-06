@@ -1,9 +1,9 @@
 import sys
 
+from PySide6.QtGui import QImage
 from PySide6.QtWidgets import QMainWindow, QApplication, QGridLayout, QTabWidget
 from qt_material import apply_stylesheet
 
-from frontengine.show.image.paint_image import ImageWidget
 from frontengine.ui.setting.gif.gif_setting_ui import GIFSettingUI
 from frontengine.ui.setting.image.image_setting_ui import ImageSettingUI
 from frontengine.ui.setting.sound_player.sound_player_setting_ui import SoundPlayerSettingUI
@@ -36,11 +36,10 @@ class FrontEngineMainUI(QMainWindow):
         self.tab_widget.addTab(self.video_setting_ui, "Video")
         self.tab_widget.addTab(self.image_setting_ui, "Image")
         self.tab_widget.addTab(self.web_setting_ui, "WEB")
-        self.tab_widget.addTab(self.gif_setting_ui, "GIF")
+        self.tab_widget.addTab(self.gif_setting_ui, "GIF AND WEBP")
         self.tab_widget.addTab(self.sound_player_setting_ui, "Sound")
         self.tab_widget.addTab(self.text_setting_ui, "Text")
         self.setCentralWidget(self.tab_widget)
-
 
 
 def start_front_engine():
