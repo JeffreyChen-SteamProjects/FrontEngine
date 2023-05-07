@@ -8,7 +8,9 @@ from PySide6.QtWidgets import QWidget, QLabel, QMessageBox
 
 class GifWidget(QWidget):
 
-    def __init__(self, gif_image_path: str, speed: int = 100, opacity: float = 0.2):
+    def __init__(self, gif_image_path: str,
+                 speed: int = 100, opacity: float = 0.2
+                 ):
         super().__init__()
         self.setWindowFlag(
             Qt.WindowType.WindowTransparentForInput |

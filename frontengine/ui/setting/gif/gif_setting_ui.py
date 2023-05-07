@@ -3,6 +3,7 @@ import shutil
 from pathlib import Path
 
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QScreen
 from PySide6.QtWidgets import QWidget, QGridLayout, QLabel, QSlider, QPushButton, QFileDialog, QMessageBox
 
 from frontengine.show.gif.paint_gif import GifWidget
@@ -16,7 +17,8 @@ class GIFSettingUI(QWidget):
         self.grid_layout = QGridLayout(self)
         self.grid_layout.setContentsMargins(0, 0, 0, 0)
         # Init variable
-        self.gif_widget: [GifWidget, None] = None
+        self.gif_widget_list = list()
+        self.show_all_screen = False
         # Opacity setting
         self.opacity_slider = QSlider()
         self.opacity_slider.setOrientation(Qt.Orientation.Horizontal)
@@ -57,6 +59,10 @@ class GIFSettingUI(QWidget):
         self.grid_layout.addWidget(self.ready_label, 2, 1)
         self.grid_layout.addWidget(self.start_button, 3, 0)
         self.setLayout(self.grid_layout)
+        # monitors = QScreen.virtualSiblings(self.screen())
+        # for screen in monitors:
+        #     if screen is not None:
+        #         print(screen.availableGeometry())
 
     def start_play_gif(self):
         if self.gif_image_path is None:
@@ -64,12 +70,13 @@ class GIFSettingUI(QWidget):
             message_box.setText("Please choose a gif or webp")
             message_box.show()
         else:
-            self.gif_widget = GifWidget(
+            gif_widget = GifWidget(
                 gif_image_path=self.gif_image_path,
                 speed=self.speed_slider.value(),
                 opacity=float(self.opacity_slider.value()) / 100
             )
-            self.gif_widget.showMaximized()
+            self.gif_widget_list.append(gif_widget)
+            gif_widget.showMaximized()
 
     def choose_and_copy_file_to_cwd_gif_dir_then_play(self):
         file_path = QFileDialog().getOpenFileName(
@@ -98,3 +105,7 @@ class GIFSettingUI(QWidget):
 
     def speed_trick(self):
         self.speed_slider_value_label.setText(str(self.speed_slider.value()))
+
+    def closeEvent(self, event) -> None:
+        super().closeEvent(event)
+        self.gif_widget_list.clear()
