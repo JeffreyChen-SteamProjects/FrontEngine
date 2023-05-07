@@ -16,7 +16,8 @@ class ImageSettingUI(QWidget):
         self.grid_layout = QGridLayout(self)
         self.grid_layout.setContentsMargins(0, 0, 0, 0)
         # Init variable
-        self.image_widget: [ImageWidget, None] = None
+        self.image_widget_list = list()
+        self.show_all_screen = False
         # Opacity setting
         self.opacity_slider = QSlider()
         self.opacity_slider.setOrientation(Qt.Orientation.Horizontal)
@@ -52,11 +53,12 @@ class ImageSettingUI(QWidget):
             message_box.setText("Please choose a Image")
             message_box.show()
         else:
-            self.image_widget = ImageWidget(
+            image_widget = ImageWidget(
                 image_path=self.gif_image_path,
                 opacity=float(self.opacity_slider.value()) / 100
             )
-            self.image_widget.showMaximized()
+            self.image_widget_list.append(image_widget)
+            image_widget.showMaximized()
 
     def choose_and_copy_file_to_cwd_image_dir_then_play(self):
         file_path = QFileDialog().getOpenFileName(
@@ -84,3 +86,7 @@ class ImageSettingUI(QWidget):
 
     def opacity_trick(self):
         self.opacity_slider_value_label.setText(str(self.opacity_slider.value()))
+
+    def closeEvent(self, event):
+        super().closeEvent(event)
+        self.image_widget_list.clear()
