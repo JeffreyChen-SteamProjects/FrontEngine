@@ -66,6 +66,3 @@ class TextSettingUI(QWidget):
         self.text_widget_list.append(text_widget)
         text_widget.showMaximized()
 
-    def closeEvent(self, event) -> None:
-        super().closeEvent(event)
-        self.text_widget_list.clear()

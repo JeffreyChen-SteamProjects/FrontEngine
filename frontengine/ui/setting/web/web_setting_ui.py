@@ -47,7 +47,3 @@ class WEBSettingUI(QWidget):
         )
         self.web_widget_list.append(web_widget)
         web_widget.showMaximized()
-
-    def closeEvent(self, event) -> None:
-        super().closeEvent(event)
-        self.web_widget_list.clear()

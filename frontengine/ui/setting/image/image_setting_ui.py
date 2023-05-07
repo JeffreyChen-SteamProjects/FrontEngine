@@ -86,7 +86,3 @@ class ImageSettingUI(QWidget):
 
     def opacity_trick(self):
         self.opacity_slider_value_label.setText(str(self.opacity_slider.value()))
-
-    def closeEvent(self, event):
-        super().closeEvent(event)
-        self.image_widget_list.clear()

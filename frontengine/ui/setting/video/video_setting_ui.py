@@ -118,6 +118,3 @@ class VideoSettingUI(QWidget):
     def volume_trick(self):
         self.volume_slider_value_label.setText(str(self.volume_slider.value()))
 
-    def closeEvent(self, event) -> None:
-        super().closeEvent(event)
-        self.video_widget_list.clear()

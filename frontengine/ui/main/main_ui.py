@@ -53,6 +53,15 @@ class FrontEngineMainUI(QMainWindow):
             self.system_icon = QSystemTrayIcon()
             self.system_icon.setIcon(self.icon)
 
+    def closeEvent(self, event) -> None:
+        super().closeEvent(event)
+        self.video_setting_ui.video_widget_list.clear()
+        self.image_setting_ui.image_widget_list.clear()
+        self.web_setting_ui.web_widget_list.clear()
+        self.gif_setting_ui.gif_widget_list.clear()
+        self.sound_player_setting_ui.sound_widget_list.clear()
+        self.text_setting_ui.text_widget_list.clear()
+
 
 def start_front_engine():
     new_editor = QApplication(sys.argv)

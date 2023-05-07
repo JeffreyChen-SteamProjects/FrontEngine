@@ -106,6 +106,3 @@ class GIFSettingUI(QWidget):
     def speed_trick(self):
         self.speed_slider_value_label.setText(str(self.speed_slider.value()))
 
-    def closeEvent(self, event) -> None:
-        super().closeEvent(event)
-        self.gif_widget_list.clear()
