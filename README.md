@@ -14,6 +14,7 @@
 
 * FrontEngine can draw below type on front of your screen.
 * You can use your computer as usual without being disturbed.
+* FrontEngine can play multi instance.
   * Video.
   * Website.
   * GIF & WEBP.

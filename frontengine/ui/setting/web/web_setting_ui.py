@@ -12,7 +12,8 @@ class WEBSettingUI(QWidget):
         self.grid_layout = QGridLayout(self)
         self.grid_layout.setContentsMargins(0, 0, 0, 0)
         # Init variable
-        self.web_widget: [WebWidget, None] = None
+        self.web_widget_list = list()
+        self.show_all_screen = False
         # Opacity setting
         self.opacity_slider = QSlider()
         self.opacity_slider.setOrientation(Qt.Orientation.Horizontal)
@@ -40,8 +41,9 @@ class WEBSettingUI(QWidget):
         self.opacity_slider_value_label.setText(str(self.opacity_slider.value()))
 
     def start_open_web(self):
-        self.web_widget = WebWidget(
+        web_widget = WebWidget(
             self.web_url_input.text(),
             float(self.opacity_slider.value()) / 100
         )
-        self.web_widget.showMaximized()
+        self.web_widget_list.append(web_widget)
+        web_widget.showMaximized()

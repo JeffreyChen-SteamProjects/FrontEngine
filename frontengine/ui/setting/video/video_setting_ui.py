@@ -16,7 +16,8 @@ class VideoSettingUI(QWidget):
         self.grid_layout = QGridLayout(self)
         self.grid_layout.setContentsMargins(0, 0, 0, 0)
         # Init variable
-        self.video_widget: [VideoWidget, None] = None
+        self.video_widget_list = list()
+        self.show_all_screen = False
         # Opacity setting
         self.opacity_slider = QSlider()
         self.opacity_slider.setOrientation(Qt.Orientation.Horizontal)
@@ -77,13 +78,14 @@ class VideoSettingUI(QWidget):
             message_box.setText("Please choose a video file")
             message_box.show()
         else:
-            self.video_widget = VideoWidget(
+            video_widget = VideoWidget(
                 self.video_path,
                 float(self.opacity_slider.value()) / 100,
                 float(self.play_rate_slider.value()) / 100,
                 self.volume_slider.value()
             )
-            self.video_widget.showMaximized()
+            self.video_widget_list.append(video_widget)
+            video_widget.showMaximized()
 
     def choose_and_copy_file_to_cwd_gif_dir_then_play(self):
         file_path = QFileDialog().getOpenFileName(
@@ -115,3 +117,4 @@ class VideoSettingUI(QWidget):
 
     def volume_trick(self):
         self.volume_slider_value_label.setText(str(self.volume_slider.value()))
+

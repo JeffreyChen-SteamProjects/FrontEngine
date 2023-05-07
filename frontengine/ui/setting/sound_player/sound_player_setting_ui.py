@@ -17,8 +17,8 @@ class SoundPlayerSettingUI(QWidget):
         self.grid_layout = QGridLayout(self)
         self.grid_layout.setContentsMargins(0, 0, 0, 0)
         # Init variable
-        self.sound_widget: [SoundEffectWidget, None] = None
-        self.sound_player: [SoundPlayer, None] = None
+        self.sound_widget_list = list()
+        self.show_all_screen = False
         # Volume setting
         self.volume_label = QLabel("volume")
         self.volume_slider = QSlider()
@@ -65,11 +65,12 @@ class SoundPlayerSettingUI(QWidget):
             message_box.setText("Please choose a wav")
             message_box.show()
         else:
-            self.sound_widget = SoundEffectWidget(
+            sound_widget = SoundEffectWidget(
                 sound_path=self.wav_sound_path,
                 volume=self.volume_slider.value()
             )
-            self.sound_widget.showMaximized()
+            self.sound_widget_list.append(sound_widget)
+            sound_widget.showMaximized()
 
     def start_play_sound(self):
         if self.player_sound_path is None:
@@ -77,11 +78,12 @@ class SoundPlayerSettingUI(QWidget):
             message_box.setText("Please choose a sound file")
             message_box.show()
         else:
-            self.sound_player = SoundPlayer(
+            sound_player = SoundPlayer(
                 sound_path=self.player_sound_path,
                 volume=self.volume_slider.value()
             )
-            self.sound_player.showMaximized()
+            self.sound_widget_list.append(sound_player)
+            sound_player.showMaximized()
 
     def choose_and_copy_wav_file_to_cwd_sound_dir_then_play(self):
         file_path = QFileDialog().getOpenFileName(
@@ -129,3 +131,4 @@ class SoundPlayerSettingUI(QWidget):
 
     def volume_trick(self):
         self.volume_slider_value_label.setText(str(self.volume_slider.value()))
+

@@ -13,7 +13,8 @@ class TextSettingUI(QWidget):
         self.grid_layout.setContentsMargins(0, 0, 0, 0)
         self.grid_layout.setContentsMargins(0, 0, 0, 0)
         # Init variable
-        self.text_widget: [TextWidget, None] = None
+        self.text_widget_list = list()
+        self.show_all_screen = False
         # Opacity setting
         self.opacity_slider = QSlider()
         self.opacity_slider.setOrientation(Qt.Orientation.Horizontal)
@@ -57,9 +58,11 @@ class TextSettingUI(QWidget):
         self.font_size_slider_value_label.setText(str(self.font_size_slider.value()))
 
     def start_draw_text_on_screen(self):
-        self.text_widget = TextWidget(
+        text_widget = TextWidget(
             self.line_edit.text(),
             self.font_size_slider.value(),
             float(self.opacity_slider.value()) / 100
         )
-        self.text_widget.showMaximized()
+        self.text_widget_list.append(text_widget)
+        text_widget.showMaximized()
+
