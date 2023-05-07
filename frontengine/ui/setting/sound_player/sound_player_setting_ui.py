@@ -18,7 +18,7 @@ class SoundPlayerSettingUI(QWidget):
         self.grid_layout.setContentsMargins(0, 0, 0, 0)
         # Init variable
         self.sound_widget_list = list()
-        self.sound_player: [SoundPlayer, None] = None
+        self.show_all_screen = False
         # Volume setting
         self.volume_label = QLabel("volume")
         self.volume_slider = QSlider()
