@@ -59,10 +59,10 @@ class GIFSettingUI(QWidget):
         self.grid_layout.addWidget(self.ready_label, 2, 1)
         self.grid_layout.addWidget(self.start_button, 3, 0)
         self.setLayout(self.grid_layout)
-        # monitors = QScreen.virtualSiblings(self.screen())
-        # for screen in monitors:
-        #     if screen is not None:
-        #         print(screen.availableGeometry())
+        monitors = QScreen.virtualSiblings(self.screen())
+        for screen in monitors:
+            if screen is not None:
+                print(screen.availableGeometry())
 
     def start_play_gif(self):
         if self.gif_image_path is None:
