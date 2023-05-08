@@ -3,6 +3,7 @@ import shutil
 from pathlib import Path
 
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QScreen
 from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QPushButton, QMessageBox, QFileDialog
 
 from frontengine.show.video.video_player import VideoWidget
@@ -72,20 +73,32 @@ class VideoSettingUI(QWidget):
         self.grid_layout.addWidget(self.ready_label, 4, 1)
         self.setLayout(self.grid_layout)
 
+    def _create_video_widget(self):
+        video_widget = VideoWidget(
+            self.video_path,
+            float(self.opacity_slider.value()) / 100,
+            float(self.play_rate_slider.value()) / 100,
+            self.volume_slider.value()
+        )
+        self.video_widget_list.append(video_widget)
+        return video_widget
+
     def start_play_gif(self):
         if self.video_path is None:
             message_box = QMessageBox(self)
             message_box.setText("Please choose a video file")
             message_box.show()
         else:
-            video_widget = VideoWidget(
-                self.video_path,
-                float(self.opacity_slider.value()) / 100,
-                float(self.play_rate_slider.value()) / 100,
-                self.volume_slider.value()
-            )
-            self.video_widget_list.append(video_widget)
-            video_widget.showMaximized()
+            if self.show_all_screen:
+                video_widget = self._create_video_widget()
+                video_widget.showMaximized()
+            else:
+                monitors = QScreen.virtualSiblings(self.screen())
+                for screen in monitors:
+                    monitor = screen.availableGeometry()
+                    video_widget = self._create_video_widget()
+                    video_widget.move(monitor.left(), monitor.top())
+                    video_widget.showMaximized()
 
     def choose_and_copy_file_to_cwd_gif_dir_then_play(self):
         file_path = QFileDialog().getOpenFileName(

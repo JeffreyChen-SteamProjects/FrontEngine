@@ -59,10 +59,15 @@ class GIFSettingUI(QWidget):
         self.grid_layout.addWidget(self.ready_label, 2, 1)
         self.grid_layout.addWidget(self.start_button, 3, 0)
         self.setLayout(self.grid_layout)
-        monitors = QScreen.virtualSiblings(self.screen())
-        for screen in monitors:
-            if screen is not None:
-                print(screen.availableGeometry())
+
+    def _create_gif_widget(self):
+        gif_widget = GifWidget(
+            gif_image_path=self.gif_image_path,
+            speed=self.speed_slider.value(),
+            opacity=float(self.opacity_slider.value()) / 100
+        )
+        self.gif_widget_list.append(gif_widget)
+        return gif_widget
 
     def start_play_gif(self):
         if self.gif_image_path is None:
@@ -70,13 +75,16 @@ class GIFSettingUI(QWidget):
             message_box.setText("Please choose a gif or webp")
             message_box.show()
         else:
-            gif_widget = GifWidget(
-                gif_image_path=self.gif_image_path,
-                speed=self.speed_slider.value(),
-                opacity=float(self.opacity_slider.value()) / 100
-            )
-            self.gif_widget_list.append(gif_widget)
-            gif_widget.showMaximized()
+            if self.show_all_screen:
+                gif_widget = self._create_gif_widget()
+                gif_widget.showMaximized()
+            else:
+                monitors = QScreen.virtualSiblings(self.screen())
+                for screen in monitors:
+                    monitor = screen.availableGeometry()
+                    gif_widget = self._create_gif_widget()
+                    gif_widget.move(monitor.left(), monitor.top())
+                    gif_widget.showMaximized()
 
     def choose_and_copy_file_to_cwd_gif_dir_then_play(self):
         file_path = QFileDialog().getOpenFileName(

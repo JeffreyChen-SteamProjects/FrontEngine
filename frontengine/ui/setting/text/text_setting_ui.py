@@ -1,4 +1,5 @@
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QScreen
 from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QLineEdit, QPushButton
 
 from frontengine.show.text.draw_text import TextWidget
@@ -51,6 +52,15 @@ class TextSettingUI(QWidget):
         self.grid_layout.addWidget(self.line_edit, 2, 2)
         self.setLayout(self.grid_layout)
 
+    def _create_text_widget(self):
+        text_widget = TextWidget(
+            self.line_edit.text(),
+            self.font_size_slider.value(),
+            float(self.opacity_slider.value()) / 100
+        )
+        self.text_widget_list.append(text_widget)
+        return text_widget
+
     def opacity_trick(self):
         self.opacity_slider_value_label.setText(str(self.opacity_slider.value()))
 
@@ -58,11 +68,14 @@ class TextSettingUI(QWidget):
         self.font_size_slider_value_label.setText(str(self.font_size_slider.value()))
 
     def start_draw_text_on_screen(self):
-        text_widget = TextWidget(
-            self.line_edit.text(),
-            self.font_size_slider.value(),
-            float(self.opacity_slider.value()) / 100
-        )
-        self.text_widget_list.append(text_widget)
-        text_widget.showMaximized()
+        if self.show_all_screen:
+            text_widget = self._create_text_widget()
+            text_widget.showMaximized()
+        else:
+            monitors = QScreen.virtualSiblings(self.screen())
+            for screen in monitors:
+                monitor = screen.availableGeometry()
+                text_widget = self._create_text_widget()
+                text_widget.move(monitor.left(), monitor.top())
+                text_widget.showMaximized()
 

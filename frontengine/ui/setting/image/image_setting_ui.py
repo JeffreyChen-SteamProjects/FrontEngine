@@ -3,6 +3,7 @@ import shutil
 from pathlib import Path
 
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QScreen
 from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QPushButton, QFileDialog, QMessageBox
 
 from frontengine.show.image.paint_image import ImageWidget
@@ -47,18 +48,30 @@ class ImageSettingUI(QWidget):
         self.grid_layout.addWidget(self.start_button, 2, 0)
         self.setLayout(self.grid_layout)
 
+    def _create_image_widget(self):
+        image_widget = ImageWidget(
+            image_path=self.gif_image_path,
+            opacity=float(self.opacity_slider.value()) / 100
+        )
+        self.image_widget_list.append(image_widget)
+        return image_widget
+
     def start_play_image(self):
         if self.gif_image_path is None:
             message_box = QMessageBox(self)
             message_box.setText("Please choose a Image")
             message_box.show()
         else:
-            image_widget = ImageWidget(
-                image_path=self.gif_image_path,
-                opacity=float(self.opacity_slider.value()) / 100
-            )
-            self.image_widget_list.append(image_widget)
-            image_widget.showMaximized()
+            if self.show_all_screen:
+                image_widget = self._create_image_widget()
+                image_widget.showMaximized()
+            else:
+                monitors = QScreen.virtualSiblings(self.screen())
+                for screen in monitors:
+                    monitor = screen.availableGeometry()
+                    image_widget = self._create_image_widget()
+                    image_widget.move(monitor.left(), monitor.top())
+                    image_widget.showMaximized()
 
     def choose_and_copy_file_to_cwd_image_dir_then_play(self):
         file_path = QFileDialog().getOpenFileName(
