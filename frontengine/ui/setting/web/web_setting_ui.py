@@ -1,6 +1,6 @@
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QScreen
-from PySide6.QtWidgets import QWidget, QGridLayout, QLabel, QSlider, QLineEdit, QPushButton
+from PySide6.QtWidgets import QWidget, QGridLayout, QLabel, QSlider, QLineEdit, QPushButton, QRadioButton
 
 from frontengine.show.web.webview import WebWidget
 
@@ -30,13 +30,20 @@ class WEBSettingUI(QWidget):
         # Start button
         self.start_button = QPushButton("Open web with url")
         self.start_button.clicked.connect(self.start_open_web)
+        # Show on all screen
+        self.show_on_all_screen_button = QRadioButton("Show on all screen")
+        self.show_on_all_screen_button.clicked.connect(self.set_show_all_screen)
         # Add to layout
         self.grid_layout.addWidget(self.opacity_label, 0, 0)
         self.grid_layout.addWidget(self.opacity_slider_value_label, 0, 1)
         self.grid_layout.addWidget(self.opacity_slider, 0, 2)
         self.grid_layout.addWidget(self.start_button, 1, 0)
+        self.grid_layout.addWidget(self.show_on_all_screen_button, 1, 1)
         self.grid_layout.addWidget(self.web_url_input, 1, 2)
         self.setLayout(self.grid_layout)
+
+    def set_show_all_screen(self):
+        self.show_all_screen = self.show_on_all_screen_button.isChecked()
 
     def _create_web_widget(self):
         web_widget = WebWidget(

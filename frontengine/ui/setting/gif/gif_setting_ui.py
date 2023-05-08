@@ -4,7 +4,7 @@ from pathlib import Path
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QScreen
-from PySide6.QtWidgets import QWidget, QGridLayout, QLabel, QSlider, QPushButton, QFileDialog, QMessageBox
+from PySide6.QtWidgets import QWidget, QGridLayout, QLabel, QSlider, QPushButton, QFileDialog, QMessageBox, QRadioButton
 
 from frontengine.show.gif.paint_gif import GifWidget
 
@@ -18,7 +18,7 @@ class GIFSettingUI(QWidget):
         self.grid_layout.setContentsMargins(0, 0, 0, 0)
         # Init variable
         self.gif_widget_list = list()
-        self.show_all_screen = False
+        self.show_all_screen = True
         # Opacity setting
         self.opacity_slider = QSlider()
         self.opacity_slider.setOrientation(Qt.Orientation.Horizontal)
@@ -48,6 +48,9 @@ class GIFSettingUI(QWidget):
         # Start button
         self.start_button = QPushButton("Start Play GIF or WEBP")
         self.start_button.clicked.connect(self.start_play_gif)
+        # Show on all screen
+        self.show_on_all_screen_button = QRadioButton("Show on all screen")
+        self.show_on_all_screen_button.clicked.connect(self.set_show_all_screen)
         # Add to layout
         self.grid_layout.addWidget(self.opacity_label, 0, 0)
         self.grid_layout.addWidget(self.opacity_slider_value_label, 0, 1)
@@ -58,7 +61,11 @@ class GIFSettingUI(QWidget):
         self.grid_layout.addWidget(self.choose_file_button, 2, 0)
         self.grid_layout.addWidget(self.ready_label, 2, 1)
         self.grid_layout.addWidget(self.start_button, 3, 0)
+        self.grid_layout.addWidget(self.show_on_all_screen_button, 3, 1)
         self.setLayout(self.grid_layout)
+
+    def set_show_all_screen(self):
+        self.show_all_screen = self.show_on_all_screen_button.isChecked()
 
     def _create_gif_widget(self):
         gif_widget = GifWidget(
