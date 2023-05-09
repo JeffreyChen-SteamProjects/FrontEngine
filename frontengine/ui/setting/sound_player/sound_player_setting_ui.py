@@ -20,7 +20,7 @@ class SoundPlayerSettingUI(QWidget):
         self.sound_widget_list = list()
         self.show_all_screen = False
         # Volume setting
-        self.volume_label = QLabel("volume")
+        self.volume_label = QLabel("Volume")
         self.volume_slider = QSlider()
         self.volume_slider.setMinimum(1)
         self.volume_slider.setMaximum(200)

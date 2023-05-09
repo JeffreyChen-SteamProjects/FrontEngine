@@ -6,6 +6,7 @@ from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QMainWindow, QApplication, QGridLayout, QTabWidget, QSystemTrayIcon
 from qt_material import apply_stylesheet
 
+from frontengine.ui.setting.audio_visualizer.audio_visualizer_setting_ui import AudioVisualizerUI
 from frontengine.ui.setting.gif.gif_setting_ui import GIFSettingUI
 from frontengine.ui.setting.image.image_setting_ui import ImageSettingUI
 from frontengine.ui.setting.sound_player.sound_player_setting_ui import SoundPlayerSettingUI
@@ -20,11 +21,6 @@ class FrontEngineMainUI(QMainWindow):
         super().__init__()
         # User setting
         self.id = "FrontEngine"
-        self.audio_device = None
-        self.screen_device = None
-        self.play_volume = None
-        self.play_rate = None
-        self.opacity = None
         if sys.platform in ["win32", "cygwin", "msys"]:
             from ctypes import windll
             windll.shell32.SetCurrentProcessExplicitAppUserModelID(self.id)
@@ -39,12 +35,14 @@ class FrontEngineMainUI(QMainWindow):
         self.gif_setting_ui = GIFSettingUI()
         self.sound_player_setting_ui = SoundPlayerSettingUI()
         self.text_setting_ui = TextSettingUI()
+        self.audio_visualizer_ui = AudioVisualizerUI()
         self.tab_widget.addTab(self.video_setting_ui, "Video")
         self.tab_widget.addTab(self.image_setting_ui, "Image")
         self.tab_widget.addTab(self.web_setting_ui, "WEB")
         self.tab_widget.addTab(self.gif_setting_ui, "GIF AND WEBP")
         self.tab_widget.addTab(self.sound_player_setting_ui, "Sound")
         self.tab_widget.addTab(self.text_setting_ui, "Text")
+        self.tab_widget.addTab(self.audio_visualizer_ui, "Audio Visualizer")
         self.setCentralWidget(self.tab_widget)
         self.icon_path = Path(os.getcwd() + "/je_driver_icon.ico")
         self.icon = QIcon(str(self.icon_path))
@@ -69,4 +67,3 @@ def start_front_engine():
     apply_stylesheet(new_editor, theme='dark_amber.xml')
     window.showMaximized()
     sys.exit(new_editor.exec())
-
