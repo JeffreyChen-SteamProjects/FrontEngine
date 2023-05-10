@@ -1,6 +1,6 @@
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QScreen
-from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QLineEdit, QPushButton, QRadioButton
+from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QLineEdit, QPushButton, QRadioButton, QCheckBox
 
 from frontengine.show.text.draw_text import TextWidget
 
@@ -42,8 +42,8 @@ class TextSettingUI(QWidget):
         self.start_button = QPushButton("Start draw text on screen")
         self.start_button.clicked.connect(self.start_draw_text_on_screen)
         # Show on all screen
-        self.show_on_all_screen_button = QRadioButton("Show on all screen")
-        self.show_on_all_screen_button.clicked.connect(self.set_show_all_screen)
+        self.show_on_all_screen_checkbox = QCheckBox("Show on all screen")
+        self.show_on_all_screen_checkbox.clicked.connect(self.set_show_all_screen)
         # Add to layout
         self.grid_layout.addWidget(self.opacity_label, 0, 0)
         self.grid_layout.addWidget(self.opacity_slider_value_label, 0, 1)
@@ -52,12 +52,12 @@ class TextSettingUI(QWidget):
         self.grid_layout.addWidget(self.font_size_slider_value_label, 1, 1)
         self.grid_layout.addWidget(self.font_size_slider, 1, 2)
         self.grid_layout.addWidget(self.start_button, 2, 0)
-        self.grid_layout.addWidget(self.show_on_all_screen_button, 2, 1)
+        self.grid_layout.addWidget(self.show_on_all_screen_checkbox, 2, 1)
         self.grid_layout.addWidget(self.line_edit, 2, 2)
         self.setLayout(self.grid_layout)
 
     def set_show_all_screen(self):
-        self.show_all_screen = self.show_on_all_screen_button.isChecked()
+        self.show_all_screen = self.show_on_all_screen_checkbox.isChecked()
 
     def _create_text_widget(self):
         text_widget = TextWidget(

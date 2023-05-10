@@ -1,22 +1,37 @@
 import os
 from pathlib import Path
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QUrl
 from PySide6.QtGui import QIcon
 from PySide6.QtWebEngineWidgets import QWebEngineView
+from PySide6.QtWidgets import QMessageBox
 
 
 class WebWidget(QWebEngineView):
 
-    def __init__(self, url: str, opacity: float = 0.2):
+    def __init__(self, url: str, opacity: float = 0.2,
+                 is_file: bool = False, enable_input: bool = False
+                 ):
         super().__init__()
+        if not enable_input:
+            self.setWindowFlag(
+                Qt.WindowType.WindowTransparentForInput
+            )
+            self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setWindowFlag(
-            Qt.WindowType.WindowTransparentForInput |
             Qt.WindowType.FramelessWindowHint |
             Qt.WindowType.WindowStaysOnTopHint
         )
-        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        self.load(url)
+        if not is_file:
+            self.load(url)
+        else:
+            self.web_url = Path(url)
+            if self.web_url.exists() and self.web_url.is_file():
+                self.load(QUrl.fromLocalFile(url))
+            else:
+                message_box = QMessageBox(self)
+                message_box.setText("Web file error")
+                message_box.show()
         self.setWindowOpacity(opacity)
         # Set Icon
         self.icon_path = Path(os.getcwd() + "/je_driver_icon.ico")

@@ -4,7 +4,8 @@ from pathlib import Path
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QScreen
-from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QPushButton, QFileDialog, QMessageBox, QRadioButton
+from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QPushButton, QFileDialog, QMessageBox, \
+    QRadioButton, QCheckBox
 
 from frontengine.show.image.paint_image import ImageWidget
 
@@ -40,8 +41,8 @@ class ImageSettingUI(QWidget):
         self.start_button = QPushButton("Start Play Image")
         self.start_button.clicked.connect(self.start_play_image)
         # Show on all screen
-        self.show_on_all_screen_button = QRadioButton("Show on all screen")
-        self.show_on_all_screen_button.clicked.connect(self.set_show_all_screen)
+        self.show_on_all_screen_checkbox = QCheckBox("Show on all screen")
+        self.show_on_all_screen_checkbox.clicked.connect(self.set_show_all_screen)
         # Add to layout
         self.grid_layout.addWidget(self.opacity_label, 0, 0)
         self.grid_layout.addWidget(self.opacity_slider_value_label, 0, 1)
@@ -49,11 +50,11 @@ class ImageSettingUI(QWidget):
         self.grid_layout.addWidget(self.choose_file_button, 1, 0)
         self.grid_layout.addWidget(self.ready_label, 1, 1)
         self.grid_layout.addWidget(self.start_button, 2, 0)
-        self.grid_layout.addWidget(self.show_on_all_screen_button, 2, 1)
+        self.grid_layout.addWidget(self.show_on_all_screen_checkbox, 2, 1)
         self.setLayout(self.grid_layout)
 
     def set_show_all_screen(self):
-        self.show_all_screen = self.show_on_all_screen_button.isChecked()
+        self.show_all_screen = self.show_on_all_screen_checkbox.isChecked()
 
     def _create_image_widget(self):
         image_widget = ImageWidget(
