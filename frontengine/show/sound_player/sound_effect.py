@@ -14,7 +14,8 @@ class SoundEffectWidget(QWidget):
         self.setWindowFlag(
             Qt.WindowType.WindowTransparentForInput |
             Qt.WindowType.FramelessWindowHint |
-            Qt.WindowType.WindowStaysOnTopHint
+            Qt.WindowType.WindowStaysOnTopHint |
+            Qt.WindowType.Tool
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.sound_player = QSoundEffect()

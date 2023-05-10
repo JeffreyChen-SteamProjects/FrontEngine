@@ -77,12 +77,12 @@ class TextSettingUI(QWidget):
     def start_draw_text_on_screen(self):
         if self.show_all_screen:
             text_widget = self._create_text_widget()
-            text_widget.showMaximized()
+            text_widget.showFullScreen()
         else:
             monitors = QScreen.virtualSiblings(self.screen())
             for screen in monitors:
                 monitor = screen.availableGeometry()
                 text_widget = self._create_text_widget()
                 text_widget.move(monitor.left(), monitor.top())
-                text_widget.showMaximized()
+                text_widget.showFullScreen()
 

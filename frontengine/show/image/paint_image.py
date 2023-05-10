@@ -13,7 +13,8 @@ class ImageWidget(QWidget):
         self.setWindowFlag(
             Qt.WindowType.WindowTransparentForInput |
             Qt.WindowType.FramelessWindowHint |
-            Qt.WindowType.WindowStaysOnTopHint
+            Qt.WindowType.WindowStaysOnTopHint |
+            Qt.WindowType.Tool
         )
         self.image_path = Path(image_path)
         if self.image_path.exists() and self.image_path.is_file():

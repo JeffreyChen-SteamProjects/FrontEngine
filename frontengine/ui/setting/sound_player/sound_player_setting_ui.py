@@ -70,7 +70,7 @@ class SoundPlayerSettingUI(QWidget):
                 volume=self.volume_slider.value()
             )
             self.sound_widget_list.append(sound_widget)
-            sound_widget.showMaximized()
+            sound_widget.showFullScreen()
 
     def start_play_sound(self):
         if self.player_sound_path is None:
@@ -83,7 +83,7 @@ class SoundPlayerSettingUI(QWidget):
                 volume=self.volume_slider.value()
             )
             self.sound_widget_list.append(sound_player)
-            sound_player.showMaximized()
+            sound_player.showFullScreen()
 
     def choose_and_copy_wav_file_to_cwd_sound_dir_then_play(self):
         file_path = QFileDialog().getOpenFileName(

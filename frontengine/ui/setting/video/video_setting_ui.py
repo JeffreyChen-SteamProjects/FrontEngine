@@ -99,14 +99,14 @@ class VideoSettingUI(QWidget):
         else:
             if self.show_all_screen:
                 video_widget = self._create_video_widget()
-                video_widget.showMaximized()
+                video_widget.showFullScreen()
             else:
                 monitors = QScreen.virtualSiblings(self.screen())
                 for screen in monitors:
                     monitor = screen.availableGeometry()
                     video_widget = self._create_video_widget()
                     video_widget.move(monitor.left(), monitor.top())
-                    video_widget.showMaximized()
+                    video_widget.showFullScreen()
 
     def choose_and_copy_file_to_cwd_gif_dir_then_play(self):
         file_path = QFileDialog().getOpenFileName(

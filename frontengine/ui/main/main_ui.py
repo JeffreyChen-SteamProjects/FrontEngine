@@ -6,6 +6,7 @@ from PySide6.QtGui import QIcon, QAction
 from PySide6.QtWidgets import QMainWindow, QApplication, QGridLayout, QTabWidget, QSystemTrayIcon, QMenuBar
 from qt_material import apply_stylesheet, QtStyleTools
 
+from frontengine.ui.setting.control_center.control_center_ui import ControlCenterUI
 from frontengine.ui.setting.gif.gif_setting_ui import GIFSettingUI
 from frontengine.ui.setting.image.image_setting_ui import ImageSettingUI
 from frontengine.ui.setting.sound_player.sound_player_setting_ui import SoundPlayerSettingUI
@@ -34,12 +35,21 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
         self.gif_setting_ui = GIFSettingUI()
         self.sound_player_setting_ui = SoundPlayerSettingUI()
         self.text_setting_ui = TextSettingUI()
+        self.control_center_ui = ControlCenterUI(
+            self.video_setting_ui,
+            self.image_setting_ui,
+            self.web_setting_ui,
+            self.gif_setting_ui,
+            self.sound_player_setting_ui,
+            self.text_setting_ui
+        )
         self.tab_widget.addTab(self.video_setting_ui, "Video")
         self.tab_widget.addTab(self.image_setting_ui, "Image")
         self.tab_widget.addTab(self.web_setting_ui, "WEB")
         self.tab_widget.addTab(self.gif_setting_ui, "GIF AND WEBP")
         self.tab_widget.addTab(self.sound_player_setting_ui, "Sound")
         self.tab_widget.addTab(self.text_setting_ui, "Text")
+        self.tab_widget.addTab(self.control_center_ui, "Control Center")
         self.setCentralWidget(self.tab_widget)
         self.icon_path = Path(os.getcwd() + "/je_driver_icon.ico")
         self.icon = QIcon(str(self.icon_path))

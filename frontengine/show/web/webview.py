@@ -13,6 +13,7 @@ class WebWidget(QWebEngineView):
                  is_file: bool = False, enable_input: bool = False
                  ):
         super().__init__()
+        self.setWindowOpacity(opacity)
         if not enable_input:
             self.setWindowFlag(
                 Qt.WindowType.WindowTransparentForInput
@@ -32,7 +33,6 @@ class WebWidget(QWebEngineView):
                 message_box = QMessageBox(self)
                 message_box.setText("Web file error")
                 message_box.show()
-        self.setWindowOpacity(opacity)
         # Set Icon
         self.icon_path = Path(os.getcwd() + "/je_driver_icon.ico")
         if self.icon_path.exists() and self.icon_path.is_file():

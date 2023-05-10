@@ -72,14 +72,14 @@ class ImageSettingUI(QWidget):
         else:
             if self.show_all_screen:
                 image_widget = self._create_image_widget()
-                image_widget.showMaximized()
+                image_widget.showFullScreen()
             else:
                 monitors = QScreen.virtualSiblings(self.screen())
                 for screen in monitors:
                     monitor = screen.availableGeometry()
                     image_widget = self._create_image_widget()
                     image_widget.move(monitor.left(), monitor.top())
-                    image_widget.showMaximized()
+                    image_widget.showFullScreen()
 
     def choose_and_copy_file_to_cwd_image_dir_then_play(self):
         file_path = QFileDialog().getOpenFileName(
