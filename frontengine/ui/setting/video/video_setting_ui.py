@@ -4,7 +4,8 @@ from pathlib import Path
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QScreen
-from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QPushButton, QMessageBox, QFileDialog, QRadioButton
+from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QPushButton, QMessageBox, QFileDialog, \
+    QRadioButton, QCheckBox
 
 from frontengine.show.video.video_player import VideoWidget
 
@@ -59,8 +60,8 @@ class VideoSettingUI(QWidget):
         self.start_button = QPushButton("Start Play Video")
         self.start_button.clicked.connect(self.start_play_gif)
         # Show on all screen
-        self.show_on_all_screen_button = QRadioButton("Show on all screen")
-        self.show_on_all_screen_button.clicked.connect(self.set_show_all_screen)
+        self.show_on_all_screen_checkbox = QCheckBox("Show on all screen")
+        self.show_on_all_screen_checkbox.clicked.connect(self.set_show_all_screen)
         # Add to layout
         self.grid_layout.addWidget(self.opacity_label, 0, 0)
         self.grid_layout.addWidget(self.opacity_slider_value_label, 0, 1)
@@ -74,11 +75,11 @@ class VideoSettingUI(QWidget):
         self.grid_layout.addWidget(self.choose_file_button, 3, 0)
         self.grid_layout.addWidget(self.start_button, 4, 0)
         self.grid_layout.addWidget(self.ready_label, 4, 1)
-        self.grid_layout.addWidget(self.show_on_all_screen_button, 4, 2)
+        self.grid_layout.addWidget(self.show_on_all_screen_checkbox, 4, 2)
         self.setLayout(self.grid_layout)
 
     def set_show_all_screen(self):
-        self.show_all_screen = self.show_on_all_screen_button.isChecked()
+        self.show_all_screen = self.show_on_all_screen_checkbox.isChecked()
 
     def _create_video_widget(self):
         video_widget = VideoWidget(
