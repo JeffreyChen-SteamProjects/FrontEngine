@@ -17,8 +17,7 @@ class VideoWidget(QVideoWidget):
         self.setWindowFlag(
             Qt.WindowType.WindowTransparentForInput |
             Qt.WindowType.FramelessWindowHint |
-            Qt.WindowType.WindowStaysOnTopHint |
-            Qt.WindowType.Tool
+            Qt.WindowType.WindowStaysOnTopHint
         )
         self.setAttribute(
             Qt.WidgetAttribute.WA_TranslucentBackground
@@ -29,9 +28,13 @@ class VideoWidget(QVideoWidget):
         if self.video_path.exists() and self.video_path.is_file():
             self.video_file_path = str(self.video_path)
             self.audioOutput = QAudioOutput()
-            self.media_player.setSource(QUrl.fromLocalFile(str(self.video_file_path)))
+            source = QUrl.fromLocalFile(str(self.video_file_path).encode())
+            source = source.fromEncoded(source.toEncoded())
+            self.media_player.setSource(source)
+            print(self.media_player.source())
             self.media_player.setVideoOutput(self)
             self.media_player.setAudioOutput(self.audioOutput)
+            self.media_player.errorOccurred.connect(self.video_player_error)
             self.media_player.setPlaybackRate(play_rate)
             self.media_player.audioOutput().setVolume(volume)
             self.media_player.setLoops(-1)
@@ -49,3 +52,6 @@ class VideoWidget(QVideoWidget):
     def closeEvent(self, event):
         super().closeEvent(event)
         self.media_player.stop()
+
+    def video_player_error(self):
+        print(self.media_player.error())
