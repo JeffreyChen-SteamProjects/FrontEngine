@@ -5,7 +5,7 @@ from pathlib import Path
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QScreen
 from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QPushButton, QMessageBox, QFileDialog, \
-    QRadioButton, QCheckBox
+    QCheckBox
 
 from frontengine.show.video.video_player import VideoWidget
 

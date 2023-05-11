@@ -13,6 +13,7 @@ from frontengine.ui.setting.sound_player.sound_player_setting_ui import SoundPla
 from frontengine.ui.setting.text.text_setting_ui import TextSettingUI
 from frontengine.ui.setting.video.video_setting_ui import VideoSettingUI
 from frontengine.ui.setting.web.web_setting_ui import WEBSettingUI
+from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
 class FrontEngineMainUI(QMainWindow, QtStyleTools):
@@ -42,6 +43,17 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
             self.gif_setting_ui,
             self.sound_player_setting_ui,
             self.text_setting_ui
+        )
+        # Language Wrapper
+        language_wrapper.init_later(
+            self.video_setting_ui,
+            self.image_setting_ui,
+            self.web_setting_ui,
+            self.gif_setting_ui,
+            self.sound_player_setting_ui,
+            self.text_setting_ui,
+            self.control_center_ui,
+            self.tab_widget
         )
         self.tab_widget.addTab(self.video_setting_ui, "Video")
         self.tab_widget.addTab(self.image_setting_ui, "Image")

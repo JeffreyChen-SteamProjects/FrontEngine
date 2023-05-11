@@ -1,4 +1,4 @@
-from PySide6.QtCore import QTimer, Qt
+from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QGridLayout, QWidget, QPushButton, QTextEdit
 
 from frontengine.ui.color.global_color import error_color, output_color
@@ -51,6 +51,8 @@ class ControlCenterUI(QWidget):
         self.clear_all_button.clicked.connect(self.clear_all)
         # Log panel
         self.log_panel = QTextEdit()
+        self.log_panel.setLineWrapMode(self.log_panel.LineWrapMode.NoWrap)
+        self.log_panel.setReadOnly(True)
         # Add to layout
         self.grid_layout.addWidget(self.clear_video_button, 0, 0)
         self.grid_layout.addWidget(self.clear_image_button, 1, 0)
