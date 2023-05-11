@@ -6,8 +6,9 @@ from frontengine.show.text.draw_text import TextWidget
 from frontengine.show.web.webview import WebWidget
 from frontengine.show.image.paint_image import ImageWidget
 from frontengine.show.video.video_player import VideoWidget
+from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 __all__ = [
     "start_front_engine", "GifWidget", "SoundPlayer", "SoundEffectWidget", "TextWidget",
-    "WebWidget", "ImageWidget", "VideoWidget"
+    "WebWidget", "ImageWidget", "VideoWidget", "language_wrapper"
 ]
