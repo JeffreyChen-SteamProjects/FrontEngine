@@ -3,6 +3,7 @@ from PySide6.QtGui import QScreen
 from PySide6.QtWidgets import QWidget, QGridLayout, QLabel, QSlider, QLineEdit, QPushButton, QCheckBox
 
 from frontengine.show.web.webview import WebWidget
+from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
 class WEBSettingUI(QWidget):
@@ -20,7 +21,9 @@ class WEBSettingUI(QWidget):
         # Opacity setting
         self.opacity_slider = QSlider()
         self.opacity_slider.setOrientation(Qt.Orientation.Horizontal)
-        self.opacity_label = QLabel("Opacity")
+        self.opacity_label = QLabel(
+            language_wrapper.language_word_dict.get("Opacity")
+        )
         self.opacity_slider.setMinimum(1)
         self.opacity_slider.setMaximum(100)
         self.opacity_slider.setValue(20)
@@ -30,16 +33,24 @@ class WEBSettingUI(QWidget):
         # WEB URL input
         self.web_url_input = QLineEdit()
         # Start url button
-        self.start_button = QPushButton("Open web with url")
+        self.start_button = QPushButton(
+            language_wrapper.language_word_dict.get("web_setting_open_url")
+        )
         self.start_button.clicked.connect(self.start_open_web_with_url)
         # Show on all screen
-        self.show_on_all_screen_checkbox = QCheckBox("Show on all screen")
+        self.show_on_all_screen_checkbox = QCheckBox(
+            language_wrapper.language_word_dict.get("Show on all screen")
+        )
         self.show_on_all_screen_checkbox.clicked.connect(self.set_show_all_screen)
         # Open local html file
-        self.open_local_html_checkbox = QCheckBox("Open local file")
+        self.open_local_html_checkbox = QCheckBox(
+            language_wrapper.language_word_dict.get("web_setting_open_local_file")
+        )
         self.open_local_html_checkbox.clicked.connect(self.set_open_file)
         # Enable input
-        self.enable_input_checkbox = QCheckBox("Enable input")
+        self.enable_input_checkbox = QCheckBox(
+            language_wrapper.language_word_dict.get("web_setting_open_enable_input")
+        )
         self.enable_input_checkbox.clicked.connect(self.set_enable_input)
         # Add to layout
         self.grid_layout.addWidget(self.opacity_label, 0, 0)

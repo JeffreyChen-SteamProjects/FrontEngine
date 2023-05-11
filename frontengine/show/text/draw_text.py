@@ -13,14 +13,14 @@ class TextWidget(QWidget):
         self.setWindowFlag(
             Qt.WindowType.WindowTransparentForInput |
             Qt.WindowType.FramelessWindowHint |
-            Qt.WindowType.WindowStaysOnTopHint
+            Qt.WindowType.WindowStaysOnTopHint |
+            Qt.WindowType.Tool
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.text = text
         self.font_size = font_size
         self.opacity = opacity
         self.draw_font = QFontDatabase.font(self.font().family(), "", self.font_size)
-        self.setWindowTitle("Text")
         # Set Icon
         self.icon_path = Path(os.getcwd() + "/je_driver_icon.ico")
         if self.icon_path.exists() and self.icon_path.is_file():

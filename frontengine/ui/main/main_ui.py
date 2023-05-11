@@ -6,12 +6,16 @@ from PySide6.QtGui import QIcon, QAction
 from PySide6.QtWidgets import QMainWindow, QApplication, QGridLayout, QTabWidget, QSystemTrayIcon, QMenuBar
 from qt_material import apply_stylesheet, QtStyleTools
 
+from frontengine.ui.main.language_menu import build_language_menu
+from frontengine.ui.setting.control_center.control_center_ui import ControlCenterUI
 from frontengine.ui.setting.gif.gif_setting_ui import GIFSettingUI
 from frontengine.ui.setting.image.image_setting_ui import ImageSettingUI
 from frontengine.ui.setting.sound_player.sound_player_setting_ui import SoundPlayerSettingUI
 from frontengine.ui.setting.text.text_setting_ui import TextSettingUI
 from frontengine.ui.setting.video.video_setting_ui import VideoSettingUI
 from frontengine.ui.setting.web.web_setting_ui import WEBSettingUI
+from frontengine.user_setting.user_setting_file import write_user_setting, read_user_setting, user_setting_dict
+from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
 class FrontEngineMainUI(QMainWindow, QtStyleTools):
@@ -23,6 +27,10 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
         if sys.platform in ["win32", "cygwin", "msys"]:
             from ctypes import windll
             windll.shell32.SetCurrentProcessExplicitAppUserModelID(self.id)
+        read_user_setting()
+        # Language Support
+        self.language_wrapper = language_wrapper
+        self.language_wrapper.reset_language(user_setting_dict.get("language", "English"))
         # Init setting ui
         self.setWindowTitle("FrontEngine")
         self.grid_layout = QGridLayout(self)
@@ -34,12 +42,47 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
         self.gif_setting_ui = GIFSettingUI()
         self.sound_player_setting_ui = SoundPlayerSettingUI()
         self.text_setting_ui = TextSettingUI()
-        self.tab_widget.addTab(self.video_setting_ui, "Video")
-        self.tab_widget.addTab(self.image_setting_ui, "Image")
-        self.tab_widget.addTab(self.web_setting_ui, "WEB")
-        self.tab_widget.addTab(self.gif_setting_ui, "GIF AND WEBP")
-        self.tab_widget.addTab(self.sound_player_setting_ui, "Sound")
-        self.tab_widget.addTab(self.text_setting_ui, "Text")
+        self.control_center_ui = ControlCenterUI(
+            self.video_setting_ui,
+            self.image_setting_ui,
+            self.web_setting_ui,
+            self.gif_setting_ui,
+            self.sound_player_setting_ui,
+            self.text_setting_ui
+        )
+        # Style menu bar
+        self.menu_bar = QMenuBar()
+        build_language_menu(self)
+        self.add_style_menu()
+        self.setMenuBar(self.menu_bar)
+        self.tab_widget.addTab(
+            self.video_setting_ui,
+            language_wrapper.language_word_dict.get("tab_video_text")
+        )
+        self.tab_widget.addTab(
+            self.image_setting_ui,
+            language_wrapper.language_word_dict.get("tab_image_text")
+        )
+        self.tab_widget.addTab(
+            self.web_setting_ui,
+            language_wrapper.language_word_dict.get("tab_web_text")
+        )
+        self.tab_widget.addTab(
+            self.gif_setting_ui,
+            language_wrapper.language_word_dict.get("tab_gif_text")
+        )
+        self.tab_widget.addTab(
+            self.sound_player_setting_ui,
+            language_wrapper.language_word_dict.get("tab_sound_text")
+        )
+        self.tab_widget.addTab(
+            self.text_setting_ui,
+            language_wrapper.language_word_dict.get("tab_text_text")
+        )
+        self.tab_widget.addTab(
+            self.control_center_ui,
+            language_wrapper.language_word_dict.get("tab_control_center_text")
+        )
         self.setCentralWidget(self.tab_widget)
         self.icon_path = Path(os.getcwd() + "/je_driver_icon.ico")
         self.icon = QIcon(str(self.icon_path))
@@ -47,13 +90,14 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
             self.setWindowIcon(self.icon)
             self.system_icon = QSystemTrayIcon()
             self.system_icon.setIcon(self.icon)
-        # Style menu bar
-        self.menu_bar = QMenuBar()
-        self.add_style_menu()
-        self.setMenuBar(self.menu_bar)
+
+    def startup_setting(self):
+        pass
 
     def add_style_menu(self):
-        self.menu_bar.style_menu = self.menu_bar.addMenu("UI Style")
+        self.menu_bar.style_menu = self.menu_bar.addMenu(
+            language_wrapper.language_word_dict.get("menu_bar_ui_style")
+        )
         for style in [
             'dark_amber.xml', 'dark_blue.xml', 'dark_cyan.xml', 'dark_lightgreen.xml', 'dark_pink.xml',
             'dark_purple.xml', 'dark_red.xml', 'dark_teal.xml', 'dark_yellow.xml', 'light_amber.xml',
@@ -75,6 +119,7 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
         self.gif_setting_ui.gif_widget_list.clear()
         self.sound_player_setting_ui.sound_widget_list.clear()
         self.text_setting_ui.text_widget_list.clear()
+        write_user_setting()
 
 
 def start_front_engine():
@@ -82,4 +127,8 @@ def start_front_engine():
     window = FrontEngineMainUI()
     apply_stylesheet(new_editor, theme='dark_amber.xml')
     window.showMaximized()
+    try:
+        window.startup_setting()
+    except Exception as error:
+        print(repr(error))
     sys.exit(new_editor.exec())

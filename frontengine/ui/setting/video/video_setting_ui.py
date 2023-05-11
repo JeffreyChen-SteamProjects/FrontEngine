@@ -5,9 +5,10 @@ from pathlib import Path
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QScreen
 from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QPushButton, QMessageBox, QFileDialog, \
-    QRadioButton, QCheckBox
+    QCheckBox
 
 from frontengine.show.video.video_player import VideoWidget
+from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
 class VideoSettingUI(QWidget):
@@ -23,7 +24,9 @@ class VideoSettingUI(QWidget):
         # Opacity setting
         self.opacity_slider = QSlider()
         self.opacity_slider.setOrientation(Qt.Orientation.Horizontal)
-        self.opacity_label = QLabel("Opacity")
+        self.opacity_label = QLabel(
+            language_wrapper.language_word_dict.get("Opacity")
+        )
         self.opacity_slider.setMinimum(1)
         self.opacity_slider.setMaximum(100)
         self.opacity_slider.setValue(20)
@@ -31,7 +34,9 @@ class VideoSettingUI(QWidget):
         self.opacity_slider_value_label = QLabel(str(self.opacity_slider.value()))
         self.opacity_slider.actionTriggered.connect(self.opacity_trick)
         # Play rate setting
-        self.play_rate_label = QLabel("Play rate")
+        self.play_rate_label = QLabel(
+            language_wrapper.language_word_dict.get("Play rate")
+        )
         self.play_rate_slider = QSlider()
         self.play_rate_slider.setMinimum(100)
         self.play_rate_slider.setMaximum(200)
@@ -41,7 +46,9 @@ class VideoSettingUI(QWidget):
         self.play_rate_slider.setOrientation(Qt.Orientation.Horizontal)
         self.play_rate_slider.actionTriggered.connect(self.play_rate_trick)
         # Volume setting
-        self.volume_label = QLabel("Volume")
+        self.volume_label = QLabel(
+            language_wrapper.language_word_dict.get("Volume")
+        )
         self.volume_slider = QSlider()
         self.volume_slider.setMinimum(100)
         self.volume_slider.setMaximum(200)
@@ -51,16 +58,24 @@ class VideoSettingUI(QWidget):
         self.volume_slider.setOrientation(Qt.Orientation.Horizontal)
         self.volume_slider.actionTriggered.connect(self.volume_trick)
         # Ready label and variable
-        self.ready_label = QLabel("Not Ready yet.")
+        self.ready_label = QLabel(
+            language_wrapper.language_word_dict.get("Not Ready")
+        )
         self.video_path: [str, None] = None
         # Choose file button
-        self.choose_file_button = QPushButton("Choose video file")
+        self.choose_file_button = QPushButton(
+            language_wrapper.language_word_dict.get("video_setting_choose_file")
+        )
         self.choose_file_button.clicked.connect(self.choose_and_copy_file_to_cwd_gif_dir_then_play)
         # Start button
-        self.start_button = QPushButton("Start Play Video")
+        self.start_button = QPushButton(
+            language_wrapper.language_word_dict.get("video_setting_start_play")
+        )
         self.start_button.clicked.connect(self.start_play_gif)
         # Show on all screen
-        self.show_on_all_screen_checkbox = QCheckBox("Show on all screen")
+        self.show_on_all_screen_checkbox = QCheckBox(
+            language_wrapper.language_word_dict.get("Show on all screen")
+        )
         self.show_on_all_screen_checkbox.clicked.connect(self.set_show_all_screen)
         # Add to layout
         self.grid_layout.addWidget(self.opacity_label, 0, 0)
@@ -83,10 +98,10 @@ class VideoSettingUI(QWidget):
 
     def _create_video_widget(self):
         video_widget = VideoWidget(
-            self.video_path,
-            float(self.opacity_slider.value()) / 100,
-            float(self.play_rate_slider.value()) / 100,
-            self.volume_slider.value()
+            video_path=self.video_path,
+            opacity=float(self.opacity_slider.value()) / 100,
+            play_rate=float(self.play_rate_slider.value()) / 100,
+            volume=self.volume_slider.value()
         )
         self.video_widget_list.append(video_widget)
         return video_widget
@@ -94,7 +109,9 @@ class VideoSettingUI(QWidget):
     def start_play_gif(self):
         if self.video_path is None:
             message_box = QMessageBox(self)
-            message_box.setText("Please choose a video file")
+            message_box.setText(
+                language_wrapper.language_word_dict.get("video_setting_message_box")
+            )
             message_box.show()
         else:
             if self.show_all_screen:
@@ -115,6 +132,9 @@ class VideoSettingUI(QWidget):
             filter=" Video (*.mp4;)"
         )[0]
         file_path = Path(file_path)
+        self.ready_label.setText(
+            language_wrapper.language_word_dict.get("Not Ready")
+        )
         if file_path.is_file() and file_path.exists():
             video_path = Path(str(Path.cwd()) + "/video")
             if not video_path.exists() or not video_path.is_dir():
@@ -124,10 +144,14 @@ class VideoSettingUI(QWidget):
                     self.video_path = shutil.copy(file_path, video_path)
                 except shutil.SameFileError:
                     self.video_path = str(Path(f"{video_path}/{file_path.name}"))
-                self.ready_label.setText("Ready")
+                self.ready_label.setText(
+                    language_wrapper.language_word_dict.get("Ready")
+                )
             else:
                 message_box = QMessageBox(self)
-                message_box.setText("Please choose a gif or webp")
+                message_box.setText(
+                    language_wrapper.language_word_dict.get("video_setting_message_box")
+                )
                 message_box.show()
 
     def opacity_trick(self):
