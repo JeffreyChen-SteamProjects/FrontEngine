@@ -1,11 +1,14 @@
-from PySide6.QtWidgets import QGridLayout, QWidget, QPushButton, QVBoxLayout
+from PySide6.QtCore import QTimer, Qt
+from PySide6.QtWidgets import QGridLayout, QWidget, QPushButton, QTextEdit
 
+from frontengine.ui.color.global_color import error_color, output_color
 from frontengine.ui.setting.gif.gif_setting_ui import GIFSettingUI
 from frontengine.ui.setting.image.image_setting_ui import ImageSettingUI
 from frontengine.ui.setting.sound_player.sound_player_setting_ui import SoundPlayerSettingUI
 from frontengine.ui.setting.text.text_setting_ui import TextSettingUI
 from frontengine.ui.setting.video.video_setting_ui import VideoSettingUI
 from frontengine.ui.setting.web.web_setting_ui import WEBSettingUI
+from frontengine.utils.redirect_manager.redirect_manager_class import redirect_manager_instance
 
 
 class ControlCenterUI(QWidget):
@@ -46,15 +49,24 @@ class ControlCenterUI(QWidget):
         self.clear_text_button.clicked.connect(self.clear_text)
         self.clear_all_button = QPushButton("Close all")
         self.clear_all_button.clicked.connect(self.clear_all)
+        # Log panel
+        self.log_panel = QTextEdit()
         # Add to layout
         self.grid_layout.addWidget(self.clear_video_button, 0, 0)
-        self.grid_layout.addWidget(self.clear_image_button, 0, 1)
-        self.grid_layout.addWidget(self.clear_gif_button, 0, 2)
-        self.grid_layout.addWidget(self.clear_web_button, 1, 0)
-        self.grid_layout.addWidget(self.clear_sound_button, 1, 1)
-        self.grid_layout.addWidget(self.clear_text_button, 1, 2)
-        self.grid_layout.addWidget(self.clear_text_button, 2, 0)
+        self.grid_layout.addWidget(self.clear_image_button, 1, 0)
+        self.grid_layout.addWidget(self.clear_gif_button, 2, 0)
+        self.grid_layout.addWidget(self.clear_web_button, 3, 0)
+        self.grid_layout.addWidget(self.clear_sound_button, 4, 0)
+        self.grid_layout.addWidget(self.clear_text_button, 5, 0)
+        self.grid_layout.addWidget(self.clear_all_button, 6, 0)
+        self.grid_layout.addWidget(self.log_panel, 0, 1, 7, 10)
         self.setLayout(self.grid_layout)
+        # Redirect
+        self.redirect_timer = QTimer(self)
+        self.redirect_timer.setInterval(1)
+        self.redirect_timer.timeout.connect(self.redirect)
+        self.redirect_timer.start()
+        redirect_manager_instance.set_redirect(self, True)
 
     def clear_video(self):
         self.video_setting_ui.video_widget_list.clear()
@@ -81,3 +93,17 @@ class ControlCenterUI(QWidget):
         self.gif_setting_ui.gif_widget_list.clear()
         self.sound_player_setting_ui.sound_widget_list.clear()
         self.text_setting_ui.text_widget_list.clear()
+
+    def redirect(self):
+        if not redirect_manager_instance.std_out_queue.empty():
+            output_message = redirect_manager_instance.std_out_queue.get_nowait()
+            output_message = str(output_message).strip()
+            if output_message:
+                self.log_panel.append(output_message)
+        self.log_panel.setTextColor(error_color)
+        if not redirect_manager_instance.std_err_queue.empty():
+            error_message = redirect_manager_instance.std_err_queue.get_nowait()
+            error_message = str(error_message).strip()
+            if error_message:
+                self.log_panel.append(error_message)
+        self.log_panel.setTextColor(output_color)
