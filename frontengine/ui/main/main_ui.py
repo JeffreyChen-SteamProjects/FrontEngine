@@ -26,6 +26,8 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
         if sys.platform in ["win32", "cygwin", "msys"]:
             from ctypes import windll
             windll.shell32.SetCurrentProcessExplicitAppUserModelID(self.id)
+        # Language Support
+        self.language_wrapper = language_wrapper
         # Init setting ui
         self.setWindowTitle("FrontEngine")
         self.grid_layout = QGridLayout(self)
@@ -85,8 +87,6 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
             self.setWindowIcon(self.icon)
             self.system_icon = QSystemTrayIcon()
             self.system_icon.setIcon(self.icon)
-        # Language
-        self.language_wrapper = language_wrapper
 
     def startup_setting(self):
         pass

@@ -8,6 +8,7 @@ from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QPushButton
     QRadioButton, QCheckBox
 
 from frontengine.show.image.paint_image import ImageWidget
+from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
 class ImageSettingUI(QWidget):
@@ -23,7 +24,9 @@ class ImageSettingUI(QWidget):
         # Opacity setting
         self.opacity_slider = QSlider()
         self.opacity_slider.setOrientation(Qt.Orientation.Horizontal)
-        self.opacity_label = QLabel("Opacity")
+        self.opacity_label = QLabel(
+            language_wrapper.language_word_dict.get("Opacity")
+        )
         self.opacity_slider.setMinimum(1)
         self.opacity_slider.setMaximum(100)
         self.opacity_slider.setValue(20)
@@ -32,16 +35,24 @@ class ImageSettingUI(QWidget):
         self.opacity_slider.actionTriggered.connect(self.opacity_trick)
         self.setLayout(self.grid_layout)
         # Choose file button
-        self.choose_file_button = QPushButton("Choose Image")
+        self.choose_file_button = QPushButton(
+            language_wrapper.language_word_dict.get("image_setting_choose_file")
+        )
         self.choose_file_button.clicked.connect(self.choose_and_copy_file_to_cwd_image_dir_then_play)
         # Ready label and variable
-        self.ready_label = QLabel("Not Ready yet.")
+        self.ready_label = QLabel(
+            language_wrapper.language_word_dict.get("Not Ready")
+        )
         self.gif_image_path: [str, None] = None
         # Start button
-        self.start_button = QPushButton("Start Play Image")
+        self.start_button = QPushButton(
+            language_wrapper.language_word_dict.get("image_setting_ui_play")
+        )
         self.start_button.clicked.connect(self.start_play_image)
         # Show on all screen
-        self.show_on_all_screen_checkbox = QCheckBox("Show on all screen")
+        self.show_on_all_screen_checkbox = QCheckBox(
+            language_wrapper.language_word_dict.get("Show on all screen")
+        )
         self.show_on_all_screen_checkbox.clicked.connect(self.set_show_all_screen)
         # Add to layout
         self.grid_layout.addWidget(self.opacity_label, 0, 0)
@@ -67,7 +78,9 @@ class ImageSettingUI(QWidget):
     def start_play_image(self):
         if self.gif_image_path is None:
             message_box = QMessageBox(self)
-            message_box.setText("Please choose a Image")
+            message_box.setText(
+                language_wrapper.language_word_dict.get("image_setting_message_box")
+            )
             message_box.show()
         else:
             if self.show_all_screen:
@@ -88,7 +101,9 @@ class ImageSettingUI(QWidget):
             filter="Images (*.png;*.jpg;*.webp)"
         )[0]
         file_path = Path(file_path)
-        self.ready_label.setText("Not Ready yet.")
+        self.ready_label.setText(
+            language_wrapper.language_word_dict.get("Not Ready")
+        )
         if file_path.is_file() and file_path.exists():
             image_path = Path(str(Path.cwd()) + "/image")
             if not image_path.exists() or not image_path.is_dir():
@@ -100,10 +115,14 @@ class ImageSettingUI(QWidget):
                     self.gif_image_path = shutil.copy(file_path, image_path)
                 except shutil.SameFileError:
                     self.gif_image_path = str(Path(f"{image_path}/{file_path.name}"))
-                self.ready_label.setText("Ready")
+                self.ready_label.setText(
+                    language_wrapper.language_word_dict.get("Ready")
+                )
             else:
                 message_box = QMessageBox(self)
-                message_box.setText("Please choose a Image")
+                message_box.setText(
+                    language_wrapper.language_word_dict.get("image_setting_message_box")
+                )
                 message_box.show()
 
     def opacity_trick(self):

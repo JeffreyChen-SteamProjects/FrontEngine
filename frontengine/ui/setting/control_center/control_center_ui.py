@@ -8,6 +8,7 @@ from frontengine.ui.setting.sound_player.sound_player_setting_ui import SoundPla
 from frontengine.ui.setting.text.text_setting_ui import TextSettingUI
 from frontengine.ui.setting.video.video_setting_ui import VideoSettingUI
 from frontengine.ui.setting.web.web_setting_ui import WEBSettingUI
+from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.redirect_manager.redirect_manager_class import redirect_manager_instance
 
 
@@ -36,20 +37,32 @@ class ControlCenterUI(QWidget):
         self.text_setting_ui = text_setting_ui
         # Close button
         self.clear_video_button = QPushButton(
-            "Close all video"
+            language_wrapper.language_word_dict.get("control_center_close_all_video")
         )
         self.clear_video_button.clicked.connect(self.clear_video)
-        self.clear_image_button = QPushButton("Close all image")
+        self.clear_image_button = QPushButton(
+            language_wrapper.language_word_dict.get("control_center_close_all_image")
+        )
         self.clear_image_button.clicked.connect(self.clear_image)
-        self.clear_gif_button = QPushButton("Close all gif")
+        self.clear_gif_button = QPushButton(
+            language_wrapper.language_word_dict.get("control_center_close_all_gif")
+        )
         self.clear_gif_button.clicked.connect(self.clear_gif)
-        self.clear_web_button = QPushButton("Close all web")
+        self.clear_web_button = QPushButton(
+            language_wrapper.language_word_dict.get("control_center_close_all_web")
+        )
         self.clear_web_button.clicked.connect(self.clear_web)
-        self.clear_sound_button = QPushButton("Close all sound")
+        self.clear_sound_button = QPushButton(
+            language_wrapper.language_word_dict.get("control_center_close_all_sound")
+        )
         self.clear_sound_button.clicked.connect(self.clear_sound)
-        self.clear_text_button = QPushButton("Close all text")
+        self.clear_text_button = QPushButton(
+            language_wrapper.language_word_dict.get("control_center_close_all_text")
+        )
         self.clear_text_button.clicked.connect(self.clear_text)
-        self.clear_all_button = QPushButton("Close all")
+        self.clear_all_button = QPushButton(
+            language_wrapper.language_word_dict.get("control_center_close_all")
+        )
         self.clear_all_button.clicked.connect(self.clear_all)
         # Log panel
         self.log_panel = QTextEdit()

@@ -29,4 +29,38 @@ english_word_dict = {
     "control_center_close_all_sound": "Close all sound",
     "control_center_close_all_text": "Close all text",
     "control_center_close_all": "Close all",
+    # General
+    "Opacity": "Opacity",
+    "Speed": "Speed",
+    "Not Ready": "Not Ready yet.",
+    "Ready": "Ready",
+    "Show on all screen": "Show on all screen",
+    "Volume": "Volume",
+    "Font size": "Font size",
+    "Play rate": "Play rate",
+    # GIF setting ui
+    "gif_setting_ui_choose_file": "Choose GIF or WEBP file",
+    "gif_setting_ui_play": "Start Play GIF or WEBP",
+    "gif_setting_message_box": "Please choose a gif or webp",
+    # Image setting ui
+    "image_setting_choose_file": "Choose Image",
+    "image_setting_ui_play": "Start Play Image",
+    "image_setting_message_box": "Please choose a Image",
+    # Sound player setting ui
+    "sound_player_setting_choose_wav_file": "Choose wav file",
+    "sound_player_setting_choose_sound_file": "Choose sound file",
+    "sound_player_setting_play_wav": "Start Play Wav",
+    "sound_player_setting_play_sound": "Start Player",
+    "sound_player_setting_message_box_wav": "Please choose a wav",
+    "sound_player_setting_message_box_sound": "Please choose a sound file",
+    # Text setting ui
+    "text_setting_start_draw": "Start draw text on screen",
+    # Video setting ui
+    "video_setting_choose_file": "Choose video file",
+    "video_setting_start_play": "Start Play Video",
+    "video_setting_message_box": "Please choose a video file",
+    # Web setting ui
+    "web_setting_open_url": "Open web with url",
+    "web_setting_open_local_file": "Open local file",
+    "web_setting_open_enable_input": "Enable input",
 }

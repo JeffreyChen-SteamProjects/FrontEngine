@@ -1,8 +1,9 @@
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QScreen
-from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QLineEdit, QPushButton, QRadioButton, QCheckBox
+from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QLineEdit, QPushButton, QCheckBox
 
 from frontengine.show.text.draw_text import TextWidget
+from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
 class TextSettingUI(QWidget):
@@ -19,7 +20,9 @@ class TextSettingUI(QWidget):
         # Opacity setting
         self.opacity_slider = QSlider()
         self.opacity_slider.setOrientation(Qt.Orientation.Horizontal)
-        self.opacity_label = QLabel("Opacity")
+        self.opacity_label = QLabel(
+            language_wrapper.language_word_dict.get("Opacity")
+        )
         self.opacity_slider.setMinimum(1)
         self.opacity_slider.setMaximum(100)
         self.opacity_slider.setValue(20)
@@ -29,7 +32,9 @@ class TextSettingUI(QWidget):
         # Font size setting
         self.font_size_slider = QSlider()
         self.font_size_slider.setOrientation(Qt.Orientation.Horizontal)
-        self.font_size_label = QLabel("Font size")
+        self.font_size_label = QLabel(
+            language_wrapper.language_word_dict.get("Font size")
+        )
         self.font_size_slider.setMinimum(1)
         self.font_size_slider.setMaximum(300)
         self.font_size_slider.setValue(100)
@@ -39,10 +44,14 @@ class TextSettingUI(QWidget):
         # Font input button
         self.line_edit = QLineEdit()
         # Start Button
-        self.start_button = QPushButton("Start draw text on screen")
+        self.start_button = QPushButton(
+            language_wrapper.language_word_dict.get("text_setting_start_draw")
+        )
         self.start_button.clicked.connect(self.start_draw_text_on_screen)
         # Show on all screen
-        self.show_on_all_screen_checkbox = QCheckBox("Show on all screen")
+        self.show_on_all_screen_checkbox = QCheckBox(
+            language_wrapper.language_word_dict.get("Show on all screen")
+        )
         self.show_on_all_screen_checkbox.clicked.connect(self.set_show_all_screen)
         # Add to layout
         self.grid_layout.addWidget(self.opacity_label, 0, 0)
