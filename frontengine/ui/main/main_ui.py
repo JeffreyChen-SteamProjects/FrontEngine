@@ -14,6 +14,7 @@ from frontengine.ui.setting.sound_player.sound_player_setting_ui import SoundPla
 from frontengine.ui.setting.text.text_setting_ui import TextSettingUI
 from frontengine.ui.setting.video.video_setting_ui import VideoSettingUI
 from frontengine.ui.setting.web.web_setting_ui import WEBSettingUI
+from frontengine.user_setting.user_setting_file import write_user_setting, read_user_setting, user_setting_dict
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
@@ -26,8 +27,10 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
         if sys.platform in ["win32", "cygwin", "msys"]:
             from ctypes import windll
             windll.shell32.SetCurrentProcessExplicitAppUserModelID(self.id)
+        read_user_setting()
         # Language Support
         self.language_wrapper = language_wrapper
+        self.language_wrapper.reset_language(user_setting_dict.get("language", "English"))
         # Init setting ui
         self.setWindowTitle("FrontEngine")
         self.grid_layout = QGridLayout(self)
@@ -116,6 +119,7 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
         self.gif_setting_ui.gif_widget_list.clear()
         self.sound_player_setting_ui.sound_widget_list.clear()
         self.text_setting_ui.text_widget_list.clear()
+        write_user_setting()
 
 
 def start_front_engine():

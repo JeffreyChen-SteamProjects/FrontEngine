@@ -59,4 +59,8 @@ traditional_chinese_word_dict = {
     "video_setting_choose_file": "選擇影片檔案",
     "video_setting_start_play": "開始撥放影片",
     "video_setting_message_box": "請選擇影片檔案",
+    # Web setting ui
+    "web_setting_open_url": "用網址開啟網頁",
+    "web_setting_open_local_file": "開啟本地網頁",
+    "web_setting_open_enable_input": "啟用輸入",
 }
