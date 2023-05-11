@@ -11,7 +11,7 @@ from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 class SoundPlayer(QWidget):
 
-    def __init__(self, sound_path: str, volume: int = 100):
+    def __init__(self, sound_path: str, volume: float = 1):
         super().__init__()
         self.setWindowFlag(
             Qt.WindowType.WindowTransparentForInput |

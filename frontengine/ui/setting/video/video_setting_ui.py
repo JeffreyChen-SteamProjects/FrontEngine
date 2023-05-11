@@ -50,8 +50,8 @@ class VideoSettingUI(QWidget):
             language_wrapper.language_word_dict.get("Volume")
         )
         self.volume_slider = QSlider()
-        self.volume_slider.setMinimum(100)
-        self.volume_slider.setMaximum(200)
+        self.volume_slider.setMinimum(1)
+        self.volume_slider.setMaximum(100)
         self.volume_slider.setTickInterval(1)
         self.volume_slider.setValue(100)
         self.volume_slider_value_label = QLabel(str(self.volume_slider.value()))
@@ -101,7 +101,7 @@ class VideoSettingUI(QWidget):
             video_path=self.video_path,
             opacity=float(self.opacity_slider.value()) / 100,
             play_rate=float(self.play_rate_slider.value()) / 100,
-            volume=self.volume_slider.value()
+            volume=float(self.volume_slider.value() /100 )
         )
         self.video_widget_list.append(video_widget)
         return video_widget

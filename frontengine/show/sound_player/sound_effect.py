@@ -11,7 +11,7 @@ from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 class SoundEffectWidget(QWidget):
 
-    def __init__(self, sound_path: str, volume: int = 100):
+    def __init__(self, sound_path: str, volume: float = 1):
         super().__init__()
         self.setWindowFlag(
             Qt.WindowType.WindowTransparentForInput |
@@ -19,6 +19,7 @@ class SoundEffectWidget(QWidget):
             Qt.WindowType.WindowStaysOnTopHint |
             Qt.WindowType.Tool
         )
+        print(volume)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.sound_player = QSoundEffect()
         self.sound_path = Path(sound_path)

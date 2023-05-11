@@ -26,7 +26,7 @@ class SoundPlayerSettingUI(QWidget):
         )
         self.volume_slider = QSlider()
         self.volume_slider.setMinimum(1)
-        self.volume_slider.setMaximum(200)
+        self.volume_slider.setMaximum(100)
         self.volume_slider.setTickInterval(1)
         self.volume_slider.setValue(100)
         self.volume_slider_value_label = QLabel(str(self.volume_slider.value()))
@@ -84,7 +84,7 @@ class SoundPlayerSettingUI(QWidget):
         else:
             sound_widget = SoundEffectWidget(
                 sound_path=self.wav_sound_path,
-                volume=self.volume_slider.value()
+                volume=float(self.volume_slider.value() / 100)
             )
             self.sound_widget_list.append(sound_widget)
             sound_widget.showFullScreen()
@@ -99,7 +99,7 @@ class SoundPlayerSettingUI(QWidget):
         else:
             sound_player = SoundPlayer(
                 sound_path=self.player_sound_path,
-                volume=self.volume_slider.value()
+                volume=float(self.volume_slider.value() / 100)
             )
             self.sound_widget_list.append(sound_player)
             sound_player.showFullScreen()
