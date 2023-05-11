@@ -24,7 +24,10 @@ class SoundPlayer(QWidget):
             self.media_player_audio = QAudioOutput()
             self.media_player.setAudioOutput(self.media_player_audio)
             self.media_player_audio = self.media_player.audioOutput()
-            self.media_player.setSource(QUrl.fromLocalFile(str(self.sound_path)))
+            # QUrl non ascii path encode, Avoid read wrong path and file name
+            source = QUrl.fromLocalFile(str(self.sound_path).encode())
+            source = source.fromEncoded(source.toEncoded())
+            self.media_player.setSource(source)
             self.media_player_audio.setVolume(volume)
             self.media_player.setLoops(-1)
             self.media_player.play()

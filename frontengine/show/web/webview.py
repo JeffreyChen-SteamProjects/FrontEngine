@@ -28,7 +28,10 @@ class WebWidget(QWebEngineView):
         else:
             self.web_url = Path(url)
             if self.web_url.exists() and self.web_url.is_file():
-                self.load(QUrl.fromLocalFile(url))
+                # QUrl non ascii path encode, Avoid read wrong path and file name
+                source = QUrl.fromLocalFile(str(self.web_url).encode())
+                source = source.fromEncoded(source.toEncoded())
+                self.load(source)
             else:
                 message_box = QMessageBox(self)
                 message_box.setText("Web file error")

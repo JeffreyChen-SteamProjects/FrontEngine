@@ -21,7 +21,10 @@ class SoundEffectWidget(QWidget):
         self.sound_player = QSoundEffect()
         self.sound_path = Path(sound_path)
         if self.sound_path.exists() and self.sound_path.is_file():
-            self.sound_player.setSource(QUrl.fromLocalFile(str(self.sound_path)))
+            # QUrl non ascii path encode, Avoid read wrong path and file name
+            source = QUrl.fromLocalFile(str(self.sound_path).encode())
+            source = source.fromEncoded(source.toEncoded())
+            self.sound_player.setSource(source)
             self.sound_player.setVolume(volume)
             # -2 means loop forever
             self.sound_player.setLoopCount(-2)
