@@ -1,3 +1,3 @@
-from frontengine import start_front_engine
+from frontengine import *
 
 start_front_engine()
