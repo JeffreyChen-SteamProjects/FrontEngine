@@ -101,6 +101,7 @@ class GIFSettingUI(QWidget):
             filter="GIF WEBP (*.gif;*.webp)"
         )[0]
         file_path = Path(file_path)
+        self.ready_label.setText("Not Ready yet.")
         if file_path.is_file() and file_path.exists():
             gif_dir_path = Path(str(Path.cwd()) + "/gif")
             if not gif_dir_path.exists() or not gif_dir_path.is_dir():

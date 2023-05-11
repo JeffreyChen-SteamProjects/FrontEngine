@@ -7,6 +7,8 @@ from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PySide6.QtMultimediaWidgets import QVideoWidget
 from PySide6.QtWidgets import QMessageBox
 
+from frontengine.utils.multi_language.language_wrapper import language_wrapper
+
 
 class VideoWidget(QVideoWidget):
 
@@ -17,7 +19,8 @@ class VideoWidget(QVideoWidget):
         self.setWindowFlag(
             Qt.WindowType.WindowTransparentForInput |
             Qt.WindowType.FramelessWindowHint |
-            Qt.WindowType.WindowStaysOnTopHint
+            Qt.WindowType.WindowStaysOnTopHint |
+            Qt.WindowType.CoverWindow
         )
         self.setAttribute(
             Qt.WidgetAttribute.WA_TranslucentBackground
@@ -31,8 +34,8 @@ class VideoWidget(QVideoWidget):
             # QUrl non ascii path encode, Avoid read wrong path and file name
             source = QUrl.fromLocalFile(str(self.video_file_path).encode())
             source = source.fromEncoded(source.toEncoded())
+            print(f"Origin file {str(self.video_file_path)}")
             self.media_player.setSource(source)
-            print(self.media_player.source())
             self.media_player.setVideoOutput(self)
             self.media_player.setAudioOutput(self.audioOutput)
             self.media_player.errorOccurred.connect(self.video_player_error)
@@ -42,9 +45,10 @@ class VideoWidget(QVideoWidget):
             self.media_player.play()
         else:
             message_box = QMessageBox(self)
-            message_box.setText("Video error")
+            message_box.setText(
+                language_wrapper.language_word_dict.get("video_player_message_box_text")
+            )
             message_box.show()
-        self.setWindowTitle("Video")
         # Set Icon
         self.icon_path = Path(os.getcwd() + "/je_driver_icon.ico")
         if self.icon_path.exists() and self.icon_path.is_file():

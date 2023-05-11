@@ -83,10 +83,10 @@ class VideoSettingUI(QWidget):
 
     def _create_video_widget(self):
         video_widget = VideoWidget(
-            self.video_path,
-            float(self.opacity_slider.value()) / 100,
-            float(self.play_rate_slider.value()) / 100,
-            self.volume_slider.value()
+            video_path=self.video_path,
+            opacity=float(self.opacity_slider.value()) / 100,
+            play_rate=float(self.play_rate_slider.value()) / 100,
+            volume=self.volume_slider.value()
         )
         self.video_widget_list.append(video_widget)
         return video_widget
@@ -115,6 +115,7 @@ class VideoSettingUI(QWidget):
             filter=" Video (*.mp4;)"
         )[0]
         file_path = Path(file_path)
+        self.ready_label.setText("Not Ready yet.")
         if file_path.is_file() and file_path.exists():
             video_path = Path(str(Path.cwd()) + "/video")
             if not video_path.exists() or not video_path.is_dir():

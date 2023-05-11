@@ -6,6 +6,7 @@ from PySide6.QtGui import QIcon, QAction
 from PySide6.QtWidgets import QMainWindow, QApplication, QGridLayout, QTabWidget, QSystemTrayIcon, QMenuBar
 from qt_material import apply_stylesheet, QtStyleTools
 
+from frontengine.ui.main.language_menu import build_language_menu
 from frontengine.ui.setting.control_center.control_center_ui import ControlCenterUI
 from frontengine.ui.setting.gif.gif_setting_ui import GIFSettingUI
 from frontengine.ui.setting.image.image_setting_ui import ImageSettingUI
@@ -44,24 +45,39 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
             self.sound_player_setting_ui,
             self.text_setting_ui
         )
-        # Language Wrapper
-        language_wrapper.init_later(
+        # Style menu bar
+        self.menu_bar = QMenuBar()
+        build_language_menu(self)
+        self.add_style_menu()
+        self.setMenuBar(self.menu_bar)
+        self.tab_widget.addTab(
             self.video_setting_ui,
-            self.image_setting_ui,
-            self.web_setting_ui,
-            self.gif_setting_ui,
-            self.sound_player_setting_ui,
-            self.text_setting_ui,
-            self.control_center_ui,
-            self.tab_widget
+            language_wrapper.language_word_dict.get("tab_video_text")
         )
-        self.tab_widget.addTab(self.video_setting_ui, "Video")
-        self.tab_widget.addTab(self.image_setting_ui, "Image")
-        self.tab_widget.addTab(self.web_setting_ui, "WEB")
-        self.tab_widget.addTab(self.gif_setting_ui, "GIF AND WEBP")
-        self.tab_widget.addTab(self.sound_player_setting_ui, "Sound")
-        self.tab_widget.addTab(self.text_setting_ui, "Text")
-        self.tab_widget.addTab(self.control_center_ui, "Control Center")
+        self.tab_widget.addTab(
+            self.image_setting_ui,
+            language_wrapper.language_word_dict.get("tab_image_text")
+        )
+        self.tab_widget.addTab(
+            self.web_setting_ui,
+            language_wrapper.language_word_dict.get("tab_web_text")
+        )
+        self.tab_widget.addTab(
+            self.gif_setting_ui,
+            language_wrapper.language_word_dict.get("tab_gif_text")
+        )
+        self.tab_widget.addTab(
+            self.sound_player_setting_ui,
+            language_wrapper.language_word_dict.get("tab_sound_text")
+        )
+        self.tab_widget.addTab(
+            self.text_setting_ui,
+            language_wrapper.language_word_dict.get("tab_text_text")
+        )
+        self.tab_widget.addTab(
+            self.control_center_ui,
+            language_wrapper.language_word_dict.get("tab_control_center_text")
+        )
         self.setCentralWidget(self.tab_widget)
         self.icon_path = Path(os.getcwd() + "/je_driver_icon.ico")
         self.icon = QIcon(str(self.icon_path))
@@ -69,13 +85,16 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
             self.setWindowIcon(self.icon)
             self.system_icon = QSystemTrayIcon()
             self.system_icon.setIcon(self.icon)
-        # Style menu bar
-        self.menu_bar = QMenuBar()
-        self.add_style_menu()
-        self.setMenuBar(self.menu_bar)
+        # Language
+        self.language_wrapper = language_wrapper
+
+    def startup_setting(self):
+        pass
 
     def add_style_menu(self):
-        self.menu_bar.style_menu = self.menu_bar.addMenu("UI Style")
+        self.menu_bar.style_menu = self.menu_bar.addMenu(
+            language_wrapper.language_word_dict.get("menu_bar_ui_style")
+        )
         for style in [
             'dark_amber.xml', 'dark_blue.xml', 'dark_cyan.xml', 'dark_lightgreen.xml', 'dark_pink.xml',
             'dark_purple.xml', 'dark_red.xml', 'dark_teal.xml', 'dark_yellow.xml', 'light_amber.xml',
@@ -104,4 +123,8 @@ def start_front_engine():
     window = FrontEngineMainUI()
     apply_stylesheet(new_editor, theme='dark_amber.xml')
     window.showMaximized()
+    try:
+        window.startup_setting()
+    except Exception as error:
+        print(repr(error))
     sys.exit(new_editor.exec())

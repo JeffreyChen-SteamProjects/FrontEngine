@@ -1,5 +1,5 @@
 from PySide6.QtCore import QTimer
-from PySide6.QtWidgets import QGridLayout, QWidget, QPushButton, QTextEdit
+from PySide6.QtWidgets import QGridLayout, QWidget, QPushButton, QTextEdit, QScrollArea
 
 from frontengine.ui.color.global_color import error_color, output_color
 from frontengine.ui.setting.gif.gif_setting_ui import GIFSettingUI
@@ -35,7 +35,9 @@ class ControlCenterUI(QWidget):
         self.sound_player_setting_ui = sound_player_setting_ui
         self.text_setting_ui = text_setting_ui
         # Close button
-        self.clear_video_button = QPushButton("Close all video")
+        self.clear_video_button = QPushButton(
+            "Close all video"
+        )
         self.clear_video_button.clicked.connect(self.clear_video)
         self.clear_image_button = QPushButton("Close all image")
         self.clear_image_button.clicked.connect(self.clear_image)
@@ -53,6 +55,10 @@ class ControlCenterUI(QWidget):
         self.log_panel = QTextEdit()
         self.log_panel.setLineWrapMode(self.log_panel.LineWrapMode.NoWrap)
         self.log_panel.setReadOnly(True)
+        self.log_panel_scroll_area = QScrollArea()
+        self.log_panel_scroll_area.setWidgetResizable(True)
+        self.log_panel_scroll_area.setViewportMargins(0, 0, 0, 0)
+        self.log_panel_scroll_area.setWidget(self.log_panel)
         # Add to layout
         self.grid_layout.addWidget(self.clear_video_button, 0, 0)
         self.grid_layout.addWidget(self.clear_image_button, 1, 0)
@@ -61,7 +67,7 @@ class ControlCenterUI(QWidget):
         self.grid_layout.addWidget(self.clear_sound_button, 4, 0)
         self.grid_layout.addWidget(self.clear_text_button, 5, 0)
         self.grid_layout.addWidget(self.clear_all_button, 6, 0)
-        self.grid_layout.addWidget(self.log_panel, 0, 1, 7, 10)
+        self.grid_layout.addWidget(self.log_panel_scroll_area, 0, 1, 7, 10)
         self.setLayout(self.grid_layout)
         # Redirect
         self.redirect_timer = QTimer(self)

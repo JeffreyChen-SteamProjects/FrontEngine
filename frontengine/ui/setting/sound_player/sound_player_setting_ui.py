@@ -92,6 +92,7 @@ class SoundPlayerSettingUI(QWidget):
             filter="WAV (*.wav)"
         )[0]
         file_path = Path(file_path)
+        self.wav_ready_label.setText("Not Ready yet.")
         if file_path.is_file() and file_path.exists():
             sound_path = Path(str(Path.cwd()) + "/sound")
             if not sound_path.exists() or not sound_path.is_dir():

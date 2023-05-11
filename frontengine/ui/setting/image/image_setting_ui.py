@@ -88,6 +88,7 @@ class ImageSettingUI(QWidget):
             filter="Images (*.png;*.jpg;*.webp)"
         )[0]
         file_path = Path(file_path)
+        self.ready_label.setText("Not Ready yet.")
         if file_path.is_file() and file_path.exists():
             image_path = Path(str(Path.cwd()) + "/image")
             if not image_path.exists() or not image_path.is_dir():

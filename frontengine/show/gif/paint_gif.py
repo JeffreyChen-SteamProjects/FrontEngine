@@ -5,6 +5,8 @@ from PySide6.QtCore import Qt, QRect
 from PySide6.QtGui import QMovie, QPainter, QIcon
 from PySide6.QtWidgets import QWidget, QLabel, QMessageBox
 
+from frontengine.utils.multi_language.language_wrapper import language_wrapper
+
 
 class GifWidget(QWidget):
 
@@ -24,6 +26,7 @@ class GifWidget(QWidget):
         self.opacity = opacity
         self.gif_path = Path(gif_image_path)
         if self.gif_path.exists() and self.gif_path.is_file():
+            print(f"Origin file {str(self.gif_path)}")
             self.movie = QMovie(str(self.gif_path))
             self.movie.setSpeed(speed)
             self.movie.frameChanged.connect(self.repaint)
@@ -31,10 +34,10 @@ class GifWidget(QWidget):
             self.movie.start()
         else:
             message_box = QMessageBox(self)
-            message_box.setText("GIF or WEBP error")
+            message_box.setText(
+                language_wrapper.language_word_dict.get("paint_gif_message_box_text")
+            )
             message_box.show()
-        # Window setting
-        self.setWindowTitle("GIF AND WEBP")
         # Set Icon
         self.icon_path = Path(os.getcwd() + "/je_driver_icon.ico")
         if self.icon_path.exists() and self.icon_path.is_file():

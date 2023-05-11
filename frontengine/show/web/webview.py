@@ -6,6 +6,8 @@ from PySide6.QtGui import QIcon
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import QMessageBox
 
+from frontengine.utils.multi_language.language_wrapper import language_wrapper
+
 
 class WebWidget(QWebEngineView):
 
@@ -21,7 +23,8 @@ class WebWidget(QWebEngineView):
             self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setWindowFlag(
             Qt.WindowType.FramelessWindowHint |
-            Qt.WindowType.WindowStaysOnTopHint
+            Qt.WindowType.WindowStaysOnTopHint |
+            Qt.WindowType.CoverWindow
         )
         if not is_file:
             self.load(url)
@@ -31,10 +34,13 @@ class WebWidget(QWebEngineView):
                 # QUrl non ascii path encode, Avoid read wrong path and file name
                 source = QUrl.fromLocalFile(str(self.web_url).encode())
                 source = source.fromEncoded(source.toEncoded())
+                print(f"Origin file {str(self.web_url)}")
                 self.load(source)
             else:
                 message_box = QMessageBox(self)
-                message_box.setText("Web file error")
+                message_box.setText(
+                    language_wrapper.language_word_dict.get("webview_message_box_text")
+                )
                 message_box.show()
         # Set Icon
         self.icon_path = Path(os.getcwd() + "/je_driver_icon.ico")
