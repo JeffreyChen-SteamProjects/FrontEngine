@@ -38,7 +38,7 @@ class VideoSettingUI(QWidget):
             language_wrapper.language_word_dict.get("Play rate")
         )
         self.play_rate_slider = QSlider()
-        self.play_rate_slider.setMinimum(100)
+        self.play_rate_slider.setMinimum(1)
         self.play_rate_slider.setMaximum(200)
         self.play_rate_slider.setTickInterval(1)
         self.play_rate_slider.setValue(100)
