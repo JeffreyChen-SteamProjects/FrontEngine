@@ -21,6 +21,7 @@ class VideoSettingUI(QWidget):
         # Init variable
         self.video_widget_list = list()
         self.show_all_screen = False
+        self.ready_to_play = False
         # Opacity setting
         self.opacity_slider = QSlider()
         self.opacity_slider.setOrientation(Qt.Orientation.Horizontal)
@@ -38,7 +39,7 @@ class VideoSettingUI(QWidget):
             language_wrapper.language_word_dict.get("Play rate")
         )
         self.play_rate_slider = QSlider()
-        self.play_rate_slider.setMinimum(100)
+        self.play_rate_slider.setMinimum(1)
         self.play_rate_slider.setMaximum(200)
         self.play_rate_slider.setTickInterval(1)
         self.play_rate_slider.setValue(100)
@@ -50,8 +51,8 @@ class VideoSettingUI(QWidget):
             language_wrapper.language_word_dict.get("Volume")
         )
         self.volume_slider = QSlider()
-        self.volume_slider.setMinimum(100)
-        self.volume_slider.setMaximum(200)
+        self.volume_slider.setMinimum(1)
+        self.volume_slider.setMaximum(100)
         self.volume_slider.setTickInterval(1)
         self.volume_slider.setValue(100)
         self.volume_slider_value_label = QLabel(str(self.volume_slider.value()))
@@ -101,16 +102,16 @@ class VideoSettingUI(QWidget):
             video_path=self.video_path,
             opacity=float(self.opacity_slider.value()) / 100,
             play_rate=float(self.play_rate_slider.value()) / 100,
-            volume=self.volume_slider.value()
+            volume=float(self.volume_slider.value() / 100)
         )
         self.video_widget_list.append(video_widget)
         return video_widget
 
     def start_play_gif(self):
-        if self.video_path is None:
+        if self.video_path is None or self.ready_to_play is False:
             message_box = QMessageBox(self)
             message_box.setText(
-                language_wrapper.language_word_dict.get("video_setting_message_box")
+                language_wrapper.language_word_dict.get("not_prepare")
             )
             message_box.show()
         else:
@@ -135,6 +136,7 @@ class VideoSettingUI(QWidget):
         self.ready_label.setText(
             language_wrapper.language_word_dict.get("Not Ready")
         )
+        self.ready_to_play = False
         if file_path.is_file() and file_path.exists():
             video_path = Path(str(Path.cwd()) + "/video")
             if not video_path.exists() or not video_path.is_dir():
@@ -147,6 +149,7 @@ class VideoSettingUI(QWidget):
                 self.ready_label.setText(
                     language_wrapper.language_word_dict.get("Ready")
                 )
+                self.ready_to_play = True
             else:
                 message_box = QMessageBox(self)
                 message_box.setText(
@@ -162,4 +165,3 @@ class VideoSettingUI(QWidget):
 
     def volume_trick(self):
         self.volume_slider_value_label.setText(str(self.volume_slider.value()))
-

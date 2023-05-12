@@ -13,7 +13,7 @@ from frontengine.utils.multi_language.language_wrapper import language_wrapper
 class VideoWidget(QVideoWidget):
 
     def __init__(self, video_path: str, opacity: float = 0.2,
-                 play_rate: float = 1, volume: int = 100
+                 play_rate: float = 1, volume: float = 1
                  ):
         super().__init__()
         self.setWindowFlag(
