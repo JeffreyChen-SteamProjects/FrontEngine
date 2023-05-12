@@ -21,6 +21,7 @@ class GIFSettingUI(QWidget):
         # Init variable
         self.gif_widget_list = list()
         self.show_all_screen = True
+        self.ready_to_play = False
         # Opacity setting
         self.opacity_slider = QSlider()
         self.opacity_slider.setOrientation(Qt.Orientation.Horizontal)
@@ -91,10 +92,10 @@ class GIFSettingUI(QWidget):
         return gif_widget
 
     def start_play_gif(self):
-        if self.gif_image_path is None:
+        if self.gif_image_path is None or self.ready_to_play is False:
             message_box = QMessageBox(self)
             message_box.setText(
-                language_wrapper.language_word_dict.get("gif_setting_message_box")
+                language_wrapper.language_word_dict.get("not_prepare")
             )
             message_box.show()
         else:
@@ -119,6 +120,7 @@ class GIFSettingUI(QWidget):
         self.ready_label.setText(
             language_wrapper.language_word_dict.get("Not Ready")
         )
+        self.ready_to_play = False
         if file_path.is_file() and file_path.exists():
             gif_dir_path = Path(str(Path.cwd()) + "/gif")
             if not gif_dir_path.exists() or not gif_dir_path.is_dir():
@@ -131,6 +133,7 @@ class GIFSettingUI(QWidget):
                 self.ready_label.setText(
                     language_wrapper.language_word_dict.get("Ready")
                 )
+                self.ready_to_play = True
             else:
                 message_box = QMessageBox(self)
                 message_box.setText(

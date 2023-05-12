@@ -38,6 +38,7 @@ traditional_chinese_word_dict = {
     "Volume": "音量",
     "Font size": "字體大小",
     "Play rate": "撥放速度",
+    "not_prepare": "尚未準備好",
     # GIF setting ui
     "gif_setting_ui_choose_file": "選擇 GIF 或 WEBP 檔案",
     "gif_setting_ui_play": "開始撥放 GIF 或 WEBP",

@@ -20,6 +20,7 @@ class SoundPlayerSettingUI(QWidget):
         # Init variable
         self.sound_widget_list = list()
         self.show_all_screen = False
+        self.ready_to_play = False
         # Volume setting
         self.volume_label = QLabel(
             language_wrapper.language_word_dict.get("Volume")
@@ -75,7 +76,7 @@ class SoundPlayerSettingUI(QWidget):
         self.setLayout(self.grid_layout)
 
     def start_play_wav(self):
-        if self.wav_sound_path is None:
+        if self.wav_sound_path is None or self.ready_to_play is False:
             message_box = QMessageBox(self)
             message_box.setText(
                 language_wrapper.language_word_dict.get("sound_player_setting_message_box_wav")
@@ -93,7 +94,7 @@ class SoundPlayerSettingUI(QWidget):
         if self.player_sound_path is None:
             message_box = QMessageBox(self)
             message_box.setText(
-                language_wrapper.language_word_dict.get("sound_player_setting_message_box_sound")
+                language_wrapper.language_word_dict.get("not_prepare")
             )
             message_box.show()
         else:
@@ -114,6 +115,7 @@ class SoundPlayerSettingUI(QWidget):
         self.wav_ready_label.setText(
             language_wrapper.language_word_dict.get("Not Ready")
         )
+        self.ready_to_play = False
         if file_path.is_file() and file_path.exists():
             sound_path = Path(str(Path.cwd()) + "/sound")
             if not sound_path.exists() or not sound_path.is_dir():
@@ -126,6 +128,7 @@ class SoundPlayerSettingUI(QWidget):
                 self.wav_ready_label.setText(
                     language_wrapper.language_word_dict.get("Ready")
                 )
+                self.ready_to_play = True
             else:
                 message_box = QMessageBox(self)
                 message_box.setText(
