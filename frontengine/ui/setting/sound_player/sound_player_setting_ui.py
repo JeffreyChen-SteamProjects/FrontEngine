@@ -75,7 +75,7 @@ class SoundPlayerSettingUI(QWidget):
         self.grid_layout.addWidget(self.start_player_button, 3, 1)
         self.setLayout(self.grid_layout)
 
-    def start_play_wav(self):
+    def start_play_wav(self) -> None:
         if self.wav_sound_path is None or self.ready_to_play is False:
             message_box = QMessageBox(self)
             message_box.setText(
@@ -90,7 +90,7 @@ class SoundPlayerSettingUI(QWidget):
             self.sound_widget_list.append(sound_widget)
             sound_widget.showFullScreen()
 
-    def start_play_sound(self):
+    def start_play_sound(self) -> None:
         if self.player_sound_path is None:
             message_box = QMessageBox(self)
             message_box.setText(
@@ -105,7 +105,7 @@ class SoundPlayerSettingUI(QWidget):
             self.sound_widget_list.append(sound_player)
             sound_player.showFullScreen()
 
-    def choose_and_copy_wav_file_to_cwd_sound_dir_then_play(self):
+    def choose_and_copy_wav_file_to_cwd_sound_dir_then_play(self) -> None:
         file_path = QFileDialog().getOpenFileName(
             parent=self,
             dir=os.getcwd(),
@@ -136,7 +136,7 @@ class SoundPlayerSettingUI(QWidget):
                 )
                 message_box.show()
 
-    def choose_and_copy_sound_file_to_cwd_sound_dir_then_play(self):
+    def choose_and_copy_sound_file_to_cwd_sound_dir_then_play(self) -> None:
         file_path = QFileDialog().getOpenFileName(
             parent=self,
             dir=os.getcwd(),
@@ -162,6 +162,6 @@ class SoundPlayerSettingUI(QWidget):
                 )
                 message_box.show()
 
-    def volume_trick(self):
+    def volume_trick(self) -> None:
         self.volume_slider_value_label.setText(str(self.volume_slider.value()))
 

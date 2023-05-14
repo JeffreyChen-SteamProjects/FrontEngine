@@ -65,10 +65,10 @@ class TextSettingUI(QWidget):
         self.grid_layout.addWidget(self.line_edit, 2, 2)
         self.setLayout(self.grid_layout)
 
-    def set_show_all_screen(self):
+    def set_show_all_screen(self) -> None:
         self.show_all_screen = self.show_on_all_screen_checkbox.isChecked()
 
-    def _create_text_widget(self):
+    def _create_text_widget(self) -> TextWidget:
         text_widget = TextWidget(
             self.line_edit.text(),
             self.font_size_slider.value(),
@@ -77,13 +77,13 @@ class TextSettingUI(QWidget):
         self.text_widget_list.append(text_widget)
         return text_widget
 
-    def opacity_trick(self):
+    def opacity_trick(self) -> None:
         self.opacity_slider_value_label.setText(str(self.opacity_slider.value()))
 
-    def font_size_trick(self):
+    def font_size_trick(self) -> None:
         self.font_size_slider_value_label.setText(str(self.font_size_slider.value()))
 
-    def start_draw_text_on_screen(self):
+    def start_draw_text_on_screen(self) -> None:
         if self.show_all_screen:
             text_widget = self._create_text_widget()
             text_widget.showFullScreen()

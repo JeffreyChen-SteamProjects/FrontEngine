@@ -65,10 +65,10 @@ class ImageSettingUI(QWidget):
         self.grid_layout.addWidget(self.show_on_all_screen_checkbox, 2, 1)
         self.setLayout(self.grid_layout)
 
-    def set_show_all_screen(self):
+    def set_show_all_screen(self) -> None:
         self.show_all_screen = self.show_on_all_screen_checkbox.isChecked()
 
-    def _create_image_widget(self):
+    def _create_image_widget(self) -> ImageWidget:
         image_widget = ImageWidget(
             image_path=self.gif_image_path,
             opacity=float(self.opacity_slider.value()) / 100
@@ -76,7 +76,7 @@ class ImageSettingUI(QWidget):
         self.image_widget_list.append(image_widget)
         return image_widget
 
-    def start_play_image(self):
+    def start_play_image(self) -> None:
         if self.gif_image_path is None or self.ready_to_play is False:
             message_box = QMessageBox(self)
             message_box.setText(
@@ -95,7 +95,7 @@ class ImageSettingUI(QWidget):
                     image_widget.move(monitor.left(), monitor.top())
                     image_widget.showFullScreen()
 
-    def choose_and_copy_file_to_cwd_image_dir_then_play(self):
+    def choose_and_copy_file_to_cwd_image_dir_then_play(self) -> None:
         file_path = QFileDialog().getOpenFileName(
             parent=self,
             dir=os.getcwd(),
@@ -128,5 +128,5 @@ class ImageSettingUI(QWidget):
                 )
                 message_box.show()
 
-    def opacity_trick(self):
+    def opacity_trick(self) -> None:
         self.opacity_slider_value_label.setText(str(self.opacity_slider.value()))

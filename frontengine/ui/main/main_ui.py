@@ -108,7 +108,7 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
             change_style_action.triggered.connect(self.set_style)
             self.menu_bar.style_menu.addAction(change_style_action)
 
-    def set_style(self):
+    def set_style(self) -> None:
         self.apply_stylesheet(self, self.sender().text())
 
     def closeEvent(self, event) -> None:
@@ -122,7 +122,7 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
         write_user_setting()
 
 
-def start_front_engine():
+def start_front_engine() -> None:
     new_editor = QApplication(sys.argv)
     window = FrontEngineMainUI()
     apply_stylesheet(new_editor, theme='dark_amber.xml')

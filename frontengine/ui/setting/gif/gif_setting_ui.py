@@ -79,10 +79,10 @@ class GIFSettingUI(QWidget):
         self.grid_layout.addWidget(self.show_on_all_screen_checkbox, 3, 1)
         self.setLayout(self.grid_layout)
 
-    def set_show_all_screen(self):
+    def set_show_all_screen(self) -> None:
         self.show_all_screen = self.show_on_all_screen_checkbox.isChecked()
 
-    def _create_gif_widget(self):
+    def _create_gif_widget(self) -> GifWidget:
         gif_widget = GifWidget(
             gif_image_path=self.gif_image_path,
             speed=self.speed_slider.value(),
@@ -91,7 +91,7 @@ class GIFSettingUI(QWidget):
         self.gif_widget_list.append(gif_widget)
         return gif_widget
 
-    def start_play_gif(self):
+    def start_play_gif(self) -> None:
         if self.gif_image_path is None or self.ready_to_play is False:
             message_box = QMessageBox(self)
             message_box.setText(
@@ -110,7 +110,7 @@ class GIFSettingUI(QWidget):
                     gif_widget.move(monitor.left(), monitor.top())
                     gif_widget.showFullScreen()
 
-    def choose_and_copy_file_to_cwd_gif_dir_then_play(self):
+    def choose_and_copy_file_to_cwd_gif_dir_then_play(self) -> None:
         file_path = QFileDialog().getOpenFileName(
             parent=self,
             dir=os.getcwd(),
@@ -141,9 +141,9 @@ class GIFSettingUI(QWidget):
                 )
                 message_box.show()
 
-    def opacity_trick(self):
+    def opacity_trick(self) -> None:
         self.opacity_slider_value_label.setText(str(self.opacity_slider.value()))
 
-    def speed_trick(self):
+    def speed_trick(self) -> None:
         self.speed_slider_value_label.setText(str(self.speed_slider.value()))
 
