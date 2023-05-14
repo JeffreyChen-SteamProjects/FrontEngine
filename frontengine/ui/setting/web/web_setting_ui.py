@@ -63,16 +63,16 @@ class WEBSettingUI(QWidget):
         self.grid_layout.addWidget(self.web_url_input, 2, 2)
         self.setLayout(self.grid_layout)
 
-    def set_show_all_screen(self):
+    def set_show_all_screen(self) -> None:
         self.show_all_screen = self.show_on_all_screen_checkbox.isChecked()
 
-    def set_open_file(self):
+    def set_open_file(self) -> None:
         self.open_file = self.open_local_html_checkbox.isChecked()
 
-    def set_enable_input(self):
+    def set_enable_input(self) -> None:
         self.enable_input = self.enable_input_checkbox.isChecked()
 
-    def _create_web_widget(self):
+    def _create_web_widget(self) -> WebWidget:
         web_widget = WebWidget(
             self.web_url_input.text(),
             float(self.opacity_slider.value()) / 100,
@@ -82,10 +82,10 @@ class WEBSettingUI(QWidget):
         self.web_widget_list.append(web_widget)
         return web_widget
 
-    def opacity_trick(self):
+    def opacity_trick(self) -> None:
         self.opacity_slider_value_label.setText(str(self.opacity_slider.value()))
 
-    def start_open_web_with_url(self):
+    def start_open_web_with_url(self) -> None:
         if self.show_all_screen:
             web_widget = self._create_web_widget()
             web_widget.showMaximized()

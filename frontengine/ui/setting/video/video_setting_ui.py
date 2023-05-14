@@ -97,7 +97,7 @@ class VideoSettingUI(QWidget):
     def set_show_all_screen(self):
         self.show_all_screen = self.show_on_all_screen_checkbox.isChecked()
 
-    def _create_video_widget(self):
+    def _create_video_widget(self) -> VideoWidget:
         video_widget = VideoWidget(
             video_path=self.video_path,
             opacity=float(self.opacity_slider.value()) / 100,
@@ -107,7 +107,7 @@ class VideoSettingUI(QWidget):
         self.video_widget_list.append(video_widget)
         return video_widget
 
-    def start_play_gif(self):
+    def start_play_gif(self) -> None:
         if self.video_path is None or self.ready_to_play is False:
             message_box = QMessageBox(self)
             message_box.setText(
@@ -126,7 +126,7 @@ class VideoSettingUI(QWidget):
                     video_widget.move(monitor.left(), monitor.top())
                     video_widget.showMaximized()
 
-    def choose_and_copy_file_to_cwd_gif_dir_then_play(self):
+    def choose_and_copy_file_to_cwd_gif_dir_then_play(self) -> None:
         file_path = QFileDialog().getOpenFileName(
             parent=self,
             dir=os.getcwd(),
@@ -157,11 +157,11 @@ class VideoSettingUI(QWidget):
                 )
                 message_box.show()
 
-    def opacity_trick(self):
+    def opacity_trick(self) -> None:
         self.opacity_slider_value_label.setText(str(self.opacity_slider.value()))
 
-    def play_rate_trick(self):
+    def play_rate_trick(self) -> None:
         self.play_rate_slider_value_label.setText(str(self.play_rate_slider.value()))
 
-    def volume_trick(self):
+    def volume_trick(self) -> None:
         self.volume_slider_value_label.setText(str(self.volume_slider.value()))

@@ -89,25 +89,25 @@ class ControlCenterUI(QWidget):
         self.redirect_timer.start()
         redirect_manager_instance.set_redirect(self, True)
 
-    def clear_video(self):
+    def clear_video(self) -> None:
         self.video_setting_ui.video_widget_list.clear()
 
-    def clear_image(self):
+    def clear_image(self) -> None:
         self.image_setting_ui.image_widget_list.clear()
 
-    def clear_gif(self):
+    def clear_gif(self) -> None:
         self.gif_setting_ui.gif_widget_list.clear()
 
-    def clear_web(self):
+    def clear_web(self) -> None:
         self.web_setting_ui.web_widget_list.clear()
 
-    def clear_sound(self):
+    def clear_sound(self) -> None:
         self.sound_player_setting_ui.sound_widget_list.clear()
 
-    def clear_text(self):
+    def clear_text(self) -> None:
         self.text_setting_ui.text_widget_list.clear()
 
-    def clear_all(self):
+    def clear_all(self) -> None:
         self.video_setting_ui.video_widget_list.clear()
         self.image_setting_ui.image_widget_list.clear()
         self.web_setting_ui.web_widget_list.clear()
@@ -115,7 +115,7 @@ class ControlCenterUI(QWidget):
         self.sound_player_setting_ui.sound_widget_list.clear()
         self.text_setting_ui.text_widget_list.clear()
 
-    def redirect(self):
+    def redirect(self) -> None:
         if not redirect_manager_instance.std_out_queue.empty():
             output_message = redirect_manager_instance.std_out_queue.get_nowait()
             output_message = str(output_message).strip()
