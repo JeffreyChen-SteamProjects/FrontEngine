@@ -10,6 +10,7 @@ from frontengine.ui.main.language_menu import build_language_menu
 from frontengine.ui.setting.control_center.control_center_ui import ControlCenterUI
 from frontengine.ui.setting.gif.gif_setting_ui import GIFSettingUI
 from frontengine.ui.setting.image.image_setting_ui import ImageSettingUI
+from frontengine.ui.setting.scene_setting.scene_setting_ui import SceneSettingUI
 from frontengine.ui.setting.sound_player.sound_player_setting_ui import SoundPlayerSettingUI
 from frontengine.ui.setting.text.text_setting_ui import TextSettingUI
 from frontengine.ui.setting.video.video_setting_ui import VideoSettingUI
@@ -42,13 +43,15 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
         self.gif_setting_ui = GIFSettingUI()
         self.sound_player_setting_ui = SoundPlayerSettingUI()
         self.text_setting_ui = TextSettingUI()
+        self.scene_setting_ui = SceneSettingUI()
         self.control_center_ui = ControlCenterUI(
             self.video_setting_ui,
             self.image_setting_ui,
             self.web_setting_ui,
             self.gif_setting_ui,
             self.sound_player_setting_ui,
-            self.text_setting_ui
+            self.text_setting_ui,
+            self.scene_setting_ui
         )
         # Style menu bar
         self.menu_bar = QMenuBar()
@@ -78,6 +81,10 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
         self.tab_widget.addTab(
             self.text_setting_ui,
             language_wrapper.language_word_dict.get("tab_text_text")
+        )
+        self.tab_widget.addTab(
+            self.scene_setting_ui,
+            language_wrapper.language_word_dict.get("tab_scene_text")
         )
         self.tab_widget.addTab(
             self.control_center_ui,
