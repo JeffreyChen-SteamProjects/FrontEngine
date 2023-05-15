@@ -64,4 +64,7 @@ english_word_dict = {
     "web_setting_open_url": "Open web with url",
     "web_setting_open_local_file": "Open local file",
     "web_setting_open_enable_input": "Enable input",
+    # Scene UI
+    "tab_scene_text": "Scene",
+    "scene_setting_start_scene_button": "Start Scene",
 }

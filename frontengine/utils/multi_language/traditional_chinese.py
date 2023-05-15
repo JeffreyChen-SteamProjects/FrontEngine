@@ -64,4 +64,7 @@ traditional_chinese_word_dict = {
     "web_setting_open_url": "用網址開啟網頁",
     "web_setting_open_local_file": "開啟本地網頁",
     "web_setting_open_enable_input": "啟用輸入",
+    # Scene UI
+    "tab_scene_text": "場景",
+    "scene_setting_start_scene_button": "開始場景",
 }
