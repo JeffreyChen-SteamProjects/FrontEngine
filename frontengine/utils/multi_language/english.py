@@ -39,6 +39,7 @@ english_word_dict = {
     "Font size": "Font size",
     "Play rate": "Play rate",
     "not_prepare": "Not prepare",
+    "Show on bottom": "Show on all window bottom",
     # GIF setting ui
     "gif_setting_ui_choose_file": "Choose GIF or WEBP file",
     "gif_setting_ui_play": "Start Play GIF or WEBP",

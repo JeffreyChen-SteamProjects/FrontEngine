@@ -10,15 +10,8 @@ from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 class GifWidget(QWidget):
 
-    def __init__(self, gif_image_path: str
-                 ):
+    def __init__(self, gif_image_path: str):
         super().__init__()
-        self.setWindowFlag(
-            Qt.WindowType.WindowTransparentForInput |
-            Qt.WindowType.FramelessWindowHint |
-            Qt.WindowType.WindowStaysOnTopHint |
-            Qt.WindowType.Tool
-        )
         self.opacity = 0.2
         self.speed = 100
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
@@ -49,6 +42,17 @@ class GifWidget(QWidget):
 
     def set_ui_variable(self, opacity: float = 0.2):
         self.opacity = opacity
+
+    def set_ui_window_flag(self, show_on_bottom: bool = False) -> None:
+        self.setWindowFlag(
+            Qt.WindowType.WindowTransparentForInput |
+            Qt.WindowType.FramelessWindowHint |
+            Qt.WindowType.Tool
+        )
+        if not show_on_bottom:
+            self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint)
+        else:
+            self.setWindowFlag(Qt.WindowType.WindowStaysOnBottomHint)
 
     def paintEvent(self, event) -> None:
         current_gif_frame = self.movie.currentPixmap()

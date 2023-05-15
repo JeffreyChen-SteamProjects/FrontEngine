@@ -55,6 +55,10 @@ class ImageSettingUI(QWidget):
             language_wrapper.language_word_dict.get("Show on all screen")
         )
         self.show_on_all_screen_checkbox.clicked.connect(self.set_show_all_screen)
+        # Show on bottom
+        self.show_on_bottom_checkbox = QCheckBox(
+            language_wrapper.language_word_dict.get("Show on bottom")
+        )
         # Add to layout
         self.grid_layout.addWidget(self.opacity_label, 0, 0)
         self.grid_layout.addWidget(self.opacity_slider_value_label, 0, 1)
@@ -63,6 +67,7 @@ class ImageSettingUI(QWidget):
         self.grid_layout.addWidget(self.ready_label, 1, 1)
         self.grid_layout.addWidget(self.start_button, 2, 0)
         self.grid_layout.addWidget(self.show_on_all_screen_checkbox, 2, 1)
+        self.grid_layout.addWidget(self.show_on_bottom_checkbox, 2, 2)
         self.setLayout(self.grid_layout)
 
     def set_show_all_screen(self) -> None:
@@ -71,6 +76,7 @@ class ImageSettingUI(QWidget):
     def _create_image_widget(self) -> ImageWidget:
         image_widget = ImageWidget(image_path=self.gif_image_path)
         image_widget.set_ui_variable(opacity=float(self.opacity_slider.value()) / 100)
+        image_widget.set_ui_window_flag(self.show_on_bottom_checkbox.isChecked())
         self.image_widget_list.append(image_widget)
         return image_widget
 

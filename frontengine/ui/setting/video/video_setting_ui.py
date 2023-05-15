@@ -78,6 +78,10 @@ class VideoSettingUI(QWidget):
             language_wrapper.language_word_dict.get("Show on all screen")
         )
         self.show_on_all_screen_checkbox.clicked.connect(self.set_show_all_screen)
+        # Show on bottom
+        self.show_on_bottom_checkbox = QCheckBox(
+            language_wrapper.language_word_dict.get("Show on bottom")
+        )
         # Add to layout
         self.grid_layout.addWidget(self.opacity_label, 0, 0)
         self.grid_layout.addWidget(self.opacity_slider_value_label, 0, 1)
@@ -89,9 +93,10 @@ class VideoSettingUI(QWidget):
         self.grid_layout.addWidget(self.volume_slider_value_label, 2, 1)
         self.grid_layout.addWidget(self.volume_slider, 2, 2)
         self.grid_layout.addWidget(self.choose_file_button, 3, 0)
-        self.grid_layout.addWidget(self.start_button, 4, 0)
-        self.grid_layout.addWidget(self.ready_label, 4, 1)
-        self.grid_layout.addWidget(self.show_on_all_screen_checkbox, 4, 2)
+        self.grid_layout.addWidget(self.show_on_all_screen_checkbox, 4, 0)
+        self.grid_layout.addWidget(self.show_on_bottom_checkbox, 4, 1)
+        self.grid_layout.addWidget(self.start_button, 5, 0)
+        self.grid_layout.addWidget(self.ready_label, 5, 1)
         self.setLayout(self.grid_layout)
 
     def set_show_all_screen(self):
@@ -104,6 +109,7 @@ class VideoSettingUI(QWidget):
             play_rate=float(self.play_rate_slider.value()) / 100,
             volume=float(self.volume_slider.value() / 100)
         )
+        video_widget.set_ui_window_flag(self.show_on_bottom_checkbox.isChecked())
         self.video_widget_list.append(video_widget)
         return video_widget
 
@@ -117,6 +123,7 @@ class VideoSettingUI(QWidget):
         else:
             if self.show_all_screen:
                 video_widget = self._create_video_widget()
+                video_widget.set_ui_window_flag(self.show_on_bottom_checkbox.isChecked())
                 video_widget.showMaximized()
             else:
                 monitors = QScreen.virtualSiblings(self.screen())

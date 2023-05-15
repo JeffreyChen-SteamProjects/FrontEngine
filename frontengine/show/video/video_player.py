@@ -17,13 +17,6 @@ class VideoWidget(QVideoWidget):
         self.opacity: float = 0.2
         self.volume: float = 1
         self.play_rate: float = 1
-        self.setWindowFlag(
-            Qt.WindowType.WindowTransparentForInput |
-            Qt.WindowType.FramelessWindowHint |
-            Qt.WindowType.WindowStaysOnTopHint |
-            Qt.WindowType.WindowType_Mask |
-            Qt.WindowType.Tool
-        )
         self.setAttribute(
             Qt.WidgetAttribute.WA_TranslucentBackground
         )
@@ -52,6 +45,19 @@ class VideoWidget(QVideoWidget):
         self.icon_path = Path(os.getcwd() + "/je_driver_icon.ico")
         if self.icon_path.exists() and self.icon_path.is_file():
             self.setWindowIcon(QIcon(str(self.icon_path)))
+
+    def set_ui_window_flag(self, show_on_bottom: bool = False) -> None:
+        self.setWindowFlag(
+            Qt.WindowType.WindowTransparentForInput |
+            Qt.WindowType.FramelessWindowHint |
+            Qt.WindowType.WindowType_Mask |
+            Qt.WindowType.Tool
+        )
+        if not show_on_bottom:
+            self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint)
+        else:
+            self.setWindowFlag(Qt.WindowType.WindowStaysOnBottomHint)
+
 
     def set_ui_variable(self, opacity: float = 0.2):
         self.opacity = opacity

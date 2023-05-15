@@ -53,6 +53,10 @@ class TextSettingUI(QWidget):
             language_wrapper.language_word_dict.get("Show on all screen")
         )
         self.show_on_all_screen_checkbox.clicked.connect(self.set_show_all_screen)
+        # Show on bottom
+        self.show_on_bottom_checkbox = QCheckBox(
+            language_wrapper.language_word_dict.get("Show on bottom")
+        )
         # Add to layout
         self.grid_layout.addWidget(self.opacity_label, 0, 0)
         self.grid_layout.addWidget(self.opacity_slider_value_label, 0, 1)
@@ -60,9 +64,10 @@ class TextSettingUI(QWidget):
         self.grid_layout.addWidget(self.font_size_label, 1, 0)
         self.grid_layout.addWidget(self.font_size_slider_value_label, 1, 1)
         self.grid_layout.addWidget(self.font_size_slider, 1, 2)
-        self.grid_layout.addWidget(self.start_button, 2, 0)
-        self.grid_layout.addWidget(self.show_on_all_screen_checkbox, 2, 1)
-        self.grid_layout.addWidget(self.line_edit, 2, 2)
+        self.grid_layout.addWidget(self.show_on_all_screen_checkbox, 2, 0)
+        self.grid_layout.addWidget(self.show_on_bottom_checkbox, 2, 1)
+        self.grid_layout.addWidget(self.start_button, 3, 0)
+        self.grid_layout.addWidget(self.line_edit, 3, 2)
         self.setLayout(self.grid_layout)
 
     def set_show_all_screen(self) -> None:
@@ -72,6 +77,7 @@ class TextSettingUI(QWidget):
         text_widget = TextWidget(self.line_edit.text())
         text_widget.set_font_variable(self.font_size_slider.value())
         text_widget.set_ui_variable(float(self.opacity_slider.value()) / 100)
+        text_widget.set_ui_window_flag(self.show_on_bottom_checkbox.isChecked())
         self.text_widget_list.append(text_widget)
         return text_widget
 
