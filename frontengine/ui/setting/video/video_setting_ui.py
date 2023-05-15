@@ -98,9 +98,9 @@ class VideoSettingUI(QWidget):
         self.show_all_screen = self.show_on_all_screen_checkbox.isChecked()
 
     def _create_video_widget(self) -> VideoWidget:
-        video_widget = VideoWidget(
-            video_path=self.video_path,
-            opacity=float(self.opacity_slider.value()) / 100,
+        video_widget = VideoWidget(video_path=self.video_path)
+        video_widget.set_ui_variable(opacity=float(self.opacity_slider.value()) / 100)
+        video_widget.set_player_variable(
             play_rate=float(self.play_rate_slider.value()) / 100,
             volume=float(self.volume_slider.value() / 100)
         )

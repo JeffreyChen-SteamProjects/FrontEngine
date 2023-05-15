@@ -69,10 +69,8 @@ class ImageSettingUI(QWidget):
         self.show_all_screen = self.show_on_all_screen_checkbox.isChecked()
 
     def _create_image_widget(self) -> ImageWidget:
-        image_widget = ImageWidget(
-            image_path=self.gif_image_path,
-            opacity=float(self.opacity_slider.value()) / 100
-        )
+        image_widget = ImageWidget(image_path=self.gif_image_path)
+        image_widget.set_ui_variable(opacity=float(self.opacity_slider.value()) / 100)
         self.image_widget_list.append(image_widget)
         return image_widget
 

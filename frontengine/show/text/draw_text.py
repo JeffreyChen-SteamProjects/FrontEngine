@@ -8,7 +8,7 @@ from PySide6.QtWidgets import QWidget
 
 class TextWidget(QWidget):
 
-    def __init__(self, text: str, font_size: int = 100, opacity: float = 0.2):
+    def __init__(self, text: str):
         super().__init__()
         self.setWindowFlag(
             Qt.WindowType.WindowTransparentForInput |
@@ -18,13 +18,19 @@ class TextWidget(QWidget):
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.text = text
-        self.font_size = font_size
-        self.opacity = opacity
+        self.font_size = 100
+        self.opacity = 0.2
         self.draw_font = QFontDatabase.font(self.font().family(), "", self.font_size)
         # Set Icon
         self.icon_path = Path(os.getcwd() + "/je_driver_icon.ico")
         if self.icon_path.exists() and self.icon_path.is_file():
             self.setWindowIcon(QIcon(str(self.icon_path)))
+
+    def set_font_variable(self, font_size: int = 100):
+        self.font_size = font_size
+
+    def set_ui_variable(self, opacity: float = 0.2):
+        self.opacity = opacity
 
     def paintEvent(self, event) -> None:
         painter = QPainter(self)

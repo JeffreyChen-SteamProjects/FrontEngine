@@ -83,25 +83,19 @@ class SoundPlayerSettingUI(QWidget):
             )
             message_box.show()
         else:
-            sound_widget = SoundEffectWidget(
-                sound_path=self.wav_sound_path,
-                volume=float(self.volume_slider.value() / 100)
-            )
+            sound_widget = SoundEffectWidget(sound_path=self.wav_sound_path)
+            sound_widget.set_sound_effect_variable(volume=float(self.volume_slider.value() / 100))
             self.sound_widget_list.append(sound_widget)
             sound_widget.showFullScreen()
 
     def start_play_sound(self) -> None:
         if self.player_sound_path is None:
             message_box = QMessageBox(self)
-            message_box.setText(
-                language_wrapper.language_word_dict.get("not_prepare")
-            )
+            message_box.setText(language_wrapper.language_word_dict.get("not_prepare"))
             message_box.show()
         else:
-            sound_player = SoundPlayer(
-                sound_path=self.player_sound_path,
-                volume=float(self.volume_slider.value() / 100)
-            )
+            sound_player = SoundPlayer(sound_path=self.player_sound_path)
+            sound_player.set_player_variable(volume=float(self.volume_slider.value() / 100))
             self.sound_widget_list.append(sound_player)
             sound_player.showFullScreen()
 
@@ -164,4 +158,3 @@ class SoundPlayerSettingUI(QWidget):
 
     def volume_trick(self) -> None:
         self.volume_slider_value_label.setText(str(self.volume_slider.value()))
-

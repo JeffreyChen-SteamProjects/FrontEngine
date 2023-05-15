@@ -69,11 +69,9 @@ class TextSettingUI(QWidget):
         self.show_all_screen = self.show_on_all_screen_checkbox.isChecked()
 
     def _create_text_widget(self) -> TextWidget:
-        text_widget = TextWidget(
-            self.line_edit.text(),
-            self.font_size_slider.value(),
-            float(self.opacity_slider.value()) / 100
-        )
+        text_widget = TextWidget(self.line_edit.text())
+        text_widget.set_font_variable(self.font_size_slider.value())
+        text_widget.set_ui_variable(float(self.opacity_slider.value()) / 100)
         self.text_widget_list.append(text_widget)
         return text_widget
 

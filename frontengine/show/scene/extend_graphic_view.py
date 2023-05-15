@@ -6,6 +6,12 @@ class ExtendGraphicView(QGraphicsView):
 
     def __init__(self, *args):
         super().__init__(*args)
+        self.setWindowFlag(
+            Qt.WindowType.FramelessWindowHint |
+            Qt.WindowType.WindowStaysOnTopHint |
+            Qt.WindowType.WindowType_Mask |
+            Qt.WindowType.Tool
+        )
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setDragMode(QGraphicsView.DragMode.ScrollHandDrag)

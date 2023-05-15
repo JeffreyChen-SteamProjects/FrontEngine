@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QWidget, QGridLayout, QPushButton
 
-from frontengine.show.scene.scene import SceneWidget
+from frontengine.show.scene.scene import SceneManager
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
@@ -22,5 +22,5 @@ class SceneSettingUI(QWidget):
         self.setLayout(self.grid_layout)
 
     def start_scene(self):
-        scene = SceneWidget()
+        scene = SceneManager()
         self.scene_list.append(scene)

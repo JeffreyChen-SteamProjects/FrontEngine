@@ -11,8 +11,9 @@ from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 class SoundPlayer(QWidget):
 
-    def __init__(self, sound_path: str, volume: float = 1):
+    def __init__(self, sound_path: str):
         super().__init__()
+        self.volume: float = 1
         self.setWindowFlag(
             Qt.WindowType.WindowTransparentForInput |
             Qt.WindowType.FramelessWindowHint |
@@ -31,7 +32,6 @@ class SoundPlayer(QWidget):
             source = source.fromEncoded(source.toEncoded())
             print(f"Origin file {str(self.sound_path)}")
             self.media_player.setSource(source)
-            self.media_player_audio.setVolume(volume)
             self.media_player.setLoops(-1)
             self.media_player.play()
         else:
@@ -44,6 +44,10 @@ class SoundPlayer(QWidget):
         self.icon_path = Path(os.getcwd() + "/je_driver_icon.ico")
         if self.icon_path.exists() and self.icon_path.is_file():
             self.setWindowIcon(QIcon(str(self.icon_path)))
+
+    def set_player_variable(self, volume: float = 1):
+        self.volume = volume
+        self.media_player_audio.setVolume(self.volume)
 
     def closeEvent(self, event):
         super().closeEvent(event)

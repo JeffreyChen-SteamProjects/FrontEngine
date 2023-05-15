@@ -73,12 +73,9 @@ class WEBSettingUI(QWidget):
         self.enable_input = self.enable_input_checkbox.isChecked()
 
     def _create_web_widget(self) -> WebWidget:
-        web_widget = WebWidget(
-            self.web_url_input.text(),
-            float(self.opacity_slider.value()) / 100,
-            is_file=self.open_file,
-            enable_input=self.enable_input
-        )
+        web_widget = WebWidget(self.web_url_input.text(), is_file=self.open_file)
+        web_widget.set_ui_window_flag(enable_input=self.enable_input)
+        web_widget.set_ui_variable(float(self.opacity_slider.value()) / 100, )
         self.web_widget_list.append(web_widget)
         return web_widget
 

@@ -83,11 +83,9 @@ class GIFSettingUI(QWidget):
         self.show_all_screen = self.show_on_all_screen_checkbox.isChecked()
 
     def _create_gif_widget(self) -> GifWidget:
-        gif_widget = GifWidget(
-            gif_image_path=self.gif_image_path,
-            speed=self.speed_slider.value(),
-            opacity=float(self.opacity_slider.value()) / 100
-        )
+        gif_widget = GifWidget(gif_image_path=self.gif_image_path)
+        gif_widget.set_gif_variable(speed=self.speed_slider.value())
+        gif_widget.set_ui_variable(opacity=float(self.opacity_slider.value()) / 100)
         self.gif_widget_list.append(gif_widget)
         return gif_widget
 
