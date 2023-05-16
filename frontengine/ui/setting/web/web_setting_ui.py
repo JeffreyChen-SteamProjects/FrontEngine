@@ -61,11 +61,11 @@ class WEBSettingUI(QWidget):
         self.grid_layout.addWidget(self.opacity_slider_value_label, 0, 1)
         self.grid_layout.addWidget(self.opacity_slider, 0, 2)
         self.grid_layout.addWidget(self.open_local_html_checkbox, 1, 0)
-        self.grid_layout.addWidget(self.show_on_all_screen_checkbox, 1, 1)
-        self.grid_layout.addWidget(self.show_on_bottom_checkbox, 1, 2)
-        self.grid_layout.addWidget(self.enable_input_checkbox, 1, 2)
-        self.grid_layout.addWidget(self.start_button, 2, 0)
-        self.grid_layout.addWidget(self.web_url_input, 2, 2)
+        self.grid_layout.addWidget(self.enable_input_checkbox, 1, 1)
+        self.grid_layout.addWidget(self.show_on_all_screen_checkbox, 2, 0)
+        self.grid_layout.addWidget(self.show_on_bottom_checkbox, 2, 1)
+        self.grid_layout.addWidget(self.start_button, 3, 0)
+        self.grid_layout.addWidget(self.web_url_input, 3, 2)
         self.setLayout(self.grid_layout)
 
     def set_show_all_screen(self) -> None:
