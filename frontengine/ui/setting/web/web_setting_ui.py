@@ -51,16 +51,21 @@ class WEBSettingUI(QWidget):
         self.enable_input_checkbox = QCheckBox(
             language_wrapper.language_word_dict.get("web_setting_open_enable_input")
         )
+        # Show on bottom
+        self.show_on_bottom_checkbox = QCheckBox(
+            language_wrapper.language_word_dict.get("Show on bottom")
+        )
         self.enable_input_checkbox.clicked.connect(self.set_enable_input)
         # Add to layout
         self.grid_layout.addWidget(self.opacity_label, 0, 0)
         self.grid_layout.addWidget(self.opacity_slider_value_label, 0, 1)
         self.grid_layout.addWidget(self.opacity_slider, 0, 2)
         self.grid_layout.addWidget(self.open_local_html_checkbox, 1, 0)
-        self.grid_layout.addWidget(self.show_on_all_screen_checkbox, 1, 1)
-        self.grid_layout.addWidget(self.enable_input_checkbox, 1, 2)
-        self.grid_layout.addWidget(self.start_button, 2, 0)
-        self.grid_layout.addWidget(self.web_url_input, 2, 2)
+        self.grid_layout.addWidget(self.enable_input_checkbox, 1, 1)
+        self.grid_layout.addWidget(self.show_on_all_screen_checkbox, 2, 0)
+        self.grid_layout.addWidget(self.show_on_bottom_checkbox, 2, 1)
+        self.grid_layout.addWidget(self.start_button, 3, 0)
+        self.grid_layout.addWidget(self.web_url_input, 3, 2)
         self.setLayout(self.grid_layout)
 
     def set_show_all_screen(self) -> None:
@@ -73,11 +78,12 @@ class WEBSettingUI(QWidget):
         self.enable_input = self.enable_input_checkbox.isChecked()
 
     def _create_web_widget(self) -> WebWidget:
-        web_widget = WebWidget(
-            self.web_url_input.text(),
-            float(self.opacity_slider.value()) / 100,
-            is_file=self.open_file,
-            enable_input=self.enable_input
+        web_widget = WebWidget(self.web_url_input.text(), is_file=self.open_file)
+        web_widget.set_ui_window_flag(enable_input=self.enable_input)
+        web_widget.set_ui_variable(float(self.opacity_slider.value()) / 100)
+        web_widget.set_ui_window_flag(
+            self.enable_input_checkbox.isChecked(),
+            self.show_on_bottom_checkbox.isChecked()
         )
         self.web_widget_list.append(web_widget)
         return web_widget

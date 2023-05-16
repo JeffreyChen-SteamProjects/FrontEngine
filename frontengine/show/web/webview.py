@@ -11,21 +11,9 @@ from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 class WebWidget(QWebEngineView):
 
-    def __init__(self, url: str, opacity: float = 0.2,
-                 is_file: bool = False, enable_input: bool = False
-                 ):
+    def __init__(self, url: str, is_file: bool = False):
         super().__init__()
-        self.setWindowOpacity(opacity)
-        if not enable_input:
-            self.setWindowFlag(
-                Qt.WindowType.WindowTransparentForInput
-            )
-            self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        self.setWindowFlag(
-            Qt.WindowType.FramelessWindowHint |
-            Qt.WindowType.WindowStaysOnTopHint |
-            Qt.WindowType.CoverWindow
-        )
+        self.opacity: float = 0.2
         if not is_file:
             self.load(url)
         else:
@@ -46,3 +34,23 @@ class WebWidget(QWebEngineView):
         self.icon_path = Path(os.getcwd() + "/je_driver_icon.ico")
         if self.icon_path.exists() and self.icon_path.is_file():
             self.setWindowIcon(QIcon(str(self.icon_path)))
+
+    def set_ui_variable(self, opacity: float = 0.2):
+        self.opacity = opacity
+        self.setWindowOpacity(opacity)
+
+    def set_ui_window_flag(self, enable_input: bool = False, show_on_bottom: bool = False):
+        if not enable_input:
+            self.setWindowFlag(
+                Qt.WindowType.WindowTransparentForInput
+            )
+            self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        if show_on_bottom:
+            self.setWindowFlag(Qt.WindowType.WindowStaysOnBottomHint)
+        else:
+            self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint)
+        self.setWindowFlag(
+            Qt.WindowType.FramelessWindowHint |
+            Qt.WindowType.WindowType_Mask |
+            Qt.WindowType.Tool
+        )

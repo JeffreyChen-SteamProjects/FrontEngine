@@ -11,15 +11,15 @@ from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 class SoundEffectWidget(QWidget):
 
-    def __init__(self, sound_path: str, volume: float = 1):
+    def __init__(self, sound_path: str):
         super().__init__()
+        self.volume: float = 1
         self.setWindowFlag(
             Qt.WindowType.WindowTransparentForInput |
             Qt.WindowType.FramelessWindowHint |
             Qt.WindowType.WindowStaysOnTopHint |
             Qt.WindowType.Tool
         )
-        print(volume)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.sound_player = QSoundEffect()
         self.sound_path = Path(sound_path)
@@ -29,7 +29,6 @@ class SoundEffectWidget(QWidget):
             source = source.fromEncoded(source.toEncoded())
             print(f"Origin file {str(self.sound_path)}")
             self.sound_player.setSource(source)
-            self.sound_player.setVolume(volume)
             # -2 means loop forever
             self.sound_player.setLoopCount(-2)
             self.sound_player.play()
@@ -43,6 +42,10 @@ class SoundEffectWidget(QWidget):
         self.icon_path = Path(os.getcwd() + "/je_driver_icon.ico")
         if self.icon_path.exists() and self.icon_path.is_file():
             self.setWindowIcon(QIcon(str(self.icon_path)))
+
+    def set_sound_effect_variable(self, volume: float = 1):
+        self.volume = volume
+        self.sound_player.setVolume(self.volume)
 
     def closeEvent(self, event):
         super().closeEvent(event)

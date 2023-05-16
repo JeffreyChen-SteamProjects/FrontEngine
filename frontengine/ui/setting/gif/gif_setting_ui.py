@@ -66,6 +66,10 @@ class GIFSettingUI(QWidget):
             language_wrapper.language_word_dict.get("Show on all screen")
         )
         self.show_on_all_screen_checkbox.clicked.connect(self.set_show_all_screen)
+        # Show on bottom
+        self.show_on_bottom_checkbox = QCheckBox(
+            language_wrapper.language_word_dict.get("Show on bottom")
+        )
         # Add to layout
         self.grid_layout.addWidget(self.opacity_label, 0, 0)
         self.grid_layout.addWidget(self.opacity_slider_value_label, 0, 1)
@@ -77,17 +81,17 @@ class GIFSettingUI(QWidget):
         self.grid_layout.addWidget(self.ready_label, 2, 1)
         self.grid_layout.addWidget(self.start_button, 3, 0)
         self.grid_layout.addWidget(self.show_on_all_screen_checkbox, 3, 1)
+        self.grid_layout.addWidget(self.show_on_bottom_checkbox, 3, 2)
         self.setLayout(self.grid_layout)
 
     def set_show_all_screen(self) -> None:
         self.show_all_screen = self.show_on_all_screen_checkbox.isChecked()
 
     def _create_gif_widget(self) -> GifWidget:
-        gif_widget = GifWidget(
-            gif_image_path=self.gif_image_path,
-            speed=self.speed_slider.value(),
-            opacity=float(self.opacity_slider.value()) / 100
-        )
+        gif_widget = GifWidget(gif_image_path=self.gif_image_path)
+        gif_widget.set_gif_variable(speed=self.speed_slider.value())
+        gif_widget.set_ui_variable(opacity=float(self.opacity_slider.value()) / 100)
+        gif_widget.set_ui_window_flag(show_on_bottom=self.show_on_bottom_checkbox.isChecked())
         self.gif_widget_list.append(gif_widget)
         return gif_widget
 
