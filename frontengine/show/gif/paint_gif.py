@@ -1,3 +1,4 @@
+import logging
 import os
 from pathlib import Path
 
@@ -6,6 +7,7 @@ from PySide6.QtGui import QMovie, QPainter, QIcon
 from PySide6.QtWidgets import QWidget, QLabel, QMessageBox
 
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
+from frontengine.utils.redirect_manager.redirect_manager_class import redirect_manager_instance
 
 
 class GifWidget(QWidget):

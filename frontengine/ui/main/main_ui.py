@@ -82,10 +82,10 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
             self.text_setting_ui,
             language_wrapper.language_word_dict.get("tab_text_text")
         )
-        # self.tab_widget.addTab(
-        #     self.scene_setting_ui,
-        #     language_wrapper.language_word_dict.get("tab_scene_text")
-        # )
+        self.tab_widget.addTab(
+            self.scene_setting_ui,
+            language_wrapper.language_word_dict.get("tab_scene_text")
+        )
         self.tab_widget.addTab(
             self.control_center_ui,
             language_wrapper.language_word_dict.get("tab_control_center_text")

@@ -39,15 +39,18 @@ class WebWidget(QWebEngineView):
         self.opacity = opacity
         self.setWindowOpacity(opacity)
 
-    def set_ui_window_flag(self, enable_input: bool = False):
+    def set_ui_window_flag(self, enable_input: bool = False, show_on_bottom: bool = False):
         if not enable_input:
             self.setWindowFlag(
                 Qt.WindowType.WindowTransparentForInput
             )
             self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        if show_on_bottom:
+            self.setWindowFlag(Qt.WindowType.WindowStaysOnBottomHint)
+        else:
+            self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint)
         self.setWindowFlag(
             Qt.WindowType.FramelessWindowHint |
-            Qt.WindowType.WindowStaysOnTopHint |
             Qt.WindowType.WindowType_Mask |
             Qt.WindowType.Tool
         )
