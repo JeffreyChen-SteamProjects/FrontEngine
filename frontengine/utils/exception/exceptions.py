@@ -12,3 +12,7 @@ class FrontEngineSaveFileException(Exception):
 
 class FrontEngineJsonFileException(Exception):
     pass
+
+
+class FrontEngineLoadUIException(Exception):
+    pass
