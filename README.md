@@ -3,6 +3,8 @@
 
 ## Contents
 
+> Project kanban https://github.com/orgs/Integration-Automation/projects/2/views/1
+
 ---
 - [About](#about)
 - [Features](#features)
