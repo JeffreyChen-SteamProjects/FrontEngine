@@ -16,16 +16,18 @@
 
 ---
 
-* FrontEngine can draw below type on front of your screen.
-* You can use your computer as usual without being disturbed.
-* FrontEngine can play multi instance.
-  * Video.
-  * Website.
-  * GIF & WEBP.
-  * Image.
-  * Play sound.
-  * Text.
-* And FrontEngine is super easy to use.
+* Smart automation assistant.
+* Chat based automation.
+* User-defined front ground.
+* User-defined virtual assistant.
+* Assistant can open website.
+* Assistant can draw text on your screen.
+* Assistant can play video on your screen.
+* Assistant can play sound.
+* Cowork with another automation components.  
+* Extendable.
+* Remote automation support.
+
  
 ## Features
 
