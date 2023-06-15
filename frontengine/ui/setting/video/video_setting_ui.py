@@ -99,7 +99,7 @@ class VideoSettingUI(QWidget):
         self.grid_layout.addWidget(self.ready_label, 5, 1)
         self.setLayout(self.grid_layout)
 
-    def set_show_all_screen(self):
+    def set_show_all_screen(self) -> None:
         self.show_all_screen = self.show_on_all_screen_checkbox.isChecked()
 
     def _create_video_widget(self) -> VideoWidget:

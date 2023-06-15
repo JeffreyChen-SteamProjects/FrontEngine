@@ -5,7 +5,7 @@ from frontengine.user_setting.user_setting_file import user_setting_dict
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
-def build_language_menu(ui_we_want_to_set: QMainWindow):
+def build_language_menu(ui_we_want_to_set: QMainWindow) -> None:
     ui_we_want_to_set.menu_bar.language_menu = ui_we_want_to_set.menu_bar.addMenu(
         language_wrapper.language_word_dict.get("menu_bar_language")
     )
@@ -29,7 +29,7 @@ def build_language_menu(ui_we_want_to_set: QMainWindow):
     )
 
 
-def set_language(language: str, ui_we_want_to_set: QMainWindow):
+def set_language(language: str, ui_we_want_to_set: QMainWindow) -> None:
     language_wrapper.reset_language(language)
     user_setting_dict.update({"language": language})
     message_box = QMessageBox(ui_we_want_to_set)

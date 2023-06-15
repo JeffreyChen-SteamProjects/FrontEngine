@@ -12,20 +12,20 @@ class ImageWidget(QWidget):
 
     def __init__(self, image_path: str):
         super().__init__()
-        self.opacity = 0.2
-        self.image_path = Path(image_path)
+        self.opacity: float = 0.2
+        self.image_path: Path = Path(image_path)
         if self.image_path.exists() and self.image_path.is_file():
             print(f"Origin file {str(self.image_path)}")
             self.image = QImage(str(self.image_path))
         else:
-            message_box = QMessageBox(self)
+            message_box: QMessageBox = QMessageBox(self)
             message_box.setText(
                 language_wrapper.language_word_dict.get("paint_image_message_box_text")
             )
             message_box.show()
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         # Set Icon
-        self.icon_path = Path(os.getcwd() + "/je_driver_icon.ico")
+        self.icon_path: Path = Path(os.getcwd() + "/je_driver_icon.ico")
         if self.icon_path.exists() and self.icon_path.is_file():
             self.setWindowIcon(QIcon(str(self.icon_path)))
 
@@ -40,7 +40,7 @@ class ImageWidget(QWidget):
         else:
             self.setWindowFlag(Qt.WindowType.WindowStaysOnBottomHint)
 
-    def set_ui_variable(self, opacity: float = 0.2):
+    def set_ui_variable(self, opacity: float = 0.2) -> None:
         self.opacity = opacity
 
     def paintEvent(self, event) -> None:
@@ -57,5 +57,5 @@ class ImageWidget(QWidget):
     def mouseDoubleClickEvent(self, event) -> None:
         super().mouseDoubleClickEvent(event)
 
-    def mouseGrabber(self):
+    def mouseGrabber(self) -> None:
         super().mouseGrabber()

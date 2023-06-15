@@ -43,10 +43,10 @@ class SoundEffectWidget(QWidget):
         if self.icon_path.exists() and self.icon_path.is_file():
             self.setWindowIcon(QIcon(str(self.icon_path)))
 
-    def set_sound_effect_variable(self, volume: float = 1):
+    def set_sound_effect_variable(self, volume: float = 1) -> None:
         self.volume = volume
         self.sound_player.setVolume(self.volume)
 
-    def closeEvent(self, event):
+    def closeEvent(self, event) -> None:
         super().closeEvent(event)
         self.sound_player.stop()

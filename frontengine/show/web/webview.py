@@ -35,11 +35,11 @@ class WebWidget(QWebEngineView):
         if self.icon_path.exists() and self.icon_path.is_file():
             self.setWindowIcon(QIcon(str(self.icon_path)))
 
-    def set_ui_variable(self, opacity: float = 0.2):
+    def set_ui_variable(self, opacity: float = 0.2) -> None:
         self.opacity = opacity
         self.setWindowOpacity(opacity)
 
-    def set_ui_window_flag(self, enable_input: bool = False, show_on_bottom: bool = False):
+    def set_ui_window_flag(self, enable_input: bool = False, show_on_bottom: bool = False) -> None:
         if not enable_input:
             self.setWindowFlag(
                 Qt.WindowType.WindowTransparentForInput
@@ -61,6 +61,6 @@ class WebWidget(QWebEngineView):
     def mouseDoubleClickEvent(self, event) -> None:
         super().mouseDoubleClickEvent(event)
 
-    def mouseGrabber(self):
+    def mouseGrabber(self) -> None:
         super().mouseGrabber()
 

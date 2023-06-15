@@ -80,6 +80,6 @@ class SceneManager(object):
         extend_widget = load_ui_file(ui_path)
         return self.graphic_scene.addWidget(extend_widget)
 
-    def add_extend_ui(self, ui: QWidget):
+    def add_extend_ui(self, ui: QWidget) -> QGraphicsProxyWidget:
         extend_widget = read_extend_ui(ui)
         return self.graphic_scene.addWidget(extend_widget)

@@ -1,3 +1,5 @@
+from typing import Union
+
 from PySide6.QtWidgets import QWidget, QGridLayout, QPushButton
 
 from frontengine.show.scene.scene import SceneManager
@@ -11,7 +13,7 @@ class SceneSettingUI(QWidget):
         self.grid_layout = QGridLayout(self)
         self.grid_layout.setContentsMargins(0, 0, 0, 0)
         # Init variable
-        self.scene_list = list()
+        self.scene: Union[None, SceneManager] = None
         # Start button
         self.start_button = QPushButton(
             language_wrapper.language_word_dict.get("scene_setting_start_scene_button")
@@ -21,6 +23,8 @@ class SceneSettingUI(QWidget):
         self.grid_layout.addWidget(self.start_button, 0, 0)
         self.setLayout(self.grid_layout)
 
-    def start_scene(self):
-        scene = SceneManager()
-        self.scene_list.append(scene)
+    def start_scene(self) -> None:
+        self.scene = SceneManager()
+
+    def show_scene(self) -> None:
+        self.scene.graphic_view.showMaximized()
