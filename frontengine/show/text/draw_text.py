@@ -50,3 +50,13 @@ class TextWidget(QWidget):
             self.text
         )
         painter.restore()
+
+    def mousePressEvent(self, event) -> None:
+        super().mousePressEvent(event)
+
+    def mouseDoubleClickEvent(self, event) -> None:
+        super().mouseDoubleClickEvent(event)
+
+    def mouseGrabber(self):
+        super().mouseGrabber()
+

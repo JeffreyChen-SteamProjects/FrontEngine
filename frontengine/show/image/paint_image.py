@@ -50,3 +50,12 @@ class ImageWidget(QWidget):
             QRect(self.x(), self.y(), self.width(), self.height()),
             self.image)
         painter.restore()
+
+    def mousePressEvent(self, event) -> None:
+        super().mousePressEvent(event)
+
+    def mouseDoubleClickEvent(self, event) -> None:
+        super().mouseDoubleClickEvent(event)
+
+    def mouseGrabber(self):
+        super().mouseGrabber()

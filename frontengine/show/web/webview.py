@@ -54,3 +54,13 @@ class WebWidget(QWebEngineView):
             Qt.WindowType.WindowType_Mask |
             Qt.WindowType.Tool
         )
+
+    def mousePressEvent(self, event) -> None:
+        super().mousePressEvent(event)
+
+    def mouseDoubleClickEvent(self, event) -> None:
+        super().mouseDoubleClickEvent(event)
+
+    def mouseGrabber(self):
+        super().mouseGrabber()
+

@@ -67,3 +67,13 @@ class GifWidget(QWidget):
             current_gif_frame
         )
         painter.restore()
+
+    def mousePressEvent(self, event) -> None:
+        super().mousePressEvent(event)
+
+    def mouseDoubleClickEvent(self, event) -> None:
+        super().mouseDoubleClickEvent(event)
+
+    def mouseGrabber(self):
+        super().mouseGrabber()
+

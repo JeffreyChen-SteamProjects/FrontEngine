@@ -75,3 +75,13 @@ class VideoWidget(QVideoWidget):
 
     def video_player_error(self):
         print(self.media_player.error())
+
+    def mousePressEvent(self, event) -> None:
+        super().mousePressEvent(event)
+
+    def mouseDoubleClickEvent(self, event) -> None:
+        super().mouseDoubleClickEvent(event)
+
+    def mouseGrabber(self):
+        super().mouseGrabber()
+
