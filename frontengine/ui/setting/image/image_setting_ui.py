@@ -1,13 +1,10 @@
-import os
-import shutil
-from pathlib import Path
-
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QScreen
-from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QPushButton, QFileDialog, QMessageBox, \
+from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QPushButton, QMessageBox, \
     QCheckBox
 
 from frontengine.show.image.paint_image import ImageWidget
+from frontengine.ui.setting.choose_dialog.choose_file_dialog import choose_image
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
@@ -44,7 +41,7 @@ class ImageSettingUI(QWidget):
         self.ready_label = QLabel(
             language_wrapper.language_word_dict.get("Not Ready")
         )
-        self.gif_image_path: [str, None] = None
+        self.image_path: [str, None] = None
         # Start button
         self.start_button = QPushButton(
             language_wrapper.language_word_dict.get("image_setting_ui_play")
@@ -74,14 +71,14 @@ class ImageSettingUI(QWidget):
         self.show_all_screen = self.show_on_all_screen_checkbox.isChecked()
 
     def _create_image_widget(self) -> ImageWidget:
-        image_widget = ImageWidget(image_path=self.gif_image_path)
+        image_widget = ImageWidget(image_path=self.image_path)
         image_widget.set_ui_variable(opacity=float(self.opacity_slider.value()) / 100)
         image_widget.set_ui_window_flag(self.show_on_bottom_checkbox.isChecked())
         self.image_widget_list.append(image_widget)
         return image_widget
 
     def start_play_image(self) -> None:
-        if self.gif_image_path is None or self.ready_to_play is False:
+        if self.image_path is None or self.ready_to_play is False:
             message_box = QMessageBox(self)
             message_box.setText(
                 language_wrapper.language_word_dict.get("not_prepare")
@@ -100,37 +97,16 @@ class ImageSettingUI(QWidget):
                     image_widget.showFullScreen()
 
     def choose_and_copy_file_to_cwd_image_dir_then_play(self) -> None:
-        file_path = QFileDialog().getOpenFileName(
-            parent=self,
-            dir=os.getcwd(),
-            filter="Images (*.png;*.jpg;*.webp)"
-        )[0]
-        file_path = Path(file_path)
         self.ready_label.setText(
             language_wrapper.language_word_dict.get("Not Ready")
         )
         self.ready_to_play = False
-        if file_path.is_file() and file_path.exists():
-            image_path = Path(str(Path.cwd()) + "/image")
-            if not image_path.exists() or not image_path.is_dir():
-                image_path.mkdir(parents=True, exist_ok=True)
-            if file_path.suffix.lower() in [
-                ".png", ".jpg", ".webp"
-            ]:
-                try:
-                    self.gif_image_path = shutil.copy(file_path, image_path)
-                except shutil.SameFileError:
-                    self.gif_image_path = str(Path(f"{image_path}/{file_path.name}"))
-                self.ready_label.setText(
-                    language_wrapper.language_word_dict.get("Ready")
-                )
-                self.ready_to_play = True
-            else:
-                message_box = QMessageBox(self)
-                message_box.setText(
-                    language_wrapper.language_word_dict.get("image_setting_message_box")
-                )
-                message_box.show()
+        self.image_path = choose_image(self)
+        if self.image_path is not None:
+            self.ready_label.setText(
+                language_wrapper.language_word_dict.get("Ready")
+            )
+            self.ready_to_play = True
 
     def opacity_trick(self) -> None:
         self.opacity_slider_value_label.setText(str(self.opacity_slider.value()))

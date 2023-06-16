@@ -28,6 +28,7 @@ english_word_dict = {
     "control_center_close_all_web": "Close all web",
     "control_center_close_all_sound": "Close all sound",
     "control_center_close_all_text": "Close all text",
+    "control_center_scene": "Close scene",
     "control_center_close_all": "Close all",
     # General
     "Opacity": "Opacity",
@@ -67,5 +68,7 @@ english_word_dict = {
     "web_setting_open_enable_input": "Enable input",
     # Scene UI
     "tab_scene_text": "Scene",
+    "scene_table_view_type": "Type",
+    "scene_file_path": "File path",
     "scene_setting_start_scene_button": "Start Scene",
 }

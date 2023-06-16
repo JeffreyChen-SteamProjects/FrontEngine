@@ -1,12 +1,9 @@
-import os
-import shutil
-from pathlib import Path
-
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QWidget, QGridLayout, QLabel, QSlider, QPushButton, QFileDialog, QMessageBox
+from PySide6.QtWidgets import QWidget, QGridLayout, QLabel, QSlider, QPushButton, QMessageBox
 
 from frontengine.show.sound_player.sound_effect import SoundEffectWidget
 from frontengine.show.sound_player.sound_player import SoundPlayer
+from frontengine.ui.setting.choose_dialog.choose_file_dialog import choose_player_sound, choose_wav_sound
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
@@ -100,61 +97,28 @@ class SoundPlayerSettingUI(QWidget):
             sound_player.showFullScreen()
 
     def choose_and_copy_wav_file_to_cwd_sound_dir_then_play(self) -> None:
-        file_path = QFileDialog().getOpenFileName(
-            parent=self,
-            dir=os.getcwd(),
-            filter="WAV (*.wav)"
-        )[0]
-        file_path = Path(file_path)
         self.wav_ready_label.setText(
             language_wrapper.language_word_dict.get("Not Ready")
         )
         self.ready_to_play = False
-        if file_path.is_file() and file_path.exists():
-            sound_path = Path(str(Path.cwd()) + "/sound")
-            if not sound_path.exists() or not sound_path.is_dir():
-                sound_path.mkdir(parents=True, exist_ok=True)
-            if file_path.suffix.lower() in [".wav"]:
-                try:
-                    self.wav_sound_path = shutil.copy(file_path, sound_path)
-                except shutil.SameFileError:
-                    self.wav_sound_path = str(Path(f"{sound_path}/{file_path.name}"))
-                self.wav_ready_label.setText(
-                    language_wrapper.language_word_dict.get("Ready")
-                )
-                self.ready_to_play = True
-            else:
-                message_box = QMessageBox(self)
-                message_box.setText(
-                    language_wrapper.language_word_dict.get("sound_player_setting_message_box_sound")
-                )
-                message_box.show()
+        self.wav_sound_path = choose_wav_sound(self)
+        if self.wav_sound_path is not None:
+            self.wav_ready_label.setText(
+                language_wrapper.language_word_dict.get("Ready")
+            )
+            self.ready_to_play = True
 
     def choose_and_copy_sound_file_to_cwd_sound_dir_then_play(self) -> None:
-        file_path = QFileDialog().getOpenFileName(
-            parent=self,
-            dir=os.getcwd(),
-            filter="Sound (*.mp4;*.mp3;*.wav)"
-        )[0]
-        file_path = Path(file_path)
-        if file_path.is_file() and file_path.exists():
-            sound_path = Path(str(Path.cwd()) + "/sound")
-            if not sound_path.exists() or not sound_path.is_dir():
-                sound_path.mkdir(parents=True, exist_ok=True)
-            if file_path.suffix.lower() in [".mp3", ".mp4", ".wav"]:
-                try:
-                    self.player_sound_path = shutil.copy(file_path, sound_path)
-                except shutil.SameFileError:
-                    self.player_sound_path = str(Path(f"{sound_path}/{file_path.name}"))
-                self.player_ready_label.setText(
-                    language_wrapper.language_word_dict.get("Ready")
-                )
-            else:
-                message_box = QMessageBox(self)
-                message_box.setText(
-                    language_wrapper.language_word_dict.get("sound_player_setting_message_box_sound")
-                )
-                message_box.show()
+        self.player_ready_label.setText(
+            language_wrapper.language_word_dict.get("Not Ready")
+        )
+        self.ready_to_play = False
+        self.player_sound_path = choose_player_sound(self)
+        if self.player_sound_path is not None:
+            self.player_ready_label.setText(
+                language_wrapper.language_word_dict.get("Ready")
+            )
+            self.ready_to_play = True
 
     def volume_trick(self) -> None:
         self.volume_slider_value_label.setText(str(self.volume_slider.value()))

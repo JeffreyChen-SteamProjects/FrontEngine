@@ -39,30 +39,42 @@ class ControlCenterUI(QWidget):
         self.text_setting_ui = text_setting_ui
         self.scene_setting_ui = scene_setting_ui
         # Close button
+        # Video
         self.clear_video_button = QPushButton(
             language_wrapper.language_word_dict.get("control_center_close_all_video")
         )
         self.clear_video_button.clicked.connect(self.clear_video)
+        # Image
         self.clear_image_button = QPushButton(
             language_wrapper.language_word_dict.get("control_center_close_all_image")
         )
         self.clear_image_button.clicked.connect(self.clear_image)
+        # GIF
         self.clear_gif_button = QPushButton(
             language_wrapper.language_word_dict.get("control_center_close_all_gif")
         )
         self.clear_gif_button.clicked.connect(self.clear_gif)
+        # Web
         self.clear_web_button = QPushButton(
             language_wrapper.language_word_dict.get("control_center_close_all_web")
         )
         self.clear_web_button.clicked.connect(self.clear_web)
+        # Sound
         self.clear_sound_button = QPushButton(
             language_wrapper.language_word_dict.get("control_center_close_all_sound")
         )
         self.clear_sound_button.clicked.connect(self.clear_sound)
+        # Text
         self.clear_text_button = QPushButton(
             language_wrapper.language_word_dict.get("control_center_close_all_text")
         )
         self.clear_text_button.clicked.connect(self.clear_text)
+        # Scene
+        self.clear_scene_button = QPushButton(
+            language_wrapper.language_word_dict.get("control_center_scene")
+        )
+        self.clear_scene_button.clicked.connect(self.clear_scene)
+        # All
         self.clear_all_button = QPushButton(
             language_wrapper.language_word_dict.get("control_center_close_all")
         )
@@ -110,6 +122,9 @@ class ControlCenterUI(QWidget):
     def clear_text(self) -> None:
         self.text_setting_ui.text_widget_list.clear()
 
+    def clear_scene(self) -> None:
+        self.scene_setting_ui.close_scene()
+
     def clear_all(self) -> None:
         self.video_setting_ui.video_widget_list.clear()
         self.image_setting_ui.image_widget_list.clear()
@@ -117,6 +132,7 @@ class ControlCenterUI(QWidget):
         self.gif_setting_ui.gif_widget_list.clear()
         self.sound_player_setting_ui.sound_widget_list.clear()
         self.text_setting_ui.text_widget_list.clear()
+        self.scene_setting_ui.close_scene()
 
     def redirect(self) -> None:
         if not redirect_manager_instance.std_out_queue.empty():

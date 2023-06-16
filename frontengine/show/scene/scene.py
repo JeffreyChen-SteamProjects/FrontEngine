@@ -1,3 +1,5 @@
+from typing import List
+
 from PySide6.QtWidgets import QGraphicsProxyWidget, QWidget
 from frontengine.show.text.draw_text import TextWidget
 
@@ -20,12 +22,15 @@ class SceneManager(object):
         self.graphic_scene = ExtendGraphicScene()
         self.graphic_view = ExtendGraphicView(self.graphic_scene)
         self.graphic_view.showMaximized()
+        self.widget_list: List[QGraphicsProxyWidget] = list()
 
     def add_image(self, image_path: str, image_setting: dict = None) -> QGraphicsProxyWidget:
         image_widget = ImageWidget(image_path)
         opacity = image_setting.get("opacity")
         image_widget.set_ui_variable(opacity)
-        return self.graphic_scene.addWidget(image_widget)
+        proxy_widget = self.graphic_scene.addWidget(image_widget)
+        self.widget_list.append(proxy_widget)
+        return proxy_widget
 
     def add_gif(self, gif_image_path: str, gif_setting: dict = None) -> QGraphicsProxyWidget:
         gif_widget = GifWidget(gif_image_path)
@@ -35,14 +40,18 @@ class SceneManager(object):
         opacity = opacity if opacity is not None else 0.2
         gif_widget.set_gif_variable(speed)
         gif_widget.set_ui_variable(opacity)
-        return self.graphic_scene.addWidget(gif_widget)
+        proxy_widget = self.graphic_scene.addWidget(gif_widget)
+        self.widget_list.append(proxy_widget)
+        return proxy_widget
 
     def add_sound(self, sound_path: str, sound_setting: dict = None) -> QGraphicsProxyWidget:
         sound_widget = SoundPlayer(sound_path)
         volume = sound_setting.get("volume")
         volume = volume if volume is not None else 1
         sound_widget.set_player_variable(volume)
-        return self.graphic_scene.addWidget(sound_widget)
+        proxy_widget = self.graphic_scene.addWidget(sound_widget)
+        self.widget_list.append(proxy_widget)
+        return proxy_widget
 
     def add_text(self, text: str, text_setting: dict = None) -> QGraphicsProxyWidget:
         text_widget = TextWidget(text)
@@ -52,7 +61,9 @@ class SceneManager(object):
         opacity = opacity if opacity is not None else 0.2
         text_widget.set_ui_variable(opacity)
         text_widget.set_font_variable(font_size)
-        return self.graphic_scene.addWidget(text_widget)
+        proxy_widget = self.graphic_scene.addWidget(text_widget)
+        self.widget_list.append(proxy_widget)
+        return proxy_widget
 
     def add_video(self, video_path: str, video_setting: dict = None) -> QGraphicsProxyWidget:
         video_widget = VideoWidget(video_path)
@@ -64,7 +75,9 @@ class SceneManager(object):
         play_rate = play_rate if play_rate is not None else 1
         video_widget.set_ui_variable(opacity)
         video_widget.set_player_variable(play_rate, volume)
-        return self.graphic_scene.addWidget(video_widget)
+        proxy_widget = self.graphic_scene.addWidget(video_widget)
+        self.widget_list.append(proxy_widget)
+        return proxy_widget
 
     def add_web(self, url: str, web_setting: dict = None) -> QGraphicsProxyWidget:
         web_widget = WebWidget(url)
@@ -74,12 +87,18 @@ class SceneManager(object):
         enable_input = enable_input if enable_input is not None else False
         web_widget.set_ui_variable(opacity)
         web_widget.set_ui_window_flag(enable_input=enable_input)
-        return self.graphic_scene.addWidget(web_widget)
+        proxy_widget = self.graphic_scene.addWidget(web_widget)
+        self.widget_list.append(proxy_widget)
+        return proxy_widget
 
     def add_extend_ui_file(self, ui_path: str) -> QGraphicsProxyWidget:
         extend_widget = load_ui_file(ui_path)
-        return self.graphic_scene.addWidget(extend_widget)
+        proxy_widget = self.graphic_scene.addWidget(extend_widget)
+        self.widget_list.append(proxy_widget)
+        return proxy_widget
 
     def add_extend_ui(self, ui: QWidget) -> QGraphicsProxyWidget:
         extend_widget = read_extend_ui(ui)
-        return self.graphic_scene.addWidget(extend_widget)
+        proxy_widget = self.graphic_scene.addWidget(extend_widget)
+        self.widget_list.append(proxy_widget)
+        return proxy_widget

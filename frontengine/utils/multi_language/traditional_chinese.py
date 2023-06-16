@@ -28,6 +28,7 @@ traditional_chinese_word_dict = {
     "control_center_close_all_web": "關閉全部網頁",
     "control_center_close_all_sound": "關閉全部音樂",
     "control_center_close_all_text": "關閉全部文字",
+    "control_center_scene": "關閉場景",
     "control_center_close_all": "關閉所有",
     # General
     "Opacity": "不透明度",
@@ -67,5 +68,7 @@ traditional_chinese_word_dict = {
     "web_setting_open_enable_input": "啟用輸入",
     # Scene UI
     "tab_scene_text": "場景",
+    "scene_table_view_type": "類型",
+    "scene_file_path": "檔案路徑",
     "scene_setting_start_scene_button": "開始場景",
 }
