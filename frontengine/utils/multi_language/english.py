@@ -41,6 +41,9 @@ english_word_dict = {
     "Play rate": "Play rate",
     "not_prepare": "Not prepare",
     "Show on bottom": "Show on all window bottom",
+    "url": "url",
+    "text": "text",
+    "ui_path": "UI path",
     # GIF setting ui
     "gif_setting_ui_choose_file": "Choose GIF or WEBP file",
     "gif_setting_ui_play": "Start Play GIF or WEBP",
@@ -71,4 +74,11 @@ english_word_dict = {
     "scene_table_view_type": "Type",
     "scene_file_path": "File path",
     "scene_setting_start_scene_button": "Start Scene",
+    "scene_add_image": "Add image to scene",
+    "scene_add_gif": "Add gif to scene",
+    "scene_add_sound": "Add sound to scene",
+    "scene_add_text": "Add text to scene",
+    "scene_add_video": "Add video to scene",
+    "scene_add_web": "Add web to scene",
+    "scene_add_UI": "Add ui to scene",
 }

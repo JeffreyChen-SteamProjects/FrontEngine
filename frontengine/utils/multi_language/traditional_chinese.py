@@ -41,6 +41,9 @@ traditional_chinese_word_dict = {
     "Play rate": "撥放速度",
     "not_prepare": "尚未準備好",
     "Show on bottom": "顯示在所有視窗底部",
+    "url": "連結",
+    "text": "文字",
+    "ui_path": "UI 路徑",
     # GIF setting ui
     "gif_setting_ui_choose_file": "選擇 GIF 或 WEBP 檔案",
     "gif_setting_ui_play": "開始撥放 GIF 或 WEBP",
@@ -71,4 +74,11 @@ traditional_chinese_word_dict = {
     "scene_table_view_type": "類型",
     "scene_file_path": "檔案路徑",
     "scene_setting_start_scene_button": "開始場景",
+    "scene_add_image": "添加圖片到場景",
+    "scene_add_gif": "添加動圖到場景",
+    "scene_add_sound": "添加聲音到場景",
+    "scene_add_text": "添加文字到場景",
+    "scene_add_video": "添加影片到場景",
+    "scene_add_web": "添加網頁到場景",
+    "scene_add_UI": "添加UI到場景",
 }
