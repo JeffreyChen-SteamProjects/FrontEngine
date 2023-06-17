@@ -21,6 +21,7 @@ english_word_dict = {
     "sound_player_message_box_text": "Sound file error",
     "video_player_message_box_text": "Video error",
     "webview_message_box_text": "Web file error",
+    "cant_find_extend_ui_message_box_text": "Can't find UI",
     # Control Center UI
     "control_center_close_all_video": "Close all video",
     "control_center_close_all_image": "Close all image",
@@ -44,6 +45,8 @@ english_word_dict = {
     "url": "url",
     "text": "text",
     "ui_path": "UI path",
+    "position_x": "X - coordinate",
+    "position_y": "Y - coordinate",
     # GIF setting ui
     "gif_setting_ui_choose_file": "Choose GIF or WEBP file",
     "gif_setting_ui_play": "Start Play GIF or WEBP",

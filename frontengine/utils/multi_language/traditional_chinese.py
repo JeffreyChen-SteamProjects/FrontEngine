@@ -21,6 +21,7 @@ traditional_chinese_word_dict = {
     "sound_player_message_box_text": "音樂錯誤",
     "video_player_message_box_text": "影片錯誤",
     "webview_message_box_text": "網頁錯誤",
+    "cant_find_extend_ui_message_box_text": "未找到 UI",
     # Control Center UI
     "control_center_close_all_video": "關閉全部影片",
     "control_center_close_all_image": "關閉全部圖片",
@@ -44,6 +45,8 @@ traditional_chinese_word_dict = {
     "url": "連結",
     "text": "文字",
     "ui_path": "UI 路徑",
+    "position_x": "X 座標",
+    "position_y": "Y 座標",
     # GIF setting ui
     "gif_setting_ui_choose_file": "選擇 GIF 或 WEBP 檔案",
     "gif_setting_ui_play": "開始撥放 GIF 或 WEBP",
