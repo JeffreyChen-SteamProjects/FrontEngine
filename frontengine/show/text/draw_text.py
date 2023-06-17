@@ -31,10 +31,10 @@ class TextWidget(QWidget):
         else:
             self.setWindowFlag(Qt.WindowType.WindowStaysOnBottomHint)
 
-    def set_font_variable(self, font_size: int = 100):
+    def set_font_variable(self, font_size: int = 100) -> None:
         self.font_size = font_size
 
-    def set_ui_variable(self, opacity: float = 0.2):
+    def set_ui_variable(self, opacity: float = 0.2) -> None:
         self.opacity = opacity
 
     def paintEvent(self, event) -> None:
@@ -50,3 +50,13 @@ class TextWidget(QWidget):
             self.text
         )
         painter.restore()
+
+    def mousePressEvent(self, event) -> None:
+        super().mousePressEvent(event)
+
+    def mouseDoubleClickEvent(self, event) -> None:
+        super().mouseDoubleClickEvent(event)
+
+    def mouseGrabber(self) -> None:
+        super().mouseGrabber()
+

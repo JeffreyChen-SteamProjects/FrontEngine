@@ -1,13 +1,10 @@
-import os
-import shutil
-from pathlib import Path
-
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QScreen
-from PySide6.QtWidgets import QWidget, QGridLayout, QLabel, QSlider, QPushButton, QFileDialog, QMessageBox, \
+from PySide6.QtWidgets import QWidget, QGridLayout, QLabel, QSlider, QPushButton, QMessageBox, \
     QCheckBox
 
 from frontengine.show.gif.paint_gif import GifWidget
+from frontengine.ui.setting.choose_dialog.choose_file_dialog import choose_gif
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
@@ -115,35 +112,16 @@ class GIFSettingUI(QWidget):
                     gif_widget.showFullScreen()
 
     def choose_and_copy_file_to_cwd_gif_dir_then_play(self) -> None:
-        file_path = QFileDialog().getOpenFileName(
-            parent=self,
-            dir=os.getcwd(),
-            filter="GIF WEBP (*.gif;*.webp)"
-        )[0]
-        file_path = Path(file_path)
         self.ready_label.setText(
             language_wrapper.language_word_dict.get("Not Ready")
         )
         self.ready_to_play = False
-        if file_path.is_file() and file_path.exists():
-            gif_dir_path = Path(str(Path.cwd()) + "/gif")
-            if not gif_dir_path.exists() or not gif_dir_path.is_dir():
-                gif_dir_path.mkdir(parents=True, exist_ok=True)
-            if file_path.suffix.lower() in [".gif", ".webp"]:
-                try:
-                    self.gif_image_path = shutil.copy(file_path, gif_dir_path)
-                except shutil.SameFileError:
-                    self.gif_image_path = str(Path(f"{gif_dir_path}/{file_path.name}"))
-                self.ready_label.setText(
-                    language_wrapper.language_word_dict.get("Ready")
-                )
-                self.ready_to_play = True
-            else:
-                message_box = QMessageBox(self)
-                message_box.setText(
-                    language_wrapper.language_word_dict.get("gif_setting_message_box")
-                )
-                message_box.show()
+        self.gif_image_path = choose_gif(self)
+        if self.gif_image_path is not None:
+            self.ready_label.setText(
+                language_wrapper.language_word_dict.get("Ready")
+            )
+            self.ready_to_play = True
 
     def opacity_trick(self) -> None:
         self.opacity_slider_value_label.setText(str(self.opacity_slider.value()))

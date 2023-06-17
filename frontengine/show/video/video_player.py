@@ -58,20 +58,28 @@ class VideoWidget(QVideoWidget):
         else:
             self.setWindowFlag(Qt.WindowType.WindowStaysOnBottomHint)
 
-
-    def set_ui_variable(self, opacity: float = 0.2):
+    def set_ui_variable(self, opacity: float = 0.2) -> None:
         self.opacity = opacity
         self.setWindowOpacity(self.opacity)
 
-    def set_player_variable(self, play_rate: float = 1, volume: float = 1):
+    def set_player_variable(self, play_rate: float = 1, volume: float = 1) -> None:
         self.play_rate = play_rate
         self.volume = volume
         self.media_player.setPlaybackRate(self.play_rate)
         self.media_player.audioOutput().setVolume(self.volume)
 
-    def closeEvent(self, event):
+    def closeEvent(self, event) -> None:
         super().closeEvent(event)
         self.media_player.stop()
 
-    def video_player_error(self):
+    def video_player_error(self) -> None:
         print(self.media_player.error())
+
+    def mousePressEvent(self, event) -> None:
+        super().mousePressEvent(event)
+
+    def mouseDoubleClickEvent(self, event) -> None:
+        super().mouseDoubleClickEvent(event)
+
+    def mouseGrabber(self) -> None:
+        super().mouseGrabber()

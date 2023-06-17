@@ -21,6 +21,7 @@ traditional_chinese_word_dict = {
     "sound_player_message_box_text": "音樂錯誤",
     "video_player_message_box_text": "影片錯誤",
     "webview_message_box_text": "網頁錯誤",
+    "cant_find_extend_ui_message_box_text": "未找到 UI",
     # Control Center UI
     "control_center_close_all_video": "關閉全部影片",
     "control_center_close_all_image": "關閉全部圖片",
@@ -28,6 +29,7 @@ traditional_chinese_word_dict = {
     "control_center_close_all_web": "關閉全部網頁",
     "control_center_close_all_sound": "關閉全部音樂",
     "control_center_close_all_text": "關閉全部文字",
+    "control_center_scene": "關閉場景",
     "control_center_close_all": "關閉所有",
     # General
     "Opacity": "不透明度",
@@ -40,6 +42,11 @@ traditional_chinese_word_dict = {
     "Play rate": "撥放速度",
     "not_prepare": "尚未準備好",
     "Show on bottom": "顯示在所有視窗底部",
+    "url": "連結",
+    "text": "文字",
+    "ui_path": "UI 路徑",
+    "position_x": "X 座標",
+    "position_y": "Y 座標",
     # GIF setting ui
     "gif_setting_ui_choose_file": "選擇 GIF 或 WEBP 檔案",
     "gif_setting_ui_play": "開始撥放 GIF 或 WEBP",
@@ -67,5 +74,14 @@ traditional_chinese_word_dict = {
     "web_setting_open_enable_input": "啟用輸入",
     # Scene UI
     "tab_scene_text": "場景",
+    "scene_table_view_type": "類型",
+    "scene_file_path": "檔案路徑",
     "scene_setting_start_scene_button": "開始場景",
+    "scene_add_image": "添加圖片到場景",
+    "scene_add_gif": "添加動圖到場景",
+    "scene_add_sound": "添加聲音到場景",
+    "scene_add_text": "添加文字到場景",
+    "scene_add_video": "添加影片到場景",
+    "scene_add_web": "添加網頁到場景",
+    "scene_add_UI": "添加UI到場景",
 }

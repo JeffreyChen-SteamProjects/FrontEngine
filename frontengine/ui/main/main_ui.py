@@ -98,10 +98,10 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
             self.system_icon = QSystemTrayIcon()
             self.system_icon.setIcon(self.icon)
 
-    def startup_setting(self):
+    def startup_setting(self) -> None:
         pass
 
-    def add_style_menu(self):
+    def add_style_menu(self) -> None:
         self.menu_bar.style_menu = self.menu_bar.addMenu(
             language_wrapper.language_word_dict.get("menu_bar_ui_style")
         )

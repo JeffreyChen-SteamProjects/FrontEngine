@@ -8,6 +8,7 @@ from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QPushButton
     QCheckBox
 
 from frontengine.show.video.video_player import VideoWidget
+from frontengine.ui.setting.choose_dialog.choose_file_dialog import choose_video
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
@@ -99,7 +100,7 @@ class VideoSettingUI(QWidget):
         self.grid_layout.addWidget(self.ready_label, 5, 1)
         self.setLayout(self.grid_layout)
 
-    def set_show_all_screen(self):
+    def set_show_all_screen(self) -> None:
         self.show_all_screen = self.show_on_all_screen_checkbox.isChecked()
 
     def _create_video_widget(self) -> VideoWidget:
@@ -134,35 +135,16 @@ class VideoSettingUI(QWidget):
                     video_widget.showMaximized()
 
     def choose_and_copy_file_to_cwd_gif_dir_then_play(self) -> None:
-        file_path = QFileDialog().getOpenFileName(
-            parent=self,
-            dir=os.getcwd(),
-            filter=" Video (*.mp4;)"
-        )[0]
-        file_path = Path(file_path)
         self.ready_label.setText(
             language_wrapper.language_word_dict.get("Not Ready")
         )
         self.ready_to_play = False
-        if file_path.is_file() and file_path.exists():
-            video_path = Path(str(Path.cwd()) + "/video")
-            if not video_path.exists() or not video_path.is_dir():
-                video_path.mkdir(parents=True, exist_ok=True)
-            if file_path.suffix.lower() in [".mp4"]:
-                try:
-                    self.video_path = shutil.copy(file_path, video_path)
-                except shutil.SameFileError:
-                    self.video_path = str(Path(f"{video_path}/{file_path.name}"))
-                self.ready_label.setText(
-                    language_wrapper.language_word_dict.get("Ready")
-                )
-                self.ready_to_play = True
-            else:
-                message_box = QMessageBox(self)
-                message_box.setText(
-                    language_wrapper.language_word_dict.get("video_setting_message_box")
-                )
-                message_box.show()
+        self.video_path = choose_video(self)
+        if self.video_path is not None:
+            self.ready_label.setText(
+                language_wrapper.language_word_dict.get("Ready")
+            )
+            self.ready_to_play = True
 
     def opacity_trick(self) -> None:
         self.opacity_slider_value_label.setText(str(self.opacity_slider.value()))

@@ -21,6 +21,7 @@ english_word_dict = {
     "sound_player_message_box_text": "Sound file error",
     "video_player_message_box_text": "Video error",
     "webview_message_box_text": "Web file error",
+    "cant_find_extend_ui_message_box_text": "Can't find UI",
     # Control Center UI
     "control_center_close_all_video": "Close all video",
     "control_center_close_all_image": "Close all image",
@@ -28,6 +29,7 @@ english_word_dict = {
     "control_center_close_all_web": "Close all web",
     "control_center_close_all_sound": "Close all sound",
     "control_center_close_all_text": "Close all text",
+    "control_center_scene": "Close scene",
     "control_center_close_all": "Close all",
     # General
     "Opacity": "Opacity",
@@ -40,6 +42,11 @@ english_word_dict = {
     "Play rate": "Play rate",
     "not_prepare": "Not prepare",
     "Show on bottom": "Show on all window bottom",
+    "url": "url",
+    "text": "text",
+    "ui_path": "UI path",
+    "position_x": "X - coordinate",
+    "position_y": "Y - coordinate",
     # GIF setting ui
     "gif_setting_ui_choose_file": "Choose GIF or WEBP file",
     "gif_setting_ui_play": "Start Play GIF or WEBP",
@@ -67,5 +74,14 @@ english_word_dict = {
     "web_setting_open_enable_input": "Enable input",
     # Scene UI
     "tab_scene_text": "Scene",
+    "scene_table_view_type": "Type",
+    "scene_file_path": "File path",
     "scene_setting_start_scene_button": "Start Scene",
+    "scene_add_image": "Add image to scene",
+    "scene_add_gif": "Add gif to scene",
+    "scene_add_sound": "Add sound to scene",
+    "scene_add_text": "Add text to scene",
+    "scene_add_video": "Add video to scene",
+    "scene_add_web": "Add web to scene",
+    "scene_add_UI": "Add ui to scene",
 }
