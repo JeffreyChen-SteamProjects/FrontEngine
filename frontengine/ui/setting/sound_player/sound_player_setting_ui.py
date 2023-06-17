@@ -4,6 +4,7 @@ from PySide6.QtWidgets import QWidget, QGridLayout, QLabel, QSlider, QPushButton
 from frontengine.show.sound_player.sound_effect import SoundEffectWidget
 from frontengine.show.sound_player.sound_player import SoundPlayer
 from frontengine.ui.setting.choose_dialog.choose_file_dialog import choose_player_sound, choose_wav_sound
+from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
@@ -73,6 +74,7 @@ class SoundPlayerSettingUI(QWidget):
         self.setLayout(self.grid_layout)
 
     def start_play_wav(self) -> None:
+        front_engine_logger.info("start_play_wav")
         if self.wav_sound_path is None or self.ready_to_play is False:
             message_box = QMessageBox(self)
             message_box.setText(
@@ -86,6 +88,7 @@ class SoundPlayerSettingUI(QWidget):
             sound_widget.showFullScreen()
 
     def start_play_sound(self) -> None:
+        front_engine_logger.info("start_play_sound")
         if self.player_sound_path is None:
             message_box = QMessageBox(self)
             message_box.setText(language_wrapper.language_word_dict.get("not_prepare"))

@@ -30,6 +30,7 @@ english_word_dict = {
     "control_center_close_all_sound": "Close all sound",
     "control_center_close_all_text": "Close all text",
     "control_center_scene": "Close scene",
+    "control_center_clear_log_panel": "Clear Log",
     "control_center_close_all": "Close all",
     # General
     "Opacity": "Opacity",

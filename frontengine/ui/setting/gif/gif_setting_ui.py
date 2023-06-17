@@ -5,6 +5,7 @@ from PySide6.QtWidgets import QWidget, QGridLayout, QLabel, QSlider, QPushButton
 
 from frontengine.show.gif.paint_gif import GifWidget
 from frontengine.ui.setting.choose_dialog.choose_file_dialog import choose_gif
+from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
@@ -100,6 +101,7 @@ class GIFSettingUI(QWidget):
             )
             message_box.show()
         else:
+            front_engine_logger.info("start_play_gif")
             if self.show_all_screen:
                 gif_widget = self._create_gif_widget()
                 gif_widget.showFullScreen()
@@ -128,4 +130,3 @@ class GIFSettingUI(QWidget):
 
     def speed_trick(self) -> None:
         self.speed_slider_value_label.setText(str(self.speed_slider.value()))
-

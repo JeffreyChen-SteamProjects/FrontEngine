@@ -3,11 +3,13 @@ from pathlib import Path
 
 from PySide6.QtWidgets import QMessageBox, QWidget, QFileDialog
 
+from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
 def choose_file(
         trigger_ui: QWidget, file_filter: str, save_path: Path, extensions: list, warning_message: str) -> str:
+    front_engine_logger.info("choose_file")
     file_path = QFileDialog().getOpenFileName(
         parent=trigger_ui,
         dir=str(Path.cwd()),
@@ -35,6 +37,7 @@ def choose_file(
 def choose_gif(
         trigger_ui: QWidget, file_filter: str = "GIF WEBP (*.gif;*.webp)",
         save_path: Path = Path(str(Path.cwd()) + "/gif"), extensions: list = None) -> str:
+    front_engine_logger.info("choose_gif")
     extensions = extensions or [".gif", ".webp"]
     return choose_file(
         trigger_ui=trigger_ui, file_filter=file_filter, save_path=save_path, extensions=extensions,
@@ -44,6 +47,7 @@ def choose_gif(
 def choose_image(
         trigger_ui: QWidget, file_filter: str = "Images (*.png;*.jpg;*.webp)",
         save_path: Path = Path(str(Path.cwd()) + "/image"), extensions: list = None) -> str:
+    front_engine_logger.info("choose_image")
     extensions = extensions or [".png", ".jpg", ".webp"]
     return choose_file(
         trigger_ui=trigger_ui, file_filter=file_filter, save_path=save_path, extensions=extensions,
@@ -53,6 +57,7 @@ def choose_image(
 def choose_wav_sound(
         trigger_ui: QWidget, file_filter: str = "WAV (*.wav)",
         save_path: Path = Path(str(Path.cwd()) + "/sound"), extensions: list = None) -> str:
+    front_engine_logger.info("choose_wav_sound")
     extensions = extensions or [".wav"]
     return choose_file(
         trigger_ui=trigger_ui, file_filter=file_filter, save_path=save_path, extensions=extensions,
@@ -62,6 +67,7 @@ def choose_wav_sound(
 def choose_player_sound(
         trigger_ui: QWidget, file_filter: str = "Sound (*.mp4;*.mp3;*.wav)",
         save_path: Path = Path(str(Path.cwd()) + "/sound"), extensions: list = None) -> str:
+    front_engine_logger.info("choose_player_sound")
     extensions = extensions or [".mp3", ".mp4", ".wav"]
     return choose_file(
         trigger_ui=trigger_ui, file_filter=file_filter, save_path=save_path, extensions=extensions,
@@ -71,6 +77,7 @@ def choose_player_sound(
 def choose_video(
         trigger_ui: QWidget, file_filter: str = "Video (*.mp4;)",
         save_path: Path = Path(str(Path.cwd()) + "/video"), extensions: list = None) -> str:
+    front_engine_logger.info("choose_video")
     extensions = extensions or [".mp4"]
     return choose_file(
         trigger_ui=trigger_ui, file_filter=file_filter, save_path=save_path, extensions=extensions,

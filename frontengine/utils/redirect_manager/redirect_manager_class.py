@@ -52,8 +52,6 @@ class RedirectManager(object):
             redirect_err = RedirectStdErr()
             sys.stdout = redirect_out
             sys.stderr = redirect_err
-            default_logger = logging.getLogger()
-            default_logger.addHandler(redirect_err)
             for name in logging.root.manager.loggerDict.keys():
                 logging.getLogger(name).addHandler(redirect_err)
 
