@@ -53,8 +53,6 @@ class SceneSettingUI(QWidget):
         # Set resize as content
         self.scene_table_view.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
         self.scene_table_view.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
-        # # Get data
-        # print(self.table_view_model.item(0, 0).text())
         self.scene_table_view.setModel(self.table_view_model)
         # Image button
         self.image_button = QPushButton(
