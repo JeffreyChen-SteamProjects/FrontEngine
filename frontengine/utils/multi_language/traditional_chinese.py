@@ -30,6 +30,7 @@ traditional_chinese_word_dict = {
     "control_center_close_all_sound": "關閉全部音樂",
     "control_center_close_all_text": "關閉全部文字",
     "control_center_scene": "關閉場景",
+    "control_center_clear_log_panel": "清除 Log",
     "control_center_close_all": "關閉所有",
     # General
     "Opacity": "不透明度",

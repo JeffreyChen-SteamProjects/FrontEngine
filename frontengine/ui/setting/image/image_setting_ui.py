@@ -5,6 +5,7 @@ from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QPushButton
 
 from frontengine.show.image.paint_image import ImageWidget
 from frontengine.ui.setting.choose_dialog.choose_file_dialog import choose_image
+from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
@@ -85,6 +86,7 @@ class ImageSettingUI(QWidget):
             )
             message_box.show()
         else:
+            front_engine_logger.info("start_play_image")
             if self.show_all_screen:
                 image_widget = self._create_image_widget()
                 image_widget.showFullScreen()

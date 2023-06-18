@@ -3,6 +3,7 @@ from PySide6.QtGui import QScreen
 from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QLineEdit, QPushButton, QCheckBox
 
 from frontengine.show.text.draw_text import TextWidget
+from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
@@ -88,6 +89,7 @@ class TextSettingUI(QWidget):
         self.font_size_slider_value_label.setText(str(self.font_size_slider.value()))
 
     def start_draw_text_on_screen(self) -> None:
+        front_engine_logger.info("start_draw_text_on_screen")
         if self.show_all_screen:
             text_widget = self._create_text_widget()
             text_widget.showFullScreen()
@@ -98,4 +100,3 @@ class TextSettingUI(QWidget):
                 text_widget = self._create_text_widget()
                 text_widget.move(monitor.left(), monitor.top())
                 text_widget.showFullScreen()
-

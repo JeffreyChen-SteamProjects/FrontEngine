@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, Dict, Callable, List
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QIntValidator
@@ -9,6 +9,7 @@ from frontengine.show.load.load_someone_make_ui import load_ui_file
 from frontengine.show.scene.scene import SceneManager
 from frontengine.ui.setting.choose_dialog.choose_file_dialog import choose_video, choose_player_sound, choose_gif, \
     choose_image
+from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
@@ -29,7 +30,7 @@ class SceneSettingUI(QWidget):
         # Data model
         self.table_view_model = QStandardItemModel()
         # Set horizontal label
-        self.table_view_model.setHorizontalHeaderLabels([
+        self.label_list = [
             language_wrapper.language_word_dict.get("scene_table_view_type"),
             language_wrapper.language_word_dict.get("scene_file_path"),
             language_wrapper.language_word_dict.get("url"),
@@ -43,12 +44,15 @@ class SceneSettingUI(QWidget):
             language_wrapper.language_word_dict.get("web_setting_open_enable_input"),
             language_wrapper.language_word_dict.get("position_x"),
             language_wrapper.language_word_dict.get("position_y"),
-        ])
+        ]
+        self.param_key_name_list = [
+            "widget_type", "file_path", "url", "text", "opacity", "speed", "volume", "font_size", "play_rate",
+            "web_setting_open_local_file", "web_setting_open_enable_input", "position_x", "position_y"
+        ]
+        self.table_view_model.setHorizontalHeaderLabels(self.label_list)
         # Set resize as content
         self.scene_table_view.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
         self.scene_table_view.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
-        # # Get data
-        # print(self.table_view_model.item(0, 0).text())
         self.scene_table_view.setModel(self.table_view_model)
         # Image button
         self.image_button = QPushButton(
@@ -194,7 +198,7 @@ class SceneSettingUI(QWidget):
         self.setLayout(self.scroll_area.layout())
         self.scene = SceneManager()
         # Use to build component
-        self.scene_component = {
+        self.scene_component: Dict[str, Callable] = {
             "IMAGE": self.scene.add_image,
             "GIF": self.scene.add_gif,
             "SOUND": self.scene.add_sound,
@@ -204,136 +208,85 @@ class SceneSettingUI(QWidget):
             "EXTEND_UI_FILE": self.scene.add_extend_ui_file
         }
 
-    def add_image(self):
+    def add_row_data(self, data_list: List):
+        row = self.table_view_model.rowCount()
+        for index, data in enumerate(data_list):
+            self.table_view_model.setItem(row, index, QStandardItem(str(data)))
+
+    def add_image(self) -> None:
         image_path = choose_image(self)
         if image_path is not None:
-            row = self.table_view_model.rowCount()
-            self.table_view_model.setItem(row, 0, QStandardItem("IMAGE"))
-            self.table_view_model.setItem(row, 1, QStandardItem(image_path))
-            self.table_view_model.setItem(row, 2, QStandardItem(""))
-            self.table_view_model.setItem(row, 3, QStandardItem(""))
-            self.table_view_model.setItem(row, 4, QStandardItem(str(self.opacity_slider.value())))
-            self.table_view_model.setItem(row, 5, QStandardItem(""))
-            self.table_view_model.setItem(row, 6, QStandardItem(""))
-            self.table_view_model.setItem(row, 7, QStandardItem(""))
-            self.table_view_model.setItem(row, 8, QStandardItem(""))
-            self.table_view_model.setItem(row, 9, QStandardItem(""))
-            self.table_view_model.setItem(row, 10, QStandardItem(""))
-            self.table_view_model.setItem(row, 11, QStandardItem(self.position_x_input.text()))
-            self.table_view_model.setItem(row, 12, QStandardItem(self.position_y_input.text()))
+            row_data = ["IMAGE", image_path, "", "", str(self.opacity_slider.value()), "", "", "", "", "", "",
+                        self.position_x_input.text(), self.position_y_input.text()]
+            front_engine_logger.info(f"add image, param: {row_data}")
+            self.add_row_data(row_data)
 
-    def add_gif(self):
+    def add_gif(self) -> None:
         gif_path = choose_gif(self)
         if gif_path is not None:
-            row = self.table_view_model.rowCount()
-            self.table_view_model.setItem(row, 0, QStandardItem("GIF"))
-            self.table_view_model.setItem(row, 1, QStandardItem(gif_path))
-            self.table_view_model.setItem(row, 2, QStandardItem(""))
-            self.table_view_model.setItem(row, 3, QStandardItem(""))
-            self.table_view_model.setItem(row, 4, QStandardItem(str(self.opacity_slider.value())))
-            self.table_view_model.setItem(row, 5, QStandardItem(str(self.speed_slider.value())))
-            self.table_view_model.setItem(row, 6, QStandardItem(""))
-            self.table_view_model.setItem(row, 7, QStandardItem(""))
-            self.table_view_model.setItem(row, 8, QStandardItem(""))
-            self.table_view_model.setItem(row, 9, QStandardItem(""))
-            self.table_view_model.setItem(row, 10, QStandardItem(""))
-            self.table_view_model.setItem(row, 11, QStandardItem(self.position_x_input.text()))
-            self.table_view_model.setItem(row, 12, QStandardItem(self.position_y_input.text()))
+            row_data = ["GIF", gif_path, "", "", str(self.opacity_slider.value()), str(self.speed_slider.value()),
+                        "", "", "", "", "", self.position_x_input.text(), self.position_y_input.text()]
+            front_engine_logger.info(f"add gif, param: {row_data}")
+            self.add_row_data(row_data)
 
-    def add_sound(self):
+    def add_sound(self) -> None:
         sound_path = choose_player_sound(self)
         if sound_path is not None:
-            row = self.table_view_model.rowCount()
-            self.table_view_model.setItem(row, 0, QStandardItem("SOUND"))
-            self.table_view_model.setItem(row, 1, QStandardItem(sound_path))
-            self.table_view_model.setItem(row, 2, QStandardItem(""))
-            self.table_view_model.setItem(row, 3, QStandardItem(""))
-            self.table_view_model.setItem(row, 4, QStandardItem(""))
-            self.table_view_model.setItem(row, 5, QStandardItem(""))
-            self.table_view_model.setItem(row, 6, QStandardItem(str(self.volume_slider.value())))
-            self.table_view_model.setItem(row, 7, QStandardItem(""))
-            self.table_view_model.setItem(row, 8, QStandardItem(""))
-            self.table_view_model.setItem(row, 9, QStandardItem(""))
-            self.table_view_model.setItem(row, 10, QStandardItem(""))
-            self.table_view_model.setItem(row, 11, QStandardItem(self.position_x_input.text()))
-            self.table_view_model.setItem(row, 12, QStandardItem(self.position_y_input.text()))
+            row_data = ["SOUND", sound_path, "", "", "", "", str(self.volume_slider.value()),
+                        "", "", "", "", self.position_x_input.text(), self.position_y_input.text()]
+            front_engine_logger.info(f"add sound, param: {row_data}")
+            self.add_row_data(row_data)
 
-    def add_text(self):
-        row = self.table_view_model.rowCount()
-        self.table_view_model.setItem(row, 0, QStandardItem("TEXT"))
-        self.table_view_model.setItem(row, 1, QStandardItem(""))
-        self.table_view_model.setItem(row, 2, QStandardItem(""))
-        self.table_view_model.setItem(row, 3, QStandardItem(self.text_input.text()))
-        self.table_view_model.setItem(row, 4, QStandardItem(str(self.opacity_slider.value())))
-        self.table_view_model.setItem(row, 5, QStandardItem(""))
-        self.table_view_model.setItem(row, 6, QStandardItem(""))
-        self.table_view_model.setItem(row, 7, QStandardItem(str(self.font_size_slider.value())))
-        self.table_view_model.setItem(row, 8, QStandardItem(""))
-        self.table_view_model.setItem(row, 9, QStandardItem(""))
-        self.table_view_model.setItem(row, 10, QStandardItem(""))
-        self.table_view_model.setItem(row, 11, QStandardItem(self.position_x_input.text()))
-        self.table_view_model.setItem(row, 12, QStandardItem(self.position_y_input.text()))
+    def add_text(self) -> None:
+        row_data = ["TEXT", "", "", self.text_input.text(), str(self.opacity_slider.value()), "", "",
+                    str(self.font_size_slider.value()), "", "", "",
+                    self.position_x_input.text(), self.position_y_input.text()]
+        front_engine_logger.info(f"add text, param: {row_data}")
+        self.add_row_data(row_data)
 
-    def add_video(self):
+    def add_video(self) -> None:
         video_path = choose_video(self)
         if video_path is not None:
-            row = self.table_view_model.rowCount()
-            self.table_view_model.setItem(row, 0, QStandardItem("VIDEO"))
-            self.table_view_model.setItem(row, 1, QStandardItem(video_path))
-            self.table_view_model.setItem(row, 2, QStandardItem(""))
-            self.table_view_model.setItem(row, 3, QStandardItem(""))
-            self.table_view_model.setItem(row, 4, QStandardItem(str(self.opacity_slider.value())))
-            self.table_view_model.setItem(row, 5, QStandardItem(""))
-            self.table_view_model.setItem(row, 6, QStandardItem(str(self.volume_slider.value())))
-            self.table_view_model.setItem(row, 7, QStandardItem(""))
-            self.table_view_model.setItem(row, 8, QStandardItem(str(self.play_rate_slider.value())))
-            self.table_view_model.setItem(row, 9, QStandardItem(""))
-            self.table_view_model.setItem(row, 10, QStandardItem(""))
-            self.table_view_model.setItem(row, 11, QStandardItem(self.position_x_input.text()))
-            self.table_view_model.setItem(row, 12, QStandardItem(self.position_y_input.text()))
+            row_data = ["VIDEO", video_path, "", "", str(self.opacity_slider.value()), "",
+                        str(self.volume_slider.value()), "", str(self.play_rate_slider.value()), "", "",
+                        self.position_x_input.text(), self.position_y_input.text()]
+            front_engine_logger.info(f"add video, param: {row_data}")
+            self.add_row_data(row_data)
 
-    def add_web(self):
-        row = self.table_view_model.rowCount()
-        self.table_view_model.setItem(row, 0, QStandardItem("WEB"))
-        self.table_view_model.setItem(row, 1, QStandardItem(""))
-        self.table_view_model.setItem(row, 2, QStandardItem(self.web_url_input.text()))
-        self.table_view_model.setItem(row, 3, QStandardItem(""))
-        self.table_view_model.setItem(row, 4, QStandardItem(str(self.opacity_slider.value())))
-        self.table_view_model.setItem(row, 5, QStandardItem(""))
-        self.table_view_model.setItem(row, 6, QStandardItem(""))
-        self.table_view_model.setItem(row, 7, QStandardItem(""))
-        self.table_view_model.setItem(row, 8, QStandardItem(""))
-        self.table_view_model.setItem(row, 9, QStandardItem(""))
-        self.table_view_model.setItem(row, 10, QStandardItem(""))
-        self.table_view_model.setItem(row, 11, QStandardItem(self.position_x_input.text()))
-        self.table_view_model.setItem(row, 12, QStandardItem(self.position_y_input.text()))
+    def add_web(self) -> None:
+        row_data = ["WEB", "", self.web_url_input.text(), "", str(self.opacity_slider.value()), "", "",
+                    "", "", "", "",
+                    self.position_x_input.text(), self.position_y_input.text()]
+        front_engine_logger.info(f"add web, param: {row_data}")
+        self.add_row_data(row_data)
 
-    def add_extend_ui_file(self):
+    def add_extend_ui_file(self) -> None:
         if load_ui_file(self.ui_path_input.text()):
-            row = self.table_view_model.rowCount()
-            self.table_view_model.setItem(row, 0, QStandardItem("EXTEND_UI_FILE"))
-            self.table_view_model.setItem(row, 1, QStandardItem(self.ui_path_input.text()))
-            self.table_view_model.setItem(row, 2, QStandardItem(""))
-            self.table_view_model.setItem(row, 3, QStandardItem(""))
-            self.table_view_model.setItem(row, 4, QStandardItem(""))
-            self.table_view_model.setItem(row, 5, QStandardItem(""))
-            self.table_view_model.setItem(row, 6, QStandardItem(""))
-            self.table_view_model.setItem(row, 7, QStandardItem(""))
-            self.table_view_model.setItem(row, 8, QStandardItem(""))
-            self.table_view_model.setItem(row, 9, QStandardItem(""))
-            self.table_view_model.setItem(row, 10, QStandardItem(""))
-            self.table_view_model.setItem(row, 11, QStandardItem(self.position_x_input.text()))
-            self.table_view_model.setItem(row, 12, QStandardItem(self.position_y_input.text()))
-
+            self.add_row_data(
+                ["EXTEND_UI_FILE", self.ui_path_input.text(), "", "", "", "", "",
+                 "", "", "", "", self.position_x_input.text(), self.position_y_input.text()])
         else:
             ui_not_found_message = QMessageBox(self)
             ui_not_found_message.setText(
                 language_wrapper.language_word_dict.get("cant_find_extend_ui_message_box_text"))
             ui_not_found_message.show()
+            front_engine_logger.error(language_wrapper.language_word_dict.get("cant_find_extend_ui_message_box_text"))
 
-    def close_scene(self):
+    def close_scene(self) -> None:
         self.scene.widget_list.clear()
         self.scene.graphic_view.close()
+        front_engine_logger.info("close_scene")
 
     def start_scene(self) -> None:
-        self.scene.graphic_view.showMaximized()
+        front_engine_logger.info("start_scene")
+        for row in range(self.table_view_model.rowCount()):
+            widget_type_text = self.table_view_model.item(row, 0).text()
+            add_widget_function = self.scene_component.get(widget_type_text)
+            param_dict: Dict[str, str] = dict()
+            for column in range(1, self.table_view_model.columnCount()):
+                param = self.table_view_model.item(row, column).text()
+                if param != "":
+                    param_dict.update({self.param_key_name_list[column]: param})
+            add_widget_function(param_dict)
+            front_engine_logger.info(f"start_scene type: {widget_type_text}, param: {param_dict}")
+        self.scene.show()

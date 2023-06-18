@@ -9,6 +9,7 @@ from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QPushButton
 
 from frontengine.show.video.video_player import VideoWidget
 from frontengine.ui.setting.choose_dialog.choose_file_dialog import choose_video
+from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
@@ -122,6 +123,7 @@ class VideoSettingUI(QWidget):
             )
             message_box.show()
         else:
+            front_engine_logger.info("start_play_gif")
             if self.show_all_screen:
                 video_widget = self._create_video_widget()
                 video_widget.set_ui_window_flag(self.show_on_bottom_checkbox.isChecked())

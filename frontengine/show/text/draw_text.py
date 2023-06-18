@@ -46,7 +46,7 @@ class TextWidget(QWidget):
         painter.setOpacity(self.opacity)
         painter.drawText(
             QRect(self.x(), self.y(), self.width(), self.height()),
-            Qt.AlignmentFlag.AlignCenter,
+            Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter,
             self.text
         )
         painter.restore()

@@ -3,6 +3,7 @@ from PySide6.QtGui import QScreen
 from PySide6.QtWidgets import QWidget, QGridLayout, QLabel, QSlider, QLineEdit, QPushButton, QCheckBox
 
 from frontengine.show.web.webview import WebWidget
+from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
@@ -96,6 +97,7 @@ class WEBSettingUI(QWidget):
             web_widget = self._create_web_widget()
             web_widget.showMaximized()
         else:
+            front_engine_logger.info("start_open_web_with_url")
             monitors = QScreen.virtualSiblings(self.screen())
             for screen in monitors:
                 monitor = screen.availableGeometry()
