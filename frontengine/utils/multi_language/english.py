@@ -14,6 +14,7 @@ english_word_dict = {
     "tab_sound_text": "Sound",
     "tab_text_text": "Text",
     "tab_control_center_text": "Control Center",
+    "tab_external_ui": "External UI",
     # Messagebox text
     "paint_gif_message_box_text": "GIF or WEBP error",
     "paint_image_message_box_text": "Image Error",
@@ -85,4 +86,13 @@ english_word_dict = {
     "scene_add_video": "Add video to scene",
     "scene_add_web": "Add web to scene",
     "scene_add_UI": "Add ui to scene",
+    "scene_choose_message_box": "Please choose a scene file",
+    "scene_choose_output_path_message_box": "Please choose a scene file output path",
+    "scene_output": "output scene file",
+    "scene_input": "load scene file",
+    "tableview_clear": "clear all setting",
+    "scene_control_panel": "Scene control panel",
+    # Chat scene input
+    "chat_scene_input_title": "input chat content",
+    "chat_scene_send_chat": "send text",
 }

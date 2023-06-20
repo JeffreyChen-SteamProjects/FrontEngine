@@ -3,7 +3,7 @@ from PySide6.QtWidgets import QWidget, QGridLayout, QLabel, QSlider, QPushButton
 
 from frontengine.show.sound_player.sound_effect import SoundEffectWidget
 from frontengine.show.sound_player.sound_player import SoundPlayer
-from frontengine.ui.setting.choose_dialog.choose_file_dialog import choose_player_sound, choose_wav_sound
+from frontengine.ui.dialog.choose_file_dialog import choose_player_sound, choose_wav_sound
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 

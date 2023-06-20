@@ -13,6 +13,7 @@ traditional_chinese_word_dict = {
     "tab_gif_text": "GIF 和 WEBP",
     "tab_sound_text": "音樂",
     "tab_text_text": "文字",
+    "tab_external_ui": "外部 UI",
     "tab_control_center_text": "控制中心",
     # Messagebox text
     "paint_gif_message_text": "GIF 或者 WEBP 檔案有錯誤",
@@ -85,4 +86,13 @@ traditional_chinese_word_dict = {
     "scene_add_video": "添加影片到場景",
     "scene_add_web": "添加網頁到場景",
     "scene_add_UI": "添加UI到場景",
+    "scene_choose_message_box": "請選擇場景檔案",
+    "scene_choose_output_path_message_box": "請選擇場景檔案輸出路徑",
+    "scene_output": "輸出場景檔案",
+    "scene_input": "讀取場景檔案",
+    "tableview_clear": "清除所有設定",
+    "scene_control_panel": "場景控制中心",
+    # Chat scene input
+    "chat_scene_input_title": "輸入聊天內容",
+    "chat_scene_send_chat": "送出文字",
 }

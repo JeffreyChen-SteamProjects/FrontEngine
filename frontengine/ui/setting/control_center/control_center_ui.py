@@ -140,7 +140,7 @@ class ControlCenterUI(QWidget):
 
     def clear_scene(self) -> None:
         front_engine_logger.info("clear_scene")
-        self.scene_setting_ui.close_scene()
+        self.scene_setting_ui.scene_control_setting.close_scene()
 
     def clear_all(self) -> None:
         front_engine_logger.info("clear_all")
@@ -150,7 +150,7 @@ class ControlCenterUI(QWidget):
         self.gif_setting_ui.gif_widget_list.clear()
         self.sound_player_setting_ui.sound_widget_list.clear()
         self.text_setting_ui.text_widget_list.clear()
-        self.scene_setting_ui.close_scene()
+        self.scene_setting_ui.scene_control_setting.close_scene()
 
     def redirect(self) -> None:
         if not redirect_manager_instance.std_out_queue.empty():

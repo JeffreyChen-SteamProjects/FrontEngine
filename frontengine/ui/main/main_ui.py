@@ -59,17 +59,11 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
         self.add_style_menu()
         self.setMenuBar(self.menu_bar)
         self.tab_widget.addTab(
-            self.video_setting_ui,
-            language_wrapper.language_word_dict.get("tab_video_text")
-        )
+            self.video_setting_ui, language_wrapper.language_word_dict.get("tab_video_text"))
         self.tab_widget.addTab(
-            self.image_setting_ui,
-            language_wrapper.language_word_dict.get("tab_image_text")
-        )
+            self.image_setting_ui, language_wrapper.language_word_dict.get("tab_image_text"))
         self.tab_widget.addTab(
-            self.web_setting_ui,
-            language_wrapper.language_word_dict.get("tab_web_text")
-        )
+            self.web_setting_ui, language_wrapper.language_word_dict.get("tab_web_text"))
         self.tab_widget.addTab(
             self.gif_setting_ui,
             language_wrapper.language_word_dict.get("tab_gif_text")
