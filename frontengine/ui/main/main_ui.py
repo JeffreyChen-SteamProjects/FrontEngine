@@ -7,6 +7,7 @@ from PySide6.QtWidgets import QMainWindow, QApplication, QGridLayout, QTabWidget
 from qt_material import apply_stylesheet, QtStyleTools
 
 from frontengine.ui.main.language_menu import build_language_menu
+from frontengine.ui.setting.chat_scene.chat_scene_setting import ChatSceneUI
 from frontengine.ui.setting.control_center.control_center_ui import ControlCenterUI
 from frontengine.ui.setting.gif.gif_setting_ui import GIFSettingUI
 from frontengine.ui.setting.image.image_setting_ui import ImageSettingUI
@@ -44,6 +45,7 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
         self.sound_player_setting_ui = SoundPlayerSettingUI()
         self.text_setting_ui = TextSettingUI()
         self.scene_setting_ui = SceneSettingUI()
+        self.chat_scene_ui = ChatSceneUI()
         self.control_center_ui = ControlCenterUI(
             self.video_setting_ui,
             self.image_setting_ui,
@@ -51,7 +53,8 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
             self.gif_setting_ui,
             self.sound_player_setting_ui,
             self.text_setting_ui,
-            self.scene_setting_ui
+            self.scene_setting_ui,
+            self.chat_scene_ui
         )
         # Style menu bar
         self.menu_bar = QMenuBar()
@@ -59,17 +62,11 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
         self.add_style_menu()
         self.setMenuBar(self.menu_bar)
         self.tab_widget.addTab(
-            self.video_setting_ui,
-            language_wrapper.language_word_dict.get("tab_video_text")
-        )
+            self.video_setting_ui, language_wrapper.language_word_dict.get("tab_video_text"))
         self.tab_widget.addTab(
-            self.image_setting_ui,
-            language_wrapper.language_word_dict.get("tab_image_text")
-        )
+            self.image_setting_ui, language_wrapper.language_word_dict.get("tab_image_text"))
         self.tab_widget.addTab(
-            self.web_setting_ui,
-            language_wrapper.language_word_dict.get("tab_web_text")
-        )
+            self.web_setting_ui, language_wrapper.language_word_dict.get("tab_web_text"))
         self.tab_widget.addTab(
             self.gif_setting_ui,
             language_wrapper.language_word_dict.get("tab_gif_text")
@@ -85,6 +82,10 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
         self.tab_widget.addTab(
             self.scene_setting_ui,
             language_wrapper.language_word_dict.get("tab_scene_text")
+        )
+        self.tab_widget.addTab(
+            self.chat_scene_ui,
+            language_wrapper.language_word_dict.get("chat_ui_text")
         )
         self.tab_widget.addTab(
             self.control_center_ui,

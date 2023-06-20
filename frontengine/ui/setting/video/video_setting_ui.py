@@ -1,14 +1,9 @@
-import os
-import shutil
-from pathlib import Path
-
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QScreen
-from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QPushButton, QMessageBox, QFileDialog, \
-    QCheckBox
+from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QPushButton, QMessageBox, QCheckBox
 
 from frontengine.show.video.video_player import VideoWidget
-from frontengine.ui.setting.choose_dialog.choose_file_dialog import choose_video
+from frontengine.ui.dialog.choose_file_dialog import choose_video
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 

@@ -4,7 +4,7 @@ from PySide6.QtWidgets import QWidget, QGridLayout, QLabel, QSlider, QPushButton
     QCheckBox
 
 from frontengine.show.gif.paint_gif import GifWidget
-from frontengine.ui.setting.choose_dialog.choose_file_dialog import choose_gif
+from frontengine.ui.dialog.choose_file_dialog import choose_gif
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
