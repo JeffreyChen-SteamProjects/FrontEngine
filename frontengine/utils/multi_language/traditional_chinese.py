@@ -15,6 +15,7 @@ traditional_chinese_word_dict = {
     "tab_text_text": "文字",
     "tab_external_ui": "外部 UI",
     "tab_control_center_text": "控制中心",
+    "chat_ui_text": "聊天",
     # Messagebox text
     "paint_gif_message_text": "GIF 或者 WEBP 檔案有錯誤",
     "paint_image_message_box_text": "圖片錯誤",
@@ -32,6 +33,7 @@ traditional_chinese_word_dict = {
     "control_center_close_all_text": "關閉全部文字",
     "control_center_scene": "關閉場景",
     "control_center_clear_log_panel": "清除 Log",
+    "chat_scene_close": "關閉所有聊天",
     "control_center_close_all": "關閉所有",
     # General
     "Opacity": "不透明度",
@@ -95,4 +97,6 @@ traditional_chinese_word_dict = {
     # Chat scene input
     "chat_scene_input_title": "輸入聊天內容",
     "chat_scene_send_chat": "送出文字",
+    # Chat scene
+    "chat_scene_start_button": "開始聊天",
 }

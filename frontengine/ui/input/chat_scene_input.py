@@ -2,7 +2,7 @@ from PySide6.QtWidgets import QBoxLayout, QWidget, QLineEdit, QPushButton, QHBox
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
-class SearchResultBox(QWidget):
+class ChatInputDialog(QWidget):
     def __init__(self):
         super().__init__()
         self.box_layout = QBoxLayout(QBoxLayout.Direction.TopToBottom)

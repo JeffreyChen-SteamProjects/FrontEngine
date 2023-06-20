@@ -15,6 +15,7 @@ english_word_dict = {
     "tab_text_text": "Text",
     "tab_control_center_text": "Control Center",
     "tab_external_ui": "External UI",
+    "chat_ui_text": "Chat",
     # Messagebox text
     "paint_gif_message_box_text": "GIF or WEBP error",
     "paint_image_message_box_text": "Image Error",
@@ -32,6 +33,7 @@ english_word_dict = {
     "control_center_close_all_text": "Close all text",
     "control_center_scene": "Close scene",
     "control_center_clear_log_panel": "Clear Log",
+    "chat_scene_close": "Close all chat",
     "control_center_close_all": "Close all",
     # General
     "Opacity": "Opacity",
@@ -95,4 +97,6 @@ english_word_dict = {
     # Chat scene input
     "chat_scene_input_title": "input chat content",
     "chat_scene_send_chat": "send text",
+    # Chat scene
+    "chat_scene_start_button": "start chat",
 }

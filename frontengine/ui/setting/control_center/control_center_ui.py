@@ -2,6 +2,7 @@ from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QGridLayout, QWidget, QPushButton, QTextEdit, QScrollArea
 
 from frontengine.ui.color.global_color import error_color, output_color
+from frontengine.ui.setting.chat_scene.chat_scene_setting import ChatSceneUI
 from frontengine.ui.setting.gif.gif_setting_ui import GIFSettingUI
 from frontengine.ui.setting.image.image_setting_ui import ImageSettingUI
 from frontengine.ui.setting.scene_setting.scene_setting_ui import SceneSettingUI
@@ -24,7 +25,8 @@ class ControlCenterUI(QWidget):
             gif_setting_ui: GIFSettingUI,
             sound_player_setting_ui: SoundPlayerSettingUI,
             text_setting_ui: TextSettingUI,
-            scene_setting_ui: SceneSettingUI
+            scene_setting_ui: SceneSettingUI,
+            chat_scene_ui: ChatSceneUI
     ):
         super().__init__()
         # Layout
@@ -39,6 +41,7 @@ class ControlCenterUI(QWidget):
         self.sound_player_setting_ui = sound_player_setting_ui
         self.text_setting_ui = text_setting_ui
         self.scene_setting_ui = scene_setting_ui
+        self.chat_scene_ui = chat_scene_ui
         # Close video widget
         self.clear_video_button = QPushButton(
             language_wrapper.language_word_dict.get("control_center_close_all_video")
@@ -74,16 +77,21 @@ class ControlCenterUI(QWidget):
             language_wrapper.language_word_dict.get("control_center_scene")
         )
         self.clear_scene_button.clicked.connect(self.clear_scene)
-        # All widget close
-        self.clear_all_button = QPushButton(
-            language_wrapper.language_word_dict.get("control_center_close_all")
-        )
-        self.clear_all_button.clicked.connect(self.clear_all)
         # Clear redirect
         self.clear_redirect_button = QPushButton(
             language_wrapper.language_word_dict.get("control_center_clear_log_panel")
         )
         self.clear_redirect_button.clicked.connect(self.clear_redirect)
+        # Close chat scene
+        self.clear_chat_button = QPushButton(
+            language_wrapper.language_word_dict.get("chat_scene_close")
+        )
+        self.clear_chat_button.clicked.connect(self.clear_redirect)
+        # All widget close
+        self.clear_all_button = QPushButton(
+            language_wrapper.language_word_dict.get("control_center_close_all")
+        )
+        self.clear_all_button.clicked.connect(self.clear_all)
         # Log panel
         self.log_panel = QTextEdit()
         self.log_panel.setLineWrapMode(self.log_panel.LineWrapMode.NoWrap)
@@ -101,7 +109,7 @@ class ControlCenterUI(QWidget):
         self.grid_layout.addWidget(self.clear_text_button, 5, 0)
         self.grid_layout.addWidget(self.clear_redirect_button, 6, 0)
         self.grid_layout.addWidget(self.clear_all_button, 7, 0)
-        self.grid_layout.addWidget(self.log_panel_scroll_area, 0, 1, 8, 10)
+        self.grid_layout.addWidget(self.log_panel_scroll_area, 0, 1, -1, -1)
         self.setLayout(self.grid_layout)
         # Redirect
         self.redirect_timer = QTimer(self)
@@ -141,6 +149,10 @@ class ControlCenterUI(QWidget):
     def clear_scene(self) -> None:
         front_engine_logger.info("clear_scene")
         self.scene_setting_ui.scene_control_setting.close_scene()
+
+    def clear_chat(self):
+        front_engine_logger.info("clear_chat")
+        self.chat_scene_ui.close_chat_ui()
 
     def clear_all(self) -> None:
         front_engine_logger.info("clear_all")
