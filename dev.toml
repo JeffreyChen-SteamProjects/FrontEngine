@@ -13,6 +13,7 @@ authors = [
 dependencies = [
     "PySide6",
     "qt-material",
+    "EdgeGPT"
 ]
 description = "FrontEngine is a tool allow you set Video or Image or GIF front of all window"
 requires-python = ">=3.8"
