@@ -1,8 +1,10 @@
 import asyncio
+import json
 from queue import Queue
 from threading import Thread
 
 from EdgeGPT.EdgeGPT import Chatbot, ConversationStyle
+from EdgeGPT.EdgeUtils import Query
 
 
 class DelegateChat(object):
@@ -25,7 +27,7 @@ class ChatThread(Thread):
             self.chat_bot = DELEGATE_CHAT.chat_bot
 
     def run(self) -> None:
-        chat_response = ""
+        chat_response = dict()
 
         async def send_chat_async():
             nonlocal chat_response
@@ -41,7 +43,9 @@ class ChatThread(Thread):
         asyncio.run(send_chat_async())
         self.current_message = chat_response
         MESSAGE_QUEUE.put(self.current_message)
-        print(self.current_message)
+        for text_dict in self.current_message.get("item").get("messages"):
+            if text_dict.get("author") == "bot":
+                print(text_dict.get("text"))
         DELEGATE_CHAT.chat_bot = self.chat_bot
 
 
