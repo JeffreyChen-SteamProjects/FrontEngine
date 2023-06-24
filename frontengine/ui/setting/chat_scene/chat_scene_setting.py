@@ -1,7 +1,7 @@
-from PySide6.QtWidgets import QWidget, QGridLayout, QPushButton, QTextEdit, QScrollArea
+from PySide6.QtWidgets import QWidget, QGridLayout, QPushButton, QTextEdit, QScrollArea, QComboBox, QLabel
 
 from frontengine.ui.chat.chat_scene_input import ChatInputDialog
-from frontengine.ui.chat.chatthread import ChatThread
+from frontengine.ui.chat.chatthread import ChatThread, DELEGATE_CHAT
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
@@ -15,6 +15,16 @@ class ChatSceneUI(QWidget):
         # Init
         self.chat_input = ChatInputDialog()
         self.chat_list = list()
+        self.choose_style_combobox = QComboBox()
+        self.choose_style_combobox.addItems([
+            language_wrapper.language_word_dict.get("chat_scene_creative"),
+            language_wrapper.language_word_dict.get("chat_scene_precise"),
+            language_wrapper.language_word_dict.get("chat_scene_balanced")
+        ])
+        self.choose_style_combobox.currentTextChanged.connect(self.change_style)
+        # New topic button
+        self.new_topic_button = QPushButton(language_wrapper.language_word_dict.get("chat_scene_new_topic"))
+        self.new_topic_button.clicked.connect(self.new_topic)
         # Start button
         self.start_button = QPushButton(language_wrapper.language_word_dict.get("chat_scene_start_button"))
         self.start_button.clicked.connect(self.start_chat)
@@ -27,7 +37,9 @@ class ChatSceneUI(QWidget):
         self.chat_panel_scroll_area.setViewportMargins(0, 0, 0, 0)
         self.chat_panel_scroll_area.setWidget(self.chat_panel)
         # Add to layout
-        self.grid_layout.addWidget(self.start_button, 0, 0)
+        self.grid_layout.addWidget(self.choose_style_combobox, 0, 0)
+        self.grid_layout.addWidget(self.new_topic_button, 0, 1)
+        self.grid_layout.addWidget(self.start_button, 0, 2)
         self.grid_layout.addWidget(self.chat_panel_scroll_area, 1, 0, -1, -1)
         self.setLayout(self.grid_layout)
 
@@ -37,8 +49,14 @@ class ChatSceneUI(QWidget):
         self.chat_input.send_text_button.clicked.connect(self.send_chat)
 
     def send_chat(self):
-        chat_thread = ChatThread(self.chat_input.chat_input.toPlainText())
+        chat_thread = ChatThread(self.chat_panel, self.chat_input.chat_input.toPlainText())
         chat_thread.start()
+
+    def change_style(self):
+        DELEGATE_CHAT.change_style(self.choose_style_combobox.currentText())
+
+    def new_topic(self):
+        DELEGATE_CHAT.new_topic(self.chat_panel)
 
     def close_chat_ui(self):
         self.chat_input.close()

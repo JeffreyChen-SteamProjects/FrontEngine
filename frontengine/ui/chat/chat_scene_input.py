@@ -16,3 +16,7 @@ class ChatInputDialog(QWidget):
         self.box_layout.addLayout(self.box_h_layout)
         self.setWindowTitle(language_wrapper.language_word_dict.get("chat_scene_input_title"))
         self.setLayout(self.box_layout)
+
+    def close(self) -> bool:
+        self.deleteLater()
+        return super().close()

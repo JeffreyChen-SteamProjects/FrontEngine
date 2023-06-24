@@ -99,4 +99,8 @@ english_word_dict = {
     "chat_scene_send_chat": "send text",
     # Chat scene
     "chat_scene_start_button": "start chat",
+    "chat_scene_new_topic": "new topic",
+    "chat_scene_creative": "creative",
+    "chat_scene_precise": "precise",
+    "chat_scene_balanced": "balanced",
 }
