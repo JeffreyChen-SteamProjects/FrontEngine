@@ -99,4 +99,8 @@ traditional_chinese_word_dict = {
     "chat_scene_send_chat": "送出文字",
     # Chat scene
     "chat_scene_start_button": "開始聊天",
+    "chat_scene_new_topic": "開始一個新聊天",
+    "chat_scene_creative": "創意",
+    "chat_scene_precise": "精準",
+    "chat_scene_balanced": "平衡",
 }

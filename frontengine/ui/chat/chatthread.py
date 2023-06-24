@@ -1,28 +1,37 @@
 import asyncio
-import json
 from queue import Queue
 from threading import Thread
 
 from EdgeGPT.EdgeGPT import Chatbot, ConversationStyle
-from EdgeGPT.EdgeUtils import Query
+from PySide6.QtWidgets import QTextEdit
 
 
 class DelegateChat(object):
 
     def __init__(self):
         self.chat_bot = None
+        self.style = ConversationStyle.creative
 
-    def clear(self):
+    def new_topic(self, message_panel: QTextEdit):
         self.chat_bot = None
+        message_panel.clear()
+
+    def change_style(self, style: str):
+        if style == "creative":
+            self.style = ConversationStyle.creative
+        elif style == "precise":
+            self.style = ConversationStyle.precise
+        else:
+            self.style = ConversationStyle.balanced
 
 
 class ChatThread(Thread):
 
-    def __init__(self, chat_send_message: str):
+    def __init__(self, message_panel: QTextEdit, chat_send_message: str):
         super().__init__()
         self.current_message = None
         self.chat_send_message = chat_send_message
-        self.chat_bot = None
+        self.message_panel = message_panel
         if DELEGATE_CHAT.chat_bot is not None:
             self.chat_bot = DELEGATE_CHAT.chat_bot
 
@@ -31,13 +40,14 @@ class ChatThread(Thread):
 
         async def send_chat_async():
             nonlocal chat_response
-            if self.chat_bot is None:
+            if DELEGATE_CHAT.chat_bot is None:
                 bot = await Chatbot.create()
-                response = await bot.ask(prompt=self.chat_send_message, conversation_style=ConversationStyle.creative)
+                response = await bot.ask(prompt=self.chat_send_message, conversation_style=DELEGATE_CHAT.style)
                 chat_response = response
+                DELEGATE_CHAT.chat_bot = bot
             else:
-                response = await self.chat_bot.ask(prompt=self.chat_send_message,
-                                                   conversation_style=ConversationStyle.creative)
+                response = await DELEGATE_CHAT.chat_bot.ask(
+                    prompt=self.chat_send_message, conversation_style=DELEGATE_CHAT.style)
                 chat_response = response
 
         asyncio.run(send_chat_async())
@@ -45,8 +55,7 @@ class ChatThread(Thread):
         MESSAGE_QUEUE.put(self.current_message)
         for text_dict in self.current_message.get("item").get("messages"):
             if text_dict.get("author") == "bot":
-                print(text_dict.get("text"))
-        DELEGATE_CHAT.chat_bot = self.chat_bot
+                self.message_panel.append(text_dict.get("text"))
 
 
 MESSAGE_QUEUE = Queue()
