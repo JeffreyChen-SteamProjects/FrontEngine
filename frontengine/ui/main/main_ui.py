@@ -127,6 +127,8 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
         self.gif_setting_ui.gif_widget_list.clear()
         self.sound_player_setting_ui.sound_widget_list.clear()
         self.text_setting_ui.text_widget_list.clear()
+        self.chat_scene_ui.close_scene()
+        self.chat_scene_ui.close()
         write_user_setting()
 
 

@@ -1,7 +1,13 @@
-from PySide6.QtWidgets import QWidget, QGridLayout, QPushButton, QTextEdit, QScrollArea, QComboBox, QLabel
+from typing import Dict, Callable
 
+from PySide6.QtCore import QTimer
+from PySide6.QtWidgets import QWidget, QGridLayout, QPushButton, QTextEdit, QScrollArea, QComboBox
+
+from frontengine.show.scene.scene import SceneManager
+from frontengine.ui.chat.chat_model import load_scene_json, chat_model
 from frontengine.ui.chat.chat_scene_input import ChatInputDialog
 from frontengine.ui.chat.chatthread import ChatThread, DELEGATE_CHAT
+from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
@@ -22,6 +28,10 @@ class ChatSceneUI(QWidget):
             language_wrapper.language_word_dict.get("chat_scene_balanced")
         ])
         self.choose_style_combobox.currentTextChanged.connect(self.change_style)
+        self.param_key_name_list = [
+            "widget_type", "file_path", "url", "text", "opacity", "speed", "volume", "font_size", "play_rate",
+            "web_setting_open_local_file", "web_setting_open_enable_input", "position_x", "position_y"
+        ]
         # New topic button
         self.new_topic_button = QPushButton(language_wrapper.language_word_dict.get("chat_scene_new_topic"))
         self.new_topic_button.clicked.connect(self.new_topic)
@@ -36,10 +46,25 @@ class ChatSceneUI(QWidget):
         self.chat_panel_scroll_area.setWidgetResizable(True)
         self.chat_panel_scroll_area.setViewportMargins(0, 0, 0, 0)
         self.chat_panel_scroll_area.setWidget(self.chat_panel)
+        # Scene
+        self.scene = SceneManager()
+        self.scene_component: Dict[str, Callable] = {
+            "IMAGE": self.scene.add_image,
+            "GIF": self.scene.add_gif,
+            "SOUND": self.scene.add_sound,
+            "TEXT": self.scene.add_text,
+            "VIDEO": self.scene.add_video,
+            "WEB": self.scene.add_web,
+            "EXTEND_UI_FILE": self.scene.add_extend_ui_file
+        }
+        # Load scene
+        self.scene_input_button = QPushButton(language_wrapper.language_word_dict.get("scene_input"))
+        self.scene_input_button.clicked.connect(load_scene_json)
         # Add to layout
         self.grid_layout.addWidget(self.choose_style_combobox, 0, 0)
         self.grid_layout.addWidget(self.new_topic_button, 0, 1)
-        self.grid_layout.addWidget(self.start_button, 0, 2)
+        self.grid_layout.addWidget(self.scene_input_button, 0, 2)
+        self.grid_layout.addWidget(self.start_button, 0, 3)
         self.grid_layout.addWidget(self.chat_panel_scroll_area, 1, 0, -1, -1)
         self.setLayout(self.grid_layout)
 
@@ -47,6 +72,8 @@ class ChatSceneUI(QWidget):
         self.chat_input = ChatInputDialog()
         self.chat_input.show()
         self.chat_input.send_text_button.clicked.connect(self.send_chat)
+        if chat_model.rowCount() > 0:
+            self.start_scene()
 
     def send_chat(self):
         chat_thread = ChatThread(self.chat_panel, self.chat_input.chat_input.toPlainText())
@@ -57,10 +84,31 @@ class ChatSceneUI(QWidget):
 
     def new_topic(self):
         DELEGATE_CHAT.new_topic(self.chat_panel)
+        self.chat_input.close()
 
     def close_chat_ui(self):
         self.chat_input.close()
         self.chat_list.clear()
+        self.close_scene()
+
+    def close_scene(self) -> None:
+        self.scene.widget_list.clear()
+        self.scene.graphic_view.close()
+        front_engine_logger.info("close_scene")
+
+    def start_scene(self) -> None:
+        front_engine_logger.info("start_scene")
+        for row in range(chat_model.rowCount()):
+            widget_type_text = chat_model.item(row, 0).text()
+            add_widget_function = self.scene_component.get(widget_type_text)
+            param_dict: Dict[str, str] = dict()
+            for column in range(1, chat_model.columnCount()):
+                param = chat_model.item(row, column).text()
+                if param != "":
+                    param_dict.update({self.param_key_name_list[column]: param})
+            add_widget_function(param_dict)
+            front_engine_logger.info(f"start_scene type: {widget_type_text}, param: {param_dict}")
+        self.scene.show()
 
     def close(self) -> bool:
         self.close_chat_ui()
