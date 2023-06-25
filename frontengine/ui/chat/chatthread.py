@@ -52,10 +52,10 @@ class ChatThread(Thread):
 
         asyncio.run(send_chat_async())
         self.current_message = chat_response
-        MESSAGE_QUEUE.put(self.current_message)
         for text_dict in self.current_message.get("item").get("messages"):
             if text_dict.get("author") == "bot":
                 self.message_panel.append(text_dict.get("text"))
+                MESSAGE_QUEUE.put(text_dict.get("text"))
 
 
 MESSAGE_QUEUE = Queue()
