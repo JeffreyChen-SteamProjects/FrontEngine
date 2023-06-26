@@ -36,27 +36,31 @@ class ChatThread(Thread):
             self.chat_bot = DELEGATE_CHAT.chat_bot
 
     def run(self) -> None:
-        chat_response = dict()
+        try:
+            chat_response = dict()
 
-        async def send_chat_async():
-            nonlocal chat_response
-            if DELEGATE_CHAT.chat_bot is None:
-                bot = await Chatbot.create()
-                response = await bot.ask(prompt=self.chat_send_message, conversation_style=DELEGATE_CHAT.style)
-                chat_response = response
-                DELEGATE_CHAT.chat_bot = bot
-            else:
-                response = await DELEGATE_CHAT.chat_bot.ask(
-                    prompt=self.chat_send_message, conversation_style=DELEGATE_CHAT.style)
-                chat_response = response
+            async def send_chat_async():
+                nonlocal chat_response
+                if DELEGATE_CHAT.chat_bot is None:
+                    bot = await Chatbot.create()
+                    response = await bot.ask(prompt=self.chat_send_message, conversation_style=DELEGATE_CHAT.style)
+                    chat_response = response
+                    DELEGATE_CHAT.chat_bot = bot
+                else:
+                    response = await DELEGATE_CHAT.chat_bot.ask(
+                        prompt=self.chat_send_message, conversation_style=DELEGATE_CHAT.style)
+                    chat_response = response
 
-        asyncio.run(send_chat_async())
-        self.current_message = chat_response
-        for text_dict in self.current_message.get("item").get("messages"):
-            if text_dict.get("author") == "bot":
-                self.message_panel.append(text_dict.get("text"))
-                MESSAGE_QUEUE.put(text_dict.get("text"))
+            asyncio.run(send_chat_async())
+            self.current_message = chat_response
+            for text_dict in self.current_message.get("item").get("messages"):
+                if text_dict.get("author") == "bot":
+                    self.message_panel.append(text_dict.get("text"))
+                    MESSAGE_QUEUE.put_nowait(text_dict.get("text"))
+        except Exception as error:
+            EXCEPTION_QUEUE.put_nowait(repr(error))
 
 
 MESSAGE_QUEUE = Queue()
 DELEGATE_CHAT = DelegateChat()
+EXCEPTION_QUEUE = Queue()

@@ -5,7 +5,7 @@ from PySide6.QtWidgets import QWidget
 
 class ChatToast(QWidget):
 
-    def __init__(self, text: str, close_time: int = 10000):
+    def __init__(self, text: str, close_time: int = 10000, font_size: int = 16):
         super().__init__()
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setWindowFlag(
@@ -15,7 +15,7 @@ class ChatToast(QWidget):
             Qt.WindowType.WindowStaysOnTopHint
         )
         self.text = text
-        self.font_size = 16
+        self.font_size = font_size
         self.draw_font = QFontDatabase.font(self.font().family(), "", self.font_size)
         self.draw_font.setBold(True)
         self.close_timer = QTimer()

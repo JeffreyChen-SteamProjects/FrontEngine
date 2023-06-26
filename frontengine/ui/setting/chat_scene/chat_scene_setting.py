@@ -1,7 +1,6 @@
 from typing import Dict, Callable
 
-from PySide6.QtCore import QTimer
-from PySide6.QtWidgets import QWidget, QGridLayout, QPushButton, QTextEdit, QScrollArea, QComboBox
+from PySide6.QtWidgets import QWidget, QGridLayout, QPushButton, QTextEdit, QScrollArea, QComboBox, QLabel
 
 from frontengine.show.scene.scene import SceneManager
 from frontengine.ui.chat.chat_model import load_scene_json, chat_model
@@ -57,19 +56,40 @@ class ChatSceneUI(QWidget):
             "WEB": self.scene.add_web,
             "EXTEND_UI_FILE": self.scene.add_extend_ui_file
         }
+        # Font size combobox
+        self.font_size_label = QLabel(language_wrapper.language_word_dict.get("Font size"))
+        self.font_size_combobox = QComboBox()
+        for font_size in range(2, 101, 2):
+            self.font_size_combobox.addItem(str(font_size))
+        self.font_size_combobox.setCurrentText("16")
+        # Close delay combobox
+        self.close_delay_label = QLabel(language_wrapper.language_word_dict.get("close_delay"))
+        self.close_delay_combobox = QComboBox()
+        for sec in range(1, 101, 1):
+            self.close_delay_combobox.addItem(str(sec))
+        self.close_delay_combobox.setCurrentText("10")
         # Load scene
         self.scene_input_button = QPushButton(language_wrapper.language_word_dict.get("scene_input"))
         self.scene_input_button.clicked.connect(load_scene_json)
         # Add to layout
         self.grid_layout.addWidget(self.choose_style_combobox, 0, 0)
-        self.grid_layout.addWidget(self.new_topic_button, 0, 1)
-        self.grid_layout.addWidget(self.scene_input_button, 0, 2)
-        self.grid_layout.addWidget(self.start_button, 0, 3)
+        self.grid_layout.addWidget(self.close_delay_label, 0, 1)
+        self.grid_layout.addWidget(self.close_delay_combobox, 0, 2)
+        self.grid_layout.addWidget(self.font_size_label, 0, 3)
+        self.grid_layout.addWidget(self.font_size_combobox, 0, 4)
+        self.grid_layout.addWidget(self.new_topic_button, 0, 5)
+        self.grid_layout.addWidget(self.scene_input_button, 0, 6)
+        self.grid_layout.addWidget(self.start_button, 0, 7)
         self.grid_layout.addWidget(self.chat_panel_scroll_area, 1, 0, -1, -1)
         self.setLayout(self.grid_layout)
 
     def start_chat(self) -> None:
-        self.chat_input = ChatInputDialog()
+        if self.chat_input is not None:
+            self.new_topic()
+        self.chat_input = ChatInputDialog(
+            close_time=int(self.close_delay_combobox.currentText()) * 1000,
+            font_size=int(self.font_size_combobox.currentText())
+        )
         self.chat_input.show()
         self.chat_input.send_text_button.clicked.connect(self.send_chat)
         if chat_model.rowCount() > 0:

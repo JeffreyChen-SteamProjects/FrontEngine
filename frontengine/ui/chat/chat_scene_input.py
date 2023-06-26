@@ -1,13 +1,14 @@
 from PySide6.QtCore import QTimer
-from PySide6.QtWidgets import QBoxLayout, QWidget, QPushButton, QHBoxLayout, QTextEdit
+from PySide6.QtGui import QScreen
+from PySide6.QtWidgets import QBoxLayout, QWidget, QPushButton, QHBoxLayout, QTextEdit, QMessageBox
 
 from frontengine.show.chat.chat_toast import ChatToast
-from frontengine.ui.chat.chatthread import MESSAGE_QUEUE
+from frontengine.ui.chat.chatthread import MESSAGE_QUEUE, EXCEPTION_QUEUE
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
 class ChatInputDialog(QWidget):
-    def __init__(self):
+    def __init__(self, close_time: int = 10000, font_size: int = 16):
         super().__init__()
         self.box_layout = QBoxLayout(QBoxLayout.Direction.TopToBottom)
         self.chat_input = QTextEdit()
@@ -24,13 +25,31 @@ class ChatInputDialog(QWidget):
         self.get_message_timer.setInterval(5000)
         self.get_message_timer.timeout.connect(self.get_message)
         self.get_message_timer.start()
+        # Check error timer
+        self.check_error_timer = QTimer()
+        self.check_error_timer.setInterval(1000)
+        self.check_error_timer.timeout.connect(self.get_message)
+        self.check_error_timer.start()
         # Toast
+        self.close_time = close_time
+        self.font_size = font_size
         self.toast = None
 
     def get_message(self):
         if not MESSAGE_QUEUE.empty():
-            self.toast = ChatToast(MESSAGE_QUEUE.get_nowait())
-            self.toast.showFullScreen()
+            monitors = QScreen.virtualSiblings(self.screen())
+            for screen in monitors:
+                monitor = screen.availableGeometry()
+                toast_widget = ChatToast(
+                    text=MESSAGE_QUEUE.get_nowait(), close_time=self.close_time, font_size=self.font_size)
+                toast_widget.move(monitor.left(), monitor.top())
+                toast_widget.showFullScreen()
+
+    def check_error(self):
+        if not EXCEPTION_QUEUE.empty():
+            gpt_error_messagebox = QMessageBox(self)
+            gpt_error_messagebox.setText(language_wrapper.language_word_dict.get("chat_gpt_exception"))
+            gpt_error_messagebox.show()
 
     def close(self) -> bool:
         self.deleteLater()

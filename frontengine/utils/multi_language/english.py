@@ -51,6 +51,8 @@ english_word_dict = {
     "ui_path": "UI path",
     "position_x": "X - coordinate",
     "position_y": "Y - coordinate",
+    "seconds": "sec",
+    "close_delay": "Message disappear time sec",
     # GIF setting ui
     "gif_setting_ui_choose_file": "Choose GIF or WEBP file",
     "gif_setting_ui_play": "Start Play GIF or WEBP",
@@ -103,4 +105,5 @@ english_word_dict = {
     "chat_scene_creative": "creative",
     "chat_scene_precise": "precise",
     "chat_scene_balanced": "balanced",
+    "chat_gpt_exception": "GPT error, pls retry or new topic",
 }
