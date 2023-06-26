@@ -3,7 +3,7 @@ from queue import Queue
 from threading import Thread
 
 from EdgeGPT.EdgeGPT import Chatbot, ConversationStyle
-from PySide6.QtWidgets import QTextEdit
+from PySide6.QtWidgets import QTextEdit, QPlainTextEdit
 
 
 class DelegateChat(object):
@@ -27,7 +27,7 @@ class DelegateChat(object):
 
 class ChatThread(Thread):
 
-    def __init__(self, message_panel: QTextEdit, chat_send_message: str):
+    def __init__(self, message_panel: QPlainTextEdit, chat_send_message: str):
         super().__init__()
         self.current_message = None
         self.chat_send_message = chat_send_message
@@ -55,7 +55,7 @@ class ChatThread(Thread):
             self.current_message = chat_response
             for text_dict in self.current_message.get("item").get("messages"):
                 if text_dict.get("author") == "bot":
-                    self.message_panel.append(text_dict.get("text"))
+                    self.message_panel.appendPlainText(text_dict.get("text"))
                     MESSAGE_QUEUE.put_nowait(text_dict.get("text"))
         except Exception as error:
             EXCEPTION_QUEUE.put_nowait(repr(error))
