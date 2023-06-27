@@ -54,13 +54,11 @@ class ChatThread(Thread):
 
             asyncio.run(send_chat_async())
             self.current_message = chat_response
-            print(json.dumps(self.current_message, indent=2))
             for text_dict in self.current_message.get("item").get("messages"):
                 if text_dict.get("author") == "bot":
                     response_text: str = text_dict.get("text")
-                    if not response_text.isspace() and response_text != "":
-                        self.message_panel.appendPlainText(response_text)
-                        self.message_panel.appendPlainText("\n")
+                    self.message_panel.appendPlainText(response_text)
+                    self.message_panel.appendPlainText("\n")
                     MESSAGE_QUEUE.put_nowait(response_text)
         except Exception as error:
             EXCEPTION_QUEUE.put_nowait(repr(error))

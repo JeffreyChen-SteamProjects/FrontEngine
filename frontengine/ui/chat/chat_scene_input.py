@@ -37,11 +37,12 @@ class ChatInputDialog(QWidget):
 
     def get_message(self):
         if not MESSAGE_QUEUE.empty():
+            text = MESSAGE_QUEUE.get_nowait()
             monitors = QScreen.virtualSiblings(self.screen())
             for screen in monitors:
                 monitor = screen.availableGeometry()
                 toast_widget = ChatToast(
-                    text=MESSAGE_QUEUE.get_nowait(), close_time=self.close_time, font_size=self.font_size)
+                    text=text, close_time=self.close_time, font_size=self.font_size)
                 toast_widget.move(monitor.left(), monitor.top())
                 toast_widget.showFullScreen()
 
