@@ -1,7 +1,7 @@
 from typing import Dict, Callable
 
 from PySide6.QtWidgets import QWidget, QGridLayout, QPushButton, QScrollArea, QComboBox, QLabel, \
-    QPlainTextEdit
+    QTextEdit
 
 from frontengine.show.scene.scene import SceneManager
 from frontengine.ui.chat.chat_model import load_scene_json, chat_model
@@ -39,9 +39,9 @@ class ChatSceneUI(QWidget):
         self.start_button = QPushButton(language_wrapper.language_word_dict.get("chat_scene_start_button"))
         self.start_button.clicked.connect(self.start_chat)
         # Chat panel
-        self.chat_panel = QPlainTextEdit()
+        self.chat_panel = QTextEdit()
         self.chat_panel.setLineWrapMode(self.chat_panel.LineWrapMode.NoWrap)
-        self.chat_panel.setReadOnly(True)
+        # self.chat_panel.setReadOnly(True)
         self.chat_panel_scroll_area = QScrollArea()
         self.chat_panel_scroll_area.setWidgetResizable(True)
         self.chat_panel_scroll_area.setViewportMargins(0, 0, 0, 0)
@@ -85,8 +85,6 @@ class ChatSceneUI(QWidget):
         self.setLayout(self.grid_layout)
 
     def start_chat(self) -> None:
-        if self.chat_input is not None:
-            self.new_topic()
         self.chat_input = ChatInputDialog(
             close_time=int(self.close_delay_combobox.currentText()) * 1000,
             font_size=int(self.font_size_combobox.currentText())
