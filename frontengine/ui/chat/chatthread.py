@@ -1,9 +1,10 @@
 import asyncio
+import json
 from queue import Queue
 from threading import Thread
 
 from EdgeGPT.EdgeGPT import Chatbot, ConversationStyle
-from PySide6.QtWidgets import QTextEdit
+from PySide6.QtWidgets import QPlainTextEdit
 
 
 class DelegateChat(object):
@@ -12,7 +13,7 @@ class DelegateChat(object):
         self.chat_bot = None
         self.style = ConversationStyle.creative
 
-    def new_topic(self, message_panel: QTextEdit):
+    def new_topic(self, message_panel: QPlainTextEdit):
         self.chat_bot = None
         message_panel.clear()
 
@@ -27,7 +28,7 @@ class DelegateChat(object):
 
 class ChatThread(Thread):
 
-    def __init__(self, message_panel: QTextEdit, chat_send_message: str):
+    def __init__(self, message_panel: QPlainTextEdit, chat_send_message: str):
         super().__init__()
         self.current_message = None
         self.chat_send_message = chat_send_message
@@ -36,27 +37,33 @@ class ChatThread(Thread):
             self.chat_bot = DELEGATE_CHAT.chat_bot
 
     def run(self) -> None:
-        chat_response = dict()
+        try:
+            chat_response = dict()
 
-        async def send_chat_async():
-            nonlocal chat_response
-            if DELEGATE_CHAT.chat_bot is None:
-                bot = await Chatbot.create()
-                response = await bot.ask(prompt=self.chat_send_message, conversation_style=DELEGATE_CHAT.style)
-                chat_response = response
-                DELEGATE_CHAT.chat_bot = bot
-            else:
-                response = await DELEGATE_CHAT.chat_bot.ask(
-                    prompt=self.chat_send_message, conversation_style=DELEGATE_CHAT.style)
-                chat_response = response
+            async def send_chat_async():
+                nonlocal chat_response
+                if DELEGATE_CHAT.chat_bot is None:
+                    bot = await Chatbot.create()
+                    response = await bot.ask(prompt=self.chat_send_message, conversation_style=DELEGATE_CHAT.style)
+                    chat_response = response
+                    DELEGATE_CHAT.chat_bot = bot
+                else:
+                    response = await DELEGATE_CHAT.chat_bot.ask(
+                        prompt=self.chat_send_message, conversation_style=DELEGATE_CHAT.style)
+                    chat_response = response
 
-        asyncio.run(send_chat_async())
-        self.current_message = chat_response
-        for text_dict in self.current_message.get("item").get("messages"):
-            if text_dict.get("author") == "bot":
-                self.message_panel.append(text_dict.get("text"))
-                MESSAGE_QUEUE.put(text_dict.get("text"))
+            asyncio.run(send_chat_async())
+            self.current_message = chat_response
+            for text_dict in self.current_message.get("item").get("messages"):
+                if text_dict.get("author") == "bot":
+                    response_text: str = text_dict.get("text")
+                    self.message_panel.appendPlainText(response_text)
+                    self.message_panel.appendPlainText("\n")
+                    MESSAGE_QUEUE.put_nowait(response_text)
+        except Exception as error:
+            EXCEPTION_QUEUE.put_nowait(repr(error))
 
 
 MESSAGE_QUEUE = Queue()
 DELEGATE_CHAT = DelegateChat()
+EXCEPTION_QUEUE = Queue()
