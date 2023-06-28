@@ -19,10 +19,12 @@ from frontengine.ui.setting.control_center.control_center_ui import ControlCente
 from frontengine.ui.setting.scene_setting.scene_setting_ui import SceneSettingUI
 from frontengine.ui.main.main_ui import FrontEngineMainUI
 from frontengine.ui.setting.scene_setting.scene_setting_ui import SceneControlSettingUI
+from frontengine.ui.setting.chat_scene.chat_scene_setting import ChatSceneUI
 
 __all__ = [
     "start_front_engine", "GifWidget", "SoundPlayer", "SoundEffectWidget", "TextWidget",
     "WebWidget", "ImageWidget", "VideoWidget", "language_wrapper", "load_extend_ui_file", "load_ui_file",
     "TextSettingUI", "WEBSettingUI", "GIFSettingUI", "ImageSettingUI", "SoundPlayerSettingUI",
-    "VideoSettingUI", "ControlCenterUI", "SceneSettingUI", "FrontEngineMainUI", "SceneControlSettingUI"
+    "VideoSettingUI", "ControlCenterUI", "SceneSettingUI", "FrontEngineMainUI", "SceneControlSettingUI",
+    "ChatSceneUI"
 ]

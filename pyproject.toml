@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "frontengine_dev"
-version = "0.0.21"
+version = "0.0.22"
 authors = [
     { name = "JE-Chen", email = "jechenmailman@gmail.com" },
 ]
@@ -15,7 +15,7 @@ dependencies = [
     "qt-material",
     "EdgeGPT"
 ]
-description = "FrontEngine is a tool allow you set Video or Image or GIF front of all window"
+description = "FrontEngine is BingGPT that can use-define front end or only use like screen saver"
 requires-python = ">=3.8"
 license = { text = "MIT" }
 classifiers = [
