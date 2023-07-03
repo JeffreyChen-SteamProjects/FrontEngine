@@ -1,7 +1,7 @@
 How to use
 ----
 
-.. image:: docs/source/Eng/image/FrontEngine.png
+.. image:: image/FrontEngine.png
 
 * Language Menu (Choose ui language)
 * UI Style (Choose ui style)
