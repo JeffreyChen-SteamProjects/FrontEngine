@@ -1,7 +1,7 @@
 怎麼使用 UI
 ----
 
-.. image:: docs/source/Zh/image/FrontEngine.png
+.. image:: image/FrontEngine.png
 
 * 選擇語言選單 (選擇使用者介面語言)
 * 選擇介面風格 (選擇使用者介面風格)
