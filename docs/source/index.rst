@@ -2,7 +2,7 @@ FrontEngine
 ----
 
 .. toctree::
-   :maxdepth: 4
+    :maxdepth: 4
 
     Eng/eng_index.rst
     Zh/zh_index.rst
