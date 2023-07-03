@@ -39,6 +39,7 @@ class UISceneSettingUI(QWidget):
         # Set UI
         self.box_layout.addLayout(self.position_x_layout)
         self.box_layout.addLayout(self.position_y_layout)
+        self.box_layout.addWidget(self.ui_path_input)
         self.box_layout.addWidget(self.ui_button)
         self.setLayout(self.box_layout)
 
