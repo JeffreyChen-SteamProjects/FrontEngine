@@ -1,6 +1,9 @@
 
 [![Downloads](https://static.pepy.tech/badge/frontengine)](https://pepy.tech/project/frontengine)
 
+[![Documentation Status](https://readthedocs.org/projects/frontengine/badge/?version=latest)](https://frontengine.readthedocs.io/en/latest/?badge=latest)
+
+
 ## Contents
 
 > Project kanban https://github.com/orgs/Integration-Automation/projects/2/views/1
