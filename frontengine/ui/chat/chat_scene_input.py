@@ -34,7 +34,7 @@ class ChatInputDialog(QWidget):
         # Toast
         self.close_time = close_time
         self.font_size = font_size
-        self.toast = None
+        self.toast_widget = None
         # Text to speech
         self.engine = pyttsx3.init()
 
@@ -44,10 +44,10 @@ class ChatInputDialog(QWidget):
             monitors = QScreen.virtualSiblings(self.screen())
             for screen in monitors:
                 monitor = screen.availableGeometry()
-                toast_widget = ChatToast(
+                self.toast_widget = ChatToast(
                     text=text, close_time=self.close_time, font_size=self.font_size)
-                toast_widget.move(monitor.left(), monitor.top())
-                toast_widget.showFullScreen()
+                self.toast_widget.move(monitor.left(), monitor.top())
+                self.toast_widget.showFullScreen()
             self.engine.say(text)
 
     def check_error(self):
