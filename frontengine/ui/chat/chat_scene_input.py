@@ -41,14 +41,10 @@ class ChatInputDialog(QWidget):
     def get_message(self):
         if not MESSAGE_QUEUE.empty():
             text = MESSAGE_QUEUE.get_nowait()
-            monitors = QScreen.virtualSiblings(self.screen())
-            for screen in monitors:
-                monitor = screen.availableGeometry()
-                self.toast_widget = ChatToast(
-                    text=text, close_time=self.close_time, font_size=self.font_size)
-                self.toast_widget.move(monitor.left(), monitor.top())
-                self.toast_widget.showFullScreen()
-            self.engine.say(text)
+            self.toast_widget = ChatToast(
+                text=text, close_time=self.close_time, font_size=self.font_size)
+            self.toast_widget.showFullScreen()
+            # self.engine.say(text)
 
     def check_error(self):
         if not EXCEPTION_QUEUE.empty():

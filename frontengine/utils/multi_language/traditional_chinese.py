@@ -53,6 +53,7 @@ traditional_chinese_word_dict = {
     "position_y": "Y 座標",
     "seconds": "秒",
     "close_delay": "字幕消失時間 秒",
+    "country_code": "區域代碼",
     # GIF setting ui
     "gif_setting_ui_choose_file": "選擇 GIF 或 WEBP 檔案",
     "gif_setting_ui_play": "開始撥放 GIF 或 WEBP",
