@@ -1,7 +1,7 @@
 from typing import Dict, Callable
 
 from PySide6.QtWidgets import QWidget, QGridLayout, QPushButton, QScrollArea, QComboBox, QLabel, \
-    QPlainTextEdit
+    QPlainTextEdit, QLineEdit, QBoxLayout
 
 from frontengine.show.scene.scene import SceneManager
 from frontengine.ui.chat.chat_model import load_scene_json, chat_model
@@ -72,15 +72,23 @@ class ChatSceneUI(QWidget):
         # Load scene
         self.scene_input_button = QPushButton(language_wrapper.language_word_dict.get("scene_input"))
         self.scene_input_button.clicked.connect(lambda: load_scene_json(self))
+        # Locale box
+        self.locale_label = QLabel(language_wrapper.language_word_dict.get("country_code"))
+        self.locale_input = QLineEdit()
+        self.locale_input.setText("zh-tw")
+        self.local_box = QBoxLayout(QBoxLayout.Direction.LeftToRight)
+        self.local_box.addWidget(self.locale_label)
+        self.local_box.addWidget(self.locale_input)
         # Add to layout
         self.grid_layout.addWidget(self.choose_style_combobox, 0, 0)
         self.grid_layout.addWidget(self.close_delay_label, 0, 1)
         self.grid_layout.addWidget(self.close_delay_combobox, 0, 2)
         self.grid_layout.addWidget(self.font_size_label, 0, 3)
         self.grid_layout.addWidget(self.font_size_combobox, 0, 4)
-        self.grid_layout.addWidget(self.new_topic_button, 0, 5)
-        self.grid_layout.addWidget(self.scene_input_button, 0, 6)
-        self.grid_layout.addWidget(self.start_button, 0, 7)
+        self.grid_layout.addLayout(self.local_box, 0, 5)
+        self.grid_layout.addWidget(self.new_topic_button, 0, 6)
+        self.grid_layout.addWidget(self.scene_input_button, 0, 7)
+        self.grid_layout.addWidget(self.start_button, 0, 8)
         self.grid_layout.addWidget(self.chat_panel_scroll_area, 1, 0, -1, -1)
         self.setLayout(self.grid_layout)
 
@@ -95,7 +103,8 @@ class ChatSceneUI(QWidget):
             self.start_scene()
 
     def send_chat(self):
-        chat_thread = ChatThread(self.chat_panel, self.chat_input.chat_input.toPlainText())
+        chat_thread = ChatThread(
+            self.chat_panel, self.chat_input.chat_input.toPlainText(), self.locale_input.text())
         chat_thread.start()
 
     def change_style(self):

@@ -53,6 +53,7 @@ english_word_dict = {
     "position_y": "Y - coordinate",
     "seconds": "sec",
     "close_delay": "Message disappear time sec",
+    "country_code": "locale code",
     # GIF setting ui
     "gif_setting_ui_choose_file": "Choose GIF or WEBP file",
     "gif_setting_ui_play": "Start Play GIF or WEBP",

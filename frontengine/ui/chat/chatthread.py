@@ -28,11 +28,12 @@ class DelegateChat(object):
 
 class ChatThread(Thread):
 
-    def __init__(self, message_panel: QPlainTextEdit, chat_send_message: str):
+    def __init__(self, message_panel: QPlainTextEdit, chat_send_message: str, locale: str):
         super().__init__()
         self.current_message = None
         self.chat_send_message = chat_send_message
         self.message_panel = message_panel
+        self.locale = locale
         if DELEGATE_CHAT.chat_bot is not None:
             self.chat_bot = DELEGATE_CHAT.chat_bot
 
@@ -44,7 +45,9 @@ class ChatThread(Thread):
                 nonlocal chat_response
                 if DELEGATE_CHAT.chat_bot is None:
                     bot = await Chatbot.create()
-                    response = await bot.ask(prompt=self.chat_send_message, conversation_style=DELEGATE_CHAT.style)
+                    response = await bot.ask(
+                        prompt=self.chat_send_message, conversation_style=DELEGATE_CHAT.style, locale=self.locale
+                    )
                     chat_response = response
                     DELEGATE_CHAT.chat_bot = bot
                 else:
@@ -54,6 +57,7 @@ class ChatThread(Thread):
 
             asyncio.run(send_chat_async())
             self.current_message = chat_response
+            print(json.dumps(self.current_message, indent=2))
             for text_dict in self.current_message.get("item").get("messages"):
                 if text_dict.get("author") == "bot":
                     response_text: str = text_dict.get("text")
