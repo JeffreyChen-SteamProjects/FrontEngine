@@ -1,6 +1,5 @@
 import pyttsx3
 from PySide6.QtCore import QTimer
-from PySide6.QtGui import QScreen
 from PySide6.QtWidgets import QBoxLayout, QWidget, QPushButton, QHBoxLayout, QTextEdit, QMessageBox
 
 from frontengine.show.chat.chat_toast import ChatToast
