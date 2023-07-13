@@ -7,6 +7,7 @@ from frontengine.show.scene.scene import SceneManager
 from frontengine.ui.chat.chat_model import load_scene_json, chat_model
 from frontengine.ui.chat.chat_scene_input import ChatInputDialog
 from frontengine.ui.chat.chatthread import ChatThread, DELEGATE_CHAT
+from frontengine.ui.chat.speech_to_text import ChatSpeechToText
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
@@ -15,6 +16,7 @@ class ChatSceneUI(QWidget):
 
     def __init__(self):
         super().__init__()
+        self.voice_input = None
         self.grid_layout = QGridLayout()
         self.grid_layout = QGridLayout(self)
         self.grid_layout.setContentsMargins(0, 0, 0, 0)
@@ -79,6 +81,10 @@ class ChatSceneUI(QWidget):
         self.local_box = QBoxLayout(QBoxLayout.Direction.LeftToRight)
         self.local_box.addWidget(self.locale_label)
         self.local_box.addWidget(self.locale_input)
+        # Start voice input
+        self.start_voice_input_button = QPushButton(
+            language_wrapper.language_word_dict.get("start_chat_voice_input_ui"))
+        self.start_voice_input_button.clicked.connect(self.start_voice_input)
         # Add to layout
         self.grid_layout.addWidget(self.choose_style_combobox, 0, 0)
         self.grid_layout.addWidget(self.close_delay_label, 0, 1)
@@ -88,7 +94,8 @@ class ChatSceneUI(QWidget):
         self.grid_layout.addLayout(self.local_box, 0, 5)
         self.grid_layout.addWidget(self.new_topic_button, 0, 6)
         self.grid_layout.addWidget(self.scene_input_button, 0, 7)
-        self.grid_layout.addWidget(self.start_button, 0, 8)
+        self.grid_layout.addWidget(self.start_voice_input_button, 0, 8)
+        self.grid_layout.addWidget(self.start_button, 0, 9)
         self.grid_layout.addWidget(self.chat_panel_scroll_area, 1, 0, -1, -1)
         self.setLayout(self.grid_layout)
 
@@ -101,6 +108,16 @@ class ChatSceneUI(QWidget):
         self.chat_input.send_text_button.clicked.connect(self.send_chat)
         if chat_model.rowCount() > 0:
             self.start_scene()
+
+    def start_voice_input(self):
+        self.voice_input = ChatSpeechToText()
+        self.voice_input.show()
+        self.voice_input.send_text_button.clicked.connect(self.send_voice_chat)
+
+    def send_voice_chat(self):
+        chat_thread = ChatThread(
+            self.chat_panel, self.voice_input.voice_text_edit.text(), self.locale_input.text())
+        chat_thread.start()
 
     def send_chat(self):
         chat_thread = ChatThread(
