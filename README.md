@@ -18,7 +18,16 @@
 ## About
 
 ---
-> * Notice! not stable version. (in dev)
+> * Notice! BingGPT need cookies file now!
+> * Save cookie to bing_cookies.json and put json in program current-working-dir
+> - Open bing.com/chat
+> - If you see a chat feature, you are good to continue...
+> - Install the cookie editor extension for Chrome or Firefox
+> - Go to bing.com
+> - Open the extension
+> - Click "Export" on the bottom right, then "Export as JSON" (This saves your cookies to clipboard)
+> - Paste your cookies into a file bing_cookies.json.
+> - NOTE: The cookies file name MUST follow the regex pattern bbing_cookies.json, so that they could be recognized by internal cookie processing mechanisms
 * Smart automation assistant.
 * Chat based automation.
 * User-defined front ground.

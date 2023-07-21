@@ -22,7 +22,7 @@ class ChatInputDialog(QWidget):
         self.setLayout(self.box_layout)
         # Get message timer
         self.get_message_timer = QTimer()
-        self.get_message_timer.setInterval(5000)
+        self.get_message_timer.setInterval(1000)
         self.get_message_timer.timeout.connect(self.get_message)
         self.get_message_timer.start()
         # Check error timer
