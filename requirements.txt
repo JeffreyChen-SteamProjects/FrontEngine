@@ -1,3 +1,4 @@
+Sphinx
 PySide6
 qt-material
 EdgeGPT
