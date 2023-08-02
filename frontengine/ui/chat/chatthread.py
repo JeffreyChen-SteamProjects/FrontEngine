@@ -4,7 +4,7 @@ from pathlib import Path
 from queue import Queue
 from threading import Thread
 
-from EdgeGPT.EdgeGPT import Chatbot, ConversationStyle
+from re_edge_gpt import Chatbot, ConversationStyle
 from PySide6.QtWidgets import QPlainTextEdit
 
 
@@ -29,11 +29,10 @@ class DelegateChat(object):
 
 class ChatThread(Thread):
 
-    def __init__(self, message_panel: QPlainTextEdit, chat_send_message: str, locale: str):
+    def __init__(self, chat_send_message: str, locale: str):
         super().__init__()
         self.current_message = None
         self.chat_send_message = chat_send_message
-        self.message_panel = message_panel
         self.locale = locale
         if DELEGATE_CHAT.chat_bot is not None:
             self.chat_bot = DELEGATE_CHAT.chat_bot
@@ -60,17 +59,18 @@ class ChatThread(Thread):
 
             asyncio.run(send_chat_async())
             self.current_message = chat_response
-            for text_dict in self.current_message.get("item").get("messages"):
-                if text_dict.get("author") == "bot":
-                    response_text: str = text_dict.get("text")
-                    self.message_panel.appendPlainText(response_text)
-                    self.message_panel.appendPlainText("\n")
-                    MESSAGE_QUEUE.put_nowait(response_text)
+            if self.current_message is not None:
+                for text_dict in self.current_message.get("item").get("messages"):
+                    if text_dict.get("author") == "bot":
+                        response_text: str = text_dict.get("text")
+                        MESSAGE_QUEUE.put_nowait(response_text)
+                        PANEL_MESSAGE_QUEUE.put_nowait(response_text)
         except Exception as error:
-            print(repr(error))
             EXCEPTION_QUEUE.put_nowait(repr(error))
+            raise error
 
 
 MESSAGE_QUEUE = Queue()
+PANEL_MESSAGE_QUEUE = Queue()
 DELEGATE_CHAT = DelegateChat()
 EXCEPTION_QUEUE = Queue()

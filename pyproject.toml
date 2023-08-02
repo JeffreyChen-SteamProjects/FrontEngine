@@ -6,12 +6,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "frontengine"
-version = "0.0.30"
+version = "0.0.32"
 authors = [
     { name = "JE-Chen", email = "jechenmailman@gmail.com" },
 ]
 dependencies = [
-    "PySide6", "qt-material", "EdgeGPT", "pyttsx3", "SpeechRecognition", "PyAudio"
+    "PySide6", "qt-material", "re_edge_gpt", "pyttsx3", "SpeechRecognition", "PyAudio"
 ]
 description = "FrontEngine is BingGPT that can use-define front end or only use like screen saver"
 requires-python = ">=3.8"

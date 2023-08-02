@@ -113,10 +113,10 @@ class ControlCenterUI(QWidget):
         self.setLayout(self.grid_layout)
         # Redirect
         self.redirect_timer = QTimer(self)
-        self.redirect_timer.setInterval(1)
+        self.redirect_timer.setInterval(10)
         self.redirect_timer.timeout.connect(self.redirect)
         self.redirect_timer.start()
-        redirect_manager_instance.set_redirect(self, True)
+        # redirect_manager_instance.set_redirect(self, True)
 
     def clear_video(self) -> None:
         front_engine_logger.info("clear_video")

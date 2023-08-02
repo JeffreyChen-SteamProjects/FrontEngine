@@ -1,12 +1,13 @@
 from typing import Dict, Callable
 
+from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QWidget, QGridLayout, QPushButton, QScrollArea, QComboBox, QLabel, \
     QPlainTextEdit, QLineEdit, QBoxLayout
 
 from frontengine.show.scene.scene import SceneManager
 from frontengine.ui.chat.chat_model import load_scene_json, chat_model
 from frontengine.ui.chat.chat_scene_input import ChatInputDialog
-from frontengine.ui.chat.chatthread import ChatThread, DELEGATE_CHAT
+from frontengine.ui.chat.chatthread import ChatThread, DELEGATE_CHAT, PANEL_MESSAGE_QUEUE
 from frontengine.ui.chat.speech_to_text import ChatSpeechToText
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
@@ -98,6 +99,17 @@ class ChatSceneUI(QWidget):
         self.grid_layout.addWidget(self.start_button, 0, 9)
         self.grid_layout.addWidget(self.chat_panel_scroll_area, 1, 0, -1, -1)
         self.setLayout(self.grid_layout)
+        # update panel timer
+        self.update_panel_timer = QTimer()
+        self.update_panel_timer.setInterval(10)
+        self.update_panel_timer.timeout.connect(self.update_panel)
+        self.update_panel_timer.start()
+
+    def update_panel(self):
+        if not PANEL_MESSAGE_QUEUE.empty():
+            text = PANEL_MESSAGE_QUEUE.get_nowait()
+            self.chat_panel.appendPlainText(text)
+            self.chat_panel.appendPlainText("\n")
 
     def start_chat(self) -> None:
         self.chat_input = ChatInputDialog(
@@ -115,13 +127,11 @@ class ChatSceneUI(QWidget):
         self.voice_input.send_text_button.clicked.connect(self.send_voice_chat)
 
     def send_voice_chat(self):
-        chat_thread = ChatThread(
-            self.chat_panel, self.voice_input.voice_text_edit.text(), self.locale_input.text())
+        chat_thread = ChatThread(self.voice_input.voice_text_edit.text(), self.locale_input.text())
         chat_thread.start()
 
     def send_chat(self):
-        chat_thread = ChatThread(
-            self.chat_panel, self.chat_input.chat_input.toPlainText(), self.locale_input.text())
+        chat_thread = ChatThread(self.chat_input.chat_input.toPlainText(), self.locale_input.text())
         chat_thread.start()
 
     def change_style(self):

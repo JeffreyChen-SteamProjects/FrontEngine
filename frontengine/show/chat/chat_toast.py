@@ -25,6 +25,7 @@ class ChatToast(QWidget):
 
     def paintEvent(self, event) -> None:
         painter = QPainter(self)
+        painter.save()
         painter.setFont(
             self.draw_font
         )
