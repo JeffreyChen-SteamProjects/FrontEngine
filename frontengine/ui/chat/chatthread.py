@@ -4,7 +4,7 @@ from pathlib import Path
 from queue import Queue
 from threading import Thread
 
-from EdgeGPT.EdgeGPT import Chatbot, ConversationStyle
+from re_edge_gpt import Chatbot, ConversationStyle
 from PySide6.QtWidgets import QPlainTextEdit
 
 
@@ -44,10 +44,9 @@ class ChatThread(Thread):
             async def send_chat_async():
                 nonlocal chat_response
                 if DELEGATE_CHAT.chat_bot is None:
-                    # cookies = json.loads(open(
-                    #     str(Path(str(Path.cwd()) + "/bing_cookies.json")), encoding="utf-8").read())
-                    # bot = await Chatbot.create(cookies=cookies)
-                    bot = await Chatbot.create()
+                    cookies = json.loads(open(
+                        str(Path(str(Path.cwd()) + "/bing_cookies.json")), encoding="utf-8").read())
+                    bot = await Chatbot.create(cookies=cookies)
                     response = await bot.ask(
                         prompt=self.chat_send_message, conversation_style=DELEGATE_CHAT.style, locale=self.locale
                     )

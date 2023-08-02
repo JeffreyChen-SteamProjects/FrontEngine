@@ -1,6 +1,6 @@
 PySide6
 qt-material
-EdgeGPT
+re_edge_gpt
 pyttsx3
 SpeechRecognition
 frontengine
