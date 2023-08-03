@@ -33,6 +33,7 @@ class ChatThread(Thread):
         super().__init__()
         self.current_message = None
         self.chat_send_message = chat_send_message
+        PANEL_MESSAGE_QUEUE.put_nowait("Q: " + chat_send_message)
         self.locale = locale
         if DELEGATE_CHAT.chat_bot is not None:
             self.chat_bot = DELEGATE_CHAT.chat_bot
@@ -63,8 +64,9 @@ class ChatThread(Thread):
                 for text_dict in self.current_message.get("item").get("messages"):
                     if text_dict.get("author") == "bot":
                         response_text: str = text_dict.get("text")
-                        MESSAGE_QUEUE.put_nowait(response_text)
-                        PANEL_MESSAGE_QUEUE.put_nowait(response_text)
+                        if response_text is not None and not response_text.isspace():
+                            MESSAGE_QUEUE.put_nowait(response_text)
+                            PANEL_MESSAGE_QUEUE.put_nowait("A: " + response_text)
         except Exception as error:
             EXCEPTION_QUEUE.put_nowait(repr(error))
             raise error
