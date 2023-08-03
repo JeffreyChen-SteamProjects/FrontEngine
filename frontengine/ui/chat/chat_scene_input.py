@@ -1,3 +1,5 @@
+from typing import Union
+
 import pyttsx3
 from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QBoxLayout, QWidget, QPushButton, QHBoxLayout, QTextEdit, QMessageBox
@@ -28,12 +30,12 @@ class ChatInputDialog(QWidget):
         # Check error timer
         self.check_error_timer = QTimer()
         self.check_error_timer.setInterval(1000)
-        self.check_error_timer.timeout.connect(self.get_message)
+        self.check_error_timer.timeout.connect(self.check_error)
         self.check_error_timer.start()
         # Toast
         self.close_time = close_time
         self.font_size = font_size
-        self.toast_widget = None
+        self.toast_widget: Union[ChatToast, None] = None
         # Text to speech
         self.engine = pyttsx3.init()
 
@@ -44,6 +46,12 @@ class ChatInputDialog(QWidget):
                 text=text, close_time=self.close_time, font_size=self.font_size)
             self.toast_widget.showFullScreen()
             # self.engine.say(text)
+
+    def show_text(self):
+        if self.toast_widget is not None and self.toast_widget.isVisible() is False:
+            self.get_message()
+        elif self.toast_widget is None:
+            self.get_message()
 
     def check_error(self):
         if not EXCEPTION_QUEUE.empty():
