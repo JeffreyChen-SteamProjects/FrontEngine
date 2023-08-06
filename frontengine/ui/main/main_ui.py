@@ -2,6 +2,7 @@ import os
 import sys
 from pathlib import Path
 
+from PySide6.QtCore import QTimer
 from PySide6.QtGui import QIcon, QAction
 from PySide6.QtWidgets import QMainWindow, QApplication, QGridLayout, QTabWidget, QSystemTrayIcon, QMenuBar
 from qt_material import apply_stylesheet, QtStyleTools
@@ -22,7 +23,7 @@ from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 class FrontEngineMainUI(QMainWindow, QtStyleTools):
 
-    def __init__(self):
+    def __init__(self, debug: bool = False):
         super().__init__()
         # User setting
         self.id = "FrontEngine"
@@ -98,6 +99,11 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
             self.setWindowIcon(self.icon)
             self.system_icon = QSystemTrayIcon()
             self.system_icon.setIcon(self.icon)
+        if debug:
+            self.debug_timer = QTimer()
+            self.debug_timer.setInterval(10000)
+            self.debug_timer.timeout.connect(self.close)
+            self.debug_timer.start()
 
     def startup_setting(self) -> None:
         pass
@@ -132,9 +138,9 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
         write_user_setting()
 
 
-def start_front_engine() -> None:
+def start_front_engine(debug: bool = False) -> None:
     new_editor = QApplication(sys.argv)
-    window = FrontEngineMainUI()
+    window = FrontEngineMainUI(debug=debug)
     apply_stylesheet(new_editor, theme='dark_amber.xml')
     window.showMaximized()
     try:
