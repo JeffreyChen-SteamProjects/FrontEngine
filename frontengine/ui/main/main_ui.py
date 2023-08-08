@@ -4,10 +4,11 @@ from pathlib import Path
 
 from PySide6.QtCore import QTimer
 from PySide6.QtGui import QIcon, QAction
-from PySide6.QtWidgets import QMainWindow, QApplication, QGridLayout, QTabWidget, QSystemTrayIcon, QMenuBar
+from PySide6.QtWidgets import QMainWindow, QApplication, QGridLayout, QTabWidget, QMenuBar
 from qt_material import apply_stylesheet, QtStyleTools
 
 from frontengine.ui.main.language_menu import build_language_menu
+from frontengine.ui.main.system_tray.extend_system_tray import ExtendSystemTray
 from frontengine.ui.setting.chat_scene.chat_scene_setting import ChatSceneUI
 from frontengine.ui.setting.control_center.control_center_ui import ControlCenterUI
 from frontengine.ui.setting.gif.gif_setting_ui import GIFSettingUI
@@ -93,16 +94,19 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
             language_wrapper.language_word_dict.get("tab_control_center_text")
         )
         self.setCentralWidget(self.tab_widget)
+        # Set Icon
         self.icon_path = Path(os.getcwd() + "/je_driver_icon.ico")
         self.icon = QIcon(str(self.icon_path))
         if self.icon.isNull() is False:
             self.setWindowIcon(self.icon)
-            self.system_icon = QSystemTrayIcon()
-            self.system_icon.setIcon(self.icon)
+            if ExtendSystemTray.isSystemTrayAvailable():
+                self.system_tray = ExtendSystemTray(main_window=self)
+                self.system_tray.setIcon(self.icon)
+                self.system_tray.show()
         if debug:
             self.debug_timer = QTimer()
             self.debug_timer.setInterval(10000)
-            self.debug_timer.timeout.connect(self.close)
+            self.debug_timer.timeout.connect(self.debug_close)
             self.debug_timer.start()
 
     def startup_setting(self) -> None:
@@ -126,16 +130,24 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
         self.apply_stylesheet(self, self.sender().text())
 
     def closeEvent(self, event) -> None:
-        super().closeEvent(event)
-        self.video_setting_ui.video_widget_list.clear()
-        self.image_setting_ui.image_widget_list.clear()
-        self.web_setting_ui.web_widget_list.clear()
-        self.gif_setting_ui.gif_widget_list.clear()
-        self.sound_player_setting_ui.sound_widget_list.clear()
-        self.text_setting_ui.text_widget_list.clear()
-        self.chat_scene_ui.close_scene()
-        self.chat_scene_ui.close()
-        write_user_setting()
+        if self.system_tray.isVisible():
+            self.hide()
+            event.ignore()
+        else:
+            super().closeEvent(event)
+            self.video_setting_ui.video_widget_list.clear()
+            self.image_setting_ui.image_widget_list.clear()
+            self.web_setting_ui.web_widget_list.clear()
+            self.gif_setting_ui.gif_widget_list.clear()
+            self.sound_player_setting_ui.sound_widget_list.clear()
+            self.text_setting_ui.text_widget_list.clear()
+            self.chat_scene_ui.close_scene()
+            self.chat_scene_ui.close()
+            write_user_setting()
+
+    @classmethod
+    def debug_close(cls):
+        sys.exit(0)
 
 
 def start_front_engine(debug: bool = False) -> None:
