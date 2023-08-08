@@ -17,7 +17,7 @@ description = "FrontEngine is BingGPT that can use-define front end or only use 
 requires-python = ">=3.8"
 license = { text = "MIT" }
 classifiers = [
-    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
     "Development Status :: 2 - Pre-Alpha",
     "Environment :: Win32 (MS Windows)",
     "Environment :: MacOS X",
