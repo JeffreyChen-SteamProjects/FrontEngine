@@ -106,7 +106,7 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
         if debug:
             self.debug_timer = QTimer()
             self.debug_timer.setInterval(10000)
-            self.debug_timer.timeout.connect(self.close)
+            self.debug_timer.timeout.connect(self.debug_close)
             self.debug_timer.start()
 
     def startup_setting(self) -> None:
@@ -144,6 +144,10 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
             self.chat_scene_ui.close_scene()
             self.chat_scene_ui.close()
             write_user_setting()
+
+    @classmethod
+    def debug_close(cls):
+        sys.exit(0)
 
 
 def start_front_engine(debug: bool = False) -> None:
