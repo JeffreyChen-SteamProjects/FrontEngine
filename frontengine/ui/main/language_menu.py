@@ -1,11 +1,17 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from frontengine.ui.main.main_ui import FrontEngineMainUI
 from PySide6.QtGui import QAction
-from PySide6.QtWidgets import QMainWindow, QMessageBox
+from PySide6.QtWidgets import QMessageBox
 
 from frontengine.user_setting.user_setting_file import user_setting_dict
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
-def build_language_menu(ui_we_want_to_set: QMainWindow) -> None:
+def build_language_menu(ui_we_want_to_set: FrontEngineMainUI) -> None:
     ui_we_want_to_set.menu_bar.language_menu = ui_we_want_to_set.menu_bar.addMenu(
         language_wrapper.language_word_dict.get("menu_bar_language")
     )
@@ -29,7 +35,7 @@ def build_language_menu(ui_we_want_to_set: QMainWindow) -> None:
     )
 
 
-def set_language(language: str, ui_we_want_to_set: QMainWindow) -> None:
+def set_language(language: str, ui_we_want_to_set: FrontEngineMainUI) -> None:
     language_wrapper.reset_language(language)
     user_setting_dict.update({"language": language})
     message_box = QMessageBox(ui_we_want_to_set)
