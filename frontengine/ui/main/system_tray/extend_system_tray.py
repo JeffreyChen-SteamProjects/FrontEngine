@@ -29,8 +29,13 @@ class ExtendSystemTray(QSystemTrayIcon):
         self.close_main_window_action.triggered.connect(self.close_all)
         self.menu.addAction(self.close_main_window_action)
         self.setContextMenu(self.menu)
+        self.activated.connect(self.clicked)
 
     def close_all(self):
         self.setVisible(False)
         self.main_window.close()
         sys.exit(0)
+
+    def clicked(self, reason):
+        if reason == self.ActivationReason.DoubleClick:
+            self.main_window.showMaximized()

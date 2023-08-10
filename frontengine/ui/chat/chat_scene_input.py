@@ -63,6 +63,6 @@ class ChatInputDialog(QWidget):
             gpt_error_messagebox.show()
 
     def close(self) -> bool:
-        self.deleteLater()
         self.get_message_timer.stop()
+        self.check_error_timer.stop()
         return super().close()

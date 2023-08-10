@@ -150,6 +150,7 @@ class ChatSceneUI(QWidget):
 
     def close_chat_ui(self):
         self.chat_input.close()
+        self.chat_input = None
         self.chat_list.clear()
         self.close_scene()
 

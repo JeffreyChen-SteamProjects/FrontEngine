@@ -1,10 +1,11 @@
 import os
 import sys
 from pathlib import Path
+from typing import Dict, Type
 
 from PySide6.QtCore import QTimer
 from PySide6.QtGui import QIcon, QAction
-from PySide6.QtWidgets import QMainWindow, QApplication, QGridLayout, QTabWidget, QMenuBar
+from PySide6.QtWidgets import QMainWindow, QApplication, QGridLayout, QTabWidget, QMenuBar, QWidget
 from qt_material import apply_stylesheet, QtStyleTools
 
 from frontengine.ui.main.language_menu import build_language_menu
@@ -20,6 +21,8 @@ from frontengine.ui.setting.video.video_setting_ui import VideoSettingUI
 from frontengine.ui.setting.web.web_setting_ui import WEBSettingUI
 from frontengine.user_setting.user_setting_file import write_user_setting, read_user_setting, user_setting_dict
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
+
+EDITOR_EXTEND_TAB: Dict[str, Type[QWidget]] = {}
 
 
 class FrontEngineMainUI(QMainWindow, QtStyleTools):
@@ -93,6 +96,8 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
             self.control_center_ui,
             language_wrapper.language_word_dict.get("tab_control_center_text")
         )
+        for widget_name, widget in EDITOR_EXTEND_TAB.items():
+            self.tab_widget.addTab(widget(), widget_name)
         self.setCentralWidget(self.tab_widget)
         # Set Icon
         self.icon_path = Path(os.getcwd() + "/je_driver_icon.ico")
@@ -103,6 +108,7 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
                 self.system_tray = ExtendSystemTray(main_window=self)
                 self.system_tray.setIcon(self.icon)
                 self.system_tray.show()
+                self.system_tray.setToolTip("FrontEngine")
         if debug:
             self.debug_timer = QTimer()
             self.debug_timer.setInterval(10000)
