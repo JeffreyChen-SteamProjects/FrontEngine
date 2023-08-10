@@ -56,7 +56,10 @@ class ChatInputDialog(QWidget):
     def check_error(self):
         if not EXCEPTION_QUEUE.empty():
             gpt_error_messagebox = QMessageBox(self)
-            gpt_error_messagebox.setText(language_wrapper.language_word_dict.get("chat_gpt_exception"))
+            gpt_error_messagebox.setText(
+                language_wrapper.language_word_dict.get("chat_gpt_exception") + "\n"
+                + EXCEPTION_QUEUE.get_nowait()
+            )
             gpt_error_messagebox.show()
 
     def close(self) -> bool:
