@@ -27,3 +27,5 @@ jobs:
         pip install -r dev_requirements.txt
     - name: Start FrontEngine
       run: python ./tests/unit_test/start/start_front_engine.py
+    - name: Extend FrontEngine
+      run: python ./tests/unit_test/start/extend_front_engine.py
