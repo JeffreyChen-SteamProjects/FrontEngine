@@ -20,12 +20,12 @@ from frontengine.ui.setting.scene_setting.scene_setting_ui import SceneSettingUI
 from frontengine.ui.main.main_ui import FrontEngineMainUI
 from frontengine.ui.setting.scene_setting.scene_setting_ui import SceneControlSettingUI
 from frontengine.ui.setting.chat_scene.chat_scene_setting import ChatSceneUI
-from frontengine.ui.main.main_ui import EDITOR_EXTEND_TAB
+from frontengine.ui.main.main_ui import FrontEngine_EXTEND_TAB
 
 __all__ = [
     "start_front_engine", "GifWidget", "SoundPlayer", "SoundEffectWidget", "TextWidget",
     "WebWidget", "ImageWidget", "VideoWidget", "language_wrapper", "load_extend_ui_file", "load_ui_file",
     "TextSettingUI", "WEBSettingUI", "GIFSettingUI", "ImageSettingUI", "SoundPlayerSettingUI",
     "VideoSettingUI", "ControlCenterUI", "SceneSettingUI", "FrontEngineMainUI", "SceneControlSettingUI",
-    "ChatSceneUI", "EDITOR_EXTEND_TAB"
+    "ChatSceneUI", "FrontEngine_EXTEND_TAB"
 ]

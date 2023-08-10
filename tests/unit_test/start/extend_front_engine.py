@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QWidget, QGridLayout, QLineEdit, QPushButton, QLabel
 
-from frontengine import start_front_engine, EDITOR_EXTEND_TAB
+from frontengine import start_front_engine, FrontEngine_EXTEND_TAB
 
 
 class TestUI(QWidget):
@@ -22,6 +22,6 @@ class TestUI(QWidget):
         self.label.setText(self.line_edit.text())
 
 
-EDITOR_EXTEND_TAB.update({"test": TestUI})
+FrontEngine_EXTEND_TAB.update({"test": TestUI})
 
 start_front_engine(debug=True)
