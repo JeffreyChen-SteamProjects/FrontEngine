@@ -22,7 +22,7 @@ from frontengine.ui.setting.web.web_setting_ui import WEBSettingUI
 from frontengine.user_setting.user_setting_file import write_user_setting, read_user_setting, user_setting_dict
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
-EDITOR_EXTEND_TAB: Dict[str, Type[QWidget]] = {}
+FrontEngine_EXTEND_TAB: Dict[str, Type[QWidget]] = {}
 
 
 class FrontEngineMainUI(QMainWindow, QtStyleTools):
@@ -96,7 +96,7 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
             self.control_center_ui,
             language_wrapper.language_word_dict.get("tab_control_center_text")
         )
-        for widget_name, widget in EDITOR_EXTEND_TAB.items():
+        for widget_name, widget in FrontEngine_EXTEND_TAB.items():
             self.tab_widget.addTab(widget(), widget_name)
         self.setCentralWidget(self.tab_widget)
         # Set Icon
