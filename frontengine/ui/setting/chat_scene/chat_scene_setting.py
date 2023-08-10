@@ -1,6 +1,7 @@
 from typing import Dict, Callable
 
 from PySide6.QtCore import QTimer
+from PySide6.QtGui import QFontDatabase
 from PySide6.QtWidgets import QWidget, QGridLayout, QPushButton, QScrollArea, QComboBox, QLabel, \
     QPlainTextEdit, QLineEdit, QBoxLayout
 
@@ -49,6 +50,7 @@ class ChatSceneUI(QWidget):
         self.chat_panel_scroll_area.setWidgetResizable(True)
         self.chat_panel_scroll_area.setViewportMargins(0, 0, 0, 0)
         self.chat_panel_scroll_area.setWidget(self.chat_panel)
+        self.chat_panel.setFont(QFontDatabase.font(self.font().family(), "", 16))
         # Scene
         self.scene = SceneManager()
         self.scene_component: Dict[str, Callable] = {
@@ -66,6 +68,7 @@ class ChatSceneUI(QWidget):
         for font_size in range(2, 101, 2):
             self.font_size_combobox.addItem(str(font_size))
         self.font_size_combobox.setCurrentText("16")
+        self.font_size_combobox.currentTextChanged.connect(self.update_panel_text_size)
         # Close delay combobox
         self.close_delay_label = QLabel(language_wrapper.language_word_dict.get("close_delay"))
         self.close_delay_combobox = QComboBox()
@@ -110,6 +113,10 @@ class ChatSceneUI(QWidget):
             text = PANEL_MESSAGE_QUEUE.get_nowait()
             self.chat_panel.appendPlainText(text)
             self.chat_panel.appendPlainText("\n")
+
+    def update_panel_text_size(self):
+        self.chat_panel.setFont(
+            QFontDatabase.font(self.font().family(), "", int(self.font_size_combobox.currentText())))
 
     def start_chat(self) -> None:
         self.chat_input = ChatInputDialog(
