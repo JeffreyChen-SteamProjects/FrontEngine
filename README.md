@@ -3,6 +3,7 @@
 
 [![Documentation Status](https://readthedocs.org/projects/frontengine/badge/?version=latest)](https://frontengine.readthedocs.io/en/latest/?badge=latest)
 
+[FrontEngine Doc Click Here!](https://frontengine.readthedocs.io/en/latest/)
 
 ## Contents
 
