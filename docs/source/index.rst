@@ -4,8 +4,8 @@ FrontEngine
 .. toctree::
     :maxdepth: 4
 
-    ../docs/Eng/eng_index.rst
-    ../docs/Zh/zh_index.rst
+    docs/Eng/eng_index.rst
+    docs/Zh/zh_index.rst
 
 ----
 
