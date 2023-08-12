@@ -9,7 +9,7 @@
 
     from frontengine import start_front_engine, FrontEngine_EXTEND_TAB
 
-
+    # You can use you own QWidget
     class TestUI(QWidget):
 
         def __init__(self):
@@ -31,4 +31,4 @@
 
     FrontEngine_EXTEND_TAB.update({"test": TestUI})
 
-    start_front_engine(debug=True)
+    start_front_engine()
