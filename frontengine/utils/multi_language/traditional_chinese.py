@@ -109,5 +109,9 @@ traditional_chinese_word_dict = {
     "chat_gpt_exception": "GPT 錯誤，請重試或開始一個新話題",
     # Chat voice input
     "start_chat_voice_input_ui": "開啟聲音輸入介面",
-    "chat_recognizer_voice_button": "開始錄製聲音"
+    "chat_recognizer_voice_button": "開始錄製聲音",
+    # Image Generation
+    "image_generation_tab": "圖片產生",
+    "start_generate_image": "開始產生圖片",
+    "input_error": "請勿無輸入或空格"
 }

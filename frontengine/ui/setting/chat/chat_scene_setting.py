@@ -6,10 +6,10 @@ from PySide6.QtWidgets import QWidget, QGridLayout, QPushButton, QScrollArea, QC
     QPlainTextEdit, QLineEdit, QBoxLayout
 
 from frontengine.show.scene.scene import SceneManager
-from frontengine.ui.chat.chat_model import load_scene_json, chat_model
-from frontengine.ui.chat.chat_scene_input import ChatInputDialog
-from frontengine.ui.chat.chatthread import ChatThread, DELEGATE_CHAT, PANEL_MESSAGE_QUEUE
-from frontengine.ui.chat.speech_to_text import ChatSpeechToText
+from frontengine.ui.setting.chat.chat_model import load_scene_json, chat_model
+from frontengine.ui.setting.chat.chat_scene_input import ChatInputDialog
+from frontengine.ui.setting.chat.chatthread import ChatThread, DELEGATE_CHAT, PANEL_MESSAGE_QUEUE
+from frontengine.ui.setting.chat.speech_to_text import ChatSpeechToText
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
@@ -19,7 +19,6 @@ class ChatSceneUI(QWidget):
     def __init__(self):
         super().__init__()
         self.voice_input = None
-        self.grid_layout = QGridLayout()
         self.grid_layout = QGridLayout(self)
         self.grid_layout.setContentsMargins(0, 0, 0, 0)
         # Init
