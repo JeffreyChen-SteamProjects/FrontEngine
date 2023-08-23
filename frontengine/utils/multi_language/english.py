@@ -109,5 +109,9 @@ english_word_dict = {
     "chat_gpt_exception": "GPT error, pls retry or new topic",
     # Chat voice input
     "start_chat_voice_input_ui": "Open voice input ui",
-    "chat_recognizer_voice_button": "Start listen voice"
+    "chat_recognizer_voice_button": "Start listen voice",
+    # Image Generation
+    "image_generation_tab": "Image generation",
+    "start_generate_image": "Star generate",
+    "input_error": "Please input something"
 }

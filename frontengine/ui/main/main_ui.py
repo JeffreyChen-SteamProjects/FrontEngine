@@ -10,7 +10,7 @@ from qt_material import apply_stylesheet, QtStyleTools
 
 from frontengine.ui.main.language_menu import build_language_menu
 from frontengine.ui.main.system_tray.extend_system_tray import ExtendSystemTray
-from frontengine.ui.setting.chat_scene.chat_scene_setting import ChatSceneUI
+from frontengine.ui.setting.chat.chat_scene_setting import ChatSceneUI
 from frontengine.ui.setting.control_center.control_center_ui import ControlCenterUI
 from frontengine.ui.setting.gif.gif_setting_ui import GIFSettingUI
 from frontengine.ui.setting.image.image_setting_ui import ImageSettingUI
@@ -19,6 +19,7 @@ from frontengine.ui.setting.sound_player.sound_player_setting_ui import SoundPla
 from frontengine.ui.setting.text.text_setting_ui import TextSettingUI
 from frontengine.ui.setting.video.video_setting_ui import VideoSettingUI
 from frontengine.ui.setting.web.web_setting_ui import WEBSettingUI
+from frontengine.ui.setting.image_generation.image_generation_input import ImageGenerationUI
 from frontengine.user_setting.user_setting_file import write_user_setting, read_user_setting, user_setting_dict
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
@@ -51,6 +52,7 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
         self.text_setting_ui = TextSettingUI()
         self.scene_setting_ui = SceneSettingUI()
         self.chat_scene_ui = ChatSceneUI()
+        self.image_generation_ui = ImageGenerationUI()
         self.control_center_ui = ControlCenterUI(
             self.video_setting_ui,
             self.image_setting_ui,
@@ -95,6 +97,10 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
         self.tab_widget.addTab(
             self.control_center_ui,
             language_wrapper.language_word_dict.get("tab_control_center_text")
+        )
+        self.tab_widget.addTab(
+            self.image_generation_ui,
+            language_wrapper.language_word_dict.get("image_generation_tab")
         )
         for widget_name, widget in FrontEngine_EXTEND_TAB.items():
             self.tab_widget.addTab(widget(), widget_name)

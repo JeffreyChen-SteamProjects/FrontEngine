@@ -5,7 +5,7 @@ from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QBoxLayout, QWidget, QPushButton, QHBoxLayout, QTextEdit, QMessageBox
 
 from frontengine.show.chat.chat_toast import ChatToast
-from frontengine.ui.chat.chatthread import MESSAGE_QUEUE, EXCEPTION_QUEUE
+from frontengine.ui.setting.chat.chatthread import MESSAGE_QUEUE, EXCEPTION_QUEUE
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 

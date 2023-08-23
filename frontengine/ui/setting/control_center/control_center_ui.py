@@ -2,7 +2,7 @@ from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QGridLayout, QWidget, QPushButton, QTextEdit, QScrollArea
 
 from frontengine.ui.color.global_color import error_color, output_color
-from frontengine.ui.setting.chat_scene.chat_scene_setting import ChatSceneUI
+from frontengine.ui.setting.chat.chat_scene_setting import ChatSceneUI
 from frontengine.ui.setting.gif.gif_setting_ui import GIFSettingUI
 from frontengine.ui.setting.image.image_setting_ui import ImageSettingUI
 from frontengine.ui.setting.scene_setting.scene_setting_ui import SceneSettingUI

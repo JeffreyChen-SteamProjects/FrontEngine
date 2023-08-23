@@ -19,7 +19,7 @@ from frontengine.ui.setting.control_center.control_center_ui import ControlCente
 from frontengine.ui.setting.scene_setting.scene_setting_ui import SceneSettingUI
 from frontengine.ui.main.main_ui import FrontEngineMainUI
 from frontengine.ui.setting.scene_setting.scene_setting_ui import SceneControlSettingUI
-from frontengine.ui.setting.chat_scene.chat_scene_setting import ChatSceneUI
+from frontengine.ui.setting.chat.chat_scene_setting import ChatSceneUI
 from frontengine.ui.main.main_ui import FrontEngine_EXTEND_TAB
 
 __all__ = [
