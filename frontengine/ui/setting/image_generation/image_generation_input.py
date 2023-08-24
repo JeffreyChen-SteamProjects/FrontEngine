@@ -50,7 +50,7 @@ class ImageGenerationUI(QWidget):
             image_response = requests.get(image_link)
             image = QPixmap()
             image.loadFromData(image_response.content)
-            image_show = ImageGenerateShow(image)
+            image_show = ImageGenerateShow(image, image_link)
             self.show_list.append(image_show)
             image_show.show()
             self.image_panel.appendPlainText(image_link)
@@ -59,4 +59,3 @@ class ImageGenerationUI(QWidget):
         for widget in self.show_list:
             widget.close()
         return super().close()
-

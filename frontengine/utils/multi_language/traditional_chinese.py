@@ -113,5 +113,6 @@ traditional_chinese_word_dict = {
     # Image Generation
     "image_generation_tab": "圖片產生",
     "start_generate_image": "開始產生圖片",
-    "input_error": "請勿無輸入或空格"
+    "input_error": "請勿無輸入或空格",
+    "save_generation_image": "儲存圖片",
 }
