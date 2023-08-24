@@ -113,5 +113,6 @@ english_word_dict = {
     # Image Generation
     "image_generation_tab": "Image generation",
     "start_generate_image": "Star generate",
-    "input_error": "Please input something"
+    "input_error": "Please input something",
+    "save_generation_image": "Save Image",
 }
