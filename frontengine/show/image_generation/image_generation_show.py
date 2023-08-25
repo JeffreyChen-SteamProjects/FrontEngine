@@ -33,8 +33,7 @@ class ImageGenerateShow(QWidget):
             filter="Images (*.png;*.jpg;*.webp)"
         )[0]
         file_path = Path(file_path)
-        if file_path.is_file():
-            self.pixmap.save(str(file_path))
+        self.pixmap.save(str(file_path))
 
     def mousePressEvent(self, event: PySide6.QtGui.QMouseEvent) -> None:
         if event.button() == Qt.MouseButton.RightButton:
