@@ -28,7 +28,7 @@ FrontEngine_EXTEND_TAB: Dict[str, Type[QWidget]] = {}
 
 class FrontEngineMainUI(QMainWindow, QtStyleTools):
 
-    def __init__(self, debug: bool = False):
+    def __init__(self, debug: bool = False, show_system_tray_ray: bool = True):
         super().__init__()
         # User setting
         self.id = "FrontEngine"
@@ -110,7 +110,7 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
         self.icon = QIcon(str(self.icon_path))
         if self.icon.isNull() is False:
             self.setWindowIcon(self.icon)
-            if ExtendSystemTray.isSystemTrayAvailable():
+            if ExtendSystemTray.isSystemTrayAvailable() and show_system_tray_ray:
                 self.system_tray = ExtendSystemTray(main_window=self)
                 self.system_tray.setIcon(self.icon)
                 self.system_tray.show()
