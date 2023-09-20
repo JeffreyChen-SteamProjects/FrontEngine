@@ -8,6 +8,7 @@ class ChatToast(QWidget):
     def __init__(self, text: str, close_time: int = 10000, font_size: int = 16):
         super().__init__()
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         self.setWindowFlag(
             Qt.WindowType.WindowTransparentForInput |
             Qt.WindowType.FramelessWindowHint |

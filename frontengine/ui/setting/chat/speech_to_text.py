@@ -2,7 +2,7 @@ import queue
 import sys
 import time
 
-from PySide6.QtCore import QTimer
+from PySide6.QtCore import QTimer, Qt
 from PySide6.QtWidgets import QWidget, QPushButton, QBoxLayout, QLineEdit
 from speech_recognition import Microphone
 from speech_recognition import Recognizer
@@ -27,6 +27,7 @@ class ChatSpeechToText(QWidget):
     def __init__(self):
         super().__init__()
         # UI
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         self.box_layout = QBoxLayout(QBoxLayout.Direction.LeftToRight)
         self.voice_text_edit = QLineEdit()
         self.start_listen_button = QPushButton(

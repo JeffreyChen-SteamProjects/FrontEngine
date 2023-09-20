@@ -1,5 +1,6 @@
 from typing import Dict, Callable
 
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QWidget, QGridLayout, QPushButton, QHeaderView, QTableView, QScrollArea
 
 from frontengine.show.scene.scene import SceneManager
@@ -13,6 +14,7 @@ class SceneControlSettingUI(QWidget):
 
     def __init__(self):
         super().__init__()
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         self.grad_layout = QGridLayout()
         self.param_key_name_list = [
             "widget_type", "file_path", "url", "text", "opacity", "speed", "volume", "font_size", "play_rate",
@@ -59,7 +61,6 @@ class SceneControlSettingUI(QWidget):
     def close_scene(self) -> None:
         self.scene.widget_list.clear()
         self.scene.graphic_view.close()
-        front_engine_logger.info("close_scene")
 
     def start_scene(self) -> None:
         front_engine_logger.info("start_scene")

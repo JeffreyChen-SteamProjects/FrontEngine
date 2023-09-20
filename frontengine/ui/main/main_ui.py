@@ -108,9 +108,10 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
         # Set Icon
         self.icon_path = Path(os.getcwd() + "/je_driver_icon.ico")
         self.icon = QIcon(str(self.icon_path))
+        self.show_system_tray_ray = show_system_tray_ray
         if self.icon.isNull() is False:
             self.setWindowIcon(self.icon)
-            if ExtendSystemTray.isSystemTrayAvailable() and show_system_tray_ray:
+            if ExtendSystemTray.isSystemTrayAvailable() and self.show_system_tray_ray:
                 self.system_tray = ExtendSystemTray(main_window=self)
                 self.system_tray.setIcon(self.icon)
                 self.system_tray.show()
@@ -142,7 +143,7 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
         self.apply_stylesheet(self, self.sender().text())
 
     def closeEvent(self, event) -> None:
-        if self.system_tray.isVisible():
+        if self.show_system_tray_ray and self.system_tray.isVisible():
             self.hide()
             event.ignore()
         else:

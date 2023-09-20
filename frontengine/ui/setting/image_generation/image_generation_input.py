@@ -2,7 +2,7 @@ from typing import List
 
 import requests
 from PySide6.QtCore import QTimer
-from PySide6.QtGui import QPixmap
+from PySide6.QtGui import QPixmap, Qt
 from PySide6.QtWidgets import QWidget, QPushButton, QLineEdit, QGridLayout, QMessageBox, QPlainTextEdit
 
 from frontengine.show.image_generation.image_generation_show import ImageGenerateShow
@@ -13,6 +13,7 @@ from frontengine.utils.multi_language.language_wrapper import language_wrapper
 class ImageGenerationUI(QWidget):
     def __init__(self):
         super().__init__()
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         # UI
         self.image_keyword_input = QLineEdit()
         self.send_text_button = QPushButton()

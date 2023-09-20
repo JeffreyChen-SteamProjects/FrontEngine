@@ -21,6 +21,7 @@ class SoundEffectWidget(QWidget):
             Qt.WindowType.Tool
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         self.sound_player = QSoundEffect()
         self.sound_path = Path(sound_path)
         if self.sound_path.exists() and self.sound_path.is_file():

@@ -1,17 +1,17 @@
-from PySide6.QtGui import QIntValidator
+from PySide6.QtGui import QIntValidator, Qt
 from PySide6.QtWidgets import QWidget, QBoxLayout, QMessageBox, QPushButton, QLineEdit, QLabel, QHBoxLayout
 
+from frontengine import load_ui_file
 from frontengine.ui.setting.scene_setting.scene_tabs.tableview_model import add_row_data
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
-
-from frontengine import load_ui_file
 
 
 class UISceneSettingUI(QWidget):
 
     def __init__(self):
         super().__init__()
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         self.box_layout = QBoxLayout(QBoxLayout.Direction.TopToBottom)
         # UI button
         self.ui_button = QPushButton(

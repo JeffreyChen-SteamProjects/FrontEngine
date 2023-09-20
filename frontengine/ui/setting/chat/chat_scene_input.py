@@ -1,7 +1,7 @@
 from typing import Union
 
 import pyttsx3
-from PySide6.QtCore import QTimer
+from PySide6.QtCore import QTimer, Qt
 from PySide6.QtWidgets import QBoxLayout, QWidget, QPushButton, QHBoxLayout, QTextEdit, QMessageBox
 
 from frontengine.show.chat.chat_toast import ChatToast
@@ -12,6 +12,7 @@ from frontengine.utils.multi_language.language_wrapper import language_wrapper
 class ChatInputDialog(QWidget):
     def __init__(self, close_time: int = 10000, font_size: int = 16):
         super().__init__()
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         self.box_layout = QBoxLayout(QBoxLayout.Direction.TopToBottom)
         self.chat_input = QTextEdit()
         self.send_text_button = QPushButton()

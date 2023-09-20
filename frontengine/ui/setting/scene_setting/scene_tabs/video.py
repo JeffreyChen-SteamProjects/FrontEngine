@@ -12,6 +12,7 @@ class VideoSceneSettingUI(QWidget):
 
     def __init__(self):
         super().__init__()
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         self.box_layout = QBoxLayout(QBoxLayout.Direction.TopToBottom)
         # Video button
         self.video_button = QPushButton(

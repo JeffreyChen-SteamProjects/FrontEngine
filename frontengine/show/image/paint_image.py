@@ -23,6 +23,7 @@ class ImageWidget(QWidget):
                 language_wrapper.language_word_dict.get("paint_image_message_box_text")
             )
             message_box.show()
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         # Set Icon
         self.icon_path: Path = Path(os.getcwd() + "/je_driver_icon.ico")

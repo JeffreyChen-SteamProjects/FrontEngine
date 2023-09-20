@@ -1,5 +1,6 @@
 from typing import Union
 
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QWidget, QGridLayout, QTabWidget
 
 from frontengine.show.scene.scene import SceneManager
@@ -18,6 +19,7 @@ class SceneSettingUI(QWidget):
 
     def __init__(self):
         super().__init__()
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         self.grid_layout = QGridLayout(self)
         self.grid_layout.setContentsMargins(0, 0, 0, 0)
         # Init variable

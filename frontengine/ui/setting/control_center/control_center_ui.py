@@ -1,4 +1,4 @@
-from PySide6.QtCore import QTimer
+from PySide6.QtCore import QTimer, Qt
 from PySide6.QtWidgets import QGridLayout, QWidget, QPushButton, QTextEdit, QScrollArea
 
 from frontengine.ui.color.global_color import error_color, output_color
@@ -33,6 +33,7 @@ class ControlCenterUI(QWidget):
         self.grid_layout = QGridLayout()
         self.grid_layout = QGridLayout(self)
         self.grid_layout.setContentsMargins(0, 0, 0, 0)
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         # UI instance
         self.video_setting_ui = video_setting_ui
         self.image_setting_ui = image_setting_ui
