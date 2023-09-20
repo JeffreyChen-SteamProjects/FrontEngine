@@ -14,6 +14,7 @@ class WebWidget(QWebEngineView):
     def __init__(self, url: str, is_file: bool = False):
         super().__init__()
         self.opacity: float = 0.2
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         if not is_file:
             self.load(url)
         else:

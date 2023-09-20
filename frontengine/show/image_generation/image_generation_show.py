@@ -12,6 +12,7 @@ class ImageGenerateShow(QWidget):
     def __init__(self, pixmap: QPixmap, title: str):
         super().__init__()
         self.setWindowTitle(title)
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         self.pixmap = pixmap
         self.label = QLabel()
         self.label.setPixmap(pixmap)

@@ -11,6 +11,7 @@ class TextWidget(QWidget):
     def __init__(self, text: str):
         super().__init__()
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         self.text = text
         self.font_size = 100
         self.opacity = 0.2

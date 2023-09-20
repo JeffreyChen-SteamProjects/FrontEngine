@@ -11,6 +11,7 @@ class WEBSceneSettingUI(QWidget):
 
     def __init__(self):
         super().__init__()
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         self.box_layout = QBoxLayout(QBoxLayout.Direction.TopToBottom)
         # Web button
         self.web_button = QPushButton(

@@ -16,6 +16,7 @@ class ImageSettingUI(QWidget):
         self.grid_layout = QGridLayout()
         self.grid_layout = QGridLayout(self)
         self.grid_layout.setContentsMargins(0, 0, 0, 0)
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         # Init variable
         self.image_widget_list = list()
         self.show_all_screen = False

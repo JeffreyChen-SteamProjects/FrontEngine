@@ -1,7 +1,7 @@
 from typing import Dict, Callable
 
 from PySide6.QtCore import QTimer
-from PySide6.QtGui import QFontDatabase
+from PySide6.QtGui import QFontDatabase, Qt
 from PySide6.QtWidgets import QWidget, QGridLayout, QPushButton, QScrollArea, QComboBox, QLabel, \
     QPlainTextEdit, QLineEdit, QBoxLayout
 
@@ -18,6 +18,7 @@ class ChatSceneUI(QWidget):
 
     def __init__(self):
         super().__init__()
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         self.voice_input = None
         self.grid_layout = QGridLayout(self)
         self.grid_layout.setContentsMargins(0, 0, 0, 0)
@@ -156,7 +157,6 @@ class ChatSceneUI(QWidget):
     def close_scene(self) -> None:
         self.scene.widget_list.clear()
         self.scene.graphic_view.close()
-        front_engine_logger.info("close_scene")
 
     def start_scene(self) -> None:
         front_engine_logger.info("start_scene")

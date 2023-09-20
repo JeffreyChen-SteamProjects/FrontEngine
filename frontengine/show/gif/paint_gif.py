@@ -15,6 +15,7 @@ class GifWidget(QWidget):
         self.opacity: float = 0.2
         self.speed: int = 100
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         self.gif_label: QLabel = QLabel()
         self.gif_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.movie: QMovie = QMovie()

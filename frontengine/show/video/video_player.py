@@ -20,6 +20,7 @@ class VideoWidget(QVideoWidget):
         self.setAttribute(
             Qt.WidgetAttribute.WA_TranslucentBackground
         )
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         self.media_player = QMediaPlayer()
         self.video_path = Path(video_path)
         if self.video_path.exists() and self.video_path.is_file():

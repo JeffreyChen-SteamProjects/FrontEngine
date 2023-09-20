@@ -1,7 +1,6 @@
 from typing import List, Dict
 
 from PySide6.QtWidgets import QGraphicsProxyWidget, QWidget
-from frontengine.show.text.draw_text import TextWidget
 
 from frontengine.show.gif.paint_gif import GifWidget
 from frontengine.show.image.paint_image import ImageWidget
@@ -9,6 +8,7 @@ from frontengine.show.load.load_someone_make_ui import load_ui_file, read_extend
 from frontengine.show.scene.extend_graphic_scene import ExtendGraphicScene
 from frontengine.show.scene.extend_graphic_view import ExtendGraphicView
 from frontengine.show.sound_player.sound_player import SoundPlayer
+from frontengine.show.text.draw_text import TextWidget
 from frontengine.show.video.video_player import VideoWidget
 from frontengine.show.web.webview import WebWidget
 
