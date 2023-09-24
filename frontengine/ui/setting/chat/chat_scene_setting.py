@@ -149,14 +149,16 @@ class ChatSceneUI(QWidget):
         self.chat_input.close()
 
     def close_chat_ui(self):
-        self.chat_input.close()
+        if self.chat_input:
+            self.chat_input.close()
         self.chat_input = None
         self.chat_list.clear()
         self.close_scene()
 
     def close_scene(self) -> None:
         self.scene.widget_list.clear()
-        self.scene.graphic_view.close()
+        if self.scene.graphic_view:
+            self.scene.graphic_view.close()
 
     def start_scene(self) -> None:
         front_engine_logger.info("start_scene")
