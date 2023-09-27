@@ -31,7 +31,6 @@ class ControlCenterUI(QWidget):
         super().__init__()
         # Layout
         self.grid_layout = QGridLayout()
-        self.grid_layout = QGridLayout(self)
         self.grid_layout.setContentsMargins(0, 0, 0, 0)
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         # UI instance

@@ -21,7 +21,6 @@ class SceneManager(object):
         super().__init__()
         self.graphic_scene = ExtendGraphicScene()
         self.graphic_view = ExtendGraphicView(self.graphic_scene)
-        self.graphic_view.showMaximized()
         self.widget_list: List[QGraphicsProxyWidget] = list()
 
     def add_image(self, image_setting: Dict[str, str]) -> QGraphicsProxyWidget:
