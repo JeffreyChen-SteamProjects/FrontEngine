@@ -22,11 +22,12 @@ class ImageGenerationUI(QWidget):
         self.image_panel.setReadOnly(True)
         self.send_text_button.clicked.connect(self.generate_image)
         # Layout
-        self.grid_layout = QGridLayout(self)
+        self.grid_layout = QGridLayout()
         self.grid_layout.setContentsMargins(0, 0, 0, 0)
         self.grid_layout.addWidget(self.image_keyword_input, 0, 0)
         self.grid_layout.addWidget(self.send_text_button, 0, 1)
         self.grid_layout.addWidget(self.image_panel, 1, 0, -1, -1)
+        self.setLayout(self.grid_layout)
         # Pull image timer
         self.pull_image_timer = QTimer()
         self.pull_image_timer.setInterval(1000)

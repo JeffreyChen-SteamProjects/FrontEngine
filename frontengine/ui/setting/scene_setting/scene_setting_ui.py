@@ -20,7 +20,7 @@ class SceneSettingUI(QWidget):
     def __init__(self):
         super().__init__()
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
-        self.grid_layout = QGridLayout(self)
+        self.grid_layout = QGridLayout()
         self.grid_layout.setContentsMargins(0, 0, 0, 0)
         # Init variable
         self.scene: Union[None, SceneManager] = None
@@ -45,3 +45,4 @@ class SceneSettingUI(QWidget):
             UISceneSettingUI(), language_wrapper.language_word_dict.get("tab_external_ui"))
         # Add to layout
         self.grid_layout.addWidget(self.tab_widget, 0, 0, -1, -1)
+        self.setLayout(self.grid_layout)

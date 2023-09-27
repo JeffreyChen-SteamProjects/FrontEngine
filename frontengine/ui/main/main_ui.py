@@ -41,18 +41,19 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
         self.language_wrapper.reset_language(user_setting_dict.get("language", "English"))
         # Init setting ui
         self.setWindowTitle("FrontEngine")
-        self.grid_layout = QGridLayout(self)
+        self.grid_layout = QGridLayout()
         self.grid_layout.setContentsMargins(0, 0, 0, 0)
         self.tab_widget = QTabWidget(self)
+        self.setCentralWidget(self.tab_widget)
         self.video_setting_ui = VideoSettingUI()
         self.image_setting_ui = ImageSettingUI()
         self.web_setting_ui = WEBSettingUI()
         self.gif_setting_ui = GIFSettingUI()
         self.sound_player_setting_ui = SoundPlayerSettingUI()
         self.text_setting_ui = TextSettingUI()
-        self.scene_setting_ui = SceneSettingUI()
-        self.chat_scene_ui = ChatSceneUI()
         self.image_generation_ui = ImageGenerationUI()
+        self.chat_scene_ui = ChatSceneUI()
+        self.scene_setting_ui = SceneSettingUI()
         self.control_center_ui = ControlCenterUI(
             self.video_setting_ui,
             self.image_setting_ui,
@@ -104,7 +105,6 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
         )
         for widget_name, widget in FrontEngine_EXTEND_TAB.items():
             self.tab_widget.addTab(widget(), widget_name)
-        self.setCentralWidget(self.tab_widget)
         # Set Icon
         self.icon_path = Path(os.getcwd() + "/je_driver_icon.ico")
         self.icon = QIcon(str(self.icon_path))

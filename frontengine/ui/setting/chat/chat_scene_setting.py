@@ -20,7 +20,7 @@ class ChatSceneUI(QWidget):
         super().__init__()
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         self.voice_input = None
-        self.grid_layout = QGridLayout(self)
+        self.grid_layout = QGridLayout()
         self.grid_layout.setContentsMargins(0, 0, 0, 0)
         # Init
         self.chat_input = ChatInputDialog()
@@ -101,12 +101,12 @@ class ChatSceneUI(QWidget):
         self.grid_layout.addWidget(self.start_voice_input_button, 0, 8)
         self.grid_layout.addWidget(self.start_button, 0, 9)
         self.grid_layout.addWidget(self.chat_panel_scroll_area, 1, 0, -1, -1)
-        self.setLayout(self.grid_layout)
         # update panel timer
         self.update_panel_timer = QTimer()
         self.update_panel_timer.setInterval(10)
         self.update_panel_timer.timeout.connect(self.update_panel)
         self.update_panel_timer.start()
+        self.setLayout(self.grid_layout)
 
     def update_panel(self):
         if not PANEL_MESSAGE_QUEUE.empty():
@@ -149,7 +149,7 @@ class ChatSceneUI(QWidget):
         self.chat_input.close()
 
     def close_chat_ui(self):
-        if self.chat_input:
+        if self.chat_input.isVisible():
             self.chat_input.close()
         self.chat_input = None
         self.chat_list.clear()
@@ -157,8 +157,9 @@ class ChatSceneUI(QWidget):
 
     def close_scene(self) -> None:
         self.scene.widget_list.clear()
-        if self.scene.graphic_view:
-            self.scene.graphic_view.close()
+        if self.scene:
+            if self.scene.graphic_view:
+                self.scene.graphic_view.close()
 
     def start_scene(self) -> None:
         front_engine_logger.info("start_scene")
