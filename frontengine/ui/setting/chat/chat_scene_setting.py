@@ -3,7 +3,7 @@ from typing import Dict, Callable
 from PySide6.QtCore import QTimer
 from PySide6.QtGui import QFontDatabase, Qt
 from PySide6.QtWidgets import QWidget, QGridLayout, QPushButton, QScrollArea, QComboBox, QLabel, \
-    QPlainTextEdit, QLineEdit, QBoxLayout
+    QPlainTextEdit, QLineEdit, QBoxLayout, QCheckBox
 
 from frontengine.show.scene.scene import SceneManager
 from frontengine.ui.setting.chat.chat_model import load_scene_json, chat_model
@@ -89,6 +89,10 @@ class ChatSceneUI(QWidget):
         self.start_voice_input_button = QPushButton(
             language_wrapper.language_word_dict.get("start_chat_voice_input_ui"))
         self.start_voice_input_button.clicked.connect(self.start_voice_input)
+        # Show toast checkbox
+        self.show_toast_checkbox_label = QLabel(
+            language_wrapper.language_word_dict.get("should_we_show_toast"))
+        self.show_toast_checkbox = QCheckBox()
         # Add to layout
         self.grid_layout.addWidget(self.choose_style_combobox, 0, 0)
         self.grid_layout.addWidget(self.close_delay_label, 0, 1)
@@ -96,10 +100,12 @@ class ChatSceneUI(QWidget):
         self.grid_layout.addWidget(self.font_size_label, 0, 3)
         self.grid_layout.addWidget(self.font_size_combobox, 0, 4)
         self.grid_layout.addLayout(self.local_box, 0, 5)
-        self.grid_layout.addWidget(self.new_topic_button, 0, 6)
-        self.grid_layout.addWidget(self.scene_input_button, 0, 7)
-        self.grid_layout.addWidget(self.start_voice_input_button, 0, 8)
-        self.grid_layout.addWidget(self.start_button, 0, 9)
+        self.grid_layout.addWidget(self.show_toast_checkbox_label, 0, 6)
+        self.grid_layout.addWidget(self.show_toast_checkbox, 0, 7)
+        self.grid_layout.addWidget(self.new_topic_button, 0, 8)
+        self.grid_layout.addWidget(self.scene_input_button, 0, 9)
+        self.grid_layout.addWidget(self.start_voice_input_button, 0, 10)
+        self.grid_layout.addWidget(self.start_button, 0, 11)
         self.grid_layout.addWidget(self.chat_panel_scroll_area, 1, 0, -1, -1)
         # update panel timer
         self.update_panel_timer = QTimer()
@@ -121,7 +127,8 @@ class ChatSceneUI(QWidget):
     def start_chat(self) -> None:
         self.chat_input = ChatInputDialog(
             close_time=int(self.close_delay_combobox.currentText()) * 1000,
-            font_size=int(self.font_size_combobox.currentText())
+            font_size=int(self.font_size_combobox.currentText()),
+            show_toast=self.show_toast_checkbox.isChecked()
         )
         self.chat_input.show()
         self.chat_input.send_text_button.clicked.connect(self.send_chat)
