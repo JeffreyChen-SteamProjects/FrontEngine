@@ -5,8 +5,8 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "frontengine_dev"
-version = "0.0.56"
+name = "frontengine"
+version = "0.0.55"
 authors = [
     { name = "JE-Chen", email = "jechenmailman@gmail.com" },
 ]
