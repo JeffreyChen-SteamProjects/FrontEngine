@@ -107,6 +107,7 @@ english_word_dict = {
     "chat_scene_precise": "precise",
     "chat_scene_balanced": "balanced",
     "chat_gpt_exception": "GPT error, pls retry or new topic",
+    "should_we_show_toast": "Show Toast?",
     # Chat voice input
     "start_chat_voice_input_ui": "Open voice input ui",
     "chat_recognizer_voice_button": "Start listen voice",

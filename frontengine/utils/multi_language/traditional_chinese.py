@@ -107,6 +107,7 @@ traditional_chinese_word_dict = {
     "chat_scene_precise": "精準",
     "chat_scene_balanced": "平衡",
     "chat_gpt_exception": "GPT 錯誤，請重試或開始一個新話題",
+    "should_we_show_toast": "顯示對話?",
     # Chat voice input
     "start_chat_voice_input_ui": "開啟聲音輸入介面",
     "chat_recognizer_voice_button": "開始錄製聲音",
