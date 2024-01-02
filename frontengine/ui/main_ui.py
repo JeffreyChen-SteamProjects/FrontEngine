@@ -9,7 +9,7 @@ from PySide6.QtWidgets import QMainWindow, QApplication, QGridLayout, QTabWidget
 from qt_material import apply_stylesheet, QtStyleTools
 
 from frontengine.ui.menu.language_menu import build_language_menu
-from frontengine.system_tray import ExtendSystemTray
+from frontengine.system_tray.extend_system_tray import ExtendSystemTray
 from frontengine.ui.setting.chat.chat_scene_setting import ChatSceneUI
 from frontengine.ui.setting.control_center.control_center_ui import ControlCenterUI
 from frontengine.ui.setting.gif.gif_setting_ui import GIFSettingUI
