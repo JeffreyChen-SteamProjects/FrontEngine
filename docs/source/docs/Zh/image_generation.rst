@@ -1,4 +1,4 @@
 Image Generation Page
 ----
 
-.. image:: image/image_gen.png
+.. image:: image/image_gen/image_gen.png
