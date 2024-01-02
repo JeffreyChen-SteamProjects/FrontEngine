@@ -1,4 +1,4 @@
 Text Page
 ----
 
-.. image:: image/text.png
+.. image:: image/text/text.png

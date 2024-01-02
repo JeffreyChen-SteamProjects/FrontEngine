@@ -1,4 +1,4 @@
 Scene Page
 ----
 
-.. image:: image/scene.png
+.. image:: image/scene/scene.png
