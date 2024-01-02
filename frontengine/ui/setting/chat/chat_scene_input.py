@@ -69,4 +69,5 @@ class ChatInputDialog(QWidget):
     def close(self) -> bool:
         self.get_message_timer.stop()
         self.check_error_timer.stop()
-        return super().close()
+        self.destroy()
+        return False

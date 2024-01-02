@@ -1,7 +1,7 @@
 How to use
 ----
 
-.. image:: image/FrontEngine.png
+.. image:: image/main/FrontEngine.png
 
 * Language Menu (Choose ui language)
 * UI Style (Choose ui style)
@@ -15,3 +15,4 @@ How to use
     * SCENE (Add multi component on scene and show multi widget, can save setting as file)
     * CHAT (Chat with bing on front)
     * CONTROL CENTER (Control all another widget)
+    * IMAGE GENERATION (Generate image by prompt)

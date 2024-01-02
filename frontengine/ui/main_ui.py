@@ -8,8 +8,8 @@ from PySide6.QtGui import QIcon, QAction
 from PySide6.QtWidgets import QMainWindow, QApplication, QGridLayout, QTabWidget, QMenuBar, QWidget
 from qt_material import apply_stylesheet, QtStyleTools
 
-from frontengine.ui.main.language_menu import build_language_menu
-from frontengine.ui.main.system_tray.extend_system_tray import ExtendSystemTray
+from frontengine.ui.menu.language_menu import build_language_menu
+from frontengine.system_tray.extend_system_tray import ExtendSystemTray
 from frontengine.ui.setting.chat.chat_scene_setting import ChatSceneUI
 from frontengine.ui.setting.control_center.control_center_ui import ControlCenterUI
 from frontengine.ui.setting.gif.gif_setting_ui import GIFSettingUI
@@ -143,9 +143,10 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
         self.apply_stylesheet(self, self.sender().text())
 
     def closeEvent(self, event) -> None:
-        if self.show_system_tray_ray and self.system_tray.isVisible():
-            self.hide()
-            event.ignore()
+        if ExtendSystemTray.isSystemTrayAvailable() and self.show_system_tray_ray:
+            if self.system_tray.isVisible():
+                self.hide()
+                event.ignore()
         else:
             super().closeEvent(event)
             self.video_setting_ui.video_widget_list.clear()
@@ -164,12 +165,12 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
 
 
 def start_front_engine(debug: bool = False) -> None:
-    new_editor = QApplication(sys.argv)
+    main_app = QApplication(sys.argv)
     window = FrontEngineMainUI(debug=debug)
-    apply_stylesheet(new_editor, theme='dark_amber.xml')
+    apply_stylesheet(main_app, theme='dark_amber.xml')
     window.showMaximized()
     try:
         window.startup_setting()
     except Exception as error:
         print(repr(error))
-    sys.exit(new_editor.exec())
+    sys.exit(main_app.exec())
