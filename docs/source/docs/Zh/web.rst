@@ -1,4 +1,4 @@
 Web Page
 ----
 
-.. image:: image/web/web.png
+.. image:: ../image/web/web.png

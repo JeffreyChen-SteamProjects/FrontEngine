@@ -1,7 +1,7 @@
 怎麼擴充 FrontEngine UI
 ----
 
-.. image:: image/main/FrontEngine.png
+.. image:: ../image/main/FrontEngine.png
 
 .. code-block::
 

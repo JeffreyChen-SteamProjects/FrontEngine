@@ -1,4 +1,4 @@
 Sound Page
 ----
 
-.. image:: image/sound/sound.png
+.. image:: ../image/sound/sound.png

@@ -1,7 +1,7 @@
 Chat Page
 ----
 
-..  image:: image/chat/chat.png
+..  image:: ../image/chat/chat.png
 
 
 *  How to use chat on FrontEngine
