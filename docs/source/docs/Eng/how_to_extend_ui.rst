@@ -1,7 +1,7 @@
 How to extend FrontEngine UI
 ----
 
-.. image:: image/FrontEngine.png
+.. image:: image/main/FrontEngine.png
 
 .. code-block::
 
