@@ -1,4 +1,4 @@
 Video Page
 ----
 
-.. image:: image/video/video.png
+.. image:: ../image/video/video.png

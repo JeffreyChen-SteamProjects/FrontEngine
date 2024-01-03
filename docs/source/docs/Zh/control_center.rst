@@ -1,7 +1,7 @@
 Control Center Page
 ----
 
-.. image:: image/control_center/control_center.png
+.. image:: ../image/control_center/control_center.png
 
 * Control panel has an area to display error messages and control other instances.
     * Close all video button will close all video instance.
