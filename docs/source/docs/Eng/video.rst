@@ -10,5 +10,5 @@ Video Page
     * Show on all screen (Show video on all screen)
     * Show on all window bottom (Video will hide on all window bottom)
 * Buttons
-    * Choose video file (use to choose video you want to play)
+    * Choose video file (use to choose video you want to play .mp4)
     * Start play video (read options and start play video)
