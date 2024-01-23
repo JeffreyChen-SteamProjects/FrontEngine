@@ -19,7 +19,6 @@ from frontengine.ui.setting.control_center.control_center_ui import ControlCente
 from frontengine.ui.setting.scene_setting.scene_setting_ui import SceneSettingUI
 from frontengine.ui.main_ui import FrontEngineMainUI
 from frontengine.ui.setting.scene_setting.scene_setting_ui import SceneControlSettingUI
-from frontengine.ui.setting.chat.chat_scene_setting import ChatSceneUI
 from frontengine.ui.main_ui import FrontEngine_EXTEND_TAB
 from frontengine.utils.redirect_manager.redirect_manager_class import RedirectManager
 
@@ -28,5 +27,5 @@ __all__ = [
     "WebWidget", "ImageWidget", "VideoWidget", "language_wrapper", "load_extend_ui_file", "load_ui_file",
     "TextSettingUI", "WEBSettingUI", "GIFSettingUI", "ImageSettingUI", "SoundPlayerSettingUI",
     "VideoSettingUI", "ControlCenterUI", "SceneSettingUI", "FrontEngineMainUI", "SceneControlSettingUI",
-    "ChatSceneUI", "FrontEngine_EXTEND_TAB", "RedirectManager"
+    "FrontEngine_EXTEND_TAB", "RedirectManager"
 ]

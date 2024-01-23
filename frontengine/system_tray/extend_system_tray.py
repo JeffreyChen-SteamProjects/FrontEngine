@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from frontengine.ui.main_ui import FrontEngineMainUI
-import sys
 
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QSystemTrayIcon, QMenu
@@ -34,7 +33,6 @@ class ExtendSystemTray(QSystemTrayIcon):
     def close_all(self):
         self.setVisible(False)
         self.main_window.close()
-        sys.exit(0)
 
     def clicked(self, reason):
         if reason == self.ActivationReason.DoubleClick:

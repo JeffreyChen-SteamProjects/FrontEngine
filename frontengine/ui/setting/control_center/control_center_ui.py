@@ -2,7 +2,6 @@ from PySide6.QtCore import QTimer, Qt
 from PySide6.QtWidgets import QGridLayout, QWidget, QPushButton, QTextEdit, QScrollArea
 
 from frontengine.ui.color.global_color import error_color, output_color
-from frontengine.ui.setting.chat.chat_scene_setting import ChatSceneUI
 from frontengine.ui.setting.gif.gif_setting_ui import GIFSettingUI
 from frontengine.ui.setting.image.image_setting_ui import ImageSettingUI
 from frontengine.ui.setting.scene_setting.scene_setting_ui import SceneSettingUI
@@ -25,8 +24,7 @@ class ControlCenterUI(QWidget):
             gif_setting_ui: GIFSettingUI,
             sound_player_setting_ui: SoundPlayerSettingUI,
             text_setting_ui: TextSettingUI,
-            scene_setting_ui: SceneSettingUI,
-            chat_scene_ui: ChatSceneUI
+            scene_setting_ui: SceneSettingUI
     ):
         super().__init__()
         # Layout
@@ -41,7 +39,6 @@ class ControlCenterUI(QWidget):
         self.sound_player_setting_ui = sound_player_setting_ui
         self.text_setting_ui = text_setting_ui
         self.scene_setting_ui = scene_setting_ui
-        self.chat_scene_ui = chat_scene_ui
         # Close video widget
         self.clear_video_button = QPushButton(
             language_wrapper.language_word_dict.get("control_center_close_all_video")
