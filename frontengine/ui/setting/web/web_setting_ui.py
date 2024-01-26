@@ -93,14 +93,14 @@ class WEBSettingUI(QWidget):
         self.opacity_slider_value_label.setText(str(self.opacity_slider.value()))
 
     def start_open_web_with_url(self) -> None:
-        if self.show_all_screen:
+        if not self.show_all_screen:
             web_widget = self._create_web_widget()
             web_widget.showMaximized()
         else:
             front_engine_logger.info("start_open_web_with_url")
             monitors = QScreen.virtualSiblings(self.screen())
-            for screen in monitors:
-                monitor = screen.availableGeometry()
+            for monitor in monitors:
                 web_widget = self._create_web_widget()
-                web_widget.move(monitor.left(), monitor.top())
-                web_widget.showMaximized()
+                web_widget.setScreen(monitor)
+                web_widget.move(monitor.availableGeometry().topLeft())
+                web_widget.showFullScreen()

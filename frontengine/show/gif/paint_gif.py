@@ -10,8 +10,10 @@ from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 class GifWidget(QWidget):
 
-    def __init__(self, gif_image_path: str):
+    def __init__(self, gif_image_path: str, draw_location_x: int = 0, draw_location_y: int = 0):
         super().__init__()
+        self.draw_location_x = draw_location_x
+        self.draw_location_y = draw_location_y
         self.opacity: float = 0.2
         self.speed: int = 100
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
@@ -61,7 +63,7 @@ class GifWidget(QWidget):
         painter.setOpacity(self.opacity)
         painter.drawPixmap(
             QRect(
-                self.x(), self.y(), self.width(), self.height()
+                self.draw_location_x, self.draw_location_y, self.width(), self.height()
             ),
             current_gif_frame
         )

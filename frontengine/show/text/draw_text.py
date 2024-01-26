@@ -8,8 +8,10 @@ from PySide6.QtWidgets import QWidget
 
 class TextWidget(QWidget):
 
-    def __init__(self, text: str):
+    def __init__(self, text: str, draw_location_x: int = 0, draw_location_y: int = 0):
         super().__init__()
+        self.draw_location_x = draw_location_x
+        self.draw_location_y = draw_location_y
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         self.text = text
@@ -46,7 +48,7 @@ class TextWidget(QWidget):
         painter.setPen(Qt.GlobalColor.black)
         painter.setOpacity(self.opacity)
         painter.drawText(
-            QRect(self.x(), self.y(), self.width(), self.height()),
+            QRect(self.draw_location_x, self.draw_location_y, self.width(), self.height()),
             Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft,
             self.text
         )

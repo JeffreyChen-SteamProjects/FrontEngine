@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Dict, Type
 
 from PySide6.QtCore import QTimer, QCoreApplication
-from PySide6.QtGui import QIcon, QAction
+from PySide6.QtGui import QIcon, QAction, Qt
 from PySide6.QtWidgets import QMainWindow, QApplication, QGridLayout, QTabWidget, QMenuBar, QWidget
 from qt_material import apply_stylesheet, QtStyleTools
 
@@ -30,6 +30,7 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
         super().__init__()
         # User setting
         self.id = "FrontEngine"
+        QCoreApplication.setAttribute(Qt.ApplicationAttribute.AA_EnableHighDpiScaling)
         if sys.platform in ["win32", "cygwin", "msys"]:
             from ctypes import windll
             windll.shell32.SetCurrentProcessExplicitAppUserModelID(self.id)

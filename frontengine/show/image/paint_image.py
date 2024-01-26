@@ -10,8 +10,10 @@ from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 class ImageWidget(QWidget):
 
-    def __init__(self, image_path: str):
+    def __init__(self, image_path: str, draw_location_x: int = 0, draw_location_y: int = 0):
         super().__init__()
+        self.draw_location_x = draw_location_x
+        self.draw_location_y = draw_location_y
         self.opacity: float = 0.2
         self.image_path: Path = Path(image_path)
         if self.image_path.exists() and self.image_path.is_file():
@@ -48,7 +50,7 @@ class ImageWidget(QWidget):
         painter = QPainter(self)
         painter.setOpacity(self.opacity)
         painter.drawImage(
-            QRect(self.x(), self.y(), self.width(), self.height()),
+            QRect(self.draw_location_x, self.draw_location_y, self.width(), self.height()),
             self.image)
         painter.restore()
 

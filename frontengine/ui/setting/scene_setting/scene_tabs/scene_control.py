@@ -60,7 +60,8 @@ class SceneControlSettingUI(QWidget):
 
     def close_scene(self) -> None:
         self.scene.widget_list.clear()
-        self.scene.graphic_view.close()
+        if self.scene.graphic_view.isEnabled() and self.scene.graphic_view.isVisible():
+            self.scene.graphic_view.close()
 
     def start_scene(self) -> None:
         front_engine_logger.info("start_scene")
