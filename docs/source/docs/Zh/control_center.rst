@@ -3,12 +3,12 @@ Control Center Page
 
 .. image:: ../image/control_center/control_center.png
 
-* Control panel has an area to display error messages and control other instances.
-    * Close all video button will close all video instance.
-    * Close all image button will close all image instance.
-    * Close all gif button will close all gif instance.
-    * Close all web button will close all web page.
-    * Close all sound button will close all playing sound instance.
-    * Close all text will clear all text on screen.
-    * Clear log will clear error message area.
-    * Close all will close all instance.
+* 控制面板有一個區域用於顯示錯誤訊息並控制其他實例。
+    * 「關閉所有影片」按鈕將關閉所有影片實例。
+    * 「關閉所有圖片」按鈕將關閉所有圖片實例。
+    * 「關閉所有 GIF」按鈕將關閉所有 GIF 實例。
+    * 「關閉所有網頁」按鈕將關閉所有網頁。
+    * 「關閉所有音效」按鈕將關閉所有正在播放的音效實例。
+    * 「清除所有文字」將清除屏幕上的所有文字。
+    * 「清除日誌」將清除錯誤訊息區域。
+    * 「關閉所有」將關閉所有實例。
