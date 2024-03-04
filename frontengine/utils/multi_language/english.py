@@ -116,4 +116,8 @@ english_word_dict = {
     "start_generate_image": "Star generate",
     "input_error": "Please input something",
     "save_generation_image": "Save Image",
+    # Help Menu
+    "help_menu_label": "Help menu",
+    # HowTo Menu
+    "how_to_menu_label": "How to menu"
 }
