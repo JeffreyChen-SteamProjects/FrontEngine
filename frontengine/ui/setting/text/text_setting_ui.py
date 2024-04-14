@@ -1,5 +1,5 @@
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QScreen
+from PySide6.QtGui import QScreen, QGuiApplication
 from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QLineEdit, QPushButton, QCheckBox
 
 from frontengine.show.text.draw_text import TextWidget
@@ -89,13 +89,13 @@ class TextSettingUI(QWidget):
 
     def start_draw_text_on_screen(self) -> None:
         front_engine_logger.info("start_draw_text_on_screen")
-        if self.show_all_screen:
+        if not self.show_all_screen:
             text_widget = self._create_text_widget()
             text_widget.showFullScreen()
         else:
-            monitors = QScreen.virtualSiblings(self.screen())
-            for screen in monitors:
-                monitor = screen.availableGeometry()
+            monitors = QGuiApplication.screens()
+            for monitor in monitors:
                 text_widget = self._create_text_widget()
-                text_widget.move(monitor.left(), monitor.top())
+                text_widget.setScreen(monitor)
+                text_widget.move(monitor.availableGeometry().topLeft())
                 text_widget.showFullScreen()

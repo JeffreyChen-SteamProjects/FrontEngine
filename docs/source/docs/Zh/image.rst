@@ -1,12 +1,12 @@
-Image Page
+圖片頁面
 ----
 
 .. image:: ../image/image_page/image_page.png
 
-* Image tab have below option:
-    * Opacity: Image opacity
-    * Show on all screen (Show image on all screen)
-    * Show on all window bottom (Image will hide on all window bottom)
-* Buttons
-    * Choose Image (use to choose image you want to play .jpg .png . webp)
-    * Start play image (read options and start play image)
+* 圖片選項卡具有以下選項:
+    * 不透明度：圖片的不透明度。
+    * 在所有螢幕上顯示（在所有屏幕上顯示圖片）。
+    * 在所有視窗底部顯示（圖片將在所有視窗底部隱藏）。
+* 按鈕
+    * 選擇圖片 (選擇你想播放的圖片檔案 .jpg .png . webp)
+    * 開始播放圖片 (讀取設定並開始播放)

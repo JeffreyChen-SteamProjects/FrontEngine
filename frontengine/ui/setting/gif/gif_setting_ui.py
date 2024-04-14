@@ -1,5 +1,5 @@
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QScreen
+from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import QWidget, QGridLayout, QLabel, QSlider, QPushButton, QMessageBox, \
     QCheckBox
 
@@ -103,15 +103,15 @@ class GIFSettingUI(QWidget):
             message_box.show()
         else:
             front_engine_logger.info("start_play_gif")
-            if self.show_all_screen:
+            if not self.show_all_screen:
                 gif_widget = self._create_gif_widget()
                 gif_widget.showFullScreen()
             else:
-                monitors = QScreen.virtualSiblings(self.screen())
-                for screen in monitors:
-                    monitor = screen.availableGeometry()
+                monitors = QGuiApplication.screens()
+                for monitor in monitors:
                     gif_widget = self._create_gif_widget()
-                    gif_widget.move(monitor.left(), monitor.top())
+                    gif_widget.setScreen(monitor)
+                    gif_widget.move(monitor.availableGeometry().topLeft())
                     gif_widget.showFullScreen()
 
     def choose_and_copy_file_to_cwd_gif_dir_then_play(self) -> None:

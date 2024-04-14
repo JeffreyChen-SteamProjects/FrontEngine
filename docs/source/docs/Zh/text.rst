@@ -1,12 +1,12 @@
-Text Page
+文字頁面
 ----
 
 .. image:: ../image/text/text.png
 
-* Text tab have below option:
-    * Opacity: Text opacity
-    * Font size: text font size
-    * Show on all screen (Show image on all screen)
-    * Show on all window bottom (Image will hide on all window bottom)
-* Buttons
-    * Start draw text on screen (draw text that on input area)
+* 文字選項卡具有以下選項:
+    * 不透明度：文字的不透明度。
+    * 字體大小: 文字的大小
+    * 在所有螢幕上顯示（在所有屏幕上顯示圖片）。
+    * 在所有視窗底部顯示（圖片將在所有視窗底部隱藏）。
+* 按鈕
+    * 開始繪製文字到螢幕 (繪製使用者提供的文字)

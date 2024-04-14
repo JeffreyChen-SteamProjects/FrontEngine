@@ -1,13 +1,13 @@
-Web Page
+網頁頁面
 ----
 
 .. image:: ../image/web/web.png
 
-* Web tab have below option:
-    * Opacity: WEB opacity
-    * Open local file (open local HTML file <you can use javascript and css> )
-    * Enable input (Enable web page input)
-    * Show on all screen (Show image on all screen)
-    * Show on all window bottom (Image will hide on all window bottom)
-* Buttons
-    * Open web with url (open url that input on input area)
+* 網頁選項卡具有以下選項:
+    * 不透明度：網頁的不透明度。
+    * 開始本地檔案 (開啟本地 HTML 檔案 <你可以使用 javascript 和 css> )
+    * 開啟輸入 (開啟網頁輸入)
+    * 在所有螢幕上顯示（在所有屏幕上顯示圖片）。
+    * 在所有視窗底部顯示（圖片將在所有視窗底部隱藏）。
+* 按鈕
+    * 用 URL 開啟網頁 (用使用者輸入的網址開啟網頁)

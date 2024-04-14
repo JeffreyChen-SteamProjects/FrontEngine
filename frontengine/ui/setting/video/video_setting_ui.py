@@ -1,5 +1,5 @@
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QScreen
+from PySide6.QtGui import QScreen, QGuiApplication
 from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QPushButton, QMessageBox, QCheckBox
 
 from frontengine.show.video.video_player import VideoWidget
@@ -119,16 +119,16 @@ class VideoSettingUI(QWidget):
             message_box.show()
         else:
             front_engine_logger.info("start_play_gif")
-            if self.show_all_screen:
+            if not self.show_all_screen:
                 video_widget = self._create_video_widget()
                 video_widget.set_ui_window_flag(self.show_on_bottom_checkbox.isChecked())
                 video_widget.showMaximized()
             else:
-                monitors = QScreen.virtualSiblings(self.screen())
-                for screen in monitors:
-                    monitor = screen.availableGeometry()
+                monitors = QGuiApplication.screens()
+                for monitor in monitors:
                     video_widget = self._create_video_widget()
-                    video_widget.move(monitor.left(), monitor.top())
+                    video_widget.setScreen(monitor)
+                    video_widget.move(monitor.availableGeometry().topLeft())
                     video_widget.showMaximized()
 
     def choose_and_copy_file_to_cwd_gif_dir_then_play(self) -> None:

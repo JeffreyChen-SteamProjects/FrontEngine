@@ -1,14 +1,14 @@
-Video Page
+影片頁面
 ----
 
 .. image:: ../image/video/video.png
 
-* Video tab have below option:
-    * Opacity: Video opacity
-    * Play rate: Video play rate percentage (100 = 100%)
-    * Volume: Video volume percentage (100 = 100%)
-    * Show on all screen (Show video on all screen)
-    * Show on all window bottom (Video will hide on all window bottom)
-* Buttons
-    * Choose video file (use to choose video you want to play .mp4)
-    * Start play video (read options and start play video)
+* 影片選項卡具有以下選項:
+    * 不透明度: 影片的不透明度
+    * 撥放速率: 影片的播放速率趴數 (100 = 100%)
+    * 音量: 影片的撥放音量趴數 (100 = 100%)
+    * 在所有螢幕上顯示（在所有屏幕上顯示圖片）。
+    * 在所有視窗底部顯示（圖片將在所有視窗底部隱藏）。
+* 按鈕
+    * 選擇影片檔案 (用來選擇你想播放的 .mp4 檔案)
+    * 開始播放影片 (讀取設定並開始播放)

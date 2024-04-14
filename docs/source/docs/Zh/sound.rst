@@ -1,10 +1,10 @@
-Sound Page
+音樂頁面
 ----
 
 .. image:: ../image/sound/sound.png
 
-* Video tab have below option:
-    * Volume: Sound volume percentage (100 = 100%)
-* Buttons
-    * Choose wav file (choose .wav file to play)
-    * Choose sound file (choose0.mp3 .mp4 .wav to play)
+* 音樂選項卡具有以下選項:
+    * 音量: 音量趴數 (100 = 100%)
+* 按鈕
+    * 選擇 wav 檔案 (選擇 .wav 檔案來播放)
+    * 選擇 sound 檔案 (選擇 .mp3 .mp4 .wav 檔案來播放)
