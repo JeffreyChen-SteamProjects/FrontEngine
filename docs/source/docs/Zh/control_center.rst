@@ -1,4 +1,4 @@
-Control Center Page
+控制中心頁面
 ----
 
 .. image:: ../image/control_center/control_center.png

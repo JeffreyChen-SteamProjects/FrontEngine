@@ -1,4 +1,4 @@
-Scene Page
+場景頁面
 ----
 
 .. image:: ../image/scene/scene.png
