@@ -8,6 +8,7 @@ from PySide6.QtGui import QIcon, QAction, Qt
 from PySide6.QtWidgets import QMainWindow, QApplication, QGridLayout, QTabWidget, QMenuBar, QWidget
 from qt_material import apply_stylesheet, QtStyleTools
 
+from frontengine.ui.menu.help_menu import build_help_menu
 from frontengine.ui.menu.language_menu import build_language_menu
 from frontengine.system_tray.extend_system_tray import ExtendSystemTray
 from frontengine.ui.setting.control_center.control_center_ui import ControlCenterUI
@@ -62,7 +63,6 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
         )
         # Style menu bar
         self.menu_bar = QMenuBar()
-        build_language_menu(self)
         self.add_style_menu()
         self.setMenuBar(self.menu_bar)
         self.tab_widget.addTab(
@@ -93,6 +93,8 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
         )
         for widget_name, widget in FrontEngine_EXTEND_TAB.items():
             self.tab_widget.addTab(widget(), widget_name)
+        build_language_menu(self)
+        build_help_menu(self)
         # Set Icon
         self.icon_path = Path(os.getcwd() + "/je_driver_icon.ico")
         self.icon = QIcon(str(self.icon_path))
