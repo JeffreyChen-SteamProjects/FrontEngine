@@ -8,9 +8,9 @@ from PySide6.QtGui import QIcon, QAction, Qt
 from PySide6.QtWidgets import QMainWindow, QApplication, QGridLayout, QTabWidget, QMenuBar, QWidget
 from qt_material import apply_stylesheet, QtStyleTools
 
+from frontengine.system_tray.extend_system_tray import ExtendSystemTray
 from frontengine.ui.menu.help_menu import build_help_menu
 from frontengine.ui.menu.language_menu import build_language_menu
-from frontengine.system_tray.extend_system_tray import ExtendSystemTray
 from frontengine.ui.setting.control_center.control_center_ui import ControlCenterUI
 from frontengine.ui.setting.gif.gif_setting_ui import GIFSettingUI
 from frontengine.ui.setting.image.image_setting_ui import ImageSettingUI
@@ -113,7 +113,7 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
             self.debug_timer.start()
 
     def startup_setting(self) -> None:
-        pass
+        apply_stylesheet(self, theme=user_setting_dict.get("theme"))
 
     def add_style_menu(self) -> None:
         self.menu_bar.style_menu = self.menu_bar.addMenu(
@@ -131,6 +131,7 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
 
     def set_style(self) -> None:
         self.apply_stylesheet(self, self.sender().text())
+        user_setting_dict.update({"theme": self.sender().text()})
 
     def closeEvent(self, event) -> None:
         if ExtendSystemTray.isSystemTrayAvailable() and self.show_system_tray_ray:
@@ -159,7 +160,6 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
 def start_front_engine(debug: bool = False) -> None:
     main_app = QApplication(sys.argv)
     window = FrontEngineMainUI(debug=debug)
-    apply_stylesheet(main_app, theme='dark_amber.xml')
     window.showMaximized()
     try:
         window.startup_setting()
