@@ -124,12 +124,16 @@ class VideoSettingUI(QWidget):
                 video_widget.set_ui_window_flag(self.show_on_bottom_checkbox.isChecked())
                 video_widget.showMaximized()
             else:
+                count = 0
                 monitors = QGuiApplication.screens()
                 for monitor in monitors:
                     video_widget = self._create_video_widget()
+                    if count >= 1:
+                        video_widget.media_player.audioOutput().setVolume(0)
                     video_widget.setScreen(monitor)
                     video_widget.move(monitor.availableGeometry().topLeft())
                     video_widget.showMaximized()
+                    count = count + 1
 
     def choose_and_copy_file_to_cwd_gif_dir_then_play(self) -> None:
         self.ready_label.setText(
