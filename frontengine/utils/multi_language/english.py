@@ -118,6 +118,7 @@ english_word_dict = {
     "save_generation_image": "Save Image",
     # Help Menu
     "help_menu_label": "Help menu",
+    "help_menu_open_issue": "Open issue tracker",
     # HowTo Menu
-    "how_to_menu_label": "How to menu"
+    "how_to_menu_label": "How to menu",
 }

@@ -5,7 +5,8 @@ from frontengine.utils.json.json_file import read_json
 from frontengine.utils.json.json_file import write_json
 
 user_setting_dict = {
-    "language": "English"
+    "language": "English",
+    "theme": "dark_amber.xml",
 }
 
 

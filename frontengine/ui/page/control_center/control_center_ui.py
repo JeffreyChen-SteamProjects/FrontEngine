@@ -2,13 +2,13 @@ from PySide6.QtCore import QTimer, Qt
 from PySide6.QtWidgets import QGridLayout, QWidget, QPushButton, QTextEdit, QScrollArea
 
 from frontengine.ui.color.global_color import error_color, output_color
-from frontengine.ui.setting.gif.gif_setting_ui import GIFSettingUI
-from frontengine.ui.setting.image.image_setting_ui import ImageSettingUI
-from frontengine.ui.setting.scene_setting.scene_setting_ui import SceneSettingUI
-from frontengine.ui.setting.sound_player.sound_player_setting_ui import SoundPlayerSettingUI
-from frontengine.ui.setting.text.text_setting_ui import TextSettingUI
-from frontengine.ui.setting.video.video_setting_ui import VideoSettingUI
-from frontengine.ui.setting.web.web_setting_ui import WEBSettingUI
+from frontengine.ui.page.gif.gif_setting_ui import GIFSettingUI
+from frontengine.ui.page.image.image_setting_ui import ImageSettingUI
+from frontengine.ui.page.scene_setting.scene_setting_ui import SceneSettingUI
+from frontengine.ui.page.sound_player.sound_player_setting_ui import SoundPlayerSettingUI
+from frontengine.ui.page.text.text_setting_ui import TextSettingUI
+from frontengine.ui.page.video.video_setting_ui import VideoSettingUI
+from frontengine.ui.page.web.web_setting_ui import WEBSettingUI
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.redirect_manager.redirect_manager_class import redirect_manager_instance

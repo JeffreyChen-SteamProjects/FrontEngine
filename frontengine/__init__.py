@@ -9,16 +9,16 @@ from frontengine.show.video.video_player import VideoWidget
 from frontengine.show.web.webview import WebWidget
 from frontengine.ui.main_ui import start_front_engine
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
-from frontengine.ui.setting.text.text_setting_ui import TextSettingUI
-from frontengine.ui.setting.web.web_setting_ui import WEBSettingUI
-from frontengine.ui.setting.gif.gif_setting_ui import GIFSettingUI
-from frontengine.ui.setting.image.image_setting_ui import ImageSettingUI
-from frontengine.ui.setting.sound_player.sound_player_setting_ui import SoundPlayerSettingUI
-from frontengine.ui.setting.video.video_setting_ui import VideoSettingUI
-from frontengine.ui.setting.control_center.control_center_ui import ControlCenterUI
-from frontengine.ui.setting.scene_setting.scene_setting_ui import SceneSettingUI
+from frontengine.ui.page.text.text_setting_ui import TextSettingUI
+from frontengine.ui.page.web.web_setting_ui import WEBSettingUI
+from frontengine.ui.page.gif.gif_setting_ui import GIFSettingUI
+from frontengine.ui.page.image.image_setting_ui import ImageSettingUI
+from frontengine.ui.page.sound_player.sound_player_setting_ui import SoundPlayerSettingUI
+from frontengine.ui.page.video.video_setting_ui import VideoSettingUI
+from frontengine.ui.page.control_center.control_center_ui import ControlCenterUI
+from frontengine.ui.page.scene_setting.scene_setting_ui import SceneSettingUI
 from frontengine.ui.main_ui import FrontEngineMainUI
-from frontengine.ui.setting.scene_setting.scene_setting_ui import SceneControlSettingUI
+from frontengine.ui.page.scene_setting.scene_setting_ui import SceneControlSettingUI
 from frontengine.ui.main_ui import FrontEngine_EXTEND_TAB
 from frontengine.utils.redirect_manager.redirect_manager_class import RedirectManager
 

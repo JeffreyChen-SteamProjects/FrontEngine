@@ -117,5 +117,8 @@ traditional_chinese_word_dict = {
     "input_error": "請勿無輸入或空格",
     "save_generation_image": "儲存圖片",
     # Help Menu
+    "help_menu_label": "幫助選單",
+    "help_menu_open_issue": "開啟問題回報",
     # HowTo Menu
+    "how_to_menu_label": "問題選單",
 }
