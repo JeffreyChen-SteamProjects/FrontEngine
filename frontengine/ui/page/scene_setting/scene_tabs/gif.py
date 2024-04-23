@@ -4,7 +4,7 @@ from PySide6.QtWidgets import QWidget, QBoxLayout, QPushButton, QSlider, QLabel,
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 from frontengine.ui.dialog.choose_file_dialog import choose_gif
-from frontengine.ui.setting.scene_setting.scene_tabs.tableview_model import add_row_data
+from frontengine.ui.page.scene_setting.scene_tabs.tableview_model import add_row_data
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 
 

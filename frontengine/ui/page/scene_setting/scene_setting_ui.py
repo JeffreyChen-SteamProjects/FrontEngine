@@ -4,14 +4,14 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QWidget, QGridLayout, QTabWidget
 
 from frontengine.show.scene.scene import SceneManager
-from frontengine.ui.setting.scene_setting.scene_tabs.Image import ImageSceneSettingUI
-from frontengine.ui.setting.scene_setting.scene_tabs.gif import GIFSceneSettingUI
-from frontengine.ui.setting.scene_setting.scene_tabs.scene_control import SceneControlSettingUI
-from frontengine.ui.setting.scene_setting.scene_tabs.sound import SoundSceneSettingUI
-from frontengine.ui.setting.scene_setting.scene_tabs.text import TextSceneSettingUI
-from frontengine.ui.setting.scene_setting.scene_tabs.ui import UISceneSettingUI
-from frontengine.ui.setting.scene_setting.scene_tabs.video import VideoSceneSettingUI
-from frontengine.ui.setting.scene_setting.scene_tabs.web import WEBSceneSettingUI
+from frontengine.ui.page.scene_setting.scene_tabs.Image import ImageSceneSettingUI
+from frontengine.ui.page.scene_setting.scene_tabs.gif import GIFSceneSettingUI
+from frontengine.ui.page.scene_setting.scene_tabs.scene_control import SceneControlSettingUI
+from frontengine.ui.page.scene_setting.scene_tabs.sound import SoundSceneSettingUI
+from frontengine.ui.page.scene_setting.scene_tabs.text import TextSceneSettingUI
+from frontengine.ui.page.scene_setting.scene_tabs.ui import UISceneSettingUI
+from frontengine.ui.page.scene_setting.scene_tabs.video import VideoSceneSettingUI
+from frontengine.ui.page.scene_setting.scene_tabs.web import WEBSceneSettingUI
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 

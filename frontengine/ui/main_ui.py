@@ -11,14 +11,14 @@ from qt_material import apply_stylesheet, QtStyleTools
 from frontengine.system_tray.extend_system_tray import ExtendSystemTray
 from frontengine.ui.menu.help_menu import build_help_menu
 from frontengine.ui.menu.language_menu import build_language_menu
-from frontengine.ui.setting.control_center.control_center_ui import ControlCenterUI
-from frontengine.ui.setting.gif.gif_setting_ui import GIFSettingUI
-from frontengine.ui.setting.image.image_setting_ui import ImageSettingUI
-from frontengine.ui.setting.scene_setting.scene_setting_ui import SceneSettingUI
-from frontengine.ui.setting.sound_player.sound_player_setting_ui import SoundPlayerSettingUI
-from frontengine.ui.setting.text.text_setting_ui import TextSettingUI
-from frontengine.ui.setting.video.video_setting_ui import VideoSettingUI
-from frontengine.ui.setting.web.web_setting_ui import WEBSettingUI
+from frontengine.ui.page.control_center.control_center_ui import ControlCenterUI
+from frontengine.ui.page.gif.gif_setting_ui import GIFSettingUI
+from frontengine.ui.page.image.image_setting_ui import ImageSettingUI
+from frontengine.ui.page.scene_setting.scene_setting_ui import SceneSettingUI
+from frontengine.ui.page.sound_player.sound_player_setting_ui import SoundPlayerSettingUI
+from frontengine.ui.page.text.text_setting_ui import TextSettingUI
+from frontengine.ui.page.video.video_setting_ui import VideoSettingUI
+from frontengine.ui.page.web.web_setting_ui import WEBSettingUI
 from frontengine.user_setting.user_setting_file import write_user_setting, read_user_setting, user_setting_dict
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 

@@ -4,7 +4,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QWidget, QGridLayout, QPushButton, QHeaderView, QTableView, QScrollArea
 
 from frontengine.show.scene.scene import SceneManager
-from frontengine.ui.setting.scene_setting.scene_tabs.tableview_model import tableview_model, output_scene_as_json, \
+from frontengine.ui.page.scene_setting.scene_tabs.tableview_model import tableview_model, output_scene_as_json, \
     load_scene_json
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
