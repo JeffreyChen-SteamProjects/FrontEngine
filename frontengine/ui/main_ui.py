@@ -114,6 +114,7 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
 
     def startup_setting(self) -> None:
         apply_stylesheet(self, theme=user_setting_dict.get("theme"))
+        self.showMaximized()
 
     def add_style_menu(self) -> None:
         self.menu_bar.style_menu = self.menu_bar.addMenu(
@@ -160,7 +161,6 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
 def start_front_engine(debug: bool = False) -> None:
     main_app = QApplication(sys.argv)
     window = FrontEngineMainUI(debug=debug)
-    window.showMaximized()
     try:
         window.startup_setting()
     except Exception as error:

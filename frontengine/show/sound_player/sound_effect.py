@@ -26,8 +26,7 @@ class SoundEffectWidget(QWidget):
         self.sound_path = Path(sound_path)
         if self.sound_path.exists() and self.sound_path.is_file():
             # QUrl non ascii path encode, Avoid read wrong path and file name
-            source = QUrl.fromLocalFile(str(self.sound_path).encode())
-            source = source.fromEncoded(source.toEncoded())
+            source = QUrl.fromLocalFile(str(self.sound_path))
             print(f"Origin file {str(self.sound_path)}")
             self.sound_player.setSource(source)
             # -2 means loop forever

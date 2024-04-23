@@ -27,8 +27,7 @@ class VideoWidget(QVideoWidget):
             self.video_file_path = str(self.video_path)
             self.audioOutput = QAudioOutput()
             # QUrl non ascii path encode, Avoid read wrong path and file name
-            source = QUrl.fromLocalFile(str(self.video_file_path).encode())
-            source = source.fromEncoded(source.toEncoded())
+            source = QUrl.fromLocalFile(str(self.video_file_path))
             print(f"Origin file {str(self.video_file_path)}")
             self.media_player.setSource(source)
             self.media_player.setVideoOutput(self)

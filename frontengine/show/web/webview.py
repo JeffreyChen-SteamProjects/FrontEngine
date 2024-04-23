@@ -21,8 +21,7 @@ class WebWidget(QWebEngineView):
             self.web_url = Path(url)
             if self.web_url.exists() and self.web_url.is_file():
                 # QUrl non ascii path encode, Avoid read wrong path and file name
-                source = QUrl.fromLocalFile(str(self.web_url).encode())
-                source = source.fromEncoded(source.toEncoded())
+                source = QUrl.fromLocalFile(str(self.web_url))
                 print(f"Origin file {str(self.web_url)}")
                 self.load(source)
             else:
@@ -64,4 +63,3 @@ class WebWidget(QWebEngineView):
 
     def mouseGrabber(self) -> None:
         super().mouseGrabber()
-
