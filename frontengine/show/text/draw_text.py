@@ -8,7 +8,8 @@ from PySide6.QtWidgets import QWidget
 
 class TextWidget(QWidget):
 
-    def __init__(self, text: str, draw_location_x: int = 0, draw_location_y: int = 0):
+    def __init__(self, text: str, draw_location_x: int = 0, draw_location_y: int = 0,
+                 alignment: str = "Center"):
         super().__init__()
         self.draw_location_x = draw_location_x
         self.draw_location_y = draw_location_y
@@ -17,6 +18,16 @@ class TextWidget(QWidget):
         self.text = text
         self.font_size = 100
         self.opacity = 0.2
+        if alignment == "TopLeft":
+            self.alignment = (Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        elif alignment == "TopRight":
+            self.alignment = (Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignRight)
+        elif alignment == "BottomLeft":
+            self.alignment = (Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignLeft)
+        elif alignment == "BottomRight":
+            self.alignment = (Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight)
+        else:
+            self.alignment = Qt.AlignmentFlag.AlignCenter
         self.draw_font = QFontDatabase.font(self.font().family(), "", self.font_size)
         # Set Icon
         self.icon_path = Path(os.getcwd() + "/je_driver_icon.ico")
@@ -40,6 +51,9 @@ class TextWidget(QWidget):
     def set_ui_variable(self, opacity: float = 0.2) -> None:
         self.opacity = opacity
 
+    def set_font(self):
+        self.draw_font = QFontDatabase.font(self.font().family(), "", self.font_size)
+
     def paintEvent(self, event) -> None:
         painter = QPainter(self)
         painter.setFont(
@@ -49,7 +63,7 @@ class TextWidget(QWidget):
         painter.setOpacity(self.opacity)
         painter.drawText(
             QRect(self.draw_location_x, self.draw_location_y, self.width(), self.height()),
-            Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft,
+            int(self.alignment),
             self.text
         )
         painter.restore()
@@ -62,4 +76,3 @@ class TextWidget(QWidget):
 
     def mouseGrabber(self) -> None:
         super().mouseGrabber()
-

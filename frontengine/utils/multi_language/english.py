@@ -71,6 +71,7 @@ english_word_dict = {
     "sound_player_setting_message_box_sound": "Please choose a sound file",
     # Text setting ui
     "text_setting_start_draw": "Start draw text on screen",
+    "text_setting_choose_position": "Choose text alignment",
     # Video setting ui
     "video_setting_choose_file": "Choose video file",
     "video_setting_start_play": "Start Play Video",

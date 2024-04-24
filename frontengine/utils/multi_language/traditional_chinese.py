@@ -71,6 +71,8 @@ traditional_chinese_word_dict = {
     "sound_player_setting_message_box_sound": "請選擇音檔",
     # Text setting ui
     "text_setting_start_draw": "開始在螢幕上繪製文字",
+    "text_setting_choose_alignment": "選擇文字排列方式",
+    "text_setting_alignment_Top": "置頂",
     # Video setting ui
     "video_setting_choose_file": "選擇影片檔案",
     "video_setting_start_play": "開始撥放影片",

@@ -1,6 +1,6 @@
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QScreen, QGuiApplication
-from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QLineEdit, QPushButton, QCheckBox
+from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QLineEdit, QPushButton, QCheckBox, QComboBox
 
 from frontengine.show.text.draw_text import TextWidget
 from frontengine.utils.logging.loggin_instance import front_engine_logger
@@ -36,7 +36,7 @@ class TextSettingUI(QWidget):
             language_wrapper.language_word_dict.get("Font size")
         )
         self.font_size_slider.setMinimum(1)
-        self.font_size_slider.setMaximum(300)
+        self.font_size_slider.setMaximum(600)
         self.font_size_slider.setValue(100)
         self.font_size_slider.setTickInterval(1)
         self.font_size_slider_value_label = QLabel(str(self.font_size_slider.value()))
@@ -57,6 +57,16 @@ class TextSettingUI(QWidget):
         self.show_on_bottom_checkbox = QCheckBox(
             language_wrapper.language_word_dict.get("Show on bottom")
         )
+        # Text position
+        self.text_position_label = QLabel(
+            language_wrapper.language_word_dict.get("text_setting_choose_alignment")
+        )
+        self.text_position_combobox = QComboBox()
+        self.text_position_combobox.addItem("TopLeft")
+        self.text_position_combobox.addItem("TopRight")
+        self.text_position_combobox.addItem("BottomLeft")
+        self.text_position_combobox.addItem("BottomRight")
+        self.text_position_combobox.addItem("Center")
         # Add to layout
         self.grid_layout.addWidget(self.opacity_label, 0, 0)
         self.grid_layout.addWidget(self.opacity_slider_value_label, 0, 1)
@@ -66,18 +76,23 @@ class TextSettingUI(QWidget):
         self.grid_layout.addWidget(self.font_size_slider, 1, 2)
         self.grid_layout.addWidget(self.show_on_all_screen_checkbox, 2, 0)
         self.grid_layout.addWidget(self.show_on_bottom_checkbox, 2, 1)
-        self.grid_layout.addWidget(self.start_button, 3, 0)
-        self.grid_layout.addWidget(self.line_edit, 3, 2)
+        self.grid_layout.addWidget(self.text_position_label, 3, 0)
+        self.grid_layout.addWidget(self.text_position_combobox, 3, 1)
+        self.grid_layout.addWidget(self.start_button, 4, 0)
+        self.grid_layout.addWidget(self.line_edit, 4, 1)
         self.setLayout(self.grid_layout)
 
     def set_show_all_screen(self) -> None:
         self.show_all_screen = self.show_on_all_screen_checkbox.isChecked()
 
     def _create_text_widget(self) -> TextWidget:
-        text_widget = TextWidget(self.line_edit.text())
+        text_widget = TextWidget(
+            text=self.line_edit.text(),
+            alignment=self.text_position_combobox.currentText())
         text_widget.set_font_variable(self.font_size_slider.value())
         text_widget.set_ui_variable(float(self.opacity_slider.value()) / 100)
         text_widget.set_ui_window_flag(self.show_on_bottom_checkbox.isChecked())
+        text_widget.set_font()
         self.text_widget_list.append(text_widget)
         return text_widget
 

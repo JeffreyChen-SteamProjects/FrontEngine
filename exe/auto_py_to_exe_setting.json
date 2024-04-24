@@ -26,10 +26,6 @@
    "value": "FrontEngine"
   },
   {
-   "optionDest": "ascii",
-   "value": false
-  },
-  {
    "optionDest": "clean_build",
    "value": false
   },
@@ -46,10 +42,6 @@
    "value": false
   },
   {
-   "optionDest": "embed_manifest",
-   "value": true
-  },
-  {
    "optionDest": "uac_admin",
    "value": false
   },
@@ -58,11 +50,7 @@
    "value": false
   },
   {
-   "optionDest": "win_private_assemblies",
-   "value": false
-  },
-  {
-   "optionDest": "win_no_prefer_redirects",
+   "optionDest": "argv_emulation",
    "value": false
   },
   {
@@ -70,16 +58,12 @@
    "value": false
   },
   {
-   "optionDest": "argv_emulation",
-   "value": false
+   "optionDest": "pathex",
+   "value": "C:/Users/JeffreyChen/Desktop/Code_Space/FrontEngine/venv"
   },
   {
    "optionDest": "datas",
    "value": "C:/Users/JeffreyChen/Desktop/Code_Space/FrontEngine/exe/je_driver_icon.ico;."
-  },
-  {
-   "optionDest": "pathex",
-   "value": "C:/Users/JeffreyChen/Desktop/Code_Space/FrontEngine/venv"
   }
  ],
  "nonPyinstallerOptions": {
