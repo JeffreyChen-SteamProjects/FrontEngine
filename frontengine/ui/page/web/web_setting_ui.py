@@ -1,8 +1,9 @@
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QScreen
-from PySide6.QtWidgets import QWidget, QGridLayout, QLabel, QSlider, QLineEdit, QPushButton, QCheckBox
+from PySide6.QtWidgets import QWidget, QGridLayout, QLabel, QSlider, QLineEdit, QPushButton, QCheckBox, QDialog
 
 from frontengine.show.web.webview import WebWidget
+from frontengine.ui.page.utils import monitor_choose_dialog
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
@@ -93,12 +94,23 @@ class WEBSettingUI(QWidget):
         self.opacity_slider_value_label.setText(str(self.opacity_slider.value()))
 
     def start_open_web_with_url(self) -> None:
-        if not self.show_all_screen:
+        monitors = QScreen.virtualSiblings(self.screen())
+        if self.show_all_screen is False and len(monitors) <= 1:
             web_widget = self._create_web_widget()
             web_widget.showMaximized()
+        elif self.show_all_screen is False and len(monitors) >= 2:
+            input_dialog, combobox = monitor_choose_dialog(self, monitors)
+            result = input_dialog.exec_()
+            if result == QDialog.DialogCode.Accepted:
+                select_monitor_index = int(combobox.currentText())
+                if len(monitors) > select_monitor_index:
+                    monitor = monitors[select_monitor_index]
+                    gif_widget = self._create_web_widget()
+                    gif_widget.setScreen(monitor)
+                    gif_widget.move(monitor.availableGeometry().topLeft())
+                    gif_widget.showFullScreen()
         else:
             front_engine_logger.info("start_open_web_with_url")
-            monitors = QScreen.virtualSiblings(self.screen())
             for monitor in monitors:
                 web_widget = self._create_web_widget()
                 web_widget.setScreen(monitor)
