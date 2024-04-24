@@ -54,6 +54,9 @@ english_word_dict = {
     "seconds": "sec",
     "close_delay": "Message disappear time sec",
     "country_code": "locale code",
+    "show_on_which_monitor": "Show on which monitor",
+    "ok": "ok",
+    "no": "no",
     # GIF setting ui
     "gif_setting_ui_choose_file": "Choose GIF or WEBP file",
     "gif_setting_ui_play": "Start Play GIF or WEBP",

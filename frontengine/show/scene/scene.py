@@ -1,10 +1,9 @@
 from typing import List, Dict
 
-from PySide6.QtWidgets import QGraphicsProxyWidget, QWidget
+from PySide6.QtWidgets import QGraphicsProxyWidget
 
 from frontengine.show.gif.paint_gif import GifWidget
 from frontengine.show.image.paint_image import ImageWidget
-from frontengine.show.load.load_someone_make_ui import load_ui_file, read_extend_ui
 from frontengine.show.scene.extend_graphic_scene import ExtendGraphicScene
 from frontengine.show.scene.extend_graphic_view import ExtendGraphicView
 from frontengine.show.sound_player.sound_player import SoundPlayer
@@ -94,19 +93,6 @@ class SceneManager(object):
         web_widget.set_ui_variable(opacity)
         web_widget.set_ui_window_flag(enable_input=enable_input)
         proxy_widget = self.graphic_scene.addWidget(web_widget)
-        self.widget_list.append(proxy_widget)
-        return proxy_widget
-
-    def add_extend_ui_file(self, ui_setting_dict: Dict[str, str]) -> QGraphicsProxyWidget:
-        ui_path = ui_setting_dict.get("file_path")
-        extend_widget = load_ui_file(ui_path)
-        proxy_widget = self.graphic_scene.addWidget(extend_widget)
-        self.widget_list.append(proxy_widget)
-        return proxy_widget
-
-    def add_extend_ui(self, ui: QWidget) -> QGraphicsProxyWidget:
-        extend_widget = read_extend_ui(ui)
-        proxy_widget = self.graphic_scene.addWidget(extend_widget)
         self.widget_list.append(proxy_widget)
         return proxy_widget
 
