@@ -124,5 +124,6 @@ english_word_dict = {
     "help_menu_label": "Help menu",
     "help_menu_open_issue": "Open issue tracker",
     # HowTo Menu
-    "how_to_menu_label": "How to menu",
+    "doc_menu_label": "Doc menu",
+    "doc_menu_open_doc": "Open doc",
 }

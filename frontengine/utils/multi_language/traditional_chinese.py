@@ -125,5 +125,6 @@ traditional_chinese_word_dict = {
     "help_menu_label": "幫助選單",
     "help_menu_open_issue": "開啟問題回報",
     # HowTo Menu
-    "how_to_menu_label": "問題選單",
+    "doc_menu_label": "文件選單",
+    "doc_menu_open_doc": "開啟文件",
 }

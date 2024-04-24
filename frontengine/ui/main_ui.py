@@ -10,6 +10,7 @@ from qt_material import apply_stylesheet, QtStyleTools
 
 from frontengine.system_tray.extend_system_tray import ExtendSystemTray
 from frontengine.ui.menu.help_menu import build_help_menu
+from frontengine.ui.menu.how_to_menu import build_how_to_menu
 from frontengine.ui.menu.language_menu import build_language_menu
 from frontengine.ui.page.control_center.control_center_ui import ControlCenterUI
 from frontengine.ui.page.gif.gif_setting_ui import GIFSettingUI
@@ -95,6 +96,7 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
             self.tab_widget.addTab(widget(), widget_name)
         build_language_menu(self)
         build_help_menu(self)
+        build_how_to_menu(self)
         # Set Icon
         self.icon_path = Path(os.getcwd() + "/je_driver_icon.ico")
         self.icon = QIcon(str(self.icon_path))
