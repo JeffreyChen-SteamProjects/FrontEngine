@@ -96,8 +96,8 @@ english_word_dict = {
     "scene_choose_output_path_message_box": "Please choose a scene file output path",
     "scene_output": "output scene file",
     "scene_input": "load scene file",
-    "tableview_clear": "clear all setting",
-    "scene_control_panel": "Scene control panel",
+    "scene_script_clear": "clear all script",
+    "scene_script": "Scene script",
     # Chat scene input
     "chat_scene_input_title": "input chat content",
     "chat_scene_send_chat": "send text",

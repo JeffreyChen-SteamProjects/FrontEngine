@@ -97,8 +97,8 @@ traditional_chinese_word_dict = {
     "scene_choose_output_path_message_box": "請選擇場景檔案輸出路徑",
     "scene_output": "輸出場景檔案",
     "scene_input": "讀取場景檔案",
-    "tableview_clear": "清除所有設定",
-    "scene_control_panel": "場景控制中心",
+    "scene_script_clear": "清除所有腳本",
+    "scene_script": "場景腳本",
     # Chat scene input
     "chat_scene_input_title": "輸入聊天內容",
     "chat_scene_send_chat": "送出文字",

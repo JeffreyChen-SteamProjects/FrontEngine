@@ -18,7 +18,6 @@ from frontengine.ui.page.video.video_setting_ui import VideoSettingUI
 from frontengine.ui.page.control_center.control_center_ui import ControlCenterUI
 from frontengine.ui.page.scene_setting.scene_setting_ui import SceneSettingUI
 from frontengine.ui.main_ui import FrontEngineMainUI
-from frontengine.ui.page.scene_setting.scene_setting_ui import SceneControlSettingUI
 from frontengine.ui.main_ui import FrontEngine_EXTEND_TAB
 from frontengine.utils.redirect_manager.redirect_manager_class import RedirectManager
 
@@ -26,6 +25,6 @@ __all__ = [
     "start_front_engine", "GifWidget", "SoundPlayer", "SoundEffectWidget", "TextWidget",
     "WebWidget", "ImageWidget", "VideoWidget", "language_wrapper", "load_extend_ui_file", "load_ui_file",
     "TextSettingUI", "WEBSettingUI", "GIFSettingUI", "ImageSettingUI", "SoundPlayerSettingUI",
-    "VideoSettingUI", "ControlCenterUI", "SceneSettingUI", "FrontEngineMainUI", "SceneControlSettingUI",
+    "VideoSettingUI", "ControlCenterUI", "SceneSettingUI", "FrontEngineMainUI",
     "FrontEngine_EXTEND_TAB", "RedirectManager"
 ]
