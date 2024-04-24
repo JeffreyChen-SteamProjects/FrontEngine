@@ -15,8 +15,8 @@ class WebSceneSettingUI(QWidget):
     def update_scene_json(self):
         scene_json.update(
             {
-                "WEB": {
-
+                "SCENE": {
+                    "type": "WEB",
                 }
             }
         )

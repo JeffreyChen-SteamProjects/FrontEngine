@@ -15,8 +15,8 @@ class VideoSceneSettingUI(QWidget):
     def update_scene_json(self):
         scene_json.update(
             {
-                "VIDEO": {
-
+                "SCENE": {
+                    "type": "VIDEO",
                 }
             }
         )

@@ -15,8 +15,8 @@ class TextSceneSettingUI(QWidget):
     def update_scene_json(self):
         scene_json.update(
             {
-                "TEXT": {
-
+                "SCENE": {
+                    "type": "TEXT",
                 }
             }
         )

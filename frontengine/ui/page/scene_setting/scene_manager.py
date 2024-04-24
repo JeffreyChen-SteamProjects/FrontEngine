@@ -31,4 +31,7 @@ class SceneManagerUI(QWidget):
 
     def update_scene_json(self):
         choose_scene_json(self)
+        self.renew_json_plain_text()
+
+    def renew_json_plain_text(self):
         self.json_plaintext.setPlainText(json.dumps(scene_json, indent=4))
