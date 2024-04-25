@@ -85,6 +85,7 @@ english_word_dict = {
     "web_setting_open_enable_input": "Enable input",
     # Scene UI
     "tab_scene_text": "Scene",
+    "scene_start": "Start scene",
     "scene_table_view_type": "Type",
     "scene_file_path": "File path",
     "scene_setting_start_scene_button": "Start Scene",
@@ -94,6 +95,7 @@ english_word_dict = {
     "scene_add_text": "Add text to scene",
     "scene_add_video": "Add video to scene",
     "scene_add_web": "Add web to scene",
+    "scene_url_label": "URL",
     "scene_add_UI": "Add ui to scene",
     "scene_choose_message_box": "Please choose a scene file",
     "scene_choose_output_path_message_box": "Please choose a scene file output path",

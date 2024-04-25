@@ -23,7 +23,7 @@ class SceneSettingUI(QWidget):
         self.scene = SceneManager()
         # Tab
         self.tab_widget = QTabWidget(self)
-        self.scene_manager_ui = SceneManagerUI()
+        self.scene_manager_ui = SceneManagerUI(self.scene)
         self.tab_widget.addTab(
             self.scene_manager_ui, language_wrapper.language_word_dict.get("scene_script")
         )
@@ -51,5 +51,5 @@ class SceneSettingUI(QWidget):
 
     def close_scene(self) -> None:
         self.scene.widget_list.clear()
-        if self.scene.graphic_view.isEnabled() and self.scene.graphic_view.isVisible():
-            self.scene.graphic_view.close()
+        for view in self.scene.view_list:
+            view.close()

@@ -23,6 +23,7 @@ class GIFSceneSettingUI(QWidget):
         self.opacity_slider.setValue(20)
         self.opacity_slider.setTickInterval(1)
         self.opacity_slider_value_label = QLabel(str(self.opacity_slider.value()))
+        self.opacity_slider.actionTriggered.connect(self.opacity_trick)
         # Speed setting
         self.speed_label = QLabel(
             language_wrapper.language_word_dict.get("Speed")
@@ -34,6 +35,7 @@ class GIFSceneSettingUI(QWidget):
         self.speed_slider.setValue(100)
         self.speed_slider_value_label = QLabel(str(self.speed_slider.value()))
         self.speed_slider.setOrientation(Qt.Orientation.Horizontal)
+        self.speed_slider.actionTriggered.connect(self.speed_trick)
         # Choose file button
         self.choose_file_button = QPushButton(
             language_wrapper.language_word_dict.get("gif_setting_ui_choose_file")
@@ -61,6 +63,12 @@ class GIFSceneSettingUI(QWidget):
         self.grid_layout.addWidget(self.update_scene_button, 3, 0)
         self.setLayout(self.grid_layout)
 
+    def opacity_trick(self) -> None:
+        self.opacity_slider_value_label.setText(str(self.opacity_slider.value()))
+
+    def speed_trick(self) -> None:
+        self.speed_slider_value_label.setText(str(self.speed_slider.value()))
+
     def get_gif(self):
         self.ready_label.setText(
             language_wrapper.language_word_dict.get("Not Ready")
@@ -83,10 +91,10 @@ class GIFSceneSettingUI(QWidget):
         else:
             scene_json.update(
                 {
-                    "SCENE": {
+                    f"{len(scene_json)}": {
                         "type": "GIF",
-                        "gif_path": self.gif_image_path,
-                        "opacity": float(self.opacity_slider.value()) / 100,
+                        "file_path": self.gif_image_path,
+                        "opacity": self.opacity_slider.value(),
                         "speed": self.speed_slider.value()
                     }
                 }

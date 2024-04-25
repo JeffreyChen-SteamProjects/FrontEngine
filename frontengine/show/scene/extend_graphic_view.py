@@ -12,6 +12,7 @@ class ExtendGraphicView(QGraphicsView):
             Qt.WindowType.WindowType_Mask |
             Qt.WindowType.Tool
         )
+        self.setStyleSheet("background:transparent")
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -23,7 +24,7 @@ class ExtendGraphicView(QGraphicsView):
             pass
         else:
             current_position = event.position()
-            scene_position = self.mapToScene(QPoint(current_position.x(), current_position.y()))
+            scene_position = self.mapToScene(QPoint(int(current_position.x()), int(current_position.y())))
             view_width = self.viewport().width()
             view_height = self.viewport().height()
             horizon_scale = current_position.x() / view_width

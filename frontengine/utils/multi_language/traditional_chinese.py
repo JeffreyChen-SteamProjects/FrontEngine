@@ -86,6 +86,7 @@ traditional_chinese_word_dict = {
     "web_setting_open_enable_input": "啟用輸入",
     # Scene UI
     "tab_scene_text": "場景",
+    "scene_start": "開始場景",
     "scene_table_view_type": "類型",
     "scene_file_path": "檔案路徑",
     "scene_setting_start_scene_button": "開始場景",
@@ -95,6 +96,7 @@ traditional_chinese_word_dict = {
     "scene_add_text": "添加文字到場景",
     "scene_add_video": "添加影片到場景",
     "scene_add_web": "添加網頁到場景",
+    "scene_url_label": "網址",
     "scene_add_UI": "添加UI到場景",
     "scene_choose_message_box": "請選擇場景檔案",
     "scene_choose_output_path_message_box": "請選擇場景檔案輸出路徑",

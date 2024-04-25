@@ -54,6 +54,18 @@ class TextWidget(QWidget):
     def set_font(self):
         self.draw_font = QFontDatabase.font(self.font().family(), "", self.font_size)
 
+    def set_alignment(self, alignment: str = "Center") -> None:
+        if alignment == "TopLeft":
+            self.alignment = (Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        elif alignment == "TopRight":
+            self.alignment = (Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignRight)
+        elif alignment == "BottomLeft":
+            self.alignment = (Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignLeft)
+        elif alignment == "BottomRight":
+            self.alignment = (Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight)
+        else:
+            self.alignment = Qt.AlignmentFlag.AlignCenter
+
     def paintEvent(self, event) -> None:
         painter = QPainter(self)
         painter.setFont(

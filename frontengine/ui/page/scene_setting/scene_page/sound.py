@@ -24,26 +24,35 @@ class SoundSceneSettingUI(QWidget):
         self.volume_slider.setValue(100)
         self.volume_slider_value_label = QLabel(str(self.volume_slider.value()))
         self.volume_slider.setOrientation(Qt.Orientation.Horizontal)
+        self.volume_slider.actionTriggered.connect(self.volume_trick)
         # Choose file button
         self.player_sound_path: [str, None] = None
         # Choose file button
         self.choose_player_file_button = QPushButton(
             language_wrapper.language_word_dict.get("sound_player_setting_choose_sound_file")
         )
-        self.choose_player_file_button.clicked.connect(self.choose_and_copy_sound_file_to_cwd_sound_dir_then_play)
+        self.choose_player_file_button.clicked.connect(self.get_sound)
         # Ready label and variable
         self.player_ready_label = QLabel(
             language_wrapper.language_word_dict.get("Not Ready")
         )
+        self.update_scene_button = QPushButton(
+            language_wrapper.language_word_dict.get("scene_add_sound")
+        )
+        self.update_scene_button.clicked.connect(self.update_scene_json)
         self.grid_layout = QGridLayout()
         self.grid_layout.addWidget(self.volume_label, 0, 0)
         self.grid_layout.addWidget(self.volume_slider_value_label, 0, 1)
         self.grid_layout.addWidget(self.volume_slider, 0, 2)
         self.grid_layout.addWidget(self.choose_player_file_button, 1, 0)
         self.grid_layout.addWidget(self.player_ready_label, 1, 1)
+        self.grid_layout.addWidget(self.update_scene_button, 2, 0)
         self.setLayout(self.grid_layout)
 
-    def choose_and_copy_sound_file_to_cwd_sound_dir_then_play(self) -> None:
+    def volume_trick(self) -> None:
+        self.volume_slider_value_label.setText(str(self.volume_slider.value()))
+
+    def get_sound(self) -> None:
         self.player_ready_label.setText(
             language_wrapper.language_word_dict.get("Not Ready")
         )
@@ -65,10 +74,10 @@ class SoundSceneSettingUI(QWidget):
         else:
             scene_json.update(
                 {
-                    "SCENE": {
+                    f"{len(scene_json)}": {
                         "type": "SOUND",
-                        "sound_path": self.player_sound_path,
-                        "volume": float(self.volume_slider.value() / 100)
+                        "file_path": self.player_sound_path,
+                        "volume": self.volume_slider.value()
                     }
                 }
             )
