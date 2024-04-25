@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 
 from PySide6.QtCore import Qt, QUrl
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QIcon, QAction
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import QMessageBox
 
@@ -35,6 +35,13 @@ class WebWidget(QWebEngineView):
         if self.icon_path.exists() and self.icon_path.is_file():
             self.setWindowIcon(QIcon(str(self.icon_path)))
 
+    def contextMenuEvent(self, event):
+        self.menu = self.createStandardContextMenu()
+        self.close_action = QAction("Close")
+        self.close_action.triggered.connect(self.close)
+        self.menu.addAction(self.close_action)
+        self.menu.popup(event.globalPos())
+
     def set_ui_variable(self, opacity: float = 0.2) -> None:
         self.opacity = opacity
         self.setWindowOpacity(opacity)
@@ -56,6 +63,8 @@ class WebWidget(QWebEngineView):
         )
 
     def mousePressEvent(self, event) -> None:
+        # if event.button() == Qt.MouseButton.MiddleButton:
+        print(event.button())
         super().mousePressEvent(event)
 
     def mouseDoubleClickEvent(self, event) -> None:

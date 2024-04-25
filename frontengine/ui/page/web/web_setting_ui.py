@@ -1,4 +1,4 @@
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QEvent
 from PySide6.QtGui import QScreen
 from PySide6.QtWidgets import QWidget, QGridLayout, QLabel, QSlider, QLineEdit, QPushButton, QCheckBox, QDialog
 
@@ -88,7 +88,9 @@ class WEBSettingUI(QWidget):
             self.show_on_bottom_checkbox.isChecked()
         )
         self.web_widget_list.append(web_widget)
+
         return web_widget
+
 
     def opacity_trick(self) -> None:
         self.opacity_slider_value_label.setText(str(self.opacity_slider.value()))
@@ -97,7 +99,7 @@ class WEBSettingUI(QWidget):
         monitors = QScreen.virtualSiblings(self.screen())
         if self.show_all_screen is False and len(monitors) <= 1:
             web_widget = self._create_web_widget()
-            web_widget.showMaximized()
+            web_widget.showFullScreen()
         elif self.show_all_screen is False and len(monitors) >= 2:
             input_dialog, combobox = monitor_choose_dialog(self, monitors)
             result = input_dialog.exec_()

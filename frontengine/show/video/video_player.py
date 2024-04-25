@@ -7,6 +7,7 @@ from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PySide6.QtMultimediaWidgets import QVideoWidget
 from PySide6.QtWidgets import QMessageBox
 
+from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
@@ -17,13 +18,11 @@ class VideoWidget(QVideoWidget):
         self.opacity: float = 0.2
         self.volume: float = 1
         self.play_rate: float = 1
-        self.setAttribute(
-            Qt.WidgetAttribute.WA_TranslucentBackground
-        )
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         self.media_player = QMediaPlayer()
         self.video_path = Path(video_path)
         if self.video_path.exists() and self.video_path.is_file():
+            front_engine_logger.info("start_play_video")
             self.video_file_path = str(self.video_path)
             self.audioOutput = QAudioOutput()
             # QUrl non ascii path encode, Avoid read wrong path and file name
