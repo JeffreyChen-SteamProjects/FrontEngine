@@ -27,11 +27,56 @@ def build_language_menu(ui_we_want_to_set: FrontEngineMainUI) -> None:
     ui_we_want_to_set.language_menu.change_to_traditional_chinese_language_action.triggered.connect(
         lambda: set_language("Traditional_Chinese", ui_we_want_to_set)
     )
+    ui_we_want_to_set.language_menu.change_to_simplified_chinese_language_action = QAction(
+        language_wrapper.language_word_dict.get("language_menu_bar_simplified_chinese")
+    )
+    ui_we_want_to_set.language_menu.change_to_simplified_chinese_language_action.triggered.connect(
+        lambda: set_language("Simplified_Chinese", ui_we_want_to_set)
+    )
+    ui_we_want_to_set.language_menu.change_to_deutsch_language_action = QAction(
+        language_wrapper.language_word_dict.get("language_menu_bar_germany")
+    )
+    ui_we_want_to_set.language_menu.change_to_deutsch_language_action.triggered.connect(
+        lambda: set_language("Deutsch", ui_we_want_to_set)
+    )
+    ui_we_want_to_set.language_menu.change_to_russian_language_action = QAction(
+        language_wrapper.language_word_dict.get("language_menu_bar_russian")
+    )
+    ui_we_want_to_set.language_menu.change_to_russian_language_action.triggered.connect(
+        lambda: set_language("Russian", ui_we_want_to_set)
+    )
+    ui_we_want_to_set.language_menu.change_to_france_language_action = QAction(
+        language_wrapper.language_word_dict.get("language_menu_bar_french")
+    )
+    ui_we_want_to_set.language_menu.change_to_france_language_action.triggered.connect(
+        lambda: set_language("France", ui_we_want_to_set)
+    )
+    ui_we_want_to_set.language_menu.change_to_italian_language_action = QAction(
+        language_wrapper.language_word_dict.get("language_menu_bar_italian")
+    )
+    ui_we_want_to_set.language_menu.change_to_italian_language_action.triggered.connect(
+        lambda: set_language("Italy", ui_we_want_to_set)
+    )
     ui_we_want_to_set.language_menu.addAction(
         ui_we_want_to_set.language_menu.change_to_english_language_action
     )
     ui_we_want_to_set.language_menu.addAction(
         ui_we_want_to_set.language_menu.change_to_traditional_chinese_language_action
+    )
+    ui_we_want_to_set.language_menu.addAction(
+        ui_we_want_to_set.language_menu.change_to_simplified_chinese_language_action
+    )
+    ui_we_want_to_set.language_menu.addAction(
+        ui_we_want_to_set.language_menu.change_to_deutsch_language_action
+    )
+    ui_we_want_to_set.language_menu.addAction(
+        ui_we_want_to_set.language_menu.change_to_russian_language_action
+    )
+    ui_we_want_to_set.language_menu.addAction(
+        ui_we_want_to_set.language_menu.change_to_france_language_action
+    )
+    ui_we_want_to_set.language_menu.addAction(
+        ui_we_want_to_set.language_menu.change_to_italian_language_action
     )
 
 

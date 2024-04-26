@@ -5,6 +5,11 @@ traditional_chinese_word_dict = {
     # Language Menubar
     "language_menu_bar_english": "英文",
     "language_menu_bar_traditional_chinese": "繁體中文",
+    "language_menu_bar_simplified_chinese": "簡體中文",
+    "language_menu_bar_germany": "德文",
+    "language_menu_bar_russian": "俄羅斯文",
+    "language_menu_bar_french": "法文",
+    "language_menu_bar_italian": "義大利文",
     "language_menu_bar_please_restart_messagebox": "請重啟以應用更改",
     # Tab text
     "tab_video_text": "影片",

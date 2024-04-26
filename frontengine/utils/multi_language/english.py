@@ -5,6 +5,11 @@ english_word_dict = {
     # Language Menubar
     "language_menu_bar_english": "English",
     "language_menu_bar_traditional_chinese": "Traditional Chinese",
+    "language_menu_bar_simplified_chinese": "Simplified Chinese",
+    "language_menu_bar_germany": "Deutsch",
+    "language_menu_bar_russian": "Russian",
+    "language_menu_bar_french": "French",
+    "language_menu_bar_italian": "Italian",
     "language_menu_bar_please_restart_messagebox": "Please restart",
     # Tab text
     "tab_video_text": "Video",
