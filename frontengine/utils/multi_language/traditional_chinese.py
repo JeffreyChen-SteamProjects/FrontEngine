@@ -5,6 +5,11 @@ traditional_chinese_word_dict = {
     # Language Menubar
     "language_menu_bar_english": "英文",
     "language_menu_bar_traditional_chinese": "繁體中文",
+    "language_menu_bar_simplified_chinese": "簡體中文",
+    "language_menu_bar_germany": "德文",
+    "language_menu_bar_russian": "俄羅斯文",
+    "language_menu_bar_french": "法文",
+    "language_menu_bar_italian": "義大利文",
     "language_menu_bar_please_restart_messagebox": "請重啟以應用更改",
     # Tab text
     "tab_video_text": "影片",
@@ -54,6 +59,9 @@ traditional_chinese_word_dict = {
     "seconds": "秒",
     "close_delay": "字幕消失時間 秒",
     "country_code": "區域代碼",
+    "show_on_which_monitor": "顯示在哪個螢幕",
+    "ok": "確定",
+    "no": "否",
     # GIF setting ui
     "gif_setting_ui_choose_file": "選擇 GIF 或 WEBP 檔案",
     "gif_setting_ui_play": "開始撥放 GIF 或 WEBP",
@@ -71,6 +79,8 @@ traditional_chinese_word_dict = {
     "sound_player_setting_message_box_sound": "請選擇音檔",
     # Text setting ui
     "text_setting_start_draw": "開始在螢幕上繪製文字",
+    "text_setting_choose_alignment": "選擇文字排列方式",
+    "text_setting_alignment_Top": "置頂",
     # Video setting ui
     "video_setting_choose_file": "選擇影片檔案",
     "video_setting_start_play": "開始撥放影片",
@@ -81,6 +91,7 @@ traditional_chinese_word_dict = {
     "web_setting_open_enable_input": "啟用輸入",
     # Scene UI
     "tab_scene_text": "場景",
+    "scene_start": "開始場景",
     "scene_table_view_type": "類型",
     "scene_file_path": "檔案路徑",
     "scene_setting_start_scene_button": "開始場景",
@@ -90,13 +101,14 @@ traditional_chinese_word_dict = {
     "scene_add_text": "添加文字到場景",
     "scene_add_video": "添加影片到場景",
     "scene_add_web": "添加網頁到場景",
+    "scene_url_label": "網址",
     "scene_add_UI": "添加UI到場景",
     "scene_choose_message_box": "請選擇場景檔案",
     "scene_choose_output_path_message_box": "請選擇場景檔案輸出路徑",
     "scene_output": "輸出場景檔案",
     "scene_input": "讀取場景檔案",
-    "tableview_clear": "清除所有設定",
-    "scene_control_panel": "場景控制中心",
+    "scene_script_clear": "清除所有腳本",
+    "scene_script": "場景腳本",
     # Chat scene input
     "chat_scene_input_title": "輸入聊天內容",
     "chat_scene_send_chat": "送出文字",
@@ -120,5 +132,6 @@ traditional_chinese_word_dict = {
     "help_menu_label": "幫助選單",
     "help_menu_open_issue": "開啟問題回報",
     # HowTo Menu
-    "how_to_menu_label": "問題選單",
+    "doc_menu_label": "文件選單",
+    "doc_menu_open_doc": "開啟文件",
 }

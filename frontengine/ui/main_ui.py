@@ -10,6 +10,7 @@ from qt_material import apply_stylesheet, QtStyleTools
 
 from frontengine.system_tray.extend_system_tray import ExtendSystemTray
 from frontengine.ui.menu.help_menu import build_help_menu
+from frontengine.ui.menu.how_to_menu import build_how_to_menu
 from frontengine.ui.menu.language_menu import build_language_menu
 from frontengine.ui.page.control_center.control_center_ui import ControlCenterUI
 from frontengine.ui.page.gif.gif_setting_ui import GIFSettingUI
@@ -95,6 +96,7 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
             self.tab_widget.addTab(widget(), widget_name)
         build_language_menu(self)
         build_help_menu(self)
+        build_how_to_menu(self)
         # Set Icon
         self.icon_path = Path(os.getcwd() + "/je_driver_icon.ico")
         self.icon = QIcon(str(self.icon_path))
@@ -114,6 +116,7 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
 
     def startup_setting(self) -> None:
         apply_stylesheet(self, theme=user_setting_dict.get("theme"))
+        self.showMaximized()
 
     def add_style_menu(self) -> None:
         self.menu_bar.style_menu = self.menu_bar.addMenu(
@@ -160,7 +163,6 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
 def start_front_engine(debug: bool = False) -> None:
     main_app = QApplication(sys.argv)
     window = FrontEngineMainUI(debug=debug)
-    window.showMaximized()
     try:
         window.startup_setting()
     except Exception as error:

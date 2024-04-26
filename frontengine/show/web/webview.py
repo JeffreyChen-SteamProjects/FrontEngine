@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 
 from PySide6.QtCore import Qt, QUrl
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QIcon, QAction
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import QMessageBox
 
@@ -21,8 +21,7 @@ class WebWidget(QWebEngineView):
             self.web_url = Path(url)
             if self.web_url.exists() and self.web_url.is_file():
                 # QUrl non ascii path encode, Avoid read wrong path and file name
-                source = QUrl.fromLocalFile(str(self.web_url).encode())
-                source = source.fromEncoded(source.toEncoded())
+                source = QUrl.fromLocalFile(str(self.web_url))
                 print(f"Origin file {str(self.web_url)}")
                 self.load(source)
             else:
@@ -35,6 +34,13 @@ class WebWidget(QWebEngineView):
         self.icon_path = Path(os.getcwd() + "/je_driver_icon.ico")
         if self.icon_path.exists() and self.icon_path.is_file():
             self.setWindowIcon(QIcon(str(self.icon_path)))
+
+    def contextMenuEvent(self, event):
+        self.menu = self.createStandardContextMenu()
+        self.close_action = QAction("Close")
+        self.close_action.triggered.connect(self.close)
+        self.menu.addAction(self.close_action)
+        self.menu.popup(event.globalPos())
 
     def set_ui_variable(self, opacity: float = 0.2) -> None:
         self.opacity = opacity
@@ -57,6 +63,8 @@ class WebWidget(QWebEngineView):
         )
 
     def mousePressEvent(self, event) -> None:
+        # if event.button() == Qt.MouseButton.MiddleButton:
+        print(event.button())
         super().mousePressEvent(event)
 
     def mouseDoubleClickEvent(self, event) -> None:
@@ -64,4 +72,3 @@ class WebWidget(QWebEngineView):
 
     def mouseGrabber(self) -> None:
         super().mouseGrabber()
-

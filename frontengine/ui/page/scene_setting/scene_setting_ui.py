@@ -1,17 +1,14 @@
-from typing import Union
-
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QWidget, QGridLayout, QTabWidget
+from frontengine.ui.page.scene_setting.scene_page.gif import GIFSceneSettingUI
 
 from frontengine.show.scene.scene import SceneManager
-from frontengine.ui.page.scene_setting.scene_tabs.Image import ImageSceneSettingUI
-from frontengine.ui.page.scene_setting.scene_tabs.gif import GIFSceneSettingUI
-from frontengine.ui.page.scene_setting.scene_tabs.scene_control import SceneControlSettingUI
-from frontengine.ui.page.scene_setting.scene_tabs.sound import SoundSceneSettingUI
-from frontengine.ui.page.scene_setting.scene_tabs.text import TextSceneSettingUI
-from frontengine.ui.page.scene_setting.scene_tabs.ui import UISceneSettingUI
-from frontengine.ui.page.scene_setting.scene_tabs.video import VideoSceneSettingUI
-from frontengine.ui.page.scene_setting.scene_tabs.web import WEBSceneSettingUI
+from frontengine.ui.page.scene_setting.scene_manager import SceneManagerUI
+from frontengine.ui.page.scene_setting.scene_page.image import ImageSceneSettingUI
+from frontengine.ui.page.scene_setting.scene_page.sound import SoundSceneSettingUI
+from frontengine.ui.page.scene_setting.scene_page.text import TextSceneSettingUI
+from frontengine.ui.page.scene_setting.scene_page.video import VideoSceneSettingUI
+from frontengine.ui.page.scene_setting.scene_page.web import WebSceneSettingUI
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
@@ -22,27 +19,37 @@ class SceneSettingUI(QWidget):
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         self.grid_layout = QGridLayout()
         self.grid_layout.setContentsMargins(0, 0, 0, 0)
-        # Init variable
-        self.scene: Union[None, SceneManager] = None
-        self.scene_control_setting = SceneControlSettingUI()
-        # Tab widget
+        # scene
+        self.scene = SceneManager()
+        # Tab
         self.tab_widget = QTabWidget(self)
+        self.scene_manager_ui = SceneManagerUI(self.scene)
         self.tab_widget.addTab(
-            SceneControlSettingUI(), language_wrapper.language_word_dict.get("scene_control_panel"))
+            self.scene_manager_ui, language_wrapper.language_word_dict.get("scene_script")
+        )
         self.tab_widget.addTab(
-            ImageSceneSettingUI(), language_wrapper.language_word_dict.get("tab_image_text"))
+            GIFSceneSettingUI(self.scene_manager_ui), language_wrapper.language_word_dict.get("tab_gif_text")
+        )
         self.tab_widget.addTab(
-            GIFSceneSettingUI(), language_wrapper.language_word_dict.get("tab_gif_text"))
+            ImageSceneSettingUI(self.scene_manager_ui), language_wrapper.language_word_dict.get("tab_image_text")
+        )
         self.tab_widget.addTab(
-            TextSceneSettingUI(), language_wrapper.language_word_dict.get("tab_text_text"))
+            SoundSceneSettingUI(self.scene_manager_ui), language_wrapper.language_word_dict.get("tab_sound_text")
+        )
         self.tab_widget.addTab(
-            VideoSceneSettingUI(), language_wrapper.language_word_dict.get("tab_video_text"))
+            TextSceneSettingUI(self.scene_manager_ui), language_wrapper.language_word_dict.get("tab_text_text")
+        )
         self.tab_widget.addTab(
-            WEBSceneSettingUI(), language_wrapper.language_word_dict.get("tab_web_text"))
+            VideoSceneSettingUI(self.scene_manager_ui), language_wrapper.language_word_dict.get("tab_video_text")
+        )
         self.tab_widget.addTab(
-            SoundSceneSettingUI(), language_wrapper.language_word_dict.get("tab_sound_text"))
-        self.tab_widget.addTab(
-            UISceneSettingUI(), language_wrapper.language_word_dict.get("tab_external_ui"))
+            WebSceneSettingUI(self.scene_manager_ui), language_wrapper.language_word_dict.get("tab_web_text")
+        )
         # Add to layout
         self.grid_layout.addWidget(self.tab_widget, 0, 0, -1, -1)
         self.setLayout(self.grid_layout)
+
+    def close_scene(self) -> None:
+        self.scene.widget_list.clear()
+        for view in self.scene.view_list:
+            view.close()

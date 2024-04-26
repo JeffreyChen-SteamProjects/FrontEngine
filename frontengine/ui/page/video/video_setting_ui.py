@@ -1,9 +1,10 @@
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QScreen, QGuiApplication
-from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QPushButton, QMessageBox, QCheckBox
+from PySide6.QtGui import QGuiApplication
+from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QPushButton, QMessageBox, QCheckBox, QDialog
 
 from frontengine.show.video.video_player import VideoWidget
 from frontengine.ui.dialog.choose_file_dialog import choose_video
+from frontengine.ui.page.utils import monitor_choose_dialog
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
@@ -119,20 +120,30 @@ class VideoSettingUI(QWidget):
             message_box.show()
         else:
             front_engine_logger.info("start_play_gif")
-            if not self.show_all_screen:
+            monitors = QGuiApplication.screens()
+            if self.show_all_screen is False and len(monitors) <= 1:
                 video_widget = self._create_video_widget()
-                video_widget.set_ui_window_flag(self.show_on_bottom_checkbox.isChecked())
-                video_widget.showMaximized()
+                video_widget.showFullScreen()
+            elif self.show_all_screen is False and len(monitors) >= 2:
+                input_dialog, combobox = monitor_choose_dialog(self, monitors)
+                result = input_dialog.exec_()
+                if result == QDialog.DialogCode.Accepted:
+                    select_monitor_index = int(combobox.currentText())
+                    if len(monitors) > select_monitor_index:
+                        monitor = monitors[select_monitor_index]
+                        video_widget = self._create_video_widget()
+                        video_widget.setScreen(monitor)
+                        video_widget.move(monitor.availableGeometry().topLeft())
+                        video_widget.showFullScreen()
             else:
                 count = 0
-                monitors = QGuiApplication.screens()
                 for monitor in monitors:
                     video_widget = self._create_video_widget()
                     if count >= 1:
                         video_widget.media_player.audioOutput().setVolume(0)
                     video_widget.setScreen(monitor)
                     video_widget.move(monitor.availableGeometry().topLeft())
-                    video_widget.showMaximized()
+                    video_widget.showFullScreen()
                     count = count + 1
 
     def choose_and_copy_file_to_cwd_gif_dir_then_play(self) -> None:

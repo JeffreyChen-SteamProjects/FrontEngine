@@ -1,10 +1,6 @@
 PySide6
 qt-material
-re_edge_gpt
-pyttsx3
-SpeechRecognition
 frontengine
-PyAudio
 twine
 build
 steam

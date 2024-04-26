@@ -28,8 +28,7 @@ class SoundPlayer(QWidget):
             self.media_player.setAudioOutput(self.media_player_audio)
             self.media_player_audio = self.media_player.audioOutput()
             # QUrl non ascii path encode, Avoid read wrong path and file name
-            source = QUrl.fromLocalFile(str(self.sound_path).encode())
-            source = source.fromEncoded(source.toEncoded())
+            source = QUrl.fromLocalFile(str(self.sound_path))
             print(f"Origin file {str(self.sound_path)}")
             self.media_player.setSource(source)
             self.media_player.setLoops(-1)

@@ -68,12 +68,3 @@ def choose_video(
     return choose_file(
         trigger_ui=trigger_ui, file_filter=file_filter, extensions=extensions,
         warning_message=language_wrapper.language_word_dict.get("video_setting_message_box"))
-
-
-def choose_scene_json(
-        trigger_ui: QWidget, file_filter: str = "Json (*.json;)", extensions: list = None) -> str:
-    front_engine_logger.info("choose_scene_json")
-    extensions = extensions or [".json"]
-    return choose_file(
-        trigger_ui=trigger_ui, file_filter=file_filter, extensions=extensions,
-        warning_message=language_wrapper.language_word_dict.get("scene_choose_message_box"))

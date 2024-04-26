@@ -5,6 +5,11 @@ english_word_dict = {
     # Language Menubar
     "language_menu_bar_english": "English",
     "language_menu_bar_traditional_chinese": "Traditional Chinese",
+    "language_menu_bar_simplified_chinese": "Simplified Chinese",
+    "language_menu_bar_germany": "Deutsch",
+    "language_menu_bar_russian": "Russian",
+    "language_menu_bar_french": "French",
+    "language_menu_bar_italian": "Italian",
     "language_menu_bar_please_restart_messagebox": "Please restart",
     # Tab text
     "tab_video_text": "Video",
@@ -54,6 +59,9 @@ english_word_dict = {
     "seconds": "sec",
     "close_delay": "Message disappear time sec",
     "country_code": "locale code",
+    "show_on_which_monitor": "Show on which monitor",
+    "ok": "ok",
+    "no": "no",
     # GIF setting ui
     "gif_setting_ui_choose_file": "Choose GIF or WEBP file",
     "gif_setting_ui_play": "Start Play GIF or WEBP",
@@ -71,6 +79,7 @@ english_word_dict = {
     "sound_player_setting_message_box_sound": "Please choose a sound file",
     # Text setting ui
     "text_setting_start_draw": "Start draw text on screen",
+    "text_setting_choose_position": "Choose text alignment",
     # Video setting ui
     "video_setting_choose_file": "Choose video file",
     "video_setting_start_play": "Start Play Video",
@@ -81,6 +90,7 @@ english_word_dict = {
     "web_setting_open_enable_input": "Enable input",
     # Scene UI
     "tab_scene_text": "Scene",
+    "scene_start": "Start scene",
     "scene_table_view_type": "Type",
     "scene_file_path": "File path",
     "scene_setting_start_scene_button": "Start Scene",
@@ -90,13 +100,14 @@ english_word_dict = {
     "scene_add_text": "Add text to scene",
     "scene_add_video": "Add video to scene",
     "scene_add_web": "Add web to scene",
+    "scene_url_label": "URL",
     "scene_add_UI": "Add ui to scene",
     "scene_choose_message_box": "Please choose a scene file",
     "scene_choose_output_path_message_box": "Please choose a scene file output path",
     "scene_output": "output scene file",
     "scene_input": "load scene file",
-    "tableview_clear": "clear all setting",
-    "scene_control_panel": "Scene control panel",
+    "scene_script_clear": "clear all script",
+    "scene_script": "Scene script",
     # Chat scene input
     "chat_scene_input_title": "input chat content",
     "chat_scene_send_chat": "send text",
@@ -120,5 +131,6 @@ english_word_dict = {
     "help_menu_label": "Help menu",
     "help_menu_open_issue": "Open issue tracker",
     # HowTo Menu
-    "how_to_menu_label": "How to menu",
+    "doc_menu_label": "Doc menu",
+    "doc_menu_open_doc": "Open doc",
 }
