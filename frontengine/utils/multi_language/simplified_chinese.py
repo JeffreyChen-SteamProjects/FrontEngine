@@ -131,6 +131,8 @@ simplified_chinese_word_dict = {
     # Help Menu
     "help_menu_label": "帮助菜单",
     "help_menu_open_issue": "开启问题回报",
+    "how_to_critical_exit_action": "怎么强制关闭",
+    "how_to_critical_exit": "按下 F12 可以紧急关闭",
     # HowTo Menu
     "doc_menu_label": "文件菜单",
     "doc_menu_open_doc": "开启文件",

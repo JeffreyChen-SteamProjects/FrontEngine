@@ -4,3 +4,4 @@ frontengine
 twine
 build
 steam
+je-auto-control

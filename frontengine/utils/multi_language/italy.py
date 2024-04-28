@@ -131,6 +131,8 @@ italian_word_dict = {
     # Help Menu
     "help_menu_label": "Menu Aiuto",
     "help_menu_open_issue": "Apri un ticket di supporto",
+    "how_to_critical_exit_action": "Come forzare la chiusura",
+    "how_to_critical_exit": "Premere F12 per chiudere urgentemente",
     # HowTo Menu
     "doc_menu_label": "Menu Documentazione",
     "doc_menu_open_doc": "Apri la documentazione",

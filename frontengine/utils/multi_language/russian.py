@@ -131,6 +131,8 @@ russian_word_dict = {
     # Help Menu
     "help_menu_label": "Меню помощи",
     "help_menu_open_issue": "Открыть жалобу",
+    "how_to_critical_exit_action": "Как принудительно закрыть",
+    "how_to_critical_exit": "Нажмите F12, чтобы срочно закрыть",
     # HowTo Menu
     "doc_menu_label": "Меню документации",
     "doc_menu_open_doc": "Открыть документацию",

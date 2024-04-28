@@ -6,6 +6,7 @@ from typing import Dict, Type
 from PySide6.QtCore import QTimer, QCoreApplication
 from PySide6.QtGui import QIcon, QAction, Qt
 from PySide6.QtWidgets import QMainWindow, QApplication, QGridLayout, QTabWidget, QMenuBar, QWidget
+from je_auto_control import CriticalExit, keyboard_keys_table
 from qt_material import apply_stylesheet, QtStyleTools
 
 from frontengine.system_tray.extend_system_tray import ExtendSystemTray
@@ -21,6 +22,7 @@ from frontengine.ui.page.text.text_setting_ui import TextSettingUI
 from frontengine.ui.page.video.video_setting_ui import VideoSettingUI
 from frontengine.ui.page.web.web_setting_ui import WEBSettingUI
 from frontengine.user_setting.user_setting_file import write_user_setting, read_user_setting, user_setting_dict
+from frontengine.utils.critical_exit.critical_exit import FrontEngineCriticalExit
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 FrontEngine_EXTEND_TAB: Dict[str, Type[QWidget]] = {}
@@ -97,6 +99,10 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
         build_language_menu(self)
         build_help_menu(self)
         build_how_to_menu(self)
+        # Set critical exit
+        self.critical_ext = FrontEngineCriticalExit()
+        self.critical_ext.set_critical_key(keyboard_keys_table.get("f12"))
+        self.critical_ext.init_critical_exit()
         # Set Icon
         self.icon_path = Path(os.getcwd() + "/je_driver_icon.ico")
         self.icon = QIcon(str(self.icon_path))

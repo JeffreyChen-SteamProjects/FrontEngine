@@ -131,6 +131,8 @@ traditional_chinese_word_dict = {
     # Help Menu
     "help_menu_label": "幫助選單",
     "help_menu_open_issue": "開啟問題回報",
+    "how_to_critical_exit_action": "怎麼強制關閉",
+    "how_to_critical_exit": "按下 F12 可以緊急關閉",
     # HowTo Menu
     "doc_menu_label": "文件選單",
     "doc_menu_open_doc": "開啟文件",
