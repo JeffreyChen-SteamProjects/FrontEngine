@@ -3,5 +3,4 @@ qt-material
 frontengine
 twine
 build
-steam
 je-auto-control
