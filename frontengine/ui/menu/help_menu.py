@@ -1,5 +1,8 @@
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
+
+from PySide6.QtWidgets import QMessageBox
 
 if TYPE_CHECKING:
     from frontengine.ui.main_ui import FrontEngineMainUI
@@ -22,4 +25,20 @@ def build_help_menu(ui_we_want_to_set: FrontEngineMainUI) -> None:
     ui_we_want_to_set.help_menu.addAction(
         ui_we_want_to_set.help_menu.open_issue_action
     )
+    ui_we_want_to_set.help_menu.how_to_critical_exit = QAction(
+        language_wrapper.language_word_dict.get("how_to_critical_exit_action")
+    )
+    ui_we_want_to_set.help_menu.how_to_critical_exit.triggered.connect(
+        lambda: how_to_critical_exit(ui_we_want_to_set)
+    )
+    ui_we_want_to_set.help_menu.addAction(
+        ui_we_want_to_set.help_menu.how_to_critical_exit
+    )
 
+
+def how_to_critical_exit(ui_we_want_to_set: FrontEngineMainUI):
+    message_box: QMessageBox = QMessageBox(ui_we_want_to_set)
+    message_box.setText(
+        language_wrapper.language_word_dict.get("how_to_critical_exit")
+    )
+    message_box.show()

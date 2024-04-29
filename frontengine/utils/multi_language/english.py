@@ -130,6 +130,8 @@ english_word_dict = {
     # Help Menu
     "help_menu_label": "Help menu",
     "help_menu_open_issue": "Open issue tracker",
+    "how_to_critical_exit_action": "How to force close",
+    "how_to_critical_exit": "Press F12 to close urgently",
     # HowTo Menu
     "doc_menu_label": "Doc menu",
     "doc_menu_open_doc": "Open doc",

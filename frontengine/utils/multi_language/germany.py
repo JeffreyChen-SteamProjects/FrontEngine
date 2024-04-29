@@ -131,6 +131,8 @@ germany_word_dict = {
     # Hilfe-Menü  
     "help_menu_label": "Hilfe-Menü",
     "help_menu_open_issue": "Problem melden",
+    "how_to_critical_exit_action": "Wie erzwinge ich das Schließen",
+    "how_to_critical_exit": "Drücken Sie F12, um dringend zu schließen",
     # HowTo-Menü
     "doc_menu_label": "Dokumentations-Menü",  
     "doc_menu_open_doc": "Dokumentation öffnen",

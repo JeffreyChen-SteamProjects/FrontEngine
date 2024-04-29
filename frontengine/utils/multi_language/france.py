@@ -131,6 +131,8 @@ french_word_dict = {
     # Help Menu
     "help_menu_label": "Menu Aide",
     "help_menu_open_issue": "Ouvrir un rapport de problème",
+    "how_to_critical_exit_action": " Comment forcer la fermeture",
+    "how_to_critical_exit": "Appuyez sur F12 pour fermer d’urgence",
     # HowTo Menu
     "doc_menu_label": "Menu Documentation",
     "doc_menu_open_doc": "Ouvrir la documentation",

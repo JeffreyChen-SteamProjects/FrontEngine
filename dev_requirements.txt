@@ -1,7 +1,6 @@
 PySide6
 qt-material
-re_edge_gpt
-pyttsx3
-SpeechRecognition
-frontengine_dev
-PyAudio
+frontengine
+twine
+build
+je-auto-control
