@@ -38,11 +38,17 @@ class SceneManagerUI(QWidget):
             language_wrapper.language_word_dict.get("Show on all screen")
         )
         self.show_on_all_screen_checkbox.clicked.connect(self.set_show_all_screen)
+        # Clear json button
+        self.clear_json_button = QPushButton(
+            language_wrapper.language_word_dict.get("scene_script_clear")
+        )
+        self.clear_json_button.clicked.connect(self.json_plaintext.clear)
         # Add to layout
         self.grid_layout.addWidget(self.json_plaintext, 0, 0, -1, -1)
         self.grid_layout.addWidget(self.read_scene_json_button, 1, 0)
         self.grid_layout.addWidget(self.write_scene_json_button, 1, 1)
         self.grid_layout.addWidget(self.show_on_all_screen_checkbox, 2, 0)
+        self.grid_layout.addWidget(self.clear_json_button, 2, 1)
         self.grid_layout.addWidget(self.start_button, 3, 0, 1, 0)
         self.setLayout(self.grid_layout)
 
