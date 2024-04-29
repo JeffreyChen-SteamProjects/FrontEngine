@@ -1,6 +1,4 @@
 PySide6
 qt-material
 frontengine
-twine
-build
 je-auto-control
