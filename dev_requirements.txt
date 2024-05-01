@@ -3,4 +3,4 @@ qt-material
 frontengine
 twine
 build
-je-auto-control
+auto-py-to-exe
