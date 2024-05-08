@@ -2,6 +2,8 @@ import _thread
 import sys
 from threading import Thread
 
+from PySide6.QtWidgets import QApplication
+
 from frontengine.utils.critical_exit.check_key_is_press import check_key_is_press
 from frontengine.utils.critical_exit.win32_vk import keyboard_keys_table
 
@@ -37,7 +39,7 @@ class CriticalExit(Thread):
         try:
             while True:
                 if check_key_is_press(self._exit_check_key):
-                    _thread.interrupt_main()
+                    QApplication.exit(0)
         except Exception as error:
             print(repr(error), file=sys.stderr)
 
