@@ -11,28 +11,35 @@ from frontengine.show.scene.extend_graphic_view import ExtendGraphicView
 
 class ParticleWidget(QWidget):
 
-    def __init__(self, pixmap: QPixmap, particle_size: QSize, particle_direction: str):
+    def __init__(self, pixmap: QPixmap, particle_size: int, particle_direction: str, particle_count: int = 50,
+                 screen_height: int = 1920, screen_width: int = 1080, opacity: float = 0.2,
+                 particle_speed: int = 1):
         super().__init__()
-        self.pixmap = pixmap
-        self.pixmap.scaled(particle_size, Qt.AspectRatioMode.KeepAspectRatio)
+        if particle_size:
+            self.pixmap = pixmap.scaled(QSize(particle_size, particle_size), Qt.AspectRatioMode.KeepAspectRatio)
+        else:
+            self.pixmap = pixmap.scaled(QSize(pixmap.width(), pixmap.height()), Qt.AspectRatioMode.KeepAspectRatio)
         self.particle_view = ExtendGraphicView()
-        self.particle_scene = ParticleGraphicScene(self.pixmap, particle_direction)
+        self.particle_scene = ParticleGraphicScene(
+            self.pixmap, particle_direction, particle_count,
+            screen_height, screen_width, opacity, particle_speed)
         self.particle_view.setScene(self.particle_scene)
         self.grid_layout = QGridLayout()
         self.grid_layout.addWidget(self.particle_view, 0, 0, -1, -1)
         self.setLayout(self.grid_layout)
 
 
-class TestUI(QMainWindow, QtStyleTools):
-
-    def __init__(self):
-        super().__init__()
-        self.main_widget = ParticleWidget()
-        self.setCentralWidget(self.main_widget)
-        self.showMaximized()
-
-
-if __name__ == "__main__":
-    main_app = QApplication(sys.argv)
-    window = TestUI()
-    sys.exit(main_app.exec())
+# class TestUI(QMainWindow, QtStyleTools):
+#
+#     def __init__(self):
+#         super().__init__()
+#         self.pixmap = QPixmap("pipi.png")
+#         self.main_widget = ParticleWidget(self.pixmap, 128, "right_down")
+#         self.setCentralWidget(self.main_widget)
+#         self.showMaximized()
+#
+#
+# if __name__ == "__main__":
+#     main_app = QApplication(sys.argv)
+#     window = TestUI()
+#     sys.exit(main_app.exec())
