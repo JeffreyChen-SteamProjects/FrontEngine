@@ -12,7 +12,7 @@ from frontengine.show.scene.extend_graphic_view import ExtendGraphicView
 class ParticleWidget(QWidget):
 
     def __init__(self, pixmap: QPixmap, particle_size: int, particle_direction: str, particle_count: int = 50,
-                 screen_height: int = 1920, screen_width: int = 1080, opacity: float = 0.2,
+                 screen_height: int = 1080, screen_width: int = 1920, opacity: float = 0.2,
                  particle_speed: int = 1):
         super().__init__()
         if particle_size:
@@ -29,17 +29,17 @@ class ParticleWidget(QWidget):
         self.setLayout(self.grid_layout)
 
 
-# class TestUI(QMainWindow, QtStyleTools):
-#
-#     def __init__(self):
-#         super().__init__()
-#         self.pixmap = QPixmap("pipi.png")
-#         self.main_widget = ParticleWidget(self.pixmap, 128, "right_down")
-#         self.setCentralWidget(self.main_widget)
-#         self.showMaximized()
-#
-#
-# if __name__ == "__main__":
-#     main_app = QApplication(sys.argv)
-#     window = TestUI()
-#     sys.exit(main_app.exec())
+class TestUI(QMainWindow, QtStyleTools):
+
+    def __init__(self):
+        super().__init__()
+        self.pixmap = QPixmap("pipi.png")
+        self.main_widget = ParticleWidget(self.pixmap, 64, "random_add", particle_count=500)
+        self.setCentralWidget(self.main_widget)
+        self.showMaximized()
+
+
+if __name__ == "__main__":
+    main_app = QApplication(sys.argv)
+    window = TestUI()
+    sys.exit(main_app.exec())
