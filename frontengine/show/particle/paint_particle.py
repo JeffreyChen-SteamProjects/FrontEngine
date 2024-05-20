@@ -1,9 +1,6 @@
-import sys
-
 from PySide6.QtCore import QSize
 from PySide6.QtGui import QPixmap, Qt
-from PySide6.QtWidgets import QWidget, QApplication, QMainWindow, QGridLayout
-from qt_material import QtStyleTools
+from PySide6.QtWidgets import QWidget, QGridLayout
 
 from frontengine.show.particle.particle_scene import ParticleGraphicScene
 from frontengine.show.scene.extend_graphic_view import ExtendGraphicView
@@ -40,19 +37,3 @@ class ParticleWidget(QWidget):
             self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint)
         else:
             self.setWindowFlag(Qt.WindowType.WindowStaysOnBottomHint)
-
-
-class TestUI(QMainWindow, QtStyleTools):
-
-    def __init__(self):
-        super().__init__()
-        self.pixmap = QPixmap("pipi.png")
-        self.main_widget = ParticleWidget(self.pixmap, 200, "random_add", particle_count=1000)
-        self.setCentralWidget(self.main_widget)
-        self.showMaximized()
-
-
-if __name__ == "__main__":
-    main_app = QApplication(sys.argv)
-    window = TestUI()
-    sys.exit(main_app.exec())
