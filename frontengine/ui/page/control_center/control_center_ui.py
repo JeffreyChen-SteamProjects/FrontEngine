@@ -4,6 +4,7 @@ from PySide6.QtWidgets import QGridLayout, QWidget, QPushButton, QTextEdit, QScr
 from frontengine.ui.color.global_color import error_color, output_color
 from frontengine.ui.page.gif.gif_setting_ui import GIFSettingUI
 from frontengine.ui.page.image.image_setting_ui import ImageSettingUI
+from frontengine.ui.page.particle.particle_setting_ui import ParticleSettingUI
 from frontengine.ui.page.scene_setting.scene_setting_ui import SceneSettingUI
 from frontengine.ui.page.sound_player.sound_player_setting_ui import SoundPlayerSettingUI
 from frontengine.ui.page.text.text_setting_ui import TextSettingUI
@@ -24,7 +25,8 @@ class ControlCenterUI(QWidget):
             gif_setting_ui: GIFSettingUI,
             sound_player_setting_ui: SoundPlayerSettingUI,
             text_setting_ui: TextSettingUI,
-            scene_setting_ui: SceneSettingUI
+            scene_setting_ui: SceneSettingUI,
+            particle_setting_ui: ParticleSettingUI
     ):
         super().__init__()
         # Layout
@@ -39,6 +41,7 @@ class ControlCenterUI(QWidget):
         self.sound_player_setting_ui = sound_player_setting_ui
         self.text_setting_ui = text_setting_ui
         self.scene_setting_ui = scene_setting_ui
+        self.particle_setting_ui = particle_setting_ui
         # Close video widget
         self.clear_video_button = QPushButton(
             language_wrapper.language_word_dict.get("control_center_close_all_video")
@@ -155,6 +158,7 @@ class ControlCenterUI(QWidget):
         self.gif_setting_ui.gif_widget_list.clear()
         self.sound_player_setting_ui.sound_widget_list.clear()
         self.text_setting_ui.text_widget_list.clear()
+        self.particle_setting_ui.particle_list.clear()
         self.scene_setting_ui.close_scene()
 
     def redirect(self) -> None:
