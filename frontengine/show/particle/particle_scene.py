@@ -2,7 +2,7 @@ from typing import Callable
 
 from PySide6.QtCore import QTimer, QPoint, QRect
 from PySide6.QtGui import QPixmap
-from PySide6.QtWidgets import QGraphicsScene, QWidget
+from PySide6.QtWidgets import QGraphicsScene
 
 from frontengine.show.particle.particle_utils import particle_down, particle_up, particle_left, particle_right, \
     particle_left_down, particle_left_up, particle_right_down, particle_right_up, particle_random_minus, Particle, \

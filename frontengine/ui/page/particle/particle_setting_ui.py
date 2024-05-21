@@ -56,11 +56,13 @@ class ParticleSettingUI(QWidget):
         self.particle_size_combobox = QComboBox()
         for size in range(10, 310, 10):
             self.particle_size_combobox.addItem(str(size))
+        self.particle_size_combobox.setCurrentText("50")
         # Particle count
         self.particle_count_label = QLabel(language_wrapper.language_word_dict.get("particle_count"))
         self.particle_count_combobox = QComboBox()
         for count in range(50, 1010, 10):
             self.particle_count_combobox.addItem(str(count))
+        self.particle_count_combobox.setCurrentText("100")
         # Particle count
         self.particle_speed_label = QLabel(language_wrapper.language_word_dict.get("particle_speed"))
         self.particle_speed_combobox = QComboBox()
