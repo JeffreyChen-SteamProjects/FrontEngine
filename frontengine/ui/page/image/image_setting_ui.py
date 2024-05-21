@@ -100,10 +100,10 @@ class ImageSettingUI(QWidget):
                     select_monitor_index = int(combobox.currentText())
                     if len(monitors) > select_monitor_index:
                         monitor = monitors[select_monitor_index]
-                        gif_widget = self._create_image_widget()
-                        gif_widget.setScreen(monitor)
-                        gif_widget.move(monitor.availableGeometry().topLeft())
-                        gif_widget.showFullScreen()
+                        image_widget = self._create_image_widget()
+                        image_widget.setScreen(monitor)
+                        image_widget.move(monitor.availableGeometry().topLeft())
+                        image_widget.showFullScreen()
             else:
                 for monitor in monitors:
                     image_widget = self._create_image_widget()

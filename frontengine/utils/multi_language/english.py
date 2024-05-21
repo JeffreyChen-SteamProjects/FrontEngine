@@ -108,6 +108,13 @@ english_word_dict = {
     "scene_input": "load scene file",
     "scene_script_clear": "clear all script",
     "scene_script": "Scene script",
+    # Particle ui
+    "tab_particle_text": "Particle",
+    "choose_particle_direction": "Choose particle direction",
+    "particle_setting_ui_play": "Start play particle",
+    "particle_size": "Particle size",
+    "particle_count": "Particle count",
+    "particle_speed": "Particle speed",
     # Chat scene input
     "chat_scene_input_title": "input chat content",
     "chat_scene_send_chat": "send text",
