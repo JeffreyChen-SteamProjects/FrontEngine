@@ -109,6 +109,13 @@ germany_word_dict = {
     "scene_input": "Szenendatei laden", 
     "scene_script_clear": "Alle Skripte löschen",
     "scene_script": "Szenen-Skript",
+    # Particle ui
+    "tab_particle_text": "Partikel",
+    "choose_particle_direction": "Partikelrichtung auswählen",
+    "particle_setting_ui_play": "Partikelwiedergabe starten",
+    "particle_size": "Partikelgröße",
+    "particle_count": "Partikelanzahl",
+    "particle_speed": "Partikelgeschwindigkeit",
     # Chat-Szenen-Eingabe
     "chat_scene_input_title": "Chat-Inhalt eingeben",
     "chat_scene_send_chat": "Text senden",

@@ -109,6 +109,13 @@ italian_word_dict = {
     "scene_input": "Carica il file di scena",
     "scene_script_clear": "Cancella tutti gli script",
     "scene_script": "Script della scena",
+    # Particle ui
+    "tab_particle_text": "Particella",
+    "choose_particle_direction": "Scegli la direzione delle particelle",
+    "particle_setting_ui_play": "Avvia la riproduzione delle particelle",
+    "particle_size": "Dimensione delle particelle",
+    "particle_count": "Numero di particelle",
+    "particle_speed": "Velocità delle particelle",
     # Chat scene input
     "chat_scene_input_title": "Inserisci il contenuto della chat",
     "chat_scene_send_chat": "Invia il testo",

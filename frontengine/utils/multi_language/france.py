@@ -109,6 +109,13 @@ french_word_dict = {
     "scene_input": "Charger le fichier de scène",
     "scene_script_clear": "Effacer tous les scripts",
     "scene_script": "Script de scène",
+    # Particle ui
+    "tab_particle_text": "Particule",
+    "choose_particle_direction": "Choisissez la direction des particules",
+    "particle_setting_ui_play": "Démarrer la lecture des particules",
+    "particle_size": "Taille des particules",
+    "particle_count": "Nombre de particules",
+    "particle_speed": "Vitesse des particules",
     # Chat scene input
     "chat_scene_input_title": "Entrer le contenu de la discussion",
     "chat_scene_send_chat": "Envoyer le texte",
