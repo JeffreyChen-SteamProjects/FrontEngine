@@ -60,7 +60,7 @@ class ParticleSettingUI(QWidget):
         # Particle count
         self.particle_count_label = QLabel(language_wrapper.language_word_dict.get("particle_count"))
         self.particle_count_combobox = QComboBox()
-        for count in range(50, 1010, 10):
+        for count in range(50, 10010, 10):
             self.particle_count_combobox.addItem(str(count))
         self.particle_count_combobox.setCurrentText("100")
         # Particle count
