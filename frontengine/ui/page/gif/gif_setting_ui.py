@@ -5,7 +5,7 @@ from PySide6.QtWidgets import QWidget, QGridLayout, QLabel, QSlider, QPushButton
 
 from frontengine.show.gif.paint_gif import GifWidget
 from frontengine.ui.dialog.choose_file_dialog import choose_gif
-from frontengine.ui.page.utils import monitor_choose_dialog
+from frontengine.ui.page.utils import monitor_choose_dialog, check_show_fullscreen
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
@@ -61,6 +61,11 @@ class GIFSettingUI(QWidget):
             language_wrapper.language_word_dict.get("gif_setting_ui_play")
         )
         self.start_button.clicked.connect(self.start_play_gif)
+        # Expand
+        self.fullscreen_checkbox = QCheckBox(
+            language_wrapper.language_word_dict.get("fullscreen_checkbox_label")
+        )
+        self.fullscreen_checkbox.setChecked(True)
         # Show on all screen
         self.show_on_all_screen_checkbox = QCheckBox(
             language_wrapper.language_word_dict.get("Show on all screen")
@@ -79,6 +84,7 @@ class GIFSettingUI(QWidget):
         self.grid_layout.addWidget(self.speed_slider, 1, 2)
         self.grid_layout.addWidget(self.choose_file_button, 2, 0)
         self.grid_layout.addWidget(self.ready_label, 2, 1)
+        self.grid_layout.addWidget(self.fullscreen_checkbox, 2, 2)
         self.grid_layout.addWidget(self.start_button, 3, 0)
         self.grid_layout.addWidget(self.show_on_all_screen_checkbox, 3, 1)
         self.grid_layout.addWidget(self.show_on_bottom_checkbox, 3, 2)
@@ -116,15 +122,11 @@ class GIFSettingUI(QWidget):
                     if len(monitors) > select_monitor_index:
                         monitor = monitors[select_monitor_index]
                         gif_widget = self._create_gif_widget()
-                        gif_widget.setScreen(monitor)
-                        gif_widget.move(monitor.availableGeometry().topLeft())
-                        gif_widget.showFullScreen()
+                        check_show_fullscreen(gif_widget, self.fullscreen_checkbox, monitor)
             else:
                 for monitor in monitors:
                     gif_widget = self._create_gif_widget()
-                    gif_widget.setScreen(monitor)
-                    gif_widget.move(monitor.availableGeometry().topLeft())
-                    gif_widget.showFullScreen()
+                    check_show_fullscreen(gif_widget, self.fullscreen_checkbox, monitor)
 
     def choose_and_copy_file_to_cwd_gif_dir_then_play(self) -> None:
         self.ready_label.setText(

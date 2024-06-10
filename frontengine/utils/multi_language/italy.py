@@ -62,6 +62,7 @@ italian_word_dict = {
     "show_on_which_monitor": "Mostra su quale schermo",
     "ok": "OK",
     "no": "No",
+    "fullscreen_checkbox_label": "Schermo intero?",
     # GIF setting ui
     "gif_setting_ui_choose_file": "Scegli un file GIF o WEBP",
     "gif_setting_ui_play": "Avvia la riproduzione di GIF o WEBP",

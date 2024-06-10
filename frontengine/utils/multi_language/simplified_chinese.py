@@ -62,6 +62,7 @@ simplified_chinese_word_dict = {
     "show_on_which_monitor": "显示在哪个屏幕",
     "ok": "确定",
     "no": "否",
+    "fullscreen_checkbox_label": "全屏?",
     # GIF 设置 UI
     "gif_setting_ui_choose_file": "选择 GIF 或 WEBP 文件",
     "gif_setting_ui_play": "开始播放 GIF 或 WEBP",

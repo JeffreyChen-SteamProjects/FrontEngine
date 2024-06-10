@@ -62,6 +62,7 @@ french_word_dict = {
     "show_on_which_monitor": "Afficher sur quel écran",
     "ok": "OK",
     "no": "Non",
+    "fullscreen_checkbox_label": "Plein écran?",
     # GIF setting ui
     "gif_setting_ui_choose_file": "Choisir un fichier GIF ou WEBP",
     "gif_setting_ui_play": "Lancer la lecture du GIF ou WEBP",

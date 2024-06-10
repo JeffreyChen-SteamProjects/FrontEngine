@@ -45,6 +45,7 @@ class VideoWidget(QVideoWidget):
         if self.icon_path.exists() and self.icon_path.is_file():
             self.setWindowIcon(QIcon(str(self.icon_path)))
 
+
     def set_ui_window_flag(self, show_on_bottom: bool = False) -> None:
         self.setWindowFlag(
             Qt.WindowType.WindowTransparentForInput |

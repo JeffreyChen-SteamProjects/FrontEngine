@@ -62,6 +62,7 @@ russian_word_dict = {
     "show_on_which_monitor": "На каком мониторе показать",
     "ok": "ОК",
     "no": "Нет",
+    "fullscreen_checkbox_label": "Полноэкранный режим?",
     # GIF setting ui
     "gif_setting_ui_choose_file": "Выберите файл GIF или WEBP",
     "gif_setting_ui_play": "Начать воспроизведение GIF или WEBP",

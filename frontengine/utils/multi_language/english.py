@@ -62,6 +62,7 @@ english_word_dict = {
     "show_on_which_monitor": "Show on which monitor",
     "ok": "ok",
     "no": "no",
+    "fullscreen_checkbox_label": "Fullscreen?",
     # GIF setting ui
     "gif_setting_ui_choose_file": "Choose GIF or WEBP file",
     "gif_setting_ui_play": "Start Play GIF or WEBP",

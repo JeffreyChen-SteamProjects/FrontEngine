@@ -62,6 +62,7 @@ germany_word_dict = {
     "show_on_which_monitor": "Auf welchem Monitor anzeigen",
     "ok": "OK",
     "no": "Nein",
+    "fullscreen_checkbox_label": "Vollbild?",
     # GIF-Einstellungs-UI
     "gif_setting_ui_choose_file": "GIF- oder WEBP-Datei auswählen",
     "gif_setting_ui_play": "GIF oder WEBP abspielen",

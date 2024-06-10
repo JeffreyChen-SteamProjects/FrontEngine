@@ -1,4 +1,5 @@
-from PySide6.QtWidgets import QWidget, QDialog, QGridLayout, QLabel, QComboBox, QPushButton
+from PySide6.QtGui import QScreen
+from PySide6.QtWidgets import QWidget, QDialog, QGridLayout, QLabel, QComboBox, QPushButton, QCheckBox
 
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
@@ -21,3 +22,15 @@ def monitor_choose_dialog(parent: QWidget, monitors: list):
     grid_layout.addWidget(no_button, 2, 1)
     input_dialog.setLayout(grid_layout)
     return input_dialog, combobox
+
+
+def check_show_fullscreen(widget: QWidget, fullscreen_checkbox: QCheckBox, monitor: QScreen):
+    if fullscreen_checkbox.isChecked():
+        widget.setScreen(monitor)
+        widget.move(monitor.availableGeometry().topLeft())
+        widget.showFullScreen()
+    else:
+        widget.setScreen(monitor)
+        center = monitor.availableGeometry().center()
+        widget.move(center - widget.rect().center())
+        widget.show()
