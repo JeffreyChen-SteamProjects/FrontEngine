@@ -19,6 +19,7 @@ class ImageWidget(QWidget):
         if self.image_path.exists() and self.image_path.is_file():
             print(f"Origin file {str(self.image_path)}")
             self.image = QImage(str(self.image_path))
+            self.resize(self.image.size())
         else:
             message_box: QMessageBox = QMessageBox(self)
             message_box.setText(

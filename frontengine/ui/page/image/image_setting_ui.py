@@ -5,7 +5,8 @@ from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QPushButton
 
 from frontengine.show.image.paint_image import ImageWidget
 from frontengine.ui.dialog.choose_file_dialog import choose_image
-from frontengine.ui.page.utils import monitor_choose_dialog, check_show_fullscreen
+from frontengine.ui.page.utils import monitor_choose_dialog, check_show_fullscreen_multi_screen, \
+    check_show_fullscreen_one_screen
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
@@ -98,7 +99,7 @@ class ImageSettingUI(QWidget):
             monitors = QGuiApplication.screens()
             if self.show_all_screen is False and len(monitors) <= 1:
                 image_widget = self._create_image_widget()
-                image_widget.showFullScreen()
+                check_show_fullscreen_one_screen(image_widget, self.fullscreen_checkbox)
             elif self.show_all_screen is False and len(monitors) >= 2:
                 input_dialog, combobox = monitor_choose_dialog(self, monitors)
                 result = input_dialog.exec_()
@@ -107,12 +108,12 @@ class ImageSettingUI(QWidget):
                     if len(monitors) > select_monitor_index:
                         monitor = monitors[select_monitor_index]
                         image_widget = self._create_image_widget()
-                        check_show_fullscreen(image_widget, self.fullscreen_checkbox, monitor)
+                        check_show_fullscreen_multi_screen(image_widget, self.fullscreen_checkbox, monitor)
 
             else:
                 for monitor in monitors:
                     image_widget = self._create_image_widget()
-                    check_show_fullscreen(image_widget, self.fullscreen_checkbox, monitor)
+                    check_show_fullscreen_multi_screen(image_widget, self.fullscreen_checkbox, monitor)
 
     def choose_and_copy_file_to_cwd_image_dir_then_play(self) -> None:
         self.ready_label.setText(

@@ -24,7 +24,7 @@ def monitor_choose_dialog(parent: QWidget, monitors: list):
     return input_dialog, combobox
 
 
-def check_show_fullscreen(widget: QWidget, fullscreen_checkbox: QCheckBox, monitor: QScreen):
+def check_show_fullscreen_multi_screen(widget: QWidget, fullscreen_checkbox: QCheckBox, monitor: QScreen):
     if fullscreen_checkbox.isChecked():
         widget.setScreen(monitor)
         widget.move(monitor.availableGeometry().topLeft())
@@ -33,4 +33,11 @@ def check_show_fullscreen(widget: QWidget, fullscreen_checkbox: QCheckBox, monit
         widget.setScreen(monitor)
         center = monitor.availableGeometry().center()
         widget.move(center - widget.rect().center())
+        widget.show()
+
+
+def check_show_fullscreen_one_screen(widget: QWidget, fullscreen_checkbox: QCheckBox):
+    if fullscreen_checkbox.isChecked():
+        widget.showFullScreen()
+    else:
         widget.show()
