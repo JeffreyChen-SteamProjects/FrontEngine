@@ -62,6 +62,7 @@ simplified_chinese_word_dict = {
     "show_on_which_monitor": "显示在哪个屏幕",
     "ok": "确定",
     "no": "否",
+    "fullscreen_checkbox_label": "全屏?",
     # GIF 设置 UI
     "gif_setting_ui_choose_file": "选择 GIF 或 WEBP 文件",
     "gif_setting_ui_play": "开始播放 GIF 或 WEBP",
@@ -109,6 +110,13 @@ simplified_chinese_word_dict = {
     "scene_input": "读取场景文件",
     "scene_script_clear": "清除所有脚本",
     "scene_script": "场景脚本",
+    # Particle ui
+    "tab_particle_text": "粒子",
+    "choose_particle_direction": "选择粒子方向",
+    "particle_setting_ui_play": "开始播放粒子",
+    "particle_size": "粒子大小",
+    "particle_count": "粒子数量",
+    "particle_speed": "粒子速度",
     # Chat scene input
     "chat_scene_input_title": "输入聊天内容",
     "chat_scene_send_chat": "送出文字",

@@ -4,9 +4,9 @@ from pathlib import Path
 from typing import Dict, Type
 
 from PySide6.QtCore import QTimer, QCoreApplication
-from PySide6.QtGui import QIcon, QAction, Qt
+from PySide6.QtGui import QIcon, Qt
 from PySide6.QtWidgets import QMainWindow, QApplication, QGridLayout, QTabWidget, QMenuBar, QWidget
-from qt_material import apply_stylesheet, QtStyleTools
+from qt_material import apply_stylesheet
 
 from frontengine.system_tray.extend_system_tray import ExtendSystemTray
 from frontengine.ui.menu.help_menu import build_help_menu
@@ -29,7 +29,7 @@ from frontengine.utils.multi_language.language_wrapper import language_wrapper
 FrontEngine_EXTEND_TAB: Dict[str, Type[QWidget]] = {}
 
 
-class FrontEngineMainUI(QMainWindow, QtStyleTools):
+class FrontEngineMainUI(QMainWindow):
 
     def __init__(self, debug: bool = False, show_system_tray_ray: bool = True):
         super().__init__()
@@ -69,7 +69,6 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
         )
         # Style menu bar
         self.menu_bar = QMenuBar()
-        self.add_style_menu()
         self.setMenuBar(self.menu_bar)
         self.tab_widget.addTab(
             self.video_setting_ui, language_wrapper.language_word_dict.get("tab_video_text"))
@@ -131,22 +130,7 @@ class FrontEngineMainUI(QMainWindow, QtStyleTools):
         apply_stylesheet(self, theme=user_setting_dict.get("theme"))
         self.showMaximized()
 
-    def add_style_menu(self) -> None:
-        self.menu_bar.style_menu = self.menu_bar.addMenu(
-            language_wrapper.language_word_dict.get("menu_bar_ui_style")
-        )
-        for style in [
-            'dark_amber.xml', 'dark_blue.xml', 'dark_cyan.xml', 'dark_lightgreen.xml', 'dark_pink.xml',
-            'dark_purple.xml', 'dark_red.xml', 'dark_teal.xml', 'dark_yellow.xml', 'light_amber.xml',
-            'light_blue.xml', 'light_cyan.xml', 'light_cyan_500.xml', 'light_lightgreen.xml',
-            'light_pink.xml', 'light_purple.xml', 'light_red.xml', 'light_teal.xml', 'light_yellow.xml'
-        ]:
-            change_style_action = QAction(style, parent=self)
-            change_style_action.triggered.connect(self.set_style)
-            self.menu_bar.style_menu.addAction(change_style_action)
-
     def set_style(self) -> None:
-        self.apply_stylesheet(self, self.sender().text())
         user_setting_dict.update({"theme": self.sender().text()})
 
     def closeEvent(self, event) -> None:

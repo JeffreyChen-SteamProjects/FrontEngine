@@ -62,6 +62,7 @@ french_word_dict = {
     "show_on_which_monitor": "Afficher sur quel écran",
     "ok": "OK",
     "no": "Non",
+    "fullscreen_checkbox_label": "Plein écran?",
     # GIF setting ui
     "gif_setting_ui_choose_file": "Choisir un fichier GIF ou WEBP",
     "gif_setting_ui_play": "Lancer la lecture du GIF ou WEBP",
@@ -109,6 +110,13 @@ french_word_dict = {
     "scene_input": "Charger le fichier de scène",
     "scene_script_clear": "Effacer tous les scripts",
     "scene_script": "Script de scène",
+    # Particle ui
+    "tab_particle_text": "Particule",
+    "choose_particle_direction": "Choisissez la direction des particules",
+    "particle_setting_ui_play": "Démarrer la lecture des particules",
+    "particle_size": "Taille des particules",
+    "particle_count": "Nombre de particules",
+    "particle_speed": "Vitesse des particules",
     # Chat scene input
     "chat_scene_input_title": "Entrer le contenu de la discussion",
     "chat_scene_send_chat": "Envoyer le texte",

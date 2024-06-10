@@ -1,11 +1,12 @@
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QScreen, QGuiApplication
+from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QPushButton, QMessageBox, \
     QCheckBox, QDialog
 
 from frontengine.show.image.paint_image import ImageWidget
 from frontengine.ui.dialog.choose_file_dialog import choose_image
-from frontengine.ui.page.utils import monitor_choose_dialog
+from frontengine.ui.page.utils import monitor_choose_dialog, check_show_fullscreen_multi_screen, \
+    check_show_fullscreen_one_screen
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
@@ -50,6 +51,11 @@ class ImageSettingUI(QWidget):
             language_wrapper.language_word_dict.get("image_setting_ui_play")
         )
         self.start_button.clicked.connect(self.start_play_image)
+        # Expand
+        self.fullscreen_checkbox = QCheckBox(
+            language_wrapper.language_word_dict.get("fullscreen_checkbox_label")
+        )
+        self.fullscreen_checkbox.setChecked(True)
         # Show on all screen
         self.show_on_all_screen_checkbox = QCheckBox(
             language_wrapper.language_word_dict.get("Show on all screen")
@@ -65,6 +71,7 @@ class ImageSettingUI(QWidget):
         self.grid_layout.addWidget(self.opacity_slider, 0, 2)
         self.grid_layout.addWidget(self.choose_file_button, 1, 0)
         self.grid_layout.addWidget(self.ready_label, 1, 1)
+        self.grid_layout.addWidget(self.fullscreen_checkbox, 1, 2)
         self.grid_layout.addWidget(self.start_button, 2, 0)
         self.grid_layout.addWidget(self.show_on_all_screen_checkbox, 2, 1)
         self.grid_layout.addWidget(self.show_on_bottom_checkbox, 2, 2)
@@ -92,7 +99,7 @@ class ImageSettingUI(QWidget):
             monitors = QGuiApplication.screens()
             if self.show_all_screen is False and len(monitors) <= 1:
                 image_widget = self._create_image_widget()
-                image_widget.showFullScreen()
+                check_show_fullscreen_one_screen(image_widget, self.fullscreen_checkbox)
             elif self.show_all_screen is False and len(monitors) >= 2:
                 input_dialog, combobox = monitor_choose_dialog(self, monitors)
                 result = input_dialog.exec_()
@@ -101,15 +108,12 @@ class ImageSettingUI(QWidget):
                     if len(monitors) > select_monitor_index:
                         monitor = monitors[select_monitor_index]
                         image_widget = self._create_image_widget()
-                        image_widget.setScreen(monitor)
-                        image_widget.move(monitor.availableGeometry().topLeft())
-                        image_widget.showFullScreen()
+                        check_show_fullscreen_multi_screen(image_widget, self.fullscreen_checkbox, monitor)
+
             else:
                 for monitor in monitors:
                     image_widget = self._create_image_widget()
-                    image_widget.setScreen(monitor)
-                    image_widget.move(monitor.availableGeometry().topLeft())
-                    image_widget.showFullScreen()
+                    check_show_fullscreen_multi_screen(image_widget, self.fullscreen_checkbox, monitor)
 
     def choose_and_copy_file_to_cwd_image_dir_then_play(self) -> None:
         self.ready_label.setText(

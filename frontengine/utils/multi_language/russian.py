@@ -62,6 +62,7 @@ russian_word_dict = {
     "show_on_which_monitor": "На каком мониторе показать",
     "ok": "ОК",
     "no": "Нет",
+    "fullscreen_checkbox_label": "Полноэкранный режим?",
     # GIF setting ui
     "gif_setting_ui_choose_file": "Выберите файл GIF или WEBP",
     "gif_setting_ui_play": "Начать воспроизведение GIF или WEBP",
@@ -109,6 +110,13 @@ russian_word_dict = {
     "scene_input": "Входной файл сцены",
     "scene_script_clear": "Очистить все скрипты",
     "scene_script": "Сценарий сцены",
+    # Particle ui
+    "tab_particle_text": "Частица",
+    "choose_particle_direction": "Выберите направление частицы",
+    "particle_setting_ui_play": "Начать воспроизведение частиц",
+    "particle_size": "Размер частицы",
+    "particle_count": "Количество частиц",
+    "particle_speed": "Скорость частицы",
     # Chat scene input
     "chat_scene_input_title": "Введите содержание чата",
     "chat_scene_send_chat": "Отправить текст",

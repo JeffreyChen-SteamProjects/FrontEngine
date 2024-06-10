@@ -3,7 +3,7 @@ from PySide6.QtGui import QGuiApplication, QPixmap
 from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QPushButton, QMessageBox, \
     QCheckBox, QDialog, QComboBox
 
-from frontengine.show.particle.paint_particle import ParticleWidget
+from frontengine.show.particle.particle_ui import ParticleWidget
 from frontengine.ui.dialog.choose_file_dialog import choose_image
 from frontengine.ui.page.utils import monitor_choose_dialog
 from frontengine.utils.logging.loggin_instance import front_engine_logger
@@ -60,7 +60,7 @@ class ParticleSettingUI(QWidget):
         # Particle count
         self.particle_count_label = QLabel(language_wrapper.language_word_dict.get("particle_count"))
         self.particle_count_combobox = QComboBox()
-        for count in range(50, 1010, 10):
+        for count in range(50, 10010, 10):
             self.particle_count_combobox.addItem(str(count))
         self.particle_count_combobox.setCurrentText("100")
         # Particle count

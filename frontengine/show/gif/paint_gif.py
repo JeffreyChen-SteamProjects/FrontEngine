@@ -28,6 +28,7 @@ class GifWidget(QWidget):
             self.movie.frameChanged.connect(self.repaint)
             self.gif_label.setMovie(self.movie)
             self.movie.start()
+            self.resize(self.movie.frameRect().size())
         else:
             message_box: QMessageBox = QMessageBox(self)
             message_box.setText(

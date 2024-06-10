@@ -1,3 +1,4 @@
+import random
 from typing import Callable
 
 from PySide6.QtCore import QTimer, QPoint, QRect
@@ -5,7 +6,7 @@ from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QGraphicsScene
 
 from frontengine.show.particle.particle_utils import particle_down, particle_up, particle_left, particle_right, \
-    particle_left_down, particle_left_up, particle_right_down, particle_right_up, particle_random_minus, Particle, \
+    particle_left_down, particle_left_up, particle_right_down, particle_right_up, particle_random_minus, \
     particle_random_add, particle_random
 
 
@@ -40,26 +41,31 @@ class ParticleGraphicScene(QGraphicsScene):
         }.get(self.particle_direction)
         self.setSceneRect(QRect(0, 0, screen_width, screen_height))
         self.update_timer: QTimer = QTimer()
-        self.update_timer.setInterval(10)
-        self.update_timer.timeout.connect(self.update_particle)
+        self.update_timer.setInterval(100)
+        self.update_timer.timeout.connect(self.update_particle_xy)
         self.update_timer.start()
 
     def create_particle(self):
         self.particle_dict = {}
         for count in range(self.particle_count):
+            item = self.addPixmap(self.particle_pixmap)
+            item.setOpacity(self.opacity)
             self.particle_dict.update({
-                f"particle_{count}": Particle(self.screen_height, self.screen_width, self.particle_pixmap)
+                f"particle_{count}": {
+                    "x": random.randint(0, self.screen_width),
+                    "y": random.randint(0, self.screen_height),
+                    "height": self.screen_height,
+                    "width": self.screen_width,
+                    "pixmap_item": item,
+                }
             })
 
-    def update_particle(self):
-        self.clear()
+    def update_particle_xy(self):
         self.update_function(self.particle_dict, self.particle_speed)
         for particle_key, particle in self.particle_dict.items():
-            pixmap_item = self.addPixmap(particle.pixmap)
-            pixmap_item.setOpacity(self.opacity)
-            pixmap_item.setPos(particle.x, particle.y)
-            particle.pixmap_item = pixmap_item
-            if not self.sceneRect().contains(QPoint(particle.x, particle.y)):
-                self.removeItem(particle.pixmap_item)
+            pixmap_item = particle.get("pixmap_item")
+            pixmap_item.setPos(particle.get("x"), particle.get("y"))
+            if not self.sceneRect().contains(QPoint(particle.get("x"), particle.get("y"))):
+                self.removeItem(particle.get("pixmap_item"))
         if len(self.items()) == 0:
             self.create_particle()
