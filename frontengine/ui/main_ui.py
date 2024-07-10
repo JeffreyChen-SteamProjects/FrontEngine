@@ -31,10 +31,11 @@ FrontEngine_EXTEND_TAB: Dict[str, Type[QWidget]] = {}
 
 class FrontEngineMainUI(QMainWindow):
 
-    def __init__(self, debug: bool = False, show_system_tray_ray: bool = True):
+    def __init__(self, main_app: QApplication = None, debug: bool = False, show_system_tray_ray: bool = True):
         super().__init__()
         # User setting
         self.id = "FrontEngine"
+        self.main_app = main_app
         QCoreApplication.setAttribute(Qt.ApplicationAttribute.AA_EnableHighDpiScaling)
         if sys.platform in ["win32", "cygwin", "msys"]:
             from ctypes import windll
@@ -150,7 +151,8 @@ class FrontEngineMainUI(QMainWindow):
         self.sound_player_setting_ui.sound_widget_list.clear()
         self.text_setting_ui.text_widget_list.clear()
         super().close()
-        QCoreApplication.exit(0)
+        if self.main_app:
+            self.main_app.exit(0)
 
     @classmethod
     def debug_close(cls):
@@ -159,7 +161,7 @@ class FrontEngineMainUI(QMainWindow):
 
 def start_front_engine(debug: bool = False) -> None:
     main_app = QApplication(sys.argv)
-    window = FrontEngineMainUI(debug=debug)
+    window = FrontEngineMainUI(main_app=main_app, debug=debug)
     try:
         window.startup_setting()
     except Exception as error:

@@ -4,7 +4,7 @@ from pathlib import Path
 from PySide6.QtCore import Qt, QUrl
 from PySide6.QtGui import QIcon, QAction
 from PySide6.QtWebEngineWidgets import QWebEngineView
-from PySide6.QtWidgets import QMessageBox
+from PySide6.QtWidgets import QMessageBox, QMenu
 
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
@@ -13,6 +13,8 @@ class WebWidget(QWebEngineView):
 
     def __init__(self, url: str, is_file: bool = False):
         super().__init__()
+        self.menu = None
+        self.close_action = None
         self.opacity: float = 0.2
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         if not is_file:
@@ -36,10 +38,12 @@ class WebWidget(QWebEngineView):
             self.setWindowIcon(QIcon(str(self.icon_path)))
 
     def contextMenuEvent(self, event):
-        self.menu = self.createStandardContextMenu()
-        self.close_action = QAction("Close")
-        self.close_action.triggered.connect(self.close)
-        self.menu.addAction(self.close_action)
+        if self.close_action is None:
+            self.close_action = QAction("Close")
+            self.close_action.triggered.connect(self.close)
+        if self.menu is None:
+            self.menu = QMenu(self)
+            self.menu.addAction(self.close_action)
         self.menu.popup(event.globalPos())
 
     def set_ui_variable(self, opacity: float = 0.2) -> None:
