@@ -31,7 +31,8 @@ FrontEngine_EXTEND_TAB: Dict[str, Type[QWidget]] = {}
 
 class FrontEngineMainUI(QMainWindow):
 
-    def __init__(self, main_app: QApplication = None, debug: bool = False, show_system_tray_ray: bool = True):
+    def __init__(self, main_app: QApplication = None, debug: bool = False,
+                 show_system_tray_ray: bool = True, redirect_output: bool = True):
         super().__init__()
         # User setting
         self.id = "FrontEngine"
@@ -66,7 +67,8 @@ class FrontEngineMainUI(QMainWindow):
             self.sound_player_setting_ui,
             self.text_setting_ui,
             self.scene_setting_ui,
-            self.particle_setting_ui
+            self.particle_setting_ui,
+            redirect_output
         )
         # Style menu bar
         self.menu_bar = QMenuBar()

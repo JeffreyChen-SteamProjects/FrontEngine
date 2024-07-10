@@ -26,7 +26,8 @@ class ControlCenterUI(QWidget):
             sound_player_setting_ui: SoundPlayerSettingUI,
             text_setting_ui: TextSettingUI,
             scene_setting_ui: SceneSettingUI,
-            particle_setting_ui: ParticleSettingUI
+            particle_setting_ui: ParticleSettingUI,
+            redirect_output:bool = True
     ):
         super().__init__()
         # Layout
@@ -111,12 +112,13 @@ class ControlCenterUI(QWidget):
         self.grid_layout.addWidget(self.clear_all_button, 7, 0)
         self.grid_layout.addWidget(self.log_panel_scroll_area, 0, 1, -1, -1)
         self.setLayout(self.grid_layout)
-        # Redirect
-        self.redirect_timer = QTimer(self)
-        self.redirect_timer.setInterval(10)
-        self.redirect_timer.timeout.connect(self.redirect)
-        self.redirect_timer.start()
-        redirect_manager_instance.set_redirect(self, True)
+        if redirect_output:
+            # Redirect
+            self.redirect_timer = QTimer(self)
+            self.redirect_timer.setInterval(10)
+            self.redirect_timer.timeout.connect(self.redirect)
+            self.redirect_timer.start()
+            redirect_manager_instance.set_redirect(self, True)
 
     def clear_video(self) -> None:
         front_engine_logger.info("clear_video")
