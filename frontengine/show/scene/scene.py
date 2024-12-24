@@ -10,6 +10,7 @@ from frontengine.show.sound_player.sound_player import SoundPlayer
 from frontengine.show.text.draw_text import TextWidget
 from frontengine.show.video.video_player import VideoWidget
 from frontengine.show.web.webview import WebWidget
+from frontengine.utils.logging.loggin_instance import front_engine_logger
 
 
 class SceneManager(object):
@@ -17,12 +18,14 @@ class SceneManager(object):
     def __init__(
             self
     ):
+        front_engine_logger.info("Init SceneManager")
         super().__init__()
         self.graphic_scene = ExtendGraphicScene()
         self.widget_list: List[QGraphicsProxyWidget] = list()
         self.view_list: List[ExtendGraphicView] = []
 
     def add_image(self, setting_dict: Dict) -> QGraphicsProxyWidget:
+        front_engine_logger.info(f"SceneManager setting_dict: {setting_dict}")
         image_path = setting_dict.get("file_path")
         image_widget = ImageWidget(image_path)
         opacity = float(setting_dict.get("opacity")) / 100

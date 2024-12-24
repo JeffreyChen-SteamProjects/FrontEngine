@@ -5,12 +5,17 @@ from PySide6.QtCore import Qt, QRect
 from PySide6.QtGui import QPainter, QImage, QIcon
 from PySide6.QtWidgets import QWidget, QMessageBox
 
+from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
 class ImageWidget(QWidget):
 
     def __init__(self, image_path: str, draw_location_x: int = 0, draw_location_y: int = 0):
+        front_engine_logger.info("Init ImageWidget"
+                                 f"image_path: {image_path} "
+                                 f"draw_location_x: {draw_location_x} "
+                                 f" draw_location_y: {draw_location_y}")
         super().__init__()
         self.draw_location_x = draw_location_x
         self.draw_location_y = draw_location_y
@@ -34,6 +39,7 @@ class ImageWidget(QWidget):
             self.setWindowIcon(QIcon(str(self.icon_path)))
 
     def set_ui_window_flag(self, show_on_bottom: bool = False) -> None:
+        front_engine_logger.info(f"ImageWidget set_ui_window_flag show_on_bottom: {show_on_bottom}")
         self.setWindowFlag(
             Qt.WindowType.WindowTransparentForInput |
             Qt.WindowType.FramelessWindowHint |
@@ -45,9 +51,11 @@ class ImageWidget(QWidget):
             self.setWindowFlag(Qt.WindowType.WindowStaysOnBottomHint)
 
     def set_ui_variable(self, opacity: float = 0.2) -> None:
+        front_engine_logger.info(f"ImageWidget set_ui_variable opacity: {opacity}")
         self.opacity = opacity
 
     def paintEvent(self, event) -> None:
+        front_engine_logger.info(f"ImageWidget paintEvent event: {event}")
         painter = QPainter(self)
         painter.setOpacity(self.opacity)
         painter.drawImage(
@@ -56,10 +64,13 @@ class ImageWidget(QWidget):
         painter.restore()
 
     def mousePressEvent(self, event) -> None:
+        front_engine_logger.info(f"ImageWidget mousePressEvent event: {event}")
         super().mousePressEvent(event)
 
     def mouseDoubleClickEvent(self, event) -> None:
+        front_engine_logger.info(f"ImageWidget mouseDoubleClickEvent event: {event}")
         super().mouseDoubleClickEvent(event)
 
     def mouseGrabber(self) -> None:
+        front_engine_logger.info(f"ImageWidget mouseGrabber")
         super().mouseGrabber()

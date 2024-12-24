@@ -8,6 +8,7 @@ from PySide6.QtWidgets import QGraphicsScene
 from frontengine.show.particle.particle_utils import particle_down, particle_up, particle_left, particle_right, \
     particle_left_down, particle_left_up, particle_right_down, particle_right_up, particle_random_minus, \
     particle_random_add, particle_random
+from frontengine.utils.logging.loggin_instance import front_engine_logger
 
 
 class ParticleGraphicScene(QGraphicsScene):
@@ -16,6 +17,14 @@ class ParticleGraphicScene(QGraphicsScene):
                  particle_count: int = 500,
                  screen_height: int = 1920, screen_width: int = 1080, opacity: float = 0.2,
                  particle_speed: int = 1):
+        front_engine_logger.info("Init ParticleGraphicScene "
+                                 f"particle_pixmap: {particle_pixmap} "
+                                 f"particle_direction: {particle_direction} "
+                                 f"particle_count: {particle_count} "
+                                 f"screen_height: {screen_height} "
+                                 f"screen_width: {screen_width} "
+                                 f"opacity: {opacity} "
+                                 f"particle_speed: {particle_speed} ")
         super().__init__()
         self.particle_pixmap: QPixmap = particle_pixmap
         self.particle_direction: str = particle_direction
@@ -46,6 +55,7 @@ class ParticleGraphicScene(QGraphicsScene):
         self.update_timer.start()
 
     def create_particle(self):
+        front_engine_logger.info("ParticleGraphicScene create_particle")
         self.particle_dict = {}
         for count in range(self.particle_count):
             item = self.addPixmap(self.particle_pixmap)
@@ -61,6 +71,7 @@ class ParticleGraphicScene(QGraphicsScene):
             })
 
     def update_particle_xy(self):
+        front_engine_logger.info("ParticleGraphicScene update_particle_xy")
         self.update_function(self.particle_dict, self.particle_speed)
         for particle_key, particle in self.particle_dict.items():
             pixmap_item = particle.get("pixmap_item")
