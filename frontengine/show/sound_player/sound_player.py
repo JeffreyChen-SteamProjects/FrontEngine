@@ -6,12 +6,14 @@ from PySide6.QtGui import QIcon
 from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PySide6.QtWidgets import QWidget, QMessageBox
 
+from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
 class SoundPlayer(QWidget):
 
     def __init__(self, sound_path: str):
+        front_engine_logger.info(f"Init SoundPlayer sound_path: {sound_path}")
         super().__init__()
         self.volume: float = 1
         self.setWindowFlag(
@@ -45,9 +47,11 @@ class SoundPlayer(QWidget):
             self.setWindowIcon(QIcon(str(self.icon_path)))
 
     def set_player_variable(self, volume: float = 1) -> None:
+        front_engine_logger.info(f"SoundPlayer set_player_variable volume: {volume}")
         self.volume = volume
         self.media_player_audio.setVolume(self.volume)
 
     def closeEvent(self, event) -> None:
+        front_engine_logger.info(f"SoundPlayer closeEvent event: {event}")
         super().closeEvent(event)
         self.media_player.stop()
