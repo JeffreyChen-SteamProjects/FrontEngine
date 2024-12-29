@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from frontengine.utils.logging.loggin_instance import front_engine_logger
+
 if TYPE_CHECKING:
     from frontengine.ui.main_ui import FrontEngineMainUI
 
@@ -12,6 +14,7 @@ from PySide6.QtWidgets import QSystemTrayIcon, QMenu
 class ExtendSystemTray(QSystemTrayIcon):
 
     def __init__(self, main_window: FrontEngineMainUI):
+        front_engine_logger.info(f"Init ExtendSystemTray main_window: {main_window}")
         super().__init__(parent=main_window)
         self.menu = QMenu()
         self.main_window = main_window
@@ -31,9 +34,11 @@ class ExtendSystemTray(QSystemTrayIcon):
         self.activated.connect(self.clicked)
 
     def close_all(self):
+        front_engine_logger.info("ExtendSystemTray close_all")
         self.setVisible(False)
         self.main_window.close()
 
     def clicked(self, reason):
+        front_engine_logger.info(f"ExtendSystemTray clicked reason:{reason}")
         if reason == self.ActivationReason.DoubleClick:
             self.main_window.showMaximized()
