@@ -6,12 +6,16 @@ from PySide6.QtGui import QIcon, QAction
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import QMessageBox, QMenu
 
+from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
 class WebWidget(QWebEngineView):
 
     def __init__(self, url: str, is_file: bool = False):
+        front_engine_logger.info("Init WebWidget "
+                                 f"url: {url} "
+                                 f"is_file: {is_file}")
         super().__init__()
         self.menu = None
         self.close_action = None
@@ -38,6 +42,7 @@ class WebWidget(QWebEngineView):
             self.setWindowIcon(QIcon(str(self.icon_path)))
 
     def contextMenuEvent(self, event):
+        front_engine_logger.info(f"WebWidget contextMenuEvent event: {event}")
         if self.close_action is None:
             self.close_action = QAction("Close")
             self.close_action.triggered.connect(self.close)
@@ -47,10 +52,14 @@ class WebWidget(QWebEngineView):
         self.menu.popup(event.globalPos())
 
     def set_ui_variable(self, opacity: float = 0.2) -> None:
+        front_engine_logger.info(f"WebWidget set_ui_variable opacity: {opacity}")
         self.opacity = opacity
         self.setWindowOpacity(opacity)
 
     def set_ui_window_flag(self, enable_input: bool = False, show_on_bottom: bool = False) -> None:
+        front_engine_logger.info("WebWidget set_ui_window_flag "
+                                 f"enable_input: {enable_input} "
+                                 f"show_on_bottom: {show_on_bottom}")
         if not enable_input:
             self.setWindowFlag(
                 Qt.WindowType.WindowTransparentForInput
@@ -67,12 +76,15 @@ class WebWidget(QWebEngineView):
         )
 
     def mousePressEvent(self, event) -> None:
+        front_engine_logger.info(f"WebWidget mousePressEvent event: {event}")
         # if event.button() == Qt.MouseButton.MiddleButton:
         print(event.button())
         super().mousePressEvent(event)
 
     def mouseDoubleClickEvent(self, event) -> None:
+        front_engine_logger.info(f"WebWidget mouseDoubleClickEvent event: {event}")
         super().mouseDoubleClickEvent(event)
 
     def mouseGrabber(self) -> None:
+        front_engine_logger.info(f"WebWidget mouseGrabber")
         super().mouseGrabber()
