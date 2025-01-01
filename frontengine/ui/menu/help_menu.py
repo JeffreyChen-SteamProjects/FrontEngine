@@ -4,6 +4,8 @@ from typing import TYPE_CHECKING
 
 from PySide6.QtWidgets import QMessageBox
 
+from frontengine.utils.logging.loggin_instance import front_engine_logger
+
 if TYPE_CHECKING:
     from frontengine.ui.main_ui import FrontEngineMainUI
 
@@ -13,6 +15,7 @@ from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
 def build_help_menu(ui_we_want_to_set: FrontEngineMainUI) -> None:
+    front_engine_logger.info(f"help_menu.py build_help_menu ui_we_want_to_set: {ui_we_want_to_set}")
     ui_we_want_to_set.help_menu = ui_we_want_to_set.menu_bar.addMenu(
         language_wrapper.language_word_dict.get("help_menu_label")
     )
@@ -37,6 +40,7 @@ def build_help_menu(ui_we_want_to_set: FrontEngineMainUI) -> None:
 
 
 def how_to_critical_exit(ui_we_want_to_set: FrontEngineMainUI):
+    front_engine_logger.info(f"help_menu.py how_to_critical_exit ui_we_want_to_set: {ui_we_want_to_set}")
     message_box: QMessageBox = QMessageBox(ui_we_want_to_set)
     message_box.setText(
         language_wrapper.language_word_dict.get("how_to_critical_exit")
