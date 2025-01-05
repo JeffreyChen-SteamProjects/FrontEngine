@@ -3,11 +3,13 @@ from PySide6.QtWidgets import QWidget, QGridLayout
 
 from frontengine.show.clicker.clicker_scene import ClickerGraphicScene
 from frontengine.show.scene.extend_graphic_view import ExtendGraphicView
+from frontengine.utils.logging.loggin_instance import front_engine_logger
 
 
 class ClickerWidget(QWidget):
 
     def __init__(self):
+        front_engine_logger.info("Init ClickerWidget")
         super().__init__()
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
@@ -19,6 +21,7 @@ class ClickerWidget(QWidget):
         self.setLayout(self.grid_layout)
 
     def set_ui_window_flag(self, show_on_bottom: bool = False) -> None:
+        front_engine_logger.info("ClickerWidget set_ui_window_flag")
         self.setWindowFlag(
             Qt.WindowType.WindowTransparentForInput |
             Qt.WindowType.FramelessWindowHint |

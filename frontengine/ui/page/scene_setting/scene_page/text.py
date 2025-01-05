@@ -3,12 +3,14 @@ from PySide6.QtWidgets import QWidget, QGridLayout, QMessageBox, QSlider, QLabel
 
 from frontengine.ui.page.scene_setting.scene_manager import SceneManagerUI
 from frontengine.user_setting.scene_setting import scene_json
+from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
 class TextSceneSettingUI(QWidget):
 
     def __init__(self, script_ui: SceneManagerUI):
+        front_engine_logger.info(f"Init TextSceneSettingUI script_ui: {script_ui}")
         super().__init__()
         self.script_ui = script_ui
         # Opacity setting
@@ -66,12 +68,15 @@ class TextSceneSettingUI(QWidget):
         self.setLayout(self.grid_layout)
 
     def opacity_trick(self) -> None:
+        front_engine_logger.info("TextSceneSettingUI opacity_trick")
         self.opacity_slider_value_label.setText(str(self.opacity_slider.value()))
 
     def font_size_trick(self) -> None:
+        front_engine_logger.info("TextSceneSettingUI font_size_trick")
         self.font_size_slider_value_label.setText(str(self.font_size_slider.value()))
 
     def update_scene_json(self):
+        front_engine_logger.info("TextSceneSettingUI update_scene_json")
         if self.line_edit.text() == "" or self.line_edit.text().strip() == "":
             message_box = QMessageBox(self)
             message_box.setText(

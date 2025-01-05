@@ -8,6 +8,11 @@ from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 def choose_file(
         trigger_ui: QWidget, file_filter: str, extensions: list, warning_message: str) -> str:
+    front_engine_logger.info("choose_file_dialog.py choose_file "
+                             f" trigger_ui: {trigger_ui} "
+                             f" file_filter: {file_filter} "
+                             f" extensions: {extensions} "
+                             f" warning_message: {warning_message}")
     front_engine_logger.info("choose_file")
     file_path = QFileDialog().getOpenFileName(
         parent=trigger_ui,
@@ -27,6 +32,10 @@ def choose_file(
 
 def choose_gif(
         trigger_ui: QWidget, file_filter: str = "GIF WEBP (*.gif;*.webp)", extensions: list = None) -> str:
+    front_engine_logger.info("choose_file_dialog.py choose_gif "
+                             f" trigger_ui: {trigger_ui} "
+                             f" file_filter: {file_filter} "
+                             f" extensions: {extensions}")
     front_engine_logger.info("choose_gif")
     extensions = extensions or [".gif", ".webp"]
     return choose_file(
@@ -36,6 +45,10 @@ def choose_gif(
 
 def choose_image(
         trigger_ui: QWidget, file_filter: str = "Images (*.png;*.jpg;*.webp)", extensions: list = None) -> str:
+    front_engine_logger.info("choose_file_dialog.py choose_image "
+                             f" trigger_ui: {trigger_ui} "
+                             f" file_filter: {file_filter} "
+                             f" extensions: {extensions}")
     front_engine_logger.info("choose_image")
     extensions = extensions or [".png", ".jpg", ".webp"]
     return choose_file(
@@ -45,6 +58,10 @@ def choose_image(
 
 def choose_wav_sound(
         trigger_ui: QWidget, file_filter: str = "WAV (*.wav)", extensions: list = None) -> str:
+    front_engine_logger.info("choose_file_dialog.py choose_wav_sound "
+                             f" trigger_ui: {trigger_ui} "
+                             f" file_filter: {file_filter} "
+                             f" extensions: {extensions}")
     front_engine_logger.info("choose_wav_sound")
     extensions = extensions or [".wav"]
     return choose_file(
@@ -54,6 +71,10 @@ def choose_wav_sound(
 
 def choose_player_sound(
         trigger_ui: QWidget, file_filter: str = "Sound (*.mp4;*.mp3;*.wav)", extensions: list = None) -> str:
+    front_engine_logger.info("choose_file_dialog.py choose_player_sound "
+                             f" trigger_ui: {trigger_ui} "
+                             f" file_filter: {file_filter} "
+                             f" extensions: {extensions}")
     front_engine_logger.info("choose_player_sound")
     extensions = extensions or [".mp3", ".mp4", ".wav"]
     return choose_file(
@@ -63,6 +84,10 @@ def choose_player_sound(
 
 def choose_video(
         trigger_ui: QWidget, file_filter: str = "Video (*.mp4;)", extensions: list = None) -> str:
+    front_engine_logger.info("choose_file_dialog.py choose_video "
+                             f" trigger_ui: {trigger_ui} "
+                             f" file_filter: {file_filter} "
+                             f" extensions: {extensions}")
     front_engine_logger.info("choose_video")
     extensions = extensions or [".mp4"]
     return choose_file(

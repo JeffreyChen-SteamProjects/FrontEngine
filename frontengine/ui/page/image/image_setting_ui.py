@@ -14,6 +14,7 @@ from frontengine.utils.multi_language.language_wrapper import language_wrapper
 class ImageSettingUI(QWidget):
 
     def __init__(self):
+        front_engine_logger.info("Init ImageSettingUI")
         super().__init__()
         self.grid_layout = QGridLayout()
         self.grid_layout = QGridLayout(self)
@@ -78,9 +79,11 @@ class ImageSettingUI(QWidget):
         self.setLayout(self.grid_layout)
 
     def set_show_all_screen(self) -> None:
+        front_engine_logger.info("ImageSettingUI set_show_all_screen")
         self.show_all_screen = self.show_on_all_screen_checkbox.isChecked()
 
     def _create_image_widget(self) -> ImageWidget:
+        front_engine_logger.info("ImageSettingUI _create_image_widget")
         image_widget = ImageWidget(image_path=self.image_path)
         image_widget.set_ui_variable(opacity=float(self.opacity_slider.value()) / 100)
         image_widget.set_ui_window_flag(self.show_on_bottom_checkbox.isChecked())
@@ -88,6 +91,7 @@ class ImageSettingUI(QWidget):
         return image_widget
 
     def start_play_image(self) -> None:
+        front_engine_logger.info("ImageSettingUI start_play_image")
         if self.image_path is None or self.ready_to_play is False:
             message_box = QMessageBox(self)
             message_box.setText(
@@ -116,6 +120,7 @@ class ImageSettingUI(QWidget):
                     check_show_fullscreen_multi_screen(image_widget, self.fullscreen_checkbox, monitor)
 
     def choose_and_copy_file_to_cwd_image_dir_then_play(self) -> None:
+        front_engine_logger.info("ImageSettingUI choose_and_copy_file_to_cwd_image_dir_then_play")
         self.ready_label.setText(
             language_wrapper.language_word_dict.get("Not Ready")
         )
@@ -128,4 +133,5 @@ class ImageSettingUI(QWidget):
             self.ready_to_play = True
 
     def opacity_trick(self) -> None:
+        front_engine_logger.info("ImageSettingUI opacity_trick")
         self.opacity_slider_value_label.setText(str(self.opacity_slider.value()))

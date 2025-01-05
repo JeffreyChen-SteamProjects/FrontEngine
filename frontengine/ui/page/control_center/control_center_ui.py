@@ -29,6 +29,16 @@ class ControlCenterUI(QWidget):
             particle_setting_ui: ParticleSettingUI,
             redirect_output:bool = True
     ):
+        front_engine_logger.info("Init ControlCenterUI "
+                                 f"video_setting_ui: {video_setting_ui} "
+                                 f"image_setting_ui: {image_setting_ui} "
+                                 f"web_setting_ui: {web_setting_ui} "
+                                 f"gif_setting_ui: {gif_setting_ui} "
+                                 f"sound_player_setting_ui: {sound_player_setting_ui} "
+                                 f"text_setting_ui: {text_setting_ui} "
+                                 f"scene_setting_ui: {scene_setting_ui} "
+                                 f"particle_setting_ui: {particle_setting_ui} "
+                                 f"redirect_output: {redirect_output}")
         super().__init__()
         # Layout
         self.grid_layout = QGridLayout()
@@ -118,42 +128,42 @@ class ControlCenterUI(QWidget):
             self.redirect_timer.setInterval(10)
             self.redirect_timer.timeout.connect(self.redirect)
             self.redirect_timer.start()
-            redirect_manager_instance.set_redirect(self, True)
+            redirect_manager_instance.set_redirect()
 
     def clear_video(self) -> None:
-        front_engine_logger.info("clear_video")
+        front_engine_logger.info(f"ControlCenterUI clear_video")
         self.video_setting_ui.video_widget_list.clear()
 
     def clear_image(self) -> None:
-        front_engine_logger.info("clear_image")
+        front_engine_logger.info(f"ControlCenterUI clear_image")
         self.image_setting_ui.image_widget_list.clear()
 
     def clear_gif(self) -> None:
-        front_engine_logger.info("clear_gif")
+        front_engine_logger.info("ControlCenterUI clear_gif")
         self.gif_setting_ui.gif_widget_list.clear()
 
     def clear_web(self) -> None:
-        front_engine_logger.info("clear_web")
+        front_engine_logger.info("ControlCenterUI clear_web")
         self.web_setting_ui.web_widget_list.clear()
 
     def clear_sound(self) -> None:
-        front_engine_logger.info("clear_sound")
+        front_engine_logger.info("ControlCenterUI clear_sound")
         self.sound_player_setting_ui.sound_widget_list.clear()
 
     def clear_text(self) -> None:
-        front_engine_logger.info("clear_text")
+        front_engine_logger.info("ControlCenterUI clear_text")
         self.text_setting_ui.text_widget_list.clear()
 
     def clear_redirect(self) -> None:
-        front_engine_logger.info("clear_redirect")
+        front_engine_logger.info("ControlCenterUI clear_redirect")
         self.log_panel.clear()
 
     def clear_scene(self) -> None:
-        front_engine_logger.info("clear_scene")
+        front_engine_logger.info("ControlCenterUI clear_scene")
         self.scene_setting_ui.close_scene()
 
     def clear_all(self) -> None:
-        front_engine_logger.info("clear_all")
+        front_engine_logger.info("ControlCenterUI clear_all")
         self.video_setting_ui.video_widget_list.clear()
         self.image_setting_ui.image_widget_list.clear()
         self.web_setting_ui.web_widget_list.clear()
@@ -164,6 +174,7 @@ class ControlCenterUI(QWidget):
         self.scene_setting_ui.close_scene()
 
     def redirect(self) -> None:
+        front_engine_logger.info("ControlCenterUI redirect")
         if not redirect_manager_instance.std_out_queue.empty():
             output_message = redirect_manager_instance.std_out_queue.get_nowait()
             output_message = str(output_message).strip()

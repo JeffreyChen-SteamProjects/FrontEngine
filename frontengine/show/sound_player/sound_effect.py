@@ -6,12 +6,14 @@ from PySide6.QtGui import QIcon
 from PySide6.QtMultimedia import QSoundEffect
 from PySide6.QtWidgets import QWidget, QMessageBox
 
+from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
 class SoundEffectWidget(QWidget):
 
     def __init__(self, sound_path: str):
+        front_engine_logger.info(f"Init SoundEffectWidget sound_path: {sound_path}")
         super().__init__()
         self.volume: float = 1
         self.setWindowFlag(
@@ -44,9 +46,11 @@ class SoundEffectWidget(QWidget):
             self.setWindowIcon(QIcon(str(self.icon_path)))
 
     def set_sound_effect_variable(self, volume: float = 1) -> None:
+        front_engine_logger.info(f"SoundEffectWidget set_sound_effect_variable volume:{volume}")
         self.volume = volume
         self.sound_player.setVolume(self.volume)
 
     def closeEvent(self, event) -> None:
+        front_engine_logger.info(f"SoundEffectWidget closeEvent event:{event}")
         super().closeEvent(event)
         self.sound_player.stop()

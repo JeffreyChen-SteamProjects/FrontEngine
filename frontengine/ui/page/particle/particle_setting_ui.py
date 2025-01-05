@@ -13,6 +13,7 @@ from frontengine.utils.multi_language.language_wrapper import language_wrapper
 class ParticleSettingUI(QWidget):
 
     def __init__(self):
+        front_engine_logger.info("Init ParticleSettingUI")
         super().__init__()
         self.grid_layout = QGridLayout()
         self.grid_layout = QGridLayout(self)
@@ -102,9 +103,11 @@ class ParticleSettingUI(QWidget):
         self.setLayout(self.grid_layout)
 
     def set_show_all_screen(self) -> None:
+        front_engine_logger.info("ParticleSettingUI set_show_all_screen")
         self.show_all_screen = self.show_on_all_screen_checkbox.isChecked()
 
     def _create_particle_widget(self, screen_width: int = 1920, screen_height: int = 1080) -> ParticleWidget:
+        front_engine_logger.info("ParticleSettingUI _create_particle_widget")
         particle_widget = ParticleWidget(
             pixmap=QPixmap(self.image_path),
             particle_size=int(self.particle_size_combobox.currentText()),
@@ -120,6 +123,7 @@ class ParticleSettingUI(QWidget):
         return particle_widget
 
     def start_play_particle(self) -> None:
+        front_engine_logger.info("ParticleSettingUI start_play_particle")
         if self.image_path is None or self.ready_to_play is False:
             message_box = QMessageBox(self)
             message_box.setText(
@@ -160,6 +164,7 @@ class ParticleSettingUI(QWidget):
                     particle_widget.showFullScreen()
 
     def choose_and_copy_file_to_cwd_image_dir_then_play(self) -> None:
+        front_engine_logger.info("ParticleSettingUI choose_and_copy_file_to_cwd_image_dir_then_play")
         self.ready_label.setText(
             language_wrapper.language_word_dict.get("Not Ready")
         )
@@ -172,4 +177,5 @@ class ParticleSettingUI(QWidget):
             self.ready_to_play = True
 
     def opacity_trick(self) -> None:
+        front_engine_logger.info("ParticleSettingUI opacity_trick")
         self.opacity_slider_value_label.setText(str(self.opacity_slider.value()))

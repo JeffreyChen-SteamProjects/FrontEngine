@@ -14,6 +14,7 @@ from frontengine.utils.multi_language.language_wrapper import language_wrapper
 class GIFSettingUI(QWidget):
 
     def __init__(self):
+        front_engine_logger.info("Init GIFSettingUI")
         super().__init__()
         self.grid_layout = QGridLayout()
         self.grid_layout = QGridLayout(self)
@@ -92,9 +93,11 @@ class GIFSettingUI(QWidget):
         self.setLayout(self.grid_layout)
 
     def set_show_all_screen(self) -> None:
+        front_engine_logger.info("GIFSettingUI set_show_all_screen")
         self.show_all_screen = self.show_on_all_screen_checkbox.isChecked()
 
     def _create_gif_widget(self) -> GifWidget:
+        front_engine_logger.info("GIFSettingUI _create_gif_widget")
         gif_widget = GifWidget(gif_image_path=self.gif_image_path)
         gif_widget.set_gif_variable(speed=self.speed_slider.value())
         gif_widget.set_ui_variable(opacity=float(self.opacity_slider.value()) / 100)
@@ -103,6 +106,7 @@ class GIFSettingUI(QWidget):
         return gif_widget
 
     def start_play_gif(self) -> None:
+        front_engine_logger.info("GIFSettingUI start_play_gif")
         if self.gif_image_path is None or self.ready_to_play is False:
             message_box = QMessageBox(self)
             message_box.setText(
@@ -130,6 +134,7 @@ class GIFSettingUI(QWidget):
                     check_show_fullscreen_multi_screen(gif_widget, self.fullscreen_checkbox, monitor)
 
     def choose_and_copy_file_to_cwd_gif_dir_then_play(self) -> None:
+        front_engine_logger.info("GIFSettingUI choose_and_copy_file_to_cwd_gif_dir_then_play")
         self.ready_label.setText(
             language_wrapper.language_word_dict.get("Not Ready")
         )
@@ -142,7 +147,9 @@ class GIFSettingUI(QWidget):
             self.ready_to_play = True
 
     def opacity_trick(self) -> None:
+        front_engine_logger.info("GIFSettingUI opacity_trick")
         self.opacity_slider_value_label.setText(str(self.opacity_slider.value()))
 
     def speed_trick(self) -> None:
+        front_engine_logger.info("GIFSettingUI speed_trick")
         self.speed_slider_value_label.setText(str(self.speed_slider.value()))

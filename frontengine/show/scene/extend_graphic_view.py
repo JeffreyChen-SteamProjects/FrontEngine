@@ -1,10 +1,14 @@
 from PySide6.QtCore import Qt, QPoint
 from PySide6.QtWidgets import QGraphicsView
 
+from frontengine.utils.logging.loggin_instance import front_engine_logger
+
 
 class ExtendGraphicView(QGraphicsView):
 
     def __init__(self, *args):
+        front_engine_logger.info("Init ExtendGraphicView "
+                                 f"args: {args}")
         super().__init__(*args)
         self.setWindowFlag(
             Qt.WindowType.FramelessWindowHint |
@@ -23,6 +27,8 @@ class ExtendGraphicView(QGraphicsView):
         if len(self.scene().items()) == 0:
             pass
         else:
+            front_engine_logger.info("ExtendGraphicView wheelEvent"
+                                     f"event: {event}")
             current_position = event.position()
             scene_position = self.mapToScene(QPoint(int(current_position.x()), int(current_position.y())))
             view_width = self.viewport().width()

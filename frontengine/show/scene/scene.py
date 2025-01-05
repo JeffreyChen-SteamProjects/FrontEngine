@@ -10,6 +10,7 @@ from frontengine.show.sound_player.sound_player import SoundPlayer
 from frontengine.show.text.draw_text import TextWidget
 from frontengine.show.video.video_player import VideoWidget
 from frontengine.show.web.webview import WebWidget
+from frontengine.utils.logging.loggin_instance import front_engine_logger
 
 
 class SceneManager(object):
@@ -17,12 +18,14 @@ class SceneManager(object):
     def __init__(
             self
     ):
+        front_engine_logger.info("Init SceneManager")
         super().__init__()
         self.graphic_scene = ExtendGraphicScene()
         self.widget_list: List[QGraphicsProxyWidget] = list()
         self.view_list: List[ExtendGraphicView] = []
 
     def add_image(self, setting_dict: Dict) -> QGraphicsProxyWidget:
+        front_engine_logger.info(f"SceneManager setting_dict: {setting_dict}")
         image_path = setting_dict.get("file_path")
         image_widget = ImageWidget(image_path)
         opacity = float(setting_dict.get("opacity")) / 100
@@ -33,6 +36,7 @@ class SceneManager(object):
         return proxy_widget
 
     def add_gif(self, setting_dict: Dict) -> QGraphicsProxyWidget:
+        front_engine_logger.info(f"SceneManager add_gif setting_dict: {setting_dict}")
         gif_image_path = setting_dict.get("file_path")
         gif_widget = GifWidget(gif_image_path)
         speed = int(setting_dict.get("speed"))
@@ -46,6 +50,7 @@ class SceneManager(object):
         return proxy_widget
 
     def add_sound(self, setting_dict: Dict) -> QGraphicsProxyWidget:
+        front_engine_logger.info(f"SceneManager add_sound setting_dict: {setting_dict}")
         sound_path = setting_dict.get("file_path")
         sound_widget = SoundPlayer(sound_path)
         volume = float(setting_dict.get("volume")) / 100
@@ -56,6 +61,7 @@ class SceneManager(object):
         return proxy_widget
 
     def add_text(self, setting_dict: Dict) -> QGraphicsProxyWidget:
+        front_engine_logger.info(f"SceneManager add_text setting_dict: {setting_dict}")
         text = setting_dict.get("text")
         text_widget = TextWidget(text)
         font_size = int(setting_dict.get("font_size"))
@@ -71,6 +77,7 @@ class SceneManager(object):
         return proxy_widget
 
     def add_video(self, video_setting: Dict) -> QGraphicsProxyWidget:
+        front_engine_logger.info(f"SceneManager add_video video_setting: {video_setting}")
         video_path = video_setting.get("file_path")
         video_widget = VideoWidget(video_path)
         opacity = float(video_setting.get("opacity")) / 100
@@ -86,6 +93,7 @@ class SceneManager(object):
         return proxy_widget
 
     def add_web(self, setting_dict: Dict) -> QGraphicsProxyWidget:
+        front_engine_logger.info(f"SceneManager add_web setting_dict: {setting_dict}")
         url = setting_dict.get("url")
         web_widget = WebWidget(url)
         opacity = float(setting_dict.get("opacity")) / 100
