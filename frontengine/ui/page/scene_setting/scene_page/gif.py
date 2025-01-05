@@ -4,12 +4,14 @@ from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QPushButton
 from frontengine.ui.dialog.choose_file_dialog import choose_gif
 from frontengine.ui.page.scene_setting.scene_manager import SceneManagerUI
 from frontengine.user_setting.scene_setting import scene_json
+from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
 class GIFSceneSettingUI(QWidget):
 
     def __init__(self, script_ui: SceneManagerUI):
+        front_engine_logger.info(f"Init GIFSceneSettingUI script_ui: {script_ui}")
         super().__init__()
         self.script_ui = script_ui
         # UI components
@@ -64,12 +66,15 @@ class GIFSceneSettingUI(QWidget):
         self.setLayout(self.grid_layout)
 
     def opacity_trick(self) -> None:
+        front_engine_logger.info("GIFSceneSettingUI opacity_trick")
         self.opacity_slider_value_label.setText(str(self.opacity_slider.value()))
 
     def speed_trick(self) -> None:
+        front_engine_logger.info("GIFSceneSettingUI speed_trick")
         self.speed_slider_value_label.setText(str(self.speed_slider.value()))
 
     def get_gif(self):
+        front_engine_logger.info("GIFSceneSettingUI get_gif")
         self.ready_label.setText(
             language_wrapper.language_word_dict.get("Not Ready")
         )
@@ -82,6 +87,7 @@ class GIFSceneSettingUI(QWidget):
             self.ready_to_play = True
 
     def update_scene_json(self):
+        front_engine_logger.info("GIFSceneSettingUI update_scene_json")
         if self.gif_image_path is None:
             message_box = QMessageBox(self)
             message_box.setText(

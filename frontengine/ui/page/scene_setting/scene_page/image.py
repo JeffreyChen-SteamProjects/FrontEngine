@@ -4,12 +4,14 @@ from PySide6.QtWidgets import QWidget, QGridLayout, QPushButton, QLabel, QSlider
 from frontengine.ui.dialog.choose_file_dialog import choose_image
 from frontengine.ui.page.scene_setting.scene_manager import SceneManagerUI
 from frontengine.user_setting.scene_setting import scene_json
+from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
 class ImageSceneSettingUI(QWidget):
 
     def __init__(self, script_ui: SceneManagerUI):
+        front_engine_logger.info(f"Init ImageSceneSettingUI script_ui: {script_ui}")
         super().__init__()
         self.script_ui = script_ui
         self.image_path: [str, None] = None
@@ -49,9 +51,11 @@ class ImageSceneSettingUI(QWidget):
         self.setLayout(self.grid_layout)
 
     def opacity_trick(self) -> None:
+        front_engine_logger.info(f"ImageSceneSettingUI opacity_trick")
         self.opacity_slider_value_label.setText(str(self.opacity_slider.value()))
 
     def get_image(self):
+        front_engine_logger.info(f"ImageSceneSettingUI get_image")
         self.ready_label.setText(
             language_wrapper.language_word_dict.get("Not Ready")
         )
@@ -64,6 +68,7 @@ class ImageSceneSettingUI(QWidget):
             self.ready_to_play = True
 
     def update_scene_json(self):
+        front_engine_logger.info(f"ImageSceneSettingUI update_scene_json")
         if self.image_path is None:
             message_box = QMessageBox(self)
             message_box.setText(
