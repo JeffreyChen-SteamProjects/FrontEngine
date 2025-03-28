@@ -42,10 +42,6 @@
    "value": false
   },
   {
-   "optionDest": "embed_manifest",
-   "value": false
-  },
-  {
    "optionDest": "uac_admin",
    "value": false
   },
@@ -60,22 +56,6 @@
   {
    "optionDest": "bootloader_ignore_signals",
    "value": false
-  },
-  {
-   "optionDest": "win_private_assemblies",
-   "value": false
-  },
-  {
-   "optionDest": "win_no_prefer_redirects",
-   "value": false
-  },
-  {
-   "optionDest": "ascii",
-   "value": false
-  },
-  {
-   "optionDest": "datas",
-   "value": "C:/CodeWorkspace/Python/FrontEngine/exe/je_driver_icon.ico;."
   },
   {
    "optionDest": "pathex",
