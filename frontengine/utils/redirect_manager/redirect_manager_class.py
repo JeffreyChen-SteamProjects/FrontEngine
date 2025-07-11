@@ -50,7 +50,7 @@ class RedirectManager(object):
         redirect_err = RedirectStdErr()
         sys.stdout = redirect_out
         sys.stderr = redirect_err
-        default_logger = logging.getLogger("RedirectManager")
+        default_logger = logging.getLogger("FrontEngine_RedirectManager")
         default_logger.addHandler(redirect_err)
         skip_logger_list = ["JEditor", "FrontEngine",
                             "AutomationIDE", "TestPioneer", "langchain", "langchain_core", "langchain_openai"]
