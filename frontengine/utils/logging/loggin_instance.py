@@ -3,6 +3,7 @@ from logging.handlers import RotatingFileHandler
 
 logging.root.setLevel(logging.DEBUG)
 front_engine_logger = logging.getLogger("FrontEngine")
+front_engine_logger.setLevel(logging.WARNING)
 formatter = logging.Formatter('%(asctime)s | %(name)s | %(levelname)s | %(message)s')
 
 
