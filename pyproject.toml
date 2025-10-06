@@ -6,12 +6,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "frontengine_dev"
-version = "0.0.88"
+version = "0.0.89"
 authors = [
     { name = "JE-Chen", email = "jechenmailman@gmail.com" },
 ]
 dependencies = [
-    "PySide6==6.9.2", "qt-material"
+    "PySide6==6.9.3", "qt-material"
 ]
 description = "FrontEngine is use-define frontview or only use like screen saver"
 requires-python = ">=3.10"
