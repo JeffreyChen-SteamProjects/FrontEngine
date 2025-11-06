@@ -1,6 +1,6 @@
-import _thread
 import sys
 from threading import Thread
+from typing import Union
 
 from PySide6.QtWidgets import QApplication
 
@@ -10,31 +10,42 @@ from frontengine.utils.critical_exit.win32_vk import keyboard_keys_table
 
 class CriticalExit(Thread):
     """
-    use to make program interrupt
+    致命退出監聽器：在背景執行緒中監聽指定按鍵，按下後立即退出程式
+    Critical Exit Listener: Runs in a background thread, listens for a key press, and exits the app immediately
     """
 
     def __init__(self, default_daemon: bool = True):
         """
-        default interrupt is keyboard F7 key
-        :param default_daemon bool thread setDaemon
+        初始化 CriticalExit，預設監聽 F7 鍵
+        Initialize CriticalExit, default key is F7
+
+        :param default_daemon: 是否將執行緒設為 daemon (Whether to set thread as daemon)
         """
         super().__init__()
         self.daemon = default_daemon
+        # 預設退出鍵為 F7
+        # Default exit key is F7
         self._exit_check_key: int = keyboard_keys_table.get("f7")
 
-    def set_critical_key(self, keycode: [int, str] = None) -> None:
+    def set_critical_key(self, keycode: Union[int, str] = None) -> None:
         """
-        set interrupt key
-        :param keycode interrupt key
+        設定退出按鍵
+        Set the critical exit key
+
+        :param keycode: 可以是虛擬鍵碼 (int) 或鍵盤名稱 (str)
+                        Can be a virtual key code (int) or key name (str)
         """
         if isinstance(keycode, int):
             self._exit_check_key = keycode
-        else:
+        elif isinstance(keycode, str):
             self._exit_check_key = keyboard_keys_table.get(keycode)
+        else:
+            raise ValueError("keycode must be int or str")
 
     def run(self) -> None:
         """
-        listener keycode _exit_check_key to interrupt
+        執行緒主迴圈：持續監聽指定按鍵，按下後結束應用程式
+        Thread main loop: Continuously listens for the key, exits app when pressed
         """
         try:
             while True:
@@ -45,8 +56,7 @@ class CriticalExit(Thread):
 
     def init_critical_exit(self) -> None:
         """
-        should only use this to start critical exit
-        may this function will add more
+        啟動致命退出監聽器
+        Start the critical exit listener
         """
-        critical_thread = self
-        critical_thread.start()
+        self.start()

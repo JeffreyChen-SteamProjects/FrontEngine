@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 from threading import Lock
-from typing import Union
+from typing import Union, Optional, Any
 
 from frontengine.utils.exception.exception_tags import cant_find_json_error
 from frontengine.utils.exception.exception_tags import cant_save_json_error
@@ -10,7 +10,7 @@ from frontengine.utils.exception.exceptions import FrontEngineJsonFileException
 _lock = Lock()
 
 
-def read_json(json_file_path: str) -> Union[list, dict]:
+def read_json(json_file_path: str) -> Optional[Any]:
     """
     use to read action file
     :param json_file_path json file's path to read
