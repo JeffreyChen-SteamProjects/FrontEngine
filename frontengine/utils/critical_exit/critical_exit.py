@@ -1,4 +1,5 @@
 import sys
+import time
 from threading import Thread
 from typing import Union
 
@@ -16,8 +17,8 @@ class CriticalExit(Thread):
 
     def __init__(self, default_daemon: bool = True):
         """
-        初始化 CriticalExit，預設監聽 F7 鍵
-        Initialize CriticalExit, default key is F7
+        初始化 CriticalExit，預設監聽 F12 鍵
+        Initialize CriticalExit, default key is F12
 
         :param default_daemon: 是否將執行緒設為 daemon (Whether to set thread as daemon)
         """
@@ -25,7 +26,7 @@ class CriticalExit(Thread):
         self.daemon = default_daemon
         # 預設退出鍵為 F7
         # Default exit key is F7
-        self._exit_check_key: int = keyboard_keys_table.get("f7")
+        self._exit_check_key: int = keyboard_keys_table.get("f12")
 
     def set_critical_key(self, keycode: Union[int, str] = None) -> None:
         """
@@ -49,8 +50,10 @@ class CriticalExit(Thread):
         """
         try:
             while True:
+                time.sleep(0.1)
                 if check_key_is_press(self._exit_check_key):
                     QApplication.exit(0)
+                    sys.exit(0)
         except Exception as error:
             print(repr(error), file=sys.stderr)
 
