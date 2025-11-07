@@ -60,6 +60,10 @@
   {
    "optionDest": "pathex",
    "value": "C:/CodeWorkspace/Python/FrontEngine/venv"
+  },
+  {
+   "optionDest": "datas",
+   "value": "C:/CodeWorkspace/Python/FrontEngine/exe/je_driver_icon.ico;."
   }
  ],
  "nonPyinstallerOptions": {

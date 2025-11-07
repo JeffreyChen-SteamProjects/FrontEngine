@@ -16,6 +16,10 @@ from frontengine.utils.redirect_manager.redirect_manager_class import redirect_m
 
 
 class ControlCenterUI(QWidget):
+    """
+    ControlCenterUI: 控制中心面板，集中管理各種 widget 與 log panel
+    ControlCenterUI: Control center panel to manage widgets and log panel
+    """
 
     def __init__(
             self,
@@ -27,23 +31,20 @@ class ControlCenterUI(QWidget):
             text_setting_ui: TextSettingUI,
             scene_setting_ui: SceneSettingUI,
             particle_setting_ui: ParticleSettingUI,
-            redirect_output:bool = True
+            redirect_output: bool = True
     ):
-        front_engine_logger.info("Init ControlCenterUI "
-                                 f"video_setting_ui: {video_setting_ui} "
-                                 f"image_setting_ui: {image_setting_ui} "
-                                 f"web_setting_ui: {web_setting_ui} "
-                                 f"gif_setting_ui: {gif_setting_ui} "
-                                 f"sound_player_setting_ui: {sound_player_setting_ui} "
-                                 f"text_setting_ui: {text_setting_ui} "
-                                 f"scene_setting_ui: {scene_setting_ui} "
-                                 f"particle_setting_ui: {particle_setting_ui} "
-                                 f"redirect_output: {redirect_output}")
+        front_engine_logger.info(
+            f"[ControlCenterUI] Init | video={video_setting_ui}, image={image_setting_ui}, web={web_setting_ui}, "
+            f"gif={gif_setting_ui}, sound={sound_player_setting_ui}, text={text_setting_ui}, "
+            f"scene={scene_setting_ui}, particle={particle_setting_ui}, redirect_output={redirect_output}"
+        )
         super().__init__()
+
         # Layout
         self.grid_layout = QGridLayout()
         self.grid_layout.setContentsMargins(0, 0, 0, 0)
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
+
         # UI instance
         self.video_setting_ui = video_setting_ui
         self.image_setting_ui = image_setting_ui
@@ -53,56 +54,19 @@ class ControlCenterUI(QWidget):
         self.text_setting_ui = text_setting_ui
         self.scene_setting_ui = scene_setting_ui
         self.particle_setting_ui = particle_setting_ui
-        # Close video widget
-        self.clear_video_button = QPushButton(
-            language_wrapper.language_word_dict.get("control_center_close_all_video")
-        )
-        self.clear_video_button.clicked.connect(self.clear_video)
-        # Close image widget
-        self.clear_image_button = QPushButton(
-            language_wrapper.language_word_dict.get("control_center_close_all_image")
-        )
-        self.clear_image_button.clicked.connect(self.clear_image)
-        # Close gif widget
-        self.clear_gif_button = QPushButton(
-            language_wrapper.language_word_dict.get("control_center_close_all_gif")
-        )
-        self.clear_gif_button.clicked.connect(self.clear_gif)
-        # Close web widget
-        self.clear_web_button = QPushButton(
-            language_wrapper.language_word_dict.get("control_center_close_all_web")
-        )
-        self.clear_web_button.clicked.connect(self.clear_web)
-        # Close sound widget
-        self.clear_sound_button = QPushButton(
-            language_wrapper.language_word_dict.get("control_center_close_all_sound")
-        )
-        self.clear_sound_button.clicked.connect(self.clear_sound)
-        # Close text widget
-        self.clear_text_button = QPushButton(
-            language_wrapper.language_word_dict.get("control_center_close_all_text")
-        )
-        self.clear_text_button.clicked.connect(self.clear_text)
-        # Close scene widget
-        self.clear_scene_button = QPushButton(
-            language_wrapper.language_word_dict.get("control_center_scene")
-        )
-        self.clear_scene_button.clicked.connect(self.clear_scene)
-        # Clear redirect
-        self.clear_redirect_button = QPushButton(
-            language_wrapper.language_word_dict.get("control_center_clear_log_panel")
-        )
-        self.clear_redirect_button.clicked.connect(self.clear_redirect)
-        # Close chat scene
-        self.clear_chat_button = QPushButton(
-            language_wrapper.language_word_dict.get("chat_scene_close")
-        )
-        self.clear_chat_button.clicked.connect(self.clear_redirect)
-        # All widget close
-        self.clear_all_button = QPushButton(
-            language_wrapper.language_word_dict.get("control_center_close_all")
-        )
-        self.clear_all_button.clicked.connect(self.clear_all)
+
+        # Buttons
+        self.clear_video_button = self._create_button("control_center_close_all_video", self.clear_video)
+        self.clear_image_button = self._create_button("control_center_close_all_image", self.clear_image)
+        self.clear_gif_button = self._create_button("control_center_close_all_gif", self.clear_gif)
+        self.clear_web_button = self._create_button("control_center_close_all_web", self.clear_web)
+        self.clear_sound_button = self._create_button("control_center_close_all_sound", self.clear_sound)
+        self.clear_text_button = self._create_button("control_center_close_all_text", self.clear_text)
+        self.clear_scene_button = self._create_button("control_center_scene", self.clear_scene)
+        self.clear_redirect_button = self._create_button("control_center_clear_log_panel", self.clear_redirect)
+        self.clear_chat_button = self._create_button("chat_scene_close", self.clear_scene)  # 修正：應該關閉場景而不是 redirect
+        self.clear_all_button = self._create_button("control_center_close_all", self.clear_all)
+
         # Log panel
         self.log_panel = QTextEdit()
         self.log_panel.setLineWrapMode(self.log_panel.LineWrapMode.NoWrap)
@@ -111,6 +75,7 @@ class ControlCenterUI(QWidget):
         self.log_panel_scroll_area.setWidgetResizable(True)
         self.log_panel_scroll_area.setViewportMargins(0, 0, 0, 0)
         self.log_panel_scroll_area.setWidget(self.log_panel)
+
         # Add to layout
         self.grid_layout.addWidget(self.clear_video_button, 0, 0)
         self.grid_layout.addWidget(self.clear_image_button, 1, 0)
@@ -120,39 +85,44 @@ class ControlCenterUI(QWidget):
         self.grid_layout.addWidget(self.clear_text_button, 5, 0)
         self.grid_layout.addWidget(self.clear_redirect_button, 6, 0)
         self.grid_layout.addWidget(self.clear_all_button, 7, 0)
-        self.grid_layout.addWidget(self.log_panel_scroll_area, 0, 1, -1, -1)
+        self.grid_layout.addWidget(self.log_panel_scroll_area, 0, 1, 8, 1)  # 明確指定 rowSpan=8, colSpan=1
         self.setLayout(self.grid_layout)
+
+        # Redirect
         if redirect_output:
-            # Redirect
             self.redirect_timer = QTimer(self)
             self.redirect_timer.setInterval(10)
             self.redirect_timer.timeout.connect(self.redirect)
             self.redirect_timer.start()
             redirect_manager_instance.set_redirect()
 
+    def _create_button(self, label_key: str, callback) -> QPushButton:
+        """建立按鈕並綁定事件 / Create button and bind callback"""
+        button = QPushButton(language_wrapper.language_word_dict.get(label_key))
+        button.clicked.connect(callback)
+        return button
+
+    def _clear_widget_list(self, widget_list: list, name: str) -> None:
+        front_engine_logger.info(f"[ControlCenterUI] clear_{name}")
+        widget_list.clear()
+
     def clear_video(self) -> None:
-        front_engine_logger.info(f"ControlCenterUI clear_video")
-        self.video_setting_ui.video_widget_list.clear()
+        self._clear_widget_list(self.video_setting_ui.video_widget_list, "video")
 
     def clear_image(self) -> None:
-        front_engine_logger.info(f"ControlCenterUI clear_image")
-        self.image_setting_ui.image_widget_list.clear()
+        self._clear_widget_list(self.image_setting_ui.image_widget_list, "image")
 
     def clear_gif(self) -> None:
-        front_engine_logger.info("ControlCenterUI clear_gif")
-        self.gif_setting_ui.gif_widget_list.clear()
+        self._clear_widget_list(self.gif_setting_ui.gif_widget_list, "gif")
 
     def clear_web(self) -> None:
-        front_engine_logger.info("ControlCenterUI clear_web")
-        self.web_setting_ui.web_widget_list.clear()
+        self._clear_widget_list(self.web_setting_ui.web_widget_list, "web")
 
     def clear_sound(self) -> None:
-        front_engine_logger.info("ControlCenterUI clear_sound")
-        self.sound_player_setting_ui.sound_widget_list.clear()
+        self._clear_widget_list(self.sound_player_setting_ui.sound_widget_list, "sound")
 
     def clear_text(self) -> None:
-        front_engine_logger.info("ControlCenterUI clear_text")
-        self.text_setting_ui.text_widget_list.clear()
+        self._clear_widget_list(self.text_setting_ui.text_widget_list, "text")
 
     def clear_redirect(self) -> None:
         front_engine_logger.info("ControlCenterUI clear_redirect")

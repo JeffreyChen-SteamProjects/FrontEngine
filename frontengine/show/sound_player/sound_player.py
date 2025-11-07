@@ -11,11 +11,26 @@ from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
 class SoundPlayer(QWidget):
+    """
+    SoundPlayer: 播放音樂/音效的自訂元件
+    SoundPlayer: A custom widget for playing audio files
+    """
 
     def __init__(self, sound_path: str):
-        front_engine_logger.info(f"Init SoundPlayer sound_path: {sound_path}")
+        """
+        初始化音樂播放器
+        Initialize the sound player
+
+        :param sound_path: 音檔路徑 / Path to the audio file
+        """
+        front_engine_logger.info(f"[SoundPlayer] Init | sound_path={sound_path}")
         super().__init__()
-        self.volume: float = 1
+
+        # --- 基本屬性 / Basic attributes ---
+        self.volume: float = 1.0
+        self.sound_path: Path = Path(sound_path)
+
+        # 設定視窗旗標 / Set window flags
         self.setWindowFlag(
             Qt.WindowType.WindowTransparentForInput |
             Qt.WindowType.FramelessWindowHint |
@@ -23,35 +38,51 @@ class SoundPlayer(QWidget):
             Qt.WindowType.Tool
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        self.sound_path = Path(sound_path)
+
+        # --- 初始化播放器 / Initialize media player ---
         if self.sound_path.exists() and self.sound_path.is_file():
-            self.media_player = QMediaPlayer()
-            self.media_player_audio = QAudioOutput()
+            self.media_player: QMediaPlayer = QMediaPlayer()
+            self.media_player_audio: QAudioOutput = QAudioOutput()
             self.media_player.setAudioOutput(self.media_player_audio)
-            self.media_player_audio = self.media_player.audioOutput()
-            # QUrl non ascii path encode, Avoid read wrong path and file name
+
+            # QUrl non-ascii path encode, 避免路徑錯誤
             source = QUrl.fromLocalFile(str(self.sound_path))
-            print(f"Origin file {str(self.sound_path)}")
+            front_engine_logger.info(f"[SoundPlayer] Loading file: {self.sound_path}")
+
             self.media_player.setSource(source)
-            self.media_player.setLoops(-1)
+            self.media_player.setLoops(QMediaPlayer.Loops.Infinite)  # 無限循環播放
             self.media_player.play()
         else:
+            front_engine_logger.error(f"[SoundPlayer] File not found: {self.sound_path}")
             message_box = QMessageBox(self)
             message_box.setText(
                 language_wrapper.language_word_dict.get("sound_player_message_box_text")
             )
             message_box.show()
-        # Set Icon
-        self.icon_path = Path(os.getcwd() + "/je_driver_icon.ico")
+
+        # --- 設定視窗 Icon / Set window icon ---
+        self.icon_path: Path = Path(os.getcwd()) / "je_driver_icon.ico"
         if self.icon_path.exists() and self.icon_path.is_file():
             self.setWindowIcon(QIcon(str(self.icon_path)))
 
-    def set_player_variable(self, volume: float = 1) -> None:
-        front_engine_logger.info(f"SoundPlayer set_player_variable volume: {volume}")
-        self.volume = volume
-        self.media_player_audio.setVolume(self.volume)
+    def set_player_variable(self, volume: float = 1.0) -> None:
+        """
+        設定播放器音量
+        Set player volume
+
+        :param volume: 音量 (0.0 ~ 1.0) / Volume (0.0 ~ 1.0)
+        """
+        front_engine_logger.info(f"[SoundPlayer] set_player_variable | volume={volume}")
+        self.volume = max(0.0, min(volume, 1.0))  # 限制範圍 / Clamp between 0.0 and 1.0
+        if hasattr(self, "media_player_audio"):
+            self.media_player_audio.setVolume(self.volume)
 
     def closeEvent(self, event) -> None:
-        front_engine_logger.info(f"SoundPlayer closeEvent event: {event}")
+        """
+        視窗關閉事件：停止播放
+        Window close event: stop playback
+        """
+        front_engine_logger.info(f"[SoundPlayer] closeEvent | event={event}")
+        if hasattr(self, "media_player"):
+            self.media_player.stop()
         super().closeEvent(event)
-        self.media_player.stop()
