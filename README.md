@@ -1,69 +1,50 @@
-[![Downloads](https://static.pepy.tech/badge/frontengine)](https://pepy.tech/project/frontengine)
+# FrontEngine
 
-[![Documentation Status](https://readthedocs.org/projects/frontengine/badge/?version=latest)](https://frontengine.readthedocs.io/en/latest/?badge=latest)
-
-[FrontEngine Doc Click Here!](https://frontengine.readthedocs.io/en/latest/)
-
-## Support this project on steam
-
-[SteamStoreLink](https://store.steampowered.com/app/2793470/FrontEngine/)
-
-## Contents
-
-> Project kanban https://github.com/orgs/Integration-Automation/projects/2/views/1
-
----
-
-- [About](#about)
-- [Features](#features)
-- [Download](#Download)
-- [Dev](#Dev)
-
----
+[Support this project on Steam](https://store.steampowered.com/app/2793470/FrontEngine/)
 
 ## About
 
----
-
+FrontEngine is a lightweight and flexible framework designed to simplify automation and visualization tasks.  
+It provides an intuitive interface and supports multiple media formats for interactive demonstrations.
 
 ![FrontEngine UI](image/FrontEngine.png)
 
+---
 
 ## Features
 
+- **GIFs & Animations**  
+  *(GIFs may take time to load)*  
+  ![GIF](gifs/play_gif.gif)  
+  ![WEBP](gifs/webp.gif)
+
+- **Video**  
+  ![Video](gifs/video.gif)
+
+- **Website**  
+  ![Website](gifs/website.gif)
+
+- **YouTube Showcase**  
+  [Watch on YouTube](https://youtu.be/fewogcb3b8Y)
+
 ---
-
-* GIFs need time to load please, wait.
-
-* Video
-
-![Video](gifs/video.gif)
-
-* Website
-
-![Website](gifs/website.gif)
-
-* GIF & WEBP.
-
-![GIF](gifs/play_gif.gif)
-![WEBP](gifs/webp.gif)
-
-- [Youtube](https://youtu.be/fewogcb3b8Y)
-
-
 
 ## Download
 
+- **System Requirements**  
+  - Windows 10 or 11  
+  - For Unix-like systems, compilation from source is required  
+
+- **Get FrontEngine**  
+  - [Download Releases](https://github.com/Intergration-Automation-Testing/FrontEngine/releases)  
+  - Install via PyPI:  
+    ```bash
+    pip install frontengine
+    ```
+
 ---
 
-> Require Windows 10 or 11. \
-> If you want to use this on a Unix-like system, you need to compile the source code.
+## Development
 
-- [Download](https://github.com/Intergration-Automation-Testing/FrontEngine/releases)
-
-> PYPI package: pip install frontengine
-
-## Dev
-
-> Require Python 3.9 or later version
-
+- Requires **Python 3.9+**  
+- Contributions and pull requests are welcome!  
