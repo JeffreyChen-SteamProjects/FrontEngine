@@ -26,7 +26,7 @@ class BaseWidget(QWidget):
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
 
         # 設定視窗 Icon / Set window icon
-        self.icon_path: Path = Path(os.getcwd()) / "je_driver_icon.ico"
+        self.icon_path: Path = Path(os.getcwd()) / "frontengine.ico"
         if self.icon_path.exists() and self.icon_path.is_file():
             self.setWindowIcon(QIcon(str(self.icon_path)))
 
