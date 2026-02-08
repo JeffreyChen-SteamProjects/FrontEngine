@@ -144,7 +144,6 @@ class ControlCenterUI(QWidget):
         self.scene_setting_ui.close_scene()
 
     def redirect(self) -> None:
-        front_engine_logger.info("ControlCenterUI redirect")
         if not redirect_manager_instance.std_out_queue.empty():
             output_message = redirect_manager_instance.std_out_queue.get_nowait()
             output_message = str(output_message).strip()
