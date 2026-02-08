@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Dict, Type
 
 from PySide6.QtCore import QTimer, QCoreApplication
-from PySide6.QtGui import QIcon, Qt
+from PySide6.QtGui import QIcon, Qt, QSurfaceFormat
 from PySide6.QtWidgets import QMainWindow, QApplication, QGridLayout, QTabWidget, QMenuBar, QWidget
 from qt_material import apply_stylesheet
 
@@ -52,9 +52,8 @@ class FrontEngineMainUI(QMainWindow):
 
         # Windows 平台設定 AppUserModelID
         # Set AppUserModelID for Windows platform
-        if sys.platform in ["win32", "cygwin", "msys"]:
-            from ctypes import windll
-            windll.shell32.SetCurrentProcessExplicitAppUserModelID(self.id)
+        from ctypes import windll
+        windll.shell32.SetCurrentProcessExplicitAppUserModelID(self.id)
 
         # 讀取使用者設定
         # Load user settings
