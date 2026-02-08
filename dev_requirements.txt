@@ -1,6 +1,9 @@
-PySide6==6.8.2.1
+PySide6==6.10.2
 qt-material
 frontengine
 twine
 build
 auto-py-to-exe
+PyOpenGL
+PyOpenGL_accelerate
+numpy

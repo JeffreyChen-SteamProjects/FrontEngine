@@ -1,11 +1,11 @@
 from typing import Optional
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QGuiApplication, QPixmap
+from PySide6.QtGui import QGuiApplication, QPixmap, QImage
 from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QPushButton, QMessageBox, QCheckBox, QDialog, \
     QComboBox
 
-from frontengine.show.particle.particle_ui import ParticleWidget
+from frontengine.show.particle.particle_ui import ParticleOpenGLWidget
 from frontengine.ui.dialog.choose_file_dialog import choose_image
 from frontengine.ui.page.utils import create_monitor_selection_dialog
 from frontengine.utils.logging.loggin_instance import front_engine_logger
@@ -66,8 +66,8 @@ class ParticleSettingUI(QWidget):
         # Particle speed
         self.particle_speed_label = QLabel(language_wrapper.language_word_dict.get("particle_speed"))
         self.particle_speed_combobox = QComboBox()
-        for speed in range(1, 11):
-            self.particle_speed_combobox.addItem(str(speed))
+        for speed in range(3, 11):
+            self.particle_speed_combobox.addItem(str(speed / 1000))
 
         # Start button
         self.start_button = QPushButton(language_wrapper.language_word_dict.get("particle_setting_ui_play"))
@@ -76,8 +76,6 @@ class ParticleSettingUI(QWidget):
         # Checkboxes
         self.show_on_all_screen_checkbox = QCheckBox(language_wrapper.language_word_dict.get("Show on all screen"))
         self.show_on_all_screen_checkbox.clicked.connect(self.set_show_all_screen)
-
-        self.show_on_bottom_checkbox = QCheckBox(language_wrapper.language_word_dict.get("Show on bottom"))
 
         # Layout
         self.grid_layout.addWidget(self.opacity_label, 0, 0)
@@ -95,15 +93,14 @@ class ParticleSettingUI(QWidget):
         self.grid_layout.addWidget(self.particle_speed_combobox, 5, 1)
         self.grid_layout.addWidget(self.start_button, 6, 0)
         self.grid_layout.addWidget(self.show_on_all_screen_checkbox, 6, 1)
-        self.grid_layout.addWidget(self.show_on_bottom_checkbox, 6, 2)
 
     def set_show_all_screen(self) -> None:
         front_engine_logger.info("[ParticleSettingUI] set_show_all_screen")
         self.show_all_screen = self.show_on_all_screen_checkbox.isChecked()
 
-    def _create_particle_widget(self, screen_width: int = 1920, screen_height: int = 1080) -> ParticleWidget:
+    def _create_particle_widget(self, screen_width: int = 1920, screen_height: int = 1080) -> ParticleOpenGLWidget:
         front_engine_logger.info("[ParticleSettingUI] _create_particle_widget")
-        particle_widget = ParticleWidget(
+        particle_widget = ParticleOpenGLWidget(
             pixmap=QPixmap(self.image_path),
             particle_size=int(self.particle_size_combobox.currentText()),
             particle_direction=self.choose_direction_combobox.currentText(),
@@ -111,9 +108,9 @@ class ParticleSettingUI(QWidget):
             opacity=float(self.opacity_slider.value()) / 100,
             screen_width=screen_width,
             screen_height=screen_height,
-            particle_speed=int(self.particle_speed_combobox.currentText())
+            particle_speed=float(self.particle_speed_combobox.currentText())
         )
-        particle_widget.set_ui_window_flag(self.show_on_bottom_checkbox.isChecked())
+        particle_widget.set_ui_window_flag()
         self.particle_list.append(particle_widget)
         return particle_widget
 
