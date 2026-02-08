@@ -37,7 +37,7 @@ class ParticleOpenGLWidget(QOpenGLWidget):
         self.setAttribute(Qt.WidgetAttribute.WA_NoSystemBackground)
         self.setAutoFillBackground(False)
 
-        if sys.platform == "win32":
+        if sys.platform in ["win32", "cygwin", "msys"]:
             hwnd = int(self.winId())
             extended_style = ctypes.windll.user32.GetWindowLongW(hwnd, -20)
             ctypes.windll.user32.SetWindowLongW(hwnd, -20,
