@@ -157,7 +157,7 @@ class FrontEngineMainUI(QMainWindow):
 
     def _setup_icon(self, show_system_tray_ray: bool) -> None:
         """設定視窗 Icon 與系統托盤 / Setup window icon and system tray"""
-        self.icon_path = Path(os.getcwd()) / "je_driver_icon.ico"
+        self.icon_path = Path(os.getcwd()) / "frontengine.ico"
         self.icon = QIcon(str(self.icon_path))
         self.show_system_tray_ray = show_system_tray_ray
 
