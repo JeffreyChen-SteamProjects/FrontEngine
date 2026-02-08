@@ -45,8 +45,7 @@ class ParticleSettingUI(QWidget):
         self.choose_direction_label = QLabel(language_wrapper.language_word_dict.get("choose_particle_direction"))
         self.choose_direction_combobox = QComboBox()
         self.choose_direction_combobox.addItems(
-            ["down", "up", "left", "right", "left_down", "left_up", "right_down", "right_up",
-             "random_minus", "random_add", "random"]
+            ["down", "up", "left", "right"]
         )
 
         # Particle size
@@ -130,7 +129,7 @@ class ParticleSettingUI(QWidget):
                 monitors[0].availableGeometry().width(),
                 monitors[0].availableGeometry().height()
             )
-            particle_widget.showFullScreen()
+            particle_widget.showMaximized()
 
         elif not self.show_all_screen and len(monitors) >= 2:
             input_dialog, combobox = create_monitor_selection_dialog(self, monitors)
@@ -145,7 +144,7 @@ class ParticleSettingUI(QWidget):
                     )
                     particle_widget.setScreen(monitor)
                     particle_widget.move(monitor.availableGeometry().topLeft())
-                    particle_widget.showFullScreen()
+                    particle_widget.showMaximized()
 
         else:
             for monitor in monitors:
@@ -155,7 +154,7 @@ class ParticleSettingUI(QWidget):
                 )
                 particle_widget.setScreen(monitor)
                 particle_widget.move(monitor.availableGeometry().topLeft())
-                particle_widget.showFullScreen()
+                particle_widget.showMaximized()
 
     def choose_and_copy_file_to_cwd_image_dir_then_play(self) -> None:
         front_engine_logger.info("[ParticleSettingUI] choose_and_copy_file_to_cwd_image_dir_then_play")
