@@ -1,12 +1,11 @@
 from typing import Optional
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QGuiApplication
-from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QPushButton, QMessageBox, QCheckBox, QDialog
+from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QPushButton, QMessageBox, QCheckBox
 
 from frontengine.show.video.video_player import VideoWidget
 from frontengine.ui.dialog.choose_file_dialog import choose_video
-from frontengine.ui.page.utils import create_monitor_selection_dialog, show_on_selected_monitor, show_on_primary_screen
+from frontengine.ui.page.utils import dispatch_to_monitors, show_on_primary_screen, show_on_selected_monitor
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
@@ -111,28 +110,21 @@ class VideoSettingUI(QWidget):
             return
 
         front_engine_logger.info("[VideoSettingUI] start_play_video")
-        monitors = QGuiApplication.screens()
 
-        if not self.show_all_screen and len(monitors) <= 1:
-            video_widget = self._create_video_widget()
-            show_on_primary_screen(video_widget, self.fullscreen_checkbox)
+        def present_on_monitor(widget: VideoWidget, monitor, index: int) -> None:
+            # Mute secondary monitors when we duplicate audio across screens
+            # to avoid the same track playing out of every output.
+            if self.show_all_screen and index >= 1:
+                widget.media_player.audioOutput().setVolume(0)
+            show_on_selected_monitor(widget, self.fullscreen_checkbox, monitor)
 
-        elif not self.show_all_screen and len(monitors) >= 2:
-            input_dialog, combobox = create_monitor_selection_dialog(self, monitors)
-            result = input_dialog.exec()
-            if result == QDialog.DialogCode.Accepted:
-                select_monitor_index = int(combobox.currentText())
-                if len(monitors) > select_monitor_index:
-                    monitor = monitors[select_monitor_index]
-                    video_widget = self._create_video_widget()
-                    show_on_selected_monitor(video_widget, self.fullscreen_checkbox, monitor)
-
-        else:
-            for count, monitor in enumerate(monitors):
-                video_widget = self._create_video_widget()
-                if count >= 1:
-                    video_widget.media_player.audioOutput().setVolume(0)
-                show_on_selected_monitor(video_widget, self.fullscreen_checkbox, monitor)
+        dispatch_to_monitors(
+            parent=self,
+            show_all_screen=self.show_all_screen,
+            factory=lambda _monitor: self._create_video_widget(),
+            present_primary=lambda widget: show_on_primary_screen(widget, self.fullscreen_checkbox),
+            present_on_monitor=present_on_monitor,
+        )
 
     def choose_and_copy_file_to_cwd_video_dir_then_play(self) -> None:
         front_engine_logger.info("[VideoSettingUI] choose_and_copy_file_to_cwd_video_dir_then_play")

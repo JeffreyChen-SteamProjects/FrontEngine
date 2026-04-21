@@ -1,9 +1,8 @@
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QGuiApplication
-from PySide6.QtWidgets import QWidget, QGridLayout, QLabel, QSlider, QLineEdit, QPushButton, QCheckBox, QDialog
+from PySide6.QtWidgets import QWidget, QGridLayout, QLabel, QSlider, QLineEdit, QPushButton, QCheckBox
 
 from frontengine.show.web.webview import WebWidget
-from frontengine.ui.page.utils import create_monitor_selection_dialog
+from frontengine.ui.page.utils import dispatch_to_monitors
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
@@ -92,24 +91,16 @@ class WEBSettingUI(QWidget):
 
     def start_open_web_with_url(self) -> None:
         front_engine_logger.info("[WEBSettingUI] start_open_web_with_url")
-        monitors = QGuiApplication.screens()
-        if not self.show_all_screen and len(monitors) <= 1:
-            web_widget = self._create_web_widget()
-            web_widget.showFullScreen()
-        elif not self.show_all_screen and len(monitors) >= 2:
-            input_dialog, combobox = create_monitor_selection_dialog(self, monitors)
-            result = input_dialog.exec()
-            if result == QDialog.DialogCode.Accepted:
-                select_monitor_index = int(combobox.currentText())
-                if len(monitors) > select_monitor_index:
-                    monitor = monitors[select_monitor_index]
-                    web_widget = self._create_web_widget()
-                    web_widget.setScreen(monitor)
-                    web_widget.move(monitor.availableGeometry().topLeft())
-                    web_widget.showFullScreen()
-        else:
-            for monitor in monitors:
-                web_widget = self._create_web_widget()
-                web_widget.setScreen(monitor)
-                web_widget.move(monitor.availableGeometry().topLeft())
-                web_widget.showFullScreen()
+
+        def present_on_monitor(widget: WebWidget, monitor, _idx: int) -> None:
+            widget.setScreen(monitor)
+            widget.move(monitor.availableGeometry().topLeft())
+            widget.showFullScreen()
+
+        dispatch_to_monitors(
+            parent=self,
+            show_all_screen=self.show_all_screen,
+            factory=lambda _monitor: self._create_web_widget(),
+            present_primary=lambda widget: widget.showFullScreen(),
+            present_on_monitor=present_on_monitor,
+        )

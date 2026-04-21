@@ -1,10 +1,9 @@
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QLineEdit, QPushButton, QCheckBox, QComboBox, \
-    QDialog, QMessageBox
+    QMessageBox
 
 from frontengine.show.text.draw_text import TextWidget
-from frontengine.ui.page.utils import create_monitor_selection_dialog
+from frontengine.ui.page.utils import dispatch_to_monitors
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
@@ -100,24 +99,15 @@ class TextSettingUI(QWidget):
             QMessageBox.warning(self, "Warning", language_wrapper.language_word_dict.get("not_prepare"))
             return
 
-        monitors = QGuiApplication.screens()
-        if not self.show_all_screen and len(monitors) <= 1:
-            text_widget = self._create_text_widget()
-            text_widget.showFullScreen()
-        elif not self.show_all_screen and len(monitors) >= 2:
-            input_dialog, combobox = create_monitor_selection_dialog(self, monitors)
-            result = input_dialog.exec()
-            if result == QDialog.DialogCode.Accepted:
-                select_monitor_index = int(combobox.currentText())
-                if len(monitors) > select_monitor_index:
-                    monitor = monitors[select_monitor_index]
-                    text_widget = self._create_text_widget()
-                    text_widget.setScreen(monitor)
-                    text_widget.move(monitor.availableGeometry().topLeft())
-                    text_widget.showFullScreen()
-        else:
-            for monitor in monitors:
-                text_widget = self._create_text_widget()
-                text_widget.setScreen(monitor)
-                text_widget.move(monitor.availableGeometry().topLeft())
-                text_widget.showFullScreen()
+        def present_on_monitor(widget: TextWidget, monitor, _idx: int) -> None:
+            widget.setScreen(monitor)
+            widget.move(monitor.availableGeometry().topLeft())
+            widget.showFullScreen()
+
+        dispatch_to_monitors(
+            parent=self,
+            show_all_screen=self.show_all_screen,
+            factory=lambda _monitor: self._create_text_widget(),
+            present_primary=lambda widget: widget.showFullScreen(),
+            present_on_monitor=present_on_monitor,
+        )
