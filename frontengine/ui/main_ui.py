@@ -25,6 +25,7 @@ from frontengine.ui.page.web.web_setting_ui import WEBSettingUI
 from frontengine.user_setting.user_setting_file import write_user_setting, read_user_setting, user_setting_dict
 from frontengine.utils.critical_exit.critical_exit import CriticalExit
 from frontengine.utils.critical_exit.win32_vk import keyboard_keys_table
+from frontengine.utils.hotkey.hotkey_service import HotkeyService
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 # 可擴充的外部 Tab 註冊表
@@ -123,6 +124,11 @@ class FrontEngineMainUI(QMainWindow):
         self.critical_ext.set_critical_key(keyboard_keys_table.get("f12"))
         self.critical_ext.init_critical_exit()
 
+        # 全域快速鍵 / Global hotkeys
+        self.hotkey_service = HotkeyService({"<ctrl>+<shift>+<f12>": "close_all"})
+        self.hotkey_service.hotkey_triggered.connect(self._handle_hotkey)
+        self.hotkey_service.start()
+
         # 設定 Icon 與系統托盤
         # Set icon and system tray
         self._setup_icon(show_system_tray_ray)
@@ -189,8 +195,18 @@ class FrontEngineMainUI(QMainWindow):
         else:
             super().closeEvent(event)
 
+    def _handle_hotkey(self, action: str) -> None:
+        """
+        分派全域快速鍵到對應動作。
+        Dispatch global hotkey to the matching action on the UI thread.
+        """
+        if action == "close_all":
+            self.control_center_ui.clear_all()
+
     def close(self) -> None:
         """關閉程式並清理資源 / Close application and clear resources"""
+        if getattr(self, "hotkey_service", None) is not None:
+            self.hotkey_service.stop()
         write_user_setting()
         self.video_setting_ui.video_widget_list.clear()
         self.image_setting_ui.image_widget_list.clear()
