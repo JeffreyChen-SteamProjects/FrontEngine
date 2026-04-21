@@ -1,12 +1,11 @@
 Release Process
 ----
 
-FrontEngine ships two PyPI packages from a single source tree:
+FrontEngine is published to PyPI as ``frontengine`` whenever a pull request is
+merged into ``main``. Development work happens on the ``dev`` branch and is
+released by opening and merging a pull request targeting ``main``.
 
-* ``frontengine`` — the stable release, published from the ``main`` branch.
-* ``frontengine_dev`` — the development preview, published from the ``dev`` branch.
-
-Continuous integration and publishing are driven by three GitHub Actions
+Continuous integration and publishing are driven by two GitHub Actions
 workflows that live in ``.github/workflows/``.
 
 Workflows
@@ -20,46 +19,42 @@ Workflows
   * Compiles every module under ``frontengine/`` and launches the two GUI
     smoke scripts in ``tests/unit_test/start/``.
 
-* ``release-dev.yml`` — *Release Dev*
+* ``release.yml`` — *Release*
 
-  * Runs on pushes to ``dev`` or via manual dispatch.
-  * Reads the version from ``pyproject.toml`` and computes the tag
-    ``dev-v<version>``.
-  * If the tag already exists the job is a no-op; otherwise it builds an sdist
+  * Runs only when a pull request is **merged** into ``main`` (a closed-but-
+    unmerged pull request will not trigger a release). The workflow can also
+    be re-run manually via ``workflow_dispatch`` — the manual trigger takes a
+    ``bump`` input (``patch`` / ``minor`` / ``major``, default ``patch``).
+  * **Before** building or uploading, the workflow reads the current
+    ``version`` field from ``stable.toml``, bumps the selected segment (the
+    PR-merged trigger always does a patch bump), writes the new version back
+    to ``stable.toml`` and ``pyproject.toml``, and commits that change to
+    ``main`` with ``[skip ci]`` in the commit message so it doesn't trigger
+    CI on itself.
+  * Then it copies ``stable.toml`` over ``pyproject.toml``, builds an sdist
     and wheel, verifies them with ``twine check``, uploads them to PyPI as
-    ``frontengine_dev`` using ``twine upload``, and creates a GitHub
-    **prerelease** whose assets are the built distributions.
-
-* ``release-stable.yml`` — *Release Stable*
-
-  * Runs on pushes to ``main`` or via manual dispatch.
-  * Copies ``stable.toml`` over ``pyproject.toml`` so the build uses the
-    stable project metadata, then follows the same build/check/upload/release
-    steps as the dev workflow.
-  * The produced tag is ``v<version>`` and the release is marked as a normal
-    (non-prerelease) release.
+    ``frontengine`` using ``twine upload``, and creates a GitHub release
+    tagged ``v<new-version>`` with the built distributions attached.
+  * If the computed tag somehow already exists the workflow aborts before
+    touching PyPI, so a run can never republish an existing version.
 
 Cutting a release
 ====
 
-1. Bump the ``version`` field inside ``pyproject.toml`` (for dev) or
-   ``stable.toml`` (for stable).
-2. Commit and push to the matching branch.
-3. The corresponding release workflow starts automatically.
+1. Merge a pull request into ``main``. The patch segment bumps automatically.
+2. The workflow publishes to PyPI and creates the GitHub release in one run.
 
-Because both release workflows refuse to re-use an existing tag, day-to-day
-pushes that don't touch the version field are safe: the job runs, sees the
-tag, and exits without republishing.
+For a minor or major bump — or to re-run a failed publish without cutting a
+fresh PR — trigger the workflow manually via **Actions → Release → Run
+workflow** and pick the ``bump`` segment.
 
 Required secrets
 ====
 
-Configure these as repository secrets:
+Configure this as a repository secret:
 
-* ``PYPI_DEV_API_TOKEN`` — a PyPI API token scoped to the ``frontengine_dev``
-  project, used by ``release-dev.yml``.
-* ``PYPI_STABLE_API_TOKEN`` — a PyPI API token scoped to the ``frontengine``
-  project, used by ``release-stable.yml``.
+* ``PYPI_API_TOKEN`` — a PyPI API token scoped to the ``frontengine`` project.
 
-Both workflows use ``__token__`` as the twine username, so only the token
-itself needs to be stored.
+The workflow uses ``__token__`` as the twine username, so only the token
+itself needs to be stored. Pushing the version-bump commit back to ``main``
+uses the default ``GITHUB_TOKEN`` that GitHub Actions provides automatically.

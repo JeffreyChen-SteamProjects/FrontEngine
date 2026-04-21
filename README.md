@@ -36,14 +36,9 @@ It provides an intuitive interface and supports multiple media formats for inter
   - Windows 10/11 is the primary target; macOS and Linux are supported but may need extra OS dependencies.
 
 - **From PyPI**
-  - Stable release:
-    ```bash
-    pip install frontengine
-    ```
-  - Development release (tracks the `dev` branch):
-    ```bash
-    pip install frontengine_dev
-    ```
+  ```bash
+  pip install frontengine
+  ```
 
 - **Pre-built binaries**
   - [GitHub Releases](https://github.com/Intergration-Automation-Testing/FrontEngine/releases)
@@ -69,30 +64,34 @@ It provides an intuitive interface and supports multiple media formats for inter
 
 ## Continuous Integration & Release
 
-This repository ships three GitHub Actions workflows:
+This repository ships two GitHub Actions workflows:
 
 | Workflow | Trigger | Purpose |
 |----------|---------|---------|
 | `CI` (`.github/workflows/ci.yml`) | Push / PR to `main` or `dev`, daily cron | Matrix smoke test across Python 3.10 / 3.11 / 3.12 on Windows |
-| `Release Dev` (`.github/workflows/release-dev.yml`) | Push to `dev`, or manual dispatch | Builds `frontengine_dev`, uploads to PyPI via `twine`, creates a GitHub **prerelease** tagged `dev-v<version>` |
-| `Release Stable` (`.github/workflows/release-stable.yml`) | Push to `main`, or manual dispatch | Swaps `stable.toml` → `pyproject.toml`, builds `frontengine`, uploads via `twine`, creates a GitHub release tagged `v<version>` |
+| `Release` (`.github/workflows/release.yml`) | A pull request is merged into `main` (or manual dispatch) | Auto-bumps the version in `stable.toml`/`pyproject.toml`, commits the bump back to `main`, swaps `stable.toml` → `pyproject.toml`, builds sdist + wheel, uploads to PyPI as `frontengine` via `twine`, creates a GitHub release tagged `v<version>` |
 
-Each release workflow reads the version from the relevant pyproject file and
-**skips cleanly** when the corresponding git tag already exists, so code-only
-pushes to `main`/`dev` never republish the same version.
+Publishing **only happens on merge to `main`** — pushing to `dev` runs CI but
+never publishes. On merge, the workflow **automatically bumps the patch
+segment** of the version (configurable via manual dispatch: `patch` / `minor`
+/ `major`), commits the bump back to `main` with `[skip ci]`, then builds,
+uploads, and releases under the new version. Both the PyPI upload and the
+GitHub release see the bumped version, not the previous one.
 
 ### Cutting a new release
 
-1. Bump `version` in `pyproject.toml` (dev) or `stable.toml` (stable).
-2. Commit and push to `dev` (or `main`).
-3. The matching release workflow runs automatically.
+1. Merge a pull request into `main` — the patch version bumps automatically.
+2. That's it. PyPI publish and GitHub release happen in one workflow run.
+
+For a minor or major bump, trigger the workflow manually via *Actions →
+Release → Run workflow* and pick the `bump` segment. That path also works
+when you need to re-run a failed publish without a new merge.
 
 ### Required repository secrets
 
 | Secret | Used by | Contents |
 |--------|---------|----------|
-| `PYPI_DEV_API_TOKEN` | `release-dev.yml` | A PyPI API token scoped to the `frontengine_dev` project |
-| `PYPI_STABLE_API_TOKEN` | `release-stable.yml` | A PyPI API token scoped to the `frontengine` project |
+| `PYPI_API_TOKEN` | `release.yml` | A PyPI API token scoped to the `frontengine` project |
 
-The workflows use `__token__` as the twine username, so only the token itself
-needs to be stored in secrets.
+The workflow uses `__token__` as the twine username, so only the token itself
+needs to be stored.
