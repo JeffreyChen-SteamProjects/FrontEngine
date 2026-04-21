@@ -1,9 +1,13 @@
 import random
+import sys
 
 from OpenGL.GL import *
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QSurfaceFormat, QPixmap
 from PySide6.QtOpenGLWidgets import QOpenGLWidget
+
+if sys.platform == "win32":
+    import ctypes
 
 
 class ParticleOpenGLWidget(QOpenGLWidget):
@@ -74,9 +78,12 @@ class ParticleOpenGLWidget(QOpenGLWidget):
         self.timer.timeout.connect(self.update_particles)
         self.timer.start(16)
 
-        QTimer.singleShot(0, self.apply_winapi)
+        if sys.platform == "win32":
+            QTimer.singleShot(0, self.apply_winapi)
 
     def apply_winapi(self):
+        if sys.platform != "win32":
+            return
         hwnd = int(self.winId())
         GWL_EXSTYLE = -20
         WS_EX_LAYERED = 0x80000

@@ -33,5 +33,7 @@ def read_user_setting() -> Path:
     """
     user_setting_file = Path(getcwd()) / "user_setting.json"
     if user_setting_file.exists() and user_setting_file.is_file():
-        user_setting_dict.update(read_json(str(user_setting_file)))
+        data = read_json(str(user_setting_file))
+        if isinstance(data, dict):
+            user_setting_dict.update(data)
     return user_setting_file

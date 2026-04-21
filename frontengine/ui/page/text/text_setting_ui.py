@@ -82,7 +82,6 @@ class TextSettingUI(QWidget):
         text_widget.set_font_variable(self.font_size_slider.value())
         text_widget.set_ui_variable(float(self.opacity_slider.value()) / 100)
         text_widget.set_ui_window_flag(self.show_on_bottom_checkbox.isChecked())
-        text_widget.set_font()
         self.text_widget_list.append(text_widget)
         return text_widget
 

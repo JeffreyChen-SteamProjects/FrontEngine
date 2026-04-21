@@ -38,6 +38,7 @@ class SoundPlayer(QWidget):
             Qt.WindowType.Tool
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
 
         # --- 初始化播放器 / Initialize media player ---
         if self.sound_path.exists() and self.sound_path.is_file():

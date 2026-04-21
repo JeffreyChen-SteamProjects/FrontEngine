@@ -40,9 +40,10 @@ def choose_scene_json(
     )
 
     if file_path:
-        # 更新全域場景設定
-        # Update global scene configuration
-        scene_json.update(read_json(file_path))
+        data = read_json(file_path)
+        if isinstance(data, dict):
+            scene_json.clear()
+            scene_json.update(data)
         return file_path
 
     return None

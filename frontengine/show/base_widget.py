@@ -61,9 +61,12 @@ class BaseWidget(QWidget):
         """
         front_engine_logger.debug(f"{self.__class__.__name__} paintEvent | event: {event}")
         painter = QPainter(self)
+        painter.save()
         painter.setOpacity(self.opacity)
-        self.draw_content(painter)
-        painter.restore()
+        try:
+            self.draw_content(painter)
+        finally:
+            painter.restore()
 
     @abstractmethod
     def draw_content(self, painter: QPainter) -> None:

@@ -52,8 +52,9 @@ class FrontEngineMainUI(QMainWindow):
 
         # Windows 平台設定 AppUserModelID
         # Set AppUserModelID for Windows platform
-        from ctypes import windll
-        windll.shell32.SetCurrentProcessExplicitAppUserModelID(self.id)
+        if sys.platform == "win32":
+            from ctypes import windll
+            windll.shell32.SetCurrentProcessExplicitAppUserModelID(self.id)
 
         # 讀取使用者設定
         # Load user settings
@@ -195,6 +196,8 @@ class FrontEngineMainUI(QMainWindow):
         self.gif_setting_ui.gif_widget_list.clear()
         self.sound_player_setting_ui.sound_widget_list.clear()
         self.text_setting_ui.text_widget_list.clear()
+        self.particle_setting_ui.particle_list.clear()
+        self.scene_setting_ui.close_scene()
         super().close()
         if self.main_app:
             self.main_app.exit(0)
