@@ -146,3 +146,33 @@ class VideoSettingUI(QWidget):
     def volume_trick(self) -> None:
         front_engine_logger.info("[VideoSettingUI] volume_trick")
         self.volume_slider_value_label.setText(str(self.volume_slider.value()))
+
+    def get_state(self) -> dict:
+        return {
+            "opacity": self.opacity_slider.value(),
+            "play_rate": self.play_rate_slider.value(),
+            "volume": self.volume_slider.value(),
+            "video_path": self.video_path,
+            "fullscreen": self.fullscreen_checkbox.isChecked(),
+            "show_on_all_screen": self.show_on_all_screen_checkbox.isChecked(),
+            "show_on_bottom": self.show_on_bottom_checkbox.isChecked(),
+        }
+
+    def set_state(self, state: dict) -> None:
+        if "opacity" in state:
+            self.opacity_slider.setValue(int(state["opacity"]))
+        if "play_rate" in state:
+            self.play_rate_slider.setValue(int(state["play_rate"]))
+        if "volume" in state:
+            self.volume_slider.setValue(int(state["volume"]))
+        if state.get("video_path"):
+            self.video_path = state["video_path"]
+            self.ready_to_play = True
+            self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+        if "fullscreen" in state:
+            self.fullscreen_checkbox.setChecked(bool(state["fullscreen"]))
+        if "show_on_all_screen" in state:
+            self.show_on_all_screen_checkbox.setChecked(bool(state["show_on_all_screen"]))
+            self.show_all_screen = bool(state["show_on_all_screen"])
+        if "show_on_bottom" in state:
+            self.show_on_bottom_checkbox.setChecked(bool(state["show_on_bottom"]))

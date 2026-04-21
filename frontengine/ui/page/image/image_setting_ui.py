@@ -105,3 +105,27 @@ class ImageSettingUI(QWidget):
     def opacity_trick(self) -> None:
         front_engine_logger.info("[ImageSettingUI] opacity_trick")
         self.opacity_slider_value_label.setText(str(self.opacity_slider.value()))
+
+    def get_state(self) -> dict:
+        return {
+            "opacity": self.opacity_slider.value(),
+            "image_path": self.image_path,
+            "fullscreen": self.fullscreen_checkbox.isChecked(),
+            "show_on_all_screen": self.show_on_all_screen_checkbox.isChecked(),
+            "show_on_bottom": self.show_on_bottom_checkbox.isChecked(),
+        }
+
+    def set_state(self, state: dict) -> None:
+        if "opacity" in state:
+            self.opacity_slider.setValue(int(state["opacity"]))
+        if state.get("image_path"):
+            self.image_path = state["image_path"]
+            self.ready_to_play = True
+            self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+        if "fullscreen" in state:
+            self.fullscreen_checkbox.setChecked(bool(state["fullscreen"]))
+        if "show_on_all_screen" in state:
+            self.show_on_all_screen_checkbox.setChecked(bool(state["show_on_all_screen"]))
+            self.show_all_screen = bool(state["show_on_all_screen"])
+        if "show_on_bottom" in state:
+            self.show_on_bottom_checkbox.setChecked(bool(state["show_on_bottom"]))

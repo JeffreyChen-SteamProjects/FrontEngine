@@ -150,3 +150,35 @@ class ParticleSettingUI(QWidget):
     def opacity_trick(self) -> None:
         front_engine_logger.info("[ParticleSettingUI] opacity_trick")
         self.opacity_slider_value_label.setText(str(self.opacity_slider.value()))
+
+    def get_state(self) -> dict:
+        return {
+            "opacity": self.opacity_slider.value(),
+            "image_path": self.image_path,
+            "direction": self.choose_direction_combobox.currentText(),
+            "size": self.particle_size_combobox.currentText(),
+            "count": self.particle_count_combobox.currentText(),
+            "speed": self.particle_speed_combobox.currentText(),
+            "show_on_all_screen": self.show_on_all_screen_checkbox.isChecked(),
+        }
+
+    def set_state(self, state: dict) -> None:
+        if "opacity" in state:
+            self.opacity_slider.setValue(int(state["opacity"]))
+        if state.get("image_path"):
+            self.image_path = state["image_path"]
+            self.ready_to_play = True
+            self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+        for combobox, key in (
+            (self.choose_direction_combobox, "direction"),
+            (self.particle_size_combobox, "size"),
+            (self.particle_count_combobox, "count"),
+            (self.particle_speed_combobox, "speed"),
+        ):
+            if state.get(key) is not None:
+                index = combobox.findText(str(state[key]))
+                if index >= 0:
+                    combobox.setCurrentIndex(index)
+        if "show_on_all_screen" in state:
+            self.show_on_all_screen_checkbox.setChecked(bool(state["show_on_all_screen"]))
+            self.show_all_screen = bool(state["show_on_all_screen"])

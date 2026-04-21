@@ -89,6 +89,33 @@ class WEBSettingUI(QWidget):
         front_engine_logger.info("[WEBSettingUI] opacity_trick")
         self.opacity_slider_value_label.setText(str(self.opacity_slider.value()))
 
+    def get_state(self) -> dict:
+        return {
+            "opacity": self.opacity_slider.value(),
+            "url": self.web_url_input.text(),
+            "open_file": self.open_local_html_checkbox.isChecked(),
+            "enable_input": self.enable_input_checkbox.isChecked(),
+            "show_on_all_screen": self.show_on_all_screen_checkbox.isChecked(),
+            "show_on_bottom": self.show_on_bottom_checkbox.isChecked(),
+        }
+
+    def set_state(self, state: dict) -> None:
+        if "opacity" in state:
+            self.opacity_slider.setValue(int(state["opacity"]))
+        if "url" in state:
+            self.web_url_input.setText(str(state.get("url") or ""))
+        if "open_file" in state:
+            self.open_local_html_checkbox.setChecked(bool(state["open_file"]))
+            self.open_file = bool(state["open_file"])
+        if "enable_input" in state:
+            self.enable_input_checkbox.setChecked(bool(state["enable_input"]))
+            self.enable_input = bool(state["enable_input"])
+        if "show_on_all_screen" in state:
+            self.show_on_all_screen_checkbox.setChecked(bool(state["show_on_all_screen"]))
+            self.show_all_screen = bool(state["show_on_all_screen"])
+        if "show_on_bottom" in state:
+            self.show_on_bottom_checkbox.setChecked(bool(state["show_on_bottom"]))
+
     def start_open_web_with_url(self) -> None:
         front_engine_logger.info("[WEBSettingUI] start_open_web_with_url")
 

@@ -92,6 +92,33 @@ class TextSettingUI(QWidget):
         front_engine_logger.info("[TextSettingUI] font_size_trick")
         self.font_size_slider_value_label.setText(str(self.font_size_slider.value()))
 
+    def get_state(self) -> dict:
+        return {
+            "opacity": self.opacity_slider.value(),
+            "font_size": self.font_size_slider.value(),
+            "text": self.line_edit.text(),
+            "alignment": self.text_position_combobox.currentText(),
+            "show_on_all_screen": self.show_on_all_screen_checkbox.isChecked(),
+            "show_on_bottom": self.show_on_bottom_checkbox.isChecked(),
+        }
+
+    def set_state(self, state: dict) -> None:
+        if "opacity" in state:
+            self.opacity_slider.setValue(int(state["opacity"]))
+        if "font_size" in state:
+            self.font_size_slider.setValue(int(state["font_size"]))
+        if "text" in state:
+            self.line_edit.setText(str(state.get("text") or ""))
+        if "alignment" in state:
+            index = self.text_position_combobox.findText(str(state["alignment"]))
+            if index >= 0:
+                self.text_position_combobox.setCurrentIndex(index)
+        if "show_on_all_screen" in state:
+            self.show_on_all_screen_checkbox.setChecked(bool(state["show_on_all_screen"]))
+            self.show_all_screen = bool(state["show_on_all_screen"])
+        if "show_on_bottom" in state:
+            self.show_on_bottom_checkbox.setChecked(bool(state["show_on_bottom"]))
+
     def start_draw_text_on_screen(self) -> None:
         front_engine_logger.info("[TextSettingUI] start_draw_text_on_screen")
 

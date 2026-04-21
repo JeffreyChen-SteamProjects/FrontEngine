@@ -12,6 +12,7 @@ from frontengine.system_tray.extend_system_tray import ExtendSystemTray
 from frontengine.ui.menu.help_menu import build_help_menu
 from frontengine.ui.menu.how_to_menu import build_how_to_menu
 from frontengine.ui.menu.language_menu import build_language_menu
+from frontengine.ui.menu.preset_menu import build_preset_menu
 from frontengine.ui.page.control_center.control_center_ui import ControlCenterUI
 from frontengine.ui.page.gif.gif_setting_ui import GIFSettingUI
 from frontengine.ui.page.image.image_setting_ui import ImageSettingUI
@@ -114,6 +115,7 @@ class FrontEngineMainUI(QMainWindow):
         build_language_menu(self)
         build_help_menu(self)
         build_how_to_menu(self)
+        build_preset_menu(self)
 
         # 致命退出設定
         # Critical exit setting

@@ -109,3 +109,21 @@ class SoundPlayerSettingUI(QWidget):
     def volume_trick(self) -> None:
         front_engine_logger.info("[SoundPlayerSettingUI] volume_trick")
         self.volume_slider_value_label.setText(str(self.volume_slider.value()))
+
+    def get_state(self) -> dict:
+        return {
+            "volume": self.volume_slider.value(),
+            "wav_sound_path": self.wav_sound_path,
+            "player_sound_path": self.player_sound_path,
+        }
+
+    def set_state(self, state: dict) -> None:
+        if "volume" in state:
+            self.volume_slider.setValue(int(state["volume"]))
+        if state.get("wav_sound_path"):
+            self.wav_sound_path = state["wav_sound_path"]
+            self.ready_to_play = True
+            self.wav_ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+        if state.get("player_sound_path"):
+            self.player_sound_path = state["player_sound_path"]
+            self.player_ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
