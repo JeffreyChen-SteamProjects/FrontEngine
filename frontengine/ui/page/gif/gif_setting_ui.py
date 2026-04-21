@@ -5,7 +5,13 @@ from PySide6.QtWidgets import QWidget, QGridLayout, QLabel, QSlider, QPushButton
 
 from frontengine.show.gif.paint_gif import GifWidget
 from frontengine.ui.dialog.choose_file_dialog import choose_gif
-from frontengine.ui.page.utils import dispatch_to_monitors, show_on_primary_screen, show_on_selected_monitor
+from frontengine.ui.page.utils import (
+    build_target_monitor_combobox,
+    dispatch_to_monitors,
+    resolve_preferred_monitor,
+    show_on_primary_screen,
+    show_on_selected_monitor,
+)
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
@@ -60,6 +66,12 @@ class GIFSettingUI(QWidget):
 
         self.show_on_bottom_checkbox = QCheckBox(language_wrapper.language_word_dict.get("Show on bottom"))
 
+        # Target monitor selector
+        self.target_monitor_label = QLabel(
+            language_wrapper.language_word_dict.get("target_monitor_label", "Target monitor")
+        )
+        self.target_monitor_combobox = build_target_monitor_combobox()
+
         # Layout
         self.grid_layout.addWidget(self.opacity_label, 0, 0)
         self.grid_layout.addWidget(self.opacity_slider_value_label, 0, 1)
@@ -73,6 +85,8 @@ class GIFSettingUI(QWidget):
         self.grid_layout.addWidget(self.start_button, 3, 0)
         self.grid_layout.addWidget(self.show_on_all_screen_checkbox, 3, 1)
         self.grid_layout.addWidget(self.show_on_bottom_checkbox, 3, 2)
+        self.grid_layout.addWidget(self.target_monitor_label, 4, 0)
+        self.grid_layout.addWidget(self.target_monitor_combobox, 4, 1)
 
     def set_show_all_screen(self) -> None:
         front_engine_logger.info("[GIFSettingUI] set_show_all_screen")
@@ -103,6 +117,7 @@ class GIFSettingUI(QWidget):
             present_on_monitor=lambda widget, monitor, _idx: show_on_selected_monitor(
                 widget, self.fullscreen_checkbox, monitor
             ),
+            preferred_monitor_index=resolve_preferred_monitor(self.target_monitor_combobox),
         )
 
     def choose_and_copy_file_to_cwd_gif_dir_then_play(self) -> None:
@@ -121,3 +136,35 @@ class GIFSettingUI(QWidget):
     def speed_trick(self) -> None:
         front_engine_logger.info("[GIFSettingUI] speed_trick")
         self.speed_slider_value_label.setText(str(self.speed_slider.value()))
+
+    def get_state(self) -> dict:
+        return {
+            "opacity": self.opacity_slider.value(),
+            "speed": self.speed_slider.value(),
+            "gif_image_path": self.gif_image_path,
+            "fullscreen": self.fullscreen_checkbox.isChecked(),
+            "show_on_all_screen": self.show_on_all_screen_checkbox.isChecked(),
+            "show_on_bottom": self.show_on_bottom_checkbox.isChecked(),
+            "target_monitor": self.target_monitor_combobox.currentText(),
+        }
+
+    def set_state(self, state: dict) -> None:
+        if "opacity" in state:
+            self.opacity_slider.setValue(int(state["opacity"]))
+        if "speed" in state:
+            self.speed_slider.setValue(int(state["speed"]))
+        if state.get("gif_image_path"):
+            self.gif_image_path = state["gif_image_path"]
+            self.ready_to_play = True
+            self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+        if "fullscreen" in state:
+            self.fullscreen_checkbox.setChecked(bool(state["fullscreen"]))
+        if "show_on_all_screen" in state:
+            self.show_on_all_screen_checkbox.setChecked(bool(state["show_on_all_screen"]))
+            self.show_all_screen = bool(state["show_on_all_screen"])
+        if "show_on_bottom" in state:
+            self.show_on_bottom_checkbox.setChecked(bool(state["show_on_bottom"]))
+        if state.get("target_monitor") is not None:
+            index = self.target_monitor_combobox.findText(str(state["target_monitor"]))
+            if index >= 0:
+                self.target_monitor_combobox.setCurrentIndex(index)

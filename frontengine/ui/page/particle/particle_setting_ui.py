@@ -6,7 +6,11 @@ from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QPushButton
 
 from frontengine.show.particle.particle_ui import ParticleOpenGLWidget
 from frontengine.ui.dialog.choose_file_dialog import choose_image
-from frontengine.ui.page.utils import dispatch_to_monitors
+from frontengine.ui.page.utils import (
+    build_target_monitor_combobox,
+    dispatch_to_monitors,
+    resolve_preferred_monitor,
+)
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
@@ -75,6 +79,12 @@ class ParticleSettingUI(QWidget):
         self.show_on_all_screen_checkbox = QCheckBox(language_wrapper.language_word_dict.get("Show on all screen"))
         self.show_on_all_screen_checkbox.clicked.connect(self.set_show_all_screen)
 
+        # Target monitor selector
+        self.target_monitor_label = QLabel(
+            language_wrapper.language_word_dict.get("target_monitor_label", "Target monitor")
+        )
+        self.target_monitor_combobox = build_target_monitor_combobox()
+
         # Layout
         self.grid_layout.addWidget(self.opacity_label, 0, 0)
         self.grid_layout.addWidget(self.opacity_slider_value_label, 0, 1)
@@ -91,6 +101,8 @@ class ParticleSettingUI(QWidget):
         self.grid_layout.addWidget(self.particle_speed_combobox, 5, 1)
         self.grid_layout.addWidget(self.start_button, 6, 0)
         self.grid_layout.addWidget(self.show_on_all_screen_checkbox, 6, 1)
+        self.grid_layout.addWidget(self.target_monitor_label, 7, 0)
+        self.grid_layout.addWidget(self.target_monitor_combobox, 7, 1)
 
     def set_show_all_screen(self) -> None:
         front_engine_logger.info("[ParticleSettingUI] set_show_all_screen")
@@ -136,6 +148,7 @@ class ParticleSettingUI(QWidget):
             factory=factory,
             present_primary=lambda widget: widget.showMaximized(),
             present_on_monitor=present_on_monitor,
+            preferred_monitor_index=resolve_preferred_monitor(self.target_monitor_combobox),
         )
 
     def choose_and_copy_file_to_cwd_image_dir_then_play(self) -> None:
@@ -150,3 +163,40 @@ class ParticleSettingUI(QWidget):
     def opacity_trick(self) -> None:
         front_engine_logger.info("[ParticleSettingUI] opacity_trick")
         self.opacity_slider_value_label.setText(str(self.opacity_slider.value()))
+
+    def get_state(self) -> dict:
+        return {
+            "opacity": self.opacity_slider.value(),
+            "image_path": self.image_path,
+            "direction": self.choose_direction_combobox.currentText(),
+            "size": self.particle_size_combobox.currentText(),
+            "count": self.particle_count_combobox.currentText(),
+            "speed": self.particle_speed_combobox.currentText(),
+            "show_on_all_screen": self.show_on_all_screen_checkbox.isChecked(),
+            "target_monitor": self.target_monitor_combobox.currentText(),
+        }
+
+    def set_state(self, state: dict) -> None:
+        if "opacity" in state:
+            self.opacity_slider.setValue(int(state["opacity"]))
+        if state.get("image_path"):
+            self.image_path = state["image_path"]
+            self.ready_to_play = True
+            self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+        for combobox, key in (
+            (self.choose_direction_combobox, "direction"),
+            (self.particle_size_combobox, "size"),
+            (self.particle_count_combobox, "count"),
+            (self.particle_speed_combobox, "speed"),
+        ):
+            if state.get(key) is not None:
+                index = combobox.findText(str(state[key]))
+                if index >= 0:
+                    combobox.setCurrentIndex(index)
+        if "show_on_all_screen" in state:
+            self.show_on_all_screen_checkbox.setChecked(bool(state["show_on_all_screen"]))
+            self.show_all_screen = bool(state["show_on_all_screen"])
+        if state.get("target_monitor") is not None:
+            index = self.target_monitor_combobox.findText(str(state["target_monitor"]))
+            if index >= 0:
+                self.target_monitor_combobox.setCurrentIndex(index)
