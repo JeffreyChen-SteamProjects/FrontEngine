@@ -3,7 +3,11 @@ from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QLineEdit, 
     QMessageBox
 
 from frontengine.show.text.draw_text import TextWidget
-from frontengine.ui.page.utils import dispatch_to_monitors
+from frontengine.ui.page.utils import (
+    build_target_monitor_combobox,
+    dispatch_to_monitors,
+    resolve_preferred_monitor,
+)
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
@@ -54,6 +58,12 @@ class TextSettingUI(QWidget):
         self.text_position_combobox = QComboBox()
         self.text_position_combobox.addItems(["TopLeft", "TopRight", "BottomLeft", "BottomRight", "Center"])
 
+        # Target monitor selector
+        self.target_monitor_label = QLabel(
+            language_wrapper.language_word_dict.get("target_monitor_label", "Target monitor")
+        )
+        self.target_monitor_combobox = build_target_monitor_combobox()
+
         # Layout
         self.grid_layout.addWidget(self.opacity_label, 0, 0)
         self.grid_layout.addWidget(self.opacity_slider_value_label, 0, 1)
@@ -67,6 +77,8 @@ class TextSettingUI(QWidget):
         self.grid_layout.addWidget(self.text_position_combobox, 3, 1)
         self.grid_layout.addWidget(self.start_button, 4, 0)
         self.grid_layout.addWidget(self.line_edit, 4, 1)
+        self.grid_layout.addWidget(self.target_monitor_label, 5, 0)
+        self.grid_layout.addWidget(self.target_monitor_combobox, 5, 1)
 
     def set_show_all_screen(self) -> None:
         front_engine_logger.info("[TextSettingUI] set_show_all_screen")
@@ -100,6 +112,7 @@ class TextSettingUI(QWidget):
             "alignment": self.text_position_combobox.currentText(),
             "show_on_all_screen": self.show_on_all_screen_checkbox.isChecked(),
             "show_on_bottom": self.show_on_bottom_checkbox.isChecked(),
+            "target_monitor": self.target_monitor_combobox.currentText(),
         }
 
     def set_state(self, state: dict) -> None:
@@ -118,6 +131,10 @@ class TextSettingUI(QWidget):
             self.show_all_screen = bool(state["show_on_all_screen"])
         if "show_on_bottom" in state:
             self.show_on_bottom_checkbox.setChecked(bool(state["show_on_bottom"]))
+        if state.get("target_monitor") is not None:
+            index = self.target_monitor_combobox.findText(str(state["target_monitor"]))
+            if index >= 0:
+                self.target_monitor_combobox.setCurrentIndex(index)
 
     def start_draw_text_on_screen(self) -> None:
         front_engine_logger.info("[TextSettingUI] start_draw_text_on_screen")
@@ -137,4 +154,5 @@ class TextSettingUI(QWidget):
             factory=lambda _monitor: self._create_text_widget(),
             present_primary=lambda widget: widget.showFullScreen(),
             present_on_monitor=present_on_monitor,
+            preferred_monitor_index=resolve_preferred_monitor(self.target_monitor_combobox),
         )

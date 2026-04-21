@@ -5,7 +5,13 @@ from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QPushButton
 
 from frontengine.show.video.video_player import VideoWidget
 from frontengine.ui.dialog.choose_file_dialog import choose_video
-from frontengine.ui.page.utils import dispatch_to_monitors, show_on_primary_screen, show_on_selected_monitor
+from frontengine.ui.page.utils import (
+    build_target_monitor_combobox,
+    dispatch_to_monitors,
+    resolve_preferred_monitor,
+    show_on_primary_screen,
+    show_on_selected_monitor,
+)
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
@@ -69,6 +75,12 @@ class VideoSettingUI(QWidget):
         # Show on bottom
         self.show_on_bottom_checkbox = QCheckBox(language_wrapper.language_word_dict.get("Show on bottom"))
 
+        # Target monitor selector
+        self.target_monitor_label = QLabel(
+            language_wrapper.language_word_dict.get("target_monitor_label", "Target monitor")
+        )
+        self.target_monitor_combobox = build_target_monitor_combobox()
+
         # Layout
         self.grid_layout.addWidget(self.opacity_label, 0, 0)
         self.grid_layout.addWidget(self.opacity_slider_value_label, 0, 1)
@@ -85,6 +97,8 @@ class VideoSettingUI(QWidget):
         self.grid_layout.addWidget(self.fullscreen_checkbox, 4, 2)
         self.grid_layout.addWidget(self.start_button, 5, 0)
         self.grid_layout.addWidget(self.ready_label, 5, 1)
+        self.grid_layout.addWidget(self.target_monitor_label, 6, 0)
+        self.grid_layout.addWidget(self.target_monitor_combobox, 6, 1)
 
     def set_show_all_screen(self) -> None:
         front_engine_logger.info("[VideoSettingUI] set_show_all_screen")
@@ -124,6 +138,7 @@ class VideoSettingUI(QWidget):
             factory=lambda _monitor: self._create_video_widget(),
             present_primary=lambda widget: show_on_primary_screen(widget, self.fullscreen_checkbox),
             present_on_monitor=present_on_monitor,
+            preferred_monitor_index=resolve_preferred_monitor(self.target_monitor_combobox),
         )
 
     def choose_and_copy_file_to_cwd_video_dir_then_play(self) -> None:
@@ -156,6 +171,7 @@ class VideoSettingUI(QWidget):
             "fullscreen": self.fullscreen_checkbox.isChecked(),
             "show_on_all_screen": self.show_on_all_screen_checkbox.isChecked(),
             "show_on_bottom": self.show_on_bottom_checkbox.isChecked(),
+            "target_monitor": self.target_monitor_combobox.currentText(),
         }
 
     def set_state(self, state: dict) -> None:
@@ -176,3 +192,7 @@ class VideoSettingUI(QWidget):
             self.show_all_screen = bool(state["show_on_all_screen"])
         if "show_on_bottom" in state:
             self.show_on_bottom_checkbox.setChecked(bool(state["show_on_bottom"]))
+        if state.get("target_monitor") is not None:
+            index = self.target_monitor_combobox.findText(str(state["target_monitor"]))
+            if index >= 0:
+                self.target_monitor_combobox.setCurrentIndex(index)

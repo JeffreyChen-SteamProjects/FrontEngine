@@ -92,6 +92,7 @@ def dispatch_to_monitors(
     factory: Callable[[Optional[QScreen]], QWidget],
     present_primary: Callable[[QWidget], None],
     present_on_monitor: Callable[[QWidget, QScreen, int], None],
+    preferred_monitor_index: Optional[int] = None,
 ) -> None:
     """
     Run the canonical monitor-dispatch flow the setting pages share:
@@ -100,12 +101,21 @@ def dispatch_to_monitors(
 
     `factory` receives the target monitor (or None for the primary path)
     so callers can pass monitor geometry into widget construction if
-    needed.
+    needed. `preferred_monitor_index` lets callers pre-select a specific
+    monitor so the user is not prompted; out-of-range values fall back
+    to the prompt flow.
     """
     monitors = QGuiApplication.screens()
     if not show_all_screen and len(monitors) <= 1:
         widget = factory(None)
         present_primary(widget)
+        return
+
+    if not show_all_screen and preferred_monitor_index is not None and \
+            0 <= preferred_monitor_index < len(monitors):
+        monitor = monitors[preferred_monitor_index]
+        widget = factory(monitor)
+        present_on_monitor(widget, monitor, preferred_monitor_index)
         return
 
     if not show_all_screen and len(monitors) >= 2:
@@ -123,3 +133,24 @@ def dispatch_to_monitors(
     for index, monitor in enumerate(monitors):
         widget = factory(monitor)
         present_on_monitor(widget, monitor, index)
+
+
+def build_target_monitor_combobox() -> QComboBox:
+    """
+    Build a combobox listing the current monitors plus an initial "Ask"
+    entry. Selection "Ask" (data=None) preserves today's prompt flow;
+    selecting a monitor index pre-selects that screen.
+    """
+    combobox = QComboBox()
+    combobox.addItem(language_wrapper.language_word_dict.get("target_monitor_ask", "Ask"), None)
+    for index, _ in enumerate(QGuiApplication.screens()):
+        combobox.addItem(str(index), index)
+    return combobox
+
+
+def resolve_preferred_monitor(combobox: Optional[QComboBox]) -> Optional[int]:
+    """Return the selected monitor index, or None for the Ask entry."""
+    if combobox is None:
+        return None
+    data = combobox.currentData()
+    return int(data) if isinstance(data, int) else None

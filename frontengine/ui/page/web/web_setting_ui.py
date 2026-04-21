@@ -2,7 +2,11 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QWidget, QGridLayout, QLabel, QSlider, QLineEdit, QPushButton, QCheckBox
 
 from frontengine.show.web.webview import WebWidget
-from frontengine.ui.page.utils import dispatch_to_monitors
+from frontengine.ui.page.utils import (
+    build_target_monitor_combobox,
+    dispatch_to_monitors,
+    resolve_preferred_monitor,
+)
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
@@ -51,6 +55,12 @@ class WEBSettingUI(QWidget):
         # Show on bottom
         self.show_on_bottom_checkbox = QCheckBox(language_wrapper.language_word_dict.get("Show on bottom"))
 
+        # Target monitor selector
+        self.target_monitor_label = QLabel(
+            language_wrapper.language_word_dict.get("target_monitor_label", "Target monitor")
+        )
+        self.target_monitor_combobox = build_target_monitor_combobox()
+
         # Layout
         self.grid_layout.addWidget(self.opacity_label, 0, 0)
         self.grid_layout.addWidget(self.opacity_slider_value_label, 0, 1)
@@ -61,6 +71,8 @@ class WEBSettingUI(QWidget):
         self.grid_layout.addWidget(self.show_on_bottom_checkbox, 2, 1)
         self.grid_layout.addWidget(self.start_button, 3, 0)
         self.grid_layout.addWidget(self.web_url_input, 3, 2)
+        self.grid_layout.addWidget(self.target_monitor_label, 4, 0)
+        self.grid_layout.addWidget(self.target_monitor_combobox, 4, 1)
 
     def set_show_all_screen(self) -> None:
         front_engine_logger.info("[WEBSettingUI] set_show_all_screen")
@@ -97,6 +109,7 @@ class WEBSettingUI(QWidget):
             "enable_input": self.enable_input_checkbox.isChecked(),
             "show_on_all_screen": self.show_on_all_screen_checkbox.isChecked(),
             "show_on_bottom": self.show_on_bottom_checkbox.isChecked(),
+            "target_monitor": self.target_monitor_combobox.currentText(),
         }
 
     def set_state(self, state: dict) -> None:
@@ -115,6 +128,10 @@ class WEBSettingUI(QWidget):
             self.show_all_screen = bool(state["show_on_all_screen"])
         if "show_on_bottom" in state:
             self.show_on_bottom_checkbox.setChecked(bool(state["show_on_bottom"]))
+        if state.get("target_monitor") is not None:
+            index = self.target_monitor_combobox.findText(str(state["target_monitor"]))
+            if index >= 0:
+                self.target_monitor_combobox.setCurrentIndex(index)
 
     def start_open_web_with_url(self) -> None:
         front_engine_logger.info("[WEBSettingUI] start_open_web_with_url")
@@ -130,4 +147,5 @@ class WEBSettingUI(QWidget):
             factory=lambda _monitor: self._create_web_widget(),
             present_primary=lambda widget: widget.showFullScreen(),
             present_on_monitor=present_on_monitor,
+            preferred_monitor_index=resolve_preferred_monitor(self.target_monitor_combobox),
         )
