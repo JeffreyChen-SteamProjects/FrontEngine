@@ -12,7 +12,6 @@ FrontEngine English Documentation
     sound.rst
     text.rst
     scene.rst
-    chat.rst
     control_center.rst
     how_to_extend_ui.rst
-    image_generation.rst
+    release_process.rst
