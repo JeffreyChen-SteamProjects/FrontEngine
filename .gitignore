@@ -158,3 +158,4 @@ cython_debug/
 **/user_setting.*
 **/bing_cookies.*
 exe/pipi.png
+/.claude/

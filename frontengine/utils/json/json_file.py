@@ -12,32 +12,26 @@ _lock = Lock()
 
 def read_json(json_file_path: str) -> Optional[Any]:
     """
-    use to read action file
-    :param json_file_path json file's path to read
+    Read JSON from disk. Returns None when the file does not exist.
     """
-    _lock.acquire()
-    try:
+    with _lock:
         file_path = Path(json_file_path)
-        if file_path.exists() and file_path.is_file():
-            with open(json_file_path) as read_file:
+        if not (file_path.exists() and file_path.is_file()):
+            return None
+        try:
+            with open(file_path, "r", encoding="utf-8") as read_file:
                 return json.loads(read_file.read())
-    except FrontEngineJsonFileException:
-        raise FrontEngineJsonFileException(cant_find_json_error)
-    finally:
-        _lock.release()
+        except (OSError, json.JSONDecodeError) as error:
+            raise FrontEngineJsonFileException(f"{cant_find_json_error}: {error}") from error
 
 
 def write_json(json_save_path: str, data_to_output: Union[dict, list]) -> None:
     """
-    use to save action file
-    :param json_save_path  json save path
-    :param data_to_output json data to output
+    Write JSON to disk atomically enough for our overlay app.
     """
-    _lock.acquire()
-    try:
-        with open(json_save_path, "w+") as file_to_write:
-            file_to_write.write(json.dumps(data_to_output, indent=4))
-    except FrontEngineJsonFileException:
-        raise FrontEngineJsonFileException(cant_save_json_error)
-    finally:
-        _lock.release()
+    with _lock:
+        try:
+            with open(json_save_path, "w", encoding="utf-8") as file_to_write:
+                file_to_write.write(json.dumps(data_to_output, indent=4))
+        except OSError as error:
+            raise FrontEngineJsonFileException(f"{cant_save_json_error}: {error}") from error

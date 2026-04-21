@@ -1,13 +1,12 @@
 from typing import Optional
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QGuiApplication, QPixmap, QImage
-from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QPushButton, QMessageBox, QCheckBox, QDialog, \
-    QComboBox
+from PySide6.QtGui import QGuiApplication, QPixmap
+from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QPushButton, QMessageBox, QCheckBox, QComboBox
 
 from frontengine.show.particle.particle_ui import ParticleOpenGLWidget
 from frontengine.ui.dialog.choose_file_dialog import choose_image
-from frontengine.ui.page.utils import create_monitor_selection_dialog
+from frontengine.ui.page.utils import dispatch_to_monitors
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
@@ -118,43 +117,26 @@ class ParticleSettingUI(QWidget):
         if not self.image_path or not self.ready_to_play:
             message_box = QMessageBox(self)
             message_box.setText(language_wrapper.language_word_dict.get("not_prepare"))
-            message_box.exec()  # 改為阻塞
+            message_box.exec()
             return
 
-        front_engine_logger.info("[ParticleSettingUI] start play particle")
-        monitors = QGuiApplication.screens()
+        def factory(monitor):
+            target = monitor or QGuiApplication.primaryScreen()
+            geometry = target.availableGeometry()
+            return self._create_particle_widget(geometry.width(), geometry.height())
 
-        if not self.show_all_screen and len(monitors) <= 1:
-            particle_widget = self._create_particle_widget(
-                monitors[0].availableGeometry().width(),
-                monitors[0].availableGeometry().height()
-            )
-            particle_widget.showMaximized()
+        def present_on_monitor(widget: ParticleOpenGLWidget, monitor, _idx: int) -> None:
+            widget.setScreen(monitor)
+            widget.move(monitor.availableGeometry().topLeft())
+            widget.showMaximized()
 
-        elif not self.show_all_screen and len(monitors) >= 2:
-            input_dialog, combobox = create_monitor_selection_dialog(self, monitors)
-            result = input_dialog.exec()
-            if result == QDialog.DialogCode.Accepted:
-                select_monitor_index = int(combobox.currentText())
-                if len(monitors) > select_monitor_index:
-                    monitor = monitors[select_monitor_index]
-                    particle_widget = self._create_particle_widget(
-                        monitor.availableGeometry().width(),
-                        monitor.availableGeometry().height()
-                    )
-                    particle_widget.setScreen(monitor)
-                    particle_widget.move(monitor.availableGeometry().topLeft())
-                    particle_widget.showMaximized()
-
-        else:
-            for monitor in monitors:
-                particle_widget = self._create_particle_widget(
-                    monitor.availableGeometry().width(),
-                    monitor.availableGeometry().height()
-                )
-                particle_widget.setScreen(monitor)
-                particle_widget.move(monitor.availableGeometry().topLeft())
-                particle_widget.showMaximized()
+        dispatch_to_monitors(
+            parent=self,
+            show_all_screen=self.show_all_screen,
+            factory=factory,
+            present_primary=lambda widget: widget.showMaximized(),
+            present_on_monitor=present_on_monitor,
+        )
 
     def choose_and_copy_file_to_cwd_image_dir_then_play(self) -> None:
         front_engine_logger.info("[ParticleSettingUI] choose_and_copy_file_to_cwd_image_dir_then_play")

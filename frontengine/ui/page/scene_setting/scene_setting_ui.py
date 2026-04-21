@@ -3,12 +3,7 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QTabWidget
 
 from frontengine.show.scene.scene import SceneManager
 from frontengine.ui.page.scene_setting.scene_manager import SceneManagerUI
-from frontengine.ui.page.scene_setting.scene_page.gif import GIFSceneSettingUI
-from frontengine.ui.page.scene_setting.scene_page.image import ImageSceneSettingUI
-from frontengine.ui.page.scene_setting.scene_page.sound import SoundSceneSettingUI
-from frontengine.ui.page.scene_setting.scene_page.text import TextSceneSettingUI
-from frontengine.ui.page.scene_setting.scene_page.video import VideoSceneSettingUI
-from frontengine.ui.page.scene_setting.scene_page.web import WebSceneSettingUI
+from frontengine.ui.page.scene_setting.scene_page.registry import SCENE_PAGE_REGISTRY
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
@@ -29,16 +24,7 @@ class SceneSettingUI(QWidget):
             self.scene_manager_ui, language_wrapper.language_word_dict.get("scene_script")
         )
 
-        tabs = [
-            (GIFSceneSettingUI, "tab_gif_text"),
-            (ImageSceneSettingUI, "tab_image_text"),
-            (SoundSceneSettingUI, "tab_sound_text"),
-            (TextSceneSettingUI, "tab_text_text"),
-            (VideoSceneSettingUI, "tab_video_text"),
-            (WebSceneSettingUI, "tab_web_text"),
-        ]
-
-        for ui_class, label_key in tabs:
+        for ui_class, label_key in SCENE_PAGE_REGISTRY:
             self.tab_widget.addTab(ui_class(self.scene_manager_ui), language_wrapper.language_word_dict.get(label_key))
 
         # Layout
