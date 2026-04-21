@@ -6,6 +6,8 @@ from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QSurfaceFormat, QPixmap
 from PySide6.QtOpenGLWidgets import QOpenGLWidget
 
+from frontengine.show.window_helpers import apply_overlay_window_flags, load_overlay_icon
+
 if sys.platform == "win32":
     import ctypes
 
@@ -28,26 +30,14 @@ class ParticleOpenGLWidget(QOpenGLWidget):
         QSurfaceFormat.setDefaultFormat(fmt)
         super().__init__()
 
-        self.setWindowFlag(
-            Qt.WindowType.WindowTransparentForInput |
-            Qt.WindowType.FramelessWindowHint |
-            Qt.WindowType.WindowStaysOnTopHint |
-            Qt.WindowType.Tool
-        )
+        apply_overlay_window_flags(self, show_on_bottom=False)
 
-        # 視窗大小
         self.resize(screen_width, screen_height)
 
-        # Qt 透明背景設定
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setAttribute(Qt.WidgetAttribute.WA_NoSystemBackground)
         self.setAutoFillBackground(False)
-
-        self.setWindowFlags(
-            Qt.WindowType.FramelessWindowHint |
-            Qt.WindowType.WindowStaysOnTopHint |
-            Qt.WindowType.Tool
-        )
+        load_overlay_icon(self)
 
         # 縮放 pixmap 成 particle_size（保持比例）
         target_size = pixmap.size().scaled(
@@ -172,11 +162,5 @@ class ParticleOpenGLWidget(QOpenGLWidget):
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
 
-    def set_ui_window_flag(self) -> None:
-        """ 設定視窗旗標 (保持最上層或最下層) Set window flags (stay on top or bottom) """
-        self.setWindowFlag(
-            Qt.WindowType.Window |
-            Qt.WindowType.WindowTransparentForInput |
-            Qt.WindowType.FramelessWindowHint |
-            Qt.WindowType.WindowStaysOnTopHint |
-            Qt.WindowType.Tool)
+    def set_ui_window_flag(self, show_on_bottom: bool = False) -> None:
+        apply_overlay_window_flags(self, show_on_bottom=show_on_bottom)
