@@ -239,6 +239,7 @@ traditional_chinese_word_dict = {
     "pet_chatter_happy": "我好開心！|你最棒了！|(^o^)/|今天真美好！",
     "pet_chatter_sad": "有點寂寞…|摸摸我好嗎？|(._.)|別忘了我～",
     "pet_chatter_meet": "嗨朋友！|你好呀！|一起玩吧！|在這遇到你真巧！",
+    "pet_chatter_battery": "電量很低，幫我插電好嗎？|快沒電了，小心！|該找充電器囉？|我快撐不住了～",
     "pet_start": "召喚寵物",
     "pet_message_box_text": "找不到寵物圖片",
 }
