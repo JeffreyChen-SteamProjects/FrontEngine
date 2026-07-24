@@ -226,6 +226,8 @@ traditional_chinese_word_dict = {
     "pet_behaviour_chase": "追逐游標",
     "pet_climb_label": "攀爬牆壁",
     "pet_clone": "複製",
+    "pet_choose_pack": "選擇動作包資料夾...",
+    "pet_pack_empty": "該資料夾找不到精靈檔（walk/idle/climb/fall/drag）。",
     "pet_start": "召喚寵物",
     "pet_message_box_text": "找不到寵物圖片",
 }
