@@ -11,7 +11,7 @@ authors = [
     { name = "JE-Chen", email = "jechenmailman@gmail.com" },
 ]
 dependencies = [
-    "PySide6==6.10.2", "qt-material", "PyOpenGL", "PyOpenGL_accelerate", "numpy"
+    "PySide6==6.10.2", "qt-material", "PyOpenGL", "PyOpenGL_accelerate", "numpy", "pynput"
 ]
 description = "FrontEngine is use-define frontview or only use like screen saver"
 requires-python = ">=3.10"
@@ -24,6 +24,9 @@ classifiers = [
     "Environment :: X11 Applications",
     "Operating System :: OS Independent"
 ]
+
+[project.scripts]
+frontengine = "frontengine.ui.main_ui:main"
 
 [project.urls]
 Homepage = "https://github.com/Intergration-Automation-Testing/FrontEngine"

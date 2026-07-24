@@ -48,6 +48,10 @@ class SoundEffectWidget(QWidget):
         self.volume = max(0.0, min(volume, 1.0))
         self.sound_player.setVolume(self.volume)
 
+    def set_muted(self, muted: bool) -> None:
+        front_engine_logger.info(f"[SoundEffectWidget] set_muted | muted={muted}")
+        self.sound_player.setMuted(bool(muted))
+
     def closeEvent(self, event) -> None:
         front_engine_logger.info(f"[SoundEffectWidget] closeEvent | event={event}")
         self.sound_player.stop()

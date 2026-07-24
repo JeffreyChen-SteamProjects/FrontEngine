@@ -1,0 +1,298 @@
+from __future__ import annotations
+
+from pathlib import Path
+from typing import TYPE_CHECKING, Callable
+
+from PySide6.QtGui import QAction
+from PySide6.QtWidgets import QFileDialog, QInputDialog, QMessageBox
+
+from frontengine.user_setting.preset_repository import PresetRepository
+from frontengine.user_setting.user_setting_file import user_setting_dict, write_user_setting
+from frontengine.utils.logging.loggin_instance import front_engine_logger
+from frontengine.utils.multi_language.language_wrapper import language_wrapper
+
+if TYPE_CHECKING:
+    from frontengine.ui.main_ui import FrontEngineMainUI
+
+
+_PRESET_PAGES = (
+    ("video", "video_setting_ui"),
+    ("image", "image_setting_ui"),
+    ("web", "web_setting_ui"),
+    ("gif", "gif_setting_ui"),
+    ("sound", "sound_player_setting_ui"),
+    ("text", "text_setting_ui"),
+    ("particle", "particle_setting_ui"),
+)
+
+
+def _t(key: str, fallback: str) -> str:
+    return language_wrapper.language_word_dict.get(key, fallback)
+
+
+def _collect_state(ui: "FrontEngineMainUI") -> dict:
+    state: dict = {}
+    for name, attribute in _PRESET_PAGES:
+        page = getattr(ui, attribute, None)
+        if page is not None and hasattr(page, "get_state"):
+            state[name] = page.get_state()
+    return state
+
+
+def _apply_state(ui: "FrontEngineMainUI", state: dict) -> None:
+    for name, attribute in _PRESET_PAGES:
+        page = getattr(ui, attribute, None)
+        section = state.get(name)
+        if page is not None and isinstance(section, dict) and hasattr(page, "set_state"):
+            # Isolate each page: a malformed section (e.g. a hand-edited
+            # preset) must not crash the load or block the other pages.
+            try:
+                page.set_state(section)
+            except Exception as error:  # pragma: no cover - defensive boundary
+                front_engine_logger.warning(
+                    f"[PresetMenu] Failed to apply '{name}' preset section: {error!r}"
+                )
+
+
+def _pick_preset(ui: "FrontEngineMainUI", title: str) -> str:
+    repository = PresetRepository()
+    presets = repository.list_presets()
+    if not presets:
+        QMessageBox.information(ui, title, _t("preset_no_presets", "No presets saved yet."))
+        return ""
+    preset, ok = QInputDialog.getItem(ui, title, _t("preset_pick_label", "Preset:"), presets, 0, False)
+    if not ok or not preset:
+        return ""
+    return preset
+
+
+def _save_action(ui: "FrontEngineMainUI") -> Callable[[], None]:
+    def handler() -> None:
+        front_engine_logger.info("[PresetMenu] save")
+        name, ok = QInputDialog.getText(
+            ui,
+            _t("preset_save_title", "Save preset"),
+            _t("preset_save_label", "Preset name:"),
+        )
+        if not ok or not name.strip():
+            return
+        name = name.strip()
+        title = _t("preset_save_title", "Save preset")
+        repository = PresetRepository()
+        try:
+            if repository.exists(name):
+                confirm = QMessageBox.question(
+                    ui,
+                    title,
+                    _t(
+                        "preset_overwrite_confirm",
+                        "Preset '{name}' already exists. Overwrite?",
+                    ).format(name=name),
+                )
+                if confirm != QMessageBox.StandardButton.Yes:
+                    return
+            repository.save(name, _collect_state(ui))
+        except (OSError, ValueError) as error:
+            QMessageBox.warning(ui, title, str(error))
+            return
+        QMessageBox.information(ui, title, _t("preset_saved", "Preset saved."))
+
+    return handler
+
+
+def _load_action(ui: "FrontEngineMainUI") -> Callable[[], None]:
+    def handler() -> None:
+        front_engine_logger.info("[PresetMenu] load")
+        title = _t("preset_load_title", "Load preset")
+        preset = _pick_preset(ui, title)
+        if not preset:
+            return
+        try:
+            data = PresetRepository().load(preset)
+        except (OSError, FileNotFoundError, ValueError) as error:
+            QMessageBox.warning(ui, title, str(error))
+            return
+        _apply_state(ui, data)
+        QMessageBox.information(ui, title, _t("preset_loaded", "Preset loaded."))
+
+    return handler
+
+
+def _delete_action(ui: "FrontEngineMainUI") -> Callable[[], None]:
+    def handler() -> None:
+        front_engine_logger.info("[PresetMenu] delete")
+        title = _t("preset_delete_title", "Delete preset")
+        preset = _pick_preset(ui, title)
+        if not preset:
+            return
+        confirm = QMessageBox.question(
+            ui,
+            title,
+            _t("preset_delete_confirm", "Delete preset '{name}'?").format(name=preset),
+        )
+        if confirm != QMessageBox.StandardButton.Yes:
+            return
+        try:
+            PresetRepository().delete(preset)
+        except (OSError, ValueError) as error:
+            QMessageBox.warning(ui, title, str(error))
+
+    return handler
+
+
+def _export_action(ui: "FrontEngineMainUI") -> Callable[[], None]:
+    def handler() -> None:
+        front_engine_logger.info("[PresetMenu] export")
+        title = _t("preset_export_title", "Export preset")
+        preset = _pick_preset(ui, title)
+        if not preset:
+            return
+        destination, _ok = QFileDialog.getSaveFileName(
+            ui, title, f"{preset}.json", _t("preset_file_filter", "Preset files (*.json)")
+        )
+        if not destination:
+            return
+        try:
+            PresetRepository().export_preset(preset, Path(destination))
+        except (OSError, FileNotFoundError, ValueError) as error:
+            QMessageBox.warning(ui, title, str(error))
+            return
+        QMessageBox.information(ui, title, _t("preset_exported", "Preset exported."))
+
+    return handler
+
+
+def _import_action(ui: "FrontEngineMainUI") -> Callable[[], None]:
+    def handler() -> None:
+        front_engine_logger.info("[PresetMenu] import")
+        title = _t("preset_import_title", "Import preset")
+        source, _ok = QFileDialog.getOpenFileName(
+            ui, title, "", _t("preset_file_filter", "Preset files (*.json)")
+        )
+        if not source:
+            return
+        try:
+            PresetRepository().import_preset(Path(source))
+        except (OSError, FileNotFoundError, ValueError) as error:
+            QMessageBox.warning(ui, title, str(error))
+            return
+        QMessageBox.information(ui, title, _t("preset_imported", "Preset imported."))
+
+    return handler
+
+
+def _set_startup_action(ui: "FrontEngineMainUI") -> Callable[[], None]:
+    def handler() -> None:
+        front_engine_logger.info("[PresetMenu] set startup preset")
+        title = _t("preset_startup_title", "Startup preset")
+        preset = _pick_preset(ui, title)
+        if not preset:
+            return
+        user_setting_dict["startup_preset"] = preset
+        write_user_setting()
+        QMessageBox.information(ui, title, _t("preset_startup_set", "Startup preset set."))
+
+    return handler
+
+
+def _clear_startup_action(ui: "FrontEngineMainUI") -> Callable[[], None]:
+    def handler() -> None:
+        front_engine_logger.info("[PresetMenu] clear startup preset")
+        title = _t("preset_startup_title", "Startup preset")
+        user_setting_dict["startup_preset"] = ""
+        write_user_setting()
+        QMessageBox.information(ui, title, _t("preset_startup_cleared", "Startup preset cleared."))
+
+    return handler
+
+
+def apply_named_preset(ui: "FrontEngineMainUI", name: str) -> bool:
+    """
+    依名稱套用預設集；缺失或損毀時僅記錄警告並回傳 False，不丟出例外。
+    Apply a preset by name. A missing or corrupt preset is logged and
+    skipped (returns False) rather than raising.
+    """
+    if not isinstance(name, str) or not name.strip():
+        return False
+    front_engine_logger.info(f"[PresetMenu] apply_named_preset | name={name}")
+    try:
+        data = PresetRepository().load(name)
+    except (OSError, FileNotFoundError, ValueError) as error:
+        front_engine_logger.warning(f"[PresetMenu] preset '{name}' failed: {error!r}")
+        return False
+    _apply_state(ui, data)
+    return True
+
+
+def apply_startup_preset(ui: "FrontEngineMainUI") -> None:
+    """
+    啟動時套用設定的預設集；缺失或損毀時僅記錄警告，不影響啟動。
+    Apply the configured startup preset on launch. A missing or corrupt
+    preset is logged and skipped so startup never fails because of it.
+    """
+    apply_named_preset(ui, user_setting_dict.get("startup_preset", ""))
+
+
+def _export_package_action(ui: "FrontEngineMainUI") -> Callable[[], None]:
+    def handler() -> None:
+        front_engine_logger.info("[PresetMenu] export package")
+        title = _t("preset_export_package_title", "Export package")
+        preset = _pick_preset(ui, title)
+        if not preset:
+            return
+        destination, _ok = QFileDialog.getSaveFileName(
+            ui, title, f"{preset}.zip", _t("preset_package_filter", "Preset packages (*.zip)")
+        )
+        if not destination:
+            return
+        try:
+            PresetRepository().export_package(preset, Path(destination))
+        except (OSError, FileNotFoundError, ValueError) as error:
+            QMessageBox.warning(ui, title, str(error))
+            return
+        QMessageBox.information(ui, title, _t("preset_exported", "Preset exported."))
+
+    return handler
+
+
+def _import_package_action(ui: "FrontEngineMainUI") -> Callable[[], None]:
+    def handler() -> None:
+        front_engine_logger.info("[PresetMenu] import package")
+        title = _t("preset_import_package_title", "Import package")
+        source, _ok = QFileDialog.getOpenFileName(
+            ui, title, "", _t("preset_package_filter", "Preset packages (*.zip)")
+        )
+        if not source:
+            return
+        try:
+            PresetRepository().import_package(Path(source))
+        except (OSError, FileNotFoundError, ValueError) as error:
+            QMessageBox.warning(ui, title, str(error))
+            return
+        QMessageBox.information(ui, title, _t("preset_imported", "Preset imported."))
+
+    return handler
+
+
+def build_preset_menu(ui: "FrontEngineMainUI") -> None:
+    """
+    Build the Presets menu with Save / Load / Delete / Export / Import actions.
+    """
+    front_engine_logger.info(f"[PresetMenu] build_preset_menu | ui={ui}")
+    menu = ui.menu_bar.addMenu(_t("menu_bar_presets", "Presets"))
+    ui.preset_menu = menu
+
+    for label_key, fallback, callback_factory in (
+        ("preset_menu_save", "Save preset...", _save_action),
+        ("preset_menu_load", "Load preset...", _load_action),
+        ("preset_menu_delete", "Delete preset...", _delete_action),
+        ("preset_menu_export", "Export preset...", _export_action),
+        ("preset_menu_import", "Import preset...", _import_action),
+        ("preset_menu_export_package", "Export package (+media)...", _export_package_action),
+        ("preset_menu_import_package", "Import package (+media)...", _import_package_action),
+        ("preset_menu_set_startup", "Set as startup preset...", _set_startup_action),
+        ("preset_menu_clear_startup", "Clear startup preset", _clear_startup_action),
+    ):
+        action = QAction(_t(label_key, fallback), menu)
+        action.triggered.connect(callback_factory(ui))
+        menu.addAction(action)

@@ -7,3 +7,4 @@ auto-py-to-exe
 PyOpenGL
 PyOpenGL_accelerate
 numpy
+pynput

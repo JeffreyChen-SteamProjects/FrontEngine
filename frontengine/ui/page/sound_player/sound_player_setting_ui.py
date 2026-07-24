@@ -6,6 +6,7 @@ from PySide6.QtWidgets import QWidget, QGridLayout, QLabel, QSlider, QPushButton
 from frontengine.show.sound_player.sound_effect import SoundEffectWidget
 from frontengine.show.sound_player.sound_player import SoundPlayer
 from frontengine.ui.dialog.choose_file_dialog import choose_player_sound, choose_wav_sound
+from frontengine.ui.page.utils import coerce_int
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
@@ -109,3 +110,22 @@ class SoundPlayerSettingUI(QWidget):
     def volume_trick(self) -> None:
         front_engine_logger.info("[SoundPlayerSettingUI] volume_trick")
         self.volume_slider_value_label.setText(str(self.volume_slider.value()))
+
+    def get_state(self) -> dict:
+        return {
+            "volume": self.volume_slider.value(),
+            "wav_sound_path": self.wav_sound_path,
+            "player_sound_path": self.player_sound_path,
+        }
+
+    def set_state(self, state: dict) -> None:
+        volume = coerce_int(state.get("volume"))
+        if volume is not None:
+            self.volume_slider.setValue(volume)
+        if state.get("wav_sound_path"):
+            self.wav_sound_path = state["wav_sound_path"]
+            self.ready_to_play = True
+            self.wav_ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+        if state.get("player_sound_path"):
+            self.player_sound_path = state["player_sound_path"]
+            self.player_ready_label.setText(language_wrapper.language_word_dict.get("Ready"))

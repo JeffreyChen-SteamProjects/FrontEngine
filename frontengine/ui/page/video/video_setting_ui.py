@@ -5,7 +5,18 @@ from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QPushButton
 
 from frontengine.show.video.video_player import VideoWidget
 from frontengine.ui.dialog.choose_file_dialog import choose_video
-from frontengine.ui.page.utils import dispatch_to_monitors, show_on_primary_screen, show_on_selected_monitor
+from frontengine.ui.page.utils import (
+    build_recent_combobox,
+    build_target_monitor_combobox,
+    coerce_int,
+    dispatch_to_monitors,
+    enable_file_drop,
+    reload_recent_combobox,
+    resolve_preferred_monitor,
+    show_on_primary_screen,
+    show_on_selected_monitor,
+)
+from frontengine.user_setting.user_setting_file import add_recent_file
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
@@ -69,6 +80,20 @@ class VideoSettingUI(QWidget):
         # Show on bottom
         self.show_on_bottom_checkbox = QCheckBox(language_wrapper.language_word_dict.get("Show on bottom"))
 
+        # Target monitor selector
+        self.target_monitor_label = QLabel(
+            language_wrapper.language_word_dict.get("target_monitor_label", "Target monitor")
+        )
+        self.target_monitor_combobox = build_target_monitor_combobox()
+
+        # Recent files
+        self.recent_files_label = QLabel(language_wrapper.language_word_dict.get("recent_files_label", "Recent"))
+        self.recent_files_combobox = build_recent_combobox("video")
+        self.recent_files_combobox.activated.connect(self._apply_recent_file)
+
+        # Accept dropped video files
+        self._drop_filter = enable_file_drop(self, (".mp4",), self._on_file_dropped)
+
         # Layout
         self.grid_layout.addWidget(self.opacity_label, 0, 0)
         self.grid_layout.addWidget(self.opacity_slider_value_label, 0, 1)
@@ -85,6 +110,10 @@ class VideoSettingUI(QWidget):
         self.grid_layout.addWidget(self.fullscreen_checkbox, 4, 2)
         self.grid_layout.addWidget(self.start_button, 5, 0)
         self.grid_layout.addWidget(self.ready_label, 5, 1)
+        self.grid_layout.addWidget(self.target_monitor_label, 6, 0)
+        self.grid_layout.addWidget(self.target_monitor_combobox, 6, 1)
+        self.grid_layout.addWidget(self.recent_files_label, 7, 0)
+        self.grid_layout.addWidget(self.recent_files_combobox, 7, 1)
 
     def set_show_all_screen(self) -> None:
         front_engine_logger.info("[VideoSettingUI] set_show_all_screen")
@@ -124,6 +153,7 @@ class VideoSettingUI(QWidget):
             factory=lambda _monitor: self._create_video_widget(),
             present_primary=lambda widget: show_on_primary_screen(widget, self.fullscreen_checkbox),
             present_on_monitor=present_on_monitor,
+            preferred_monitor_index=resolve_preferred_monitor(self.target_monitor_combobox),
         )
 
     def choose_and_copy_file_to_cwd_video_dir_then_play(self) -> None:
@@ -134,6 +164,26 @@ class VideoSettingUI(QWidget):
         if self.video_path:
             self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
             self.ready_to_play = True
+            add_recent_file("video", self.video_path)
+            reload_recent_combobox(self.recent_files_combobox, "video")
+
+    def _apply_recent_file(self, _index: int = 0) -> None:
+        path = self.recent_files_combobox.currentData()
+        self.recent_files_combobox.setCurrentIndex(0)
+        if not path:
+            return
+        front_engine_logger.info(f"[VideoSettingUI] _apply_recent_file | path={path}")
+        self.video_path = path
+        self.ready_to_play = True
+        self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+
+    def _on_file_dropped(self, path: str) -> None:
+        front_engine_logger.info(f"[VideoSettingUI] _on_file_dropped | path={path}")
+        self.video_path = path
+        self.ready_to_play = True
+        self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+        add_recent_file("video", path)
+        reload_recent_combobox(self.recent_files_combobox, "video")
 
     def opacity_trick(self) -> None:
         front_engine_logger.info("[VideoSettingUI] opacity_trick")
@@ -146,3 +196,41 @@ class VideoSettingUI(QWidget):
     def volume_trick(self) -> None:
         front_engine_logger.info("[VideoSettingUI] volume_trick")
         self.volume_slider_value_label.setText(str(self.volume_slider.value()))
+
+    def get_state(self) -> dict:
+        return {
+            "opacity": self.opacity_slider.value(),
+            "play_rate": self.play_rate_slider.value(),
+            "volume": self.volume_slider.value(),
+            "video_path": self.video_path,
+            "fullscreen": self.fullscreen_checkbox.isChecked(),
+            "show_on_all_screen": self.show_on_all_screen_checkbox.isChecked(),
+            "show_on_bottom": self.show_on_bottom_checkbox.isChecked(),
+            "target_monitor": self.target_monitor_combobox.currentText(),
+        }
+
+    def set_state(self, state: dict) -> None:
+        opacity = coerce_int(state.get("opacity"))
+        if opacity is not None:
+            self.opacity_slider.setValue(opacity)
+        play_rate = coerce_int(state.get("play_rate"))
+        if play_rate is not None:
+            self.play_rate_slider.setValue(play_rate)
+        volume = coerce_int(state.get("volume"))
+        if volume is not None:
+            self.volume_slider.setValue(volume)
+        if state.get("video_path"):
+            self.video_path = state["video_path"]
+            self.ready_to_play = True
+            self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+        if "fullscreen" in state:
+            self.fullscreen_checkbox.setChecked(bool(state["fullscreen"]))
+        if "show_on_all_screen" in state:
+            self.show_on_all_screen_checkbox.setChecked(bool(state["show_on_all_screen"]))
+            self.show_all_screen = bool(state["show_on_all_screen"])
+        if "show_on_bottom" in state:
+            self.show_on_bottom_checkbox.setChecked(bool(state["show_on_bottom"]))
+        if state.get("target_monitor") is not None:
+            index = self.target_monitor_combobox.findText(str(state["target_monitor"]))
+            if index >= 0:
+                self.target_monitor_combobox.setCurrentIndex(index)
