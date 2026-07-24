@@ -483,6 +483,31 @@ class PetMotion:
         """設定可站立的視窗上緣平台 / Set standable window top-edge platforms."""
         self.platforms = list(platforms)
 
+    def grab_nearest_wall(self, threshold: float = 40.0) -> bool:
+        """
+        若目前貼近左/右螢幕邊緣，就抓住該牆開始往上爬；成功回傳 True。
+        If close to the left/right screen edge, grab that wall and start
+        climbing it. Returns True when a wall was grabbed.
+        """
+        if not self.climb:
+            return False
+        left, _top, right, _bottom = self.bounds
+        if self.x <= left + threshold:
+            self.x = float(left)
+            surface = SURFACE_LEFT
+        elif self.x + self.width >= right - threshold:
+            self.x = float(right - self.width)
+            surface = SURFACE_RIGHT
+        else:
+            return False
+        self.surface = surface
+        self.vy = float(-self.speed)
+        self._airborne = False
+        self.on_platform = False
+        self.platform_span = None
+        self.follow_target_x = None
+        return True
+
     def set_follow(self, target_x) -> None:
         """設定要走向的 x 座標（朝同伴玩耍）/ Set a horizontal target to walk toward."""
         self.follow_target_x = float(target_x)
@@ -1237,9 +1262,10 @@ class DesktopPetWidget(BaseWidget):
             self.motion.x = float(self.x())
             self.motion.y = float(self.y())
             if self._moved:
-                # Fling with the momentum of the last drag movement (floor mode).
                 if self.motion.behaviour == BEHAVIOUR_FLOOR:
-                    self.motion.throw(self._last_move_delta[0], self._last_move_delta[1])
+                    # Dropping against a screen edge grabs the wall; otherwise fling.
+                    if not self.motion.grab_nearest_wall():
+                        self.motion.throw(self._last_move_delta[0], self._last_move_delta[1])
             else:
                 self.say()  # a click (no drag) makes the pet talk
         super().mouseReleaseEvent(event)
