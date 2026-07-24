@@ -36,6 +36,9 @@ user_setting_dict: Dict[str, Any] = {
     # 桌面寵物心情值（0~100），跨工作階段保存
     # Desktop pet mood (0..100), persisted across sessions
     "pet_mood": 60,
+    # 桌面寵物飽足值（0~100）
+    # Desktop pet fullness (0..100)
+    "pet_hunger": 70,
 }
 
 

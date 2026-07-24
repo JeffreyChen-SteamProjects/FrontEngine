@@ -266,6 +266,40 @@ class PetMood:
         return self.CONTENT
 
 
+class PetHunger:
+    """
+    寵物飽足值 0~100：餵食上升、隨時間下降；level() 回傳 full/ok/hungry。
+    Pet fullness 0..100: feeding raises it, time lowers it; level() buckets it.
+    """
+
+    FULL = "full"
+    OK = "ok"
+    HUNGRY = "hungry"
+
+    def __init__(self, value: int = 70) -> None:
+        self.value = self._clamp(value)
+
+    @staticmethod
+    def _clamp(value) -> int:
+        try:
+            return max(0, min(100, int(value)))
+        except (TypeError, ValueError):
+            return 70
+
+    def feed(self, amount: int = 30) -> None:
+        self.value = self._clamp(self.value + amount)
+
+    def decay(self, amount: int = 1) -> None:
+        self.value = self._clamp(self.value - amount)
+
+    def level(self) -> str:
+        if self.value >= 60:
+            return self.FULL
+        if self.value <= 25:
+            return self.HUNGRY
+        return self.OK
+
+
 class SpeechBubble(QWidget):
     """寵物頭上的小對話泡泡，數秒後自動消失 / A small speech bubble that auto-hides."""
 
@@ -702,6 +736,8 @@ class DesktopPetWidget(BaseWidget):
         self._moved = False
         self._chatter_rng = _random_module.SystemRandom()
         self._mood = PetMood(user_setting_dict.get("pet_mood", 60))
+        self._hunger = PetHunger(user_setting_dict.get("pet_hunger", 70))
+        self._hunger_warned = False
         self._messages = self._load_messages()
         self._sound: Optional[QSoundEffect] = None
         self._init_sound(sound_path)
@@ -728,6 +764,9 @@ class DesktopPetWidget(BaseWidget):
         self.clone_action = QAction(language_wrapper.language_word_dict.get("pet_clone", "Clone"), self)
         self.clone_action.triggered.connect(self.clone_requested.emit)
         self.menu.addAction(self.clone_action)
+        self.feed_action = QAction(language_wrapper.language_word_dict.get("pet_feed", "Feed"), self)
+        self.feed_action.triggered.connect(self.feed)
+        self.menu.addAction(self.feed_action)
         self.reminder_action = QAction(
             language_wrapper.language_word_dict.get("pet_set_reminder", "Set reminder..."), self)
         self.reminder_action.triggered.connect(self._prompt_reminder)
@@ -866,6 +905,8 @@ class DesktopPetWidget(BaseWidget):
             "sad": lines("pet_chatter_sad", "Feeling a bit lonely...|Pet me?|(._.)"),
             "meet": lines("pet_chatter_meet", "Hi friend!|Hello!|Let's play!"),
             "battery": lines("pet_chatter_battery", "Battery's low - plug me in?|Low power!|Find a charger?"),
+            "hungry": lines("pet_chatter_hungry", "I'm hungry...|Got a snack?|Feed me?"),
+            "fed": lines("pet_chatter_fed", "Yum!|Thank you!|Delicious!"),
             "any": lines("pet_chatter_any", "Hi there!|(^_^)|Keep going!"),
         }
 
@@ -930,10 +971,41 @@ class DesktopPetWidget(BaseWidget):
 
     def _on_chatter(self) -> None:
         self._mood.decay()  # a little neglect over time
+        self._hunger.decay()
         self._persist_mood()
-        if not self._warn_battery():   # a low-battery warning takes priority
+        # priority: low battery, then hunger, otherwise normal chatter
+        if not self._warn_battery() and not self._warn_hungry():
             self.say()
         self._schedule_chatter()
+
+    def _persist_hunger(self) -> None:
+        user_setting_dict["pet_hunger"] = self._hunger.value
+
+    def feed(self) -> None:
+        """餵食：補足飽足並讓心情變好，說一句道謝。"""
+        self._hunger.feed()
+        self._mood.pet()
+        self._persist_hunger()
+        self._persist_mood()
+        pool = self._messages.get("fed") or []
+        if pool:
+            self.say(pool[self._chatter_rng.randrange(len(pool))])
+
+    def _warn_hungry(self) -> bool:
+        """飢餓時討食一次；吃飽後重置。回傳是否有討食。"""
+        self._persist_hunger()
+        if not self._talk:
+            return False
+        if self._hunger.level() == PetHunger.HUNGRY:
+            if not self._hunger_warned:
+                self._hunger_warned = True
+                pool = self._messages.get("hungry") or []
+                if pool:
+                    self.say(pool[self._chatter_rng.randrange(len(pool))])
+                    return True
+        elif self._hunger.level() == PetHunger.FULL:
+            self._hunger_warned = False
+        return False
 
     BATTERY_THRESHOLD = 20
 
