@@ -168,6 +168,46 @@ def idle_seconds():
         return None
 
 
+class PetTimeline:
+    """
+    寵物動作時間軸：一連串 (offset_seconds, action_dict)，依經過秒數依序觸發。
+    A scene-timeline of (offset_seconds, action_dict) events fired in order as
+    elapsed time passes. Events are sorted; pop_due advances an internal index.
+    """
+
+    def __init__(self, events) -> None:
+        self._events = sorted(list(events), key=lambda item: item[0])
+        self._index = 0
+
+    def __len__(self) -> int:
+        return len(self._events)
+
+    def reset(self) -> None:
+        self._index = 0
+
+    def pop_due(self, elapsed: float) -> list:
+        due = []
+        while self._index < len(self._events) and self._events[self._index][0] <= elapsed:
+            due.append(self._events[self._index][1])
+            self._index += 1
+        return due
+
+
+def parse_timeline(raw) -> list:
+    """把設定裡的 [{'at': 秒, ...}] 轉成 (offset, action_dict) 清單，忽略格式錯誤者。"""
+    events = []
+    if isinstance(raw, list):
+        for item in raw:
+            if not isinstance(item, dict) or "at" not in item:
+                continue
+            try:
+                offset = float(item["at"])
+            except (TypeError, ValueError):
+                continue
+            events.append((offset, item))
+    return events
+
+
 def pop_due_reminders(now, reminders):
     """
     依 now 分出已到期與未到期的提醒。reminders 為 (due_datetime, text) 清單。
@@ -862,7 +902,10 @@ class DesktopPetWidget(BaseWidget):
         self._now_provider = datetime.now
         self._reminders: list = []
         self._reminder_timer = QTimer(self)
-        self._reminder_timer.timeout.connect(self._check_reminders)
+        self._reminder_timer.timeout.connect(self._on_schedule_tick)
+        # 場景時間軸 / Scene timeline of scheduled actions
+        self._timeline = PetTimeline(parse_timeline(user_setting_dict.get("pet_timeline", [])))
+        self._timeline_start = None
         self._bubble = SpeechBubble()
         self._chatter_timer = QTimer(self)
         self._chatter_timer.setSingleShot(True)
@@ -1001,6 +1044,8 @@ class DesktopPetWidget(BaseWidget):
         self._timer.start(max(10, int(interval_ms)))
         self._schedule_chatter()
         self._reminder_timer.start(10000)
+        if self._timeline_start is None:
+            self._timeline_start = self._now_provider()
 
     def _load_messages(self) -> dict:
         d = language_wrapper.language_word_dict
@@ -1068,6 +1113,39 @@ class DesktopPetWidget(BaseWidget):
         due = self._now_provider() + timedelta(minutes=max(1, int(minutes)))
         self._reminders.append((due, str(text)))
         front_engine_logger.info(f"[DesktopPetWidget] reminder set | due={due}, text={text}")
+
+    def _on_schedule_tick(self) -> None:
+        self._check_reminders()
+        self._check_timeline()
+
+    def set_timeline(self, raw) -> None:
+        """設定場景時間軸並從現在起算 / Set the timeline and start its clock now."""
+        self._timeline = PetTimeline(parse_timeline(raw))
+        self._timeline_start = self._now_provider()
+
+    def _check_timeline(self) -> None:
+        if self._timeline is None or self._timeline_start is None or len(self._timeline) == 0:
+            return
+        elapsed = (self._now_provider() - self._timeline_start).total_seconds()
+        for action in self._timeline.pop_due(elapsed):
+            self._run_timeline_action(action)
+
+    def _run_timeline_action(self, action) -> None:
+        if not isinstance(action, dict):
+            return
+        if action.get("say"):
+            self.say(str(action["say"]))
+        if action.get("sleep"):
+            self.motion.sleep()
+        if action.get("wake"):
+            self.motion.wake()
+        if action.get("feed"):
+            self.feed()
+        if action.get("status"):
+            self.show_status()
+        behaviour = action.get("behaviour")
+        if behaviour in (BEHAVIOUR_FLOOR, BEHAVIOUR_WANDER, BEHAVIOUR_CHASE):
+            self.motion.behaviour = behaviour
 
     def _check_reminders(self) -> None:
         if not self._reminders:

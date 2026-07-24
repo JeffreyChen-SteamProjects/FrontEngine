@@ -42,6 +42,9 @@ user_setting_dict: Dict[str, Any] = {
     # 桌面寵物親密度（累積互動）
     # Desktop pet affection (accumulated interactions)
     "pet_affection": 0,
+    # 桌面寵物場景時間軸：[{"at": 秒, "say"/"sleep"/"feed"/"behaviour": ...}, ...]
+    # Desktop pet scene timeline of scheduled actions
+    "pet_timeline": [],
 }
 
 
