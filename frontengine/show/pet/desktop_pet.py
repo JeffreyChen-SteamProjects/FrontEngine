@@ -3,8 +3,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional, Tuple
 
-from PySide6.QtCore import Qt, QRect, QTimer, Signal
+from PySide6.QtCore import Qt, QRect, QTimer, QUrl, Signal
 from PySide6.QtGui import QAction, QColor, QCursor, QFont, QFontMetrics, QMovie, QPainter, QPixmap, QTransform
+from PySide6.QtMultimedia import QSoundEffect
 from PySide6.QtWidgets import QMenu, QMessageBox, QWidget
 
 from frontengine.show.base_widget import BaseWidget
@@ -451,10 +452,11 @@ class DesktopPetWidget(BaseWidget):
     clone_requested = Signal()
 
     def __init__(self, image_path: str, size: int = 128, speed: int = 3,
-                 behaviour: str = BEHAVIOUR_FLOOR, climb: bool = True, talk: bool = True):
+                 behaviour: str = BEHAVIOUR_FLOOR, climb: bool = True, talk: bool = True,
+                 sound_path: Optional[str] = None):
         front_engine_logger.info(
             f"[DesktopPetWidget] Init | path={image_path}, size={size}, speed={speed}, "
-            f"behaviour={behaviour}, climb={climb}, talk={talk}"
+            f"behaviour={behaviour}, climb={climb}, talk={talk}, sound={sound_path}"
         )
         super().__init__()
         self.opacity = 1.0
@@ -490,6 +492,8 @@ class DesktopPetWidget(BaseWidget):
         self._chatter_rng = _random_module.SystemRandom()
         self._mood = PetMood(user_setting_dict.get("pet_mood", 60))
         self._messages = self._load_messages()
+        self._sound: Optional[QSoundEffect] = None
+        self._init_sound(sound_path)
         self._bubble = SpeechBubble()
         self._chatter_timer = QTimer(self)
         self._chatter_timer.setSingleShot(True)
@@ -592,6 +596,27 @@ class DesktopPetWidget(BaseWidget):
     def _persist_mood(self) -> None:
         user_setting_dict["pet_mood"] = self._mood.value
 
+    def _init_sound(self, sound_path: Optional[str]) -> None:
+        if not sound_path:
+            return
+        path = Path(sound_path)
+        if not (path.exists() and path.is_file()):
+            return
+        try:
+            self._sound = QSoundEffect(self)
+            self._sound.setSource(QUrl.fromLocalFile(str(path)))
+        except Exception as error:  # pragma: no cover - audio backend guard
+            front_engine_logger.warning(f"[DesktopPetWidget] sound load failed: {error!r}")
+            self._sound = None
+
+    def _play_sound(self) -> None:
+        if self._sound is None:
+            return
+        try:
+            self._sound.play()
+        except Exception as error:  # pragma: no cover - audio backend guard
+            front_engine_logger.warning(f"[DesktopPetWidget] sound play failed: {error!r}")
+
     def _schedule_chatter(self) -> None:
         if self._talk:
             self._chatter_timer.start(self._chatter_rng.randint(15000, 35000))
@@ -636,6 +661,7 @@ class DesktopPetWidget(BaseWidget):
             self.motion.wake()  # interacting wakes a sleeping pet
             self._mood.pet()    # petting cheers it up
             self._persist_mood()
+            self._play_sound()
             self._set_active_sprite(STATE_DRAG)
         super().mousePressEvent(event)
 
