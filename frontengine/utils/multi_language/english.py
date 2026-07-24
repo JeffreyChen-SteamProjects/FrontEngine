@@ -219,7 +219,10 @@ english_word_dict = {
     "pet_choose_file": "Choose pet sprite",
     "pet_size_label": "Size",
     "pet_speed_label": "Speed",
-    "pet_gravity_label": "Walk on floor",
+    "pet_behaviour_label": "Behaviour",
+    "pet_behaviour_floor": "Walk on floor",
+    "pet_behaviour_wander": "Free wander",
+    "pet_behaviour_chase": "Chase cursor",
     "pet_start": "Spawn pet",
     "pet_message_box_text": "Pet image not found",
 }
