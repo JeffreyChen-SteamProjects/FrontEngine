@@ -230,6 +230,7 @@ traditional_chinese_word_dict = {
     "pet_choose_sound": "選擇音效（選填）",
     "pet_pack_empty": "該資料夾找不到精靈檔（walk/idle/sleep/climb/fall/drag）。",
     "pet_talk_label": "對話泡泡",
+    "pet_sit_label": "站在視窗上",
     "pet_chatter_morning": "早安！|新的一天開始囉！|準備好了嗎？",
     "pet_chatter_afternoon": "午安！|要不要休息一下？|繼續加油！",
     "pet_chatter_evening": "晚上好！|今天過得如何？|快完成了嗎？",
