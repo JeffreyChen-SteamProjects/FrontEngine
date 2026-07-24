@@ -144,6 +144,38 @@ def windows_platforms(exclude_hwnds=()) -> list:
         return []
 
 
+def read_battery():
+    """
+    回傳 (電量百分比, 是否充電中)；無法取得時回傳 None。僅 Windows 實作。
+    Return (percent, charging) or None when unavailable. Windows only.
+    """
+    if sys.platform != "win32":
+        return None
+    try:
+        import ctypes
+
+        class _SPS(ctypes.Structure):
+            _fields_ = [
+                ("ACLineStatus", ctypes.c_byte),
+                ("BatteryFlag", ctypes.c_byte),
+                ("BatteryLifePercent", ctypes.c_byte),
+                ("SystemStatusFlag", ctypes.c_byte),
+                ("BatteryLifeTime", ctypes.c_ulong),
+                ("BatteryFullLifeTime", ctypes.c_ulong),
+            ]
+
+        status = _SPS()
+        if not ctypes.windll.kernel32.GetSystemPowerStatus(ctypes.byref(status)):
+            return None
+        percent = status.BatteryLifePercent & 0xFF
+        if percent == 255:  # unknown / no battery
+            return None
+        return (int(percent), status.ACLineStatus == 1)
+    except Exception as error:  # pragma: no cover - Win32 boundary
+        front_engine_logger.warning(f"[read_battery] error: {error!r}")
+        return None
+
+
 def nearest_peer(center, peers):
     """
     回傳離 center 最近的同伴座標與距離；無同伴回傳 (None, inf)。
@@ -668,6 +700,9 @@ class DesktopPetWidget(BaseWidget):
         self._peers_provider = None
         self._peer_greeted = False
         self._peer_tick = 0
+        # 電量提醒 / Low-battery reaction
+        self._battery_provider = read_battery
+        self._battery_warned = False
         self._bubble = SpeechBubble()
         self._chatter_timer = QTimer(self)
         self._chatter_timer.setSingleShot(True)
@@ -809,6 +844,7 @@ class DesktopPetWidget(BaseWidget):
             "happy": lines("pet_chatter_happy", "I'm so happy!|You're the best!|(^o^)"),
             "sad": lines("pet_chatter_sad", "Feeling a bit lonely...|Pet me?|(._.)"),
             "meet": lines("pet_chatter_meet", "Hi friend!|Hello!|Let's play!"),
+            "battery": lines("pet_chatter_battery", "Battery's low - plug me in?|Low power!|Find a charger?"),
             "any": lines("pet_chatter_any", "Hi there!|(^_^)|Keep going!"),
         }
 
@@ -843,8 +879,30 @@ class DesktopPetWidget(BaseWidget):
     def _on_chatter(self) -> None:
         self._mood.decay()  # a little neglect over time
         self._persist_mood()
-        self.say()
+        if not self._warn_battery():   # a low-battery warning takes priority
+            self.say()
         self._schedule_chatter()
+
+    BATTERY_THRESHOLD = 20
+
+    def _warn_battery(self) -> bool:
+        """低電量時提醒一次；充電或回升後重置。回傳是否有發出提醒。"""
+        if not self._talk:
+            return False
+        status = self._battery_provider()
+        if status is None:
+            return False
+        percent, charging = status
+        if not charging and percent <= self.BATTERY_THRESHOLD:
+            if not self._battery_warned:
+                self._battery_warned = True
+                pool = self._messages.get("battery") or []
+                if pool:
+                    self.say(pool[self._chatter_rng.randrange(len(pool))])
+                    return True
+        elif charging or percent > self.BATTERY_THRESHOLD + 10:
+            self._battery_warned = False
+        return False
 
     def say(self, text: Optional[str] = None) -> None:
         """顯示一句台詞（text 為 None 時依心情/時段隨機挑）。"""
