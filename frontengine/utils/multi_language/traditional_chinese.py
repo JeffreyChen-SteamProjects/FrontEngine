@@ -230,6 +230,7 @@ traditional_chinese_word_dict = {
     "pet_chatter_hungry": "我餓了…|有點心嗎？|餵餵我好嗎？|肚子咕咕叫～",
     "pet_chatter_fed": "好吃！|謝謝你！|真美味！|嗯嗯 (^o^)",
     "pet_chatter_away": "還在嗎？|我先打個盹等你回來～|Zzz…|慢慢來沒關係！",
+    "pet_chatter_levelup": "升級了！|我長大了！|我們更親近了！|耶，謝謝你！",
     "pet_set_reminder": "設定提醒...",
     "pet_reminder_prompt": "提醒我：",
     "pet_reminder_minutes": "幾分鐘後？",

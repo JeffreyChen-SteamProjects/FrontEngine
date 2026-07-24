@@ -290,6 +290,34 @@ class PetMood:
         return self.CONTENT
 
 
+class PetGrowth:
+    """
+    親密度累積與等級：互動會累加親密度，跨過門檻即升級。
+    Affection points accrue from interactions; crossing a threshold levels up.
+    """
+
+    THRESHOLDS = (0, 100, 250, 500, 1000, 2000)
+
+    def __init__(self, affection: int = 0) -> None:
+        self.affection = self._clamp(affection)
+
+    @staticmethod
+    def _clamp(value) -> int:
+        try:
+            return max(0, int(value))
+        except (TypeError, ValueError):
+            return 0
+
+    def level(self) -> int:
+        return max(1, sum(1 for threshold in self.THRESHOLDS if self.affection >= threshold))
+
+    def add(self, amount: int) -> bool:
+        """累加親密度；若因此升級回傳 True。"""
+        before = self.level()
+        self.affection = self._clamp(self.affection + int(amount))
+        return self.level() > before
+
+
 class PetHunger:
     """
     寵物飽足值 0~100：餵食上升、隨時間下降；level() 回傳 full/ok/hungry。
@@ -768,6 +796,7 @@ class DesktopPetWidget(BaseWidget):
         self._mood = PetMood(user_setting_dict.get("pet_mood", 60))
         self._hunger = PetHunger(user_setting_dict.get("pet_hunger", 70))
         self._hunger_warned = False
+        self._growth = PetGrowth(user_setting_dict.get("pet_affection", 0))
         self._messages = self._load_messages()
         self._sound: Optional[QSoundEffect] = None
         self._init_sound(sound_path)
@@ -849,6 +878,7 @@ class DesktopPetWidget(BaseWidget):
             self.motion.clear_follow()
             if self._talk and not self._peer_greeted:
                 self._peer_greeted = True
+                self._gain_affection(3)
                 self.motion.vx = abs(self.motion.vx) if peer[0] >= my_center[0] else -abs(self.motion.vx)
                 pool = self._messages.get("meet") or []
                 if pool:
@@ -941,8 +971,18 @@ class DesktopPetWidget(BaseWidget):
             "hungry": lines("pet_chatter_hungry", "I'm hungry...|Got a snack?|Feed me?"),
             "fed": lines("pet_chatter_fed", "Yum!|Thank you!|Delicious!"),
             "away": lines("pet_chatter_away", "Still there?|I'll nap till you're back~|Zzz..."),
+            "levelup": lines("pet_chatter_levelup", "Level up!|I'm growing!|We're getting closer!"),
             "any": lines("pet_chatter_any", "Hi there!|(^_^)|Keep going!"),
         }
+
+    def _gain_affection(self, amount: int) -> None:
+        """互動累加親密度；升級時慶祝一下並保存。"""
+        leveled = self._growth.add(amount)
+        user_setting_dict["pet_affection"] = self._growth.affection
+        if leveled and self._talk:
+            pool = self._messages.get("levelup") or []
+            if pool:
+                self.say(pool[self._chatter_rng.randrange(len(pool))])
 
     def _persist_mood(self) -> None:
         user_setting_dict["pet_mood"] = self._mood.value
@@ -1043,6 +1083,7 @@ class DesktopPetWidget(BaseWidget):
         self._mood.pet()
         self._persist_hunger()
         self._persist_mood()
+        self._gain_affection(5)
         pool = self._messages.get("fed") or []
         if pool:
             self.say(pool[self._chatter_rng.randrange(len(pool))])
@@ -1128,6 +1169,7 @@ class DesktopPetWidget(BaseWidget):
             self.motion.clear_follow()
             self._mood.pet()    # petting cheers it up
             self._persist_mood()
+            self._gain_affection(2)
             self._play_sound()
             self._set_active_sprite(STATE_DRAG)
         super().mousePressEvent(event)
