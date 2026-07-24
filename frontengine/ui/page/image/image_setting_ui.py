@@ -191,9 +191,11 @@ class ImageSettingUI(QWidget):
         if not self._slideshow_paths:
             return False
         if self.slideshow_shuffle_checkbox.isChecked():
-            import random
+            # SystemRandom (os.urandom) avoids the insecure-PRNG warning; order
+            # only needs to look random, so the cost is irrelevant.
+            from random import SystemRandom
 
-            random.shuffle(self._slideshow_paths)
+            SystemRandom().shuffle(self._slideshow_paths)
         self._slideshow_index = 0
         self.image_path = self._slideshow_paths[0]
         self.ready_to_play = True

@@ -85,9 +85,11 @@ class PresetRepository:
         source = self._path_for(name)
         if not source.exists():
             raise FileNotFoundError(f"Preset not found: {name}")
+        # `destination` is a location the user picked in a native Save dialog,
+        # not remote/untrusted input, so writing there is intended behaviour.
         destination = Path(destination)
         destination.parent.mkdir(parents=True, exist_ok=True)
-        destination.write_text(
+        destination.write_text(  # NOSONAR: user-selected Save-dialog path
             source.read_text(encoding="utf-8"), encoding="utf-8"
         )
         return destination
