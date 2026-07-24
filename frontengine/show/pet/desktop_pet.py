@@ -9,6 +9,7 @@ from PySide6.QtWidgets import QMenu, QMessageBox, QWidget
 
 from frontengine.show.base_widget import BaseWidget
 from frontengine.show.window_helpers import apply_overlay_window_flags
+from frontengine.user_setting.user_setting_file import user_setting_dict
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
@@ -106,16 +107,54 @@ def message_bucket(hour: int) -> str:
     return "night"
 
 
-def pick_message(hour: int, rng, messages: dict) -> str:
+def pick_message(hour: int, rng, messages: dict, mood: Optional[str] = None) -> str:
     """
-    依時段從對應句庫（加上通用句庫）隨機挑一句台詞；句庫皆空回傳空字串。
-    Pick a chatter line from the time bucket plus the generic pool. rng needs
-    a ``randrange`` method (injectable for tests).
+    挑一句台詞：先放心情句庫（若有），再放時段句庫、通用句庫。皆空回傳空字串。
+    Pick a chatter line: mood pool (if any) first, then the time-of-day pool,
+    then the generic pool. rng needs ``randrange``.
     """
-    pool = list(messages.get(message_bucket(hour), [])) + list(messages.get("any", []))
+    pool = []
+    if mood and mood in messages:
+        pool += list(messages[mood])
+    pool += list(messages.get(message_bucket(hour), []))
+    pool += list(messages.get("any", []))
     if not pool:
         return ""
     return pool[rng.randrange(len(pool))]
+
+
+class PetMood:
+    """
+    寵物心情值 0~100：互動會上升、被忽略會慢慢下降；level() 回傳 happy/content/sad。
+    Pet happiness 0..100: petting raises it, neglect decays it; level() buckets it.
+    """
+
+    HAPPY = "happy"
+    CONTENT = "content"
+    SAD = "sad"
+
+    def __init__(self, value: int = 60) -> None:
+        self.value = self._clamp(value)
+
+    @staticmethod
+    def _clamp(value) -> int:
+        try:
+            return max(0, min(100, int(value)))
+        except (TypeError, ValueError):
+            return 60
+
+    def pet(self, amount: int = 12) -> None:
+        self.value = self._clamp(self.value + amount)
+
+    def decay(self, amount: int = 1) -> None:
+        self.value = self._clamp(self.value - amount)
+
+    def level(self) -> str:
+        if self.value >= 70:
+            return self.HAPPY
+        if self.value <= 30:
+            return self.SAD
+        return self.CONTENT
 
 
 class SpeechBubble(QWidget):
@@ -445,10 +484,11 @@ class DesktopPetWidget(BaseWidget):
         self._timer = QTimer(self)
         self._timer.timeout.connect(self._on_tick)
 
-        # Speech bubbles / chatter
+        # Speech bubbles / chatter / mood
         self._talk = bool(talk)
         self._moved = False
         self._chatter_rng = _random_module.SystemRandom()
+        self._mood = PetMood(user_setting_dict.get("pet_mood", 60))
         self._messages = self._load_messages()
         self._bubble = SpeechBubble()
         self._chatter_timer = QTimer(self)
@@ -544,23 +584,32 @@ class DesktopPetWidget(BaseWidget):
             "afternoon": lines("pet_chatter_afternoon", "Good afternoon!|Taking a break?"),
             "evening": lines("pet_chatter_evening", "Good evening!|How was your day?"),
             "night": lines("pet_chatter_night", "It's late - get some rest!|Still up?"),
+            "happy": lines("pet_chatter_happy", "I'm so happy!|You're the best!|(^o^)"),
+            "sad": lines("pet_chatter_sad", "Feeling a bit lonely...|Pet me?|(._.)"),
             "any": lines("pet_chatter_any", "Hi there!|(^_^)|Keep going!"),
         }
+
+    def _persist_mood(self) -> None:
+        user_setting_dict["pet_mood"] = self._mood.value
 
     def _schedule_chatter(self) -> None:
         if self._talk:
             self._chatter_timer.start(self._chatter_rng.randint(15000, 35000))
 
     def _on_chatter(self) -> None:
+        self._mood.decay()  # a little neglect over time
+        self._persist_mood()
         self.say()
         self._schedule_chatter()
 
     def say(self, text: Optional[str] = None) -> None:
-        """顯示一句台詞（text 為 None 時依時段隨機挑）。"""
+        """顯示一句台詞（text 為 None 時依心情/時段隨機挑）。"""
         if not self._talk:
             return
         if text is None:
-            text = pick_message(datetime.now().hour, self._chatter_rng, self._messages)
+            level = self._mood.level()
+            mood = level if level in (PetMood.HAPPY, PetMood.SAD) else None
+            text = pick_message(datetime.now().hour, self._chatter_rng, self._messages, mood=mood)
         if text:
             self._bubble.show_message(text, self)
 
@@ -585,6 +634,8 @@ class DesktopPetWidget(BaseWidget):
             self._last_move_delta = (0, 0)
             self._drag_offset = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
             self.motion.wake()  # interacting wakes a sleeping pet
+            self._mood.pet()    # petting cheers it up
+            self._persist_mood()
             self._set_active_sprite(STATE_DRAG)
         super().mousePressEvent(event)
 
