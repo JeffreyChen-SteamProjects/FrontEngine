@@ -1,5 +1,16 @@
 # CLAUDE.md - FrontEngine
 
+## Session Progress Log (check first)
+
+At the start of every session, check `.claude/PROGRESS.md` — a local, git-ignored
+scratch record of in-flight / unfinished work. Read it before planning so you can
+resume where the last session left off.
+
+- While working: record in-progress and pending items there.
+- When **all** listed items are done (merged/verified), **clear the file** — reset it
+  to just its header/instructions, leaving no stale entries.
+- It is local-only (ignored via `/.claude/`); never rely on it being committed.
+
 ## Project Overview
 
 FrontEngine is a PySide6-based desktop overlay framework for displaying GIFs, images, videos, web content, particles, text, and sound on screen. It supports Windows, macOS, and Linux. Published on PyPI as `frontengine` (stable) and `frontengine_dev` (dev).
