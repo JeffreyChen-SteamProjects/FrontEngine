@@ -142,7 +142,7 @@ class PetMotion:
 
     # --- free wander ---
     def _step_wander(self, left, top, right, bottom) -> Tuple[int, int]:
-        if self.vy == 0.0:
+        if abs(self.vy) < 1e-9:
             self.vy = float(self.speed)
         self.x += self.vx
         self.y += self.vy
