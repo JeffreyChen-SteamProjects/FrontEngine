@@ -234,6 +234,8 @@ traditional_chinese_word_dict = {
     "pet_chatter_evening": "晚上好！|今天過得如何？|快完成了嗎？",
     "pet_chatter_night": "很晚了，早點休息！|還沒睡嗎？|祝好夢～",
     "pet_chatter_any": "嗨！|(^_^)|加油！|你可以的！",
+    "pet_chatter_happy": "我好開心！|你最棒了！|(^o^)/|今天真美好！",
+    "pet_chatter_sad": "有點寂寞…|摸摸我好嗎？|(._.)|別忘了我～",
     "pet_start": "召喚寵物",
     "pet_message_box_text": "找不到寵物圖片",
 }
