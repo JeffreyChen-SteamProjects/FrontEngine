@@ -2,11 +2,11 @@ from typing import Optional
 
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import (
-    QWidget, QGridLayout, QLabel, QPushButton, QMessageBox, QComboBox, QCheckBox,
+    QWidget, QGridLayout, QLabel, QPushButton, QMessageBox, QComboBox, QCheckBox, QFileDialog,
 )
 
 from frontengine.show.pet.desktop_pet import (
-    DesktopPetWidget, BEHAVIOUR_FLOOR, BEHAVIOUR_WANDER, BEHAVIOUR_CHASE,
+    DesktopPetWidget, BEHAVIOUR_FLOOR, BEHAVIOUR_WANDER, BEHAVIOUR_CHASE, scan_pet_pack,
 )
 from frontengine.ui.dialog.choose_file_dialog import choose_pet
 from frontengine.ui.page.utils import (
@@ -38,6 +38,10 @@ class PetSettingUI(QWidget):
             language_wrapper.language_word_dict.get("pet_choose_file", "Choose pet sprite")
         )
         self.choose_file_button.clicked.connect(self.choose_and_play)
+        self.choose_pack_button = QPushButton(
+            language_wrapper.language_word_dict.get("pet_choose_pack", "Choose pet pack...")
+        )
+        self.choose_pack_button.clicked.connect(self.choose_pack)
         self.ready_label = QLabel(language_wrapper.language_word_dict.get("Not Ready"))
 
         # Size
@@ -81,6 +85,7 @@ class PetSettingUI(QWidget):
         # Layout
         self.grid_layout.addWidget(self.choose_file_button, 0, 0)
         self.grid_layout.addWidget(self.ready_label, 0, 1)
+        self.grid_layout.addWidget(self.choose_pack_button, 0, 2)
         self.grid_layout.addWidget(self.size_label, 1, 0)
         self.grid_layout.addWidget(self.size_combobox, 1, 1)
         self.grid_layout.addWidget(self.speed_label, 2, 0)
@@ -131,6 +136,28 @@ class PetSettingUI(QWidget):
             self.ready_to_play = True
             add_recent_file("pet", self.pet_image_path)
             reload_recent_combobox(self.recent_files_combobox, "pet")
+
+    def choose_pack(self) -> None:
+        """選擇動作包資料夾（依 walk/idle/climb/fall/drag 檔名對應狀態）。"""
+        front_engine_logger.info("[PetSettingUI] choose_pack")
+        folder = QFileDialog.getExistingDirectory(
+            self, language_wrapper.language_word_dict.get("pet_choose_pack", "Choose pet pack...")
+        )
+        if not folder:
+            return
+        if not scan_pet_pack(folder):
+            QMessageBox.warning(
+                self,
+                language_wrapper.language_word_dict.get("pet_choose_pack", "Choose pet pack..."),
+                language_wrapper.language_word_dict.get(
+                    "pet_pack_empty", "No sprites (walk/idle/climb/fall/drag) found in that folder."),
+            )
+            return
+        self.pet_image_path = folder
+        self.ready_to_play = True
+        self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+        add_recent_file("pet", folder)
+        reload_recent_combobox(self.recent_files_combobox, "pet")
 
     def _apply_recent_file(self, _index: int = 0) -> None:
         path = self.recent_files_combobox.currentData()
