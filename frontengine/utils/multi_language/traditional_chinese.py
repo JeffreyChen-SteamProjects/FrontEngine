@@ -215,4 +215,12 @@ traditional_chinese_word_dict = {
     "web_zoom_label": "縮放",
     "web_refresh_label": "自動重新整理",
     "web_refresh_off": "關閉",
+    # Desktop pet
+    "tab_pet_text": "桌面寵物",
+    "pet_choose_file": "選擇寵物圖片",
+    "pet_size_label": "大小",
+    "pet_speed_label": "速度",
+    "pet_gravity_label": "沿底部行走",
+    "pet_start": "召喚寵物",
+    "pet_message_box_text": "找不到寵物圖片",
 }

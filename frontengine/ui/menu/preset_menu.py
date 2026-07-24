@@ -23,6 +23,7 @@ _PRESET_PAGES = (
     ("sound", "sound_player_setting_ui"),
     ("text", "text_setting_ui"),
     ("particle", "particle_setting_ui"),
+    ("pet", "pet_setting_ui"),
 )
 
 

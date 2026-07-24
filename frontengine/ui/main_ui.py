@@ -18,6 +18,7 @@ from frontengine.ui.page.control_center.control_center_ui import ControlCenterUI
 from frontengine.ui.page.gif.gif_setting_ui import GIFSettingUI
 from frontengine.ui.page.image.image_setting_ui import ImageSettingUI
 from frontengine.ui.page.particle.particle_setting_ui import ParticleSettingUI
+from frontengine.ui.page.pet.pet_setting_ui import PetSettingUI
 from frontengine.ui.page.scene_setting.scene_setting_ui import SceneSettingUI
 from frontengine.ui.page.sound_player.sound_player_setting_ui import SoundPlayerSettingUI
 from frontengine.ui.page.text.text_setting_ui import TextSettingUI
@@ -98,6 +99,7 @@ class FrontEngineMainUI(QMainWindow):
         self.text_setting_ui = TextSettingUI()
         self.scene_setting_ui = SceneSettingUI()
         self.particle_setting_ui = ParticleSettingUI()
+        self.pet_setting_ui = PetSettingUI()
 
         # 控制中心
         # Control Center
@@ -110,7 +112,8 @@ class FrontEngineMainUI(QMainWindow):
             self.text_setting_ui,
             self.scene_setting_ui,
             self.particle_setting_ui,
-            redirect_output
+            redirect_output,
+            pet_setting_ui=self.pet_setting_ui,
         )
 
         # Menu Bar
@@ -200,6 +203,7 @@ class FrontEngineMainUI(QMainWindow):
             (self.text_setting_ui, "tab_text_text"),
             (self.scene_setting_ui, "tab_scene_text"),
             (self.particle_setting_ui, "tab_particle_text"),
+            (self.pet_setting_ui, "tab_pet_text"),
             (self.control_center_ui, "tab_control_center_text"),
         ]
 
@@ -351,6 +355,7 @@ class FrontEngineMainUI(QMainWindow):
         self.sound_player_setting_ui.sound_widget_list.clear()
         self.text_setting_ui.text_widget_list.clear()
         self.particle_setting_ui.particle_list.clear()
+        self.pet_setting_ui.pet_list.clear()
         self.scene_setting_ui.close_scene()
         super().close()
         if self.main_app:
