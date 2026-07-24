@@ -1,10 +1,11 @@
 import random as _random_module
+from datetime import datetime
 from pathlib import Path
 from typing import Optional, Tuple
 
 from PySide6.QtCore import Qt, QRect, QTimer, Signal
-from PySide6.QtGui import QAction, QCursor, QMovie, QPainter, QPixmap, QTransform
-from PySide6.QtWidgets import QMenu, QMessageBox
+from PySide6.QtGui import QAction, QColor, QCursor, QFont, QFontMetrics, QMovie, QPainter, QPixmap, QTransform
+from PySide6.QtWidgets import QMenu, QMessageBox, QWidget
 
 from frontengine.show.base_widget import BaseWidget
 from frontengine.show.window_helpers import apply_overlay_window_flags
@@ -78,6 +79,74 @@ def derive_visual_state(dragging: bool, airborne: bool, surface: str, motion_sta
     if surface == SURFACE_FLOOR and motion_state == "idle":
         return STATE_IDLE
     return STATE_WALK
+
+
+def message_bucket(hour: int) -> str:
+    """依小時回傳時段 / Time-of-day bucket for the given hour."""
+    hour = int(hour) % 24
+    if 5 <= hour < 12:
+        return "morning"
+    if 12 <= hour < 18:
+        return "afternoon"
+    if 18 <= hour < 22:
+        return "evening"
+    return "night"
+
+
+def pick_message(hour: int, rng, messages: dict) -> str:
+    """
+    依時段從對應句庫（加上通用句庫）隨機挑一句台詞；句庫皆空回傳空字串。
+    Pick a chatter line from the time bucket plus the generic pool. rng needs
+    a ``randrange`` method (injectable for tests).
+    """
+    pool = list(messages.get(message_bucket(hour), [])) + list(messages.get("any", []))
+    if not pool:
+        return ""
+    return pool[rng.randrange(len(pool))]
+
+
+class SpeechBubble(QWidget):
+    """寵物頭上的小對話泡泡，數秒後自動消失 / A small speech bubble that auto-hides."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._text = ""
+        self._font = QFont()
+        self._font.setPointSize(11)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        apply_overlay_window_flags(self, show_on_bottom=False, allow_input=False)
+        self._hide_timer = QTimer(self)
+        self._hide_timer.setSingleShot(True)
+        self._hide_timer.timeout.connect(self.hide)
+
+    def show_message(self, text: str, anchor: QWidget, duration_ms: int = 4000) -> None:
+        self._text = text
+        width = min(260, QFontMetrics(self._font).horizontalAdvance(text) + 28)
+        self.resize(max(60, width), 44)
+        self.reposition(anchor)
+        self.show()
+        self.raise_()
+        self.update()
+        self._hide_timer.start(max(500, int(duration_ms)))
+
+    def reposition(self, anchor: QWidget) -> None:
+        geo = anchor.frameGeometry()
+        self.move(geo.center().x() - self.width() // 2, geo.top() - self.height() - 6)
+
+    def paintEvent(self, event) -> None:
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        rect = self.rect().adjusted(1, 1, -1, -1)
+        painter.setBrush(QColor(255, 255, 240, 235))
+        painter.setPen(QColor(90, 90, 90))
+        painter.drawRoundedRect(rect, 8, 8)
+        painter.setPen(QColor(30, 30, 30))
+        painter.setFont(self._font)
+        painter.drawText(
+            rect.adjusted(8, 2, -8, -2),
+            int(Qt.AlignmentFlag.AlignCenter | Qt.TextFlag.TextWordWrap),
+            self._text,
+        )
 
 
 class PetMotion:
@@ -317,10 +386,10 @@ class DesktopPetWidget(BaseWidget):
     clone_requested = Signal()
 
     def __init__(self, image_path: str, size: int = 128, speed: int = 3,
-                 behaviour: str = BEHAVIOUR_FLOOR, climb: bool = True):
+                 behaviour: str = BEHAVIOUR_FLOOR, climb: bool = True, talk: bool = True):
         front_engine_logger.info(
             f"[DesktopPetWidget] Init | path={image_path}, size={size}, speed={speed}, "
-            f"behaviour={behaviour}, climb={climb}"
+            f"behaviour={behaviour}, climb={climb}, talk={talk}"
         )
         super().__init__()
         self.opacity = 1.0
@@ -349,6 +418,16 @@ class DesktopPetWidget(BaseWidget):
 
         self._timer = QTimer(self)
         self._timer.timeout.connect(self._on_tick)
+
+        # Speech bubbles / chatter
+        self._talk = bool(talk)
+        self._moved = False
+        self._chatter_rng = _random_module.SystemRandom()
+        self._messages = self._load_messages()
+        self._bubble = SpeechBubble()
+        self._chatter_timer = QTimer(self)
+        self._chatter_timer.setSingleShot(True)
+        self._chatter_timer.timeout.connect(self._on_chatter)
 
         self.menu = QMenu(self)
         self.clone_action = QAction(language_wrapper.language_word_dict.get("pet_clone", "Clone"), self)
@@ -426,6 +505,38 @@ class DesktopPetWidget(BaseWidget):
         self.motion.y = float(bottom - self.pet_size)
         self.move(int(self.motion.x), int(self.motion.y))
         self._timer.start(max(10, int(interval_ms)))
+        self._schedule_chatter()
+
+    def _load_messages(self) -> dict:
+        d = language_wrapper.language_word_dict
+
+        def lines(key: str, fallback: str) -> list:
+            return [part.strip() for part in str(d.get(key, fallback)).split("|") if part.strip()]
+
+        return {
+            "morning": lines("pet_chatter_morning", "Good morning!|Ready for the day?"),
+            "afternoon": lines("pet_chatter_afternoon", "Good afternoon!|Taking a break?"),
+            "evening": lines("pet_chatter_evening", "Good evening!|How was your day?"),
+            "night": lines("pet_chatter_night", "It's late - get some rest!|Still up?"),
+            "any": lines("pet_chatter_any", "Hi there!|(^_^)|Keep going!"),
+        }
+
+    def _schedule_chatter(self) -> None:
+        if self._talk:
+            self._chatter_timer.start(self._chatter_rng.randint(15000, 35000))
+
+    def _on_chatter(self) -> None:
+        self.say()
+        self._schedule_chatter()
+
+    def say(self, text: Optional[str] = None) -> None:
+        """顯示一句台詞（text 為 None 時依時段隨機挑）。"""
+        if not self._talk:
+            return
+        if text is None:
+            text = pick_message(datetime.now().hour, self._chatter_rng, self._messages)
+        if text:
+            self._bubble.show_message(text, self)
 
     def _on_tick(self) -> None:
         if self._dragging:
@@ -437,11 +548,14 @@ class DesktopPetWidget(BaseWidget):
         x, y = self.motion.step()
         self.move(x, y)
         self._set_active_sprite(self._visual_state())
+        if self._bubble.isVisible():
+            self._bubble.reposition(self)
 
     # --- dragging + throwing ---
     def mousePressEvent(self, event) -> None:
         if event.button() == Qt.MouseButton.LeftButton:
             self._dragging = True
+            self._moved = False
             self._last_move_delta = (0, 0)
             self._drag_offset = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
             self._set_active_sprite(STATE_DRAG)
@@ -451,6 +565,7 @@ class DesktopPetWidget(BaseWidget):
         if self._dragging and self._drag_offset is not None:
             new_top_left = event.globalPosition().toPoint() - self._drag_offset
             self._last_move_delta = (new_top_left.x() - self.x(), new_top_left.y() - self.y())
+            self._moved = True
             self.move(new_top_left)
         super().mouseMoveEvent(event)
 
@@ -459,9 +574,12 @@ class DesktopPetWidget(BaseWidget):
             self._dragging = False
             self.motion.x = float(self.x())
             self.motion.y = float(self.y())
-            # Fling with the momentum of the last drag movement (floor mode).
-            if self.motion.behaviour == BEHAVIOUR_FLOOR:
-                self.motion.throw(self._last_move_delta[0], self._last_move_delta[1])
+            if self._moved:
+                # Fling with the momentum of the last drag movement (floor mode).
+                if self.motion.behaviour == BEHAVIOUR_FLOOR:
+                    self.motion.throw(self._last_move_delta[0], self._last_move_delta[1])
+            else:
+                self.say()  # a click (no drag) makes the pet talk
         super().mouseReleaseEvent(event)
 
     def contextMenuEvent(self, event) -> None:
@@ -470,6 +588,9 @@ class DesktopPetWidget(BaseWidget):
     def closeEvent(self, event) -> None:
         if self._timer.isActive():
             self._timer.stop()
+        if self._chatter_timer.isActive():
+            self._chatter_timer.stop()
+        self._bubble.close()
         for kind, obj in self._sprites.values():
             if kind == "movie":
                 obj.stop()

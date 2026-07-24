@@ -227,6 +227,12 @@ english_word_dict = {
     "pet_clone": "Clone",
     "pet_choose_pack": "Choose pet pack...",
     "pet_pack_empty": "No sprites (walk/idle/climb/fall/drag) found in that folder.",
+    "pet_talk_label": "Speech bubbles",
+    "pet_chatter_morning": "Good morning!|Rise and shine!|Ready for the day?",
+    "pet_chatter_afternoon": "Good afternoon!|Taking a break?|Keep it up!",
+    "pet_chatter_evening": "Good evening!|How was your day?|Almost done?",
+    "pet_chatter_night": "It's late - get some rest!|Still up?|Sweet dreams soon~",
+    "pet_chatter_any": "Hi there!|(^_^)|Keep going!|You've got this!",
     "pet_start": "Spawn pet",
     "pet_message_box_text": "Pet image not found",
 }

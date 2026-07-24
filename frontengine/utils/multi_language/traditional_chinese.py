@@ -228,6 +228,12 @@ traditional_chinese_word_dict = {
     "pet_clone": "複製",
     "pet_choose_pack": "選擇動作包資料夾...",
     "pet_pack_empty": "該資料夾找不到精靈檔（walk/idle/climb/fall/drag）。",
+    "pet_talk_label": "對話泡泡",
+    "pet_chatter_morning": "早安！|新的一天開始囉！|準備好了嗎？",
+    "pet_chatter_afternoon": "午安！|要不要休息一下？|繼續加油！",
+    "pet_chatter_evening": "晚上好！|今天過得如何？|快完成了嗎？",
+    "pet_chatter_night": "很晚了，早點休息！|還沒睡嗎？|祝好夢～",
+    "pet_chatter_any": "嗨！|(^_^)|加油！|你可以的！",
     "pet_start": "召喚寵物",
     "pet_message_box_text": "找不到寵物圖片",
 }

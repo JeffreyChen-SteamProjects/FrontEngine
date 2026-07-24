@@ -69,6 +69,8 @@ class PetSettingUI(QWidget):
         # Climb walls / ceiling (only meaningful in floor mode)
         self.climb_checkbox = QCheckBox(language_wrapper.language_word_dict.get("pet_climb_label", "Climb walls"))
         self.climb_checkbox.setChecked(True)
+        self.talk_checkbox = QCheckBox(language_wrapper.language_word_dict.get("pet_talk_label", "Speech bubbles"))
+        self.talk_checkbox.setChecked(True)
 
         # Start
         self.start_button = QPushButton(language_wrapper.language_word_dict.get("pet_start", "Spawn pet"))
@@ -93,6 +95,7 @@ class PetSettingUI(QWidget):
         self.grid_layout.addWidget(self.behaviour_label, 3, 0)
         self.grid_layout.addWidget(self.behaviour_combobox, 3, 1)
         self.grid_layout.addWidget(self.climb_checkbox, 3, 2)
+        self.grid_layout.addWidget(self.talk_checkbox, 2, 2)
         self.grid_layout.addWidget(self.start_button, 4, 0)
         self.grid_layout.addWidget(self.recent_files_label, 5, 0)
         self.grid_layout.addWidget(self.recent_files_combobox, 5, 1)
@@ -107,6 +110,7 @@ class PetSettingUI(QWidget):
             speed=int(self.speed_combobox.currentText()),
             behaviour=self.behaviour_combobox.currentData(),
             climb=self.climb_checkbox.isChecked(),
+            talk=self.talk_checkbox.isChecked(),
         )
         pet.clone_requested.connect(self._spawn_pet)
         pet.set_pet_window_flag()
@@ -183,6 +187,7 @@ class PetSettingUI(QWidget):
             "speed": self.speed_combobox.currentText(),
             "behaviour": self.behaviour_combobox.currentData(),
             "climb": self.climb_checkbox.isChecked(),
+            "talk": self.talk_checkbox.isChecked(),
         }
 
     def set_state(self, state: dict) -> None:
@@ -204,3 +209,5 @@ class PetSettingUI(QWidget):
                 self.behaviour_combobox.setCurrentIndex(index)
         if "climb" in state:
             self.climb_checkbox.setChecked(bool(state["climb"]))
+        if "talk" in state:
+            self.talk_checkbox.setChecked(bool(state["talk"]))
