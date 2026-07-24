@@ -144,6 +144,30 @@ def windows_platforms(exclude_hwnds=()) -> list:
         return []
 
 
+def idle_seconds():
+    """
+    回傳使用者未操作的秒數；無法取得時回傳 None。僅 Windows 實作。
+    Seconds since the last user input, or None when unavailable (Windows only).
+    """
+    if sys.platform != "win32":
+        return None
+    try:
+        import ctypes
+
+        class _LASTINPUTINFO(ctypes.Structure):
+            _fields_ = [("cbSize", ctypes.c_uint), ("dwTime", ctypes.c_uint)]
+
+        info = _LASTINPUTINFO()
+        info.cbSize = ctypes.sizeof(info)
+        if not ctypes.windll.user32.GetLastInputInfo(ctypes.byref(info)):
+            return None
+        elapsed_ms = ctypes.windll.kernel32.GetTickCount() - info.dwTime
+        return max(0.0, elapsed_ms / 1000.0)
+    except Exception as error:  # pragma: no cover - Win32 boundary
+        front_engine_logger.warning(f"[idle_seconds] error: {error!r}")
+        return None
+
+
 def pop_due_reminders(now, reminders):
     """
     依 now 分出已到期與未到期的提醒。reminders 為 (due_datetime, text) 清單。
@@ -646,6 +670,12 @@ class PetMotion:
         self._idle_count = 0
         self._new_state(force_walk=True)
 
+    def sleep(self) -> None:
+        """讓寵物進入睡眠（使用者閒置時呼叫）/ Put the pet to sleep."""
+        self.state = STATE_SLEEP
+        self._state_ticks = self._rng.randint(300, 600)
+        self.follow_target_x = None
+
     # --- free wander ---
     def _step_wander(self, left, top, right, bottom) -> Tuple[int, int]:
         if abs(self.vy) < 1e-9:
@@ -750,6 +780,9 @@ class DesktopPetWidget(BaseWidget):
         # 電量提醒 / Low-battery reaction
         self._battery_provider = read_battery
         self._battery_warned = False
+        # 閒置反應 / Idle reaction
+        self._idle_provider = idle_seconds
+        self._idle_reacted = False
         # 提醒事項 / Reminders
         self._now_provider = datetime.now
         self._reminders: list = []
@@ -907,6 +940,7 @@ class DesktopPetWidget(BaseWidget):
             "battery": lines("pet_chatter_battery", "Battery's low - plug me in?|Low power!|Find a charger?"),
             "hungry": lines("pet_chatter_hungry", "I'm hungry...|Got a snack?|Feed me?"),
             "fed": lines("pet_chatter_fed", "Yum!|Thank you!|Delicious!"),
+            "away": lines("pet_chatter_away", "Still there?|I'll nap till you're back~|Zzz..."),
             "any": lines("pet_chatter_any", "Hi there!|(^_^)|Keep going!"),
         }
 
@@ -973,10 +1007,32 @@ class DesktopPetWidget(BaseWidget):
         self._mood.decay()  # a little neglect over time
         self._hunger.decay()
         self._persist_mood()
-        # priority: low battery, then hunger, otherwise normal chatter
-        if not self._warn_battery() and not self._warn_hungry():
+        # priority: user idle (nap), low battery, hunger, otherwise normal chatter
+        if not self._check_idle() and not self._warn_battery() and not self._warn_hungry():
             self.say()
         self._schedule_chatter()
+
+    IDLE_THRESHOLD = 120.0
+
+    def _check_idle(self) -> bool:
+        """使用者閒置久了打盹並說一句；回來後醒。回傳是否有反應（抑制一般閒聊）。"""
+        seconds = self._idle_provider()
+        if seconds is None:
+            return False
+        if seconds >= self.IDLE_THRESHOLD:
+            if not self._idle_reacted:
+                self._idle_reacted = True
+                self.motion.sleep()
+                if self._talk:
+                    pool = self._messages.get("away") or []
+                    if pool:
+                        self.say(pool[self._chatter_rng.randrange(len(pool))])
+                        return True
+            return False
+        if seconds < 5.0 and self._idle_reacted:
+            self._idle_reacted = False
+            self.motion.wake()
+        return False
 
     def _persist_hunger(self) -> None:
         user_setting_dict["pet_hunger"] = self._hunger.value

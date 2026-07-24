@@ -228,6 +228,7 @@ english_word_dict = {
     "pet_feed": "Feed",
     "pet_chatter_hungry": "I'm hungry...|Got a snack?|Feed me, please?|My tummy's rumbling~",
     "pet_chatter_fed": "Yum!|Thank you!|Delicious!|Nom nom (^o^)",
+    "pet_chatter_away": "Still there?|I'll nap till you're back~|Zzz...|Take your time!",
     "pet_set_reminder": "Set reminder...",
     "pet_reminder_prompt": "Remind me to:",
     "pet_reminder_minutes": "In how many minutes?",
