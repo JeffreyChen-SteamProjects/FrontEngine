@@ -15,6 +15,24 @@ else:
     _PYNPUT_ERROR = None
 
 
+def is_valid_hotkey(combo: str) -> bool:
+    """
+    檢查組合鍵字串是否可被 pynput 解析。pynput 不可用時無法驗證，一律視為
+    有效（交由執行期處理）。
+    Return True if `combo` parses as a pynput hotkey. When pynput is
+    unavailable it cannot be validated, so it is accepted.
+    """
+    if not isinstance(combo, str) or not combo.strip():
+        return False
+    if _pynput_keyboard is None:
+        return True
+    try:
+        _pynput_keyboard.HotKey.parse(combo)
+        return True
+    except Exception:
+        return False
+
+
 class HotkeyService(QObject):
     """
     Thin wrapper around pynput.keyboard.GlobalHotKeys that re-emits every
@@ -43,11 +61,22 @@ class HotkeyService(QObject):
             return False
         if not self._bindings:
             return False
+        dispatch = {}
+        for combo, action in self._bindings.items():
+            # Validate each combo up front so one malformed binding cannot
+            # take down every hotkey when GlobalHotKeys parses the map.
+            try:
+                _pynput_keyboard.HotKey.parse(combo)
+            except Exception as parse_error:  # pragma: no cover - defensive boundary
+                front_engine_logger.warning(
+                    f"[HotkeyService] Ignoring invalid hotkey {combo!r}: {parse_error!r}"
+                )
+                continue
+            dispatch[combo] = (lambda name=action: self.hotkey_triggered.emit(name))
+        if not dispatch:
+            front_engine_logger.warning("[HotkeyService] No valid hotkeys to bind")
+            return False
         try:
-            dispatch = {
-                combo: (lambda name=action: self.hotkey_triggered.emit(name))
-                for combo, action in self._bindings.items()
-            }
             self._listener = _pynput_keyboard.GlobalHotKeys(dispatch)
             self._listener.daemon = True
             self._listener.start()
