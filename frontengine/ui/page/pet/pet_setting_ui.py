@@ -8,7 +8,7 @@ from PySide6.QtWidgets import (
 from frontengine.show.pet.desktop_pet import (
     DesktopPetWidget, BEHAVIOUR_FLOOR, BEHAVIOUR_WANDER, BEHAVIOUR_CHASE, scan_pet_pack,
 )
-from frontengine.ui.dialog.choose_file_dialog import choose_pet
+from frontengine.ui.dialog.choose_file_dialog import choose_pet, choose_wav_sound
 from frontengine.ui.page.utils import (
     build_recent_combobox,
     enable_file_drop,
@@ -32,6 +32,7 @@ class PetSettingUI(QWidget):
         self.pet_list: list = []
         self.ready_to_play = False
         self.pet_image_path: Optional[str] = None
+        self.pet_sound_path: Optional[str] = None
 
         # Choose file
         self.choose_file_button = QPushButton(
@@ -42,6 +43,10 @@ class PetSettingUI(QWidget):
             language_wrapper.language_word_dict.get("pet_choose_pack", "Choose pet pack...")
         )
         self.choose_pack_button.clicked.connect(self.choose_pack)
+        self.choose_sound_button = QPushButton(
+            language_wrapper.language_word_dict.get("pet_choose_sound", "Choose sound (optional)")
+        )
+        self.choose_sound_button.clicked.connect(self.choose_sound)
         self.ready_label = QLabel(language_wrapper.language_word_dict.get("Not Ready"))
 
         # Size
@@ -88,6 +93,7 @@ class PetSettingUI(QWidget):
         self.grid_layout.addWidget(self.choose_file_button, 0, 0)
         self.grid_layout.addWidget(self.ready_label, 0, 1)
         self.grid_layout.addWidget(self.choose_pack_button, 0, 2)
+        self.grid_layout.addWidget(self.choose_sound_button, 1, 2)
         self.grid_layout.addWidget(self.size_label, 1, 0)
         self.grid_layout.addWidget(self.size_combobox, 1, 1)
         self.grid_layout.addWidget(self.speed_label, 2, 0)
@@ -111,6 +117,7 @@ class PetSettingUI(QWidget):
             behaviour=self.behaviour_combobox.currentData(),
             climb=self.climb_checkbox.isChecked(),
             talk=self.talk_checkbox.isChecked(),
+            sound_path=self.pet_sound_path,
         )
         pet.clone_requested.connect(self._spawn_pet)
         pet.set_pet_window_flag()
@@ -140,6 +147,13 @@ class PetSettingUI(QWidget):
             self.ready_to_play = True
             add_recent_file("pet", self.pet_image_path)
             reload_recent_combobox(self.recent_files_combobox, "pet")
+
+    def choose_sound(self) -> None:
+        """選擇點擊時播放的音效（選填）/ Choose an optional click sound."""
+        front_engine_logger.info("[PetSettingUI] choose_sound")
+        path = choose_wav_sound(self)
+        if path:
+            self.pet_sound_path = path
 
     def choose_pack(self) -> None:
         """選擇動作包資料夾（依 walk/idle/climb/fall/drag 檔名對應狀態）。"""
@@ -188,6 +202,7 @@ class PetSettingUI(QWidget):
             "behaviour": self.behaviour_combobox.currentData(),
             "climb": self.climb_checkbox.isChecked(),
             "talk": self.talk_checkbox.isChecked(),
+            "sound": self.pet_sound_path,
         }
 
     def set_state(self, state: dict) -> None:
@@ -211,3 +226,5 @@ class PetSettingUI(QWidget):
             self.climb_checkbox.setChecked(bool(state["climb"]))
         if "talk" in state:
             self.talk_checkbox.setChecked(bool(state["talk"]))
+        if state.get("sound"):
+            self.pet_sound_path = str(state["sound"])
