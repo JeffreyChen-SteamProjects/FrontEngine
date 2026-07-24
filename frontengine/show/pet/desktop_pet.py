@@ -144,6 +144,23 @@ def windows_platforms(exclude_hwnds=()) -> list:
         return []
 
 
+def nearest_peer(center, peers):
+    """
+    回傳離 center 最近的同伴座標與距離；無同伴回傳 (None, inf)。
+    Return the nearest peer center and its distance to `center`, or
+    (None, inf) when there are no peers.
+    """
+    best = None
+    best_distance = float("inf")
+    cx, cy = center
+    for peer_x, peer_y in peers:
+        distance = ((peer_x - cx) ** 2 + (peer_y - cy) ** 2) ** 0.5
+        if distance < best_distance:
+            best_distance = distance
+            best = (peer_x, peer_y)
+    return best, best_distance
+
+
 def message_bucket(hour: int) -> str:
     """依小時回傳時段 / Time-of-day bucket for the given hour."""
     hour = int(hour) % 24
@@ -616,6 +633,10 @@ class DesktopPetWidget(BaseWidget):
         self._init_sound(sound_path)
         self._sit_on_windows = bool(sit_on_windows)
         self._platform_tick = 0
+        # 多寵物互動 / Multi-pet interaction
+        self._peers_provider = None
+        self._peer_greeted = False
+        self._peer_tick = 0
         self._bubble = SpeechBubble()
         self._chatter_timer = QTimer(self)
         self._chatter_timer.setSingleShot(True)
@@ -629,9 +650,41 @@ class DesktopPetWidget(BaseWidget):
         self.close_action.triggered.connect(self.close)
         self.menu.addAction(self.close_action)
 
+    MEET_DISTANCE = 90.0
+
     def set_pet_window_flag(self) -> None:
         """寵物需接收滑鼠以便拖曳，故 allow_input=True 並置頂。"""
         apply_overlay_window_flags(self, show_on_bottom=False, allow_input=True)
+
+    def center(self) -> Tuple[int, int]:
+        return (self.x() + self.width() // 2, self.y() + self.height() // 2)
+
+    def set_peers_provider(self, provider) -> None:
+        """設定回傳其他寵物中心座標清單的函式 / Provider of other pets' centres."""
+        self._peers_provider = provider
+
+    def _check_peers(self) -> None:
+        """靠近其他寵物時轉向並打招呼（帶遲滯，避免重複）。"""
+        if self._peers_provider is None or not self._talk:
+            return
+        try:
+            peers = self._peers_provider()
+        except Exception:  # pragma: no cover - defensive
+            return
+        my_center = self.center()
+        peer, distance = nearest_peer(my_center, peers)
+        if peer is None:
+            self._peer_greeted = False
+            return
+        if distance <= self.MEET_DISTANCE:
+            if not self._peer_greeted:
+                self._peer_greeted = True
+                self.motion.vx = abs(self.motion.vx) if peer[0] >= my_center[0] else -abs(self.motion.vx)
+                pool = self._messages.get("meet") or []
+                if pool:
+                    self.say(pool[self._chatter_rng.randrange(len(pool))])
+        elif distance > self.MEET_DISTANCE * 1.6:
+            self._peer_greeted = False
 
     def _load_sprite(self, path: str):
         if Path(path).suffix.lower() in (".gif", ".webp"):
@@ -712,6 +765,7 @@ class DesktopPetWidget(BaseWidget):
             "night": lines("pet_chatter_night", "It's late - get some rest!|Still up?"),
             "happy": lines("pet_chatter_happy", "I'm so happy!|You're the best!|(^o^)"),
             "sad": lines("pet_chatter_sad", "Feeling a bit lonely...|Pet me?|(._.)"),
+            "meet": lines("pet_chatter_meet", "Hi friend!|Hello!|Let's play!"),
             "any": lines("pet_chatter_any", "Hi there!|(^_^)|Keep going!"),
         }
 
@@ -775,6 +829,10 @@ class DesktopPetWidget(BaseWidget):
         x, y = self.motion.step()
         self.move(x, y)
         self._set_active_sprite(self._visual_state())
+        self._peer_tick += 1
+        if self._peer_tick >= 5:
+            self._peer_tick = 0
+            self._check_peers()
         if self._bubble.isVisible():
             self._bubble.reposition(self)
 
