@@ -227,7 +227,7 @@ traditional_chinese_word_dict = {
     "pet_climb_label": "攀爬牆壁",
     "pet_clone": "複製",
     "pet_choose_pack": "選擇動作包資料夾...",
-    "pet_pack_empty": "該資料夾找不到精靈檔（walk/idle/climb/fall/drag）。",
+    "pet_pack_empty": "該資料夾找不到精靈檔（walk/idle/sleep/climb/fall/drag）。",
     "pet_talk_label": "對話泡泡",
     "pet_chatter_morning": "早安！|新的一天開始囉！|準備好了嗎？",
     "pet_chatter_afternoon": "午安！|要不要休息一下？|繼續加油！",

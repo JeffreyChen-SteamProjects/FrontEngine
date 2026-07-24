@@ -226,7 +226,7 @@ english_word_dict = {
     "pet_climb_label": "Climb walls",
     "pet_clone": "Clone",
     "pet_choose_pack": "Choose pet pack...",
-    "pet_pack_empty": "No sprites (walk/idle/climb/fall/drag) found in that folder.",
+    "pet_pack_empty": "No sprites (walk/idle/sleep/climb/fall/drag) found in that folder.",
     "pet_talk_label": "Speech bubbles",
     "pet_chatter_morning": "Good morning!|Rise and shine!|Ready for the day?",
     "pet_chatter_afternoon": "Good afternoon!|Taking a break?|Keep it up!",
