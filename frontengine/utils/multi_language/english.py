@@ -223,6 +223,8 @@ english_word_dict = {
     "pet_behaviour_floor": "Walk on floor",
     "pet_behaviour_wander": "Free wander",
     "pet_behaviour_chase": "Chase cursor",
+    "pet_climb_label": "Climb walls",
+    "pet_clone": "Clone",
     "pet_start": "Spawn pet",
     "pet_message_box_text": "Pet image not found",
 }

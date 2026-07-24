@@ -224,6 +224,8 @@ traditional_chinese_word_dict = {
     "pet_behaviour_floor": "沿底部行走",
     "pet_behaviour_wander": "自由漫遊",
     "pet_behaviour_chase": "追逐游標",
+    "pet_climb_label": "攀爬牆壁",
+    "pet_clone": "複製",
     "pet_start": "召喚寵物",
     "pet_message_box_text": "找不到寵物圖片",
 }
