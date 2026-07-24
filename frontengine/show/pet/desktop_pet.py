@@ -318,6 +318,17 @@ class PetGrowth:
         return self.level() > before
 
 
+def format_status(level: int, mood_level: str, hunger_level: str, labels: dict) -> str:
+    """
+    組出「等級 · 心情 · 飽足」狀態字串;labels 提供各狀態的顯示文字。
+    Compose a "Lv.N · mood · hunger" status string using `labels`.
+    """
+    level_label = labels.get("level", "Lv.")
+    mood_text = labels.get(mood_level, mood_level)
+    hunger_text = labels.get(hunger_level, hunger_level)
+    return f"{level_label}{level} · {mood_text} · {hunger_text}"
+
+
 def size_for_level(base_size: int, level: int) -> int:
     """依等級放大基礎尺寸（每級 +8%，上限 +50%）/ Grow base size by level (cap +50%)."""
     factor = min(1.5, 1.0 + 0.08 * max(0, int(level) - 1))
@@ -837,6 +848,9 @@ class DesktopPetWidget(BaseWidget):
         self.feed_action = QAction(language_wrapper.language_word_dict.get("pet_feed", "Feed"), self)
         self.feed_action.triggered.connect(self.feed)
         self.menu.addAction(self.feed_action)
+        self.status_action = QAction(language_wrapper.language_word_dict.get("pet_status", "Status"), self)
+        self.status_action.triggered.connect(self.show_status)
+        self.menu.addAction(self.status_action)
         self.reminder_action = QAction(
             language_wrapper.language_word_dict.get("pet_set_reminder", "Set reminder..."), self)
         self.reminder_action.triggered.connect(self._prompt_reminder)
@@ -993,6 +1007,21 @@ class DesktopPetWidget(BaseWidget):
                 pool = self._messages.get("levelup") or []
                 if pool:
                     self.say(pool[self._chatter_rng.randrange(len(pool))])
+
+    def show_status(self) -> None:
+        """顯示等級 · 心情 · 飽足 / Show level · mood · fullness."""
+        get = language_wrapper.language_word_dict.get
+        labels = {
+            "level": get("pet_status_level", "Lv."),
+            PetMood.HAPPY: get("pet_mood_happy", "happy"),
+            PetMood.CONTENT: get("pet_mood_content", "content"),
+            PetMood.SAD: get("pet_mood_sad", "sad"),
+            PetHunger.FULL: get("pet_hunger_full", "full"),
+            PetHunger.OK: get("pet_hunger_ok", "ok"),
+            PetHunger.HUNGRY: get("pet_hunger_hungry", "hungry"),
+        }
+        text = format_status(self._growth.level(), self._mood.level(), self._hunger.level(), labels)
+        self._bubble.show_message(text, self, duration_ms=8000)
 
     def _apply_growth_size(self) -> None:
         """依目前等級調整體型（motion 下一步會自動重新落地）。"""
