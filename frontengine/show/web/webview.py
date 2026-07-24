@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from PySide6.QtCore import Qt, QUrl
+from PySide6.QtCore import Qt, QTimer, QUrl
 from PySide6.QtGui import QAction
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import QMessageBox, QMenu
@@ -44,7 +44,30 @@ class WebWidget(QWebEngineView):
         self.menu = QMenu(self)
         self.menu.addAction(self.close_action)
 
+        # 定期自動重新整理（適合網頁儀表板）/ Periodic auto-refresh (dashboards)
+        self._refresh_timer = QTimer(self)
+        self._refresh_timer.timeout.connect(self.reload)
+
         load_overlay_icon(self)
+
+    def set_zoom(self, factor: float) -> None:
+        front_engine_logger.info(f"[WebWidget] set_zoom | factor={factor}")
+        try:
+            self.setZoomFactor(max(0.25, min(5.0, float(factor))))
+        except (TypeError, ValueError):
+            pass
+
+    def set_auto_refresh(self, seconds: int) -> None:
+        """每 seconds 秒重新整理一次；<=0 表示停用。"""
+        front_engine_logger.info(f"[WebWidget] set_auto_refresh | seconds={seconds}")
+        try:
+            interval = int(seconds)
+        except (TypeError, ValueError):
+            interval = 0
+        if interval > 0:
+            self._refresh_timer.start(interval * 1000)
+        else:
+            self._refresh_timer.stop()
 
     def contextMenuEvent(self, event):
         front_engine_logger.debug(f"[WebWidget] contextMenuEvent | event={event}")
