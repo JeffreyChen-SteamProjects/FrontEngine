@@ -39,6 +39,9 @@ user_setting_dict: Dict[str, Any] = {
     # 桌面寵物飽足值（0~100）
     # Desktop pet fullness (0..100)
     "pet_hunger": 70,
+    # 桌面寵物親密度（累積互動）
+    # Desktop pet affection (accumulated interactions)
+    "pet_affection": 0,
 }
 
 
