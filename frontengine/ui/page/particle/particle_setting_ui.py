@@ -7,10 +7,15 @@ from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QPushButton
 from frontengine.show.particle.particle_ui import ParticleOpenGLWidget
 from frontengine.ui.dialog.choose_file_dialog import choose_image
 from frontengine.ui.page.utils import (
+    build_recent_combobox,
     build_target_monitor_combobox,
+    coerce_int,
     dispatch_to_monitors,
+    enable_file_drop,
+    reload_recent_combobox,
     resolve_preferred_monitor,
 )
+from frontengine.user_setting.user_setting_file import add_recent_file
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
@@ -85,6 +90,16 @@ class ParticleSettingUI(QWidget):
         )
         self.target_monitor_combobox = build_target_monitor_combobox()
 
+        # Recent files
+        self.recent_files_label = QLabel(language_wrapper.language_word_dict.get("recent_files_label", "Recent"))
+        self.recent_files_combobox = build_recent_combobox("particle")
+        self.recent_files_combobox.activated.connect(self._apply_recent_file)
+
+        # Accept dropped image files
+        self._drop_filter = enable_file_drop(
+            self, (".png", ".jpg", ".jpeg", ".webp", ".bmp"), self._on_file_dropped
+        )
+
         # Layout
         self.grid_layout.addWidget(self.opacity_label, 0, 0)
         self.grid_layout.addWidget(self.opacity_slider_value_label, 0, 1)
@@ -103,6 +118,8 @@ class ParticleSettingUI(QWidget):
         self.grid_layout.addWidget(self.show_on_all_screen_checkbox, 6, 1)
         self.grid_layout.addWidget(self.target_monitor_label, 7, 0)
         self.grid_layout.addWidget(self.target_monitor_combobox, 7, 1)
+        self.grid_layout.addWidget(self.recent_files_label, 8, 0)
+        self.grid_layout.addWidget(self.recent_files_combobox, 8, 1)
 
     def set_show_all_screen(self) -> None:
         front_engine_logger.info("[ParticleSettingUI] set_show_all_screen")
@@ -159,6 +176,26 @@ class ParticleSettingUI(QWidget):
         if self.image_path:
             self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
             self.ready_to_play = True
+            add_recent_file("particle", self.image_path)
+            reload_recent_combobox(self.recent_files_combobox, "particle")
+
+    def _apply_recent_file(self, _index: int = 0) -> None:
+        path = self.recent_files_combobox.currentData()
+        self.recent_files_combobox.setCurrentIndex(0)
+        if not path:
+            return
+        front_engine_logger.info(f"[ParticleSettingUI] _apply_recent_file | path={path}")
+        self.image_path = path
+        self.ready_to_play = True
+        self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+
+    def _on_file_dropped(self, path: str) -> None:
+        front_engine_logger.info(f"[ParticleSettingUI] _on_file_dropped | path={path}")
+        self.image_path = path
+        self.ready_to_play = True
+        self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+        add_recent_file("particle", path)
+        reload_recent_combobox(self.recent_files_combobox, "particle")
 
     def opacity_trick(self) -> None:
         front_engine_logger.info("[ParticleSettingUI] opacity_trick")
@@ -177,8 +214,9 @@ class ParticleSettingUI(QWidget):
         }
 
     def set_state(self, state: dict) -> None:
-        if "opacity" in state:
-            self.opacity_slider.setValue(int(state["opacity"]))
+        opacity = coerce_int(state.get("opacity"))
+        if opacity is not None:
+            self.opacity_slider.setValue(opacity)
         if state.get("image_path"):
             self.image_path = state["image_path"]
             self.ready_to_play = True

@@ -6,12 +6,17 @@ from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QPushButton
 from frontengine.show.video.video_player import VideoWidget
 from frontengine.ui.dialog.choose_file_dialog import choose_video
 from frontengine.ui.page.utils import (
+    build_recent_combobox,
     build_target_monitor_combobox,
+    coerce_int,
     dispatch_to_monitors,
+    enable_file_drop,
+    reload_recent_combobox,
     resolve_preferred_monitor,
     show_on_primary_screen,
     show_on_selected_monitor,
 )
+from frontengine.user_setting.user_setting_file import add_recent_file
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
@@ -81,6 +86,14 @@ class VideoSettingUI(QWidget):
         )
         self.target_monitor_combobox = build_target_monitor_combobox()
 
+        # Recent files
+        self.recent_files_label = QLabel(language_wrapper.language_word_dict.get("recent_files_label", "Recent"))
+        self.recent_files_combobox = build_recent_combobox("video")
+        self.recent_files_combobox.activated.connect(self._apply_recent_file)
+
+        # Accept dropped video files
+        self._drop_filter = enable_file_drop(self, (".mp4",), self._on_file_dropped)
+
         # Layout
         self.grid_layout.addWidget(self.opacity_label, 0, 0)
         self.grid_layout.addWidget(self.opacity_slider_value_label, 0, 1)
@@ -99,6 +112,8 @@ class VideoSettingUI(QWidget):
         self.grid_layout.addWidget(self.ready_label, 5, 1)
         self.grid_layout.addWidget(self.target_monitor_label, 6, 0)
         self.grid_layout.addWidget(self.target_monitor_combobox, 6, 1)
+        self.grid_layout.addWidget(self.recent_files_label, 7, 0)
+        self.grid_layout.addWidget(self.recent_files_combobox, 7, 1)
 
     def set_show_all_screen(self) -> None:
         front_engine_logger.info("[VideoSettingUI] set_show_all_screen")
@@ -149,6 +164,26 @@ class VideoSettingUI(QWidget):
         if self.video_path:
             self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
             self.ready_to_play = True
+            add_recent_file("video", self.video_path)
+            reload_recent_combobox(self.recent_files_combobox, "video")
+
+    def _apply_recent_file(self, _index: int = 0) -> None:
+        path = self.recent_files_combobox.currentData()
+        self.recent_files_combobox.setCurrentIndex(0)
+        if not path:
+            return
+        front_engine_logger.info(f"[VideoSettingUI] _apply_recent_file | path={path}")
+        self.video_path = path
+        self.ready_to_play = True
+        self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+
+    def _on_file_dropped(self, path: str) -> None:
+        front_engine_logger.info(f"[VideoSettingUI] _on_file_dropped | path={path}")
+        self.video_path = path
+        self.ready_to_play = True
+        self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+        add_recent_file("video", path)
+        reload_recent_combobox(self.recent_files_combobox, "video")
 
     def opacity_trick(self) -> None:
         front_engine_logger.info("[VideoSettingUI] opacity_trick")
@@ -175,12 +210,15 @@ class VideoSettingUI(QWidget):
         }
 
     def set_state(self, state: dict) -> None:
-        if "opacity" in state:
-            self.opacity_slider.setValue(int(state["opacity"]))
-        if "play_rate" in state:
-            self.play_rate_slider.setValue(int(state["play_rate"]))
-        if "volume" in state:
-            self.volume_slider.setValue(int(state["volume"]))
+        opacity = coerce_int(state.get("opacity"))
+        if opacity is not None:
+            self.opacity_slider.setValue(opacity)
+        play_rate = coerce_int(state.get("play_rate"))
+        if play_rate is not None:
+            self.play_rate_slider.setValue(play_rate)
+        volume = coerce_int(state.get("volume"))
+        if volume is not None:
+            self.volume_slider.setValue(volume)
         if state.get("video_path"):
             self.video_path = state["video_path"]
             self.ready_to_play = True

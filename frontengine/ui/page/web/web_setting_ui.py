@@ -1,14 +1,16 @@
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QWidget, QGridLayout, QLabel, QSlider, QLineEdit, QPushButton, QCheckBox
+from PySide6.QtWidgets import QWidget, QGridLayout, QLabel, QSlider, QLineEdit, QPushButton, QCheckBox, QComboBox
 
 from frontengine.show.web.webview import WebWidget
 from frontengine.ui.page.utils import (
     build_target_monitor_combobox,
+    coerce_int,
     dispatch_to_monitors,
     resolve_preferred_monitor,
 )
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
+from frontengine.utils.web_url import normalize_web_url
 
 
 class WEBSettingUI(QWidget):
@@ -55,6 +57,21 @@ class WEBSettingUI(QWidget):
         # Show on bottom
         self.show_on_bottom_checkbox = QCheckBox(language_wrapper.language_word_dict.get("Show on bottom"))
 
+        # Zoom
+        self.zoom_label = QLabel(language_wrapper.language_word_dict.get("web_zoom_label", "Zoom"))
+        self.zoom_combobox = QComboBox()
+        for label, factor in (("50%", 0.5), ("75%", 0.75), ("100%", 1.0),
+                              ("125%", 1.25), ("150%", 1.5), ("200%", 2.0)):
+            self.zoom_combobox.addItem(label, factor)
+        self.zoom_combobox.setCurrentText("100%")
+
+        # Auto refresh
+        self.refresh_label = QLabel(language_wrapper.language_word_dict.get("web_refresh_label", "Auto refresh"))
+        self.refresh_combobox = QComboBox()
+        _off = language_wrapper.language_word_dict.get("web_refresh_off", "Off")
+        for label, seconds in ((_off, 0), ("30s", 30), ("1m", 60), ("5m", 300), ("15m", 900)):
+            self.refresh_combobox.addItem(label, seconds)
+
         # Target monitor selector
         self.target_monitor_label = QLabel(
             language_wrapper.language_word_dict.get("target_monitor_label", "Target monitor")
@@ -73,6 +90,10 @@ class WEBSettingUI(QWidget):
         self.grid_layout.addWidget(self.web_url_input, 3, 2)
         self.grid_layout.addWidget(self.target_monitor_label, 4, 0)
         self.grid_layout.addWidget(self.target_monitor_combobox, 4, 1)
+        self.grid_layout.addWidget(self.zoom_label, 5, 0)
+        self.grid_layout.addWidget(self.zoom_combobox, 5, 1)
+        self.grid_layout.addWidget(self.refresh_label, 6, 0)
+        self.grid_layout.addWidget(self.refresh_combobox, 6, 1)
 
     def set_show_all_screen(self) -> None:
         front_engine_logger.info("[WEBSettingUI] set_show_all_screen")
@@ -88,12 +109,18 @@ class WEBSettingUI(QWidget):
 
     def _create_web_widget(self) -> WebWidget:
         front_engine_logger.info("[WEBSettingUI] _create_web_widget")
-        web_widget = WebWidget(self.web_url_input.text(), is_file=self.open_file)
+        url_text = self.web_url_input.text()
+        if not self.open_file:
+            # Turn YouTube links into an autoplay embed; other URLs unchanged.
+            url_text = normalize_web_url(url_text)
+        web_widget = WebWidget(url_text, is_file=self.open_file)
         web_widget.set_ui_variable(float(self.opacity_slider.value()) / 100)
         web_widget.set_ui_window_flag(
             enable_input=self.enable_input,
             show_on_bottom=self.show_on_bottom_checkbox.isChecked()
         )
+        web_widget.set_zoom(self.zoom_combobox.currentData())
+        web_widget.set_auto_refresh(self.refresh_combobox.currentData())
         self.web_widget_list.append(web_widget)
         return web_widget
 
@@ -110,11 +137,14 @@ class WEBSettingUI(QWidget):
             "show_on_all_screen": self.show_on_all_screen_checkbox.isChecked(),
             "show_on_bottom": self.show_on_bottom_checkbox.isChecked(),
             "target_monitor": self.target_monitor_combobox.currentText(),
+            "zoom": self.zoom_combobox.currentText(),
+            "refresh": self.refresh_combobox.currentText(),
         }
 
     def set_state(self, state: dict) -> None:
-        if "opacity" in state:
-            self.opacity_slider.setValue(int(state["opacity"]))
+        opacity = coerce_int(state.get("opacity"))
+        if opacity is not None:
+            self.opacity_slider.setValue(opacity)
         if "url" in state:
             self.web_url_input.setText(str(state.get("url") or ""))
         if "open_file" in state:
@@ -132,6 +162,14 @@ class WEBSettingUI(QWidget):
             index = self.target_monitor_combobox.findText(str(state["target_monitor"]))
             if index >= 0:
                 self.target_monitor_combobox.setCurrentIndex(index)
+        if state.get("zoom") is not None:
+            index = self.zoom_combobox.findText(str(state["zoom"]))
+            if index >= 0:
+                self.zoom_combobox.setCurrentIndex(index)
+        if state.get("refresh") is not None:
+            index = self.refresh_combobox.findText(str(state["refresh"]))
+            if index >= 0:
+                self.refresh_combobox.setCurrentIndex(index)
 
     def start_open_web_with_url(self) -> None:
         front_engine_logger.info("[WEBSettingUI] start_open_web_with_url")
