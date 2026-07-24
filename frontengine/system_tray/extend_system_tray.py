@@ -10,6 +10,8 @@ if TYPE_CHECKING:
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QSystemTrayIcon, QMenu
 
+from frontengine.utils.multi_language.language_wrapper import language_wrapper
+
 
 class ExtendSystemTray(QSystemTrayIcon):
     """
@@ -54,9 +56,48 @@ class ExtendSystemTray(QSystemTrayIcon):
         self.normal_main_window_action.triggered.connect(self.main_window.showNormal)
         self.menu.addAction(self.normal_main_window_action)
 
+        # 覆蓋層快捷控制 / Overlay quick controls
+        self.menu.addSeparator()
+        self.hide_all_overlays_action = QAction(
+            language_wrapper.language_word_dict.get("control_center_hide_all", "Hide all"), self
+        )
+        self.hide_all_overlays_action.triggered.connect(lambda: self._overlay_call("hide_all"))
+        self.menu.addAction(self.hide_all_overlays_action)
+
+        self.show_all_overlays_action = QAction(
+            language_wrapper.language_word_dict.get("control_center_show_all", "Show all"), self
+        )
+        self.show_all_overlays_action.triggered.connect(lambda: self._overlay_call("show_all"))
+        self.menu.addAction(self.show_all_overlays_action)
+
+        self.mute_all_overlays_action = QAction(
+            language_wrapper.language_word_dict.get("control_center_mute_all", "Mute all"), self
+        )
+        self.mute_all_overlays_action.triggered.connect(lambda: self._overlay_call("toggle_mute_all"))
+        self.menu.addAction(self.mute_all_overlays_action)
+
+        self.close_all_overlays_action = QAction(
+            language_wrapper.language_word_dict.get("control_center_close_all", "Close all"), self
+        )
+        self.close_all_overlays_action.triggered.connect(lambda: self._overlay_call("clear_all"))
+        self.menu.addAction(self.close_all_overlays_action)
+
+        self.menu.addSeparator()
         self.close_main_window_action = QAction("Close", self)
         self.close_main_window_action.triggered.connect(self.close_all)
         self.menu.addAction(self.close_main_window_action)
+
+    def _overlay_call(self, method_name: str) -> None:
+        """
+        呼叫控制中心的覆蓋層操作，並防護控制中心尚未建立的情況。
+        Invoke a control-center overlay action, guarding against the control
+        center not being ready.
+        """
+        front_engine_logger.info(f"[ExtendSystemTray] _overlay_call | {method_name}")
+        control_center = getattr(self.main_window, "control_center_ui", None)
+        method = getattr(control_center, method_name, None)
+        if callable(method):
+            method()
 
     def close_all(self) -> None:
         """
