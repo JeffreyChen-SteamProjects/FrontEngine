@@ -369,6 +369,15 @@ def format_status(level: int, mood_level: str, hunger_level: str, labels: dict) 
     return f"{level_label}{level} · {mood_text} · {hunger_text}"
 
 
+def audio_pulse_scale(level, base: float = 0.7, amplitude: float = 0.3) -> float:
+    """把音訊音量 (0~1) 轉成脈動縮放比例 / Map an audio level (0..1) to a pulse scale."""
+    try:
+        clamped = max(0.0, min(1.0, float(level)))
+    except (TypeError, ValueError):
+        return 1.0
+    return base + amplitude * clamped
+
+
 def size_for_level(base_size: int, level: int) -> int:
     """依等級放大基礎尺寸（每級 +8%，上限 +50%）/ Grow base size by level (cap +50%)."""
     factor = min(1.5, 1.0 + 0.08 * max(0, int(level) - 1))
@@ -838,7 +847,7 @@ class DesktopPetWidget(BaseWidget):
     def __init__(self, image_path: str, size: int = 128, speed: int = 3,
                  behaviour: str = BEHAVIOUR_FLOOR, climb: bool = True, talk: bool = True,
                  sound_path: Optional[str] = None, sit_on_windows: bool = True,
-                 volume: float = 1.0):
+                 volume: float = 1.0, audio_react: bool = False):
         front_engine_logger.info(
             f"[DesktopPetWidget] Init | path={image_path}, size={size}, speed={speed}, "
             f"behaviour={behaviour}, climb={climb}, talk={talk}, sound={sound_path}, "
@@ -888,6 +897,10 @@ class DesktopPetWidget(BaseWidget):
         self._init_sound(sound_path)
         self._sit_on_windows = bool(sit_on_windows)
         self._platform_tick = 0
+        # 音訊視覺化：依可注入的音量 provider 脈動 / Audio-reactive pulse
+        self._audio_react = bool(audio_react)
+        self._audio_level_provider = None  # callable -> level 0..1 or None
+        self._audio_scale = 1.0
         # 多寵物互動 / Multi-pet interaction
         self._peers_provider = None
         self._peer_greeted = False
@@ -1026,13 +1039,35 @@ class DesktopPetWidget(BaseWidget):
         kind, obj = self._active
         return obj.currentPixmap() if kind == "movie" else obj
 
+    def set_audio_level_provider(self, provider) -> None:
+        """設定回傳目前音量 (0~1 或 None) 的函式 / Provider of the current audio level."""
+        self._audio_level_provider = provider
+
+    def _update_audio_scale(self) -> None:
+        if not self._audio_react or self._audio_level_provider is None:
+            self._audio_scale = 1.0
+            return
+        try:
+            level = self._audio_level_provider()
+        except Exception:  # pragma: no cover - defensive
+            level = None
+        self._audio_scale = 1.0 if level is None else audio_pulse_scale(level)
+
     def draw_content(self, painter: QPainter) -> None:
         pixmap = self._current_pixmap()
         if pixmap is None or pixmap.isNull():
             return
         if self.motion.facing_left:
             pixmap = pixmap.transformed(QTransform().scale(-1, 1))
-        painter.drawPixmap(QRect(0, 0, self.width(), self.height()), pixmap)
+        scale = self._audio_scale if self._audio_react else 1.0
+        if scale >= 0.999:
+            painter.drawPixmap(QRect(0, 0, self.width(), self.height()), pixmap)
+        else:
+            # Anchor to the bottom so the feet stay on the ground while it pulses.
+            width = int(self.width() * scale)
+            height = int(self.height() * scale)
+            painter.drawPixmap(
+                QRect((self.width() - width) // 2, self.height() - height, width, height), pixmap)
 
     def start_moving(self, bounds: Tuple[int, int, int, int], interval_ms: int = 33) -> None:
         front_engine_logger.info(f"[DesktopPetWidget] start_moving | bounds={bounds}")
@@ -1306,6 +1341,9 @@ class DesktopPetWidget(BaseWidget):
         x, y = self.motion.step()
         self.move(x, y)
         self._set_active_sprite(self._visual_state())
+        if self._audio_react:
+            self._update_audio_scale()
+            self.update()
         self._peer_tick += 1
         if self._peer_tick >= 5:
             self._peer_tick = 0
