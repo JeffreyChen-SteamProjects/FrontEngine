@@ -318,6 +318,12 @@ class PetGrowth:
         return self.level() > before
 
 
+def size_for_level(base_size: int, level: int) -> int:
+    """依等級放大基礎尺寸（每級 +8%，上限 +50%）/ Grow base size by level (cap +50%)."""
+    factor = min(1.5, 1.0 + 0.08 * max(0, int(level) - 1))
+    return max(16, int(round(int(base_size) * factor)))
+
+
 class PetHunger:
     """
     寵物飽足值 0~100：餵食上升、隨時間下降；level() 回傳 full/ok/hungry。
@@ -763,7 +769,10 @@ class DesktopPetWidget(BaseWidget):
         )
         super().__init__()
         self.opacity = 1.0
-        self.pet_size: int = max(16, int(size))
+        # 基礎尺寸依已存等級放大 / Base size grown by the persisted level.
+        self._base_size: int = max(16, int(size))
+        self._growth = PetGrowth(user_setting_dict.get("pet_affection", 0))
+        self.pet_size: int = size_for_level(self._base_size, self._growth.level())
         self.image_path: Path = Path(image_path)
         self._dragging: bool = False
         self._drag_offset = None
@@ -796,7 +805,6 @@ class DesktopPetWidget(BaseWidget):
         self._mood = PetMood(user_setting_dict.get("pet_mood", 60))
         self._hunger = PetHunger(user_setting_dict.get("pet_hunger", 70))
         self._hunger_warned = False
-        self._growth = PetGrowth(user_setting_dict.get("pet_affection", 0))
         self._messages = self._load_messages()
         self._sound: Optional[QSoundEffect] = None
         self._init_sound(sound_path)
@@ -976,13 +984,25 @@ class DesktopPetWidget(BaseWidget):
         }
 
     def _gain_affection(self, amount: int) -> None:
-        """互動累加親密度；升級時慶祝一下並保存。"""
+        """互動累加親密度；升級時長大、慶祝一下並保存。"""
         leveled = self._growth.add(amount)
         user_setting_dict["pet_affection"] = self._growth.affection
-        if leveled and self._talk:
-            pool = self._messages.get("levelup") or []
-            if pool:
-                self.say(pool[self._chatter_rng.randrange(len(pool))])
+        if leveled:
+            self._apply_growth_size()
+            if self._talk:
+                pool = self._messages.get("levelup") or []
+                if pool:
+                    self.say(pool[self._chatter_rng.randrange(len(pool))])
+
+    def _apply_growth_size(self) -> None:
+        """依目前等級調整體型（motion 下一步會自動重新落地）。"""
+        new_size = size_for_level(self._base_size, self._growth.level())
+        if new_size == self.pet_size:
+            return
+        self.pet_size = new_size
+        self.resize(new_size, new_size)
+        self.motion.width = new_size
+        self.motion.height = new_size
 
     def _persist_mood(self) -> None:
         user_setting_dict["pet_mood"] = self._mood.value
