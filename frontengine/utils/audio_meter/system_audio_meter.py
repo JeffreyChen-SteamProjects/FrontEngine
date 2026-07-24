@@ -115,8 +115,10 @@ class SystemAudioMeter:
             if iface is not None and getattr(iface, "value", None) and self._release_method is not None:
                 try:
                     self._release_method(iface)(iface)
-                except Exception:
-                    pass
+                except Exception as error:  # pragma: no cover - COM boundary
+                    # 釋放個別介面失敗不影響清理流程，記錄後繼續。
+                    # A single interface failing to release must not abort cleanup.
+                    front_engine_logger.debug(f"[SystemAudioMeter] release failed: {error!r}")
         self._meter = self._device = self._enumerator = None
         self._ok = False
 
