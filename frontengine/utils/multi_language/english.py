@@ -237,6 +237,7 @@ english_word_dict = {
     "pet_chatter_any": "Hi there!|(^_^)|Keep going!|You've got this!",
     "pet_chatter_happy": "I'm so happy!|You're the best!|(^o^)/|Best day ever!",
     "pet_chatter_sad": "Feeling a bit lonely...|Pet me?|(._.)|Don't forget about me~",
+    "pet_chatter_meet": "Hi friend!|Hello there!|Let's play!|Fancy meeting you here!",
     "pet_start": "Spawn pet",
     "pet_message_box_text": "Pet image not found",
 }

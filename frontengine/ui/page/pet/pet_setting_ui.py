@@ -124,6 +124,7 @@ class PetSettingUI(QWidget):
             sit_on_windows=self.sit_checkbox.isChecked(),
         )
         pet.clone_requested.connect(self._spawn_pet)
+        pet.set_peers_provider(lambda me=pet: self._peer_centers(me))
         pet.set_pet_window_flag()
         self.pet_list.append(pet)
         screen = QGuiApplication.primaryScreen()
@@ -131,6 +132,18 @@ class PetSettingUI(QWidget):
         pet.show()
         if geometry is not None:
             pet.start_moving((geometry.left(), geometry.top(), geometry.right(), geometry.bottom()))
+
+    def _peer_centers(self, me) -> list:
+        """回傳其他仍存活寵物的中心座標（略過已被銷毀者）。"""
+        centers = []
+        for other in list(self.pet_list):
+            if other is me:
+                continue
+            try:
+                centers.append(other.center())
+            except RuntimeError:
+                pass  # underlying C++ object already deleted
+        return centers
 
     def start_play_pet(self) -> None:
         front_engine_logger.info("[PetSettingUI] start_play_pet")
