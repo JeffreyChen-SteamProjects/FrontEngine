@@ -26,6 +26,7 @@ SURFACE_RIGHT = "right"
 # 視覺狀態（決定顯示哪張精靈）/ Visual states (which sprite to show)
 STATE_WALK = "walk"
 STATE_IDLE = "idle"
+STATE_SLEEP = "sleep"
 STATE_CLIMB = "climb"
 STATE_FALL = "fall"
 STATE_DRAG = "drag"
@@ -34,12 +35,22 @@ STATE_DRAG = "drag"
 # Accepted file stems per state inside a pet pack folder (first match wins).
 _PACK_STATE_ALIASES = {
     STATE_WALK: ("walk", "run", "move"),
-    STATE_IDLE: ("idle", "sit", "stand", "sleep"),
+    STATE_IDLE: ("idle", "sit", "stand"),
+    STATE_SLEEP: ("sleep", "zzz", "rest"),
     STATE_CLIMB: ("climb", "grab", "wall"),
     STATE_FALL: ("fall", "jump"),
     STATE_DRAG: ("drag", "pinch", "grabbed", "held"),
 }
 _PACK_EXTS = (".gif", ".webp", ".png", ".jpg", ".jpeg")
+
+# 缺該狀態精靈時的退回順序 / Fallback order when a state's sprite is missing
+_STATE_FALLBACKS = {
+    STATE_SLEEP: (STATE_IDLE, STATE_WALK),
+    STATE_IDLE: (STATE_WALK,),
+    STATE_CLIMB: (STATE_WALK,),
+    STATE_FALL: (STATE_WALK,),
+    STATE_DRAG: (STATE_WALK,),
+}
 
 
 def scan_pet_pack(folder: str) -> dict:
@@ -76,6 +87,8 @@ def derive_visual_state(dragging: bool, airborne: bool, surface: str, motion_sta
         return STATE_FALL
     if surface in (SURFACE_LEFT, SURFACE_RIGHT, SURFACE_CEILING):
         return STATE_CLIMB
+    if surface == SURFACE_FLOOR and motion_state == STATE_SLEEP:
+        return STATE_SLEEP
     if surface == SURFACE_FLOOR and motion_state == "idle":
         return STATE_IDLE
     return STATE_WALK
@@ -192,8 +205,9 @@ class PetMotion:
         self.vx = float(self.speed)
         self.vy = 0.0 if behaviour != BEHAVIOUR_WANDER else float(self.speed)
         self._airborne = False
-        self.state = "walk"  # walk | idle
+        self.state = "walk"  # walk | idle | sleep
         self._state_ticks = 0
+        self._idle_count = 0
         self.target: Optional[Tuple[float, float]] = None
         self.asleep = False
         self.climb = bool(climb)
@@ -329,12 +343,24 @@ class PetMotion:
     def _new_state(self, force_walk: bool = False) -> None:
         if force_walk or self._rng.random() < 0.65:
             self.state = "walk"
+            self._idle_count = 0
             if not force_walk:
                 self.vx = float(self.speed) if self._rng.random() < 0.5 else float(-self.speed)
             self._state_ticks = self._rng.randint(30, 120)
+        elif self._idle_count >= 2:
+            # been idling a while -> doze off
+            self.state = STATE_SLEEP
+            self._idle_count = 0
+            self._state_ticks = self._rng.randint(120, 300)
         else:
             self.state = "idle"
+            self._idle_count += 1
             self._state_ticks = self._rng.randint(20, 80)
+
+    def wake(self) -> None:
+        """喚醒寵物並恢復走動（互動時呼叫）/ Wake the pet and resume walking."""
+        self._idle_count = 0
+        self._new_state(force_walk=True)
 
     # --- free wander ---
     def _step_wander(self, left, top, right, bottom) -> Tuple[int, int]:
@@ -461,7 +487,7 @@ class DesktopPetWidget(BaseWidget):
             return self._sprites["default"]
         if state in self._sprites:
             return self._sprites[state]
-        for fallback in (STATE_WALK, STATE_IDLE):
+        for fallback in _STATE_FALLBACKS.get(state, (STATE_WALK,)):
             if fallback in self._sprites:
                 return self._sprites[fallback]
         return next(iter(self._sprites.values()), None)
@@ -558,6 +584,7 @@ class DesktopPetWidget(BaseWidget):
             self._moved = False
             self._last_move_delta = (0, 0)
             self._drag_offset = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
+            self.motion.wake()  # interacting wakes a sleeping pet
             self._set_active_sprite(STATE_DRAG)
         super().mousePressEvent(event)
 
