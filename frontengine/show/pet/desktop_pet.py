@@ -797,7 +797,8 @@ class DesktopPetWidget(BaseWidget):
 
     def __init__(self, image_path: str, size: int = 128, speed: int = 3,
                  behaviour: str = BEHAVIOUR_FLOOR, climb: bool = True, talk: bool = True,
-                 sound_path: Optional[str] = None, sit_on_windows: bool = True):
+                 sound_path: Optional[str] = None, sit_on_windows: bool = True,
+                 volume: float = 1.0):
         front_engine_logger.info(
             f"[DesktopPetWidget] Init | path={image_path}, size={size}, speed={speed}, "
             f"behaviour={behaviour}, climb={climb}, talk={talk}, sound={sound_path}, "
@@ -842,6 +843,7 @@ class DesktopPetWidget(BaseWidget):
         self._hunger = PetHunger(user_setting_dict.get("pet_hunger", 70))
         self._hunger_warned = False
         self._messages = self._load_messages()
+        self._volume = max(0.0, min(1.0, float(volume)))
         self._sound: Optional[QSoundEffect] = None
         self._init_sound(sound_path)
         self._sit_on_windows = bool(sit_on_windows)
@@ -1101,6 +1103,7 @@ class DesktopPetWidget(BaseWidget):
         try:
             self._sound = QSoundEffect(self)
             self._sound.setSource(QUrl.fromLocalFile(str(path)))
+            self._sound.setVolume(self._volume)
         except Exception as error:  # pragma: no cover - audio backend guard
             front_engine_logger.warning(f"[DesktopPetWidget] sound load failed: {error!r}")
             self._sound = None
