@@ -214,4 +214,12 @@ english_word_dict = {
     "web_zoom_label": "Zoom",
     "web_refresh_label": "Auto refresh",
     "web_refresh_off": "Off",
+    # Desktop pet
+    "tab_pet_text": "Pet",
+    "pet_choose_file": "Choose pet sprite",
+    "pet_size_label": "Size",
+    "pet_speed_label": "Speed",
+    "pet_gravity_label": "Walk on floor",
+    "pet_start": "Spawn pet",
+    "pet_message_box_text": "Pet image not found",
 }

@@ -85,6 +85,16 @@ def choose_player_sound(trigger_ui: QWidget) -> Optional[str]:
     )
 
 
+def choose_pet(trigger_ui: QWidget) -> Optional[str]:
+    """選擇桌面寵物圖片 (gif/webp/png/jpg) / Choose a desktop-pet sprite."""
+    return choose_file(
+        trigger_ui,
+        file_filter="Pet sprite (*.gif;*.webp;*.png;*.jpg)",
+        extensions=[".gif", ".webp", ".png", ".jpg"],
+        warning_message=language_wrapper.language_word_dict.get("gif_setting_message_box")
+    )
+
+
 def choose_video(trigger_ui: QWidget) -> Optional[str]:
     """選擇影片檔案 (mp4) / Choose video file"""
     return choose_file(

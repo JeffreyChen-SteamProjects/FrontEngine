@@ -31,7 +31,8 @@ class ControlCenterUI(QWidget):
             text_setting_ui: TextSettingUI,
             scene_setting_ui: SceneSettingUI,
             particle_setting_ui: ParticleSettingUI,
-            redirect_output: bool = True
+            redirect_output: bool = True,
+            pet_setting_ui=None,
     ):
         front_engine_logger.info(
             f"[ControlCenterUI] Init | video={video_setting_ui}, image={image_setting_ui}, web={web_setting_ui}, "
@@ -54,6 +55,7 @@ class ControlCenterUI(QWidget):
         self.text_setting_ui = text_setting_ui
         self.scene_setting_ui = scene_setting_ui
         self.particle_setting_ui = particle_setting_ui
+        self.pet_setting_ui = pet_setting_ui
 
         # Buttons
         self.clear_video_button = self._create_button("control_center_close_all_video", self.clear_video)
@@ -151,11 +153,13 @@ class ControlCenterUI(QWidget):
         self.sound_player_setting_ui.sound_widget_list.clear()
         self.text_setting_ui.text_widget_list.clear()
         self.particle_setting_ui.particle_list.clear()
+        if self.pet_setting_ui is not None:
+            self.pet_setting_ui.pet_list.clear()
         self.scene_setting_ui.close_scene()
 
     def _all_overlay_widget_lists(self) -> list:
         """回傳所有覆蓋層 widget 清單 / All overlay widget lists."""
-        return [
+        lists = [
             self.video_setting_ui.video_widget_list,
             self.image_setting_ui.image_widget_list,
             self.web_setting_ui.web_widget_list,
@@ -164,6 +168,9 @@ class ControlCenterUI(QWidget):
             self.text_setting_ui.text_widget_list,
             self.particle_setting_ui.particle_list,
         ]
+        if self.pet_setting_ui is not None:
+            lists.append(self.pet_setting_ui.pet_list)
+        return lists
 
     def _for_each_overlay(self, action) -> None:
         """
