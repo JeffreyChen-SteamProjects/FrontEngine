@@ -2,7 +2,7 @@ import random as _random_module
 from pathlib import Path
 from typing import Optional, Tuple
 
-from PySide6.QtCore import Qt, QRect, QTimer
+from PySide6.QtCore import Qt, QRect, QTimer, Signal
 from PySide6.QtGui import QAction, QCursor, QMovie, QPainter, QPixmap, QTransform
 from PySide6.QtWidgets import QMenu, QMessageBox
 
@@ -15,6 +15,12 @@ from frontengine.utils.multi_language.language_wrapper import language_wrapper
 BEHAVIOUR_FLOOR = "floor"    # walk on the floor with gravity, throw & bounce
 BEHAVIOUR_WANDER = "wander"  # free 2D bounce, no gravity
 BEHAVIOUR_CHASE = "chase"    # chase the mouse cursor, sleep when caught
+
+# 攀爬時所在的表面 / Surface the pet is crawling on while climbing
+SURFACE_FLOOR = "floor"
+SURFACE_LEFT = "left"
+SURFACE_CEILING = "ceiling"
+SURFACE_RIGHT = "right"
 
 
 class PetMotion:
@@ -34,6 +40,8 @@ class PetMotion:
     BOUNCE_THRESHOLD = 8.0
     CHASE_STOP_DISTANCE = 10.0
     CHASE_SPEED_FACTOR = 2.0
+    CLIMB_CHANCE = 0.5      # chance to grab a wall (vs. turn around) at a floor corner
+    DROP_CHANCE = 0.008     # chance per step to let go while on a wall/ceiling
 
     def __init__(
         self,
@@ -45,6 +53,7 @@ class PetMotion:
         speed: int = 3,
         behaviour: str = BEHAVIOUR_FLOOR,
         rng=None,
+        climb: bool = True,
     ) -> None:
         self.x = float(x)
         self.y = float(y)
@@ -61,6 +70,8 @@ class PetMotion:
         self._state_ticks = 0
         self.target: Optional[Tuple[float, float]] = None
         self.asleep = False
+        self.climb = bool(climb)
+        self.surface = SURFACE_FLOOR
 
     @property
     def facing_left(self) -> bool:
@@ -78,6 +89,7 @@ class PetMotion:
         self.vy = float(vy)
         self._airborne = True
         self.asleep = False
+        self.surface = SURFACE_FLOOR
 
     def step(self) -> Tuple[int, int]:
         left, top, right, bottom = self.bounds
@@ -88,9 +100,9 @@ class PetMotion:
             return self._step_wander(left, top, right, bottom)
         return self._step_floor(left, top, right, bottom, floor_y)
 
-    # --- floor / gravity ---
+    # --- floor / gravity / climbing ---
     def _step_floor(self, left, top, right, bottom, floor_y) -> Tuple[int, int]:
-        airborne = self._airborne or self.y < floor_y - 0.5
+        airborne = self._airborne or (self.surface == SURFACE_FLOOR and self.y < floor_y - 0.5)
         if airborne:
             self.vy += self.GRAVITY
             self.x += self.vx
@@ -111,23 +123,81 @@ class PetMotion:
                 else:
                     self.vy = 0.0
                     self._airborne = False
+                    self.surface = SURFACE_FLOOR
                     self.vx = float(self.speed) if self.vx >= 0 else float(-self.speed)
                     self._new_state(force_walk=True)
             return int(self.x), int(self.y)
 
-        # grounded: random walk / idle
+        if self.surface != SURFACE_FLOOR:
+            return self._step_climb(left, top, right, bottom, floor_y)
+
+        # grounded on the floor: random walk / idle, with a chance to climb a wall
         self.y = float(floor_y)
         if self._state_ticks <= 0:
             self._new_state()
         self._state_ticks -= 1
-        if self.state == "walk":
-            self.x += self.vx
-            if self.x <= left:
-                self.x = float(left)
+        if self.state != "walk":
+            return int(self.x), int(self.y)
+        self.x += self.vx
+        if self.x <= left:
+            self.x = float(left)
+            if self.climb and self._rng.random() < self.CLIMB_CHANCE:
+                self.surface = SURFACE_LEFT
+                self.vy = float(-self.speed)
+            else:
                 self.vx = abs(self.vx)
-            elif self.x + self.width >= right:
-                self.x = float(right - self.width)
+        elif self.x + self.width >= right:
+            self.x = float(right - self.width)
+            if self.climb and self._rng.random() < self.CLIMB_CHANCE:
+                self.surface = SURFACE_RIGHT
+                self.vy = float(-self.speed)
+            else:
                 self.vx = -abs(self.vx)
+        return int(self.x), int(self.y)
+
+    def _step_climb(self, left, top, right, bottom, floor_y) -> Tuple[int, int]:
+        """沿螢幕邊緣爬行；隨機放手則掉落 / Crawl the screen perimeter; may let go and fall."""
+        if self._rng.random() < self.DROP_CHANCE:
+            self.surface = SURFACE_FLOOR
+            self._airborne = True
+            self.vy = 1.0
+            return int(self.x), int(self.y)
+
+        if self.surface == SURFACE_RIGHT:
+            self.x = float(right - self.width)
+            self.y += self.vy
+            if self.vy < 0 and self.y <= top:            # reached the ceiling, crawl left
+                self.y = float(top)
+                self.surface = SURFACE_CEILING
+                self.vx = float(-self.speed)
+            elif self.vy > 0 and self.y >= floor_y:      # climbed back down
+                self.y = float(floor_y)
+                self.surface = SURFACE_FLOOR
+                self.vx = float(-self.speed)
+                self._new_state(force_walk=True)
+        elif self.surface == SURFACE_LEFT:
+            self.x = float(left)
+            self.y += self.vy
+            if self.vy < 0 and self.y <= top:
+                self.y = float(top)
+                self.surface = SURFACE_CEILING
+                self.vx = float(self.speed)
+            elif self.vy > 0 and self.y >= floor_y:
+                self.y = float(floor_y)
+                self.surface = SURFACE_FLOOR
+                self.vx = float(self.speed)
+                self._new_state(force_walk=True)
+        elif self.surface == SURFACE_CEILING:
+            self.y = float(top)
+            self.x += self.vx
+            if self.vx < 0 and self.x <= left:           # corner -> climb down the left wall
+                self.x = float(left)
+                self.surface = SURFACE_LEFT
+                self.vy = float(self.speed)
+            elif self.vx > 0 and self.x + self.width >= right:
+                self.x = float(right - self.width)
+                self.surface = SURFACE_RIGHT
+                self.vy = float(self.speed)
         return int(self.x), int(self.y)
 
     def _new_state(self, force_walk: bool = False) -> None:
@@ -187,10 +257,13 @@ class DesktopPetWidget(BaseWidget):
     A draggable, throwable, cursor-chasing animated sprite (GIF or image).
     """
 
+    clone_requested = Signal()
+
     def __init__(self, image_path: str, size: int = 128, speed: int = 3,
-                 behaviour: str = BEHAVIOUR_FLOOR):
+                 behaviour: str = BEHAVIOUR_FLOOR, climb: bool = True):
         front_engine_logger.info(
-            f"[DesktopPetWidget] Init | path={image_path}, size={size}, speed={speed}, behaviour={behaviour}"
+            f"[DesktopPetWidget] Init | path={image_path}, size={size}, speed={speed}, "
+            f"behaviour={behaviour}, climb={climb}"
         )
         super().__init__()
         self.opacity = 1.0
@@ -216,14 +289,19 @@ class DesktopPetWidget(BaseWidget):
             message_box.show()
 
         self.resize(self.pet_size, self.pet_size)
-        self.motion = PetMotion(0, 0, self.pet_size, self.pet_size, (0, 0, 1920, 1080), speed, behaviour)
+        self.motion = PetMotion(
+            0, 0, self.pet_size, self.pet_size, (0, 0, 1920, 1080), speed, behaviour, climb=climb
+        )
 
         self._timer = QTimer(self)
         self._timer.timeout.connect(self._on_tick)
 
+        self.menu = QMenu(self)
+        self.clone_action = QAction(language_wrapper.language_word_dict.get("pet_clone", "Clone"), self)
+        self.clone_action.triggered.connect(self.clone_requested.emit)
+        self.menu.addAction(self.clone_action)
         self.close_action = QAction(language_wrapper.language_word_dict.get("control_center_close_all", "Close"), self)
         self.close_action.triggered.connect(self.close)
-        self.menu = QMenu(self)
         self.menu.addAction(self.close_action)
 
     def set_pet_window_flag(self) -> None:
