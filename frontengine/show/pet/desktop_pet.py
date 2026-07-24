@@ -323,6 +323,8 @@ class PetMotion:
         self.on_platform = False
         self.platform_span: Optional[Tuple[float, float]] = None
         self.ground_feet = 0.0
+        # 追向某個 x（用於朝同伴走過去玩耍）/ Horizontal target to walk toward (play).
+        self.follow_target_x: Optional[float] = None
 
     @property
     def facing_left(self) -> bool:
@@ -334,6 +336,13 @@ class PetMotion:
     def set_platforms(self, platforms) -> None:
         """設定可站立的視窗上緣平台 / Set standable window top-edge platforms."""
         self.platforms = list(platforms)
+
+    def set_follow(self, target_x) -> None:
+        """設定要走向的 x 座標（朝同伴玩耍）/ Set a horizontal target to walk toward."""
+        self.follow_target_x = float(target_x)
+
+    def clear_follow(self) -> None:
+        self.follow_target_x = None
 
     def set_target(self, x: float, y: float) -> None:
         self.target = (float(x), float(y))
@@ -347,6 +356,7 @@ class PetMotion:
         self.surface = SURFACE_FLOOR
         self.on_platform = False
         self.platform_span = None
+        self.follow_target_x = None
 
     def step(self) -> Tuple[int, int]:
         left, top, right, bottom = self.bounds
@@ -364,6 +374,8 @@ class PetMotion:
         )
         if airborne:
             return self._step_fall(left, top, right, bottom, floor_y)
+        if self.follow_target_x is not None:
+            return self._step_follow(left, top, right, bottom, floor_y)
         if self.on_platform:
             return self._step_platform(left, top, right, bottom, floor_y)
         if self.surface != SURFACE_FLOOR:
@@ -435,6 +447,25 @@ class PetMotion:
                 self.ground_feet = land_feet
                 self.vx = float(self.speed) if self.vx >= 0 else float(-self.speed)
                 self._new_state(force_walk=True)
+        return int(self.x), int(self.y)
+
+    def _step_follow(self, left, top, right, bottom, floor_y) -> Tuple[int, int]:
+        """朝 follow_target_x 走過去；抵達附近即清除並恢復隨機行為。"""
+        center_x = self.x + self.width / 2.0
+        if abs(center_x - self.follow_target_x) <= self.speed + 2.0:
+            self.follow_target_x = None
+            self._new_state()
+            return int(self.x), int(self.y)
+        self.state = "walk"
+        self.vx = float(self.speed) if self.follow_target_x >= center_x else float(-self.speed)
+        self.x += self.vx
+        if self.on_platform and self.platform_span is not None:
+            span_left, span_right = self.platform_span
+            self.x = min(max(self.x, span_left), span_right - self.width)
+            self.y = float(self.ground_feet - self.height)
+        else:
+            self.x = min(max(self.x, float(left)), float(right - self.width))
+            self.y = float(floor_y)
         return int(self.x), int(self.y)
 
     def _platform_under(self) -> Optional[Tuple[float, float]]:
@@ -651,6 +682,8 @@ class DesktopPetWidget(BaseWidget):
         self.menu.addAction(self.close_action)
 
     MEET_DISTANCE = 90.0
+    PLAY_RANGE = 320.0
+    PLAY_CHANCE = 0.25
 
     def set_pet_window_flag(self) -> None:
         """寵物需接收滑鼠以便拖曳，故 allow_input=True 並置頂。"""
@@ -664,8 +697,8 @@ class DesktopPetWidget(BaseWidget):
         self._peers_provider = provider
 
     def _check_peers(self) -> None:
-        """靠近其他寵物時轉向並打招呼（帶遲滯，避免重複）。"""
-        if self._peers_provider is None or not self._talk:
+        """靠近其他寵物時走過去玩耍、抵達後轉向打招呼（帶遲滯，避免重複）。"""
+        if self._peers_provider is None:
             return
         try:
             peers = self._peers_provider()
@@ -675,9 +708,19 @@ class DesktopPetWidget(BaseWidget):
         peer, distance = nearest_peer(my_center, peers)
         if peer is None:
             self._peer_greeted = False
+            self.motion.clear_follow()
             return
+        # play: a floor pet may walk over to a near-ish peer
+        if self.motion.behaviour == BEHAVIOUR_FLOOR:
+            if self.MEET_DISTANCE < distance <= self.PLAY_RANGE:
+                if self.motion.follow_target_x is not None or self._chatter_rng.random() < self.PLAY_CHANCE:
+                    self.motion.set_follow(peer[0])
+            elif distance > self.PLAY_RANGE:
+                self.motion.clear_follow()
+        # greet: face and say a meet line once per approach
         if distance <= self.MEET_DISTANCE:
-            if not self._peer_greeted:
+            self.motion.clear_follow()
+            if self._talk and not self._peer_greeted:
                 self._peer_greeted = True
                 self.motion.vx = abs(self.motion.vx) if peer[0] >= my_center[0] else -abs(self.motion.vx)
                 pool = self._messages.get("meet") or []
@@ -844,6 +887,7 @@ class DesktopPetWidget(BaseWidget):
             self._last_move_delta = (0, 0)
             self._drag_offset = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
             self.motion.wake()  # interacting wakes a sleeping pet
+            self.motion.clear_follow()
             self._mood.pet()    # petting cheers it up
             self._persist_mood()
             self._play_sound()
