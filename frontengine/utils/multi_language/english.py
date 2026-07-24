@@ -233,6 +233,8 @@ english_word_dict = {
     "pet_chatter_evening": "Good evening!|How was your day?|Almost done?",
     "pet_chatter_night": "It's late - get some rest!|Still up?|Sweet dreams soon~",
     "pet_chatter_any": "Hi there!|(^_^)|Keep going!|You've got this!",
+    "pet_chatter_happy": "I'm so happy!|You're the best!|(^o^)/|Best day ever!",
+    "pet_chatter_sad": "Feeling a bit lonely...|Pet me?|(._.)|Don't forget about me~",
     "pet_start": "Spawn pet",
     "pet_message_box_text": "Pet image not found",
 }
