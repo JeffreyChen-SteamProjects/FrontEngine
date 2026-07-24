@@ -25,6 +25,9 @@ classifiers = [
     "Operating System :: OS Independent"
 ]
 
+[project.scripts]
+frontengine = "frontengine.ui.main_ui:main"
+
 [project.urls]
 Homepage = "https://github.com/Intergration-Automation-Testing/FrontEngine"
 Code = "https://github.com/Intergration-Automation-Testing/FrontEngine"
