@@ -22,6 +22,63 @@ SURFACE_LEFT = "left"
 SURFACE_CEILING = "ceiling"
 SURFACE_RIGHT = "right"
 
+# 視覺狀態（決定顯示哪張精靈）/ Visual states (which sprite to show)
+STATE_WALK = "walk"
+STATE_IDLE = "idle"
+STATE_CLIMB = "climb"
+STATE_FALL = "fall"
+STATE_DRAG = "drag"
+
+# 動作包（資料夾）中，各狀態可接受的檔名（不含副檔名，先命中者為準）
+# Accepted file stems per state inside a pet pack folder (first match wins).
+_PACK_STATE_ALIASES = {
+    STATE_WALK: ("walk", "run", "move"),
+    STATE_IDLE: ("idle", "sit", "stand", "sleep"),
+    STATE_CLIMB: ("climb", "grab", "wall"),
+    STATE_FALL: ("fall", "jump"),
+    STATE_DRAG: ("drag", "pinch", "grabbed", "held"),
+}
+_PACK_EXTS = (".gif", ".webp", ".png", ".jpg", ".jpeg")
+
+
+def scan_pet_pack(folder: str) -> dict:
+    """
+    掃描動作包資料夾，回傳「視覺狀態 -> 圖片路徑」對應。非資料夾回傳空 dict。
+    Scan a pet-pack folder and return a ``state -> image path`` mapping.
+    Returns {} when `folder` is not a directory.
+    """
+    result: dict = {}
+    try:
+        folder_path = Path(folder)
+        if not folder_path.is_dir():
+            return result
+        by_stem = {
+            path.stem.lower(): path
+            for path in sorted(folder_path.iterdir())
+            if path.is_file() and path.suffix.lower() in _PACK_EXTS
+        }
+        for state, aliases in _PACK_STATE_ALIASES.items():
+            for alias in aliases:
+                if alias in by_stem:
+                    result[state] = str(by_stem[alias])
+                    break
+    except OSError:
+        pass
+    return result
+
+
+def derive_visual_state(dragging: bool, airborne: bool, surface: str, motion_state: str) -> str:
+    """依目前情形推導應顯示的視覺狀態 / Derive which sprite state to show."""
+    if dragging:
+        return STATE_DRAG
+    if airborne:
+        return STATE_FALL
+    if surface in (SURFACE_LEFT, SURFACE_RIGHT, SURFACE_CEILING):
+        return STATE_CLIMB
+    if surface == SURFACE_FLOOR and motion_state == "idle":
+        return STATE_IDLE
+    return STATE_WALK
+
 
 class PetMotion:
     """
@@ -269,21 +326,17 @@ class DesktopPetWidget(BaseWidget):
         self.opacity = 1.0
         self.pet_size: int = max(16, int(size))
         self.image_path: Path = Path(image_path)
-        self.movie: Optional[QMovie] = None
-        self.pixmap: Optional[QPixmap] = None
         self._dragging: bool = False
         self._drag_offset = None
         self._last_move_delta: Tuple[int, int] = (0, 0)
+        # 視覺狀態 -> ("movie"|"pixmap", 物件) / state -> sprite
+        self._sprites: dict = {}
+        self._active = None
+        self._active_state = None
 
-        if self.image_path.exists() and self.image_path.is_file():
-            if self.image_path.suffix.lower() in (".gif", ".webp"):
-                self.movie = QMovie(str(self.image_path))
-                self.movie.frameChanged.connect(self.update)
-                self.movie.start()
-            else:
-                self.pixmap = QPixmap(str(self.image_path))
-        else:
-            front_engine_logger.error(f"[DesktopPetWidget] File not found: {self.image_path}")
+        self._load_sprites(self.image_path)
+        if not self._sprites:
+            front_engine_logger.error(f"[DesktopPetWidget] No sprite found: {self.image_path}")
             message_box = QMessageBox(self)
             message_box.setText(language_wrapper.language_word_dict.get("pet_message_box_text", "Pet image not found"))
             message_box.show()
@@ -292,6 +345,7 @@ class DesktopPetWidget(BaseWidget):
         self.motion = PetMotion(
             0, 0, self.pet_size, self.pet_size, (0, 0, 1920, 1080), speed, behaviour, climb=climb
         )
+        self._set_active_sprite(STATE_WALK)
 
         self._timer = QTimer(self)
         self._timer.timeout.connect(self._on_tick)
@@ -308,10 +362,53 @@ class DesktopPetWidget(BaseWidget):
         """寵物需接收滑鼠以便拖曳，故 allow_input=True 並置頂。"""
         apply_overlay_window_flags(self, show_on_bottom=False, allow_input=True)
 
+    def _load_sprite(self, path: str):
+        if Path(path).suffix.lower() in (".gif", ".webp"):
+            movie = QMovie(str(path))
+            movie.frameChanged.connect(self.update)
+            return ("movie", movie)
+        return ("pixmap", QPixmap(str(path)))
+
+    def _load_sprites(self, image_path: Path) -> None:
+        """單一檔 -> 所有狀態共用；資料夾 -> 依檔名對應各狀態。"""
+        if image_path.is_dir():
+            for state, path in scan_pet_pack(str(image_path)).items():
+                self._sprites[state] = self._load_sprite(path)
+        elif image_path.is_file():
+            self._sprites["default"] = self._load_sprite(str(image_path))
+
+    def _sprite_for(self, state: str):
+        if "default" in self._sprites:
+            return self._sprites["default"]
+        if state in self._sprites:
+            return self._sprites[state]
+        for fallback in (STATE_WALK, STATE_IDLE):
+            if fallback in self._sprites:
+                return self._sprites[fallback]
+        return next(iter(self._sprites.values()), None)
+
+    def _set_active_sprite(self, state: str) -> None:
+        sprite = self._sprite_for(state)
+        if sprite is None or sprite is self._active:
+            return
+        if self._active is not None and self._active[0] == "movie":
+            self._active[1].stop()
+        self._active = sprite
+        self._active_state = state
+        if sprite[0] == "movie":
+            sprite[1].start()
+        self.update()
+
+    def _visual_state(self) -> str:
+        return derive_visual_state(
+            self._dragging, self.motion._airborne, self.motion.surface, self.motion.state
+        )
+
     def _current_pixmap(self) -> Optional[QPixmap]:
-        if self.movie is not None:
-            return self.movie.currentPixmap()
-        return self.pixmap
+        if self._active is None:
+            return None
+        kind, obj = self._active
+        return obj.currentPixmap() if kind == "movie" else obj
 
     def draw_content(self, painter: QPainter) -> None:
         pixmap = self._current_pixmap()
@@ -332,12 +429,14 @@ class DesktopPetWidget(BaseWidget):
 
     def _on_tick(self) -> None:
         if self._dragging:
+            self._set_active_sprite(STATE_DRAG)
             return
         if self.motion.behaviour == BEHAVIOUR_CHASE:
             cursor = QCursor.pos()
             self.motion.set_target(cursor.x(), cursor.y())
         x, y = self.motion.step()
         self.move(x, y)
+        self._set_active_sprite(self._visual_state())
 
     # --- dragging + throwing ---
     def mousePressEvent(self, event) -> None:
@@ -345,6 +444,7 @@ class DesktopPetWidget(BaseWidget):
             self._dragging = True
             self._last_move_delta = (0, 0)
             self._drag_offset = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
+            self._set_active_sprite(STATE_DRAG)
         super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event) -> None:
@@ -370,6 +470,7 @@ class DesktopPetWidget(BaseWidget):
     def closeEvent(self, event) -> None:
         if self._timer.isActive():
             self._timer.stop()
-        if self.movie is not None:
-            self.movie.stop()
+        for kind, obj in self._sprites.values():
+            if kind == "movie":
+                obj.stop()
         super().closeEvent(event)
