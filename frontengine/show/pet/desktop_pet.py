@@ -1,6 +1,6 @@
 import random as _random_module
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Optional, Tuple
 
@@ -142,6 +142,17 @@ def windows_platforms(exclude_hwnds=()) -> list:
     except Exception as error:  # pragma: no cover - Win32 boundary
         front_engine_logger.warning(f"[windows_platforms] error: {error!r}")
         return []
+
+
+def pop_due_reminders(now, reminders):
+    """
+    依 now 分出已到期與未到期的提醒。reminders 為 (due_datetime, text) 清單。
+    Split reminders into (due, remaining) at `now`. Each reminder is a
+    (due_datetime, text) tuple.
+    """
+    due = [item for item in reminders if item[0] <= now]
+    remaining = [item for item in reminders if item[0] > now]
+    return due, remaining
 
 
 def read_battery():
@@ -703,6 +714,11 @@ class DesktopPetWidget(BaseWidget):
         # 電量提醒 / Low-battery reaction
         self._battery_provider = read_battery
         self._battery_warned = False
+        # 提醒事項 / Reminders
+        self._now_provider = datetime.now
+        self._reminders: list = []
+        self._reminder_timer = QTimer(self)
+        self._reminder_timer.timeout.connect(self._check_reminders)
         self._bubble = SpeechBubble()
         self._chatter_timer = QTimer(self)
         self._chatter_timer.setSingleShot(True)
@@ -712,6 +728,10 @@ class DesktopPetWidget(BaseWidget):
         self.clone_action = QAction(language_wrapper.language_word_dict.get("pet_clone", "Clone"), self)
         self.clone_action.triggered.connect(self.clone_requested.emit)
         self.menu.addAction(self.clone_action)
+        self.reminder_action = QAction(
+            language_wrapper.language_word_dict.get("pet_set_reminder", "Set reminder..."), self)
+        self.reminder_action.triggered.connect(self._prompt_reminder)
+        self.menu.addAction(self.reminder_action)
         self.close_action = QAction(language_wrapper.language_word_dict.get("control_center_close_all", "Close"), self)
         self.close_action.triggered.connect(self.close)
         self.menu.addAction(self.close_action)
@@ -829,6 +849,7 @@ class DesktopPetWidget(BaseWidget):
         self.move(int(self.motion.x), int(self.motion.y))
         self._timer.start(max(10, int(interval_ms)))
         self._schedule_chatter()
+        self._reminder_timer.start(10000)
 
     def _load_messages(self) -> dict:
         d = language_wrapper.language_word_dict
@@ -850,6 +871,37 @@ class DesktopPetWidget(BaseWidget):
 
     def _persist_mood(self) -> None:
         user_setting_dict["pet_mood"] = self._mood.value
+
+    def add_reminder(self, text: str, minutes: int) -> None:
+        """在 minutes 分鐘後提醒 text / Remind `text` in `minutes` minutes."""
+        due = self._now_provider() + timedelta(minutes=max(1, int(minutes)))
+        self._reminders.append((due, str(text)))
+        front_engine_logger.info(f"[DesktopPetWidget] reminder set | due={due}, text={text}")
+
+    def _check_reminders(self) -> None:
+        if not self._reminders:
+            return
+        due, remaining = pop_due_reminders(self._now_provider(), self._reminders)
+        self._reminders = remaining
+        if due:
+            # Reminders are explicit user requests: deliver even if chatter is off.
+            self._bubble.show_message(due[-1][1], self, duration_ms=12000)
+            self._play_sound()
+
+    def _prompt_reminder(self) -> None:
+        from PySide6.QtWidgets import QInputDialog
+
+        title = language_wrapper.language_word_dict.get("pet_set_reminder", "Set reminder...")
+        text, ok = QInputDialog.getText(
+            self, title, language_wrapper.language_word_dict.get("pet_reminder_prompt", "Remind me to:"))
+        if not ok or not text.strip():
+            return
+        minutes, ok_minutes = QInputDialog.getInt(
+            self, title, language_wrapper.language_word_dict.get("pet_reminder_minutes", "In how many minutes?"),
+            5, 1, 1440)
+        if not ok_minutes:
+            return
+        self.add_reminder(text.strip(), minutes)
 
     def _init_sound(self, sound_path: Optional[str]) -> None:
         if not sound_path:
@@ -981,6 +1033,8 @@ class DesktopPetWidget(BaseWidget):
             self._timer.stop()
         if self._chatter_timer.isActive():
             self._chatter_timer.stop()
+        if self._reminder_timer.isActive():
+            self._reminder_timer.stop()
         self._bubble.close()
         for kind, obj in self._sprites.values():
             if kind == "movie":
