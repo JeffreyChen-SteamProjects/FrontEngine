@@ -11,8 +11,10 @@ from frontengine.show.pet.desktop_pet import (
 from frontengine.ui.dialog.choose_file_dialog import choose_pet, choose_wav_sound
 from frontengine.ui.page.utils import (
     build_recent_combobox,
+    build_target_monitor_combobox,
     enable_file_drop,
     reload_recent_combobox,
+    resolve_preferred_monitor,
 )
 from frontengine.user_setting.user_setting_file import add_recent_file
 from frontengine.utils.logging.loggin_instance import front_engine_logger
@@ -79,6 +81,16 @@ class PetSettingUI(QWidget):
         self.sit_checkbox = QCheckBox(language_wrapper.language_word_dict.get("pet_sit_label", "Sit on windows"))
         self.sit_checkbox.setChecked(True)
 
+        # Target monitor + sound volume
+        self.target_monitor_label = QLabel(
+            language_wrapper.language_word_dict.get("target_monitor_label", "Target monitor"))
+        self.target_monitor_combobox = build_target_monitor_combobox()
+        self.volume_label = QLabel(language_wrapper.language_word_dict.get("pet_volume_label", "Volume"))
+        self.volume_combobox = QComboBox()
+        for label, value in (("0%", 0), ("25%", 25), ("50%", 50), ("75%", 75), ("100%", 100)):
+            self.volume_combobox.addItem(label, value)
+        self.volume_combobox.setCurrentText("100%")
+
         # Start
         self.start_button = QPushButton(language_wrapper.language_word_dict.get("pet_start", "Spawn pet"))
         self.start_button.clicked.connect(self.start_play_pet)
@@ -108,6 +120,10 @@ class PetSettingUI(QWidget):
         self.grid_layout.addWidget(self.start_button, 4, 0)
         self.grid_layout.addWidget(self.recent_files_label, 5, 0)
         self.grid_layout.addWidget(self.recent_files_combobox, 5, 1)
+        self.grid_layout.addWidget(self.target_monitor_label, 6, 0)
+        self.grid_layout.addWidget(self.target_monitor_combobox, 6, 1)
+        self.grid_layout.addWidget(self.volume_label, 6, 2)
+        self.grid_layout.addWidget(self.volume_combobox, 7, 2)
 
     def _spawn_pet(self) -> None:
         """建立、顯示並開始移動一隻寵物（供 Start 與右鍵複製共用）。"""
@@ -122,16 +138,30 @@ class PetSettingUI(QWidget):
             talk=self.talk_checkbox.isChecked(),
             sound_path=self.pet_sound_path,
             sit_on_windows=self.sit_checkbox.isChecked(),
+            volume=int(self.volume_combobox.currentData()) / 100.0,
         )
         pet.clone_requested.connect(self._spawn_pet)
         pet.set_peers_provider(lambda me=pet: self._peer_centers(me))
         pet.set_pet_window_flag()
         self.pet_list.append(pet)
-        screen = QGuiApplication.primaryScreen()
-        geometry = screen.availableGeometry() if screen is not None else None
         pet.show()
+        geometry = self._target_geometry()
         if geometry is not None:
-            pet.start_moving((geometry.left(), geometry.top(), geometry.right(), geometry.bottom()))
+            pet.setScreen(geometry[1])
+            bounds = geometry[0]
+            pet.start_moving((bounds.left(), bounds.top(), bounds.right(), bounds.bottom()))
+
+    def _target_geometry(self):
+        """回傳 (available_geometry, screen) 依所選目標螢幕，否則主螢幕。"""
+        screens = QGuiApplication.screens()
+        index = resolve_preferred_monitor(self.target_monitor_combobox)
+        if index is not None and 0 <= index < len(screens):
+            screen = screens[index]
+        else:
+            screen = QGuiApplication.primaryScreen()
+        if screen is None:
+            return None
+        return (screen.availableGeometry(), screen)
 
     def _peer_centers(self, me) -> list:
         """回傳其他仍存活寵物的中心座標（略過已被銷毀者）。"""
@@ -221,6 +251,8 @@ class PetSettingUI(QWidget):
             "talk": self.talk_checkbox.isChecked(),
             "sound": self.pet_sound_path,
             "sit": self.sit_checkbox.isChecked(),
+            "target_monitor": self.target_monitor_combobox.currentText(),
+            "volume": self.volume_combobox.currentText(),
         }
 
     def set_state(self, state: dict) -> None:
@@ -248,3 +280,11 @@ class PetSettingUI(QWidget):
             self.pet_sound_path = str(state["sound"])
         if "sit" in state:
             self.sit_checkbox.setChecked(bool(state["sit"]))
+        if state.get("target_monitor") is not None:
+            index = self.target_monitor_combobox.findText(str(state["target_monitor"]))
+            if index >= 0:
+                self.target_monitor_combobox.setCurrentIndex(index)
+        if state.get("volume") is not None:
+            index = self.volume_combobox.findText(str(state["volume"]))
+            if index >= 0:
+                self.volume_combobox.setCurrentIndex(index)
