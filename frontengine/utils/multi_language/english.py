@@ -247,6 +247,7 @@ english_word_dict = {
     "pet_talk_label": "Speech bubbles",
     "pet_sit_label": "Sit on windows",
     "pet_volume_label": "Volume",
+    "pet_audio_label": "React to audio",
     "pet_chatter_morning": "Good morning!|Rise and shine!|Ready for the day?",
     "pet_chatter_afternoon": "Good afternoon!|Taking a break?|Keep it up!",
     "pet_chatter_evening": "Good evening!|How was your day?|Almost done?",

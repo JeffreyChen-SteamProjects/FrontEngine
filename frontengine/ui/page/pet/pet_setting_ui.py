@@ -90,6 +90,8 @@ class PetSettingUI(QWidget):
         for label, value in (("0%", 0), ("25%", 25), ("50%", 50), ("75%", 75), ("100%", 100)):
             self.volume_combobox.addItem(label, value)
         self.volume_combobox.setCurrentText("100%")
+        self.audio_react_checkbox = QCheckBox(
+            language_wrapper.language_word_dict.get("pet_audio_label", "React to audio"))
 
         # Start
         self.start_button = QPushButton(language_wrapper.language_word_dict.get("pet_start", "Spawn pet"))
@@ -124,6 +126,7 @@ class PetSettingUI(QWidget):
         self.grid_layout.addWidget(self.target_monitor_combobox, 6, 1)
         self.grid_layout.addWidget(self.volume_label, 6, 2)
         self.grid_layout.addWidget(self.volume_combobox, 7, 2)
+        self.grid_layout.addWidget(self.audio_react_checkbox, 7, 0)
 
     def _spawn_pet(self) -> None:
         """建立、顯示並開始移動一隻寵物（供 Start 與右鍵複製共用）。"""
@@ -139,6 +142,7 @@ class PetSettingUI(QWidget):
             sound_path=self.pet_sound_path,
             sit_on_windows=self.sit_checkbox.isChecked(),
             volume=int(self.volume_combobox.currentData()) / 100.0,
+            audio_react=self.audio_react_checkbox.isChecked(),
         )
         pet.clone_requested.connect(self._spawn_pet)
         pet.set_peers_provider(lambda me=pet: self._peer_centers(me))
@@ -253,6 +257,7 @@ class PetSettingUI(QWidget):
             "sit": self.sit_checkbox.isChecked(),
             "target_monitor": self.target_monitor_combobox.currentText(),
             "volume": self.volume_combobox.currentText(),
+            "audio_react": self.audio_react_checkbox.isChecked(),
         }
 
     def set_state(self, state: dict) -> None:
@@ -288,3 +293,5 @@ class PetSettingUI(QWidget):
             index = self.volume_combobox.findText(str(state["volume"]))
             if index >= 0:
                 self.volume_combobox.setCurrentIndex(index)
+        if "audio_react" in state:
+            self.audio_react_checkbox.setChecked(bool(state["audio_react"]))
