@@ -1,4 +1,5 @@
 import random as _random_module
+import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, Tuple
@@ -94,6 +95,53 @@ def derive_visual_state(dragging: bool, airborne: bool, surface: str, motion_sta
     if surface == SURFACE_FLOOR and motion_state == "idle":
         return STATE_IDLE
     return STATE_WALK
+
+
+# 列舉可站立視窗時要略過的外殼視窗類別
+# Shell window classes skipped when enumerating standable windows.
+_PLATFORM_SKIP_CLASSES = {"WorkerW", "Progman", "Shell_TrayWnd", "Button"}
+
+
+def windows_platforms(exclude_hwnds=()) -> list:
+    """
+    回傳目前可見頂層視窗的上緣做為可站立平台 (left, right, top_y)。僅 Windows
+    有效，其餘平台或發生錯誤時回傳空清單。
+    Return the top edges of visible top-level windows as standable platforms
+    (left, right, top_y). Windows only; returns [] elsewhere or on error.
+    """
+    if sys.platform != "win32":
+        return []
+    try:
+        import ctypes
+        from ctypes import wintypes
+
+        user32 = ctypes.windll.user32
+        exclude = {int(h) for h in exclude_hwnds}
+        platforms: list = []
+
+        @ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
+        def _collect(hwnd, _lparam):
+            if int(hwnd) in exclude or not user32.IsWindowVisible(hwnd):
+                return True
+            rect = wintypes.RECT()
+            if not user32.GetWindowRect(hwnd, ctypes.byref(rect)):
+                return True
+            width = rect.right - rect.left
+            height = rect.bottom - rect.top
+            if width < 80 or height < 40:
+                return True
+            class_buffer = ctypes.create_unicode_buffer(64)
+            user32.GetClassNameW(hwnd, class_buffer, 64)
+            if class_buffer.value in _PLATFORM_SKIP_CLASSES:
+                return True
+            platforms.append((rect.left, rect.right, rect.top))
+            return True
+
+        user32.EnumWindows(_collect, 0)
+        return platforms
+    except Exception as error:  # pragma: no cover - Win32 boundary
+        front_engine_logger.warning(f"[windows_platforms] error: {error!r}")
+        return []
 
 
 def message_bucket(hour: int) -> str:
@@ -252,6 +300,12 @@ class PetMotion:
         self.asleep = False
         self.climb = bool(climb)
         self.surface = SURFACE_FLOOR
+        # 可站立的視窗平台 (left, right, top_y)；站在平台上時的狀態
+        # Standable window platforms (left, right, top_y) and platform state.
+        self.platforms: list = []
+        self.on_platform = False
+        self.platform_span: Optional[Tuple[float, float]] = None
+        self.ground_feet = 0.0
 
     @property
     def facing_left(self) -> bool:
@@ -259,6 +313,10 @@ class PetMotion:
 
     def set_bounds(self, bounds: Tuple[int, int, int, int]) -> None:
         self.bounds = bounds
+
+    def set_platforms(self, platforms) -> None:
+        """設定可站立的視窗上緣平台 / Set standable window top-edge platforms."""
+        self.platforms = list(platforms)
 
     def set_target(self, x: float, y: float) -> None:
         self.target = (float(x), float(y))
@@ -270,6 +328,8 @@ class PetMotion:
         self._airborne = True
         self.asleep = False
         self.surface = SURFACE_FLOOR
+        self.on_platform = False
+        self.platform_span = None
 
     def step(self) -> Tuple[int, int]:
         left, top, right, bottom = self.bounds
@@ -280,38 +340,19 @@ class PetMotion:
             return self._step_wander(left, top, right, bottom)
         return self._step_floor(left, top, right, bottom, floor_y)
 
-    # --- floor / gravity / climbing ---
+    # --- floor / gravity / climbing / window platforms ---
     def _step_floor(self, left, top, right, bottom, floor_y) -> Tuple[int, int]:
-        airborne = self._airborne or (self.surface == SURFACE_FLOOR and self.y < floor_y - 0.5)
+        airborne = self._airborne or (
+            not self.on_platform and self.surface == SURFACE_FLOOR and self.y < floor_y - 0.5
+        )
         if airborne:
-            self.vy += self.GRAVITY
-            self.x += self.vx
-            self.y += self.vy
-            if self.x <= left:
-                self.x = float(left)
-                self.vx = abs(self.vx) * self.WALL_DAMPING
-            elif self.x + self.width >= right:
-                self.x = float(right - self.width)
-                self.vx = -abs(self.vx) * self.WALL_DAMPING
-            if self.y <= top:
-                self.y = float(top)
-                self.vy = abs(self.vy) * self.WALL_DAMPING
-            if self.y >= floor_y:
-                self.y = float(floor_y)
-                if abs(self.vy) > self.BOUNCE_THRESHOLD:
-                    self.vy = -self.vy * self.BOUNCE_DAMPING
-                else:
-                    self.vy = 0.0
-                    self._airborne = False
-                    self.surface = SURFACE_FLOOR
-                    self.vx = float(self.speed) if self.vx >= 0 else float(-self.speed)
-                    self._new_state(force_walk=True)
-            return int(self.x), int(self.y)
-
+            return self._step_fall(left, top, right, bottom, floor_y)
+        if self.on_platform:
+            return self._step_platform(left, top, right, bottom, floor_y)
         if self.surface != SURFACE_FLOOR:
             return self._step_climb(left, top, right, bottom, floor_y)
 
-        # grounded on the floor: random walk / idle, with a chance to climb a wall
+        # grounded on the screen floor: random walk / idle, with a chance to climb a wall
         self.y = float(floor_y)
         if self._state_ticks <= 0:
             self._new_state()
@@ -333,6 +374,84 @@ class PetMotion:
                 self.vy = float(-self.speed)
             else:
                 self.vx = -abs(self.vx)
+        return int(self.x), int(self.y)
+
+    def _step_fall(self, left, top, right, bottom, floor_y) -> Tuple[int, int]:
+        """落下：撞牆/天花板反彈，並在越過視窗平台或螢幕地板時落地。"""
+        prev_feet = self.y + self.height
+        self.vy += self.GRAVITY
+        self.x += self.vx
+        self.y += self.vy
+        if self.x <= left:
+            self.x = float(left)
+            self.vx = abs(self.vx) * self.WALL_DAMPING
+        elif self.x + self.width >= right:
+            self.x = float(right - self.width)
+            self.vx = -abs(self.vx) * self.WALL_DAMPING
+        if self.y <= top:
+            self.y = float(top)
+            self.vy = abs(self.vy) * self.WALL_DAMPING
+        new_feet = self.y + self.height
+        center_x = self.x + self.width / 2.0
+
+        land_feet = None
+        land_span = None
+        for platform_left, platform_right, platform_y in self.platforms:
+            if platform_left <= center_x <= platform_right and prev_feet <= platform_y <= new_feet:
+                if land_feet is None or platform_y < land_feet:
+                    land_feet = float(platform_y)
+                    land_span = (float(platform_left), float(platform_right))
+        if prev_feet <= bottom <= new_feet and (land_feet is None or bottom < land_feet):
+            land_feet = float(bottom)
+            land_span = None
+
+        if land_feet is not None:
+            self.y = float(land_feet - self.height)
+            if abs(self.vy) > self.BOUNCE_THRESHOLD:
+                self.vy = -self.vy * self.BOUNCE_DAMPING
+            else:
+                self.vy = 0.0
+                self._airborne = False
+                self.surface = SURFACE_FLOOR
+                self.on_platform = land_span is not None
+                self.platform_span = land_span
+                self.ground_feet = land_feet
+                self.vx = float(self.speed) if self.vx >= 0 else float(-self.speed)
+                self._new_state(force_walk=True)
+        return int(self.x), int(self.y)
+
+    def _platform_under(self) -> Optional[Tuple[float, float]]:
+        """回傳目前站立平台的水平範圍；平台已消失（視窗移走/關閉）則回傳 None。"""
+        body_left = self.x
+        body_right = self.x + self.width
+        for platform_left, platform_right, platform_y in self.platforms:
+            if abs(platform_y - self.ground_feet) <= 2.0 and not (platform_right < body_left or platform_left > body_right):
+                return (float(platform_left), float(platform_right))
+        return None
+
+    def _step_platform(self, left, top, right, bottom, floor_y) -> Tuple[int, int]:
+        """站在視窗平台上走動；到平台兩端轉向；平台消失則掉落。"""
+        span = self._platform_under()
+        if span is None:
+            self._airborne = True
+            self.on_platform = False
+            self.platform_span = None
+            return self._step_fall(left, top, right, bottom, floor_y)
+        self.platform_span = span
+        span_left, span_right = span
+        self.y = float(self.ground_feet - self.height)
+        if self._state_ticks <= 0:
+            self._new_state()
+        self._state_ticks -= 1
+        if self.state != "walk":
+            return int(self.x), int(self.y)
+        self.x += self.vx
+        if self.x <= span_left:
+            self.x = float(span_left)
+            self.vx = abs(self.vx)
+        elif self.x + self.width >= span_right:
+            self.x = float(span_right - self.width)
+            self.vx = -abs(self.vx)
         return int(self.x), int(self.y)
 
     def _step_climb(self, left, top, right, bottom, floor_y) -> Tuple[int, int]:
@@ -453,10 +572,11 @@ class DesktopPetWidget(BaseWidget):
 
     def __init__(self, image_path: str, size: int = 128, speed: int = 3,
                  behaviour: str = BEHAVIOUR_FLOOR, climb: bool = True, talk: bool = True,
-                 sound_path: Optional[str] = None):
+                 sound_path: Optional[str] = None, sit_on_windows: bool = True):
         front_engine_logger.info(
             f"[DesktopPetWidget] Init | path={image_path}, size={size}, speed={speed}, "
-            f"behaviour={behaviour}, climb={climb}, talk={talk}, sound={sound_path}"
+            f"behaviour={behaviour}, climb={climb}, talk={talk}, sound={sound_path}, "
+            f"sit_on_windows={sit_on_windows}"
         )
         super().__init__()
         self.opacity = 1.0
@@ -494,6 +614,8 @@ class DesktopPetWidget(BaseWidget):
         self._messages = self._load_messages()
         self._sound: Optional[QSoundEffect] = None
         self._init_sound(sound_path)
+        self._sit_on_windows = bool(sit_on_windows)
+        self._platform_tick = 0
         self._bubble = SpeechBubble()
         self._chatter_timer = QTimer(self)
         self._chatter_timer.setSingleShot(True)
@@ -645,6 +767,11 @@ class DesktopPetWidget(BaseWidget):
         if self.motion.behaviour == BEHAVIOUR_CHASE:
             cursor = QCursor.pos()
             self.motion.set_target(cursor.x(), cursor.y())
+        elif self._sit_on_windows and self.motion.behaviour == BEHAVIOUR_FLOOR:
+            self._platform_tick += 1
+            if self._platform_tick >= 10:
+                self._platform_tick = 0
+                self.motion.set_platforms(windows_platforms(exclude_hwnds=(int(self.winId()),)))
         x, y = self.motion.step()
         self.move(x, y)
         self._set_active_sprite(self._visual_state())
