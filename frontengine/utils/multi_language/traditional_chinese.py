@@ -220,7 +220,10 @@ traditional_chinese_word_dict = {
     "pet_choose_file": "選擇寵物圖片",
     "pet_size_label": "大小",
     "pet_speed_label": "速度",
-    "pet_gravity_label": "沿底部行走",
+    "pet_behaviour_label": "行為",
+    "pet_behaviour_floor": "沿底部行走",
+    "pet_behaviour_wander": "自由漫遊",
+    "pet_behaviour_chase": "追逐游標",
     "pet_start": "召喚寵物",
     "pet_message_box_text": "找不到寵物圖片",
 }

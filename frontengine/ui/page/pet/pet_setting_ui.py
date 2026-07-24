@@ -2,10 +2,12 @@ from typing import Optional
 
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import (
-    QWidget, QGridLayout, QLabel, QPushButton, QMessageBox, QCheckBox, QComboBox,
+    QWidget, QGridLayout, QLabel, QPushButton, QMessageBox, QComboBox,
 )
 
-from frontengine.show.pet.desktop_pet import DesktopPetWidget
+from frontengine.show.pet.desktop_pet import (
+    DesktopPetWidget, BEHAVIOUR_FLOOR, BEHAVIOUR_WANDER, BEHAVIOUR_CHASE,
+)
 from frontengine.ui.dialog.choose_file_dialog import choose_pet
 from frontengine.ui.page.utils import (
     build_recent_combobox,
@@ -50,9 +52,15 @@ class PetSettingUI(QWidget):
         self.speed_combobox.addItems([str(n) for n in range(1, 11)])
         self.speed_combobox.setCurrentText("3")
 
-        # Gravity / walk on floor
-        self.gravity_checkbox = QCheckBox(language_wrapper.language_word_dict.get("pet_gravity_label", "Walk on floor"))
-        self.gravity_checkbox.setChecked(True)
+        # Behaviour
+        self.behaviour_label = QLabel(language_wrapper.language_word_dict.get("pet_behaviour_label", "Behaviour"))
+        self.behaviour_combobox = QComboBox()
+        self.behaviour_combobox.addItem(
+            language_wrapper.language_word_dict.get("pet_behaviour_floor", "Walk on floor"), BEHAVIOUR_FLOOR)
+        self.behaviour_combobox.addItem(
+            language_wrapper.language_word_dict.get("pet_behaviour_wander", "Free wander"), BEHAVIOUR_WANDER)
+        self.behaviour_combobox.addItem(
+            language_wrapper.language_word_dict.get("pet_behaviour_chase", "Chase cursor"), BEHAVIOUR_CHASE)
 
         # Start
         self.start_button = QPushButton(language_wrapper.language_word_dict.get("pet_start", "Spawn pet"))
@@ -73,7 +81,8 @@ class PetSettingUI(QWidget):
         self.grid_layout.addWidget(self.size_combobox, 1, 1)
         self.grid_layout.addWidget(self.speed_label, 2, 0)
         self.grid_layout.addWidget(self.speed_combobox, 2, 1)
-        self.grid_layout.addWidget(self.gravity_checkbox, 3, 0)
+        self.grid_layout.addWidget(self.behaviour_label, 3, 0)
+        self.grid_layout.addWidget(self.behaviour_combobox, 3, 1)
         self.grid_layout.addWidget(self.start_button, 4, 0)
         self.grid_layout.addWidget(self.recent_files_label, 5, 0)
         self.grid_layout.addWidget(self.recent_files_combobox, 5, 1)
@@ -83,7 +92,7 @@ class PetSettingUI(QWidget):
             image_path=self.pet_image_path,
             size=int(self.size_combobox.currentText()),
             speed=int(self.speed_combobox.currentText()),
-            gravity=self.gravity_checkbox.isChecked(),
+            behaviour=self.behaviour_combobox.currentData(),
         )
         pet.set_pet_window_flag()
         self.pet_list.append(pet)
@@ -137,7 +146,7 @@ class PetSettingUI(QWidget):
             "pet_image_path": self.pet_image_path,
             "size": self.size_combobox.currentText(),
             "speed": self.speed_combobox.currentText(),
-            "gravity": self.gravity_checkbox.isChecked(),
+            "behaviour": self.behaviour_combobox.currentData(),
         }
 
     def set_state(self, state: dict) -> None:
@@ -150,5 +159,10 @@ class PetSettingUI(QWidget):
                 index = combobox.findText(str(state[key]))
                 if index >= 0:
                     combobox.setCurrentIndex(index)
-        if "gravity" in state:
-            self.gravity_checkbox.setChecked(bool(state["gravity"]))
+        behaviour = state.get("behaviour")
+        if behaviour is None and "gravity" in state:  # back-compat with old presets
+            behaviour = BEHAVIOUR_FLOOR if state.get("gravity") else BEHAVIOUR_WANDER
+        if behaviour is not None:
+            index = self.behaviour_combobox.findData(behaviour)
+            if index >= 0:
+                self.behaviour_combobox.setCurrentIndex(index)
