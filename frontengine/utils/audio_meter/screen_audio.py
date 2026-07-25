@@ -74,7 +74,10 @@ def screen_hints(screen) -> List[str]:
             continue
         try:
             value = getter()
-        except Exception:  # pragma: no cover - defensive against Qt/duck-typed screens
+        except Exception as error:  # pragma: no cover - defensive against Qt/duck-typed screens
+            # 某個欄位問不到不影響其他欄位的比對，記錄後繼續。
+            # One attribute refusing to answer must not stop the remaining hints.
+            front_engine_logger.debug(f"[screen_hints] {attribute} failed: {error!r}")
             continue
         if value:
             hints.append(str(value))
