@@ -12,6 +12,7 @@ from PySide6.QtWidgets import QMenu, QMessageBox, QWidget
 from frontengine.show.base_widget import BaseWidget
 from frontengine.show.window_helpers import apply_overlay_window_flags
 from frontengine.user_setting.user_setting_file import user_setting_dict
+from frontengine.utils.audio_meter.audio_envelope import AudioEnvelope
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
@@ -80,6 +81,28 @@ def scan_pet_pack(folder: str) -> dict:
     except OSError:
         pass
     return result
+
+
+# 拖進寵物的檔案分類 / What a file dropped onto the pet means
+DROP_SPRITE = "sprite"  # 圖片或動作包 -> 換一套外觀
+DROP_FOOD = "food"      # 其他檔案 -> 當成食物餵給寵物
+
+
+def classify_drop(path) -> Optional[str]:
+    """
+    判斷拖到寵物身上的檔案要換裝還是當食物；路徑無效或空資料夾回傳 None。
+    Classify a file dropped onto the pet: a sprite/pack to wear, food to eat,
+    or None when the path is unusable.
+    """
+    try:
+        target = Path(path)
+        if not target.exists():
+            return None
+    except (OSError, TypeError, ValueError):
+        return None
+    if target.is_dir():
+        return DROP_SPRITE if scan_pet_pack(str(target)) else None
+    return DROP_SPRITE if target.suffix.lower() in _PACK_EXTS else DROP_FOOD
 
 
 def derive_visual_state(dragging: bool, airborne: bool, surface: str, motion_state: str) -> str:
@@ -876,6 +899,7 @@ class DesktopPetWidget(BaseWidget):
             message_box.show()
 
         self.resize(self.pet_size, self.pet_size)
+        self.setAcceptDrops(True)  # drop an image to dress it up, anything else to feed it
         self.motion = PetMotion(
             0, 0, self.pet_size, self.pet_size, (0, 0, 1920, 1080), speed, behaviour, climb=climb
         )
@@ -901,6 +925,9 @@ class DesktopPetWidget(BaseWidget):
         self._audio_react = bool(audio_react)
         self._audio_level_provider = None  # callable -> level 0..1 or None
         self._audio_scale = 1.0
+        # 峰值抖動大，先過 RMS + 快起慢降包絡再驅動脈動
+        # Raw peaks jitter, so smooth them through an RMS + attack/decay envelope.
+        self._audio_envelope = AudioEnvelope()
         # 多寵物互動 / Multi-pet interaction
         self._peers_provider = None
         self._peer_greeted = False
@@ -992,19 +1019,50 @@ class DesktopPetWidget(BaseWidget):
             self._peer_greeted = False
 
     def _load_sprite(self, path: str):
+        """載入一張精靈；檔案損毀或格式不支援時回傳 None。"""
         if Path(path).suffix.lower() in (".gif", ".webp"):
             movie = QMovie(str(path))
+            if not movie.isValid():
+                return None
             movie.frameChanged.connect(self.update)
             return ("movie", movie)
-        return ("pixmap", QPixmap(str(path)))
+        pixmap = QPixmap(str(path))
+        return None if pixmap.isNull() else ("pixmap", pixmap)
 
     def _load_sprites(self, image_path: Path) -> None:
-        """單一檔 -> 所有狀態共用；資料夾 -> 依檔名對應各狀態。"""
+        """單一檔 -> 所有狀態共用；資料夾 -> 依檔名對應各狀態；載不起來的略過。"""
         if image_path.is_dir():
             for state, path in scan_pet_pack(str(image_path)).items():
-                self._sprites[state] = self._load_sprite(path)
+                sprite = self._load_sprite(path)
+                if sprite is not None:
+                    self._sprites[state] = sprite
         elif image_path.is_file():
-            self._sprites["default"] = self._load_sprite(str(image_path))
+            sprite = self._load_sprite(str(image_path))
+            if sprite is not None:
+                self._sprites["default"] = sprite
+
+    def change_sprite(self, path) -> None:
+        """換一套外觀（拖圖片或動作包到寵物身上時觸發）；載不到就維持原樣。"""
+        image_path = Path(path)
+        previous = self._sprites
+        self._sprites = {}
+        self._load_sprites(image_path)
+        if not self._sprites:
+            front_engine_logger.warning(f"[DesktopPetWidget] change_sprite ignored: {image_path}")
+            self._sprites = previous
+            return
+        front_engine_logger.info(f"[DesktopPetWidget] change_sprite | path={image_path}")
+        for kind, obj in previous.values():
+            if kind == "movie":
+                obj.stop()
+        self.image_path = image_path
+        self._active = None
+        self._active_state = None
+        self._set_active_sprite(self._visual_state())
+        self._gain_affection(2)
+        pool = self._messages.get("costume") or []
+        if pool:
+            self.say(pool[self._chatter_rng.randrange(len(pool))])
 
     def _sprite_for(self, state: str):
         if "default" in self._sprites:
@@ -1042,16 +1100,23 @@ class DesktopPetWidget(BaseWidget):
     def set_audio_level_provider(self, provider) -> None:
         """設定回傳目前音量 (0~1 或 None) 的函式 / Provider of the current audio level."""
         self._audio_level_provider = provider
+        self._audio_envelope.reset()
 
     def _update_audio_scale(self) -> None:
+        """取一次音量取樣，經包絡平滑後換算成脈動比例（無音源則不脈動）。"""
         if not self._audio_react or self._audio_level_provider is None:
             self._audio_scale = 1.0
+            self._audio_envelope.reset()
             return
         try:
             level = self._audio_level_provider()
         except Exception:  # pragma: no cover - defensive
             level = None
-        self._audio_scale = 1.0 if level is None else audio_pulse_scale(level)
+        if level is None:
+            self._audio_scale = 1.0
+            self._audio_envelope.reset()
+            return
+        self._audio_scale = audio_pulse_scale(self._audio_envelope.push(level))
 
     def draw_content(self, painter: QPainter) -> None:
         pixmap = self._current_pixmap()
@@ -1101,6 +1166,7 @@ class DesktopPetWidget(BaseWidget):
             "fed": lines("pet_chatter_fed", "Yum!|Thank you!|Delicious!"),
             "away": lines("pet_chatter_away", "Still there?|I'll nap till you're back~|Zzz..."),
             "levelup": lines("pet_chatter_levelup", "Level up!|I'm growing!|We're getting closer!"),
+            "costume": lines("pet_chatter_costume", "New look!|How do I look?|Nice fit!"),
             "any": lines("pet_chatter_any", "Hi there!|(^_^)|Keep going!"),
         }
 
@@ -1388,6 +1454,38 @@ class DesktopPetWidget(BaseWidget):
             else:
                 self.say()  # a click (no drag) makes the pet talk
         super().mouseReleaseEvent(event)
+
+    # --- drop a file onto the pet: wear it (image / pack) or eat it ---
+    @staticmethod
+    def dropped_path(mime_data) -> Optional[str]:
+        """從拖曳資料取出第一個可用的本機路徑；沒有可用者回傳 None。"""
+        if mime_data is None or not mime_data.hasUrls():
+            return None
+        for url in mime_data.urls():
+            local_path = url.toLocalFile()
+            if local_path and classify_drop(local_path) is not None:
+                return local_path
+        return None
+
+    def dragEnterEvent(self, event) -> None:
+        if self.dropped_path(event.mimeData()) is not None:
+            event.acceptProposedAction()
+
+    def dragMoveEvent(self, event) -> None:
+        if self.dropped_path(event.mimeData()) is not None:
+            event.acceptProposedAction()
+
+    def dropEvent(self, event) -> None:
+        path = self.dropped_path(event.mimeData())
+        if path is None:
+            return
+        front_engine_logger.info(f"[DesktopPetWidget] dropEvent | path={path}")
+        self.motion.wake()
+        if classify_drop(path) == DROP_SPRITE:
+            self.change_sprite(path)
+        else:
+            self.feed()
+        event.acceptProposedAction()
 
     def contextMenuEvent(self, event) -> None:
         self.menu.popup(event.globalPos())

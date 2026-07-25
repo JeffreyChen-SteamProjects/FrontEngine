@@ -239,6 +239,8 @@ traditional_chinese_word_dict = {
     "pet_chatter_fed": "好吃！|謝謝你！|真美味！|嗯嗯 (^o^)",
     "pet_chatter_away": "還在嗎？|我先打個盹等你回來～|Zzz…|慢慢來沒關係！",
     "pet_chatter_levelup": "升級了！|我長大了！|我們更親近了！|耶，謝謝你！",
+    "pet_chatter_costume": "換新裝！|好看嗎？|很合身耶！|我喜歡這套！",
+    "pet_drop_hint": "小提示：把圖片或動作包拖到寵物身上可以換裝，拖其他檔案則是餵牠吃東西。",
     "pet_set_reminder": "設定提醒...",
     "pet_reminder_prompt": "提醒我：",
     "pet_reminder_minutes": "幾分鐘後？",

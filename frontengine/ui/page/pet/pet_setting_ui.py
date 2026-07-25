@@ -17,7 +17,7 @@ from frontengine.ui.page.utils import (
     resolve_preferred_monitor,
 )
 from frontengine.user_setting.user_setting_file import add_recent_file
-from frontengine.utils.audio_meter.system_audio_meter import system_audio_level
+from frontengine.utils.audio_meter.screen_audio import audio_level_provider_for_screen
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
@@ -93,6 +93,12 @@ class PetSettingUI(QWidget):
         self.volume_combobox.setCurrentText("100%")
         self.audio_react_checkbox = QCheckBox(
             language_wrapper.language_word_dict.get("pet_audio_label", "React to audio"))
+        self.drop_hint_label = QLabel(
+            language_wrapper.language_word_dict.get(
+                "pet_drop_hint",
+                "Tip: drop an image or pet pack onto the pet to change its look, "
+                "or any other file to feed it."))
+        self.drop_hint_label.setWordWrap(True)
 
         # Start
         self.start_button = QPushButton(language_wrapper.language_word_dict.get("pet_start", "Spawn pet"))
@@ -128,6 +134,7 @@ class PetSettingUI(QWidget):
         self.grid_layout.addWidget(self.volume_label, 6, 2)
         self.grid_layout.addWidget(self.volume_combobox, 7, 2)
         self.grid_layout.addWidget(self.audio_react_checkbox, 7, 0)
+        self.grid_layout.addWidget(self.drop_hint_label, 8, 0, 1, 3)
 
     def _spawn_pet(self) -> None:
         """建立、顯示並開始移動一隻寵物（供 Start 與右鍵複製共用）。"""
@@ -147,12 +154,15 @@ class PetSettingUI(QWidget):
         )
         pet.clone_requested.connect(self._spawn_pet)
         pet.set_peers_provider(lambda me=pet: self._peer_centers(me))
+        geometry = self._target_geometry()
         if self.audio_react_checkbox.isChecked():
-            pet.set_audio_level_provider(system_audio_level)  # real system output peak meter
+            # 跟隨寵物所在螢幕的音源（比對不到就用系統預設輸出裝置）
+            # Follow the audio of the screen the pet lives on; default endpoint otherwise.
+            pet.set_audio_level_provider(
+                audio_level_provider_for_screen(geometry[1] if geometry is not None else None))
         pet.set_pet_window_flag()
         self.pet_list.append(pet)
         pet.show()
-        geometry = self._target_geometry()
         if geometry is not None:
             pet.setScreen(geometry[1])
             bounds = geometry[0]

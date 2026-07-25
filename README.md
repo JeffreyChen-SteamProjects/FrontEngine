@@ -29,6 +29,33 @@ It provides an intuitive interface and supports multiple media formats for inter
 
 ---
 
+## Desktop pet
+
+Spawn an animated sprite that lives on your desktop, from the **Pet** tab.
+
+- **Sprites** — pick a single GIF/WebP/PNG, or a *pet pack* folder whose file
+  names map to states: `walk`, `idle`, `sleep`, `climb`, `fall`, `drag`
+  (missing states fall back to `walk`).
+- **Behaviour** — walk on the floor with gravity (throw it and it bounces),
+  wander freely, or chase the cursor. Floor pets can climb screen edges and
+  stand on the top edge of other windows.
+- **Life** — mood, fullness and an affection level that persist between runs;
+  the pet grows as it levels up, chats in speech bubbles, naps while you are
+  away, and warns you about a low battery.
+- **Interaction** — drag it around, right-click to clone/feed/set a reminder,
+  and **drop a file onto it**: an image or pet pack becomes its new look,
+  anything else is eaten as a snack.
+- **React to audio** — the pet pulses to your speakers' output level. It reads
+  only the Windows output *meter* (WASAPI `IAudioMeterInformation`); no audio
+  is captured or recorded. Peaks are smoothed with an RMS window and a
+  fast-attack/slow-decay envelope so the pulse breathes instead of flickering.
+  On multi-monitor setups each pet follows the audio endpoint that matches its
+  own screen, falling back to the default output device.
+
+Audio features are Windows-only and degrade to "no pulse" elsewhere.
+
+---
+
 ## Install
 
 - **System Requirements**
