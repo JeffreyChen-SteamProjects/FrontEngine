@@ -39,6 +39,9 @@ jobs:
       - name: Compile package
         run: python -m compileall -q frontengine
 
+      - name: Run unit tests
+        run: python -m pytest tests/ -q
+
       - name: Start FrontEngine
         run: python ./tests/unit_test/start/start_front_engine.py
 
