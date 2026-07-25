@@ -17,7 +17,7 @@ from frontengine.ui.page.utils import (
     resolve_preferred_monitor,
 )
 from frontengine.user_setting.user_setting_file import add_recent_file
-from frontengine.utils.audio_meter.system_audio_meter import system_audio_level
+from frontengine.utils.audio_meter.screen_audio import audio_level_provider_for_screen
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
@@ -147,12 +147,15 @@ class PetSettingUI(QWidget):
         )
         pet.clone_requested.connect(self._spawn_pet)
         pet.set_peers_provider(lambda me=pet: self._peer_centers(me))
+        geometry = self._target_geometry()
         if self.audio_react_checkbox.isChecked():
-            pet.set_audio_level_provider(system_audio_level)  # real system output peak meter
+            # 跟隨寵物所在螢幕的音源（比對不到就用系統預設輸出裝置）
+            # Follow the audio of the screen the pet lives on; default endpoint otherwise.
+            pet.set_audio_level_provider(
+                audio_level_provider_for_screen(geometry[1] if geometry is not None else None))
         pet.set_pet_window_flag()
         self.pet_list.append(pet)
         pet.show()
-        geometry = self._target_geometry()
         if geometry is not None:
             pet.setScreen(geometry[1])
             bounds = geometry[0]
