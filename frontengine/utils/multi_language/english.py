@@ -196,6 +196,11 @@ english_word_dict = {
     "marquee_label": "Marquee",
     "marquee_speed_label": "Speed",
     "outline_label": "Outline",
+    # Web dashboard
+    "web_dashboard_label": "Dashboard URLs",
+    "web_dashboard_hint": "One URL per line; lines starting with # are ignored.",
+    "web_dashboard_start": "Start dashboard",
+    "web_dashboard_next": "Next page",
     # Dynamic text sources
     "text_source_label": "Text source",
     "text_source_static": "Static text",

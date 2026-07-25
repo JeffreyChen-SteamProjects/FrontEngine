@@ -197,6 +197,11 @@ traditional_chinese_word_dict = {
     "marquee_label": "跑馬燈",
     "marquee_speed_label": "速度",
     "outline_label": "描邊",
+    # 網頁儀表板
+    "web_dashboard_label": "儀表板網址",
+    "web_dashboard_hint": "一行一個網址；# 開頭的行會被忽略。",
+    "web_dashboard_start": "啟動儀表板",
+    "web_dashboard_next": "下一頁",
     # 動態文字來源
     "text_source_label": "文字來源",
     "text_source_static": "固定文字",

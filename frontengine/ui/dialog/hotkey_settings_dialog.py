@@ -30,6 +30,7 @@ _ACTION_LABELS: Dict[str, Tuple[str, str]] = {
     "mute_all": ("control_center_mute_all", "Mute all"),
     "opacity_up": ("hotkey_opacity_up", "Opacity up"),
     "opacity_down": ("hotkey_opacity_down", "Opacity down"),
+    "dashboard_next": ("web_dashboard_next", "Next page"),
 }
 
 

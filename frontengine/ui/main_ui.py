@@ -321,6 +321,8 @@ class FrontEngineMainUI(QMainWindow):
             self.control_center_ui.step_opacity_all(0.1)
         elif action == "opacity_down":
             self.control_center_ui.step_opacity_all(-0.1)
+        elif action == "dashboard_next":
+            self.web_setting_ui.show_next_dashboard_page()
 
     def _on_fullscreen_changed(self, fullscreen_active: bool) -> None:
         """
