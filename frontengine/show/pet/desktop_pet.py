@@ -12,6 +12,7 @@ from PySide6.QtWidgets import QMenu, QMessageBox, QWidget
 from frontengine.show.base_widget import BaseWidget
 from frontengine.show.window_helpers import apply_overlay_window_flags
 from frontengine.user_setting.user_setting_file import user_setting_dict
+from frontengine.utils.audio_meter.audio_envelope import AudioEnvelope
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
@@ -901,6 +902,9 @@ class DesktopPetWidget(BaseWidget):
         self._audio_react = bool(audio_react)
         self._audio_level_provider = None  # callable -> level 0..1 or None
         self._audio_scale = 1.0
+        # 峰值抖動大，先過 RMS + 快起慢降包絡再驅動脈動
+        # Raw peaks jitter, so smooth them through an RMS + attack/decay envelope.
+        self._audio_envelope = AudioEnvelope()
         # 多寵物互動 / Multi-pet interaction
         self._peers_provider = None
         self._peer_greeted = False
@@ -1042,16 +1046,23 @@ class DesktopPetWidget(BaseWidget):
     def set_audio_level_provider(self, provider) -> None:
         """設定回傳目前音量 (0~1 或 None) 的函式 / Provider of the current audio level."""
         self._audio_level_provider = provider
+        self._audio_envelope.reset()
 
     def _update_audio_scale(self) -> None:
+        """取一次音量取樣，經包絡平滑後換算成脈動比例（無音源則不脈動）。"""
         if not self._audio_react or self._audio_level_provider is None:
             self._audio_scale = 1.0
+            self._audio_envelope.reset()
             return
         try:
             level = self._audio_level_provider()
         except Exception:  # pragma: no cover - defensive
             level = None
-        self._audio_scale = 1.0 if level is None else audio_pulse_scale(level)
+        if level is None:
+            self._audio_scale = 1.0
+            self._audio_envelope.reset()
+            return
+        self._audio_scale = audio_pulse_scale(self._audio_envelope.push(level))
 
     def draw_content(self, painter: QPainter) -> None:
         pixmap = self._current_pixmap()
