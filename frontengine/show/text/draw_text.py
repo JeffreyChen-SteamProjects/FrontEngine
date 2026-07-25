@@ -41,6 +41,11 @@ class TextWidget(BaseWidget):
         self._marquee_timer = QTimer(self)
         self._marquee_timer.timeout.connect(self._tick_marquee)
 
+        # 動態文字來源（時鐘／倒數／系統資訊…）/ Dynamic text source
+        self.text_source = None
+        self._source_timer = QTimer(self)
+        self._source_timer.timeout.connect(self.refresh_text)
+
     def set_font_variable(self, font_size: int = 100) -> None:
         front_engine_logger.info(f"[TextWidget] set_font_variable | font_size={font_size}")
         self.font_size = font_size
@@ -82,6 +87,35 @@ class TextWidget(BaseWidget):
         else:
             self._marquee_timer.stop()
 
+    def set_text_source(self, source) -> None:
+        """
+        接上動態文字來源（TextSource）；靜態來源只取一次文字，不啟動計時器。
+        Attach a dynamic text source; a static one is read once, with no timer.
+        """
+        front_engine_logger.info(f"[TextWidget] set_text_source | kind={getattr(source, 'kind', None)}")
+        self._source_timer.stop()
+        self.text_source = source
+        if source is None:
+            return
+        source.start()
+        self.refresh_text()
+        interval = getattr(source, "refresh_interval_ms", 0)
+        if interval > 0:
+            self._source_timer.start(int(interval))
+
+    def refresh_text(self) -> None:
+        """向來源取一次最新文字並重繪 / Pull the latest text and repaint."""
+        if self.text_source is None:
+            return
+        try:
+            text = self.text_source.text()
+        except Exception as error:  # pragma: no cover - defensive around providers
+            front_engine_logger.warning(f"[TextWidget] text source failed: {error!r}")
+            return
+        if text != self.text:
+            self.text = text
+            self.update()
+
     def _tick_marquee(self) -> None:
         text_width = QFontMetrics(self.draw_font).horizontalAdvance(self.text)
         self.marquee_offset -= self.marquee_speed
@@ -101,6 +135,12 @@ class TextWidget(BaseWidget):
                 int(self.alignment),
                 self.text,
             )
+
+    def closeEvent(self, event) -> None:
+        for timer in (self._marquee_timer, self._source_timer):
+            if timer.isActive():
+                timer.stop()
+        super().closeEvent(event)
 
     def draw_content(self, painter: QPainter) -> None:
         painter.setFont(self.draw_font)

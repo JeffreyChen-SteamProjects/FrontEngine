@@ -12,6 +12,12 @@ from frontengine.ui.page.utils import (
 )
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
+from frontengine.utils.system_stats.system_stats import system_stats
+from frontengine.utils.text_source.text_source import (
+    DEFAULT_TEMPLATES, SOURCE_CLOCK, SOURCE_COUNTDOWN, SOURCE_DATE, SOURCE_STATIC,
+    SOURCE_STOPWATCH, SOURCE_SYSTEM, SOURCE_WEATHER, TextSource,
+)
+from frontengine.utils.weather.weather_service import current_weather, lookup_city, weather_service
 
 # 名稱 -> HEX 顏色 / Named text colors -> hex
 _TEXT_COLORS = [
@@ -97,6 +103,29 @@ class TextSettingUI(QWidget):
         )
         self.target_monitor_combobox = build_target_monitor_combobox()
 
+        # 文字來源：靜態字串或時鐘／日期／倒數／碼表／系統資訊／天氣
+        # Text source: a fixed string, or a clock/date/countdown/stopwatch/stats/weather feed.
+        self.text_source_label = QLabel(
+            language_wrapper.language_word_dict.get("text_source_label", "Text source"))
+        self.text_source_combobox = QComboBox()
+        for kind, fallback in (
+            (SOURCE_STATIC, "Static text"), (SOURCE_CLOCK, "Clock"), (SOURCE_DATE, "Date"),
+            (SOURCE_COUNTDOWN, "Countdown"), (SOURCE_STOPWATCH, "Stopwatch"),
+            (SOURCE_SYSTEM, "System stats"), (SOURCE_WEATHER, "Weather"),
+        ):
+            self.text_source_combobox.addItem(
+                language_wrapper.language_word_dict.get(f"text_source_{kind}", fallback), kind)
+        self.text_source_combobox.currentIndexChanged.connect(self._update_source_hint)
+        self.text_source_hint_label = QLabel("")
+        self.text_source_hint_label.setWordWrap(True)
+
+        # 天氣地點（只有天氣來源會用到）/ Weather location (only used by the weather source)
+        self.weather_location_label = QLabel(
+            language_wrapper.language_word_dict.get("weather_location_label", "Weather city"))
+        self.weather_location_edit = QLineEdit()
+        self.weather_location_edit.setPlaceholderText(
+            language_wrapper.language_word_dict.get("weather_location_hint", "e.g. Taipei"))
+
         # Layout
         self.grid_layout.addWidget(self.opacity_label, 0, 0)
         self.grid_layout.addWidget(self.opacity_slider_value_label, 0, 1)
@@ -121,10 +150,48 @@ class TextSettingUI(QWidget):
         self.grid_layout.addWidget(self.marquee_speed_combobox, 8, 2)
         self.grid_layout.addWidget(self.outline_checkbox, 9, 0)
         self.grid_layout.addWidget(self.outline_color_combobox, 9, 1)
+        self.grid_layout.addWidget(self.text_source_label, 10, 0)
+        self.grid_layout.addWidget(self.text_source_combobox, 10, 1)
+        self.grid_layout.addWidget(self.weather_location_label, 11, 0)
+        self.grid_layout.addWidget(self.weather_location_edit, 11, 1)
+        self.grid_layout.addWidget(self.text_source_hint_label, 12, 0, 1, 3)
+        self._update_source_hint()
 
     def set_show_all_screen(self) -> None:
         front_engine_logger.info("[TextSettingUI] set_show_all_screen")
         self.show_all_screen = self.show_on_all_screen_checkbox.isChecked()
+
+    def _update_source_hint(self) -> None:
+        """依所選來源說明文字欄位的意義（樣板、倒數分鐘數…）。"""
+        kind = self.text_source_combobox.currentData() or SOURCE_STATIC
+        default = DEFAULT_TEMPLATES.get(kind, "")
+        hint = language_wrapper.language_word_dict.get(f"text_source_hint_{kind}", "")
+        self.text_source_hint_label.setText(f"{hint}  ({default})" if default else hint)
+        self.weather_location_label.setVisible(kind == SOURCE_WEATHER)
+        self.weather_location_edit.setVisible(kind == SOURCE_WEATHER)
+
+    def _build_text_source(self) -> TextSource:
+        """依目前設定組出文字來源；天氣來源會先把地名解析成座標。"""
+        kind = self.text_source_combobox.currentData() or SOURCE_STATIC
+        if kind == SOURCE_WEATHER:
+            self._apply_weather_location()
+        return TextSource(
+            kind=kind,
+            template=self.line_edit.text(),
+            stats_provider=system_stats,
+            weather_provider=current_weather,
+        )
+
+    def _apply_weather_location(self) -> None:
+        """把使用者填的地名換成座標；查不到就沿用預設地點。"""
+        city = self.weather_location_edit.text().strip()
+        if not city:
+            return
+        found = lookup_city(city)
+        if found is None:
+            front_engine_logger.warning(f"[TextSettingUI] weather city not found: {city}")
+            return
+        weather_service().set_location(found[0], found[1])
 
     def _create_text_widget(self) -> TextWidget:
         front_engine_logger.info("[TextSettingUI] _create_text_widget")
@@ -144,6 +211,7 @@ class TextSettingUI(QWidget):
             self.marquee_checkbox.isChecked(),
             int(self.marquee_speed_combobox.currentText()),
         )
+        text_widget.set_text_source(self._build_text_source())
         self.text_widget_list.append(text_widget)
         return text_widget
 
@@ -170,6 +238,8 @@ class TextSettingUI(QWidget):
             "marquee_speed": self.marquee_speed_combobox.currentText(),
             "outline": self.outline_checkbox.isChecked(),
             "outline_color": self.outline_color_combobox.currentText(),
+            "text_source": self.text_source_combobox.currentData(),
+            "weather_location": self.weather_location_edit.text(),
         }
 
     def set_state(self, state: dict) -> None:
@@ -212,11 +282,21 @@ class TextSettingUI(QWidget):
             index = self.outline_color_combobox.findText(str(state["outline_color"]))
             if index >= 0:
                 self.outline_color_combobox.setCurrentIndex(index)
+        if state.get("text_source") is not None:
+            index = self.text_source_combobox.findData(str(state["text_source"]))
+            if index >= 0:
+                self.text_source_combobox.setCurrentIndex(index)
+        if state.get("weather_location") is not None:
+            self.weather_location_edit.setText(str(state["weather_location"]))
 
     def start_draw_text_on_screen(self) -> None:
         front_engine_logger.info("[TextSettingUI] start_draw_text_on_screen")
 
-        if not self.line_edit.text().strip():
+        # 動態來源不需要固定文字（樣板留白就用預設）；只有靜態文字必須填。
+        # Dynamic sources fall back to their default template, so only static
+        # text has to be filled in.
+        is_static = (self.text_source_combobox.currentData() or SOURCE_STATIC) == SOURCE_STATIC
+        if is_static and not self.line_edit.text().strip():
             QMessageBox.warning(self, "Warning", language_wrapper.language_word_dict.get("not_prepare"))
             return
 

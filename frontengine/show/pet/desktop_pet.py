@@ -1161,8 +1161,9 @@ class DesktopPetWidget(BaseWidget):
     PLAY_CHANCE = 0.25
 
     def set_pet_window_flag(self) -> None:
-        """寵物需接收滑鼠以便拖曳，故 allow_input=True 並置頂。"""
+        """寵物需接收滑鼠以便拖曳，故 allow_input=True 並置頂，也不參與全域鎖定。"""
         apply_overlay_window_flags(self, show_on_bottom=False, allow_input=True)
+        self.overlay_lockable = False
 
     def center(self) -> Tuple[int, int]:
         return (self.x() + self.width() // 2, self.y() + self.height() // 2)
