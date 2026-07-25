@@ -105,6 +105,43 @@ def classify_drop(path) -> Optional[str]:
     return DROP_SPRITE if target.suffix.lower() in _PACK_EXTS else DROP_FOOD
 
 
+# 食物種類（依副檔名猜）與各自的效果 / Food kinds guessed from the suffix
+FOOD_SNACK = "snack"    # 一般點心 / an ordinary snack
+FOOD_FEAST = "feast"    # 壓縮檔＝大餐 / an archive is a hearty meal
+FOOD_MUSIC = "music"    # 音樂檔＝聽了很開心 / music cheers it up more than it fills
+FOOD_BOOK = "book"      # 文件檔＝細嚼慢嚥 / a document is chewed slowly
+FOOD_HARD = "hard"      # 可執行檔＝咬不動 / a binary is too hard to chew
+
+_FOOD_SUFFIXES = {
+    FOOD_FEAST: (".zip", ".7z", ".rar", ".tar", ".gz", ".iso"),
+    FOOD_MUSIC: (".mp3", ".wav", ".ogg", ".flac", ".m4a", ".aac"),
+    FOOD_BOOK: (".txt", ".md", ".pdf", ".doc", ".docx", ".rtf", ".epub"),
+    FOOD_HARD: (".exe", ".dll", ".msi", ".sys", ".bat"),
+}
+
+# 每種食物的飽足／心情／親密度變化（心情為負代表不喜歡）
+# Fullness / mood / affection change per food kind (negative mood = dislikes it).
+FOOD_EFFECTS = {
+    FOOD_SNACK: {"fullness": 30, "mood": 12, "affection": 5},
+    FOOD_FEAST: {"fullness": 45, "mood": 8, "affection": 6},
+    FOOD_MUSIC: {"fullness": 15, "mood": 20, "affection": 5},
+    FOOD_BOOK: {"fullness": 20, "mood": 6, "affection": 4},
+    FOOD_HARD: {"fullness": 2, "mood": -6, "affection": 1},
+}
+
+
+def classify_food(path) -> str:
+    """依副檔名判斷食物種類；認不出來就當一般點心 / Guess the food kind from the suffix."""
+    try:
+        suffix = Path(path).suffix.lower()
+    except (OSError, TypeError, ValueError):
+        return FOOD_SNACK
+    for kind, suffixes in _FOOD_SUFFIXES.items():
+        if suffix in suffixes:
+            return kind
+    return FOOD_SNACK
+
+
 def derive_visual_state(dragging: bool, airborne: bool, surface: str, motion_state: str) -> str:
     """依目前情形推導應顯示的視覺狀態 / Derive which sprite state to show."""
     if dragging:
@@ -1164,6 +1201,10 @@ class DesktopPetWidget(BaseWidget):
             "battery": lines("pet_chatter_battery", "Battery's low - plug me in?|Low power!|Find a charger?"),
             "hungry": lines("pet_chatter_hungry", "I'm hungry...|Got a snack?|Feed me?"),
             "fed": lines("pet_chatter_fed", "Yum!|Thank you!|Delicious!"),
+            "fed_feast": lines("pet_chatter_fed_feast", "What a feast!|So full!|That was huge!"),
+            "fed_music": lines("pet_chatter_fed_music", "Tasty tune!|That one sings!|Encore!"),
+            "fed_book": lines("pet_chatter_fed_book", "Food for thought.|Chewy words!|Mmm, a story."),
+            "fed_hard": lines("pet_chatter_fed_hard", "Too hard to chew!|Ouch, my teeth!|Not food!"),
             "away": lines("pet_chatter_away", "Still there?|I'll nap till you're back~|Zzz..."),
             "levelup": lines("pet_chatter_levelup", "Level up!|I'm growing!|We're getting closer!"),
             "costume": lines("pet_chatter_costume", "New look!|How do I look?|Nice fit!"),
@@ -1333,14 +1374,19 @@ class DesktopPetWidget(BaseWidget):
     def _persist_hunger(self) -> None:
         user_setting_dict["pet_hunger"] = self._hunger.value
 
-    def feed(self) -> None:
-        """餵食：補足飽足並讓心情變好，說一句道謝。"""
-        self._hunger.feed()
-        self._mood.pet()
+    def feed(self, kind: str = FOOD_SNACK) -> None:
+        """餵食：依食物種類調整飽足與心情，並說一句對應的話。"""
+        effect = FOOD_EFFECTS.get(kind, FOOD_EFFECTS[FOOD_SNACK])
+        self._hunger.feed(effect["fullness"])
+        mood_change = effect["mood"]
+        if mood_change >= 0:
+            self._mood.pet(mood_change)
+        else:
+            self._mood.decay(-mood_change)
         self._persist_hunger()
         self._persist_mood()
-        self._gain_affection(5)
-        pool = self._messages.get("fed") or []
+        self._gain_affection(effect["affection"])
+        pool = self._messages.get(f"fed_{kind}") or self._messages.get("fed") or []
         if pool:
             self.say(pool[self._chatter_rng.randrange(len(pool))])
 
@@ -1484,7 +1530,7 @@ class DesktopPetWidget(BaseWidget):
         if classify_drop(path) == DROP_SPRITE:
             self.change_sprite(path)
         else:
-            self.feed()
+            self.feed(classify_food(path))
         event.acceptProposedAction()
 
     def contextMenuEvent(self, event) -> None:
