@@ -83,6 +83,9 @@ class ControlCenterUI(QWidget):
         self.chroma_key_button = self._create_button("control_center_chroma_key_on", self.toggle_chroma_key)
         self.reset_positions_button = self._create_button(
             "control_center_reset_positions", self.reset_overlay_positions)
+        self._low_power = False
+        self.low_power_button = self._create_button(
+            "control_center_low_power_on", self.toggle_low_power)
         self.clear_all_button = self._create_button("control_center_close_all", self.clear_all)
 
         # Log panel
@@ -108,8 +111,9 @@ class ControlCenterUI(QWidget):
         self.grid_layout.addWidget(self.lock_all_button, 10, 0)
         self.grid_layout.addWidget(self.chroma_key_button, 11, 0)
         self.grid_layout.addWidget(self.reset_positions_button, 12, 0)
-        self.grid_layout.addWidget(self.clear_all_button, 13, 0)
-        self.grid_layout.addWidget(self.log_panel_scroll_area, 0, 1, 14, 1)  # 明確指定 rowSpan, colSpan=1
+        self.grid_layout.addWidget(self.low_power_button, 13, 0)
+        self.grid_layout.addWidget(self.clear_all_button, 14, 0)
+        self.grid_layout.addWidget(self.log_panel_scroll_area, 0, 1, 15, 1)  # rowSpan covers every button
         self.setLayout(self.grid_layout)
 
         # Redirect
@@ -289,6 +293,27 @@ class ControlCenterUI(QWidget):
         """忘掉記住的覆蓋層位置，之後開的覆蓋層回到各自的預設顯示方式。"""
         front_engine_logger.info("ControlCenterUI reset_overlay_positions")
         clear_overlay_geometry()
+    def set_low_power(self, enabled: bool) -> None:
+        """省電模式：讓支援的覆蓋層把更新頻率調慢。"""
+        front_engine_logger.info(f"ControlCenterUI set_low_power | enabled={enabled}")
+        self._low_power = bool(enabled)
+
+        def apply(widget) -> None:
+            setter = getattr(widget, "set_low_power", None)
+            if setter is not None:
+                setter(self._low_power)
+
+        self._for_each_overlay(apply)
+        self.low_power_button.setText(
+            language_wrapper.language_word_dict.get(
+                "control_center_low_power_off" if self._low_power else "control_center_low_power_on",
+                "Low power off" if self._low_power else "Low power on",
+            )
+        )
+
+    def toggle_low_power(self) -> None:
+        """切換省電模式 / Toggle low-power mode."""
+        self.set_low_power(not getattr(self, "_low_power", False))
 
     def _sample_overlay_opacity(self) -> float:
         """取一個現有覆蓋層的不透明度作為起始值 / Seed from an existing overlay's opacity."""

@@ -187,6 +187,11 @@ traditional_chinese_word_dict = {
     "control_center_chroma_key_off": "關閉綠幕背景",
     "control_center_reset_positions": "重設覆蓋層位置",
     "hotkey_toggle_lock": "鎖定／解鎖覆蓋層",
+    "settings_menu_autostart": "開機時自動啟動",
+    "settings_menu_restore_session": "還原上次工作階段",
+    "settings_autostart_failed": "無法變更自動啟動設定。",
+    "control_center_low_power_on": "開啟省電模式",
+    "control_center_low_power_off": "關閉省電模式",
     "control_center_mute_all": "全部靜音",
     "control_center_unmute_all": "取消全部靜音",
     # Recent files

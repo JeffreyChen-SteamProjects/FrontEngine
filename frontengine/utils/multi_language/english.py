@@ -186,6 +186,11 @@ english_word_dict = {
     "control_center_chroma_key_off": "Chroma key off",
     "control_center_reset_positions": "Reset overlay positions",
     "hotkey_toggle_lock": "Lock / unlock overlays",
+    "settings_menu_autostart": "Start with the system",
+    "settings_menu_restore_session": "Restore last session",
+    "settings_autostart_failed": "Could not change the autostart setting.",
+    "control_center_low_power_on": "Low power on",
+    "control_center_low_power_off": "Low power off",
     "control_center_mute_all": "Mute all",
     "control_center_unmute_all": "Unmute all",
     # Recent files

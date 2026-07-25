@@ -16,6 +16,12 @@ from frontengine.show.window_helpers import apply_overlay_window_flags
 from frontengine.user_setting.user_setting_file import user_setting_dict
 from frontengine.utils.audio_meter.audio_envelope import AudioEnvelope
 from frontengine.utils.logging.loggin_instance import front_engine_logger
+from frontengine.utils.power_mode.power_mode import scaled_interval
+from frontengine.utils.platform_info.platform_info import (
+    idle_seconds as platform_idle_seconds,
+    read_battery as platform_read_battery,
+    standable_windows,
+)
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 # 行為模式 / Behaviour modes
@@ -212,75 +218,17 @@ def derive_visual_state(dragging: bool, airborne: bool, surface: str, motion_sta
     return STATE_WALK
 
 
-# 列舉可站立視窗時要略過的外殼視窗類別
-# Shell window classes skipped when enumerating standable windows.
-_PLATFORM_SKIP_CLASSES = {"WorkerW", "Progman", "Shell_TrayWnd", "Button"}
-
-
 def windows_platforms(exclude_hwnds=()) -> list:
     """
-    回傳目前可見頂層視窗的上緣做為可站立平台 (left, right, top_y)。僅 Windows
-    有效，其餘平台或發生錯誤時回傳空清單。
-    Return the top edges of visible top-level windows as standable platforms
-    (left, right, top_y). Windows only; returns [] elsewhere or on error.
+    回傳目前可站立的視窗上緣 (left, right, top_y)；各平台實作見 platform_info。
+    Standable window top edges; per-platform implementations live in platform_info.
     """
-    if sys.platform != "win32":
-        return []
-    try:
-        import ctypes
-        from ctypes import wintypes
-
-        user32 = ctypes.windll.user32
-        exclude = {int(h) for h in exclude_hwnds}
-        platforms: list = []
-
-        @ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
-        def _collect(hwnd, _lparam):
-            if int(hwnd) in exclude or not user32.IsWindowVisible(hwnd):
-                return True
-            rect = wintypes.RECT()
-            if not user32.GetWindowRect(hwnd, ctypes.byref(rect)):
-                return True
-            width = rect.right - rect.left
-            height = rect.bottom - rect.top
-            if width < 80 or height < 40:
-                return True
-            class_buffer = ctypes.create_unicode_buffer(64)
-            user32.GetClassNameW(hwnd, class_buffer, 64)
-            if class_buffer.value in _PLATFORM_SKIP_CLASSES:
-                return True
-            platforms.append((rect.left, rect.right, rect.top))
-            return True
-
-        user32.EnumWindows(_collect, 0)
-        return platforms
-    except Exception as error:  # pragma: no cover - Win32 boundary
-        front_engine_logger.warning(f"[windows_platforms] error: {error!r}")
-        return []
+    return standable_windows(exclude_hwnds)
 
 
 def idle_seconds():
-    """
-    回傳使用者未操作的秒數；無法取得時回傳 None。僅 Windows 實作。
-    Seconds since the last user input, or None when unavailable (Windows only).
-    """
-    if sys.platform != "win32":
-        return None
-    try:
-        import ctypes
-
-        class _LASTINPUTINFO(ctypes.Structure):
-            _fields_ = [("cbSize", ctypes.c_uint), ("dwTime", ctypes.c_uint)]
-
-        info = _LASTINPUTINFO()
-        info.cbSize = ctypes.sizeof(info)
-        if not ctypes.windll.user32.GetLastInputInfo(ctypes.byref(info)):
-            return None
-        elapsed_ms = ctypes.windll.kernel32.GetTickCount() - info.dwTime
-        return max(0.0, elapsed_ms / 1000.0)
-    except Exception as error:  # pragma: no cover - Win32 boundary
-        front_engine_logger.warning(f"[idle_seconds] error: {error!r}")
-        return None
+    """使用者未操作的秒數；取不到回傳 None（跨平台，見 platform_info）。"""
+    return platform_idle_seconds()
 
 
 class PetTimeline:
@@ -335,35 +283,8 @@ def pop_due_reminders(now, reminders):
 
 
 def read_battery():
-    """
-    回傳 (電量百分比, 是否充電中)；無法取得時回傳 None。僅 Windows 實作。
-    Return (percent, charging) or None when unavailable. Windows only.
-    """
-    if sys.platform != "win32":
-        return None
-    try:
-        import ctypes
-
-        class _SPS(ctypes.Structure):
-            _fields_ = [
-                ("ACLineStatus", ctypes.c_byte),
-                ("BatteryFlag", ctypes.c_byte),
-                ("BatteryLifePercent", ctypes.c_byte),
-                ("SystemStatusFlag", ctypes.c_byte),
-                ("BatteryLifeTime", ctypes.c_ulong),
-                ("BatteryFullLifeTime", ctypes.c_ulong),
-            ]
-
-        status = _SPS()
-        if not ctypes.windll.kernel32.GetSystemPowerStatus(ctypes.byref(status)):
-            return None
-        percent = status.BatteryLifePercent & 0xFF
-        if percent == 255:  # unknown / no battery
-            return None
-        return (int(percent), status.ACLineStatus == 1)
-    except Exception as error:  # pragma: no cover - Win32 boundary
-        front_engine_logger.warning(f"[read_battery] error: {error!r}")
-        return None
+    """回傳 (電量百分比, 是否充電中)；沒有電池或取不到回傳 None（跨平台）。"""
+    return platform_read_battery()
 
 
 def nearest_peer(center, peers):
@@ -1147,6 +1068,9 @@ class DesktopPetWidget(BaseWidget):
 
         self._timer = QTimer(self)
         self._timer.timeout.connect(self._on_tick)
+        # 省電模式與原始更新間隔 / Low-power state and the base tick interval
+        self._low_power = False
+        self._tick_interval_ms = 33
 
         # Speech bubbles / chatter / mood
         self._talk = bool(talk)
@@ -1417,6 +1341,12 @@ class DesktopPetWidget(BaseWidget):
             painter.drawPixmap(
                 QRect((self.width() - width) // 2, self.height() - height, width, height), pixmap)
 
+    def set_low_power(self, enabled: bool) -> None:
+        """省電模式：把移動更新拉慢（畫面較不順，但省電）。"""
+        self._low_power = bool(enabled)
+        if self._timer.isActive():
+            self._timer.start(scaled_interval(self._tick_interval_ms, self._low_power))
+
     def start_moving(self, bounds: Tuple[int, int, int, int], interval_ms: int = 33) -> None:
         front_engine_logger.info(f"[DesktopPetWidget] start_moving | bounds={bounds}")
         left, top, right, bottom = bounds
@@ -1424,7 +1354,8 @@ class DesktopPetWidget(BaseWidget):
         self.motion.x = float(left)
         self.motion.y = float(bottom - self.pet_size)
         self.move(int(self.motion.x), int(self.motion.y))
-        self._timer.start(max(10, int(interval_ms)))
+        self._tick_interval_ms = max(10, int(interval_ms))
+        self._timer.start(scaled_interval(self._tick_interval_ms, self._low_power))
         self._schedule_chatter()
         self._reminder_timer.start(10000)
         if self._timeline_start is None:
