@@ -10,7 +10,7 @@ dependencies, and the parsing is pure so it can be tested anywhere.
 """
 from __future__ import annotations
 
-import subprocess
+import subprocess  # nosec B404 - only runs the fixed, read-only argv in _ALLOWED_COMMANDS
 import sys
 from pathlib import Path
 from typing import List, Optional, Tuple
@@ -18,6 +18,15 @@ from typing import List, Optional, Tuple
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 
 _COMMAND_TIMEOUT = 3
+# 唯一允許執行的系統指令；argv 全部寫死在這裡，呼叫端只能指名，
+# 不可能把使用者輸入變成命令的一部分。
+# The only commands this module may run. Every argv is fixed here and callers
+# pass a name, so user input can never become part of a command line.
+_ALLOWED_COMMANDS = {
+    "macos_idle": ["ioreg", "-c", "IOHIDSystem"],
+    "macos_battery": ["pmset", "-g", "batt"],
+    "linux_windows": ["wmctrl", "-lG"],
+}
 # 桌面／工作列等外殼視窗類別，不視為可站立的程式視窗
 # Shell windows (desktop / taskbar) that must not count as standable.
 _PLATFORM_SKIP_CLASSES = {"WorkerW", "Progman", "Shell_TrayWnd", "Button"}
@@ -25,16 +34,24 @@ _MIN_WINDOW_WIDTH = 80
 _MIN_WINDOW_HEIGHT = 40
 
 
-def run_command(command: List[str]) -> Optional[str]:
+def run_command(name: str) -> Optional[str]:
     """
-    執行唯讀的系統指令並回傳輸出；指令不存在、逾時或失敗回傳 None。
-    永遠使用 list 形式、不經 shell（不接受使用者輸入）。
-    Run a read-only system command, returning its output or None. Always list
-    form, never a shell — these commands take no user input.
+    執行 _ALLOWED_COMMANDS 裡的唯讀系統指令並回傳輸出；未列入白名單、
+    指令不存在、逾時或失敗都回傳 None。list 形式、不經 shell、無使用者輸入。
+    Run one of the read-only commands in `_ALLOWED_COMMANDS` and return its
+    output, or None. List form, no shell, and no user input reaches it.
     """
+    command = _ALLOWED_COMMANDS.get(name)
+    if command is None:
+        front_engine_logger.warning(f"[platform_info] refusing unknown command: {name!r}")
+        return None
     try:
-        completed = subprocess.run(  # noqa: S603 - fixed argv, no shell, no user input
-            command, capture_output=True, text=True, timeout=_COMMAND_TIMEOUT, check=False)
+        # nosec B603 - argv is a constant from _ALLOWED_COMMANDS; shell=False and
+        # no caller-supplied text can reach this call.
+        completed = subprocess.run(  # noqa: S603
+            command, capture_output=True, text=True, timeout=_COMMAND_TIMEOUT, check=False,
+            shell=False,
+        )
     except (OSError, subprocess.SubprocessError) as error:
         front_engine_logger.debug(f"[platform_info] {command[0]} unavailable: {error!r}")
         return None
@@ -61,7 +78,7 @@ def idle_seconds() -> Optional[float]:
     if sys.platform == "win32":
         return _idle_seconds_windows()
     if sys.platform == "darwin":
-        output = run_command(["ioreg", "-c", "IOHIDSystem"])
+        output = run_command("macos_idle")
         return parse_macos_idle(output) if output else None
     return _idle_seconds_x11()
 
@@ -159,7 +176,7 @@ def read_battery() -> Optional[Tuple[int, bool]]:
     if sys.platform == "win32":
         return _read_battery_windows()
     if sys.platform == "darwin":
-        output = run_command(["pmset", "-g", "batt"])
+        output = run_command("macos_battery")
         return parse_macos_battery(output) if output else None
     return read_linux_battery()
 
@@ -217,7 +234,7 @@ def standable_windows(exclude_handles=()) -> List[Tuple[int, int, int]]:
         return _standable_windows_windows(exclude_handles)
     if sys.platform == "darwin":
         return []  # needs a native API binding; degrades to "floor only"
-    output = run_command(["wmctrl", "-lG"])
+    output = run_command("linux_windows")
     return parse_wmctrl_geometry(output) if output else []
 
 

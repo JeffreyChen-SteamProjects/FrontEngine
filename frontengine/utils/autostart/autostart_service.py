@@ -13,13 +13,22 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 from typing import List, Optional
-from xml.sax.saxutils import escape
 
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 
 APP_NAME = "FrontEngine"
 LAUNCH_AGENT_LABEL = "com.frontengine.autostart"
 _DESKTOP_FILE = "frontengine.desktop"
+
+
+def escape_xml(text) -> str:
+    """
+    跳脫 plist 需要的三個字元。這裡只產生輸出、不解析任何 XML，所以不引入
+    XML 解析器（也就沒有 XXE 那類疑慮）。
+    Escape the three characters a plist needs. This only writes XML — nothing
+    here parses it — so no XML parser is pulled in.
+    """
+    return str(text).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
 def launch_command() -> List[str]:
@@ -57,7 +66,7 @@ def desktop_entry_text(command: List[str], app_name: str = APP_NAME) -> str:
 
 def launch_agent_plist(command: List[str], label: str = LAUNCH_AGENT_LABEL) -> str:
     """產生 macOS LaunchAgent 用的 plist 內容。"""
-    arguments = "".join(f"        <string>{escape(str(part))}</string>\n" for part in command)
+    arguments = "".join(f"        <string>{escape_xml(part)}</string>\n" for part in command)
     return (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" '
@@ -65,7 +74,7 @@ def launch_agent_plist(command: List[str], label: str = LAUNCH_AGENT_LABEL) -> s
         '<plist version="1.0">\n'
         "<dict>\n"
         "    <key>Label</key>\n"
-        f"    <string>{escape(label)}</string>\n"
+        f"    <string>{escape_xml(label)}</string>\n"
         "    <key>ProgramArguments</key>\n"
         "    <array>\n"
         f"{arguments}"

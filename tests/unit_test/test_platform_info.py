@@ -97,8 +97,10 @@ def test_wmctrl_geometry_tolerates_junk() -> None:
 
 
 # --- live probes ----------------------------------------------------------
-def test_run_command_returns_none_for_a_missing_binary() -> None:
-    assert run_command(["frontengine-not-a-real-binary", "--version"]) is None
+def test_run_command_refuses_anything_not_allowlisted() -> None:
+    assert run_command("rm -rf /") is None
+    assert run_command("unknown_probe") is None
+    assert run_command("") is None
 
 
 def test_idle_seconds_shape() -> None:
