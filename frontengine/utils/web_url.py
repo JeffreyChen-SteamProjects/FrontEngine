@@ -28,6 +28,32 @@ def _youtube_video_id(url: str) -> Optional[str]:
     return None
 
 
+def parse_dashboard_urls(text: str) -> list:
+    """
+    把多行文字拆成儀表板網址清單：一行一個，忽略空行與 `#` 開頭的註解。
+    Split multi-line text into dashboard URLs — one per line, ignoring blank
+    lines and `#` comments.
+    """
+    if not isinstance(text, str):
+        return []
+    urls = []
+    for line in text.splitlines():
+        candidate = line.strip()
+        if candidate and not candidate.startswith("#"):
+            urls.append(candidate)
+    return urls
+
+
+def next_page_index(current: int, count: int, step: int = 1) -> int:
+    """回傳下一頁索引（循環）；沒有頁面時回傳 0。"""
+    if count <= 0:
+        return 0
+    try:
+        return (int(current) + int(step)) % count
+    except (TypeError, ValueError):
+        return 0
+
+
 def normalize_web_url(url: str) -> str:
     """
     將 YouTube 觀看連結轉為可自動播放、循環的內嵌網址，方便當成覆蓋層播放；

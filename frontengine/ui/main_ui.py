@@ -23,6 +23,8 @@ from frontengine.ui.page.image.image_setting_ui import ImageSettingUI
 from frontengine.ui.page.particle.particle_setting_ui import ParticleSettingUI
 from frontengine.ui.page.pet.pet_setting_ui import PetSettingUI
 from frontengine.ui.page.scene_setting.scene_setting_ui import SceneSettingUI
+from frontengine.ui.page.presentation.presentation_setting_ui import PresentationSettingUI
+from frontengine.ui.page.screen_care.screen_care_setting_ui import ScreenCareSettingUI
 from frontengine.ui.page.sound_player.sound_player_setting_ui import SoundPlayerSettingUI
 from frontengine.ui.page.text.text_setting_ui import TextSettingUI
 from frontengine.ui.page.video.video_setting_ui import VideoSettingUI
@@ -103,6 +105,8 @@ class FrontEngineMainUI(QMainWindow):
         self.scene_setting_ui = SceneSettingUI()
         self.particle_setting_ui = ParticleSettingUI()
         self.pet_setting_ui = PetSettingUI()
+        self.screen_care_setting_ui = ScreenCareSettingUI()
+        self.presentation_setting_ui = PresentationSettingUI()
 
         # 控制中心
         # Control Center
@@ -209,6 +213,8 @@ class FrontEngineMainUI(QMainWindow):
             (self.scene_setting_ui, "tab_scene_text"),
             (self.particle_setting_ui, "tab_particle_text"),
             (self.pet_setting_ui, "tab_pet_text"),
+            (self.screen_care_setting_ui, "tab_screen_care_text"),
+            (self.presentation_setting_ui, "tab_presentation_text"),
             (self.control_center_ui, "tab_control_center_text"),
         ]
 
@@ -326,6 +332,10 @@ class FrontEngineMainUI(QMainWindow):
             self.control_center_ui.step_opacity_all(0.1)
         elif action == "opacity_down":
             self.control_center_ui.step_opacity_all(-0.1)
+        elif action == "dashboard_next":
+            self.web_setting_ui.show_next_dashboard_page()
+        elif action == "toggle_lock":
+            self.control_center_ui.toggle_lock_all()
 
     def _on_fullscreen_changed(self, fullscreen_active: bool) -> None:
         """
