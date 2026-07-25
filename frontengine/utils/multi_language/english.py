@@ -180,6 +180,12 @@ english_word_dict = {
     "target_monitor_ask": "Ask",
     "control_center_hide_all": "Hide all",
     "control_center_show_all": "Show all",
+    "control_center_lock_all": "Lock overlays",
+    "control_center_unlock_all": "Unlock overlays",
+    "control_center_chroma_key_on": "Chroma key on",
+    "control_center_chroma_key_off": "Chroma key off",
+    "control_center_reset_positions": "Reset overlay positions",
+    "hotkey_toggle_lock": "Lock / unlock overlays",
     "control_center_mute_all": "Mute all",
     "control_center_unmute_all": "Unmute all",
     # Recent files

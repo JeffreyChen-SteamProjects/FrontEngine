@@ -181,6 +181,12 @@ traditional_chinese_word_dict = {
     "target_monitor_ask": "詢問",
     "control_center_hide_all": "全部隱藏",
     "control_center_show_all": "全部顯示",
+    "control_center_lock_all": "鎖定覆蓋層",
+    "control_center_unlock_all": "解鎖覆蓋層",
+    "control_center_chroma_key_on": "開啟綠幕背景",
+    "control_center_chroma_key_off": "關閉綠幕背景",
+    "control_center_reset_positions": "重設覆蓋層位置",
+    "hotkey_toggle_lock": "鎖定／解鎖覆蓋層",
     "control_center_mute_all": "全部靜音",
     "control_center_unmute_all": "取消全部靜音",
     # Recent files

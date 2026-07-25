@@ -31,6 +31,7 @@ _ACTION_LABELS: Dict[str, Tuple[str, str]] = {
     "opacity_up": ("hotkey_opacity_up", "Opacity up"),
     "opacity_down": ("hotkey_opacity_down", "Opacity down"),
     "dashboard_next": ("web_dashboard_next", "Next page"),
+    "toggle_lock": ("hotkey_toggle_lock", "Lock / unlock overlays"),
 }
 
 

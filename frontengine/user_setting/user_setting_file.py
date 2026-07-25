@@ -1,6 +1,6 @@
 from os import getcwd
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from frontengine.utils.json.json_repository import JsonRepository
 from frontengine.utils.preset_schedule.preset_schedule_service import DEFAULT_PRESET_SCHEDULE
@@ -16,6 +16,7 @@ default_hotkeys: Dict[str, str] = {
     "opacity_up": "<ctrl>+<shift>+<up>",
     "opacity_down": "<ctrl>+<shift>+<down>",
     "dashboard_next": "<ctrl>+<shift>+<right>",
+    "toggle_lock": "<ctrl>+<shift>+l",
 }
 
 user_setting_dict: Dict[str, Any] = {
@@ -34,6 +35,9 @@ user_setting_dict: Dict[str, Any] = {
     # 每天在指定時間自動套用預設集
     # Auto-apply a preset at a configured time each day
     "preset_schedule": dict(DEFAULT_PRESET_SCHEDULE),
+    # 使用者拖曳過的覆蓋層位置：類別名稱 -> [x, y, 寬, 高]
+    # Overlay positions the user dragged into place: class name -> [x, y, w, h]
+    "overlay_geometry": {},
     # 桌面寵物心情值（0~100），跨工作階段保存
     # Desktop pet mood (0..100), persisted across sessions
     "pet_mood": 60,
@@ -84,6 +88,34 @@ def import_user_setting(source: Path) -> None:
         raise ValueError("Settings file must contain a JSON object")
     user_setting_dict.update(data)
     write_user_setting()
+
+
+def save_overlay_geometry(kind: str, x: int, y: int, width: int, height: int) -> None:
+    """記住某類覆蓋層被拖曳到的位置與大小 / Remember where an overlay was dragged."""
+    geometry = user_setting_dict.get("overlay_geometry")
+    if not isinstance(geometry, dict):
+        geometry = {}
+        user_setting_dict["overlay_geometry"] = geometry
+    geometry[str(kind)] = [int(x), int(y), int(width), int(height)]
+
+
+def get_overlay_geometry(kind: str) -> Optional[List[int]]:
+    """回傳該類覆蓋層記住的 [x, y, 寬, 高]；沒有或格式錯誤回傳 None。"""
+    geometry = user_setting_dict.get("overlay_geometry")
+    if not isinstance(geometry, dict):
+        return None
+    values = geometry.get(str(kind))
+    if not isinstance(values, (list, tuple)) or len(values) != 4:
+        return None
+    try:
+        return [int(value) for value in values]
+    except (TypeError, ValueError):
+        return None
+
+
+def clear_overlay_geometry() -> None:
+    """忘掉所有記住的覆蓋層位置，讓它們回到各自預設的顯示方式。"""
+    user_setting_dict["overlay_geometry"] = {}
 
 
 def get_hotkey_bindings() -> Dict[str, str]:
