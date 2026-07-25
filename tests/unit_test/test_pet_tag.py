@@ -26,7 +26,7 @@ def test_the_chaser_heads_for_its_nearest_peer() -> None:
     game = PetTagGame()
     game.it = "a"
     roles = game.update({"a": (0, 0), "b": (700, 0), "c": (300, 0)})
-    assert roles["a"] == (TAG_CHASE, 300)
+    assert roles["a"] == (TAG_CHASE, 300.0, 0.0)
 
 
 def test_runners_head_away_from_the_chaser() -> None:
@@ -35,6 +35,24 @@ def test_runners_head_away_from_the_chaser() -> None:
     roles = game.update({"a": (400, 0), "b": (600, 0), "c": (200, 0)})
     assert roles["b"][1] > 600, "a peer on the right runs further right"
     assert roles["c"][1] < 200, "a peer on the left runs further left"
+
+
+def test_runners_flee_diagonally_when_they_are_not_in_line() -> None:
+    game = PetTagGame(flee_distance=100.0)
+    game.it = "a"
+    roles = game.update({"a": (0, 0), "b": (60, 80)})  # 3-4-5 triangle, out of reach
+    _role, target_x, target_y = roles["b"]
+    assert round(target_x) == 120, "runs 100 further along the same direction"
+    assert round(target_y) == 160
+
+
+def test_overlapping_runners_still_get_a_direction() -> None:
+    # Seeded by update() so the opening cooldown holds the tag off, leaving two
+    # pets standing on exactly the same spot with no direction to flee along.
+    game = PetTagGame(flee_distance=50.0, cooldown_ticks=99)
+    roles = game.update({"a": (100, 100), "b": (100, 100)})
+    assert game.it == "a"
+    assert roles["b"] == (TAG_FLEE, 150.0, 100.0)
 
 
 def test_catching_passes_the_tag_on() -> None:
@@ -112,7 +130,7 @@ def test_the_chase_converges_when_the_chaser_is_faster() -> None:
         if game.just_tagged is not None:
             tagged = True
             break
-        for key, (role, target_x) in roles.items():
+        for key, (role, target_x, _target_y) in roles.items():
             speed = 6.0 if role == TAG_CHASE else 3.0
             step = speed if target_x > positions[key][0] else -speed
             positions[key][0] += step
