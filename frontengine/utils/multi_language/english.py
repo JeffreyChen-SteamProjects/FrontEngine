@@ -238,6 +238,9 @@ english_word_dict = {
     "pet_chatter_fed": "Yum!|Thank you!|Delicious!|Nom nom (^o^)",
     "pet_chatter_away": "Still there?|I'll nap till you're back~|Zzz...|Take your time!",
     "pet_chatter_levelup": "Level up!|I'm growing!|We're getting closer!|Yay, thank you!",
+    "pet_chatter_costume": "New look!|How do I look?|Nice fit!|I like this one!",
+    "pet_drop_hint": "Tip: drop an image or pet pack onto the pet to change its look, "
+                     "or any other file to feed it.",
     "pet_set_reminder": "Set reminder...",
     "pet_reminder_prompt": "Remind me to:",
     "pet_reminder_minutes": "In how many minutes?",

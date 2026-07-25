@@ -93,6 +93,12 @@ class PetSettingUI(QWidget):
         self.volume_combobox.setCurrentText("100%")
         self.audio_react_checkbox = QCheckBox(
             language_wrapper.language_word_dict.get("pet_audio_label", "React to audio"))
+        self.drop_hint_label = QLabel(
+            language_wrapper.language_word_dict.get(
+                "pet_drop_hint",
+                "Tip: drop an image or pet pack onto the pet to change its look, "
+                "or any other file to feed it."))
+        self.drop_hint_label.setWordWrap(True)
 
         # Start
         self.start_button = QPushButton(language_wrapper.language_word_dict.get("pet_start", "Spawn pet"))
@@ -128,6 +134,7 @@ class PetSettingUI(QWidget):
         self.grid_layout.addWidget(self.volume_label, 6, 2)
         self.grid_layout.addWidget(self.volume_combobox, 7, 2)
         self.grid_layout.addWidget(self.audio_react_checkbox, 7, 0)
+        self.grid_layout.addWidget(self.drop_hint_label, 8, 0, 1, 3)
 
     def _spawn_pet(self) -> None:
         """建立、顯示並開始移動一隻寵物（供 Start 與右鍵複製共用）。"""
