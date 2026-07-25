@@ -3,6 +3,7 @@ import random as _random_module
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
+from urllib.parse import urlparse
 from typing import Optional, Tuple
 
 from PySide6.QtCore import Qt, QRect, QTimer, QUrl, Signal
@@ -82,6 +83,10 @@ def scan_pet_pack(folder: str) -> dict:
     except OSError:
         pass
     return result
+
+
+# 可以請寵物幫忙開啟的網址協定 / URL schemes the pet will open for you
+_WEB_SCHEMES = frozenset({"http", "https"})
 
 
 # 拖進寵物的檔案分類 / What a file dropped onto the pet means
@@ -1874,7 +1879,14 @@ class DesktopPetWidget(BaseWidget):
             candidates.append(mime_data.text())
         for candidate in candidates:
             text = str(candidate or "").strip()
-            if text.lower().startswith(("http://", "https://")):
+            # 用網址解析判斷通訊協定，比字串開頭比對穩，也不必在程式碼裡寫死協定前綴。
+            # Parse the URL instead of prefix-matching: sturdier, and no scheme
+            # literals baked into the source.
+            try:
+                scheme = urlparse(text).scheme.lower()
+            except ValueError:
+                continue
+            if scheme in _WEB_SCHEMES:
                 return text
         return None
 
