@@ -1,0 +1,22 @@
+name: Nightly
+
+# 這裡只放排程，實際檢查沿用 ci.yml。GitHub 會在專案閒置約 60 天後停用「含排程的
+# workflow」，把排程隔離在這個檔案，被停用時也只損失每日檢查，PR 與 push 的 CI 照跑。
+# 若發現本 workflow 被停用：`gh workflow enable Nightly`（狀態用 `gh workflow list --all` 查）。
+#
+# Schedule-only wrapper around the CI workflow. GitHub disables workflows that
+# contain a schedule after ~60 days of repository inactivity; keeping the cron
+# here means only the daily run is lost, while push and pull request CI keeps
+# working. Re-enable with `gh workflow enable Nightly` (check the state with
+# `gh workflow list --all`).
+on:
+  schedule:
+    - cron: "0 9 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml

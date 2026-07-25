@@ -1,12 +1,20 @@
 name: CI
 
+# 注意：本檔刻意不放 schedule 觸發。GitHub 會在專案閒置約 60 天後自動停用「含排程的
+# workflow」，那會連 push / pull_request 的檢查一起停掉（曾實際發生）。排程改放在
+# nightly.yml，它再呼叫本 workflow；就算 nightly 被停用，PR 與 push 的 CI 仍會照跑。
+#
+# NOTE: no `schedule:` trigger here on purpose. GitHub disables workflows that
+# contain a schedule after ~60 days of repository inactivity, which takes the
+# push/pull_request checks down with it (this happened). The cron lives in
+# nightly.yml and calls this workflow instead, so PR and push CI keep running
+# even if the nightly one is disabled.
 on:
   push:
     branches: [main, dev]
   pull_request:
     branches: [main, dev]
-  schedule:
-    - cron: "0 9 * * *"
+  workflow_call:
 
 permissions:
   contents: read
