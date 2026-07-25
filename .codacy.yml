@@ -1,0 +1,10 @@
+---
+# 測試碼不納入靜態分析：pytest 本來就以 assert 斷言（Bandit B101）、
+# 用 random 產生可重現的測試資料（B311），並以動態匯入巡覽套件模組，
+# 這些在測試情境下都是預期用法，掃描只會產生誤報。
+#
+# Exclude test code from static analysis: pytest asserts by design (Bandit
+# B101), uses random for reproducible fixtures (B311) and imports modules
+# dynamically to walk the package — all expected in tests, and only noise here.
+exclude_paths:
+  - 'tests/**'
