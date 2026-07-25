@@ -22,11 +22,7 @@ _COMMAND_TIMEOUT = 3
 # 不可能把使用者輸入變成命令的一部分。
 # The only commands this module may run. Every argv is fixed here and callers
 # pass a name, so user input can never become part of a command line.
-_ALLOWED_COMMANDS = {
-    "macos_idle": ["ioreg", "-c", "IOHIDSystem"],
-    "macos_battery": ["pmset", "-g", "batt"],
-    "linux_windows": ["wmctrl", "-lG"],
-}
+_ALLOWED_COMMANDS = {}  # name -> runner, filled in below once the runners exist
 # 桌面／工作列等外殼視窗類別，不視為可站立的程式視窗
 # Shell windows (desktop / taskbar) that must not count as standable.
 _PLATFORM_SKIP_CLASSES = {"WorkerW", "Progman", "Shell_TrayWnd", "Button"}
@@ -34,28 +30,56 @@ _MIN_WINDOW_WIDTH = 80
 _MIN_WINDOW_HEIGHT = 40
 
 
+def _output_of(completed) -> Optional[str]:
+    """指令成功才回傳輸出，否則 None。"""
+    return completed.stdout if completed.returncode == 0 else None
+
+
+def _macos_idle_output() -> Optional[str]:
+    return _output_of(subprocess.run(  # nosec B603 # nosemgrep - literal argv, shell=False
+        ["ioreg", "-c", "IOHIDSystem"],
+        capture_output=True, text=True, timeout=_COMMAND_TIMEOUT, check=False, shell=False))
+
+
+def _macos_battery_output() -> Optional[str]:
+    return _output_of(subprocess.run(  # nosec B603 # nosemgrep - literal argv, shell=False
+        ["pmset", "-g", "batt"],
+        capture_output=True, text=True, timeout=_COMMAND_TIMEOUT, check=False, shell=False))
+
+
+def _linux_windows_output() -> Optional[str]:
+    return _output_of(subprocess.run(  # nosec B603 # nosemgrep - literal argv, shell=False
+        ["wmctrl", "-lG"],
+        capture_output=True, text=True, timeout=_COMMAND_TIMEOUT, check=False, shell=False))
+
+
+_ALLOWED_COMMANDS.update({
+    "macos_idle": _macos_idle_output,
+    "macos_battery": _macos_battery_output,
+    "linux_windows": _linux_windows_output,
+})
+
+
 def run_command(name: str) -> Optional[str]:
     """
-    執行 _ALLOWED_COMMANDS 裡的唯讀系統指令並回傳輸出；未列入白名單、
-    指令不存在、逾時或失敗都回傳 None。list 形式、不經 shell、無使用者輸入。
-    Run one of the read-only commands in `_ALLOWED_COMMANDS` and return its
-    output, or None. List form, no shell, and no user input reaches it.
+    執行白名單內的唯讀系統指令並回傳輸出；名稱不在白名單、指令不存在、逾時或
+    失敗都回傳 None。每個指令的 argv 寫死在各自的函式裡，呼叫端只能指名，
+    使用者輸入不可能變成命令的一部分，也不經過 shell。
+
+    Run one of the allowlisted read-only commands and return its output, or
+    None. Each command's argv is a literal inside its own function and callers
+    only pass a name, so user input can never become part of a command line —
+    and nothing goes through a shell.
     """
-    command = _ALLOWED_COMMANDS.get(name)
-    if command is None:
+    runner = _ALLOWED_COMMANDS.get(name)
+    if runner is None:
         front_engine_logger.warning(f"[platform_info] refusing unknown command: {name!r}")
         return None
     try:
-        # nosec B603 - argv is a constant from _ALLOWED_COMMANDS; shell=False and
-        # no caller-supplied text can reach this call.
-        completed = subprocess.run(  # noqa: S603
-            command, capture_output=True, text=True, timeout=_COMMAND_TIMEOUT, check=False,
-            shell=False,
-        )
+        return runner()
     except (OSError, subprocess.SubprocessError) as error:
-        front_engine_logger.debug(f"[platform_info] {command[0]} unavailable: {error!r}")
+        front_engine_logger.debug(f"[platform_info] {name} unavailable: {error!r}")
         return None
-    return completed.stdout if completed.returncode == 0 else None
 
 
 # --- idle time ------------------------------------------------------------
