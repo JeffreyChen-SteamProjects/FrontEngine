@@ -328,6 +328,92 @@ def nearest_peer(center, peers):
     return best, best_distance
 
 
+# 鬼抓人角色 / Roles in the tag game
+TAG_CHASE = "chase"
+TAG_FLEE = "flee"
+
+
+class PetTagGame:
+    """
+    多隻寵物的鬼抓人：一隻當鬼追最近的同伴，其他往反方向逃；抓到就換人當鬼，
+    並有短暫冷卻避免立刻抓回去。純邏輯、不依賴 Qt，由外部每一拍餵入座標。
+
+    Tag between pets: one is "it" and chases its nearest peer while the others
+    run the other way; catching someone passes "it" on, with a short cooldown so
+    the tag cannot bounce straight back. Pure logic — positions are fed in each
+    tick from outside.
+    """
+
+    CATCH_DISTANCE = 60.0
+    FLEE_DISTANCE = 220.0
+    COOLDOWN_TICKS = 20
+
+    def __init__(self, catch_distance: float = CATCH_DISTANCE, flee_distance: float = FLEE_DISTANCE,
+                 cooldown_ticks: int = COOLDOWN_TICKS) -> None:
+        self.catch_distance = float(catch_distance)
+        self.flee_distance = float(flee_distance)
+        self.cooldown_ticks = max(0, int(cooldown_ticks))
+        self.it = None
+        self.just_tagged = None
+        self._cooldown = 0
+
+    def reset(self) -> None:
+        """重置遊戲（參與者換人或停玩時呼叫）。"""
+        self.it = None
+        self.just_tagged = None
+        self._cooldown = 0
+
+    @staticmethod
+    def _nearest(positions: dict, source):
+        """回傳離 source 最近的其他參與者 (id, 距離)；只有一人時回傳 (None, inf)。"""
+        source_x, source_y = positions[source]
+        best, best_distance = None, float("inf")
+        for participant, (x, y) in positions.items():
+            if participant == source:
+                continue
+            distance = ((x - source_x) ** 2 + (y - source_y) ** 2) ** 0.5
+            if distance < best_distance:
+                best, best_distance = participant, distance
+        return best, best_distance
+
+    def update(self, positions: dict) -> dict:
+        """
+        餵入 {參與者: (x, y)}，回傳 {參與者: (角色, 目標 x)}。少於兩人時不開局。
+        Feed in {participant: (x, y)} and get {participant: (role, target_x)}.
+        """
+        self.just_tagged = None
+        if not positions or len(positions) < 2:
+            self.reset()
+            return {}
+        if self.it not in positions:
+            self.it = sorted(positions)[0]
+            self._cooldown = self.cooldown_ticks
+        # 冷卻期間只是跑給對方追，不換鬼；先判斷再遞減，冷卻 N 拍就真的保護 N 拍。
+        # While cooling down nobody can be tagged; check before decrementing so a
+        # cooldown of N protects exactly N updates.
+        can_tag = self._cooldown <= 0
+        if self._cooldown > 0:
+            self._cooldown -= 1
+        prey, distance = self._nearest(positions, self.it)
+        if prey is not None and can_tag and distance <= self.catch_distance:
+            self.it = prey
+            self.just_tagged = prey
+            self._cooldown = self.cooldown_ticks
+            prey, _distance = self._nearest(positions, self.it)
+        return self._roles(positions, prey)
+
+    def _roles(self, positions: dict, prey) -> dict:
+        """依目前的鬼與獵物組出每個人的角色與要走向的 x。"""
+        it_x, _it_y = positions[self.it]
+        roles = {self.it: (TAG_CHASE, positions[prey][0] if prey is not None else it_x)}
+        for participant, (x, _y) in positions.items():
+            if participant == self.it:
+                continue
+            away = self.flee_distance if x >= it_x else -self.flee_distance
+            roles[participant] = (TAG_FLEE, x + away)
+        return roles
+
+
 def message_bucket(hour: int) -> str:
     """依小時回傳時段 / Time-of-day bucket for the given hour."""
     hour = int(hour) % 24
@@ -969,6 +1055,8 @@ class DesktopPetWidget(BaseWidget):
         self._peers_provider = None
         self._peer_greeted = False
         self._peer_tick = 0
+        # 鬼抓人角色（由外部的 PetTagGame 指派）/ Tag role assigned by a PetTagGame
+        self._tag_role = None
         # 電量提醒 / Low-battery reaction
         self._battery_provider = read_battery
         self._battery_warned = False
@@ -1021,8 +1109,31 @@ class DesktopPetWidget(BaseWidget):
         """設定回傳其他寵物中心座標清單的函式 / Provider of other pets' centres."""
         self._peers_provider = provider
 
+    def apply_tag_role(self, role) -> None:
+        """
+        套用鬼抓人角色 (角色, 目標 x)；None 代表沒在玩，恢復平常的同伴互動。
+        Apply a tag role; None means the game is off and normal peer play resumes.
+        """
+        if role is None:
+            if self._tag_role is not None:
+                self._tag_role = None
+                self.motion.clear_follow()
+            return
+        self._tag_role, target_x = role
+        self.motion.wake()
+        self.motion.set_follow(target_x)
+
+    def on_tagged(self) -> None:
+        """換自己當鬼時喊一句 / Shout when the tag lands on this pet."""
+        self._gain_affection(1)
+        pool = self._messages.get("tag") or []
+        if pool:
+            self.say(pool[self._chatter_rng.randrange(len(pool))])
+
     def _check_peers(self) -> None:
         """靠近其他寵物時走過去玩耍、抵達後轉向打招呼（帶遲滯，避免重複）。"""
+        if self._tag_role is not None:
+            return  # the tag game owns where this pet is heading
         if self._peers_provider is None:
             return
         try:
@@ -1208,6 +1319,7 @@ class DesktopPetWidget(BaseWidget):
             "away": lines("pet_chatter_away", "Still there?|I'll nap till you're back~|Zzz..."),
             "levelup": lines("pet_chatter_levelup", "Level up!|I'm growing!|We're getting closer!"),
             "costume": lines("pet_chatter_costume", "New look!|How do I look?|Nice fit!"),
+            "tag": lines("pet_chatter_tag", "You're it!|Caught you!|My turn to chase!"),
             "any": lines("pet_chatter_any", "Hi there!|(^_^)|Keep going!"),
         }
 
