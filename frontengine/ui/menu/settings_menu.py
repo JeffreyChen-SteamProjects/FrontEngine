@@ -44,6 +44,13 @@ def build_settings_menu(ui: "FrontEngineMainUI") -> None:
     menu.addAction(theme_schedule_action)
     ui.theme_schedule_action = theme_schedule_action
 
+    plugins_action = QAction(_t("settings_menu_plugins", "Load plugins (advanced)"), menu)
+    plugins_action.setCheckable(True)
+    plugins_action.setChecked(bool(user_setting_dict.get("load_plugins")))
+    plugins_action.toggled.connect(lambda checked: _toggle_plugins(ui, checked))
+    menu.addAction(plugins_action)
+    ui.plugins_action = plugins_action
+
     menu.addSeparator()
     export_action = QAction(_t("settings_menu_export", "Export settings..."), menu)
     export_action.triggered.connect(lambda: _export_settings(ui))
@@ -52,6 +59,26 @@ def build_settings_menu(ui: "FrontEngineMainUI") -> None:
     import_action = QAction(_t("settings_menu_import", "Import settings..."), menu)
     import_action.triggered.connect(lambda: _import_settings(ui))
     menu.addAction(import_action)
+
+
+def _toggle_plugins(ui: "FrontEngineMainUI", enabled: bool) -> None:
+    """
+    開關外掛載入。外掛是 Python 程式、與本程式同權限，無法沙箱化，
+    因此開啟時明確告知風險，並在下次啟動才生效。
+    Toggle plugin loading. Plugins are Python and run with this application's
+    own privileges — they cannot be sandboxed — so say so plainly when it is
+    switched on. It takes effect on the next launch.
+    """
+    user_setting_dict["load_plugins"] = bool(enabled)
+    write_user_setting()
+    if enabled:
+        QMessageBox.warning(
+            ui,
+            _t("settings_menu_plugins", "Load plugins (advanced)"),
+            _t("settings_plugins_warning",
+               "Plugins are Python code and run with the same privileges as FrontEngine. "
+               "Only install plugins you trust. Takes effect on the next launch."),
+        )
 
 
 def _toggle_theme_schedule(ui: "FrontEngineMainUI", enabled: bool) -> None:

@@ -37,6 +37,7 @@ from frontengine.utils.critical_exit.win32_vk import keyboard_keys_table
 from frontengine.utils.hotkey.hotkey_service import HotkeyService
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
+from frontengine.utils.plugins.plugin_loader import load_plugins
 from frontengine.utils.preset_schedule.preset_schedule_service import PresetScheduleService
 from frontengine.utils.smart_pause.smart_pause_service import SmartPauseService
 from frontengine.utils.theme_schedule.theme_schedule_service import ThemeScheduleService
@@ -123,6 +124,13 @@ class FrontEngineMainUI(QMainWindow):
         # Menu Bar
         self.menu_bar = QMenuBar()
         self.setMenuBar(self.menu_bar)
+
+        # 使用者明確開啟時才載入外掛（外掛與本程式同權限，無法沙箱化）
+        # Plugins load only when explicitly enabled; they run with our privileges.
+        loaded_plugins = load_plugins(
+            FrontEngine_EXTEND_TAB, enabled=bool(user_setting_dict.get("load_plugins")))
+        if loaded_plugins:
+            front_engine_logger.info(f"[FrontEngineMainUI] plugin tabs: {loaded_plugins}")
 
         # 加入各 Tab
         # Add tabs

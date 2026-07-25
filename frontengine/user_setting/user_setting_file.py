@@ -33,6 +33,9 @@ user_setting_dict: Dict[str, Any] = {
     # 每天在指定時間自動套用預設集
     # Auto-apply a preset at a configured time each day
     "preset_schedule": dict(DEFAULT_PRESET_SCHEDULE),
+    # 是否載入 plugins/ 資料夾裡的外掛（外掛與本程式同權限，預設關閉）
+    # Load plugins from plugins/? They run with our privileges, so: off by default.
+    "load_plugins": False,
     # 桌面寵物心情值（0~100），跨工作階段保存
     # Desktop pet mood (0..100), persisted across sessions
     "pet_mood": 60,
