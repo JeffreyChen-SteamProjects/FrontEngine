@@ -11,7 +11,7 @@ The formatting is pure and independently testable.
 from __future__ import annotations
 
 import time
-from typing import List, Optional, Tuple
+from typing import List, Tuple
 
 from PySide6.QtCore import QRect, QTimer, Qt
 from PySide6.QtGui import QColor, QFont, QFontMetrics, QPainter

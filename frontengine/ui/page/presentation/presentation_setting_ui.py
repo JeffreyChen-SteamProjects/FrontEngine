@@ -6,7 +6,7 @@ The presentation page: screen annotation, cursor emphasis (ring, click ripple,
 spotlight), a keystroke display and a region magnifier. Everything except the
 annotation layer passes clicks straight through.
 """
-from typing import List, Optional
+from typing import List
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QGuiApplication

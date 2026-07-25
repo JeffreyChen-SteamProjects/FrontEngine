@@ -5,7 +5,7 @@
 The eye-comfort page: colour filter, reading ruler and break reminders. All
 three are click-through overlays, so they never get in the way of your work.
 """
-from typing import List, Optional
+from typing import List
 
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QGuiApplication

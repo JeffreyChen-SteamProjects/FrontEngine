@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from typing import Optional, Tuple
 
-from PySide6.QtCore import QPoint, QRect, QTimer, Qt
+from PySide6.QtCore import QRect, QTimer, Qt
 from PySide6.QtGui import QColor, QCursor, QGuiApplication, QPainter, QPixmap
 
 from frontengine.show.base_widget import BaseWidget

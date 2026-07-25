@@ -8,9 +8,9 @@ audience can follow the mouse during a demo. Click-through throughout.
 """
 from __future__ import annotations
 
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
-from PySide6.QtCore import QPoint, QRect, QTimer, Qt
+from PySide6.QtCore import QPoint, QTimer, Qt
 from PySide6.QtGui import QColor, QCursor, QPainter, QRadialGradient
 
 from frontengine.show.base_widget import BaseWidget
