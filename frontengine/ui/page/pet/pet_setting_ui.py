@@ -1,12 +1,13 @@
 from typing import Optional
 
+from PySide6.QtCore import QTimer
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import (
     QWidget, QGridLayout, QLabel, QPushButton, QMessageBox, QComboBox, QCheckBox, QFileDialog,
 )
 
 from frontengine.show.pet.desktop_pet import (
-    DesktopPetWidget, BEHAVIOUR_FLOOR, BEHAVIOUR_WANDER, BEHAVIOUR_CHASE, scan_pet_pack,
+    DesktopPetWidget, BEHAVIOUR_FLOOR, BEHAVIOUR_WANDER, BEHAVIOUR_CHASE, PetTagGame, scan_pet_pack,
 )
 from frontengine.ui.dialog.choose_file_dialog import choose_pet, choose_wav_sound
 from frontengine.ui.page.utils import (
@@ -36,6 +37,11 @@ class PetSettingUI(QWidget):
         self.ready_to_play = False
         self.pet_image_path: Optional[str] = None
         self.pet_sound_path: Optional[str] = None
+        # 鬼抓人：由本頁統一驅動，寵物只負責套用被指派的角色
+        # Tag game: driven from this page, pets only apply the role they are given.
+        self.tag_game = PetTagGame()
+        self.tag_timer = QTimer(self)
+        self.tag_timer.timeout.connect(self._tick_tag_game)
 
         # Choose file
         self.choose_file_button = QPushButton(
@@ -81,6 +87,9 @@ class PetSettingUI(QWidget):
         self.talk_checkbox.setChecked(True)
         self.sit_checkbox = QCheckBox(language_wrapper.language_word_dict.get("pet_sit_label", "Sit on windows"))
         self.sit_checkbox.setChecked(True)
+        self.tag_checkbox = QCheckBox(
+            language_wrapper.language_word_dict.get("pet_tag_label", "Play tag with each other"))
+        self.tag_checkbox.toggled.connect(self._on_tag_toggled)
 
         # Target monitor + sound volume
         self.target_monitor_label = QLabel(
@@ -134,6 +143,7 @@ class PetSettingUI(QWidget):
         self.grid_layout.addWidget(self.volume_label, 6, 2)
         self.grid_layout.addWidget(self.volume_combobox, 7, 2)
         self.grid_layout.addWidget(self.audio_react_checkbox, 7, 0)
+        self.grid_layout.addWidget(self.tag_checkbox, 7, 1)
         self.grid_layout.addWidget(self.drop_hint_label, 8, 0, 1, 3)
 
     def _spawn_pet(self) -> None:
@@ -163,6 +173,7 @@ class PetSettingUI(QWidget):
         pet.set_pet_window_flag()
         self.pet_list.append(pet)
         pet.show()
+        self._start_tag_game()
         if geometry is not None:
             pet.setScreen(geometry[1])
             bounds = geometry[0]
@@ -180,17 +191,59 @@ class PetSettingUI(QWidget):
             return None
         return (screen.availableGeometry(), screen)
 
+    def _alive_pets(self) -> list:
+        """回傳仍存活的寵物，並把已被銷毀者從清單移除。"""
+        alive = []
+        for pet in list(self.pet_list):
+            try:
+                pet.center()
+            except RuntimeError:
+                self.pet_list.remove(pet)  # underlying C++ object already deleted
+                continue
+            alive.append(pet)
+        return alive
+
     def _peer_centers(self, me) -> list:
         """回傳其他仍存活寵物的中心座標（略過已被銷毀者）。"""
-        centers = []
-        for other in list(self.pet_list):
-            if other is me:
-                continue
-            try:
-                centers.append(other.center())
-            except RuntimeError:
-                pass  # underlying C++ object already deleted
-        return centers
+        return [pet.center() for pet in self._alive_pets() if pet is not me]
+
+    TAG_INTERVAL_MS = 100
+
+    def _on_tag_toggled(self, checked: bool) -> None:
+        """切換鬼抓人：關掉時停錶並把所有寵物放回平常的行為。"""
+        front_engine_logger.info(f"[PetSettingUI] tag game | enabled={checked}")
+        if checked:
+            self._start_tag_game()
+            return
+        self.tag_timer.stop()
+        self.tag_game.reset()
+        for pet in self._alive_pets():
+            pet.apply_tag_role(None)
+
+    def _start_tag_game(self) -> None:
+        """有兩隻以上寵物且已勾選時才需要開錶 / Only run the game with 2+ pets."""
+        if self.tag_checkbox.isChecked() and len(self._alive_pets()) >= 2:
+            if not self.tag_timer.isActive():
+                self.tag_timer.start(self.TAG_INTERVAL_MS)
+
+    def _tick_tag_game(self) -> None:
+        """每一拍把座標餵給遊戲，再把角色發回各隻寵物。"""
+        pets = self._alive_pets()
+        if len(pets) < 2:
+            self.tag_timer.stop()
+            self.tag_game.reset()
+            for pet in pets:
+                pet.apply_tag_role(None)
+            return
+        # 用每隻寵物的物件識別碼當鍵，避免有寵物關閉後索引位移導致「鬼」換人
+        # Key by object identity so closing a pet cannot shift who is "it".
+        by_key = {id(pet): pet for pet in pets}
+        roles = self.tag_game.update({key: pet.center() for key, pet in by_key.items()})
+        tagged = self.tag_game.just_tagged
+        for key, pet in by_key.items():
+            pet.apply_tag_role(roles.get(key))
+            if key == tagged:
+                pet.on_tagged()
 
     def start_play_pet(self) -> None:
         front_engine_logger.info("[PetSettingUI] start_play_pet")
@@ -271,6 +324,7 @@ class PetSettingUI(QWidget):
             "target_monitor": self.target_monitor_combobox.currentText(),
             "volume": self.volume_combobox.currentText(),
             "audio_react": self.audio_react_checkbox.isChecked(),
+            "tag": self.tag_checkbox.isChecked(),
         }
 
     def set_state(self, state: dict) -> None:
@@ -308,3 +362,5 @@ class PetSettingUI(QWidget):
                 self.volume_combobox.setCurrentIndex(index)
         if "audio_react" in state:
             self.audio_react_checkbox.setChecked(bool(state["audio_react"]))
+        if "tag" in state:
+            self.tag_checkbox.setChecked(bool(state["tag"]))

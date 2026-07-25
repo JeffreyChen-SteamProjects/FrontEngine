@@ -105,6 +105,43 @@ def classify_drop(path) -> Optional[str]:
     return DROP_SPRITE if target.suffix.lower() in _PACK_EXTS else DROP_FOOD
 
 
+# 食物種類（依副檔名猜）與各自的效果 / Food kinds guessed from the suffix
+FOOD_SNACK = "snack"    # 一般點心 / an ordinary snack
+FOOD_FEAST = "feast"    # 壓縮檔＝大餐 / an archive is a hearty meal
+FOOD_MUSIC = "music"    # 音樂檔＝聽了很開心 / music cheers it up more than it fills
+FOOD_BOOK = "book"      # 文件檔＝細嚼慢嚥 / a document is chewed slowly
+FOOD_HARD = "hard"      # 可執行檔＝咬不動 / a binary is too hard to chew
+
+_FOOD_SUFFIXES = {
+    FOOD_FEAST: (".zip", ".7z", ".rar", ".tar", ".gz", ".iso"),
+    FOOD_MUSIC: (".mp3", ".wav", ".ogg", ".flac", ".m4a", ".aac"),
+    FOOD_BOOK: (".txt", ".md", ".pdf", ".doc", ".docx", ".rtf", ".epub"),
+    FOOD_HARD: (".exe", ".dll", ".msi", ".sys", ".bat"),
+}
+
+# 每種食物的飽足／心情／親密度變化（心情為負代表不喜歡）
+# Fullness / mood / affection change per food kind (negative mood = dislikes it).
+FOOD_EFFECTS = {
+    FOOD_SNACK: {"fullness": 30, "mood": 12, "affection": 5},
+    FOOD_FEAST: {"fullness": 45, "mood": 8, "affection": 6},
+    FOOD_MUSIC: {"fullness": 15, "mood": 20, "affection": 5},
+    FOOD_BOOK: {"fullness": 20, "mood": 6, "affection": 4},
+    FOOD_HARD: {"fullness": 2, "mood": -6, "affection": 1},
+}
+
+
+def classify_food(path) -> str:
+    """依副檔名判斷食物種類；認不出來就當一般點心 / Guess the food kind from the suffix."""
+    try:
+        suffix = Path(path).suffix.lower()
+    except (OSError, TypeError, ValueError):
+        return FOOD_SNACK
+    for kind, suffixes in _FOOD_SUFFIXES.items():
+        if suffix in suffixes:
+            return kind
+    return FOOD_SNACK
+
+
 def derive_visual_state(dragging: bool, airborne: bool, surface: str, motion_state: str) -> str:
     """依目前情形推導應顯示的視覺狀態 / Derive which sprite state to show."""
     if dragging:
@@ -289,6 +326,92 @@ def nearest_peer(center, peers):
             best_distance = distance
             best = (peer_x, peer_y)
     return best, best_distance
+
+
+# 鬼抓人角色 / Roles in the tag game
+TAG_CHASE = "chase"
+TAG_FLEE = "flee"
+
+
+class PetTagGame:
+    """
+    多隻寵物的鬼抓人：一隻當鬼追最近的同伴，其他往反方向逃；抓到就換人當鬼，
+    並有短暫冷卻避免立刻抓回去。純邏輯、不依賴 Qt，由外部每一拍餵入座標。
+
+    Tag between pets: one is "it" and chases its nearest peer while the others
+    run the other way; catching someone passes "it" on, with a short cooldown so
+    the tag cannot bounce straight back. Pure logic — positions are fed in each
+    tick from outside.
+    """
+
+    CATCH_DISTANCE = 60.0
+    FLEE_DISTANCE = 220.0
+    COOLDOWN_TICKS = 20
+
+    def __init__(self, catch_distance: float = CATCH_DISTANCE, flee_distance: float = FLEE_DISTANCE,
+                 cooldown_ticks: int = COOLDOWN_TICKS) -> None:
+        self.catch_distance = float(catch_distance)
+        self.flee_distance = float(flee_distance)
+        self.cooldown_ticks = max(0, int(cooldown_ticks))
+        self.it = None
+        self.just_tagged = None
+        self._cooldown = 0
+
+    def reset(self) -> None:
+        """重置遊戲（參與者換人或停玩時呼叫）。"""
+        self.it = None
+        self.just_tagged = None
+        self._cooldown = 0
+
+    @staticmethod
+    def _nearest(positions: dict, source):
+        """回傳離 source 最近的其他參與者 (id, 距離)；只有一人時回傳 (None, inf)。"""
+        source_x, source_y = positions[source]
+        best, best_distance = None, float("inf")
+        for participant, (x, y) in positions.items():
+            if participant == source:
+                continue
+            distance = ((x - source_x) ** 2 + (y - source_y) ** 2) ** 0.5
+            if distance < best_distance:
+                best, best_distance = participant, distance
+        return best, best_distance
+
+    def update(self, positions: dict) -> dict:
+        """
+        餵入 {參與者: (x, y)}，回傳 {參與者: (角色, 目標 x)}。少於兩人時不開局。
+        Feed in {participant: (x, y)} and get {participant: (role, target_x)}.
+        """
+        self.just_tagged = None
+        if not positions or len(positions) < 2:
+            self.reset()
+            return {}
+        if self.it not in positions:
+            self.it = sorted(positions)[0]
+            self._cooldown = self.cooldown_ticks
+        # 冷卻期間只是跑給對方追，不換鬼；先判斷再遞減，冷卻 N 拍就真的保護 N 拍。
+        # While cooling down nobody can be tagged; check before decrementing so a
+        # cooldown of N protects exactly N updates.
+        can_tag = self._cooldown <= 0
+        if self._cooldown > 0:
+            self._cooldown -= 1
+        prey, distance = self._nearest(positions, self.it)
+        if prey is not None and can_tag and distance <= self.catch_distance:
+            self.it = prey
+            self.just_tagged = prey
+            self._cooldown = self.cooldown_ticks
+            prey, _distance = self._nearest(positions, self.it)
+        return self._roles(positions, prey)
+
+    def _roles(self, positions: dict, prey) -> dict:
+        """依目前的鬼與獵物組出每個人的角色與要走向的 x。"""
+        it_x, _it_y = positions[self.it]
+        roles = {self.it: (TAG_CHASE, positions[prey][0] if prey is not None else it_x)}
+        for participant, (x, _y) in positions.items():
+            if participant == self.it:
+                continue
+            away = self.flee_distance if x >= it_x else -self.flee_distance
+            roles[participant] = (TAG_FLEE, x + away)
+        return roles
 
 
 def message_bucket(hour: int) -> str:
@@ -932,6 +1055,8 @@ class DesktopPetWidget(BaseWidget):
         self._peers_provider = None
         self._peer_greeted = False
         self._peer_tick = 0
+        # 鬼抓人角色（由外部的 PetTagGame 指派）/ Tag role assigned by a PetTagGame
+        self._tag_role = None
         # 電量提醒 / Low-battery reaction
         self._battery_provider = read_battery
         self._battery_warned = False
@@ -984,8 +1109,31 @@ class DesktopPetWidget(BaseWidget):
         """設定回傳其他寵物中心座標清單的函式 / Provider of other pets' centres."""
         self._peers_provider = provider
 
+    def apply_tag_role(self, role) -> None:
+        """
+        套用鬼抓人角色 (角色, 目標 x)；None 代表沒在玩，恢復平常的同伴互動。
+        Apply a tag role; None means the game is off and normal peer play resumes.
+        """
+        if role is None:
+            if self._tag_role is not None:
+                self._tag_role = None
+                self.motion.clear_follow()
+            return
+        self._tag_role, target_x = role
+        self.motion.wake()
+        self.motion.set_follow(target_x)
+
+    def on_tagged(self) -> None:
+        """換自己當鬼時喊一句 / Shout when the tag lands on this pet."""
+        self._gain_affection(1)
+        pool = self._messages.get("tag") or []
+        if pool:
+            self.say(pool[self._chatter_rng.randrange(len(pool))])
+
     def _check_peers(self) -> None:
         """靠近其他寵物時走過去玩耍、抵達後轉向打招呼（帶遲滯，避免重複）。"""
+        if self._tag_role is not None:
+            return  # the tag game owns where this pet is heading
         if self._peers_provider is None:
             return
         try:
@@ -1164,9 +1312,14 @@ class DesktopPetWidget(BaseWidget):
             "battery": lines("pet_chatter_battery", "Battery's low - plug me in?|Low power!|Find a charger?"),
             "hungry": lines("pet_chatter_hungry", "I'm hungry...|Got a snack?|Feed me?"),
             "fed": lines("pet_chatter_fed", "Yum!|Thank you!|Delicious!"),
+            "fed_feast": lines("pet_chatter_fed_feast", "What a feast!|So full!|That was huge!"),
+            "fed_music": lines("pet_chatter_fed_music", "Tasty tune!|That one sings!|Encore!"),
+            "fed_book": lines("pet_chatter_fed_book", "Food for thought.|Chewy words!|Mmm, a story."),
+            "fed_hard": lines("pet_chatter_fed_hard", "Too hard to chew!|Ouch, my teeth!|Not food!"),
             "away": lines("pet_chatter_away", "Still there?|I'll nap till you're back~|Zzz..."),
             "levelup": lines("pet_chatter_levelup", "Level up!|I'm growing!|We're getting closer!"),
             "costume": lines("pet_chatter_costume", "New look!|How do I look?|Nice fit!"),
+            "tag": lines("pet_chatter_tag", "You're it!|Caught you!|My turn to chase!"),
             "any": lines("pet_chatter_any", "Hi there!|(^_^)|Keep going!"),
         }
 
@@ -1333,14 +1486,19 @@ class DesktopPetWidget(BaseWidget):
     def _persist_hunger(self) -> None:
         user_setting_dict["pet_hunger"] = self._hunger.value
 
-    def feed(self) -> None:
-        """餵食：補足飽足並讓心情變好，說一句道謝。"""
-        self._hunger.feed()
-        self._mood.pet()
+    def feed(self, kind: str = FOOD_SNACK) -> None:
+        """餵食：依食物種類調整飽足與心情，並說一句對應的話。"""
+        effect = FOOD_EFFECTS.get(kind, FOOD_EFFECTS[FOOD_SNACK])
+        self._hunger.feed(effect["fullness"])
+        mood_change = effect["mood"]
+        if mood_change >= 0:
+            self._mood.pet(mood_change)
+        else:
+            self._mood.decay(-mood_change)
         self._persist_hunger()
         self._persist_mood()
-        self._gain_affection(5)
-        pool = self._messages.get("fed") or []
+        self._gain_affection(effect["affection"])
+        pool = self._messages.get(f"fed_{kind}") or self._messages.get("fed") or []
         if pool:
             self.say(pool[self._chatter_rng.randrange(len(pool))])
 
@@ -1484,7 +1642,7 @@ class DesktopPetWidget(BaseWidget):
         if classify_drop(path) == DROP_SPRITE:
             self.change_sprite(path)
         else:
-            self.feed()
+            self.feed(classify_food(path))
         event.acceptProposedAction()
 
     def contextMenuEvent(self, event) -> None:
