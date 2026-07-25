@@ -1,0 +1,279 @@
+"""
+工具分頁：取色器／像素尺／量角器、區域截圖、視窗釘選、攝影機覆蓋層。
+這些是「拿來量、拿來抓、拿來擺」的工具，和其他分頁的「拿來顯示」不同。
+
+The tools page: colour picker / pixel ruler / protractor, region capture,
+window pinning and the camera overlay. These are for measuring, grabbing and
+arranging - as opposed to the other pages, which are for showing.
+"""
+from typing import List, Optional
+
+from PySide6.QtGui import QGuiApplication
+from PySide6.QtWidgets import (
+    QCheckBox, QComboBox, QGridLayout, QLabel, QPushButton, QSpinBox, QWidget,
+)
+
+from frontengine.show.camera.camera_widget import (
+    SHAPE_CIRCLE, SHAPE_RECTANGLE, SHAPE_ROUNDED, CameraWidget, list_cameras,
+)
+from frontengine.show.capture.region_capture import RegionCaptureWidget
+from frontengine.show.measure.measure_widget import (
+    MODE_ANGLE, MODE_COLOR, MODE_RULER, MeasureWidget,
+)
+from frontengine.ui.dialog.window_pin_dialog import WindowPinDialog
+from frontengine.ui.page.utils import coerce_int
+from frontengine.utils.logging.loggin_instance import front_engine_logger
+from frontengine.utils.measure.measure import (
+    FORMAT_CSS_VAR, FORMAT_HEX, FORMAT_HSL, FORMAT_RGB,
+)
+from frontengine.utils.multi_language.language_wrapper import language_wrapper
+
+
+def _t(key: str, fallback: str) -> str:
+    return language_wrapper.language_word_dict.get(key, fallback)
+
+
+class ToolsSettingUI(QWidget):
+    """工具設定頁 / The tools page."""
+
+    def __init__(self):
+        front_engine_logger.info("[ToolsSettingUI] Init")
+        super().__init__()
+        self.grid_layout = QGridLayout(self)
+        self.grid_layout.setContentsMargins(0, 0, 0, 0)
+
+        self.measure_widget_list: List[MeasureWidget] = []
+        self.capture_widget_list: List[RegionCaptureWidget] = []
+        self.camera_widget_list: List[CameraWidget] = []
+        self.last_capture: Optional[RegionCaptureWidget] = None
+        self.pin_dialog: Optional[WindowPinDialog] = None
+
+        self._build_measure_row()
+        self._build_capture_row()
+        self._build_camera_row()
+        self.pin_button = QPushButton(_t("tools_pin_window", "Pin a window..."))
+        self.pin_button.clicked.connect(self.open_pin_dialog)
+        self.hint_label = QLabel(
+            _t("tools_hint",
+               "Click to measure; right-click clears. What you measure is copied to the "
+               "clipboard. The camera is shown locally only - nothing is recorded."))
+        self.hint_label.setWordWrap(True)
+
+        self.grid_layout.addWidget(self.measure_label, 0, 0)
+        self.grid_layout.addWidget(self.measure_mode_combobox, 0, 1)
+        self.grid_layout.addWidget(self.measure_button, 0, 2)
+        self.grid_layout.addWidget(self.color_format_label, 1, 0)
+        self.grid_layout.addWidget(self.color_format_combobox, 1, 1)
+        self.grid_layout.addWidget(self.capture_label, 2, 0)
+        self.grid_layout.addWidget(self.capture_button, 2, 1)
+        self.grid_layout.addWidget(self.capture_copy_button, 2, 2)
+        self.grid_layout.addWidget(self.camera_label, 3, 0)
+        self.grid_layout.addWidget(self.camera_shape_combobox, 3, 1)
+        self.grid_layout.addWidget(self.camera_button, 3, 2)
+        self.grid_layout.addWidget(self.camera_device_combobox, 4, 0, 1, 2)
+        self.grid_layout.addWidget(self.camera_mirror_checkbox, 4, 2)
+        self.grid_layout.addWidget(self.camera_border_label, 5, 0)
+        self.grid_layout.addWidget(self.camera_border_spinbox, 5, 1)
+        self.grid_layout.addWidget(self.pin_button, 6, 0)
+        self.grid_layout.addWidget(self.hint_label, 7, 0, 1, 3)
+
+    # --- construction helpers -------------------------------------------
+    def _build_measure_row(self) -> None:
+        self.measure_label = QLabel(_t("tools_measure_label", "Measure"))
+        self.measure_mode_combobox = QComboBox()
+        for mode, key, fallback in ((MODE_COLOR, "tools_measure_color", "Colour picker"),
+                                    (MODE_RULER, "tools_measure_ruler", "Pixel ruler"),
+                                    (MODE_ANGLE, "tools_measure_angle", "Protractor")):
+            self.measure_mode_combobox.addItem(_t(key, fallback), mode)
+        self.measure_mode_combobox.currentIndexChanged.connect(self._apply_measure_settings)
+        self.color_format_label = QLabel(_t("tools_color_format", "Copy colour as"))
+        self.color_format_combobox = QComboBox()
+        for value, label in ((FORMAT_HEX, "#rrggbb"), (FORMAT_RGB, "rgb(r, g, b)"),
+                             (FORMAT_HSL, "hsl(h, s%, l%)"), (FORMAT_CSS_VAR, "--color: ...;")):
+            self.color_format_combobox.addItem(label, value)
+        self.color_format_combobox.currentIndexChanged.connect(self._apply_measure_settings)
+        self.measure_button = QPushButton(_t("tools_measure_start", "Start measuring"))
+        self.measure_button.clicked.connect(self.toggle_measure)
+
+    def _build_capture_row(self) -> None:
+        self.capture_label = QLabel(_t("tools_capture_label", "Region capture"))
+        self.capture_button = QPushButton(_t("tools_capture_start", "Capture area"))
+        self.capture_button.clicked.connect(self.start_capture)
+        self.capture_copy_button = QPushButton(_t("tools_capture_copy", "Copy last"))
+        self.capture_copy_button.clicked.connect(self.copy_last_capture)
+
+    def _build_camera_row(self) -> None:
+        self.camera_label = QLabel(_t("tools_camera_label", "Camera"))
+        self.camera_shape_combobox = QComboBox()
+        for shape, key, fallback in ((SHAPE_CIRCLE, "tools_camera_circle", "Circle"),
+                                     (SHAPE_ROUNDED, "tools_camera_rounded", "Rounded"),
+                                     (SHAPE_RECTANGLE, "tools_camera_rectangle", "Rectangle")):
+            self.camera_shape_combobox.addItem(_t(key, fallback), shape)
+        self.camera_shape_combobox.currentIndexChanged.connect(self._apply_camera_settings)
+        self.camera_device_combobox = QComboBox()
+        for camera_id, description in list_cameras():
+            self.camera_device_combobox.addItem(description, camera_id)
+        if self.camera_device_combobox.count() == 0:
+            self.camera_device_combobox.addItem(_t("tools_camera_none", "No camera found"), "")
+        self.camera_mirror_checkbox = QCheckBox(_t("tools_camera_mirror", "Mirror"))
+        self.camera_mirror_checkbox.setChecked(True)
+        self.camera_mirror_checkbox.toggled.connect(self._apply_camera_settings)
+        self.camera_border_label = QLabel(_t("tools_camera_border", "Border"))
+        self.camera_border_spinbox = QSpinBox()
+        self.camera_border_spinbox.setRange(0, 20)
+        self.camera_border_spinbox.setValue(4)
+        self.camera_border_spinbox.valueChanged.connect(self._apply_camera_settings)
+        self.camera_button = QPushButton(_t("tools_camera_start", "Show camera"))
+        self.camera_button.clicked.connect(self.toggle_camera)
+
+    # --- measuring -------------------------------------------------------
+    def toggle_measure(self) -> None:
+        if self.measure_widget_list:
+            self.stop_measure()
+        else:
+            self.start_measure()
+
+    def start_measure(self) -> None:
+        """開一層全螢幕量測覆蓋層。"""
+        front_engine_logger.info("[ToolsSettingUI] start_measure")
+        widget = MeasureWidget(self.measure_mode_combobox.currentData(),
+                               self.color_format_combobox.currentData())
+        screen = QGuiApplication.primaryScreen()
+        if screen is not None:
+            widget.setGeometry(screen.geometry())
+        widget.setMouseTracking(True)
+        widget.show()
+        self.measure_widget_list.append(widget)
+        self.measure_button.setText(_t("tools_measure_stop", "Stop measuring"))
+
+    def stop_measure(self) -> None:
+        for widget in list(self.measure_widget_list):
+            try:
+                widget.close()
+            except RuntimeError:
+                pass
+        self.measure_widget_list.clear()
+        self.measure_button.setText(_t("tools_measure_start", "Start measuring"))
+
+    def _apply_measure_settings(self) -> None:
+        for widget in list(self.measure_widget_list):
+            try:
+                widget.set_mode(self.measure_mode_combobox.currentData())
+                widget.set_color_format(self.color_format_combobox.currentData())
+            except RuntimeError:
+                self.measure_widget_list.remove(widget)
+
+    # --- region capture --------------------------------------------------
+    def start_capture(self) -> RegionCaptureWidget:
+        """開一層框選截圖（放開滑鼠就擷取並自己關掉）。"""
+        front_engine_logger.info("[ToolsSettingUI] start_capture")
+        widget = RegionCaptureWidget(on_captured=lambda pixmap, rect: self._on_captured(widget))
+        screen = QGuiApplication.primaryScreen()
+        if screen is not None:
+            widget.setGeometry(screen.geometry())
+        widget.setMouseTracking(True)
+        widget.show()
+        self.capture_widget_list.append(widget)
+        return widget
+
+    def _on_captured(self, widget: RegionCaptureWidget) -> None:
+        """擷取完成：記住它並直接複製到剪貼簿。"""
+        self.last_capture = widget
+        widget.copy_to_clipboard()
+        if widget in self.capture_widget_list:
+            self.capture_widget_list.remove(widget)
+
+    def copy_last_capture(self) -> bool:
+        """把最近一次的截圖再放進剪貼簿一次。"""
+        if self.last_capture is None:
+            return False
+        try:
+            return self.last_capture.copy_to_clipboard()
+        except RuntimeError:
+            self.last_capture = None
+            return False
+
+    # --- camera ----------------------------------------------------------
+    def toggle_camera(self) -> None:
+        if self.camera_widget_list:
+            self.stop_camera()
+        else:
+            self.start_camera()
+
+    def start_camera(self) -> bool:
+        """開一個攝影機覆蓋層；沒有裝置就什麼都不做。"""
+        front_engine_logger.info("[ToolsSettingUI] start_camera")
+        widget = CameraWidget(self.camera_shape_combobox.currentData(),
+                              self.camera_border_spinbox.value(),
+                              self.camera_mirror_checkbox.isChecked())
+        widget.set_ui_window_flag(show_on_bottom=False)
+        screen = QGuiApplication.primaryScreen()
+        if screen is not None:
+            area = screen.availableGeometry()
+            widget.move(area.x() + area.width() - widget.width() - 60,
+                        area.y() + area.height() - widget.height() - 60)
+        if not widget.start(self.camera_device_combobox.currentData() or None):
+            widget.close()
+            return False
+        widget.show()
+        self.camera_widget_list.append(widget)
+        self.camera_button.setText(_t("tools_camera_stop", "Hide camera"))
+        return True
+
+    def stop_camera(self) -> None:
+        for widget in list(self.camera_widget_list):
+            try:
+                widget.close()
+            except RuntimeError:
+                pass
+        self.camera_widget_list.clear()
+        self.camera_button.setText(_t("tools_camera_start", "Show camera"))
+
+    def _apply_camera_settings(self) -> None:
+        for widget in list(self.camera_widget_list):
+            try:
+                widget.set_shape(self.camera_shape_combobox.currentData())
+                widget.set_border(self.camera_border_spinbox.value())
+                widget.set_mirrored(self.camera_mirror_checkbox.isChecked())
+            except RuntimeError:
+                self.camera_widget_list.remove(widget)
+
+    # --- window pinning --------------------------------------------------
+    def open_pin_dialog(self) -> WindowPinDialog:
+        """開視窗釘選對話框（關掉時會把釘過的視窗放開）。"""
+        self.pin_dialog = WindowPinDialog(self)
+        self.pin_dialog.exec()
+        return self.pin_dialog
+
+    def release_pinned_windows(self) -> None:
+        """把釘過的別人視窗放開（主程式關閉時呼叫）。"""
+        if self.pin_dialog is not None:
+            try:
+                self.pin_dialog.release_all()
+            except RuntimeError:
+                self.pin_dialog = None
+
+    # --- preset state ----------------------------------------------------
+    def get_state(self) -> dict:
+        return {
+            "measure_mode": self.measure_mode_combobox.currentData(),
+            "color_format": self.color_format_combobox.currentData(),
+            "camera_shape": self.camera_shape_combobox.currentData(),
+            "camera_border": self.camera_border_spinbox.value(),
+            "camera_mirror": self.camera_mirror_checkbox.isChecked(),
+        }
+
+    def set_state(self, state: dict) -> None:
+        for combobox, key in ((self.measure_mode_combobox, "measure_mode"),
+                              (self.color_format_combobox, "color_format"),
+                              (self.camera_shape_combobox, "camera_shape")):
+            value = state.get(key)
+            if value is not None:
+                index = combobox.findData(str(value))
+                if index >= 0:
+                    combobox.setCurrentIndex(index)
+        border = coerce_int(state.get("camera_border"))
+        if border is not None:
+            self.camera_border_spinbox.setValue(max(0, min(20, border)))
+        if "camera_mirror" in state:
+            self.camera_mirror_checkbox.setChecked(bool(state["camera_mirror"]))
