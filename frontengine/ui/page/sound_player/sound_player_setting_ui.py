@@ -6,6 +6,7 @@ from PySide6.QtWidgets import QWidget, QGridLayout, QLabel, QSlider, QPushButton
 from frontengine.show.sound_player.sound_effect import SoundEffectWidget
 from frontengine.show.sound_player.sound_player import SoundPlayer
 from frontengine.ui.dialog.choose_file_dialog import choose_player_sound, choose_wav_sound
+from frontengine.ui.page.utils import coerce_int
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
@@ -118,8 +119,9 @@ class SoundPlayerSettingUI(QWidget):
         }
 
     def set_state(self, state: dict) -> None:
-        if "volume" in state:
-            self.volume_slider.setValue(int(state["volume"]))
+        volume = coerce_int(state.get("volume"))
+        if volume is not None:
+            self.volume_slider.setValue(volume)
         if state.get("wav_sound_path"):
             self.wav_sound_path = state["wav_sound_path"]
             self.ready_to_play = True

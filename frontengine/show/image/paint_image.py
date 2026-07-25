@@ -28,6 +28,22 @@ class ImageWidget(BaseWidget):
             message_box.setText(language_wrapper.language_word_dict.get("paint_image_message_box_text"))
             message_box.show()
 
+    def set_image_path(self, image_path: str) -> bool:
+        """
+        熱換顯示的圖片（用於輪播）。路徑無效時保持原圖並回傳 False。
+        Hot-swap the displayed image (used by the slideshow). Keeps the
+        current image and returns False when the path is invalid.
+        """
+        path = Path(image_path)
+        if not (path.exists() and path.is_file()):
+            front_engine_logger.warning(f"[ImageWidget] set_image_path skip invalid: {path}")
+            return False
+        self.image_path = path
+        self.image = QImage(str(path))
+        self.resize(self.image.size())
+        self.update()
+        return True
+
     def draw_content(self, painter: QPainter) -> None:
         painter.drawImage(
             QRect(self.draw_location_x, self.draw_location_y, self.width(), self.height()),

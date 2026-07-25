@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "frontengine"
-version = "1.0.0"
+version = "1.0.25"
 authors = [
     { name = "JE-Chen", email = "jechenmailman@gmail.com" },
 ]
@@ -24,6 +24,9 @@ classifiers = [
     "Environment :: X11 Applications",
     "Operating System :: OS Independent"
 ]
+
+[project.scripts]
+frontengine = "frontengine.ui.main_ui:main"
 
 [project.urls]
 Homepage = "https://github.com/Intergration-Automation-Testing/FrontEngine"

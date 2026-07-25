@@ -1,0 +1,300 @@
+from typing import Optional
+
+from PySide6.QtGui import QGuiApplication
+from PySide6.QtWidgets import (
+    QWidget, QGridLayout, QLabel, QPushButton, QMessageBox, QComboBox, QCheckBox, QFileDialog,
+)
+
+from frontengine.show.pet.desktop_pet import (
+    DesktopPetWidget, BEHAVIOUR_FLOOR, BEHAVIOUR_WANDER, BEHAVIOUR_CHASE, scan_pet_pack,
+)
+from frontengine.ui.dialog.choose_file_dialog import choose_pet, choose_wav_sound
+from frontengine.ui.page.utils import (
+    build_recent_combobox,
+    build_target_monitor_combobox,
+    enable_file_drop,
+    reload_recent_combobox,
+    resolve_preferred_monitor,
+)
+from frontengine.user_setting.user_setting_file import add_recent_file
+from frontengine.utils.audio_meter.system_audio_meter import system_audio_level
+from frontengine.utils.logging.loggin_instance import front_engine_logger
+from frontengine.utils.multi_language.language_wrapper import language_wrapper
+
+_PET_EXTENSIONS = (".gif", ".webp", ".png", ".jpg")
+
+
+class PetSettingUI(QWidget):
+    def __init__(self):
+        front_engine_logger.info("[PetSettingUI] Init")
+        super().__init__()
+        self.grid_layout = QGridLayout(self)
+        self.grid_layout.setContentsMargins(0, 0, 0, 0)
+
+        # Init variable
+        self.pet_list: list = []
+        self.ready_to_play = False
+        self.pet_image_path: Optional[str] = None
+        self.pet_sound_path: Optional[str] = None
+
+        # Choose file
+        self.choose_file_button = QPushButton(
+            language_wrapper.language_word_dict.get("pet_choose_file", "Choose pet sprite")
+        )
+        self.choose_file_button.clicked.connect(self.choose_and_play)
+        self.choose_pack_button = QPushButton(
+            language_wrapper.language_word_dict.get("pet_choose_pack", "Choose pet pack...")
+        )
+        self.choose_pack_button.clicked.connect(self.choose_pack)
+        self.choose_sound_button = QPushButton(
+            language_wrapper.language_word_dict.get("pet_choose_sound", "Choose sound (optional)")
+        )
+        self.choose_sound_button.clicked.connect(self.choose_sound)
+        self.ready_label = QLabel(language_wrapper.language_word_dict.get("Not Ready"))
+
+        # Size
+        self.size_label = QLabel(language_wrapper.language_word_dict.get("pet_size_label", "Size"))
+        self.size_combobox = QComboBox()
+        self.size_combobox.addItems(["64", "96", "128", "192", "256"])
+        self.size_combobox.setCurrentText("128")
+
+        # Speed
+        self.speed_label = QLabel(language_wrapper.language_word_dict.get("pet_speed_label", "Speed"))
+        self.speed_combobox = QComboBox()
+        self.speed_combobox.addItems([str(n) for n in range(1, 11)])
+        self.speed_combobox.setCurrentText("3")
+
+        # Behaviour
+        self.behaviour_label = QLabel(language_wrapper.language_word_dict.get("pet_behaviour_label", "Behaviour"))
+        self.behaviour_combobox = QComboBox()
+        self.behaviour_combobox.addItem(
+            language_wrapper.language_word_dict.get("pet_behaviour_floor", "Walk on floor"), BEHAVIOUR_FLOOR)
+        self.behaviour_combobox.addItem(
+            language_wrapper.language_word_dict.get("pet_behaviour_wander", "Free wander"), BEHAVIOUR_WANDER)
+        self.behaviour_combobox.addItem(
+            language_wrapper.language_word_dict.get("pet_behaviour_chase", "Chase cursor"), BEHAVIOUR_CHASE)
+
+        # Climb walls / ceiling (only meaningful in floor mode)
+        self.climb_checkbox = QCheckBox(language_wrapper.language_word_dict.get("pet_climb_label", "Climb walls"))
+        self.climb_checkbox.setChecked(True)
+        self.talk_checkbox = QCheckBox(language_wrapper.language_word_dict.get("pet_talk_label", "Speech bubbles"))
+        self.talk_checkbox.setChecked(True)
+        self.sit_checkbox = QCheckBox(language_wrapper.language_word_dict.get("pet_sit_label", "Sit on windows"))
+        self.sit_checkbox.setChecked(True)
+
+        # Target monitor + sound volume
+        self.target_monitor_label = QLabel(
+            language_wrapper.language_word_dict.get("target_monitor_label", "Target monitor"))
+        self.target_monitor_combobox = build_target_monitor_combobox()
+        self.volume_label = QLabel(language_wrapper.language_word_dict.get("pet_volume_label", "Volume"))
+        self.volume_combobox = QComboBox()
+        for label, value in (("0%", 0), ("25%", 25), ("50%", 50), ("75%", 75), ("100%", 100)):
+            self.volume_combobox.addItem(label, value)
+        self.volume_combobox.setCurrentText("100%")
+        self.audio_react_checkbox = QCheckBox(
+            language_wrapper.language_word_dict.get("pet_audio_label", "React to audio"))
+
+        # Start
+        self.start_button = QPushButton(language_wrapper.language_word_dict.get("pet_start", "Spawn pet"))
+        self.start_button.clicked.connect(self.start_play_pet)
+
+        # Recent files
+        self.recent_files_label = QLabel(language_wrapper.language_word_dict.get("recent_files_label", "Recent"))
+        self.recent_files_combobox = build_recent_combobox("pet")
+        self.recent_files_combobox.activated.connect(self._apply_recent_file)
+
+        # Drag and drop
+        self._drop_filter = enable_file_drop(self, _PET_EXTENSIONS, self._on_file_dropped)
+
+        # Layout
+        self.grid_layout.addWidget(self.choose_file_button, 0, 0)
+        self.grid_layout.addWidget(self.ready_label, 0, 1)
+        self.grid_layout.addWidget(self.choose_pack_button, 0, 2)
+        self.grid_layout.addWidget(self.choose_sound_button, 1, 2)
+        self.grid_layout.addWidget(self.size_label, 1, 0)
+        self.grid_layout.addWidget(self.size_combobox, 1, 1)
+        self.grid_layout.addWidget(self.speed_label, 2, 0)
+        self.grid_layout.addWidget(self.speed_combobox, 2, 1)
+        self.grid_layout.addWidget(self.behaviour_label, 3, 0)
+        self.grid_layout.addWidget(self.behaviour_combobox, 3, 1)
+        self.grid_layout.addWidget(self.climb_checkbox, 3, 2)
+        self.grid_layout.addWidget(self.talk_checkbox, 2, 2)
+        self.grid_layout.addWidget(self.sit_checkbox, 4, 2)
+        self.grid_layout.addWidget(self.start_button, 4, 0)
+        self.grid_layout.addWidget(self.recent_files_label, 5, 0)
+        self.grid_layout.addWidget(self.recent_files_combobox, 5, 1)
+        self.grid_layout.addWidget(self.target_monitor_label, 6, 0)
+        self.grid_layout.addWidget(self.target_monitor_combobox, 6, 1)
+        self.grid_layout.addWidget(self.volume_label, 6, 2)
+        self.grid_layout.addWidget(self.volume_combobox, 7, 2)
+        self.grid_layout.addWidget(self.audio_react_checkbox, 7, 0)
+
+    def _spawn_pet(self) -> None:
+        """建立、顯示並開始移動一隻寵物（供 Start 與右鍵複製共用）。"""
+        if not self.pet_image_path:
+            return
+        pet = DesktopPetWidget(
+            image_path=self.pet_image_path,
+            size=int(self.size_combobox.currentText()),
+            speed=int(self.speed_combobox.currentText()),
+            behaviour=self.behaviour_combobox.currentData(),
+            climb=self.climb_checkbox.isChecked(),
+            talk=self.talk_checkbox.isChecked(),
+            sound_path=self.pet_sound_path,
+            sit_on_windows=self.sit_checkbox.isChecked(),
+            volume=int(self.volume_combobox.currentData()) / 100.0,
+            audio_react=self.audio_react_checkbox.isChecked(),
+        )
+        pet.clone_requested.connect(self._spawn_pet)
+        pet.set_peers_provider(lambda me=pet: self._peer_centers(me))
+        if self.audio_react_checkbox.isChecked():
+            pet.set_audio_level_provider(system_audio_level)  # real system output peak meter
+        pet.set_pet_window_flag()
+        self.pet_list.append(pet)
+        pet.show()
+        geometry = self._target_geometry()
+        if geometry is not None:
+            pet.setScreen(geometry[1])
+            bounds = geometry[0]
+            pet.start_moving((bounds.left(), bounds.top(), bounds.right(), bounds.bottom()))
+
+    def _target_geometry(self):
+        """回傳 (available_geometry, screen) 依所選目標螢幕，否則主螢幕。"""
+        screens = QGuiApplication.screens()
+        index = resolve_preferred_monitor(self.target_monitor_combobox)
+        if index is not None and 0 <= index < len(screens):
+            screen = screens[index]
+        else:
+            screen = QGuiApplication.primaryScreen()
+        if screen is None:
+            return None
+        return (screen.availableGeometry(), screen)
+
+    def _peer_centers(self, me) -> list:
+        """回傳其他仍存活寵物的中心座標（略過已被銷毀者）。"""
+        centers = []
+        for other in list(self.pet_list):
+            if other is me:
+                continue
+            try:
+                centers.append(other.center())
+            except RuntimeError:
+                pass  # underlying C++ object already deleted
+        return centers
+
+    def start_play_pet(self) -> None:
+        front_engine_logger.info("[PetSettingUI] start_play_pet")
+        if not self.pet_image_path or not self.ready_to_play:
+            message_box = QMessageBox(self)
+            message_box.setText(language_wrapper.language_word_dict.get("not_prepare"))
+            message_box.exec()
+            return
+        self._spawn_pet()
+
+    def choose_and_play(self) -> None:
+        front_engine_logger.info("[PetSettingUI] choose_and_play")
+        self.ready_label.setText(language_wrapper.language_word_dict.get("Not Ready"))
+        self.ready_to_play = False
+        self.pet_image_path = choose_pet(self)
+        if self.pet_image_path:
+            self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+            self.ready_to_play = True
+            add_recent_file("pet", self.pet_image_path)
+            reload_recent_combobox(self.recent_files_combobox, "pet")
+
+    def choose_sound(self) -> None:
+        """選擇點擊時播放的音效（選填）/ Choose an optional click sound."""
+        front_engine_logger.info("[PetSettingUI] choose_sound")
+        path = choose_wav_sound(self)
+        if path:
+            self.pet_sound_path = path
+
+    def choose_pack(self) -> None:
+        """選擇動作包資料夾（依 walk/idle/climb/fall/drag 檔名對應狀態）。"""
+        front_engine_logger.info("[PetSettingUI] choose_pack")
+        folder = QFileDialog.getExistingDirectory(
+            self, language_wrapper.language_word_dict.get("pet_choose_pack", "Choose pet pack...")
+        )
+        if not folder:
+            return
+        if not scan_pet_pack(folder):
+            QMessageBox.warning(
+                self,
+                language_wrapper.language_word_dict.get("pet_choose_pack", "Choose pet pack..."),
+                language_wrapper.language_word_dict.get(
+                    "pet_pack_empty", "No sprites (walk/idle/climb/fall/drag) found in that folder."),
+            )
+            return
+        self.pet_image_path = folder
+        self.ready_to_play = True
+        self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+        add_recent_file("pet", folder)
+        reload_recent_combobox(self.recent_files_combobox, "pet")
+
+    def _apply_recent_file(self, _index: int = 0) -> None:
+        path = self.recent_files_combobox.currentData()
+        self.recent_files_combobox.setCurrentIndex(0)
+        if not path:
+            return
+        self.pet_image_path = path
+        self.ready_to_play = True
+        self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+
+    def _on_file_dropped(self, path: str) -> None:
+        front_engine_logger.info(f"[PetSettingUI] _on_file_dropped | path={path}")
+        self.pet_image_path = path
+        self.ready_to_play = True
+        self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+        add_recent_file("pet", path)
+        reload_recent_combobox(self.recent_files_combobox, "pet")
+
+    def get_state(self) -> dict:
+        return {
+            "pet_image_path": self.pet_image_path,
+            "size": self.size_combobox.currentText(),
+            "speed": self.speed_combobox.currentText(),
+            "behaviour": self.behaviour_combobox.currentData(),
+            "climb": self.climb_checkbox.isChecked(),
+            "talk": self.talk_checkbox.isChecked(),
+            "sound": self.pet_sound_path,
+            "sit": self.sit_checkbox.isChecked(),
+            "target_monitor": self.target_monitor_combobox.currentText(),
+            "volume": self.volume_combobox.currentText(),
+            "audio_react": self.audio_react_checkbox.isChecked(),
+        }
+
+    def set_state(self, state: dict) -> None:
+        if state.get("pet_image_path"):
+            self.pet_image_path = state["pet_image_path"]
+            self.ready_to_play = True
+            self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+        for combobox, key in ((self.size_combobox, "size"), (self.speed_combobox, "speed")):
+            if state.get(key) is not None:
+                index = combobox.findText(str(state[key]))
+                if index >= 0:
+                    combobox.setCurrentIndex(index)
+        behaviour = state.get("behaviour")
+        if behaviour is None and "gravity" in state:  # back-compat with old presets
+            behaviour = BEHAVIOUR_FLOOR if state.get("gravity") else BEHAVIOUR_WANDER
+        if behaviour is not None:
+            index = self.behaviour_combobox.findData(behaviour)
+            if index >= 0:
+                self.behaviour_combobox.setCurrentIndex(index)
+        if "climb" in state:
+            self.climb_checkbox.setChecked(bool(state["climb"]))
+        if "talk" in state:
+            self.talk_checkbox.setChecked(bool(state["talk"]))
+        if state.get("sound"):
+            self.pet_sound_path = str(state["sound"])
+        if "sit" in state:
+            self.sit_checkbox.setChecked(bool(state["sit"]))
+        if state.get("target_monitor") is not None:
+            index = self.target_monitor_combobox.findText(str(state["target_monitor"]))
+            if index >= 0:
+                self.target_monitor_combobox.setCurrentIndex(index)
+        if state.get("volume") is not None:
+            index = self.volume_combobox.findText(str(state["volume"]))
+            if index >= 0:
+                self.volume_combobox.setCurrentIndex(index)
+        if "audio_react" in state:
+            self.audio_react_checkbox.setChecked(bool(state["audio_react"]))

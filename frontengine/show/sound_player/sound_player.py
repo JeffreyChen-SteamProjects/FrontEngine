@@ -53,6 +53,11 @@ class SoundPlayer(QWidget):
         if hasattr(self, "media_player_audio"):
             self.media_player_audio.setVolume(self.volume)
 
+    def set_muted(self, muted: bool) -> None:
+        front_engine_logger.info(f"[SoundPlayer] set_muted | muted={muted}")
+        if hasattr(self, "media_player_audio"):
+            self.media_player_audio.setMuted(bool(muted))
+
     def closeEvent(self, event) -> None:
         front_engine_logger.info(f"[SoundPlayer] closeEvent | event={event}")
         if hasattr(self, "media_player"):
