@@ -1,3 +1,4 @@
+import json
 import random as _random_module
 import sys
 from datetime import datetime, timedelta
@@ -140,6 +141,55 @@ def classify_food(path) -> str:
         if suffix in suffixes:
             return kind
     return FOOD_SNACK
+
+
+# 動作包設定檔：放在動作包資料夾裡，用來描述這隻寵物的個性與參數
+# Pack manifest: sits inside a pet pack folder describing that pet's traits.
+PACK_MANIFEST_NAME = "pet.json"
+_MANIFEST_NUMBERS = ("size", "speed")
+_MANIFEST_FLAGS = ("climb", "talk", "sit_on_windows")
+
+
+def read_pet_manifest(folder) -> dict:
+    """
+    讀取動作包裡的 pet.json（可選）。只取認得的欄位，型別不符就略過，
+    讀不到或格式錯誤一律回傳空 dict，讓動作包永遠不會弄壞寵物。
+
+    Read a pack's optional pet.json. Only known, well-typed fields are kept and
+    anything unreadable yields {}, so a pack can never break the pet.
+    """
+    manifest: dict = {}
+    try:
+        path = Path(folder) / PACK_MANIFEST_NAME
+        if not path.is_file():
+            return manifest
+        with path.open("r", encoding="utf-8") as handle:
+            raw = json.load(handle)
+    except (OSError, ValueError, TypeError):
+        return manifest
+    if not isinstance(raw, dict):
+        return manifest
+    for key in _MANIFEST_NUMBERS:
+        try:
+            if key in raw:
+                manifest[key] = max(1, int(raw[key]))
+        except (TypeError, ValueError):
+            continue
+    for key in _MANIFEST_FLAGS:
+        if isinstance(raw.get(key), bool):
+            manifest[key] = raw[key]
+    if isinstance(raw.get("name"), str):
+        manifest["name"] = raw["name"]
+    if isinstance(raw.get("sound"), str):
+        manifest["sound"] = raw["sound"]
+    lines = raw.get("lines")
+    if isinstance(lines, dict):
+        manifest["lines"] = {
+            str(pool): [str(line) for line in values if str(line).strip()]
+            for pool, values in lines.items()
+            if isinstance(values, list) and values
+        }
+    return manifest
 
 
 def derive_visual_state(dragging: bool, airborne: bool, surface: str, motion_state: str) -> str:
@@ -1101,9 +1151,21 @@ class DesktopPetWidget(BaseWidget):
         self._hunger = PetHunger(user_setting_dict.get("pet_hunger", 70))
         self._hunger_warned = False
         self._messages = self._load_messages()
+        # 動作包自帶的設定（可含台詞、速度、體型、音效）
+        # Traits shipped inside the pack (lines, speed, size, sound).
+        self.manifest = read_pet_manifest(self.image_path) if self.image_path.is_dir() else {}
+        self._apply_manifest()
         self._volume = max(0.0, min(1.0, float(volume)))
         self._sound: Optional[QSoundEffect] = None
-        self._init_sound(sound_path)
+        self._init_sound(self.manifest.get("sound_path", sound_path))
+        # 語音朗讀（可選，缺少 QtTextToSpeech 時自動停用）
+        # Optional spoken lines; disabled automatically without QtTextToSpeech.
+        self._speech = None
+        self._speak = False
+        # AI 對話（可選，需環境變數金鑰；預設關閉）
+        # Optional AI chat; needs an env-var key and is off by default.
+        self._chat_service = None
+        self._pending_chat_reply: Optional[str] = None
         self._sit_on_windows = bool(sit_on_windows)
         self._platform_tick = 0
         # 音訊視覺化：依可注入的音量 provider 脈動 / Audio-reactive pulse
@@ -1152,6 +1214,11 @@ class DesktopPetWidget(BaseWidget):
             language_wrapper.language_word_dict.get("pet_set_reminder", "Set reminder..."), self)
         self.reminder_action.triggered.connect(self._prompt_reminder)
         self.menu.addAction(self.reminder_action)
+        self.chat_action = QAction(
+            language_wrapper.language_word_dict.get("pet_chat_menu", "Talk to me..."), self)
+        self.chat_action.triggered.connect(self._prompt_chat)
+        self.chat_action.setVisible(False)  # shown only when a chat service is attached
+        self.menu.addAction(self.chat_action)
         self.close_action = QAction(language_wrapper.language_word_dict.get("control_center_close_all", "Close"), self)
         self.close_action.triggered.connect(self.close)
         self.menu.addAction(self.close_action)
@@ -1357,6 +1424,58 @@ class DesktopPetWidget(BaseWidget):
         if self._timeline_start is None:
             self._timeline_start = self._now_provider()
 
+    def _apply_manifest(self) -> None:
+        """套用動作包設定：台詞併入句庫，速度／體型／音效覆寫預設值。"""
+        if not self.manifest:
+            return
+        front_engine_logger.info(f"[DesktopPetWidget] pack manifest | {self.manifest}")
+        for pool, lines in (self.manifest.get("lines") or {}).items():
+            self._messages[pool] = list(lines)
+        if "speed" in self.manifest:
+            self.motion.speed = max(1, int(self.manifest["speed"]))
+        if "size" in self.manifest:
+            self._base_size = max(16, int(self.manifest["size"]))
+            self._apply_growth_size()
+        if "climb" in self.manifest:
+            self.motion.climb = bool(self.manifest["climb"])
+        if "talk" in self.manifest:
+            self._talk = bool(self.manifest["talk"])
+        sound = self.manifest.get("sound")
+        if sound:
+            candidate = self.image_path / sound
+            if candidate.is_file():
+                self.manifest["sound_path"] = str(candidate)
+
+    def set_speech_enabled(self, enabled: bool) -> bool:
+        """
+        開關語音朗讀；系統缺少 QtTextToSpeech 時回傳 False 並維持關閉。
+        Toggle spoken lines, returning False when QtTextToSpeech is unavailable.
+        """
+        if not enabled:
+            self._speak = False
+            return False
+        if self._speech is None:
+            try:
+                from PySide6.QtTextToSpeech import QTextToSpeech
+
+                self._speech = QTextToSpeech(self)
+            except Exception as error:  # pragma: no cover - optional Qt module
+                front_engine_logger.warning(f"[DesktopPetWidget] speech unavailable: {error!r}")
+                self._speech = None
+                self._speak = False
+                return False
+        self._speak = True
+        return True
+
+    def _speak_text(self, text: str) -> None:
+        """把台詞念出來（未啟用或失敗時安靜略過）。"""
+        if not self._speak or self._speech is None or not text:
+            return
+        try:
+            self._speech.say(text)
+        except Exception as error:  # pragma: no cover - speech backend guard
+            front_engine_logger.warning(f"[DesktopPetWidget] speech failed: {error!r}")
+
     def _load_messages(self) -> dict:
         d = language_wrapper.language_word_dict
 
@@ -1381,6 +1500,11 @@ class DesktopPetWidget(BaseWidget):
             "away": lines("pet_chatter_away", "Still there?|I'll nap till you're back~|Zzz..."),
             "levelup": lines("pet_chatter_levelup", "Level up!|I'm growing!|We're getting closer!"),
             "costume": lines("pet_chatter_costume", "New look!|How do I look?|Nice fit!"),
+            "fetch": lines("pet_chatter_fetch", "Fetch!|On it!|Opening that for you!"),
+            "focus_start": lines("pet_chatter_focus_start", "Focus time!|Let's concentrate!|I'll wait here."),
+            "focus_break": lines("pet_chatter_focus_break", "Break time!|Stretch a little!|Rest your eyes."),
+            "focus_back": lines("pet_chatter_focus_back", "Back to it!|Round two!|Let's keep going."),
+            "focus_done": lines("pet_chatter_focus_done", "Long break earned!|Great run!|Take a proper rest."),
             "tag": lines("pet_chatter_tag", "You're it!|Caught you!|My turn to chase!"),
             "any": lines("pet_chatter_any", "Hi there!|(^_^)|Keep going!"),
         }
@@ -1487,6 +1611,53 @@ class DesktopPetWidget(BaseWidget):
         if not ok_minutes:
             return
         self.add_reminder(text.strip(), minutes)
+
+    # --- optional AI chat --------------------------------------------------
+    def set_chat_service(self, service) -> None:
+        """
+        接上 AI 對話服務（None 表示關閉）；服務不可用時右鍵選單不會出現該項目。
+        Attach the AI chat service (None disables it); the menu entry only
+        appears when the service is actually usable.
+        """
+        self._chat_service = service
+        usable = service is not None and bool(getattr(service, "available", lambda: False)())
+        self.chat_action.setVisible(usable)
+
+    def _prompt_chat(self) -> None:
+        """問使用者要說什麼，然後在背景等回覆（不卡 UI）。"""
+        from PySide6.QtWidgets import QInputDialog
+
+        if self._chat_service is None:
+            return
+        title = language_wrapper.language_word_dict.get("pet_chat_menu", "Talk to me...")
+        text, ok = QInputDialog.getText(
+            self, title, language_wrapper.language_word_dict.get("pet_chat_prompt", "Say something:"))
+        if not ok or not text.strip():
+            return
+        self.ask_chat(text.strip())
+
+    def ask_chat(self, message: str) -> None:
+        """送出一句話並在收到回覆時說出來；失敗則說一句抱歉。"""
+        if self._chat_service is None:
+            return
+        self.say(language_wrapper.language_word_dict.get("pet_chat_thinking", "Hmm, let me think..."))
+        self._chat_service.ask_async(message, self.handle_chat_reply)
+
+    def handle_chat_reply(self, reply: Optional[str]) -> None:
+        """處理回覆（可能來自背景執行緒）；空回覆時說一句抱歉。"""
+        if reply:
+            self._pending_chat_reply = reply
+        else:
+            self._pending_chat_reply = language_wrapper.language_word_dict.get(
+                "pet_chat_failed", "I couldn't reach my thoughts just now.")
+        # 回覆可能在背景執行緒抵達，透過計時器回到 UI 執行緒再顯示
+        # The reply may arrive off-thread; hop back to the UI thread to show it.
+        QTimer.singleShot(0, self._say_pending_chat_reply)
+
+    def _say_pending_chat_reply(self) -> None:
+        if self._pending_chat_reply:
+            self.say(self._pending_chat_reply)
+            self._pending_chat_reply = None
 
     def _init_sound(self, sound_path: Optional[str]) -> None:
         if not sound_path:
@@ -1611,6 +1782,7 @@ class DesktopPetWidget(BaseWidget):
             text = pick_message(datetime.now().hour, self._chatter_rng, self._messages, mood=mood)
         if text:
             self._bubble.show_message(text, self)
+            self._speak_text(text)
 
     def _on_tick(self) -> None:
         if self._dragging:
@@ -1687,25 +1859,64 @@ class DesktopPetWidget(BaseWidget):
                 return local_path
         return None
 
+    @staticmethod
+    def dropped_link(mime_data) -> Optional[str]:
+        """
+        從拖曳資料取出網址（拖連結到寵物身上請牠幫忙開啟）；沒有則回傳 None。
+        Pull an http(s) link out of a drop so the pet can open it for you.
+        """
+        if mime_data is None:
+            return None
+        candidates = []
+        if mime_data.hasUrls():
+            candidates += [url.toString() for url in mime_data.urls() if not url.isLocalFile()]
+        if mime_data.hasText():
+            candidates.append(mime_data.text())
+        for candidate in candidates:
+            text = str(candidate or "").strip()
+            if text.lower().startswith(("http://", "https://")):
+                return text
+        return None
+
+    def _accepts_drop(self, mime_data) -> bool:
+        return self.dropped_path(mime_data) is not None or self.dropped_link(mime_data) is not None
+
     def dragEnterEvent(self, event) -> None:
-        if self.dropped_path(event.mimeData()) is not None:
+        if self._accepts_drop(event.mimeData()):
             event.acceptProposedAction()
 
     def dragMoveEvent(self, event) -> None:
-        if self.dropped_path(event.mimeData()) is not None:
+        if self._accepts_drop(event.mimeData()):
             event.acceptProposedAction()
 
     def dropEvent(self, event) -> None:
         path = self.dropped_path(event.mimeData())
-        if path is None:
+        link = self.dropped_link(event.mimeData()) if path is None else None
+        if path is None and link is None:
             return
-        front_engine_logger.info(f"[DesktopPetWidget] dropEvent | path={path}")
+        front_engine_logger.info(f"[DesktopPetWidget] dropEvent | path={path}, link={link}")
         self.motion.wake()
-        if classify_drop(path) == DROP_SPRITE:
+        if link is not None:
+            self.fetch_link(link)
+        elif classify_drop(path) == DROP_SPRITE:
             self.change_sprite(path)
         else:
             self.feed(classify_food(path))
         event.acceptProposedAction()
+
+    def fetch_link(self, url: str) -> None:
+        """把拖進來的連結叼去瀏覽器開啟，並說一句 / Fetch a dropped link in the browser."""
+        from frontengine.utils.browser.browser import open_browser
+
+        front_engine_logger.info(f"[DesktopPetWidget] fetch_link | url={url}")
+        self._gain_affection(1)
+        pool = self._messages.get("fetch") or []
+        if pool:
+            self.say(pool[self._chatter_rng.randrange(len(pool))])
+        try:
+            open_browser(url)
+        except Exception as error:  # pragma: no cover - browser boundary
+            front_engine_logger.warning(f"[DesktopPetWidget] open_browser failed: {error!r}")
 
     def contextMenuEvent(self, event) -> None:
         self.menu.popup(event.globalPos())
