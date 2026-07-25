@@ -3,6 +3,7 @@ from PySide6.QtGui import QPainter, QFont, QColor, QFontMetrics
 
 from frontengine.show.base_widget import BaseWidget
 from frontengine.utils.logging.loggin_instance import front_engine_logger
+from frontengine.utils.power_mode.power_mode import scaled_interval
 
 
 _ALIGNMENT_MAP = {
@@ -35,6 +36,7 @@ class TextWidget(BaseWidget):
         self.draw_font = QFont(self.font().family(), self.font_size)
 
         # Marquee (horizontal scroll) state
+        self.low_power: bool = False
         self.marquee: bool = False
         self.marquee_speed: int = 4
         self.marquee_offset: int = 0
@@ -78,9 +80,15 @@ class TextWidget(BaseWidget):
             self.marquee_speed = 4
         if self.marquee:
             self.marquee_offset = self.width()
-            self._marquee_timer.start(30)
+            self._marquee_timer.start(scaled_interval(30, self.low_power))
         else:
             self._marquee_timer.stop()
+
+    def set_low_power(self, enabled: bool) -> None:
+        """省電模式：拉慢跑馬燈更新，降低重繪次數。"""
+        self.low_power = bool(enabled)
+        if self._marquee_timer.isActive():
+            self._marquee_timer.start(scaled_interval(30, self.low_power))
 
     def _tick_marquee(self) -> None:
         text_width = QFontMetrics(self.draw_font).horizontalAdvance(self.text)

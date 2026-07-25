@@ -181,6 +181,11 @@ traditional_chinese_word_dict = {
     "target_monitor_ask": "詢問",
     "control_center_hide_all": "全部隱藏",
     "control_center_show_all": "全部顯示",
+    "settings_menu_autostart": "開機時自動啟動",
+    "settings_menu_restore_session": "還原上次工作階段",
+    "settings_autostart_failed": "無法變更自動啟動設定。",
+    "control_center_low_power_on": "開啟省電模式",
+    "control_center_low_power_off": "關閉省電模式",
     "control_center_mute_all": "全部靜音",
     "control_center_unmute_all": "取消全部靜音",
     # Recent files

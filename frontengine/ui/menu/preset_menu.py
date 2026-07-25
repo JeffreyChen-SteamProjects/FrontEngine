@@ -225,6 +225,27 @@ def apply_named_preset(ui: "FrontEngineMainUI", name: str) -> bool:
     return True
 
 
+LAST_SESSION_PRESET = "__last_session__"
+
+
+def save_last_session(ui: "FrontEngineMainUI") -> bool:
+    """
+    把目前各頁面的設定存成「上次工作階段」預設集（關閉程式時呼叫）。
+    Store the current page settings as the last-session preset on exit.
+    """
+    try:
+        PresetRepository().save(LAST_SESSION_PRESET, _collect_state(ui))
+        return True
+    except (OSError, ValueError) as error:
+        front_engine_logger.warning(f"[PresetMenu] save_last_session failed: {error!r}")
+        return False
+
+
+def restore_last_session(ui: "FrontEngineMainUI") -> bool:
+    """啟動時還原上次的設定；沒存過或讀不到就跳過。"""
+    return apply_named_preset(ui, LAST_SESSION_PRESET)
+
+
 def apply_startup_preset(ui: "FrontEngineMainUI") -> None:
     """
     啟動時套用設定的預設集；缺失或損毀時僅記錄警告，不影響啟動。

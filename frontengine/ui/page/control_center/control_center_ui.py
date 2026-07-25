@@ -74,6 +74,9 @@ class ControlCenterUI(QWidget):
         # 全域不透明度（None 表示尚未使用過）/ Global opacity level (None until first used)
         self._global_opacity = None
         self.mute_all_button = self._create_button("control_center_mute_all", self.toggle_mute_all)
+        self._low_power = False
+        self.low_power_button = self._create_button(
+            "control_center_low_power_on", self.toggle_low_power)
         self.clear_all_button = self._create_button("control_center_close_all", self.clear_all)
 
         # Log panel
@@ -96,8 +99,9 @@ class ControlCenterUI(QWidget):
         self.grid_layout.addWidget(self.hide_all_button, 7, 0)
         self.grid_layout.addWidget(self.show_all_button, 8, 0)
         self.grid_layout.addWidget(self.mute_all_button, 9, 0)
-        self.grid_layout.addWidget(self.clear_all_button, 10, 0)
-        self.grid_layout.addWidget(self.log_panel_scroll_area, 0, 1, 11, 1)  # 明確指定 rowSpan=11, colSpan=1
+        self.grid_layout.addWidget(self.low_power_button, 10, 0)
+        self.grid_layout.addWidget(self.clear_all_button, 11, 0)
+        self.grid_layout.addWidget(self.log_panel_scroll_area, 0, 1, 12, 1)  # 明確指定 rowSpan=11, colSpan=1
         self.setLayout(self.grid_layout)
 
         # Redirect
@@ -224,6 +228,28 @@ class ControlCenterUI(QWidget):
     def toggle_mute_all(self) -> None:
         """切換全域靜音狀態 / Toggle the global mute state."""
         self.set_mute_all(not getattr(self, "_muted", False))
+
+    def set_low_power(self, enabled: bool) -> None:
+        """省電模式：讓支援的覆蓋層把更新頻率調慢。"""
+        front_engine_logger.info(f"ControlCenterUI set_low_power | enabled={enabled}")
+        self._low_power = bool(enabled)
+
+        def apply(widget) -> None:
+            setter = getattr(widget, "set_low_power", None)
+            if setter is not None:
+                setter(self._low_power)
+
+        self._for_each_overlay(apply)
+        self.low_power_button.setText(
+            language_wrapper.language_word_dict.get(
+                "control_center_low_power_off" if self._low_power else "control_center_low_power_on",
+                "Low power off" if self._low_power else "Low power on",
+            )
+        )
+
+    def toggle_low_power(self) -> None:
+        """切換省電模式 / Toggle low-power mode."""
+        self.set_low_power(not getattr(self, "_low_power", False))
 
     def _sample_overlay_opacity(self) -> float:
         """取一個現有覆蓋層的不透明度作為起始值 / Seed from an existing overlay's opacity."""

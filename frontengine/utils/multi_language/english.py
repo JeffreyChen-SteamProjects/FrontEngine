@@ -180,6 +180,11 @@ english_word_dict = {
     "target_monitor_ask": "Ask",
     "control_center_hide_all": "Hide all",
     "control_center_show_all": "Show all",
+    "settings_menu_autostart": "Start with the system",
+    "settings_menu_restore_session": "Restore last session",
+    "settings_autostart_failed": "Could not change the autostart setting.",
+    "control_center_low_power_on": "Low power on",
+    "control_center_low_power_off": "Low power off",
     "control_center_mute_all": "Mute all",
     "control_center_unmute_all": "Unmute all",
     # Recent files

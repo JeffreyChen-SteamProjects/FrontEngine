@@ -33,6 +33,9 @@ user_setting_dict: Dict[str, Any] = {
     # 每天在指定時間自動套用預設集
     # Auto-apply a preset at a configured time each day
     "preset_schedule": dict(DEFAULT_PRESET_SCHEDULE),
+    # 啟動時還原上次的頁面設定
+    # Restore the previous session's page settings on launch
+    "restore_last_session": False,
     # 桌面寵物心情值（0~100），跨工作階段保存
     # Desktop pet mood (0..100), persisted across sessions
     "pet_mood": 60,
