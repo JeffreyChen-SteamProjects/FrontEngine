@@ -44,7 +44,12 @@ Spawn an animated sprite that lives on your desktop, from the **Pet** tab.
   away, and warns you about a low battery.
 - **Interaction** — drag it around, right-click to clone/feed/set a reminder,
   and **drop a file onto it**: an image or pet pack becomes its new look,
-  anything else is eaten as a snack.
+  anything else is eaten. What it eats matters — an archive is a feast, music
+  cheers it up more than it fills, a document is a modest meal, and a binary is
+  too hard to chew.
+- **Tag** — with two or more pets on screen, tick *Play tag with each other* and
+  one becomes "it": it walks toward its nearest neighbour while the others run
+  the other way, and catching someone passes the tag on.
 - **React to audio** — the pet pulses to your speakers' output level. It reads
   only the Windows output *meter* (WASAPI `IAudioMeterInformation`); no audio
   is captured or recorded. Peaks are smoothed with an RMS window and a
