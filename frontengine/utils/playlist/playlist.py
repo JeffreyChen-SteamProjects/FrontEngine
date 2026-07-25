@@ -68,7 +68,9 @@ class Playlist:
         self.items: List[str] = [str(item) for item in items if str(item).strip()]
         self.shuffle = bool(shuffle)
         self.interval_seconds = clamp_interval(interval_seconds)
-        self._rng = rng if rng is not None else _random_module.Random()
+        # 只用來決定桌布輪播順序，不涉及任何安全用途。
+        # Only decides the wallpaper rotation order - never used for anything security related.
+        self._rng = rng if rng is not None else _random_module.Random()  # nosec B311
         self._order: List[int] = []
         self._position = -1
 

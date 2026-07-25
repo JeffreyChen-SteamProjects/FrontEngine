@@ -6,7 +6,7 @@ The focus page: dim everything except the window you are working in, and cover
 the parts of the screen that pull your eye away. Both pass clicks through, so
 what is covered still works.
 """
-from typing import List, Optional
+from typing import List
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QGuiApplication

@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Dict, Optional, Type
 
 from PySide6.QtCore import QByteArray, QTimer, QCoreApplication
-from PySide6.QtGui import QIcon, Qt, QSurfaceFormat
+from PySide6.QtGui import QIcon, Qt
 from PySide6.QtWidgets import QMainWindow, QApplication, QGridLayout, QTabWidget, QMenuBar, QWidget
 from qt_material import apply_stylesheet
 

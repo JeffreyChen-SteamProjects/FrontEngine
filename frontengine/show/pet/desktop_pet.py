@@ -1,6 +1,5 @@
 import json
 import random as _random_module
-import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 from urllib.parse import urlparse

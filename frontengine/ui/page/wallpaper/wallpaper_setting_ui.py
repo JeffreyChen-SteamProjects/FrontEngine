@@ -6,7 +6,7 @@ The wallpaper page: rotate a folder of images and animations beneath every
 window, optionally shuffled and pulsing with the system audio level — and each
 monitor can point at a different folder.
 """
-from typing import Dict, List, Optional
+from typing import Dict
 
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QGuiApplication
