@@ -15,6 +15,7 @@ from frontengine.ui.menu.language_menu import build_language_menu
 from frontengine.ui.menu.preset_menu import apply_named_preset, apply_startup_preset, build_preset_menu
 from frontengine.ui.menu.settings_menu import build_settings_menu
 from frontengine.ui.page.control_center.control_center_ui import ControlCenterUI
+from frontengine.ui.page.focus.focus_setting_ui import FocusSettingUI
 from frontengine.ui.page.gif.gif_setting_ui import GIFSettingUI
 from frontengine.ui.page.image.image_setting_ui import ImageSettingUI
 from frontengine.ui.page.particle.particle_setting_ui import ParticleSettingUI
@@ -23,6 +24,7 @@ from frontengine.ui.page.scene_setting.scene_setting_ui import SceneSettingUI
 from frontengine.ui.page.sound_player.sound_player_setting_ui import SoundPlayerSettingUI
 from frontengine.ui.page.text.text_setting_ui import TextSettingUI
 from frontengine.ui.page.video.video_setting_ui import VideoSettingUI
+from frontengine.ui.page.wallpaper.wallpaper_setting_ui import WallpaperSettingUI
 from frontengine.ui.page.web.web_setting_ui import WEBSettingUI
 from frontengine.user_setting.user_setting_file import (
     get_hotkey_bindings,
@@ -100,6 +102,8 @@ class FrontEngineMainUI(QMainWindow):
         self.scene_setting_ui = SceneSettingUI()
         self.particle_setting_ui = ParticleSettingUI()
         self.pet_setting_ui = PetSettingUI()
+        self.wallpaper_setting_ui = WallpaperSettingUI()
+        self.focus_setting_ui = FocusSettingUI()
 
         # 控制中心
         # Control Center
@@ -204,6 +208,8 @@ class FrontEngineMainUI(QMainWindow):
             (self.scene_setting_ui, "tab_scene_text"),
             (self.particle_setting_ui, "tab_particle_text"),
             (self.pet_setting_ui, "tab_pet_text"),
+            (self.wallpaper_setting_ui, "tab_wallpaper_text"),
+            (self.focus_setting_ui, "tab_focus_text"),
             (self.control_center_ui, "tab_control_center_text"),
         ]
 
