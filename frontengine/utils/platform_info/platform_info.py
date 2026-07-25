@@ -23,6 +23,10 @@ _COMMAND_TIMEOUT = 3
 # The only commands this module may run. Every argv is fixed here and callers
 # pass a name, so user input can never become part of a command line.
 _ALLOWED_COMMANDS = {}  # name -> runner, filled in below once the runners exist
+# 只從這些固定的絕對路徑找 wmctrl，不依賴 PATH（避免被同名程式攔截）
+# wmctrl is looked up in these fixed absolute locations only — never via PATH,
+# which another program could shadow.
+_WMCTRL_PATHS = ("/usr/bin/wmctrl", "/usr/local/bin/wmctrl", "/bin/wmctrl")
 # 桌面／工作列等外殼視窗類別，不視為可站立的程式視窗
 # Shell windows (desktop / taskbar) that must not count as standable.
 _PLATFORM_SKIP_CLASSES = {"WorkerW", "Progman", "Shell_TrayWnd", "Button"}
@@ -36,21 +40,26 @@ def _output_of(completed) -> Optional[str]:
 
 
 def _macos_idle_output() -> Optional[str]:
-    return _output_of(subprocess.run(  # nosec B603 # nosemgrep - literal argv, shell=False
-        ["ioreg", "-c", "IOHIDSystem"],
+    return _output_of(subprocess.run(  # nosec B603 # nosemgrep - literal absolute argv, shell=False
+        ["/usr/sbin/ioreg", "-c", "IOHIDSystem"],
         capture_output=True, text=True, timeout=_COMMAND_TIMEOUT, check=False, shell=False))
 
 
 def _macos_battery_output() -> Optional[str]:
-    return _output_of(subprocess.run(  # nosec B603 # nosemgrep - literal argv, shell=False
-        ["pmset", "-g", "batt"],
+    return _output_of(subprocess.run(  # nosec B603 # nosemgrep - literal absolute argv, shell=False
+        ["/usr/bin/pmset", "-g", "batt"],
         capture_output=True, text=True, timeout=_COMMAND_TIMEOUT, check=False, shell=False))
 
 
 def _linux_windows_output() -> Optional[str]:
-    return _output_of(subprocess.run(  # nosec B603 # nosemgrep - literal argv, shell=False
-        ["wmctrl", "-lG"],
-        capture_output=True, text=True, timeout=_COMMAND_TIMEOUT, check=False, shell=False))
+    """wmctrl 各發行版安裝位置不同，只從固定的絕對路徑清單裡找，不查 PATH。"""
+    for candidate in _WMCTRL_PATHS:
+        if not Path(candidate).is_file():
+            continue
+        return _output_of(subprocess.run(  # nosec B603 # nosemgrep - absolute path from a fixed list
+            [candidate, "-lG"],
+            capture_output=True, text=True, timeout=_COMMAND_TIMEOUT, check=False, shell=False))
+    return None
 
 
 _ALLOWED_COMMANDS.update({
