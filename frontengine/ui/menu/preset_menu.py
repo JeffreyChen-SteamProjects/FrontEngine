@@ -7,6 +7,9 @@ from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QFileDialog, QInputDialog, QMessageBox
 
 from frontengine.user_setting.preset_repository import PresetRepository
+from frontengine.utils.workshop.workshop_content import (
+    KIND_PET_PACK, KIND_PRESET, find_workshop_dir, preset_files, scan_workshop_items,
+)
 from frontengine.user_setting.user_setting_file import user_setting_dict, write_user_setting
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
@@ -296,6 +299,66 @@ def _import_package_action(ui: "FrontEngineMainUI") -> Callable[[], None]:
     return handler
 
 
+def _workshop_action(ui: "FrontEngineMainUI") -> Callable[[], None]:
+    """
+    匯入 Steam 創意工坊已訂閱的內容：掃描 Steam 下載的資料夾，把預設集複製進來，
+    動作包則列出路徑供寵物頁選用。找不到 Steam 時請使用者自己指定路徑。
+    Import subscribed Steam Workshop content: copy presets in, and list pet packs
+    with their paths so the pet page can point at them. If Steam is not where we
+    expect, ask the user where it is.
+    """
+    def handler() -> None:
+        front_engine_logger.info("[PresetMenu] import workshop content")
+        title = _t("workshop_menu_import", "Import Workshop content...")
+        content_dir = find_workshop_dir()
+        if content_dir is None:
+            chosen = QFileDialog.getExistingDirectory(
+                ui, _t("workshop_pick_steam", "Where is Steam installed?"))
+            if not chosen:
+                return
+            content_dir = find_workshop_dir(extra_paths=[chosen])
+        if content_dir is None:
+            QMessageBox.information(
+                ui, title, _t("workshop_not_found", "No Workshop content found for FrontEngine."))
+            return
+        items = scan_workshop_items(content_dir)
+        if not items:
+            QMessageBox.information(
+                ui, title,
+                _t("workshop_no_items", "Nothing subscribed yet - subscribe in Steam first."))
+            return
+        imported, packs = _install_workshop_items(items)
+        lines = [
+            _t("workshop_imported_presets", "Presets imported: {count}").format(count=imported),
+            _t("workshop_found_packs", "Pet packs available: {count}").format(count=len(packs)),
+        ]
+        lines.extend(f"- {title_}: {path}" for title_, path in packs[:8])
+        QMessageBox.information(ui, title, chr(10).join(lines))
+
+    return handler
+
+
+def _install_workshop_items(items) -> tuple:
+    """把預設集複製進本機的 presets/，並回傳可用的動作包 (名稱, 路徑)。"""
+    repository = PresetRepository()
+    imported = 0
+    packs = []
+    for item in items:
+        if item["kind"] == KIND_PET_PACK:
+            packs.append((item["title"], item["path"]))
+            continue
+        if item["kind"] != KIND_PRESET:
+            continue
+        for preset_path in preset_files(item["path"]):
+            try:
+                repository.import_preset(Path(preset_path))
+                imported += 1
+            except Exception as error:  # pragma: no cover - third-party content
+                front_engine_logger.warning(
+                    f"[PresetMenu] workshop preset failed: {preset_path} ({error!r})")
+    return (imported, packs)
+
+
 def build_preset_menu(ui: "FrontEngineMainUI") -> None:
     """
     Build the Presets menu with Save / Load / Delete / Export / Import actions.
@@ -314,6 +377,7 @@ def build_preset_menu(ui: "FrontEngineMainUI") -> None:
         ("preset_menu_import_package", "Import package (+media)...", _import_package_action),
         ("preset_menu_set_startup", "Set as startup preset...", _set_startup_action),
         ("preset_menu_clear_startup", "Clear startup preset", _clear_startup_action),
+        ("workshop_menu_import", "Import Workshop content...", _workshop_action),
     ):
         action = QAction(_t(label_key, fallback), menu)
         action.triggered.connect(callback_factory(ui))

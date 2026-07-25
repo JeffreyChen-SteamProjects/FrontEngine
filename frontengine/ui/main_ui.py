@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Dict, Optional, Type
 
 from PySide6.QtCore import QByteArray, QTimer, QCoreApplication
-from PySide6.QtGui import QIcon, Qt, QSurfaceFormat
+from PySide6.QtGui import QIcon, Qt
 from PySide6.QtWidgets import QMainWindow, QApplication, QGridLayout, QTabWidget, QMenuBar, QWidget
 from qt_material import apply_stylesheet
 
@@ -18,6 +18,7 @@ from frontengine.ui.menu.preset_menu import (
 )
 from frontengine.ui.menu.settings_menu import build_settings_menu
 from frontengine.ui.page.control_center.control_center_ui import ControlCenterUI
+from frontengine.ui.page.focus.focus_setting_ui import FocusSettingUI
 from frontengine.ui.page.gif.gif_setting_ui import GIFSettingUI
 from frontengine.ui.page.image.image_setting_ui import ImageSettingUI
 from frontengine.ui.page.particle.particle_setting_ui import ParticleSettingUI
@@ -28,6 +29,7 @@ from frontengine.ui.page.screen_care.screen_care_setting_ui import ScreenCareSet
 from frontengine.ui.page.sound_player.sound_player_setting_ui import SoundPlayerSettingUI
 from frontengine.ui.page.text.text_setting_ui import TextSettingUI
 from frontengine.ui.page.video.video_setting_ui import VideoSettingUI
+from frontengine.ui.page.wallpaper.wallpaper_setting_ui import WallpaperSettingUI
 from frontengine.ui.page.web.web_setting_ui import WEBSettingUI
 from frontengine.user_setting.user_setting_file import (
     get_hotkey_bindings,
@@ -40,6 +42,7 @@ from frontengine.utils.critical_exit.win32_vk import keyboard_keys_table
 from frontengine.utils.hotkey.hotkey_service import HotkeyService
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
+from frontengine.utils.plugins.plugin_loader import load_plugins
 from frontengine.utils.preset_schedule.preset_schedule_service import PresetScheduleService
 from frontengine.utils.smart_pause.smart_pause_service import SmartPauseService
 from frontengine.utils.theme_schedule.theme_schedule_service import ThemeScheduleService
@@ -107,6 +110,8 @@ class FrontEngineMainUI(QMainWindow):
         self.pet_setting_ui = PetSettingUI()
         self.screen_care_setting_ui = ScreenCareSettingUI()
         self.presentation_setting_ui = PresentationSettingUI()
+        self.wallpaper_setting_ui = WallpaperSettingUI()
+        self.focus_setting_ui = FocusSettingUI()
 
         # 控制中心
         # Control Center
@@ -126,6 +131,13 @@ class FrontEngineMainUI(QMainWindow):
         # Menu Bar
         self.menu_bar = QMenuBar()
         self.setMenuBar(self.menu_bar)
+
+        # 使用者明確開啟時才載入外掛（外掛與本程式同權限，無法沙箱化）
+        # Plugins load only when explicitly enabled; they run with our privileges.
+        loaded_plugins = load_plugins(
+            FrontEngine_EXTEND_TAB, enabled=bool(user_setting_dict.get("load_plugins")))
+        if loaded_plugins:
+            front_engine_logger.info(f"[FrontEngineMainUI] plugin tabs: {loaded_plugins}")
 
         # 加入各 Tab
         # Add tabs
@@ -215,6 +227,8 @@ class FrontEngineMainUI(QMainWindow):
             (self.pet_setting_ui, "tab_pet_text"),
             (self.screen_care_setting_ui, "tab_screen_care_text"),
             (self.presentation_setting_ui, "tab_presentation_text"),
+            (self.wallpaper_setting_ui, "tab_wallpaper_text"),
+            (self.focus_setting_ui, "tab_focus_text"),
             (self.control_center_ui, "tab_control_center_text"),
         ]
 

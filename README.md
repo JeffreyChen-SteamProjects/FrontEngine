@@ -61,6 +61,50 @@ Audio features are Windows-only and degrade to "no pulse" elsewhere.
 
 ---
 
+## Focus
+
+Two overlays for when the screen is competing with your work, both on the
+**Focus** tab:
+
+- **Dim background windows** — everything except the window you are working in
+  is shaded, at an adjustable strength. Off Windows, where the active window
+  cannot be identified without a native binding, it shades the whole screen.
+- **Cover a distraction** — mask a strip of the screen: the taskbar, a
+  notification corner, an edge, or all of it.
+
+Both pass clicks through, so what they cover still works — it just stops pulling
+your eye.
+
+---
+
+## Wallpaper
+
+Play a folder of images and animations *beneath* every window, from the
+**Wallpaper** tab:
+
+- **A playlist per monitor** — each screen points at its own folder, changes on
+  its own timer, and can be shuffled or read recursively.
+- **React to audio** — the wallpaper can pulse with your speakers' output level,
+  using the same meter-only reading as the pet (no audio is captured).
+
+---
+
+## Community content
+
+- **Steam Workshop** — subscribed items are picked up from Steam's own
+  `steamapps/workshop/content` folder: presets are imported and pet packs are
+  listed with their paths, from **Presets → Import Workshop content**.
+  Publishing to the Workshop needs the Steamworks SDK and is not built in.
+- **Plugins** — a `plugins/` folder can add its own tabs, either through a
+  `FRONTENGINE_TABS` mapping or a `register(registry)` hook.
+
+  > A plugin is Python and runs with the same privileges as FrontEngine — it
+  > cannot be sandboxed. Loading is **off by default** (Settings → Load plugins),
+  > every load is logged, and one broken plugin is skipped rather than stopping
+  > the app. Only install plugins you trust.
+
+---
+
 ## Install
 
 - **System Requirements**
