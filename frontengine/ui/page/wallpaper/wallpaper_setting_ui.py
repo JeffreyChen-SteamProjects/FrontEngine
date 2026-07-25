@@ -6,12 +6,14 @@ The wallpaper page: rotate a folder of images and animations beneath every
 window, optionally shuffled and pulsing with the system audio level — and each
 monitor can point at a different folder.
 """
-from typing import Dict
+from datetime import datetime
+from typing import Callable, Dict
 
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import (
-    QCheckBox, QComboBox, QFileDialog, QGridLayout, QLabel, QPushButton, QSlider, QWidget,
+    QCheckBox, QComboBox, QFileDialog, QGridLayout, QLabel, QPushButton, QSlider, QSpinBox,
+    QWidget,
 )
 
 from frontengine.show.wallpaper.wallpaper_widget import WallpaperWidget
@@ -19,7 +21,9 @@ from frontengine.ui.page.utils import coerce_int
 from frontengine.utils.audio_meter.screen_audio import audio_level_provider_for_screen
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
-from frontengine.utils.playlist.playlist import Playlist, clamp_interval, collect_media
+from frontengine.utils.playlist.playlist import (
+    Playlist, ScheduledPlaylists, clamp_interval, collect_media,
+)
 
 
 class WallpaperSettingUI(QWidget):
@@ -35,7 +39,12 @@ class WallpaperSettingUI(QWidget):
         # Per-monitor folder, wallpaper widget and playlist.
         self.folders: Dict[int, str] = {}
         self.wallpaper_widgets: Dict[int, WallpaperWidget] = {}
-        self.playlists: Dict[int, Playlist] = {}
+        self.playlists: Dict[int, ScheduledPlaylists] = {}
+        # 工作時段用的資料夾（可留空），以及判斷「現在幾點」的時鐘（測試可換掉）
+        # The folder used during work hours (may be empty) and the clock that
+        # decides what time it is - swappable in tests.
+        self.quiet_folders: Dict[int, str] = {}
+        self.now_provider: Callable[[], datetime] = datetime.now
         self.advance_timer = QTimer(self)
         self.advance_timer.timeout.connect(self.advance_all)
 
@@ -77,6 +86,26 @@ class WallpaperSettingUI(QWidget):
         self.react_strength_slider.setValue(100)
         self.react_strength_slider.valueChanged.connect(self._apply_audio_react)
 
+        # 工作時段：這段時間改播另一個資料夾（例如安靜、低干擾的桌布）
+        # Work hours: play a different folder during this window - the quiet,
+        # low-distraction set - and the usual one outside it.
+        self.quiet_label = QLabel(
+            language_wrapper.language_word_dict.get(
+                "wallpaper_quiet_label", "Quiet hours"))
+        self.quiet_start_spinbox = QSpinBox()
+        self.quiet_start_spinbox.setRange(0, 23)
+        self.quiet_start_spinbox.setValue(9)
+        self.quiet_end_spinbox = QSpinBox()
+        self.quiet_end_spinbox.setRange(0, 23)
+        self.quiet_end_spinbox.setValue(18)
+        self.quiet_folder_button = QPushButton(
+            language_wrapper.language_word_dict.get(
+                "wallpaper_quiet_folder", "Quiet folder..."))
+        self.quiet_folder_button.clicked.connect(self.choose_quiet_folder)
+        self.quiet_folder_label = QLabel(
+            language_wrapper.language_word_dict.get("wallpaper_no_folder", "No folder chosen"))
+        self.quiet_folder_label.setWordWrap(True)
+
         # Start / stop
         self.start_button = QPushButton(
             language_wrapper.language_word_dict.get("wallpaper_start", "Start wallpaper"))
@@ -101,9 +130,14 @@ class WallpaperSettingUI(QWidget):
         self.grid_layout.addWidget(self.recursive_checkbox, 3, 0)
         self.grid_layout.addWidget(self.react_checkbox, 4, 0)
         self.grid_layout.addWidget(self.react_strength_slider, 4, 1, 1, 2)
-        self.grid_layout.addWidget(self.start_button, 5, 0)
-        self.grid_layout.addWidget(self.next_button, 5, 1)
-        self.grid_layout.addWidget(self.hint_label, 6, 0, 1, 3)
+        self.grid_layout.addWidget(self.quiet_label, 5, 0)
+        self.grid_layout.addWidget(self.quiet_start_spinbox, 5, 1)
+        self.grid_layout.addWidget(self.quiet_end_spinbox, 5, 2)
+        self.grid_layout.addWidget(self.quiet_folder_button, 6, 0)
+        self.grid_layout.addWidget(self.quiet_folder_label, 6, 1, 1, 2)
+        self.grid_layout.addWidget(self.start_button, 7, 0)
+        self.grid_layout.addWidget(self.next_button, 7, 1)
+        self.grid_layout.addWidget(self.hint_label, 8, 0, 1, 3)
 
     # --- folders ---------------------------------------------------------
     def current_monitor(self) -> int:
@@ -123,17 +157,56 @@ class WallpaperSettingUI(QWidget):
         self.folders[int(monitor)] = str(folder)
         self._show_folder_for_monitor()
 
+    def choose_quiet_folder(self) -> None:
+        """為目前選到的螢幕挑一個「工作時段」資料夾。"""
+        folder = QFileDialog.getExistingDirectory(
+            self, language_wrapper.language_word_dict.get(
+                "wallpaper_quiet_folder", "Quiet folder..."))
+        if folder:
+            self.set_quiet_folder(self.current_monitor(), folder)
+
+    def set_quiet_folder(self, monitor: int, folder: str) -> None:
+        """指定某螢幕在工作時段使用的資料夾。"""
+        self.quiet_folders[int(monitor)] = str(folder)
+        self._show_folder_for_monitor()
+
     def _show_folder_for_monitor(self) -> None:
-        folder = self.folders.get(self.current_monitor())
-        self.folder_label.setText(folder or language_wrapper.language_word_dict.get(
-            "wallpaper_no_folder", "No folder chosen"))
+        empty = language_wrapper.language_word_dict.get(
+            "wallpaper_no_folder", "No folder chosen")
+        monitor = self.current_monitor()
+        self.folder_label.setText(self.folders.get(monitor) or empty)
+        self.quiet_folder_label.setText(self.quiet_folders.get(monitor) or empty)
 
     def build_playlist(self, monitor: int) -> Playlist:
-        """依該螢幕的資料夾建立播放清單。"""
-        items = collect_media(self.folders.get(int(monitor), ""),
-                              recursive=self.recursive_checkbox.isChecked())
+        """依該螢幕的（一般時段）資料夾建立播放清單。"""
+        return self._playlist_from(self.folders.get(int(monitor), ""))
+
+    def _playlist_from(self, folder: str) -> Playlist:
+        items = collect_media(folder or "", recursive=self.recursive_checkbox.isChecked())
         return Playlist(items, shuffle=self.shuffle_checkbox.isChecked(),
                         interval_seconds=int(self.interval_combobox.currentData()))
+
+    def build_schedule(self, monitor: int) -> ScheduledPlaylists:
+        """
+        建立該螢幕的時段清單：工作時段用安靜資料夾，其餘時間用一般資料夾。
+        沒設安靜資料夾（或裡面沒有媒體檔）就整天都用一般清單。
+        The per-monitor schedule: the quiet folder during work hours, the usual
+        one otherwise. With no quiet folder (or nothing in it) the normal
+        playlist simply runs all day.
+        """
+        schedule = ScheduledPlaylists(default=self.build_playlist(monitor))
+        quiet = self._playlist_from(self.quiet_folders.get(int(monitor), ""))
+        if len(quiet):
+            schedule.add_window(self.quiet_start_spinbox.value(),
+                                self.quiet_end_spinbox.value(), quiet)
+        return schedule
+
+    def playlist_for_now(self, monitor: int) -> Playlist:
+        """此刻該用的清單（依現在幾點決定）。"""
+        schedule = self.playlists.get(int(monitor))
+        if schedule is None:
+            return self.build_playlist(monitor)
+        return schedule.playlist_for(self.now_provider().hour) or schedule.default
 
     # --- lifecycle -------------------------------------------------------
     def toggle_wallpaper(self) -> None:
@@ -150,8 +223,9 @@ class WallpaperSettingUI(QWidget):
         for monitor, folder in sorted(self.folders.items()):
             if not folder or monitor >= len(screens):
                 continue
-            playlist = self.build_playlist(monitor)
-            if not len(playlist):
+            schedule = self.build_schedule(monitor)
+            playlist = schedule.playlist_for(self.now_provider().hour) or schedule.default
+            if playlist is None or not len(playlist):
                 front_engine_logger.warning(f"[WallpaperSettingUI] no media in {folder}")
                 continue
             widget = WallpaperWidget(react_strength=self.react_strength_slider.value())
@@ -166,7 +240,7 @@ class WallpaperSettingUI(QWidget):
             widget.show()
             widget.lower()
             self.wallpaper_widgets[monitor] = widget
-            self.playlists[monitor] = playlist
+            self.playlists[monitor] = schedule
         if self.wallpaper_widgets:
             self.advance_timer.start(
                 clamp_interval(self.interval_combobox.currentData()) * 1000)
@@ -187,10 +261,10 @@ class WallpaperSettingUI(QWidget):
             language_wrapper.language_word_dict.get("wallpaper_start", "Start wallpaper"))
 
     def advance_all(self) -> None:
-        """每個螢幕各自換到清單的下一張。"""
+        """每個螢幕各自換到「此刻該用的清單」的下一張。"""
         for monitor, widget in list(self.wallpaper_widgets.items()):
-            playlist = self.playlists.get(monitor)
-            if playlist is None:
+            playlist = self.playlist_for_now(monitor)
+            if playlist is None or not len(playlist):
                 continue
             try:
                 nxt = playlist.next()
@@ -221,18 +295,30 @@ class WallpaperSettingUI(QWidget):
             "recursive": self.recursive_checkbox.isChecked(),
             "audio_react": self.react_checkbox.isChecked(),
             "react_strength": self.react_strength_slider.value(),
+            "quiet_folders": {str(monitor): folder
+                              for monitor, folder in self.quiet_folders.items()},
+            "quiet_start": self.quiet_start_spinbox.value(),
+            "quiet_end": self.quiet_end_spinbox.value(),
         }
 
     def set_state(self, state: dict) -> None:
-        folders = state.get("folders")
-        if isinstance(folders, dict):
-            self.folders = {}
+        for key, target in (("folders", "folders"), ("quiet_folders", "quiet_folders")):
+            folders = state.get(key)
+            if not isinstance(folders, dict):
+                continue
+            restored: Dict[int, str] = {}
             for monitor, folder in folders.items():
                 try:
-                    self.folders[int(monitor)] = str(folder)
+                    restored[int(monitor)] = str(folder)
                 except (TypeError, ValueError):
                     continue
-            self._show_folder_for_monitor()
+            setattr(self, target, restored)
+        self._show_folder_for_monitor()
+        for spinbox, key in ((self.quiet_start_spinbox, "quiet_start"),
+                             (self.quiet_end_spinbox, "quiet_end")):
+            hour = coerce_int(state.get(key))
+            if hour is not None:
+                spinbox.setValue(max(0, min(23, hour)))
         if state.get("interval") is not None:
             index = self.interval_combobox.findText(str(state["interval"]))
             if index >= 0:

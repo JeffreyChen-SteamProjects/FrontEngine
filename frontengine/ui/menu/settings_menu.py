@@ -6,7 +6,10 @@ from typing import TYPE_CHECKING
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QDialog, QFileDialog, QMessageBox
 
+from frontengine.ui.dialog.app_profile_dialog import AppProfileDialog
 from frontengine.ui.dialog.hotkey_settings_dialog import HotkeySettingsDialog
+from frontengine.ui.dialog.reminder_dialog import ReminderDialog
+from frontengine.ui.dialog.smart_pause_dialog import SmartPauseDialog
 from frontengine.user_setting.user_setting_file import (
     export_user_setting,
     import_user_setting,
@@ -58,12 +61,29 @@ def build_settings_menu(ui: "FrontEngineMainUI") -> None:
     restore_action.toggled.connect(lambda checked: _toggle_restore_session(checked))
     menu.addAction(restore_action)
     ui.restore_session_action = restore_action
+
     plugins_action = QAction(_t("settings_menu_plugins", "Load plugins (advanced)"), menu)
     plugins_action.setCheckable(True)
     plugins_action.setChecked(bool(user_setting_dict.get("load_plugins")))
     plugins_action.toggled.connect(lambda checked: _toggle_plugins(ui, checked))
     menu.addAction(plugins_action)
     ui.plugins_action = plugins_action
+
+    menu.addSeparator()
+    smart_pause_action = QAction(_t("settings_menu_smart_pause", "Smart pause..."), menu)
+    smart_pause_action.triggered.connect(lambda: _open_dialog(ui, SmartPauseDialog))
+    menu.addAction(smart_pause_action)
+    ui.smart_pause_action = smart_pause_action
+
+    app_profile_action = QAction(_t("settings_menu_app_profiles", "App profiles..."), menu)
+    app_profile_action.triggered.connect(lambda: _open_dialog(ui, AppProfileDialog))
+    menu.addAction(app_profile_action)
+    ui.app_profile_action = app_profile_action
+
+    reminder_action = QAction(_t("settings_menu_reminders", "Reminders..."), menu)
+    reminder_action.triggered.connect(lambda: _open_dialog(ui, ReminderDialog))
+    menu.addAction(reminder_action)
+    ui.reminder_action = reminder_action
 
     menu.addSeparator()
     export_action = QAction(_t("settings_menu_export", "Export settings..."), menu)
@@ -73,6 +93,23 @@ def build_settings_menu(ui: "FrontEngineMainUI") -> None:
     import_action = QAction(_t("settings_menu_import", "Import settings..."), menu)
     import_action.triggered.connect(lambda: _import_settings(ui))
     menu.addAction(import_action)
+
+
+def _open_dialog(ui: "FrontEngineMainUI", dialog_class) -> bool:
+    """
+    開一個設定對話框並回傳使用者是否按下確定。三個規則類對話框都自己負責寫回
+    設定，這裡只管開窗與記錄。
+    Open one of the rule dialogs and report whether it was accepted. Each dialog
+    persists its own settings; this only opens it and logs the outcome.
+    """
+    front_engine_logger.info(f"[SettingsMenu] open {dialog_class.__name__}")
+    dialog = dialog_class(ui)
+    accepted = dialog.exec() == QDialog.DialogCode.Accepted
+    if accepted:
+        refresh = getattr(ui, "refresh_rule_services", None)
+        if refresh is not None:
+            refresh()
+    return accepted
 
 
 def _toggle_autostart(ui: "FrontEngineMainUI", enabled: bool) -> None:

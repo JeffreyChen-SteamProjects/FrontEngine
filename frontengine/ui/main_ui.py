@@ -8,6 +8,7 @@ from PySide6.QtGui import QIcon, Qt
 from PySide6.QtWidgets import QMainWindow, QApplication, QGridLayout, QTabWidget, QMenuBar, QWidget
 from qt_material import apply_stylesheet
 
+from frontengine.show.toast.toast_widget import show_toast
 from frontengine.system_tray.extend_system_tray import ExtendSystemTray
 from frontengine.ui.menu.help_menu import build_help_menu
 from frontengine.ui.menu.how_to_menu import build_how_to_menu
@@ -44,6 +45,9 @@ from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.plugins.plugin_loader import load_plugins
 from frontengine.utils.preset_schedule.preset_schedule_service import PresetScheduleService
+from frontengine.ui.dialog.smart_pause_dialog import current_rules
+from frontengine.utils.app_profile.app_profile_service import AppProfileService
+from frontengine.utils.reminder.reminder_service import ReminderService
 from frontengine.utils.smart_pause.smart_pause_service import SmartPauseService
 from frontengine.utils.theme_schedule.theme_schedule_service import ThemeScheduleService
 
@@ -127,6 +131,7 @@ class FrontEngineMainUI(QMainWindow):
             redirect_output,
             pet_setting_ui=self.pet_setting_ui,
         )
+        self._register_extra_overlays()
 
         # Menu Bar
         self.menu_bar = QMenuBar()
@@ -173,14 +178,35 @@ class FrontEngineMainUI(QMainWindow):
         # Set icon and system tray
         self._setup_icon(show_system_tray_ray)
 
-        # 智慧暫停：偵測全螢幕程式時暫時隱藏覆蓋層
-        # Smart pause: hide overlays while a fullscreen app is running
+        # 智慧暫停：全螢幕程式、電池供電或指定程式取得焦點時暫時收起覆蓋層
+        # Smart pause: stand the overlays down for a fullscreen app, battery
+        # power, or one of the user's own apps taking focus.
         self._smart_pause_hid = False
         self.smart_pause_service = None
         if user_setting_dict.get("smart_pause", True):
-            self.smart_pause_service = SmartPauseService()
-            self.smart_pause_service.fullscreen_changed.connect(self._on_fullscreen_changed)
+            self.smart_pause_service = SmartPauseService(rules_provider=current_rules)
+            self.smart_pause_service.pause_changed.connect(self._on_smart_pause_changed)
             self.smart_pause_service.start()
+
+        # 依前景程式自動套用預設集 / Apply a preset when a configured app takes focus
+        self.app_profile_service = AppProfileService(
+            config_provider=lambda: user_setting_dict.get("app_profiles", {})
+        )
+        self.app_profile_service.profile_due.connect(
+            lambda name: apply_named_preset(self, name)
+        )
+        self.app_profile_service.start()
+
+        # 自訂提醒（喝水、久坐、每日鬧鐘），到期時以提示卡顯示
+        # Custom reminders - water, posture, a daily alarm - shown as a toast.
+        self.reminder_service = ReminderService(
+            config_provider=lambda: user_setting_dict.get("reminders", [])
+        )
+        self.reminder_service.reminder_due.connect(self._show_reminder)
+        self.reminder_service.start()
+        # 最近一張提示卡；它會自己關掉，這裡留著只是為了測試與除錯
+        # The most recent toast. It closes itself; this reference is for tests and debugging.
+        self._last_toast = None
 
         # 依時間自動切換日/夜主題（始終運行，尊重 enabled 旗標）
         # Scheduled day/night theme (always running; respects the enabled flag)
@@ -212,6 +238,30 @@ class FrontEngineMainUI(QMainWindow):
             self.debug_timer.setInterval(10000)
             self.debug_timer.timeout.connect(self.debug_close)
             self.debug_timer.start()
+
+    def _register_extra_overlays(self) -> None:
+        """
+        把較新的分頁（護眼、簡報、桌布、專注）開的覆蓋層也交給控制中心管理，
+        「全部隱藏／鎖定／畫質檔位」這些整批操作才不會漏掉它們。
+        Hand the newer pages' overlays - screen care, presenting, wallpaper,
+        focus - to the control center, so the batch actions (hide all, lock,
+        quality tier) reach them too.
+        """
+        sources = (
+            (self.screen_care_setting_ui, ("filter_widget_list", "ruler_widget_list",
+                                           "break_overlay_list")),
+            (self.presentation_setting_ui, ("annotation_widget_list", "cursor_widget_list",
+                                            "keystroke_widget_list", "magnifier_widget_list")),
+            (self.focus_setting_ui, ("dim_widget_list", "mask_widget_list")),
+        )
+        for page, attributes in sources:
+            for attribute in attributes:
+                self.control_center_ui.register_overlay_source(
+                    lambda page=page, attribute=attribute: getattr(page, attribute, []))
+        # 桌布是以螢幕編號為鍵的 dict，取它的值
+        # The wallpaper page keys its widgets by monitor, so hand over the values.
+        self.control_center_ui.register_overlay_source(
+            lambda: list(self.wallpaper_setting_ui.wallpaper_widgets.values()))
 
     def _add_tabs(self) -> None:
         """加入所有內建與擴充的 Tab / Add all built-in and extended tabs"""
@@ -351,19 +401,35 @@ class FrontEngineMainUI(QMainWindow):
         elif action == "toggle_lock":
             self.control_center_ui.toggle_lock_all()
 
-    def _on_fullscreen_changed(self, fullscreen_active: bool) -> None:
+    def _on_smart_pause_changed(self, paused: bool, reason: str) -> None:
         """
-        智慧暫停回呼：全螢幕程式出現時隱藏覆蓋層，離開時還原（僅還原本服務
+        智慧暫停回呼：規則成立時隱藏覆蓋層，規則解除時還原（僅還原本服務
         自己隱藏的部分，避免覆蓋使用者手動操作）。
-        Smart-pause callback: hide overlays when a fullscreen app appears and
-        restore them when it leaves — only restoring what this service hid.
+        Smart-pause callback: hide the overlays while a rule holds and restore
+        them when it lifts — only restoring what this service hid.
         """
-        if fullscreen_active:
+        front_engine_logger.info(f"[MainUI] smart pause | paused={paused}, reason={reason or '-'}")
+        if paused:
             self.control_center_ui.hide_all()
             self._smart_pause_hid = True
         elif self._smart_pause_hid:
             self.control_center_ui.show_all()
             self._smart_pause_hid = False
+
+    def _show_reminder(self, label: str) -> None:
+        """提醒到期：在畫面上方顯示一張會自己消失的提示卡。"""
+        front_engine_logger.info(f"[MainUI] reminder | {label}")
+        self._last_toast = show_toast(label)
+
+    def refresh_rule_services(self) -> None:
+        """
+        設定對話框按下確定後呼叫：規則與對照表都是每次輪詢重讀，所以只要把
+        提醒的計時歸零，其餘服務下一輪就會自己拿到新設定。
+        Called after a rule dialog is accepted. Rules and profiles are re-read on
+        every poll, so only the reminder timers need resetting here.
+        """
+        if getattr(self, "reminder_service", None) is not None:
+            self.reminder_service.tracker.reset()
 
     def close(self) -> None:
         """關閉程式並清理資源 / Close application and clear resources"""
@@ -373,6 +439,10 @@ class FrontEngineMainUI(QMainWindow):
             self.preset_schedule_service.stop()
         if getattr(self, "theme_schedule_service", None) is not None:
             self.theme_schedule_service.stop()
+        if getattr(self, "reminder_service", None) is not None:
+            self.reminder_service.stop()
+        if getattr(self, "app_profile_service", None) is not None:
+            self.app_profile_service.stop()
         if getattr(self, "smart_pause_service", None) is not None:
             self.smart_pause_service.stop()
         if getattr(self, "hotkey_service", None) is not None:

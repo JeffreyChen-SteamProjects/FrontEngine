@@ -1,5 +1,7 @@
 from PySide6.QtCore import QTimer, Qt
-from PySide6.QtWidgets import QGridLayout, QWidget, QPushButton, QTextEdit, QScrollArea
+from PySide6.QtWidgets import (
+    QComboBox, QGridLayout, QLabel, QPushButton, QScrollArea, QTextEdit, QWidget,
+)
 
 from frontengine.show.window_helpers import set_overlay_locked
 from frontengine.ui.color.global_color import error_color, output_color
@@ -14,6 +16,9 @@ from frontengine.ui.page.web.web_setting_ui import WEBSettingUI
 from frontengine.user_setting.user_setting_file import clear_overlay_geometry
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
+from frontengine.utils.power_mode.power_mode import (
+    TIER_BALANCED, TIER_HIGH, TIER_SAVER, normalize_tier,
+)
 from frontengine.utils.redirect_manager.redirect_manager_class import redirect_manager_instance
 
 
@@ -84,9 +89,25 @@ class ControlCenterUI(QWidget):
         self.reset_positions_button = self._create_button(
             "control_center_reset_positions", self.reset_overlay_positions)
         self._low_power = False
+        # 其他分頁登記進來的覆蓋層來源（桌布、專注、護眼、簡報…）
+        # Overlay sources registered by the other pages: wallpaper, focus, screen care, presenting.
+        self._extra_overlay_sources: list = []
         self.low_power_button = self._create_button(
             "control_center_low_power_on", self.toggle_low_power)
         self.clear_all_button = self._create_button("control_center_close_all", self.clear_all)
+
+        # 畫質檔位：比省電模式更細，一次套用到所有覆蓋層
+        # Quality tier: finer than the low-power switch, applied to every overlay.
+        self.quality_label = QLabel(
+            language_wrapper.language_word_dict.get("control_center_quality", "Quality"))
+        self.quality_combobox = QComboBox()
+        for tier, key, fallback in (
+                (TIER_HIGH, "control_center_quality_high", "High"),
+                (TIER_BALANCED, "control_center_quality_balanced", "Balanced"),
+                (TIER_SAVER, "control_center_quality_saver", "Saver")):
+            self.quality_combobox.addItem(
+                language_wrapper.language_word_dict.get(key, fallback), tier)
+        self.quality_combobox.currentIndexChanged.connect(self._apply_quality_tier)
 
         # Log panel
         self.log_panel = QTextEdit()
@@ -112,8 +133,10 @@ class ControlCenterUI(QWidget):
         self.grid_layout.addWidget(self.chroma_key_button, 11, 0)
         self.grid_layout.addWidget(self.reset_positions_button, 12, 0)
         self.grid_layout.addWidget(self.low_power_button, 13, 0)
-        self.grid_layout.addWidget(self.clear_all_button, 14, 0)
-        self.grid_layout.addWidget(self.log_panel_scroll_area, 0, 1, 15, 1)  # rowSpan covers every button
+        self.grid_layout.addWidget(self.quality_label, 14, 0)
+        self.grid_layout.addWidget(self.quality_combobox, 15, 0)
+        self.grid_layout.addWidget(self.clear_all_button, 16, 0)
+        self.grid_layout.addWidget(self.log_panel_scroll_area, 0, 1, 17, 1)  # rowSpan covers every button
         self.setLayout(self.grid_layout)
 
         # Redirect
@@ -173,6 +196,16 @@ class ControlCenterUI(QWidget):
             self.pet_setting_ui.pet_list.clear()
         self.scene_setting_ui.close_scene()
 
+    def register_overlay_source(self, provider) -> None:
+        """
+        讓控制中心也管得到其他分頁開的覆蓋層。provider 是一個回傳 widget 清單
+        的函式（每次都重新問，才拿得到當下還活著的那些）。
+        Let a page hand its overlays to the control center. The provider returns
+        the widget list and is asked again every time, so it always reflects
+        what is actually on screen right now.
+        """
+        self._extra_overlay_sources.append(provider)
+
     def _all_overlay_widget_lists(self) -> list:
         """回傳所有覆蓋層 widget 清單 / All overlay widget lists."""
         lists = [
@@ -186,6 +219,14 @@ class ControlCenterUI(QWidget):
         ]
         if self.pet_setting_ui is not None:
             lists.append(self.pet_setting_ui.pet_list)
+        for provider in self._extra_overlay_sources:
+            try:
+                widgets = provider()
+            except Exception as error:  # pragma: no cover - defensive boundary
+                front_engine_logger.warning(f"[ControlCenterUI] overlay source failed: {error!r}")
+                continue
+            if widgets:
+                lists.append(list(widgets))
         return lists
 
     def _for_each_overlay(self, action) -> None:
@@ -293,6 +334,7 @@ class ControlCenterUI(QWidget):
         """忘掉記住的覆蓋層位置，之後開的覆蓋層回到各自的預設顯示方式。"""
         front_engine_logger.info("ControlCenterUI reset_overlay_positions")
         clear_overlay_geometry()
+
     def set_low_power(self, enabled: bool) -> None:
         """省電模式：讓支援的覆蓋層把更新頻率調慢。"""
         front_engine_logger.info(f"ControlCenterUI set_low_power | enabled={enabled}")
@@ -314,6 +356,29 @@ class ControlCenterUI(QWidget):
     def toggle_low_power(self) -> None:
         """切換省電模式 / Toggle low-power mode."""
         self.set_low_power(not getattr(self, "_low_power", False))
+
+    def current_quality_tier(self) -> str:
+        """目前選到的畫質檔位。"""
+        return normalize_tier(self.quality_combobox.currentData())
+
+    def set_quality_tier(self, tier: str) -> None:
+        """把畫質檔位套用到所有支援的覆蓋層。"""
+        tier = normalize_tier(tier)
+        front_engine_logger.info(f"ControlCenterUI set_quality_tier | tier={tier}")
+        index = self.quality_combobox.findData(tier)
+        if index >= 0 and index != self.quality_combobox.currentIndex():
+            self.quality_combobox.setCurrentIndex(index)
+            return  # currentIndexChanged 會再走一次 _apply_quality_tier
+
+        def apply(widget) -> None:
+            setter = getattr(widget, "set_quality_tier", None)
+            if setter is not None:
+                setter(tier)
+
+        self._for_each_overlay(apply)
+
+    def _apply_quality_tier(self) -> None:
+        self.set_quality_tier(self.current_quality_tier())
 
     def _sample_overlay_opacity(self) -> float:
         """取一個現有覆蓋層的不透明度作為起始值 / Seed from an existing overlay's opacity."""

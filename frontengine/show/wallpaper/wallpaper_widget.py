@@ -13,12 +13,13 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Optional
 
-from PySide6.QtCore import QRect, QTimer
+from PySide6.QtCore import QRect, Qt, QTimer
 from PySide6.QtGui import QMovie, QPainter, QPixmap
 
 from frontengine.show.base_widget import BaseWidget
 from frontengine.utils.audio_meter.audio_envelope import AudioEnvelope
 from frontengine.utils.logging.loggin_instance import front_engine_logger
+from frontengine.utils.power_mode.power_mode import tier_interval
 
 _ANIMATED_SUFFIXES = (".gif", ".webp")
 MIN_REACT_SCALE = 1.0
@@ -105,11 +106,16 @@ class WallpaperWidget(BaseWidget):
         if strength is not None:
             self.react_strength = max(0, min(100, int(strength)))
         if self.audio_react:
-            self._react_timer.start(self.REACT_INTERVAL_MS)
+            self._react_timer.start(tier_interval(self.REACT_INTERVAL_MS, self.quality_tier))
         else:
             self._react_timer.stop()
             self.scale = MIN_REACT_SCALE
             self.update()
+
+    def apply_quality_tier(self) -> None:
+        """畫質檔位改變時，跟著調整脈動的更新頻率（算圖縮放在繪製時套用）。"""
+        if self._react_timer.isActive():
+            self._react_timer.start(tier_interval(self.REACT_INTERVAL_MS, self.quality_tier))
 
     def _update_scale(self) -> None:
         """取一次音量、平滑後換成縮放比例。"""
@@ -141,6 +147,14 @@ class WallpaperWidget(BaseWidget):
         pixmap = self.current_pixmap()
         if pixmap is None or pixmap.isNull():
             return
+        # 低畫質檔位先把來源縮小再放大回來：算的像素少，看起來只是稍軟。
+        # Lower tiers shrink the source before scaling it back up: fewer pixels
+        # to push, at the cost of a slightly softer picture.
+        scale = self.render_scale()
+        if scale < 1.0:
+            pixmap = pixmap.scaled(
+                max(1, int(pixmap.width() * scale)), max(1, int(pixmap.height() * scale)),
+                Qt.AspectRatioMode.IgnoreAspectRatio, Qt.TransformationMode.FastTransformation)
         width = int(self.width() * self.scale)
         height = int(self.height() * self.scale)
         # 放大時往外溢出，維持置中，畫面才不會出現黑邊
