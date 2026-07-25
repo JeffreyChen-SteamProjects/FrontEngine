@@ -19,6 +19,10 @@ from frontengine.ui.page.utils import (
 )
 from frontengine.user_setting.user_setting_file import add_recent_file
 from frontengine.utils.audio_meter.screen_audio import audio_level_provider_for_screen
+from frontengine.utils.pet_chat.pet_chat_service import PetChatService
+from frontengine.utils.focus_timer.focus_timer import (
+    PHASE_BREAK, PHASE_FOCUS, PHASE_LONG_BREAK, FocusTimer,
+)
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
@@ -42,6 +46,14 @@ class PetSettingUI(QWidget):
         self.tag_game = PetTagGame()
         self.tag_timer = QTimer(self)
         self.tag_timer.timeout.connect(self._tick_tag_game)
+        # 專注計時：寵物在每個階段開始時說一句，並在旁邊陪著
+        # Focus timer: the pet announces each phase and keeps you company.
+        self.focus_timer = FocusTimer()
+        self.focus_tick_timer = QTimer(self)
+        self.focus_tick_timer.timeout.connect(self._tick_focus_timer)
+        # AI 對話服務（懶建立，沒有金鑰就自動不可用）
+        # Lazily built chat service; reports itself unavailable without a key.
+        self._chat_service = None
 
         # Choose file
         self.choose_file_button = QPushButton(
@@ -90,6 +102,27 @@ class PetSettingUI(QWidget):
         self.tag_checkbox = QCheckBox(
             language_wrapper.language_word_dict.get("pet_tag_label", "Play tag with each other"))
         self.tag_checkbox.toggled.connect(self._on_tag_toggled)
+        self.speech_checkbox = QCheckBox(
+            language_wrapper.language_word_dict.get("pet_speech_label", "Speak out loud"))
+        self.chat_checkbox = QCheckBox(
+            language_wrapper.language_word_dict.get("pet_chat_label", "AI chat (needs API key)"))
+        self.chat_checkbox.setToolTip(
+            language_wrapper.language_word_dict.get(
+                "pet_chat_hint",
+                "Reads the ANTHROPIC_API_KEY environment variable; the key is never stored."))
+
+        # Focus timer (pomodoro) controls
+        self.focus_label = QLabel(
+            language_wrapper.language_word_dict.get("pet_focus_label", "Focus timer (min)"))
+        self.focus_minutes_combobox = QComboBox()
+        self.focus_minutes_combobox.addItems(["15", "20", "25", "30", "45", "50"])
+        self.focus_minutes_combobox.setCurrentText("25")
+        self.break_minutes_combobox = QComboBox()
+        self.break_minutes_combobox.addItems(["3", "5", "10", "15"])
+        self.break_minutes_combobox.setCurrentText("5")
+        self.focus_button = QPushButton(
+            language_wrapper.language_word_dict.get("pet_focus_start", "Start focus"))
+        self.focus_button.clicked.connect(self.toggle_focus_session)
 
         # Target monitor + sound volume
         self.target_monitor_label = QLabel(
@@ -144,7 +177,13 @@ class PetSettingUI(QWidget):
         self.grid_layout.addWidget(self.volume_combobox, 7, 2)
         self.grid_layout.addWidget(self.audio_react_checkbox, 7, 0)
         self.grid_layout.addWidget(self.tag_checkbox, 7, 1)
-        self.grid_layout.addWidget(self.drop_hint_label, 8, 0, 1, 3)
+        self.grid_layout.addWidget(self.speech_checkbox, 7, 2)
+        self.grid_layout.addWidget(self.focus_label, 8, 0)
+        self.grid_layout.addWidget(self.focus_minutes_combobox, 8, 1)
+        self.grid_layout.addWidget(self.break_minutes_combobox, 8, 2)
+        self.grid_layout.addWidget(self.focus_button, 9, 0)
+        self.grid_layout.addWidget(self.chat_checkbox, 9, 1)
+        self.grid_layout.addWidget(self.drop_hint_label, 10, 0, 1, 3)
 
     def _spawn_pet(self) -> None:
         """建立、顯示並開始移動一隻寵物（供 Start 與右鍵複製共用）。"""
@@ -164,6 +203,10 @@ class PetSettingUI(QWidget):
         )
         pet.clone_requested.connect(self._spawn_pet)
         pet.set_peers_provider(lambda me=pet: self._peer_centers(me))
+        if self.speech_checkbox.isChecked():
+            pet.set_speech_enabled(True)
+        if self.chat_checkbox.isChecked():
+            pet.set_chat_service(self.chat_service())
         geometry = self._target_geometry()
         if self.audio_react_checkbox.isChecked():
             # 跟隨寵物所在螢幕的音源（比對不到就用系統預設輸出裝置）
@@ -178,6 +221,63 @@ class PetSettingUI(QWidget):
             pet.setScreen(geometry[1])
             bounds = geometry[0]
             pet.start_moving((bounds.left(), bounds.top(), bounds.right(), bounds.bottom()))
+
+    def chat_service(self) -> PetChatService:
+        """共用的 AI 對話服務（懶建立；沒有金鑰時它自己會回報不可用）。"""
+        if self._chat_service is None:
+            self._chat_service = PetChatService()
+        return self._chat_service
+
+    # --- focus timer -----------------------------------------------------
+    FOCUS_TICK_MS = 1000
+
+    def toggle_focus_session(self) -> None:
+        """開始或停止一次專注（沒有寵物時仍可計時，只是沒人陪你）。"""
+        if self.focus_timer.running:
+            self.stop_focus_session()
+        else:
+            self.start_focus_session()
+
+    def start_focus_session(self) -> None:
+        """依目前設定開始專注，並讓寵物宣布 / Start focusing; the pet announces it."""
+        self.focus_timer.focus_minutes = int(self.focus_minutes_combobox.currentText())
+        self.focus_timer.break_minutes = int(self.break_minutes_combobox.currentText())
+        self.focus_timer.start()
+        front_engine_logger.info(
+            f"[PetSettingUI] focus started | focus={self.focus_timer.focus_minutes}, "
+            f"break={self.focus_timer.break_minutes}"
+        )
+        self.focus_tick_timer.start(self.FOCUS_TICK_MS)
+        self._announce_focus("focus_start")
+        self.focus_button.setText(
+            language_wrapper.language_word_dict.get("pet_focus_stop", "Stop focus"))
+
+    def stop_focus_session(self) -> None:
+        """停止專注 / Stop the focus session."""
+        front_engine_logger.info("[PetSettingUI] focus stopped")
+        self.focus_timer.stop()
+        self.focus_tick_timer.stop()
+        self.focus_button.setText(
+            language_wrapper.language_word_dict.get("pet_focus_start", "Start focus"))
+
+    def _tick_focus_timer(self) -> None:
+        """每秒推進一次；換階段時讓寵物說話。"""
+        phase = self.focus_timer.tick()
+        if phase is None:
+            return
+        if phase == PHASE_FOCUS:
+            self._announce_focus("focus_back")
+        elif phase == PHASE_BREAK:
+            self._announce_focus("focus_break")
+        elif phase == PHASE_LONG_BREAK:
+            self._announce_focus("focus_done")
+
+    def _announce_focus(self, pool_name: str) -> None:
+        """讓所有寵物說出該階段的台詞（沒有寵物就安靜略過）。"""
+        for pet in self._alive_pets():
+            pool = pet._messages.get(pool_name) or []
+            if pool:
+                pet.say(pool[0])
 
     def _target_geometry(self):
         """回傳 (available_geometry, screen) 依所選目標螢幕，否則主螢幕。"""
@@ -325,6 +425,10 @@ class PetSettingUI(QWidget):
             "volume": self.volume_combobox.currentText(),
             "audio_react": self.audio_react_checkbox.isChecked(),
             "tag": self.tag_checkbox.isChecked(),
+            "speech": self.speech_checkbox.isChecked(),
+            "chat": self.chat_checkbox.isChecked(),
+            "focus_minutes": self.focus_minutes_combobox.currentText(),
+            "break_minutes": self.break_minutes_combobox.currentText(),
         }
 
     def set_state(self, state: dict) -> None:
@@ -364,3 +468,13 @@ class PetSettingUI(QWidget):
             self.audio_react_checkbox.setChecked(bool(state["audio_react"]))
         if "tag" in state:
             self.tag_checkbox.setChecked(bool(state["tag"]))
+        if "speech" in state:
+            self.speech_checkbox.setChecked(bool(state["speech"]))
+        if "chat" in state:
+            self.chat_checkbox.setChecked(bool(state["chat"]))
+        for combobox, key in ((self.focus_minutes_combobox, "focus_minutes"),
+                              (self.break_minutes_combobox, "break_minutes")):
+            if state.get(key) is not None:
+                index = combobox.findText(str(state[key]))
+                if index >= 0:
+                    combobox.setCurrentIndex(index)
