@@ -3,6 +3,7 @@ from PySide6.QtGui import QPainter, QFont, QColor, QFontMetrics
 
 from frontengine.show.base_widget import BaseWidget
 from frontengine.utils.logging.loggin_instance import front_engine_logger
+from frontengine.utils.power_mode.power_mode import scaled_interval
 
 
 _ALIGNMENT_MAP = {
@@ -35,11 +36,17 @@ class TextWidget(BaseWidget):
         self.draw_font = QFont(self.font().family(), self.font_size)
 
         # Marquee (horizontal scroll) state
+        self.low_power: bool = False
         self.marquee: bool = False
         self.marquee_speed: int = 4
         self.marquee_offset: int = 0
         self._marquee_timer = QTimer(self)
         self._marquee_timer.timeout.connect(self._tick_marquee)
+
+        # 動態文字來源（時鐘／倒數／系統資訊…）/ Dynamic text source
+        self.text_source = None
+        self._source_timer = QTimer(self)
+        self._source_timer.timeout.connect(self.refresh_text)
 
     def set_font_variable(self, font_size: int = 100) -> None:
         front_engine_logger.info(f"[TextWidget] set_font_variable | font_size={font_size}")
@@ -78,9 +85,47 @@ class TextWidget(BaseWidget):
             self.marquee_speed = 4
         if self.marquee:
             self.marquee_offset = self.width()
-            self._marquee_timer.start(30)
+            self._marquee_timer.start(scaled_interval(30, self.low_power))
         else:
             self._marquee_timer.stop()
+
+    def set_text_source(self, source) -> None:
+        """
+        接上動態文字來源（TextSource）；靜態來源只取一次文字，不啟動計時器。
+        Attach a dynamic text source; a static one is read once, with no timer.
+        """
+        front_engine_logger.info(f"[TextWidget] set_text_source | kind={getattr(source, 'kind', None)}")
+        self._source_timer.stop()
+        self.text_source = source
+        if source is None:
+            return
+        source.start()
+        self.refresh_text()
+        interval = getattr(source, "refresh_interval_ms", 0)
+        if interval > 0:
+            self._source_timer.start(int(interval))
+
+    def refresh_text(self) -> None:
+        """向來源取一次最新文字並重繪 / Pull the latest text and repaint."""
+        if self.text_source is None:
+            return
+        try:
+            text = self.text_source.text()
+        except Exception as error:  # pragma: no cover - defensive around providers
+            front_engine_logger.warning(f"[TextWidget] text source failed: {error!r}")
+            return
+        if text != self.text:
+            self.text = text
+            self.update()
+
+    def set_low_power(self, enabled: bool) -> None:
+        """省電模式：拉慢文字來源與跑馬燈的更新，降低重繪次數。"""
+        self.low_power = bool(enabled)
+        if self._source_timer.isActive() and self.text_source is not None:
+            self._source_timer.start(scaled_interval(
+                getattr(self.text_source, "refresh_interval_ms", 1000), self.low_power))
+        if self._marquee_timer.isActive():
+            self._marquee_timer.start(scaled_interval(30, self.low_power))
 
     def _tick_marquee(self) -> None:
         text_width = QFontMetrics(self.draw_font).horizontalAdvance(self.text)
@@ -101,6 +146,12 @@ class TextWidget(BaseWidget):
                 int(self.alignment),
                 self.text,
             )
+
+    def closeEvent(self, event) -> None:
+        for timer in (self._marquee_timer, self._source_timer):
+            if timer.isActive():
+                timer.stop()
+        super().closeEvent(event)
 
     def draw_content(self, painter: QPainter) -> None:
         painter.setFont(self.draw_font)

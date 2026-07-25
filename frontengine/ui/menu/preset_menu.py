@@ -228,6 +228,27 @@ def apply_named_preset(ui: "FrontEngineMainUI", name: str) -> bool:
     return True
 
 
+LAST_SESSION_PRESET = "__last_session__"
+
+
+def save_last_session(ui: "FrontEngineMainUI") -> bool:
+    """
+    把目前各頁面的設定存成「上次工作階段」預設集（關閉程式時呼叫）。
+    Store the current page settings as the last-session preset on exit.
+    """
+    try:
+        PresetRepository().save(LAST_SESSION_PRESET, _collect_state(ui))
+        return True
+    except (OSError, ValueError) as error:
+        front_engine_logger.warning(f"[PresetMenu] save_last_session failed: {error!r}")
+        return False
+
+
+def restore_last_session(ui: "FrontEngineMainUI") -> bool:
+    """啟動時還原上次的設定；沒存過或讀不到就跳過。"""
+    return apply_named_preset(ui, LAST_SESSION_PRESET)
+
+
 def apply_startup_preset(ui: "FrontEngineMainUI") -> None:
     """
     啟動時套用設定的預設集；缺失或損毀時僅記錄警告，不影響啟動。
@@ -355,7 +376,7 @@ def build_preset_menu(ui: "FrontEngineMainUI") -> None:
         ("preset_menu_export_package", "Export package (+media)...", _export_package_action),
         ("preset_menu_import_package", "Import package (+media)...", _import_package_action),
         ("preset_menu_set_startup", "Set as startup preset...", _set_startup_action),
-        ("preset_menu_clear_startup", "Clear startup preset", _clear_startup_action),
+        ("preset_menu_clear_startup", "Clear startup preset", _clear_startup_action),
         ("workshop_menu_import", "Import Workshop content...", _workshop_action),
     ):
         action = QAction(_t(label_key, fallback), menu)

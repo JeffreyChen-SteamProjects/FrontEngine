@@ -12,7 +12,10 @@ from frontengine.system_tray.extend_system_tray import ExtendSystemTray
 from frontengine.ui.menu.help_menu import build_help_menu
 from frontengine.ui.menu.how_to_menu import build_how_to_menu
 from frontengine.ui.menu.language_menu import build_language_menu
-from frontengine.ui.menu.preset_menu import apply_named_preset, apply_startup_preset, build_preset_menu
+from frontengine.ui.menu.preset_menu import (
+    apply_named_preset, apply_startup_preset, build_preset_menu, restore_last_session,
+    save_last_session,
+)
 from frontengine.ui.menu.settings_menu import build_settings_menu
 from frontengine.ui.page.control_center.control_center_ui import ControlCenterUI
 from frontengine.ui.page.focus.focus_setting_ui import FocusSettingUI
@@ -21,6 +24,8 @@ from frontengine.ui.page.image.image_setting_ui import ImageSettingUI
 from frontengine.ui.page.particle.particle_setting_ui import ParticleSettingUI
 from frontengine.ui.page.pet.pet_setting_ui import PetSettingUI
 from frontengine.ui.page.scene_setting.scene_setting_ui import SceneSettingUI
+from frontengine.ui.page.presentation.presentation_setting_ui import PresentationSettingUI
+from frontengine.ui.page.screen_care.screen_care_setting_ui import ScreenCareSettingUI
 from frontengine.ui.page.sound_player.sound_player_setting_ui import SoundPlayerSettingUI
 from frontengine.ui.page.text.text_setting_ui import TextSettingUI
 from frontengine.ui.page.video.video_setting_ui import VideoSettingUI
@@ -103,6 +108,8 @@ class FrontEngineMainUI(QMainWindow):
         self.scene_setting_ui = SceneSettingUI()
         self.particle_setting_ui = ParticleSettingUI()
         self.pet_setting_ui = PetSettingUI()
+        self.screen_care_setting_ui = ScreenCareSettingUI()
+        self.presentation_setting_ui = PresentationSettingUI()
         self.wallpaper_setting_ui = WallpaperSettingUI()
         self.focus_setting_ui = FocusSettingUI()
 
@@ -192,8 +199,10 @@ class FrontEngineMainUI(QMainWindow):
         )
         self.preset_schedule_service.start()
 
-        # 套用啟動預設集（若有設定）
-        # Apply the configured startup preset, if any
+        # 還原上次工作階段（若有開啟），再套用啟動預設集
+        # Restore the last session when enabled, then apply the startup preset.
+        if user_setting_dict.get("restore_last_session"):
+            restore_last_session(self)
         apply_startup_preset(self)
 
         # Debug 模式下自動關閉
@@ -216,6 +225,8 @@ class FrontEngineMainUI(QMainWindow):
             (self.scene_setting_ui, "tab_scene_text"),
             (self.particle_setting_ui, "tab_particle_text"),
             (self.pet_setting_ui, "tab_pet_text"),
+            (self.screen_care_setting_ui, "tab_screen_care_text"),
+            (self.presentation_setting_ui, "tab_presentation_text"),
             (self.wallpaper_setting_ui, "tab_wallpaper_text"),
             (self.focus_setting_ui, "tab_focus_text"),
             (self.control_center_ui, "tab_control_center_text"),
@@ -335,6 +346,10 @@ class FrontEngineMainUI(QMainWindow):
             self.control_center_ui.step_opacity_all(0.1)
         elif action == "opacity_down":
             self.control_center_ui.step_opacity_all(-0.1)
+        elif action == "dashboard_next":
+            self.web_setting_ui.show_next_dashboard_page()
+        elif action == "toggle_lock":
+            self.control_center_ui.toggle_lock_all()
 
     def _on_fullscreen_changed(self, fullscreen_active: bool) -> None:
         """
@@ -352,6 +367,8 @@ class FrontEngineMainUI(QMainWindow):
 
     def close(self) -> None:
         """關閉程式並清理資源 / Close application and clear resources"""
+        if user_setting_dict.get("restore_last_session"):
+            save_last_session(self)
         if getattr(self, "preset_schedule_service", None) is not None:
             self.preset_schedule_service.stop()
         if getattr(self, "theme_schedule_service", None) is not None:

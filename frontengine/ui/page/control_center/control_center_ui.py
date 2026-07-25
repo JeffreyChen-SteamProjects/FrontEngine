@@ -1,6 +1,7 @@
 from PySide6.QtCore import QTimer, Qt
 from PySide6.QtWidgets import QGridLayout, QWidget, QPushButton, QTextEdit, QScrollArea
 
+from frontengine.show.window_helpers import set_overlay_locked
 from frontengine.ui.color.global_color import error_color, output_color
 from frontengine.ui.page.gif.gif_setting_ui import GIFSettingUI
 from frontengine.ui.page.image.image_setting_ui import ImageSettingUI
@@ -10,6 +11,7 @@ from frontengine.ui.page.sound_player.sound_player_setting_ui import SoundPlayer
 from frontengine.ui.page.text.text_setting_ui import TextSettingUI
 from frontengine.ui.page.video.video_setting_ui import VideoSettingUI
 from frontengine.ui.page.web.web_setting_ui import WEBSettingUI
+from frontengine.user_setting.user_setting_file import clear_overlay_geometry
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.redirect_manager.redirect_manager_class import redirect_manager_instance
@@ -74,6 +76,16 @@ class ControlCenterUI(QWidget):
         # 全域不透明度（None 表示尚未使用過）/ Global opacity level (None until first used)
         self._global_opacity = None
         self.mute_all_button = self._create_button("control_center_mute_all", self.toggle_mute_all)
+        # 覆蓋層鎖定（點擊穿透）與綠幕背景 / Overlay lock (click-through) and chroma key
+        self._overlays_locked = True
+        self._chroma_key = False
+        self.lock_all_button = self._create_button("control_center_unlock_all", self.toggle_lock_all)
+        self.chroma_key_button = self._create_button("control_center_chroma_key_on", self.toggle_chroma_key)
+        self.reset_positions_button = self._create_button(
+            "control_center_reset_positions", self.reset_overlay_positions)
+        self._low_power = False
+        self.low_power_button = self._create_button(
+            "control_center_low_power_on", self.toggle_low_power)
         self.clear_all_button = self._create_button("control_center_close_all", self.clear_all)
 
         # Log panel
@@ -96,8 +108,12 @@ class ControlCenterUI(QWidget):
         self.grid_layout.addWidget(self.hide_all_button, 7, 0)
         self.grid_layout.addWidget(self.show_all_button, 8, 0)
         self.grid_layout.addWidget(self.mute_all_button, 9, 0)
-        self.grid_layout.addWidget(self.clear_all_button, 10, 0)
-        self.grid_layout.addWidget(self.log_panel_scroll_area, 0, 1, 11, 1)  # 明確指定 rowSpan=11, colSpan=1
+        self.grid_layout.addWidget(self.lock_all_button, 10, 0)
+        self.grid_layout.addWidget(self.chroma_key_button, 11, 0)
+        self.grid_layout.addWidget(self.reset_positions_button, 12, 0)
+        self.grid_layout.addWidget(self.low_power_button, 13, 0)
+        self.grid_layout.addWidget(self.clear_all_button, 14, 0)
+        self.grid_layout.addWidget(self.log_panel_scroll_area, 0, 1, 15, 1)  # rowSpan covers every button
         self.setLayout(self.grid_layout)
 
         # Redirect
@@ -224,6 +240,80 @@ class ControlCenterUI(QWidget):
     def toggle_mute_all(self) -> None:
         """切換全域靜音狀態 / Toggle the global mute state."""
         self.set_mute_all(not getattr(self, "_muted", False))
+
+    # --- lock / chroma key / positions -----------------------------------
+    CHROMA_KEY_COLOR = "#00ff00"
+
+    def set_lock_all(self, locked: bool) -> None:
+        """
+        鎖定＝所有覆蓋層點擊穿透；解鎖＝可以用滑鼠把覆蓋層拖到想要的位置，
+        放開時位置會被記住。寵物不受影響（它本來就要接收滑鼠）。
+        Locked overlays are click-through; unlocked ones can be dragged into
+        place and remember where they were dropped. The pet is left alone as it
+        needs the mouse either way.
+        """
+        front_engine_logger.info(f"ControlCenterUI set_lock_all | locked={locked}")
+        self._overlays_locked = bool(locked)
+        self._for_each_overlay(lambda widget: set_overlay_locked(widget, self._overlays_locked))
+        self.lock_all_button.setText(
+            language_wrapper.language_word_dict.get(
+                "control_center_unlock_all" if self._overlays_locked else "control_center_lock_all",
+                "Unlock overlays" if self._overlays_locked else "Lock overlays",
+            )
+        )
+
+    def toggle_lock_all(self) -> None:
+        """切換覆蓋層鎖定狀態 / Toggle the overlay lock."""
+        self.set_lock_all(not getattr(self, "_overlays_locked", True))
+
+    def set_chroma_key(self, enabled: bool) -> None:
+        """開關綠幕背景（給 OBS 之類的軟體去背用）。"""
+        front_engine_logger.info(f"ControlCenterUI set_chroma_key | enabled={enabled}")
+        self._chroma_key = bool(enabled)
+        color = self.CHROMA_KEY_COLOR if self._chroma_key else None
+
+        def apply(widget) -> None:
+            setter = getattr(widget, "set_background_color", None)
+            if setter is not None:
+                setter(color)
+
+        self._for_each_overlay(apply)
+        self.chroma_key_button.setText(
+            language_wrapper.language_word_dict.get(
+                "control_center_chroma_key_off" if self._chroma_key else "control_center_chroma_key_on",
+                "Chroma key off" if self._chroma_key else "Chroma key on",
+            )
+        )
+
+    def toggle_chroma_key(self) -> None:
+        """切換綠幕背景 / Toggle the chroma key background."""
+        self.set_chroma_key(not getattr(self, "_chroma_key", False))
+
+    def reset_overlay_positions(self) -> None:
+        """忘掉記住的覆蓋層位置，之後開的覆蓋層回到各自的預設顯示方式。"""
+        front_engine_logger.info("ControlCenterUI reset_overlay_positions")
+        clear_overlay_geometry()
+    def set_low_power(self, enabled: bool) -> None:
+        """省電模式：讓支援的覆蓋層把更新頻率調慢。"""
+        front_engine_logger.info(f"ControlCenterUI set_low_power | enabled={enabled}")
+        self._low_power = bool(enabled)
+
+        def apply(widget) -> None:
+            setter = getattr(widget, "set_low_power", None)
+            if setter is not None:
+                setter(self._low_power)
+
+        self._for_each_overlay(apply)
+        self.low_power_button.setText(
+            language_wrapper.language_word_dict.get(
+                "control_center_low_power_off" if self._low_power else "control_center_low_power_on",
+                "Low power off" if self._low_power else "Low power on",
+            )
+        )
+
+    def toggle_low_power(self) -> None:
+        """切換省電模式 / Toggle low-power mode."""
+        self.set_low_power(not getattr(self, "_low_power", False))
 
     def _sample_overlay_opacity(self) -> float:
         """取一個現有覆蓋層的不透明度作為起始值 / Seed from an existing overlay's opacity."""

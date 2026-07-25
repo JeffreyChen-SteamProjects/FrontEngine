@@ -1,5 +1,8 @@
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QWidget, QGridLayout, QLabel, QSlider, QLineEdit, QPushButton, QCheckBox, QComboBox
+from PySide6.QtWidgets import (
+    QWidget, QGridLayout, QLabel, QSlider, QLineEdit, QPushButton, QCheckBox, QComboBox,
+    QPlainTextEdit,
+)
 
 from frontengine.show.web.webview import WebWidget
 from frontengine.ui.page.utils import (
@@ -10,7 +13,7 @@ from frontengine.ui.page.utils import (
 )
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
-from frontengine.utils.web_url import normalize_web_url
+from frontengine.utils.web_url import next_page_index, normalize_web_url, parse_dashboard_urls
 
 
 class WEBSettingUI(QWidget):
@@ -25,6 +28,10 @@ class WEBSettingUI(QWidget):
         self.show_all_screen = False
         self.open_file = False
         self.enable_input = False
+        # 網頁儀表板：一次開多個網址，一次只顯示一頁，可循環切換
+        # Web dashboard: open several URLs at once, show one page at a time.
+        self.dashboard_widgets: list = []
+        self.dashboard_index = 0
 
         # Opacity setting
         self.opacity_label = QLabel(language_wrapper.language_word_dict.get("Opacity"))
@@ -78,6 +85,21 @@ class WEBSettingUI(QWidget):
         )
         self.target_monitor_combobox = build_target_monitor_combobox()
 
+        # Dashboard: one URL per line, shown one page at a time
+        self.dashboard_label = QLabel(
+            language_wrapper.language_word_dict.get("web_dashboard_label", "Dashboard URLs"))
+        self.dashboard_edit = QPlainTextEdit()
+        self.dashboard_edit.setPlaceholderText(
+            language_wrapper.language_word_dict.get(
+                "web_dashboard_hint", "One URL per line; lines starting with # are ignored."))
+        self.dashboard_edit.setMaximumHeight(90)
+        self.dashboard_start_button = QPushButton(
+            language_wrapper.language_word_dict.get("web_dashboard_start", "Start dashboard"))
+        self.dashboard_start_button.clicked.connect(self.start_dashboard)
+        self.dashboard_next_button = QPushButton(
+            language_wrapper.language_word_dict.get("web_dashboard_next", "Next page"))
+        self.dashboard_next_button.clicked.connect(self.show_next_dashboard_page)
+
         # Layout
         self.grid_layout.addWidget(self.opacity_label, 0, 0)
         self.grid_layout.addWidget(self.opacity_slider_value_label, 0, 1)
@@ -94,6 +116,10 @@ class WEBSettingUI(QWidget):
         self.grid_layout.addWidget(self.zoom_combobox, 5, 1)
         self.grid_layout.addWidget(self.refresh_label, 6, 0)
         self.grid_layout.addWidget(self.refresh_combobox, 6, 1)
+        self.grid_layout.addWidget(self.dashboard_label, 7, 0)
+        self.grid_layout.addWidget(self.dashboard_edit, 7, 1, 1, 2)
+        self.grid_layout.addWidget(self.dashboard_start_button, 8, 0)
+        self.grid_layout.addWidget(self.dashboard_next_button, 8, 1)
 
     def set_show_all_screen(self) -> None:
         front_engine_logger.info("[WEBSettingUI] set_show_all_screen")
@@ -128,6 +154,89 @@ class WEBSettingUI(QWidget):
         front_engine_logger.info("[WEBSettingUI] opacity_trick")
         self.opacity_slider_value_label.setText(str(self.opacity_slider.value()))
 
+    # --- dashboard -------------------------------------------------------
+    def dashboard_urls(self) -> list:
+        """目前設定的儀表板網址清單 / The dashboard URLs as currently configured."""
+        return parse_dashboard_urls(self.dashboard_edit.toPlainText())
+
+    def start_dashboard(self) -> None:
+        """
+        一次開啟所有儀表板網址，但只顯示第一頁；其餘先隱藏，之後可循環切換。
+        Open every dashboard URL at once but show only the first page; the rest
+        stay hidden until the user cycles to them.
+        """
+        front_engine_logger.info("[WEBSettingUI] start_dashboard")
+        self.close_dashboard()
+        urls = self.dashboard_urls()
+        if not urls:
+            return
+        monitor_index = resolve_preferred_monitor(self.target_monitor_combobox)
+        original_url = self.web_url_input.text()
+        try:
+            for url in urls:
+                self.web_url_input.setText(url)
+                widget = self._create_web_widget()
+                self.dashboard_widgets.append(widget)
+                self._present_dashboard_widget(widget, monitor_index)
+        finally:
+            self.web_url_input.setText(original_url)
+        self.dashboard_index = 0
+        self._apply_dashboard_visibility()
+
+    def _present_dashboard_widget(self, widget: WebWidget, monitor_index) -> None:
+        """把儀表板頁面放到目標螢幕上（先建立後再依索引決定顯示哪一頁）。"""
+        from PySide6.QtGui import QGuiApplication
+
+        screens = QGuiApplication.screens()
+        if monitor_index is not None and 0 <= monitor_index < len(screens):
+            widget.setScreen(screens[monitor_index])
+            widget.move(screens[monitor_index].availableGeometry().topLeft())
+        widget.showFullScreen()
+
+    def show_next_dashboard_page(self) -> None:
+        """切換到下一頁（循環）；沒有儀表板時什麼都不做。"""
+        if not self._alive_dashboard_widgets():
+            return
+        self.dashboard_index = next_page_index(self.dashboard_index, len(self.dashboard_widgets))
+        self._apply_dashboard_visibility()
+
+    def close_dashboard(self) -> None:
+        """關閉整組儀表板 / Close the whole dashboard."""
+        for widget in list(self.dashboard_widgets):
+            try:
+                widget.close()
+            except RuntimeError:
+                pass  # already destroyed
+            if widget in self.web_widget_list:
+                self.web_widget_list.remove(widget)
+        self.dashboard_widgets.clear()
+        self.dashboard_index = 0
+
+    def _alive_dashboard_widgets(self) -> list:
+        """清掉已被銷毀的頁面後回傳仍存活者。"""
+        alive = []
+        for widget in list(self.dashboard_widgets):
+            try:
+                widget.isVisible()
+            except RuntimeError:
+                self.dashboard_widgets.remove(widget)
+                continue
+            alive.append(widget)
+        return alive
+
+    def _apply_dashboard_visibility(self) -> None:
+        """只顯示目前索引的那一頁。"""
+        widgets = self._alive_dashboard_widgets()
+        if not widgets:
+            return
+        self.dashboard_index = self.dashboard_index % len(widgets)
+        for index, widget in enumerate(widgets):
+            if index == self.dashboard_index:
+                widget.show()
+                widget.raise_()
+            else:
+                widget.hide()
+
     def get_state(self) -> dict:
         return {
             "opacity": self.opacity_slider.value(),
@@ -139,6 +248,7 @@ class WEBSettingUI(QWidget):
             "target_monitor": self.target_monitor_combobox.currentText(),
             "zoom": self.zoom_combobox.currentText(),
             "refresh": self.refresh_combobox.currentText(),
+            "dashboard": self.dashboard_edit.toPlainText(),
         }
 
     def set_state(self, state: dict) -> None:
@@ -170,6 +280,8 @@ class WEBSettingUI(QWidget):
             index = self.refresh_combobox.findText(str(state["refresh"]))
             if index >= 0:
                 self.refresh_combobox.setCurrentIndex(index)
+        if state.get("dashboard") is not None:
+            self.dashboard_edit.setPlainText(str(state["dashboard"]))
 
     def start_open_web_with_url(self) -> None:
         front_engine_logger.info("[WEBSettingUI] start_open_web_with_url")
