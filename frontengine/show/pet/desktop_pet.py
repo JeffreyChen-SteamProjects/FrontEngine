@@ -403,14 +403,28 @@ class PetTagGame:
         return self._roles(positions, prey)
 
     def _roles(self, positions: dict, prey) -> dict:
-        """依目前的鬼與獵物組出每個人的角色與要走向的 x。"""
-        it_x, _it_y = positions[self.it]
-        roles = {self.it: (TAG_CHASE, positions[prey][0] if prey is not None else it_x)}
-        for participant, (x, _y) in positions.items():
+        """
+        依目前的鬼與獵物組出每個人的 (角色, 目標 x, 目標 y)。逃跑方向取兩點連線的反向，
+        讓地板模式（只用 x）與飄移／追游標模式（用整個點）都有合理目標。
+        Build each participant's (role, target_x, target_y). Runners head along
+        the line away from "it", which suits floor pets (x only) and wander or
+        chase pets (the whole point) alike.
+        """
+        it_x, it_y = positions[self.it]
+        prey_position = positions[prey] if prey is not None else (it_x, it_y)
+        roles = {self.it: (TAG_CHASE, float(prey_position[0]), float(prey_position[1]))}
+        for participant, (x, y) in positions.items():
             if participant == self.it:
                 continue
-            away = self.flee_distance if x >= it_x else -self.flee_distance
-            roles[participant] = (TAG_FLEE, x + away)
+            dx, dy = x - it_x, y - it_y
+            length = (dx * dx + dy * dy) ** 0.5
+            if length < 1e-9:  # standing on each other: just pick a direction
+                dx, dy, length = 1.0, 0.0, 1.0
+            roles[participant] = (
+                TAG_FLEE,
+                x + self.flee_distance * dx / length,
+                y + self.flee_distance * dy / length,
+            )
         return roles
 
 
@@ -666,6 +680,10 @@ class PetMotion:
         self.ground_feet = 0.0
         # 追向某個 x（用於朝同伴走過去玩耍）/ Horizontal target to walk toward (play).
         self.follow_target_x: Optional[float] = None
+        # 引導目標 (x, y)：三種行為模式都會朝它移動（鬼抓人用），優先於各自的預設動線。
+        # Guidance point (x, y) honoured by every behaviour (used by the tag
+        # game); it takes precedence over each mode's own default movement.
+        self.guidance: Optional[Tuple[float, float]] = None
 
     @property
     def facing_left(self) -> bool:
@@ -712,6 +730,43 @@ class PetMotion:
 
     def set_target(self, x: float, y: float) -> None:
         self.target = (float(x), float(y))
+
+    def set_guidance(self, x: float, y: Optional[float] = None) -> None:
+        """
+        設定引導目標；地板模式走向該 x，飄移／追游標模式則朝該點移動。
+        Set the guidance point: floor pets walk toward its x, wander and chase
+        pets steer toward the point itself.
+        """
+        centre_y = self.y + self.height / 2.0
+        self.guidance = (float(x), centre_y if y is None else float(y))
+        if self.behaviour == BEHAVIOUR_FLOOR:
+            self.follow_target_x = self.guidance[0]
+
+    def clear_guidance(self) -> None:
+        """取消引導，回到該模式原本的動線 / Drop the guidance and resume normal movement."""
+        self.guidance = None
+        self.follow_target_x = None
+
+    STEER_BLEND = 0.4
+
+    def _steer_toward(self, point: Tuple[float, float]) -> None:
+        """把速度往目標點轉一些（保持速率），轉彎自然而不是瞬間轉向。"""
+        target_x, target_y = point
+        dx = target_x - (self.x + self.width / 2.0)
+        dy = target_y - (self.y + self.height / 2.0)
+        distance = (dx * dx + dy * dy) ** 0.5
+        if distance < 1e-9:
+            return
+        desired_x = self.speed * dx / distance
+        desired_y = self.speed * dy / distance
+        blended_x = self.vx + self.STEER_BLEND * (desired_x - self.vx)
+        blended_y = self.vy + self.STEER_BLEND * (desired_y - self.vy)
+        magnitude = (blended_x * blended_x + blended_y * blended_y) ** 0.5
+        if magnitude < 1e-9:
+            self.vx, self.vy = desired_x, desired_y
+            return
+        self.vx = self.speed * blended_x / magnitude
+        self.vy = self.speed * blended_y / magnitude
 
     def throw(self, vx: float, vy: float) -> None:
         """拖曳放開後以動量丟出（只在重力模式有意義）。"""
@@ -945,6 +1000,8 @@ class PetMotion:
     def _step_wander(self, left, top, right, bottom) -> Tuple[int, int]:
         if abs(self.vy) < 1e-9:
             self.vy = float(self.speed)
+        if self.guidance is not None:
+            self._steer_toward(self.guidance)
         self.x += self.vx
         self.y += self.vy
         if self.x <= left:
@@ -963,14 +1020,19 @@ class PetMotion:
 
     # --- chase cursor ---
     def _step_chase(self, left, top, right, bottom) -> Tuple[int, int]:
-        if self.target is None:
+        # 被引導時（鬼抓人）以引導目標為準，而不是游標
+        # While guided (tag game) the guidance point wins over the cursor.
+        chase_target = self.guidance if self.guidance is not None else self.target
+        if chase_target is None:
             return int(self.x), int(self.y)
-        target_x, target_y = self.target
+        target_x, target_y = chase_target
         dx = target_x - (self.x + self.width / 2)
         dy = target_y - (self.y + self.height / 2)
         distance = (dx * dx + dy * dy) ** 0.5
         if distance <= self.CHASE_STOP_DISTANCE:
-            self.asleep = True
+            # 追到游標會睡著；玩鬼抓人時只是站在對方身上，不睡。
+            # Catching the cursor means a nap; catching a playmate does not.
+            self.asleep = self.guidance is None
             return int(self.x), int(self.y)
         self.asleep = False
         step = float(self.speed) * self.CHASE_SPEED_FACTOR
@@ -1111,17 +1173,17 @@ class DesktopPetWidget(BaseWidget):
 
     def apply_tag_role(self, role) -> None:
         """
-        套用鬼抓人角色 (角色, 目標 x)；None 代表沒在玩，恢復平常的同伴互動。
+        套用鬼抓人角色 (角色, 目標 x, 目標 y)；None 代表沒在玩，恢復平常的同伴互動。
         Apply a tag role; None means the game is off and normal peer play resumes.
         """
         if role is None:
             if self._tag_role is not None:
                 self._tag_role = None
-                self.motion.clear_follow()
+                self.motion.clear_guidance()
             return
-        self._tag_role, target_x = role
+        self._tag_role, target_x, target_y = role
         self.motion.wake()
-        self.motion.set_follow(target_x)
+        self.motion.set_guidance(target_x, target_y)
 
     def on_tagged(self) -> None:
         """換自己當鬼時喊一句 / Shout when the tag lands on this pet."""
