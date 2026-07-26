@@ -10,13 +10,14 @@ from typing import List, Optional
 
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import (
-    QCheckBox, QComboBox, QGridLayout, QLabel, QLineEdit, QPushButton, QSpinBox, QWidget,
+    QCheckBox, QComboBox, QFileDialog, QGridLayout, QLabel, QLineEdit, QPushButton, QSpinBox,
+    QWidget,
 )
 
 from frontengine.show.camera.camera_widget import (
     SHAPE_CIRCLE, SHAPE_RECTANGLE, SHAPE_ROUNDED, CameraWidget, list_cameras,
 )
-from frontengine.show.capture.region_capture import RegionCaptureWidget
+from frontengine.show.capture.region_capture import RegionCaptureWidget, is_usable
 from frontengine.show.measure.measure_widget import (
     MODE_ANGLE, MODE_COLOR, MODE_RULER, MeasureWidget,
 )
@@ -28,6 +29,9 @@ from frontengine.utils.measure.measure import (
     FORMAT_CSS_VAR, FORMAT_HEX, FORMAT_HSL, FORMAT_RGB,
 )
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
+from frontengine.utils.recording.frame_recorder import (
+    DEFAULT_FPS, DEFAULT_MAX_SECONDS, MAX_FPS, MIN_FPS, FrameRecorder,
+)
 from frontengine.utils.window_pin import window_pin
 from frontengine.utils.window_pin.window_layout import capture_layout, restore_layout
 
@@ -46,6 +50,8 @@ class ToolsSettingUI(QWidget):
         self.grid_layout.setContentsMargins(0, 0, 0, 0)
 
         self.measure_widget_list: List[MeasureWidget] = []
+        self.recorder = FrameRecorder(self)
+        self.last_recording: Optional[str] = None
         self.capture_widget_list: List[RegionCaptureWidget] = []
         self.camera_widget_list: List[CameraWidget] = []
         self.last_capture: Optional[RegionCaptureWidget] = None
@@ -53,6 +59,7 @@ class ToolsSettingUI(QWidget):
 
         self._build_measure_row()
         self._build_capture_row()
+        self._build_record_row()
         self._build_camera_row()
         self.pin_button = QPushButton(_t("tools_pin_window", "Pin a window..."))
         self.pin_button.clicked.connect(self.open_pin_dialog)
@@ -84,20 +91,25 @@ class ToolsSettingUI(QWidget):
         self.grid_layout.addWidget(self.capture_label, 2, 0)
         self.grid_layout.addWidget(self.capture_button, 2, 1)
         self.grid_layout.addWidget(self.capture_copy_button, 2, 2)
-        self.grid_layout.addWidget(self.camera_label, 3, 0)
-        self.grid_layout.addWidget(self.camera_shape_combobox, 3, 1)
-        self.grid_layout.addWidget(self.camera_button, 3, 2)
-        self.grid_layout.addWidget(self.camera_device_combobox, 4, 0, 1, 2)
-        self.grid_layout.addWidget(self.camera_mirror_checkbox, 4, 2)
-        self.grid_layout.addWidget(self.camera_border_label, 5, 0)
-        self.grid_layout.addWidget(self.camera_border_spinbox, 5, 1)
-        self.grid_layout.addWidget(self.pin_button, 6, 0)
-        self.grid_layout.addWidget(self.layout_label, 7, 0)
-        self.grid_layout.addWidget(self.layout_name_edit, 7, 1)
-        self.grid_layout.addWidget(self.layout_save_button, 7, 2)
-        self.grid_layout.addWidget(self.layout_combobox, 8, 0, 1, 2)
-        self.grid_layout.addWidget(self.layout_restore_button, 8, 2)
-        self.grid_layout.addWidget(self.hint_label, 9, 0, 1, 3)
+        self.grid_layout.addWidget(self.record_label, 3, 0)
+        self.grid_layout.addWidget(self.record_fps_spinbox, 3, 1)
+        self.grid_layout.addWidget(self.record_button, 3, 2)
+        self.grid_layout.addWidget(self.record_seconds_spinbox, 4, 1)
+        self.grid_layout.addWidget(self.record_camera_checkbox, 4, 2)
+        self.grid_layout.addWidget(self.camera_label, 5, 0)
+        self.grid_layout.addWidget(self.camera_shape_combobox, 5, 1)
+        self.grid_layout.addWidget(self.camera_button, 5, 2)
+        self.grid_layout.addWidget(self.camera_device_combobox, 6, 0, 1, 2)
+        self.grid_layout.addWidget(self.camera_mirror_checkbox, 6, 2)
+        self.grid_layout.addWidget(self.camera_border_label, 7, 0)
+        self.grid_layout.addWidget(self.camera_border_spinbox, 7, 1)
+        self.grid_layout.addWidget(self.pin_button, 8, 0)
+        self.grid_layout.addWidget(self.layout_label, 9, 0)
+        self.grid_layout.addWidget(self.layout_name_edit, 9, 1)
+        self.grid_layout.addWidget(self.layout_save_button, 9, 2)
+        self.grid_layout.addWidget(self.layout_combobox, 10, 0, 1, 2)
+        self.grid_layout.addWidget(self.layout_restore_button, 10, 2)
+        self.grid_layout.addWidget(self.hint_label, 11, 0, 1, 3)
 
     # --- construction helpers -------------------------------------------
     def _build_measure_row(self) -> None:
@@ -123,6 +135,18 @@ class ToolsSettingUI(QWidget):
         self.capture_button.clicked.connect(self.start_capture)
         self.capture_copy_button = QPushButton(_t("tools_capture_copy", "Copy last"))
         self.capture_copy_button.clicked.connect(self.copy_last_capture)
+
+    def _build_record_row(self) -> None:
+        self.record_label = QLabel(_t("tools_record_label", "Record area"))
+        self.record_fps_spinbox = QSpinBox()
+        self.record_fps_spinbox.setRange(MIN_FPS, MAX_FPS)
+        self.record_fps_spinbox.setValue(DEFAULT_FPS)
+        self.record_seconds_spinbox = QSpinBox()
+        self.record_seconds_spinbox.setRange(1, 120)
+        self.record_seconds_spinbox.setValue(DEFAULT_MAX_SECONDS)
+        self.record_camera_checkbox = QCheckBox(_t("tools_record_camera", "Include camera"))
+        self.record_button = QPushButton(_t("tools_record_start", "Record area"))
+        self.record_button.clicked.connect(self.toggle_recording)
 
     def _build_camera_row(self) -> None:
         self.camera_label = QLabel(_t("tools_camera_label", "Camera"))
@@ -275,6 +299,61 @@ class ToolsSettingUI(QWidget):
             except RuntimeError:
                 self.pin_dialog = None
 
+    # --- recording -------------------------------------------------------
+    def toggle_recording(self) -> None:
+        if self.recorder.running:
+            self.finish_recording()
+        else:
+            self.start_recording()
+
+    def start_recording(self) -> RegionCaptureWidget:
+        """先框一塊範圍，放開滑鼠後就從那塊開始錄。"""
+        front_engine_logger.info("[ToolsSettingUI] start_recording")
+        picker = RegionCaptureWidget()
+        picker.finish = _recording_region_picker(self, picker)
+        screen = QGuiApplication.primaryScreen()
+        if screen is not None:
+            picker.setGeometry(screen.geometry())
+        picker.setMouseTracking(True)
+        picker.show()
+        self.capture_widget_list.append(picker)
+        return picker
+
+    def begin_recording(self, region) -> bool:
+        """對指定範圍開始錄製。"""
+        inset = self.camera_inset if self.record_camera_checkbox.isChecked() else None
+        self.recorder.set_inset_provider(inset)
+        started = self.recorder.start(region, self.record_fps_spinbox.value(),
+                                      self.record_seconds_spinbox.value())
+        if started:
+            self.record_button.setText(_t("tools_record_stop", "Stop recording"))
+        return started
+
+    def camera_inset(self) -> Optional[object]:
+        """錄影時要疊上去的攝影機畫面（沒開攝影機就沒有）。"""
+        for widget in list(self.camera_widget_list):
+            try:
+                if widget.frame is not None:
+                    return widget.frame
+            except RuntimeError:
+                self.camera_widget_list.remove(widget)
+        return None
+
+    def finish_recording(self) -> Optional[str]:
+        """停止錄製並存成 GIF，回傳檔案路徑。"""
+        self.recorder.stop()
+        self.record_button.setText(_t("tools_record_start", "Record area"))
+        if not self.recorder.frames:
+            return None
+        target = QFileDialog.getSaveFileName(
+            self, _t("tools_record_save", "Save recording"), "recording.gif", "GIF (*.gif)")[0]
+        if not target:
+            self.recorder.clear()
+            return None
+        self.last_recording = self.recorder.save_gif(target)
+        self.recorder.clear()
+        return self.last_recording
+
     # --- window layouts --------------------------------------------------
     def saved_layouts(self) -> dict:
         """設定裡目前存了哪些版面。"""
@@ -336,3 +415,26 @@ class ToolsSettingUI(QWidget):
             self.camera_border_spinbox.setValue(max(0, min(20, border)))
         if "camera_mirror" in state:
             self.camera_mirror_checkbox.setChecked(bool(state["camera_mirror"]))
+
+
+def _recording_region_picker(page: "ToolsSettingUI", picker: RegionCaptureWidget):
+    """
+    把框選層的 finish() 換成「不擷取畫面、只回報範圍給錄影」。錄影要的是
+    連續的畫面，不是放開當下那一張。
+    Replace the picker's finish() so it reports the region to the recorder
+    instead of grabbing one still: a recording wants the frames that follow.
+    """
+    original_close = picker.close
+
+    def finish(point):
+        picker.extend(point)
+        region = picker.selection()
+        picker.origin = picker.current = None
+        if picker in page.capture_widget_list:
+            page.capture_widget_list.remove(picker)
+        original_close()
+        if region is not None and is_usable(region):
+            page.begin_recording(region)
+        return None
+
+    return finish

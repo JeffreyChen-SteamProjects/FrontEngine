@@ -499,4 +499,9 @@ english_word_dict = {
     "tools_layout_name": 'Layout name',
     "tools_layout_save": 'Save layout',
     "tools_layout_restore": 'Restore',
+    "tools_record_label": 'Record area',
+    "tools_record_start": 'Record area',
+    "tools_record_stop": 'Stop recording',
+    "tools_record_camera": 'Include camera',
+    "tools_record_save": 'Save recording',
 }
