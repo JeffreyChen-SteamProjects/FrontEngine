@@ -8,6 +8,7 @@ from PySide6.QtWidgets import QWidget
 from frontengine.show.window_helpers import apply_overlay_window_flags, load_overlay_icon
 from frontengine.user_setting.user_setting_file import get_overlay_geometry, save_overlay_geometry
 from frontengine.utils.logging.loggin_instance import front_engine_logger
+from frontengine.utils.power_mode.power_mode import DEFAULT_TIER, normalize_tier, tier_render_scale
 
 
 class BaseWidget(QWidget):
@@ -29,6 +30,9 @@ class BaseWidget(QWidget):
         # 綠幕背景色：設了就以不透明色填滿背景，方便 OBS 去背
         # Chroma key colour: fills the background opaquely so OBS can key it out.
         self.background_color: Optional[QColor] = None
+        # 畫質檔位：影響更新頻率上限與算圖縮放（見 utils/power_mode）
+        # Quality tier: caps the refresh rate and scales rendering (see utils/power_mode).
+        self.quality_tier: str = DEFAULT_TIER
         self._drag_origin = None
         self._geometry_restored = False
 
@@ -43,6 +47,27 @@ class BaseWidget(QWidget):
     def set_ui_variable(self, opacity: float = 0.2) -> None:
         front_engine_logger.info(f"{self.__class__.__name__} set_ui_variable | opacity: {opacity}")
         self.opacity = opacity
+
+    def set_quality_tier(self, tier: str) -> None:
+        """
+        設定畫質檔位。基底類別只記下來並通知子類別，實際怎麼省由子類別決定
+        （例如放慢自己的計時器、用較低解析度算圖）。
+        Set the quality tier. The base class records it and tells the subclass;
+        what to actually give up - timer rate, render resolution - is the
+        subclass's call.
+        """
+        self.quality_tier = normalize_tier(tier)
+        front_engine_logger.info(
+            f"{self.__class__.__name__} set_quality_tier | tier: {self.quality_tier}")
+        self.apply_quality_tier()
+        self.update()
+
+    def apply_quality_tier(self) -> None:
+        """子類別覆寫這裡，把新的檔位套到自己的計時器／算圖上。"""
+
+    def render_scale(self) -> float:
+        """目前檔位的算圖縮放，1.0 表示原生解析度。"""
+        return tier_render_scale(self.quality_tier)
 
     def set_background_color(self, color) -> None:
         """

@@ -41,6 +41,18 @@ user_setting_dict: Dict[str, Any] = {
     # 啟動時還原上次的頁面設定
     # Restore the previous session's page settings on launch
     "restore_last_session": False,
+    # 智慧暫停規則：{"fullscreen": bool, "battery": bool, "apps": [程式名稱]}
+    # Smart-pause rules: which conditions stand the overlays down.
+    "smart_pause_rules": {"fullscreen": True, "battery": False, "apps": []},
+    # 前景程式對應的預設集：{程式名稱: 預設集名稱}
+    # Per-app profiles: {app name: preset name}
+    "app_profiles": {},
+    # 自訂提醒：[{"label", "kind": "every"/"at", "minutes"/"at", "enabled"}]
+    # Custom reminders, shown as a toast when they come due.
+    "reminders": [],
+    # 覆蓋層畫質檔位：high / balanced / saver
+    # Overlay quality tier: high / balanced / saver.
+    "quality_tier": "high",
     # 是否載入 plugins/ 資料夾裡的外掛（外掛與本程式同權限，預設關閉）
     # Load plugins from plugins/? They run with our privileges, so: off by default.
     "load_plugins": False,

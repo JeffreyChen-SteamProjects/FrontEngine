@@ -27,6 +27,9 @@ _ALLOWED_COMMANDS = {}  # name -> runner, filled in below once the runners exist
 # wmctrl is looked up in these fixed absolute locations only — never via PATH,
 # which another program could shadow.
 _WMCTRL_PATHS = ("/usr/bin/wmctrl", "/usr/local/bin/wmctrl", "/bin/wmctrl")
+# 同樣的道理：xdotool 只從固定絕對路徑找
+# Same reasoning for xdotool: fixed absolute locations only.
+_XDOTOOL_PATHS = ("/usr/bin/xdotool", "/usr/local/bin/xdotool", "/bin/xdotool")
 # 桌面／工作列等外殼視窗類別，不視為可站立的程式視窗
 # Shell windows (desktop / taskbar) that must not count as standable.
 _PLATFORM_SKIP_CLASSES = {"WorkerW", "Progman", "Shell_TrayWnd", "Button"}
@@ -62,10 +65,32 @@ def _linux_windows_output() -> Optional[str]:
     return None
 
 
+def _macos_front_app_output() -> Optional[str]:
+    """問 System Events 目前最前面的程式叫什麼名字（argv 全部寫死）。"""
+    return _output_of(subprocess.run(  # nosec B603 # nosemgrep - literal absolute argv, shell=False
+        ["/usr/bin/osascript", "-e",
+         'tell application "System Events" to get name of first application process '
+         'whose frontmost is true'],
+        capture_output=True, text=True, timeout=_COMMAND_TIMEOUT, check=False, shell=False))
+
+
+def _linux_front_app_output() -> Optional[str]:
+    """xdotool 各發行版位置不同，只從固定的絕對路徑清單裡找，不查 PATH。"""
+    for candidate in _XDOTOOL_PATHS:
+        if not Path(candidate).is_file():
+            continue
+        return _output_of(subprocess.run(  # nosec B603 # nosemgrep - absolute path from a fixed list
+            [candidate, "getactivewindow", "getwindowclassname"],
+            capture_output=True, text=True, timeout=_COMMAND_TIMEOUT, check=False, shell=False))
+    return None
+
+
 _ALLOWED_COMMANDS.update({
     "macos_idle": _macos_idle_output,
     "macos_battery": _macos_battery_output,
     "linux_windows": _linux_windows_output,
+    "macos_front_app": _macos_front_app_output,
+    "linux_front_app": _linux_front_app_output,
 })
 
 
@@ -301,3 +326,63 @@ def _standable_windows_windows(exclude_handles=()) -> List[Tuple[int, int, int]]
     except Exception as error:  # pragma: no cover - Win32 boundary
         front_engine_logger.warning(f"[platform_info] EnumWindows failed: {error!r}")
         return []
+
+
+# --- foreground application ------------------------------------------------
+def parse_front_app_output(output: Optional[str]) -> Optional[str]:
+    """
+    把 osascript／xdotool 的輸出整理成單一程式名稱；空輸出回傳 None。
+    Reduce the osascript / xdotool output to a single app name, or None.
+    """
+    if not output:
+        return None
+    first_line = output.strip().splitlines()[0].strip() if output.strip() else ""
+    return first_line or None
+
+
+def active_app_name() -> Optional[str]:
+    """
+    目前前景程式的名稱（Windows 走 ctypes，macOS 走 osascript，Linux 走
+    xdotool）。取不到就回傳 None，呼叫端要能接受「不知道」這個答案。
+    The name of the app that currently has focus. Windows uses ctypes, macOS
+    asks System Events, Linux asks xdotool. Returns None when it cannot be
+    determined - callers must cope with not knowing.
+    """
+    if sys.platform == "win32":
+        return _active_app_name_windows()
+    if sys.platform == "darwin":
+        return parse_front_app_output(run_command("macos_front_app"))
+    return parse_front_app_output(run_command("linux_front_app"))
+
+
+def _active_app_name_windows() -> Optional[str]:
+    try:
+        import ctypes
+        from ctypes import wintypes
+
+        user32 = ctypes.windll.user32
+        kernel32 = ctypes.windll.kernel32
+        hwnd = user32.GetForegroundWindow()
+        if not hwnd:
+            return None
+        pid = wintypes.DWORD()
+        user32.GetWindowThreadProcessId(hwnd, ctypes.byref(pid))
+        if not pid.value:
+            return None
+        # PROCESS_QUERY_LIMITED_INFORMATION：只問名字，不要求更多權限
+        # PROCESS_QUERY_LIMITED_INFORMATION: ask for the name, nothing more.
+        handle = kernel32.OpenProcess(0x1000, False, pid.value)
+        if not handle:
+            return None
+        try:
+            size = wintypes.DWORD(260)
+            buffer = ctypes.create_unicode_buffer(size.value)
+            if not kernel32.QueryFullProcessImageNameW(
+                    handle, 0, buffer, ctypes.byref(size)):
+                return None
+            return Path(buffer.value).name or None
+        finally:
+            kernel32.CloseHandle(handle)
+    except Exception as error:  # pragma: no cover - Win32 boundary
+        front_engine_logger.warning(f"[platform_info] foreground app failed: {error!r}")
+        return None
