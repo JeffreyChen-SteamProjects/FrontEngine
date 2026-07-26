@@ -841,34 +841,46 @@ class PetMotion:
         if self.y <= top:
             self.y = float(top)
             self.vy = abs(self.vy) * self.WALL_DAMPING
-        new_feet = self.y + self.height
-        center_x = self.x + self.width / 2.0
+        land_feet, land_span = self._landing_for(prev_feet, self.y + self.height, bottom)
+        if land_feet is not None:
+            self._land_on(land_feet, land_span)
+        return int(self.x), int(self.y)
 
+    def _landing_for(self, prev_feet: float, new_feet: float, bottom: float):
+        """
+        這一步跨過了哪個落腳處：回傳 (腳底高度, 平台範圍)。平台優先於螢幕地板，
+        多個平台則取最高的那個；都沒跨過就回傳 (None, None)。
+        What this step crossed, as (feet height, platform span). A platform wins
+        over the screen floor, the highest platform wins among several, and
+        crossing nothing gives (None, None).
+        """
+        center_x = self.x + self.width / 2.0
         land_feet = None
         land_span = None
         for platform_left, platform_right, platform_y in self.platforms:
-            if platform_left <= center_x <= platform_right and prev_feet <= platform_y <= new_feet:
-                if land_feet is None or platform_y < land_feet:
-                    land_feet = float(platform_y)
-                    land_span = (float(platform_left), float(platform_right))
+            crossed = prev_feet <= platform_y <= new_feet
+            over_it = platform_left <= center_x <= platform_right
+            if crossed and over_it and (land_feet is None or platform_y < land_feet):
+                land_feet = float(platform_y)
+                land_span = (float(platform_left), float(platform_right))
         if prev_feet <= bottom <= new_feet and (land_feet is None or bottom < land_feet):
-            land_feet = float(bottom)
-            land_span = None
+            return (float(bottom), None)
+        return (land_feet, land_span)
 
-        if land_feet is not None:
-            self.y = float(land_feet - self.height)
-            if abs(self.vy) > self.BOUNCE_THRESHOLD:
-                self.vy = -self.vy * self.BOUNCE_DAMPING
-            else:
-                self.vy = 0.0
-                self._airborne = False
-                self.surface = SURFACE_FLOOR
-                self.on_platform = land_span is not None
-                self.platform_span = land_span
-                self.ground_feet = land_feet
-                self.vx = float(self.speed) if self.vx >= 0 else float(-self.speed)
-                self._new_state(force_walk=True)
-        return int(self.x), int(self.y)
+    def _land_on(self, land_feet: float, land_span) -> None:
+        """落地：還有力氣就彈起來，否則就站定並恢復走動。"""
+        self.y = float(land_feet - self.height)
+        if abs(self.vy) > self.BOUNCE_THRESHOLD:
+            self.vy = -self.vy * self.BOUNCE_DAMPING
+            return
+        self.vy = 0.0
+        self._airborne = False
+        self.surface = SURFACE_FLOOR
+        self.on_platform = land_span is not None
+        self.platform_span = land_span
+        self.ground_feet = land_feet
+        self.vx = float(self.speed) if self.vx >= 0 else float(-self.speed)
+        self._new_state(force_walk=True)
 
     def _step_follow(self, left, _top, right, _bottom, floor_y) -> Tuple[int, int]:
         """朝 follow_target_x 走過去；抵達附近即清除並恢復隨機行為。"""

@@ -8,6 +8,7 @@ imports left behind by removed features (e.g. the deleted ChatSceneUI).
 """
 import importlib
 import pkgutil
+import re
 from pathlib import Path
 
 import pytest
@@ -68,6 +69,22 @@ def test_every_package_directory_has_an_init_file() -> None:
     assert missing == [], f"these packages would be left out of the wheel: {missing}"
 
 
+def _declared_dependencies(pyproject: Path) -> list:
+    """
+    讀出 pyproject 的 dependencies 陣列。刻意不用 tomllib：那是 3.11 才進標準
+    函式庫的，而本專案支援 3.10（CI 也真的在 3.10 上跑）。這個陣列只是一串
+    引號字串，用不著完整的 TOML 解析器。
+    The dependencies array from pyproject. Deliberately not via tomllib, which
+    only joined the standard library in 3.11 while this project supports 3.10
+    and CI really does run there. The array is a list of quoted strings; a full
+    TOML parser is not needed to read it.
+    """
+    text = pyproject.read_text(encoding="utf-8")
+    start = text.index("dependencies = [")
+    body = text[start + len("dependencies = ["):]
+    return re.findall(r'"([^"]+)"', body[:body.index("]")])
+
+
 def test_requirements_agree_with_the_packaged_dependencies() -> None:
     """
     requirements.txt 必須和 pyproject.toml 的 dependencies 說同一件事。
@@ -78,11 +95,8 @@ def test_requirements_agree_with_the_packaged_dependencies() -> None:
     They used to disagree - 6.8.2.1 against 6.10.2 - so anyone following the
     README got an environment unlike the one that actually ships.
     """
-    import tomllib
-
     root = Path(frontengine.__file__).parent.parent
-    with (root / "pyproject.toml").open("rb") as handle:
-        declared = tomllib.load(handle)["project"]["dependencies"]
+    declared = _declared_dependencies(root / "pyproject.toml")
 
     listed = [line.strip() for line in (root / "requirements.txt").read_text(
         encoding="utf-8").splitlines() if line.strip() and not line.startswith("#")]

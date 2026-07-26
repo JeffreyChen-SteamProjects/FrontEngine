@@ -89,10 +89,10 @@ class PresetRepository:
         # not remote/untrusted input, so writing there is intended behaviour.
         destination = Path(destination)
         destination.parent.mkdir(parents=True, exist_ok=True)
-        # NOSONAR - the destination came from a native Save dialog
-        destination.write_text(
-            source.read_text(encoding="utf-8"), encoding="utf-8"
-        )
+        # destination 是使用者在原生「另存新檔」對話框裡挑的位置，不是遠端輸入。
+        # destination is where the user pointed a native Save dialog, not remote input.
+        destination.write_text(  # NOSONAR
+            source.read_text(encoding="utf-8"), encoding="utf-8")
         return destination
 
     def import_preset(self, source: Path) -> str:
