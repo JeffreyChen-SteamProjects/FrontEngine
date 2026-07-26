@@ -88,7 +88,8 @@ def test_stopping_an_unopened_input_is_safe() -> None:
 
 # --- the remote's two gates ----------------------------------------------
 def test_every_start_mints_a_different_token() -> None:
-    assert make_token() != make_token()
+    first, second = make_token(), make_token()
+    assert first != second
 
 
 def test_only_the_listed_actions_are_allowed() -> None:
