@@ -24,3 +24,18 @@ def _run_from_temporary_directory():
             yield directory
         finally:
             os.chdir(original)
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _qt_application():
+    """
+    整個 session 共用一個 QApplication。QPixmap、QMovie 這類類別在沒有
+    QGuiApplication 時會直接讓行程中止（不是丟例外），所以這裡一定要先建好。
+    One QApplication for the whole session. Classes like QPixmap and QMovie
+    abort the process - they do not raise - when no QGuiApplication exists, so
+    it has to be in place before any test touches them.
+    """
+    from PySide6.QtWidgets import QApplication
+
+    application = QApplication.instance() or QApplication([])
+    yield application

@@ -119,6 +119,10 @@ Measuring and capture tools on the **Tools** tab:
   `hsl(...)` or a CSS custom property.
 - **Region capture** — drag out an area; it lands on the clipboard and can be
   saved to a file.
+- **Record area** — drag out an area and record it to an animated GIF, with the
+  camera composited into the corner if you want the reaction-video look.
+  Recording is capped by both length and frame count, because every frame is
+  held in memory.
 - **Pin a window** — keep another program's window on top, or fade it, while
   you work against it. Only stacking and opacity are touched, never window
   content. Windows only.

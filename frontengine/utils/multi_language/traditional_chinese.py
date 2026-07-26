@@ -498,4 +498,9 @@ traditional_chinese_word_dict = {
     "tools_layout_name": '版面名稱',
     "tools_layout_save": '儲存版面',
     "tools_layout_restore": '還原',
+    "tools_record_label": '區域錄影',
+    "tools_record_start": '框選錄影',
+    "tools_record_stop": '停止錄影',
+    "tools_record_camera": '疊上攝影機',
+    "tools_record_save": '儲存錄影',
 }
