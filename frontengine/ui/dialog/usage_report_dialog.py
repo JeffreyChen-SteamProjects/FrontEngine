@@ -47,8 +47,9 @@ class UsageReportDialog(QDialog):
         self._on_toggle = on_toggle
         self._on_clear = on_clear
 
-        self.enable_checkbox = QCheckBox(_t("usage_enable", "Track which apps I use"))
-        retranslator.bind(self.enable_checkbox, "usage_enable", "Track which apps I use")
+        self.enable_checkbox = QCheckBox()
+        retranslator.bind(self.enable_checkbox, "usage_enable",
+                          "Track which apps I use")
         self.enable_checkbox.setChecked(bool(enabled))
         self.enable_checkbox.toggled.connect(self._toggle)
 
@@ -65,17 +66,18 @@ class UsageReportDialog(QDialog):
 
         self.week_label = QLabel()
         self.week_label.setWordWrap(True)
-        self.refresh_button = QPushButton(_t("usage_refresh", "Refresh"))
-        retranslator.bind(self.refresh_button, "usage_refresh", "Refresh")
+        self.refresh_button = QPushButton()
+        retranslator.bind(self.refresh_button, "usage_refresh",
+                          "Refresh")
         self.refresh_button.clicked.connect(self.reload_report)
-        self.clear_button = QPushButton(_t("usage_clear", "Clear history"))
-        retranslator.bind(self.clear_button, "usage_clear", "Clear history")
+        self.clear_button = QPushButton()
+        retranslator.bind(self.clear_button, "usage_clear",
+                          "Clear history")
         self.clear_button.clicked.connect(self.clear_history)
-        self.hint_label = QLabel(
-            _t("usage_hint",
-               "This is stored on this machine only and is never sent anywhere. "
-               "Clearing deletes the file itself."))
-        retranslator.bind(self.hint_label, "usage_hint", "This is stored on this machine only and is never sent anywhere. " "Clearing deletes the file itself.")
+        self.hint_label = QLabel()
+        retranslator.bind(self.hint_label, "usage_hint",
+                          "This is stored on this machine only and is never sent anywhere. "
+               "Clearing deletes the file itself.")
         self.hint_label.setWordWrap(True)
 
         self.button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)

@@ -54,12 +54,13 @@ class ScreenPrivacyDialog(QDialog):
         self.setWindowTitle(_t("screen_privacy_title", "Screen-sharing privacy"))
         settings = current_settings()
 
-        self.enable_checkbox = QCheckBox(
-            _t("screen_privacy_enable", "Hide overlays while one of these apps is open"))
-        retranslator.bind(self.enable_checkbox, "screen_privacy_enable", "Hide overlays while one of these apps is open")
+        self.enable_checkbox = QCheckBox()
+        retranslator.bind(self.enable_checkbox, "screen_privacy_enable",
+                          "Hide overlays while one of these apps is open")
         self.enable_checkbox.setChecked(bool(settings.get("enabled")))
-        self.apps_label = QLabel(_t("screen_privacy_apps_label", "Meeting and capture apps:"))
-        retranslator.bind(self.apps_label, "screen_privacy_apps_label", "Meeting and capture apps:")
+        self.apps_label = QLabel()
+        retranslator.bind(self.apps_label, "screen_privacy_apps_label",
+                          "Meeting and capture apps:")
         self.apps_edit = QLineEdit(", ".join(settings.get("apps", [])))
         self.apps_edit.setPlaceholderText("zoom, teams, discord")
         # 提示句取決於平台支不支援，登記的必須是實際選到的那個鍵

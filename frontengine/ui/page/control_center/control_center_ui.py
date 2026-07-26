@@ -107,9 +107,9 @@ class ControlCenterUI(QWidget):
 
         # 畫質檔位：比省電模式更細，一次套用到所有覆蓋層
         # Quality tier: finer than the low-power switch, applied to every overlay.
-        self.quality_label = QLabel(
-            language_wrapper.language_word_dict.get("control_center_quality", "Quality"))
-        retranslator.bind(self.quality_label, "control_center_quality", "Quality")
+        self.quality_label = QLabel()
+        retranslator.bind(self.quality_label, "control_center_quality",
+                          "Quality")
         self.quality_combobox = QComboBox()
         for tier, key, fallback in (
                 (TIER_HIGH, "control_center_quality_high", "High"),

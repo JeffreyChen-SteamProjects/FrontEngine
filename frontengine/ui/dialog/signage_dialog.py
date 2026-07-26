@@ -52,26 +52,28 @@ class SignageDialog(QDialog):
         self.setWindowTitle(_t("signage_title", "Signage mode"))
         settings = current_settings()
 
-        self.enable_checkbox = QCheckBox(_t("signage_enable", "Rotate presets"))
-        retranslator.bind(self.enable_checkbox, "signage_enable", "Rotate presets")
+        self.enable_checkbox = QCheckBox()
+        retranslator.bind(self.enable_checkbox, "signage_enable",
+                          "Rotate presets")
         self.enable_checkbox.setChecked(bool(settings.get("enabled")))
-        self.presets_label = QLabel(_t("signage_presets_label", "Presets, one per line:"))
-        retranslator.bind(self.presets_label, "signage_presets_label", "Presets, one per line:")
+        self.presets_label = QLabel()
+        retranslator.bind(self.presets_label, "signage_presets_label",
+                          "Presets, one per line:")
         self.presets_edit = QPlainTextEdit("\n".join(settings.get("presets", [])))
-        self.interval_label = QLabel(_t("signage_interval_label", "Change every (minutes)"))
-        retranslator.bind(self.interval_label, "signage_interval_label", "Change every (minutes)")
+        self.interval_label = QLabel()
+        retranslator.bind(self.interval_label, "signage_interval_label",
+                          "Change every (minutes)")
         self.interval_spinbox = QSpinBox()
         self.interval_spinbox.setRange(MIN_INTERVAL_MINUTES, MAX_INTERVAL_MINUTES)
         self.interval_spinbox.setValue(settings.get("interval_minutes"))
-        self.hide_checkbox = QCheckBox(
-            _t("signage_hide_window", "Hide the main window while rotating"))
-        retranslator.bind(self.hide_checkbox, "signage_hide_window", "Hide the main window while rotating")
+        self.hide_checkbox = QCheckBox()
+        retranslator.bind(self.hide_checkbox, "signage_hide_window",
+                          "Hide the main window while rotating")
         self.hide_checkbox.setChecked(bool(settings.get("hide_window", True)))
-        self.hint_label = QLabel(
-            _t("signage_hint",
-               "Presets are saved from the Presets menu. The rotation wraps at the end, so a "
-               "machine left running keeps cycling."))
-        retranslator.bind(self.hint_label, "signage_hint", "Presets are saved from the Presets menu. The rotation wraps at the end, so a " "machine left running keeps cycling.")
+        self.hint_label = QLabel()
+        retranslator.bind(self.hint_label, "signage_hint",
+                          "Presets are saved from the Presets menu. The rotation wraps at the end, so a "
+               "machine left running keeps cycling.")
         self.hint_label.setWordWrap(True)
 
         self.button_box = QDialogButtonBox(

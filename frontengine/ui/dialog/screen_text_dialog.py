@@ -78,12 +78,13 @@ class ScreenTextDialog(QDialog):
 
         self.text_edit = QPlainTextEdit(str(text))
         self.text_edit.setReadOnly(False)
-        self.copy_button = QPushButton(_t("screen_text_copy", "Copy"))
-        retranslator.bind(self.copy_button, "screen_text_copy", "Copy")
+        self.copy_button = QPushButton()
+        retranslator.bind(self.copy_button, "screen_text_copy",
+                          "Copy")
         self.copy_button.clicked.connect(self.copy_text)
-        self.consent_checkbox = QCheckBox(
-            _t("screen_text_consent_toggle", "Allow sending captures to Anthropic"))
-        retranslator.bind(self.consent_checkbox, "screen_text_consent_toggle", "Allow sending captures to Anthropic")
+        self.consent_checkbox = QCheckBox()
+        retranslator.bind(self.consent_checkbox, "screen_text_consent_toggle",
+                          "Allow sending captures to Anthropic")
         self.consent_checkbox.setChecked(has_consent())
         self.consent_checkbox.toggled.connect(set_consent)
         self.hint_label = QLabel(self.status_text())

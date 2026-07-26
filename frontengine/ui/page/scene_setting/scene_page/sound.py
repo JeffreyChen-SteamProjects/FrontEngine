@@ -5,7 +5,6 @@ from PySide6.QtWidgets import QPushButton
 from frontengine.ui.dialog.choose_file_dialog import choose_player_sound
 from frontengine.ui.page.scene_setting.scene_manager import SceneManagerUI
 from frontengine.ui.page.scene_setting.scene_page.base_scene_page import BaseSceneSettingUI
-from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import retranslator
 
 
@@ -16,10 +15,8 @@ class SoundSceneSettingUI(BaseSceneSettingUI):
 
         volume_label, self.volume_value, self.volume_slider = self._build_slider("Volume", 1, 100, 100)
 
-        self.choose_player_file_button = QPushButton(
-            language_wrapper.language_word_dict.get("sound_player_setting_choose_sound_file")
-        )
-        retranslator.bind(self.choose_player_file_button, "sound_player_setting_choose_sound_file", "")
+        self.choose_player_file_button = QPushButton()
+        retranslator.bind(self.choose_player_file_button, "sound_player_setting_choose_sound_file")
         self.player_ready_label = self._make_ready_label()
         self.choose_player_file_button.clicked.connect(
             self._wire_chooser(
@@ -30,8 +27,8 @@ class SoundSceneSettingUI(BaseSceneSettingUI):
             )
         )
 
-        self.update_scene_button = QPushButton(language_wrapper.language_word_dict.get("scene_add_sound"))
-        retranslator.bind(self.update_scene_button, "scene_add_sound", "")
+        self.update_scene_button = QPushButton()
+        retranslator.bind(self.update_scene_button, "scene_add_sound")
         self.update_scene_button.clicked.connect(self._update_scene)
 
         self.grid_layout.addWidget(volume_label, 0, 0)

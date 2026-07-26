@@ -43,23 +43,22 @@ class SmartPauseDialog(QDialog):
         self.setWindowTitle(_t("smart_pause_title", "Smart pause"))
         rules = current_rules()
 
-        self.fullscreen_checkbox = QCheckBox(
-            _t("smart_pause_fullscreen", "Pause while a fullscreen app is running"))
-        retranslator.bind(self.fullscreen_checkbox, "smart_pause_fullscreen", "Pause while a fullscreen app is running")
+        self.fullscreen_checkbox = QCheckBox()
+        retranslator.bind(self.fullscreen_checkbox, "smart_pause_fullscreen",
+                          "Pause while a fullscreen app is running")
         self.fullscreen_checkbox.setChecked(bool(rules.get("fullscreen", True)))
-        self.battery_checkbox = QCheckBox(
-            _t("smart_pause_battery", "Pause while running on battery"))
-        retranslator.bind(self.battery_checkbox, "smart_pause_battery", "Pause while running on battery")
+        self.battery_checkbox = QCheckBox()
+        retranslator.bind(self.battery_checkbox, "smart_pause_battery",
+                          "Pause while running on battery")
         self.battery_checkbox.setChecked(bool(rules.get("battery", False)))
-        self.apps_label = QLabel(
-            _t("smart_pause_apps_label", "Pause while these apps have focus:"))
-        retranslator.bind(self.apps_label, "smart_pause_apps_label", "Pause while these apps have focus:")
+        self.apps_label = QLabel()
+        retranslator.bind(self.apps_label, "smart_pause_apps_label",
+                          "Pause while these apps have focus:")
         self.apps_edit = QLineEdit(", ".join(rules.get("apps", [])))
         self.apps_edit.setPlaceholderText("photoshop, premiere, blender")
-        self.hint_label = QLabel(
-            _t("smart_pause_hint",
-               "Names are matched without the folder or .exe, so \"photoshop\" is enough."))
-        retranslator.bind(self.hint_label, "smart_pause_hint", "Names are matched without the folder or .exe, so \"photoshop\" is enough.")
+        self.hint_label = QLabel()
+        retranslator.bind(self.hint_label, "smart_pause_hint",
+                          "Names are matched without the folder or .exe, so \"photoshop\" is enough.")
         self.hint_label.setWordWrap(True)
 
         self.button_box = QDialogButtonBox(

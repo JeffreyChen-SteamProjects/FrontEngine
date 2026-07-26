@@ -31,8 +31,8 @@ class SoundPlayerSettingUI(QWidget):
         self.player_sound_path: Optional[str] = None
 
         # Volume setting
-        self.volume_label = QLabel(language_wrapper.language_word_dict.get("Volume"))
-        retranslator.bind(self.volume_label, "Volume", "")
+        self.volume_label = QLabel()
+        retranslator.bind(self.volume_label, "Volume")
         self.volume_slider = QSlider(Qt.Orientation.Horizontal)
         self.volume_slider.setRange(1, 100)
         self.volume_slider.setValue(100)
@@ -40,29 +40,26 @@ class SoundPlayerSettingUI(QWidget):
         self.volume_slider.valueChanged.connect(self.volume_trick)
 
         # Choose WAV file
-        self.choose_wav_file_button = QPushButton(
-            language_wrapper.language_word_dict.get("sound_player_setting_choose_wav_file"))
-        retranslator.bind(self.choose_wav_file_button, "sound_player_setting_choose_wav_file", "")
+        self.choose_wav_file_button = QPushButton()
+        retranslator.bind(self.choose_wav_file_button, "sound_player_setting_choose_wav_file")
         self.choose_wav_file_button.clicked.connect(self.choose_and_copy_wav_file_to_cwd_sound_dir_then_play)
         self.wav_ready_label = QLabel(translate(_NOT_READY))
         retranslator.bind(self.wav_ready_label, _NOT_READY)
 
         # Choose general sound file
-        self.choose_player_file_button = QPushButton(
-            language_wrapper.language_word_dict.get("sound_player_setting_choose_sound_file"))
-        retranslator.bind(self.choose_player_file_button, "sound_player_setting_choose_sound_file", "")
+        self.choose_player_file_button = QPushButton()
+        retranslator.bind(self.choose_player_file_button, "sound_player_setting_choose_sound_file")
         self.choose_player_file_button.clicked.connect(self.choose_and_copy_sound_file_to_cwd_sound_dir_then_play)
         self.player_ready_label = QLabel(translate(_NOT_READY))
         retranslator.bind(self.player_ready_label, _NOT_READY)
 
         # Start buttons
-        self.start_wav_button = QPushButton(language_wrapper.language_word_dict.get("sound_player_setting_play_wav"))
-        retranslator.bind(self.start_wav_button, "sound_player_setting_play_wav", "")
+        self.start_wav_button = QPushButton()
+        retranslator.bind(self.start_wav_button, "sound_player_setting_play_wav")
         self.start_wav_button.clicked.connect(self.start_play_wav)
 
-        self.start_player_button = QPushButton(
-            language_wrapper.language_word_dict.get("sound_player_setting_play_sound"))
-        retranslator.bind(self.start_player_button, "sound_player_setting_play_sound", "")
+        self.start_player_button = QPushButton()
+        retranslator.bind(self.start_player_button, "sound_player_setting_play_sound")
         self.start_player_button.clicked.connect(self.start_play_sound)
 
         # Layout

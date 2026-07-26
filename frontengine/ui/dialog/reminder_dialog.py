@@ -55,17 +55,18 @@ class ReminderDialog(QDialog):
         self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.table.horizontalHeader().setStretchLastSection(True)
 
-        self.add_button = QPushButton(_t("reminder_add", "Add"))
-        retranslator.bind(self.add_button, "reminder_add", "Add")
+        self.add_button = QPushButton()
+        retranslator.bind(self.add_button, "reminder_add",
+                          "Add")
         self.add_button.clicked.connect(lambda: self.add_row())
-        self.remove_button = QPushButton(_t("reminder_remove", "Remove"))
-        retranslator.bind(self.remove_button, "reminder_remove", "Remove")
+        self.remove_button = QPushButton()
+        retranslator.bind(self.remove_button, "reminder_remove",
+                          "Remove")
         self.remove_button.clicked.connect(self.remove_selected_row)
-        self.hint_label = QLabel(
-            _t("reminder_hint",
-               "Tick a row to keep it active. \"Every\" takes minutes, \"At\" takes a "
-               "24-hour time such as 14:30."))
-        retranslator.bind(self.hint_label, "reminder_hint", "Tick a row to keep it active. \"Every\" takes minutes, \"At\" takes a " "24-hour time such as 14:30.")
+        self.hint_label = QLabel()
+        retranslator.bind(self.hint_label, "reminder_hint",
+                          "Tick a row to keep it active. \"Every\" takes minutes, \"At\" takes a "
+               "24-hour time such as 14:30.")
         self.hint_label.setWordWrap(True)
 
         self.button_box = QDialogButtonBox(

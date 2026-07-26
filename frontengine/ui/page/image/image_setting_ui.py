@@ -50,8 +50,8 @@ class ImageSettingUI(QWidget):
         self._slideshow_timer.timeout.connect(self._advance_slideshow)
 
         # Opacity setting
-        self.opacity_label = QLabel(language_wrapper.language_word_dict.get("Opacity"))
-        retranslator.bind(self.opacity_label, "Opacity", "")
+        self.opacity_label = QLabel()
+        retranslator.bind(self.opacity_label, "Opacity")
         self.opacity_slider = QSlider(Qt.Orientation.Horizontal)
         self.opacity_slider.setRange(1, 100)
         self.opacity_slider.setValue(20)
@@ -59,67 +59,64 @@ class ImageSettingUI(QWidget):
         self.opacity_slider.valueChanged.connect(self.opacity_trick)
 
         # Choose file button
-        self.choose_file_button = QPushButton(language_wrapper.language_word_dict.get("image_setting_choose_file"))
-        retranslator.bind(self.choose_file_button, "image_setting_choose_file", "")
+        self.choose_file_button = QPushButton()
+        retranslator.bind(self.choose_file_button, "image_setting_choose_file")
         self.choose_file_button.clicked.connect(self.choose_and_copy_file_to_cwd_image_dir_then_play)
 
         # Ready label
-        self.ready_label = QLabel(language_wrapper.language_word_dict.get("Not Ready"))
-        retranslator.bind(self.ready_label, "Not Ready", "")
+        self.ready_label = QLabel()
+        retranslator.bind(self.ready_label, "Not Ready")
 
         # Start button
-        self.start_button = QPushButton(language_wrapper.language_word_dict.get("image_setting_ui_play"))
-        retranslator.bind(self.start_button, "image_setting_ui_play", "")
+        self.start_button = QPushButton()
+        retranslator.bind(self.start_button, "image_setting_ui_play")
         self.start_button.clicked.connect(self.start_play_image)
 
         # Checkboxes
-        self.fullscreen_checkbox = QCheckBox(language_wrapper.language_word_dict.get("fullscreen_checkbox_label"))
-        retranslator.bind(self.fullscreen_checkbox, "fullscreen_checkbox_label", "")
+        self.fullscreen_checkbox = QCheckBox()
+        retranslator.bind(self.fullscreen_checkbox, "fullscreen_checkbox_label")
         self.fullscreen_checkbox.setChecked(True)
 
-        self.show_on_all_screen_checkbox = QCheckBox(language_wrapper.language_word_dict.get("Show on all screen"))
-        retranslator.bind(self.show_on_all_screen_checkbox, "Show on all screen", "")
+        self.show_on_all_screen_checkbox = QCheckBox()
+        retranslator.bind(self.show_on_all_screen_checkbox, "Show on all screen")
         self.show_on_all_screen_checkbox.clicked.connect(self.set_show_all_screen)
 
-        self.show_on_bottom_checkbox = QCheckBox(language_wrapper.language_word_dict.get("Show on bottom"))
-        retranslator.bind(self.show_on_bottom_checkbox, "Show on bottom", "")
+        self.show_on_bottom_checkbox = QCheckBox()
+        retranslator.bind(self.show_on_bottom_checkbox, "Show on bottom")
 
         # Target monitor selector
-        self.target_monitor_label = QLabel(
-            language_wrapper.language_word_dict.get("target_monitor_label", "Target monitor")
-        )
-        retranslator.bind(self.target_monitor_label, "target_monitor_label", "Target monitor")
+        self.target_monitor_label = QLabel()
+        retranslator.bind(self.target_monitor_label, "target_monitor_label",
+                          "Target monitor")
         self.target_monitor_combobox = build_target_monitor_combobox()
 
         # Recent files
-        self.recent_files_label = QLabel(language_wrapper.language_word_dict.get("recent_files_label", "Recent"))
-        retranslator.bind(self.recent_files_label, "recent_files_label", "Recent")
+        self.recent_files_label = QLabel()
+        retranslator.bind(self.recent_files_label, "recent_files_label",
+                          "Recent")
         self.recent_files_combobox = build_recent_combobox("image")
         self.recent_files_combobox.activated.connect(self._apply_recent_file)
 
         # Slideshow controls
-        self.slideshow_checkbox = QCheckBox(language_wrapper.language_word_dict.get("slideshow_label", "Slideshow"))
-        retranslator.bind(self.slideshow_checkbox, "slideshow_label", "Slideshow")
-        self.slideshow_folder_button = QPushButton(
-            language_wrapper.language_word_dict.get("slideshow_choose_folder", "Choose folder")
-        )
-        retranslator.bind(self.slideshow_folder_button, "slideshow_choose_folder", "Choose folder")
+        self.slideshow_checkbox = QCheckBox()
+        retranslator.bind(self.slideshow_checkbox, "slideshow_label",
+                          "Slideshow")
+        self.slideshow_folder_button = QPushButton()
+        retranslator.bind(self.slideshow_folder_button, "slideshow_choose_folder",
+                          "Choose folder")
         self.slideshow_folder_button.clicked.connect(self.choose_slideshow_folder)
-        self.slideshow_interval_label = QLabel(
-            language_wrapper.language_word_dict.get("slideshow_interval_label", "Interval (s)")
-        )
-        retranslator.bind(self.slideshow_interval_label, "slideshow_interval_label", "Interval (s)")
+        self.slideshow_interval_label = QLabel()
+        retranslator.bind(self.slideshow_interval_label, "slideshow_interval_label",
+                          "Interval (s)")
         self.slideshow_interval_combobox = QComboBox()
         self.slideshow_interval_combobox.addItems(["3", "5", "10", "15", "30", "60"])
         self.slideshow_interval_combobox.setCurrentText("5")
-        self.slideshow_shuffle_checkbox = QCheckBox(
-            language_wrapper.language_word_dict.get("slideshow_shuffle", "Shuffle")
-        )
-        retranslator.bind(self.slideshow_shuffle_checkbox, "slideshow_shuffle", "Shuffle")
-        self.slideshow_recursive_checkbox = QCheckBox(
-            language_wrapper.language_word_dict.get("slideshow_recursive", "Include subfolders")
-        )
-        retranslator.bind(self.slideshow_recursive_checkbox, "slideshow_recursive", "Include subfolders")
+        self.slideshow_shuffle_checkbox = QCheckBox()
+        retranslator.bind(self.slideshow_shuffle_checkbox, "slideshow_shuffle",
+                          "Shuffle")
+        self.slideshow_recursive_checkbox = QCheckBox()
+        retranslator.bind(self.slideshow_recursive_checkbox, "slideshow_recursive",
+                          "Include subfolders")
 
         # Accept dropped image files
         self._drop_filter = enable_file_drop(self, _SLIDESHOW_EXTENSIONS, self._on_file_dropped)

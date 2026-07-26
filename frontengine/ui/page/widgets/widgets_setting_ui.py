@@ -55,12 +55,11 @@ class WidgetsSettingUI(QWidget):
         self._build_spectrum_row()
         self._build_monitor_row()
         self._build_note_row()
-        self.hint_label = QLabel(
-            _t("widgets_hint",
-               "The spectrum captures the audio your speakers are playing so it can "
+        self.hint_label = QLabel()
+        retranslator.bind(self.hint_label, "widgets_hint",
+                          "The spectrum captures the audio your speakers are playing so it can "
                "compute frequencies. It is analysed in memory only - nothing is recorded "
-               "or sent - and capture stops when you stop the spectrum."))
-        retranslator.bind(self.hint_label, "widgets_hint", "The spectrum captures the audio your speakers are playing so it can " "compute frequencies. It is analysed in memory only - nothing is recorded " "or sent - and capture stops when you stop the spectrum.")
+               "or sent - and capture stops when you stop the spectrum.")
         self.hint_label.setWordWrap(True)
 
         self.grid_layout.addWidget(self.spectrum_label, 0, 0)
@@ -80,20 +79,23 @@ class WidgetsSettingUI(QWidget):
 
     # --- construction helpers -------------------------------------------
     def _build_spectrum_row(self) -> None:
-        self.spectrum_label = QLabel(_t("widgets_spectrum_label", "Audio spectrum"))
-        retranslator.bind(self.spectrum_label, "widgets_spectrum_label", "Audio spectrum")
+        self.spectrum_label = QLabel()
+        retranslator.bind(self.spectrum_label, "widgets_spectrum_label",
+                          "Audio spectrum")
         self.spectrum_style_combobox = QComboBox()
         self.spectrum_style_combobox.addItem(_t("widgets_spectrum_bars", "Bars"), STYLE_BARS)
         self.spectrum_style_combobox.addItem(_t("widgets_spectrum_ring", "Ring"), STYLE_RING)
         self.spectrum_style_combobox.currentIndexChanged.connect(self._apply_spectrum_settings)
-        self.spectrum_bands_label = QLabel(_t("widgets_spectrum_bands", "Bands"))
-        retranslator.bind(self.spectrum_bands_label, "widgets_spectrum_bands", "Bands")
+        self.spectrum_bands_label = QLabel()
+        retranslator.bind(self.spectrum_bands_label, "widgets_spectrum_bands",
+                          "Bands")
         self.spectrum_bands_spinbox = QSpinBox()
         self.spectrum_bands_spinbox.setRange(4, 64)
         self.spectrum_bands_spinbox.setValue(DEFAULT_BANDS)
         self.spectrum_bands_spinbox.valueChanged.connect(self._apply_spectrum_settings)
-        self.spectrum_button = QPushButton(_t("widgets_spectrum_start", "Start spectrum"))
-        retranslator.bind(self.spectrum_button, "widgets_spectrum_start", "Start spectrum")
+        self.spectrum_button = QPushButton()
+        retranslator.bind(self.spectrum_button, "widgets_spectrum_start",
+                          "Start spectrum")
         self.spectrum_button.clicked.connect(self.toggle_spectrum)
         if not available():
             self.spectrum_button.setEnabled(False)
@@ -101,31 +103,37 @@ class WidgetsSettingUI(QWidget):
                 _t("widgets_spectrum_unavailable", "Audio capture is Windows only."))
 
     def _build_monitor_row(self) -> None:
-        self.monitor_label = QLabel(_t("widgets_monitor_label", "System monitor"))
-        retranslator.bind(self.monitor_label, "widgets_monitor_label", "System monitor")
+        self.monitor_label = QLabel()
+        retranslator.bind(self.monitor_label, "widgets_monitor_label",
+                          "System monitor")
         self.monitor_history_spinbox = QSpinBox()
         self.monitor_history_spinbox.setRange(10, 300)
         self.monitor_history_spinbox.setValue(60)
         self.monitor_history_spinbox.valueChanged.connect(self._apply_monitor_settings)
-        self.monitor_button = QPushButton(_t("widgets_monitor_start", "Start monitor"))
-        retranslator.bind(self.monitor_button, "widgets_monitor_start", "Start monitor")
+        self.monitor_button = QPushButton()
+        retranslator.bind(self.monitor_button, "widgets_monitor_start",
+                          "Start monitor")
         self.monitor_button.clicked.connect(self.toggle_monitor)
-        self.now_playing_button = QPushButton(_t("widgets_now_playing_start", "Show now playing"))
-        retranslator.bind(self.now_playing_button, "widgets_now_playing_start", "Show now playing")
+        self.now_playing_button = QPushButton()
+        retranslator.bind(self.now_playing_button, "widgets_now_playing_start",
+                          "Show now playing")
         self.now_playing_button.clicked.connect(self.toggle_now_playing)
 
     def _build_note_row(self) -> None:
-        self.note_label = QLabel(_t("widgets_note_label", "Sticky note"))
-        retranslator.bind(self.note_label, "widgets_note_label", "Sticky note")
-        self.note_button = QPushButton(_t("widgets_note_add", "New note"))
-        retranslator.bind(self.note_button, "widgets_note_add", "New note")
+        self.note_label = QLabel()
+        retranslator.bind(self.note_label, "widgets_note_label",
+                          "Sticky note")
+        self.note_button = QPushButton()
+        retranslator.bind(self.note_button, "widgets_note_add",
+                          "New note")
         self.note_button.clicked.connect(self.add_note)
-        self.note_close_button = QPushButton(_t("widgets_note_close", "Close notes"))
-        retranslator.bind(self.note_close_button, "widgets_note_close", "Close notes")
+        self.note_close_button = QPushButton()
+        retranslator.bind(self.note_close_button, "widgets_note_close",
+                          "Close notes")
         self.note_close_button.clicked.connect(self.close_notes)
-        self.note_restore_checkbox = QCheckBox(
-            _t("widgets_note_restore", "Reopen my notes when FrontEngine starts"))
-        retranslator.bind(self.note_restore_checkbox, "widgets_note_restore", "Reopen my notes when FrontEngine starts")
+        self.note_restore_checkbox = QCheckBox()
+        retranslator.bind(self.note_restore_checkbox, "widgets_note_restore",
+                          "Reopen my notes when FrontEngine starts")
         self.note_restore_checkbox.setChecked(bool(user_setting_dict.get("sticky_notes_restore")))
         self.note_restore_checkbox.toggled.connect(self._store_note_restore)
 
