@@ -50,6 +50,23 @@ jobs:
       - name: Run unit tests
         run: python -m pytest tests/ -q
 
+      # 啟動測試要用「這份 checkout 打包出來的套件」，不是 PyPI 上的版本。
+      # 之前 dev_requirements 會裝下published 的 frontengine，而啟動腳本從自己的
+      # 目錄執行，import 就落到 site-packages——等於在測已發布的版本，PR 改了什麼
+      # 都測不到。少一個 __init__.py 會讓整個子套件不被打包，就是這樣漏過去的。
+      #
+      # The start-up checks must run against the package built from THIS
+      # checkout, not the one on PyPI. dev_requirements used to install the
+      # published frontengine, and the start scripts run from their own
+      # directory, so the import landed in site-packages: the checks validated
+      # the released version and never the pull request. A missing __init__.py
+      # drops a whole sub-package from the wheel, which is how one slipped past.
+      - name: Install the built package
+        run: |
+          python -m pip install --upgrade build
+          python -m build --wheel --outdir dist
+          python -m pip install --no-deps --force-reinstall (Get-ChildItem dist/*.whl).FullName
+
       - name: Start FrontEngine
         run: python ./tests/unit_test/start/start_front_engine.py
 
