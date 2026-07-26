@@ -118,6 +118,9 @@ class DistractionMaskWidget(BaseWidget):
             f"[DistractionMaskWidget] Init | region={region}, percent={percent}")
         super().__init__()
         self.opacity = 1.0
+        # 這一層是拿來遮住東西的，分享畫面時必須留在擷取結果裡
+        # This layer exists to cover something, so it stays in the capture.
+        self.keep_in_capture = True
         self.region = region
         self.percent = clamp_percent(percent)
         self.mask_color = QColor(color) if QColor(color).isValid() else QColor("#101010")

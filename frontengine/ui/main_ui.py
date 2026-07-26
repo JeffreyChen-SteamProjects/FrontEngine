@@ -49,7 +49,9 @@ from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.plugins.plugin_loader import load_plugins
 from frontengine.utils.preset_schedule.preset_schedule_service import PresetScheduleService
+from frontengine.ui.dialog.screen_privacy_dialog import current_settings as current_privacy_settings
 from frontengine.ui.dialog.smart_pause_dialog import current_rules
+from frontengine.utils.screen_privacy.share_watch import ShareWatchService
 from frontengine.utils.app_profile.app_profile_service import AppProfileService
 from frontengine.utils.clipboard.clipboard_history import DEFAULT_LIMIT, ClipboardHistory
 from frontengine.utils.clipboard.clipboard_watcher import ClipboardWatcher
@@ -208,6 +210,12 @@ class FrontEngineMainUI(QMainWindow):
             lambda name: apply_named_preset(self, name)
         )
         self.app_profile_service.start()
+
+        # 分享畫面時把覆蓋層藏出擷取結果（自己仍看得到）
+        # Hide the overlays from the capture while sharing; they stay on screen here.
+        self.share_watch_service = ShareWatchService(config_provider=current_privacy_settings)
+        self.share_watch_service.sharing_changed.connect(self._on_sharing_changed)
+        self.share_watch_service.start()
 
         # 使用時間統計：預設關閉，只寫本機檔案，使用者可隨時清除
         # Usage tracking: off by default, local file only, clearable at any time.
@@ -460,6 +468,22 @@ class FrontEngineMainUI(QMainWindow):
             self.control_center_ui.show_all()
             self._smart_pause_hid = False
 
+    def _on_sharing_changed(self, sharing: bool, match: str) -> None:
+        """
+        偵測到會議程式開著／關掉時，自動把覆蓋層藏出擷取結果或放回去。
+        遮蔽用的覆蓋層不受影響——它們本來就是要被看到的。
+        Hide the overlays from the capture when a meeting app appears, and put
+        them back when it goes. Masking overlays are left alone: being seen is
+        the whole point of them.
+        """
+        front_engine_logger.info(
+            f"[MainUI] screen sharing={sharing}" + (f" | {match}" if match else ""))
+        self.control_center_ui.set_hide_from_capture(sharing)
+        if sharing:
+            self._last_toast = show_toast(
+                language_wrapper.language_word_dict.get(
+                    "screen_privacy_toast", "Overlays hidden from screen capture"))
+
     def _show_reminder(self, label: str) -> None:
         """提醒到期：在畫面上方顯示一張會自己消失的提示卡。"""
         front_engine_logger.info(f"[MainUI] reminder | {label}")
@@ -526,6 +550,8 @@ class FrontEngineMainUI(QMainWindow):
             self.tools_setting_ui.stop_camera()
         if getattr(self, "stream_setting_ui", None) is not None:
             self.stream_setting_ui.soundboard.stop_all()
+        if getattr(self, "share_watch_service", None) is not None:
+            self.share_watch_service.stop()
         if getattr(self, "reminder_service", None) is not None:
             self.reminder_service.stop()
         if getattr(self, "app_profile_service", None) is not None:

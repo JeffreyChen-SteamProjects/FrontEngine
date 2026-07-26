@@ -541,4 +541,13 @@ traditional_chinese_word_dict = {
     "stream_obs_record": '切換錄影',
     "stream_obs_stream": '切換直播',
     "stream_hint": '準星只是疊在畫面上的一層，不會更動任何遊戲。OBS 控制走它自己的 WebSocket，密碼只留在本機設定檔裡。',
+    "control_center_hide_from_capture": '分享時隱藏',
+    "control_center_show_in_capture": '分享時顯示',
+    "settings_menu_screen_privacy": '螢幕分享隱私…',
+    "screen_privacy_title": '螢幕分享隱私',
+    "screen_privacy_enable": '這些程式開著時，把覆蓋層藏出擷取畫面',
+    "screen_privacy_apps_label": '會議與擷取程式：',
+    "screen_privacy_hint": '比對的是視窗標題，所以在瀏覽器分頁裡開的會議也抓得到。覆蓋層仍會顯示在你自己的螢幕上，只有擷取畫面那一份是空的。遮蔽層不會被藏起來——遮住東西正是它存在的理由。',
+    "screen_privacy_unsupported": '把覆蓋層藏出螢幕擷取僅支援 Windows。',
+    "screen_privacy_toast": '已把覆蓋層藏出螢幕擷取',
 }

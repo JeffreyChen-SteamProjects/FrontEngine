@@ -33,6 +33,12 @@ class BaseWidget(QWidget):
         # 畫質檔位：影響更新頻率上限與算圖縮放（見 utils/power_mode）
         # Quality tier: caps the refresh rate and scales rendering (see utils/power_mode).
         self.quality_tier: str = DEFAULT_TIER
+        # 分享畫面時要不要一起藏起來。遮蔽用的覆蓋層要留在畫面上——
+        # 那正是它存在的理由，藏了就等於沒遮。
+        # Whether this hides along with the others while sharing. A masking
+        # overlay must stay visible in the capture: hiding it would defeat
+        # the only thing it is for.
+        self.keep_in_capture: bool = False
         self._drag_origin = None
         self._geometry_restored = False
 

@@ -16,6 +16,7 @@ from frontengine.ui.page.web.web_setting_ui import WEBSettingUI
 from frontengine.user_setting.user_setting_file import clear_overlay_geometry
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
+from frontengine.utils.screen_privacy import capture_affinity
 from frontengine.utils.power_mode.power_mode import (
     TIER_BALANCED, TIER_HIGH, TIER_SAVER, normalize_tier,
 )
@@ -94,6 +95,10 @@ class ControlCenterUI(QWidget):
         self._extra_overlay_sources: list = []
         self.low_power_button = self._create_button(
             "control_center_low_power_on", self.toggle_low_power)
+        self._hidden_from_capture = False
+        self.capture_button = self._create_button(
+            "control_center_hide_from_capture", self.toggle_hide_from_capture)
+        self.capture_button.setEnabled(capture_affinity.available())
         self.clear_all_button = self._create_button("control_center_close_all", self.clear_all)
 
         # 畫質檔位：比省電模式更細，一次套用到所有覆蓋層
@@ -135,8 +140,9 @@ class ControlCenterUI(QWidget):
         self.grid_layout.addWidget(self.low_power_button, 13, 0)
         self.grid_layout.addWidget(self.quality_label, 14, 0)
         self.grid_layout.addWidget(self.quality_combobox, 15, 0)
-        self.grid_layout.addWidget(self.clear_all_button, 16, 0)
-        self.grid_layout.addWidget(self.log_panel_scroll_area, 0, 1, 17, 1)  # rowSpan covers every button
+        self.grid_layout.addWidget(self.capture_button, 16, 0)
+        self.grid_layout.addWidget(self.clear_all_button, 17, 0)
+        self.grid_layout.addWidget(self.log_panel_scroll_area, 0, 1, 18, 1)  # rowSpan covers every button
         self.setLayout(self.grid_layout)
 
         # Redirect
@@ -352,6 +358,43 @@ class ControlCenterUI(QWidget):
                 "Low power off" if self._low_power else "Low power on",
             )
         )
+
+    def set_hide_from_capture(self, hidden: bool) -> int:
+        """
+        分享畫面時把覆蓋層藏起來（自己看得到、對方看不到）。標了
+        keep_in_capture 的覆蓋層不會被藏——遮蔽層本來就是要被看到的。
+        Hide the overlays from screen capture: still visible here, blank for the
+        people you are sharing with. Overlays marked keep_in_capture are left
+        alone, since a mask is meant to be seen.
+        """
+        self._hidden_from_capture = bool(hidden)
+        applied = 0
+
+        def apply(widget) -> None:
+            nonlocal applied
+            if getattr(widget, "keep_in_capture", False):
+                capture_affinity.apply_to_widget(widget, False)
+                return
+            if capture_affinity.apply_to_widget(widget, self._hidden_from_capture):
+                applied += 1
+
+        self._for_each_overlay(apply)
+        front_engine_logger.info(
+            f"ControlCenterUI set_hide_from_capture | hidden={hidden}, applied={applied}")
+        self.capture_button.setText(
+            language_wrapper.language_word_dict.get(
+                "control_center_show_in_capture" if self._hidden_from_capture
+                else "control_center_hide_from_capture",
+                "Show in capture" if self._hidden_from_capture else "Hide from capture"))
+        return applied
+
+    def toggle_hide_from_capture(self) -> None:
+        """切換分享時是否隱藏覆蓋層。"""
+        self.set_hide_from_capture(not self._hidden_from_capture)
+
+    @property
+    def hidden_from_capture(self) -> bool:
+        return self._hidden_from_capture
 
     def toggle_low_power(self) -> None:
         """切換省電模式 / Toggle low-power mode."""
