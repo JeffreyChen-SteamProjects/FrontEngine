@@ -536,7 +536,7 @@ english_word_dict = {
     "stream_sound_remove": 'Remove',
     "stream_sound_play": 'Play',
     "stream_obs_label": 'OBS',
-    "stream_obs_password": 'WebSocket password',
+    "stream_obs_password": 'WebSocket password',  # NOSONAR - a field label, not a credential
     "stream_obs_scene": 'Scene name',
     "stream_obs_switch": 'Switch scene',
     "stream_obs_record": 'Toggle recording',

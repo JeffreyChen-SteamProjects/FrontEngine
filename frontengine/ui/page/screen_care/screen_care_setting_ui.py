@@ -320,7 +320,7 @@ class ScreenCareSettingUI(QWidget):
             language_wrapper.language_word_dict.get("color_vision_start", "Simulate"))
 
     def _apply_color_vision_settings(self) -> None:
-        for widget in list(self.color_vision_widget_list):
+        for widget in self.color_vision_widget_list[:]:
             try:
                 widget.set_simulation(self.color_vision_combobox.currentData(),
                                       self.color_vision_slider.value() / 100.0)

@@ -50,7 +50,7 @@ def hello_needs_auth(hello: Any) -> bool:
     return isinstance(data, dict) and isinstance(data.get("authentication"), dict)
 
 
-def identify_message(hello: Any, password: str = "") -> Optional[Dict[str, Any]]:
+def identify_message(hello: Any, password: Optional[str] = None) -> Optional[Dict[str, Any]]:
     """
     依 Hello 組出 Identify 訊息。需要認證卻沒給密碼時回傳 None——
     與其送出一個一定會被拒絕的訊息，不如讓呼叫端知道少了什麼。

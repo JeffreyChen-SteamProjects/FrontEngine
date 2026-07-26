@@ -52,8 +52,9 @@ def test_an_off_palette_colour_maps_to_its_nearest_neighbour() -> None:
 
 
 def test_a_frame_of_the_wrong_shape_is_rejected() -> None:
+    flat = numpy.zeros((4, 4), dtype=numpy.uint8)
     with pytest.raises(ValueError):
-        quantize(numpy.zeros((4, 4), dtype=numpy.uint8))
+        quantize(flat)
 
 
 # --- LZW ------------------------------------------------------------------

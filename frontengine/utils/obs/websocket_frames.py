@@ -36,8 +36,15 @@ def client_key() -> str:
 
 
 def accept_key(key: str) -> str:
-    """伺服器該回的 Sec-WebSocket-Accept（用來驗證對方真的懂 WebSocket）。"""
-    digest = hashlib.sha1((str(key) + _GUID).encode("ascii")).digest()  # nosec B324 - RFC 6455 handshake, not security
+    """
+    伺服器該回的 Sec-WebSocket-Accept。RFC 6455 規定就是 SHA-1——它在這裡
+    的作用是「證明對方看懂了握手」，不是保護任何機密，換成別的雜湊就不合規格。
+    The Sec-WebSocket-Accept the server owes us. RFC 6455 specifies SHA-1;
+    its job here is to prove the peer understood the handshake, not to protect
+    anything, and any other hash would simply be non-conformant.
+    """
+    digest = hashlib.sha1(  # nosec B324 # nosemgrep - RFC 6455 handshake, not a security hash
+        (str(key) + _GUID).encode("ascii")).digest()
     return base64.b64encode(digest).decode("ascii")
 
 

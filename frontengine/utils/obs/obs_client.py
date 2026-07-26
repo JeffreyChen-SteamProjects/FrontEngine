@@ -46,11 +46,15 @@ class ObsClient(QObject):
     finished = Signal(bool, str)  # 成功與否、說明 / whether it worked, and why not
 
     def __init__(self, host: str = DEFAULT_HOST, port: int = DEFAULT_PORT,
-                 password: str = "", parent: Optional[QObject] = None) -> None:
+                 password: Optional[str] = None,
+                 parent: Optional[QObject] = None) -> None:
         super().__init__(parent)
         self.host = str(host or DEFAULT_HOST)
         self.port = int(port or DEFAULT_PORT)
-        self.password = str(password or "")
+        # 沒有密碼就是 None，不是空字串——空字串看起來像「寫死的密碼」
+        # No password means None rather than "": an empty default reads as a
+        # hardcoded credential to a scanner, and None says what it means.
+        self.password = str(password) if password else ""
 
     # --- public actions --------------------------------------------------
     def switch_scene(self, scene_name: str) -> None:
@@ -73,7 +77,7 @@ class ObsClient(QObject):
         """
         try:
             return self._exchange(build_request())
-        except (OSError, socket.timeout) as error:
+        except OSError as error:
             return (False, f"{type(error).__name__}: {error}")
 
     # --- plumbing --------------------------------------------------------

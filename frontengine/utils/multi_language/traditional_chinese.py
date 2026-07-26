@@ -535,7 +535,7 @@ traditional_chinese_word_dict = {
     "stream_sound_remove": '移除',
     "stream_sound_play": '播放',
     "stream_obs_label": 'OBS',
-    "stream_obs_password": 'WebSocket 密碼',
+    "stream_obs_password": 'WebSocket 密碼',  # NOSONAR - a field label, not a credential
     "stream_obs_scene": '場景名稱',
     "stream_obs_switch": '切換場景',
     "stream_obs_record": '切換錄影',

@@ -181,7 +181,7 @@ class StreamSettingUI(QWidget):
         self.crosshair_button.setText(_t("stream_crosshair_stop", "Hide crosshair"))
 
     def stop_crosshair(self) -> None:
-        for widget in list(self.crosshair_widget_list):
+        for widget in self.crosshair_widget_list[:]:
             try:
                 widget.close()
             except RuntimeError:
@@ -190,7 +190,7 @@ class StreamSettingUI(QWidget):
         self.crosshair_button.setText(_t("stream_crosshair_start", "Show crosshair"))
 
     def _apply_crosshair(self) -> None:
-        for widget in list(self.crosshair_widget_list):
+        for widget in self.crosshair_widget_list[:]:
             try:
                 widget.set_crosshair(style=self.crosshair_style_combobox.currentData(),
                                      color=self.crosshair_color_edit.text(),
@@ -223,7 +223,7 @@ class StreamSettingUI(QWidget):
         self.teleprompter_button.setText(_t("stream_teleprompter_stop", "Stop prompter"))
 
     def stop_teleprompter(self) -> None:
-        for widget in list(self.teleprompter_widget_list):
+        for widget in self.teleprompter_widget_list[:]:
             try:
                 widget.close()
             except RuntimeError:
@@ -232,7 +232,7 @@ class StreamSettingUI(QWidget):
         self.teleprompter_button.setText(_t("stream_teleprompter_start", "Start prompter"))
 
     def _apply_teleprompter(self) -> None:
-        for widget in list(self.teleprompter_widget_list):
+        for widget in self.teleprompter_widget_list[:]:
             try:
                 widget.set_speed(self.teleprompter_speed_spinbox.value())
                 widget.set_font_size(self.teleprompter_font_spinbox.value())
