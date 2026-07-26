@@ -81,12 +81,6 @@ user_setting_dict: Dict[str, Any] = {
     # 是否同意把擷取畫面送到 Anthropic 讀取文字（預設不同意）
     # Consent to send captures to Anthropic for reading text (off by default).
     "screen_text_consent": False,
-    # 音效板：[{label, path, hotkey, volume}]
-    # Soundboard slots: [{label, path, hotkey, volume}]
-    "soundboard": [],
-    # OBS WebSocket 連線設定（密碼只留在本機設定檔）
-    # OBS WebSocket connection; the password stays in the local settings file.
-    "obs": {"host": "127.0.0.1", "port": 4455, "password": "", "scene": ""},
     # 覆蓋層畫質檔位：high / balanced / saver
     # Overlay quality tier: high / balanced / saver.
     "quality_tier": "high",
