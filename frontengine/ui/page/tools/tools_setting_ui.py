@@ -10,7 +10,7 @@ from typing import List, Optional
 
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import (
-    QCheckBox, QComboBox, QGridLayout, QLabel, QPushButton, QSpinBox, QWidget,
+    QCheckBox, QComboBox, QGridLayout, QLabel, QLineEdit, QPushButton, QSpinBox, QWidget,
 )
 
 from frontengine.show.camera.camera_widget import (
@@ -21,12 +21,15 @@ from frontengine.show.measure.measure_widget import (
     MODE_ANGLE, MODE_COLOR, MODE_RULER, MeasureWidget,
 )
 from frontengine.ui.dialog.window_pin_dialog import WindowPinDialog
+from frontengine.user_setting.user_setting_file import user_setting_dict, write_user_setting
 from frontengine.ui.page.utils import coerce_int
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.measure.measure import (
     FORMAT_CSS_VAR, FORMAT_HEX, FORMAT_HSL, FORMAT_RGB,
 )
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
+from frontengine.utils.window_pin import window_pin
+from frontengine.utils.window_pin.window_layout import capture_layout, restore_layout
 
 
 def _t(key: str, fallback: str) -> str:
@@ -53,6 +56,20 @@ class ToolsSettingUI(QWidget):
         self._build_camera_row()
         self.pin_button = QPushButton(_t("tools_pin_window", "Pin a window..."))
         self.pin_button.clicked.connect(self.open_pin_dialog)
+
+        # 視窗版面：記下每個視窗的位置，之後一鍵擺回去
+        # Window layouts: remember where the windows are and put them back later.
+        self.layout_label = QLabel(_t("tools_layout_label", "Window layout"))
+        self.layout_name_edit = QLineEdit()
+        self.layout_name_edit.setPlaceholderText(_t("tools_layout_name", "Layout name"))
+        self.layout_save_button = QPushButton(_t("tools_layout_save", "Save layout"))
+        self.layout_save_button.clicked.connect(self.save_layout)
+        self.layout_combobox = QComboBox()
+        self.layout_restore_button = QPushButton(_t("tools_layout_restore", "Restore"))
+        self.layout_restore_button.clicked.connect(self.restore_selected_layout)
+        for button in (self.layout_save_button, self.layout_restore_button):
+            button.setEnabled(window_pin.available())
+        self.reload_layouts()
         self.hint_label = QLabel(
             _t("tools_hint",
                "Click to measure; right-click clears. What you measure is copied to the "
@@ -75,7 +92,12 @@ class ToolsSettingUI(QWidget):
         self.grid_layout.addWidget(self.camera_border_label, 5, 0)
         self.grid_layout.addWidget(self.camera_border_spinbox, 5, 1)
         self.grid_layout.addWidget(self.pin_button, 6, 0)
-        self.grid_layout.addWidget(self.hint_label, 7, 0, 1, 3)
+        self.grid_layout.addWidget(self.layout_label, 7, 0)
+        self.grid_layout.addWidget(self.layout_name_edit, 7, 1)
+        self.grid_layout.addWidget(self.layout_save_button, 7, 2)
+        self.grid_layout.addWidget(self.layout_combobox, 8, 0, 1, 2)
+        self.grid_layout.addWidget(self.layout_restore_button, 8, 2)
+        self.grid_layout.addWidget(self.hint_label, 9, 0, 1, 3)
 
     # --- construction helpers -------------------------------------------
     def _build_measure_row(self) -> None:
@@ -252,6 +274,43 @@ class ToolsSettingUI(QWidget):
                 self.pin_dialog.release_all()
             except RuntimeError:
                 self.pin_dialog = None
+
+    # --- window layouts --------------------------------------------------
+    def saved_layouts(self) -> dict:
+        """設定裡目前存了哪些版面。"""
+        layouts = user_setting_dict.get("window_layouts")
+        return layouts if isinstance(layouts, dict) else {}
+
+    def reload_layouts(self) -> int:
+        """重畫版面下拉選單，回傳數量。"""
+        self.layout_combobox.clear()
+        for name in sorted(self.saved_layouts()):
+            self.layout_combobox.addItem(name, name)
+        return self.layout_combobox.count()
+
+    def save_layout(self) -> Optional[str]:
+        """把目前所有視窗的位置存成一個版面；沒填名稱就不存。"""
+        name = self.layout_name_edit.text().strip()
+        if not name:
+            return None
+        layouts = dict(self.saved_layouts())
+        layouts[name] = capture_layout()
+        user_setting_dict["window_layouts"] = layouts
+        write_user_setting()
+        front_engine_logger.info(
+            f"[ToolsSettingUI] saved layout {name!r} with {len(layouts[name])} window(s)")
+        self.reload_layouts()
+        index = self.layout_combobox.findData(name)
+        if index >= 0:
+            self.layout_combobox.setCurrentIndex(index)
+        return name
+
+    def restore_selected_layout(self) -> tuple:
+        """把選到的版面套回去，回傳 (搬動數, 找不到數)。"""
+        name = self.layout_combobox.currentData()
+        if not name:
+            return (0, 0)
+        return restore_layout(self.saved_layouts().get(name, []))
 
     # --- preset state ----------------------------------------------------
     def get_state(self) -> dict:

@@ -142,6 +142,31 @@ that caps every overlay's refresh rate and drops its render resolution.
 
 ---
 
+## Screen time, clipboard and layouts
+
+Three things that remember, all of them **off until you switch them on** and
+all of them **local — nothing here is ever sent anywhere**:
+
+- **Screen time** (Settings → Screen time) — which apps had focus and for how
+  long, with a daily breakdown and a seven-day summary. It pauses while you are
+  away from the keyboard, keeps 60 days at most, and **clearing deletes the
+  file itself**. While it is off, no file is created at all.
+- **Clipboard history** (Settings → Clipboard history) — search what you copied
+  and pin the phrases you reuse. Clipboards routinely hold passwords, so this
+  is kept **in memory only** unless you separately tick "keep between
+  sessions".
+- **Window layouts** (Tools tab) — save where every window sits and put them
+  back later. Windows are matched by title, and one that is not on screen is
+  skipped rather than guessed at. Windows only.
+
+The **Screen care** tab also gains **colour-vision simulation** — protanopia,
+deuteranopia, tritanopia and achromatopsia at an adjustable severity, using the
+Machado et al. (2009) model. Unlike the other overlays it is opaque, because
+showing what someone else sees means repainting the screen rather than tinting
+it.
+
+---
+
 ## Community content
 
 - **Steam Workshop** — subscribed items are picked up from Steam's own
