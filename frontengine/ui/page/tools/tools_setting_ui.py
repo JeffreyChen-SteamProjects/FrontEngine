@@ -43,6 +43,12 @@ from frontengine.utils.window_pin import window_pin
 from frontengine.utils.window_pin.window_layout import capture_layout, restore_layout
 
 
+# 三個地方共用的英文備援字串（翻譯缺漏時才會看到）
+# The English fallback shared by three call sites, seen only when a
+# translation is missing.
+_RECORD_AREA = "Record area"
+
+
 def _t(key: str, fallback: str) -> str:
     return language_wrapper.language_word_dict.get(key, fallback)
 
@@ -165,7 +171,7 @@ class ToolsSettingUI(QWidget):
         self.screen_text_button.clicked.connect(self.start_screen_text)
 
     def _build_record_row(self) -> None:
-        self.record_label = QLabel(_t("tools_record_label", "Record area"))
+        self.record_label = QLabel(_t("tools_record_label", _RECORD_AREA))
         self.record_fps_spinbox = QSpinBox()
         self.record_fps_spinbox.setRange(MIN_FPS, MAX_FPS)
         self.record_fps_spinbox.setValue(DEFAULT_FPS)
@@ -173,7 +179,7 @@ class ToolsSettingUI(QWidget):
         self.record_seconds_spinbox.setRange(1, 120)
         self.record_seconds_spinbox.setValue(DEFAULT_MAX_SECONDS)
         self.record_camera_checkbox = QCheckBox(_t("tools_record_camera", "Include camera"))
-        self.record_button = QPushButton(_t("tools_record_start", "Record area"))
+        self.record_button = QPushButton(_t("tools_record_start", _RECORD_AREA))
         self.record_button.clicked.connect(self.toggle_recording)
 
     def _build_camera_row(self) -> None:
@@ -221,7 +227,7 @@ class ToolsSettingUI(QWidget):
         self.measure_button.setText(_t("tools_measure_stop", "Stop measuring"))
 
     def stop_measure(self) -> None:
-        for widget in list(self.measure_widget_list):
+        for widget in self.measure_widget_list[:]:
             try:
                 widget.close()
             except RuntimeError:
@@ -230,7 +236,7 @@ class ToolsSettingUI(QWidget):
         self.measure_button.setText(_t("tools_measure_start", "Start measuring"))
 
     def _apply_measure_settings(self) -> None:
-        for widget in list(self.measure_widget_list):
+        for widget in self.measure_widget_list[:]:
             try:
                 widget.set_mode(self.measure_mode_combobox.currentData())
                 widget.set_color_format(self.color_format_combobox.currentData())
@@ -295,7 +301,7 @@ class ToolsSettingUI(QWidget):
         return True
 
     def stop_camera(self) -> None:
-        for widget in list(self.camera_widget_list):
+        for widget in self.camera_widget_list[:]:
             try:
                 widget.close()
             except RuntimeError:
@@ -304,7 +310,7 @@ class ToolsSettingUI(QWidget):
         self.camera_button.setText(_t("tools_camera_start", "Show camera"))
 
     def _apply_camera_settings(self) -> None:
-        for widget in list(self.camera_widget_list):
+        for widget in self.camera_widget_list[:]:
             try:
                 widget.set_shape(self.camera_shape_combobox.currentData())
                 widget.set_border(self.camera_border_spinbox.value())
@@ -402,7 +408,7 @@ class ToolsSettingUI(QWidget):
 
     def camera_inset(self) -> Optional[object]:
         """錄影時要疊上去的攝影機畫面（沒開攝影機就沒有）。"""
-        for widget in list(self.camera_widget_list):
+        for widget in self.camera_widget_list[:]:
             try:
                 if widget.frame is not None:
                     return widget.frame
@@ -413,7 +419,7 @@ class ToolsSettingUI(QWidget):
     def finish_recording(self) -> Optional[str]:
         """停止錄製並存成 GIF，回傳檔案路徑。"""
         self.recorder.stop()
-        self.record_button.setText(_t("tools_record_start", "Record area"))
+        self.record_button.setText(_t("tools_record_start", _RECORD_AREA))
         if not self.recorder.frames:
             return None
         target = QFileDialog.getSaveFileName(
