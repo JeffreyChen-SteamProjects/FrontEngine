@@ -53,6 +53,8 @@ from frontengine.ui.dialog.remote_control_dialog import (
     MIDI_KEY, current_bindings, remote_enabled,
 )
 from frontengine.ui.dialog.screen_privacy_dialog import current_settings as current_privacy_settings
+from frontengine.ui.dialog.signage_dialog import current_settings as current_signage_settings
+from frontengine.utils.signage.signage_service import SignageService
 from frontengine.utils.midi.midi_input import MidiInput, binding_key
 from frontengine.utils.remote.remote_server import RemoteServer
 from frontengine.ui.dialog.smart_pause_dialog import current_rules
@@ -234,6 +236,13 @@ class FrontEngineMainUI(QMainWindow):
             self._on_midi_message, Qt.ConnectionType.QueuedConnection)
         if user_setting_dict.get(MIDI_KEY):
             self.midi_input.start(user_setting_dict.get("midi_device") or 0)
+
+        # 看板模式：依序輪播預設集，主視窗可以收起來
+        # Signage mode: rotate presets, with the main window out of the way.
+        self.signage_service = SignageService(config_provider=current_signage_settings)
+        self.signage_service.preset_due.connect(lambda name: apply_named_preset(self, name))
+        if current_signage_settings().get("enabled"):
+            self.start_signage()
 
         # 分享畫面時把覆蓋層藏出擷取結果（自己仍看得到）
         # Hide the overlays from the capture while sharing; they stay on screen here.
@@ -508,6 +517,18 @@ class FrontEngineMainUI(QMainWindow):
         if action:
             self._handle_hotkey(action)
 
+    def start_signage(self) -> Optional[str]:
+        """開始輪播；設定要求的話也把主視窗收起來。"""
+        first = self.signage_service.start()
+        if first is not None and current_signage_settings().get("hide_window", True):
+            self.hide()
+        return first
+
+    def stop_signage(self) -> None:
+        """停止輪播並把主視窗放回來。"""
+        self.signage_service.stop()
+        self.show()
+
     def _on_sharing_changed(self, sharing: bool, match: str) -> None:
         """
         偵測到會議程式開著／關掉時，自動把覆蓋層藏出擷取結果或放回去。
@@ -573,6 +594,7 @@ class FrontEngineMainUI(QMainWindow):
     # The background services to stop on close, outermost first.
     _CLOSING_SERVICES = (
         "preset_schedule_service", "theme_schedule_service", "usage_service",
+        "signage_service",
         "remote_server", "midi_input", "share_watch_service", "reminder_service",
         "app_profile_service", "smart_pause_service", "hotkey_service",
     )

@@ -12,6 +12,7 @@ from frontengine.ui.dialog.hotkey_settings_dialog import HotkeySettingsDialog
 from frontengine.ui.dialog.reminder_dialog import ReminderDialog
 from frontengine.ui.dialog.remote_control_dialog import RemoteControlDialog
 from frontengine.ui.dialog.screen_privacy_dialog import ScreenPrivacyDialog
+from frontengine.ui.dialog.signage_dialog import SignageDialog
 from frontengine.ui.dialog.smart_pause_dialog import SmartPauseDialog
 from frontengine.ui.dialog.usage_report_dialog import UsageReportDialog
 from frontengine.user_setting.user_setting_file import (
@@ -89,6 +90,11 @@ def build_settings_menu(ui: "FrontEngineMainUI") -> None:
     menu.addAction(reminder_action)
     ui.reminder_action = reminder_action
 
+    signage_action = QAction(_t("settings_menu_signage", "Signage mode..."), menu)
+    signage_action.triggered.connect(lambda: _open_signage_dialog(ui))
+    menu.addAction(signage_action)
+    ui.signage_action = signage_action
+
     remote_action = QAction(_t("settings_menu_remote", "Remote control..."), menu)
     remote_action.triggered.connect(lambda: _open_remote_dialog(ui))
     menu.addAction(remote_action)
@@ -125,6 +131,18 @@ def build_settings_menu(ui: "FrontEngineMainUI") -> None:
     import_action = QAction(_t("settings_menu_import", "Import settings..."), menu)
     import_action.triggered.connect(lambda: _import_settings(ui))
     menu.addAction(import_action)
+
+
+def _open_signage_dialog(ui: "FrontEngineMainUI") -> None:
+    """開看板設定；按下確定後立刻套用新的輪播狀態。"""
+    front_engine_logger.info("[SettingsMenu] open SignageDialog")
+    dialog = SignageDialog(ui)
+    if dialog.exec() != QDialog.DialogCode.Accepted:
+        return
+    if dialog.settings().get("enabled"):
+        ui.start_signage()
+    else:
+        ui.stop_signage()
 
 
 def _open_remote_dialog(ui: "FrontEngineMainUI") -> None:

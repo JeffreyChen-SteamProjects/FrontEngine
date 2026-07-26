@@ -11,9 +11,11 @@ from typing import List
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import (
+    QFileDialog,
     QCheckBox, QComboBox, QGridLayout, QLabel, QPushButton, QSlider, QWidget,
 )
 
+from frontengine.show.canvas.whiteboard_widget import WhiteboardWidget
 from frontengine.show.presentation.annotation_overlay import (
     PEN_COLORS, TOOL_ERASER, TOOL_HIGHLIGHTER, TOOL_PEN, AnnotationOverlay,
 )
@@ -36,6 +38,7 @@ class PresentationSettingUI(QWidget):
         self.grid_layout.setContentsMargins(0, 0, 0, 0)
 
         self.annotation_widget_list: List[AnnotationOverlay] = []
+        self.whiteboard_widget_list: List[WhiteboardWidget] = []
         self.cursor_widget_list: List[CursorEffectWidget] = []
         self.keystroke_widget_list: List[KeystrokeDisplayWidget] = []
         self.magnifier_widget_list: List[MagnifierWidget] = []
@@ -109,6 +112,12 @@ class PresentationSettingUI(QWidget):
         self.magnifier_button.clicked.connect(self.toggle_magnifier)
 
         # Shared
+        self.whiteboard_button = QPushButton(
+            language_wrapper.language_word_dict.get("whiteboard_start", "Whiteboard"))
+        self.whiteboard_button.clicked.connect(self.toggle_whiteboard)
+        self.whiteboard_save_button = QPushButton(
+            language_wrapper.language_word_dict.get("whiteboard_save", "Save whiteboard"))
+        self.whiteboard_save_button.clicked.connect(self.save_whiteboard)
         self.target_monitor_label = QLabel(
             language_wrapper.language_word_dict.get("target_monitor_label", "Target monitor"))
         self.target_monitor_combobox = build_target_monitor_combobox()
@@ -136,9 +145,11 @@ class PresentationSettingUI(QWidget):
         self.grid_layout.addWidget(self.magnifier_label, 6, 0)
         self.grid_layout.addWidget(self.magnifier_zoom_combobox, 6, 1)
         self.grid_layout.addWidget(self.magnifier_button, 6, 2)
-        self.grid_layout.addWidget(self.target_monitor_label, 7, 0)
-        self.grid_layout.addWidget(self.target_monitor_combobox, 7, 1)
-        self.grid_layout.addWidget(self.hint_label, 8, 0, 1, 3)
+        self.grid_layout.addWidget(self.whiteboard_button, 7, 0)
+        self.grid_layout.addWidget(self.whiteboard_save_button, 7, 1)
+        self.grid_layout.addWidget(self.target_monitor_label, 8, 0)
+        self.grid_layout.addWidget(self.target_monitor_combobox, 8, 1)
+        self.grid_layout.addWidget(self.hint_label, 9, 0, 1, 3)
 
     # --- shared ----------------------------------------------------------
     def target_screen(self):
@@ -331,6 +342,41 @@ class PresentationSettingUI(QWidget):
                 self.magnifier_widget_list.remove(widget)
 
     # --- preset state ----------------------------------------------------
+    # --- whiteboard ------------------------------------------------------
+    def toggle_whiteboard(self) -> None:
+        if self.whiteboard_widget_list:
+            self.stop_whiteboard()
+        else:
+            self.start_whiteboard()
+
+    def start_whiteboard(self) -> None:
+        """開一塊無限畫布（可平移縮放，畫過的東西留在畫布座標上）。"""
+        front_engine_logger.info("[PresentationSettingUI] start_whiteboard")
+        board = WhiteboardWidget(self.annotate_color_combobox.currentData(),
+                                 self.annotate_width_slider.value())
+        self._present(board)
+        self.whiteboard_widget_list.append(board)
+        self.whiteboard_button.setText(
+            language_wrapper.language_word_dict.get("whiteboard_stop", "Close whiteboard"))
+
+    def stop_whiteboard(self) -> None:
+        self._close_all(self.whiteboard_widget_list)
+        self.whiteboard_button.setText(
+            language_wrapper.language_word_dict.get("whiteboard_start", "Whiteboard"))
+
+    def save_whiteboard(self):
+        """把白板存成圖片；沒畫東西就不存。"""
+        for board in self.whiteboard_widget_list[:]:
+            try:
+                target = QFileDialog.getSaveFileName(
+                    self, language_wrapper.language_word_dict.get(
+                        "whiteboard_save", "Save whiteboard"), "whiteboard.png", "PNG (*.png)")[0]
+                if target:
+                    return board.save_image(target)
+            except RuntimeError:
+                self.whiteboard_widget_list.remove(board)
+        return None
+
     def get_state(self) -> dict:
         return {
             "annotate_tool": self.annotate_tool_combobox.currentData(),

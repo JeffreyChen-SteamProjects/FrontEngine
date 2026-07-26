@@ -21,6 +21,7 @@ from frontengine.ui.page.utils import (
     resolve_preferred_monitor,
 )
 from frontengine.user_setting.user_setting_file import add_recent_file
+from frontengine.utils.audio_meter.microphone_meter import microphone_level
 from frontengine.utils.audio_meter.screen_audio import audio_level_provider_for_screen
 from frontengine.utils.pet_chat.pet_chat_service import PetChatService
 from frontengine.utils.focus_timer.focus_timer import (
@@ -142,6 +143,12 @@ class PetSettingUI(QWidget):
         for label, value in (("0%", 0), ("25%", 25), ("50%", 50), ("75%", 75), ("100%", 100)):
             self.volume_combobox.addItem(label, value)
         self.volume_combobox.setCurrentText("100%")
+        self.audio_source_combobox = QComboBox()
+        self.audio_source_combobox.addItem(
+            language_wrapper.language_word_dict.get("pet_audio_speakers", "Speakers"), "speakers")
+        self.audio_source_combobox.addItem(
+            language_wrapper.language_word_dict.get("pet_audio_microphone", "Microphone"),
+            "microphone")
         self.audio_react_checkbox = QCheckBox(
             language_wrapper.language_word_dict.get("pet_audio_label", "React to audio"))
         self.drop_hint_label = QLabel(
@@ -185,6 +192,7 @@ class PetSettingUI(QWidget):
         self.grid_layout.addWidget(self.volume_label, 6, 2)
         self.grid_layout.addWidget(self.volume_combobox, 7, 2)
         self.grid_layout.addWidget(self.audio_react_checkbox, 7, 0)
+        self.grid_layout.addWidget(self.audio_source_combobox, 7, 1)
         self.grid_layout.addWidget(self.tag_checkbox, 7, 1)
         self.grid_layout.addWidget(self.speech_checkbox, 7, 2)
         self.grid_layout.addWidget(self.focus_label, 8, 0)
@@ -218,10 +226,7 @@ class PetSettingUI(QWidget):
             pet.set_chat_service(self.chat_service())
         geometry = self._target_geometry()
         if self.audio_react_checkbox.isChecked():
-            # 跟隨寵物所在螢幕的音源（比對不到就用系統預設輸出裝置）
-            # Follow the audio of the screen the pet lives on; default endpoint otherwise.
-            pet.set_audio_level_provider(
-                audio_level_provider_for_screen(geometry[1] if geometry is not None else None))
+            pet.set_audio_level_provider(self._audio_provider(geometry))
         pet.set_pet_window_flag()
         self.pet_list.append(pet)
         pet.show()
@@ -420,6 +425,20 @@ class PetSettingUI(QWidget):
         add_recent_file("pet", path)
         reload_recent_combobox(self.recent_files_combobox, "pet")
 
+    def _audio_provider(self, geometry):
+        """
+        寵物要跟著什麼聲音動：喇叭（跟隨牠所在螢幕的輸出裝置）或麥克風
+        （你說話時牠才動）。兩者都只讀電表數值，不擷取音訊內容。
+        What the pet reacts to: the speakers on its own screen, or the
+        microphone so it only moves while you talk. Both read a meter value and
+        capture no audio content.
+        """
+        if self.audio_source_combobox.currentData() == "microphone":
+            return microphone_level
+        # 跟隨寵物所在螢幕的音源（比對不到就用系統預設輸出裝置）
+        # Follow the audio of the screen the pet lives on; default endpoint otherwise.
+        return audio_level_provider_for_screen(geometry[1] if geometry is not None else None)
+
     def get_state(self) -> dict:
         return {
             "pet_image_path": self.pet_image_path,
@@ -433,6 +452,7 @@ class PetSettingUI(QWidget):
             "target_monitor": self.target_monitor_combobox.currentText(),
             "volume": self.volume_combobox.currentText(),
             "audio_react": self.audio_react_checkbox.isChecked(),
+            "audio_source": self.audio_source_combobox.currentData(),
             "tag": self.tag_checkbox.isChecked(),
             "speech": self.speech_checkbox.isChecked(),
             "chat": self.chat_checkbox.isChecked(),
@@ -444,6 +464,7 @@ class PetSettingUI(QWidget):
         """把預設集的內容還原到這一頁的控制項上。"""
         self._restore_media(state)
         apply_combobox_data_state(self.behaviour_combobox, self._behaviour_from(state))
+        apply_combobox_data_state(self.audio_source_combobox, state.get("audio_source"))
         apply_combobox_text_state(state, (
             (self.size_combobox, "size"),
             (self.speed_combobox, "speed"),
