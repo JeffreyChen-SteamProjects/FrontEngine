@@ -2,7 +2,7 @@ import os
 import sys
 from os import getcwd
 from pathlib import Path
-from typing import Dict, Optional, Type
+from typing import Any, Dict, Optional, Type
 
 from PySide6.QtCore import QByteArray, QTimer, QCoreApplication
 from PySide6.QtGui import QIcon, Qt
@@ -72,6 +72,20 @@ from frontengine.utils.theme_schedule.theme_schedule_service import ThemeSchedul
 # 可擴充的外部 Tab 註冊表
 # Registry for external tabs
 FrontEngine_EXTEND_TAB: Dict[str, Type[QWidget]] = {}
+
+
+def tray_can_restore_window(window: Any) -> bool:
+    """
+    系統匣能不能把主視窗叫回來。任何「把主視窗藏起來」的功能都得先問這件事，
+    不然藏掉的就是唯一能把該功能關掉的畫面。
+    Whether the tray can bring the main window back. Anything that hides the
+    window has to ask first: otherwise what it hides is the only screen that
+    can turn that same thing off.
+    """
+    tray = getattr(window, "system_tray", None)
+    return bool(ExtendSystemTray.isSystemTrayAvailable()
+                and getattr(window, "show_system_tray_ray", False)
+                and tray is not None and tray.isVisible())
 
 
 class FrontEngineMainUI(QMainWindow):
@@ -321,9 +335,10 @@ class FrontEngineMainUI(QMainWindow):
         """
         sources = (
             (self.screen_care_setting_ui, ("filter_widget_list", "ruler_widget_list",
-                                           "break_overlay_list")),
+                                           "break_overlay_list", "color_vision_widget_list")),
             (self.presentation_setting_ui, ("annotation_widget_list", "cursor_widget_list",
-                                            "keystroke_widget_list", "magnifier_widget_list")),
+                                            "keystroke_widget_list", "magnifier_widget_list",
+                                            "whiteboard_widget_list")),
             (self.focus_setting_ui, ("dim_widget_list", "mask_widget_list")),
         )
         for page, attributes in sources:
@@ -334,6 +349,12 @@ class FrontEngineMainUI(QMainWindow):
         # The wallpaper page keys its widgets by monitor, so hand over the values.
         self.control_center_ui.register_overlay_source(
             lambda: list(self.wallpaper_setting_ui.wallpaper_widgets.values()))
+        self.control_center_ui.register_overlay_source(
+            lambda: getattr(self.web_setting_ui, "dashboard_widgets", []))
+        # 批次關閉之後，沒有覆蓋層在聽就把全域輸入監聽收掉
+        # After a batch close nothing is listening, so drop the global input hook.
+        self.control_center_ui.register_cleanup(
+            self.presentation_setting_ui.release_input_watch)
         for attribute in ("spectrum_widget_list", "monitor_widget_list",
                           "now_playing_widget_list", "note_widget_list"):
             self.control_center_ui.register_overlay_source(
@@ -518,11 +539,27 @@ class FrontEngineMainUI(QMainWindow):
             self._handle_hotkey(action)
 
     def start_signage(self) -> Optional[str]:
-        """開始輪播；設定要求的話也把主視窗收起來。"""
+        """開始輪播；設定要求、而且托盤能把視窗叫回來時才收起主視窗。"""
         first = self.signage_service.start()
         if first is not None and current_signage_settings().get("hide_window", True):
-            self.hide()
+            self._hide_for_signage()
         return first
+
+    def _hide_for_signage(self) -> None:
+        """
+        收起主視窗——但只在系統匣真的能把它叫回來的時候。沒有系統匣就等於
+        把唯一能關掉輪播的畫面藏起來，重開也只會再被藏一次，使用者就只能去
+        手動改設定檔了。
+        Put the main window away - but only when the tray can actually bring it
+        back. Without a tray this would hide the only screen that can turn the
+        rotation off, and restarting just hides it again, leaving the settings
+        file as the only way out.
+        """
+        if tray_can_restore_window(self):
+            self.hide()
+            return
+        front_engine_logger.info(
+            "[FrontEngineMainUI] signage kept the window visible: no tray to restore it from")
 
     def stop_signage(self) -> None:
         """停止輪播並把主視窗放回來。"""

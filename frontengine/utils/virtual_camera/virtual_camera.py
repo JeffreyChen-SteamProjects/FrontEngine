@@ -15,7 +15,7 @@ False and the feature stays off; nothing is ever sent quietly.
 """
 from __future__ import annotations
 
-from typing import Optional, Tuple
+from typing import Any, Optional, Tuple
 
 import numpy
 
@@ -47,7 +47,7 @@ def available() -> bool:
     return _module() is not None
 
 
-def clamp_fps(value, fallback: int = DEFAULT_FPS) -> int:
+def clamp_fps(value: Any, fallback: int = DEFAULT_FPS) -> int:
     """每秒張數夾在驅動接受的範圍。"""
     try:
         return max(MIN_FPS, min(MAX_FPS, int(value)))
@@ -55,9 +55,9 @@ def clamp_fps(value, fallback: int = DEFAULT_FPS) -> int:
         return fallback
 
 
-def even_size(width, height) -> Tuple[int, int]:
+def even_size(width: Any, height: Any) -> Tuple[int, int]:
     """把尺寸調成偶數且不小於 2x2。"""
-    def fix(value, fallback):
+    def fix(value: Any, fallback: int) -> int:
         try:
             number = max(_SIZE_STEP, int(value))
         except (TypeError, ValueError):

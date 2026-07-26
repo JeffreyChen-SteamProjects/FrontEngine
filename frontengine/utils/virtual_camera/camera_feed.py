@@ -46,7 +46,7 @@ class VirtualCameraFeed(QObject):
             return None
         return screen.grabWindow(0, rect.x(), rect.y(), rect.width(), rect.height())
 
-    def set_grabber(self, grabber) -> None:
+    def set_grabber(self, grabber: Optional[Callable[[QRect], Optional[QPixmap]]]) -> None:
         self._grabber = grabber or self._default_grabber
 
     def start(self, region: QRect, fps: int) -> bool:

@@ -22,9 +22,12 @@ determined attacker, and it never hides the window from the person at the desk.
 from __future__ import annotations
 
 import sys
-from typing import Optional
+from typing import TYPE_CHECKING, Iterable, Optional
 
 from frontengine.utils.logging.loggin_instance import front_engine_logger
+
+if TYPE_CHECKING:  # 只為了型別標註，執行時不需要把 Qt 拉進這支純 ctypes 工具
+    from PySide6.QtWidgets import QWidget
 
 # WDA_NONE：正常擷取；WDA_EXCLUDEFROMCAPTURE：擷取時整片留白
 # WDA_NONE captures normally; WDA_EXCLUDEFROMCAPTURE comes out blank.
@@ -92,7 +95,7 @@ def is_excluded_from_capture(handle: int) -> Optional[bool]:
         return None
 
 
-def apply_to_widget(widget, excluded: bool) -> bool:
+def apply_to_widget(widget: Optional[QWidget], excluded: bool) -> bool:
     """
     對一個 Qt widget 套用擷取可見性。視窗還沒建立原生 handle 時回傳 False，
     呼叫端可以等 show() 之後再試一次。
@@ -108,7 +111,7 @@ def apply_to_widget(widget, excluded: bool) -> bool:
     return set_excluded_from_capture(handle, excluded)
 
 
-def apply_to_widgets(widgets, excluded: bool) -> int:
+def apply_to_widgets(widgets: Optional[Iterable[QWidget]], excluded: bool) -> int:
     """對一批 widget 套用，回傳成功的數量。"""
     applied = 0
     for widget in tuple(widgets or ()):

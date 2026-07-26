@@ -24,7 +24,7 @@ import secrets
 import socket
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 from urllib.parse import parse_qs, urlparse
 
 from PySide6.QtCore import QObject, Signal
@@ -138,7 +138,6 @@ class RemoteServer(QObject):
         self._on_action = on_action
         self._server: Optional[ThreadingHTTPServer] = None
         self._thread: Optional[threading.Thread] = None
-        self.received: List[str] = []
 
     @property
     def running(self) -> bool:
@@ -192,7 +191,6 @@ class RemoteServer(QObject):
             return 403
         if not is_allowed(action):
             return 400
-        self.received.append(str(action))
         self.action_requested.emit(str(action))
         if self._on_action is not None:
             self._on_action(str(action))

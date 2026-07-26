@@ -13,10 +13,10 @@ stacks windows and not something to work around.
 """
 from __future__ import annotations
 
-from typing import Tuple
+from typing import Any, Optional, Tuple
 
 from PySide6.QtCore import QPointF, Qt
-from PySide6.QtGui import QColor, QPainter, QPen
+from PySide6.QtGui import QColor, QPainter, QPen, QScreen
 
 from frontengine.show.base_widget import BaseWidget
 from frontengine.utils.logging.loggin_instance import front_engine_logger
@@ -35,13 +35,13 @@ MIN_SIZE = 4
 MAX_SIZE = 200
 
 
-def normalize_style(style) -> str:
+def normalize_style(style: Any) -> str:
     """把準星樣式正規化；不認得的一律當十字。"""
     name = str(style or "").strip().lower()
     return name if name in STYLES else STYLE_CROSS
 
 
-def clamp_size(value, fallback: int = DEFAULT_SIZE) -> int:
+def clamp_size(value: Any, fallback: int = DEFAULT_SIZE) -> int:
     """準星尺寸夾在看得見又不誇張的範圍。"""
     try:
         return max(MIN_SIZE, min(MAX_SIZE, int(value)))
@@ -49,7 +49,7 @@ def clamp_size(value, fallback: int = DEFAULT_SIZE) -> int:
         return fallback
 
 
-def clamp_thickness(value, fallback: int = DEFAULT_THICKNESS) -> int:
+def clamp_thickness(value: Any, fallback: int = DEFAULT_THICKNESS) -> int:
     """線寬夾在 1~12。"""
     try:
         return max(1, min(12, int(value)))
@@ -57,7 +57,7 @@ def clamp_thickness(value, fallback: int = DEFAULT_THICKNESS) -> int:
         return fallback
 
 
-def clamp_gap(value, size: int = DEFAULT_SIZE, fallback: int = DEFAULT_GAP) -> int:
+def clamp_gap(value: Any, size: int = DEFAULT_SIZE, fallback: int = DEFAULT_GAP) -> int:
     """
     中央空隙不能大到把準星吃光，所以上限跟著尺寸走。
     The centre gap cannot swallow the crosshair, so its ceiling follows the size.
@@ -100,7 +100,8 @@ class CrosshairWidget(BaseWidget):
         self.opacity = 1.0
         self.resize(self.size * 2 + 8, self.size * 2 + 8)
 
-    def set_crosshair(self, style=None, color=None, size=None,
+    def set_crosshair(self, style: Optional[str] = None, color: Optional[str] = None,
+                      size: Optional[int] = None,
                       thickness=None, gap=None) -> None:
         """一次改好幾項設定，改完立刻重畫。"""
         if style is not None:
@@ -119,7 +120,7 @@ class CrosshairWidget(BaseWidget):
         self.centre_on_screen()
         self.update()
 
-    def centre_on_screen(self, screen=None) -> None:
+    def centre_on_screen(self, screen: Optional[QScreen] = None) -> None:
         """擺到螢幕正中央（準星要對準的是畫面中心）。"""
         from PySide6.QtGui import QGuiApplication
 

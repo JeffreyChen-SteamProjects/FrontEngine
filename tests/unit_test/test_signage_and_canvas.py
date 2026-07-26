@@ -5,8 +5,11 @@ meter.
 """
 from datetime import datetime, timedelta
 
+import pytest
+
 from frontengine.show.canvas.whiteboard_widget import (
-    DEFAULT_COLOR, MAX_ZOOM, MIN_ZOOM, clamp_zoom, content_bounds, to_canvas, to_screen,
+    DEFAULT_COLOR, MAX_ZOOM, MIN_ZOOM, WhiteboardWidget, clamp_zoom, content_bounds, to_canvas,
+    to_screen,
 )
 from frontengine.utils.audio_meter.microphone_meter import (
     MicrophoneMeter, list_input_devices, microphone_level,
@@ -118,6 +121,41 @@ def test_panning_moves_the_view_not_the_drawing() -> None:
     assert after == (before[0] + 40, before[1] + 25)
 
 
+def test_zooming_keeps_the_point_under_the_cursor_in_place() -> None:
+    """
+    以游標為中心縮放的重點：游標底下的那一點縮放前後要停在原地，
+    不然每滾一格畫面就整個跑掉。
+    The point of zooming around the cursor: whatever sits under it must stay
+    put, or the view lurches away on every notch of the wheel.
+    """
+    from PySide6.QtCore import QPoint
+
+    board = WhiteboardWidget()
+    cursor = QPoint(300, 220)
+    under_cursor = to_canvas((cursor.x(), cursor.y()), board.offset, board.zoom)
+    for factor in (1.15, 1.15, 0.5, 2.0):
+        board.zoom_at(cursor, factor)
+        moved = to_screen(under_cursor, board.offset, board.zoom)
+        assert moved == pytest.approx((cursor.x(), cursor.y()), abs=1e-6), f"drifted at {factor}"
+    board.close()
+
+
+def test_a_stray_click_does_not_become_a_stroke() -> None:
+    """按一下就放開只有一個點，那是誤點不是筆畫，不留下來。"""
+    from PySide6.QtCore import QPoint
+
+    board = WhiteboardWidget()
+    board.begin_stroke(QPoint(10, 10))
+    assert board.end_stroke() is False
+    assert board.strokes == []
+
+    board.begin_stroke(QPoint(10, 10))
+    board.extend_stroke(QPoint(24, 31))
+    assert board.end_stroke() is True
+    assert len(board.strokes) == 1
+    board.close()
+
+
 def test_bounds_cover_every_stroke() -> None:
     strokes = [{"points": [(0, 0), (10, 40)]}, {"points": [(-5, 20), (30, 25)]}]
     assert content_bounds(strokes) == (-5, 0, 30, 40)
@@ -155,3 +193,40 @@ def test_closing_twice_is_safe() -> None:
     meter.close()
     meter.close()
     assert meter.level() is None
+
+
+# --- signage must not lock the user out -----------------------------------
+def test_the_window_is_only_put_away_when_the_tray_can_bring_it_back(monkeypatch) -> None:
+    """
+    看板模式會把主視窗收起來，但沒有系統匣就等於藏掉唯一能關掉輪播的畫面，
+    重開也只會再被藏一次。所以一定要先確認叫得回來。
+    Signage puts the main window away, but without a tray that hides the only
+    screen that can turn the rotation off - and restarting just hides it again.
+    So it has to be sure the window can come back first.
+    """
+    from frontengine.ui import main_ui
+
+    class _Tray:
+        def __init__(self, visible: bool) -> None:
+            self._visible = visible
+
+        def isVisible(self) -> bool:  # noqa: N802 - Qt's own spelling
+            return self._visible
+
+    class _Window:
+        def __init__(self, tray, enabled: bool = True) -> None:
+            self.system_tray = tray
+            self.show_system_tray_ray = enabled
+
+    monkeypatch.setattr(main_ui.ExtendSystemTray, "isSystemTrayAvailable",
+                        staticmethod(lambda: True))
+    assert main_ui.tray_can_restore_window(_Window(_Tray(True))) is True
+    assert main_ui.tray_can_restore_window(_Window(_Tray(False))) is False, "tray icon hidden"
+    assert main_ui.tray_can_restore_window(_Window(None)) is False, "no tray object"
+    assert main_ui.tray_can_restore_window(_Window(_Tray(True), enabled=False)) is False, \
+        "the user turned the tray off"
+
+    monkeypatch.setattr(main_ui.ExtendSystemTray, "isSystemTrayAvailable",
+                        staticmethod(lambda: False))
+    assert main_ui.tray_can_restore_window(_Window(_Tray(True))) is False, \
+        "the desktop has no tray at all"
