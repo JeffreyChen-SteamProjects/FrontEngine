@@ -118,6 +118,61 @@ def _endpoint(tools, enumerator, device_id: Optional[str]):
     return device
 
 
+def open_render_endpoint(device_id: Optional[str] = None):
+    """
+    開啟一個輸出端點，回傳 (tools, enumerator, device)；呼叫端要負責用
+    tools.release() 釋放後兩者。非 Windows 或失敗時擲出 OSError。
+    Open an output endpoint and hand back (tools, enumerator, device). The
+    caller releases the last two via tools.release(). Raises OSError when it
+    cannot be done - including on every non-Windows platform.
+    """
+    if sys.platform != "win32":
+        raise OSError("WASAPI endpoints are Windows only")
+    tools = _com_tools()
+    enumerator = _create_enumerator(tools)
+    try:
+        device = _endpoint(tools, enumerator, device_id)
+    except Exception:
+        tools.release(enumerator)
+        raise
+    return (tools, enumerator, device)
+
+
+def activate_interface(tools, device, iid_text: str):
+    """在端點上啟用一個介面（IAudioClient 等），失敗擲出 OSError。"""
+    ctypes = tools.ctypes
+    from ctypes.wintypes import DWORD
+
+    interface = ctypes.c_void_p()
+    iid = tools.guid(iid_text)
+    activate = tools.method(
+        device, 3, ctypes.HRESULT,
+        [ctypes.POINTER(tools.GUID), DWORD, ctypes.c_void_p, ctypes.POINTER(ctypes.c_void_p)])
+    if activate(device, ctypes.byref(iid), _CLSCTX_ALL, None,
+                ctypes.byref(interface)) != 0 or not interface.value:
+        raise OSError(f"Activate({iid_text}) failed")
+    return interface
+
+
+def query_interface(tools, interface, iid_text: str):
+    """
+    對已有的介面做 QueryInterface，取得它的另一個面向（例如把
+    IAudioSessionControl 換成 IAudioSessionControl2）。取不到回傳 None。
+    QueryInterface an existing pointer for another facet of the same object -
+    IAudioSessionControl to IAudioSessionControl2, say. None when unsupported.
+    """
+    ctypes = tools.ctypes
+    result_interface = ctypes.c_void_p()
+    iid = tools.guid(iid_text)
+    query = tools.method(
+        interface, 0, ctypes.HRESULT,
+        [ctypes.POINTER(tools.GUID), ctypes.POINTER(ctypes.c_void_p)])
+    if query(interface, ctypes.byref(iid), ctypes.byref(result_interface)) != 0 \
+            or not result_interface.value:
+        return None
+    return result_interface
+
+
 def _read_device_id(tools, device) -> Optional[str]:
     """讀取端點的裝置 ID 字串（COM 配置的記憶體會釋放）。"""
     ctypes = tools.ctypes

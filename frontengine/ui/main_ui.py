@@ -32,6 +32,7 @@ from frontengine.ui.page.text.text_setting_ui import TextSettingUI
 from frontengine.ui.page.video.video_setting_ui import VideoSettingUI
 from frontengine.ui.page.wallpaper.wallpaper_setting_ui import WallpaperSettingUI
 from frontengine.ui.page.web.web_setting_ui import WEBSettingUI
+from frontengine.ui.page.widgets.widgets_setting_ui import WidgetsSettingUI
 from frontengine.user_setting.user_setting_file import (
     get_hotkey_bindings,
     read_user_setting,
@@ -116,6 +117,7 @@ class FrontEngineMainUI(QMainWindow):
         self.presentation_setting_ui = PresentationSettingUI()
         self.wallpaper_setting_ui = WallpaperSettingUI()
         self.focus_setting_ui = FocusSettingUI()
+        self.widgets_setting_ui = WidgetsSettingUI()
 
         # 控制中心
         # Control Center
@@ -229,6 +231,8 @@ class FrontEngineMainUI(QMainWindow):
         # Restore the last session when enabled, then apply the startup preset.
         if user_setting_dict.get("restore_last_session"):
             restore_last_session(self)
+        if user_setting_dict.get("sticky_notes_restore"):
+            self.widgets_setting_ui.restore_saved_notes()
         apply_startup_preset(self)
 
         # Debug 模式下自動關閉
@@ -262,6 +266,10 @@ class FrontEngineMainUI(QMainWindow):
         # The wallpaper page keys its widgets by monitor, so hand over the values.
         self.control_center_ui.register_overlay_source(
             lambda: list(self.wallpaper_setting_ui.wallpaper_widgets.values()))
+        for attribute in ("spectrum_widget_list", "monitor_widget_list",
+                          "now_playing_widget_list", "note_widget_list"):
+            self.control_center_ui.register_overlay_source(
+                lambda attribute=attribute: getattr(self.widgets_setting_ui, attribute, []))
 
     def _add_tabs(self) -> None:
         """加入所有內建與擴充的 Tab / Add all built-in and extended tabs"""
@@ -279,6 +287,7 @@ class FrontEngineMainUI(QMainWindow):
             (self.presentation_setting_ui, "tab_presentation_text"),
             (self.wallpaper_setting_ui, "tab_wallpaper_text"),
             (self.focus_setting_ui, "tab_focus_text"),
+            (self.widgets_setting_ui, "tab_widgets_text"),
             (self.control_center_ui, "tab_control_center_text"),
         ]
 
@@ -439,6 +448,9 @@ class FrontEngineMainUI(QMainWindow):
             self.preset_schedule_service.stop()
         if getattr(self, "theme_schedule_service", None) is not None:
             self.theme_schedule_service.stop()
+        if getattr(self, "widgets_setting_ui", None) is not None:
+            self.widgets_setting_ui.save_notes()
+            self.widgets_setting_ui.stop_spectrum()
         if getattr(self, "reminder_service", None) is not None:
             self.reminder_service.stop()
         if getattr(self, "app_profile_service", None) is not None:

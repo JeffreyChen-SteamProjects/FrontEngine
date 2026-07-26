@@ -50,6 +50,10 @@ user_setting_dict: Dict[str, Any] = {
     # 自訂提醒：[{"label", "kind": "every"/"at", "minutes"/"at", "enabled"}]
     # Custom reminders, shown as a toast when they come due.
     "reminders": [],
+    # 便利貼內容與位置，以及要不要在啟動時開回來
+    # Sticky note contents and positions, and whether to reopen them on launch.
+    "sticky_notes": [],
+    "sticky_notes_restore": False,
     # 覆蓋層畫質檔位：high / balanced / saver
     # Overlay quality tier: high / balanced / saver.
     "quality_tier": "high",
