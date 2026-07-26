@@ -136,7 +136,7 @@ class PresetRepository:
         for section in rewritten.values():
             if not isinstance(section, dict):
                 continue
-            for key, value in list(section.items()):
+            for key, value in tuple(section.items()):
                 if isinstance(value, str) and value and Path(value).is_file():
                     archive_name = self._unique_media_name(Path(value).name, used_names)
                     used_names.add(archive_name)

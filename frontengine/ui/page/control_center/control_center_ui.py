@@ -240,7 +240,7 @@ class ControlCenterUI(QWidget):
         guarded and the dead reference is pruned so one cannot crash the batch.
         """
         for widget_list in self._all_overlay_widget_lists():
-            for widget in list(widget_list):
+            for widget in widget_list[:]:
                 try:
                     action(widget)
                 except RuntimeError:

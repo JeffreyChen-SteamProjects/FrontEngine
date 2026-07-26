@@ -174,7 +174,7 @@ class ScreenCareSettingUI(QWidget):
 
     @staticmethod
     def _close_all(widgets: list) -> None:
-        for widget in list(widgets):
+        for widget in widgets[:]:
             try:
                 widget.close()
             except RuntimeError:
