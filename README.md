@@ -190,7 +190,10 @@ From **Settings → Remote control**:
   > This opens a port on your machine, so it is **off by default**. The link
   > carries a token that is regenerated every time the server starts, so an old
   > link stops working, and the page can only ask for the fixed action list —
-  > nothing else is reachable.
+  > nothing else is reachable. It is plain HTTP: someone else on the same
+  > network could read the token and press the same buttons, which is a
+  > nuisance rather than a breach given what the buttons do, but leave it off
+  > on networks you do not trust.
 - **A MIDI controller** — press *Learn*, move a knob or pad, and bind it to an
   action. It uses Windows' built-in winmm, so no extra package is needed. A
   knob fires once it reaches the top rather than repeatedly on the way, and

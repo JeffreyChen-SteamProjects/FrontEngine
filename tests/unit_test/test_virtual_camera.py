@@ -6,7 +6,6 @@ fitting, and what happens when there is no device.
 """
 import numpy
 from PySide6.QtCore import QRect
-from PySide6.QtGui import QColor, QPixmap
 
 from frontengine.utils.virtual_camera.camera_feed import VirtualCameraFeed
 from frontengine.utils.virtual_camera.virtual_camera import (

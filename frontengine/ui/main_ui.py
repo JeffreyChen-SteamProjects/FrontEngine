@@ -569,55 +569,69 @@ class FrontEngineMainUI(QMainWindow):
         if getattr(self, "reminder_service", None) is not None:
             self.reminder_service.tracker.reset()
 
+    # 關閉時要停掉的背景服務，依相依性由外而內排列
+    # The background services to stop on close, outermost first.
+    _CLOSING_SERVICES = (
+        "preset_schedule_service", "theme_schedule_service", "usage_service",
+        "remote_server", "midi_input", "share_watch_service", "reminder_service",
+        "app_profile_service", "smart_pause_service", "hotkey_service",
+    )
+    # 關閉時要清空的覆蓋層清單
+    # The overlay lists to empty on close.
+    _CLOSING_WIDGET_LISTS = (
+        ("video_setting_ui", "video_widget_list"),
+        ("image_setting_ui", "image_widget_list"),
+        ("web_setting_ui", "web_widget_list"),
+        ("gif_setting_ui", "gif_widget_list"),
+        ("sound_player_setting_ui", "sound_widget_list"),
+        ("text_setting_ui", "text_widget_list"),
+        ("particle_setting_ui", "particle_list"),
+        ("pet_setting_ui", "pet_list"),
+    )
+
     def close(self) -> None:
         """關閉程式並清理資源 / Close application and clear resources"""
         if user_setting_dict.get("restore_last_session"):
             save_last_session(self)
-        if getattr(self, "preset_schedule_service", None) is not None:
-            self.preset_schedule_service.stop()
-        if getattr(self, "theme_schedule_service", None) is not None:
-            self.theme_schedule_service.stop()
-        if getattr(self, "usage_service", None) is not None:
-            self.usage_service.stop()
+        self._stop_services()
+        self._save_page_state()
+        self._save_window_geometry()
+        write_user_setting()
+        self._clear_overlays()
+        self.scene_setting_ui.close_scene()
+        super().close()
+        if self.main_app:
+            self.main_app.exit(0)
+
+    def _stop_services(self) -> None:
+        """停掉所有背景服務（沒建立起來的就跳過）。"""
+        for name in self._CLOSING_SERVICES:
+            service = getattr(self, name, None)
+            if service is not None:
+                service.stop()
         if getattr(self, "clipboard_watcher", None) is not None:
             self.clipboard_watcher.stop()
             self._persist_clipboard()
+
+    def _save_page_state(self) -> None:
+        """讓幾個分頁在關閉前把自己的東西收好。"""
         if getattr(self, "widgets_setting_ui", None) is not None:
             self.widgets_setting_ui.save_notes()
             self.widgets_setting_ui.stop_spectrum()
         if getattr(self, "tools_setting_ui", None) is not None:
             self.tools_setting_ui.release_pinned_windows()
             self.tools_setting_ui.stop_camera()
+            self.tools_setting_ui.stop_virtual_camera()
         if getattr(self, "stream_setting_ui", None) is not None:
             self.stream_setting_ui.soundboard.stop_all()
-        if getattr(self, "remote_server", None) is not None:
-            self.remote_server.stop()
-        if getattr(self, "midi_input", None) is not None:
-            self.midi_input.stop()
-        if getattr(self, "share_watch_service", None) is not None:
-            self.share_watch_service.stop()
-        if getattr(self, "reminder_service", None) is not None:
-            self.reminder_service.stop()
-        if getattr(self, "app_profile_service", None) is not None:
-            self.app_profile_service.stop()
-        if getattr(self, "smart_pause_service", None) is not None:
-            self.smart_pause_service.stop()
-        if getattr(self, "hotkey_service", None) is not None:
-            self.hotkey_service.stop()
-        self._save_window_geometry()
-        write_user_setting()
-        self.video_setting_ui.video_widget_list.clear()
-        self.image_setting_ui.image_widget_list.clear()
-        self.web_setting_ui.web_widget_list.clear()
-        self.gif_setting_ui.gif_widget_list.clear()
-        self.sound_player_setting_ui.sound_widget_list.clear()
-        self.text_setting_ui.text_widget_list.clear()
-        self.particle_setting_ui.particle_list.clear()
-        self.pet_setting_ui.pet_list.clear()
-        self.scene_setting_ui.close_scene()
-        super().close()
-        if self.main_app:
-            self.main_app.exit(0)
+
+    def _clear_overlays(self) -> None:
+        """清空各分頁記著的覆蓋層清單。"""
+        for page_name, attribute in self._CLOSING_WIDGET_LISTS:
+            page = getattr(self, page_name, None)
+            widget_list = getattr(page, attribute, None) if page is not None else None
+            if widget_list is not None:
+                widget_list.clear()
 
     @classmethod
     def debug_close(cls) -> None:

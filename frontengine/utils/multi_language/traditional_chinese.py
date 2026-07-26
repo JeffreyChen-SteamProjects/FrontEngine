@@ -562,7 +562,7 @@ traditional_chinese_word_dict = {
     "remote_enable": '允許手機遙控 FrontEngine',
     "remote_off": '已關閉，沒有在接聽。',
     "remote_copy": '複製連結',
-    "remote_hint": '這會在這台機器上對區域網路開一個連線埠。連結裡帶著一次性權杖，每次啟動都會換一組；而且只有頁面上那幾個按鈕能被觸發，其他都不行。',
+    "remote_hint": "這會在這台機器上對區域網路開一個連線埠。連結裡帶著一次性權杖，每次啟動都會換一組；而且只有頁面上那幾個按鈕能被觸發，其他都不行。它走的是純 HTTP，所以同一個網路上的人有可能讀到權杖、按到同樣的按鈕——在不信任的網路上請保持關閉。",
     "remote_midi_label": 'MIDI 控制器',
     "remote_midi_none": '找不到 MIDI 裝置',
     "remote_midi_learn": '學習',

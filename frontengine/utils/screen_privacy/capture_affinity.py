@@ -111,7 +111,7 @@ def apply_to_widget(widget, excluded: bool) -> bool:
 def apply_to_widgets(widgets, excluded: bool) -> int:
     """對一批 widget 套用，回傳成功的數量。"""
     applied = 0
-    for widget in list(widgets or ()):
+    for widget in tuple(widgets or ()):
         try:
             if apply_to_widget(widget, excluded):
                 applied += 1

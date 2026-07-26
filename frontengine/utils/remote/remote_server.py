@@ -39,6 +39,13 @@ DEFAULT_PORT = 8770
 ALLOWED_ACTIONS = ("hide_all", "show_all", "close_all", "mute_all",
                    "opacity_up", "opacity_down", "dashboard_next", "toggle_lock")
 _TOKEN_BYTES = 16
+_PLAIN_TEXT = "text/plain"
+# 用來問「要連外網的話會從哪張網卡出去」。這個位址只拿來讓作業系統挑
+# 路由，UDP connect 不會送出任何封包，也不會有人收到什麼。
+# Used to ask which interface would be used to reach the outside world. The
+# address only makes the OS pick a route: a UDP connect sends no packet, so
+# nothing reaches it.
+_ROUTE_PROBE = ("8.8.8.8", 80)  # NOSONAR
 
 
 def make_token() -> str:
@@ -56,7 +63,7 @@ def local_address() -> str:
     """
     probe = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
-        probe.connect(("8.8.8.8", 80))
+        probe.connect(_ROUTE_PROBE)
         return probe.getsockname()[0]
     except OSError:
         return "127.0.0.1"
@@ -208,10 +215,10 @@ class RemoteServer(QObject):
             def do_GET(self) -> None:  # noqa: N802 - required by BaseHTTPRequestHandler
                 path, query = parse_request(self.path)
                 if path != "/":
-                    self._send(404, b"not found", "text/plain")
+                    self._send(404, b"not found", _PLAIN_TEXT)
                     return
                 if not secrets.compare_digest(query.get("token", ""), server.token):
-                    self._send(403, b"bad token", "text/plain")
+                    self._send(403, b"bad token", _PLAIN_TEXT)
                     return
                 page = PAGE.replace("__ACTIONS__", json.dumps(list(ALLOWED_ACTIONS)))
                 self._send(200, page.encode("utf-8"), "text/html; charset=utf-8")
@@ -219,7 +226,7 @@ class RemoteServer(QObject):
             def do_POST(self) -> None:  # noqa: N802 - required by BaseHTTPRequestHandler
                 path, query = parse_request(self.path)
                 if path != "/action":
-                    self._send(404, b"not found", "text/plain")
+                    self._send(404, b"not found", _PLAIN_TEXT)
                     return
                 status = server.perform(query.get("token", ""), query.get("name", ""))
                 self._send(status, json.dumps({"status": status}).encode("utf-8"),

@@ -72,7 +72,9 @@ class RemoteControlDialog(QDialog):
             _t("remote_hint",
                "This opens a port on this machine for your local network. The link carries a "
                "one-time token that changes every time it starts, and only the buttons on the "
-               "page can be triggered - nothing else."))
+               "page can be triggered - nothing else. It is plain HTTP, so treat it like any "
+               "other device on your network: someone else on the same network could read the "
+               "token and press the same buttons. Leave it off on networks you do not trust."))
         self.remote_hint.setWordWrap(True)
 
         self.midi_label = QLabel(_t("remote_midi_label", "MIDI controller"))

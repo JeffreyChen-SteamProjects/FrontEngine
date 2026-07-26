@@ -6,7 +6,7 @@ Tests for the phone remote and MIDI. The remote opens a port on the machine, so
 the two gates - the token and the action allowlist - need tests holding them.
 """
 from frontengine.utils.midi.midi_input import (
-    CONTROL_CHANGE, KIND_CONTROL, KIND_NOTE, NOTE_OFF, NOTE_ON, MidiInput, available,
+    CONTROL_CHANGE, KIND_CONTROL, NOTE_OFF, NOTE_ON, MidiInput, available,
     binding_key, parse_message, scaled_value,
 )
 from frontengine.utils.remote.remote_server import (
@@ -47,8 +47,9 @@ def test_anything_else_is_ignored() -> None:
 
 def test_a_binding_survives_a_channel_change() -> None:
     """多數控制器可以整台換頻道，綁定不該因此失效。"""
-    assert binding_key(parse_message(packed(CONTROL_CHANGE, 7))) == \
-        binding_key(parse_message(packed(CONTROL_CHANGE | 5, 7)))
+    on_channel_zero = binding_key(parse_message(packed(CONTROL_CHANGE, 7)))
+    on_channel_five = binding_key(parse_message(packed(CONTROL_CHANGE | 5, 7)))
+    assert on_channel_zero == on_channel_five == "control:7"
 
 
 def test_binding_keys_separate_notes_from_knobs() -> None:
