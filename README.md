@@ -119,6 +119,13 @@ Measuring and capture tools on the **Tools** tab:
   `hsl(...)` or a CSS custom property.
 - **Region capture** — drag out an area; it lands on the clipboard and can be
   saved to a file.
+- **Read text** — drag out an area to copy the text in it, translate it, or ask
+  a question about it.
+  > This is the **only** feature here that sends screen content off the
+  > machine: the selection goes to Anthropic's API using your own
+  > `ANTHROPIC_API_KEY`. It asks once before the first send, remembers the
+  > answer, and the consent can be withdrawn from the result window at any
+  > time. Without consent or without a key, nothing is sent.
 - **Record area** — drag out an area and record it to an animated GIF, with the
   camera composited into the corner if you want the reaction-video look.
   Recording is capped by both length and frame count, because every frame is

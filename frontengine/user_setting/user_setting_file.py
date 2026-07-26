@@ -66,6 +66,9 @@ user_setting_dict: Dict[str, Any] = {
     # 已儲存的視窗版面：名稱 -> [{title, x, y, width, height}]
     # Saved window layouts: name -> [{title, x, y, width, height}]
     "window_layouts": {},
+    # 是否同意把擷取畫面送到 Anthropic 讀取文字（預設不同意）
+    # Consent to send captures to Anthropic for reading text (off by default).
+    "screen_text_consent": False,
     # 覆蓋層畫質檔位：high / balanced / saver
     # Overlay quality tier: high / balanced / saver.
     "quality_tier": "high",

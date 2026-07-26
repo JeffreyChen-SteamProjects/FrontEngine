@@ -8,6 +8,7 @@ arranging - as opposed to the other pages, which are for showing.
 """
 from typing import List, Optional
 
+from PySide6.QtCore import QBuffer, QIODevice, QTimer
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import (
     QCheckBox, QComboBox, QFileDialog, QGridLayout, QLabel, QLineEdit, QPushButton, QSpinBox,
@@ -21,6 +22,9 @@ from frontengine.show.capture.region_capture import RegionCaptureWidget, is_usab
 from frontengine.show.measure.measure_widget import (
     MODE_ANGLE, MODE_COLOR, MODE_RULER, MeasureWidget,
 )
+from frontengine.ui.dialog.screen_text_dialog import (
+    ScreenTextDialog, ask_for_consent, has_consent,
+)
 from frontengine.ui.dialog.window_pin_dialog import WindowPinDialog
 from frontengine.user_setting.user_setting_file import user_setting_dict, write_user_setting
 from frontengine.ui.page.utils import coerce_int
@@ -29,6 +33,9 @@ from frontengine.utils.measure.measure import (
     FORMAT_CSS_VAR, FORMAT_HEX, FORMAT_HSL, FORMAT_RGB,
 )
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
+from frontengine.utils.screen_text.screen_text_service import (
+    ACTION_ASK, ACTION_EXTRACT, ACTION_TRANSLATE, DEFAULT_LANGUAGE, ScreenTextService,
+)
 from frontengine.utils.recording.frame_recorder import (
     DEFAULT_FPS, DEFAULT_MAX_SECONDS, MAX_FPS, MIN_FPS, FrameRecorder,
 )
@@ -51,6 +58,8 @@ class ToolsSettingUI(QWidget):
 
         self.measure_widget_list: List[MeasureWidget] = []
         self.recorder = FrameRecorder(self)
+        self.screen_text_service = ScreenTextService(consent_provider=has_consent)
+        self.last_screen_text: Optional[str] = None
         self.last_recording: Optional[str] = None
         self.capture_widget_list: List[RegionCaptureWidget] = []
         self.camera_widget_list: List[CameraWidget] = []
@@ -59,6 +68,7 @@ class ToolsSettingUI(QWidget):
 
         self._build_measure_row()
         self._build_capture_row()
+        self._build_screen_text_row()
         self._build_record_row()
         self._build_camera_row()
         self.pin_button = QPushButton(_t("tools_pin_window", "Pin a window..."))
@@ -91,25 +101,29 @@ class ToolsSettingUI(QWidget):
         self.grid_layout.addWidget(self.capture_label, 2, 0)
         self.grid_layout.addWidget(self.capture_button, 2, 1)
         self.grid_layout.addWidget(self.capture_copy_button, 2, 2)
-        self.grid_layout.addWidget(self.record_label, 3, 0)
-        self.grid_layout.addWidget(self.record_fps_spinbox, 3, 1)
-        self.grid_layout.addWidget(self.record_button, 3, 2)
-        self.grid_layout.addWidget(self.record_seconds_spinbox, 4, 1)
-        self.grid_layout.addWidget(self.record_camera_checkbox, 4, 2)
-        self.grid_layout.addWidget(self.camera_label, 5, 0)
-        self.grid_layout.addWidget(self.camera_shape_combobox, 5, 1)
-        self.grid_layout.addWidget(self.camera_button, 5, 2)
-        self.grid_layout.addWidget(self.camera_device_combobox, 6, 0, 1, 2)
-        self.grid_layout.addWidget(self.camera_mirror_checkbox, 6, 2)
-        self.grid_layout.addWidget(self.camera_border_label, 7, 0)
-        self.grid_layout.addWidget(self.camera_border_spinbox, 7, 1)
-        self.grid_layout.addWidget(self.pin_button, 8, 0)
-        self.grid_layout.addWidget(self.layout_label, 9, 0)
-        self.grid_layout.addWidget(self.layout_name_edit, 9, 1)
-        self.grid_layout.addWidget(self.layout_save_button, 9, 2)
-        self.grid_layout.addWidget(self.layout_combobox, 10, 0, 1, 2)
-        self.grid_layout.addWidget(self.layout_restore_button, 10, 2)
-        self.grid_layout.addWidget(self.hint_label, 11, 0, 1, 3)
+        self.grid_layout.addWidget(self.screen_text_label, 3, 0)
+        self.grid_layout.addWidget(self.screen_text_combobox, 3, 1)
+        self.grid_layout.addWidget(self.screen_text_button, 3, 2)
+        self.grid_layout.addWidget(self.screen_text_input, 4, 1, 1, 2)
+        self.grid_layout.addWidget(self.record_label, 5, 0)
+        self.grid_layout.addWidget(self.record_fps_spinbox, 5, 1)
+        self.grid_layout.addWidget(self.record_button, 5, 2)
+        self.grid_layout.addWidget(self.record_seconds_spinbox, 6, 1)
+        self.grid_layout.addWidget(self.record_camera_checkbox, 6, 2)
+        self.grid_layout.addWidget(self.camera_label, 7, 0)
+        self.grid_layout.addWidget(self.camera_shape_combobox, 7, 1)
+        self.grid_layout.addWidget(self.camera_button, 7, 2)
+        self.grid_layout.addWidget(self.camera_device_combobox, 8, 0, 1, 2)
+        self.grid_layout.addWidget(self.camera_mirror_checkbox, 8, 2)
+        self.grid_layout.addWidget(self.camera_border_label, 9, 0)
+        self.grid_layout.addWidget(self.camera_border_spinbox, 9, 1)
+        self.grid_layout.addWidget(self.pin_button, 10, 0)
+        self.grid_layout.addWidget(self.layout_label, 11, 0)
+        self.grid_layout.addWidget(self.layout_name_edit, 11, 1)
+        self.grid_layout.addWidget(self.layout_save_button, 11, 2)
+        self.grid_layout.addWidget(self.layout_combobox, 12, 0, 1, 2)
+        self.grid_layout.addWidget(self.layout_restore_button, 12, 2)
+        self.grid_layout.addWidget(self.hint_label, 13, 0, 1, 3)
 
     # --- construction helpers -------------------------------------------
     def _build_measure_row(self) -> None:
@@ -135,6 +149,20 @@ class ToolsSettingUI(QWidget):
         self.capture_button.clicked.connect(self.start_capture)
         self.capture_copy_button = QPushButton(_t("tools_capture_copy", "Copy last"))
         self.capture_copy_button.clicked.connect(self.copy_last_capture)
+
+    def _build_screen_text_row(self) -> None:
+        self.screen_text_label = QLabel(_t("tools_screen_text_label", "Read text"))
+        self.screen_text_combobox = QComboBox()
+        for action, key, fallback in ((ACTION_EXTRACT, "tools_screen_text_extract", "Copy text"),
+                                      (ACTION_TRANSLATE, "tools_screen_text_translate", "Translate"),
+                                      (ACTION_ASK, "tools_screen_text_ask", "Ask about it")):
+            self.screen_text_combobox.addItem(_t(key, fallback), action)
+        self.screen_text_input = QLineEdit()
+        self.screen_text_input.setPlaceholderText(
+            _t("tools_screen_text_input", "Language, or your question"))
+        self.screen_text_input.setText(DEFAULT_LANGUAGE)
+        self.screen_text_button = QPushButton(_t("tools_screen_text_start", "Read an area"))
+        self.screen_text_button.clicked.connect(self.start_screen_text)
 
     def _build_record_row(self) -> None:
         self.record_label = QLabel(_t("tools_record_label", "Record area"))
@@ -299,6 +327,49 @@ class ToolsSettingUI(QWidget):
             except RuntimeError:
                 self.pin_dialog = None
 
+    # --- reading text on screen ------------------------------------------
+    def start_screen_text(self):
+        """
+        框一塊畫面來讀文字。第一次會先問過同意，沒同意就什麼都不做——
+        這是唯一會把畫面內容送出機器的功能。
+        Pick an area to read. The first use asks for consent and does nothing
+        without it: this is the only feature that sends screen content off the
+        machine.
+        """
+        if not ask_for_consent(self):
+            front_engine_logger.info("[ToolsSettingUI] screen text cancelled: no consent")
+            return None
+        picker = RegionCaptureWidget(on_captured=lambda pixmap, rect: self._read_capture(pixmap))
+        screen = QGuiApplication.primaryScreen()
+        if screen is not None:
+            picker.setGeometry(screen.geometry())
+        picker.setMouseTracking(True)
+        picker.show()
+        self.capture_widget_list.append(picker)
+        return picker
+
+    def _read_capture(self, pixmap) -> None:
+        """把框到的畫面送出去讀（在背景執行緒，UI 不會卡住）。"""
+        data = pixmap_to_png(pixmap)
+        if not data:
+            return
+        self.screen_text_service.read_async(
+            data, self.show_screen_text,
+            action=self.screen_text_combobox.currentData(),
+            language=self.screen_text_input.text(),
+            question=self.screen_text_input.text())
+
+    def show_screen_text(self, text) -> None:
+        """收到結果：切回 UI 執行緒再開視窗（回呼來自背景執行緒）。"""
+        self.last_screen_text = text
+        QTimer.singleShot(0, lambda: self._present_screen_text(text))
+
+    def _present_screen_text(self, text):
+        dialog = ScreenTextDialog(
+            text or _t("tools_screen_text_empty", "Nothing came back."), self)
+        dialog.exec()
+        return dialog
+
     # --- recording -------------------------------------------------------
     def toggle_recording(self) -> None:
         if self.recorder.running:
@@ -438,3 +509,20 @@ def _recording_region_picker(page: "ToolsSettingUI", picker: RegionCaptureWidget
         return None
 
     return finish
+
+
+def pixmap_to_png(pixmap) -> bytes:
+    """
+    把擷取到的畫面轉成 PNG 位元組（送出去用）。轉不出來就回傳空的，
+    呼叫端會因此什麼都不送。
+    The capture as PNG bytes, ready to send. An empty result means nothing is
+    sent at all.
+    """
+    if pixmap is None or pixmap.isNull():
+        return b""
+    buffer = QBuffer()
+    buffer.open(QIODevice.OpenModeFlag.WriteOnly)
+    saved = pixmap.save(buffer, "PNG")
+    data = bytes(buffer.data()) if saved else b""
+    buffer.close()
+    return data
