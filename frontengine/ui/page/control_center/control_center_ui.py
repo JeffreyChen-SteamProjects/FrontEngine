@@ -1,3 +1,5 @@
+from typing import Callable
+
 from PySide6.QtCore import QTimer, Qt
 from PySide6.QtWidgets import (
     QComboBox, QGridLayout, QLabel, QPushButton, QScrollArea, QTextEdit, QWidget,
@@ -93,6 +95,7 @@ class ControlCenterUI(QWidget):
         # 其他分頁登記進來的覆蓋層來源（桌布、專注、護眼、簡報…）
         # Overlay sources registered by the other pages: wallpaper, focus, screen care, presenting.
         self._extra_overlay_sources: list = []
+        self._cleanup_callbacks: list = []
         self.low_power_button = self._create_button(
             "control_center_low_power_on", self.toggle_low_power)
         self._hidden_from_capture = False
@@ -190,19 +193,29 @@ class ControlCenterUI(QWidget):
         self.scene_setting_ui.close_scene()
 
     def clear_all(self) -> None:
+        """
+        關閉所有覆蓋層。先真的 close() 再清空清單：close() 會跑到 closeEvent，
+        計時器、媒體、全域監聽才停得掉；只丟掉 Python 參考做不到這件事，而且
+        對「其他分頁註冊進來的」覆蓋層根本沒作用——它們會留在螢幕上。
+        Close every overlay. Actually call close() before emptying the lists:
+        that runs closeEvent, which is what stops timers, releases media and
+        drops global listeners. Merely dropping a Python reference does none of
+        that, and for the overlays other pages registered it did nothing at all
+        - they stayed on screen.
+        """
         front_engine_logger.info("ControlCenterUI clear_all")
-        self.video_setting_ui.video_widget_list.clear()
-        self.image_setting_ui.image_widget_list.clear()
-        self.web_setting_ui.web_widget_list.clear()
-        self.gif_setting_ui.gif_widget_list.clear()
-        self.sound_player_setting_ui.sound_widget_list.clear()
-        self.text_setting_ui.text_widget_list.clear()
-        self.particle_setting_ui.particle_list.clear()
-        if self.pet_setting_ui is not None:
-            self.pet_setting_ui.pet_list.clear()
+        self._for_each_overlay(lambda widget: widget.close())
+        for widget_list in self._all_overlay_widget_lists():
+            widget_list.clear()
         self.scene_setting_ui.close_scene()
+        for callback in self._cleanup_callbacks:
+            try:
+                callback()
+            except Exception as error:
+                front_engine_logger.warning(
+                    f"[ControlCenterUI] cleanup failed: {error!r}")
 
-    def register_overlay_source(self, provider) -> None:
+    def register_overlay_source(self, provider: Callable[[], list]) -> None:
         """
         讓控制中心也管得到其他分頁開的覆蓋層。provider 是一個回傳 widget 清單
         的函式（每次都重新問，才拿得到當下還活著的那些）。
@@ -211,6 +224,16 @@ class ControlCenterUI(QWidget):
         what is actually on screen right now.
         """
         self._extra_overlay_sources.append(provider)
+
+    def register_cleanup(self, callback: Callable[[], None]) -> None:
+        """
+        批次關閉之後要順手收掉的東西。例如全域輸入監聽：覆蓋層都關掉了就
+        沒有東西需要它，繼續掛著只是白吃資源。
+        Something to release after a batch close - a global input listener,
+        say: with every overlay gone nothing needs it, and leaving it hooked
+        just costs for nothing.
+        """
+        self._cleanup_callbacks.append(callback)
 
     def _all_overlay_widget_lists(self) -> list:
         """回傳所有覆蓋層 widget 清單 / All overlay widget lists."""
@@ -231,11 +254,15 @@ class ControlCenterUI(QWidget):
             except Exception as error:  # pragma: no cover - defensive boundary
                 front_engine_logger.warning(f"[ControlCenterUI] overlay source failed: {error!r}")
                 continue
+            # 交回原本的清單物件（不是複本），死掉的參考才清得掉、
+            # 「全部關閉」也才真的能把它們清空。
+            # Hand back the provider's own list rather than a copy, so pruning
+            # a dead reference - and closing everything - reaches the real one.
             if widgets:
-                lists.append(list(widgets))
+                lists.append(widgets if isinstance(widgets, list) else list(widgets))
         return lists
 
-    def _for_each_overlay(self, action) -> None:
+    def _for_each_overlay(self, action: Callable[[QWidget], None]) -> None:
         """
         對每個仍存活的覆蓋層 widget 執行 action(widget)。手動關閉的覆蓋層因
         WA_DeleteOnClose 已被銷毀，其 Python 參考仍留在清單中，呼叫時會

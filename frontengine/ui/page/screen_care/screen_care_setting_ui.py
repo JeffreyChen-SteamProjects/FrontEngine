@@ -292,7 +292,6 @@ class ScreenCareSettingUI(QWidget):
             self.break_overlay_list.append(overlay)
             self._present(overlay, screen)
 
-    # --- preset state ----------------------------------------------------
     # --- colour vision ---------------------------------------------------
     def toggle_color_vision(self) -> None:
         if self.color_vision_widget_list:
@@ -327,6 +326,7 @@ class ScreenCareSettingUI(QWidget):
             except RuntimeError:
                 self.color_vision_widget_list.remove(widget)
 
+    # --- preset state ----------------------------------------------------
     def get_state(self) -> dict:
         return {
             "color_vision_kind": self.color_vision_combobox.currentData(),

@@ -6,7 +6,7 @@ The presentation page: screen annotation, cursor emphasis (ring, click ripple,
 spotlight), a keystroke display and a region magnifier. Everything except the
 annotation layer passes clicks straight through.
 """
-from typing import List
+from typing import List, Optional
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QGuiApplication
@@ -181,7 +181,8 @@ class PresentationSettingUI(QWidget):
         if self.keystroke_widget_list or self.cursor_widget_list:
             self.input_watch.start()
 
-    def _release_input_watch(self) -> None:
+    def release_input_watch(self) -> None:
+        """沒有覆蓋層要聽了就收掉全域輸入監聽（批次關閉之後也會呼叫）。"""
         if not self.keystroke_widget_list and not self.cursor_widget_list:
             self.input_watch.stop()
 
@@ -250,7 +251,7 @@ class PresentationSettingUI(QWidget):
 
     def stop_cursor_effects(self) -> None:
         self._close_all(self.cursor_widget_list)
-        self._release_input_watch()
+        self.release_input_watch()
         self.cursor_button.setText(
             language_wrapper.language_word_dict.get("cursor_effect_start", "Turn cursor effects on"))
 
@@ -285,7 +286,7 @@ class PresentationSettingUI(QWidget):
 
     def stop_keystrokes(self) -> None:
         self._close_all(self.keystroke_widget_list)
-        self._release_input_watch()
+        self.release_input_watch()
         self.keystroke_button.setText(
             language_wrapper.language_word_dict.get("keystroke_start", "Show keystrokes"))
 
@@ -341,7 +342,6 @@ class PresentationSettingUI(QWidget):
             except RuntimeError:
                 self.magnifier_widget_list.remove(widget)
 
-    # --- preset state ----------------------------------------------------
     # --- whiteboard ------------------------------------------------------
     def toggle_whiteboard(self) -> None:
         if self.whiteboard_widget_list:
@@ -364,7 +364,7 @@ class PresentationSettingUI(QWidget):
         self.whiteboard_button.setText(
             language_wrapper.language_word_dict.get("whiteboard_start", "Whiteboard"))
 
-    def save_whiteboard(self):
+    def save_whiteboard(self) -> Optional[str]:
         """把白板存成圖片；沒畫東西就不存。"""
         for board in self.whiteboard_widget_list[:]:
             try:
@@ -377,6 +377,7 @@ class PresentationSettingUI(QWidget):
                 self.whiteboard_widget_list.remove(board)
         return None
 
+    # --- preset state ----------------------------------------------------
     def get_state(self) -> dict:
         return {
             "annotate_tool": self.annotate_tool_combobox.currentData(),

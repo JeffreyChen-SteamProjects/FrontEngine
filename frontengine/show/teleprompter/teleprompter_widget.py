@@ -12,7 +12,7 @@ and it stops at the last line rather than snapping back to the top mid-read.
 """
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QColor, QFont, QFontMetrics, QPainter, QTransform
@@ -31,7 +31,7 @@ _TICK_MS = 33
 _SIDE_MARGIN = 40
 
 
-def clamp_speed(value, fallback: int = DEFAULT_SPEED) -> int:
+def clamp_speed(value: Any, fallback: int = DEFAULT_SPEED) -> int:
     """捲動速度夾在讀得完又跟得上的範圍。"""
     try:
         return max(MIN_SPEED, min(MAX_SPEED, int(value)))
@@ -39,7 +39,7 @@ def clamp_speed(value, fallback: int = DEFAULT_SPEED) -> int:
         return fallback
 
 
-def clamp_font_size(value, fallback: int = DEFAULT_FONT_SIZE) -> int:
+def clamp_font_size(value: Any, fallback: int = DEFAULT_FONT_SIZE) -> int:
     """字級夾在看得見的範圍。"""
     try:
         return max(MIN_FONT_SIZE, min(MAX_FONT_SIZE, int(value)))
