@@ -10,6 +10,7 @@ from frontengine.ui.dialog.app_profile_dialog import AppProfileDialog
 from frontengine.ui.dialog.clipboard_dialog import ClipboardDialog
 from frontengine.ui.dialog.hotkey_settings_dialog import HotkeySettingsDialog
 from frontengine.ui.dialog.reminder_dialog import ReminderDialog
+from frontengine.ui.dialog.remote_control_dialog import RemoteControlDialog
 from frontengine.ui.dialog.screen_privacy_dialog import ScreenPrivacyDialog
 from frontengine.ui.dialog.smart_pause_dialog import SmartPauseDialog
 from frontengine.ui.dialog.usage_report_dialog import UsageReportDialog
@@ -88,6 +89,11 @@ def build_settings_menu(ui: "FrontEngineMainUI") -> None:
     menu.addAction(reminder_action)
     ui.reminder_action = reminder_action
 
+    remote_action = QAction(_t("settings_menu_remote", "Remote control..."), menu)
+    remote_action.triggered.connect(lambda: _open_remote_dialog(ui))
+    menu.addAction(remote_action)
+    ui.remote_action = remote_action
+
     privacy_action = QAction(
         _t("settings_menu_screen_privacy", "Screen-sharing privacy..."), menu)
     privacy_action.triggered.connect(lambda: _open_dialog(ui, ScreenPrivacyDialog))
@@ -119,6 +125,16 @@ def build_settings_menu(ui: "FrontEngineMainUI") -> None:
     import_action = QAction(_t("settings_menu_import", "Import settings..."), menu)
     import_action.triggered.connect(lambda: _import_settings(ui))
     menu.addAction(import_action)
+
+
+def _open_remote_dialog(ui: "FrontEngineMainUI") -> None:
+    """開遙控設定，並把它接上 MIDI 的「學習」流程。"""
+    front_engine_logger.info("[SettingsMenu] open RemoteControlDialog")
+    dialog = RemoteControlDialog(ui, remote=getattr(ui, "remote_server", None),
+                                 midi=getattr(ui, "midi_input", None))
+    ui.remote_dialog = dialog
+    dialog.exec()
+    ui.remote_dialog = None
 
 
 def _open_usage_dialog(ui: "FrontEngineMainUI") -> None:

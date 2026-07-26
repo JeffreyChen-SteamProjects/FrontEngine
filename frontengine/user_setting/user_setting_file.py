@@ -54,6 +54,12 @@ user_setting_dict: Dict[str, Any] = {
     # Sticky note contents and positions, and whether to reopen them on launch.
     "sticky_notes": [],
     "sticky_notes_restore": False,
+    # 手機遙控（會開一個本機網路埠，預設關閉）與 MIDI 綁定
+    # The phone remote opens a local network port and is off by default;
+    # plus the MIDI control bindings.
+    "phone_remote": {"enabled": False},
+    "midi_bindings": {},
+    "midi_device": 0,
     # 分享畫面時自動把覆蓋層藏出擷取結果（預設關閉）
     # Hide overlays from the capture while sharing; off by default.
     "screen_share_privacy": {"enabled": False, "apps": []},

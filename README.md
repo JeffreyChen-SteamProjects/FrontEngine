@@ -180,6 +180,24 @@ Four things on the **Stream** tab, for playing and for going live:
 
 ---
 
+## Remote control
+
+From **Settings → Remote control**:
+
+- **Your phone** — turn it on and FrontEngine serves a small page on your local
+  network; open the link on a phone and the buttons drive the same actions the
+  global hotkeys do.
+  > This opens a port on your machine, so it is **off by default**. The link
+  > carries a token that is regenerated every time the server starts, so an old
+  > link stops working, and the page can only ask for the fixed action list —
+  > nothing else is reachable.
+- **A MIDI controller** — press *Learn*, move a knob or pad, and bind it to an
+  action. It uses Windows' built-in winmm, so no extra package is needed. A
+  knob fires once it reaches the top rather than repeatedly on the way, and
+  releasing a pad does not count as a second press.
+
+---
+
 ## Screen-sharing privacy
 
 Your overlays are for you, not for the people you are sharing with. From
