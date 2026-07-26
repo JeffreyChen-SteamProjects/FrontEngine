@@ -43,7 +43,7 @@ def accept_key(key: str) -> str:
     its job here is to prove the peer understood the handshake, not to protect
     anything, and any other hash would simply be non-conformant.
     """
-    digest = hashlib.sha1(  # nosec B324 # nosemgrep - RFC 6455 handshake, not a security hash
+    digest = hashlib.sha1(  # nosec B324 # nosemgrep # NOSONAR - RFC 6455 handshake, not a security hash
         (str(key) + _GUID).encode("ascii")).digest()
     return base64.b64encode(digest).decode("ascii")
 
