@@ -1,16 +1,33 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Tuple
 
 from PySide6.QtGui import QAction
-from PySide6.QtWidgets import QMessageBox
 
 from frontengine.user_setting.user_setting_file import user_setting_dict
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
+from frontengine.utils.multi_language.retranslate import retranslator, translate
 
 if TYPE_CHECKING:
     from frontengine.ui.main_ui import FrontEngineMainUI
+
+# (顯示用的鍵, 語言代碼)。代碼必須是 language_wrapper 註冊過的名字——這裡原本寫
+# "French" / "Italian"，而註冊的是 "France" / "Italy"，reset_language() 找不到就
+# 默默 return，所以那兩個選項按下去完全沒有反應。
+# (label key, language code). The code must be a name language_wrapper
+# registered: this list used to say "French" / "Italian" while the registry
+# said "France" / "Italy", and reset_language() returns quietly on a name it
+# does not know - so those two entries did nothing at all.
+LANGUAGES: List[Tuple[str, str]] = [
+    ("language_menu_bar_english", "English"),
+    ("language_menu_bar_traditional_chinese", "Traditional_Chinese"),
+    ("language_menu_bar_simplified_chinese", "Simplified_Chinese"),
+    ("language_menu_bar_germany", "Deutsch"),
+    ("language_menu_bar_russian", "Russian"),
+    ("language_menu_bar_french", "France"),
+    ("language_menu_bar_italian", "Italy"),
+]
 
 
 def build_language_menu(ui_we_want_to_set: FrontEngineMainUI) -> None:
@@ -20,38 +37,28 @@ def build_language_menu(ui_we_want_to_set: FrontEngineMainUI) -> None:
     """
     front_engine_logger.info(f"[LanguageMenu] build_language_menu | ui={ui_we_want_to_set}")
 
-    language_menu = ui_we_want_to_set.menu_bar.addMenu(
-        language_wrapper.language_word_dict.get("menu_bar_language")
-    )
+    language_menu = ui_we_want_to_set.menu_bar.addMenu(translate("menu_bar_language", "Language"))
+    retranslator.bind(language_menu, "menu_bar_language", "Language", "setTitle")
     ui_we_want_to_set.language_menu = language_menu
 
-    # 語言清單 (label_key, 語言代碼)
-    languages = [
-        ("language_menu_bar_english", "English"),
-        ("language_menu_bar_traditional_chinese", "Traditional_Chinese"),
-        ("language_menu_bar_simplified_chinese", "Simplified_Chinese"),
-        ("language_menu_bar_germany", "Deutsch"),
-        ("language_menu_bar_russian", "Russian"),
-        ("language_menu_bar_french", "French"),
-        ("language_menu_bar_italian", "Italian"),
-    ]
-
-    # 動態建立 QAction
-    for label_key, lang_code in languages:
-        action = QAction(language_wrapper.language_word_dict.get(label_key), language_menu)
-        action.triggered.connect(lambda _, code=lang_code: set_language(code, ui_we_want_to_set))
+    for label_key, language_code in LANGUAGES:
+        action = QAction(translate(label_key, language_code), language_menu)
+        retranslator.bind(action, label_key, language_code)
+        action.triggered.connect(
+            lambda _, code=language_code: set_language(code, ui_we_want_to_set))
         language_menu.addAction(action)
 
 
-def set_language(language: str, ui_we_want_to_set: FrontEngineMainUI) -> None:
+def set_language(language: str, ui_we_want_to_set: FrontEngineMainUI) -> bool:
     """
-    設定語言並提示使用者重新啟動
-    Set application language and prompt user to restart
+    切換語言並立刻重寫畫面上的文字，不必重新啟動。
+    回傳是否真的換成功（語言代碼不認得就是 False）。
+    Switch language and rewrite the interface immediately - no restart needed.
+    Returns whether the switch actually happened; an unknown code gives False.
     """
-    front_engine_logger.info(f"[LanguageMenu] set_language | ui={ui_we_want_to_set}, language={language}")
-    language_wrapper.reset_language(language)
+    front_engine_logger.info(f"[LanguageMenu] set_language | language={language}")
+    if not language_wrapper.reset_language(language):
+        return False
     user_setting_dict.update({"language": language})
-
-    message_box = QMessageBox(ui_we_want_to_set)
-    message_box.setText(language_wrapper.language_word_dict.get("language_menu_bar_please_restart_messagebox"))
-    message_box.exec()  # 使用 exec() 讓使用者必須確認
+    ui_we_want_to_set.retranslate()
+    return True

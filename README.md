@@ -161,6 +161,16 @@ that caps every overlay's refresh rate and drops its render resolution.
 
 ---
 
+## Languages
+
+Seven: English, 繁體中文, 简体中文, Deutsch, Русский, Français, Italiano.
+
+Pick one from the **Language** menu and the interface changes **immediately** —
+no restart. Whatever you had open stays open: overlays keep running, and the
+settings on every page are left exactly as they were.
+
+---
+
 ## Signage, whiteboard and lip-sync
 
 - **Signage mode** (Settings) — rotate through a list of presets on a timer and

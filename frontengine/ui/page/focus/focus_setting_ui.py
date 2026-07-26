@@ -21,6 +21,7 @@ from frontengine.utils.focus_shield.focus_shield import (
 )
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
+from frontengine.utils.multi_language.retranslate import retranslator
 
 
 class FocusSettingUI(QWidget):
@@ -38,17 +39,20 @@ class FocusSettingUI(QWidget):
         # Dim background windows
         self.dim_label = QLabel(
             language_wrapper.language_word_dict.get("focus_dim_label", "Dim background windows"))
+        retranslator.bind(self.dim_label, "focus_dim_label", "Dim background windows")
         self.dim_slider = QSlider(Qt.Orientation.Horizontal)
         self.dim_slider.setRange(10, 90)
         self.dim_slider.setValue(45)
         self.dim_slider.valueChanged.connect(self._apply_dim_settings)
         self.dim_button = QPushButton(
             language_wrapper.language_word_dict.get("focus_dim_start", "Dim the background"))
+        retranslator.bind(self.dim_button, "focus_dim_start", "Dim the background")
         self.dim_button.clicked.connect(self.toggle_dim)
 
         # Mask a distraction
         self.mask_label = QLabel(
             language_wrapper.language_word_dict.get("focus_mask_label", "Cover a distraction"))
+        retranslator.bind(self.mask_label, "focus_mask_label", "Cover a distraction")
         self.mask_region_combobox = QComboBox()
         for region, fallback in (
             (REGION_BOTTOM, "Bottom strip (taskbar)"), (REGION_BOTTOM_RIGHT, "Bottom-right corner"),
@@ -65,17 +69,20 @@ class FocusSettingUI(QWidget):
         self.mask_percent_slider.valueChanged.connect(self._apply_mask_settings)
         self.mask_button = QPushButton(
             language_wrapper.language_word_dict.get("focus_mask_start", "Cover it up"))
+        retranslator.bind(self.mask_button, "focus_mask_start", "Cover it up")
         self.mask_button.clicked.connect(self.toggle_mask)
 
         # Shared
         self.target_monitor_label = QLabel(
             language_wrapper.language_word_dict.get("target_monitor_label", "Target monitor"))
+        retranslator.bind(self.target_monitor_label, "target_monitor_label", "Target monitor")
         self.target_monitor_combobox = build_target_monitor_combobox()
         self.hint_label = QLabel(
             language_wrapper.language_word_dict.get(
                 "focus_hint",
                 "Both overlays pass clicks through — what they cover still works, "
                 "it just stops competing for your attention."))
+        retranslator.bind(self.hint_label, "focus_hint", "Both overlays pass clicks through — what they cover still works, " "it just stops competing for your attention.")
         self.hint_label.setWordWrap(True)
 
         # Layout

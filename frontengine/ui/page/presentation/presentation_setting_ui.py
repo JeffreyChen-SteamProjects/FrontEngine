@@ -26,6 +26,7 @@ from frontengine.ui.page.utils import build_target_monitor_combobox, coerce_int,
 from frontengine.utils.input_watch.input_watch_service import InputWatchService
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
+from frontengine.utils.multi_language.retranslate import retranslator
 
 
 class PresentationSettingUI(QWidget):
@@ -51,6 +52,7 @@ class PresentationSettingUI(QWidget):
         # Annotation
         self.annotate_label = QLabel(
             language_wrapper.language_word_dict.get("annotate_label", "Screen annotation"))
+        retranslator.bind(self.annotate_label, "annotate_label", "Screen annotation")
         self.annotate_tool_combobox = QComboBox()
         for tool, fallback in ((TOOL_PEN, "Pen"), (TOOL_HIGHLIGHTER, "Highlighter"),
                                (TOOL_ERASER, "Eraser")):
@@ -67,64 +69,80 @@ class PresentationSettingUI(QWidget):
         self.annotate_width_slider.valueChanged.connect(self._apply_annotation_settings)
         self.annotate_button = QPushButton(
             language_wrapper.language_word_dict.get("annotate_start", "Start drawing"))
+        retranslator.bind(self.annotate_button, "annotate_start", "Start drawing")
         self.annotate_button.clicked.connect(self.toggle_annotation)
         self.annotate_undo_button = QPushButton(
             language_wrapper.language_word_dict.get("annotate_undo", "Undo"))
+        retranslator.bind(self.annotate_undo_button, "annotate_undo", "Undo")
         self.annotate_undo_button.clicked.connect(self.undo_annotation)
         self.annotate_clear_button = QPushButton(
             language_wrapper.language_word_dict.get("annotate_clear", "Clear"))
+        retranslator.bind(self.annotate_clear_button, "annotate_clear", "Clear")
         self.annotate_clear_button.clicked.connect(self.clear_annotation)
 
         # Cursor effects
         self.cursor_label = QLabel(
             language_wrapper.language_word_dict.get("cursor_effect_label", "Cursor emphasis"))
+        retranslator.bind(self.cursor_label, "cursor_effect_label", "Cursor emphasis")
         self.cursor_ring_checkbox = QCheckBox(
             language_wrapper.language_word_dict.get("cursor_effect_ring", "Highlight"))
+        retranslator.bind(self.cursor_ring_checkbox, "cursor_effect_ring", "Highlight")
         self.cursor_ring_checkbox.setChecked(True)
         self.cursor_ripple_checkbox = QCheckBox(
             language_wrapper.language_word_dict.get("cursor_effect_ripple", "Click ripple"))
+        retranslator.bind(self.cursor_ripple_checkbox, "cursor_effect_ripple", "Click ripple")
         self.cursor_ripple_checkbox.setChecked(True)
         self.cursor_spotlight_checkbox = QCheckBox(
             language_wrapper.language_word_dict.get("cursor_effect_spotlight", "Spotlight"))
+        retranslator.bind(self.cursor_spotlight_checkbox, "cursor_effect_spotlight", "Spotlight")
         for checkbox in (self.cursor_ring_checkbox, self.cursor_ripple_checkbox,
                          self.cursor_spotlight_checkbox):
             checkbox.toggled.connect(self._apply_cursor_settings)
         self.cursor_button = QPushButton(
             language_wrapper.language_word_dict.get("cursor_effect_start", "Turn cursor effects on"))
+        retranslator.bind(self.cursor_button, "cursor_effect_start", "Turn cursor effects on")
         self.cursor_button.clicked.connect(self.toggle_cursor_effects)
 
         # Keystroke display
         self.keystroke_label = QLabel(
             language_wrapper.language_word_dict.get("keystroke_label", "Keystroke display"))
+        retranslator.bind(self.keystroke_label, "keystroke_label", "Keystroke display")
         self.keystroke_button = QPushButton(
             language_wrapper.language_word_dict.get("keystroke_start", "Show keystrokes"))
+        retranslator.bind(self.keystroke_button, "keystroke_start", "Show keystrokes")
         self.keystroke_button.clicked.connect(self.toggle_keystrokes)
 
         # Magnifier
         self.magnifier_label = QLabel(
             language_wrapper.language_word_dict.get("magnifier_label", "Magnifier"))
+        retranslator.bind(self.magnifier_label, "magnifier_label", "Magnifier")
         self.magnifier_zoom_combobox = QComboBox()
         self.magnifier_zoom_combobox.addItems(["1.5", "2.0", "3.0", "4.0", "6.0"])
         self.magnifier_zoom_combobox.setCurrentText("2.0")
         self.magnifier_zoom_combobox.currentIndexChanged.connect(self._apply_magnifier_settings)
         self.magnifier_button = QPushButton(
             language_wrapper.language_word_dict.get("magnifier_start", "Turn magnifier on"))
+        retranslator.bind(self.magnifier_button, "magnifier_start", "Turn magnifier on")
         self.magnifier_button.clicked.connect(self.toggle_magnifier)
 
         # Shared
         self.whiteboard_button = QPushButton(
             language_wrapper.language_word_dict.get("whiteboard_start", "Whiteboard"))
+        retranslator.bind(self.whiteboard_button, "whiteboard_start", "Whiteboard")
         self.whiteboard_button.clicked.connect(self.toggle_whiteboard)
         self.whiteboard_save_button = QPushButton(
             language_wrapper.language_word_dict.get("whiteboard_save", "Save whiteboard"))
+        retranslator.bind(self.whiteboard_save_button, "whiteboard_save", "Save whiteboard")
         self.whiteboard_save_button.clicked.connect(self.save_whiteboard)
         self.target_monitor_label = QLabel(
             language_wrapper.language_word_dict.get("target_monitor_label", "Target monitor"))
+        retranslator.bind(self.target_monitor_label, "target_monitor_label", "Target monitor")
         self.target_monitor_combobox = build_target_monitor_combobox()
         self.hint_label = QLabel(
             language_wrapper.language_word_dict.get(
                 "presentation_hint",
                 "Drawing takes the mouse while it is on; the other overlays pass clicks through."))
+        retranslator.bind(self.hint_label, "presentation_hint", "Drawing takes the mouse while it is on; the other overlays pass clicks through.")
         self.hint_label.setWordWrap(True)
 
         # Layout

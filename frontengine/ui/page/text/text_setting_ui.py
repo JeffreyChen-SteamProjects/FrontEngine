@@ -15,6 +15,7 @@ from frontengine.ui.page.utils import (
 )
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
+from frontengine.utils.multi_language.retranslate import retranslator
 from frontengine.utils.system_stats.system_stats import system_stats
 from frontengine.utils.text_source.text_source import (
     DEFAULT_TEMPLATES, SOURCE_CLOCK, SOURCE_COUNTDOWN, SOURCE_DATE, SOURCE_STATIC,
@@ -43,6 +44,7 @@ class TextSettingUI(QWidget):
 
         # Opacity setting
         self.opacity_label = QLabel(language_wrapper.language_word_dict.get("Opacity"))
+        retranslator.bind(self.opacity_label, "Opacity", "")
         self.opacity_slider = QSlider(Qt.Orientation.Horizontal)
         self.opacity_slider.setRange(1, 100)
         self.opacity_slider.setValue(20)
@@ -51,6 +53,7 @@ class TextSettingUI(QWidget):
 
         # Font size setting
         self.font_size_label = QLabel(language_wrapper.language_word_dict.get("Font size"))
+        retranslator.bind(self.font_size_label, "Font size", "")
         self.font_size_slider = QSlider(Qt.Orientation.Horizontal)
         self.font_size_slider.setRange(1, 600)
         self.font_size_slider.setValue(100)
@@ -62,39 +65,48 @@ class TextSettingUI(QWidget):
 
         # Start Button
         self.start_button = QPushButton(language_wrapper.language_word_dict.get("text_setting_start_draw"))
+        retranslator.bind(self.start_button, "text_setting_start_draw", "")
         self.start_button.clicked.connect(self.start_draw_text_on_screen)
 
         # Show on all screen
         self.show_on_all_screen_checkbox = QCheckBox(language_wrapper.language_word_dict.get("Show on all screen"))
+        retranslator.bind(self.show_on_all_screen_checkbox, "Show on all screen", "")
         self.show_on_all_screen_checkbox.clicked.connect(self.set_show_all_screen)
 
         # Show on bottom
         self.show_on_bottom_checkbox = QCheckBox(language_wrapper.language_word_dict.get("Show on bottom"))
+        retranslator.bind(self.show_on_bottom_checkbox, "Show on bottom", "")
 
         # Text position
         self.text_position_label = QLabel(language_wrapper.language_word_dict.get("text_setting_choose_alignment"))
+        retranslator.bind(self.text_position_label, "text_setting_choose_alignment", "")
         self.text_position_combobox = QComboBox()
         self.text_position_combobox.addItems(["TopLeft", "TopRight", "BottomLeft", "BottomRight", "Center"])
 
         # Text color
         self.text_color_label = QLabel(language_wrapper.language_word_dict.get("text_color_label", "Color"))
+        retranslator.bind(self.text_color_label, "text_color_label", "Color")
         self.text_color_combobox = QComboBox()
         for name, hex_value in _TEXT_COLORS:
             self.text_color_combobox.addItem(name, hex_value)
 
         # Font family
         self.font_family_label = QLabel(language_wrapper.language_word_dict.get("font_family_label", "Font"))
+        retranslator.bind(self.font_family_label, "font_family_label", "Font")
         self.font_family_combobox = QFontComboBox()
 
         # Marquee scroll
         self.marquee_checkbox = QCheckBox(language_wrapper.language_word_dict.get("marquee_label", "Marquee"))
+        retranslator.bind(self.marquee_checkbox, "marquee_label", "Marquee")
         self.marquee_speed_label = QLabel(language_wrapper.language_word_dict.get("marquee_speed_label", "Speed"))
+        retranslator.bind(self.marquee_speed_label, "marquee_speed_label", "Speed")
         self.marquee_speed_combobox = QComboBox()
         self.marquee_speed_combobox.addItems(["2", "4", "6", "8", "12"])
         self.marquee_speed_combobox.setCurrentText("4")
 
         # Outline (readability on any background)
         self.outline_checkbox = QCheckBox(language_wrapper.language_word_dict.get("outline_label", "Outline"))
+        retranslator.bind(self.outline_checkbox, "outline_label", "Outline")
         self.outline_color_combobox = QComboBox()
         for name, hex_value in _TEXT_COLORS:
             self.outline_color_combobox.addItem(name, hex_value)
@@ -104,12 +116,14 @@ class TextSettingUI(QWidget):
         self.target_monitor_label = QLabel(
             language_wrapper.language_word_dict.get("target_monitor_label", "Target monitor")
         )
+        retranslator.bind(self.target_monitor_label, "target_monitor_label", "Target monitor")
         self.target_monitor_combobox = build_target_monitor_combobox()
 
         # 文字來源：靜態字串或時鐘／日期／倒數／碼表／系統資訊／天氣
         # Text source: a fixed string, or a clock/date/countdown/stopwatch/stats/weather feed.
         self.text_source_label = QLabel(
             language_wrapper.language_word_dict.get("text_source_label", "Text source"))
+        retranslator.bind(self.text_source_label, "text_source_label", "Text source")
         self.text_source_combobox = QComboBox()
         for kind, fallback in (
             (SOURCE_STATIC, "Static text"), (SOURCE_CLOCK, "Clock"), (SOURCE_DATE, "Date"),
@@ -120,11 +134,15 @@ class TextSettingUI(QWidget):
                 language_wrapper.language_word_dict.get(f"text_source_{kind}", fallback), kind)
         self.text_source_combobox.currentIndexChanged.connect(self._update_source_hint)
         self.text_source_hint_label = QLabel("")
+        # 這句是「提示 + 樣板」組出來的，不是單一個鍵，換語言時整段重算
+        # Composed from a hint plus a template, so recompute it wholesale.
+        retranslator.bind_call(self._update_source_hint)
         self.text_source_hint_label.setWordWrap(True)
 
         # 天氣地點（只有天氣來源會用到）/ Weather location (only used by the weather source)
         self.weather_location_label = QLabel(
             language_wrapper.language_word_dict.get("weather_location_label", "Weather city"))
+        retranslator.bind(self.weather_location_label, "weather_location_label", "Weather city")
         self.weather_location_edit = QLineEdit()
         self.weather_location_edit.setPlaceholderText(
             language_wrapper.language_word_dict.get("weather_location_hint", "e.g. Taipei"))

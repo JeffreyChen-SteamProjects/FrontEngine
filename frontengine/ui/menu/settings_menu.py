@@ -24,6 +24,7 @@ from frontengine.user_setting.user_setting_file import (
 from frontengine.utils.autostart import autostart_service
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
+from frontengine.utils.multi_language.retranslate import retranslator
 
 if TYPE_CHECKING:
     from frontengine.ui.main_ui import FrontEngineMainUI
@@ -37,16 +38,17 @@ def build_settings_menu(ui: "FrontEngineMainUI") -> None:
     """Build the Settings menu with hotkey configuration and settings I/O."""
     front_engine_logger.info(f"[SettingsMenu] build_settings_menu | ui={ui}")
     menu = ui.menu_bar.addMenu(_t("menu_bar_settings", "Settings"))
+    retranslator.bind(menu, "menu_bar_settings", "Settings", "setTitle")
     ui.settings_menu = menu
 
     hotkey_action = QAction(_t("settings_menu_hotkeys", "Hotkeys..."), menu)
+    retranslator.bind(hotkey_action, "settings_menu_hotkeys", "Hotkeys...")
     hotkey_action.triggered.connect(lambda: _open_hotkey_dialog(ui))
     menu.addAction(hotkey_action)
 
     schedule = user_setting_dict.get("theme_schedule")
-    theme_schedule_action = QAction(
-        _t("settings_menu_theme_schedule", "Scheduled day/night theme"), menu
-    )
+    theme_schedule_action = QAction(_t("settings_menu_theme_schedule", "Scheduled day/night theme"), menu)
+    retranslator.bind(theme_schedule_action, "settings_menu_theme_schedule", "Scheduled day/night theme")
     theme_schedule_action.setCheckable(True)
     theme_schedule_action.setChecked(bool(isinstance(schedule, dict) and schedule.get("enabled")))
     theme_schedule_action.toggled.connect(lambda checked: _toggle_theme_schedule(ui, checked))
@@ -54,6 +56,7 @@ def build_settings_menu(ui: "FrontEngineMainUI") -> None:
     ui.theme_schedule_action = theme_schedule_action
 
     autostart_action = QAction(_t("settings_menu_autostart", "Start with the system"), menu)
+    retranslator.bind(autostart_action, "settings_menu_autostart", "Start with the system")
     autostart_action.setCheckable(True)
     autostart_action.setChecked(autostart_service.is_enabled())
     autostart_action.toggled.connect(lambda checked: _toggle_autostart(ui, checked))
@@ -61,6 +64,7 @@ def build_settings_menu(ui: "FrontEngineMainUI") -> None:
     ui.autostart_action = autostart_action
 
     restore_action = QAction(_t("settings_menu_restore_session", "Restore last session"), menu)
+    retranslator.bind(restore_action, "settings_menu_restore_session", "Restore last session")
     restore_action.setCheckable(True)
     restore_action.setChecked(bool(user_setting_dict.get("restore_last_session")))
     restore_action.toggled.connect(lambda checked: _toggle_restore_session(checked))
@@ -68,6 +72,7 @@ def build_settings_menu(ui: "FrontEngineMainUI") -> None:
     ui.restore_session_action = restore_action
 
     plugins_action = QAction(_t("settings_menu_plugins", "Load plugins (advanced)"), menu)
+    retranslator.bind(plugins_action, "settings_menu_plugins", "Load plugins (advanced)")
     plugins_action.setCheckable(True)
     plugins_action.setChecked(bool(user_setting_dict.get("load_plugins")))
     plugins_action.toggled.connect(lambda checked: _toggle_plugins(ui, checked))
@@ -76,47 +81,55 @@ def build_settings_menu(ui: "FrontEngineMainUI") -> None:
 
     menu.addSeparator()
     smart_pause_action = QAction(_t("settings_menu_smart_pause", "Smart pause..."), menu)
+    retranslator.bind(smart_pause_action, "settings_menu_smart_pause", "Smart pause...")
     smart_pause_action.triggered.connect(lambda: _open_dialog(ui, SmartPauseDialog))
     menu.addAction(smart_pause_action)
     ui.smart_pause_action = smart_pause_action
 
     app_profile_action = QAction(_t("settings_menu_app_profiles", "App profiles..."), menu)
+    retranslator.bind(app_profile_action, "settings_menu_app_profiles", "App profiles...")
     app_profile_action.triggered.connect(lambda: _open_dialog(ui, AppProfileDialog))
     menu.addAction(app_profile_action)
     ui.app_profile_action = app_profile_action
 
     reminder_action = QAction(_t("settings_menu_reminders", "Reminders..."), menu)
+    retranslator.bind(reminder_action, "settings_menu_reminders", "Reminders...")
     reminder_action.triggered.connect(lambda: _open_dialog(ui, ReminderDialog))
     menu.addAction(reminder_action)
     ui.reminder_action = reminder_action
 
     signage_action = QAction(_t("settings_menu_signage", "Signage mode..."), menu)
+    retranslator.bind(signage_action, "settings_menu_signage", "Signage mode...")
     signage_action.triggered.connect(lambda: _open_signage_dialog(ui))
     menu.addAction(signage_action)
     ui.signage_action = signage_action
 
     remote_action = QAction(_t("settings_menu_remote", "Remote control..."), menu)
+    retranslator.bind(remote_action, "settings_menu_remote", "Remote control...")
     remote_action.triggered.connect(lambda: _open_remote_dialog(ui))
     menu.addAction(remote_action)
     ui.remote_action = remote_action
 
-    privacy_action = QAction(
-        _t("settings_menu_screen_privacy", "Screen-sharing privacy..."), menu)
+    privacy_action = QAction(_t("settings_menu_screen_privacy", "Screen-sharing privacy..."), menu)
+    retranslator.bind(privacy_action, "settings_menu_screen_privacy", "Screen-sharing privacy...")
     privacy_action.triggered.connect(lambda: _open_dialog(ui, ScreenPrivacyDialog))
     menu.addAction(privacy_action)
     ui.screen_privacy_action = privacy_action
 
     usage_action = QAction(_t("settings_menu_usage", "Screen time..."), menu)
+    retranslator.bind(usage_action, "settings_menu_usage", "Screen time...")
     usage_action.triggered.connect(lambda: _open_usage_dialog(ui))
     menu.addAction(usage_action)
     ui.usage_action = usage_action
 
     clipboard_action = QAction(_t("settings_menu_clipboard", "Clipboard history..."), menu)
+    retranslator.bind(clipboard_action, "settings_menu_clipboard", "Clipboard history...")
     clipboard_action.triggered.connect(lambda: _open_clipboard_dialog(ui))
     menu.addAction(clipboard_action)
     ui.clipboard_action = clipboard_action
 
     clipboard_toggle = QAction(_t("settings_menu_clipboard_record", "Record clipboard"), menu)
+    retranslator.bind(clipboard_toggle, "settings_menu_clipboard_record", "Record clipboard")
     clipboard_toggle.setCheckable(True)
     clipboard_toggle.setChecked(bool(user_setting_dict.get("clipboard_history")))
     clipboard_toggle.toggled.connect(lambda checked: ui.set_clipboard_history(checked))
@@ -125,10 +138,12 @@ def build_settings_menu(ui: "FrontEngineMainUI") -> None:
 
     menu.addSeparator()
     export_action = QAction(_t("settings_menu_export", "Export settings..."), menu)
+    retranslator.bind(export_action, "settings_menu_export", "Export settings...")
     export_action.triggered.connect(lambda: _export_settings(ui))
     menu.addAction(export_action)
 
     import_action = QAction(_t("settings_menu_import", "Import settings..."), menu)
+    retranslator.bind(import_action, "settings_menu_import", "Import settings...")
     import_action.triggered.connect(lambda: _import_settings(ui))
     menu.addAction(import_action)
 

@@ -9,6 +9,7 @@ from frontengine.ui.dialog.choose_file_dialog import choose_player_sound, choose
 from frontengine.ui.page.utils import coerce_int
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
+from frontengine.utils.multi_language.retranslate import retranslator, translate
 
 
 # 四處共用的語系鍵
@@ -31,6 +32,7 @@ class SoundPlayerSettingUI(QWidget):
 
         # Volume setting
         self.volume_label = QLabel(language_wrapper.language_word_dict.get("Volume"))
+        retranslator.bind(self.volume_label, "Volume", "")
         self.volume_slider = QSlider(Qt.Orientation.Horizontal)
         self.volume_slider.setRange(1, 100)
         self.volume_slider.setValue(100)
@@ -40,21 +42,27 @@ class SoundPlayerSettingUI(QWidget):
         # Choose WAV file
         self.choose_wav_file_button = QPushButton(
             language_wrapper.language_word_dict.get("sound_player_setting_choose_wav_file"))
+        retranslator.bind(self.choose_wav_file_button, "sound_player_setting_choose_wav_file", "")
         self.choose_wav_file_button.clicked.connect(self.choose_and_copy_wav_file_to_cwd_sound_dir_then_play)
-        self.wav_ready_label = QLabel(language_wrapper.language_word_dict.get(_NOT_READY))
+        self.wav_ready_label = QLabel(translate(_NOT_READY))
+        retranslator.bind(self.wav_ready_label, _NOT_READY)
 
         # Choose general sound file
         self.choose_player_file_button = QPushButton(
             language_wrapper.language_word_dict.get("sound_player_setting_choose_sound_file"))
+        retranslator.bind(self.choose_player_file_button, "sound_player_setting_choose_sound_file", "")
         self.choose_player_file_button.clicked.connect(self.choose_and_copy_sound_file_to_cwd_sound_dir_then_play)
-        self.player_ready_label = QLabel(language_wrapper.language_word_dict.get(_NOT_READY))
+        self.player_ready_label = QLabel(translate(_NOT_READY))
+        retranslator.bind(self.player_ready_label, _NOT_READY)
 
         # Start buttons
         self.start_wav_button = QPushButton(language_wrapper.language_word_dict.get("sound_player_setting_play_wav"))
+        retranslator.bind(self.start_wav_button, "sound_player_setting_play_wav", "")
         self.start_wav_button.clicked.connect(self.start_play_wav)
 
         self.start_player_button = QPushButton(
             language_wrapper.language_word_dict.get("sound_player_setting_play_sound"))
+        retranslator.bind(self.start_player_button, "sound_player_setting_play_sound", "")
         self.start_player_button.clicked.connect(self.start_play_sound)
 
         # Layout
@@ -96,20 +104,20 @@ class SoundPlayerSettingUI(QWidget):
 
     def choose_and_copy_wav_file_to_cwd_sound_dir_then_play(self) -> None:
         front_engine_logger.info("[SoundPlayerSettingUI] choose_and_copy_wav_file_to_cwd_sound_dir_then_play")
-        self.wav_ready_label.setText(language_wrapper.language_word_dict.get(_NOT_READY))
+        retranslator.set_text(self.wav_ready_label, _NOT_READY)
         self.ready_to_play = False
         self.wav_sound_path = choose_wav_sound(self)
         if self.wav_sound_path:
-            self.wav_ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+            retranslator.set_text(self.wav_ready_label, "Ready")
             self.ready_to_play = True
 
     def choose_and_copy_sound_file_to_cwd_sound_dir_then_play(self) -> None:
         front_engine_logger.info("[SoundPlayerSettingUI] choose_and_copy_sound_file_to_cwd_sound_dir_then_play")
-        self.player_ready_label.setText(language_wrapper.language_word_dict.get(_NOT_READY))
+        retranslator.set_text(self.player_ready_label, _NOT_READY)
         self.ready_to_play = False
         self.player_sound_path = choose_player_sound(self)
         if self.player_sound_path:
-            self.player_ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+            retranslator.set_text(self.player_ready_label, "Ready")
             self.ready_to_play = True
 
     def volume_trick(self) -> None:
@@ -130,7 +138,7 @@ class SoundPlayerSettingUI(QWidget):
         if state.get("wav_sound_path"):
             self.wav_sound_path = state["wav_sound_path"]
             self.ready_to_play = True
-            self.wav_ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+            retranslator.set_text(self.wav_ready_label, "Ready")
         if state.get("player_sound_path"):
             self.player_sound_path = state["player_sound_path"]
-            self.player_ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+            retranslator.set_text(self.player_ready_label, "Ready")

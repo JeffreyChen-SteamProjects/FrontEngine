@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (
 
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
+from frontengine.utils.multi_language.retranslate import retranslator
 from frontengine.utils.usage_tracking.usage_tracker import UsageTracker, format_duration
 
 
@@ -47,6 +48,7 @@ class UsageReportDialog(QDialog):
         self._on_clear = on_clear
 
         self.enable_checkbox = QCheckBox(_t("usage_enable", "Track which apps I use"))
+        retranslator.bind(self.enable_checkbox, "usage_enable", "Track which apps I use")
         self.enable_checkbox.setChecked(bool(enabled))
         self.enable_checkbox.toggled.connect(self._toggle)
 
@@ -64,13 +66,16 @@ class UsageReportDialog(QDialog):
         self.week_label = QLabel()
         self.week_label.setWordWrap(True)
         self.refresh_button = QPushButton(_t("usage_refresh", "Refresh"))
+        retranslator.bind(self.refresh_button, "usage_refresh", "Refresh")
         self.refresh_button.clicked.connect(self.reload_report)
         self.clear_button = QPushButton(_t("usage_clear", "Clear history"))
+        retranslator.bind(self.clear_button, "usage_clear", "Clear history")
         self.clear_button.clicked.connect(self.clear_history)
         self.hint_label = QLabel(
             _t("usage_hint",
                "This is stored on this machine only and is never sent anywhere. "
                "Clearing deletes the file itself."))
+        retranslator.bind(self.hint_label, "usage_hint", "This is stored on this machine only and is never sent anywhere. " "Clearing deletes the file itself.")
         self.hint_label.setWordWrap(True)
 
         self.button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)

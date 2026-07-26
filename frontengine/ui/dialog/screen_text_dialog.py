@@ -24,6 +24,7 @@ from PySide6.QtWidgets import (
 from frontengine.user_setting.user_setting_file import user_setting_dict, write_user_setting
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
+from frontengine.utils.multi_language.retranslate import retranslator
 from frontengine.utils.screen_text.screen_text_service import API_KEY_ENV, api_key
 
 CONSENT_KEY = "screen_text_consent"
@@ -78,9 +79,11 @@ class ScreenTextDialog(QDialog):
         self.text_edit = QPlainTextEdit(str(text))
         self.text_edit.setReadOnly(False)
         self.copy_button = QPushButton(_t("screen_text_copy", "Copy"))
+        retranslator.bind(self.copy_button, "screen_text_copy", "Copy")
         self.copy_button.clicked.connect(self.copy_text)
         self.consent_checkbox = QCheckBox(
             _t("screen_text_consent_toggle", "Allow sending captures to Anthropic"))
+        retranslator.bind(self.consent_checkbox, "screen_text_consent_toggle", "Allow sending captures to Anthropic")
         self.consent_checkbox.setChecked(has_consent())
         self.consent_checkbox.toggled.connect(set_consent)
         self.hint_label = QLabel(self.status_text())
