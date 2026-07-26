@@ -55,13 +55,14 @@ class WindowPinDialog(QDialog):
         self.opacity_slider.setValue(window_pin.MAX_OPACITY_PERCENT)
         self.opacity_slider.valueChanged.connect(self.apply_opacity)
 
-        self.hint_label = QLabel(
-            _t("window_pin_hint",
-               "Pinning changes how a window is stacked and how see-through it is. "
-               "Windows only - other systems do not allow it.")
+        hint_key, hint_fallback = (
+            ("window_pin_hint",
+             "Pinning changes how a window is stacked and how see-through it is. "
+             "Windows only - other systems do not allow it.")
             if window_pin.available() else
-            _t("window_pin_unsupported", "Pinning other windows is Windows only."))
-        retranslator.bind(self.hint_label, "window_pin_hint", "Pinning changes how a window is stacked and how see-through it is. " "Windows only - other systems do not allow it.") if window_pin.available() else _t("window_pin_unsupported", "Pinning other windows is Windows only.")
+            ("window_pin_unsupported", "Pinning other windows is Windows only."))
+        self.hint_label = QLabel(_t(hint_key, hint_fallback))
+        retranslator.bind(self.hint_label, hint_key, hint_fallback)
         self.hint_label.setWordWrap(True)
 
         self.button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)

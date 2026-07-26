@@ -62,15 +62,19 @@ class ScreenPrivacyDialog(QDialog):
         retranslator.bind(self.apps_label, "screen_privacy_apps_label", "Meeting and capture apps:")
         self.apps_edit = QLineEdit(", ".join(settings.get("apps", [])))
         self.apps_edit.setPlaceholderText("zoom, teams, discord")
-        self.hint_label = QLabel(
-            _t("screen_privacy_hint",
-               "Matched against window titles, so a meeting held in a browser tab is caught "
-               "too. Your overlays stay on your own screen - only the capture is blank. "
-               "Masks stay visible, since covering something is what they are for.")
+        # 提示句取決於平台支不支援，登記的必須是實際選到的那個鍵
+        # The hint depends on whether the platform supports this, so register
+        # whichever key was actually chosen.
+        hint_key, hint_fallback = (
+            ("screen_privacy_hint",
+             "Matched against window titles, so a meeting held in a browser tab is caught "
+             "too. Your overlays stay on your own screen - only the capture is blank. "
+             "Masks stay visible, since covering something is what they are for.")
             if capture_affinity.available() else
-            _t("screen_privacy_unsupported",
-               "Hiding overlays from screen capture is Windows only."))
-        retranslator.bind(self.hint_label, "screen_privacy_hint", "Matched against window titles, so a meeting held in a browser tab is caught " "too. Your overlays stay on your own screen - only the capture is blank. " "Masks stay visible, since covering something is what they are for.") if capture_affinity.available() else _t("screen_privacy_unsupported", "Hiding overlays from screen capture is Windows only.")
+            ("screen_privacy_unsupported",
+             "Hiding overlays from screen capture is Windows only."))
+        self.hint_label = QLabel(_t(hint_key, hint_fallback))
+        retranslator.bind(self.hint_label, hint_key, hint_fallback)
         self.hint_label.setWordWrap(True)
 
         self.button_box = QDialogButtonBox(

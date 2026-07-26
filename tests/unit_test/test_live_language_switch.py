@@ -242,3 +242,37 @@ def test_the_translation_lands_where_you_can_see_it(tmp_path) -> None:
     finally:
         os.chdir(original)
         language_wrapper.reset_language("English")
+
+
+def test_a_hint_that_depends_on_the_platform_binds_the_branch_it_chose(monkeypatch,
+                                                                      tmp_path) -> None:
+    """
+    有些提示句取決於平台支不支援。登記的必須是實際選到的那個鍵——不然換語言時
+    畫面會跳到另一個分支的句子，說的正好是相反的事。
+    Some hints depend on whether the platform supports the feature. The key
+    registered has to be the branch that was actually chosen: otherwise a
+    language switch swaps in the other branch's sentence, which says the
+    opposite of what is true.
+    """
+    from frontengine.ui.main_ui import FrontEngineMainUI
+    from frontengine.ui.menu.language_menu import set_language
+    from frontengine.utils.virtual_camera import virtual_camera
+
+    monkeypatch.setattr(virtual_camera, "available", lambda: False)
+    (tmp_path / "user_setting.json").write_text(
+        json.dumps({"language": "English"}), encoding="utf-8")
+    original = os.getcwd()
+    os.chdir(tmp_path)
+    try:
+        window = FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)
+        status = window.tools_setting_ui.virtual_camera_status
+        assert status.text() == english_word_dict["tools_vcam_missing"]
+
+        set_language("Deutsch", window)
+
+        assert status.text() == germany_word_dict["tools_vcam_missing"]
+        assert status.text() != germany_word_dict["tools_vcam_ready"]
+        window.close()
+    finally:
+        os.chdir(original)
+        language_wrapper.reset_language("English")

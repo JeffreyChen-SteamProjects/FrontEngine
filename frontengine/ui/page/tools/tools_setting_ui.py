@@ -221,11 +221,11 @@ class ToolsSettingUI(QWidget):
         self.virtual_camera_button = QPushButton(_t("tools_vcam_start", "Send an area"))
         retranslator.bind(self.virtual_camera_button, "tools_vcam_start", "Send an area")
         self.virtual_camera_button.clicked.connect(self.toggle_virtual_camera)
-        self.virtual_camera_status = QLabel(
-            _t("tools_vcam_ready", "Ready") if virtual_camera.available()
-            else _t("tools_vcam_missing", "Install pyvirtualcam and a virtual camera driver"))
-        retranslator.bind(self.virtual_camera_status, "tools_vcam_ready", "Ready") if virtual_camera.available() else _t("tools_vcam_missing", "Install pyvirtualcam and a virtual camera driver")
-        retranslator.bind(self.virtual_camera_status, "tools_vcam_ready", "Ready")
+        status_key, status_fallback = (
+            ("tools_vcam_ready", "Ready") if virtual_camera.available()
+            else ("tools_vcam_missing", "Install pyvirtualcam and a virtual camera driver"))
+        self.virtual_camera_status = QLabel(_t(status_key, status_fallback))
+        retranslator.bind(self.virtual_camera_status, status_key, status_fallback)
         self.virtual_camera_status.setWordWrap(True)
         self.virtual_camera_button.setEnabled(virtual_camera.available())
 
