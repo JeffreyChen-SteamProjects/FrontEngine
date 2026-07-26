@@ -121,7 +121,7 @@ class CursorEffectWidget(BaseWidget):
         except Exception:  # pragma: no cover - defensive around injected providers
             return
         self.cursor_point = QPoint(int(position.x()) - self.x(), int(position.y()) - self.y())
-        for ripple in list(self.ripples):
+        for ripple in self.ripples[:]:
             ripple["step"] += 1
             if ripple["step"] > RIPPLE_STEPS:
                 self.ripples.remove(ripple)

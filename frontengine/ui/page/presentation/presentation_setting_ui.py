@@ -207,7 +207,7 @@ class PresentationSettingUI(QWidget):
             widget.clear()
 
     def _apply_annotation_settings(self) -> None:
-        for widget in list(self.annotation_widget_list):
+        for widget in self.annotation_widget_list[:]:
             try:
                 widget.set_tool(self.annotate_tool_combobox.currentData())
                 widget.set_pen(self.annotate_color_combobox.currentData(),
@@ -244,7 +244,7 @@ class PresentationSettingUI(QWidget):
             language_wrapper.language_word_dict.get("cursor_effect_start", "Turn cursor effects on"))
 
     def _apply_cursor_settings(self) -> None:
-        for widget in list(self.cursor_widget_list):
+        for widget in self.cursor_widget_list[:]:
             try:
                 widget.set_effects(
                     ring=self.cursor_ring_checkbox.isChecked(),
@@ -279,7 +279,7 @@ class PresentationSettingUI(QWidget):
             language_wrapper.language_word_dict.get("keystroke_start", "Show keystrokes"))
 
     def _on_key_pressed(self, keys) -> None:
-        for widget in list(self.keystroke_widget_list):
+        for widget in self.keystroke_widget_list[:]:
             try:
                 widget.push_keys(keys)
             except RuntimeError:
@@ -288,7 +288,7 @@ class PresentationSettingUI(QWidget):
     def _on_mouse_clicked(self, x: int, y: int) -> None:
         from PySide6.QtCore import QPoint
 
-        for widget in list(self.cursor_widget_list):
+        for widget in self.cursor_widget_list[:]:
             try:
                 widget.add_ripple(QPoint(int(x) - widget.x(), int(y) - widget.y()))
             except RuntimeError:
@@ -324,7 +324,7 @@ class PresentationSettingUI(QWidget):
             language_wrapper.language_word_dict.get("magnifier_start", "Turn magnifier on"))
 
     def _apply_magnifier_settings(self) -> None:
-        for widget in list(self.magnifier_widget_list):
+        for widget in self.magnifier_widget_list[:]:
             try:
                 widget.set_zoom(float(self.magnifier_zoom_combobox.currentText()))
             except RuntimeError:

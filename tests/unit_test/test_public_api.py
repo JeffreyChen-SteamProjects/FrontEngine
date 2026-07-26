@@ -66,3 +66,51 @@ def test_every_package_directory_has_an_init_file() -> None:
         if holds_python and not (directory / "__init__.py").exists():
             missing.append(str(directory.relative_to(root)))
     assert missing == [], f"these packages would be left out of the wheel: {missing}"
+
+
+def test_requirements_agree_with_the_packaged_dependencies() -> None:
+    """
+    requirements.txt 必須和 pyproject.toml 的 dependencies 說同一件事。
+    先前 requirements 釘 PySide6 6.8.2.1、pyproject 釘 6.10.2，兩份互相矛盾，
+    照著 README 安裝的人拿到的環境和實際發佈的套件不一樣。
+
+    requirements.txt has to say the same thing as pyproject.toml's dependencies.
+    They used to disagree - 6.8.2.1 against 6.10.2 - so anyone following the
+    README got an environment unlike the one that actually ships.
+    """
+    import tomllib
+
+    root = Path(frontengine.__file__).parent.parent
+    with (root / "pyproject.toml").open("rb") as handle:
+        declared = tomllib.load(handle)["project"]["dependencies"]
+
+    listed = [line.strip() for line in (root / "requirements.txt").read_text(
+        encoding="utf-8").splitlines() if line.strip() and not line.startswith("#")]
+
+    def name_of(requirement: str) -> str:
+        for separator in ("==", ">=", "<=", "~=", ">", "<"):
+            if separator in requirement:
+                return requirement.split(separator)[0].strip().lower()
+        return requirement.strip().lower()
+
+    assert {name_of(item) for item in listed} == {name_of(item) for item in declared}
+    pinned = {item for item in declared if "==" in item}
+    for requirement in pinned:
+        assert requirement in listed, f"{requirement} is pinned differently in requirements.txt"
+
+
+def test_requirements_do_not_install_frontengine_itself() -> None:
+    """
+    requirements.txt 不該列 frontengine：那會把 PyPI 上的版本裝進來蓋掉工作目錄，
+    測試就會在測已發佈的版本而不是眼前的程式碼（CI 曾經因此完全沒發現打包壞掉）。
+
+    requirements.txt must not list frontengine: that installs the published
+    build over the working tree, so checks end up validating the release rather
+    than the code in front of them - which is exactly how a packaging break went
+    unnoticed.
+    """
+    root = Path(frontengine.__file__).parent.parent
+    for name in ("requirements.txt", "dev_requirements.txt"):
+        lines = [line.strip().lower() for line in (root / name).read_text(
+            encoding="utf-8").splitlines()]
+        assert "frontengine" not in lines, f"{name} must not install frontengine itself"

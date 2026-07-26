@@ -21,6 +21,11 @@ from frontengine.ui.page.utils import coerce_int
 from frontengine.utils.audio_meter.screen_audio import audio_level_provider_for_screen
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
+# 多處共用的英文備援字串（只有在翻譯缺漏時才會看到）
+# The English fallback shared by several call sites, seen only when a
+# translation is missing.
+_NO_FOLDER = "No folder chosen"
+
 from frontengine.utils.playlist.playlist import (
     Playlist, ScheduledPlaylists, clamp_interval, collect_media,
 )
@@ -61,7 +66,7 @@ class WallpaperSettingUI(QWidget):
             language_wrapper.language_word_dict.get("wallpaper_choose_folder", "Choose folder..."))
         self.folder_button.clicked.connect(self.choose_folder)
         self.folder_label = QLabel(
-            language_wrapper.language_word_dict.get("wallpaper_no_folder", "No folder chosen"))
+            language_wrapper.language_word_dict.get("wallpaper_no_folder", _NO_FOLDER))
         self.folder_label.setWordWrap(True)
 
         # Playlist options
@@ -103,7 +108,7 @@ class WallpaperSettingUI(QWidget):
                 "wallpaper_quiet_folder", "Quiet folder..."))
         self.quiet_folder_button.clicked.connect(self.choose_quiet_folder)
         self.quiet_folder_label = QLabel(
-            language_wrapper.language_word_dict.get("wallpaper_no_folder", "No folder chosen"))
+            language_wrapper.language_word_dict.get("wallpaper_no_folder", _NO_FOLDER))
         self.quiet_folder_label.setWordWrap(True)
 
         # Start / stop
@@ -172,7 +177,7 @@ class WallpaperSettingUI(QWidget):
 
     def _show_folder_for_monitor(self) -> None:
         empty = language_wrapper.language_word_dict.get(
-            "wallpaper_no_folder", "No folder chosen")
+            "wallpaper_no_folder", _NO_FOLDER)
         monitor = self.current_monitor()
         self.folder_label.setText(self.folders.get(monitor) or empty)
         self.quiet_folder_label.setText(self.quiet_folders.get(monitor) or empty)
@@ -250,7 +255,7 @@ class WallpaperSettingUI(QWidget):
     def stop_wallpaper(self) -> None:
         """收掉所有桌布。"""
         self.advance_timer.stop()
-        for widget in list(self.wallpaper_widgets.values()):
+        for widget in tuple(self.wallpaper_widgets.values()):
             try:
                 widget.close()
             except RuntimeError:
@@ -262,7 +267,7 @@ class WallpaperSettingUI(QWidget):
 
     def advance_all(self) -> None:
         """每個螢幕各自換到「此刻該用的清單」的下一張。"""
-        for monitor, widget in list(self.wallpaper_widgets.items()):
+        for monitor, widget in tuple(self.wallpaper_widgets.items()):
             playlist = self.playlist_for_now(monitor)
             if playlist is None or not len(playlist):
                 continue
@@ -279,7 +284,7 @@ class WallpaperSettingUI(QWidget):
                 clamp_interval(self.interval_combobox.currentData()) * 1000)
 
     def _apply_audio_react(self) -> None:
-        for widget in list(self.wallpaper_widgets.values()):
+        for widget in tuple(self.wallpaper_widgets.values()):
             try:
                 widget.set_audio_react(self.react_checkbox.isChecked(),
                                        self.react_strength_slider.value())

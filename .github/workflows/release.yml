@@ -130,8 +130,11 @@ jobs:
           NAME=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['name'])")
           echo "name=${NAME}" >> "$GITHUB_OUTPUT"
 
+      # 建置工具釘版本：發佈流程不該因為上游今天推了新版就跟著改行為。
+      # Pin the build tooling: a publish must not change behaviour because an
+      # upstream release happened to land today.
       - name: Install build tooling
-        run: python -m pip install --upgrade pip build twine
+        run: python -m pip install --upgrade pip "build==1.4.2" "twine==6.2.0"
 
       - name: Build sdist + wheel
         run: python -m build

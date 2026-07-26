@@ -79,9 +79,12 @@ def _build_com_tools():
         if iface is not None and getattr(iface, "value", None):
             method(iface, 2, ctypes.c_ulong, [])(iface)
 
+    # 工廠叫 make_guid，型別叫 GUID：只差大小寫的兩個名字太容易看錯
+    # The factory is make_guid and the type is GUID: two names differing only
+    # by case are far too easy to misread.
     return SimpleNamespace(
         ctypes=ctypes, ole32=ctypes.windll.ole32, GUID=_GUID, PROPERTYKEY=_PROPERTYKEY,
-        PROPVARIANT=_PROPVARIANT, guid=guid, method=method, release=release,
+        PROPVARIANT=_PROPVARIANT, make_guid=guid, method=method, release=release,
     )
 
 
@@ -90,8 +93,8 @@ def _create_enumerator(tools):
     ctypes = tools.ctypes
     tools.ole32.CoInitialize(None)  # S_FALSE if already initialised; harmless
     enumerator = ctypes.c_void_p()
-    clsid = tools.guid(_CLSID_MMDeviceEnumerator)
-    iid = tools.guid(_IID_IMMDeviceEnumerator)
+    clsid = tools.make_guid(_CLSID_MMDeviceEnumerator)
+    iid = tools.make_guid(_IID_IMMDeviceEnumerator)
     created = tools.ole32.CoCreateInstance(
         ctypes.byref(clsid), None, _CLSCTX_ALL, ctypes.byref(iid), ctypes.byref(enumerator))
     if created != 0 or not enumerator.value:
@@ -144,7 +147,7 @@ def activate_interface(tools, device, iid_text: str):
     from ctypes.wintypes import DWORD
 
     interface = ctypes.c_void_p()
-    iid = tools.guid(iid_text)
+    iid = tools.make_guid(iid_text)
     activate = tools.method(
         device, 3, ctypes.HRESULT,
         [ctypes.POINTER(tools.GUID), DWORD, ctypes.c_void_p, ctypes.POINTER(ctypes.c_void_p)])
@@ -163,7 +166,7 @@ def query_interface(tools, interface, iid_text: str):
     """
     ctypes = tools.ctypes
     result_interface = ctypes.c_void_p()
-    iid = tools.guid(iid_text)
+    iid = tools.make_guid(iid_text)
     query = tools.method(
         interface, 0, ctypes.HRESULT,
         [ctypes.POINTER(tools.GUID), ctypes.POINTER(ctypes.c_void_p)])
@@ -197,7 +200,7 @@ def _read_friendly_name(tools, device) -> Optional[str]:
         return None
     try:
         key = tools.PROPERTYKEY()
-        key.fmtid = tools.guid(_PKEY_DEVICE_FRIENDLY_NAME_FMTID)
+        key.fmtid = tools.make_guid(_PKEY_DEVICE_FRIENDLY_NAME_FMTID)
         key.pid = _PKEY_DEVICE_FRIENDLY_NAME_PID
         value = tools.PROPVARIANT()
         get_value = tools.method(
@@ -301,7 +304,7 @@ class SystemAudioMeter:
         self._device = _endpoint(tools, self._enumerator, self.device_id)
 
         meter = ctypes.c_void_p()
-        iid_meter = tools.guid(_IID_IAudioMeterInformation)
+        iid_meter = tools.make_guid(_IID_IAudioMeterInformation)
         activate = tools.method(
             self._device, 3, ctypes.HRESULT,
             [ctypes.POINTER(tools.GUID), DWORD, ctypes.c_void_p, ctypes.POINTER(ctypes.c_void_p)])

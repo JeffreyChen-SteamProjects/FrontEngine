@@ -148,7 +148,7 @@ class WidgetsSettingUI(QWidget):
     def stop_spectrum(self) -> None:
         """收掉頻譜並停止擷取。"""
         self.capture.stop()
-        for widget in list(self.spectrum_widget_list):
+        for widget in self.spectrum_widget_list[:]:
             try:
                 widget.close()
             except RuntimeError:
@@ -159,7 +159,7 @@ class WidgetsSettingUI(QWidget):
     def _apply_spectrum_settings(self) -> None:
         bands = self.spectrum_bands_spinbox.value()
         self.capture.set_bands(bands)
-        for widget in list(self.spectrum_widget_list):
+        for widget in self.spectrum_widget_list[:]:
             try:
                 widget.set_bands(bands)
                 widget.set_style(self.spectrum_style_combobox.currentData())
@@ -187,7 +187,7 @@ class WidgetsSettingUI(QWidget):
         self.monitor_button.setText(_t("widgets_monitor_stop", "Stop monitor"))
 
     def stop_monitor(self) -> None:
-        for widget in list(self.monitor_widget_list):
+        for widget in self.monitor_widget_list[:]:
             try:
                 widget.close()
             except RuntimeError:
@@ -196,7 +196,7 @@ class WidgetsSettingUI(QWidget):
         self.monitor_button.setText(_t("widgets_monitor_start", "Start monitor"))
 
     def _apply_monitor_settings(self) -> None:
-        for widget in list(self.monitor_widget_list):
+        for widget in self.monitor_widget_list[:]:
             try:
                 widget.set_history(self.monitor_history_spinbox.value())
             except RuntimeError:
@@ -223,7 +223,7 @@ class WidgetsSettingUI(QWidget):
         self.now_playing_button.setText(_t("widgets_now_playing_stop", "Hide now playing"))
 
     def stop_now_playing(self) -> None:
-        for widget in list(self.now_playing_widget_list):
+        for widget in self.now_playing_widget_list[:]:
             try:
                 widget.close()
             except RuntimeError:
@@ -248,7 +248,7 @@ class WidgetsSettingUI(QWidget):
     def close_notes(self) -> None:
         """收掉所有便利貼（收之前先把內容存起來）。"""
         self.save_notes()
-        for note in list(self.note_widget_list):
+        for note in self.note_widget_list[:]:
             try:
                 note.close()
             except RuntimeError:
@@ -258,7 +258,7 @@ class WidgetsSettingUI(QWidget):
     def save_notes(self) -> List[Dict]:
         """把目前的便利貼內容與位置寫進設定。"""
         states = []
-        for note in list(self.note_widget_list):
+        for note in self.note_widget_list[:]:
             try:
                 states.append(note_state(note))
             except RuntimeError:

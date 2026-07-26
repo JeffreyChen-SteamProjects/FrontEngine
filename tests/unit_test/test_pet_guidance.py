@@ -80,7 +80,8 @@ def test_unguided_wander_is_unchanged() -> None:
     motion = _motion(x=100, y=100, behaviour=BEHAVIOUR_WANDER)
     velocity = (motion.vx, motion.vy)
     motion.step()
-    assert (motion.vx, motion.vy) == velocity, "no guidance means no steering"
+    after = (motion.vx, motion.vy)
+    assert after == velocity, "no guidance means no steering"
 
 
 def test_chase_guidance_wins_over_the_cursor() -> None:

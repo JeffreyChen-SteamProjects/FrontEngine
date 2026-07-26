@@ -81,6 +81,11 @@ def _list_windows_windows() -> List[Tuple[int, str]]:  # pragma: no cover - Win3
     windows: List[Tuple[int, str]] = []
 
     @ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
+    # EnumWindows 的回呼一定要回傳 True 才會繼續列舉；回 False 會中途停下。
+    # 所以「永遠回傳同一個值」在這裡是規格要求，不是漏寫。
+    # An EnumWindows callback must return True to keep enumerating; False
+    # stops it early. Always returning the same value is the contract
+    # here, not an oversight.
     def _collect(hwnd, _lparam):
         if not user32.IsWindowVisible(hwnd):
             return True

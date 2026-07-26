@@ -92,11 +92,35 @@ def scan_pet_pack(folder: str) -> dict:
 
 # 可以請寵物幫忙開啟的網址協定 / URL schemes the pet will open for you
 _WEB_SCHEMES = frozenset({"http", "https"})
+# 可以當寵物音效的副檔名。音效路徑可能來自匯入的預設集或 Workshop 內容，
+# 所以只認這幾種副檔名的既存檔案。
+# The suffixes accepted as a pet sound. The path can arrive from an imported
+# preset or Workshop content, so only an existing file with one of these is
+# honoured.
+_SOUND_SUFFIXES = (".wav", ".mp3", ".ogg", ".m4a", ".flac")
 
 
 # 拖進寵物的檔案分類 / What a file dropped onto the pet means
 DROP_SPRITE = "sprite"  # 圖片或動作包 -> 換一套外觀
 DROP_FOOD = "food"      # 其他檔案 -> 當成食物餵給寵物
+
+
+def acceptable_sound(sound_path) -> Optional[Path]:
+    """
+    可以拿來當寵物音效的路徑，否則回傳 None。音效路徑可能來自匯入的預設集或
+    Workshop 內容（別人寫的資料），所以只接受「確實存在、副檔名是音訊」的檔案
+    ——不讓一份預設集指使程式去開任意檔案。
+    The path to use as a pet sound, or None. It can arrive from an imported
+    preset or from Workshop content - data someone else wrote - so only a file
+    that actually exists and carries an audio suffix is accepted: a preset does
+    not get to point this at any file it likes.
+    """
+    if not sound_path:
+        return None
+    path = Path(str(sound_path))
+    if path.is_file() and path.suffix.lower() in _SOUND_SUFFIXES:
+        return path
+    return None
 
 
 def classify_drop(path) -> Optional[str]:
@@ -238,7 +262,7 @@ class PetTimeline:
     """
 
     def __init__(self, events) -> None:
-        self._events = sorted(list(events), key=lambda item: item[0])
+        self._events = sorted(events, key=lambda item: item[0])
         self._index = 0
 
     def __len__(self) -> int:
@@ -319,12 +343,13 @@ class PetTagGame:
     tick from outside.
     """
 
-    CATCH_DISTANCE = 60.0
-    FLEE_DISTANCE = 220.0
-    COOLDOWN_TICKS = 20
+    DEFAULT_CATCH_DISTANCE = 60.0
+    DEFAULT_FLEE_DISTANCE = 220.0
+    DEFAULT_COOLDOWN_TICKS = 20
 
-    def __init__(self, catch_distance: float = CATCH_DISTANCE, flee_distance: float = FLEE_DISTANCE,
-                 cooldown_ticks: int = COOLDOWN_TICKS) -> None:
+    def __init__(self, catch_distance: float = DEFAULT_CATCH_DISTANCE,
+                 flee_distance: float = DEFAULT_FLEE_DISTANCE,
+                 cooldown_ticks: int = DEFAULT_COOLDOWN_TICKS) -> None:
         self.catch_distance = float(catch_distance)
         self.flee_distance = float(flee_distance)
         self.cooldown_ticks = max(0, int(cooldown_ticks))
@@ -361,7 +386,7 @@ class PetTagGame:
             self.reset()
             return {}
         if self.it not in positions:
-            self.it = sorted(positions)[0]
+            self.it = min(positions)
             self._cooldown = self.cooldown_ticks
         # 冷卻期間只是跑給對方追，不換鬼；先判斷再遞減，冷卻 N 拍就真的保護 N 拍。
         # While cooling down nobody can be tagged; check before decrementing so a
@@ -801,7 +826,7 @@ class PetMotion:
                 self.vx = -abs(self.vx)
         return int(self.x), int(self.y)
 
-    def _step_fall(self, left, top, right, bottom, floor_y) -> Tuple[int, int]:
+    def _step_fall(self, left, top, right, bottom, _floor_y) -> Tuple[int, int]:
         """落下：撞牆/天花板反彈，並在越過視窗平台或螢幕地板時落地。"""
         prev_feet = self.y + self.height
         self.vy += self.GRAVITY
@@ -845,7 +870,7 @@ class PetMotion:
                 self._new_state(force_walk=True)
         return int(self.x), int(self.y)
 
-    def _step_follow(self, left, top, right, bottom, floor_y) -> Tuple[int, int]:
+    def _step_follow(self, left, _top, right, _bottom, floor_y) -> Tuple[int, int]:
         """朝 follow_target_x 走過去；抵達附近即清除並恢復隨機行為。"""
         center_x = self.x + self.width / 2.0
         if abs(center_x - self.follow_target_x) <= self.speed + 2.0:
@@ -898,7 +923,7 @@ class PetMotion:
             self.vx = -abs(self.vx)
         return int(self.x), int(self.y)
 
-    def _step_climb(self, left, top, right, bottom, floor_y) -> Tuple[int, int]:
+    def _step_climb(self, left, top, right, _bottom, floor_y) -> Tuple[int, int]:
         """沿螢幕邊緣爬行；隨機放手則掉落 / Crawl the screen perimeter; may let go and fall."""
         if self._rng.random() < self.DROP_CHANCE:
             self.surface = SURFACE_FLOOR
@@ -1348,7 +1373,7 @@ class DesktopPetWidget(BaseWidget):
 
     def start_moving(self, bounds: Tuple[int, int, int, int], interval_ms: int = 33) -> None:
         front_engine_logger.info(f"[DesktopPetWidget] start_moving | bounds={bounds}")
-        left, top, right, bottom = bounds
+        left, _top, _right, bottom = bounds
         self.motion.set_bounds(bounds)
         self.motion.x = float(left)
         self.motion.y = float(bottom - self.pet_size)
@@ -1596,10 +1621,12 @@ class DesktopPetWidget(BaseWidget):
             self._pending_chat_reply = None
 
     def _init_sound(self, sound_path: Optional[str]) -> None:
-        if not sound_path:
-            return
-        path = Path(sound_path)
-        if not (path.exists() and path.is_file()):
+        """載入寵物音效（路徑先經過 acceptable_sound 檢查）。"""
+        path = acceptable_sound(sound_path)
+        if path is None:
+            if sound_path:
+                front_engine_logger.warning(
+                    f"[DesktopPetWidget] refusing sound path: {sound_path!r}")
             return
         try:
             self._sound = QSoundEffect(self)
@@ -1829,8 +1856,8 @@ class DesktopPetWidget(BaseWidget):
             event.acceptProposedAction()
 
     def dragMoveEvent(self, event) -> None:
-        if self._accepts_drop(event.mimeData()):
-            event.acceptProposedAction()
+        """拖曳過程中的判斷和進入時完全一樣，直接沿用同一套規則。"""
+        self.dragEnterEvent(event)
 
     def dropEvent(self, event) -> None:
         path = self.dropped_path(event.mimeData())

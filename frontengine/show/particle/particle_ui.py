@@ -1,7 +1,19 @@
 import random
 import sys
 
-from OpenGL.GL import *
+# 明確列出用到的 OpenGL 名稱。星號匯入會讓靜態檢查完全看不出哪些名字存在，
+# 也就是說整個檔案的「未定義名稱」檢查等於失效。
+# The OpenGL names this file uses, spelled out. A star import blinds static
+# analysis to what exists, which switches off undefined-name checking for the
+# whole file.
+from OpenGL.GL import (
+    GL_BLEND, GL_COLOR_BUFFER_BIT, GL_CULL_FACE, GL_DEPTH_BUFFER_BIT, GL_DEPTH_TEST,
+    GL_LINEAR, GL_MODELVIEW, GL_ONE_MINUS_SRC_ALPHA, GL_PROJECTION, GL_QUADS, GL_RGBA,
+    GL_SRC_ALPHA, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_TEXTURE_MIN_FILTER,
+    GL_UNSIGNED_BYTE, glBegin, glBindTexture, glBlendFunc, glClear, glClearColor, glColor4f,
+    glDisable, glEnable, glEnd, glGenTextures, glLoadIdentity, glMatrixMode, glOrtho,
+    glTexCoord2f, glTexImage2D, glTexParameteri, glTranslatef, glVertex2f, glViewport,
+)
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QSurfaceFormat, QPixmap
 from PySide6.QtOpenGLWidgets import QOpenGLWidget

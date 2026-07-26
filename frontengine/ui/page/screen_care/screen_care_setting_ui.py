@@ -208,7 +208,7 @@ class ScreenCareSettingUI(QWidget):
 
     def _apply_filter_settings(self) -> None:
         """滑桿或顏色改變時即時套用到已開啟的濾鏡。"""
-        for widget in list(self.filter_widget_list):
+        for widget in self.filter_widget_list[:]:
             try:
                 widget.set_filter(
                     self.filter_color_combobox.currentData(), self.filter_strength_slider.value())
@@ -242,7 +242,7 @@ class ScreenCareSettingUI(QWidget):
             language_wrapper.language_word_dict.get("reading_ruler_start", "Turn ruler on"))
 
     def _apply_ruler_settings(self) -> None:
-        for widget in list(self.ruler_widget_list):
+        for widget in self.ruler_widget_list[:]:
             try:
                 widget.set_band(
                     int(self.ruler_band_combobox.currentText()), self.ruler_strength_slider.value())

@@ -11,6 +11,11 @@ from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
+# 四處共用的語系鍵
+# The language key shared by four call sites.
+_NOT_READY = "Not Ready"
+
+
 class SoundPlayerSettingUI(QWidget):
     def __init__(self):
         front_engine_logger.info("[SoundPlayerSettingUI] Init")
@@ -36,13 +41,13 @@ class SoundPlayerSettingUI(QWidget):
         self.choose_wav_file_button = QPushButton(
             language_wrapper.language_word_dict.get("sound_player_setting_choose_wav_file"))
         self.choose_wav_file_button.clicked.connect(self.choose_and_copy_wav_file_to_cwd_sound_dir_then_play)
-        self.wav_ready_label = QLabel(language_wrapper.language_word_dict.get("Not Ready"))
+        self.wav_ready_label = QLabel(language_wrapper.language_word_dict.get(_NOT_READY))
 
         # Choose general sound file
         self.choose_player_file_button = QPushButton(
             language_wrapper.language_word_dict.get("sound_player_setting_choose_sound_file"))
         self.choose_player_file_button.clicked.connect(self.choose_and_copy_sound_file_to_cwd_sound_dir_then_play)
-        self.player_ready_label = QLabel(language_wrapper.language_word_dict.get("Not Ready"))
+        self.player_ready_label = QLabel(language_wrapper.language_word_dict.get(_NOT_READY))
 
         # Start buttons
         self.start_wav_button = QPushButton(language_wrapper.language_word_dict.get("sound_player_setting_play_wav"))
@@ -91,7 +96,7 @@ class SoundPlayerSettingUI(QWidget):
 
     def choose_and_copy_wav_file_to_cwd_sound_dir_then_play(self) -> None:
         front_engine_logger.info("[SoundPlayerSettingUI] choose_and_copy_wav_file_to_cwd_sound_dir_then_play")
-        self.wav_ready_label.setText(language_wrapper.language_word_dict.get("Not Ready"))
+        self.wav_ready_label.setText(language_wrapper.language_word_dict.get(_NOT_READY))
         self.ready_to_play = False
         self.wav_sound_path = choose_wav_sound(self)
         if self.wav_sound_path:
@@ -100,7 +105,7 @@ class SoundPlayerSettingUI(QWidget):
 
     def choose_and_copy_sound_file_to_cwd_sound_dir_then_play(self) -> None:
         front_engine_logger.info("[SoundPlayerSettingUI] choose_and_copy_sound_file_to_cwd_sound_dir_then_play")
-        self.player_ready_label.setText(language_wrapper.language_word_dict.get("Not Ready"))
+        self.player_ready_label.setText(language_wrapper.language_word_dict.get(_NOT_READY))
         self.ready_to_play = False
         self.player_sound_path = choose_player_sound(self)
         if self.player_sound_path:

@@ -89,7 +89,8 @@ class PresetRepository:
         # not remote/untrusted input, so writing there is intended behaviour.
         destination = Path(destination)
         destination.parent.mkdir(parents=True, exist_ok=True)
-        destination.write_text(  # NOSONAR: user-selected Save-dialog path
+        # NOSONAR - the destination came from a native Save dialog
+        destination.write_text(
             source.read_text(encoding="utf-8"), encoding="utf-8"
         )
         return destination

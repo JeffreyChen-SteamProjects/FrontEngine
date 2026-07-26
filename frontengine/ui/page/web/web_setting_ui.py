@@ -6,8 +6,10 @@ from PySide6.QtWidgets import (
 
 from frontengine.show.web.webview import WebWidget
 from frontengine.ui.page.utils import (
+    apply_checkbox_state,
+    apply_combobox_text_state,
+    apply_slider_state,
     build_target_monitor_combobox,
-    coerce_int,
     dispatch_to_monitors,
     resolve_preferred_monitor,
 )
@@ -202,7 +204,7 @@ class WEBSettingUI(QWidget):
 
     def close_dashboard(self) -> None:
         """關閉整組儀表板 / Close the whole dashboard."""
-        for widget in list(self.dashboard_widgets):
+        for widget in self.dashboard_widgets[:]:
             try:
                 widget.close()
             except RuntimeError:
@@ -215,7 +217,7 @@ class WEBSettingUI(QWidget):
     def _alive_dashboard_widgets(self) -> list:
         """清掉已被銷毀的頁面後回傳仍存活者。"""
         alive = []
-        for widget in list(self.dashboard_widgets):
+        for widget in self.dashboard_widgets[:]:
             try:
                 widget.isVisible()
             except RuntimeError:
@@ -252,34 +254,28 @@ class WEBSettingUI(QWidget):
         }
 
     def set_state(self, state: dict) -> None:
-        opacity = coerce_int(state.get("opacity"))
-        if opacity is not None:
-            self.opacity_slider.setValue(opacity)
+        """把預設集的內容還原到這一頁的控制項上。"""
+        apply_slider_state(state, ((self.opacity_slider, "opacity"),))
+        apply_combobox_text_state(state, (
+            (self.target_monitor_combobox, "target_monitor"),
+            (self.zoom_combobox, "zoom"),
+            (self.refresh_combobox, "refresh"),
+        ))
+        apply_checkbox_state(state, (
+            (self.open_local_html_checkbox, "open_file"),
+            (self.enable_input_checkbox, "enable_input"),
+            (self.show_on_all_screen_checkbox, "show_on_all_screen"),
+            (self.show_on_bottom_checkbox, "show_on_bottom"),
+        ))
+        # 這三個旗標同時記在屬性上，勾選框以外也要跟著更新
+        # These three are mirrored on attributes, which need updating as well.
+        for attribute, key in (("open_file", "open_file"),
+                               ("enable_input", "enable_input"),
+                               ("show_all_screen", "show_on_all_screen")):
+            if key in state:
+                setattr(self, attribute, bool(state[key]))
         if "url" in state:
             self.web_url_input.setText(str(state.get("url") or ""))
-        if "open_file" in state:
-            self.open_local_html_checkbox.setChecked(bool(state["open_file"]))
-            self.open_file = bool(state["open_file"])
-        if "enable_input" in state:
-            self.enable_input_checkbox.setChecked(bool(state["enable_input"]))
-            self.enable_input = bool(state["enable_input"])
-        if "show_on_all_screen" in state:
-            self.show_on_all_screen_checkbox.setChecked(bool(state["show_on_all_screen"]))
-            self.show_all_screen = bool(state["show_on_all_screen"])
-        if "show_on_bottom" in state:
-            self.show_on_bottom_checkbox.setChecked(bool(state["show_on_bottom"]))
-        if state.get("target_monitor") is not None:
-            index = self.target_monitor_combobox.findText(str(state["target_monitor"]))
-            if index >= 0:
-                self.target_monitor_combobox.setCurrentIndex(index)
-        if state.get("zoom") is not None:
-            index = self.zoom_combobox.findText(str(state["zoom"]))
-            if index >= 0:
-                self.zoom_combobox.setCurrentIndex(index)
-        if state.get("refresh") is not None:
-            index = self.refresh_combobox.findText(str(state["refresh"]))
-            if index >= 0:
-                self.refresh_combobox.setCurrentIndex(index)
         if state.get("dashboard") is not None:
             self.dashboard_edit.setPlainText(str(state["dashboard"]))
 

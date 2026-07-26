@@ -208,7 +208,7 @@ class ImageSettingUI(QWidget):
             return
         self._slideshow_index = (self._slideshow_index + 1) % len(self._slideshow_paths)
         next_path = self._slideshow_paths[self._slideshow_index]
-        for widget in list(self.image_widget_list):
+        for widget in self.image_widget_list[:]:
             setter = getattr(widget, "set_image_path", None)
             if setter is None:
                 continue

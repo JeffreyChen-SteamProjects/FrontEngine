@@ -92,7 +92,8 @@ class SystemMonitorWidget(BaseWidget):
         self._series: Dict[str, Deque[float]] = {
             key: deque(maxlen=self.history_length) for key, _label, _color in LINES
         }
-        self._latest: Dict[str, float] = {key: 0.0 for key, _label, _color in LINES}
+        self._latest: Dict[str, float] = dict.fromkeys(
+            (key for key, _label, _color in LINES), 0.0)
         self._font = QFont()
         self._font.setPointSize(9)
         self._timer = QTimer(self)
