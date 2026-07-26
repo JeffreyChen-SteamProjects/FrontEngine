@@ -52,6 +52,7 @@ from frontengine.utils.window_pin.window_layout import capture_layout, restore_l
 # The English fallback shared by three call sites, seen only when a
 # translation is missing.
 _RECORD_AREA = "Record area"
+_RECORD_AN_AREA = "Record an area"
 
 
 def _t(key: str, fallback: str) -> str:
@@ -191,7 +192,7 @@ class ToolsSettingUI(QWidget):
         self.record_seconds_spinbox.setRange(1, 120)
         self.record_seconds_spinbox.setValue(DEFAULT_MAX_SECONDS)
         self.record_camera_checkbox = QCheckBox(_t("tools_record_camera", "Include camera"))
-        self.record_button = QPushButton(_t("tools_record_start", _RECORD_AREA))
+        self.record_button = QPushButton(_t("tools_record_start", _RECORD_AN_AREA))
         self.record_button.clicked.connect(self.toggle_recording)
 
     def _build_virtual_camera_row(self) -> None:
@@ -497,7 +498,7 @@ class ToolsSettingUI(QWidget):
     def finish_recording(self) -> Optional[str]:
         """停止錄製並存成 GIF，回傳檔案路徑。"""
         self.recorder.stop()
-        self.record_button.setText(_t("tools_record_start", _RECORD_AREA))
+        self.record_button.setText(_t("tools_record_start", _RECORD_AN_AREA))
         if not self.recorder.frames:
             return None
         target = QFileDialog.getSaveFileName(
