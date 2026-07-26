@@ -49,7 +49,12 @@ from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.plugins.plugin_loader import load_plugins
 from frontengine.utils.preset_schedule.preset_schedule_service import PresetScheduleService
+from frontengine.ui.dialog.remote_control_dialog import (
+    MIDI_KEY, current_bindings, remote_enabled,
+)
 from frontengine.ui.dialog.screen_privacy_dialog import current_settings as current_privacy_settings
+from frontengine.utils.midi.midi_input import MidiInput, binding_key
+from frontengine.utils.remote.remote_server import RemoteServer
 from frontengine.ui.dialog.smart_pause_dialog import current_rules
 from frontengine.utils.screen_privacy.share_watch import ShareWatchService
 from frontengine.utils.app_profile.app_profile_service import AppProfileService
@@ -210,6 +215,25 @@ class FrontEngineMainUI(QMainWindow):
             lambda name: apply_named_preset(self, name)
         )
         self.app_profile_service.start()
+
+        # 手機遙控與 MIDI：兩者都只呼叫既有的快速鍵動作，做不到別的事
+        # The phone remote and MIDI both call the existing hotkey actions and
+        # can do nothing beyond them.
+        # 兩者的訊息都來自別的執行緒（HTTP 伺服器、winmm），所以明確用
+        # QueuedConnection 接回 UI 執行緒——和全域快速鍵同樣的理由。
+        # Both deliver from another thread (the HTTP server, winmm), so an
+        # explicit QueuedConnection brings them back to the UI thread - the same
+        # reason the global hotkeys use one.
+        self.remote_server = RemoteServer()
+        self.remote_server.action_requested.connect(
+            self._handle_hotkey, Qt.ConnectionType.QueuedConnection)
+        if remote_enabled():
+            self.remote_server.start()
+        self.midi_input = MidiInput()
+        self.midi_input.message_received.connect(
+            self._on_midi_message, Qt.ConnectionType.QueuedConnection)
+        if user_setting_dict.get(MIDI_KEY):
+            self.midi_input.start(user_setting_dict.get("midi_device") or 0)
 
         # 分享畫面時把覆蓋層藏出擷取結果（自己仍看得到）
         # Hide the overlays from the capture while sharing; they stay on screen here.
@@ -468,6 +492,22 @@ class FrontEngineMainUI(QMainWindow):
             self.control_center_ui.show_all()
             self._smart_pause_hid = False
 
+    def _on_midi_message(self, message: dict) -> None:
+        """
+        處理一則 MIDI 訊息（已經由 QueuedConnection 帶回 UI 執行緒）。
+        旋鈕轉到底才算一次按下，避免轉動途中連續觸發。
+        Handle one MIDI message, already brought back to the UI thread by the
+        queued connection. A knob only counts once it reaches the top, so
+        turning it does not fire repeatedly on the way.
+        """
+        if message.get("kind") == "note" and not message.get("pressed"):
+            return
+        if message.get("kind") == "control" and int(message.get("value", 0)) < 127:
+            return
+        action = current_bindings().get(binding_key(message))
+        if action:
+            self._handle_hotkey(action)
+
     def _on_sharing_changed(self, sharing: bool, match: str) -> None:
         """
         偵測到會議程式開著／關掉時，自動把覆蓋層藏出擷取結果或放回去。
@@ -529,51 +569,69 @@ class FrontEngineMainUI(QMainWindow):
         if getattr(self, "reminder_service", None) is not None:
             self.reminder_service.tracker.reset()
 
+    # 關閉時要停掉的背景服務，依相依性由外而內排列
+    # The background services to stop on close, outermost first.
+    _CLOSING_SERVICES = (
+        "preset_schedule_service", "theme_schedule_service", "usage_service",
+        "remote_server", "midi_input", "share_watch_service", "reminder_service",
+        "app_profile_service", "smart_pause_service", "hotkey_service",
+    )
+    # 關閉時要清空的覆蓋層清單
+    # The overlay lists to empty on close.
+    _CLOSING_WIDGET_LISTS = (
+        ("video_setting_ui", "video_widget_list"),
+        ("image_setting_ui", "image_widget_list"),
+        ("web_setting_ui", "web_widget_list"),
+        ("gif_setting_ui", "gif_widget_list"),
+        ("sound_player_setting_ui", "sound_widget_list"),
+        ("text_setting_ui", "text_widget_list"),
+        ("particle_setting_ui", "particle_list"),
+        ("pet_setting_ui", "pet_list"),
+    )
+
     def close(self) -> None:
         """關閉程式並清理資源 / Close application and clear resources"""
         if user_setting_dict.get("restore_last_session"):
             save_last_session(self)
-        if getattr(self, "preset_schedule_service", None) is not None:
-            self.preset_schedule_service.stop()
-        if getattr(self, "theme_schedule_service", None) is not None:
-            self.theme_schedule_service.stop()
-        if getattr(self, "usage_service", None) is not None:
-            self.usage_service.stop()
+        self._stop_services()
+        self._save_page_state()
+        self._save_window_geometry()
+        write_user_setting()
+        self._clear_overlays()
+        self.scene_setting_ui.close_scene()
+        super().close()
+        if self.main_app:
+            self.main_app.exit(0)
+
+    def _stop_services(self) -> None:
+        """停掉所有背景服務（沒建立起來的就跳過）。"""
+        for name in self._CLOSING_SERVICES:
+            service = getattr(self, name, None)
+            if service is not None:
+                service.stop()
         if getattr(self, "clipboard_watcher", None) is not None:
             self.clipboard_watcher.stop()
             self._persist_clipboard()
+
+    def _save_page_state(self) -> None:
+        """讓幾個分頁在關閉前把自己的東西收好。"""
         if getattr(self, "widgets_setting_ui", None) is not None:
             self.widgets_setting_ui.save_notes()
             self.widgets_setting_ui.stop_spectrum()
         if getattr(self, "tools_setting_ui", None) is not None:
             self.tools_setting_ui.release_pinned_windows()
             self.tools_setting_ui.stop_camera()
+            self.tools_setting_ui.stop_virtual_camera()
         if getattr(self, "stream_setting_ui", None) is not None:
             self.stream_setting_ui.soundboard.stop_all()
-        if getattr(self, "share_watch_service", None) is not None:
-            self.share_watch_service.stop()
-        if getattr(self, "reminder_service", None) is not None:
-            self.reminder_service.stop()
-        if getattr(self, "app_profile_service", None) is not None:
-            self.app_profile_service.stop()
-        if getattr(self, "smart_pause_service", None) is not None:
-            self.smart_pause_service.stop()
-        if getattr(self, "hotkey_service", None) is not None:
-            self.hotkey_service.stop()
-        self._save_window_geometry()
-        write_user_setting()
-        self.video_setting_ui.video_widget_list.clear()
-        self.image_setting_ui.image_widget_list.clear()
-        self.web_setting_ui.web_widget_list.clear()
-        self.gif_setting_ui.gif_widget_list.clear()
-        self.sound_player_setting_ui.sound_widget_list.clear()
-        self.text_setting_ui.text_widget_list.clear()
-        self.particle_setting_ui.particle_list.clear()
-        self.pet_setting_ui.pet_list.clear()
-        self.scene_setting_ui.close_scene()
-        super().close()
-        if self.main_app:
-            self.main_app.exit(0)
+
+    def _clear_overlays(self) -> None:
+        """清空各分頁記著的覆蓋層清單。"""
+        for page_name, attribute in self._CLOSING_WIDGET_LISTS:
+            page = getattr(self, page_name, None)
+            widget_list = getattr(page, attribute, None) if page is not None else None
+            if widget_list is not None:
+                widget_list.clear()
 
     @classmethod
     def debug_close(cls) -> None:

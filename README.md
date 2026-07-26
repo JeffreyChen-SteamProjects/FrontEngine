@@ -119,6 +119,14 @@ Measuring and capture tools on the **Tools** tab:
   `hsl(...)` or a CSS custom property.
 - **Region capture** — drag out an area; it lands on the clipboard and can be
   saved to a file.
+- **Virtual camera** — drag out an area and send it, overlays and all, as a
+  webcam that Zoom, Teams or Discord can pick as their video source. Needs the
+  optional `pyvirtualcam` package and a virtual camera driver on the system
+  (OBS installs one); without either, the button says so rather than failing
+  quietly.
+- **Camera** — any video input works, including capture cards, and the device
+  list can be refreshed without restarting since cards are usually plugged in
+  while the app is already running.
 - **Read text** — drag out an area to copy the text in it, translate it, or ask
   a question about it.
   > This is the **only** feature here that sends screen content off the
@@ -169,6 +177,27 @@ Four things on the **Stream** tab, for playing and for going live:
   button.
 - **OBS** — switch scenes and toggle recording or streaming through OBS's own
   WebSocket (built in since OBS 28). The password stays in your local settings.
+
+---
+
+## Remote control
+
+From **Settings → Remote control**:
+
+- **Your phone** — turn it on and FrontEngine serves a small page on your local
+  network; open the link on a phone and the buttons drive the same actions the
+  global hotkeys do.
+  > This opens a port on your machine, so it is **off by default**. The link
+  > carries a token that is regenerated every time the server starts, so an old
+  > link stops working, and the page can only ask for the fixed action list —
+  > nothing else is reachable. It is plain HTTP: someone else on the same
+  > network could read the token and press the same buttons, which is a
+  > nuisance rather than a breach given what the buttons do, but leave it off
+  > on networks you do not trust.
+- **A MIDI controller** — press *Learn*, move a knob or pad, and bind it to an
+  action. It uses Windows' built-in winmm, so no extra package is needed. A
+  knob fires once it reaches the top rather than repeatedly on the way, and
+  releasing a pad does not count as a second press.
 
 ---
 
