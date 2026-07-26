@@ -1,5 +1,6 @@
 import os
 import sys
+from os import getcwd
 from pathlib import Path
 from typing import Dict, Optional, Type
 
@@ -49,6 +50,11 @@ from frontengine.utils.plugins.plugin_loader import load_plugins
 from frontengine.utils.preset_schedule.preset_schedule_service import PresetScheduleService
 from frontengine.ui.dialog.smart_pause_dialog import current_rules
 from frontengine.utils.app_profile.app_profile_service import AppProfileService
+from frontengine.utils.clipboard.clipboard_history import DEFAULT_LIMIT, ClipboardHistory
+from frontengine.utils.clipboard.clipboard_watcher import ClipboardWatcher
+from frontengine.utils.json.json_repository import JsonRepository
+from frontengine.utils.usage_tracking.usage_service import UsageTrackingService
+from frontengine.utils.usage_tracking.usage_tracker import USAGE_FILE, UsageTracker
 from frontengine.utils.reminder.reminder_service import ReminderService
 from frontengine.utils.smart_pause.smart_pause_service import SmartPauseService
 from frontengine.utils.theme_schedule.theme_schedule_service import ThemeScheduleService
@@ -200,6 +206,23 @@ class FrontEngineMainUI(QMainWindow):
             lambda name: apply_named_preset(self, name)
         )
         self.app_profile_service.start()
+
+        # 使用時間統計：預設關閉，只寫本機檔案，使用者可隨時清除
+        # Usage tracking: off by default, local file only, clearable at any time.
+        self.usage_tracker = UsageTracker(JsonRepository(Path(getcwd()) / USAGE_FILE))
+        self.usage_service = UsageTrackingService(self.usage_tracker)
+        if user_setting_dict.get("usage_tracking"):
+            self.usage_service.start()
+
+        # 剪貼簿歷史：預設關閉；未勾選保存時只留在記憶體
+        # Clipboard history: off by default, memory only unless saving is on.
+        self.clipboard_history = ClipboardHistory(
+            limit=user_setting_dict.get("clipboard_limit", DEFAULT_LIMIT))
+        if user_setting_dict.get("clipboard_persist"):
+            self.clipboard_history.load(user_setting_dict.get("clipboard_entries"))
+        self.clipboard_watcher = ClipboardWatcher(self.clipboard_history)
+        if user_setting_dict.get("clipboard_history"):
+            self.clipboard_watcher.start()
 
         # 自訂提醒（喝水、久坐、每日鬧鐘），到期時以提示卡顯示
         # Custom reminders - water, posture, a daily alarm - shown as a toast.
@@ -436,6 +459,36 @@ class FrontEngineMainUI(QMainWindow):
         front_engine_logger.info(f"[MainUI] reminder | {label}")
         self._last_toast = show_toast(label)
 
+    def _persist_clipboard(self) -> None:
+        """
+        只有使用者勾選「保存到檔案」時才把剪貼簿歷史寫下來；沒勾就確保
+        設定裡不留任何內容。
+        Write the clipboard history down only when the user asked for it; when
+        they did not, make sure nothing is left behind in the settings.
+        """
+        if user_setting_dict.get("clipboard_persist"):
+            user_setting_dict["clipboard_entries"] = self.clipboard_history.to_list()
+        else:
+            user_setting_dict["clipboard_entries"] = []
+
+    def set_usage_tracking(self, enabled: bool) -> None:
+        """開關使用時間統計並記住選擇。"""
+        user_setting_dict["usage_tracking"] = bool(enabled)
+        write_user_setting()
+        if enabled:
+            self.usage_service.start()
+        else:
+            self.usage_service.stop()
+
+    def set_clipboard_history(self, enabled: bool) -> None:
+        """開關剪貼簿歷史紀錄並記住選擇。"""
+        user_setting_dict["clipboard_history"] = bool(enabled)
+        write_user_setting()
+        if enabled:
+            self.clipboard_watcher.start()
+        else:
+            self.clipboard_watcher.stop()
+
     def refresh_rule_services(self) -> None:
         """
         設定對話框按下確定後呼叫：規則與對照表都是每次輪詢重讀，所以只要把
@@ -454,6 +507,11 @@ class FrontEngineMainUI(QMainWindow):
             self.preset_schedule_service.stop()
         if getattr(self, "theme_schedule_service", None) is not None:
             self.theme_schedule_service.stop()
+        if getattr(self, "usage_service", None) is not None:
+            self.usage_service.stop()
+        if getattr(self, "clipboard_watcher", None) is not None:
+            self.clipboard_watcher.stop()
+            self._persist_clipboard()
         if getattr(self, "widgets_setting_ui", None) is not None:
             self.widgets_setting_ui.save_notes()
             self.widgets_setting_ui.stop_spectrum()

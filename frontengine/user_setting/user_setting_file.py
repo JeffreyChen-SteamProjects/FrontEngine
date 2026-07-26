@@ -54,6 +54,18 @@ user_setting_dict: Dict[str, Any] = {
     # Sticky note contents and positions, and whether to reopen them on launch.
     "sticky_notes": [],
     "sticky_notes_restore": False,
+    # 使用時間統計（只寫本機檔案、預設關閉）
+    # Usage tracking: local file only, off by default.
+    "usage_tracking": False,
+    # 剪貼簿歷史（預設關閉；未開啟保存時只留在記憶體）
+    # Clipboard history: off by default, memory only unless saving is on.
+    "clipboard_history": False,
+    "clipboard_persist": False,
+    "clipboard_entries": [],
+    "clipboard_limit": 50,
+    # 已儲存的視窗版面：名稱 -> [{title, x, y, width, height}]
+    # Saved window layouts: name -> [{title, x, y, width, height}]
+    "window_layouts": {},
     # 覆蓋層畫質檔位：high / balanced / saver
     # Overlay quality tier: high / balanced / saver.
     "quality_tier": "high",

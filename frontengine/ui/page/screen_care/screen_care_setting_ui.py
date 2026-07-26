@@ -13,12 +13,16 @@ from PySide6.QtWidgets import (
     QCheckBox, QComboBox, QGridLayout, QLabel, QPushButton, QSlider, QWidget,
 )
 
+from frontengine.show.screen_care.color_vision_widget import ColorVisionWidget
 from frontengine.show.screen_care.screen_filter import (
     FILTER_COLORS, ReadingRulerWidget, ScreenFilterWidget,
 )
 from frontengine.ui.page.utils import build_target_monitor_combobox, coerce_int, resolve_preferred_monitor
 from frontengine.utils.break_reminder.break_reminder import (
     PHASE_REST, PHASE_WORK, BreakReminder,
+)
+from frontengine.utils.color_vision.color_vision import (
+    KIND_ACHROMATOPSIA, KIND_DEUTERANOPIA, KIND_PROTANOPIA, KIND_TRITANOPIA,
 )
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
@@ -39,6 +43,7 @@ class ScreenCareSettingUI(QWidget):
         self.filter_widget_list: List[ScreenFilterWidget] = []
         self.ruler_widget_list: List[ReadingRulerWidget] = []
         self.break_overlay_list: List[ScreenFilterWidget] = []
+        self.color_vision_widget_list: List[ColorVisionWidget] = []
 
         # Colour filter
         self.filter_label = QLabel(
@@ -93,6 +98,28 @@ class ScreenCareSettingUI(QWidget):
         # Shared
         self.all_screens_checkbox = QCheckBox(
             language_wrapper.language_word_dict.get("Show on all screen", "Show on all screen"))
+        # 色覺模擬：把整個畫面換成某種色盲看到的樣子（不透明覆蓋層）
+        # Colour-vision simulation: repaint the screen as a given deficiency
+        # sees it, using an opaque overlay.
+        self.color_vision_label = QLabel(
+            language_wrapper.language_word_dict.get("color_vision_label", "Colour vision"))
+        self.color_vision_combobox = QComboBox()
+        for kind, key, fallback in (
+                (KIND_PROTANOPIA, "color_vision_protanopia", "Protanopia (red)"),
+                (KIND_DEUTERANOPIA, "color_vision_deuteranopia", "Deuteranopia (green)"),
+                (KIND_TRITANOPIA, "color_vision_tritanopia", "Tritanopia (blue)"),
+                (KIND_ACHROMATOPSIA, "color_vision_achromatopsia", "Achromatopsia (none)")):
+            self.color_vision_combobox.addItem(
+                language_wrapper.language_word_dict.get(key, fallback), kind)
+        self.color_vision_combobox.currentIndexChanged.connect(self._apply_color_vision_settings)
+        self.color_vision_slider = QSlider(Qt.Orientation.Horizontal)
+        self.color_vision_slider.setRange(0, 100)
+        self.color_vision_slider.setValue(100)
+        self.color_vision_slider.valueChanged.connect(self._apply_color_vision_settings)
+        self.color_vision_button = QPushButton(
+            language_wrapper.language_word_dict.get("color_vision_start", "Simulate"))
+        self.color_vision_button.clicked.connect(self.toggle_color_vision)
+
         self.target_monitor_label = QLabel(
             language_wrapper.language_word_dict.get("target_monitor_label", "Target monitor"))
         self.target_monitor_combobox = build_target_monitor_combobox()
@@ -116,10 +143,14 @@ class ScreenCareSettingUI(QWidget):
         self.grid_layout.addWidget(self.break_minutes_combobox, 4, 1)
         self.grid_layout.addWidget(self.break_seconds_combobox, 4, 2)
         self.grid_layout.addWidget(self.break_button, 5, 0)
-        self.grid_layout.addWidget(self.all_screens_checkbox, 6, 0)
-        self.grid_layout.addWidget(self.target_monitor_label, 7, 0)
-        self.grid_layout.addWidget(self.target_monitor_combobox, 7, 1)
-        self.grid_layout.addWidget(self.hint_label, 8, 0, 1, 3)
+        self.grid_layout.addWidget(self.color_vision_label, 6, 0)
+        self.grid_layout.addWidget(self.color_vision_combobox, 6, 1)
+        self.grid_layout.addWidget(self.color_vision_button, 6, 2)
+        self.grid_layout.addWidget(self.color_vision_slider, 7, 1, 1, 2)
+        self.grid_layout.addWidget(self.all_screens_checkbox, 8, 0)
+        self.grid_layout.addWidget(self.target_monitor_label, 9, 0)
+        self.grid_layout.addWidget(self.target_monitor_combobox, 9, 1)
+        self.grid_layout.addWidget(self.hint_label, 10, 0, 1, 3)
 
     # --- shared helpers --------------------------------------------------
     def target_screens(self) -> list:
@@ -262,8 +293,44 @@ class ScreenCareSettingUI(QWidget):
             self._present(overlay, screen)
 
     # --- preset state ----------------------------------------------------
+    # --- colour vision ---------------------------------------------------
+    def toggle_color_vision(self) -> None:
+        if self.color_vision_widget_list:
+            self.stop_color_vision()
+        else:
+            self.start_color_vision()
+
+    def start_color_vision(self) -> None:
+        """在每個目標螢幕開一層色覺模擬。"""
+        front_engine_logger.info("[ScreenCareSettingUI] start_color_vision")
+        self.stop_color_vision()
+        for screen in self.target_screens():
+            widget = ColorVisionWidget(self.color_vision_combobox.currentData(),
+                                       self.color_vision_slider.value() / 100.0)
+            widget.set_ui_window_flag(show_on_bottom=False)
+            self._present(widget, screen)
+            widget.start()
+            self.color_vision_widget_list.append(widget)
+        self.color_vision_button.setText(
+            language_wrapper.language_word_dict.get("color_vision_stop", "Stop simulating"))
+
+    def stop_color_vision(self) -> None:
+        self._close_all(self.color_vision_widget_list)
+        self.color_vision_button.setText(
+            language_wrapper.language_word_dict.get("color_vision_start", "Simulate"))
+
+    def _apply_color_vision_settings(self) -> None:
+        for widget in list(self.color_vision_widget_list):
+            try:
+                widget.set_simulation(self.color_vision_combobox.currentData(),
+                                      self.color_vision_slider.value() / 100.0)
+            except RuntimeError:
+                self.color_vision_widget_list.remove(widget)
+
     def get_state(self) -> dict:
         return {
+            "color_vision_kind": self.color_vision_combobox.currentData(),
+            "color_vision_severity": self.color_vision_slider.value(),
             "filter_color": self.filter_color_combobox.currentText(),
             "filter_strength": self.filter_strength_slider.value(),
             "ruler_band": self.ruler_band_combobox.currentText(),
@@ -286,8 +353,14 @@ class ScreenCareSettingUI(QWidget):
                 index = combobox.findText(str(state[key]))
                 if index >= 0:
                     combobox.setCurrentIndex(index)
+        kind = state.get("color_vision_kind")
+        if kind is not None:
+            index = self.color_vision_combobox.findData(str(kind))
+            if index >= 0:
+                self.color_vision_combobox.setCurrentIndex(index)
         for slider, key in ((self.filter_strength_slider, "filter_strength"),
-                            (self.ruler_strength_slider, "ruler_strength")):
+                            (self.ruler_strength_slider, "ruler_strength"),
+                            (self.color_vision_slider, "color_vision_severity")):
             value = coerce_int(state.get(key))
             if value is not None:
                 slider.setValue(value)

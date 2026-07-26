@@ -7,9 +7,11 @@ from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QDialog, QFileDialog, QMessageBox
 
 from frontengine.ui.dialog.app_profile_dialog import AppProfileDialog
+from frontengine.ui.dialog.clipboard_dialog import ClipboardDialog
 from frontengine.ui.dialog.hotkey_settings_dialog import HotkeySettingsDialog
 from frontengine.ui.dialog.reminder_dialog import ReminderDialog
 from frontengine.ui.dialog.smart_pause_dialog import SmartPauseDialog
+from frontengine.ui.dialog.usage_report_dialog import UsageReportDialog
 from frontengine.user_setting.user_setting_file import (
     export_user_setting,
     import_user_setting,
@@ -85,6 +87,23 @@ def build_settings_menu(ui: "FrontEngineMainUI") -> None:
     menu.addAction(reminder_action)
     ui.reminder_action = reminder_action
 
+    usage_action = QAction(_t("settings_menu_usage", "Screen time..."), menu)
+    usage_action.triggered.connect(lambda: _open_usage_dialog(ui))
+    menu.addAction(usage_action)
+    ui.usage_action = usage_action
+
+    clipboard_action = QAction(_t("settings_menu_clipboard", "Clipboard history..."), menu)
+    clipboard_action.triggered.connect(lambda: _open_clipboard_dialog(ui))
+    menu.addAction(clipboard_action)
+    ui.clipboard_action = clipboard_action
+
+    clipboard_toggle = QAction(_t("settings_menu_clipboard_record", "Record clipboard"), menu)
+    clipboard_toggle.setCheckable(True)
+    clipboard_toggle.setChecked(bool(user_setting_dict.get("clipboard_history")))
+    clipboard_toggle.toggled.connect(lambda checked: ui.set_clipboard_history(checked))
+    menu.addAction(clipboard_toggle)
+    ui.clipboard_toggle_action = clipboard_toggle
+
     menu.addSeparator()
     export_action = QAction(_t("settings_menu_export", "Export settings..."), menu)
     export_action.triggered.connect(lambda: _export_settings(ui))
@@ -93,6 +112,22 @@ def build_settings_menu(ui: "FrontEngineMainUI") -> None:
     import_action = QAction(_t("settings_menu_import", "Import settings..."), menu)
     import_action.triggered.connect(lambda: _import_settings(ui))
     menu.addAction(import_action)
+
+
+def _open_usage_dialog(ui: "FrontEngineMainUI") -> None:
+    """開使用時間報告；開關與清除都由對話框直接作用在主視窗的服務上。"""
+    front_engine_logger.info("[SettingsMenu] open UsageReportDialog")
+    dialog = UsageReportDialog(
+        ui.usage_tracker, ui,
+        enabled=bool(user_setting_dict.get("usage_tracking")),
+        on_toggle=ui.set_usage_tracking)
+    dialog.exec()
+
+
+def _open_clipboard_dialog(ui: "FrontEngineMainUI") -> None:
+    """開剪貼簿歷史。"""
+    front_engine_logger.info("[SettingsMenu] open ClipboardDialog")
+    ClipboardDialog(ui.clipboard_history, ui).exec()
 
 
 def _open_dialog(ui: "FrontEngineMainUI", dialog_class) -> bool:
