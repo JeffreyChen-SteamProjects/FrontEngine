@@ -51,17 +51,29 @@ class Retranslator:
     def bind(self, widget: Any, key: str, fallback: str = "",
              setter: str = "setText", *args: Any) -> str:
         """
-        記住這個控制項的文字來自哪個鍵，並回傳目前語言的字串。
+        立刻把文字設上去，並記住它來自哪個鍵；回傳的也是同一個字串。
+
+        設定與登記寫在一起，呼叫端就不必把同一段文字寫兩遍——先前建構時寫一次、
+        登記時再寫一次，長句子等於在檔案裡出現兩份。
         額外參數給 setTabText 這種需要索引的 setter 用（索引寫在文字前面）。
+
+        Set the text now and remember the key behind it, returning that same
+        string. Doing both here means the caller writes the wording once: it
+        used to appear twice, once at construction and once at registration,
+        which for the longer sentences meant two copies in the file.
         """
+        text = translate(key, fallback)
         if widget is None:
-            return translate(key, fallback)
+            return text
         try:
             reference: Any = weakref.ref(widget)
         except TypeError:  # pragma: no cover - 少數 Qt 型別不支援弱參考
             reference = lambda widget=widget: widget  # noqa: E731
         self._entries.append((reference, setter, key, fallback, args))
-        return translate(key, fallback)
+        method = getattr(widget, setter, None)
+        if method is not None:
+            method(*args, text)
+        return text
 
     def set_text(self, widget: Any, key: str, fallback: str = "",
                  setter: str = "setText") -> None:
@@ -141,3 +153,19 @@ class Retranslator:
 
 
 retranslator = Retranslator()
+
+
+def tr(widget: Any, key: str, fallback: str = "", setter: str = "setText", *args: Any) -> Any:
+    """
+    設定文字、登記，然後把控制項本身傳回來，所以可以直接寫在指派的右邊：
+
+        self.hint_label = tr(QLabel(), "signage_hint", "Presets are saved from ...")
+
+    寫成一行是有意的。先前是「建一行、登記一行」，同一個形狀重複兩百多次，
+    連工具都看得出來那是樣板。
+    Set the text, register it, and hand the widget back so it can sit on the
+    right of an assignment. One line on purpose: building and registering as two
+    lines repeated the same shape over two hundred times, plainly boilerplate.
+    """
+    retranslator.bind(widget, key, fallback, setter, *args)
+    return widget

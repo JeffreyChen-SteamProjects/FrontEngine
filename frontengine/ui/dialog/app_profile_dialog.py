@@ -20,7 +20,7 @@ from frontengine.user_setting.user_setting_file import user_setting_dict, write_
 from frontengine.utils.app_profile.app_profile_service import normalize_profiles
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
-from frontengine.utils.multi_language.retranslate import retranslator
+from frontengine.utils.multi_language.retranslate import tr
 from frontengine.utils.smart_pause.pause_rules import normalize_app_name
 
 
@@ -50,17 +50,13 @@ class AppProfileDialog(QDialog):
         self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.table.horizontalHeader().setStretchLastSection(True)
 
-        self.add_button = QPushButton(_t("app_profile_add", "Add"))
-        retranslator.bind(self.add_button, "app_profile_add", "Add")
+        self.add_button = tr(QPushButton(), "app_profile_add", "Add")
         self.add_button.clicked.connect(lambda: self.add_row("", ""))
-        self.remove_button = QPushButton(_t("app_profile_remove", "Remove"))
-        retranslator.bind(self.remove_button, "app_profile_remove", "Remove")
+        self.remove_button = tr(QPushButton(), "app_profile_remove", "Remove")
         self.remove_button.clicked.connect(self.remove_selected_row)
-        self.hint_label = QLabel(
-            _t("app_profile_hint",
-               "Presets are saved from the Presets menu. Without any saved preset "
-               "there is nothing to apply."))
-        retranslator.bind(self.hint_label, "app_profile_hint", "Presets are saved from the Presets menu. Without any saved preset " "there is nothing to apply.")
+        self.hint_label = tr(QLabel(), "app_profile_hint",
+            "Presets are saved from the Presets menu. Without any saved preset "
+            "there is nothing to apply.")
         self.hint_label.setWordWrap(True)
 
         self.button_box = QDialogButtonBox(

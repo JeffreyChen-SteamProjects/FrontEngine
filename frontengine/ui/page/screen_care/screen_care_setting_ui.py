@@ -26,7 +26,7 @@ from frontengine.utils.color_vision.color_vision import (
 )
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
-from frontengine.utils.multi_language.retranslate import retranslator
+from frontengine.utils.multi_language.retranslate import tr
 
 
 class ScreenCareSettingUI(QWidget):
@@ -47,31 +47,23 @@ class ScreenCareSettingUI(QWidget):
         self.color_vision_widget_list: List[ColorVisionWidget] = []
 
         # Colour filter
-        self.filter_label = QLabel(
-            language_wrapper.language_word_dict.get("screen_filter_label", "Screen filter"))
-        retranslator.bind(self.filter_label, "screen_filter_label", "Screen filter")
+        self.filter_label = tr(QLabel(), "screen_filter_label", "Screen filter")
         self.filter_color_combobox = QComboBox()
         for name, hex_value in FILTER_COLORS:
             self.filter_color_combobox.addItem(
                 language_wrapper.language_word_dict.get(f"screen_filter_color_{name.lower()}", name),
                 hex_value)
-        self.filter_strength_label = QLabel(
-            language_wrapper.language_word_dict.get("screen_filter_strength", "Strength"))
-        retranslator.bind(self.filter_strength_label, "screen_filter_strength", "Strength")
+        self.filter_strength_label = tr(QLabel(), "screen_filter_strength", "Strength")
         self.filter_strength_slider = QSlider(Qt.Orientation.Horizontal)
         self.filter_strength_slider.setRange(1, 80)
         self.filter_strength_slider.setValue(15)
         self.filter_strength_slider.valueChanged.connect(self._apply_filter_settings)
         self.filter_color_combobox.currentIndexChanged.connect(self._apply_filter_settings)
-        self.filter_button = QPushButton(
-            language_wrapper.language_word_dict.get("screen_filter_start", "Turn filter on"))
-        retranslator.bind(self.filter_button, "screen_filter_start", "Turn filter on")
+        self.filter_button = tr(QPushButton(), "screen_filter_start", "Turn filter on")
         self.filter_button.clicked.connect(self.toggle_filter)
 
         # Reading ruler
-        self.ruler_label = QLabel(
-            language_wrapper.language_word_dict.get("reading_ruler_label", "Reading ruler"))
-        retranslator.bind(self.ruler_label, "reading_ruler_label", "Reading ruler")
+        self.ruler_label = tr(QLabel(), "reading_ruler_label", "Reading ruler")
         self.ruler_band_combobox = QComboBox()
         self.ruler_band_combobox.addItems(["60", "90", "120", "160", "220"])
         self.ruler_band_combobox.setCurrentText("90")
@@ -80,39 +72,29 @@ class ScreenCareSettingUI(QWidget):
         self.ruler_strength_slider.setRange(10, 80)
         self.ruler_strength_slider.setValue(45)
         self.ruler_strength_slider.valueChanged.connect(self._apply_ruler_settings)
-        self.ruler_button = QPushButton(
-            language_wrapper.language_word_dict.get("reading_ruler_start", "Turn ruler on"))
-        retranslator.bind(self.ruler_button, "reading_ruler_start", "Turn ruler on")
+        self.ruler_button = tr(QPushButton(), "reading_ruler_start", "Turn ruler on")
         self.ruler_button.clicked.connect(self.toggle_ruler)
 
         # Break reminder (20-20-20)
         self.break_reminder = BreakReminder()
         self.break_timer = QTimer(self)
         self.break_timer.timeout.connect(self._tick_break_reminder)
-        self.break_label = QLabel(
-            language_wrapper.language_word_dict.get("break_reminder_label", "Eye breaks (min / sec)"))
-        retranslator.bind(self.break_label, "break_reminder_label", "Eye breaks (min / sec)")
+        self.break_label = tr(QLabel(), "break_reminder_label", "Eye breaks (min / sec)")
         self.break_minutes_combobox = QComboBox()
         self.break_minutes_combobox.addItems(["10", "20", "30", "45", "60"])
         self.break_minutes_combobox.setCurrentText("20")
         self.break_seconds_combobox = QComboBox()
         self.break_seconds_combobox.addItems(["20", "30", "60", "120"])
         self.break_seconds_combobox.setCurrentText("20")
-        self.break_button = QPushButton(
-            language_wrapper.language_word_dict.get("break_reminder_start", "Start eye breaks"))
-        retranslator.bind(self.break_button, "break_reminder_start", "Start eye breaks")
+        self.break_button = tr(QPushButton(), "break_reminder_start", "Start eye breaks")
         self.break_button.clicked.connect(self.toggle_break_reminder)
 
         # Shared
-        self.all_screens_checkbox = QCheckBox(
-            language_wrapper.language_word_dict.get("Show on all screen", "Show on all screen"))
-        retranslator.bind(self.all_screens_checkbox, "Show on all screen", "Show on all screen")
+        self.all_screens_checkbox = tr(QCheckBox(), "Show on all screen", "Show on all screen")
         # 色覺模擬：把整個畫面換成某種色盲看到的樣子（不透明覆蓋層）
         # Colour-vision simulation: repaint the screen as a given deficiency
         # sees it, using an opaque overlay.
-        self.color_vision_label = QLabel(
-            language_wrapper.language_word_dict.get("color_vision_label", "Colour vision"))
-        retranslator.bind(self.color_vision_label, "color_vision_label", "Colour vision")
+        self.color_vision_label = tr(QLabel(), "color_vision_label", "Colour vision")
         self.color_vision_combobox = QComboBox()
         for kind, key, fallback in (
                 (KIND_PROTANOPIA, "color_vision_protanopia", "Protanopia (red)"),
@@ -126,20 +108,13 @@ class ScreenCareSettingUI(QWidget):
         self.color_vision_slider.setRange(0, 100)
         self.color_vision_slider.setValue(100)
         self.color_vision_slider.valueChanged.connect(self._apply_color_vision_settings)
-        self.color_vision_button = QPushButton(
-            language_wrapper.language_word_dict.get("color_vision_start", "Simulate"))
-        retranslator.bind(self.color_vision_button, "color_vision_start", "Simulate")
+        self.color_vision_button = tr(QPushButton(), "color_vision_start", "Simulate")
         self.color_vision_button.clicked.connect(self.toggle_color_vision)
 
-        self.target_monitor_label = QLabel(
-            language_wrapper.language_word_dict.get("target_monitor_label", "Target monitor"))
-        retranslator.bind(self.target_monitor_label, "target_monitor_label", "Target monitor")
+        self.target_monitor_label = tr(QLabel(), "target_monitor_label", "Target monitor")
         self.target_monitor_combobox = build_target_monitor_combobox()
-        self.hint_label = QLabel(
-            language_wrapper.language_word_dict.get(
-                "screen_care_hint",
-                "These overlays pass clicks through, so everything underneath keeps working."))
-        retranslator.bind(self.hint_label, "screen_care_hint", "These overlays pass clicks through, so everything underneath keeps working.")
+        self.hint_label = tr(QLabel(), "screen_care_hint",
+            "These overlays pass clicks through, so everything underneath keeps working.")
         self.hint_label.setWordWrap(True)
 
         # Layout

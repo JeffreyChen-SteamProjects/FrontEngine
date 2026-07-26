@@ -23,7 +23,7 @@ from frontengine.ui.page.utils import (
 from frontengine.utils.audio_meter.screen_audio import audio_level_provider_for_screen
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
-from frontengine.utils.multi_language.retranslate import retranslator
+from frontengine.utils.multi_language.retranslate import tr
 # 多處共用的英文備援字串（只有在翻譯缺漏時才會看到）
 # The English fallback shared by several call sites, seen only when a
 # translation is missing.
@@ -57,44 +57,30 @@ class WallpaperSettingUI(QWidget):
         self.advance_timer.timeout.connect(self.advance_all)
 
         # Monitor picker (per-monitor folders)
-        self.monitor_label = QLabel(
-            language_wrapper.language_word_dict.get("wallpaper_monitor_label", "Monitor"))
-        retranslator.bind(self.monitor_label, "wallpaper_monitor_label", "Monitor")
+        self.monitor_label = tr(QLabel(), "wallpaper_monitor_label", "Monitor")
         self.monitor_combobox = QComboBox()
         for index, screen in enumerate(QGuiApplication.screens()):
             self.monitor_combobox.addItem(f"{index}: {screen.name()}", index)
         if self.monitor_combobox.count() == 0:
             self.monitor_combobox.addItem("0", 0)
         self.monitor_combobox.currentIndexChanged.connect(self._show_folder_for_monitor)
-        self.folder_button = QPushButton(
-            language_wrapper.language_word_dict.get("wallpaper_choose_folder", "Choose folder..."))
-        retranslator.bind(self.folder_button, "wallpaper_choose_folder", "Choose folder...")
+        self.folder_button = tr(QPushButton(), "wallpaper_choose_folder", "Choose folder...")
         self.folder_button.clicked.connect(self.choose_folder)
-        self.folder_label = QLabel(
-            language_wrapper.language_word_dict.get("wallpaper_no_folder", _NO_FOLDER))
-        retranslator.bind(self.folder_label, "wallpaper_no_folder", _NO_FOLDER)
+        self.folder_label = tr(QLabel(), "wallpaper_no_folder", _NO_FOLDER)
         self.folder_label.setWordWrap(True)
 
         # Playlist options
-        self.interval_label = QLabel(
-            language_wrapper.language_word_dict.get("wallpaper_interval_label", "Change every"))
-        retranslator.bind(self.interval_label, "wallpaper_interval_label", "Change every")
+        self.interval_label = tr(QLabel(), "wallpaper_interval_label", "Change every")
         self.interval_combobox = QComboBox()
         for label, seconds in (("30s", 30), ("1m", 60), ("5m", 300), ("15m", 900), ("1h", 3600)):
             self.interval_combobox.addItem(label, seconds)
         self.interval_combobox.setCurrentText("5m")
         self.interval_combobox.currentIndexChanged.connect(self._apply_interval)
-        self.shuffle_checkbox = QCheckBox(
-            language_wrapper.language_word_dict.get("wallpaper_shuffle", "Shuffle"))
-        retranslator.bind(self.shuffle_checkbox, "wallpaper_shuffle", "Shuffle")
-        self.recursive_checkbox = QCheckBox(
-            language_wrapper.language_word_dict.get("wallpaper_recursive", "Include subfolders"))
-        retranslator.bind(self.recursive_checkbox, "wallpaper_recursive", "Include subfolders")
+        self.shuffle_checkbox = tr(QCheckBox(), "wallpaper_shuffle", "Shuffle")
+        self.recursive_checkbox = tr(QCheckBox(), "wallpaper_recursive", "Include subfolders")
 
         # Audio reaction
-        self.react_checkbox = QCheckBox(
-            language_wrapper.language_word_dict.get("wallpaper_audio_react", "React to audio"))
-        retranslator.bind(self.react_checkbox, "wallpaper_audio_react", "React to audio")
+        self.react_checkbox = tr(QCheckBox(), "wallpaper_audio_react", "React to audio")
         self.react_checkbox.toggled.connect(self._apply_audio_react)
         self.react_strength_slider = QSlider(Qt.Orientation.Horizontal)
         self.react_strength_slider.setRange(0, 100)
@@ -104,40 +90,25 @@ class WallpaperSettingUI(QWidget):
         # 工作時段：這段時間改播另一個資料夾（例如安靜、低干擾的桌布）
         # Work hours: play a different folder during this window - the quiet,
         # low-distraction set - and the usual one outside it.
-        self.quiet_label = QLabel(
-            language_wrapper.language_word_dict.get(
-                "wallpaper_quiet_label", "Quiet hours"))
-        retranslator.bind(self.quiet_label, "wallpaper_quiet_label", "Quiet hours")
+        self.quiet_label = tr(QLabel(), "wallpaper_quiet_label", "Quiet hours")
         self.quiet_start_spinbox = QSpinBox()
         self.quiet_start_spinbox.setRange(0, 23)
         self.quiet_start_spinbox.setValue(9)
         self.quiet_end_spinbox = QSpinBox()
         self.quiet_end_spinbox.setRange(0, 23)
         self.quiet_end_spinbox.setValue(18)
-        self.quiet_folder_button = QPushButton(
-            language_wrapper.language_word_dict.get(
-                "wallpaper_quiet_folder", "Quiet folder..."))
-        retranslator.bind(self.quiet_folder_button, "wallpaper_quiet_folder", "Quiet folder...")
+        self.quiet_folder_button = tr(QPushButton(), "wallpaper_quiet_folder", "Quiet folder...")
         self.quiet_folder_button.clicked.connect(self.choose_quiet_folder)
-        self.quiet_folder_label = QLabel(
-            language_wrapper.language_word_dict.get("wallpaper_no_folder", _NO_FOLDER))
-        retranslator.bind(self.quiet_folder_label, "wallpaper_no_folder", _NO_FOLDER)
+        self.quiet_folder_label = tr(QLabel(), "wallpaper_no_folder", _NO_FOLDER)
         self.quiet_folder_label.setWordWrap(True)
 
         # Start / stop
-        self.start_button = QPushButton(
-            language_wrapper.language_word_dict.get("wallpaper_start", "Start wallpaper"))
-        retranslator.bind(self.start_button, "wallpaper_start", "Start wallpaper")
+        self.start_button = tr(QPushButton(), "wallpaper_start", "Start wallpaper")
         self.start_button.clicked.connect(self.toggle_wallpaper)
-        self.next_button = QPushButton(
-            language_wrapper.language_word_dict.get("wallpaper_next", "Next wallpaper"))
-        retranslator.bind(self.next_button, "wallpaper_next", "Next wallpaper")
+        self.next_button = tr(QPushButton(), "wallpaper_next", "Next wallpaper")
         self.next_button.clicked.connect(self.advance_all)
-        self.hint_label = QLabel(
-            language_wrapper.language_word_dict.get(
-                "wallpaper_hint",
-                "Wallpapers sit beneath every window. Each monitor can use its own folder."))
-        retranslator.bind(self.hint_label, "wallpaper_hint", "Wallpapers sit beneath every window. Each monitor can use its own folder.")
+        self.hint_label = tr(QLabel(), "wallpaper_hint",
+            "Wallpapers sit beneath every window. Each monitor can use its own folder.")
         self.hint_label.setWordWrap(True)
 
         # Layout

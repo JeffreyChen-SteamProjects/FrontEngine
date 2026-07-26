@@ -18,7 +18,7 @@ from frontengine.ui.page.web.web_setting_ui import WEBSettingUI
 from frontengine.user_setting.user_setting_file import clear_overlay_geometry
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
-from frontengine.utils.multi_language.retranslate import retranslator, translate
+from frontengine.utils.multi_language.retranslate import retranslator, tr, translate
 from frontengine.utils.screen_privacy import capture_affinity
 from frontengine.utils.power_mode.power_mode import (
     TIER_BALANCED, TIER_HIGH, TIER_SAVER, normalize_tier,
@@ -107,9 +107,7 @@ class ControlCenterUI(QWidget):
 
         # 畫質檔位：比省電模式更細，一次套用到所有覆蓋層
         # Quality tier: finer than the low-power switch, applied to every overlay.
-        self.quality_label = QLabel(
-            language_wrapper.language_word_dict.get("control_center_quality", "Quality"))
-        retranslator.bind(self.quality_label, "control_center_quality", "Quality")
+        self.quality_label = tr(QLabel(), "control_center_quality", "Quality")
         self.quality_combobox = QComboBox()
         for tier, key, fallback in (
                 (TIER_HIGH, "control_center_quality_high", "High"),

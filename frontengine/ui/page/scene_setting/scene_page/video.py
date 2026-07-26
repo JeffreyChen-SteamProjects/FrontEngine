@@ -5,8 +5,7 @@ from PySide6.QtWidgets import QPushButton
 from frontengine.ui.dialog.choose_file_dialog import choose_video
 from frontengine.ui.page.scene_setting.scene_manager import SceneManagerUI
 from frontengine.ui.page.scene_setting.scene_page.base_scene_page import BaseSceneSettingUI
-from frontengine.utils.multi_language.language_wrapper import language_wrapper
-from frontengine.utils.multi_language.retranslate import retranslator
+from frontengine.utils.multi_language.retranslate import tr
 
 
 class VideoSceneSettingUI(BaseSceneSettingUI):
@@ -18,8 +17,7 @@ class VideoSceneSettingUI(BaseSceneSettingUI):
         play_rate_label, self.play_rate_value, self.play_rate_slider = self._build_slider("Play rate", 1, 200, 100)
         volume_label, self.volume_value, self.volume_slider = self._build_slider("Volume", 1, 100, 100)
 
-        self.choose_file_button = QPushButton(language_wrapper.language_word_dict.get("video_setting_choose_file"))
-        retranslator.bind(self.choose_file_button, "video_setting_choose_file", "")
+        self.choose_file_button = tr(QPushButton(), "video_setting_choose_file")
         self.ready_label = self._make_ready_label()
         self.choose_file_button.clicked.connect(
             self._wire_chooser(
@@ -30,8 +28,7 @@ class VideoSceneSettingUI(BaseSceneSettingUI):
             )
         )
 
-        self.update_scene_button = QPushButton(language_wrapper.language_word_dict.get("scene_add_video"))
-        retranslator.bind(self.update_scene_button, "scene_add_video", "")
+        self.update_scene_button = tr(QPushButton(), "scene_add_video")
         self.update_scene_button.clicked.connect(self._update_scene)
 
         self.grid_layout.addWidget(opacity_label, 0, 0)

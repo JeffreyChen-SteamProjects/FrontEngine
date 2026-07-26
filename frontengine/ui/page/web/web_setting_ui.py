@@ -15,7 +15,7 @@ from frontengine.ui.page.utils import (
 )
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
-from frontengine.utils.multi_language.retranslate import retranslator
+from frontengine.utils.multi_language.retranslate import tr
 from frontengine.utils.web_url import next_page_index, normalize_web_url, parse_dashboard_urls
 
 
@@ -37,8 +37,7 @@ class WEBSettingUI(QWidget):
         self.dashboard_index = 0
 
         # Opacity setting
-        self.opacity_label = QLabel(language_wrapper.language_word_dict.get("Opacity"))
-        retranslator.bind(self.opacity_label, "Opacity", "")
+        self.opacity_label = tr(QLabel(), "Opacity")
         self.opacity_slider = QSlider(Qt.Orientation.Horizontal)
         self.opacity_slider.setRange(1, 100)
         self.opacity_slider.setValue(20)
@@ -49,33 +48,26 @@ class WEBSettingUI(QWidget):
         self.web_url_input = QLineEdit()
 
         # Start url button
-        self.start_button = QPushButton(language_wrapper.language_word_dict.get("web_setting_open_url"))
-        retranslator.bind(self.start_button, "web_setting_open_url", "")
+        self.start_button = tr(QPushButton(), "web_setting_open_url")
         self.start_button.clicked.connect(self.start_open_web_with_url)
 
         # Show on all screen
-        self.show_on_all_screen_checkbox = QCheckBox(language_wrapper.language_word_dict.get("Show on all screen"))
-        retranslator.bind(self.show_on_all_screen_checkbox, "Show on all screen", "")
+        self.show_on_all_screen_checkbox = tr(QCheckBox(), "Show on all screen")
         self.show_on_all_screen_checkbox.clicked.connect(self.set_show_all_screen)
 
         # Open local html file
-        self.open_local_html_checkbox = QCheckBox(
-            language_wrapper.language_word_dict.get("web_setting_open_local_file"))
-        retranslator.bind(self.open_local_html_checkbox, "web_setting_open_local_file", "")
+        self.open_local_html_checkbox = tr(QCheckBox(), "web_setting_open_local_file")
         self.open_local_html_checkbox.clicked.connect(self.set_open_file)
 
         # Enable input
-        self.enable_input_checkbox = QCheckBox(language_wrapper.language_word_dict.get("web_setting_open_enable_input"))
-        retranslator.bind(self.enable_input_checkbox, "web_setting_open_enable_input", "")
+        self.enable_input_checkbox = tr(QCheckBox(), "web_setting_open_enable_input")
         self.enable_input_checkbox.clicked.connect(self.set_enable_input)
 
         # Show on bottom
-        self.show_on_bottom_checkbox = QCheckBox(language_wrapper.language_word_dict.get("Show on bottom"))
-        retranslator.bind(self.show_on_bottom_checkbox, "Show on bottom", "")
+        self.show_on_bottom_checkbox = tr(QCheckBox(), "Show on bottom")
 
         # Zoom
-        self.zoom_label = QLabel(language_wrapper.language_word_dict.get("web_zoom_label", "Zoom"))
-        retranslator.bind(self.zoom_label, "web_zoom_label", "Zoom")
+        self.zoom_label = tr(QLabel(), "web_zoom_label", "Zoom")
         self.zoom_combobox = QComboBox()
         for label, factor in (("50%", 0.5), ("75%", 0.75), ("100%", 1.0),
                               ("125%", 1.25), ("150%", 1.5), ("200%", 2.0)):
@@ -83,36 +75,26 @@ class WEBSettingUI(QWidget):
         self.zoom_combobox.setCurrentText("100%")
 
         # Auto refresh
-        self.refresh_label = QLabel(language_wrapper.language_word_dict.get("web_refresh_label", "Auto refresh"))
-        retranslator.bind(self.refresh_label, "web_refresh_label", "Auto refresh")
+        self.refresh_label = tr(QLabel(), "web_refresh_label", "Auto refresh")
         self.refresh_combobox = QComboBox()
         _off = language_wrapper.language_word_dict.get("web_refresh_off", "Off")
         for label, seconds in ((_off, 0), ("30s", 30), ("1m", 60), ("5m", 300), ("15m", 900)):
             self.refresh_combobox.addItem(label, seconds)
 
         # Target monitor selector
-        self.target_monitor_label = QLabel(
-            language_wrapper.language_word_dict.get("target_monitor_label", "Target monitor")
-        )
-        retranslator.bind(self.target_monitor_label, "target_monitor_label", "Target monitor")
+        self.target_monitor_label = tr(QLabel(), "target_monitor_label", "Target monitor")
         self.target_monitor_combobox = build_target_monitor_combobox()
 
         # Dashboard: one URL per line, shown one page at a time
-        self.dashboard_label = QLabel(
-            language_wrapper.language_word_dict.get("web_dashboard_label", "Dashboard URLs"))
-        retranslator.bind(self.dashboard_label, "web_dashboard_label", "Dashboard URLs")
+        self.dashboard_label = tr(QLabel(), "web_dashboard_label", "Dashboard URLs")
         self.dashboard_edit = QPlainTextEdit()
         self.dashboard_edit.setPlaceholderText(
             language_wrapper.language_word_dict.get(
                 "web_dashboard_hint", "One URL per line; lines starting with # are ignored."))
         self.dashboard_edit.setMaximumHeight(90)
-        self.dashboard_start_button = QPushButton(
-            language_wrapper.language_word_dict.get("web_dashboard_start", "Start dashboard"))
-        retranslator.bind(self.dashboard_start_button, "web_dashboard_start", "Start dashboard")
+        self.dashboard_start_button = tr(QPushButton(), "web_dashboard_start", "Start dashboard")
         self.dashboard_start_button.clicked.connect(self.start_dashboard)
-        self.dashboard_next_button = QPushButton(
-            language_wrapper.language_word_dict.get("web_dashboard_next", "Next page"))
-        retranslator.bind(self.dashboard_next_button, "web_dashboard_next", "Next page")
+        self.dashboard_next_button = tr(QPushButton(), "web_dashboard_next", "Next page")
         self.dashboard_next_button.clicked.connect(self.show_next_dashboard_page)
 
         # Layout
