@@ -34,6 +34,15 @@ def _t(key: str, fallback: str) -> str:
     return language_wrapper.language_word_dict.get(key, fallback)
 
 
+# 同一段文字會出現在建構、登記與警告框三個地方，提成常數免得三份各自漂移。
+# The same wording appears at construction, at registration and in a warning
+# box; a constant keeps the three from drifting apart.
+_AUTOSTART = "Start with the system"
+_PLUGINS = "Load plugins (advanced)"
+_EXPORT_SETTINGS = "Export settings..."
+_IMPORT_SETTINGS = "Import settings..."
+
+
 def build_settings_menu(ui: "FrontEngineMainUI") -> None:
     """Build the Settings menu with hotkey configuration and settings I/O."""
     front_engine_logger.info(f"[SettingsMenu] build_settings_menu | ui={ui}")
@@ -55,8 +64,8 @@ def build_settings_menu(ui: "FrontEngineMainUI") -> None:
     menu.addAction(theme_schedule_action)
     ui.theme_schedule_action = theme_schedule_action
 
-    autostart_action = QAction(_t("settings_menu_autostart", "Start with the system"), menu)
-    retranslator.bind(autostart_action, "settings_menu_autostart", "Start with the system")
+    autostart_action = QAction(_t("settings_menu_autostart", _AUTOSTART), menu)
+    retranslator.bind(autostart_action, "settings_menu_autostart", _AUTOSTART)
     autostart_action.setCheckable(True)
     autostart_action.setChecked(autostart_service.is_enabled())
     autostart_action.toggled.connect(lambda checked: _toggle_autostart(ui, checked))
@@ -71,8 +80,8 @@ def build_settings_menu(ui: "FrontEngineMainUI") -> None:
     menu.addAction(restore_action)
     ui.restore_session_action = restore_action
 
-    plugins_action = QAction(_t("settings_menu_plugins", "Load plugins (advanced)"), menu)
-    retranslator.bind(plugins_action, "settings_menu_plugins", "Load plugins (advanced)")
+    plugins_action = QAction(_t("settings_menu_plugins", _PLUGINS), menu)
+    retranslator.bind(plugins_action, "settings_menu_plugins", _PLUGINS)
     plugins_action.setCheckable(True)
     plugins_action.setChecked(bool(user_setting_dict.get("load_plugins")))
     plugins_action.toggled.connect(lambda checked: _toggle_plugins(ui, checked))
@@ -137,13 +146,13 @@ def build_settings_menu(ui: "FrontEngineMainUI") -> None:
     ui.clipboard_toggle_action = clipboard_toggle
 
     menu.addSeparator()
-    export_action = QAction(_t("settings_menu_export", "Export settings..."), menu)
-    retranslator.bind(export_action, "settings_menu_export", "Export settings...")
+    export_action = QAction(_t("settings_menu_export", _EXPORT_SETTINGS), menu)
+    retranslator.bind(export_action, "settings_menu_export", _EXPORT_SETTINGS)
     export_action.triggered.connect(lambda: _export_settings(ui))
     menu.addAction(export_action)
 
-    import_action = QAction(_t("settings_menu_import", "Import settings..."), menu)
-    retranslator.bind(import_action, "settings_menu_import", "Import settings...")
+    import_action = QAction(_t("settings_menu_import", _IMPORT_SETTINGS), menu)
+    retranslator.bind(import_action, "settings_menu_import", _IMPORT_SETTINGS)
     import_action.triggered.connect(lambda: _import_settings(ui))
     menu.addAction(import_action)
 
@@ -214,7 +223,7 @@ def _toggle_autostart(ui: "FrontEngineMainUI", enabled: bool) -> None:
         action.blockSignals(False)
     QMessageBox.warning(
         ui,
-        _t("settings_menu_autostart", "Start with the system"),
+        _t("settings_menu_autostart", _AUTOSTART),
         _t("settings_autostart_failed", "Could not change the autostart setting."),
     )
 
@@ -236,7 +245,7 @@ def _toggle_plugins(ui: "FrontEngineMainUI", enabled: bool) -> None:
     if enabled:
         QMessageBox.warning(
             ui,
-            _t("settings_menu_plugins", "Load plugins (advanced)"),
+            _t("settings_menu_plugins", _PLUGINS),
             _t("settings_plugins_warning",
                "Plugins are Python code and run with the same privileges as FrontEngine. "
                "Only install plugins you trust. Takes effect on the next launch."),
@@ -266,7 +275,7 @@ def _open_hotkey_dialog(ui: "FrontEngineMainUI") -> None:
 
 
 def _export_settings(ui: "FrontEngineMainUI") -> None:
-    title = _t("settings_menu_export", "Export settings...")
+    title = _t("settings_menu_export", _EXPORT_SETTINGS)
     destination, _ok = QFileDialog.getSaveFileName(
         ui, title, "frontengine_settings.json", _t("settings_file_filter", "Settings files (*.json)")
     )
@@ -281,7 +290,7 @@ def _export_settings(ui: "FrontEngineMainUI") -> None:
 
 
 def _import_settings(ui: "FrontEngineMainUI") -> None:
-    title = _t("settings_menu_import", "Import settings...")
+    title = _t("settings_menu_import", _IMPORT_SETTINGS)
     source, _ok = QFileDialog.getOpenFileName(
         ui, title, "", _t("settings_file_filter", "Settings files (*.json)")
     )

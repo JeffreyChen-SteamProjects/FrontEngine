@@ -10,6 +10,11 @@ from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import retranslator, translate
 
 
+# 建構、登記與「重選檔案」時各用一次，提成常數免得三份各自漂移。
+# Used at construction, at registration and when a file is re-chosen.
+_NOT_READY = "Not Ready"
+
+
 class BaseSceneSettingUI(QWidget):
     """
     Template Method base for the scene-setting pages. Subclasses lay out
@@ -41,8 +46,8 @@ class BaseSceneSettingUI(QWidget):
         return label, value_label, slider
 
     def _make_ready_label(self) -> QLabel:
-        label = QLabel(translate("Not Ready"))
-        retranslator.bind(label, "Not Ready")
+        label = QLabel(translate(_NOT_READY))
+        retranslator.bind(label, _NOT_READY)
         return label
 
     def _wire_chooser(
@@ -61,7 +66,7 @@ class BaseSceneSettingUI(QWidget):
             # set_text 而不是 setText：換語言時要跟著目前是就緒還是未就緒
             # set_text, not setText, so a language change follows whichever
             # state the label is actually in.
-            retranslator.set_text(ready_label, "Not Ready")
+            retranslator.set_text(ready_label, _NOT_READY)
             on_reset()
             path = chooser(self)
             if path:
