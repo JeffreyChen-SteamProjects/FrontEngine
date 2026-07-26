@@ -10,6 +10,7 @@ from frontengine.ui.dialog.app_profile_dialog import AppProfileDialog
 from frontengine.ui.dialog.clipboard_dialog import ClipboardDialog
 from frontengine.ui.dialog.hotkey_settings_dialog import HotkeySettingsDialog
 from frontengine.ui.dialog.reminder_dialog import ReminderDialog
+from frontengine.ui.dialog.screen_privacy_dialog import ScreenPrivacyDialog
 from frontengine.ui.dialog.smart_pause_dialog import SmartPauseDialog
 from frontengine.ui.dialog.usage_report_dialog import UsageReportDialog
 from frontengine.user_setting.user_setting_file import (
@@ -86,6 +87,12 @@ def build_settings_menu(ui: "FrontEngineMainUI") -> None:
     reminder_action.triggered.connect(lambda: _open_dialog(ui, ReminderDialog))
     menu.addAction(reminder_action)
     ui.reminder_action = reminder_action
+
+    privacy_action = QAction(
+        _t("settings_menu_screen_privacy", "Screen-sharing privacy..."), menu)
+    privacy_action.triggered.connect(lambda: _open_dialog(ui, ScreenPrivacyDialog))
+    menu.addAction(privacy_action)
+    ui.screen_privacy_action = privacy_action
 
     usage_action = QAction(_t("settings_menu_usage", "Screen time..."), menu)
     usage_action.triggered.connect(lambda: _open_usage_dialog(ui))

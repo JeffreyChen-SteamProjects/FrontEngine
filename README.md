@@ -172,6 +172,28 @@ Four things on the **Stream** tab, for playing and for going live:
 
 ---
 
+## Screen-sharing privacy
+
+Your overlays are for you, not for the people you are sharing with. From
+**Settings → Screen-sharing privacy**, FrontEngine can take them out of the
+capture while a meeting app is open:
+
+- **They stay on your own screen.** Only the captured copy is blank — this uses
+  Windows' `WDA_EXCLUDEFROMCAPTURE`, an OS-level flag that conferencing apps and
+  recorders honour.
+- **Masks are the exception.** A distraction mask exists to cover something, so
+  it deliberately stays visible in the capture.
+- **The trigger is your list.** Windows has no dependable "am I being captured"
+  API, so it watches for window titles you name — which also catches a meeting
+  held in a browser tab, where the executable is just the browser.
+
+There is a manual **Hide from capture** button in the control center too.
+
+> This is privacy, not security: it defeats the ordinary capture path, and it
+> never hides anything from the person sitting at the desk. Windows only.
+
+---
+
 ## Screen time, clipboard and layouts
 
 Three things that remember, all of them **off until you switch them on** and

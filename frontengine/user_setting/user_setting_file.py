@@ -54,6 +54,9 @@ user_setting_dict: Dict[str, Any] = {
     # Sticky note contents and positions, and whether to reopen them on launch.
     "sticky_notes": [],
     "sticky_notes_restore": False,
+    # 分享畫面時自動把覆蓋層藏出擷取結果（預設關閉）
+    # Hide overlays from the capture while sharing; off by default.
+    "screen_share_privacy": {"enabled": False, "apps": []},
     # 使用時間統計（只寫本機檔案、預設關閉）
     # Usage tracking: local file only, off by default.
     "usage_tracking": False,

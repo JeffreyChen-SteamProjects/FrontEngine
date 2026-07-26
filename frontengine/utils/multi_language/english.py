@@ -542,4 +542,13 @@ english_word_dict = {
     "stream_obs_record": 'Toggle recording',
     "stream_obs_stream": 'Toggle streaming',
     "stream_hint": 'The crosshair is only drawn on top - no game is modified. OBS control uses its own WebSocket; the password is kept in your local settings.',
+    "control_center_hide_from_capture": 'Hide from capture',
+    "control_center_show_in_capture": 'Show in capture',
+    "settings_menu_screen_privacy": 'Screen-sharing privacy...',
+    "screen_privacy_title": 'Screen-sharing privacy',
+    "screen_privacy_enable": 'Hide overlays while one of these apps is open',
+    "screen_privacy_apps_label": 'Meeting and capture apps:',
+    "screen_privacy_hint": 'Matched against window titles, so a meeting held in a browser tab is caught too. Your overlays stay on your own screen - only the capture is blank. Masks stay visible, since covering something is what they are for.',
+    "screen_privacy_unsupported": 'Hiding overlays from screen capture is Windows only.',
+    "screen_privacy_toast": 'Overlays hidden from screen capture',
 }
