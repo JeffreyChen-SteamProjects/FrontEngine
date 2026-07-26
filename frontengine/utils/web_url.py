@@ -4,27 +4,45 @@ from typing import Optional
 from urllib.parse import parse_qs, urlparse
 
 
+# YouTube 影片 ID 會出現在路徑裡的這幾種前綴之後
+# The path prefixes a YouTube video id can follow.
+_YOUTUBE_PATH_PREFIXES = ("/embed/", "/shorts/", "/v/")
+_YOUTUBE_HOSTS = ("youtube.com", "music.youtube.com")
+
+
+def _bare_host(netloc: Optional[str]) -> str:
+    """去掉 www. / m. 這類前綴後的主機名稱（小寫）。"""
+    host = (netloc or "").lower()
+    for prefix in ("www.", "m."):
+        if host.startswith(prefix):
+            return host[len(prefix):]
+    return host
+
+
+def _first_path_segment(path: str, after: str = "") -> Optional[str]:
+    """取出路徑（去掉 after 前綴後）的第一段；空的回傳 None。"""
+    remainder = path[len(after):] if after else path.lstrip("/")
+    segment = remainder.split("/")[0]
+    return segment or None
+
+
 def _youtube_video_id(url: str) -> Optional[str]:
     """從常見的 YouTube 連結取出影片 ID，非 YouTube 連結回傳 None。"""
     try:
         parsed = urlparse(url)
-    except Exception:
+    except ValueError:
         return None
-    host = (parsed.netloc or "").lower()
-    for prefix in ("www.", "m."):
-        if host.startswith(prefix):
-            host = host[len(prefix):]
+    host = _bare_host(parsed.netloc)
     if host == "youtu.be":
-        video_id = parsed.path.lstrip("/").split("/")[0]
-        return video_id or None
-    if host in ("youtube.com", "music.youtube.com"):
-        if parsed.path == "/watch":
-            values = parse_qs(parsed.query).get("v")
-            return values[0] if values else None
-        for segment in ("/embed/", "/shorts/", "/v/"):
-            if parsed.path.startswith(segment):
-                video_id = parsed.path[len(segment):].split("/")[0]
-                return video_id or None
+        return _first_path_segment(parsed.path)
+    if host not in _YOUTUBE_HOSTS:
+        return None
+    if parsed.path == "/watch":
+        values = parse_qs(parsed.query).get("v")
+        return values[0] if values else None
+    for prefix in _YOUTUBE_PATH_PREFIXES:
+        if parsed.path.startswith(prefix):
+            return _first_path_segment(parsed.path, prefix)
     return None
 
 

@@ -17,7 +17,9 @@ from PySide6.QtWidgets import (
 )
 
 from frontengine.show.wallpaper.wallpaper_widget import WallpaperWidget
-from frontengine.ui.page.utils import coerce_int
+from frontengine.ui.page.utils import (
+    apply_checkbox_state, apply_combobox_text_state, apply_slider_state, apply_spinbox_state,
+)
 from frontengine.utils.audio_meter.screen_audio import audio_level_provider_for_screen
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
@@ -307,32 +309,32 @@ class WallpaperSettingUI(QWidget):
         }
 
     def set_state(self, state: dict) -> None:
-        for key, target in (("folders", "folders"), ("quiet_folders", "quiet_folders")):
-            folders = state.get(key)
-            if not isinstance(folders, dict):
-                continue
-            restored: Dict[int, str] = {}
-            for monitor, folder in folders.items():
-                try:
-                    restored[int(monitor)] = str(folder)
-                except (TypeError, ValueError):
-                    continue
-            setattr(self, target, restored)
+        """把預設集的內容還原到這一頁的控制項上。"""
+        for attribute in ("folders", "quiet_folders"):
+            folders = state.get(attribute)
+            if isinstance(folders, dict):
+                setattr(self, attribute, _monitor_folders(folders))
         self._show_folder_for_monitor()
-        for spinbox, key in ((self.quiet_start_spinbox, "quiet_start"),
-                             (self.quiet_end_spinbox, "quiet_end")):
-            hour = coerce_int(state.get(key))
-            if hour is not None:
-                spinbox.setValue(max(0, min(23, hour)))
-        if state.get("interval") is not None:
-            index = self.interval_combobox.findText(str(state["interval"]))
-            if index >= 0:
-                self.interval_combobox.setCurrentIndex(index)
-        for checkbox, key in ((self.shuffle_checkbox, "shuffle"),
-                              (self.recursive_checkbox, "recursive"),
-                              (self.react_checkbox, "audio_react")):
-            if key in state:
-                checkbox.setChecked(bool(state[key]))
-        strength = coerce_int(state.get("react_strength"))
-        if strength is not None:
-            self.react_strength_slider.setValue(strength)
+        apply_spinbox_state(state, ((self.quiet_start_spinbox, "quiet_start"),
+                                    (self.quiet_end_spinbox, "quiet_end")))
+        apply_slider_state(state, ((self.react_strength_slider, "react_strength"),))
+        apply_combobox_text_state(state, ((self.interval_combobox, "interval"),))
+        apply_checkbox_state(state, ((self.shuffle_checkbox, "shuffle"),
+                                     (self.recursive_checkbox, "recursive"),
+                                     (self.react_checkbox, "audio_react")))
+
+
+def _monitor_folders(folders: dict) -> Dict[int, str]:
+    """
+    把儲存的 {螢幕編號: 資料夾} 整理回來；編號不是數字的項目直接跳過，
+    不讓一筆手改壞的資料毀掉整份設定。
+    Restore the saved {monitor: folder} map, skipping entries whose key is not a
+    number so one hand-edited line cannot spoil the rest.
+    """
+    restored: Dict[int, str] = {}
+    for monitor, folder in folders.items():
+        try:
+            restored[int(monitor)] = str(folder)
+        except (TypeError, ValueError):
+            continue
+    return restored

@@ -163,37 +163,13 @@ class PresetRepository:
         if not source.exists() or not zipfile.is_zipfile(source):
             raise ValueError(f"Not a valid preset package: {source}")
         with zipfile.ZipFile(source, "r") as archive:
-            try:
-                raw = archive.read(_PRESET_MEMBER)
-            except KeyError as error:
-                raise ValueError("Package missing preset.json") from error
-            document = json.loads(raw.decode("utf-8"))
-            if not isinstance(document, dict):
-                raise ValueError("Package preset.json must be a JSON object")
-
-            raw_name = document.get("__preset_name__")
-            name = raw_name if isinstance(raw_name, str) and raw_name.strip() else source.stem
+            document = _read_package_preset(archive)
+            name = _package_name(document, source)
             media_dir = self._dir / "media" / _sanitize(name)
             media_dir.mkdir(parents=True, exist_ok=True)
+            _extract_media(archive, media_dir)
 
-            extracted: Dict[str, Path] = {}
-            for member in archive.namelist():
-                if not member.startswith(_MEDIA_PREFIX) or member.endswith("/"):
-                    continue
-                # Zip-slip guard: only ever use the flat basename.
-                target = media_dir / Path(member).name
-                with archive.open(member) as src, open(target, "wb") as dst:
-                    dst.write(src.read())
-                extracted[member] = target
-
-        for section in document.values():
-            if not isinstance(section, dict):
-                continue
-            for key, value in list(section.items()):
-                if isinstance(value, str) and value.startswith(_MEDIA_PREFIX):
-                    resolved = media_dir / Path(value).name
-                    section[key] = str(resolved)
-
+        _rewrite_media_paths(document, media_dir)
         payload = {key: value for key, value in document.items() if key != "__preset_name__"}
         self.save(name, payload)
         return _sanitize(name)
@@ -208,3 +184,50 @@ class PresetRepository:
         while f"{stem}_{index}{suffix}" in used:
             index += 1
         return f"{stem}_{index}{suffix}"
+
+
+def _read_package_preset(archive: zipfile.ZipFile) -> Dict[str, Any]:
+    """讀出封包裡的 preset.json；缺檔或格式不對就擲出 ValueError。"""
+    try:
+        raw = archive.read(_PRESET_MEMBER)
+    except KeyError as error:
+        raise ValueError("Package missing preset.json") from error
+    document = json.loads(raw.decode("utf-8"))
+    if not isinstance(document, dict):
+        raise ValueError("Package preset.json must be a JSON object")
+    return document
+
+
+def _package_name(document: Dict[str, Any], source: Path) -> str:
+    """封包裡記的名稱；沒記或是空白就用檔名。"""
+    raw_name = document.get("__preset_name__")
+    return raw_name if isinstance(raw_name, str) and raw_name.strip() else source.stem
+
+
+def _extract_media(archive: zipfile.ZipFile, media_dir: Path) -> Dict[str, Path]:
+    """
+    把封包裡的媒體檔解到 media_dir。**只用檔名的最後一段**，這是對 zip-slip
+    的防護：封包裡寫成 ../../ 的路徑不會逃出這個資料夾。
+    Extract the package's media into media_dir. **Only the flat basename is
+    ever used** - that is the zip-slip guard: an entry named ../../ cannot
+    escape this directory.
+    """
+    extracted: Dict[str, Path] = {}
+    for member in archive.namelist():
+        if not member.startswith(_MEDIA_PREFIX) or member.endswith("/"):
+            continue
+        target = media_dir / Path(member).name
+        with archive.open(member) as source_file, open(target, "wb") as target_file:
+            target_file.write(source_file.read())
+        extracted[member] = target
+    return extracted
+
+
+def _rewrite_media_paths(document: Dict[str, Any], media_dir: Path) -> None:
+    """把預設集裡的 media/ 相對路徑改寫成解開後的實際位置。"""
+    for section in document.values():
+        if not isinstance(section, dict):
+            continue
+        for key, value in tuple(section.items()):
+            if isinstance(value, str) and value.startswith(_MEDIA_PREFIX):
+                section[key] = str(media_dir / Path(value).name)
