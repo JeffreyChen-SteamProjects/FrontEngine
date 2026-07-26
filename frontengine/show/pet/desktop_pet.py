@@ -806,7 +806,15 @@ class PetMotion:
         if self.surface != SURFACE_FLOOR:
             return self._step_climb(left, top, right, bottom, floor_y)
 
-        # grounded on the screen floor: random walk / idle, with a chance to climb a wall
+        return self._walk_on_floor(left, right, floor_y)
+
+    def _walk_on_floor(self, left, right, floor_y) -> Tuple[int, int]:
+        """
+        站在螢幕地板上：隨機在走路與發呆之間切換，走到左右邊緣時有機會改成
+        爬牆，否則就轉頭。
+        Grounded on the screen floor: alternate between walking and idling, and
+        on reaching an edge either grab the wall or turn around.
+        """
         self.y = float(floor_y)
         if self._state_ticks <= 0:
             self._new_state()
@@ -816,19 +824,19 @@ class PetMotion:
         self.x += self.vx
         if self.x <= left:
             self.x = float(left)
-            if self.climb and self._rng.random() < self.CLIMB_CHANCE:
-                self.surface = SURFACE_LEFT
-                self.vy = float(-self.speed)
-            else:
-                self.vx = abs(self.vx)
+            self._turn_or_climb(SURFACE_LEFT, turned_vx=abs(self.vx))
         elif self.x + self.width >= right:
             self.x = float(right - self.width)
-            if self.climb and self._rng.random() < self.CLIMB_CHANCE:
-                self.surface = SURFACE_RIGHT
-                self.vy = float(-self.speed)
-            else:
-                self.vx = -abs(self.vx)
+            self._turn_or_climb(SURFACE_RIGHT, turned_vx=-abs(self.vx))
         return int(self.x), int(self.y)
+
+    def _turn_or_climb(self, wall: str, turned_vx: float) -> None:
+        """走到邊緣了：抓上牆去爬，或是掉頭往回走。"""
+        if self.climb and self._rng.random() < self.CLIMB_CHANCE:
+            self.surface = wall
+            self.vy = float(-self.speed)
+        else:
+            self.vx = turned_vx
 
     def _step_fall(self, left, top, right, bottom, _floor_y) -> Tuple[int, int]:
         """落下：撞牆/天花板反彈，並在越過視窗平台或螢幕地板時落地。"""
@@ -948,41 +956,48 @@ class PetMotion:
             return int(self.x), int(self.y)
 
         if self.surface == SURFACE_RIGHT:
-            self.x = float(right - self.width)
-            self.y += self.vy
-            if self.vy < 0 and self.y <= top:            # reached the ceiling, crawl left
-                self.y = float(top)
-                self.surface = SURFACE_CEILING
-                self.vx = float(-self.speed)
-            elif self.vy > 0 and self.y >= floor_y:      # climbed back down
-                self.y = float(floor_y)
-                self.surface = SURFACE_FLOOR
-                self.vx = float(-self.speed)
-                self._new_state(force_walk=True)
+            # 右牆：貼著右緣上下爬，離開時往左走
+            # Right wall: hug the right edge, and leave it heading left.
+            self._climb_wall(x=float(right - self.width), top=top, floor_y=floor_y,
+                             leave_vx=float(-self.speed))
         elif self.surface == SURFACE_LEFT:
-            self.x = float(left)
-            self.y += self.vy
-            if self.vy < 0 and self.y <= top:
-                self.y = float(top)
-                self.surface = SURFACE_CEILING
-                self.vx = float(self.speed)
-            elif self.vy > 0 and self.y >= floor_y:
-                self.y = float(floor_y)
-                self.surface = SURFACE_FLOOR
-                self.vx = float(self.speed)
-                self._new_state(force_walk=True)
+            self._climb_wall(x=float(left), top=top, floor_y=floor_y,
+                             leave_vx=float(self.speed))
         elif self.surface == SURFACE_CEILING:
-            self.y = float(top)
-            self.x += self.vx
-            if self.vx < 0 and self.x <= left:           # corner -> climb down the left wall
-                self.x = float(left)
-                self.surface = SURFACE_LEFT
-                self.vy = float(self.speed)
-            elif self.vx > 0 and self.x + self.width >= right:
-                self.x = float(right - self.width)
-                self.surface = SURFACE_RIGHT
-                self.vy = float(self.speed)
+            self._crawl_ceiling(left, top, right)
         return int(self.x), int(self.y)
+
+    def _climb_wall(self, x: float, top: float, floor_y: float, leave_vx: float) -> None:
+        """
+        沿著一面牆上下爬。左右兩面牆的規則一模一樣，只差「離開時往哪走」，
+        所以由呼叫端把那個方向帶進來。
+        Climb one wall. Both walls follow identical rules and differ only in
+        which way the pet leaves, so the caller passes that in.
+        """
+        self.x = x
+        self.y += self.vy
+        if self.vy < 0 and self.y <= top:            # 到天花板，改成橫著爬
+            self.y = float(top)
+            self.surface = SURFACE_CEILING
+            self.vx = leave_vx
+        elif self.vy > 0 and self.y >= floor_y:      # 爬回地面，恢復走路
+            self.y = float(floor_y)
+            self.surface = SURFACE_FLOOR
+            self.vx = leave_vx
+            self._new_state(force_walk=True)
+
+    def _crawl_ceiling(self, left, top, right) -> None:
+        """在天花板上橫著爬，到角落就轉成往下爬那面牆。"""
+        self.y = float(top)
+        self.x += self.vx
+        if self.vx < 0 and self.x <= left:
+            self.x = float(left)
+            self.surface = SURFACE_LEFT
+            self.vy = float(self.speed)
+        elif self.vx > 0 and self.x + self.width >= right:
+            self.x = float(right - self.width)
+            self.surface = SURFACE_RIGHT
+            self.vy = float(self.speed)
 
     def _new_state(self, force_walk: bool = False) -> None:
         if force_walk or self._rng.random() < 0.65:
@@ -1245,25 +1260,42 @@ class DesktopPetWidget(BaseWidget):
             self._peer_greeted = False
             self.motion.clear_follow()
             return
-        # play: a floor pet may walk over to a near-ish peer
-        if self.motion.behaviour == BEHAVIOUR_FLOOR:
-            if self.MEET_DISTANCE < distance <= self.PLAY_RANGE:
-                if self.motion.follow_target_x is not None or self._chatter_rng.random() < self.PLAY_CHANCE:
-                    self.motion.set_follow(peer[0])
-            elif distance > self.PLAY_RANGE:
-                self.motion.clear_follow()
-        # greet: face and say a meet line once per approach
-        if distance <= self.MEET_DISTANCE:
+        self._approach_peer(peer, distance)
+        self._greet_peer(peer, distance, my_center)
+
+    def _approach_peer(self, peer, distance: float) -> None:
+        """在地板上的寵物看到不遠的同伴時，有機會走過去玩。"""
+        if self.motion.behaviour != BEHAVIOUR_FLOOR:
+            return
+        if self.MEET_DISTANCE < distance <= self.PLAY_RANGE:
+            already_walking = self.motion.follow_target_x is not None
+            if already_walking or self._chatter_rng.random() < self.PLAY_CHANCE:
+                self.motion.set_follow(peer[0])
+        elif distance > self.PLAY_RANGE:
             self.motion.clear_follow()
-            if self._talk and not self._peer_greeted:
-                self._peer_greeted = True
-                self._gain_affection(3)
-                self.motion.vx = abs(self.motion.vx) if peer[0] >= my_center[0] else -abs(self.motion.vx)
-                pool = self._messages.get("meet") or []
-                if pool:
-                    self.say(pool[self._chatter_rng.randrange(len(pool))])
-        elif distance > self.MEET_DISTANCE * 1.6:
-            self._peer_greeted = False
+
+    def _greet_peer(self, peer, distance: float, my_center) -> None:
+        """
+        走到夠近就轉頭打個招呼，一次接近只打一次；離開夠遠之後才會重新算一次
+        （這段遲滯是為了避免在邊界來回時一直重複講話）。
+        Close enough: turn to face them and say hello, once per approach. The
+        flag only resets once they are well clear again, which stops a pet
+        hovering at the boundary from repeating itself.
+        """
+        if distance > self.MEET_DISTANCE:
+            if distance > self.MEET_DISTANCE * 1.6:
+                self._peer_greeted = False
+            return
+        self.motion.clear_follow()
+        if not self._talk or self._peer_greeted:
+            return
+        self._peer_greeted = True
+        self._gain_affection(3)
+        self.motion.vx = (abs(self.motion.vx) if peer[0] >= my_center[0]
+                          else -abs(self.motion.vx))
+        pool = self._messages.get("meet") or []
+        if pool:
+            self.say(pool[self._chatter_rng.randrange(len(pool))])
 
     def _load_sprite(self, path: str):
         """載入一張精靈；檔案損毀或格式不支援時回傳 None。"""

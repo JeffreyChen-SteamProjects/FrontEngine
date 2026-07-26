@@ -107,39 +107,38 @@ class ParticleOpenGLWidget(QOpenGLWidget):
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
 
+    # 每個方向：(要移動的軸, 每步的位移正負, 越過哪一邊算離場)
+    # Per direction: which axis moves, the sign of each step, and which edge
+    # counts as leaving the screen.
+    _DIRECTIONS = {
+        "down": (1, -1, -1.0),
+        "up": (1, +1, +1.0),
+        "left": (0, -1, -1.0),
+        "right": (0, +1, +1.0),
+    }
+
     def update_particles(self):
-        for p in self.particles:
-            x, y = p
-            if self.particle_direction == "down":
-                y -= self.particle_speed
-                if y < -1:
-                    y = 1
-                    x = random.uniform(-1, 1)
-
-            elif self.particle_direction == "up":
-                y += self.particle_speed
-                if y > 1:
-                    y = -1
-                    x = random.uniform(-1, 1)
-
-            elif self.particle_direction == "left":
-                x -= self.particle_speed
-                if x < -1:
-                    x = 1
-                    y = random.uniform(-1, 1)
-
-            elif self.particle_direction == "right":
-                x += self.particle_speed
-                if x > 1:
-                    x = -1
-                    y = random.uniform(-1, 1)
-
-            # 你可以自行擴充其他方向
-
-            p[0] = x
-            p[1] = y
-
+        """把每個粒子往設定的方向推一步，離開畫面的就從對面重新進場。"""
+        movement = self._DIRECTIONS.get(self.particle_direction)
+        if movement is None:
+            self.update()
+            return
+        axis, sign, edge = movement
+        other = 1 - axis
+        for particle in self.particles:
+            particle[axis] += sign * self.particle_speed
+            if self._left_the_screen(particle[axis], sign, edge):
+                # 從對面邊緣回來，另一軸重新隨機，看起來才像源源不絕
+                # Re-enter from the opposite edge with a fresh position on the
+                # other axis, so the stream never looks like a repeating loop.
+                particle[axis] = -edge
+                particle[other] = random.uniform(-1, 1)  # nosec B311 - visual only
         self.update()
+
+    @staticmethod
+    def _left_the_screen(value: float, sign: int, edge: float) -> bool:
+        """這個粒子是不是已經越過它前進方向的那一邊。"""
+        return value < edge if sign < 0 else value > edge
 
     def paintGL(self):
         glClearColor(0, 0, 0, 0)
