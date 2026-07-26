@@ -6,7 +6,7 @@
 # pyproject.toml and stable.toml - this file used to pin 6.8.2.1 while those
 # pinned 6.10.2, so the two disagreed. It must not list frontengine itself
 # either: that installs the published build over the working tree.
-PySide6==6.10.2
+PySide6==6.11.1
 qt-material
 PyOpenGL
 PyOpenGL_accelerate
