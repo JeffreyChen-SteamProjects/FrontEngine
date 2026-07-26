@@ -153,6 +153,25 @@ that caps every overlay's refresh rate and drops its render resolution.
 
 ---
 
+## Stream and gaming
+
+Four things on the **Stream** tab, for playing and for going live:
+
+- **Crosshair** — a cross, dot, circle or T shape in the middle of the screen,
+  in your colour and size. It is **only drawn on top**: nothing is injected,
+  no memory is read, no game file is touched. An exclusive-fullscreen game will
+  cover it, which is how the OS stacks windows.
+- **Teleprompter** — scroll a script at an adjustable speed and size, with a
+  mirror option for prompter glass. It stops at the last line rather than
+  snapping back mid-read.
+- **Soundboard** — up to twelve slots, each with a sound and an optional
+  hotkey. A file that has gone missing is dropped rather than kept as a dead
+  button.
+- **OBS** — switch scenes and toggle recording or streaming through OBS's own
+  WebSocket (built in since OBS 28). The password stays in your local settings.
+
+---
+
 ## Screen time, clipboard and layouts
 
 Three things that remember, all of them **off until you switch them on** and
