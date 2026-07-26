@@ -271,8 +271,9 @@ class SystemStats:
             # Step past the leading count field by address and read the rest as
             # rows. addressof plus an offset is far clearer than handing cast
             # the result of byref.
-            rows = ctypes.cast(  # NOSONAR - addressof takes the char array fine
-                ctypes.addressof(buffer) + ctypes.sizeof(ctypes.c_uint32),
+            rows = ctypes.cast(
+                ctypes.addressof(buffer)  # NOSONAR - a char array is a ctypes instance
+                + ctypes.sizeof(ctypes.c_uint32),
                 ctypes.POINTER(_MibIfRow))
             received = sent = 0
             for index in range(count):

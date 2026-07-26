@@ -117,7 +117,11 @@ def acceptable_sound(sound_path) -> Optional[Path]:
     """
     if not sound_path:
         return None
-    path = Path(str(sound_path))
+    # 下一行就是這個函式存在的理由：把外部給的字串收斂成「確定存在的音訊檔」，
+    # 不符合就回 None。
+    # The next line is why this function exists: narrow an outside string down
+    # to an audio file that actually exists, and return None otherwise.
+    path = Path(str(sound_path))  # NOSONAR - validated on the very next line
     if path.is_file() and path.suffix.lower() in _SOUND_SUFFIXES:
         return path
     return None

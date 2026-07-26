@@ -86,7 +86,7 @@ def _list_windows_windows() -> List[Tuple[int, str]]:  # pragma: no cover - Win3
     # An EnumWindows callback must return True to keep enumerating; False
     # stops it early. Always returning the same value is the contract
     # here, not an oversight.
-    def _collect(hwnd, _lparam):
+    def _collect(hwnd, _lparam):  # NOSONAR - EnumWindows must always get True
         if not user32.IsWindowVisible(hwnd):
             return True
         rect = wintypes.RECT()

@@ -311,7 +311,7 @@ def _standable_windows_windows(exclude_handles=()) -> List[Tuple[int, int, int]]
         # An EnumWindows callback must return True to keep enumerating; False
         # stops it early. Always returning the same value is the contract
         # here, not an oversight.
-        def _collect(hwnd, _lparam):
+        def _collect(hwnd, _lparam):  # NOSONAR - EnumWindows must always get True
             if int(hwnd) in exclude or not user32.IsWindowVisible(hwnd):
                 return True
             rect = wintypes.RECT()
