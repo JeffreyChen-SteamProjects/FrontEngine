@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "frontengine_dev"
-version = "1.0.46"
+version = "1.0.47"
 authors = [
     { name = "JE-Chen", email = "jechenmailman@gmail.com" },
 ]
