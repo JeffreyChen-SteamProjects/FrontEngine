@@ -54,6 +54,9 @@ user_setting_dict: Dict[str, Any] = {
     # Sticky note contents and positions, and whether to reopen them on launch.
     "sticky_notes": [],
     "sticky_notes_restore": False,
+    # 看板模式：依序輪播預設集（預設關閉）
+    # Signage mode: rotate through presets; off by default.
+    "signage": {"enabled": False, "presets": [], "interval_minutes": 5, "hide_window": True},
     # 手機遙控（會開一個本機網路埠，預設關閉）與 MIDI 綁定
     # The phone remote opens a local network port and is off by default;
     # plus the MIDI control bindings.

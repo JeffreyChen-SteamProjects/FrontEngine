@@ -180,6 +180,21 @@ Four things on the **Stream** tab, for playing and for going live:
 
 ---
 
+## Signage, whiteboard and lip-sync
+
+- **Signage mode** (Settings) — rotate through a list of presets on a timer and
+  put the main window away, for a machine left running as a display. The
+  rotation wraps, so it keeps cycling.
+- **Whiteboard** (Presenting tab) — an infinite canvas: drag with the middle
+  button to pan, scroll to zoom, and save what you drew as an image. Strokes
+  live in canvas coordinates, so panning and zooming leaves them where they
+  belong.
+- **Pet lip-sync** — the pet can react to your **microphone** instead of your
+  speakers, so it moves while you talk. Like the speaker reaction this reads
+  only the meter — a number, not sound. Windows only.
+
+---
+
 ## Remote control
 
 From **Settings → Remote control**:
