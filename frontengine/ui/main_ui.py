@@ -46,6 +46,7 @@ from frontengine.utils.critical_exit.win32_vk import keyboard_keys_table
 from frontengine.utils.hotkey.hotkey_service import HotkeyService
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
+from frontengine.utils.multi_language.retranslate import retranslator, translate
 from frontengine.utils.plugins.plugin_loader import load_plugins
 from frontengine.utils.preset_schedule.preset_schedule_service import PresetScheduleService
 from frontengine.ui.dialog.remote_control_dialog import (
@@ -382,8 +383,11 @@ class FrontEngineMainUI(QMainWindow):
             (self.control_center_ui, "tab_control_center_text"),
         ]
 
-        for widget, lang_key in tabs:
-            self.tab_widget.addTab(widget, language_wrapper.language_word_dict.get(lang_key))
+        for index, (widget, lang_key) in enumerate(tabs):
+            self.tab_widget.addTab(widget, translate(lang_key))
+            # setTabText 需要索引，所以索引跟著這筆登記一起記下來
+            # setTabText needs the index, so it travels with the entry.
+            retranslator.bind(self.tab_widget, lang_key, "", "setTabText", index)
 
         # 加入外部擴充 Tab
         # Add external extension tabs
@@ -441,6 +445,18 @@ class FrontEngineMainUI(QMainWindow):
             user_setting_dict["window_maximized"] = self.isMaximized()
         except Exception as error:
             front_engine_logger.warning(f"[FrontEngineMainUI] save geometry failed: {error!r}")
+
+    def retranslate(self) -> int:
+        """
+        用目前語言把畫面上的文字重寫一遍，回傳重寫了幾條。
+        換語言不必重開程式，所以開著的覆蓋層與各分頁的設定都留在原地。
+        Rewrite the interface in the current language and return how many
+        strings were rewritten. Changing language needs no restart, so open
+        overlays and the settings on every page stay exactly where they are.
+        """
+        applied = retranslator.apply()
+        front_engine_logger.info(f"[FrontEngineMainUI] retranslate | {applied} strings")
+        return applied
 
     def set_style(self) -> None:
         """更新使用者選擇的主題 / Update user-selected theme"""

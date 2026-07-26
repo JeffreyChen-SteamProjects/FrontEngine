@@ -25,6 +25,7 @@ from frontengine.user_setting.user_setting_file import user_setting_dict, write_
 from frontengine.utils.clipboard.clipboard_history import ClipboardHistory, preview
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
+from frontengine.utils.multi_language.retranslate import retranslator
 
 _PIN_MARK = "📌 "
 
@@ -51,16 +52,21 @@ class ClipboardDialog(QDialog):
         self.entry_list.itemDoubleClicked.connect(lambda _item: self.copy_selected())
 
         self.copy_button = QPushButton(_t("clipboard_copy", "Copy"))
+        retranslator.bind(self.copy_button, "clipboard_copy", "Copy")
         self.copy_button.clicked.connect(self.copy_selected)
         self.pin_button = QPushButton(_t("clipboard_pin", "Pin / unpin"))
+        retranslator.bind(self.pin_button, "clipboard_pin", "Pin / unpin")
         self.pin_button.clicked.connect(self.toggle_pin_selected)
         self.remove_button = QPushButton(_t("clipboard_remove", "Remove"))
+        retranslator.bind(self.remove_button, "clipboard_remove", "Remove")
         self.remove_button.clicked.connect(self.remove_selected)
         self.clear_button = QPushButton(_t("clipboard_clear", "Clear (keep pinned)"))
+        retranslator.bind(self.clear_button, "clipboard_clear", "Clear (keep pinned)")
         self.clear_button.clicked.connect(self.clear_history)
 
         self.persist_checkbox = QCheckBox(
             _t("clipboard_persist", "Keep this history between sessions"))
+        retranslator.bind(self.persist_checkbox, "clipboard_persist", "Keep this history between sessions")
         self.persist_checkbox.setChecked(bool(user_setting_dict.get("clipboard_persist")))
         self.persist_checkbox.toggled.connect(self._store_persist)
         self.hint_label = QLabel(
@@ -68,6 +74,7 @@ class ClipboardDialog(QDialog):
                "History stays on this machine and is never sent anywhere. Unless you tick "
                "the box above it is kept in memory only, because clipboards often hold "
                "passwords."))
+        retranslator.bind(self.hint_label, "clipboard_hint", "History stays on this machine and is never sent anywhere. Unless you tick " "the box above it is kept in memory only, because clipboards often hold " "passwords.")
         self.hint_label.setWordWrap(True)
 
         self.button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)

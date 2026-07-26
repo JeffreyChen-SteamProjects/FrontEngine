@@ -17,6 +17,7 @@ from PySide6.QtWidgets import (
 
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
+from frontengine.utils.multi_language.retranslate import retranslator
 from frontengine.utils.window_pin import window_pin
 
 
@@ -37,25 +38,31 @@ class WindowPinDialog(QDialog):
         self.window_list = QListWidget()
         self.window_list.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
         self.refresh_button = QPushButton(_t("window_pin_refresh", "Refresh"))
+        retranslator.bind(self.refresh_button, "window_pin_refresh", "Refresh")
         self.refresh_button.clicked.connect(self.reload_windows)
         self.pin_button = QPushButton(_t("window_pin_pin", "Keep on top"))
+        retranslator.bind(self.pin_button, "window_pin_pin", "Keep on top")
         self.pin_button.clicked.connect(lambda: self.apply_pin(True))
         self.unpin_button = QPushButton(_t("window_pin_unpin", "Release"))
+        retranslator.bind(self.unpin_button, "window_pin_unpin", "Release")
         self.unpin_button.clicked.connect(lambda: self.apply_pin(False))
 
         self.opacity_label = QLabel(_t("window_pin_opacity", "Opacity"))
+        retranslator.bind(self.opacity_label, "window_pin_opacity", "Opacity")
         self.opacity_slider = QSlider(Qt.Orientation.Horizontal)
         self.opacity_slider.setRange(window_pin.MIN_OPACITY_PERCENT,
                                      window_pin.MAX_OPACITY_PERCENT)
         self.opacity_slider.setValue(window_pin.MAX_OPACITY_PERCENT)
         self.opacity_slider.valueChanged.connect(self.apply_opacity)
 
-        self.hint_label = QLabel(
-            _t("window_pin_hint",
-               "Pinning changes how a window is stacked and how see-through it is. "
-               "Windows only - other systems do not allow it.")
+        hint_key, hint_fallback = (
+            ("window_pin_hint",
+             "Pinning changes how a window is stacked and how see-through it is. "
+             "Windows only - other systems do not allow it.")
             if window_pin.available() else
-            _t("window_pin_unsupported", "Pinning other windows is Windows only."))
+            ("window_pin_unsupported", "Pinning other windows is Windows only."))
+        self.hint_label = QLabel(_t(hint_key, hint_fallback))
+        retranslator.bind(self.hint_label, hint_key, hint_fallback)
         self.hint_label.setWordWrap(True)
 
         self.button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)

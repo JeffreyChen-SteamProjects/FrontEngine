@@ -13,6 +13,7 @@ from frontengine.utils.workshop.workshop_content import (
 from frontengine.user_setting.user_setting_file import user_setting_dict, write_user_setting
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
+from frontengine.utils.multi_language.retranslate import retranslator
 
 if TYPE_CHECKING:
     from frontengine.ui.main_ui import FrontEngineMainUI
@@ -365,6 +366,7 @@ def build_preset_menu(ui: "FrontEngineMainUI") -> None:
     """
     front_engine_logger.info(f"[PresetMenu] build_preset_menu | ui={ui}")
     menu = ui.menu_bar.addMenu(_t("menu_bar_presets", "Presets"))
+    retranslator.bind(menu, "menu_bar_presets", "Presets", "setTitle")
     ui.preset_menu = menu
 
     for label_key, fallback, callback_factory in (
@@ -380,5 +382,6 @@ def build_preset_menu(ui: "FrontEngineMainUI") -> None:
         ("workshop_menu_import", "Import Workshop content...", _workshop_action),
     ):
         action = QAction(_t(label_key, fallback), menu)
+        retranslator.bind(action, label_key, fallback)
         action.triggered.connect(callback_factory(ui))
         menu.addAction(action)

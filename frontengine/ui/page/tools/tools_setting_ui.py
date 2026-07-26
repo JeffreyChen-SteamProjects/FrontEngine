@@ -33,6 +33,7 @@ from frontengine.utils.measure.measure import (
     FORMAT_CSS_VAR, FORMAT_HEX, FORMAT_HSL, FORMAT_RGB,
 )
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
+from frontengine.utils.multi_language.retranslate import retranslator
 from frontengine.utils.screen_text.screen_text_service import (
     ACTION_ASK, ACTION_EXTRACT, ACTION_TRANSLATE, DEFAULT_LANGUAGE, ScreenTextService,
 )
@@ -87,17 +88,21 @@ class ToolsSettingUI(QWidget):
         self._build_virtual_camera_row()
         self._build_camera_row()
         self.pin_button = QPushButton(_t("tools_pin_window", "Pin a window..."))
+        retranslator.bind(self.pin_button, "tools_pin_window", "Pin a window...")
         self.pin_button.clicked.connect(self.open_pin_dialog)
 
         # 視窗版面：記下每個視窗的位置，之後一鍵擺回去
         # Window layouts: remember where the windows are and put them back later.
         self.layout_label = QLabel(_t("tools_layout_label", "Window layout"))
+        retranslator.bind(self.layout_label, "tools_layout_label", "Window layout")
         self.layout_name_edit = QLineEdit()
         self.layout_name_edit.setPlaceholderText(_t("tools_layout_name", "Layout name"))
         self.layout_save_button = QPushButton(_t("tools_layout_save", "Save layout"))
+        retranslator.bind(self.layout_save_button, "tools_layout_save", "Save layout")
         self.layout_save_button.clicked.connect(self.save_layout)
         self.layout_combobox = QComboBox()
         self.layout_restore_button = QPushButton(_t("tools_layout_restore", "Restore"))
+        retranslator.bind(self.layout_restore_button, "tools_layout_restore", "Restore")
         self.layout_restore_button.clicked.connect(self.restore_selected_layout)
         for button in (self.layout_save_button, self.layout_restore_button):
             button.setEnabled(window_pin.available())
@@ -106,6 +111,7 @@ class ToolsSettingUI(QWidget):
             _t("tools_hint",
                "Click to measure; right-click clears. What you measure is copied to the "
                "clipboard. The camera is shown locally only - nothing is recorded."))
+        retranslator.bind(self.hint_label, "tools_hint", "Click to measure; right-click clears. What you measure is copied to the " "clipboard. The camera is shown locally only - nothing is recorded.")
         self.hint_label.setWordWrap(True)
 
         self.grid_layout.addWidget(self.measure_label, 0, 0)
@@ -147,6 +153,7 @@ class ToolsSettingUI(QWidget):
     # --- construction helpers -------------------------------------------
     def _build_measure_row(self) -> None:
         self.measure_label = QLabel(_t("tools_measure_label", "Measure"))
+        retranslator.bind(self.measure_label, "tools_measure_label", "Measure")
         self.measure_mode_combobox = QComboBox()
         for mode, key, fallback in ((MODE_COLOR, "tools_measure_color", "Colour picker"),
                                     (MODE_RULER, "tools_measure_ruler", "Pixel ruler"),
@@ -154,23 +161,29 @@ class ToolsSettingUI(QWidget):
             self.measure_mode_combobox.addItem(_t(key, fallback), mode)
         self.measure_mode_combobox.currentIndexChanged.connect(self._apply_measure_settings)
         self.color_format_label = QLabel(_t("tools_color_format", "Copy colour as"))
+        retranslator.bind(self.color_format_label, "tools_color_format", "Copy colour as")
         self.color_format_combobox = QComboBox()
         for value, label in ((FORMAT_HEX, "#rrggbb"), (FORMAT_RGB, "rgb(r, g, b)"),
                              (FORMAT_HSL, "hsl(h, s%, l%)"), (FORMAT_CSS_VAR, "--color: ...;")):
             self.color_format_combobox.addItem(label, value)
         self.color_format_combobox.currentIndexChanged.connect(self._apply_measure_settings)
         self.measure_button = QPushButton(_t("tools_measure_start", "Start measuring"))
+        retranslator.bind(self.measure_button, "tools_measure_start", "Start measuring")
         self.measure_button.clicked.connect(self.toggle_measure)
 
     def _build_capture_row(self) -> None:
         self.capture_label = QLabel(_t("tools_capture_label", "Region capture"))
+        retranslator.bind(self.capture_label, "tools_capture_label", "Region capture")
         self.capture_button = QPushButton(_t("tools_capture_start", "Capture area"))
+        retranslator.bind(self.capture_button, "tools_capture_start", "Capture area")
         self.capture_button.clicked.connect(self.start_capture)
         self.capture_copy_button = QPushButton(_t("tools_capture_copy", "Copy last"))
+        retranslator.bind(self.capture_copy_button, "tools_capture_copy", "Copy last")
         self.capture_copy_button.clicked.connect(self.copy_last_capture)
 
     def _build_screen_text_row(self) -> None:
         self.screen_text_label = QLabel(_t("tools_screen_text_label", "Read text"))
+        retranslator.bind(self.screen_text_label, "tools_screen_text_label", "Read text")
         self.screen_text_combobox = QComboBox()
         for action, key, fallback in ((ACTION_EXTRACT, "tools_screen_text_extract", "Copy text"),
                                       (ACTION_TRANSLATE, "tools_screen_text_translate", "Translate"),
@@ -181,10 +194,12 @@ class ToolsSettingUI(QWidget):
             _t("tools_screen_text_input", "Language, or your question"))
         self.screen_text_input.setText(DEFAULT_LANGUAGE)
         self.screen_text_button = QPushButton(_t("tools_screen_text_start", "Read an area"))
+        retranslator.bind(self.screen_text_button, "tools_screen_text_start", "Read an area")
         self.screen_text_button.clicked.connect(self.start_screen_text)
 
     def _build_record_row(self) -> None:
         self.record_label = QLabel(_t("tools_record_label", _RECORD_AREA))
+        retranslator.bind(self.record_label, "tools_record_label", _RECORD_AREA)
         self.record_fps_spinbox = QSpinBox()
         self.record_fps_spinbox.setRange(MIN_FPS, MAX_FPS)
         self.record_fps_spinbox.setValue(DEFAULT_FPS)
@@ -192,24 +207,31 @@ class ToolsSettingUI(QWidget):
         self.record_seconds_spinbox.setRange(1, 120)
         self.record_seconds_spinbox.setValue(DEFAULT_MAX_SECONDS)
         self.record_camera_checkbox = QCheckBox(_t("tools_record_camera", "Include camera"))
+        retranslator.bind(self.record_camera_checkbox, "tools_record_camera", "Include camera")
         self.record_button = QPushButton(_t("tools_record_start", _RECORD_AN_AREA))
+        retranslator.bind(self.record_button, "tools_record_start", _RECORD_AN_AREA)
         self.record_button.clicked.connect(self.toggle_recording)
 
     def _build_virtual_camera_row(self) -> None:
         self.virtual_camera_label = QLabel(_t("tools_vcam_label", "Virtual camera"))
+        retranslator.bind(self.virtual_camera_label, "tools_vcam_label", "Virtual camera")
         self.virtual_camera_fps_spinbox = QSpinBox()
         self.virtual_camera_fps_spinbox.setRange(MIN_VCAM_FPS, MAX_VCAM_FPS)
         self.virtual_camera_fps_spinbox.setValue(DEFAULT_VCAM_FPS)
         self.virtual_camera_button = QPushButton(_t("tools_vcam_start", "Send an area"))
+        retranslator.bind(self.virtual_camera_button, "tools_vcam_start", "Send an area")
         self.virtual_camera_button.clicked.connect(self.toggle_virtual_camera)
-        self.virtual_camera_status = QLabel(
-            _t("tools_vcam_ready", "Ready") if virtual_camera.available()
-            else _t("tools_vcam_missing", "Install pyvirtualcam and a virtual camera driver"))
+        status_key, status_fallback = (
+            ("tools_vcam_ready", "Ready") if virtual_camera.available()
+            else ("tools_vcam_missing", "Install pyvirtualcam and a virtual camera driver"))
+        self.virtual_camera_status = QLabel(_t(status_key, status_fallback))
+        retranslator.bind(self.virtual_camera_status, status_key, status_fallback)
         self.virtual_camera_status.setWordWrap(True)
         self.virtual_camera_button.setEnabled(virtual_camera.available())
 
     def _build_camera_row(self) -> None:
         self.camera_label = QLabel(_t("tools_camera_label", "Camera"))
+        retranslator.bind(self.camera_label, "tools_camera_label", "Camera")
         self.camera_shape_combobox = QComboBox()
         for shape, key, fallback in ((SHAPE_CIRCLE, "tools_camera_circle", "Circle"),
                                      (SHAPE_ROUNDED, "tools_camera_rounded", "Rounded"),
@@ -219,14 +241,17 @@ class ToolsSettingUI(QWidget):
         self.camera_device_combobox = QComboBox()
         self.reload_cameras()
         self.camera_mirror_checkbox = QCheckBox(_t("tools_camera_mirror", "Mirror"))
+        retranslator.bind(self.camera_mirror_checkbox, "tools_camera_mirror", "Mirror")
         self.camera_mirror_checkbox.setChecked(True)
         self.camera_mirror_checkbox.toggled.connect(self._apply_camera_settings)
         self.camera_border_label = QLabel(_t("tools_camera_border", "Border"))
+        retranslator.bind(self.camera_border_label, "tools_camera_border", "Border")
         self.camera_border_spinbox = QSpinBox()
         self.camera_border_spinbox.setRange(0, 20)
         self.camera_border_spinbox.setValue(4)
         self.camera_border_spinbox.valueChanged.connect(self._apply_camera_settings)
         self.camera_button = QPushButton(_t("tools_camera_start", "Show camera"))
+        retranslator.bind(self.camera_button, "tools_camera_start", "Show camera")
         self.camera_button.clicked.connect(self.toggle_camera)
 
     # --- measuring -------------------------------------------------------

@@ -18,6 +18,7 @@ from frontengine.ui.page.web.web_setting_ui import WEBSettingUI
 from frontengine.user_setting.user_setting_file import clear_overlay_geometry
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
+from frontengine.utils.multi_language.retranslate import retranslator, translate
 from frontengine.utils.screen_privacy import capture_affinity
 from frontengine.utils.power_mode.power_mode import (
     TIER_BALANCED, TIER_HIGH, TIER_SAVER, normalize_tier,
@@ -108,6 +109,7 @@ class ControlCenterUI(QWidget):
         # Quality tier: finer than the low-power switch, applied to every overlay.
         self.quality_label = QLabel(
             language_wrapper.language_word_dict.get("control_center_quality", "Quality"))
+        retranslator.bind(self.quality_label, "control_center_quality", "Quality")
         self.quality_combobox = QComboBox()
         for tier, key, fallback in (
                 (TIER_HIGH, "control_center_quality_high", "High"),
@@ -157,8 +159,13 @@ class ControlCenterUI(QWidget):
             redirect_manager_instance.set_redirect()
 
     def _create_button(self, label_key: str, callback) -> QPushButton:
-        """建立按鈕並綁定事件 / Create button and bind callback"""
-        button = QPushButton(language_wrapper.language_word_dict.get(label_key))
+        """
+        建立按鈕、綁定事件，並記住文字來自哪個鍵，換語言時才跟得上。
+        Create the button, bind the callback, and remember the key behind its
+        text so a language change reaches it.
+        """
+        button = QPushButton(translate(label_key))
+        retranslator.bind(button, label_key)
         button.clicked.connect(callback)
         return button
 
@@ -304,12 +311,10 @@ class ControlCenterUI(QWidget):
                 setter(self._muted)
 
         self._for_each_overlay(apply)
-        self.mute_all_button.setText(
-            language_wrapper.language_word_dict.get(
-                "control_center_unmute_all" if self._muted else "control_center_mute_all",
-                "Unmute all" if self._muted else "Mute all",
-            )
-        )
+        retranslator.set_text(
+            self.mute_all_button,
+            "control_center_unmute_all" if self._muted else "control_center_mute_all",
+            "Unmute all" if self._muted else "Mute all",)
 
     def toggle_mute_all(self) -> None:
         """切換全域靜音狀態 / Toggle the global mute state."""
@@ -329,12 +334,10 @@ class ControlCenterUI(QWidget):
         front_engine_logger.info(f"ControlCenterUI set_lock_all | locked={locked}")
         self._overlays_locked = bool(locked)
         self._for_each_overlay(lambda widget: set_overlay_locked(widget, self._overlays_locked))
-        self.lock_all_button.setText(
-            language_wrapper.language_word_dict.get(
-                "control_center_unlock_all" if self._overlays_locked else "control_center_lock_all",
-                "Unlock overlays" if self._overlays_locked else "Lock overlays",
-            )
-        )
+        retranslator.set_text(
+            self.lock_all_button,
+            "control_center_unlock_all" if self._overlays_locked else "control_center_lock_all",
+            "Unlock overlays" if self._overlays_locked else "Lock overlays",)
 
     def toggle_lock_all(self) -> None:
         """切換覆蓋層鎖定狀態 / Toggle the overlay lock."""
@@ -352,12 +355,10 @@ class ControlCenterUI(QWidget):
                 setter(color)
 
         self._for_each_overlay(apply)
-        self.chroma_key_button.setText(
-            language_wrapper.language_word_dict.get(
-                "control_center_chroma_key_off" if self._chroma_key else "control_center_chroma_key_on",
-                "Chroma key off" if self._chroma_key else "Chroma key on",
-            )
-        )
+        retranslator.set_text(
+            self.chroma_key_button,
+            "control_center_chroma_key_off" if self._chroma_key else "control_center_chroma_key_on",
+            "Chroma key off" if self._chroma_key else "Chroma key on",)
 
     def toggle_chroma_key(self) -> None:
         """切換綠幕背景 / Toggle the chroma key background."""
@@ -379,12 +380,10 @@ class ControlCenterUI(QWidget):
                 setter(self._low_power)
 
         self._for_each_overlay(apply)
-        self.low_power_button.setText(
-            language_wrapper.language_word_dict.get(
-                "control_center_low_power_off" if self._low_power else "control_center_low_power_on",
-                "Low power off" if self._low_power else "Low power on",
-            )
-        )
+        retranslator.set_text(
+            self.low_power_button,
+            "control_center_low_power_off" if self._low_power else "control_center_low_power_on",
+            "Low power off" if self._low_power else "Low power on",)
 
     def set_hide_from_capture(self, hidden: bool) -> int:
         """
@@ -408,11 +407,11 @@ class ControlCenterUI(QWidget):
         self._for_each_overlay(apply)
         front_engine_logger.info(
             f"ControlCenterUI set_hide_from_capture | hidden={hidden}, applied={applied}")
-        self.capture_button.setText(
-            language_wrapper.language_word_dict.get(
-                "control_center_show_in_capture" if self._hidden_from_capture
-                else "control_center_hide_from_capture",
-                "Show in capture" if self._hidden_from_capture else "Hide from capture"))
+        retranslator.set_text(
+            self.capture_button,
+            "control_center_show_in_capture" if self._hidden_from_capture
+            else "control_center_hide_from_capture",
+            "Show in capture" if self._hidden_from_capture else "Hide from capture")
         return applied
 
     def toggle_hide_from_capture(self) -> None:

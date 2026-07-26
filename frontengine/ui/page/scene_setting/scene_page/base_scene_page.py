@@ -7,6 +7,7 @@ from frontengine.ui.page.scene_setting.scene_manager import SceneManagerUI
 from frontengine.user_setting.scene_setting import scene_json
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
+from frontengine.utils.multi_language.retranslate import retranslator, translate
 
 
 class BaseSceneSettingUI(QWidget):
@@ -30,7 +31,8 @@ class BaseSceneSettingUI(QWidget):
         maximum: int,
         default: int,
     ) -> Tuple[QLabel, QLabel, QSlider]:
-        label = QLabel(language_wrapper.language_word_dict.get(label_key))
+        label = QLabel(translate(label_key))
+        retranslator.bind(label, label_key)
         slider = QSlider(Qt.Orientation.Horizontal)
         slider.setRange(minimum, maximum)
         slider.setValue(default)
@@ -39,7 +41,9 @@ class BaseSceneSettingUI(QWidget):
         return label, value_label, slider
 
     def _make_ready_label(self) -> QLabel:
-        return QLabel(language_wrapper.language_word_dict.get("Not Ready"))
+        label = QLabel(translate("Not Ready"))
+        retranslator.bind(label, "Not Ready")
+        return label
 
     def _wire_chooser(
         self,
@@ -54,11 +58,14 @@ class BaseSceneSettingUI(QWidget):
         label to "Ready".
         """
         def handler() -> None:
-            ready_label.setText(language_wrapper.language_word_dict.get("Not Ready"))
+            # set_text 而不是 setText：換語言時要跟著目前是就緒還是未就緒
+            # set_text, not setText, so a language change follows whichever
+            # state the label is actually in.
+            retranslator.set_text(ready_label, "Not Ready")
             on_reset()
             path = chooser(self)
             if path:
-                ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+                retranslator.set_text(ready_label, "Ready")
                 on_chosen(path)
         return handler
 

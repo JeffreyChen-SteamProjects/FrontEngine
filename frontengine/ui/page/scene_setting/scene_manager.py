@@ -9,6 +9,7 @@ from frontengine.ui.page.utils import create_monitor_selection_dialog
 from frontengine.user_setting.scene_setting import choose_scene_json, write_scene_file, scene_json
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
+from frontengine.utils.multi_language.retranslate import retranslator
 
 
 class SceneManagerUI(QWidget):
@@ -23,9 +24,11 @@ class SceneManagerUI(QWidget):
 
         # Read and write scene json button
         self.read_scene_json_button = QPushButton(language_wrapper.language_word_dict.get("scene_input"))
+        retranslator.bind(self.read_scene_json_button, "scene_input", "")
         self.read_scene_json_button.clicked.connect(self.update_scene_json)
 
         self.write_scene_json_button = QPushButton(language_wrapper.language_word_dict.get("scene_output"))
+        retranslator.bind(self.write_scene_json_button, "scene_output", "")
         self.write_scene_json_button.clicked.connect(lambda: write_scene_file(self))
 
         # Json plaintext
@@ -35,14 +38,17 @@ class SceneManagerUI(QWidget):
 
         # Start button
         self.start_button = QPushButton(language_wrapper.language_word_dict.get("scene_start"))
+        retranslator.bind(self.start_button, "scene_start", "")
         self.start_button.clicked.connect(self.start_scene)
 
         # Show on all screen
         self.show_on_all_screen_checkbox = QCheckBox(language_wrapper.language_word_dict.get("Show on all screen"))
+        retranslator.bind(self.show_on_all_screen_checkbox, "Show on all screen", "")
         self.show_on_all_screen_checkbox.clicked.connect(self.set_show_all_screen)
 
         # Clear json button
         self.clear_json_button = QPushButton(language_wrapper.language_word_dict.get("scene_script_clear"))
+        retranslator.bind(self.clear_json_button, "scene_script_clear", "")
         self.clear_json_button.clicked.connect(self.clear_json)
 
         # Layout

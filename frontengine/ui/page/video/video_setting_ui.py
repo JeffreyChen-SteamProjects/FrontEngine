@@ -19,6 +19,7 @@ from frontengine.ui.page.utils import (
 from frontengine.user_setting.user_setting_file import add_recent_file
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
+from frontengine.utils.multi_language.retranslate import retranslator
 
 
 class VideoSettingUI(QWidget):
@@ -36,6 +37,7 @@ class VideoSettingUI(QWidget):
 
         # Opacity setting
         self.opacity_label = QLabel(language_wrapper.language_word_dict.get("Opacity"))
+        retranslator.bind(self.opacity_label, "Opacity", "")
         self.opacity_slider = QSlider(Qt.Orientation.Horizontal)
         self.opacity_slider.setRange(1, 100)
         self.opacity_slider.setValue(20)
@@ -44,6 +46,7 @@ class VideoSettingUI(QWidget):
 
         # Play rate setting
         self.play_rate_label = QLabel(language_wrapper.language_word_dict.get("Play rate"))
+        retranslator.bind(self.play_rate_label, "Play rate", "")
         self.play_rate_slider = QSlider(Qt.Orientation.Horizontal)
         self.play_rate_slider.setRange(1, 200)
         self.play_rate_slider.setValue(100)
@@ -52,6 +55,7 @@ class VideoSettingUI(QWidget):
 
         # Volume setting
         self.volume_label = QLabel(language_wrapper.language_word_dict.get("Volume"))
+        retranslator.bind(self.volume_label, "Volume", "")
         self.volume_slider = QSlider(Qt.Orientation.Horizontal)
         self.volume_slider.setRange(1, 100)
         self.volume_slider.setValue(100)
@@ -60,34 +64,42 @@ class VideoSettingUI(QWidget):
 
         # Ready label
         self.ready_label = QLabel(language_wrapper.language_word_dict.get("Not Ready"))
+        retranslator.bind(self.ready_label, "Not Ready", "")
 
         # Choose file button
         self.choose_file_button = QPushButton(language_wrapper.language_word_dict.get("video_setting_choose_file"))
+        retranslator.bind(self.choose_file_button, "video_setting_choose_file", "")
         self.choose_file_button.clicked.connect(self.choose_and_copy_file_to_cwd_video_dir_then_play)
 
         # Start button
         self.start_button = QPushButton(language_wrapper.language_word_dict.get("video_setting_start_play"))
+        retranslator.bind(self.start_button, "video_setting_start_play", "")
         self.start_button.clicked.connect(self.start_play_video)
 
         # Expand
         self.fullscreen_checkbox = QCheckBox(language_wrapper.language_word_dict.get("fullscreen_checkbox_label"))
+        retranslator.bind(self.fullscreen_checkbox, "fullscreen_checkbox_label", "")
         self.fullscreen_checkbox.setChecked(True)
 
         # Show on all screen
         self.show_on_all_screen_checkbox = QCheckBox(language_wrapper.language_word_dict.get("Show on all screen"))
+        retranslator.bind(self.show_on_all_screen_checkbox, "Show on all screen", "")
         self.show_on_all_screen_checkbox.clicked.connect(self.set_show_all_screen)
 
         # Show on bottom
         self.show_on_bottom_checkbox = QCheckBox(language_wrapper.language_word_dict.get("Show on bottom"))
+        retranslator.bind(self.show_on_bottom_checkbox, "Show on bottom", "")
 
         # Target monitor selector
         self.target_monitor_label = QLabel(
             language_wrapper.language_word_dict.get("target_monitor_label", "Target monitor")
         )
+        retranslator.bind(self.target_monitor_label, "target_monitor_label", "Target monitor")
         self.target_monitor_combobox = build_target_monitor_combobox()
 
         # Recent files
         self.recent_files_label = QLabel(language_wrapper.language_word_dict.get("recent_files_label", "Recent"))
+        retranslator.bind(self.recent_files_label, "recent_files_label", "Recent")
         self.recent_files_combobox = build_recent_combobox("video")
         self.recent_files_combobox.activated.connect(self._apply_recent_file)
 

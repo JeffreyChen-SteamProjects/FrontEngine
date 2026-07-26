@@ -3,6 +3,7 @@ from PySide6.QtWidgets import QLabel, QLineEdit, QPushButton
 from frontengine.ui.page.scene_setting.scene_manager import SceneManagerUI
 from frontengine.ui.page.scene_setting.scene_page.base_scene_page import BaseSceneSettingUI
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
+from frontengine.utils.multi_language.retranslate import retranslator
 
 
 class WebSceneSettingUI(BaseSceneSettingUI):
@@ -12,9 +13,11 @@ class WebSceneSettingUI(BaseSceneSettingUI):
         opacity_label, self.opacity_value, self.opacity_slider = self._build_slider("Opacity", 1, 100, 20)
 
         self.url_label = QLabel(language_wrapper.language_word_dict.get("scene_url_label"))
+        retranslator.bind(self.url_label, "scene_url_label", "")
         self.web_url_input = QLineEdit()
 
         self.update_scene_button = QPushButton(language_wrapper.language_word_dict.get("scene_add_web"))
+        retranslator.bind(self.update_scene_button, "scene_add_web", "")
         self.update_scene_button.clicked.connect(self._update_scene)
 
         self.grid_layout.addWidget(opacity_label, 0, 0)
