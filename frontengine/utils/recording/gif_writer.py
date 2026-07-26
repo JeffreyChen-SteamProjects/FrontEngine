@@ -62,9 +62,10 @@ def quantize(pixels: numpy.ndarray) -> numpy.ndarray:
     data = numpy.asarray(pixels, dtype=numpy.int32)
     if data.ndim != 3 or data.shape[2] < 3:
         raise ValueError("frame must be H x W x 3")
-    flat = data[:, :, :3].reshape(-1, 1, 3)
-    distances = ((flat - _PALETTE_ARRAY.reshape(1, -1, 3)) ** 2).sum(axis=2)
-    return distances.argmin(axis=1).astype(numpy.uint8).reshape(data.shape[0], data.shape[1])
+    flat = data[:, :, :3].reshape((-1, 1, 3))
+    distances = ((flat - _PALETTE_ARRAY.reshape((1, -1, 3))) ** 2).sum(axis=2)
+    return distances.argmin(axis=1).astype(numpy.uint8).reshape(
+        (data.shape[0], data.shape[1]))
 
 
 def clamp_delay(delay_ms) -> int:
