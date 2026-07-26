@@ -153,3 +153,19 @@ class Retranslator:
 
 
 retranslator = Retranslator()
+
+
+def tr(widget: Any, key: str, fallback: str = "", setter: str = "setText", *args: Any) -> Any:
+    """
+    設定文字、登記，然後把控制項本身傳回來，所以可以直接寫在指派的右邊：
+
+        self.hint_label = tr(QLabel(), "signage_hint", "Presets are saved from ...")
+
+    寫成一行是有意的。先前是「建一行、登記一行」，同一個形狀重複兩百多次，
+    連工具都看得出來那是樣板。
+    Set the text, register it, and hand the widget back so it can sit on the
+    right of an assignment. One line on purpose: building and registering as two
+    lines repeated the same shape over two hundred times, plainly boilerplate.
+    """
+    retranslator.bind(widget, key, fallback, setter, *args)
+    return widget

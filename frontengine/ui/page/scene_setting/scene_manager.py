@@ -8,7 +8,7 @@ from frontengine.show.scene.extend_graphic_view import ExtendGraphicView
 from frontengine.ui.page.utils import create_monitor_selection_dialog
 from frontengine.user_setting.scene_setting import choose_scene_json, write_scene_file, scene_json
 from frontengine.utils.logging.loggin_instance import front_engine_logger
-from frontengine.utils.multi_language.retranslate import retranslator
+from frontengine.utils.multi_language.retranslate import tr
 
 
 class SceneManagerUI(QWidget):
@@ -22,12 +22,10 @@ class SceneManagerUI(QWidget):
         self.show_all_screen = False
 
         # Read and write scene json button
-        self.read_scene_json_button = QPushButton()
-        retranslator.bind(self.read_scene_json_button, "scene_input")
+        self.read_scene_json_button = tr(QPushButton(), "scene_input")
         self.read_scene_json_button.clicked.connect(self.update_scene_json)
 
-        self.write_scene_json_button = QPushButton()
-        retranslator.bind(self.write_scene_json_button, "scene_output")
+        self.write_scene_json_button = tr(QPushButton(), "scene_output")
         self.write_scene_json_button.clicked.connect(lambda: write_scene_file(self))
 
         # Json plaintext
@@ -36,18 +34,15 @@ class SceneManagerUI(QWidget):
         self.json_plaintext.appendPlainText("{}")
 
         # Start button
-        self.start_button = QPushButton()
-        retranslator.bind(self.start_button, "scene_start")
+        self.start_button = tr(QPushButton(), "scene_start")
         self.start_button.clicked.connect(self.start_scene)
 
         # Show on all screen
-        self.show_on_all_screen_checkbox = QCheckBox()
-        retranslator.bind(self.show_on_all_screen_checkbox, "Show on all screen")
+        self.show_on_all_screen_checkbox = tr(QCheckBox(), "Show on all screen")
         self.show_on_all_screen_checkbox.clicked.connect(self.set_show_all_screen)
 
         # Clear json button
-        self.clear_json_button = QPushButton()
-        retranslator.bind(self.clear_json_button, "scene_script_clear")
+        self.clear_json_button = tr(QPushButton(), "scene_script_clear")
         self.clear_json_button.clicked.connect(self.clear_json)
 
         # Layout

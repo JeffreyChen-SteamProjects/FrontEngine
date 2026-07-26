@@ -29,7 +29,7 @@ from frontengine.utils.focus_timer.focus_timer import (
 )
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
-from frontengine.utils.multi_language.retranslate import retranslator
+from frontengine.utils.multi_language.retranslate import tr
 
 _PET_EXTENSIONS = (".gif", ".webp", ".png", ".jpg")
 
@@ -67,41 +67,28 @@ class PetSettingUI(QWidget):
         self._chat_service = None
 
         # Choose file
-        self.choose_file_button = QPushButton()
-        retranslator.bind(self.choose_file_button, "pet_choose_file",
-                          "Choose pet sprite")
+        self.choose_file_button = tr(QPushButton(), "pet_choose_file", "Choose pet sprite")
         self.choose_file_button.clicked.connect(self.choose_and_play)
-        self.choose_pack_button = QPushButton()
-        retranslator.bind(self.choose_pack_button, "pet_choose_pack",
-                          _CHOOSE_PACK)
+        self.choose_pack_button = tr(QPushButton(), "pet_choose_pack", _CHOOSE_PACK)
         self.choose_pack_button.clicked.connect(self.choose_pack)
-        self.choose_sound_button = QPushButton()
-        retranslator.bind(self.choose_sound_button, "pet_choose_sound",
-                          "Choose sound (optional)")
+        self.choose_sound_button = tr(QPushButton(), "pet_choose_sound", "Choose sound (optional)")
         self.choose_sound_button.clicked.connect(self.choose_sound)
-        self.ready_label = QLabel()
-        retranslator.bind(self.ready_label, "Not Ready")
+        self.ready_label = tr(QLabel(), "Not Ready")
 
         # Size
-        self.size_label = QLabel()
-        retranslator.bind(self.size_label, "pet_size_label",
-                          "Size")
+        self.size_label = tr(QLabel(), "pet_size_label", "Size")
         self.size_combobox = QComboBox()
         self.size_combobox.addItems(["64", "96", "128", "192", "256"])
         self.size_combobox.setCurrentText("128")
 
         # Speed
-        self.speed_label = QLabel()
-        retranslator.bind(self.speed_label, "pet_speed_label",
-                          "Speed")
+        self.speed_label = tr(QLabel(), "pet_speed_label", "Speed")
         self.speed_combobox = QComboBox()
         self.speed_combobox.addItems([str(n) for n in range(1, 11)])
         self.speed_combobox.setCurrentText("3")
 
         # Behaviour
-        self.behaviour_label = QLabel()
-        retranslator.bind(self.behaviour_label, "pet_behaviour_label",
-                          "Behaviour")
+        self.behaviour_label = tr(QLabel(), "pet_behaviour_label", "Behaviour")
         self.behaviour_combobox = QComboBox()
         self.behaviour_combobox.addItem(
             language_wrapper.language_word_dict.get("pet_behaviour_floor", "Walk on floor"), BEHAVIOUR_FLOOR)
@@ -111,56 +98,36 @@ class PetSettingUI(QWidget):
             language_wrapper.language_word_dict.get("pet_behaviour_chase", "Chase cursor"), BEHAVIOUR_CHASE)
 
         # Climb walls / ceiling (only meaningful in floor mode)
-        self.climb_checkbox = QCheckBox()
-        retranslator.bind(self.climb_checkbox, "pet_climb_label",
-                          "Climb walls")
+        self.climb_checkbox = tr(QCheckBox(), "pet_climb_label", "Climb walls")
         self.climb_checkbox.setChecked(True)
-        self.talk_checkbox = QCheckBox()
-        retranslator.bind(self.talk_checkbox, "pet_talk_label",
-                          "Speech bubbles")
+        self.talk_checkbox = tr(QCheckBox(), "pet_talk_label", "Speech bubbles")
         self.talk_checkbox.setChecked(True)
-        self.sit_checkbox = QCheckBox()
-        retranslator.bind(self.sit_checkbox, "pet_sit_label",
-                          "Sit on windows")
+        self.sit_checkbox = tr(QCheckBox(), "pet_sit_label", "Sit on windows")
         self.sit_checkbox.setChecked(True)
-        self.tag_checkbox = QCheckBox()
-        retranslator.bind(self.tag_checkbox, "pet_tag_label",
-                          "Play tag with each other")
+        self.tag_checkbox = tr(QCheckBox(), "pet_tag_label", "Play tag with each other")
         self.tag_checkbox.toggled.connect(self._on_tag_toggled)
-        self.speech_checkbox = QCheckBox()
-        retranslator.bind(self.speech_checkbox, "pet_speech_label",
-                          "Speak out loud")
-        self.chat_checkbox = QCheckBox()
-        retranslator.bind(self.chat_checkbox, "pet_chat_label",
-                          "AI chat (needs API key)")
+        self.speech_checkbox = tr(QCheckBox(), "pet_speech_label", "Speak out loud")
+        self.chat_checkbox = tr(QCheckBox(), "pet_chat_label", "AI chat (needs API key)")
         self.chat_checkbox.setToolTip(
             language_wrapper.language_word_dict.get(
                 "pet_chat_hint",
                 "Reads the ANTHROPIC_API_KEY environment variable; the key is never stored."))
 
         # Focus timer (pomodoro) controls
-        self.focus_label = QLabel()
-        retranslator.bind(self.focus_label, "pet_focus_label",
-                          "Focus timer (min)")
+        self.focus_label = tr(QLabel(), "pet_focus_label", "Focus timer (min)")
         self.focus_minutes_combobox = QComboBox()
         self.focus_minutes_combobox.addItems(["15", "20", "25", "30", "45", "50"])
         self.focus_minutes_combobox.setCurrentText("25")
         self.break_minutes_combobox = QComboBox()
         self.break_minutes_combobox.addItems(["3", "5", "10", "15"])
         self.break_minutes_combobox.setCurrentText("5")
-        self.focus_button = QPushButton()
-        retranslator.bind(self.focus_button, "pet_focus_start",
-                          "Start focus")
+        self.focus_button = tr(QPushButton(), "pet_focus_start", "Start focus")
         self.focus_button.clicked.connect(self.toggle_focus_session)
 
         # Target monitor + sound volume
-        self.target_monitor_label = QLabel()
-        retranslator.bind(self.target_monitor_label, "target_monitor_label",
-                          "Target monitor")
+        self.target_monitor_label = tr(QLabel(), "target_monitor_label", "Target monitor")
         self.target_monitor_combobox = build_target_monitor_combobox()
-        self.volume_label = QLabel()
-        retranslator.bind(self.volume_label, "pet_volume_label",
-                          "Volume")
+        self.volume_label = tr(QLabel(), "pet_volume_label", "Volume")
         self.volume_combobox = QComboBox()
         for label, value in (("0%", 0), ("25%", 25), ("50%", 50), ("75%", 75), ("100%", 100)):
             self.volume_combobox.addItem(label, value)
@@ -171,25 +138,18 @@ class PetSettingUI(QWidget):
         self.audio_source_combobox.addItem(
             language_wrapper.language_word_dict.get("pet_audio_microphone", "Microphone"),
             "microphone")
-        self.audio_react_checkbox = QCheckBox()
-        retranslator.bind(self.audio_react_checkbox, "pet_audio_label",
-                          "React to audio")
-        self.drop_hint_label = QLabel()
-        retranslator.bind(self.drop_hint_label, "pet_drop_hint",
-                          "Tip: drop an image or pet pack onto the pet to change its look, "
-                "or any other file to feed it.")
+        self.audio_react_checkbox = tr(QCheckBox(), "pet_audio_label", "React to audio")
+        self.drop_hint_label = tr(QLabel(), "pet_drop_hint",
+            "Tip: drop an image or pet pack onto the pet to change its look, "
+            "or any other file to feed it.")
         self.drop_hint_label.setWordWrap(True)
 
         # Start
-        self.start_button = QPushButton()
-        retranslator.bind(self.start_button, "pet_start",
-                          "Spawn pet")
+        self.start_button = tr(QPushButton(), "pet_start", "Spawn pet")
         self.start_button.clicked.connect(self.start_play_pet)
 
         # Recent files
-        self.recent_files_label = QLabel()
-        retranslator.bind(self.recent_files_label, "recent_files_label",
-                          "Recent")
+        self.recent_files_label = tr(QLabel(), "recent_files_label", "Recent")
         self.recent_files_combobox = build_recent_combobox("pet")
         self.recent_files_combobox.activated.connect(self._apply_recent_file)
 

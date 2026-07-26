@@ -24,7 +24,7 @@ from frontengine.user_setting.user_setting_file import user_setting_dict, write_
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.midi.midi_input import available as midi_available, list_devices
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
-from frontengine.utils.multi_language.retranslate import retranslator
+from frontengine.utils.multi_language.retranslate import tr
 from frontengine.utils.remote.remote_server import ALLOWED_ACTIONS
 
 MIDI_KEY = "midi_bindings"
@@ -60,44 +60,33 @@ class RemoteControlDialog(QDialog):
         self._midi = midi
         self._learning = False
 
-        self.remote_checkbox = QCheckBox()
-        retranslator.bind(self.remote_checkbox, "remote_enable",
-                          "Let my phone control FrontEngine")
+        self.remote_checkbox = tr(QCheckBox(), "remote_enable", "Let my phone control FrontEngine")
         self.remote_checkbox.setChecked(remote_enabled())
         self.remote_checkbox.toggled.connect(self._toggle_remote)
         self.remote_url_label = QLabel(self.remote_status())
         self.remote_url_label.setWordWrap(True)
         self.remote_url_label.setTextInteractionFlags(
             self.remote_url_label.textInteractionFlags().TextSelectableByMouse)
-        self.remote_copy_button = QPushButton()
-        retranslator.bind(self.remote_copy_button, "remote_copy",
-                          "Copy link")
+        self.remote_copy_button = tr(QPushButton(), "remote_copy", "Copy link")
         self.remote_copy_button.clicked.connect(self.copy_link)
-        self.remote_hint = QLabel()
-        retranslator.bind(self.remote_hint, "remote_hint",
-                          "This opens a port on this machine for your local network. The link carries a "
-               "one-time token that changes every time it starts, and only the buttons on the "
-               "page can be triggered - nothing else. It is plain HTTP, so treat it like any "
-               "other device on your network: someone else on the same network could read the "
-               "token and press the same buttons. Leave it off on networks you do not trust.")
+        self.remote_hint = tr(QLabel(), "remote_hint",
+            "This opens a port on this machine for your local network. The link carries a "
+            "one-time token that changes every time it starts, and only the buttons on the "
+            "page can be triggered - nothing else. It is plain HTTP, so treat it like any "
+            "other device on your network: someone else on the same network could read the "
+            "token and press the same buttons. Leave it off on networks you do not trust.")
         self.remote_hint.setWordWrap(True)
 
-        self.midi_label = QLabel()
-        retranslator.bind(self.midi_label, "remote_midi_label",
-                          "MIDI controller")
+        self.midi_label = tr(QLabel(), "remote_midi_label", "MIDI controller")
         self.midi_combobox = QComboBox()
         for index, name in list_devices():
             self.midi_combobox.addItem(name, index)
         if self.midi_combobox.count() == 0:
             self.midi_combobox.addItem(_t("remote_midi_none", "No MIDI device found"), -1)
-        self.learn_button = QPushButton()
-        retranslator.bind(self.learn_button, "remote_midi_learn",
-                          "Learn")
+        self.learn_button = tr(QPushButton(), "remote_midi_learn", "Learn")
         self.learn_button.clicked.connect(self.start_learning)
         self.learn_button.setEnabled(midi_available())
-        self.remove_button = QPushButton()
-        retranslator.bind(self.remove_button, "remote_midi_remove",
-                          "Remove")
+        self.remove_button = tr(QPushButton(), "remote_midi_remove", "Remove")
         self.remove_button.clicked.connect(self.remove_selected)
 
         self.table = QTableWidget(0, 2)
