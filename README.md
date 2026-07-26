@@ -89,6 +89,59 @@ Play a folder of images and animations *beneath* every window, from the
 
 ---
 
+## Widgets
+
+Four desktop widgets on the **Widgets** tab:
+
+- **Audio spectrum** — bars or a ring, log-spaced bands, smoothed with a
+  fast-attack/slow-decay follower and peak markers that drift down.
+  > Unlike the pet and the wallpaper, which read only the output *meter*, a
+  > spectrum needs the actual samples to compute frequencies — so this one
+  > **captures the system output stream**. The samples are analysed in memory,
+  > never written to disk or sent anywhere, and capture stops the moment you
+  > stop the spectrum. Windows only.
+- **Now playing** — the current track from Windows' media controls when the
+  optional `winsdk` bindings are installed; otherwise the name of the app that
+  is actually making sound.
+- **System monitor** — CPU, memory and disk as small sparklines. An average
+  hides a stall; a line does not.
+- **Sticky notes** — editable cards that float above every window and keep
+  their text, colour and position between sessions.
+
+---
+
+## Tools
+
+Measuring and capture tools on the **Tools** tab:
+
+- **Colour picker / pixel ruler / protractor** — click to sample or measure;
+  the result is copied straight to the clipboard as `#rrggbb`, `rgb(...)`,
+  `hsl(...)` or a CSS custom property.
+- **Region capture** — drag out an area; it lands on the clipboard and can be
+  saved to a file.
+- **Pin a window** — keep another program's window on top, or fade it, while
+  you work against it. Only stacking and opacity are touched, never window
+  content. Windows only.
+- **Camera** — your webcam in a circle, rounded box or rectangle, shown
+  locally and never recorded.
+
+---
+
+## Rules
+
+Things that decide for themselves, from the **Settings** menu:
+
+- **Smart pause** — stand the overlays down while a fullscreen app is running,
+  while the machine is on battery, or while a named app has focus.
+- **App profiles** — apply a saved preset when you switch to a given app.
+- **Reminders** — every N minutes, or once a day at a set time, shown as a
+  toast that closes itself.
+
+The control center also carries a **quality tier** (high / balanced / saver)
+that caps every overlay's refresh rate and drops its render resolution.
+
+---
+
 ## Community content
 
 - **Steam Workshop** — subscribed items are picked up from Steam's own

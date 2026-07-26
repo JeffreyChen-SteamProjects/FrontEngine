@@ -29,6 +29,7 @@ from frontengine.ui.page.presentation.presentation_setting_ui import Presentatio
 from frontengine.ui.page.screen_care.screen_care_setting_ui import ScreenCareSettingUI
 from frontengine.ui.page.sound_player.sound_player_setting_ui import SoundPlayerSettingUI
 from frontengine.ui.page.text.text_setting_ui import TextSettingUI
+from frontengine.ui.page.tools.tools_setting_ui import ToolsSettingUI
 from frontengine.ui.page.video.video_setting_ui import VideoSettingUI
 from frontengine.ui.page.wallpaper.wallpaper_setting_ui import WallpaperSettingUI
 from frontengine.ui.page.web.web_setting_ui import WEBSettingUI
@@ -118,6 +119,7 @@ class FrontEngineMainUI(QMainWindow):
         self.wallpaper_setting_ui = WallpaperSettingUI()
         self.focus_setting_ui = FocusSettingUI()
         self.widgets_setting_ui = WidgetsSettingUI()
+        self.tools_setting_ui = ToolsSettingUI()
 
         # 控制中心
         # Control Center
@@ -270,6 +272,9 @@ class FrontEngineMainUI(QMainWindow):
                           "now_playing_widget_list", "note_widget_list"):
             self.control_center_ui.register_overlay_source(
                 lambda attribute=attribute: getattr(self.widgets_setting_ui, attribute, []))
+        for attribute in ("measure_widget_list", "capture_widget_list", "camera_widget_list"):
+            self.control_center_ui.register_overlay_source(
+                lambda attribute=attribute: getattr(self.tools_setting_ui, attribute, []))
 
     def _add_tabs(self) -> None:
         """加入所有內建與擴充的 Tab / Add all built-in and extended tabs"""
@@ -288,6 +293,7 @@ class FrontEngineMainUI(QMainWindow):
             (self.wallpaper_setting_ui, "tab_wallpaper_text"),
             (self.focus_setting_ui, "tab_focus_text"),
             (self.widgets_setting_ui, "tab_widgets_text"),
+            (self.tools_setting_ui, "tab_tools_text"),
             (self.control_center_ui, "tab_control_center_text"),
         ]
 
@@ -451,6 +457,9 @@ class FrontEngineMainUI(QMainWindow):
         if getattr(self, "widgets_setting_ui", None) is not None:
             self.widgets_setting_ui.save_notes()
             self.widgets_setting_ui.stop_spectrum()
+        if getattr(self, "tools_setting_ui", None) is not None:
+            self.tools_setting_ui.release_pinned_windows()
+            self.tools_setting_ui.stop_camera()
         if getattr(self, "reminder_service", None) is not None:
             self.reminder_service.stop()
         if getattr(self, "app_profile_service", None) is not None:
