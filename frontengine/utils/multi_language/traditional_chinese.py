@@ -550,4 +550,11 @@ traditional_chinese_word_dict = {
     "screen_privacy_hint": '比對的是視窗標題，所以在瀏覽器分頁裡開的會議也抓得到。覆蓋層仍會顯示在你自己的螢幕上，只有擷取畫面那一份是空的。遮蔽層不會被藏起來——遮住東西正是它存在的理由。',
     "screen_privacy_unsupported": '把覆蓋層藏出螢幕擷取僅支援 Windows。',
     "screen_privacy_toast": '已把覆蓋層藏出螢幕擷取',
+    "tools_vcam_label": '虛擬攝影機',
+    "tools_vcam_start": '框選並送出',
+    "tools_vcam_stop": '停止送出',
+    "tools_vcam_ready": '就緒',
+    "tools_vcam_sending": '正在送到 {device}',
+    "tools_vcam_failed": '無法啟動：{reason}',
+    "tools_vcam_missing": '需要安裝 pyvirtualcam 與虛擬攝影機驅動',
 }

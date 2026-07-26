@@ -36,6 +36,11 @@ from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.screen_text.screen_text_service import (
     ACTION_ASK, ACTION_EXTRACT, ACTION_TRANSLATE, DEFAULT_LANGUAGE, ScreenTextService,
 )
+from frontengine.utils.virtual_camera import virtual_camera
+from frontengine.utils.virtual_camera.camera_feed import VirtualCameraFeed
+from frontengine.utils.virtual_camera.virtual_camera import (
+    DEFAULT_FPS as DEFAULT_VCAM_FPS, MAX_FPS as MAX_VCAM_FPS, MIN_FPS as MIN_VCAM_FPS,
+)
 from frontengine.utils.recording.frame_recorder import (
     DEFAULT_FPS, DEFAULT_MAX_SECONDS, MAX_FPS, MIN_FPS, FrameRecorder,
 )
@@ -64,6 +69,8 @@ class ToolsSettingUI(QWidget):
 
         self.measure_widget_list: List[MeasureWidget] = []
         self.recorder = FrameRecorder(self)
+        self.virtual_camera_feed = VirtualCameraFeed(self)
+        self.virtual_camera_feed.failed.connect(self._on_virtual_camera_failed)
         self.screen_text_service = ScreenTextService(consent_provider=has_consent)
         self.last_screen_text: Optional[str] = None
         self.last_recording: Optional[str] = None
@@ -76,6 +83,7 @@ class ToolsSettingUI(QWidget):
         self._build_capture_row()
         self._build_screen_text_row()
         self._build_record_row()
+        self._build_virtual_camera_row()
         self._build_camera_row()
         self.pin_button = QPushButton(_t("tools_pin_window", "Pin a window..."))
         self.pin_button.clicked.connect(self.open_pin_dialog)
@@ -116,20 +124,24 @@ class ToolsSettingUI(QWidget):
         self.grid_layout.addWidget(self.record_button, 5, 2)
         self.grid_layout.addWidget(self.record_seconds_spinbox, 6, 1)
         self.grid_layout.addWidget(self.record_camera_checkbox, 6, 2)
-        self.grid_layout.addWidget(self.camera_label, 7, 0)
-        self.grid_layout.addWidget(self.camera_shape_combobox, 7, 1)
-        self.grid_layout.addWidget(self.camera_button, 7, 2)
-        self.grid_layout.addWidget(self.camera_device_combobox, 8, 0, 1, 2)
-        self.grid_layout.addWidget(self.camera_mirror_checkbox, 8, 2)
-        self.grid_layout.addWidget(self.camera_border_label, 9, 0)
-        self.grid_layout.addWidget(self.camera_border_spinbox, 9, 1)
-        self.grid_layout.addWidget(self.pin_button, 10, 0)
-        self.grid_layout.addWidget(self.layout_label, 11, 0)
-        self.grid_layout.addWidget(self.layout_name_edit, 11, 1)
-        self.grid_layout.addWidget(self.layout_save_button, 11, 2)
-        self.grid_layout.addWidget(self.layout_combobox, 12, 0, 1, 2)
-        self.grid_layout.addWidget(self.layout_restore_button, 12, 2)
-        self.grid_layout.addWidget(self.hint_label, 13, 0, 1, 3)
+        self.grid_layout.addWidget(self.virtual_camera_label, 7, 0)
+        self.grid_layout.addWidget(self.virtual_camera_fps_spinbox, 7, 1)
+        self.grid_layout.addWidget(self.virtual_camera_button, 7, 2)
+        self.grid_layout.addWidget(self.virtual_camera_status, 8, 0, 1, 3)
+        self.grid_layout.addWidget(self.camera_label, 9, 0)
+        self.grid_layout.addWidget(self.camera_shape_combobox, 9, 1)
+        self.grid_layout.addWidget(self.camera_button, 9, 2)
+        self.grid_layout.addWidget(self.camera_device_combobox, 10, 0, 1, 2)
+        self.grid_layout.addWidget(self.camera_mirror_checkbox, 10, 2)
+        self.grid_layout.addWidget(self.camera_border_label, 11, 0)
+        self.grid_layout.addWidget(self.camera_border_spinbox, 11, 1)
+        self.grid_layout.addWidget(self.pin_button, 12, 0)
+        self.grid_layout.addWidget(self.layout_label, 13, 0)
+        self.grid_layout.addWidget(self.layout_name_edit, 13, 1)
+        self.grid_layout.addWidget(self.layout_save_button, 13, 2)
+        self.grid_layout.addWidget(self.layout_combobox, 14, 0, 1, 2)
+        self.grid_layout.addWidget(self.layout_restore_button, 14, 2)
+        self.grid_layout.addWidget(self.hint_label, 15, 0, 1, 3)
 
     # --- construction helpers -------------------------------------------
     def _build_measure_row(self) -> None:
@@ -182,6 +194,19 @@ class ToolsSettingUI(QWidget):
         self.record_button = QPushButton(_t("tools_record_start", _RECORD_AREA))
         self.record_button.clicked.connect(self.toggle_recording)
 
+    def _build_virtual_camera_row(self) -> None:
+        self.virtual_camera_label = QLabel(_t("tools_vcam_label", "Virtual camera"))
+        self.virtual_camera_fps_spinbox = QSpinBox()
+        self.virtual_camera_fps_spinbox.setRange(MIN_VCAM_FPS, MAX_VCAM_FPS)
+        self.virtual_camera_fps_spinbox.setValue(DEFAULT_VCAM_FPS)
+        self.virtual_camera_button = QPushButton(_t("tools_vcam_start", "Send an area"))
+        self.virtual_camera_button.clicked.connect(self.toggle_virtual_camera)
+        self.virtual_camera_status = QLabel(
+            _t("tools_vcam_ready", "Ready") if virtual_camera.available()
+            else _t("tools_vcam_missing", "Install pyvirtualcam and a virtual camera driver"))
+        self.virtual_camera_status.setWordWrap(True)
+        self.virtual_camera_button.setEnabled(virtual_camera.available())
+
     def _build_camera_row(self) -> None:
         self.camera_label = QLabel(_t("tools_camera_label", "Camera"))
         self.camera_shape_combobox = QComboBox()
@@ -191,10 +216,7 @@ class ToolsSettingUI(QWidget):
             self.camera_shape_combobox.addItem(_t(key, fallback), shape)
         self.camera_shape_combobox.currentIndexChanged.connect(self._apply_camera_settings)
         self.camera_device_combobox = QComboBox()
-        for camera_id, description in list_cameras():
-            self.camera_device_combobox.addItem(description, camera_id)
-        if self.camera_device_combobox.count() == 0:
-            self.camera_device_combobox.addItem(_t("tools_camera_none", "No camera found"), "")
+        self.reload_cameras()
         self.camera_mirror_checkbox = QCheckBox(_t("tools_camera_mirror", "Mirror"))
         self.camera_mirror_checkbox.setChecked(True)
         self.camera_mirror_checkbox.toggled.connect(self._apply_camera_settings)
@@ -332,6 +354,62 @@ class ToolsSettingUI(QWidget):
                 self.pin_dialog.release_all()
             except RuntimeError:
                 self.pin_dialog = None
+
+    def reload_cameras(self) -> int:
+        """
+        重新列出可用的視訊來源。擷取卡與外接攝影機常常是程式開著才插上去的，
+        所以清單要能重新整理，不然只有重開才看得到。
+        Re-list the available video sources. Capture cards and external cameras
+        are usually plugged in while the app is already running, so the list has
+        to be refreshable or they only appear after a restart.
+        """
+        self.camera_device_combobox.clear()
+        for camera_id, description in list_cameras():
+            self.camera_device_combobox.addItem(description, camera_id)
+        if self.camera_device_combobox.count() == 0:
+            self.camera_device_combobox.addItem(_t("tools_camera_none", "No camera found"), "")
+        return self.camera_device_combobox.count()
+
+    # --- virtual camera ---------------------------------------------------
+    def toggle_virtual_camera(self):
+        if self.virtual_camera_feed.running:
+            self.stop_virtual_camera()
+            return None
+        return self.start_virtual_camera()
+
+    def start_virtual_camera(self):
+        """框一塊畫面，放開滑鼠後把那塊持續送進虛擬攝影機。"""
+        front_engine_logger.info("[ToolsSettingUI] start_virtual_camera")
+        picker = RegionCaptureWidget()
+        picker.finish = _virtual_camera_region_picker(self, picker)
+        screen = QGuiApplication.primaryScreen()
+        if screen is not None:
+            picker.setGeometry(screen.geometry())
+        picker.setMouseTracking(True)
+        picker.show()
+        self.capture_widget_list.append(picker)
+        return picker
+
+    def begin_virtual_camera(self, region) -> bool:
+        """對指定範圍開始輸出。"""
+        started = self.virtual_camera_feed.start(region, self.virtual_camera_fps_spinbox.value())
+        if started:
+            self.virtual_camera_button.setText(_t("tools_vcam_stop", "Stop sending"))
+            self.virtual_camera_status.setText(
+                _t("tools_vcam_sending", "Sending to {device}").format(
+                    device=self.virtual_camera_feed.device_name()))
+        return started
+
+    def stop_virtual_camera(self) -> None:
+        self.virtual_camera_feed.stop()
+        self.virtual_camera_button.setText(_t("tools_vcam_start", "Send an area"))
+        self.virtual_camera_status.setText(_t("tools_vcam_ready", "Ready"))
+
+    def _on_virtual_camera_failed(self, reason: str) -> None:
+        """開不起來時照實說明，不要只是沒反應。"""
+        front_engine_logger.warning(f"[ToolsSettingUI] virtual camera failed: {reason}")
+        self.virtual_camera_status.setText(
+            _t("tools_vcam_failed", "Could not start: {reason}").format(reason=reason))
 
     # --- reading text on screen ------------------------------------------
     def start_screen_text(self):
@@ -532,3 +610,21 @@ def pixmap_to_png(pixmap) -> bytes:
     data = bytes(buffer.data()) if saved else b""
     buffer.close()
     return data
+
+
+def _virtual_camera_region_picker(page: "ToolsSettingUI", picker: RegionCaptureWidget):
+    """框選層放開滑鼠時，把範圍交給虛擬攝影機而不是擷取一張靜態畫面。"""
+    original_close = picker.close
+
+    def finish(point):
+        picker.extend(point)
+        region = picker.selection()
+        picker.origin = picker.current = None
+        if picker in page.capture_widget_list:
+            page.capture_widget_list.remove(picker)
+        original_close()
+        if region is not None and is_usable(region):
+            page.begin_virtual_camera(region)
+        return None
+
+    return finish

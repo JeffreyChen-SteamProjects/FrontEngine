@@ -551,4 +551,11 @@ english_word_dict = {
     "screen_privacy_hint": 'Matched against window titles, so a meeting held in a browser tab is caught too. Your overlays stay on your own screen - only the capture is blank. Masks stay visible, since covering something is what they are for.',
     "screen_privacy_unsupported": 'Hiding overlays from screen capture is Windows only.',
     "screen_privacy_toast": 'Overlays hidden from screen capture',
+    "tools_vcam_label": 'Virtual camera',
+    "tools_vcam_start": 'Send an area',
+    "tools_vcam_stop": 'Stop sending',
+    "tools_vcam_ready": 'Ready',
+    "tools_vcam_sending": 'Sending to {device}',
+    "tools_vcam_failed": 'Could not start: {reason}',
+    "tools_vcam_missing": 'Install pyvirtualcam and a virtual camera driver',
 }

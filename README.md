@@ -119,6 +119,14 @@ Measuring and capture tools on the **Tools** tab:
   `hsl(...)` or a CSS custom property.
 - **Region capture** — drag out an area; it lands on the clipboard and can be
   saved to a file.
+- **Virtual camera** — drag out an area and send it, overlays and all, as a
+  webcam that Zoom, Teams or Discord can pick as their video source. Needs the
+  optional `pyvirtualcam` package and a virtual camera driver on the system
+  (OBS installs one); without either, the button says so rather than failing
+  quietly.
+- **Camera** — any video input works, including capture cards, and the device
+  list can be refreshed without restarting since cards are usually plugged in
+  while the app is already running.
 - **Read text** — drag out an area to copy the text in it, translate it, or ask
   a question about it.
   > This is the **only** feature here that sends screen content off the
