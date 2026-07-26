@@ -11,6 +11,9 @@ from frontengine.show.pet.desktop_pet import (
 )
 from frontengine.ui.dialog.choose_file_dialog import choose_pet, choose_wav_sound
 from frontengine.ui.page.utils import (
+    apply_checkbox_state,
+    apply_combobox_data_state,
+    apply_combobox_text_state,
     build_recent_combobox,
     build_target_monitor_combobox,
     enable_file_drop,
@@ -27,6 +30,12 @@ from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 _PET_EXTENSIONS = (".gif", ".webp", ".png", ".jpg")
+
+
+# 多處共用的英文備援字串（只有在翻譯缺漏時才會看到）
+# The English fallback shared by several call sites, seen only when a
+# translation is missing.
+_CHOOSE_PACK = "Choose pet pack..."
 
 
 class PetSettingUI(QWidget):
@@ -61,7 +70,7 @@ class PetSettingUI(QWidget):
         )
         self.choose_file_button.clicked.connect(self.choose_and_play)
         self.choose_pack_button = QPushButton(
-            language_wrapper.language_word_dict.get("pet_choose_pack", "Choose pet pack...")
+            language_wrapper.language_word_dict.get("pet_choose_pack", _CHOOSE_PACK)
         )
         self.choose_pack_button.clicked.connect(self.choose_pack)
         self.choose_sound_button = QPushButton(
@@ -294,7 +303,7 @@ class PetSettingUI(QWidget):
     def _alive_pets(self) -> list:
         """回傳仍存活的寵物，並把已被銷毀者從清單移除。"""
         alive = []
-        for pet in list(self.pet_list):
+        for pet in self.pet_list[:]:
             try:
                 pet.center()
             except RuntimeError:
@@ -376,14 +385,14 @@ class PetSettingUI(QWidget):
         """選擇動作包資料夾（依 walk/idle/climb/fall/drag 檔名對應狀態）。"""
         front_engine_logger.info("[PetSettingUI] choose_pack")
         folder = QFileDialog.getExistingDirectory(
-            self, language_wrapper.language_word_dict.get("pet_choose_pack", "Choose pet pack...")
+            self, language_wrapper.language_word_dict.get("pet_choose_pack", _CHOOSE_PACK)
         )
         if not folder:
             return
         if not scan_pet_pack(folder):
             QMessageBox.warning(
                 self,
-                language_wrapper.language_word_dict.get("pet_choose_pack", "Choose pet pack..."),
+                language_wrapper.language_word_dict.get("pet_choose_pack", _CHOOSE_PACK),
                 language_wrapper.language_word_dict.get(
                     "pet_pack_empty", "No sprites (walk/idle/climb/fall/drag) found in that folder."),
             )
@@ -432,49 +441,45 @@ class PetSettingUI(QWidget):
         }
 
     def set_state(self, state: dict) -> None:
+        """把預設集的內容還原到這一頁的控制項上。"""
+        self._restore_media(state)
+        apply_combobox_data_state(self.behaviour_combobox, self._behaviour_from(state))
+        apply_combobox_text_state(state, (
+            (self.size_combobox, "size"),
+            (self.speed_combobox, "speed"),
+            (self.target_monitor_combobox, "target_monitor"),
+            (self.volume_combobox, "volume"),
+            (self.focus_minutes_combobox, "focus_minutes"),
+            (self.break_minutes_combobox, "break_minutes"),
+        ))
+        apply_checkbox_state(state, (
+            (self.climb_checkbox, "climb"),
+            (self.talk_checkbox, "talk"),
+            (self.sit_checkbox, "sit"),
+            (self.audio_react_checkbox, "audio_react"),
+            (self.tag_checkbox, "tag"),
+            (self.speech_checkbox, "speech"),
+            (self.chat_checkbox, "chat"),
+        ))
+
+    def _restore_media(self, state: dict) -> None:
+        """還原圖片與音效的路徑（有圖才算準備好可以放）。"""
         if state.get("pet_image_path"):
             self.pet_image_path = state["pet_image_path"]
             self.ready_to_play = True
             self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
-        for combobox, key in ((self.size_combobox, "size"), (self.speed_combobox, "speed")):
-            if state.get(key) is not None:
-                index = combobox.findText(str(state[key]))
-                if index >= 0:
-                    combobox.setCurrentIndex(index)
-        behaviour = state.get("behaviour")
-        if behaviour is None and "gravity" in state:  # back-compat with old presets
-            behaviour = BEHAVIOUR_FLOOR if state.get("gravity") else BEHAVIOUR_WANDER
-        if behaviour is not None:
-            index = self.behaviour_combobox.findData(behaviour)
-            if index >= 0:
-                self.behaviour_combobox.setCurrentIndex(index)
-        if "climb" in state:
-            self.climb_checkbox.setChecked(bool(state["climb"]))
-        if "talk" in state:
-            self.talk_checkbox.setChecked(bool(state["talk"]))
         if state.get("sound"):
             self.pet_sound_path = str(state["sound"])
-        if "sit" in state:
-            self.sit_checkbox.setChecked(bool(state["sit"]))
-        if state.get("target_monitor") is not None:
-            index = self.target_monitor_combobox.findText(str(state["target_monitor"]))
-            if index >= 0:
-                self.target_monitor_combobox.setCurrentIndex(index)
-        if state.get("volume") is not None:
-            index = self.volume_combobox.findText(str(state["volume"]))
-            if index >= 0:
-                self.volume_combobox.setCurrentIndex(index)
-        if "audio_react" in state:
-            self.audio_react_checkbox.setChecked(bool(state["audio_react"]))
-        if "tag" in state:
-            self.tag_checkbox.setChecked(bool(state["tag"]))
-        if "speech" in state:
-            self.speech_checkbox.setChecked(bool(state["speech"]))
-        if "chat" in state:
-            self.chat_checkbox.setChecked(bool(state["chat"]))
-        for combobox, key in ((self.focus_minutes_combobox, "focus_minutes"),
-                              (self.break_minutes_combobox, "break_minutes")):
-            if state.get(key) is not None:
-                index = combobox.findText(str(state[key]))
-                if index >= 0:
-                    combobox.setCurrentIndex(index)
+
+    @staticmethod
+    def _behaviour_from(state: dict):
+        """
+        取出行為模式。舊的預設集只存了 gravity 布林值，這裡把它翻譯成對應的
+        行為，免得舊檔案還原後寵物不會動。
+        The behaviour to use. Older presets only stored a `gravity` flag, so it
+        is translated here rather than leaving an old file with no behaviour.
+        """
+        behaviour = state.get("behaviour")
+        if behaviour is None and "gravity" in state:
+            behaviour = BEHAVIOUR_FLOOR if state.get("gravity") else BEHAVIOUR_WANDER
+        return behaviour

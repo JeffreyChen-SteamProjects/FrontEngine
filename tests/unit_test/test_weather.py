@@ -4,7 +4,6 @@ Weather tests: URL building, response parsing and caching all run against a
 fake opener, so no network call is made.
 """
 import json
-from io import BytesIO
 
 from frontengine.utils.weather.weather_service import (
     WeatherService, build_forecast_url, build_geocode_url, describe_weather_code, fetch_json,

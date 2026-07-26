@@ -136,7 +136,7 @@ class FocusSettingUI(QWidget):
             language_wrapper.language_word_dict.get("focus_dim_start", "Dim the background"))
 
     def _apply_dim_settings(self) -> None:
-        for widget in list(self.dim_widget_list):
+        for widget in self.dim_widget_list[:]:
             try:
                 widget.set_dim(self.dim_slider.value())
             except RuntimeError:
@@ -179,7 +179,7 @@ class FocusSettingUI(QWidget):
             return
         geometry = screen.geometry()
         bounds = (geometry.x(), geometry.y(), geometry.width(), geometry.height())
-        for widget in list(self.mask_widget_list):
+        for widget in self.mask_widget_list[:]:
             try:
                 widget.set_region(self.mask_region_combobox.currentData(),
                                   self.mask_percent_slider.value())

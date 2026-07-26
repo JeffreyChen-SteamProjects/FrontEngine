@@ -230,7 +230,7 @@ class SystemStats:
         try:
             import ctypes
 
-            class _MIB_IFROW(ctypes.Structure):
+            class _MibIfRow(ctypes.Structure):
                 _fields_ = [
                     ("wszName", ctypes.c_wchar * _MAX_INTERFACE_NAME_LEN),
                     ("dwIndex", ctypes.c_uint32),
@@ -266,9 +266,14 @@ class SystemStats:
             if iphlpapi.GetIfTable(buffer, ctypes.byref(size), False) != 0:
                 return None
             count = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_uint32))[0]
-            rows = ctypes.cast(
-                ctypes.byref(buffer, ctypes.sizeof(ctypes.c_uint32)),
-                ctypes.POINTER(_MIB_IFROW))
+            # 從緩衝區位址往後跳過開頭的計數欄位，再當成 row 陣列讀。
+            # 用 addressof + 位移比把 byref 的結果丟給 cast 明確得多。
+            # Step past the leading count field by address and read the rest as
+            # rows. addressof plus an offset is far clearer than handing cast
+            # the result of byref.
+            rows = ctypes.cast(  # NOSONAR - addressof takes the char array fine
+                ctypes.addressof(buffer) + ctypes.sizeof(ctypes.c_uint32),
+                ctypes.POINTER(_MibIfRow))
             received = sent = 0
             for index in range(count):
                 row = rows[index]

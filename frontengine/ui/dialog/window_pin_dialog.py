@@ -119,7 +119,7 @@ class WindowPinDialog(QDialog):
         Release everything this dialog pinned and make it opaque again, so no
         other program is left stuck on top or faded after FrontEngine exits.
         """
-        for handle in list(self.pinned):
+        for handle in self.pinned[:]:
             window_pin.set_always_on_top(handle, False)
             window_pin.set_opacity(handle, window_pin.MAX_OPACITY_PERCENT)
         self.pinned.clear()

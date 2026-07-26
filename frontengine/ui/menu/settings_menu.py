@@ -233,7 +233,7 @@ def _import_settings(ui: "FrontEngineMainUI") -> None:
         return
     try:
         import_user_setting(Path(source))
-    except (OSError, FileNotFoundError, ValueError) as error:
+    except (OSError, ValueError) as error:
         QMessageBox.warning(ui, title, str(error))
         return
     # Hotkeys can be re-applied live; language/theme need a restart.

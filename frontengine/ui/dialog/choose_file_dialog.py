@@ -7,6 +7,12 @@ from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 
+# 動圖副檔名在多個選擇器裡重複出現
+# The animation suffixes repeat across several pickers.
+_GIF = ".gif"
+_WEBP = ".webp"
+
+
 def choose_file(
         trigger_ui: QWidget,
         file_filter: str,
@@ -50,7 +56,7 @@ def choose_gif(trigger_ui: QWidget) -> Optional[str]:
     return choose_file(
         trigger_ui,
         file_filter="GIF WEBP (*.gif;*.webp)",
-        extensions=[".gif", ".webp"],
+        extensions=[_GIF, _WEBP],
         warning_message=language_wrapper.language_word_dict.get("gif_setting_message_box")
     )
 
@@ -60,7 +66,7 @@ def choose_image(trigger_ui: QWidget) -> Optional[str]:
     return choose_file(
         trigger_ui,
         file_filter="Images (*.png;*.jpg;*.webp)",
-        extensions=[".png", ".jpg", ".webp"],
+        extensions=[".png", ".jpg", _WEBP],
         warning_message=language_wrapper.language_word_dict.get("image_setting_message_box")
     )
 
@@ -90,7 +96,7 @@ def choose_pet(trigger_ui: QWidget) -> Optional[str]:
     return choose_file(
         trigger_ui,
         file_filter="Pet sprite (*.gif;*.webp;*.png;*.jpg)",
-        extensions=[".gif", ".webp", ".png", ".jpg"],
+        extensions=[_GIF, _WEBP, ".png", ".jpg"],
         warning_message=language_wrapper.language_word_dict.get("gif_setting_message_box")
     )
 

@@ -205,7 +205,7 @@ class LoopbackSpectrum:
     def _service(tools, client):  # pragma: no cover - needs a real audio device
         ctypes = tools.ctypes
         capture_client = ctypes.c_void_p()
-        iid = tools.guid(_IID_IAudioCaptureClient)
+        iid = tools.make_guid(_IID_IAudioCaptureClient)
         get_service = tools.method(
             client, 14, ctypes.HRESULT,
             [ctypes.POINTER(tools.GUID), ctypes.POINTER(ctypes.c_void_p)])

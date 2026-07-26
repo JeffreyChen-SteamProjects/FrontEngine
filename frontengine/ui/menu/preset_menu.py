@@ -113,7 +113,7 @@ def _load_action(ui: "FrontEngineMainUI") -> Callable[[], None]:
             return
         try:
             data = PresetRepository().load(preset)
-        except (OSError, FileNotFoundError, ValueError) as error:
+        except (OSError, ValueError) as error:
             QMessageBox.warning(ui, title, str(error))
             return
         _apply_state(ui, data)
@@ -158,7 +158,7 @@ def _export_action(ui: "FrontEngineMainUI") -> Callable[[], None]:
             return
         try:
             PresetRepository().export_preset(preset, Path(destination))
-        except (OSError, FileNotFoundError, ValueError) as error:
+        except (OSError, ValueError) as error:
             QMessageBox.warning(ui, title, str(error))
             return
         QMessageBox.information(ui, title, _t("preset_exported", "Preset exported."))
@@ -177,7 +177,7 @@ def _import_action(ui: "FrontEngineMainUI") -> Callable[[], None]:
             return
         try:
             PresetRepository().import_preset(Path(source))
-        except (OSError, FileNotFoundError, ValueError) as error:
+        except (OSError, ValueError) as error:
             QMessageBox.warning(ui, title, str(error))
             return
         QMessageBox.information(ui, title, _t("preset_imported", "Preset imported."))
@@ -221,7 +221,7 @@ def apply_named_preset(ui: "FrontEngineMainUI", name: str) -> bool:
     front_engine_logger.info(f"[PresetMenu] apply_named_preset | name={name}")
     try:
         data = PresetRepository().load(name)
-    except (OSError, FileNotFoundError, ValueError) as error:
+    except (OSError, ValueError) as error:
         front_engine_logger.warning(f"[PresetMenu] preset '{name}' failed: {error!r}")
         return False
     _apply_state(ui, data)
@@ -272,7 +272,7 @@ def _export_package_action(ui: "FrontEngineMainUI") -> Callable[[], None]:
             return
         try:
             PresetRepository().export_package(preset, Path(destination))
-        except (OSError, FileNotFoundError, ValueError) as error:
+        except (OSError, ValueError) as error:
             QMessageBox.warning(ui, title, str(error))
             return
         QMessageBox.information(ui, title, _t("preset_exported", "Preset exported."))
@@ -291,7 +291,7 @@ def _import_package_action(ui: "FrontEngineMainUI") -> Callable[[], None]:
             return
         try:
             PresetRepository().import_package(Path(source))
-        except (OSError, FileNotFoundError, ValueError) as error:
+        except (OSError, ValueError) as error:
             QMessageBox.warning(ui, title, str(error))
             return
         QMessageBox.information(ui, title, _t("preset_imported", "Preset imported."))

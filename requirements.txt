@@ -1,3 +1,14 @@
-PySide6==6.8.2.1
+# 執行 FrontEngine 所需的套件。版本與 pyproject.toml / stable.toml 的
+# dependencies 保持一致——先前這裡釘 6.8.2.1、那邊釘 6.10.2，兩份說法不同。
+# 這裡也不該列 frontengine 自己：那會把 PyPI 上的版本裝進來蓋掉工作目錄的程式碼。
+#
+# What FrontEngine needs to run. Kept in step with the dependencies in
+# pyproject.toml and stable.toml - this file used to pin 6.8.2.1 while those
+# pinned 6.10.2, so the two disagreed. It must not list frontengine itself
+# either: that installs the published build over the working tree.
+PySide6==6.10.2
 qt-material
-frontengine
+PyOpenGL
+PyOpenGL_accelerate
+numpy
+pynput

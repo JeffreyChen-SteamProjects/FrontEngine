@@ -64,8 +64,7 @@ def show_on_selected_monitor(widget: QWidget, fullscreen_checkbox: QCheckBox, mo
     widget.setScreen(monitor)
 
     if fullscreen_checkbox.isChecked():
-        # 全螢幕顯示
-        # Show in fullscreen
+        # 全螢幕顯示 / Show in fullscreen
         widget.move(monitor.availableGeometry().topLeft())
         widget.showFullScreen()
     else:
@@ -270,3 +269,53 @@ def coerce_int(value: object) -> Optional[int]:
         return int(value)
     except (TypeError, ValueError):
         return None
+
+# --- 還原預設集的共用小工具 / shared preset-restoring helpers ---------------
+# 每個分頁的 set_state 幾乎都是同一段話重複很多次：「設定裡有這個鍵，就把值
+# 放進這個控制項」。把它抽出來之後，各頁只剩下「哪個控制項配哪個鍵」的表格，
+# 讀起來是一份對照表而不是一長串 if。
+#
+# Every page's set_state repeated the same sentence over and over: "if the state
+# carries this key, put it in this widget". Pulled out here, each page is left
+# with a table of widget-to-key pairs, which reads as a mapping rather than a
+# wall of ifs.
+def apply_checkbox_state(state: dict, pairs) -> None:
+    """把設定裡的布林值套進對應的勾選框（沒有那個鍵就不動）。"""
+    for checkbox, key in pairs:
+        if key in state:
+            checkbox.setChecked(bool(state[key]))
+
+
+def apply_combobox_text_state(state: dict, pairs) -> None:
+    """依顯示文字選取下拉選單的項目；找不到就保持原狀。"""
+    for combobox, key in pairs:
+        value = state.get(key)
+        if value is None:
+            continue
+        index = combobox.findText(str(value))
+        if index >= 0:
+            combobox.setCurrentIndex(index)
+
+
+def apply_combobox_data_state(combobox: QComboBox, value: object) -> bool:
+    """依附帶資料選取下拉選單的項目；回傳是否真的選到。"""
+    if value is None:
+        return False
+    index = combobox.findData(str(value))
+    if index < 0:
+        return False
+    combobox.setCurrentIndex(index)
+    return True
+
+
+def apply_slider_state(state: dict, pairs) -> None:
+    """把設定裡的整數套進滑桿，並夾在滑桿自己的範圍內。"""
+    for slider, key in pairs:
+        value = coerce_int(state.get(key))
+        if value is not None:
+            slider.setValue(max(slider.minimum(), min(slider.maximum(), value)))
+
+
+def apply_spinbox_state(state: dict, pairs) -> None:
+    """把設定裡的整數套進數字框，並夾在數字框自己的範圍內。"""
+    apply_slider_state(state, pairs)

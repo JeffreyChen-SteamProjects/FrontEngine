@@ -34,7 +34,13 @@ class RedirectStdErr(logging.Handler):
             redirect_manager_instance.std_err_queue.put(str(content_to_write))
 
     def flush(self) -> None:
-        pass
+        """
+        佇列本身沒有緩衝，所以沒有東西要沖出去；但 sys.stderr 的介面要求
+        有這個方法，少了它 print() 之類的呼叫會爆掉。
+        Nothing is buffered - writes go straight onto the queue - but the
+        file interface sys.stderr must satisfy requires this method, and
+        callers such as print() break without it.
+        """
 
     def emit(self, record: logging.LogRecord) -> None:
         redirect_manager_instance.std_err_queue.put(self.format(record))

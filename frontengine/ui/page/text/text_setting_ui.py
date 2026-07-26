@@ -5,8 +5,11 @@ from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QLineEdit, 
 
 from frontengine.show.text.draw_text import TextWidget
 from frontengine.ui.page.utils import (
+    apply_checkbox_state,
+    apply_combobox_data_state,
+    apply_combobox_text_state,
+    apply_slider_state,
     build_target_monitor_combobox,
-    coerce_int,
     dispatch_to_monitors,
     resolve_preferred_monitor,
 )
@@ -243,49 +246,31 @@ class TextSettingUI(QWidget):
         }
 
     def set_state(self, state: dict) -> None:
-        opacity = coerce_int(state.get("opacity"))
-        if opacity is not None:
-            self.opacity_slider.setValue(opacity)
-        font_size = coerce_int(state.get("font_size"))
-        if font_size is not None:
-            self.font_size_slider.setValue(font_size)
+        """把預設集的內容還原到這一頁的控制項上。"""
+        apply_slider_state(state, ((self.opacity_slider, "opacity"),
+                                   (self.font_size_slider, "font_size")))
+        apply_combobox_text_state(state, (
+            (self.text_position_combobox, "alignment"),
+            (self.target_monitor_combobox, "target_monitor"),
+            (self.text_color_combobox, "color"),
+            (self.marquee_speed_combobox, "marquee_speed"),
+            (self.outline_color_combobox, "outline_color"),
+        ))
+        apply_checkbox_state(state, (
+            (self.show_on_all_screen_checkbox, "show_on_all_screen"),
+            (self.show_on_bottom_checkbox, "show_on_bottom"),
+            (self.marquee_checkbox, "marquee"),
+            (self.outline_checkbox, "outline"),
+        ))
+        apply_combobox_data_state(self.text_source_combobox, state.get("text_source"))
+        if "show_on_all_screen" in state:
+            # 這個旗標同時記在一個屬性上，勾選框以外也要跟著更新
+            # The flag is mirrored on an attribute, so it needs updating too.
+            self.show_all_screen = bool(state["show_on_all_screen"])
         if "text" in state:
             self.line_edit.setText(str(state.get("text") or ""))
-        if "alignment" in state:
-            index = self.text_position_combobox.findText(str(state["alignment"]))
-            if index >= 0:
-                self.text_position_combobox.setCurrentIndex(index)
-        if "show_on_all_screen" in state:
-            self.show_on_all_screen_checkbox.setChecked(bool(state["show_on_all_screen"]))
-            self.show_all_screen = bool(state["show_on_all_screen"])
-        if "show_on_bottom" in state:
-            self.show_on_bottom_checkbox.setChecked(bool(state["show_on_bottom"]))
-        if state.get("target_monitor") is not None:
-            index = self.target_monitor_combobox.findText(str(state["target_monitor"]))
-            if index >= 0:
-                self.target_monitor_combobox.setCurrentIndex(index)
-        if state.get("color") is not None:
-            index = self.text_color_combobox.findText(str(state["color"]))
-            if index >= 0:
-                self.text_color_combobox.setCurrentIndex(index)
         if state.get("font_family"):
             self.font_family_combobox.setCurrentFont(QFont(str(state["font_family"])))
-        if "marquee" in state:
-            self.marquee_checkbox.setChecked(bool(state["marquee"]))
-        if state.get("marquee_speed") is not None:
-            index = self.marquee_speed_combobox.findText(str(state["marquee_speed"]))
-            if index >= 0:
-                self.marquee_speed_combobox.setCurrentIndex(index)
-        if "outline" in state:
-            self.outline_checkbox.setChecked(bool(state["outline"]))
-        if state.get("outline_color") is not None:
-            index = self.outline_color_combobox.findText(str(state["outline_color"]))
-            if index >= 0:
-                self.outline_color_combobox.setCurrentIndex(index)
-        if state.get("text_source") is not None:
-            index = self.text_source_combobox.findData(str(state["text_source"]))
-            if index >= 0:
-                self.text_source_combobox.setCurrentIndex(index)
         if state.get("weather_location") is not None:
             self.weather_location_edit.setText(str(state["weather_location"]))
 

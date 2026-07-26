@@ -3,7 +3,8 @@
 Tests for food classification and the effect table — pure logic, no widgets.
 """
 from frontengine.show.pet.desktop_pet import (
-    FOOD_BOOK, FOOD_EFFECTS, FOOD_FEAST, FOOD_HARD, FOOD_MUSIC, FOOD_SNACK, classify_food,
+    FOOD_BOOK, FOOD_EFFECTS, FOOD_FEAST, FOOD_HARD, FOOD_MUSIC, FOOD_SNACK, acceptable_sound,
+    classify_food,
 )
 
 
@@ -55,3 +56,23 @@ def test_the_kinds_actually_differ() -> None:
     assert FOOD_EFFECTS[FOOD_MUSIC]["mood"] > FOOD_EFFECTS[FOOD_SNACK]["mood"]
     assert FOOD_EFFECTS[FOOD_MUSIC]["fullness"] < FOOD_EFFECTS[FOOD_SNACK]["fullness"]
     assert FOOD_EFFECTS[FOOD_HARD]["mood"] < 0, "a binary should not be enjoyed"
+
+
+# --- pet sound paths come from outside data -------------------------------
+def test_only_an_existing_audio_file_is_accepted_as_a_pet_sound(tmp_path) -> None:
+    """
+    音效路徑可能來自匯入的預設集或 Workshop 內容，所以不是音訊檔就不該載入。
+    The sound path can arrive from an imported preset or Workshop content, so
+    anything that is not an audio file must not be loaded.
+    """
+    sound = tmp_path / "bark.wav"
+    sound.write_bytes(b"RIFF....WAVEfmt ")
+    document = tmp_path / "secrets.txt"
+    document.write_text("not a sound", encoding="utf-8")
+
+    assert acceptable_sound(str(sound)) == sound
+    assert acceptable_sound(str(document)) is None
+    assert acceptable_sound(str(tmp_path / "gone.wav")) is None
+    assert acceptable_sound(str(tmp_path)) is None
+    assert acceptable_sound("") is None
+    assert acceptable_sound(None) is None
