@@ -46,7 +46,8 @@ def image_to_array(image: QImage) -> Optional[numpy.ndarray]:
     if width <= 0 or height <= 0:
         return None
     buffer = numpy.frombuffer(converted.constBits(), dtype=numpy.uint8, count=stride * height)
-    return buffer.reshape(height, stride)[:, : width * 3].reshape(height, width, 3).copy()
+    return buffer.reshape((height, stride))[:, : width * 3].reshape(
+        (height, width, 3)).copy()
 
 
 def array_to_image(pixels: numpy.ndarray) -> Optional[QImage]:
