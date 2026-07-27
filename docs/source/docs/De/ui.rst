@@ -3,38 +3,104 @@ Bedienung
 
 .. image:: ../image/main/FrontEngine.png
 
-Menüleiste
+FrontEngine legt Dinge über Ihren Bildschirm - ein Video, ein Bild, eine
+Webseite, etwas Text, ein Haustier - und lässt sie dort, während Sie
+weiterarbeiten. Jedes davon heißt Overlay. Sie können beliebig viele
+gleichzeitig laufen lassen, aus verschiedenen Registerkarten und auf
+verschiedenen Bildschirmen.
 
-* Sprache - sieben Sprachen: English, 繁體中文, 简体中文, Deutsch, Русский,
-  Français, Italiano. Die Oberfläche wechselt sofort; ein Neustart ist nicht
-  nötig, und alles Geöffnete bleibt geöffnet.
-* UI-Stil - das Farbschema, wahlweise nach Tag/Nacht-Zeitplan.
-* Voreinstellungen - alle Seiteneinstellungen zusammen sichern und später
-  zurückholen.
-* Einstellungen - Tastenkürzel, Tag/Nacht-Design, Autostart, intelligente
-  Pause, App-Profile, Erinnerungen, Anzeigetafel-Modus, Fernsteuerung,
-  Privatsphäre beim Bildschirmteilen, Bildschirmzeit und Zwischenablage.
-* Hilfe / Dokumentation - Fehlermeldungen und diese Dokumentation.
+Ihr erstes Overlay
+==================
 
-Registerkarten
+1. Wählen Sie die Registerkarte für das Gewünschte: Video, Bild, Webseite, Text
+   und so fort.
+2. Wählen Sie die Datei oder tippen Sie die Adresse.
+3. Drücken Sie auf dieser Seite die Start-Schaltfläche.
 
-* VIDEO - ein Video über allem anderen abspielen.
-* BILD - ein Bild zeigen oder eine Diashow aus einem Ordner.
-* WEBSEITE - eine Webseite zeigen oder mehrere Dashboards durchwechseln.
-* GIF UND WEBP - eine Animation zeigen.
-* MUSIK - eine wav- oder andere Tondatei abspielen.
-* TEXT - Text, Uhr, Countdown, Systemwerte oder Wetter anzeigen.
-* SZENE - mehrere davon kombinieren und als Datei sichern.
-* PARTIKEL - ein Partikeleffekt über dem Desktop.
-* HAUSTIER - ein Begleiter, der läuft, klettert und reagiert.
-* AUGENSCHUTZ - Bildschirmfilter, Leselineal, Pausen, Farbsehen-Simulation.
-* PRÄSENTIEREN - Annotation, Cursor-Hervorhebung, Tastenanzeige, Lupe, Whiteboard.
-* HINTERGRUND - ein bewegter Hintergrund unter allen Fenstern.
-* FOKUS - den Hintergrund abdunkeln oder Störendes abdecken.
-* WIDGETS - Audio-Spektrum, Systemmonitor, aktuelle Wiedergabe, Notizzettel.
-* WERKZEUGE - Messen, Aufnehmen, Text lesen, Aufzeichnen, virtuelle Kamera,
+Es erscheint über allem anderen und bleibt dort, bis Sie es schließen. Nichts,
+was Sie sonst tun, räumt es versehentlich weg.
+
+Einstellungen, die jede Seite teilt
+===================================
+
+Die meisten Seiten tragen dieselben wenigen Bedienelemente, und sie bedeuten
+überall dasselbe:
+
+* **Deckkraft** - wie viel vom Schreibtisch durchscheint. Overlays sind
+  standardmäßig recht durchsichtig, damit sie über Ihrer Arbeit liegen statt
+  sie zu verdecken.
+* **Zielbildschirm** - welcher Bildschirm. Auf *Nachfragen* gestellt, werden
+  Sie stattdessen jedes Mal gefragt.
+* **Auf allen Bildschirmen zeigen** - eine Kopie je Monitor statt nur einer.
+* **Unter allen Fenstern zeigen** - das Overlay unter Ihre Fenster schieben, so
+  wirkt es wie ein Hintergrund statt wie etwas davor.
+* **Zuletzt verwendet** - vorher benutzte Dateien, damit Sie sie nicht wieder
+  suchen müssen.
+
+Overlays stehen nicht im Weg
+============================
+
+Klicks gehen glatt durch ein Overlay auf das, was darunter liegt; das Fenster
+darunter funktioniert also weiter wie gewohnt. Zwei Dinge brauchen die Maus und
+sind deshalb Ausnahmen: das Haustier und die Zeichenebene auf der Seite
+Präsentieren, solange das Zeichnen eingeschaltet ist.
+
+Mehrere auf einmal verwalten
+============================
+
+Die Registerkarte **Kontrollzentrum** erreicht jedes Overlay, gleich von
+welcher Seite geöffnet. Sie kann alle kurz ausblenden, stummschalten, sperren,
+ihre Plätze zurücksetzen oder die Qualität senken, wenn der Akku zählt. Zum
+Verschieben zuerst entsperren - wo Sie es ablegen, merkt es sich.
+
+Den Bildschirm frei räumen
+==========================
+
+*Alles schließen* im Kontrollzentrum schließt alles auf einmal, und unter
+Einstellungen, Tastenkürzel lässt sich dafür ein globales Kürzel hinterlegen.
+Falls einmal etwas nicht mehr reagiert, beendet **F12** FrontEngine sofort.
+
+Die Menüleiste
+==============
+
+* **Sprache** - sieben Sprachen: English, 繁體中文, 简体中文, Deutsch, Русский,
+  Français, Italiano. Die Oberfläche wechselt sofort; kein Neustart, und alles
+  Geöffnete bleibt geöffnet.
+* **UI-Stil** - das Farbschema, wahlweise nach Tag/Nacht-Zeitplan.
+* **Voreinstellungen** - unter einem Namen sichern, wie alle Seiten eingestellt
+  sind, und später zurückholen. Siehe :doc:`menus`.
+* **Einstellungen** - Tastenkürzel, Autostart, intelligente Pause, App-Profile,
+  Erinnerungen, Anzeigetafel-Modus, Fernsteuerung, Privatsphäre beim
+  Bildschirmteilen, Bildschirmzeit und Zwischenablage. Ebenfalls :doc:`menus`.
+* **Hilfe** - *Bedienung …* öffnet eine kurze Anleitung in der Anwendung
+  selbst, mit demselben Stoff wie diese Seite. Dort stehen außerdem der
+  Fehler-Tracker und der Hinweis auf F12.
+* **Dokumentation** - öffnet diese Dokumentation im Browser.
+
+Die Registerkarten
+==================
+
+Etwas auf den Bildschirm bringen
+
+* :doc:`video`, :doc:`image`, :doc:`web`, :doc:`gif_and_webp`, :doc:`sound`,
+  :doc:`text` - je eine Art pro Registerkarte.
+* :doc:`scene` - mehrere zusammen, als Datei gesichert.
+* :doc:`particle` - ein Partikeleffekt über dem Desktop.
+* :doc:`pet` - ein Begleiter, der läuft, klettert und reagiert.
+
+Bequemer arbeiten
+
+* :doc:`screen_care` - Bildschirmfilter, Leselineal, Pausen,
+  Farbsehen-Simulation.
+* :doc:`focus` - den Hintergrund abdunkeln oder Störendes abdecken.
+* :doc:`wallpaper` - ein bewegter Hintergrund unter allen Fenstern.
+
+Wenn andere zusehen
+
+* :doc:`presentation` - Annotation, Cursor-Hervorhebung, Tastenanzeige, Lupe,
+  Whiteboard.
+* :doc:`tools` - Messen, Aufnehmen, Text lesen, Aufzeichnen, virtuelle Kamera,
   Kamera, Fenster anheften.
-* KONTROLLZENTRUM - alle Overlays auf einmal steuern.
+* :doc:`widgets` - Audio-Spektrum, Systemmonitor, aktuelle Wiedergabe, Notizen.
 
-Außer dem Haustier und der Zeichenebene lassen alle Overlays Klicks durch, was
-darunter liegt, funktioniert also weiter.
+Und :doc:`control_center`, um alles davon auf einmal zu befehligen.

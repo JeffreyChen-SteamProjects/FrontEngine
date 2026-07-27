@@ -45,3 +45,9 @@ Menu Impostazioni
   fissaggio. Tenuta solo in memoria salvo richiesta contraria, perché negli
   appunti finiscono spesso delle password.
 * Esporta impostazioni… / Importa impostazioni…
+
+Menu Aiuto
+
+* **Come si usa…** - una guida breve dentro l'applicazione: il primo overlay,
+  le impostazioni comuni a tutte le pagine, e come liberare di nuovo lo schermo.
+* La segnalazione problemi, e il promemoria che F12 chiude subito FrontEngine.

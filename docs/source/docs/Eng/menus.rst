@@ -44,3 +44,9 @@ Settings menu
   Kept in memory unless you ask for it to persist, because clipboards often
   hold passwords.
 * Export settings... / Import settings...
+
+Help menu
+
+* **How to use...** - a short guide inside the application: your first
+  overlay, the settings every page shares, and how to clear the screen again.
+* Open issue tracker, and a reminder that F12 closes FrontEngine at once.
