@@ -1,5 +1,5 @@
 Release Process
-----
+---------------
 
 FrontEngine is published to PyPI as ``frontengine`` whenever a pull request is
 merged into ``main``. Development work happens on the ``dev`` branch and is
@@ -9,7 +9,7 @@ Continuous integration and publishing are driven by two GitHub Actions
 workflows that live in ``.github/workflows/``.
 
 Workflows
-====
+=========
 
 * ``ci.yml`` — *CI*
 
@@ -39,7 +39,7 @@ Workflows
     touching PyPI, so a run can never republish an existing version.
 
 Cutting a release
-====
+=================
 
 1. Merge a pull request into ``main``. The patch segment bumps automatically.
 2. The workflow publishes to PyPI and creates the GitHub release in one run.
@@ -49,7 +49,7 @@ fresh PR — trigger the workflow manually via **Actions → Release → Run
 workflow** and pick the ``bump`` segment.
 
 Required secrets
-====
+================
 
 Configure this as a repository secret:
 

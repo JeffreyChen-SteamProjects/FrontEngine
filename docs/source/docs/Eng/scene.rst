@@ -1,28 +1,18 @@
 Scene Page
-----
+----------
 
 .. image:: ../image/scene/scene.png
 
-When you switch to the Scene tab, you will notice a sub-tab located below it.
-The Scene tab allows you to play multiple scenes simultaneously.
+A scene holds several overlays at once and can be saved to a file.
 
-Here’s a breakdown of the available options:
-
-* Scene Control Panel:
-    * View the number of scenes you have loaded.
-    * Save the scene file.
-    * Start all scenes.
-* Image:
-    * Add an image scene to the scene file.
-* GIF and WEBP:
-    * Include GIF and WEBP scenes in the scene file.
-* Text:
-    * Add a text scene to the scene file.
-* Video:
-    * Incorporate a video scene into the scene file.
-* Web:
-    * Add a web scene to the scene file.
-* Sound:
-    * Include a sound scene in the scene file.
-* External UI:
-    * Add an external UI scene to the scene file.
+* Add web to scene - address and opacity.
+* Add video to scene - file, opacity, play rate, volume.
+* Add image to scene - file and opacity.
+* Add gif to scene - file, opacity, speed.
+* Add sound to scene - file and volume.
+* Add text to scene - text, opacity, font size, alignment.
+* Start scene - show everything that was added.
+* output scene file - save what you built.
+* load scene file - bring a saved scene back.
+* clear all script - start again.
+* Show on all screen - one copy per monitor.
