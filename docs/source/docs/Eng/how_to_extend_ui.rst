@@ -1,5 +1,5 @@
 How to extend FrontEngine UI
-----
+----------------------------
 
 .. image:: ../image/main/FrontEngine.png
 

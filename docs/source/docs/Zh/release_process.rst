@@ -1,5 +1,5 @@
 發布流程
-----
+--------
 
 FrontEngine 會在 pull request 合併到 ``main`` 時，以 ``frontengine`` 的名義
 發布到 PyPI。開發工作都在 ``dev`` 分支進行，要發版時就開一個指向 ``main``
@@ -9,7 +9,7 @@ FrontEngine 會在 pull request 合併到 ``main`` 時，以 ``frontengine`` 的
 驅動。
 
 工作流程
-====
+========
 
 * ``ci.yml`` — *CI*
 
@@ -37,7 +37,7 @@ FrontEngine 會在 pull request 合併到 ``main`` 時，以 ``frontengine`` 的
     版本不會被重複發布。
 
 發布新版本
-====
+==========
 
 1. 把 pull request 合併進 ``main``，patch 版號會自動遞增。
 2. 同一次工作流程執行就會發布到 PyPI 並建立 GitHub 發行版。
@@ -47,7 +47,7 @@ FrontEngine 會在 pull request 合併到 ``main`` 時，以 ``frontengine`` 的
 選擇 ``bump`` 段位。
 
 必要的 Secrets
-====
+==============
 
 請在 repository secrets 中設定：
 
