@@ -44,3 +44,9 @@ Menü „Einstellungen“
   Anheften. Bleibt nur im Arbeitsspeicher, sofern Sie nichts anderes verlangen,
   denn in Zwischenablagen stehen oft Passwörter.
 * Einstellungen exportieren… / importieren…
+
+Menü „Hilfe“
+
+* **Bedienung …** - eine kurze Anleitung in der Anwendung: Ihr erstes Overlay,
+  die Einstellungen, die jede Seite teilt, und wie der Bildschirm wieder frei wird.
+* Fehler-Tracker, und der Hinweis, dass F12 FrontEngine sofort beendet.

@@ -47,3 +47,9 @@ Menu Réglages
   recherche et épinglage. Gardé en mémoire seulement sauf demande contraire, car
   les presse-papiers contiennent souvent des mots de passe.
 * Exporter les réglages… / Importer les réglages…
+
+Menu Aide
+
+* **Comment l'utiliser…** - un guide court dans l'application : votre premier
+  calque, les réglages communs à toutes les pages, et comment dégager l'écran.
+* Le suivi des problèmes, et le rappel que F12 ferme FrontEngine aussitôt.

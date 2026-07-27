@@ -24,6 +24,7 @@ import os
 import pytest
 from PySide6.QtWidgets import QCheckBox, QLabel, QMenu, QPushButton, QWidget
 
+from frontengine.ui.dialog.how_to_use_dialog import SECTIONS as HOW_TO_USE_SECTIONS
 from frontengine.ui.menu.language_menu import LANGUAGES
 from frontengine.utils.multi_language.english import english_word_dict
 from frontengine.utils.multi_language.germany import germany_word_dict
@@ -272,6 +273,73 @@ def test_a_hint_that_depends_on_the_platform_binds_the_branch_it_chose(monkeypat
 
         assert status.text() == germany_word_dict["tools_vcam_missing"]
         assert status.text() != germany_word_dict["tools_vcam_ready"]
+        window.close()
+    finally:
+        os.chdir(original)
+        language_wrapper.reset_language("English")
+
+
+# --- the in-app usage guide -----------------------------------------------
+def test_the_usage_guide_opens_from_the_help_menu(tmp_path) -> None:
+    """
+    「使用說明」是第一次打開程式的人最先需要的，所以放在說明選單第一個。
+    The usage guide is what someone opening this for the first time needs, so it
+    sits first in the Help menu.
+    """
+    from frontengine.ui.main_ui import FrontEngineMainUI
+    from frontengine.ui.menu.help_menu import show_how_to_use
+
+    (tmp_path / "user_setting.json").write_text(
+        json.dumps({"language": "English"}), encoding="utf-8")
+    original = os.getcwd()
+    os.chdir(tmp_path)
+    try:
+        window = FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)
+        entries = [action.text() for action in window.help_menu.actions() if action.text()]
+        assert entries[0] == english_word_dict["how_to_use_action"]
+
+        show_how_to_use(window)
+        dialog = window.how_to_use_dialog
+        shown = {label.text() for label in dialog.findChildren(QLabel) if label.text()}
+        assert english_word_dict["how_to_use_intro"] in shown
+        for title_key, _, body_key, _ in HOW_TO_USE_SECTIONS:
+            assert english_word_dict[title_key] in shown, title_key
+            assert english_word_dict[body_key] in shown, body_key
+        dialog.close()
+        window.close()
+    finally:
+        os.chdir(original)
+        language_wrapper.reset_language("English")
+
+
+def test_the_usage_guide_follows_a_language_change(tmp_path) -> None:
+    """開著的說明視窗也要跟著換語言，而不是留在原本那一種。"""
+    from frontengine.ui.main_ui import FrontEngineMainUI
+    from frontengine.ui.menu.help_menu import show_how_to_use
+    from frontengine.ui.menu.language_menu import set_language
+
+    (tmp_path / "user_setting.json").write_text(
+        json.dumps({"language": "English"}), encoding="utf-8")
+    original = os.getcwd()
+    os.chdir(tmp_path)
+    try:
+        window = FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)
+        show_how_to_use(window)
+        dialog = window.how_to_use_dialog
+        assert dialog.windowTitle() == english_word_dict["how_to_use_title"]
+
+        set_language("Deutsch", window)
+
+        assert dialog.windowTitle() == germany_word_dict["how_to_use_title"]
+        shown = {label.text() for label in dialog.findChildren(QLabel) if label.text()}
+        # 每一段的標題和內文都要跟著換，不是只有引言
+        # Every heading and body has to follow, not just the introduction.
+        for title_key, _, body_key, _ in HOW_TO_USE_SECTIONS:
+            assert germany_word_dict[title_key] in shown, title_key
+            assert germany_word_dict[body_key] in shown, body_key
+        assert germany_word_dict["how_to_use_intro"] in shown
+        assert not shown & {english_word_dict[key] for key, _, _, _ in HOW_TO_USE_SECTIONS}
+        dialog.close()
         window.close()
     finally:
         os.chdir(original)

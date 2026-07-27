@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QMessageBox
 
+from frontengine.ui.dialog.how_to_use_dialog import HowToUseDialog
 from frontengine.utils.browser.browser import open_browser
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
@@ -26,6 +27,15 @@ def build_help_menu(ui_we_want_to_set: FrontEngineMainUI) -> None:
     ui_we_want_to_set.help_menu = help_menu
 
     # --- 建立動作 / Create actions ---
+    # 使用說明放第一個：第一次打開程式的人最先需要的就是它
+    # Usage first: it is what someone opening this for the first time needs.
+    _add_action(
+        help_menu,
+        "how_to_use_action",
+        lambda: show_how_to_use(ui_we_want_to_set),
+        "How to use..."
+    )
+
     _add_action(
         help_menu,
         "help_menu_open_issue",
@@ -50,6 +60,14 @@ def _add_action(menu, key: str, callback, fallback: str = "") -> QAction:
     action.triggered.connect(callback)
     menu.addAction(action)
     return action
+
+
+def show_how_to_use(ui_we_want_to_set: FrontEngineMainUI) -> None:
+    """開啟使用說明對話框。"""
+    front_engine_logger.info("[HelpMenu] show_how_to_use")
+    dialog = HowToUseDialog(ui_we_want_to_set)
+    ui_we_want_to_set.how_to_use_dialog = dialog
+    dialog.show()
 
 
 def how_to_critical_exit(ui_we_want_to_set: FrontEngineMainUI) -> None:
