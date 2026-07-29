@@ -60,8 +60,11 @@ class RemoteControlDialog(QDialog):
         self._midi = midi
         self._learning = False
 
+        # 記住進來時的狀態，按取消要能回到這裡
+        # The state on entry, so Cancel has something to go back to.
+        self._remote_was_enabled = remote_enabled()
         self.remote_checkbox = tr(QCheckBox(), "remote_enable", "Let my phone control FrontEngine")
-        self.remote_checkbox.setChecked(remote_enabled())
+        self.remote_checkbox.setChecked(self._remote_was_enabled)
         self.remote_checkbox.toggled.connect(self._toggle_remote)
         self.remote_url_label = QLabel(self.remote_status())
         self.remote_url_label.setWordWrap(True)
@@ -135,8 +138,17 @@ class RemoteControlDialog(QDialog):
         return True
 
     def _toggle_remote(self, enabled: bool) -> None:
-        user_setting_dict[REMOTE_KEY] = {"enabled": bool(enabled)}
-        write_user_setting()
+        """
+        勾選當下就開／關伺服器，好讓網址（和上面的連結）立刻看得到，但不寫入設定
+        ——那要等按下確定。這裡就寫檔的話，「取消」等於取消不了：連接埠已經開了，
+        而且下次啟動還會自己再開一次。
+        Start or stop the server as the box is ticked so the URL shows up right
+        away, but do not persist - that waits for OK. Writing here made Cancel
+        meaningless: the port was already open, and it reopened on every launch.
+        """
+        self._apply_remote(bool(enabled))
+
+    def _apply_remote(self, enabled: bool) -> None:
         if self._remote is None:
             return
         if enabled:
@@ -200,8 +212,16 @@ class RemoteControlDialog(QDialog):
 
     def accept(self) -> None:
         bindings = self.bindings()
+        enabled = self.remote_checkbox.isChecked()
+        user_setting_dict[REMOTE_KEY] = {"enabled": bool(enabled)}
         user_setting_dict[MIDI_KEY] = bindings
         user_setting_dict["midi_device"] = self.midi_device()
         write_user_setting()
+        self._apply_remote(enabled)
         front_engine_logger.info(f"[RemoteControlDialog] saved | {len(bindings)} binding(s)")
         super().accept()
+
+    def reject(self) -> None:
+        """取消：把伺服器恢復成打開這個對話框之前的狀態。"""
+        self._apply_remote(self._remote_was_enabled)
+        super().reject()

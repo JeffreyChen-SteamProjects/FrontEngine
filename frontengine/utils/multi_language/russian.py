@@ -40,6 +40,10 @@ russian_word_dict = {
     "control_center_clear_log_panel": "Очистить лог",
     "chat_scene_close": "Закрыть все чаты",
     "control_center_close_all": "Закрыть все",
+    "tray_hide_window": "Скрыть окно",
+    "tray_maximize_window": "Развернуть окно",
+    "tray_normal_window": "Восстановить окно",
+    "tray_close_app": "Выйти из FrontEngine",
     # General
     "Opacity": "Непрозрачность",
     "Speed": "Скорость",

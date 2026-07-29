@@ -138,6 +138,16 @@ class CameraWidget(BaseWidget):
                 self._camera.stop()
             except RuntimeError:  # pragma: no cover - already torn down
                 pass
+        # sink 的 parent 是這個 widget，所以只把 Python 參考設成 None 不會銷毀它。
+        # 每次重新 start()（例如換攝影機）都會多留一個還連著 _on_frame 的孤兒。
+        # The sink is parented to this widget, so dropping the Python reference
+        # does not destroy it: every restart - switching camera, say - leaves
+        # another orphan still connected to _on_frame.
+        if self._sink is not None:
+            try:
+                self._sink.deleteLater()
+            except RuntimeError:  # pragma: no cover - already torn down
+                pass
         self._camera = None
         self._session = None
         self._sink = None

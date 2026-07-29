@@ -26,7 +26,7 @@ from frontengine.ui.page.utils import build_target_monitor_combobox, coerce_int,
 from frontengine.utils.input_watch.input_watch_service import InputWatchService
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
-from frontengine.utils.multi_language.retranslate import tr
+from frontengine.utils.multi_language.retranslate import retranslator, tr
 
 
 class PresentationSettingUI(QWidget):
@@ -185,13 +185,13 @@ class PresentationSettingUI(QWidget):
         widget.set_annotation_window_flag()
         self.annotation_widget_list.append(widget)
         self._present(widget)
-        self.annotate_button.setText(
-            language_wrapper.language_word_dict.get("annotate_stop", "Stop drawing"))
+        retranslator.set_text(
+            self.annotate_button, "annotate_stop", "Stop drawing")
 
     def stop_annotation(self) -> None:
         self._close_all(self.annotation_widget_list)
-        self.annotate_button.setText(
-            language_wrapper.language_word_dict.get("annotate_start", "Start drawing"))
+        retranslator.set_text(
+            self.annotate_button, "annotate_start", "Start drawing")
 
     def undo_annotation(self) -> None:
         for widget in self.annotation_widget_list:
@@ -229,14 +229,14 @@ class PresentationSettingUI(QWidget):
         self._present(widget)
         widget.start_following()
         self._ensure_input_watch()
-        self.cursor_button.setText(
-            language_wrapper.language_word_dict.get("cursor_effect_stop", "Turn cursor effects off"))
+        retranslator.set_text(
+            self.cursor_button, "cursor_effect_stop", "Turn cursor effects off")
 
     def stop_cursor_effects(self) -> None:
         self._close_all(self.cursor_widget_list)
         self.release_input_watch()
-        self.cursor_button.setText(
-            language_wrapper.language_word_dict.get("cursor_effect_start", "Turn cursor effects on"))
+        retranslator.set_text(
+            self.cursor_button, "cursor_effect_start", "Turn cursor effects on")
 
     def _apply_cursor_settings(self) -> None:
         for widget in self.cursor_widget_list[:]:
@@ -264,14 +264,14 @@ class PresentationSettingUI(QWidget):
         self._present(widget)
         widget.start()
         self._ensure_input_watch()
-        self.keystroke_button.setText(
-            language_wrapper.language_word_dict.get("keystroke_stop", "Hide keystrokes"))
+        retranslator.set_text(
+            self.keystroke_button, "keystroke_stop", "Hide keystrokes")
 
     def stop_keystrokes(self) -> None:
         self._close_all(self.keystroke_widget_list)
         self.release_input_watch()
-        self.keystroke_button.setText(
-            language_wrapper.language_word_dict.get("keystroke_start", "Show keystrokes"))
+        retranslator.set_text(
+            self.keystroke_button, "keystroke_start", "Show keystrokes")
 
     def _on_key_pressed(self, keys) -> None:
         for widget in self.keystroke_widget_list[:]:
@@ -310,13 +310,13 @@ class PresentationSettingUI(QWidget):
         widget.show()
         self.magnifier_widget_list.append(widget)
         widget.start_following()
-        self.magnifier_button.setText(
-            language_wrapper.language_word_dict.get("magnifier_stop", "Turn magnifier off"))
+        retranslator.set_text(
+            self.magnifier_button, "magnifier_stop", "Turn magnifier off")
 
     def stop_magnifier(self) -> None:
         self._close_all(self.magnifier_widget_list)
-        self.magnifier_button.setText(
-            language_wrapper.language_word_dict.get("magnifier_start", "Turn magnifier on"))
+        retranslator.set_text(
+            self.magnifier_button, "magnifier_start", "Turn magnifier on")
 
     def _apply_magnifier_settings(self) -> None:
         for widget in self.magnifier_widget_list[:]:
@@ -339,13 +339,13 @@ class PresentationSettingUI(QWidget):
                                  self.annotate_width_slider.value())
         self._present(board)
         self.whiteboard_widget_list.append(board)
-        self.whiteboard_button.setText(
-            language_wrapper.language_word_dict.get("whiteboard_stop", "Close whiteboard"))
+        retranslator.set_text(
+            self.whiteboard_button, "whiteboard_stop", "Close whiteboard")
 
     def stop_whiteboard(self) -> None:
         self._close_all(self.whiteboard_widget_list)
-        self.whiteboard_button.setText(
-            language_wrapper.language_word_dict.get("whiteboard_start", "Whiteboard"))
+        retranslator.set_text(
+            self.whiteboard_button, "whiteboard_start", "Whiteboard")
 
     def save_whiteboard(self) -> Optional[str]:
         """把白板存成圖片；沒畫東西就不存。"""

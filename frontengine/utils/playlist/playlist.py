@@ -52,7 +52,12 @@ def in_window(hour: int, start_hour: int, end_hour: int) -> bool:
     start = int(start_hour) % 24
     end = int(end_hour) % 24
     if start == end:
-        return True
+        # [start, start) 是空區間，不是「整天」。兩個小時欄位設成同一個值時
+        # 使用者要的是「不要切換」，把它當成 24 小時生效正好相反。
+        # [start, start) is an empty range, not "all day". Two spinboxes left on
+        # the same hour mean "do not switch"; treating that as 24-hour coverage
+        # does exactly the opposite.
+        return False
     if start < end:
         return start <= hour < end
     return hour >= start or hour < end

@@ -128,12 +128,20 @@ class KeystrokeDisplayWidget(BaseWidget):
         return "   ".join(visible_keys(self.entries, self._now(), self.hold_seconds))
 
     def _expire(self) -> None:
-        before = len(visible_keys(self.entries, self._now(), self.hold_seconds))
-        if before != len(self.entries):
-            self.entries = [
-                (text, stamp) for text, stamp in self.entries
-                if self._now() - stamp <= self.hold_seconds
-            ]
+        # 拿還沒過期的「全部」數量來比，不要用 visible_keys——它只回傳最多
+        # MAX_KEYS_SHOWN 筆，一旦按超過那個數量，這個比較就永遠不相等，
+        # 每 100ms 都會重建清單並重畫一次，其實什麼都沒過期。
+        # Compare against the full count of unexpired entries, not visible_keys:
+        # that returns at most MAX_KEYS_SHOWN, so past that many keys the test is
+        # never equal and every 100 ms tick rebuilds the list and repaints with
+        # nothing actually having expired.
+        now = self._now()
+        fresh = [
+            (text, stamp) for text, stamp in self.entries
+            if now - stamp <= self.hold_seconds
+        ]
+        if len(fresh) != len(self.entries):
+            self.entries = fresh
             self.update()
 
     def draw_content(self, painter: QPainter) -> None:

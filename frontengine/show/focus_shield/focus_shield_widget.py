@@ -84,12 +84,30 @@ class DimBackgroundWidget(BaseWidget):
         geometry = self.geometry()
         return (geometry.x(), geometry.y(), geometry.width(), geometry.height())
 
+    def _to_logical(self, rect: Optional[Tuple[int, int, int, int]]):
+        """
+        把 Win32 的視窗矩形換算成 Qt 的邏輯座標。GetWindowRect 給的是實體像素，
+        screen_rect() 給的是邏輯像素，顯示縮放不是 100% 時兩者對不起來：在 150%
+        的螢幕上，最大化的視窗會算成比整個螢幕還大，結果一塊都不壓暗。
+        Convert a Win32 window rect into Qt's logical coordinates. GetWindowRect
+        reports physical pixels while screen_rect() is logical, and the two
+        disagree at any scaling other than 100%: on a 150% display a maximised
+        window measures larger than the whole screen, so nothing gets dimmed.
+        """
+        if rect is None:
+            return None
+        ratio = self.devicePixelRatio() or 1.0
+        if ratio == 1.0:
+            return rect
+        return tuple(int(round(value / ratio)) for value in rect)
+
     def refresh(self) -> None:
         """重新計算要壓暗的區塊。"""
         try:
             active = self._window_provider()
         except Exception:  # pragma: no cover - defensive around providers
             active = None
+        active = self._to_logical(active)
         rects = surrounding_rects(self.screen_rect(), active)
         origin_x, origin_y = self.x(), self.y()
         # 換算成本視窗的座標系 / Convert to this widget's own coordinates

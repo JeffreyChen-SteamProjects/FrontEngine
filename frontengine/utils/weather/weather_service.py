@@ -156,16 +156,27 @@ class WeatherService:
             return dict(self._values)
 
     def _refresh(self) -> None:
-        with self._lock:
-            latitude, longitude, unit = self.latitude, self.longitude, self.unit
-        payload = fetch_json(build_forecast_url(latitude, longitude, unit), opener=self._opener)
-        values = parse_forecast(payload) if payload else {}
-        with self._lock:
-            self._refreshing = False
-            if values.get("temperature") is None:
-                return
-            self._values = values
-            self._fetched_at = time.monotonic()
+        # try/finally：這裡任何一個例外都跑在背景執行緒上，沒人接得到。
+        # 若 _refreshing 卡在 True，refresh_async 之後每次都會立刻返回——
+        # 這個工作階段的天氣就永遠停在最後一次成功的數字上。
+        # try/finally: anything raised here runs on a background thread where
+        # nobody catches it. Leaving _refreshing stuck at True makes every later
+        # refresh_async return immediately, freezing the weather on whatever the
+        # last successful fetch said for the rest of the session.
+        try:
+            with self._lock:
+                latitude, longitude, unit = self.latitude, self.longitude, self.unit
+            payload = fetch_json(
+                build_forecast_url(latitude, longitude, unit), opener=self._opener)
+            values = parse_forecast(payload) if payload else {}
+            with self._lock:
+                if values.get("temperature") is None:
+                    return
+                self._values = values
+                self._fetched_at = time.monotonic()
+        finally:
+            with self._lock:
+                self._refreshing = False
 
 
 _weather_singleton: Optional[WeatherService] = None

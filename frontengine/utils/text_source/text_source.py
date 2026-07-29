@@ -72,7 +72,11 @@ def parse_countdown_target(template: str, now: datetime) -> Optional[datetime]:
         return None
     try:
         return now + timedelta(minutes=float(text))
-    except ValueError:
+    except (ValueError, OverflowError):
+        # OverflowError：分鐘數大到超出 datetime 範圍（例如 10000000000）。
+        # 不接住的話會一路炸出 start()，倒數計時的「開始」按鈕就變成沒反應。
+        # OverflowError: a minute count past datetime's range (10000000000, say).
+        # Uncaught it escapes start(), leaving the countdown's Start button dead.
         pass
     for pattern in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M", "%Y-%m-%d"):
         try:

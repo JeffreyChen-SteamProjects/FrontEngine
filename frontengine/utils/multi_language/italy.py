@@ -40,6 +40,10 @@ italian_word_dict = {
     "control_center_clear_log_panel": "Pulisci Log",
     "chat_scene_close": "Chiudi tutte le chat",
     "control_center_close_all": "Chiudi tutto",
+    "tray_hide_window": "Nascondi la finestra",
+    "tray_maximize_window": "Ingrandisci la finestra",
+    "tray_normal_window": "Ripristina la finestra",
+    "tray_close_app": "Esci da FrontEngine",
     # General
     "Opacity": "Opacità",
     "Speed": "Velocità",

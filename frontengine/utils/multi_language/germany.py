@@ -40,6 +40,10 @@ germany_word_dict = {
     "control_center_clear_log_panel": "Log löschen",
     "chat_scene_close": "Alle Chats schließen",
     "control_center_close_all": "Alles schließen",
+    "tray_hide_window": "Fenster ausblenden",
+    "tray_maximize_window": "Fenster maximieren",
+    "tray_normal_window": "Fenster wiederherstellen",
+    "tray_close_app": "FrontEngine beenden",
     # Allgemein
     "Opacity": "Deckkraft",
     "Speed": "Geschwindigkeit",

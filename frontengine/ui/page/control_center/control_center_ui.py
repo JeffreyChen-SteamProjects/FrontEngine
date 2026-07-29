@@ -15,7 +15,7 @@ from frontengine.ui.page.sound_player.sound_player_setting_ui import SoundPlayer
 from frontengine.ui.page.text.text_setting_ui import TextSettingUI
 from frontengine.ui.page.video.video_setting_ui import VideoSettingUI
 from frontengine.ui.page.web.web_setting_ui import WEBSettingUI
-from frontengine.user_setting.user_setting_file import clear_overlay_geometry
+from frontengine.user_setting.user_setting_file import clear_overlay_geometry, user_setting_dict
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import retranslator, tr, translate
@@ -77,7 +77,6 @@ class ControlCenterUI(QWidget):
         self.clear_text_button = self._create_button("control_center_close_all_text", self.clear_text)
         self.clear_scene_button = self._create_button("control_center_scene", self.clear_scene)
         self.clear_redirect_button = self._create_button("control_center_clear_log_panel", self.clear_redirect)
-        self.clear_chat_button = self._create_button("chat_scene_close", self.clear_scene)  # 修正：應該關閉場景而不是 redirect
         self.hide_all_button = self._create_button("control_center_hide_all", self.hide_all)
         self.show_all_button = self._create_button("control_center_show_all", self.show_all)
         # 全域靜音狀態 / Global mute state
@@ -133,19 +132,25 @@ class ControlCenterUI(QWidget):
         self.grid_layout.addWidget(self.clear_web_button, 3, 0)
         self.grid_layout.addWidget(self.clear_sound_button, 4, 0)
         self.grid_layout.addWidget(self.clear_text_button, 5, 0)
-        self.grid_layout.addWidget(self.clear_redirect_button, 6, 0)
-        self.grid_layout.addWidget(self.hide_all_button, 7, 0)
-        self.grid_layout.addWidget(self.show_all_button, 8, 0)
-        self.grid_layout.addWidget(self.mute_all_button, 9, 0)
-        self.grid_layout.addWidget(self.lock_all_button, 10, 0)
-        self.grid_layout.addWidget(self.chroma_key_button, 11, 0)
-        self.grid_layout.addWidget(self.reset_positions_button, 12, 0)
-        self.grid_layout.addWidget(self.low_power_button, 13, 0)
-        self.grid_layout.addWidget(self.quality_label, 14, 0)
-        self.grid_layout.addWidget(self.quality_combobox, 15, 0)
-        self.grid_layout.addWidget(self.capture_button, 16, 0)
-        self.grid_layout.addWidget(self.clear_all_button, 17, 0)
-        self.grid_layout.addWidget(self.log_panel_scroll_area, 0, 1, 18, 1)  # rowSpan covers every button
+        # 這顆按鈕本來建好、翻好、也接上了處理函式，卻沒有加進版面，所以畫面上
+        # 根本沒有「只關閉場景」這個選項，只能用會一併關掉其他所有東西的「全部關閉」。
+        # This button was built, translated and wired, but never added to the
+        # layout - so there was no way to close just the scene, only the "close
+        # all" that takes every other overlay down with it.
+        self.grid_layout.addWidget(self.clear_scene_button, 6, 0)
+        self.grid_layout.addWidget(self.clear_redirect_button, 7, 0)
+        self.grid_layout.addWidget(self.hide_all_button, 8, 0)
+        self.grid_layout.addWidget(self.show_all_button, 9, 0)
+        self.grid_layout.addWidget(self.mute_all_button, 10, 0)
+        self.grid_layout.addWidget(self.lock_all_button, 11, 0)
+        self.grid_layout.addWidget(self.chroma_key_button, 12, 0)
+        self.grid_layout.addWidget(self.reset_positions_button, 13, 0)
+        self.grid_layout.addWidget(self.low_power_button, 14, 0)
+        self.grid_layout.addWidget(self.quality_label, 15, 0)
+        self.grid_layout.addWidget(self.quality_combobox, 16, 0)
+        self.grid_layout.addWidget(self.capture_button, 17, 0)
+        self.grid_layout.addWidget(self.clear_all_button, 18, 0)
+        self.grid_layout.addWidget(self.log_panel_scroll_area, 0, 1, 19, 1)  # rowSpan covers every button
         self.setLayout(self.grid_layout)
 
         # Redirect
@@ -168,7 +173,22 @@ class ControlCenterUI(QWidget):
         return button
 
     def _clear_widget_list(self, widget_list: list, name: str) -> None:
+        """
+        關掉這一類的所有覆蓋層。和 clear_all 一樣要真的 close()：只丟 Python
+        參考不會跑 closeEvent，計時器、媒體、全域監聽都停不掉，而被別處也記著的
+        覆蓋層（例如網頁儀表板）根本會留在螢幕上關不掉。
+        Close every overlay of this kind. As in clear_all, close() has to happen:
+        dropping the Python reference never runs closeEvent, so timers, media and
+        global listeners stay alive - and an overlay something else also holds a
+        reference to, like the web dashboard, simply stays on screen with no way
+        to dismiss it.
+        """
         front_engine_logger.info(f"[ControlCenterUI] clear_{name}")
+        for widget in widget_list[:]:
+            try:
+                widget.close()
+            except RuntimeError:  # 已經被關掉，C++ 物件不在了 / already deleted
+                continue
         widget_list.clear()
 
     def clear_video(self) -> None:
@@ -429,13 +449,19 @@ class ControlCenterUI(QWidget):
         return normalize_tier(self.quality_combobox.currentData())
 
     def set_quality_tier(self, tier: str) -> None:
-        """把畫質檔位套用到所有支援的覆蓋層。"""
+        """把畫質檔位套用到所有支援的覆蓋層，並記住這個選擇。"""
         tier = normalize_tier(tier)
         front_engine_logger.info(f"ControlCenterUI set_quality_tier | tier={tier}")
         index = self.quality_combobox.findData(tier)
         if index >= 0 and index != self.quality_combobox.currentIndex():
             self.quality_combobox.setCurrentIndex(index)
             return  # currentIndexChanged 會再走一次 _apply_quality_tier
+        # user_setting_dict 裡本來就有 "quality_tier" 這個鍵，每次存檔都會寫出去，
+        # 但從來沒有人寫進它、也沒有人讀它——選了「省電」重開就變回「高」。
+        # user_setting_dict already carried a "quality_tier" key, written out on
+        # every save, that nothing ever wrote to and nothing ever read: choosing
+        # Saver and restarting put it straight back on High.
+        user_setting_dict["quality_tier"] = tier
 
         def apply(widget) -> None:
             setter = getattr(widget, "set_quality_tier", None)

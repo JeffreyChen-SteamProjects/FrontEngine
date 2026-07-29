@@ -67,6 +67,10 @@ class MeasureWidget(BaseWidget):
         self.color_format = color_format
         self.opacity = 1.0
         self.overlay_lockable = False
+        # 量測靠的是螢幕座標，覆蓋層一被拖走就量錯
+        # Measuring is in screen coordinates; dragging the overlay falsifies it.
+        self.overlay_draggable = False
+        self.overlay_remembers_geometry = False
         self.points: List[QPoint] = []
         self.cursor_point = QPoint(0, 0)
         self.picked_color: Optional[QColor] = None
@@ -138,13 +142,21 @@ class MeasureWidget(BaseWidget):
             self.readout = self.color_text(color)
             self.update()
             return self.readout
-        self.points.append(QPoint(point))
         needed = 2 if self.mode == MODE_RULER else 3
+        if len(self.points) >= needed:
+            # 上一次已經量完了，這一下是新一次量測的第一點。先前的寫法是把新的
+            # 點加進去、拿舊的點算完再截掉，等於每一次新點擊都重算並重新複製
+            # 同一個舊結果——量尺變成只能用一次。
+            # The previous measurement is finished, so this click starts the next
+            # one. The old code appended the new point, measured the *old* ones
+            # and truncated the new one away, so every later click recomputed and
+            # re-copied the same stale result: the ruler worked exactly once.
+            self.points.clear()
+        self.points.append(QPoint(point))
         if len(self.points) < needed:
             self.update()
             return None
         self.readout = self._finish_measurement()
-        self.points = self.points[:needed]
         self.update()
         return self.readout
 

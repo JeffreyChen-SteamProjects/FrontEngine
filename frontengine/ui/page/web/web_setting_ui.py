@@ -1,7 +1,7 @@
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
-    QWidget, QGridLayout, QLabel, QSlider, QLineEdit, QPushButton, QCheckBox, QComboBox,
-    QPlainTextEdit,
+    QWidget, QGridLayout, QLabel, QMessageBox, QSlider, QLineEdit, QPushButton, QCheckBox,
+    QComboBox, QPlainTextEdit,
 )
 
 from frontengine.show.web.webview import WebWidget
@@ -276,6 +276,16 @@ class WEBSettingUI(QWidget):
 
     def start_open_web_with_url(self) -> None:
         front_engine_logger.info("[WEBSettingUI] start_open_web_with_url")
+        if not self.web_url_input.text().strip():
+            # 網址空白時開出來的是一層全螢幕、點擊穿透的空白網頁：看不見也點不到，
+            # 只能從控制中心關掉。其他分頁都會先擋下來，這裡也該一樣。
+            # An empty URL opens a blank fullscreen click-through page: invisible,
+            # unclickable, and only closable from the control center. Every other
+            # page stops first; this one should too.
+            message_box = QMessageBox(self)
+            message_box.setText(language_wrapper.language_word_dict.get("not_prepare"))
+            message_box.exec()
+            return
 
         def present_on_monitor(widget: WebWidget, monitor, _idx: int) -> None:
             widget.setScreen(monitor)

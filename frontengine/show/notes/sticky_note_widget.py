@@ -91,6 +91,12 @@ class StickyNoteWidget(BaseWidget):
         # 要打字就不能點擊穿透，也就不提供鎖定
         # Typing needs the mouse and keyboard, so this one is never lockable.
         self.overlay_lockable = False
+        # 便利貼可以拖，但每張各有各的位置，所以不用「同類共用一份」的位置記憶。
+        # 每張的位置與大小是由 note_state() 各自存的。
+        # Notes are draggable, but each has its own place, so the class-wide
+        # geometry memory does not apply: note_state() persists each note's own
+        # position and size.
+        self.overlay_remembers_geometry = False
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, False)
 
         self.text_edit = QTextEdit(self)

@@ -21,7 +21,8 @@ from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import tr
 from frontengine.utils.reminder.reminder_service import (
-    KIND_AT, KIND_EVERY, normalize_reminder, normalize_reminders,
+    DEFAULT_EVERY_MINUTES, KIND_AT, KIND_EVERY, normalize_reminder, normalize_reminders,
+    parse_time_of_day,
 )
 
 _COLUMN_LABEL = 0
@@ -96,10 +97,45 @@ class ReminderDialog(QDialog):
         kind_combobox.addItem(_t("reminder_kind_at", "At"), KIND_AT)
         kind_index = kind_combobox.findData(entry.get("kind", KIND_EVERY))
         kind_combobox.setCurrentIndex(max(0, kind_index))
+        kind_combobox.currentIndexChanged.connect(
+            lambda _index, box=kind_combobox: self._on_kind_changed(box))
         self.table.setCellWidget(row, _COLUMN_KIND, kind_combobox)
 
         value = entry.get("at") if entry.get("kind") == KIND_AT else entry.get("minutes", 45)
         self.table.setItem(row, _COLUMN_VALUE, QTableWidgetItem(str(value)))
+
+    def _on_kind_changed(self, kind_combobox: QComboBox) -> None:
+        """
+        「每隔」和「在」用的是完全不同的值：一個是分鐘數，一個是 HH:MM。
+        切換種類時把值換成該種類的合理預設，不然舊的值（例如 45）會解析失敗，
+        整列在按下確定時被無聲丟掉——使用者只是改了下拉選單，提醒就不見了。
+        "Every" and "At" take entirely different values: a minute count versus
+        HH:MM. Swap in a sensible default for the new kind, or the old value (45,
+        say) fails to parse and the whole row is silently dropped on OK - the
+        user changed a dropdown and lost the reminder.
+        """
+        row = self._row_of(kind_combobox)
+        if row < 0:
+            return
+        kind = kind_combobox.currentData()
+        value_item = self.table.item(row, _COLUMN_VALUE)
+        current = value_item.text().strip() if value_item else ""
+        if kind == KIND_AT:
+            if parse_time_of_day(current) is not None:
+                return
+            replacement = "09:00"
+        else:
+            if current.isdigit() and int(current) > 0:
+                return
+            replacement = str(DEFAULT_EVERY_MINUTES)
+        self.table.setItem(row, _COLUMN_VALUE, QTableWidgetItem(replacement))
+
+    def _row_of(self, widget: QComboBox) -> int:
+        """這個下拉選單在第幾列（列可能被刪過，索引會變）。"""
+        for row in range(self.table.rowCount()):
+            if self.table.cellWidget(row, _COLUMN_KIND) is widget:
+                return row
+        return -1
 
     def remove_selected_row(self) -> None:
         row = self.table.currentRow()

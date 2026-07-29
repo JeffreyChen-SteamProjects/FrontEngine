@@ -111,7 +111,14 @@ class CursorEffectWidget(BaseWidget):
 
     def add_ripple(self, point: Optional[QPoint] = None) -> None:
         """在指定位置（預設為目前游標）加一圈點擊漣漪。"""
-        self.ripples.append({"point": QPoint(point or self.cursor_point), "step": 0})
+        # QPoint 的真值判斷是 isNull()，所以 bool(QPoint(0, 0)) 是 False：
+        # 用 `point or ...` 的話，剛好點在覆蓋層左上角的那一下會被當成沒給座標，
+        # 漣漪畫到上一次輪詢到的游標位置去。
+        # QPoint's truthiness is isNull(), so bool(QPoint(0, 0)) is False: with
+        # `point or ...` a click exactly on the overlay's top-left corner reads as
+        # "no point given" and the ripple lands on the last polled cursor spot.
+        origin = self.cursor_point if point is None else point
+        self.ripples.append({"point": QPoint(origin), "step": 0})
         self.update()
 
     def tick(self) -> None:

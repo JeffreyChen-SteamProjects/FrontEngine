@@ -31,7 +31,10 @@ class SoundEffectWidget(QWidget):
             source = QUrl.fromLocalFile(str(self.sound_path))
             front_engine_logger.info(f"[SoundEffectWidget] Loading sound file: {self.sound_path}")
             self.sound_player.setSource(source)
-            self.sound_player.setLoopCount(QSoundEffect.Infinite)
+            # setLoopCount 只吃 int，直接餵 Loop.Infinite 這個 enum 會 TypeError
+            # setLoopCount takes an int only; handing it the Loop.Infinite enum
+            # raises TypeError.
+            self.sound_player.setLoopCount(QSoundEffect.Loop.Infinite.value)
             self.sound_player.play()
         else:
             front_engine_logger.error(f"[SoundEffectWidget] File not found: {self.sound_path}")

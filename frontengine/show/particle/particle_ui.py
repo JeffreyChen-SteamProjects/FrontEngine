@@ -15,7 +15,7 @@ from OpenGL.GL import (
     glTexCoord2f, glTexImage2D, glTexParameteri, glTranslatef, glVertex2f, glViewport,
 )
 from PySide6.QtCore import Qt, QTimer
-from PySide6.QtGui import QSurfaceFormat, QPixmap
+from PySide6.QtGui import QImage, QSurfaceFormat, QPixmap
 from PySide6.QtOpenGLWidgets import QOpenGLWidget
 
 from frontengine.show.window_helpers import apply_overlay_window_flags, load_overlay_icon
@@ -48,6 +48,7 @@ class ParticleOpenGLWidget(QOpenGLWidget):
 
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setAttribute(Qt.WidgetAttribute.WA_NoSystemBackground)
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         self.setAutoFillBackground(False)
         load_overlay_icon(self)
 
@@ -61,7 +62,13 @@ class ParticleOpenGLWidget(QOpenGLWidget):
             Qt.AspectRatioMode.KeepAspectRatio,
             Qt.TransformationMode.SmoothTransformation
         )
-        self.image = scaled_pixmap.toImage()
+        # QPixmap.toImage() 給的是 ARGB32（記憶體順序 BGRA），直接當成 GL_RGBA 上傳
+        # 會把紅藍對調。轉成 RGBA8888 才和下面的 glTexImage2D 對得起來，
+        # 順帶去掉預乘 alpha，符合 GL_SRC_ALPHA 混色的預期。
+        # toImage() hands back ARGB32, i.e. BGRA in memory; uploading that as
+        # GL_RGBA swaps red and blue. RGBA8888 matches the glTexImage2D call
+        # below and is un-premultiplied, which is what GL_SRC_ALPHA expects.
+        self.image = scaled_pixmap.toImage().convertToFormat(QImage.Format.Format_RGBA8888)
 
         self.particle_count = particle_count
         self.particle_direction = particle_direction
@@ -98,6 +105,11 @@ class ParticleOpenGLWidget(QOpenGLWidget):
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         glEnable(GL_TEXTURE_2D)
+
+        if self.image.isNull():
+            # 沒有材質就別上傳 0x0 的貼圖，畫的時候直接跳過
+            # No texture: skip the 0x0 upload and let paintGL bail out.
+            return
 
         w, h = self.image.width(), self.image.height()
 
@@ -144,6 +156,9 @@ class ParticleOpenGLWidget(QOpenGLWidget):
         glClearColor(0, 0, 0, 0)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
+        if self.texture_id is None:
+            return
+
         glBindTexture(GL_TEXTURE_2D, self.texture_id)
         glColor4f(1, 1, 1, self.opacity)
 
@@ -175,3 +190,10 @@ class ParticleOpenGLWidget(QOpenGLWidget):
 
     def set_ui_window_flag(self, show_on_bottom: bool = False) -> None:
         apply_overlay_window_flags(self, show_on_bottom=show_on_bottom)
+
+    def closeEvent(self, event) -> None:
+        # 關掉之後還在跑 60Hz 更新上萬顆粒子，畫面卻早就沒了
+        # Without this the 60 Hz update keeps churning through every particle
+        # long after the overlay has gone from the screen.
+        self.timer.stop()
+        super().closeEvent(event)

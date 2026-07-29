@@ -1,3 +1,5 @@
+import threading
+
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QLineEdit, QPushButton, QCheckBox, QComboBox, \
@@ -41,6 +43,10 @@ class TextSettingUI(QWidget):
         # Init variable
         self.text_widget_list = []
         self.show_all_screen = False
+        # 已經解析過座標的地名，避免每台螢幕都重新查一次
+        # The city already resolved to coordinates, so each monitor does not
+        # trigger another lookup.
+        self._weather_city_resolved = None
 
         # Opacity setting
         self.opacity_label = tr(QLabel(), "Opacity")
@@ -186,15 +192,36 @@ class TextSettingUI(QWidget):
         )
 
     def _apply_weather_location(self) -> None:
-        """把使用者填的地名換成座標；查不到就沿用預設地點。"""
+        """
+        把使用者填的地名換成座標；查不到就沿用預設地點。
+
+        查詢在背景執行緒進行。lookup_city 是同步的網路請求（逾時 10 秒，再加上
+        沒有上限的 DNS），而這裡是由「開始」按鈕的槽函式呼叫、而且每一台螢幕
+        各呼叫一次：勾了「顯示在所有螢幕」又剛好斷網的話，三螢幕就是整個介面
+        僵住三十幾秒，畫面上什麼提示也沒有。同一個地名只查一次。
+
+        The lookup runs on a background thread. lookup_city is a synchronous
+        network request - a 10 second timeout plus uncapped DNS - called from the
+        Start button's slot once per monitor: with "show on all screens" ticked
+        and the network down, three monitors froze the whole interface for half a
+        minute with nothing on screen to explain it. Each city is resolved once.
+        """
         city = self.weather_location_edit.text().strip()
-        if not city:
+        if not city or city == self._weather_city_resolved:
             return
-        found = lookup_city(city)
-        if found is None:
-            front_engine_logger.warning(f"[TextSettingUI] weather city not found: {city}")
-            return
-        weather_service().set_location(found[0], found[1])
+        self._weather_city_resolved = city
+
+        def resolve() -> None:
+            found = lookup_city(city)
+            if found is None:
+                front_engine_logger.warning(f"[TextSettingUI] weather city not found: {city}")
+                # 查失敗就忘掉，下次按開始才會再試一次
+                # Forget a failure so the next Start tries again.
+                self._weather_city_resolved = None
+                return
+            weather_service().set_location(found[0], found[1])
+
+        threading.Thread(target=resolve, name="frontengine-city-lookup", daemon=True).start()
 
     def _create_text_widget(self) -> TextWidget:
         front_engine_logger.info("[TextSettingUI] _create_text_widget")

@@ -24,6 +24,21 @@ def _coerce_int(value: Any, default: int, modulo: int) -> int:
         return default
 
 
+def _crossed(previous: int, target: int, current: int) -> bool:
+    """
+    上次輪詢到這次之間，有沒有經過 target 這一分鐘（全部以「午夜起算的分鐘數」表示）。
+    午夜會讓分鐘數從 1439 掉回 0，直接寫 previous < target <= current 的話，
+    排在 00:00 的預設集永遠等不到——沒有哪個 previous 會小於 0。
+    Whether the target minute was passed between the previous poll and this one,
+    all counted as minutes since midnight. Midnight drops the count from 1439
+    back to 0, so a plain `previous < target <= current` can never be satisfied
+    for a preset scheduled at 00:00: no previous value is below zero.
+    """
+    if previous <= current:
+        return previous < target <= current
+    return target > previous or target <= current
+
+
 class PresetScheduleService(QObject):
     """
     每天在指定時間套用一個預設集。以「跨越目標時間」偵測觸發，因此每天只會
@@ -76,7 +91,7 @@ class PresetScheduleService(QObject):
             return
         previous = self._prev_minutes
         self._prev_minutes = current
-        if previous is not None and previous < target <= current:
+        if previous is not None and _crossed(previous, target, current):
             front_engine_logger.info(f"[PresetSchedule] fire | preset={preset}")
             self.preset_due.emit(preset.strip())
 

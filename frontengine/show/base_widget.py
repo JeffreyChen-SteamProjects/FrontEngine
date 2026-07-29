@@ -26,6 +26,21 @@ class BaseWidget(QWidget):
         # Locked means click-through; unlocked overlays can be dragged into place.
         self.overlay_locked: bool = True
         self.overlay_lockable: bool = True
+        # 自己處理滑鼠的覆蓋層（畫筆、白板、框選、量尺、寵物）要把這個關掉。
+        # 不關的話，使用者一在上面拖曳，基底的「拖曳擺位」就把整個視窗一起搬走：
+        # 畫布滑出畫面，框選還會擷取到跟選取範圍不同的區域。
+        # Overlays that handle the mouse themselves - pen, whiteboard, region
+        # select, ruler, pet - switch this off. Otherwise dragging to draw also
+        # drags the window: the canvas slides off screen, and region capture
+        # grabs an area other than the one that was selected.
+        self.overlay_draggable: bool = True
+        # 位置記憶是以類別名稱為鍵的，也就是「同一類共用一份」。每個實例位置
+        # 各異的（便利貼、寵物）要關掉，否則會全部被拉到同一個位置與大小。
+        # The remembered geometry is keyed by class name, i.e. shared by every
+        # instance of that kind. Overlays whose instances each have their own
+        # place - sticky notes, the pet - switch it off, or they all snap to one
+        # position and size.
+        self.overlay_remembers_geometry: bool = True
         self.overlay_show_on_bottom: bool = False
         # 綠幕背景色：設了就以不透明色填滿背景，方便 OBS 去背
         # Chroma key colour: fills the background opaquely so OBS can key it out.
@@ -94,12 +109,13 @@ class BaseWidget(QWidget):
 
     # --- drag to position (only while unlocked) --------------------------
     def mousePressEvent(self, event) -> None:
-        if not self.overlay_locked and event.button() == Qt.MouseButton.LeftButton:
+        if self.overlay_draggable and not self.overlay_locked \
+                and event.button() == Qt.MouseButton.LeftButton:
             self._drag_origin = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
         super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event) -> None:
-        if not self.overlay_locked and self._drag_origin is not None:
+        if self.overlay_draggable and not self.overlay_locked and self._drag_origin is not None:
             self.move(event.globalPosition().toPoint() - self._drag_origin)
         super().mouseMoveEvent(event)
 
@@ -111,6 +127,8 @@ class BaseWidget(QWidget):
 
     def remember_geometry(self) -> None:
         """記住目前位置與大小，之後同類覆蓋層會開在同一處。"""
+        if not self.overlay_remembers_geometry:
+            return
         geometry = self.geometry()
         front_engine_logger.info(
             f"{self.__class__.__name__} remember_geometry | {geometry.x()},{geometry.y()} "
@@ -129,12 +147,19 @@ class BaseWidget(QWidget):
 
     def restore_saved_geometry(self) -> None:
         """若這類覆蓋層有記住的位置就套用（使用者拖曳過才會有）。"""
+        if not self.overlay_remembers_geometry:
+            return
         saved = get_overlay_geometry(self.__class__.__name__)
         if not saved:
             return
         try:
             if self.isFullScreen():
-                self.showNormal()
+                # 使用者這次明講要全螢幕（含「顯示在所有螢幕」），就別拿記住的
+                # 位置把它拉回視窗模式——那會讓每台螢幕的覆蓋層全擠到同一格。
+                # The caller explicitly asked for fullscreen (this is also how
+                # "show on all screens" presents each one). Dragging it back to a
+                # remembered rect would pile every screen's overlay onto one spot.
+                return
             self.setGeometry(*saved)
         except RuntimeError:  # pragma: no cover - widget closed mid-callback
             return

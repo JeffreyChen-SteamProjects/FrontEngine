@@ -63,7 +63,11 @@ class VideoWidget(QVideoWidget):
         self.play_rate = play_rate
         self.volume = max(0.0, min(volume, 1.0))
         self.media_player.setPlaybackRate(self.play_rate)
-        self.media_player.audioOutput().setVolume(self.volume)
+        # 檔案不存在時沒有建立 audio output，這裡要擋掉 None
+        # No audio output is created when the file is missing, so guard for None.
+        audio_output = self.media_player.audioOutput()
+        if audio_output is not None:
+            audio_output.setVolume(self.volume)
 
     def closeEvent(self, event) -> None:
         front_engine_logger.info(f"[VideoWidget] closeEvent | event={event}")

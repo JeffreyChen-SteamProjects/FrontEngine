@@ -23,7 +23,7 @@ from frontengine.ui.page.utils import (
 from frontengine.utils.audio_meter.screen_audio import audio_level_provider_for_screen
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
-from frontengine.utils.multi_language.retranslate import tr
+from frontengine.utils.multi_language.retranslate import retranslator, tr
 # 多處共用的英文備援字串（只有在翻譯缺漏時才會看到）
 # The English fallback shared by several call sites, seen only when a
 # translation is missing.
@@ -236,8 +236,8 @@ class WallpaperSettingUI(QWidget):
         if self.wallpaper_widgets:
             self.advance_timer.start(
                 clamp_interval(self.interval_combobox.currentData()) * 1000)
-            self.start_button.setText(
-                language_wrapper.language_word_dict.get("wallpaper_stop", "Stop wallpaper"))
+            retranslator.set_text(
+                self.start_button, "wallpaper_stop", "Stop wallpaper")
 
     def stop_wallpaper(self) -> None:
         """收掉所有桌布。"""
@@ -249,8 +249,8 @@ class WallpaperSettingUI(QWidget):
                 pass
         self.wallpaper_widgets.clear()
         self.playlists.clear()
-        self.start_button.setText(
-            language_wrapper.language_word_dict.get("wallpaper_start", "Start wallpaper"))
+        retranslator.set_text(
+            self.start_button, "wallpaper_start", "Start wallpaper")
 
     def advance_all(self) -> None:
         """每個螢幕各自換到「此刻該用的清單」的下一張。"""

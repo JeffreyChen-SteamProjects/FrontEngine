@@ -53,6 +53,49 @@ _PALETTE = build_palette()
 # which overflows int16 into negatives and makes argmin pick nonsense.
 _PALETTE_ARRAY = numpy.array(_PALETTE, dtype=numpy.int32)
 
+# 查表用的顏色精度：每個通道取高 5 位（32 階）。
+# Colour resolution of the lookup table: the top 5 bits per channel (32 steps).
+_LOOKUP_BITS = 3
+_LOOKUP_STEPS = 1 << (8 - _LOOKUP_BITS)
+_LOOKUP_CHUNK = 4096
+_lookup_table: Optional[numpy.ndarray] = None
+
+
+def _nearest_indices(colors: numpy.ndarray) -> numpy.ndarray:
+    """
+    (N, 3) 的顏色找最近的調色盤索引。分批算：一次全算會產生 N x 256 x 3 的
+    中間陣列，一張 1280x720 的畫面就要 3.8 GB。
+    Nearest palette index for an (N, 3) array of colours, in chunks: doing it in
+    one go materialises an N x 256 x 3 intermediate, which is 3.8 GB for a
+    single 1280x720 frame.
+    """
+    result = numpy.empty(colors.shape[0], dtype=numpy.uint8)
+    palette = _PALETTE_ARRAY.reshape((1, -1, 3))
+    for start in range(0, colors.shape[0], _LOOKUP_CHUNK):
+        chunk = colors[start:start + _LOOKUP_CHUNK].reshape((-1, 1, 3))
+        distances = ((chunk - palette) ** 2).sum(axis=2)
+        result[start:start + _LOOKUP_CHUNK] = distances.argmin(axis=1).astype(numpy.uint8)
+    return result
+
+
+def _get_lookup_table() -> numpy.ndarray:
+    """
+    32x32x32 的最近色查表，第一次用到才建（約 33k 次搜尋，之後每張畫面只要
+    三次位移加一次索引）。調色盤是固定的，所以這張表也是固定的。
+    A 32x32x32 nearest-colour table, built on first use (~33k searches; after
+    that a frame costs three shifts and one indexing operation). The palette is
+    fixed, so the table is too.
+    """
+    global _lookup_table
+    if _lookup_table is None:
+        centers = numpy.arange(_LOOKUP_STEPS, dtype=numpy.int32) * (1 << _LOOKUP_BITS) \
+            + (1 << (_LOOKUP_BITS - 1))
+        grid = numpy.stack(
+            numpy.meshgrid(centers, centers, centers, indexing="ij"), axis=-1)
+        _lookup_table = _nearest_indices(grid.reshape((-1, 3))).reshape(
+            (_LOOKUP_STEPS, _LOOKUP_STEPS, _LOOKUP_STEPS))
+    return _lookup_table
+
 
 def quantize(pixels: numpy.ndarray) -> numpy.ndarray:
     """
@@ -62,10 +105,9 @@ def quantize(pixels: numpy.ndarray) -> numpy.ndarray:
     data = numpy.asarray(pixels, dtype=numpy.int32)
     if data.ndim != 3 or data.shape[2] < 3:
         raise ValueError("frame must be H x W x 3")
-    flat = data[:, :, :3].reshape((-1, 1, 3))
-    distances = ((flat - _PALETTE_ARRAY.reshape((1, -1, 3))) ** 2).sum(axis=2)
-    return distances.argmin(axis=1).astype(numpy.uint8).reshape(
-        (data.shape[0], data.shape[1]))
+    table = _get_lookup_table()
+    binned = data[:, :, :3] >> _LOOKUP_BITS
+    return table[binned[:, :, 0], binned[:, :, 1], binned[:, :, 2]]
 
 
 def clamp_delay(delay_ms) -> int:

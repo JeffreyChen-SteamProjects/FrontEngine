@@ -84,6 +84,9 @@ class PetChatService:
         self._key_provider = key_provider
         self._client = None
         self.history: List[dict] = []
+        # ask() 會從背景執行緒呼叫，而且可能同時有好幾次在跑
+        # ask() runs on background threads, possibly several at once.
+        self._ask_lock = threading.Lock()
 
     def available(self) -> bool:
         """有金鑰（或注入的 client）才算可用 / Usable only with a key or an injected client."""
@@ -121,6 +124,17 @@ class PetChatService:
         client = self._build_client()
         if client is None:
             return None
+        # 兩句話問得夠快就會同時在飛。history 沒有保護的話會排成
+        # ['user', 'user']，Messages API 要求角色交替，於是那次請求被拒；更糟的是
+        # history 從此變成壞的，之後每一句都失敗，只能等 reset()。
+        # Two questions asked in quick succession overlap. Without guarding
+        # history they interleave into ['user', 'user'], which the Messages API
+        # rejects because roles must alternate - and history stays broken, so
+        # every later question fails too until reset().
+        with self._ask_lock:
+            return self._ask_locked(client, text)
+
+    def _ask_locked(self, client, text: str) -> Optional[str]:
         self.history.append({"role": "user", "content": text})
         self.history = trim_history(self.history)
         # 送出當下的快照：回覆抵達後我們還會再改動 history
