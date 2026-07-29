@@ -17,6 +17,9 @@ formatter = logging.Formatter(
     '%(asctime)s | %(name)s | %(levelname)s | %(message)s'
 )
 
+# 日誌檔名 / The log file's name
+LOG_FILE_NAME = "FrontEngine.log"
+
 
 class FrontEngineLoggingHandler(RotatingFileHandler):
     """
@@ -26,16 +29,11 @@ class FrontEngineLoggingHandler(RotatingFileHandler):
 
     def __init__(
         self,
-        filename: str = "FrontEngine.log",
+        filename: str = LOG_FILE_NAME,
         mode: str = "a",  # 建議使用 append 模式
         max_bytes: int = 1073741824,  # 1GB
         backup_count: int = 3         # 保留 3 個備份檔案
     ):
-        # delay=True：等到真的要寫第一筆才開檔。這個 handler 是在 import 期間
-        # 建立的，開檔失敗會讓整個 frontengine 套件 import 不起來。
-        # delay=True defers opening the file until the first record. This handler
-        # is built during import, so a failure to open would make the whole
-        # frontengine package unimportable.
         # encoding="utf-8"：日誌會寫進翻譯過的字串與使用者的檔案路徑。
         # 用系統預設編碼的話，cp950／cp1252 遇到俄文或中文就整行寫不進去，
         # 還會把 logging 自己的錯誤倒進被導向的輸出面板。
@@ -45,7 +43,7 @@ class FrontEngineLoggingHandler(RotatingFileHandler):
         # redirected output panel.
         super().__init__(
             filename=filename, mode=mode, maxBytes=max_bytes,
-            backupCount=backup_count, encoding="utf-8", delay=True)
+            backupCount=backup_count, encoding="utf-8")
         self.setFormatter(formatter)  # 正確套用 formatter
         self.setLevel(logging.DEBUG)
 
@@ -67,12 +65,10 @@ def _build_file_handler() -> logging.Handler:
     directory - which autostart makes easy - must not stop the app from opening:
     losing the log is acceptable, failing to start is not.
     """
-    for candidate in ("FrontEngine.log", str(Path.home() / "FrontEngine.log")):
+    for candidate in (LOG_FILE_NAME, str(Path.home() / LOG_FILE_NAME)):
         try:
-            # delay=True 不會在這裡開檔，所以自己確認一次真的寫得進去
-            # delay=True has not opened anything yet, so prove it is writable.
-            with open(candidate, "a", encoding="utf-8"):
-                pass
+            # 建構子本身就會開檔，所以「開得起來」就是這裡的測試
+            # The constructor opens the file, so building it is the test.
             return FrontEngineLoggingHandler(filename=candidate)
         except OSError:
             continue

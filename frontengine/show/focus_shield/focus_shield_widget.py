@@ -97,8 +97,6 @@ class DimBackgroundWidget(BaseWidget):
         if rect is None:
             return None
         ratio = self.devicePixelRatio() or 1.0
-        if ratio == 1.0:
-            return rect
         return tuple(int(round(value / ratio)) for value in rect)
 
     def refresh(self) -> None:
