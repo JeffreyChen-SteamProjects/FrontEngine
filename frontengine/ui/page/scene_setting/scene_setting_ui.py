@@ -35,7 +35,7 @@ class SceneSettingUI(QWidget):
 
     def close_scene(self) -> None:
         front_engine_logger.info("[SceneSettingUI] close_scene")
-        self.scene.widget_list.clear()
+        self.scene.clear()
         for view in self.scene.view_list:
             view.close()
             view.deleteLater()

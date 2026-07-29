@@ -110,7 +110,11 @@ class WidgetsSettingUI(QWidget):
     def _build_note_row(self) -> None:
         self.note_label = tr(QLabel(), "widgets_note_label", "Sticky note")
         self.note_button = tr(QPushButton(), "widgets_note_add", "New note")
-        self.note_button.clicked.connect(self.add_note)
+        # clicked 會送出 checked(bool)，直接接上 add_note(text=...) 的話新便利貼
+        # 開起來裡面就寫著 "False"
+        # clicked emits checked(bool); wired straight to add_note(text=...) every
+        # new note opens with the word "False" typed in it.
+        self.note_button.clicked.connect(lambda: self.add_note())
         self.note_close_button = tr(QPushButton(), "widgets_note_close", "Close notes")
         self.note_close_button.clicked.connect(self.close_notes)
         self.note_restore_checkbox = tr(QCheckBox(), "widgets_note_restore",

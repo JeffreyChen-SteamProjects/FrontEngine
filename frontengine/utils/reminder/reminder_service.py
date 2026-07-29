@@ -102,10 +102,17 @@ class ReminderTracker:
         self._config_provider = config_provider
         self._now = now_provider
         self._last_fired: Dict[str, datetime] = {}
+        # 上一次檢查這則提醒的時間。判斷「有沒有跨過那個時刻」要靠它，
+        # 只看「今天響過沒」的話，每次啟動只要時間已經過了就會補響一次。
+        # When each reminder was last examined. The "did we cross that moment"
+        # test needs it: going by "has it fired today" alone means every launch
+        # after the time re-fires it.
+        self._last_seen: Dict[str, datetime] = {}
 
     def reset(self) -> None:
         """忘掉所有紀錄（重新開始計時）。"""
         self._last_fired.clear()
+        self._last_seen.clear()
 
     def _key(self, reminder: Dict[str, Any]) -> str:
         return f"{reminder['kind']}:{reminder['label']}"
@@ -124,7 +131,18 @@ class ReminderTracker:
         if moment is None:
             return False
         target = now.replace(hour=moment[0], minute=moment[1], second=0, microsecond=0)
-        if now < target:
+        previous = self._last_seen.get(key)
+        self._last_seen[key] = now
+        if previous is None:
+            # 第一次看到只記時間，不響。和 _due_every 一樣的原則：不然
+            # 「09:00 吃藥」在 10 點、13 點、18 點各開一次程式就會響三次。
+            # First sighting only starts the clock, as in _due_every: otherwise a
+            # 09:00 reminder fires again at every launch that day - 10:00, 13:30,
+            # 18:45, each one another toast.
+            return False
+        if previous >= target or now < target:
+            # 那個時刻不在「上次檢查到現在」之間
+            # The moment does not fall between the previous check and now.
             return False
         last = self._last_fired.get(key)
         # 每天只響一次：同一天已經響過就跳過

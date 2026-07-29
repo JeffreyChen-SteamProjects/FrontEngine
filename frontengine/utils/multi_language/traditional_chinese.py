@@ -40,6 +40,10 @@ traditional_chinese_word_dict = {
     "control_center_clear_log_panel": "清除 Log",
     "chat_scene_close": "關閉所有聊天",
     "control_center_close_all": "關閉所有",
+    "tray_hide_window": "隱藏視窗",
+    "tray_maximize_window": "視窗最大化",
+    "tray_normal_window": "還原視窗",
+    "tray_close_app": "結束 FrontEngine",
     # General
     "Opacity": "不透明度",
     "Speed": "速度",

@@ -4,9 +4,11 @@ from os import getcwd
 from pathlib import Path
 from typing import Any, Dict, Optional, Type
 
-from PySide6.QtCore import QByteArray, QTimer, QCoreApplication
+from PySide6.QtCore import QByteArray, QTimer
 from PySide6.QtGui import QIcon, Qt
-from PySide6.QtWidgets import QMainWindow, QApplication, QGridLayout, QTabWidget, QMenuBar, QWidget
+from PySide6.QtWidgets import (
+    QMainWindow, QApplication, QGridLayout, QStyle, QTabWidget, QMenuBar, QWidget,
+)
 from qt_material import apply_stylesheet
 
 from frontengine.show.toast.toast_widget import show_toast
@@ -105,7 +107,10 @@ class FrontEngineMainUI(QMainWindow):
         # Basic settings
         self.id = "FrontEngine"
         self.main_app = main_app
-        QCoreApplication.setAttribute(Qt.ApplicationAttribute.AA_EnableHighDpiScaling)
+        self._shutdown_done = False
+        # Qt 6 一律啟用高 DPI 縮放，AA_EnableHighDpiScaling 已無作用且被標為棄用
+        # Qt 6 always scales for high DPI; AA_EnableHighDpiScaling is a deprecated
+        # no-op there.
 
         # Windows 平台設定 AppUserModelID
         # Set AppUserModelID for Windows platform
@@ -399,19 +404,34 @@ class FrontEngineMainUI(QMainWindow):
         self.icon_path = Path(os.getcwd()) / "frontengine.ico"
         self.icon = QIcon(str(self.icon_path))
         self.show_system_tray_ray = show_system_tray_ray
+        self.system_tray: Optional[ExtendSystemTray] = None
 
-        if not self.icon.isNull():
-            self.setWindowIcon(self.icon)
-            if ExtendSystemTray.isSystemTrayAvailable() and self.show_system_tray_ray:
-                self.system_tray = ExtendSystemTray(main_window=self)
-                self.system_tray.setIcon(self.icon)
-                self.system_tray.show()
-                self.system_tray.setToolTip("FrontEngine")
+        if self.icon.isNull():
+            # 從別的目錄啟動（pip 安裝的情況幾乎都是）就找不到 frontengine.ico。
+            # 托盤選單是唯一會存檔再離開的出口，不能因為少一張圖就整個不見，
+            # 改用系統內建圖示。
+            # Launched from any other directory - which is the normal case for a
+            # pip install - frontengine.ico is simply not there. The tray menu is
+            # the only exit that saves settings, so it must not disappear along
+            # with the picture; fall back to a built-in icon.
+            front_engine_logger.info(f"[FrontEngineMainUI] icon not found: {self.icon_path}")
+            self.icon = self.style().standardIcon(QStyle.StandardPixmap.SP_ComputerIcon)
+        self.setWindowIcon(self.icon)
+
+        if ExtendSystemTray.isSystemTrayAvailable() and self.show_system_tray_ray:
+            self.system_tray = ExtendSystemTray(main_window=self)
+            self.system_tray.setIcon(self.icon)
+            self.system_tray.show()
+            self.system_tray.setToolTip("FrontEngine")
 
     def startup_setting(self) -> None:
         """啟動時套用樣式並還原視窗大小/位置（無記錄時最大化） / Apply stylesheet
         and restore the saved window geometry (maximize when none is stored)."""
         apply_stylesheet(self, theme=user_setting_dict.get("theme"))
+        # 還原上次選的畫質檔位（設定檔一直有存，只是從來沒有人讀回來）
+        # Restore the quality tier chosen last time: it was always written to the
+        # settings file, just never read back.
+        self.control_center_ui.set_quality_tier(user_setting_dict.get("quality_tier"))
         if not self._restore_window_geometry():
             self.showMaximized()
 
@@ -458,10 +478,6 @@ class FrontEngineMainUI(QMainWindow):
         front_engine_logger.info(f"[FrontEngineMainUI] retranslate | {applied} strings")
         return applied
 
-    def set_style(self) -> None:
-        """更新使用者選擇的主題 / Update user-selected theme"""
-        user_setting_dict.update({"theme": self.sender().text()})
-
     def _apply_theme(self, theme: str) -> None:
         """套用主題並記住 / Apply a theme and remember it."""
         front_engine_logger.info(f"[FrontEngineMainUI] _apply_theme | theme={theme}")
@@ -473,12 +489,18 @@ class FrontEngineMainUI(QMainWindow):
 
     def closeEvent(self, event) -> None:
         """關閉事件：若系統托盤可用則隱藏視窗 / Close event: hide window if system tray is available"""
-        if ExtendSystemTray.isSystemTrayAvailable() and self.show_system_tray_ray:
-            if self.system_tray.isVisible():
-                self.hide()
-                event.ignore()
-        else:
-            super().closeEvent(event)
+        # 托盤有可能沒建起來（平台不支援、或啟動時關掉了），沒有就照一般關閉走
+        # The tray may not exist at all - unsupported platform, or switched off at
+        # startup - in which case this is an ordinary close.
+        if self.system_tray is not None and self.system_tray.isVisible():
+            self.hide()
+            event.ignore()
+            return
+        # 這條路是真的要關了（X 按鈕、登出、closeAllWindows），所以收尾要在這裡做
+        # This branch really is closing - X button, logout, closeAllWindows - so
+        # the teardown belongs here.
+        self._shutdown()
+        super().closeEvent(event)
 
     def reload_hotkeys(self) -> None:
         """
@@ -544,7 +566,21 @@ class FrontEngineMainUI(QMainWindow):
             return
         if message.get("kind") == "control" and int(message.get("value", 0)) < 127:
             return
-        action = current_bindings().get(binding_key(message))
+        key = binding_key(message)
+        # 遙控設定對話框正在「學習」的話，這一則訊息是拿來新增綁定的，不是拿來
+        # 觸發動作的。少了這一段，那顆「學習」按鈕從頭到尾沒有任何東西呼叫它，
+        # 整個 UI 也就沒有辦法建立 MIDI 綁定。
+        # While the remote dialog is learning, this message defines a binding
+        # rather than triggering one. Without this the Learn button had no caller
+        # at all, and there was no way to create a MIDI binding from the UI.
+        dialog = getattr(self, "remote_dialog", None)
+        if dialog is not None:
+            try:
+                if dialog.learn(key):
+                    return
+            except RuntimeError:  # pragma: no cover - dialog closed mid-message
+                self.remote_dialog = None
+        action = current_bindings().get(key)
         if action:
             self._handle_hotkey(action)
 
@@ -658,8 +694,23 @@ class FrontEngineMainUI(QMainWindow):
         ("pet_setting_ui", "pet_list"),
     )
 
-    def close(self) -> None:
-        """關閉程式並清理資源 / Close application and clear resources"""
+    def _shutdown(self) -> None:
+        """
+        存檔並停掉所有服務。放在這裡而不是 close() 裡面，是因為 Qt 的
+        QWidget::close() 不是虛擬函式：從標題列的 X、工作階段登出、或
+        closeAllWindows() 關閉時，Qt 只會走到 closeEvent，永遠不會呼叫這個
+        Python 的 close() 覆寫。收尾工作只寫在 close() 裡，等於只有系統匣的
+        「關閉」那一條路會存檔。
+        Save everything and stop every service. This lives here rather than in
+        close() because QWidget::close() is not virtual in Qt: closing from the
+        title-bar X, a session logout, or closeAllWindows() only ever reaches
+        closeEvent, never this Python close() override. With the teardown living
+        in close() alone, the tray's Quit item was the only exit that saved.
+        """
+        if self._shutdown_done:
+            return
+        self._shutdown_done = True
+        front_engine_logger.info("[FrontEngineMainUI] shutdown")
         if user_setting_dict.get("restore_last_session"):
             save_last_session(self)
         self._stop_services()
@@ -668,6 +719,10 @@ class FrontEngineMainUI(QMainWindow):
         write_user_setting()
         self._clear_overlays()
         self.scene_setting_ui.close_scene()
+
+    def close(self) -> None:
+        """關閉程式並清理資源 / Close application and clear resources"""
+        self._shutdown()
         super().close()
         if self.main_app:
             self.main_app.exit(0)
@@ -693,12 +748,23 @@ class FrontEngineMainUI(QMainWindow):
             self.tools_setting_ui.stop_virtual_camera()
 
     def _clear_overlays(self) -> None:
-        """清空各分頁記著的覆蓋層清單。"""
+        """
+        關閉並清空各分頁記著的覆蓋層。要先 close() 才丟參考：closeEvent 才是
+        停計時器、放掉媒體與攝影機的地方。
+        Close the overlays each page is holding, then empty the lists. close()
+        comes first because closeEvent is what stops timers and releases media.
+        """
         for page_name, attribute in self._CLOSING_WIDGET_LISTS:
             page = getattr(self, page_name, None)
             widget_list = getattr(page, attribute, None) if page is not None else None
-            if widget_list is not None:
-                widget_list.clear()
+            if widget_list is None:
+                continue
+            for widget in widget_list[:]:
+                try:
+                    widget.close()
+                except RuntimeError:  # 使用者已經關掉，C++ 物件不在了
+                    continue
+            widget_list.clear()
 
     @classmethod
     def debug_close(cls) -> None:

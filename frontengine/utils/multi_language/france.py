@@ -40,6 +40,10 @@ french_word_dict = {
     "control_center_clear_log_panel": "Effacer le journal",
     "chat_scene_close": "Fermer toutes les discussions",
     "control_center_close_all": "Fermer tout",
+    "tray_hide_window": "Masquer la fenêtre",
+    "tray_maximize_window": "Agrandir la fenêtre",
+    "tray_normal_window": "Restaurer la fenêtre",
+    "tray_close_app": "Quitter FrontEngine",
     # General
     "Opacity": "Opacité",
     "Speed": "Vitesse",

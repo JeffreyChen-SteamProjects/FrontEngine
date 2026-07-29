@@ -79,6 +79,11 @@ class WhiteboardWidget(BaseWidget):
         self.pen_width = max(1, int(width))
         self.opacity = 1.0
         self.overlay_lockable = False
+        # 白板自己處理拖曳（畫線與平移），基底的拖曳擺位會把整塊畫布搬走
+        # The whiteboard handles its own dragging - strokes and panning - and the
+        # base class's drag-to-position would carry the whole canvas off with it.
+        self.overlay_draggable = False
+        self.overlay_remembers_geometry = False
         self.strokes: List[Dict[str, Any]] = []
         self.zoom = 1.0
         self.offset = [0.0, 0.0]

@@ -1,11 +1,29 @@
 from typing import Optional, List
 
-from PySide6.QtGui import QScreen
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QGuiApplication
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtWidgets import QWidget
 
 from frontengine.utils.exception.exceptions import FrontEngineLoadUIException
 from frontengine.utils.logging.loggin_instance import front_engine_logger
+
+# 載入的視窗沒有 parent，Python 這邊不留參考就會立刻被回收，視窗根本不會出現。
+# A loaded window has no parent, so without a reference on the Python side it is
+# collected the moment this function returns and never appears at all.
+_loaded_ui_widgets: List[QWidget] = []
+
+
+def _forget_closed_ui() -> None:
+    """把已被 Qt 銷毀的視窗從清單剔除，免得一直累積。"""
+    alive: List[QWidget] = []
+    for widget in _loaded_ui_widgets:
+        try:
+            widget.isVisible()
+        except RuntimeError:  # 底層 C++ 物件已消滅 / underlying C++ object is gone
+            continue
+        alive.append(widget)
+    _loaded_ui_widgets[:] = alive
 
 
 def load_extend_ui_file(ui_path: str, show_all_screen: bool = False) -> None:
@@ -19,19 +37,24 @@ def load_extend_ui_file(ui_path: str, show_all_screen: bool = False) -> None:
     front_engine_logger.info(
         f"[load_extend_ui_file] ui_path={ui_path}, show_all_screen={show_all_screen}"
     )
-
-    ui: QWidget = load_ui_file(ui_path)
+    _forget_closed_ui()
 
     if show_all_screen:
-        ui.showFullScreen()
+        # 一個 widget 不可能同時待在多台螢幕上，每台各載入一份
+        # One widget cannot sit on several screens at once, so load one per screen.
+        for screen in QGuiApplication.screens():
+            _present_ui(load_ui_file(ui_path), screen.availableGeometry().topLeft())
     else:
-        # 取得所有螢幕並在每個螢幕上顯示 UI
-        # Get all monitors and display UI on each
-        monitors: List[QScreen] = QScreen.virtualSiblings(ui.screen())
-        for screen in monitors:
-            monitor_geometry = screen.availableGeometry()
-            ui.move(monitor_geometry.left(), monitor_geometry.top())
-            ui.showFullScreen()
+        _present_ui(load_ui_file(ui_path), None)
+
+
+def _present_ui(ui: QWidget, top_left) -> None:
+    """全螢幕顯示一個載入好的視窗，並保留參考直到它被關閉。"""
+    ui.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
+    if top_left is not None:
+        ui.move(top_left)
+    ui.showFullScreen()
+    _loaded_ui_widgets.append(ui)
 
 
 def load_ui_file(ui_path: str) -> QWidget:

@@ -86,14 +86,26 @@ class MagnifierWidget(BaseWidget):
 
     @staticmethod
     def _grab_screen(rect: QRect) -> Optional[QPixmap]:
-        """用 Qt 擷取指定螢幕區域；沒有可用螢幕時回傳 None。"""
-        screen = QGuiApplication.primaryScreen()
+        """
+        擷取指定的螢幕區域。要用「那塊區域所在的那台螢幕」去擷取，不是主螢幕：
+        放大鏡可以被指定開在副螢幕上，寫死主螢幕的話，游標移到另一台時擷取到的
+        是完全不相干的位置。
+        Grab a screen region using the screen that region is actually on, not the
+        primary one: the magnifier can be placed on a secondary display, and
+        hard-coding the primary grabs somewhere else entirely once the cursor
+        moves across.
+        """
+        screen = QGuiApplication.screenAt(rect.center()) or QGuiApplication.primaryScreen()
         if screen is None:
             return None
         return screen.grabWindow(0, rect.x(), rect.y(), rect.width(), rect.height())
 
-    def screen_bounds(self) -> Tuple[int, int, int, int]:
-        screen = self.screen() or QGuiApplication.primaryScreen()
+    def screen_bounds(self, position=None) -> Tuple[int, int, int, int]:
+        """游標所在螢幕的範圍（沒給座標就用放大鏡自己那一台）。"""
+        screen = None
+        if position is not None:
+            screen = QGuiApplication.screenAt(position)
+        screen = screen or self.screen() or QGuiApplication.primaryScreen()
         if screen is None:
             return (0, 0, 1920, 1080)
         geometry = screen.geometry()
@@ -104,7 +116,7 @@ class MagnifierWidget(BaseWidget):
         try:
             position = self._cursor_provider()
             rect = source_rect((position.x(), position.y()), self.view_size, self.zoom,
-                               self.screen_bounds())
+                               self.screen_bounds(position))
             self.captured = self._grabber(rect)
         except Exception as error:  # pragma: no cover - capture boundary
             front_engine_logger.debug(f"[MagnifierWidget] capture failed: {error!r}")

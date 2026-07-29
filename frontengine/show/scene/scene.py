@@ -45,3 +45,22 @@ class SceneManager:
 
     def add_web(self, setting_dict: Dict) -> QGraphicsProxyWidget:
         return self._add("web", setting_dict)
+
+    def clear(self) -> None:
+        """
+        真的把場景清空。只清 widget_list 不夠：項目還掛在 QGraphicsScene 上，
+        音效會在沒有視窗的情況下繼續播，重開場景還會把舊的疊上來。
+        Actually empty the scene. Clearing widget_list alone is not enough --
+        the items stay in the QGraphicsScene, so sound keeps playing with no
+        window on screen and restarting the scene stacks the old items on top.
+        """
+        front_engine_logger.info("[SceneManager] clear")
+        for proxy_widget in self.widget_list:
+            try:
+                widget = proxy_widget.widget()
+                if widget is not None:
+                    widget.close()
+            except RuntimeError:  # pragma: no cover - proxy already deleted
+                continue
+        self.graphic_scene.clear_scene()
+        self.widget_list.clear()

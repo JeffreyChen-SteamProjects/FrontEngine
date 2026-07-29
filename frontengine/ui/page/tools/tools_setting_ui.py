@@ -9,7 +9,7 @@ arranging - as opposed to the other pages, which are for showing.
 from typing import List, Optional
 
 from PySide6.QtCore import QBuffer, QIODevice, QTimer
-from PySide6.QtGui import QGuiApplication
+from PySide6.QtGui import QGuiApplication, QPixmap
 from PySide6.QtWidgets import (
     QCheckBox, QComboBox, QFileDialog, QGridLayout, QLabel, QLineEdit, QPushButton, QSpinBox,
     QWidget,
@@ -78,7 +78,13 @@ class ToolsSettingUI(QWidget):
         self.last_recording: Optional[str] = None
         self.capture_widget_list: List[RegionCaptureWidget] = []
         self.camera_widget_list: List[CameraWidget] = []
-        self.last_capture: Optional[RegionCaptureWidget] = None
+        # 存畫面本身，不要存那個覆蓋層：框選完它就自己 close() 了，而
+        # WA_DeleteOnClose 會把底層物件銷毀，留下來的參考碰一下就 RuntimeError，
+        # 「複製上一張」因此永遠是靜悄悄的沒反應。
+        # Keep the pixmap, not the overlay: it closes itself once the selection
+        # is made and WA_DeleteOnClose destroys it, so the surviving reference
+        # raises RuntimeError on touch and "copy last" was a silent no-op.
+        self.last_capture: Optional[QPixmap] = None
         self.pin_dialog: Optional[WindowPinDialog] = None
 
         self._build_measure_row()
@@ -272,7 +278,8 @@ class ToolsSettingUI(QWidget):
     def start_capture(self) -> RegionCaptureWidget:
         """開一層框選截圖（放開滑鼠就擷取並自己關掉）。"""
         front_engine_logger.info("[ToolsSettingUI] start_capture")
-        widget = RegionCaptureWidget(on_captured=lambda pixmap, rect: self._on_captured(widget))
+        widget = RegionCaptureWidget(
+            on_captured=lambda pixmap, rect: self._on_captured(widget, pixmap))
         screen = QGuiApplication.primaryScreen()
         if screen is not None:
             widget.setGeometry(screen.geometry())
@@ -281,22 +288,22 @@ class ToolsSettingUI(QWidget):
         self.capture_widget_list.append(widget)
         return widget
 
-    def _on_captured(self, widget: RegionCaptureWidget) -> None:
-        """擷取完成：記住它並直接複製到剪貼簿。"""
-        self.last_capture = widget
+    def _on_captured(self, widget: RegionCaptureWidget, pixmap: QPixmap) -> None:
+        """擷取完成：記住畫面並直接複製到剪貼簿。"""
+        self.last_capture = pixmap
         widget.copy_to_clipboard()
         if widget in self.capture_widget_list:
             self.capture_widget_list.remove(widget)
 
     def copy_last_capture(self) -> bool:
         """把最近一次的截圖再放進剪貼簿一次。"""
-        if self.last_capture is None:
+        if self.last_capture is None or self.last_capture.isNull():
             return False
-        try:
-            return self.last_capture.copy_to_clipboard()
-        except RuntimeError:
-            self.last_capture = None
+        clipboard = QGuiApplication.clipboard()
+        if clipboard is None:  # pragma: no cover - no clipboard at all
             return False
+        clipboard.setPixmap(self.last_capture)
+        return True
 
     # --- camera ----------------------------------------------------------
     def toggle_camera(self) -> None:
@@ -449,7 +456,12 @@ class ToolsSettingUI(QWidget):
     def show_screen_text(self, text) -> None:
         """收到結果：切回 UI 執行緒再開視窗（回呼來自背景執行緒）。"""
         self.last_screen_text = text
-        QTimer.singleShot(0, lambda: self._present_screen_text(text))
+        # 一定要傳 context 物件（self），否則計時器會被建在沒有事件迴圈的背景
+        # 執行緒上，永遠不會觸發，結果視窗根本不會打開。
+        # The context object (self) is essential: without it the timer is created
+        # on the worker thread, which has no event loop, so it never fires and
+        # the result window simply never opens.
+        QTimer.singleShot(0, self, lambda: self._present_screen_text(text))
 
     def _present_screen_text(self, text):
         dialog = ScreenTextDialog(

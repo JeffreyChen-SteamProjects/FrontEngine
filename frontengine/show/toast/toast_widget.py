@@ -64,11 +64,31 @@ class ToastWidget(BaseWidget):
         self.update()
 
     def card_size(self) -> tuple:
-        """依文字算出卡片的寬高（含內距）。"""
+        """
+        依文字算出卡片的寬高（含內距），寬度以螢幕為上限、超過就換行。
+        沒有上限的話，一段長一點的提醒文字會算出好幾千像素寬的卡片，
+        move_to_top_centre 把它置中之後左右兩邊都跑出螢幕，字反而看不到。
+        Size the card to its text, capped at the screen width and wrapped beyond
+        that. Uncapped, a longer reminder produced a card thousands of pixels
+        wide; centring it then ran off both edges and hid the very text it was
+        supposed to show.
+        """
         metrics = QFontMetrics(self._font)
+        max_width = self._available_width()
         width = metrics.horizontalAdvance(self.message) + _PADDING * 2
-        height = metrics.height() + _PADDING
-        return (max(80, width), max(36, height))
+        if width <= max_width:
+            return (max(80, width), max(36, metrics.height() + _PADDING))
+        bounds = metrics.boundingRect(
+            0, 0, max_width - _PADDING * 2, 0,
+            int(Qt.AlignmentFlag.AlignCenter | Qt.TextFlag.TextWordWrap), self.message)
+        return (max_width, max(36, bounds.height() + _PADDING))
+
+    def _available_width(self) -> int:
+        """卡片最寬能到多少（螢幕可用寬度再留一點邊）。"""
+        target = self.screen() or QGuiApplication.primaryScreen()
+        if target is None:  # pragma: no cover - no screen at all
+            return 800
+        return max(160, target.availableGeometry().width() - _PADDING * 4)
 
     def resize_to_message(self) -> None:
         width, height = self.card_size()
@@ -100,7 +120,10 @@ class ToastWidget(BaseWidget):
         painter.drawRoundedRect(self.rect(), _CORNER_RADIUS, _CORNER_RADIUS)
         painter.setFont(self._font)
         painter.setPen(self.text_color)
-        painter.drawText(self.rect(), Qt.AlignmentFlag.AlignCenter, self.message)
+        painter.drawText(
+            self.rect(),
+            int(Qt.AlignmentFlag.AlignCenter | Qt.TextFlag.TextWordWrap),
+            self.message)
 
 
 def show_toast(message: str, duration_ms: int = DEFAULT_DURATION_MS,

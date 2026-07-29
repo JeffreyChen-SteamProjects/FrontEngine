@@ -34,6 +34,9 @@ class WindowPinDialog(QDialog):
         self.setWindowTitle(_t("window_pin_title", "Pin a window"))
         self._lister = lister or window_pin.list_windows
         self.pinned: List[int] = []
+        # 只調過透明度、沒有釘選的視窗；關閉時同樣要回復成不透明
+        # Windows that were faded but never pinned; they need restoring too.
+        self.faded: List[int] = []
 
         self.window_list = QListWidget()
         self.window_list.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
@@ -113,7 +116,15 @@ class WindowPinDialog(QDialog):
         handle = self.selected_handle()
         if handle is None:
             return False
-        return window_pin.set_opacity(handle, self.opacity_slider.value())
+        applied = window_pin.set_opacity(handle, self.opacity_slider.value())
+        if applied and handle not in self.faded:
+            # 調過透明度的視窗也要記下來。只記「釘選過的」的話，只調透明度沒
+            # 釘選的視窗永遠不會被回復——FrontEngine 關掉了，別人的視窗還是半透明。
+            # Record windows we faded too. Tracking only pinned ones leaves a
+            # window that was merely faded stuck that way for good: FrontEngine
+            # exits and someone else's window is still see-through.
+            self.faded.append(handle)
+        return applied
 
     def release_all(self) -> None:
         """
@@ -125,7 +136,11 @@ class WindowPinDialog(QDialog):
         for handle in self.pinned[:]:
             window_pin.set_always_on_top(handle, False)
             window_pin.set_opacity(handle, window_pin.MAX_OPACITY_PERCENT)
+        for handle in self.faded[:]:
+            if handle not in self.pinned:
+                window_pin.set_opacity(handle, window_pin.MAX_OPACITY_PERCENT)
         self.pinned.clear()
+        self.faded.clear()
 
     def reject(self) -> None:
         self.release_all()

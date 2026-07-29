@@ -80,16 +80,20 @@ class HotkeySettingsDialog(QDialog):
 
     def collect_and_validate(self) -> Tuple[Dict[str, str], List[str]]:
         """
-        讀取所有欄位，回傳 (有效的 動作->組合鍵, 無效動作清單)。空欄位視為解除
-        綁定並略過。
-        Read every field and return (valid action->combo, invalid action list).
-        A blank field means "unbound" and is skipped.
+        讀取所有欄位，回傳 (動作->組合鍵, 無效動作清單)。空欄位是「解除綁定」，
+        要明確記成空字串——直接跳過的話，get_hotkey_action_map() 會從內建預設
+        重新合併，那個組合鍵原封不動地回來，使用者根本放不掉和別的程式衝突的鍵。
+        Read every field and return (action->combo, invalid action list). A blank
+        field means "unbound" and is recorded as an empty string: skipping it let
+        get_hotkey_action_map() merge the built-in default straight back in, so a
+        shortcut clashing with another application could never be released.
         """
         bindings: Dict[str, str] = {}
         invalid: List[str] = []
         for action, edit in self._edits.items():
             combo = edit.text().strip()
             if not combo:
+                bindings[action] = ""
                 continue
             if is_valid_hotkey(combo):
                 bindings[action] = combo

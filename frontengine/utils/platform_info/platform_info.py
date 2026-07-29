@@ -152,7 +152,14 @@ def _idle_seconds_windows() -> Optional[float]:
         info.cbSize = ctypes.sizeof(info)
         if not ctypes.windll.user32.GetLastInputInfo(ctypes.byref(info)):
             return None
-        elapsed_ms = ctypes.windll.kernel32.GetTickCount() - info.dwTime
+        # GetTickCount 回傳無號 32 位元，但 ctypes 預設把回傳值當成有號 int。
+        # 開機超過 24.9 天後差值會變成大負數，被 max(0.0, ...) 夾成 0，
+        # 閒置偵測（省電、寵物睡覺、使用統計暫停）就永遠當作使用者在動。
+        # GetTickCount returns an unsigned 32-bit value, but ctypes reads the
+        # result as signed. Past 24.9 days of uptime the difference goes hugely
+        # negative and max(0.0, ...) clamps it to zero, so idle detection - power
+        # saving, the sleeping pet, pausing usage tracking - never triggers again.
+        elapsed_ms = (ctypes.windll.kernel32.GetTickCount() - info.dwTime) & 0xFFFFFFFF
         return max(0.0, elapsed_ms / 1000.0)
     except Exception as error:  # pragma: no cover - Win32 boundary
         front_engine_logger.debug(f"[platform_info] GetLastInputInfo failed: {error!r}")

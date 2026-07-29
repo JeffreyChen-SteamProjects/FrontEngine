@@ -29,7 +29,7 @@ from frontengine.utils.focus_timer.focus_timer import (
 )
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
-from frontengine.utils.multi_language.retranslate import tr
+from frontengine.utils.multi_language.retranslate import retranslator, tr
 
 _PET_EXTENSIONS = (".gif", ".webp", ".png", ".jpg")
 
@@ -179,14 +179,19 @@ class PetSettingUI(QWidget):
         self.grid_layout.addWidget(self.volume_combobox, 7, 2)
         self.grid_layout.addWidget(self.audio_react_checkbox, 7, 0)
         self.grid_layout.addWidget(self.audio_source_combobox, 7, 1)
-        self.grid_layout.addWidget(self.tag_checkbox, 7, 1)
-        self.grid_layout.addWidget(self.speech_checkbox, 7, 2)
         self.grid_layout.addWidget(self.focus_label, 8, 0)
         self.grid_layout.addWidget(self.focus_minutes_combobox, 8, 1)
         self.grid_layout.addWidget(self.break_minutes_combobox, 8, 2)
         self.grid_layout.addWidget(self.focus_button, 9, 0)
         self.grid_layout.addWidget(self.chat_checkbox, 9, 1)
-        self.grid_layout.addWidget(self.drop_hint_label, 10, 0, 1, 3)
+        # 這兩個原本被放在 (7,1) 與 (7,2)，正好疊在音效來源與音量的下拉選單上面，
+        # 點下拉選單只會點到勾選框，音效來源和音量因此完全改不了。
+        # These two used to sit at (7,1) and (7,2), directly on top of the audio
+        # source and volume comboboxes: clicking a dropdown hit the checkbox
+        # instead, so neither could be changed at all.
+        self.grid_layout.addWidget(self.tag_checkbox, 10, 0)
+        self.grid_layout.addWidget(self.speech_checkbox, 10, 1)
+        self.grid_layout.addWidget(self.drop_hint_label, 11, 0, 1, 3)
 
     def _spawn_pet(self) -> None:
         """建立、顯示並開始移動一隻寵物（供 Start 與右鍵複製共用）。"""
@@ -249,16 +254,16 @@ class PetSettingUI(QWidget):
         )
         self.focus_tick_timer.start(self.FOCUS_TICK_MS)
         self._announce_focus("focus_start")
-        self.focus_button.setText(
-            language_wrapper.language_word_dict.get("pet_focus_stop", "Stop focus"))
+        retranslator.set_text(
+            self.focus_button, "pet_focus_stop", "Stop focus")
 
     def stop_focus_session(self) -> None:
         """停止專注 / Stop the focus session."""
         front_engine_logger.info("[PetSettingUI] focus stopped")
         self.focus_timer.stop()
         self.focus_tick_timer.stop()
-        self.focus_button.setText(
-            language_wrapper.language_word_dict.get("pet_focus_start", "Start focus"))
+        retranslator.set_text(
+            self.focus_button, "pet_focus_start", "Start focus")
 
     def _tick_focus_timer(self) -> None:
         """每秒推進一次；換階段時讓寵物說話。"""

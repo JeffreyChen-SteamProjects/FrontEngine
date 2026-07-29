@@ -67,6 +67,14 @@ class AnnotationOverlay(BaseWidget):
         front_engine_logger.info(f"[AnnotationOverlay] Init | tool={tool}, color={color}, width={width}")
         super().__init__()
         self.opacity = 1.0
+        # 這一層的滑鼠是拿來畫畫的：不能被基底拖走，也不能被「鎖定覆蓋層」
+        # 變成點擊穿透——那會讓畫筆整個失效，而畫好的線還留在畫面上。
+        # The mouse here is the pen: the base class must not drag the window with
+        # it, and "lock overlays" must not make it click-through - that kills the
+        # pen outright while the strokes stay frozen on screen.
+        self.overlay_lockable = False
+        self.overlay_draggable = False
+        self.overlay_remembers_geometry = False
         self.tool = tool if tool in TOOLS else TOOL_PEN
         self.pen_color = color
         self.pen_width = clamp_width(width)

@@ -65,6 +65,13 @@ class RegionCaptureWidget(BaseWidget):
         super().__init__()
         self.opacity = 1.0
         self.overlay_lockable = False
+        # 框選的拖曳就是選取範圍本身。讓基底也跟著搬視窗的話，事件座標會跟著
+        # 位移，最後擷取到的不是使用者框起來的那一塊。
+        # Here the drag is the selection. Letting the base class move the window
+        # too shifts the event coordinates, so what gets grabbed is not the area
+        # the user framed.
+        self.overlay_draggable = False
+        self.overlay_remembers_geometry = False
         self.origin: Optional[QPoint] = None
         self.current: Optional[QPoint] = None
         self.captured: Optional[QPixmap] = None

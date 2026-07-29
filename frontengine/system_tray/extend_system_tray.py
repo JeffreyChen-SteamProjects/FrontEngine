@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QSystemTrayIcon, QMenu
 
-from frontengine.utils.multi_language.language_wrapper import language_wrapper
+from frontengine.utils.multi_language.retranslate import retranslator, translate
 
 
 class ExtendSystemTray(QSystemTrayIcon):
@@ -42,50 +42,43 @@ class ExtendSystemTray(QSystemTrayIcon):
         # 綁定點擊事件 / Connect activation event
         self.activated.connect(self.clicked)
 
+    def _add_action(self, key: str, fallback: str, callback) -> QAction:
+        """
+        建立一個選單項目，並登記它的文字來自哪個鍵。沒登記的話換語言不會傳到
+        系統匣：主視窗都翻好了，右下角的選單還停在上一個語言。
+        Create a menu item and register which key its text comes from. Without
+        that registration a language change never reaches the tray: the main
+        window is retranslated while the corner menu stays in the old language.
+        """
+        action = QAction(translate(key, fallback), self)
+        retranslator.bind(action, key, fallback)
+        action.triggered.connect(callback)
+        self.menu.addAction(action)
+        return action
+
     def _create_actions(self) -> None:
         """建立系統匣選單動作 / Create system tray menu actions"""
-        self.hide_main_window_action = QAction("Hide", self)
-        self.hide_main_window_action.triggered.connect(self.main_window.hide)
-        self.menu.addAction(self.hide_main_window_action)
-
-        self.maximized_main_window_action = QAction("Maximized", self)
-        self.maximized_main_window_action.triggered.connect(self.main_window.showMaximized)
-        self.menu.addAction(self.maximized_main_window_action)
-
-        self.normal_main_window_action = QAction("Normal", self)
-        self.normal_main_window_action.triggered.connect(self.main_window.showNormal)
-        self.menu.addAction(self.normal_main_window_action)
+        self.hide_main_window_action = self._add_action(
+            "tray_hide_window", "Hide window", self.main_window.hide)
+        self.maximized_main_window_action = self._add_action(
+            "tray_maximize_window", "Maximize window", self.main_window.showMaximized)
+        self.normal_main_window_action = self._add_action(
+            "tray_normal_window", "Restore window", self.main_window.showNormal)
 
         # 覆蓋層快捷控制 / Overlay quick controls
         self.menu.addSeparator()
-        self.hide_all_overlays_action = QAction(
-            language_wrapper.language_word_dict.get("control_center_hide_all", "Hide all"), self
-        )
-        self.hide_all_overlays_action.triggered.connect(lambda: self._overlay_call("hide_all"))
-        self.menu.addAction(self.hide_all_overlays_action)
-
-        self.show_all_overlays_action = QAction(
-            language_wrapper.language_word_dict.get("control_center_show_all", "Show all"), self
-        )
-        self.show_all_overlays_action.triggered.connect(lambda: self._overlay_call("show_all"))
-        self.menu.addAction(self.show_all_overlays_action)
-
-        self.mute_all_overlays_action = QAction(
-            language_wrapper.language_word_dict.get("control_center_mute_all", "Mute all"), self
-        )
-        self.mute_all_overlays_action.triggered.connect(lambda: self._overlay_call("toggle_mute_all"))
-        self.menu.addAction(self.mute_all_overlays_action)
-
-        self.close_all_overlays_action = QAction(
-            language_wrapper.language_word_dict.get("control_center_close_all", "Close all"), self
-        )
-        self.close_all_overlays_action.triggered.connect(lambda: self._overlay_call("clear_all"))
-        self.menu.addAction(self.close_all_overlays_action)
+        self.hide_all_overlays_action = self._add_action(
+            "control_center_hide_all", "Hide all", lambda: self._overlay_call("hide_all"))
+        self.show_all_overlays_action = self._add_action(
+            "control_center_show_all", "Show all", lambda: self._overlay_call("show_all"))
+        self.mute_all_overlays_action = self._add_action(
+            "control_center_mute_all", "Mute all", lambda: self._overlay_call("toggle_mute_all"))
+        self.close_all_overlays_action = self._add_action(
+            "control_center_close_all", "Close all", lambda: self._overlay_call("clear_all"))
 
         self.menu.addSeparator()
-        self.close_main_window_action = QAction("Close", self)
-        self.close_main_window_action.triggered.connect(self.close_all)
-        self.menu.addAction(self.close_main_window_action)
+        self.close_main_window_action = self._add_action(
+            "tray_close_app", "Quit FrontEngine", self.close_all)
 
     def _overlay_call(self, method_name: str) -> None:
         """

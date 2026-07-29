@@ -151,7 +151,7 @@ class LoopbackSpectrum:
 
     def _capture_loop(self) -> None:  # pragma: no cover - needs a real audio device
         tools, enumerator, device = open_render_endpoint(self.device_id)
-        client = capture_client = None
+        client = capture_client = format_pointer = None
         try:
             client = activate_interface(tools, device, _IID_IAudioClient)
             mix_format, format_pointer = self._mix_format(tools, client)
@@ -159,6 +159,16 @@ class LoopbackSpectrum:
             capture_client = self._service(tools, client)
             self._pump(tools, client, capture_client, mix_format)
         finally:
+            # GetMixFormat 的 WAVEFORMATEX 是 COM 配置的，得自己還回去。
+            # 每次開關頻譜都會走一次這裡，不放就是一次一次累積。
+            # The WAVEFORMATEX from GetMixFormat is COM-allocated and ours to
+            # return. Every start/stop of the spectrum comes through here, so
+            # not freeing it simply accumulates.
+            if format_pointer:
+                try:
+                    tools.ole32.CoTaskMemFree(format_pointer)
+                except Exception as error:
+                    front_engine_logger.debug(f"[LoopbackCapture] format free failed: {error!r}")
             for interface in (capture_client, client, device, enumerator):
                 try:
                     tools.release(interface)
@@ -183,9 +193,21 @@ class LoopbackSpectrum:
         if get_mix_format(client, ctypes.byref(pointer)) != 0 or not pointer:
             raise OSError("GetMixFormat failed")
         wave = pointer.contents
+        # 兩個條件都要滿足才算支援，所以任一個不符就該拒絕（or，不是 and）。
+        # 寫成 and 的話，IEEE_FLOAT 的 24 bit 串流會被放行，接著
+        # samples_from_buffer 每個封包都回傳空陣列並記一筆 warning——一秒 50 次，
+        # 頻譜什麼都不顯示，日誌卻爆量。
+        # Both conditions must hold for the format to be usable, so failing
+        # either one is a rejection (or, not and). With and, an IEEE_FLOAT 24-bit
+        # stream sails through and samples_from_buffer then returns an empty
+        # array and logs a warning for every packet - 50 times a second, with the
+        # spectrum showing nothing and the log filling up.
         if wave.wFormatTag not in (_WAVE_FORMAT_IEEE_FLOAT, _WAVE_FORMAT_EXTENSIBLE) \
-                and wave.wBitsPerSample not in (16, 32):
-            raise OSError(f"unsupported mix format tag {wave.wFormatTag}")
+                or wave.wBitsPerSample not in (16, 32):
+            tools.ole32.CoTaskMemFree(pointer)
+            raise OSError(
+                f"unsupported mix format tag {wave.wFormatTag} "
+                f"at {wave.wBitsPerSample} bits")
         return (_MixFormat(wave.nChannels, wave.nSamplesPerSec,
                            wave.wBitsPerSample, wave.nBlockAlign), pointer)
 

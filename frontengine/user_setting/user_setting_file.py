@@ -193,8 +193,17 @@ def get_hotkey_action_map() -> Dict[str, str]:
     user_hotkeys = user_setting_dict.get("hotkeys")
     if isinstance(user_hotkeys, dict):
         for action, combo in user_hotkeys.items():
-            if isinstance(action, str) and isinstance(combo, str) and combo.strip():
+            if not isinstance(action, str) or not isinstance(combo, str):
+                continue
+            if combo.strip():
                 merged[action] = combo.strip()
+            else:
+                # 明確存成空字串＝使用者把那個欄位清空，也就是要解除綁定。
+                # 當成「沒設定」而沿用內建預設，等於那個快速鍵永遠拿不掉。
+                # An explicit empty string means the user cleared that field, i.e.
+                # unbind. Reading it as "unset" and falling back to the built-in
+                # default made the shortcut impossible to get rid of.
+                merged.pop(action, None)
     return merged
 
 

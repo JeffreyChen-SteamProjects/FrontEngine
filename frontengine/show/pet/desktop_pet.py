@@ -1094,6 +1094,16 @@ class DesktopPetWidget(BaseWidget):
         )
         super().__init__()
         self.opacity = 1.0
+        # 寵物自己處理拖曳，位置與大小也由 PetMotion 決定。交給基底記憶的話，
+        # 拖過一次之後那個「位置＋大小」會套到之後每一隻寵物身上——尺寸下拉選單
+        # 就等於失效：新寵物被悄悄縮回舊尺寸，碰撞判定卻還用新的大小。
+        # The pet drags itself and PetMotion owns its geometry. Letting the base
+        # class remember it means one drag pins that position and size onto every
+        # later pet - which silently disables the size combobox: a new pet is
+        # resized back while its collision box still uses the size that was asked
+        # for.
+        self.overlay_draggable = False
+        self.overlay_remembers_geometry = False
         # 基礎尺寸依已存等級放大 / Base size grown by the persisted level.
         self._base_size: int = max(16, int(size))
         self._growth = PetGrowth(user_setting_dict.get("pet_affection", 0))
@@ -1189,7 +1199,9 @@ class DesktopPetWidget(BaseWidget):
         self.clone_action.triggered.connect(self.clone_requested.emit)
         self.menu.addAction(self.clone_action)
         self.feed_action = QAction(language_wrapper.language_word_dict.get("pet_feed", "Feed"), self)
-        self.feed_action.triggered.connect(self.feed)
+        # triggered 會送出 checked(bool)，直接接的話 feed 收到的 kind 是 False
+        # triggered emits checked(bool), which would arrive as feed's `kind`.
+        self.feed_action.triggered.connect(lambda: self.feed())
         self.menu.addAction(self.feed_action)
         self.status_action = QAction(language_wrapper.language_word_dict.get("pet_status", "Status"), self)
         self.status_action.triggered.connect(self.show_status)
@@ -1659,9 +1671,15 @@ class DesktopPetWidget(BaseWidget):
         else:
             self._pending_chat_reply = language_wrapper.language_word_dict.get(
                 "pet_chat_failed", "I couldn't reach my thoughts just now.")
-        # 回覆可能在背景執行緒抵達，透過計時器回到 UI 執行緒再顯示
+        # 回覆可能在背景執行緒抵達，透過計時器回到 UI 執行緒再顯示。
+        # 一定要傳 context 物件（這裡是 self）：兩個參數的 singleShot 會把計時器
+        # 建在呼叫端那條執行緒上，而那條執行緒沒有事件迴圈，計時器永遠不會觸發
+        # ——寵物就一直停在「讓我想想…」，回覆再也不會出現。
         # The reply may arrive off-thread; hop back to the UI thread to show it.
-        QTimer.singleShot(0, self._say_pending_chat_reply)
+        # The context object (self) is essential: the two-argument singleShot
+        # creates the timer on the calling thread, which has no event loop, so it
+        # never fires - the pet stays on "let me think..." and the answer is lost.
+        QTimer.singleShot(0, self, self._say_pending_chat_reply)
 
     def _say_pending_chat_reply(self) -> None:
         if self._pending_chat_reply:

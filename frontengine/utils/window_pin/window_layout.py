@@ -121,14 +121,25 @@ def restore_layout(layout: Any, lister=None, mover=None) -> Tuple[int, int]:
     if not entries:
         return (0, 0)
     windows = (lister or list_windows)() or []
-    by_title = {normalize_title(title): handle for handle, title in windows}
+    # 同名視窗很常見（兩個「文件」的檔案總管、兩份同檔名的文件）。用 dict 存
+    # 單一 handle 的話後面的會蓋掉前面的，結果是同一個視窗被搬兩次、另一個
+    # 完全沒動，回報卻說兩個都搬好了。每個標題存一串 handle，用掉一個就取走。
+    # Windows sharing a title are common: two Explorer windows both called
+    # "Documents", two copies of the same document. Keeping one handle per title
+    # lets the later one overwrite the earlier, so one window gets moved twice,
+    # another is never touched, and the report claims both were placed. Keep a
+    # queue of handles per title and consume one per entry.
+    by_title: Dict[str, List[int]] = {}
+    for handle, title in windows:
+        by_title.setdefault(normalize_title(title), []).append(handle)
     move = mover or move_window
     moved = missing = 0
     for entry in entries:
-        handle = by_title.get(normalize_title(entry["title"]))
-        if handle is None:
+        handles = by_title.get(normalize_title(entry["title"]))
+        if not handles:
             missing += 1
             continue
+        handle = handles.pop(0)
         if move(handle, entry["x"], entry["y"], entry["width"], entry["height"]):
             moved += 1
     front_engine_logger.info(f"[WindowLayout] restored | moved={moved}, missing={missing}")

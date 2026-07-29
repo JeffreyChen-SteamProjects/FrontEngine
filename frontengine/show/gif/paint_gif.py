@@ -39,6 +39,12 @@ class GifWidget(BaseWidget):
         self.speed = speed
         self.movie.setSpeed(self.speed)
 
+    def closeEvent(self, event) -> None:
+        # 關掉之後還在解碼就是白燒 CPU，畫面早就不見了
+        # A movie still decoding after the overlay is gone is pure wasted CPU.
+        self.movie.stop()
+        super().closeEvent(event)
+
     def draw_content(self, painter: QPainter) -> None:
         current_gif_frame = self.movie.currentPixmap()
         painter.drawPixmap(

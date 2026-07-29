@@ -21,7 +21,7 @@ from frontengine.utils.focus_shield.focus_shield import (
 )
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
-from frontengine.utils.multi_language.retranslate import tr
+from frontengine.utils.multi_language.retranslate import retranslator, tr
 
 
 class FocusSettingUI(QWidget):
@@ -121,13 +121,13 @@ class FocusSettingUI(QWidget):
         widget.show()
         widget.start_following()
         self.dim_widget_list.append(widget)
-        self.dim_button.setText(
-            language_wrapper.language_word_dict.get("focus_dim_stop", "Stop dimming"))
+        retranslator.set_text(
+            self.dim_button, "focus_dim_stop", "Stop dimming")
 
     def stop_dim(self) -> None:
         self._close_all(self.dim_widget_list)
-        self.dim_button.setText(
-            language_wrapper.language_word_dict.get("focus_dim_start", "Dim the background"))
+        retranslator.set_text(
+            self.dim_button, "focus_dim_start", "Dim the background")
 
     def _apply_dim_settings(self) -> None:
         for widget in self.dim_widget_list[:]:
@@ -158,13 +158,13 @@ class FocusSettingUI(QWidget):
             (geometry.x(), geometry.y(), geometry.width(), geometry.height())))
         widget.show()
         self.mask_widget_list.append(widget)
-        self.mask_button.setText(
-            language_wrapper.language_word_dict.get("focus_mask_stop", "Uncover"))
+        retranslator.set_text(
+            self.mask_button, "focus_mask_stop", "Uncover")
 
     def stop_mask(self) -> None:
         self._close_all(self.mask_widget_list)
-        self.mask_button.setText(
-            language_wrapper.language_word_dict.get("focus_mask_start", "Cover it up"))
+        retranslator.set_text(
+            self.mask_button, "focus_mask_start", "Cover it up")
 
     def _apply_mask_settings(self) -> None:
         """區域或比例改變時，直接把已開啟的遮罩移到新位置。"""

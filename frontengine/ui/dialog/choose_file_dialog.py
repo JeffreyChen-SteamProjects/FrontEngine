@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Optional, List
 
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QMessageBox, QWidget, QFileDialog
 
 from frontengine.utils.logging.loggin_instance import front_engine_logger
@@ -39,13 +40,24 @@ def choose_file(
         filter=file_filter
     )[0]
 
-    file_path = Path(file_path_str) if file_path_str else None
+    if not file_path_str:
+        # 使用者按了取消。那是刻意的動作，不是選錯檔案，別跳警告框罵人。
+        # The user pressed Cancel. That is a deliberate action, not a bad pick,
+        # so it does not deserve a warning box.
+        front_engine_logger.info("[choose_file] cancelled")
+        return None
 
-    if file_path and file_path.is_file() and file_path.suffix.lower() in extensions:
+    file_path = Path(file_path_str)
+
+    if file_path.is_file() and file_path.suffix.lower() in extensions:
         return str(file_path)
 
     # 顯示錯誤訊息 / Show warning message
     message_box = QMessageBox(trigger_ui)
+    # 訊息框的 parent 是主視窗，關掉之後不會自己消失，每選錯一次就多留一個
+    # The box is parented to the main window and would otherwise outlive its
+    # closing, leaving one behind per bad pick.
+    message_box.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
     message_box.setText(warning_message)
     message_box.show()
     return None

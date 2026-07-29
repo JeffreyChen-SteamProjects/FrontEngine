@@ -76,6 +76,20 @@ def is_allowed(action: Any) -> bool:
     return str(action or "") in ALLOWED_ACTIONS
 
 
+def token_matches(candidate: Any, expected: str) -> bool:
+    """
+    常數時間比對權杖。要先轉成 bytes：compare_digest 拿到含非 ASCII 字元的 str
+    會丟 TypeError，而權杖是從網路來的——外面隨手送一個 %C3%A9 就能讓處理器
+    整個炸掉，連 403 都回不出去。
+    Constant-time token comparison, on bytes: compare_digest raises TypeError for
+    a str holding non-ASCII characters, and this token arrives over the network -
+    a casual %C3%A9 from outside was enough to blow up the handler before it
+    could even answer 403.
+    """
+    return secrets.compare_digest(
+        str(candidate or "").encode("utf-8"), str(expected or "").encode("utf-8"))
+
+
 def parse_request(path: str) -> Tuple[str, Dict[str, str]]:
     """把請求路徑拆成 (路徑, 查詢參數)。"""
     parsed = urlparse(str(path or "/"))
@@ -186,7 +200,7 @@ class RemoteServer(QObject):
         Handle one request and return the status code: 403 for a wrong token,
         400 for an action outside the list.
         """
-        if not secrets.compare_digest(str(token or ""), self.token):
+        if not token_matches(token, self.token):
             front_engine_logger.warning("[RemoteServer] refused a request with a bad token")
             return 403
         if not is_allowed(action):
@@ -215,7 +229,7 @@ class RemoteServer(QObject):
                 if path != "/":
                     self._send(404, b"not found", _PLAIN_TEXT)
                     return
-                if not secrets.compare_digest(query.get("token", ""), server.token):
+                if not token_matches(query.get("token", ""), server.token):
                     self._send(403, b"bad token", _PLAIN_TEXT)
                     return
                 page = PAGE.replace("__ACTIONS__", json.dumps(list(ALLOWED_ACTIONS)))

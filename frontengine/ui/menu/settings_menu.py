@@ -157,16 +157,33 @@ def build_settings_menu(ui: "FrontEngineMainUI") -> None:
     menu.addAction(import_action)
 
 
+def _dispose(dialog: QDialog) -> None:
+    """
+    對話框用完就排定銷毀。它們的 parent 是主視窗，也就是說 C++ 這邊由主視窗
+    持有——放掉 Python 參考什麼都不會發生，每開一次設定就多留一個活著的對話框
+    （連同它抓著的剪貼簿內容）直到程式結束。用 deleteLater 而不是
+    WA_DeleteOnClose：exec() 回來之後呼叫端還要讀 dialog.settings()。
+    Schedule the dialog for destruction once it is done with. They are parented
+    to the main window, so C++ owns them: dropping the Python reference does
+    nothing, and every visit to the menu left another live dialog - along with
+    whatever clipboard text it held - alive until the process ended.
+    deleteLater rather than WA_DeleteOnClose, because callers still read
+    dialog.settings() after exec() returns.
+    """
+    dialog.deleteLater()
+
+
 def _open_signage_dialog(ui: "FrontEngineMainUI") -> None:
     """開看板設定；按下確定後立刻套用新的輪播狀態。"""
     front_engine_logger.info("[SettingsMenu] open SignageDialog")
     dialog = SignageDialog(ui)
-    if dialog.exec() != QDialog.DialogCode.Accepted:
-        return
-    if dialog.settings().get("enabled"):
-        ui.start_signage()
-    else:
-        ui.stop_signage()
+    accepted = dialog.exec() == QDialog.DialogCode.Accepted
+    if accepted:
+        if dialog.settings().get("enabled"):
+            ui.start_signage()
+        else:
+            ui.stop_signage()
+    _dispose(dialog)
 
 
 def _open_remote_dialog(ui: "FrontEngineMainUI") -> None:
@@ -177,6 +194,7 @@ def _open_remote_dialog(ui: "FrontEngineMainUI") -> None:
     ui.remote_dialog = dialog
     dialog.exec()
     ui.remote_dialog = None
+    _dispose(dialog)
 
 
 def _open_usage_dialog(ui: "FrontEngineMainUI") -> None:
@@ -187,12 +205,15 @@ def _open_usage_dialog(ui: "FrontEngineMainUI") -> None:
         enabled=bool(user_setting_dict.get("usage_tracking")),
         on_toggle=ui.set_usage_tracking)
     dialog.exec()
+    _dispose(dialog)
 
 
 def _open_clipboard_dialog(ui: "FrontEngineMainUI") -> None:
     """開剪貼簿歷史。"""
     front_engine_logger.info("[SettingsMenu] open ClipboardDialog")
-    ClipboardDialog(ui.clipboard_history, ui).exec()
+    dialog = ClipboardDialog(ui.clipboard_history, ui)
+    dialog.exec()
+    _dispose(dialog)
 
 
 def _open_dialog(ui: "FrontEngineMainUI", dialog_class) -> bool:
@@ -209,6 +230,7 @@ def _open_dialog(ui: "FrontEngineMainUI", dialog_class) -> bool:
         refresh = getattr(ui, "refresh_rule_services", None)
         if refresh is not None:
             refresh()
+    _dispose(dialog)
     return accepted
 
 
@@ -272,6 +294,7 @@ def _open_hotkey_dialog(ui: "FrontEngineMainUI") -> None:
     dialog = HotkeySettingsDialog(ui)
     if dialog.exec() == QDialog.DialogCode.Accepted:
         ui.reload_hotkeys()
+    _dispose(dialog)
 
 
 def _export_settings(ui: "FrontEngineMainUI") -> None:

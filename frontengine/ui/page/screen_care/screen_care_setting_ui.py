@@ -26,7 +26,7 @@ from frontengine.utils.color_vision.color_vision import (
 )
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
-from frontengine.utils.multi_language.retranslate import tr
+from frontengine.utils.multi_language.retranslate import retranslator, tr
 
 
 class ScreenCareSettingUI(QWidget):
@@ -186,13 +186,13 @@ class ScreenCareSettingUI(QWidget):
             widget.set_ui_window_flag(show_on_bottom=False)
             self.filter_widget_list.append(widget)
             self._present(widget, screen)
-        self.filter_button.setText(
-            language_wrapper.language_word_dict.get("screen_filter_stop", "Turn filter off"))
+        retranslator.set_text(
+            self.filter_button, "screen_filter_stop", "Turn filter off")
 
     def stop_filter(self) -> None:
         self._close_all(self.filter_widget_list)
-        self.filter_button.setText(
-            language_wrapper.language_word_dict.get("screen_filter_start", "Turn filter on"))
+        retranslator.set_text(
+            self.filter_button, "screen_filter_start", "Turn filter on")
 
     def _apply_filter_settings(self) -> None:
         """滑桿或顏色改變時即時套用到已開啟的濾鏡。"""
@@ -221,13 +221,13 @@ class ScreenCareSettingUI(QWidget):
             self.ruler_widget_list.append(widget)
             self._present(widget, screen)
             widget.start_following()
-        self.ruler_button.setText(
-            language_wrapper.language_word_dict.get("reading_ruler_stop", "Turn ruler off"))
+        retranslator.set_text(
+            self.ruler_button, "reading_ruler_stop", "Turn ruler off")
 
     def stop_ruler(self) -> None:
         self._close_all(self.ruler_widget_list)
-        self.ruler_button.setText(
-            language_wrapper.language_word_dict.get("reading_ruler_start", "Turn ruler on"))
+        retranslator.set_text(
+            self.ruler_button, "reading_ruler_start", "Turn ruler on")
 
     def _apply_ruler_settings(self) -> None:
         for widget in self.ruler_widget_list[:]:
@@ -252,15 +252,15 @@ class ScreenCareSettingUI(QWidget):
         front_engine_logger.info(
             f"[ScreenCareSettingUI] break reminder started | work={self.break_reminder.work_minutes}min")
         self.break_timer.start(self.BREAK_TICK_MS)
-        self.break_button.setText(
-            language_wrapper.language_word_dict.get("break_reminder_stop", "Stop eye breaks"))
+        retranslator.set_text(
+            self.break_button, "break_reminder_stop", "Stop eye breaks")
 
     def stop_break_reminder(self) -> None:
         self.break_reminder.stop()
         self.break_timer.stop()
         self._close_all(self.break_overlay_list)
-        self.break_button.setText(
-            language_wrapper.language_word_dict.get("break_reminder_start", "Start eye breaks"))
+        retranslator.set_text(
+            self.break_button, "break_reminder_start", "Start eye breaks")
 
     def _tick_break_reminder(self) -> None:
         """時間到就顯示或收起休息畫面。"""
@@ -298,13 +298,13 @@ class ScreenCareSettingUI(QWidget):
             self._present(widget, screen)
             widget.start()
             self.color_vision_widget_list.append(widget)
-        self.color_vision_button.setText(
-            language_wrapper.language_word_dict.get("color_vision_stop", "Stop simulating"))
+        retranslator.set_text(
+            self.color_vision_button, "color_vision_stop", "Stop simulating")
 
     def stop_color_vision(self) -> None:
         self._close_all(self.color_vision_widget_list)
-        self.color_vision_button.setText(
-            language_wrapper.language_word_dict.get("color_vision_start", "Simulate"))
+        retranslator.set_text(
+            self.color_vision_button, "color_vision_start", "Simulate")
 
     def _apply_color_vision_settings(self) -> None:
         for widget in self.color_vision_widget_list[:]:

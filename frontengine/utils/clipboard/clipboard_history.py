@@ -121,7 +121,14 @@ class ClipboardHistory:
     def _evict(self) -> None:
         """超過上限時丟掉最舊的未釘選項目。"""
         while len(self.entries) > self.limit:
-            for index in range(len(self.entries) - 1, -1, -1):
+            # 掃到 index 1 為止：index 0 是剛剛才收下的那一筆。掃到 0 的話，
+            # 當比較舊的項目全被釘選時，被丟掉的就是使用者這一秒複製的東西——
+            # add() 照樣回報成功，剪貼簿紀錄卻再也沒有新內容進得去。
+            # Stop at index 1: index 0 is the entry just taken. Scanning down to
+            # 0 means that once every older entry is pinned, the one thrown away
+            # is what the user copied a moment ago - add() still reports success
+            # while nothing new can ever enter the history again.
+            for index in range(len(self.entries) - 1, 0, -1):
                 if not self.entries[index]["pinned"]:
                     self.entries.pop(index)
                     break

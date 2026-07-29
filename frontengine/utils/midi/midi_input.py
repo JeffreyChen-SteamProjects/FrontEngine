@@ -193,17 +193,26 @@ class MidiInput(QObject):
     def stop(self) -> None:
         """停止接收並關閉裝置。"""
         handle, self._handle = self._handle, None
-        self._callback = None
         if handle is None:
+            self._callback = None
             return
         try:  # pragma: no cover - Win32 boundary
             import ctypes
 
             winmm = ctypes.windll.winmm
             winmm.midiInStop(handle)
+            winmm.midiInReset(handle)
             winmm.midiInClose(handle)
         except Exception as error:  # pragma: no cover - Win32 boundary
             front_engine_logger.debug(f"[MidiInput] close failed: {error!r}")
+        # 裝置關掉之後才放掉 callback。self._callback 是那個 trampoline 唯一的
+        # 參考，裝置還在送訊息時就放掉，winmm 會呼叫進已釋放的記憶體——轉一下
+        # 旋鈕每秒就是幾十則訊息，這個空窗不是理論問題。
+        # Release the callback only once the device is closed. self._callback is
+        # the trampoline's only reference, and dropping it while the device is
+        # still delivering leaves winmm calling into freed memory - one turn of a
+        # knob is dozens of messages, so that window is not theoretical.
+        self._callback = None
         front_engine_logger.info("[MidiInput] stopped")
 
     def handle_raw(self, packed: Any) -> Optional[Dict[str, Any]]:

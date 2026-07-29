@@ -18,10 +18,14 @@ class ImageWidget(BaseWidget):
     def __init__(self, image_path: str, draw_location_x: int = 0, draw_location_y: int = 0):
         super().__init__(draw_location_x, draw_location_y)
         self.image_path: Path = Path(image_path)
+        # 先給一張空圖，路徑失效時 paintEvent 才不會撞上未定義的屬性
+        # Start from an empty image so a bad path cannot leave paintEvent
+        # facing an attribute that was never assigned.
+        self.image: QImage = QImage()
 
         if self.image_path.exists() and self.image_path.is_file():
             front_engine_logger.info(f"Loading image file: {self.image_path}")
-            self.image: QImage = QImage(str(self.image_path))
+            self.image = QImage(str(self.image_path))
             self.resize(self.image.size())
         else:
             message_box: QMessageBox = QMessageBox(self)
@@ -45,6 +49,8 @@ class ImageWidget(BaseWidget):
         return True
 
     def draw_content(self, painter: QPainter) -> None:
+        if self.image.isNull():
+            return
         painter.drawImage(
             QRect(self.draw_location_x, self.draw_location_y, self.width(), self.height()),
             self.image

@@ -40,6 +40,10 @@ english_word_dict = {
     "control_center_clear_log_panel": "Clear Log",
     "chat_scene_close": "Close all chat",
     "control_center_close_all": "Close all",
+    "tray_hide_window": "Hide window",
+    "tray_maximize_window": "Maximize window",
+    "tray_normal_window": "Restore window",
+    "tray_close_app": "Quit FrontEngine",
     # General
     "Opacity": "Opacity",
     "Speed": "Speed",

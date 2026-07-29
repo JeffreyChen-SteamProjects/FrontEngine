@@ -26,7 +26,14 @@ class SoundPlayerSettingUI(QWidget):
 
         # Init variable
         self.sound_widget_list = []
-        self.ready_to_play = False
+        # 這一頁有兩個各自獨立的選擇器。共用一個 ready_to_play 的話，在音樂選擇
+        # 對話框按下取消會把「WAV 已就緒」一起清掉，明明選好的音效反而變成
+        # 「尚未準備」。就緒狀態要跟著各自的路徑走。
+        # This page has two independent pickers. Sharing one ready_to_play meant
+        # cancelling the music dialog also cleared "the WAV is ready", so a
+        # perfectly good sound effect reported itself as not prepared. Readiness
+        # belongs to each path.
+        self.wav_ready_to_play = False
         self.wav_sound_path: Optional[str] = None
         self.player_sound_path: Optional[str] = None
 
@@ -72,7 +79,7 @@ class SoundPlayerSettingUI(QWidget):
 
     def start_play_wav(self) -> None:
         front_engine_logger.info("[SoundPlayerSettingUI] start_play_wav")
-        if not self.wav_sound_path or not self.ready_to_play:
+        if not self.wav_sound_path or not self.wav_ready_to_play:
             message_box = QMessageBox(self)
             message_box.setText(language_wrapper.language_word_dict.get("sound_player_setting_message_box_wav"))
             message_box.exec()
@@ -99,20 +106,18 @@ class SoundPlayerSettingUI(QWidget):
     def choose_and_copy_wav_file_to_cwd_sound_dir_then_play(self) -> None:
         front_engine_logger.info("[SoundPlayerSettingUI] choose_and_copy_wav_file_to_cwd_sound_dir_then_play")
         retranslator.set_text(self.wav_ready_label, _NOT_READY)
-        self.ready_to_play = False
+        self.wav_ready_to_play = False
         self.wav_sound_path = choose_wav_sound(self)
         if self.wav_sound_path:
             retranslator.set_text(self.wav_ready_label, "Ready")
-            self.ready_to_play = True
+            self.wav_ready_to_play = True
 
     def choose_and_copy_sound_file_to_cwd_sound_dir_then_play(self) -> None:
         front_engine_logger.info("[SoundPlayerSettingUI] choose_and_copy_sound_file_to_cwd_sound_dir_then_play")
         retranslator.set_text(self.player_ready_label, _NOT_READY)
-        self.ready_to_play = False
         self.player_sound_path = choose_player_sound(self)
         if self.player_sound_path:
             retranslator.set_text(self.player_ready_label, "Ready")
-            self.ready_to_play = True
 
     def volume_trick(self) -> None:
         front_engine_logger.info("[SoundPlayerSettingUI] volume_trick")
@@ -131,7 +136,7 @@ class SoundPlayerSettingUI(QWidget):
             self.volume_slider.setValue(volume)
         if state.get("wav_sound_path"):
             self.wav_sound_path = state["wav_sound_path"]
-            self.ready_to_play = True
+            self.wav_ready_to_play = True
             retranslator.set_text(self.wav_ready_label, "Ready")
         if state.get("player_sound_path"):
             self.player_sound_path = state["player_sound_path"]

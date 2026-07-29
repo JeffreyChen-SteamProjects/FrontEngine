@@ -15,6 +15,7 @@ user decide than to guess wrong.
 """
 from __future__ import annotations
 
+import re
 from typing import Any, Callable, Dict, List, Optional
 
 from PySide6.QtCore import QObject, QTimer, Signal
@@ -59,9 +60,22 @@ def sharing_app_running(watched: Any, window_titles: List[str]) -> Optional[str]
     wanted = parse_app_list(watched) or list(DEFAULT_SHARING_APPS)
     haystack = [title.lower() for title in window_titles]
     for name in wanted:
-        if any(name in title for title in haystack):
+        if any(_title_names_app(title, name) for title in haystack):
             return name
     return None
+
+
+def _title_names_app(title: str, name: str) -> bool:
+    """
+    視窗標題裡有沒有「這個名字」——要求前後是字界，不是單純的子字串。
+    純子字串比對會把 "Obsidian" 當成 obs、"jobs.txt" 當成 obs、"TeamSpeak"
+    當成 teams：一個記事軟體就足以讓所有覆蓋層永遠躲起來。
+    Whether the title names this app, on word boundaries rather than as a raw
+    substring. Plain containment reads "Obsidian" and "jobs.txt" as obs and
+    "TeamSpeak" as teams - one note-taking app was enough to hide every overlay
+    for good.
+    """
+    return re.search(rf"(?<![0-9a-z]){re.escape(name)}(?![0-9a-z])", title) is not None
 
 
 class ShareWatchService(QObject):
