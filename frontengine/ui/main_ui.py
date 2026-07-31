@@ -43,10 +43,12 @@ from frontengine.ui.page.web.web_setting_ui import WEBSettingUI
 from frontengine.ui.page.widgets.widgets_setting_ui import WidgetsSettingUI
 from frontengine.user_setting.user_setting_file import (
     get_hotkey_bindings,
+    is_stored,
     read_user_setting,
     user_setting_dict,
     write_user_setting,
 )
+from frontengine.utils.steam.steam_language import steam_language
 from frontengine.utils.critical_exit.critical_exit import CriticalExit
 from frontengine.utils.critical_exit.win32_vk import keyboard_keys_table
 from frontengine.utils.hotkey.hotkey_service import HotkeyService
@@ -129,7 +131,7 @@ class FrontEngineMainUI(QMainWindow):
         # 語言支援
         # Language support
         self.language_wrapper = language_wrapper
-        self.language_wrapper.reset_language(user_setting_dict.get("language", "English"))
+        self.language_wrapper.reset_language(self._startup_language())
 
         # 初始化 UI
         # Initialize UI
@@ -380,6 +382,24 @@ class FrontEngineMainUI(QMainWindow):
         for attribute in ("measure_widget_list", "capture_widget_list", "camera_widget_list"):
             self.control_center_ui.register_overlay_source(
                 lambda attribute=attribute: getattr(self.tools_setting_ui, attribute, []))
+
+    @staticmethod
+    def _startup_language() -> str:
+        """
+        啟動要用哪一個語言。使用者挑過就用他挑的；還沒挑過而 Steam 有裝，就跟著
+        Steam 客戶端的語言，並寫回設定——寫回之後這件事就只會發生這一次。
+        Which language to start in. The user's choice if they have made one;
+        otherwise the Steam client's language when Steam is installed, written
+        back to the settings so it happens exactly once.
+        """
+        if is_stored("language"):
+            return user_setting_dict.get("language", "English")
+        from_steam = steam_language()
+        if from_steam is None:
+            return user_setting_dict.get("language", "English")
+        front_engine_logger.info(f"[FrontEngineMainUI] first launch, following Steam: {from_steam}")
+        user_setting_dict["language"] = from_steam
+        return from_steam
 
     def _add_tabs(self) -> None:
         """
