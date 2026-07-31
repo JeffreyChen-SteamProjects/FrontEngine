@@ -22,9 +22,10 @@ from __future__ import annotations
 
 from typing import Optional, Tuple
 
-from PySide6.QtCore import QPoint, Qt
 from PySide6.QtGui import QPainter, QPixmap
 from PySide6.QtWidgets import QWidget
+
+from frontengine.show.draggable_window import DraggableTopWindow
 
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 
@@ -62,22 +63,14 @@ def clamp_zoom(zoom: float) -> float:
         return 1.0
 
 
-class PinnedImageWidget(QWidget):
+class PinnedImageWidget(DraggableTopWindow):
     """釘在最上層的一張圖：可拖曳、可滾輪縮放、雙擊或 Escape 關閉。"""
 
     def __init__(self, pixmap: QPixmap, opacity_percent: int = 100,
                  parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
-        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
-        self.setWindowFlags(
-            Qt.WindowType.FramelessWindowHint
-            | Qt.WindowType.WindowStaysOnTopHint
-            | Qt.WindowType.Tool)
-        self.setWindowTitle("FrontEngine")
-
         self.pixmap = pixmap if pixmap is not None else QPixmap()
         self.zoom = 1.0
-        self._drag_origin: Optional[QPoint] = None
         self.setWindowOpacity(max(0.1, min(1.0, opacity_percent / 100.0)))
 
         base = (self.pixmap.width(), self.pixmap.height())
@@ -108,27 +101,3 @@ class PinnedImageWidget(QWidget):
             self.apply_zoom(self.zoom * (ZOOM_STEP ** steps))
             event.accept()
 
-    def mousePressEvent(self, event) -> None:
-        if event.button() == Qt.MouseButton.LeftButton:
-            self._drag_origin = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
-            event.accept()
-
-    def mouseMoveEvent(self, event) -> None:
-        if self._drag_origin is not None and event.buttons() & Qt.MouseButton.LeftButton:
-            self.move(event.globalPosition().toPoint() - self._drag_origin)
-            event.accept()
-
-    def mouseReleaseEvent(self, event) -> None:
-        self._drag_origin = None
-        event.accept()
-
-    def mouseDoubleClickEvent(self, event) -> None:
-        """雙擊關掉——沒有標題列，總得有一個看得懂的出口。"""
-        self.close()
-        event.accept()
-
-    def keyPressEvent(self, event) -> None:
-        if event.key() == Qt.Key.Key_Escape:
-            self.close()
-            return
-        super().keyPressEvent(event)
