@@ -21,7 +21,7 @@ import tempfile
 
 from PySide6.QtCore import QRect, QSize, Qt
 from PySide6.QtGui import (
-    QColor, QFont, QIcon, QImage, QLinearGradient, QPainter,
+    QColor, QFont, QIcon, QImage, QLinearGradient, QPainter, QRadialGradient,
 )
 from PySide6.QtWidgets import QApplication
 
@@ -114,6 +114,59 @@ def backdrop(painter, width, height, shot=None, scrim=0.82):
     painter.fillRect(0, int(height * 0.45), width, int(height * 0.55) + 1, fade)
 
 
+def atmosphere(painter, width, height, icon, logo_safe=True):
+    """
+    寬幅背景：深色漸層 + 柔光 + 低透明度的巨大圖示。
+
+    這兩張不能鋪截圖。收藏庫主調圖是 3.1:1，把 16:9 的截圖塞進去只會得到一塊糊
+    掉的色斑，兩側大片空白——看起來像沒做完，而不像背景。頁面底圖同理。
+
+    `logo_safe` 會把重點推到右側：收藏庫主調圖上面會疊 logo，中左區必須留空，
+    否則 logo 會壓在圖示上，兩個都看不清楚。
+    A wide backdrop: dark gradient, a soft glow, and the icon very large and very
+    faint.
+
+    Neither of these can take a screenshot. The library hero is 3.1:1, and a 16:9
+    screenshot dropped into it is a blurred smear with empty space either side -
+    it reads as unfinished rather than as a background. The page background has
+    the same problem.
+
+    `logo_safe` pushes the interest to the right: Steam lays the logo over the
+    hero, so the centre-left has to stay clear or the two sit on top of each other
+    and neither can be read.
+    """
+    gradient = QLinearGradient(0, 0, width, height)
+    gradient.setColorAt(0.0, QColor("#16181a"))
+    gradient.setColorAt(0.55, QColor("#1d2023"))
+    gradient.setColorAt(1.0, QColor("#0d0f10"))
+    painter.fillRect(0, 0, width, height, gradient)
+
+    # 柔光：放在右側三分之一，和 logo 的位置錯開
+    glow_x = width * (0.74 if logo_safe else 0.5)
+    glow = QRadialGradient(glow_x, height * 0.45, max(width, height) * 0.55)
+    glow.setColorAt(0.0, QColor(255, 215, 64, 46))
+    glow.setColorAt(0.45, QColor(255, 215, 64, 16))
+    glow.setColorAt(1.0, QColor(255, 215, 64, 0))
+    painter.fillRect(0, 0, width, height, glow)
+
+    # 巨大但很淡的圖示當浮水印
+    if icon is not None:
+        mark = int(height * 0.92)
+        pixmap = icon.pixmap(QSize(mark, mark))
+        if not pixmap.isNull():
+            painter.save()
+            painter.setOpacity(0.13)
+            painter.drawPixmap(int(glow_x - mark * 0.5), int((height - mark) / 2),
+                               mark, mark, pixmap)
+            painter.restore()
+
+    # 底部壓一道，Steam 疊上去的文字才讀得出來
+    fade = QLinearGradient(0, height * 0.55, 0, height)
+    fade.setColorAt(0.0, QColor(13, 15, 16, 0))
+    fade.setColorAt(1.0, QColor(13, 15, 16, 200))
+    painter.fillRect(0, int(height * 0.55), width, int(height * 0.45) + 1, fade)
+
+
 def draw_icon(painter, icon, x, y, size):
     if icon is None:
         return
@@ -193,11 +246,11 @@ def compose(kind, width, height, icon, shot):
                          | Qt.TextFlag.TextWordWrap, TAGLINE)
 
     elif kind == "hero":
-        # Hero 上面會疊 logo，所以不放任何文字
-        backdrop(painter, width, height, shot, scrim=0.70)
+        # Hero 上面會疊 logo，所以不放任何文字，重點也要偏右
+        atmosphere(painter, width, height, icon, logo_safe=True)
 
     elif kind == "background":
-        backdrop(painter, width, height, shot, scrim=0.88)
+        atmosphere(painter, width, height, icon, logo_safe=False)
 
     painter.end()
     return image
