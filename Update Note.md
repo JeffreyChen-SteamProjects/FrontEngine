@@ -1,23 +1,45 @@
 # Update Notes
 
-## 31 July 2026 — Seven new tabs, and a lot of automation
+## 31 July 2026 — A new interface, seven new pages, and a lot of automation
 
-*Covers everything since the 8 February 2026 release. Current version: 1.0.56.*
+*Covers everything since the 8 February 2026 release. Current version: 1.0.59.*
 
 FrontEngine started out as a way to put a video, an image or a web page on top of
 your screen and leave it there. It still does that, and nothing about the way you
 do it has changed. What has changed is how much else it can put on screen, and how
 much of it can now happen without you.
 
-This is the largest update the project has had. Seven new tabs, a preset system
-that travels between machines, automation that reacts to what you are doing, and a
-full pass over privacy for anyone who shares their screen for a living.
+This is the largest update the project has had. A rebuilt interface, seven new
+pages, a preset system that travels between machines, automation that reacts to
+what you are doing, and a full pass over privacy for anyone who shares their
+screen for a living.
+
+---
+
+### The interface has been rebuilt
+
+This is the first thing you will notice. FrontEngine had grown to sixteen tabs in
+a single row, which sprouted scroll arrows as soon as the window narrowed and gave
+no clue which of the sixteen belonged together.
+
+The pages now live in a grouped list down the left-hand side — **On screen**,
+**Desktop**, **Work**, **Control** — so finding the right one is a matter of
+knowing what you want to do rather than reading sixteen words in a row. It cannot
+overflow, and you can always see where you are.
+
+Each page was rebuilt too. Settings are grouped under headings instead of sitting
+in one flat list, related controls line up, and sliders no longer stretch to the
+full width of the window. The button that actually does the thing — Start, Spawn,
+Close all — now sits in its own bar at the bottom of the page and looks different
+from everything else, so it is obvious which control is the one you came for.
+Nothing was removed and nothing moved to a different page: the same settings are
+in the same places, arranged so you can see them.
 
 ---
 
 ### A pet that lives on your desktop
 
-The **Pet** tab is the headline. Point it at a single image for something simple,
+The **Pet** page is the headline of the new pages. Point it at a single image for something simple,
 or at a folder of walk / idle / sleep / climb / fall / drag frames for a pet that
 animates properly.
 
@@ -31,7 +53,7 @@ it can read those aloud. It can move in time with your speakers or your
 microphone, and it will keep a focus timer for you, with breaks. If you supply
 your own Anthropic API key, you can hold a conversation with it.
 
-### Six more tabs
+### Six more pages
 
 **Eye Care** — a warm, amber, rose, yellow, green, blue or grey wash over the
 screen with adjustable strength; a reading ruler that follows the cursor; eye
@@ -93,7 +115,7 @@ at startup. Content you subscribe to on Steam can be imported directly.
 
 ### A Control Center that reaches everything
 
-One page that reaches every overlay, whichever tab opened it: close by kind or
+One page that reaches every overlay, whichever page opened it: close by kind or
 close all, hide and show, mute, lock and unlock, reset positions, and chroma key
 for keying in OBS. Unlocked overlays can be dragged into place and remember where
 you dropped them. Low power and a High / Balanced / Saver quality setting cut
