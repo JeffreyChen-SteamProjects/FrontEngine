@@ -12,6 +12,7 @@ from frontengine.ui.dialog.hotkey_settings_dialog import HotkeySettingsDialog
 from frontengine.ui.dialog.reminder_dialog import ReminderDialog
 from frontengine.ui.dialog.remote_control_dialog import RemoteControlDialog
 from frontengine.ui.dialog.screen_privacy_dialog import ScreenPrivacyDialog
+from frontengine.ui.dialog.screensaver_dialog import ScreensaverDialog
 from frontengine.ui.dialog.signage_dialog import SignageDialog
 from frontengine.ui.dialog.smart_pause_dialog import SmartPauseDialog
 from frontengine.ui.dialog.usage_report_dialog import UsageReportDialog
@@ -106,6 +107,12 @@ def build_settings_menu(ui: "FrontEngineMainUI") -> None:
     reminder_action.triggered.connect(lambda: _open_dialog(ui, ReminderDialog))
     menu.addAction(reminder_action)
     ui.reminder_action = reminder_action
+
+    screensaver_action = QAction(_t("settings_menu_screensaver", "Screensaver..."), menu)
+    retranslator.bind(screensaver_action, "settings_menu_screensaver", "Screensaver...")
+    screensaver_action.triggered.connect(lambda: ScreensaverDialog(ui).exec())
+    menu.addAction(screensaver_action)
+    ui.screensaver_action = screensaver_action
 
     signage_action = QAction(_t("settings_menu_signage", "Signage mode..."), menu)
     retranslator.bind(signage_action, "settings_menu_signage", "Signage mode...")
