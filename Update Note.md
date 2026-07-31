@@ -2,7 +2,7 @@
 
 ## 31 July 2026 — A new interface, seven new pages, and a lot of automation
 
-*Covers everything since the 8 February 2026 release. Current version: 1.0.59.*
+*Covers everything released since 8 February 2026.*
 
 FrontEngine started out as a way to put a video, an image or a web page on top of
 your screen and leave it there. It still does that, and nothing about the way you
