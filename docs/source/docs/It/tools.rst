@@ -11,6 +11,10 @@ Pagina Strumenti
 
 * Cattura di un'area - traccia un'area; finisce negli appunti, e «Copia
   l'ultima» ce la rimette.
+
+  Fissa l'ultima mette la cattura sopra tutto in una finestrella: trascinabile,
+  ridimensionabile con la rotellina, si chiude con doppio clic o Esc - una specifica,
+  un riferimento di colore o un messaggio di errore accanto al lavoro.
 * Leggi il testo - traccia un'area per copiarne il testo, tradurlo o farci una
   domanda. L'area catturata viene inviata all'API di Anthropic, quindi il
   consenso viene chiesto prima e viene usata la tua ANTHROPIC_API_KEY.

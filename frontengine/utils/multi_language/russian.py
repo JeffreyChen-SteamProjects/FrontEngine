@@ -532,6 +532,7 @@ russian_word_dict = {
     "tools_measure_start": "Начать измерение",
     "tools_measure_stop": "Остановить измерение",
     "tools_color_format": "Копировать цвет как",
+    "tools_capture_pin": "Закрепить последний",
     "tools_capture_label": "Снимок области",
     "tools_capture_start": "Снять область",
     "tools_capture_copy": "Копировать последний",

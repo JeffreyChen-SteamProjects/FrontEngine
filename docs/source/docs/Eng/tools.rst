@@ -11,6 +11,10 @@ Tools Page
 
 * Region capture - drag out an area; it lands on the clipboard, and Copy last
   puts it there again.
+
+  Pin last puts that capture on top of everything as a small window you can drag,
+  scroll to resize, and close with a double-click or Escape - a specification, a
+  colour reference or an error message kept beside what you are working on.
 * Read text - drag out an area to copy the text in it, translate it, or ask a
   question about it. This sends the captured area to Anthropic's API, so it
   asks for consent first and uses your own ANTHROPIC_API_KEY.

@@ -398,7 +398,8 @@ class FrontEngineMainUI(QMainWindow):
                           "now_playing_widget_list", "note_widget_list"):
             self.control_center_ui.register_overlay_source(
                 lambda attribute=attribute: getattr(self.widgets_setting_ui, attribute, []))
-        for attribute in ("measure_widget_list", "capture_widget_list", "camera_widget_list"):
+        for attribute in ("measure_widget_list", "capture_widget_list", "camera_widget_list",
+                          "pinned_widget_list"):
             self.control_center_ui.register_overlay_source(
                 lambda attribute=attribute: getattr(self.tools_setting_ui, attribute, []))
 
@@ -929,6 +930,7 @@ class FrontEngineMainUI(QMainWindow):
             self.widgets_setting_ui.stop_spectrum()
         if getattr(self, "tools_setting_ui", None) is not None:
             self.tools_setting_ui.release_pinned_windows()
+            self.tools_setting_ui.close_pinned()
             # 複本註冊的是 DWM 縮圖，那是系統資源：視窗沒了也不會自己消失。
             # A replica holds a DWM thumbnail, a system resource that does not
             # go away just because the process is closing.

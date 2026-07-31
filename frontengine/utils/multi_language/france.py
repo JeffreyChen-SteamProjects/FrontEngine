@@ -532,6 +532,7 @@ french_word_dict = {
     "tools_measure_start": "Commencer à mesurer",
     "tools_measure_stop": "Arrêter de mesurer",
     "tools_color_format": "Copier la couleur en",
+    "tools_capture_pin": "Épingler la dernière",
     "tools_capture_label": "Capture de zone",
     "tools_capture_start": "Capturer une zone",
     "tools_capture_copy": "Copier la dernière",

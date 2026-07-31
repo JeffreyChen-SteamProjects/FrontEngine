@@ -534,6 +534,7 @@ simplified_chinese_word_dict = {
     "tools_measure_start": "开始量测",
     "tools_measure_stop": "停止量测",
     "tools_color_format": "颜色复制为",
+    "tools_capture_pin": "固定上一张",
     "tools_capture_label": "区域截图",
     "tools_capture_start": "框选截图",
     "tools_capture_copy": "复制上一张",

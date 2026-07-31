@@ -542,6 +542,7 @@ english_word_dict = {
     "tools_measure_start": 'Start measuring',
     "tools_measure_stop": 'Stop measuring',
     "tools_color_format": 'Copy colour as',
+    "tools_capture_pin": "Pin last",
     "tools_capture_label": 'Region capture',
     "tools_capture_start": 'Capture area',
     "tools_capture_copy": 'Copy last',

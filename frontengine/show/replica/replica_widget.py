@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from PySide6.QtCore import QPoint, Qt
+from frontengine.show.draggable_window import DraggableTopWindow
 from PySide6.QtGui import QColor, QPainter
 from PySide6.QtWidgets import QWidget
 
@@ -24,7 +24,7 @@ from frontengine.utils.window_replica.dwm_thumbnail import (
 )
 
 
-class WindowReplicaWidget(QWidget):
+class WindowReplicaWidget(DraggableTopWindow):
     """顯示另一個視窗即時畫面的小視窗。"""
 
     def __init__(self, source_handle: int, title: str = "",
@@ -32,11 +32,6 @@ class WindowReplicaWidget(QWidget):
                  crop: Optional[tuple] = None) -> None:
         front_engine_logger.info(f"[WindowReplicaWidget] Init | source={source_handle}")
         super().__init__(parent)
-        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
-        self.setWindowFlags(
-            Qt.WindowType.FramelessWindowHint
-            | Qt.WindowType.WindowStaysOnTopHint
-            | Qt.WindowType.Tool)
         self.setWindowTitle(title or "FrontEngine")
         self.setMinimumSize(MIN_REPLICA_SIZE, MIN_REPLICA_SIZE)
 
@@ -48,7 +43,6 @@ class WindowReplicaWidget(QWidget):
         # the source after that window is resized.
         self.crop = crop
         self.thumbnail = DwmThumbnail()
-        self._drag_origin: Optional[QPoint] = None
 
         self.resize(DEFAULT_REPLICA_WIDTH, int(DEFAULT_REPLICA_WIDTH * 9 / 16))
 
@@ -109,24 +103,6 @@ class WindowReplicaWidget(QWidget):
         painter = QPainter(self)
         painter.fillRect(self.rect(), QColor(0, 0, 0))
 
-    def mousePressEvent(self, event) -> None:
-        if event.button() == Qt.MouseButton.LeftButton:
-            self._drag_origin = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
-            event.accept()
-
-    def mouseMoveEvent(self, event) -> None:
-        if self._drag_origin is not None and event.buttons() & Qt.MouseButton.LeftButton:
-            self.move(event.globalPosition().toPoint() - self._drag_origin)
-            event.accept()
-
-    def mouseReleaseEvent(self, event) -> None:
-        self._drag_origin = None
-        event.accept()
-
-    def mouseDoubleClickEvent(self, event) -> None:
-        """雙擊關掉——沒有標題列，總得有一個看得懂的出口。"""
-        self.close()
-        event.accept()
 
     def closeEvent(self, event) -> None:
         # 縮圖是系統資源，視窗沒了也不會自己消失。從標題列以外的任何路徑關閉時

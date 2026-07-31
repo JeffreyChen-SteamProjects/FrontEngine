@@ -11,6 +11,10 @@ Page Outils
 
 * Capture de zone - tracez une zone ; elle arrive dans le presse-papiers, et
   « Copier la dernière » l'y remet.
+
+  Épingler la dernière place la capture au-dessus de tout dans une petite fenêtre :
+  déplaçable, redimensionnable à la molette, fermée par double-clic ou Échap - une
+  spécification, une référence de couleur ou un message d'erreur à côté du travail.
 * Lire du texte - tracez une zone pour en copier le texte, le traduire, ou poser
   une question à son sujet. Cela envoie la zone capturée à l'API d'Anthropic :
   votre accord est donc demandé d'abord, et c'est votre propre ANTHROPIC_API_KEY
