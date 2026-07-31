@@ -17,6 +17,7 @@ from frontengine.ui.page.utils import (
     list_media_files,
     reload_recent_combobox,
     resolve_preferred_monitor,
+    resolve_span,
     show_on_primary_screen,
     show_on_selected_monitor,
 )
@@ -155,6 +156,7 @@ class ImageSettingUI(SettingPage):
                 widget, self.fullscreen_checkbox, monitor
             ),
             preferred_monitor_index=resolve_preferred_monitor(self.target_monitor_combobox),
+            span_all_screens=resolve_span(self.target_monitor_combobox),
         )
         if slideshow:
             self._slideshow_timer.start(self._slideshow_interval_ms())

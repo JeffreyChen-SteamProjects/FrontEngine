@@ -29,6 +29,9 @@ stessa cosa:
   trasparenti, per stare sopra al tuo lavoro invece di nasconderlo.
 * **Schermo di destinazione** - quale schermo. Impostato su *Chiedi*, la domanda
   arriva ogni volta.
+
+  Con più di uno schermo c'è anche **Su tutti gli schermi**: un solo overlay su
+  tutta la scrivania invece di uno per schermo.
 * **Mostra su tutti gli schermi** - una copia per monitor anziché una sola.
 * **Mostra sotto tutte le finestre** - infila l'overlay sotto le tue finestre,
   così si comporta da sfondo anziché da qualcosa davanti.

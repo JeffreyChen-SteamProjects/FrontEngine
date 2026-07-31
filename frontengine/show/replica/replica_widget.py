@@ -1,0 +1,118 @@
+"""
+視窗複本覆蓋層：一個小視窗，裡面是另一個視窗的即時畫面。
+
+和其他覆蓋層不同，這一個**不能點擊穿透**：使用者要能把它拖到順手的位置、拉大縮小、
+關掉。所以它是一個可以拖曳的無邊框視窗，而不是一層蓋在畫面上的東西。
+
+A window replica overlay: a small window showing another window, live.
+
+Unlike the other overlays this one must **not** pass clicks through: the user has
+to be able to drag it somewhere convenient, resize it and close it. So it is a
+draggable frameless window rather than a sheet laid over the screen.
+"""
+from __future__ import annotations
+
+from typing import Optional
+
+from PySide6.QtCore import QPoint, Qt
+from PySide6.QtGui import QColor, QPainter
+from PySide6.QtWidgets import QWidget
+
+from frontengine.utils.logging.loggin_instance import front_engine_logger
+from frontengine.utils.window_replica.dwm_thumbnail import (
+    DEFAULT_REPLICA_WIDTH, MIN_REPLICA_SIZE, DwmThumbnail, available, fit_within,
+)
+
+
+class WindowReplicaWidget(QWidget):
+    """顯示另一個視窗即時畫面的小視窗。"""
+
+    def __init__(self, source_handle: int, title: str = "",
+                 opacity_percent: int = 100, parent: Optional[QWidget] = None) -> None:
+        front_engine_logger.info(f"[WindowReplicaWidget] Init | source={source_handle}")
+        super().__init__(parent)
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
+        self.setWindowFlags(
+            Qt.WindowType.FramelessWindowHint
+            | Qt.WindowType.WindowStaysOnTopHint
+            | Qt.WindowType.Tool)
+        self.setWindowTitle(title or "FrontEngine")
+        self.setMinimumSize(MIN_REPLICA_SIZE, MIN_REPLICA_SIZE)
+
+        self.source_handle = int(source_handle)
+        self.source_title = title
+        self.opacity_percent = max(1, min(100, int(opacity_percent)))
+        self.thumbnail = DwmThumbnail()
+        self._drag_origin: Optional[QPoint] = None
+
+        self.resize(DEFAULT_REPLICA_WIDTH, int(DEFAULT_REPLICA_WIDTH * 9 / 16))
+
+    def start(self) -> bool:
+        """
+        接上來源視窗並依它的長寬比調整大小。接不上就回 False，呼叫端不要把一個
+        空視窗留在畫面上。
+        Attach to the source and take its aspect ratio. False when it could not
+        attach, so the caller does not leave an empty window on screen.
+        """
+        if not available():
+            front_engine_logger.info("[WindowReplicaWidget] not supported on this platform")
+            return False
+        # 縮圖要接在「這個視窗的 handle」上，所以必須先讓它有 handle。
+        # The thumbnail attaches to this window's handle, so it needs one first.
+        self.show()
+        if not self.thumbnail.register(int(self.winId()), self.source_handle):
+            return False
+        source_size = self.thumbnail.source_size()
+        width, height = fit_within(source_size, (DEFAULT_REPLICA_WIDTH,
+                                                 int(DEFAULT_REPLICA_WIDTH * 9 / 16)))
+        self.resize(width, height)
+        self._refresh()
+        return True
+
+    def _refresh(self) -> None:
+        self.thumbnail.update(self.width(), self.height(),
+                              opacity=int(self.opacity_percent * 255 / 100))
+
+    def set_opacity_percent(self, percent: int) -> None:
+        self.opacity_percent = max(1, min(100, int(percent)))
+        self._refresh()
+
+    def resizeEvent(self, event) -> None:
+        super().resizeEvent(event)
+        self._refresh()
+
+    def paintEvent(self, event) -> None:
+        # DWM 把縮圖合成上來之前，先鋪一層不透明底色。少了這一步，來源還沒畫上來的
+        # 那一瞬間會透出後面的東西，看起來像破圖。
+        # An opaque backing before DWM composites the thumbnail. Without it the
+        # moment before the source arrives shows whatever is behind, which reads
+        # as a rendering fault.
+        painter = QPainter(self)
+        painter.fillRect(self.rect(), QColor(0, 0, 0))
+
+    def mousePressEvent(self, event) -> None:
+        if event.button() == Qt.MouseButton.LeftButton:
+            self._drag_origin = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
+            event.accept()
+
+    def mouseMoveEvent(self, event) -> None:
+        if self._drag_origin is not None and event.buttons() & Qt.MouseButton.LeftButton:
+            self.move(event.globalPosition().toPoint() - self._drag_origin)
+            event.accept()
+
+    def mouseReleaseEvent(self, event) -> None:
+        self._drag_origin = None
+        event.accept()
+
+    def mouseDoubleClickEvent(self, event) -> None:
+        """雙擊關掉——沒有標題列，總得有一個看得懂的出口。"""
+        self.close()
+        event.accept()
+
+    def closeEvent(self, event) -> None:
+        # 縮圖是系統資源，視窗沒了也不會自己消失。從標題列以外的任何路徑關閉時
+        # closeEvent 是唯一會被呼叫到的地方，所以收尾放這裡。
+        # The thumbnail is a system resource and does not go away with the
+        # window. closeEvent is the one place every close path reaches.
+        self.thumbnail.unregister()
+        super().closeEvent(event)

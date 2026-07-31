@@ -30,6 +30,9 @@ everywhere:
   fairly translucent so they sit over your work rather than hide it.
 * **Target monitor** - which screen to use. Set it to *Ask* and you are asked
   each time instead.
+
+  With more than one screen there is also **Span all screens**, which puts a
+  single overlay across the whole desktop rather than one on each.
 * **Show on all screen** - put a copy on every monitor rather than one.
 * **Show on all window bottom** - drop the overlay beneath your windows, so it
   behaves like a backdrop instead of something in front.

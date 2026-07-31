@@ -30,6 +30,9 @@ la même chose partout :
   translucides par défaut, pour se poser sur votre travail plutôt que le cacher.
 * **Écran cible** - quel écran. Réglé sur *Demander*, la question vous est posée
   à chaque fois.
+
+  Avec plusieurs écrans s'ajoute **Sur tous les écrans** : un seul calque couvrant
+  tout le bureau plutôt qu'un par écran.
 * **Afficher sur tous les écrans** - une copie par moniteur plutôt qu'une seule.
 * **Afficher sous toutes les fenêtres** - glisser le calque sous vos fenêtres :
   il se comporte alors comme un fond plutôt que comme quelque chose devant.

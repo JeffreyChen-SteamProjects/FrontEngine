@@ -888,6 +888,10 @@ class FrontEngineMainUI(QMainWindow):
             self.widgets_setting_ui.stop_spectrum()
         if getattr(self, "tools_setting_ui", None) is not None:
             self.tools_setting_ui.release_pinned_windows()
+            # 複本註冊的是 DWM 縮圖，那是系統資源：視窗沒了也不會自己消失。
+            # A replica holds a DWM thumbnail, a system resource that does not
+            # go away just because the process is closing.
+            self.tools_setting_ui.close_replicas()
             self.tools_setting_ui.stop_camera()
             self.tools_setting_ui.stop_virtual_camera()
 
