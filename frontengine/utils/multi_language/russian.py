@@ -164,6 +164,10 @@ russian_word_dict = {
     "web_setting_open_enable_input": "Включить ввод",
     # Scene UI
     "tab_scene_text": "Сцена",
+    "image_board_label": "ДОСКА РЕФЕРЕНСОВ",
+    "image_board_choose": "Открыть доску референсов...",
+    "image_board_close": "Закрыть доски",
+    "image_board_hint": "Выберите сразу несколько изображений. Перетаскивайте каждое, чтобы расставить, фон - чтобы сдвинуть вид, колесо - масштаб; Delete убирает выбранное, Escape закрывает доску.",
     "scene_start": "Начать сцену",
     "scene_table_view_type": "Тип",
     "scene_file_path": "Путь файла",

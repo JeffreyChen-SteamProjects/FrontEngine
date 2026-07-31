@@ -164,6 +164,10 @@ traditional_chinese_word_dict = {
     "web_setting_open_enable_input": "啟用輸入",
     # Scene UI
     "tab_scene_text": "場景",
+    "image_board_label": "參考圖板",
+    "image_board_choose": "開啟參考圖板⋯",
+    "image_board_close": "關閉圖板",
+    "image_board_hint": "一次挑多張圖。拖曳單張可以排位置，拖背景可以平移，滾輪縮放，Delete 移除選取的那張，Escape 關閉圖板。",
     "scene_start": "開始場景",
     "scene_table_view_type": "類型",
     "scene_file_path": "檔案路徑",

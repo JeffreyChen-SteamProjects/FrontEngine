@@ -164,6 +164,10 @@ italian_word_dict = {
     "web_setting_open_enable_input": "Abilita input",
     # Scene UI
     "tab_scene_text": "Scena",
+    "image_board_label": "TAVOLA DI RIFERIMENTO",
+    "image_board_choose": "Apri tavola di riferimento...",
+    "image_board_close": "Chiudi le tavole",
+    "image_board_hint": "Scegli più immagini insieme. Trascina ciascuna per disporla, trascina lo sfondo per spostarti, rotellina per lo zoom, Canc toglie quella selezionata ed Esc chiude la tavola.",
     "scene_start": "Inizia la scena",
     "scene_table_view_type": "Tipo",
     "scene_file_path": "Percorso del file",

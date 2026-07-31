@@ -18,3 +18,7 @@ Bild-Seite
 
 * Zielbildschirm - welcher Bildschirm, oder jedes Mal nachfragen.
 * Zuletzt verwendet - vorher gezeigte Bilder.
+* Referenztafel öffnen… - mehrere Bilder auf einmal wählen und auf einer Fläche
+  über dem Schreibtisch ausbreiten. Einzelne ziehen zum Anordnen, den Hintergrund
+  ziehen zum Verschieben, Mausrad zum Zoomen, Entf entfernt das gewählte Bild,
+  Escape schließt die Tafel. Das Kontrollzentrum erreicht sie ebenfalls.

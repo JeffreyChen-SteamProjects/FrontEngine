@@ -164,6 +164,10 @@ simplified_chinese_word_dict = {
     "web_setting_open_enable_input": "启用输入",
     # Scene UI
     "tab_scene_text": "场景",
+    "image_board_label": "参考图板",
+    "image_board_choose": "打开参考图板⋯",
+    "image_board_close": "关闭图板",
+    "image_board_hint": "一次挑多张图。拖动单张可以排位置，拖背景可以平移，滚轮缩放，Delete 移除选中的那张，Escape 关闭图板。",
     "scene_start": "开始场景",
     "scene_table_view_type": "类型",
     "scene_file_path": "文件路径",

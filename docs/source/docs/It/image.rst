@@ -18,3 +18,7 @@ Pagina Immagine
 
 * Schermo di destinazione - quale schermo usare, o chiedere ogni volta.
 * Recenti - le immagini già mostrate.
+* Apri tavola di riferimento… - scegliere più immagini insieme e disporle su
+  un'unica superficie sopra la scrivania. Trascina ciascuna per disporla, lo sfondo
+  per spostarti, rotellina per lo zoom, Canc toglie quella selezionata ed Esc
+  chiude la tavola. Anche il Centro di controllo le raggiunge.
