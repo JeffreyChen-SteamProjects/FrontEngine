@@ -42,6 +42,40 @@ def available() -> bool:
     return sys.platform == "win32"
 
 
+def crop_rect(source: Tuple[int, int], crop: Optional[Tuple[float, float, float, float]]
+              ) -> Optional[Tuple[int, int, int, int]]:
+    """
+    把「左、上、右、下」四個 0..1 的比例換算成來源視窗上的像素矩形。
+
+    用比例而不是像素，是因為來源視窗會被使用者調大調小；記像素的話，視窗一改大小
+    框到的就不再是原來那一塊了。
+
+    框不出面積時回傳 None——寬或高為零的來源矩形會讓 DWM 直接不畫，畫面上只剩一
+    塊黑，看起來像壞掉而不是「你框錯了」。
+    Turn left/top/right/bottom fractions into a pixel rectangle on the source.
+
+    Fractions rather than pixels because the source window gets resized: pixels
+    would stop pointing at the same part of it the moment that happened.
+
+    A rectangle with no area returns None. A zero-width or zero-height source
+    rectangle makes DWM draw nothing at all, leaving a black panel that reads as
+    broken rather than as a bad selection.
+    """
+    if crop is None:
+        return None
+    source_width, source_height = source
+    if source_width <= 0 or source_height <= 0:
+        return None
+    left, top, right, bottom = (max(0.0, min(1.0, float(value))) for value in crop)
+    if right <= left or bottom <= top:
+        return None
+    rect = (int(left * source_width), int(top * source_height),
+            int(right * source_width), int(bottom * source_height))
+    if rect[2] - rect[0] < 1 or rect[3] - rect[1] < 1:
+        return None
+    return rect
+
+
 def fit_within(source: Tuple[int, int], bounds: Tuple[int, int]) -> Tuple[int, int]:
     """
     把來源尺寸等比縮到不超過 bounds，並保持長寬比。
@@ -135,8 +169,13 @@ class DwmThumbnail:
             return (0, 0)
 
     def update(self, width: int, height: int, opacity: int = 255,
-               client_area_only: bool = True) -> bool:
-        """把縮圖鋪滿目的地視窗的這個大小。"""
+               client_area_only: bool = True,
+               source_rect: Optional[Tuple[int, int, int, int]] = None) -> bool:
+        """
+        把縮圖鋪滿目的地視窗的這個大小。給了 source_rect 就只顯示來源的那一塊。
+        Fill the destination at this size. With a source_rect, only that part of
+        the source is shown.
+        """
         if self._handle is None or self._dwmapi is None:
             return False
         try:
@@ -161,6 +200,10 @@ class DwmThumbnail:
             properties.dwFlags = (DWM_TNP_RECTDESTINATION | DWM_TNP_OPACITY
                                   | DWM_TNP_VISIBLE | DWM_TNP_SOURCECLIENTAREAONLY)
             properties.rcDestination = RECT(0, 0, max(1, int(width)), max(1, int(height)))
+            if source_rect is not None:
+                left, top, right, bottom = source_rect
+                properties.rcSource = RECT(int(left), int(top), int(right), int(bottom))
+                properties.dwFlags |= DWM_TNP_RECTSOURCE
             properties.opacity = max(0, min(255, int(opacity)))
             properties.fVisible = True
             # 只取客戶區：不然複本裡會有一圈原視窗的標題列與邊框，看起來像截圖失誤。

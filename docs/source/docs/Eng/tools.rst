@@ -28,4 +28,9 @@ Tools Page
   while the original stays where it is. Useful for keeping an eye on a video or
   a build while you work in front of it. Drag the replica to move it,
   double-click to close it. Windows only.
+
+  A replica can show just part of the window - the top or bottom half, one side,
+  or the centre - so a chat column or a progress bar can be pinned on its own.
+  The part is kept as a proportion, so resizing the original still shows the same
+  piece of it.
 * Window layout - save where your windows are and put them back later.
