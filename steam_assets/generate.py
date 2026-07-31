@@ -359,11 +359,14 @@ def screenshots(icon_path):
 
 
 def main():
-    # 一定要留著參考：QApplication 被回收的話，後面所有繪圖都會失敗
-    # Keep the reference: garbage-collecting QApplication takes every
-    # later paint call down with it
+    # 一定要留著參考：QApplication 被回收的話，後面所有繪圖都會失敗。
+    # 用 setApplicationName 而不是 assert 來持有它——assert 在 -O 編譯時會整行
+    # 消失，那時候持有的理由也跟著消失了。
+    # Keep the reference: garbage-collecting QApplication takes every later paint
+    # call with it. Held through setApplicationName rather than an assert, because
+    # -O strips asserts entirely and would take the reason for holding it too.
     application = QApplication([])
-    assert application is not None
+    application.setApplicationName(NAME)
     os.makedirs(os.path.join(OUT, "screenshots"), exist_ok=True)
     icon_path = os.path.join(REPO, "exe", "frontengine.ico")
     icon = QIcon(icon_path) if os.path.exists(icon_path) else None
