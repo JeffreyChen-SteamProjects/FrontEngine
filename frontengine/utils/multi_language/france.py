@@ -455,6 +455,7 @@ french_word_dict = {
     "pet_chatter_battery": "La batterie est faible — tu me branches ?|Peu d'énergie, attention !|On trouve un chargeur ?|Je suis sur la réserve~",
     "pet_start": "Faire apparaître la mascotte",
     "pet_message_box_text": "Image de mascotte introuvable",
+    "settings_menu_keep_awake": "Garder l'écran allumé",
     "settings_menu_smart_pause": "Pause intelligente…",
     "settings_menu_app_profiles": "Profils d'application…",
     "settings_menu_reminders": "Rappels…",

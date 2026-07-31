@@ -24,6 +24,9 @@ Menü „Einstellungen“
   denselben Rechten wie FrontEngine; installieren Sie nur, was Sie kennen.
 * Intelligente Pause… - Overlays wegräumen, solange eine Vollbild-Anwendung
   läuft, im Akkubetrieb, oder wenn genannte Anwendungen im Vordergrund sind.
+* Bildschirm wach halten - verhindert, dass der Bildschirm schlafen geht, solange
+  etwas zu sehen ist. Wird beim Ausschalten und beim Beenden freigegeben, sodass
+  wieder die eigenen Energieeinstellungen gelten.
 * App-Profile… - eine Voreinstellung anwenden, sobald eine bestimmte Anwendung
   nach vorn kommt.
 * Erinnerungen… - eine Meldung alle so viele Minuten oder zu einer Uhrzeit.

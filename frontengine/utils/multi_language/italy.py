@@ -455,6 +455,7 @@ italian_word_dict = {
     "pet_chatter_battery": "La batteria è quasi scarica — mi attacchi alla presa?|Poca energia, attenta!|Cerchiamo un caricabatterie?|Sono agli sgoccioli~",
     "pet_start": "Fai comparire la mascotte",
     "pet_message_box_text": "Immagine della mascotte non trovata",
+    "settings_menu_keep_awake": "Mantieni lo schermo attivo",
     "settings_menu_smart_pause": "Pausa intelligente…",
     "settings_menu_app_profiles": "Profili applicazione…",
     "settings_menu_reminders": "Promemoria…",

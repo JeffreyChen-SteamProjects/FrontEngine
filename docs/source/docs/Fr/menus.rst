@@ -27,6 +27,9 @@ Menu Réglages
 * Pause intelligente… - ranger les calques pendant qu'une application est en
   plein écran, sur batterie, ou quand des applications nommées sont au premier
   plan.
+* Garder l'écran allumé - empêche l'écran de s'éteindre tant que quelque chose est
+  affiché. Relâché quand vous désactivez l'option et quand FrontEngine se ferme :
+  les réglages d'alimentation habituels reprennent.
 * Profils d'application… - appliquer un préréglage dès qu'une application donnée
   passe devant.
 * Rappels… - un message toutes les tant de minutes, ou à une heure donnée.

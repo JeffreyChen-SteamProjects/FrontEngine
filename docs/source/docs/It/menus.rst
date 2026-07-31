@@ -25,6 +25,9 @@ Menu Impostazioni
   privilegi di FrontEngine; installa solo quelli di cui ti fidi.
 * Pausa intelligente… - mettere via gli overlay mentre un'applicazione è a
   schermo intero, a batteria, o quando certe applicazioni sono in primo piano.
+* Mantieni lo schermo attivo - impedisce allo schermo di spegnersi finché c'è
+  qualcosa a video. Viene rilasciato quando disattivi l'opzione e alla chiusura di
+  FrontEngine, tornando alle normali impostazioni di risparmio energetico.
 * Profili applicazione… - applicare una preimpostazione quando una data
   applicazione passa in primo piano.
 * Promemoria… - un messaggio ogni tot minuti, o a un'ora precisa.

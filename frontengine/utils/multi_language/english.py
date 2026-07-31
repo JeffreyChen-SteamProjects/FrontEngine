@@ -465,6 +465,7 @@ english_word_dict = {
     "pet_chatter_battery": "Battery's low - plug me in?|Low power, careful!|Find a charger soon?|Running on fumes here~",
     "pet_start": "Spawn pet",
     "pet_message_box_text": "Pet image not found",
+    "settings_menu_keep_awake": "Keep the screen awake",
     "settings_menu_smart_pause": "Smart pause...",
     "settings_menu_app_profiles": "App profiles...",
     "settings_menu_reminders": "Reminders...",

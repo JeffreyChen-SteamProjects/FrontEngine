@@ -52,6 +52,7 @@ from frontengine.utils.steam.steam_language import steam_language
 from frontengine.utils.critical_exit.critical_exit import CriticalExit
 from frontengine.utils.critical_exit.win32_vk import keyboard_keys_table
 from frontengine.utils.hotkey.hotkey_service import HotkeyService
+from frontengine.utils.keep_awake.keep_awake import KeepAwake
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import retranslator
@@ -329,6 +330,12 @@ class FrontEngineMainUI(QMainWindow):
             lambda name: apply_named_preset(self, name)
         )
         self.preset_schedule_service.start()
+
+        # 保持喚醒：覆蓋層放著的時候別讓螢幕睡著
+        # Keep awake: do not let the display sleep while an overlay is up
+        self.keep_awake = KeepAwake()
+        if user_setting_dict.get("keep_awake"):
+            self.keep_awake.enable()
 
         # 閒置夠久就把選定的覆蓋層放上來 / Show the chosen overlay once idle
         self._screensaver_overlays: list = []
@@ -858,6 +865,11 @@ class FrontEngineMainUI(QMainWindow):
         if user_setting_dict.get("restore_last_session"):
             save_last_session(self)
         self._stop_services()
+        # 執行緒執行狀態跟著行程活著，不放開的話關掉程式之後螢幕還是不會睡。
+        # The execution state lives with the process: without releasing it the
+        # display keeps refusing to sleep after the application is gone.
+        if getattr(self, "keep_awake", None) is not None:
+            self.keep_awake.disable()
         self._save_page_state()
         self._save_window_geometry()
         write_user_setting()
