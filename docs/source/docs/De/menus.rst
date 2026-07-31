@@ -27,6 +27,10 @@ Menü „Einstellungen“
 * App-Profile… - eine Voreinstellung anwenden, sobald eine bestimmte Anwendung
   nach vorn kommt.
 * Erinnerungen… - eine Meldung alle so viele Minuten oder zu einer Uhrzeit.
+* Bildschirmschoner… - nach so vielen Minuten ohne Maus und Tastatur das Overlay
+  einer gewählten Seite anzeigen; eine Mausbewegung nimmt es wieder weg. Es nutzt
+  die Seite so, wie sie eingerichtet ist, und schließt nur, was es selbst geöffnet
+  hat - was Sie laufen ließen, ist bei Ihrer Rückkehr noch da.
 * Anzeigetafel-Modus… - eine Liste von Voreinstellungen auf Zeit durchwechseln,
   für einen Rechner, der als Anzeige läuft. Das Hauptfenster kann dabei in die
   Taskleiste - aber nur, wenn es eine gibt, die es zurückholen kann.

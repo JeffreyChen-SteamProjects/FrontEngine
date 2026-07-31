@@ -28,6 +28,10 @@ Menu Impostazioni
 * Profili applicazione… - applicare una preimpostazione quando una data
   applicazione passa in primo piano.
 * Promemoria… - un messaggio ogni tot minuti, o a un'ora precisa.
+* Salvaschermo… - dopo tot minuti senza mouse né tastiera, mette a schermo
+  l'overlay di una pagina scelta; muovere il mouse lo toglie. Usa quella pagina
+  così come l'hai impostata e chiude solo ciò che ha aperto: quello che avevi
+  lasciato attivo è ancora lì al ritorno.
 * Modalità vetrina… - ruotare una lista di preimpostazioni a tempo, per una
   macchina lasciata accesa come display. La finestra principale può intanto
   andare nell'area di notifica - ma solo se ce n'è una da cui richiamarla.
