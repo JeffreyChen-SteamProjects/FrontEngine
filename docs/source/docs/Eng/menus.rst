@@ -56,4 +56,7 @@ Help menu
 
 * **How to use...** - a short guide inside the application: your first
   overlay, the settings every page shares, and how to clear the screen again.
+* **Shortcut list...** - the global shortcuts as they are actually bound, shown
+  over the screen. Rebinding them changes this list too. Press the shortcut for it
+  again, or Escape, to put it away.
 * Open issue tracker, and a reminder that F12 closes FrontEngine at once.

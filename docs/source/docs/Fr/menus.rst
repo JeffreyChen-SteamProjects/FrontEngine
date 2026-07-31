@@ -59,4 +59,7 @@ Menu Aide
 
 * **Comment l'utiliser…** - un guide court dans l'application : votre premier
   calque, les réglages communs à toutes les pages, et comment dégager l'écran.
+* **Liste des raccourcis…** - les raccourcis globaux tels qu'ils sont réellement
+  attribués, affichés par-dessus l'écran. Les réattribuer met aussi cette liste à
+  jour. Appuyez de nouveau sur le raccourci, ou sur Échap, pour la retirer.
 * Le suivi des problèmes, et le rappel que F12 ferme FrontEngine aussitôt.

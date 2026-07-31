@@ -56,4 +56,7 @@ Menü „Hilfe“
 
 * **Bedienung …** - eine kurze Anleitung in der Anwendung: Ihr erstes Overlay,
   die Einstellungen, die jede Seite teilt, und wie der Bildschirm wieder frei wird.
+* **Tastenkürzel-Liste…** - die globalen Tastenkürzel so, wie sie tatsächlich
+  belegt sind, über dem Bildschirm. Neu belegen ändert auch diese Liste. Erneut
+  das Kürzel drücken oder Escape blendet sie aus.
 * Fehler-Tracker, und der Hinweis, dass F12 FrontEngine sofort beendet.
