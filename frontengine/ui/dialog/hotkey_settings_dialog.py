@@ -32,11 +32,26 @@ _ACTION_LABELS: Dict[str, Tuple[str, str]] = {
     "opacity_down": ("hotkey_opacity_down", "Opacity down"),
     "dashboard_next": ("web_dashboard_next", "Next page"),
     "toggle_lock": ("hotkey_toggle_lock", "Lock / unlock overlays"),
+    "show_shortcuts": ("hotkey_show_shortcuts", "Show this shortcut list"),
 }
 
 
 def _t(key: str, fallback: str) -> str:
     return language_wrapper.language_word_dict.get(key, fallback)
+
+
+def action_label(action: str) -> str:
+    """
+    動作名稱的顯示文字，翻不到就退回動作名稱本身。
+
+    速查表和這個對話框共用同一張表：兩邊各記一份的話，改了快速鍵的說明只會改到
+    其中一邊，而使用者看到的是兩個不同的名字。
+    The display text for an action, falling back to the action name. The cheat
+    sheet and this dialog share one table: with a copy each, renaming a shortcut
+    updates only one of them and the user sees two different names.
+    """
+    key, fallback = _ACTION_LABELS.get(action, ("", str(action)))
+    return _t(key, fallback) if key else fallback
 
 
 class HotkeySettingsDialog(QDialog):

@@ -36,6 +36,18 @@ def build_help_menu(ui_we_want_to_set: FrontEngineMainUI) -> None:
         "How to use..."
     )
 
+    # 也要能從選單開。只能用快速鍵叫出來的「快速鍵速查表」是個笑話：不知道快速鍵
+    # 的人正是最需要它的人。
+    # It has to be reachable from the menu too. A shortcut sheet you can only open
+    # with a shortcut is a joke: the person who does not know the shortcuts is
+    # exactly who needs it.
+    _add_action(
+        help_menu,
+        "shortcut_sheet_action",
+        lambda: ui_we_want_to_set.toggle_shortcut_sheet(),
+        "Shortcut list..."
+    )
+
     _add_action(
         help_menu,
         "help_menu_open_issue",

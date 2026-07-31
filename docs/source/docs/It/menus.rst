@@ -54,4 +54,7 @@ Menu Aiuto
 
 * **Come si usa…** - una guida breve dentro l'applicazione: il primo overlay,
   le impostazioni comuni a tutte le pagine, e come liberare di nuovo lo schermo.
+* **Elenco scorciatoie…** - le scorciatoie globali come sono realmente assegnate,
+  mostrate sopra lo schermo. Riassegnarle aggiorna anche questo elenco. Premi di
+  nuovo la scorciatoia, o Esc, per toglierlo.
 * La segnalazione problemi, e il promemoria che F12 chiude subito FrontEngine.

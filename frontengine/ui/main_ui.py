@@ -15,6 +15,7 @@ from qt_material import apply_stylesheet
 from frontengine.ui.nav.sidebar import NavigationSidebar
 from frontengine.ui.style.app_style import apply_app_style
 
+from frontengine.show.shortcuts.shortcut_sheet import build_sheet
 from frontengine.show.toast.toast_widget import show_toast
 from frontengine.system_tray.extend_system_tray import ExtendSystemTray
 from frontengine.ui.menu.help_menu import build_help_menu
@@ -54,7 +55,7 @@ from frontengine.utils.critical_exit.win32_vk import keyboard_keys_table
 from frontengine.utils.hotkey.hotkey_service import HotkeyService
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
-from frontengine.utils.multi_language.retranslate import retranslator
+from frontengine.utils.multi_language.retranslate import retranslator, translate
 from frontengine.utils.plugins.plugin_loader import load_plugins
 from frontengine.utils.preset_schedule.preset_schedule_service import PresetScheduleService
 from frontengine.ui.dialog.remote_control_dialog import (
@@ -65,6 +66,7 @@ from frontengine.ui.dialog.signage_dialog import current_settings as current_sig
 from frontengine.utils.signage.signage_service import SignageService
 from frontengine.utils.midi.midi_input import MidiInput, binding_key
 from frontengine.utils.remote.remote_server import RemoteServer
+from frontengine.ui.dialog.hotkey_settings_dialog import action_label as hotkey_action_label
 from frontengine.ui.dialog.smart_pause_dialog import current_rules
 from frontengine.utils.screen_privacy.share_watch import ShareWatchService
 from frontengine.utils.screensaver.screensaver_service import ScreensaverService
@@ -682,6 +684,33 @@ class FrontEngineMainUI(QMainWindow):
             self.web_setting_ui.show_next_dashboard_page()
         elif action == "toggle_lock":
             self.control_center_ui.toggle_lock_all()
+        elif action == "show_shortcuts":
+            self.toggle_shortcut_sheet()
+
+    def toggle_shortcut_sheet(self) -> None:
+        """
+        開關快速鍵速查表。已經開著就收起來，所以同一個快速鍵按第二次是關閉——
+        不然使用者得去找別的方法把它關掉。
+        Toggle the shortcut sheet: pressing the same shortcut again closes it,
+        rather than leaving the user hunting for another way to dismiss it.
+        """
+        existing = getattr(self, "shortcut_sheet", None)
+        if existing is not None:
+            try:
+                existing.close()
+            except RuntimeError:  # pragma: no cover - 底層物件已消失
+                pass
+            self.shortcut_sheet = None
+            return
+        sheet = build_sheet(
+            get_hotkey_bindings(),
+            lambda action: hotkey_action_label(action),
+            title=translate("shortcut_sheet_title", "Shortcuts"))
+        if sheet is None:
+            return
+        sheet.set_ui_window_flag()
+        sheet.showFullScreen()
+        self.shortcut_sheet = sheet
 
     def _on_smart_pause_changed(self, paused: bool, reason: str) -> None:
         """
