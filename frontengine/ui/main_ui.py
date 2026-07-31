@@ -67,6 +67,7 @@ from frontengine.utils.midi.midi_input import MidiInput, binding_key
 from frontengine.utils.remote.remote_server import RemoteServer
 from frontengine.ui.dialog.smart_pause_dialog import current_rules
 from frontengine.utils.screen_privacy.share_watch import ShareWatchService
+from frontengine.utils.screensaver.screensaver_service import ScreensaverService
 from frontengine.utils.app_profile.app_profile_service import AppProfileService
 from frontengine.utils.clipboard.clipboard_history import DEFAULT_LIMIT, ClipboardHistory
 from frontengine.utils.clipboard.clipboard_watcher import ClipboardWatcher
@@ -329,6 +330,15 @@ class FrontEngineMainUI(QMainWindow):
         )
         self.preset_schedule_service.start()
 
+        # 閒置夠久就把選定的覆蓋層放上來 / Show the chosen overlay once idle
+        self._screensaver_overlays: list = []
+        self.screensaver_service = ScreensaverService(
+            config_provider=lambda: user_setting_dict.get("screensaver", {})
+        )
+        self.screensaver_service.screensaver_started.connect(self._start_screensaver)
+        self.screensaver_service.screensaver_stopped.connect(self._stop_screensaver)
+        self.screensaver_service.start()
+
         # 還原上次工作階段（若有開啟），再套用啟動預設集
         # Restore the last session when enabled, then apply the startup preset.
         if user_setting_dict.get("restore_last_session"):
@@ -382,6 +392,76 @@ class FrontEngineMainUI(QMainWindow):
         for attribute in ("measure_widget_list", "capture_widget_list", "camera_widget_list"):
             self.control_center_ui.register_overlay_source(
                 lambda attribute=attribute: getattr(self.tools_setting_ui, attribute, []))
+
+    # 螢幕保護能顯示哪些分頁：來源名稱 -> (頁面屬性, 啟動方法, 覆蓋層清單屬性)
+    # What the screensaver can show: source -> (page attribute, start method,
+    # the page's overlay list).
+    _SCREENSAVER_SOURCES = {
+        "video": ("video_setting_ui", "start_play_video", "video_widget_list"),
+        "image": ("image_setting_ui", "start_play_image", "image_widget_list"),
+        "gif": ("gif_setting_ui", "start_play_gif", "gif_widget_list"),
+        "particle": ("particle_setting_ui", "start_play_particle", "particle_list"),
+        "web": ("web_setting_ui", "start_open_web_with_url", "web_widget_list"),
+    }
+
+    @staticmethod
+    def _screensaver_ready(source: str, page: Any) -> bool:
+        """
+        這一頁現在按下開始會不會出東西。
+
+        非問不可：每個分頁在沒選檔案時都會跳一個 modal 訊息框，而螢幕保護正好是
+        在沒有人的時候啟動的——那個對話框會擋在畫面上直到有人回來按掉。
+        Whether pressing start on this page would actually show something.
+
+        This has to be asked: every page opens a modal message box when no file
+        is chosen, and the screensaver fires precisely when nobody is there - the
+        dialog would sit on screen until someone came back and dismissed it.
+        """
+        if source == "web":
+            field = getattr(page, "web_url_input", None)
+            return bool(field is not None and field.text().strip())
+        return bool(getattr(page, "ready_to_play", False))
+
+    def _start_screensaver(self, source: str) -> None:
+        """閒置夠久了：把選定分頁的覆蓋層放上來，並記住是哪幾個。"""
+        entry = self._SCREENSAVER_SOURCES.get(source)
+        if entry is None:
+            return
+        attribute, start_method, list_name = entry
+        page = getattr(self, attribute, None)
+        overlays = getattr(page, list_name, None) if page is not None else None
+        if page is None or overlays is None:
+            return
+        if not self._screensaver_ready(source, page):
+            front_engine_logger.info(
+                f"[FrontEngineMainUI] screensaver source '{source}' has nothing set up")
+            return
+        before = len(overlays)
+        try:
+            getattr(page, start_method)()
+        except Exception as error:  # pragma: no cover - defensive boundary
+            front_engine_logger.warning(f"[FrontEngineMainUI] screensaver start failed: {error!r}")
+            return
+        # 只記下這次新增的那幾個。人回來時關掉的就只有這些，使用者自己開著的
+        # 覆蓋層不會跟著被收走。
+        # Only what this call added. Coming back closes these and nothing else,
+        # so overlays the user opened themselves survive.
+        self._screensaver_overlays = [(overlays, widget) for widget in overlays[before:]]
+
+    def _stop_screensaver(self) -> None:
+        """人回來了：關掉螢幕保護開的那幾個覆蓋層，其他的留著。"""
+        for overlays, widget in self._screensaver_overlays:
+            try:
+                # 先 close() 再從清單移除：只丟掉參考不會跑 closeEvent，計時器與
+                # 媒體都停不下來。
+                # close() before dropping the reference: dropping it alone never
+                # runs closeEvent, so timers and media keep going.
+                widget.close()
+            except RuntimeError:  # pragma: no cover - 底層物件已消失
+                pass
+            if widget in overlays:
+                overlays.remove(widget)
+        self._screensaver_overlays = []
 
     @staticmethod
     def _startup_language() -> str:
@@ -741,7 +821,7 @@ class FrontEngineMainUI(QMainWindow):
     # The background services to stop on close, outermost first.
     _CLOSING_SERVICES = (
         "preset_schedule_service", "theme_schedule_service", "usage_service",
-        "signage_service",
+        "signage_service", "screensaver_service",
         "remote_server", "midi_input", "share_watch_service", "reminder_service",
         "app_profile_service", "smart_pause_service", "hotkey_service",
     )

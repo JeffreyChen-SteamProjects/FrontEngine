@@ -28,6 +28,10 @@ Settings menu
 * App profiles... - apply a preset automatically when a given application comes
   to the front.
 * Reminders... - a message every so many minutes, or at a time of day.
+* Screensaver... - after so many minutes with no mouse or keyboard, put a
+  chosen page's overlay on screen; moving the mouse takes it away again. It
+  uses that page as you have it set up, and closes only what it opened, so
+  anything you left running is still there when you come back.
 * Signage mode... - rotate through a list of presets on a timer, for a machine
   left running as a display. The main window can go to the tray while it runs -
   but only when there is a tray to bring it back from.
