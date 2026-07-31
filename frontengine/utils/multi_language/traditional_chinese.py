@@ -464,6 +464,7 @@ traditional_chinese_word_dict = {
     "pet_chatter_battery": "電量很低，幫我插電好嗎？|快沒電了，小心！|該找充電器囉？|我快撐不住了～",
     "pet_start": "召喚寵物",
     "pet_message_box_text": "找不到寵物圖片",
+    "settings_menu_keep_awake": "保持螢幕喚醒",
     "settings_menu_smart_pause": "智慧暫停…",
     "settings_menu_app_profiles": "程式對應預設集…",
     "settings_menu_reminders": "自訂提醒…",

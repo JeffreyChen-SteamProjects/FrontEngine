@@ -455,6 +455,7 @@ russian_word_dict = {
     "pet_chatter_battery": "Батарея на исходе — подключишь меня?|Мало заряда, осторожнее!|Найдём зарядку?|Я на последних каплях~",
     "pet_start": "Призвать питомца",
     "pet_message_box_text": "Изображение питомца не найдено",
+    "settings_menu_keep_awake": "Не давать экрану гаснуть",
     "settings_menu_smart_pause": "Умная пауза…",
     "settings_menu_app_profiles": "Профили приложений…",
     "settings_menu_reminders": "Напоминания…",

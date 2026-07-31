@@ -456,6 +456,7 @@ simplified_chinese_word_dict = {
     "pet_chatter_battery": "电池快没了 — 帮我插电?|电量低，小心点!|快找个充电器?|快撑不住了~",
     "pet_start": "召唤宠物",
     "pet_message_box_text": "找不到宠物图档",
+    "settings_menu_keep_awake": "保持屏幕唤醒",
     "settings_menu_smart_pause": "智慧暂停…",
     "settings_menu_app_profiles": "应用情境…",
     "settings_menu_reminders": "提醒…",

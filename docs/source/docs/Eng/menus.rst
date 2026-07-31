@@ -25,6 +25,9 @@ Settings menu
   FrontEngine, so only install ones you trust.
 * Smart pause... - hide the overlays while a fullscreen application is running,
   while on battery, or while named applications have focus.
+* Keep the screen awake - stop the display sleeping while you have something on
+  screen. It is released when you switch it off and when FrontEngine closes, so
+  the machine goes back to its own power settings.
 * App profiles... - apply a preset automatically when a given application comes
   to the front.
 * Reminders... - a message every so many minutes, or at a time of day.

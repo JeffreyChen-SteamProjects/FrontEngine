@@ -457,6 +457,7 @@ germany_word_dict = {
     "pet_chatter_battery": "Der Akku ist fast leer – steckst du mich an?|Wenig Energie, pass auf!|Bald ein Ladegerät finden?|Ich laufe auf Reserve~",
     "pet_start": "Haustier erzeugen",
     "pet_message_box_text": "Haustier-Bild nicht gefunden",
+    "settings_menu_keep_awake": "Bildschirm wach halten",
     "settings_menu_smart_pause": "Intelligente Pause …",
     "settings_menu_app_profiles": "App-Profile …",
     "settings_menu_reminders": "Erinnerungen …",
