@@ -10,7 +10,7 @@ rather than in a shell history so they survive between machines and sessions.
 """
 from __future__ import annotations
 
-import subprocess
+import subprocess  # nosec B404 - only ever runs the argv that build_command assembles
 import sys
 import tomllib
 from pathlib import Path
@@ -71,7 +71,15 @@ def main() -> int:
     onefile = "--onefile" in sys.argv[1:]
     command = build_command(read_version(), onefile)
     print(" ".join(command), flush=True)
-    result = subprocess.run(command, cwd=PROJECT_ROOT, check=False)
+    # argv 全部在 build_command() 裡組好：sys.executable、寫死的旗標、由這個檔案
+    # 位置算出來的 repo 路徑，以及 pyproject.toml 的版本字串。命令列參數只用來判斷
+    # 有沒有 --onefile，內容不會進到 argv。list 形式、shell=False，沒有注入面。
+    # Every element comes from build_command(): sys.executable, literal flags,
+    # repo paths derived from this file's location, and the version string in
+    # pyproject.toml. The command line is only checked for --onefile; its content
+    # never reaches argv. List form, shell=False, so there is no injection surface.
+    result = subprocess.run(  # nosec B603 # nosemgrep - argv assembled here, shell=False
+        command, cwd=PROJECT_ROOT, check=False)
     if result.returncode == 0:
         built = OUTPUT_DIR / ("FrontEngine.exe" if onefile
                               else "start_front_engine.dist/FrontEngine.exe")
