@@ -12,8 +12,8 @@ from typing import List, Optional, Tuple
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
-    QAbstractItemView, QDialog, QDialogButtonBox, QGridLayout, QLabel, QListWidget,
-    QListWidgetItem, QPushButton, QSlider, QWidget,
+    QAbstractItemView, QComboBox, QDialog, QDialogButtonBox, QGridLayout, QLabel,
+    QListWidget, QListWidgetItem, QPushButton, QSlider, QWidget,
 )
 
 from frontengine.show.replica.replica_widget import WindowReplicaWidget
@@ -22,6 +22,19 @@ from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import retranslator, tr
 from frontengine.utils.window_pin import window_pin
 from frontengine.utils.window_replica.dwm_thumbnail import available
+
+# 要顯示來源的哪一塊，用比例（左, 上, 右, 下）表示。
+# 用比例而不是像素：來源視窗被調整大小之後，框到的還是同一塊。
+# Which part of the source to show, as (left, top, right, bottom) fractions.
+# Fractions rather than pixels, so a resize of the source keeps the same part.
+CROP_REGIONS = (
+    ("window_replica_whole", "Whole window", None),
+    ("window_replica_top_half", "Top half", (0.0, 0.0, 1.0, 0.5)),
+    ("window_replica_bottom_half", "Bottom half", (0.0, 0.5, 1.0, 1.0)),
+    ("window_replica_left_half", "Left half", (0.0, 0.0, 0.5, 1.0)),
+    ("window_replica_right_half", "Right half", (0.5, 0.0, 1.0, 1.0)),
+    ("window_replica_centre", "Centre", (0.25, 0.25, 0.75, 0.75)),
+)
 
 
 def _t(key: str, fallback: str) -> str:
@@ -47,6 +60,11 @@ class WindowReplicaDialog(QDialog):
         self.show_button = tr(QPushButton(), "window_replica_show", "Show replica")
         self.show_button.clicked.connect(self.start_replica)
 
+        self.crop_label = tr(QLabel(), "window_replica_region", "Show")
+        self.crop_combobox = QComboBox()
+        for key, fallback, region in CROP_REGIONS:
+            self.crop_combobox.addItem(_t(key, fallback), region)
+
         self.opacity_label = tr(QLabel(), "window_replica_opacity", "Opacity")
         self.opacity_slider = QSlider(Qt.Orientation.Horizontal)
         self.opacity_slider.setRange(10, 100)
@@ -69,10 +87,12 @@ class WindowReplicaDialog(QDialog):
         layout.addWidget(self.window_list, 0, 0, 1, 2)
         layout.addWidget(self.refresh_button, 1, 0)
         layout.addWidget(self.show_button, 1, 1)
-        layout.addWidget(self.opacity_label, 2, 0)
-        layout.addWidget(self.opacity_slider, 2, 1)
-        layout.addWidget(self.hint_label, 3, 0, 1, 2)
-        layout.addWidget(self.button_box, 4, 0, 1, 2)
+        layout.addWidget(self.crop_label, 2, 0)
+        layout.addWidget(self.crop_combobox, 2, 1)
+        layout.addWidget(self.opacity_label, 3, 0)
+        layout.addWidget(self.opacity_slider, 3, 1)
+        layout.addWidget(self.hint_label, 4, 0, 1, 2)
+        layout.addWidget(self.button_box, 5, 0, 1, 2)
 
         self.show_button.setEnabled(available())
         self.reload_windows()
@@ -106,7 +126,8 @@ class WindowReplicaDialog(QDialog):
         if chosen is None:
             return None
         handle, title = chosen
-        replica = self._replica_factory(handle, title, self.opacity_slider.value(), None)
+        replica = self._replica_factory(handle, title, self.opacity_slider.value(), None,
+                                        self.crop_combobox.currentData())
         if not replica.start():
             front_engine_logger.info(f"[WindowReplicaDialog] could not replicate {title!r}")
             replica.close()

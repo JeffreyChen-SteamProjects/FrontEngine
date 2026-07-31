@@ -24,6 +24,9 @@ Menü „Einstellungen“
   denselben Rechten wie FrontEngine; installieren Sie nur, was Sie kennen.
 * Intelligente Pause… - Overlays wegräumen, solange eine Vollbild-Anwendung
   läuft, im Akkubetrieb, oder wenn genannte Anwendungen im Vordergrund sind.
+* Bildschirm wach halten - verhindert, dass der Bildschirm schlafen geht, solange
+  etwas zu sehen ist. Wird beim Ausschalten und beim Beenden freigegeben, sodass
+  wieder die eigenen Energieeinstellungen gelten.
 * App-Profile… - eine Voreinstellung anwenden, sobald eine bestimmte Anwendung
   nach vorn kommt.
 * Erinnerungen… - eine Meldung alle so viele Minuten oder zu einer Uhrzeit.
@@ -31,6 +34,9 @@ Menü „Einstellungen“
   einer gewählten Seite anzeigen; eine Mausbewegung nimmt es wieder weg. Es nutzt
   die Seite so, wie sie eingerichtet ist, und schließt nur, was es selbst geöffnet
   hat - was Sie laufen ließen, ist bei Ihrer Rückkehr noch da.
+* Geplante Voreinstellung… - eine Voreinstellung zu einer Uhrzeit an den gewählten
+  Tagen anwenden. Ohne angehakten Tag täglich. Sie löst beim Überschreiten der
+  Uhrzeit aus; ein späterer Start holt sie nicht nach.
 * Anzeigetafel-Modus… - eine Liste von Voreinstellungen auf Zeit durchwechseln,
   für einen Rechner, der als Anzeige läuft. Das Hauptfenster kann dabei in die
   Taskleiste - aber nur, wenn es eine gibt, die es zurückholen kann.
@@ -53,4 +59,7 @@ Menü „Hilfe“
 
 * **Bedienung …** - eine kurze Anleitung in der Anwendung: Ihr erstes Overlay,
   die Einstellungen, die jede Seite teilt, und wie der Bildschirm wieder frei wird.
+* **Tastenkürzel-Liste…** - die globalen Tastenkürzel so, wie sie tatsächlich
+  belegt sind, über dem Bildschirm. Neu belegen ändert auch diese Liste. Erneut
+  das Kürzel drücken oder Escape blendet sie aus.
 * Fehler-Tracker, und der Hinweis, dass F12 FrontEngine sofort beendet.

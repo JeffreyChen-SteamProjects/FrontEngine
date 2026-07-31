@@ -12,7 +12,9 @@ from frontengine.ui.dialog.hotkey_settings_dialog import HotkeySettingsDialog
 from frontengine.ui.dialog.reminder_dialog import ReminderDialog
 from frontengine.ui.dialog.remote_control_dialog import RemoteControlDialog
 from frontengine.ui.dialog.screen_privacy_dialog import ScreenPrivacyDialog
+from frontengine.ui.dialog.preset_schedule_dialog import PresetScheduleDialog
 from frontengine.ui.dialog.screensaver_dialog import ScreensaverDialog
+from frontengine.utils.keep_awake.keep_awake import available as keep_awake_available
 from frontengine.ui.dialog.signage_dialog import SignageDialog
 from frontengine.ui.dialog.smart_pause_dialog import SmartPauseDialog
 from frontengine.ui.dialog.usage_report_dialog import UsageReportDialog
@@ -73,6 +75,15 @@ def build_settings_menu(ui: "FrontEngineMainUI") -> None:
     menu.addAction(autostart_action)
     ui.autostart_action = autostart_action
 
+    keep_awake_action = QAction(_t("settings_menu_keep_awake", "Keep the screen awake"), menu)
+    retranslator.bind(keep_awake_action, "settings_menu_keep_awake", "Keep the screen awake")
+    keep_awake_action.setCheckable(True)
+    keep_awake_action.setChecked(bool(user_setting_dict.get("keep_awake")))
+    keep_awake_action.setEnabled(keep_awake_available())
+    keep_awake_action.toggled.connect(lambda checked: _toggle_keep_awake(ui, checked))
+    menu.addAction(keep_awake_action)
+    ui.keep_awake_action = keep_awake_action
+
     restore_action = QAction(_t("settings_menu_restore_session", "Restore last session"), menu)
     retranslator.bind(restore_action, "settings_menu_restore_session", "Restore last session")
     restore_action.setCheckable(True)
@@ -113,6 +124,14 @@ def build_settings_menu(ui: "FrontEngineMainUI") -> None:
     screensaver_action.triggered.connect(lambda: ScreensaverDialog(ui).exec())
     menu.addAction(screensaver_action)
     ui.screensaver_action = screensaver_action
+
+    preset_schedule_action = QAction(
+        _t("settings_menu_preset_schedule", "Scheduled preset..."), menu)
+    retranslator.bind(preset_schedule_action, "settings_menu_preset_schedule",
+                      "Scheduled preset...")
+    preset_schedule_action.triggered.connect(lambda: PresetScheduleDialog(ui).exec())
+    menu.addAction(preset_schedule_action)
+    ui.preset_schedule_action = preset_schedule_action
 
     signage_action = QAction(_t("settings_menu_signage", "Signage mode..."), menu)
     retranslator.bind(signage_action, "settings_menu_signage", "Signage mode...")
@@ -178,6 +197,25 @@ def _dispose(dialog: QDialog) -> None:
     dialog.settings() after exec() returns.
     """
     dialog.deleteLater()
+
+
+def _toggle_keep_awake(ui: "FrontEngineMainUI", enabled: bool) -> None:
+    """開關保持喚醒，並把選擇記下來。做不到時把勾勾拿掉，不要留一個假的開著。"""
+    service = getattr(ui, "keep_awake", None)
+    if service is None:
+        return
+    if enabled and not service.enable():
+        # 開不起來就把選單的勾勾收回去：勾著卻沒生效比沒有這個選項更糟。
+        # If it could not be held, untick: a ticked box that does nothing is
+        # worse than no box at all.
+        action = getattr(ui, "keep_awake_action", None)
+        if action is not None:
+            action.setChecked(False)
+        return
+    if not enabled:
+        service.disable()
+    user_setting_dict["keep_awake"] = bool(enabled)
+    write_user_setting()
 
 
 def _open_signage_dialog(ui: "FrontEngineMainUI") -> None:

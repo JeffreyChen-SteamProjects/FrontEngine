@@ -25,6 +25,9 @@ Menu Impostazioni
   privilegi di FrontEngine; installa solo quelli di cui ti fidi.
 * Pausa intelligente… - mettere via gli overlay mentre un'applicazione è a
   schermo intero, a batteria, o quando certe applicazioni sono in primo piano.
+* Mantieni lo schermo attivo - impedisce allo schermo di spegnersi finché c'è
+  qualcosa a video. Viene rilasciato quando disattivi l'opzione e alla chiusura di
+  FrontEngine, tornando alle normali impostazioni di risparmio energetico.
 * Profili applicazione… - applicare una preimpostazione quando una data
   applicazione passa in primo piano.
 * Promemoria… - un messaggio ogni tot minuti, o a un'ora precisa.
@@ -32,6 +35,9 @@ Menu Impostazioni
   l'overlay di una pagina scelta; muovere il mouse lo toglie. Usa quella pagina
   così come l'hai impostata e chiude solo ciò che ha aperto: quello che avevi
   lasciato attivo è ancora lì al ritorno.
+* Preimpostazione pianificata… - applicare una preimpostazione a un orario, nei
+  giorni scelti. Senza giorni selezionati, tutti i giorni. Scatta al superamento
+  dell'ora: avviare più tardi non la recupera.
 * Modalità vetrina… - ruotare una lista di preimpostazioni a tempo, per una
   macchina lasciata accesa come display. La finestra principale può intanto
   andare nell'area di notifica - ma solo se ce n'è una da cui richiamarla.
@@ -54,4 +60,7 @@ Menu Aiuto
 
 * **Come si usa…** - una guida breve dentro l'applicazione: il primo overlay,
   le impostazioni comuni a tutte le pagine, e come liberare di nuovo lo schermo.
+* **Elenco scorciatoie…** - le scorciatoie globali come sono realmente assegnate,
+  mostrate sopra lo schermo. Riassegnarle aggiorna anche questo elenco. Premi di
+  nuovo la scorciatoia, o Esc, per toglierlo.
 * La segnalazione problemi, e il promemoria che F12 chiude subito FrontEngine.

@@ -34,4 +34,9 @@ Page Outils
   choisie, tandis que l'originale reste à sa place. Pratique pour surveiller une
   vidéo ou une compilation tout en travaillant. Faites glisser pour la déplacer,
   double-cliquez pour la fermer. Windows uniquement.
+
+  Un duplicata peut n'afficher qu'une partie de la fenêtre - moitié haute ou
+  basse, un côté, ou le centre - pour isoler une colonne de discussion ou une
+  barre de progression. La zone est retenue en proportion : redimensionner
+  l'original montre toujours la même partie.
 * Disposition des fenêtres - retenir où sont les fenêtres et les y remettre.

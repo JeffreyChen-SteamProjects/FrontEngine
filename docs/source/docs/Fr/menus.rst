@@ -27,6 +27,9 @@ Menu Réglages
 * Pause intelligente… - ranger les calques pendant qu'une application est en
   plein écran, sur batterie, ou quand des applications nommées sont au premier
   plan.
+* Garder l'écran allumé - empêche l'écran de s'éteindre tant que quelque chose est
+  affiché. Relâché quand vous désactivez l'option et quand FrontEngine se ferme :
+  les réglages d'alimentation habituels reprennent.
 * Profils d'application… - appliquer un préréglage dès qu'une application donnée
   passe devant.
 * Rappels… - un message toutes les tant de minutes, ou à une heure donnée.
@@ -34,6 +37,9 @@ Menu Réglages
   calque d'une page choisie ; un mouvement de souris le retire. Il utilise la page
   telle que vous l'avez réglée et ne ferme que ce qu'il a ouvert : ce que vous
   aviez laissé tourner est toujours là à votre retour.
+* Préréglage programmé… - appliquer un préréglage à une heure, les jours choisis.
+  Sans jour coché, tous les jours. Il se déclenche au passage de l'heure : démarrer
+  plus tard ne le rattrape pas.
 * Mode affichage… - faire défiler une liste de préréglages sur minuterie, pour
   une machine laissée en vitrine. La fenêtre principale peut alors partir dans
   la zone de notification - mais seulement s'il y en a une pour la ramener.
@@ -56,4 +62,7 @@ Menu Aide
 
 * **Comment l'utiliser…** - un guide court dans l'application : votre premier
   calque, les réglages communs à toutes les pages, et comment dégager l'écran.
+* **Liste des raccourcis…** - les raccourcis globaux tels qu'ils sont réellement
+  attribués, affichés par-dessus l'écran. Les réattribuer met aussi cette liste à
+  jour. Appuyez de nouveau sur le raccourci, ou sur Échap, pour la retirer.
 * Le suivi des problèmes, et le rappel que F12 ferme FrontEngine aussitôt.

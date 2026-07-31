@@ -20,7 +20,7 @@ from PySide6.QtWidgets import QWidget
 
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.window_replica.dwm_thumbnail import (
-    DEFAULT_REPLICA_WIDTH, MIN_REPLICA_SIZE, DwmThumbnail, available, fit_within,
+    DEFAULT_REPLICA_WIDTH, MIN_REPLICA_SIZE, DwmThumbnail, available, crop_rect, fit_within,
 )
 
 
@@ -28,7 +28,8 @@ class WindowReplicaWidget(QWidget):
     """顯示另一個視窗即時畫面的小視窗。"""
 
     def __init__(self, source_handle: int, title: str = "",
-                 opacity_percent: int = 100, parent: Optional[QWidget] = None) -> None:
+                 opacity_percent: int = 100, parent: Optional[QWidget] = None,
+                 crop: Optional[tuple] = None) -> None:
         front_engine_logger.info(f"[WindowReplicaWidget] Init | source={source_handle}")
         super().__init__(parent)
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
@@ -42,6 +43,10 @@ class WindowReplicaWidget(QWidget):
         self.source_handle = int(source_handle)
         self.source_title = title
         self.opacity_percent = max(1, min(100, int(opacity_percent)))
+        # 裁切用比例存：來源視窗被調整大小時，框到的還是同一塊。
+        # The crop is kept as fractions so it still points at the same part of
+        # the source after that window is resized.
+        self.crop = crop
         self.thumbnail = DwmThumbnail()
         self._drag_origin: Optional[QPoint] = None
 
@@ -63,6 +68,14 @@ class WindowReplicaWidget(QWidget):
         if not self.thumbnail.register(int(self.winId()), self.source_handle):
             return False
         source_size = self.thumbnail.source_size()
+        # 有裁切的話，長寬比要照框出來的那一塊算，不是照整個視窗算——否則框一條
+        # 細長的聊天欄會得到一個又寬又空的複本。
+        # With a crop the aspect ratio comes from the cropped part, not the whole
+        # window: cropping a narrow chat column would otherwise give a wide,
+        # mostly empty replica.
+        cropped = crop_rect(source_size, self.crop)
+        if cropped is not None:
+            source_size = (cropped[2] - cropped[0], cropped[3] - cropped[1])
         width, height = fit_within(source_size, (DEFAULT_REPLICA_WIDTH,
                                                  int(DEFAULT_REPLICA_WIDTH * 9 / 16)))
         self.resize(width, height)
@@ -71,7 +84,13 @@ class WindowReplicaWidget(QWidget):
 
     def _refresh(self) -> None:
         self.thumbnail.update(self.width(), self.height(),
-                              opacity=int(self.opacity_percent * 255 / 100))
+                              opacity=int(self.opacity_percent * 255 / 100),
+                              source_rect=crop_rect(self.thumbnail.source_size(), self.crop))
+
+    def set_crop(self, crop: Optional[tuple]) -> None:
+        """換一塊要顯示的區域（None 表示整個視窗）。"""
+        self.crop = crop
+        self._refresh()
 
     def set_opacity_percent(self, percent: int) -> None:
         self.opacity_percent = max(1, min(100, int(percent)))
