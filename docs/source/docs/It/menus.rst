@@ -35,6 +35,9 @@ Menu Impostazioni
   l'overlay di una pagina scelta; muovere il mouse lo toglie. Usa quella pagina
   così come l'hai impostata e chiude solo ciò che ha aperto: quello che avevi
   lasciato attivo è ancora lì al ritorno.
+* Preimpostazione pianificata… - applicare una preimpostazione a un orario, nei
+  giorni scelti. Senza giorni selezionati, tutti i giorni. Scatta al superamento
+  dell'ora: avviare più tardi non la recupera.
 * Modalità vetrina… - ruotare una lista di preimpostazioni a tempo, per una
   macchina lasciata accesa come display. La finestra principale può intanto
   andare nell'area di notifica - ma solo se ce n'è una da cui richiamarla.

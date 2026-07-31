@@ -12,6 +12,7 @@ from frontengine.ui.dialog.hotkey_settings_dialog import HotkeySettingsDialog
 from frontengine.ui.dialog.reminder_dialog import ReminderDialog
 from frontengine.ui.dialog.remote_control_dialog import RemoteControlDialog
 from frontengine.ui.dialog.screen_privacy_dialog import ScreenPrivacyDialog
+from frontengine.ui.dialog.preset_schedule_dialog import PresetScheduleDialog
 from frontengine.ui.dialog.screensaver_dialog import ScreensaverDialog
 from frontengine.utils.keep_awake.keep_awake import available as keep_awake_available
 from frontengine.ui.dialog.signage_dialog import SignageDialog
@@ -123,6 +124,14 @@ def build_settings_menu(ui: "FrontEngineMainUI") -> None:
     screensaver_action.triggered.connect(lambda: ScreensaverDialog(ui).exec())
     menu.addAction(screensaver_action)
     ui.screensaver_action = screensaver_action
+
+    preset_schedule_action = QAction(
+        _t("settings_menu_preset_schedule", "Scheduled preset..."), menu)
+    retranslator.bind(preset_schedule_action, "settings_menu_preset_schedule",
+                      "Scheduled preset...")
+    preset_schedule_action.triggered.connect(lambda: PresetScheduleDialog(ui).exec())
+    menu.addAction(preset_schedule_action)
+    ui.preset_schedule_action = preset_schedule_action
 
     signage_action = QAction(_t("settings_menu_signage", "Signage mode..."), menu)
     retranslator.bind(signage_action, "settings_menu_signage", "Signage mode...")

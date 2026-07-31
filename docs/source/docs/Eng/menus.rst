@@ -35,6 +35,9 @@ Settings menu
   chosen page's overlay on screen; moving the mouse takes it away again. It
   uses that page as you have it set up, and closes only what it opened, so
   anything you left running is still there when you come back.
+* Scheduled preset... - apply a preset at a time of day, on the days you choose.
+  With no day ticked it runs every day. It fires as the time passes, so starting
+  FrontEngine later does not apply it late.
 * Signage mode... - rotate through a list of presets on a timer, for a machine
   left running as a display. The main window can go to the tray while it runs -
   but only when there is a tray to bring it back from.

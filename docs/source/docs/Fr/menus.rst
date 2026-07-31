@@ -37,6 +37,9 @@ Menu Réglages
   calque d'une page choisie ; un mouvement de souris le retire. Il utilise la page
   telle que vous l'avez réglée et ne ferme que ce qu'il a ouvert : ce que vous
   aviez laissé tourner est toujours là à votre retour.
+* Préréglage programmé… - appliquer un préréglage à une heure, les jours choisis.
+  Sans jour coché, tous les jours. Il se déclenche au passage de l'heure : démarrer
+  plus tard ne le rattrape pas.
 * Mode affichage… - faire défiler une liste de préréglages sur minuterie, pour
   une machine laissée en vitrine. La fenêtre principale peut alors partir dans
   la zone de notification - mais seulement s'il y en a une pour la ramener.
