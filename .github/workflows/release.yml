@@ -111,14 +111,47 @@ jobs:
             exit 1
           fi
 
+      # 推版本號會和「同時被合併的其他 PR」搶 main。之前五個 PR 在 36 秒內合併，
+      # 這一步就被 `cannot lock ref 'refs/heads/main'` 打掉、整個發佈失敗。
+      # main 被推走不是錯誤，是正常情況，rebase 後重試即可；rebase 真的衝突才算失敗。
+      # Pushing the bump races with any PR merged at the same time. Five PRs
+      # merged inside 36 seconds once killed this step with
+      # `cannot lock ref 'refs/heads/main'` and failed the whole release.
+      # main moving is normal, not an error: rebase and retry. Only a genuine
+      # rebase conflict is a failure.
       - name: Commit version bump to main
+        id: commit
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add stable.toml pyproject.toml
           git commit -m "Bump version to ${{ steps.bump.outputs.version }} [skip ci]"
-          git push origin main
+
+          for attempt in 1 2 3 4 5; do
+            if git push origin main; then
+              echo "Pushed the version bump on attempt ${attempt}."
+              break
+            fi
+            if [ "${attempt}" -eq 5 ]; then
+              echo "::error::Could not push the version bump after 5 attempts."
+              exit 1
+            fi
+            echo "::notice::Push rejected - main moved. Rebasing and retrying."
+            if ! git pull --rebase origin main; then
+              git rebase --abort || true
+              echo "::error::Rebasing the version bump onto main conflicted."
+              exit 1
+            fi
+            sleep 5
+          done
+
+          # 建置與打標籤都要用這個 SHA。rebase 之後 HEAD 會換，而且此時的工作目錄
+          # 已包含期間合併進來的內容——產出的套件與標籤因此指向同一份程式碼。
+          # The build and the tag both use this SHA. HEAD changes after a rebase,
+          # and the tree now carries whatever was merged in the meantime, so the
+          # published distribution and the tag describe the same code.
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Swap in stable project metadata for build
         run: cp stable.toml pyproject.toml
@@ -155,6 +188,12 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
         run: python -m twine upload --non-interactive dist/*
 
+      # 標籤要綁在剛才推上去的那個 commit，不能綁 main。綁 main 的話，發佈期間又有
+      # PR 合併進來，標籤就會落在後來的 commit 上——v1.0.58 就是這樣指到一個
+      # 「不是 1.0.58 實際發佈內容」的 commit。
+      # Tag the commit that was just pushed, not main. With `--target main`, a PR
+      # merged while the release runs moves the tag onto a later commit: that is
+      # how v1.0.58 ended up on a commit that is not what 1.0.58 shipped.
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -163,4 +202,4 @@ jobs:
             dist/* \
             --title "${{ steps.meta.outputs.name }} ${{ steps.bump.outputs.version }}" \
             --generate-notes \
-            --target main
+            --target "${{ steps.commit.outputs.sha }}"
