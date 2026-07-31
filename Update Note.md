@@ -147,6 +147,12 @@ English, Traditional Chinese, Simplified Chinese, German, Russian, French and
 Italian. Changing language no longer needs a restart — the whole interface
 re-labels itself in place.
 
+If you installed through Steam, the first launch now follows the language your
+Steam client is set to, so it opens in your language rather than in English and
+you do not have to go and find the setting. It happens once: after you pick a
+language yourself, yours is the one that is used. Steam is read locally — no
+account, no network, nothing leaves the machine.
+
 ### A guide inside the application
 
 **Help → How to use...** now explains your first overlay, the settings every page

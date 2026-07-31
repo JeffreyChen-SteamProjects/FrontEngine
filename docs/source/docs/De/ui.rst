@@ -67,6 +67,11 @@ Die Menüleiste
 * **Sprache** - sieben Sprachen: English, 繁體中文, 简体中文, Deutsch, Русский,
   Français, Italiano. Die Oberfläche wechselt sofort; kein Neustart, und alles
   Geöffnete bleibt geöffnet.
+
+  Beim allerersten Start übernimmt FrontEngine die Sprache von Steam, sofern
+  Steam installiert und auf eine dieser sieben eingestellt ist. Das geschieht
+  nur einmal: sobald Sie hier eine Sprache wählen, gilt Ihre. Steam wird lokal
+  gelesen - kein Konto, kein Netz, nichts wird gesendet.
 * **UI-Stil** - das Farbschema, wahlweise nach Tag/Nacht-Zeitplan.
 * **Voreinstellungen** - unter einem Namen sichern, wie alle Seiten eingestellt
   sind, und später zurückholen. Siehe :doc:`menus`.

@@ -116,6 +116,26 @@ def read_user_setting() -> Path:
     return repo.path
 
 
+def is_stored(key: str) -> bool:
+    """
+    這個鍵是不是真的寫在設定檔裡（而不是這裡的預設值）。
+
+    載入是把檔案 merge 到預設值上，所以載入之後 `user_setting_dict` 分不出兩者。
+    「使用者從沒挑過語言」和「使用者挑了英文」要做的事不一樣，得問檔案本身。
+
+    Whether `key` is actually in the settings file rather than a default here.
+
+    Loading merges the file over the defaults, so afterwards `user_setting_dict`
+    cannot tell the two apart. "The user never chose a language" and "the user
+    chose English" call for different behaviour, so this asks the file itself.
+    """
+    repo = _repository()
+    if not repo.exists():
+        return False
+    data = repo.load()
+    return isinstance(data, dict) and key in data
+
+
 def export_user_setting(destination: Path) -> Path:
     """將目前所有設定寫出到指定路徑 / Write all current settings to `destination`."""
     destination = Path(destination)

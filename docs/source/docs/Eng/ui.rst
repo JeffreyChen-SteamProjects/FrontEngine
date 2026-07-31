@@ -64,6 +64,11 @@ The menu bar
 * **Language** - seven languages: English, 繁體中文, 简体中文, Deutsch,
   Русский, Français, Italiano. The interface changes immediately; no restart,
   and whatever you have open stays open.
+
+  On the very first launch, if Steam is installed and set to one of those
+  seven, FrontEngine starts in that language instead of English. It only
+  happens once: after you pick a language here, yours is the one that is
+  used. Steam is read locally - no account, no network, nothing is sent.
 * **UI Style** - the colour theme, optionally on a day/night schedule.
 * **Presets** - save how every page is set up under a name and bring it back
   later. See :doc:`menus`.
