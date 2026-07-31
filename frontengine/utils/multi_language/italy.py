@@ -47,6 +47,7 @@ italian_word_dict = {
     "tools_shape": "Forma",
     "tools_name": "Nome",
     "tools_saved": "Salvati",
+    "target_monitor_span": "Su tutti gli schermi",
     "tools_replicate_window": "Duplica una finestra...",
     "window_replica_title": "Duplica una finestra",
     "window_replica_refresh": "Aggiorna",

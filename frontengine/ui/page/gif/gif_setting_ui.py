@@ -14,6 +14,7 @@ from frontengine.ui.page.utils import (
     enable_file_drop,
     reload_recent_combobox,
     resolve_preferred_monitor,
+    resolve_span,
     show_on_primary_screen,
     show_on_selected_monitor,
 )
@@ -133,6 +134,7 @@ class GIFSettingUI(SettingPage):
                 widget, self.fullscreen_checkbox, monitor
             ),
             preferred_monitor_index=resolve_preferred_monitor(self.target_monitor_combobox),
+            span_all_screens=resolve_span(self.target_monitor_combobox),
         )
 
     def choose_and_copy_file_to_cwd_gif_dir_then_play(self) -> None:

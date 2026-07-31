@@ -47,6 +47,7 @@ russian_word_dict = {
     "tools_shape": "Форма",
     "tools_name": "Имя",
     "tools_saved": "Сохранённые",
+    "target_monitor_span": "На все экраны",
     "tools_replicate_window": "Копия окна...",
     "window_replica_title": "Копия окна",
     "window_replica_refresh": "Обновить",

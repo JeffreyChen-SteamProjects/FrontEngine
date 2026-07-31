@@ -12,6 +12,7 @@ from frontengine.ui.page.utils import (
     build_target_monitor_combobox,
     dispatch_to_monitors,
     resolve_preferred_monitor,
+    resolve_span,
 )
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
@@ -303,4 +304,5 @@ class WEBSettingUI(SettingPage):
             present_primary=lambda widget: widget.showFullScreen(),
             present_on_monitor=present_on_monitor,
             preferred_monitor_index=resolve_preferred_monitor(self.target_monitor_combobox),
+            span_all_screens=resolve_span(self.target_monitor_combobox),
         )

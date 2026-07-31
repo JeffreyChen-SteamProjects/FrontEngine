@@ -32,6 +32,9 @@ Die meisten Seiten tragen dieselben wenigen Bedienelemente, und sie bedeuten
   sie zu verdecken.
 * **Zielbildschirm** - welcher Bildschirm. Auf *Nachfragen* gestellt, werden
   Sie stattdessen jedes Mal gefragt.
+
+  Bei mehr als einem Bildschirm gibt es zusätzlich **Über alle Bildschirme**: ein
+  einzelnes Overlay über den gesamten Desktop statt eines je Bildschirm.
 * **Auf allen Bildschirmen zeigen** - eine Kopie je Monitor statt nur einer.
 * **Unter allen Fenstern zeigen** - das Overlay unter Ihre Fenster schieben, so
   wirkt es wie ein Hintergrund statt wie etwas davor.
