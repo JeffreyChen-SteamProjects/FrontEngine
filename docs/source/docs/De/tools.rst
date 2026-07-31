@@ -30,5 +30,10 @@ Werkzeuge-Seite
   live, während das Original bleibt, wo es ist. Praktisch, um ein Video oder einen
   Build im Auge zu behalten. Ziehen zum Verschieben, Doppelklick zum Schließen.
   Nur Windows.
+
+  Ein Duplikat kann auch nur einen Teil zeigen - obere oder untere Hälfte, eine
+  Seite oder die Mitte - sodass eine Chatspalte oder ein Fortschrittsbalken für
+  sich stehen kann. Der Ausschnitt ist ein Anteil, bleibt also beim Ändern der
+  Fenstergröße derselbe Teil.
 * Fensteranordnung - merken, wo die Fenster stehen, und sie später
   zurücksetzen.

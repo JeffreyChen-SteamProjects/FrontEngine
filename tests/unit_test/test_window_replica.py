@@ -64,10 +64,11 @@ def test_registering_where_dwm_does_not_exist_reports_failure(monkeypatch):
 class FakeReplica:
     """假的複本視窗：只記錄自己有沒有被要求開始與關閉。"""
 
-    def __init__(self, handle, title, opacity, parent=None):
+    def __init__(self, handle, title, opacity, parent=None, crop=None):
         self.handle = handle
         self.title = title
         self.opacity = opacity
+        self.crop = crop
         self.started = False
         self.closed = False
         self.attach_succeeds = True
@@ -92,8 +93,8 @@ def test_a_replica_that_cannot_attach_is_not_left_on_screen(tmp_path):
 
     created = []
 
-    def factory(handle, title, opacity, parent=None):
-        replica = FakeReplica(handle, title, opacity, parent)
+    def factory(handle, title, opacity, parent=None, crop=None):
+        replica = FakeReplica(handle, title, opacity, parent, crop)
         replica.attach_succeeds = False
         created.append(replica)
         return replica
@@ -144,3 +145,94 @@ def test_the_replica_carries_the_chosen_opacity():
     replica = dialog.start_replica()
     assert replica.opacity == 45
     assert replica.handle == 7
+
+
+# --- 只框一塊 / cropping to part of the source -----------------------------
+
+def test_no_crop_means_the_whole_window():
+    from frontengine.utils.window_replica.dwm_thumbnail import crop_rect
+
+    assert crop_rect((1920, 1080), None) is None
+
+
+def test_a_crop_becomes_pixels_on_the_source():
+    from frontengine.utils.window_replica.dwm_thumbnail import crop_rect
+
+    assert crop_rect((1920, 1080), (0.0, 0.0, 1.0, 0.5)) == (0, 0, 1920, 540)
+    assert crop_rect((1920, 1080), (0.5, 0.0, 1.0, 1.0)) == (960, 0, 1920, 1080)
+    assert crop_rect((800, 600), (0.25, 0.25, 0.75, 0.75)) == (200, 150, 600, 450)
+
+
+def test_the_crop_follows_the_source_being_resized():
+    """
+    比例存的意義就在這裡：來源視窗變大之後，框到的還是同一塊，不是原本那些像素。
+    Fractions exist for this: after the source is resized the crop still points
+    at the same part of it rather than at the old pixels.
+    """
+    from frontengine.utils.window_replica.dwm_thumbnail import crop_rect
+
+    right_half = (0.5, 0.0, 1.0, 1.0)
+    assert crop_rect((1000, 500), right_half) == (500, 0, 1000, 500)
+    assert crop_rect((2000, 1000), right_half) == (1000, 0, 2000, 1000)
+
+
+@pytest.mark.parametrize("crop", [
+    (0.5, 0.0, 0.5, 1.0),      # 寬度為零
+    (0.0, 0.7, 1.0, 0.7),      # 高度為零
+    (0.8, 0.0, 0.2, 1.0),      # 左右顛倒
+    (0.0, 0.9, 1.0, 0.1),      # 上下顛倒
+])
+def test_a_crop_with_no_area_is_refused(crop):
+    """
+    寬或高為零的來源矩形會讓 DWM 完全不畫，畫面上只剩一塊黑——看起來像壞掉，
+    而不是「你框錯了」。寧可整個視窗照舊顯示。
+    """
+    from frontengine.utils.window_replica.dwm_thumbnail import crop_rect
+
+    assert crop_rect((1920, 1080), crop) is None
+
+
+def test_a_crop_outside_the_window_is_clamped_not_rejected():
+    from frontengine.utils.window_replica.dwm_thumbnail import crop_rect
+
+    assert crop_rect((1000, 1000), (-0.5, -0.5, 2.0, 2.0)) == (0, 0, 1000, 1000)
+
+
+def test_an_unknown_source_size_cannot_be_cropped():
+    from frontengine.utils.window_replica.dwm_thumbnail import crop_rect
+
+    assert crop_rect((0, 0), (0.0, 0.0, 1.0, 0.5)) is None
+
+
+def test_every_offered_region_produces_a_usable_rectangle():
+    """
+    對話框上的每個選項都要框得出面積。有一個框不出來的話，選了它就只會得到
+    一塊黑，而且沒有任何錯誤訊息。
+    """
+    from frontengine.ui.dialog.window_replica_dialog import CROP_REGIONS
+    from frontengine.utils.window_replica.dwm_thumbnail import crop_rect
+
+    for key, fallback, region in CROP_REGIONS:
+        if region is None:
+            continue
+        rect = crop_rect((1920, 1080), region)
+        assert rect is not None, f"{key} selects nothing"
+        assert rect[2] > rect[0] and rect[3] > rect[1]
+
+
+def test_the_chosen_region_reaches_the_replica():
+    from frontengine.ui.dialog.window_replica_dialog import CROP_REGIONS, WindowReplicaDialog
+
+    captured = {}
+
+    def factory(handle, title, opacity, parent=None, crop=None):
+        captured["crop"] = crop
+        return FakeReplica(handle, title, opacity, parent)
+
+    dialog = WindowReplicaDialog(lister=lambda: [(1, "Window")], replica_factory=factory)
+    dialog.window_list.setCurrentRow(0)
+    index = next(i for i, entry in enumerate(CROP_REGIONS) if entry[2] is not None)
+    dialog.crop_combobox.setCurrentIndex(index)
+
+    dialog.start_replica()
+    assert captured["crop"] == CROP_REGIONS[index][2]
