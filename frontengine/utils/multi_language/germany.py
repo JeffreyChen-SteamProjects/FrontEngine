@@ -47,6 +47,7 @@ germany_word_dict = {
     "tools_shape": "Form",
     "tools_name": "Name",
     "tools_saved": "Gespeichert",
+    "pet_settle_typing": "Beim Tippen still halten",
     "target_monitor_span": "Über alle Bildschirme",
     "tools_replicate_window": "Fenster duplizieren...",
     "window_replica_title": "Fenster duplizieren",

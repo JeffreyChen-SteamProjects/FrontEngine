@@ -13,6 +13,9 @@ A companion that lives on the desktop.
 * Climb walls - let it climb window edges.
 * Sit on windows - let it rest on the top edge of other windows.
 * Speech bubbles - short remarks as the day goes on, when it is fed, and so on.
+* Settle while typing - the pet stops moving while you are at the keyboard and
+  carries on a couple of seconds after you stop, so it does not walk across the
+  line you are reading.
 * Speak out loud - read those remarks aloud.
 * Play tag with each other - two or more pets chase one another.
 * React to audio - the pet moves in time with sound. It can follow your

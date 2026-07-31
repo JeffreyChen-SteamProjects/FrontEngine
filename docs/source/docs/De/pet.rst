@@ -14,6 +14,9 @@ Ein Begleiter, der auf dem Desktop lebt.
 * An Wänden klettern - an Fensterkanten hochlaufen.
 * Auf Fenstern sitzen - auf der Oberkante anderer Fenster rasten.
 * Sprechblasen - kurze Bemerkungen je nach Tageszeit, beim Füttern und so fort.
+* Beim Tippen still halten - das Tier bleibt stehen, solange Sie tippen, und geht
+  ein paar Sekunden danach weiter, damit es nicht über die Zeile läuft, die Sie
+  gerade lesen.
 * Laut vorlesen - diese Bemerkungen ausgesprochen.
 * Fangen spielen - zwei oder mehr Haustiere jagen einander.
 * Auf Audio reagieren - das Haustier bewegt sich zum Ton. Es folgt wahlweise

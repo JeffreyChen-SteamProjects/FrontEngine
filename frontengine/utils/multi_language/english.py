@@ -46,6 +46,7 @@ english_word_dict = {
     "tools_shape": "Shape",
     "tools_name": "Name",
     "tools_saved": "Saved",
+    "pet_settle_typing": "Settle while typing",
     "target_monitor_span": "Span all screens",
     "tools_replicate_window": "Replicate a window...",
     "window_replica_title": "Replicate a window",

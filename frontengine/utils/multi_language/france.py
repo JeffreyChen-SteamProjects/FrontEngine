@@ -47,6 +47,7 @@ french_word_dict = {
     "tools_shape": "Forme",
     "tools_name": "Nom",
     "tools_saved": "Enregistrés",
+    "pet_settle_typing": "Rester tranquille pendant la frappe",
     "target_monitor_span": "Sur tous les écrans",
     "tools_replicate_window": "Dupliquer une fenêtre...",
     "window_replica_title": "Dupliquer une fenêtre",
