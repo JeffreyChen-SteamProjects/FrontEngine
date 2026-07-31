@@ -95,6 +95,29 @@ frontengine/
 - **PR rules**: One feature per PR. All CI checks must pass.
 - **Version updates**: `pyproject.toml` = dev version, `stable.toml` = stable version.
 
+## Release Announcements
+
+`Update Note.txt` is the announcement posted to Steam. It is **BBCode, not
+Markdown** — Steam renders no Markdown, so `**bold**` and `### heading` would
+appear literally in the announcement.
+
+- `[h2]…[/h2]`, `[b]…[/b]`, `[list]` / `[*]` / `[/list]`, `[hr][/hr]`.
+- There is no inline code. Write variable names and formats as plain prose, or
+  leave them out — for a reader on Steam they are noise either way.
+- **One paragraph per line, however long.** Steam turns a single newline into a
+  hard line break, so text wrapped at 80 columns arrives broken mid-sentence.
+- The file is `.txt` on purpose: BBCode in a `.md` renders as noise on GitHub.
+- No title inside the file — Steam has its own title field.
+- **Do not pin a version number in it.** The file lives in this repository, so
+  correcting the number is a merge, and every merge to `main` bumps the version;
+  whatever number is written is wrong the moment it lands. State the window the
+  announcement covers instead — the start of that window does not move.
+- Screenshots have to be uploaded to Steam first and referenced by the URL it
+  returns, so `[img]` tags are added by whoever posts it, not here.
+
+Announce what a user can see. A change that only affects the repository —
+workflow fixes, lint debt, tracked files — does not belong in it.
+
 ## Build & Run
 
 ```bash
