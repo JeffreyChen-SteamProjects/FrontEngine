@@ -26,5 +26,9 @@ Werkzeuge-Seite
   lokal gezeigt, nichts wird aufgezeichnet.
 * Fenster anheften… - das Fenster einer anderen Anwendung im Vordergrund halten
   und seine Durchsichtigkeit ändern. Nur unter Windows.
+* Fenster duplizieren… - ein zweites, kleines Fenster zeigt ein gewähltes Fenster
+  live, während das Original bleibt, wo es ist. Praktisch, um ein Video oder einen
+  Build im Auge zu behalten. Ziehen zum Verschieben, Doppelklick zum Schließen.
+  Nur Windows.
 * Fensteranordnung - merken, wo die Fenster stehen, und sie später
   zurücksetzen.
