@@ -22,6 +22,7 @@ from frontengine.show.presentation.annotation_overlay import (
 from frontengine.show.presentation.cursor_effects import CursorEffectWidget
 from frontengine.show.presentation.keystroke_display import KeystrokeDisplayWidget
 from frontengine.show.presentation.magnifier import MagnifierWidget
+from frontengine.show.freeze.freeze_widget import FreezeWidget, capture_screen
 from frontengine.ui.page.utils import build_target_monitor_combobox, coerce_int, resolve_preferred_monitor
 from frontengine.utils.input_watch.input_watch_service import InputWatchService
 from frontengine.ui.page.layout_kit import SettingPage
@@ -106,6 +107,14 @@ class PresentationSettingUI(SettingPage):
         self.whiteboard_save_button.clicked.connect(self.save_whiteboard)
         self.target_monitor_label = tr(QLabel(), "target_monitor_label", "Target monitor")
         self.target_monitor_combobox = build_target_monitor_combobox()
+
+        # 凍結畫面：把目標螢幕現在的樣子拍下來蓋上去，講解時可以先停住畫面
+        # Freeze: cover the target screen with a photograph of itself, so an
+        # explanation can be paced without the audience watching you work.
+        self.freeze_widget_list: list = []
+        self.freeze_label = tr(QLabel(), "presentation_freeze_label", "Freeze screen")
+        self.freeze_button = tr(QPushButton(), "presentation_freeze_start", "Freeze")
+        self.freeze_button.clicked.connect(self.toggle_freeze)
         self.hint_label = tr(QLabel(), "presentation_hint",
             "Drawing takes the mouse while it is on; the other overlays pass clicks through.")
         self.hint_label.setWordWrap(True)
@@ -137,6 +146,9 @@ class PresentationSettingUI(SettingPage):
         whiteboard.add_inline(self.whiteboard_button, self.whiteboard_save_button)
 
         where = self.add_section("section_where", "Where")
+        freeze = self.add_section(self.freeze_label)
+        freeze.add_inline(self.freeze_button)
+
         where.add_row(self.target_monitor_label, self.target_monitor_combobox)
 
         self.add_body_widget(self.hint_label)
@@ -339,6 +351,68 @@ class PresentationSettingUI(SettingPage):
             self.stop_whiteboard()
         else:
             self.start_whiteboard()
+
+    def toggle_freeze(self):
+        """
+        凍結／解除目標螢幕。已經凍結就解除，所以同一顆按鈕（和同一個快速鍵）
+        兩種方向都走得通。
+        Freeze or unfreeze the target screen. Frozen already means unfreeze, so
+        the same button - and the same shortcut - works both ways.
+        """
+        if self.freeze_widget_list:
+            self.unfreeze()
+            return None
+
+        screens = QGuiApplication.screens()
+        index = resolve_preferred_monitor(self.target_monitor_combobox)
+        screen = screens[index] if index is not None and 0 <= index < len(screens)             else QGuiApplication.primaryScreen()
+
+        pixmap = capture_screen(screen)
+        if pixmap.isNull():
+            # 拍不到就不要蓋一塊空白上去：那會讓整個螢幕變成一片黑，而且看起來
+            # 像當機而不是「凍結失敗」。
+            # Without a picture, do not cover anything: a blank sheet turns the
+            # screen black and reads as a crash rather than a failed freeze.
+            front_engine_logger.info("[PresentationSettingUI] nothing captured, not freezing")
+            return None
+
+        widget = FreezeWidget(pixmap)
+        widget.destroyed.connect(lambda: self._forget_freeze(widget))
+        widget.show_on(screen)
+        self.freeze_widget_list.append(widget)
+        retranslator.set_text(self.freeze_button, "presentation_freeze_stop", "Unfreeze")
+        return widget
+
+    def unfreeze(self) -> None:
+        """解除凍結。"""
+        for widget in self.freeze_widget_list[:]:
+            try:
+                widget.close()
+            except RuntimeError:  # pragma: no cover - 底層物件已消失
+                pass
+        self.freeze_widget_list.clear()
+        retranslator.set_text(self.freeze_button, "presentation_freeze_start", "Freeze")
+
+    def _forget_freeze(self, widget) -> None:
+        """
+        使用者自己按 Escape 或雙擊關掉時也要回到「凍結」字樣，否則按鈕會一直
+        寫著「解除凍結」，而畫面上根本沒有凍結的東西。
+        Coming back to "Freeze" when the user dismissed it themselves; otherwise
+        the button keeps offering to unfreeze something that is no longer there.
+        """
+        if widget in self.freeze_widget_list:
+            self.freeze_widget_list.remove(widget)
+        if self.freeze_widget_list:
+            return
+        try:
+            retranslator.set_text(self.freeze_button, "presentation_freeze_start", "Freeze")
+        except RuntimeError:
+            # destroyed 是在 C++ 物件消失之後才送到的，關閉程式時這一頁可能已經
+            # 先走了。那時候沒有按鈕可以改，也不需要改。
+            # destroyed arrives after the C++ object is gone, and on shutdown this
+            # page may already have followed it. There is no button left to
+            # relabel, and nothing that needs relabelling.
+            pass
 
     def start_whiteboard(self) -> None:
         """開一塊無限畫布（可平移縮放，畫過的東西留在畫布座標上）。"""

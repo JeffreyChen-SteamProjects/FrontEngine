@@ -13,6 +13,10 @@ Presenting Page
 * Keystroke display - show the keys you press, for recordings and demos.
 * Magnifier - a lens that follows the cursor, from 1.5x to 6x.
 * Whiteboard - an endless canvas.
+* Freeze screen - cover the chosen screen with a photograph of itself, so what is
+  projected or shared stays put while you open something else. Press the button or
+  the shortcut again to release it; any key, or a double-click on the frozen image,
+  also releases it.
 
     * Drag with the middle button to pan, scroll to zoom.
     * Strokes are kept in canvas coordinates, so panning and zooming leaves

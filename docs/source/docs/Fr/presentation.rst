@@ -13,6 +13,10 @@ Page Présentation
 * Affichage des touches - montre les touches frappées, utile en démonstration.
 * Loupe - suit le curseur, de 1,5x à 6x.
 * Tableau blanc - une toile sans fin.
+* Figer l'écran - recouvrir l'écran choisi par une photo de lui-même, pour que ce
+  qui est projeté ou partagé reste en place pendant que vous ouvrez autre chose.
+  Réappuyer sur le bouton ou le raccourci le libère ; n'importe quelle touche, ou un
+  double-clic sur l'image figée, également.
 
     * Faites glisser avec le bouton du milieu pour vous déplacer, la molette
       pour zoomer.

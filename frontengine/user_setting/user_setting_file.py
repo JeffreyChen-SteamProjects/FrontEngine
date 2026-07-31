@@ -18,6 +18,7 @@ default_hotkeys: Dict[str, str] = {
     "dashboard_next": "<ctrl>+<shift>+<right>",
     "toggle_lock": "<ctrl>+<shift>+l",
     "show_shortcuts": "<ctrl>+<shift>+<f8>",
+    "toggle_freeze": "<ctrl>+<shift>+<f7>",
 }
 
 user_setting_dict: Dict[str, Any] = {

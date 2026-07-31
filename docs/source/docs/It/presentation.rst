@@ -14,6 +14,10 @@ Pagina Presentazione
   dimostrazioni.
 * Lente - segue il cursore, da 1,5x a 6x.
 * Lavagna - una tela senza fine.
+* Congela lo schermo - coprire lo schermo scelto con una sua fotografia, così ciò
+  che è proiettato o condiviso resta fermo mentre apri altro. Premere di nuovo il
+  pulsante o la scorciatoia lo libera; anche un tasto qualsiasi o un doppio clic
+  sull'immagine ferma.
 
     * Trascina col tasto centrale per spostarti, la rotella per ingrandire.
     * I tratti sono tenuti in coordinate della tela, quindi spostarsi e

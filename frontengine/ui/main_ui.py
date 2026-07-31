@@ -698,6 +698,13 @@ class FrontEngineMainUI(QMainWindow):
             self.control_center_ui.toggle_lock_all()
         elif action == "show_shortcuts":
             self.toggle_shortcut_sheet()
+        elif action == "toggle_freeze":
+            # 畫面被凍結時，主視窗就在那張靜止圖後面，按鈕點不到——所以這個
+            # 快速鍵是唯一保證按得到的解除方式。
+            # While frozen the main window is behind the still image and its
+            # buttons cannot be reached; this shortcut is the way out that is
+            # always available.
+            self.presentation_setting_ui.toggle_freeze()
 
     def toggle_shortcut_sheet(self) -> None:
         """

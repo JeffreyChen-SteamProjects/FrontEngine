@@ -33,6 +33,7 @@ _ACTION_LABELS: Dict[str, Tuple[str, str]] = {
     "dashboard_next": ("web_dashboard_next", "Next page"),
     "toggle_lock": ("hotkey_toggle_lock", "Lock / unlock overlays"),
     "show_shortcuts": ("hotkey_show_shortcuts", "Show this shortcut list"),
+    "toggle_freeze": ("hotkey_toggle_freeze", "Freeze / unfreeze the screen"),
 }
 
 
