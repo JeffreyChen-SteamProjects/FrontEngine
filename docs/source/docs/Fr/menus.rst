@@ -30,6 +30,10 @@ Menu Réglages
 * Profils d'application… - appliquer un préréglage dès qu'une application donnée
   passe devant.
 * Rappels… - un message toutes les tant de minutes, ou à une heure donnée.
+* Économiseur d'écran… - après tant de minutes sans souris ni clavier, afficher le
+  calque d'une page choisie ; un mouvement de souris le retire. Il utilise la page
+  telle que vous l'avez réglée et ne ferme que ce qu'il a ouvert : ce que vous
+  aviez laissé tourner est toujours là à votre retour.
 * Mode affichage… - faire défiler une liste de préréglages sur minuterie, pour
   une machine laissée en vitrine. La fenêtre principale peut alors partir dans
   la zone de notification - mais seulement s'il y en a une pour la ramener.
