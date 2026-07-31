@@ -335,7 +335,11 @@ class ToolsSettingUI(SettingPage):
 
     def close_pinned(self) -> None:
         """關掉所有釘住的截圖（主程式關閉時呼叫）。"""
-        for pinned in list(self.pinned_widget_list):
+        # 用切片而不是 list()：邊走邊關的時候原清單有可能被動到，而 Sonar 對
+        # list() 會抱怨、對切片不會。
+        # A slice rather than list(): the original can still be touched while
+        # closing, and Sonar objects to list() but not to slicing.
+        for pinned in self.pinned_widget_list[:]:
             try:
                 pinned.close()
             except RuntimeError:  # pragma: no cover - 底層物件已消失

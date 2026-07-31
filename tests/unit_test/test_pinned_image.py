@@ -67,7 +67,9 @@ def test_applying_zoom_resizes_the_widget():
     widget = PinnedImageWidget(QPixmap(320, 180))
     widget.apply_zoom(2.0)
     assert widget.zoom == 2.0
-    assert (widget.width(), widget.height()) == zoom_size((320, 180), 2.0)
+    expected_width, expected_height = zoom_size((320, 180), 2.0)
+    assert widget.width() == expected_width
+    assert widget.height() == expected_height
     widget.close()
 
 
