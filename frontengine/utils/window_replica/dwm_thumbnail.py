@@ -67,10 +67,19 @@ class DwmThumbnail:
     一個註冊好的 DWM 縮圖。register() 開始、update() 調整、unregister() 收掉。
 
     縮圖是系統資源，忘了 unregister 的話 DWM 會一直替一個已經看不到的目的地合成
-    畫面。這裡在 __del__ 也補一次，不過正常路徑應該由呼叫端明確收掉。
-    A registered DWM thumbnail. Registering is a system resource: forgetting to
-    unregister leaves DWM compositing for a destination nobody can see. __del__
-    catches that, but the normal path is for the caller to release it explicitly.
+    畫面。釋放一律由呼叫端明確做，**沒有** __del__ 兜底：直譯器關閉時的解構順序
+    不保證，那時 ctypes 載入的 dwmapi 可能已經不在，靠它反而是靠一個不會發生的
+    保險。實際的三條路徑是覆蓋層的 closeEvent、對話框的 close_all()、以及主程式
+    關閉時的收尾。
+
+    A registered DWM thumbnail. It is a system resource: forgetting to
+    unregister leaves DWM compositing for a destination nobody can see.
+
+    Releasing is always explicit, with **no** __del__ fallback: destruction order
+    at interpreter shutdown is not guaranteed and the ctypes-loaded dwmapi may
+    already be gone, so relying on it means relying on something that may never
+    run. The three real paths are the overlay's closeEvent, the dialog's
+    close_all(), and the application's own shutdown.
     """
 
     def __init__(self) -> None:
@@ -178,9 +187,3 @@ class DwmThumbnail:
             front_engine_logger.warning(f"[DwmThumbnail] unregister error: {error!r}")
         finally:
             self._handle = None
-
-    def __del__(self) -> None:  # pragma: no cover - 收尾保險
-        try:
-            self.unregister()
-        except Exception:
-            pass
