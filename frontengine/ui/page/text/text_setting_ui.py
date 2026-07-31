@@ -2,7 +2,7 @@ import threading
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
-from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QLineEdit, QPushButton, QCheckBox, QComboBox, \
+from PySide6.QtWidgets import QSlider, QLabel, QLineEdit, QPushButton, QCheckBox, QComboBox, \
     QFontComboBox, QMessageBox
 
 from frontengine.show.text.draw_text import TextWidget
@@ -15,6 +15,7 @@ from frontengine.ui.page.utils import (
     dispatch_to_monitors,
     resolve_preferred_monitor,
 )
+from frontengine.ui.page.layout_kit import SettingPage
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import retranslator, tr
@@ -33,12 +34,11 @@ _TEXT_COLORS = [
 ]
 
 
-class TextSettingUI(QWidget):
+class TextSettingUI(SettingPage):
     def __init__(self):
         front_engine_logger.info("[TextSettingUI] Init")
-        super().__init__()
-        self.grid_layout = QGridLayout(self)
-        self.grid_layout.setContentsMargins(0, 0, 0, 0)
+        super().__init__("tab_text_text", "page_subtitle_text",
+                         "Text", "Put a line of text on top of everything else.")
 
         # Init variable
         self.text_widget_list = []
@@ -136,34 +136,32 @@ class TextSettingUI(QWidget):
             language_wrapper.language_word_dict.get("weather_location_hint", "e.g. Taipei"))
 
         # Layout
-        self.grid_layout.addWidget(self.opacity_label, 0, 0)
-        self.grid_layout.addWidget(self.opacity_slider_value_label, 0, 1)
-        self.grid_layout.addWidget(self.opacity_slider, 0, 2)
-        self.grid_layout.addWidget(self.font_size_label, 1, 0)
-        self.grid_layout.addWidget(self.font_size_slider_value_label, 1, 1)
-        self.grid_layout.addWidget(self.font_size_slider, 1, 2)
-        self.grid_layout.addWidget(self.show_on_all_screen_checkbox, 2, 0)
-        self.grid_layout.addWidget(self.show_on_bottom_checkbox, 2, 1)
-        self.grid_layout.addWidget(self.text_position_label, 3, 0)
-        self.grid_layout.addWidget(self.text_position_combobox, 3, 1)
-        self.grid_layout.addWidget(self.start_button, 4, 0)
-        self.grid_layout.addWidget(self.line_edit, 4, 1)
-        self.grid_layout.addWidget(self.target_monitor_label, 5, 0)
-        self.grid_layout.addWidget(self.target_monitor_combobox, 5, 1)
-        self.grid_layout.addWidget(self.text_color_label, 6, 0)
-        self.grid_layout.addWidget(self.text_color_combobox, 6, 1)
-        self.grid_layout.addWidget(self.font_family_label, 7, 0)
-        self.grid_layout.addWidget(self.font_family_combobox, 7, 1)
-        self.grid_layout.addWidget(self.marquee_checkbox, 8, 0)
-        self.grid_layout.addWidget(self.marquee_speed_label, 8, 1)
-        self.grid_layout.addWidget(self.marquee_speed_combobox, 8, 2)
-        self.grid_layout.addWidget(self.outline_checkbox, 9, 0)
-        self.grid_layout.addWidget(self.outline_color_combobox, 9, 1)
-        self.grid_layout.addWidget(self.text_source_label, 10, 0)
-        self.grid_layout.addWidget(self.text_source_combobox, 10, 1)
-        self.grid_layout.addWidget(self.weather_location_label, 11, 0)
-        self.grid_layout.addWidget(self.weather_location_edit, 11, 1)
-        self.grid_layout.addWidget(self.text_source_hint_label, 12, 0, 1, 3)
+        content = self.add_section("section_content", "Content")
+        content.add_row("text", self.line_edit, "Text")
+        content.add_row(self.text_source_label, self.text_source_combobox)
+        content.add_row(self.weather_location_label, self.weather_location_edit)
+        content.add_widget(self.text_source_hint_label)
+
+        appearance = self.add_section("section_appearance", "Appearance")
+        appearance.add_slider_row(
+            self.opacity_label, self.opacity_slider, self.opacity_slider_value_label)
+        appearance.add_slider_row(
+            self.font_size_label, self.font_size_slider, self.font_size_slider_value_label)
+        appearance.add_row(self.font_family_label, self.font_family_combobox)
+        appearance.add_row(self.text_color_label, self.text_color_combobox)
+        appearance.add_inline(self.outline_checkbox, self.outline_color_combobox)
+
+        behaviour = self.add_section("section_behaviour", "Behaviour")
+        behaviour.add_row(self.text_position_label, self.text_position_combobox)
+        behaviour.add_inline(self.marquee_checkbox, self.marquee_speed_label,
+                             self.marquee_speed_combobox)
+
+        where = self.add_section("section_where", "Where")
+        where.add_row(self.target_monitor_label, self.target_monitor_combobox)
+        where.add_inline(self.show_on_all_screen_checkbox, self.show_on_bottom_checkbox)
+
+        self.finish_body()
+        self.set_footer(primary=self.start_button)
         self._update_source_hint()
 
     def set_show_all_screen(self) -> None:

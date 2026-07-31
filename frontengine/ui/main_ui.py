@@ -7,9 +7,13 @@ from typing import Any, Dict, Optional, Type
 from PySide6.QtCore import QByteArray, QTimer
 from PySide6.QtGui import QIcon, Qt
 from PySide6.QtWidgets import (
-    QMainWindow, QApplication, QGridLayout, QStyle, QTabWidget, QMenuBar, QWidget,
+    QMainWindow, QApplication, QGridLayout, QHBoxLayout, QStackedWidget, QStyle,
+    QMenuBar, QWidget,
 )
 from qt_material import apply_stylesheet
+
+from frontengine.ui.nav.sidebar import NavigationSidebar
+from frontengine.ui.style.app_style import apply_app_style
 
 from frontengine.show.toast.toast_widget import show_toast
 from frontengine.system_tray.extend_system_tray import ExtendSystemTray
@@ -48,7 +52,7 @@ from frontengine.utils.critical_exit.win32_vk import keyboard_keys_table
 from frontengine.utils.hotkey.hotkey_service import HotkeyService
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
-from frontengine.utils.multi_language.retranslate import retranslator, translate
+from frontengine.utils.multi_language.retranslate import retranslator
 from frontengine.utils.plugins.plugin_loader import load_plugins
 from frontengine.utils.preset_schedule.preset_schedule_service import PresetScheduleService
 from frontengine.ui.dialog.remote_control_dialog import (
@@ -133,10 +137,20 @@ class FrontEngineMainUI(QMainWindow):
         self.grid_layout = QGridLayout()
         self.grid_layout.setContentsMargins(0, 0, 0, 0)
 
-        # Tab Widget 作為主介面
-        # Tab widget as main interface
-        self.tab_widget = QTabWidget(self)
-        self.setCentralWidget(self.tab_widget)
+        # 主介面：左側導覽 + 右側頁面堆疊
+        # Main interface: navigation on the left, the page stack on the right
+        self.sidebar = NavigationSidebar(self)
+        self.page_stack = QStackedWidget(self)
+        self.page_stack.setObjectName("pageBody")
+        self.sidebar.page_requested.connect(self.page_stack.setCurrentIndex)
+
+        central = QWidget(self)
+        central_layout = QHBoxLayout(central)
+        central_layout.setContentsMargins(0, 0, 0, 0)
+        central_layout.setSpacing(0)
+        central_layout.addWidget(self.sidebar)
+        central_layout.addWidget(self.page_stack, 1)
+        self.setCentralWidget(central)
 
         # 各功能頁面初始化
         # Initialize each functional page
@@ -368,36 +382,61 @@ class FrontEngineMainUI(QMainWindow):
                 lambda attribute=attribute: getattr(self.tools_setting_ui, attribute, []))
 
     def _add_tabs(self) -> None:
-        """加入所有內建與擴充的 Tab / Add all built-in and extended tabs"""
-        tabs = [
-            (self.video_setting_ui, "tab_video_text"),
-            (self.image_setting_ui, "tab_image_text"),
-            (self.web_setting_ui, "tab_web_text"),
-            (self.gif_setting_ui, "tab_gif_text"),
-            (self.sound_player_setting_ui, "tab_sound_text"),
-            (self.text_setting_ui, "tab_text_text"),
-            (self.scene_setting_ui, "tab_scene_text"),
-            (self.particle_setting_ui, "tab_particle_text"),
-            (self.pet_setting_ui, "tab_pet_text"),
-            (self.screen_care_setting_ui, "tab_screen_care_text"),
-            (self.presentation_setting_ui, "tab_presentation_text"),
-            (self.wallpaper_setting_ui, "tab_wallpaper_text"),
-            (self.focus_setting_ui, "tab_focus_text"),
-            (self.widgets_setting_ui, "tab_widgets_text"),
-            (self.tools_setting_ui, "tab_tools_text"),
-            (self.control_center_ui, "tab_control_center_text"),
+        """
+        建立左側導覽與頁面堆疊 / Build the sidebar and the page stack.
+
+        分頁依用途分組。先前十六個分頁擠成一排，視窗一窄就長出捲動箭頭，而且並排
+        的十六個詞看不出誰跟誰是一類；分組之後「我要放東西上螢幕」和「我要專心
+        工作」是兩件不同的事，找起來不必逐一讀過去。
+        The pages are grouped by what they are for. Sixteen tabs in one row grew
+        scroll arrows as soon as the window narrowed, and gave no clue which
+        belonged together; grouped, "put something on screen" and "help me
+        concentrate" are visibly different errands rather than sixteen words to
+        read through.
+        """
+        groups = [
+            ("nav_group_on_screen", "On screen", [
+                (self.video_setting_ui, "tab_video_text"),
+                (self.image_setting_ui, "tab_image_text"),
+                (self.web_setting_ui, "tab_web_text"),
+                (self.gif_setting_ui, "tab_gif_text"),
+                (self.text_setting_ui, "tab_text_text"),
+                (self.sound_player_setting_ui, "tab_sound_text"),
+                (self.scene_setting_ui, "tab_scene_text"),
+                (self.particle_setting_ui, "tab_particle_text"),
+            ]),
+            ("nav_group_desktop", "Desktop", [
+                (self.pet_setting_ui, "tab_pet_text"),
+                (self.wallpaper_setting_ui, "tab_wallpaper_text"),
+                (self.widgets_setting_ui, "tab_widgets_text"),
+            ]),
+            ("nav_group_work", "Work", [
+                (self.focus_setting_ui, "tab_focus_text"),
+                (self.screen_care_setting_ui, "tab_screen_care_text"),
+                (self.presentation_setting_ui, "tab_presentation_text"),
+                (self.tools_setting_ui, "tab_tools_text"),
+            ]),
+            ("nav_group_control", "Control", [
+                (self.control_center_ui, "tab_control_center_text"),
+            ]),
         ]
 
-        for index, (widget, lang_key) in enumerate(tabs):
-            self.tab_widget.addTab(widget, translate(lang_key))
-            # setTabText 需要索引，所以索引跟著這筆登記一起記下來
-            # setTabText needs the index, so it travels with the entry.
-            retranslator.bind(self.tab_widget, lang_key, "", "setTabText", index)
+        for group_key, group_fallback, entries in groups:
+            self.sidebar.add_group(group_key, group_fallback)
+            for widget, lang_key in entries:
+                index = self.page_stack.addWidget(widget)
+                self.sidebar.add_page(lang_key, index)
 
-        # 加入外部擴充 Tab
-        # Add external extension tabs
-        for widget_name, widget in FrontEngine_EXTEND_TAB.items():
-            self.tab_widget.addTab(widget(), widget_name)
+        # 外掛註冊的分頁自成一組，使用者才看得出哪些不是內建的
+        # Plugin tabs get their own group, so it is visible which pages did not
+        # ship with the application.
+        if FrontEngine_EXTEND_TAB:
+            self.sidebar.add_group("nav_group_extensions", "Extensions")
+            for widget_name, widget in FrontEngine_EXTEND_TAB.items():
+                index = self.page_stack.addWidget(widget())
+                self.sidebar.add_page(widget_name, index, widget_name)
+
+        self.sidebar.select_page(0)
 
     def _setup_icon(self, show_system_tray_ray: bool) -> None:
         """設定視窗 Icon 與系統托盤 / Setup window icon and system tray"""
@@ -427,7 +466,11 @@ class FrontEngineMainUI(QMainWindow):
     def startup_setting(self) -> None:
         """啟動時套用樣式並還原視窗大小/位置（無記錄時最大化） / Apply stylesheet
         and restore the saved window geometry (maximize when none is stored)."""
-        apply_stylesheet(self, theme=user_setting_dict.get("theme"))
+        theme = user_setting_dict.get("theme")
+        apply_stylesheet(self, theme=theme)
+        # qt-material 會把樣式表整份寫掉，所以自訂樣式一定要接在它後面
+        # apply_stylesheet replaces the whole stylesheet, so ours goes after it
+        apply_app_style(self, theme)
         # 還原上次選的畫質檔位（設定檔一直有存，只是從來沒有人讀回來）
         # Restore the quality tier chosen last time: it was always written to the
         # settings file, just never read back.
@@ -483,6 +526,7 @@ class FrontEngineMainUI(QMainWindow):
         front_engine_logger.info(f"[FrontEngineMainUI] _apply_theme | theme={theme}")
         try:
             apply_stylesheet(self, theme=theme)
+            apply_app_style(self, theme)
             user_setting_dict["theme"] = theme
         except Exception as error:
             front_engine_logger.warning(f"[FrontEngineMainUI] apply theme failed: {error!r}")

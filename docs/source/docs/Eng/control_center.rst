@@ -3,7 +3,7 @@ Control Center Page
 
 .. image:: ../image/control_center/control_center.png
 
-One page that reaches every overlay, including the ones the other tabs opened.
+One page that reaches every overlay, including the ones the other pages opened.
 
 Closing
 

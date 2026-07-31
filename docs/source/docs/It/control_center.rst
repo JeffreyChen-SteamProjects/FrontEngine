@@ -4,7 +4,7 @@ Pagina Centro di controllo
 .. image:: ../image/control_center/control_center.png
 
 Una pagina che raggiunge ogni overlay, compresi quelli aperti dalle altre
-schede.
+pagine.
 
 Chiusura
 

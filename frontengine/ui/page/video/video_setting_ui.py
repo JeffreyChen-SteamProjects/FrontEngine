@@ -1,10 +1,11 @@
 from typing import Optional
 
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QPushButton, QMessageBox, QCheckBox
+from PySide6.QtWidgets import QSlider, QLabel, QPushButton, QMessageBox, QCheckBox
 
 from frontengine.show.video.video_player import VideoWidget
 from frontengine.ui.dialog.choose_file_dialog import choose_video
+from frontengine.ui.page.layout_kit import SettingPage
 from frontengine.ui.page.utils import (
     build_recent_combobox,
     build_target_monitor_combobox,
@@ -22,12 +23,11 @@ from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import tr
 
 
-class VideoSettingUI(QWidget):
+class VideoSettingUI(SettingPage):
     def __init__(self):
         front_engine_logger.info("[VideoSettingUI] Init")
-        super().__init__()
-        self.grid_layout = QGridLayout(self)
-        self.grid_layout.setContentsMargins(0, 0, 0, 0)
+        super().__init__("tab_video_text", "page_subtitle_video",
+                         "Video", "Play a video on top of everything else.")
 
         # Init variable
         self.video_widget_list = []
@@ -93,26 +93,27 @@ class VideoSettingUI(QWidget):
         # Accept dropped video files
         self._drop_filter = enable_file_drop(self, (".mp4",), self._on_file_dropped)
 
-        # Layout
-        self.grid_layout.addWidget(self.opacity_label, 0, 0)
-        self.grid_layout.addWidget(self.opacity_slider_value_label, 0, 1)
-        self.grid_layout.addWidget(self.opacity_slider, 0, 2)
-        self.grid_layout.addWidget(self.play_rate_label, 1, 0)
-        self.grid_layout.addWidget(self.play_rate_slider_value_label, 1, 1)
-        self.grid_layout.addWidget(self.play_rate_slider, 1, 2)
-        self.grid_layout.addWidget(self.volume_label, 2, 0)
-        self.grid_layout.addWidget(self.volume_slider_value_label, 2, 1)
-        self.grid_layout.addWidget(self.volume_slider, 2, 2)
-        self.grid_layout.addWidget(self.choose_file_button, 3, 0)
-        self.grid_layout.addWidget(self.show_on_all_screen_checkbox, 4, 0)
-        self.grid_layout.addWidget(self.show_on_bottom_checkbox, 4, 1)
-        self.grid_layout.addWidget(self.fullscreen_checkbox, 4, 2)
-        self.grid_layout.addWidget(self.start_button, 5, 0)
-        self.grid_layout.addWidget(self.ready_label, 5, 1)
-        self.grid_layout.addWidget(self.target_monitor_label, 6, 0)
-        self.grid_layout.addWidget(self.target_monitor_combobox, 6, 1)
-        self.grid_layout.addWidget(self.recent_files_label, 7, 0)
-        self.grid_layout.addWidget(self.recent_files_combobox, 7, 1)
+        # Layout: 先選片子，再調外觀，最後決定放在哪一個螢幕
+        # Layout: pick the file, then how it looks, then where it goes
+        source = self.add_section("section_source", "Source")
+        source.add_inline(self.choose_file_button)
+        source.add_row(self.recent_files_label, self.recent_files_combobox)
+
+        appearance = self.add_section("section_appearance", "Appearance")
+        appearance.add_slider_row(
+            self.opacity_label, self.opacity_slider, self.opacity_slider_value_label)
+        appearance.add_slider_row(
+            self.play_rate_label, self.play_rate_slider, self.play_rate_slider_value_label)
+        appearance.add_slider_row(
+            self.volume_label, self.volume_slider, self.volume_slider_value_label)
+
+        where = self.add_section("section_where", "Where")
+        where.add_row(self.target_monitor_label, self.target_monitor_combobox)
+        where.add_inline(self.show_on_all_screen_checkbox, self.show_on_bottom_checkbox,
+                         self.fullscreen_checkbox)
+
+        self.finish_body()
+        self.set_footer(primary=self.start_button, status=self.ready_label)
 
     def set_show_all_screen(self) -> None:
         front_engine_logger.info("[VideoSettingUI] set_show_all_screen")

@@ -12,7 +12,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import (
     QFileDialog,
-    QCheckBox, QComboBox, QGridLayout, QLabel, QPushButton, QSlider, QWidget,
+    QCheckBox, QComboBox, QLabel, QPushButton, QSlider,
 )
 
 from frontengine.show.canvas.whiteboard_widget import WhiteboardWidget
@@ -24,19 +24,19 @@ from frontengine.show.presentation.keystroke_display import KeystrokeDisplayWidg
 from frontengine.show.presentation.magnifier import MagnifierWidget
 from frontengine.ui.page.utils import build_target_monitor_combobox, coerce_int, resolve_preferred_monitor
 from frontengine.utils.input_watch.input_watch_service import InputWatchService
+from frontengine.ui.page.layout_kit import SettingPage
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import retranslator, tr
 
 
-class PresentationSettingUI(QWidget):
+class PresentationSettingUI(SettingPage):
     """簡報與教學工具設定頁。"""
 
     def __init__(self):
         front_engine_logger.info("[PresentationSettingUI] Init")
-        super().__init__()
-        self.grid_layout = QGridLayout(self)
-        self.grid_layout.setContentsMargins(0, 0, 0, 0)
+        super().__init__("tab_presentation_text", "page_subtitle_presentation",
+                         "Presenting", "Draw, magnify and highlight while you present.")
 
         self.annotation_widget_list: List[AnnotationOverlay] = []
         self.whiteboard_widget_list: List[WhiteboardWidget] = []
@@ -111,28 +111,36 @@ class PresentationSettingUI(QWidget):
         self.hint_label.setWordWrap(True)
 
         # Layout
-        self.grid_layout.addWidget(self.annotate_label, 0, 0)
-        self.grid_layout.addWidget(self.annotate_tool_combobox, 0, 1)
-        self.grid_layout.addWidget(self.annotate_color_combobox, 0, 2)
-        self.grid_layout.addWidget(self.annotate_width_slider, 1, 1, 1, 2)
-        self.grid_layout.addWidget(self.annotate_button, 2, 0)
-        self.grid_layout.addWidget(self.annotate_undo_button, 2, 1)
-        self.grid_layout.addWidget(self.annotate_clear_button, 2, 2)
-        self.grid_layout.addWidget(self.cursor_label, 3, 0)
-        self.grid_layout.addWidget(self.cursor_ring_checkbox, 3, 1)
-        self.grid_layout.addWidget(self.cursor_ripple_checkbox, 3, 2)
-        self.grid_layout.addWidget(self.cursor_spotlight_checkbox, 4, 1)
-        self.grid_layout.addWidget(self.cursor_button, 4, 0)
-        self.grid_layout.addWidget(self.keystroke_label, 5, 0)
-        self.grid_layout.addWidget(self.keystroke_button, 5, 1)
-        self.grid_layout.addWidget(self.magnifier_label, 6, 0)
-        self.grid_layout.addWidget(self.magnifier_zoom_combobox, 6, 1)
-        self.grid_layout.addWidget(self.magnifier_button, 6, 2)
-        self.grid_layout.addWidget(self.whiteboard_button, 7, 0)
-        self.grid_layout.addWidget(self.whiteboard_save_button, 7, 1)
-        self.grid_layout.addWidget(self.target_monitor_label, 8, 0)
-        self.grid_layout.addWidget(self.target_monitor_combobox, 8, 1)
-        self.grid_layout.addWidget(self.hint_label, 9, 0, 1, 3)
+        # 簡報頁是五個各自獨立的工具，開關互不相干，所以一個工具一個分區
+        # Five independent tools whose switches have nothing to do with each
+        # other, so each gets its own section.
+        annotate = self.add_section(self.annotate_label)
+        annotate.add_row("presentation_tool", self.annotate_tool_combobox, "Tool")
+        annotate.add_row("presentation_colour", self.annotate_color_combobox, "Colour")
+        annotate.add_row("presentation_width", self.annotate_width_slider, "Width")
+        annotate.add_inline(self.annotate_button, self.annotate_undo_button,
+                            self.annotate_clear_button)
+
+        cursor = self.add_section(self.cursor_label)
+        cursor.add_inline(self.cursor_ring_checkbox, self.cursor_ripple_checkbox,
+                          self.cursor_spotlight_checkbox)
+        cursor.add_inline(self.cursor_button)
+
+        keystroke = self.add_section(self.keystroke_label)
+        keystroke.add_inline(self.keystroke_button)
+
+        magnifier = self.add_section(self.magnifier_label)
+        magnifier.add_row("presentation_zoom", self.magnifier_zoom_combobox, "Zoom")
+        magnifier.add_inline(self.magnifier_button)
+
+        whiteboard = self.add_section("section_actions", "Whiteboard")
+        whiteboard.add_inline(self.whiteboard_button, self.whiteboard_save_button)
+
+        where = self.add_section("section_where", "Where")
+        where.add_row(self.target_monitor_label, self.target_monitor_combobox)
+
+        self.add_body_widget(self.hint_label)
+        self.finish_body()
 
     # --- shared ----------------------------------------------------------
     def target_screen(self):

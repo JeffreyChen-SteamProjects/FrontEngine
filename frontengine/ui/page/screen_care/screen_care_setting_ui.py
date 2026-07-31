@@ -10,13 +10,14 @@ from typing import List
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import (
-    QCheckBox, QComboBox, QGridLayout, QLabel, QPushButton, QSlider, QWidget,
+    QCheckBox, QComboBox, QLabel, QPushButton, QSlider,
 )
 
 from frontengine.show.screen_care.color_vision_widget import ColorVisionWidget
 from frontengine.show.screen_care.screen_filter import (
     FILTER_COLORS, ReadingRulerWidget, ScreenFilterWidget,
 )
+from frontengine.ui.page.layout_kit import SettingPage
 from frontengine.ui.page.utils import build_target_monitor_combobox, coerce_int, resolve_preferred_monitor
 from frontengine.utils.break_reminder.break_reminder import (
     PHASE_REST, PHASE_WORK, BreakReminder,
@@ -29,16 +30,15 @@ from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import retranslator, tr
 
 
-class ScreenCareSettingUI(QWidget):
+class ScreenCareSettingUI(SettingPage):
     """護眼設定頁 / The eye-comfort settings page."""
 
     BREAK_TICK_MS = 1000
 
     def __init__(self):
         front_engine_logger.info("[ScreenCareSettingUI] Init")
-        super().__init__()
-        self.grid_layout = QGridLayout(self)
-        self.grid_layout.setContentsMargins(0, 0, 0, 0)
+        super().__init__("tab_screen_care_text", "page_subtitle_screen_care",
+                         "Eye care", "Filters, a reading ruler and breaks to rest your eyes.")
 
         # 目前開著的覆蓋層 / Overlays currently on screen
         self.filter_widget_list: List[ScreenFilterWidget] = []
@@ -118,27 +118,35 @@ class ScreenCareSettingUI(QWidget):
         self.hint_label.setWordWrap(True)
 
         # Layout
-        self.grid_layout.addWidget(self.filter_label, 0, 0)
-        self.grid_layout.addWidget(self.filter_color_combobox, 0, 1)
-        self.grid_layout.addWidget(self.filter_button, 0, 2)
-        self.grid_layout.addWidget(self.filter_strength_label, 1, 0)
-        self.grid_layout.addWidget(self.filter_strength_slider, 1, 1, 1, 2)
-        self.grid_layout.addWidget(self.ruler_label, 2, 0)
-        self.grid_layout.addWidget(self.ruler_band_combobox, 2, 1)
-        self.grid_layout.addWidget(self.ruler_button, 2, 2)
-        self.grid_layout.addWidget(self.ruler_strength_slider, 3, 1, 1, 2)
-        self.grid_layout.addWidget(self.break_label, 4, 0)
-        self.grid_layout.addWidget(self.break_minutes_combobox, 4, 1)
-        self.grid_layout.addWidget(self.break_seconds_combobox, 4, 2)
-        self.grid_layout.addWidget(self.break_button, 5, 0)
-        self.grid_layout.addWidget(self.color_vision_label, 6, 0)
-        self.grid_layout.addWidget(self.color_vision_combobox, 6, 1)
-        self.grid_layout.addWidget(self.color_vision_button, 6, 2)
-        self.grid_layout.addWidget(self.color_vision_slider, 7, 1, 1, 2)
-        self.grid_layout.addWidget(self.all_screens_checkbox, 8, 0)
-        self.grid_layout.addWidget(self.target_monitor_label, 9, 0)
-        self.grid_layout.addWidget(self.target_monitor_combobox, 9, 1)
-        self.grid_layout.addWidget(self.hint_label, 10, 0, 1, 3)
+        # 這一頁是四個各自獨立的功能，每個都有自己的開關。擠在同一個網格裡時
+        # 看起來像一組設定共用一顆按鈕，其實不是。
+        # Four independent features, each with its own switch. Sharing one grid
+        # made them read as a single group of settings behind one button.
+        screen_filter = self.add_section(self.filter_label)
+        screen_filter.add_row("screen_care_colour", self.filter_color_combobox, "Colour")
+        screen_filter.add_row(self.filter_strength_label, self.filter_strength_slider)
+        screen_filter.add_inline(self.filter_button)
+
+        ruler = self.add_section(self.ruler_label)
+        ruler.add_row("screen_care_band", self.ruler_band_combobox, "Band")
+        ruler.add_row("screen_care_strength", self.ruler_strength_slider, "Strength")
+        ruler.add_inline(self.ruler_button)
+
+        breaks = self.add_section(self.break_label)
+        breaks.add_inline(self.break_minutes_combobox, self.break_seconds_combobox)
+        breaks.add_inline(self.break_button)
+
+        vision = self.add_section(self.color_vision_label)
+        vision.add_row("screen_care_type", self.color_vision_combobox, "Type")
+        vision.add_row("screen_care_strength", self.color_vision_slider, "Strength")
+        vision.add_inline(self.color_vision_button)
+
+        where = self.add_section("section_where", "Where")
+        where.add_row(self.target_monitor_label, self.target_monitor_combobox)
+        where.add_inline(self.all_screens_checkbox)
+
+        self.add_body_widget(self.hint_label)
+        self.finish_body()
 
     # --- shared helpers --------------------------------------------------
     def target_screens(self) -> list:

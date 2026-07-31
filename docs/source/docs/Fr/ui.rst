@@ -6,13 +6,14 @@ Comment l'utiliser
 FrontEngine place des choses par-dessus votre écran - une vidéo, une image, une
 page web, du texte, une mascotte - et les y garde pendant que vous continuez à
 travailler. Chacune s'appelle un calque. Vous pouvez en faire tourner autant que
-vous voulez à la fois, depuis des onglets différents et sur des écrans
+vous voulez à la fois, depuis des pages différentes et sur des écrans
 différents.
 
 Votre premier calque
 ====================
 
-1. Choisissez l'onglet correspondant : Vidéo, Image, Web, Texte, et ainsi de suite.
+1. Dans la liste de gauche, choisissez la page correspondante : Vidéo, Image,
+   Web, Texte, et ainsi de suite.
 2. Choisissez le fichier ou saisissez l'adresse.
 3. Appuyez sur le bouton de démarrage de cette page.
 
@@ -45,7 +46,7 @@ tant que le dessin est actif.
 En gérer plusieurs à la fois
 ============================
 
-L'onglet **Centre de contrôle** atteint chaque calque, quelle que soit la page
+La page **Centre de contrôle** atteint chaque calque, quelle que soit la page
 qui l'a ouvert. Il peut tous les masquer un instant, les couper, les
 verrouiller, remettre leurs positions, ou baisser la qualité quand la batterie
 compte. Déverrouillez d'abord pour en déplacer un : il retient où vous l'avez
@@ -76,13 +77,13 @@ La barre de menus
   et le rappel de la touche F12.
 * **Documentation** - ouvre cette documentation dans un navigateur.
 
-Les onglets
-===========
+Les pages
+=========
 
 Mettre quelque chose à l'écran
 
 * :doc:`video`, :doc:`image`, :doc:`web`, :doc:`gif_and_webp`, :doc:`sound`,
-  :doc:`text` - une sorte par onglet.
+  :doc:`text` - une sorte par page.
 * :doc:`scene` - plusieurs ensemble, enregistrées dans un fichier.
 * :doc:`particle` - un effet de particules sur le bureau.
 * :doc:`pet` - un compagnon qui marche, grimpe et réagit.

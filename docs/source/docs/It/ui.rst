@@ -11,7 +11,8 @@ diverse e su schermi diversi.
 Il tuo primo overlay
 ====================
 
-1. Scegli la scheda corrispondente: Video, Immagine, Web, Testo e così via.
+1. Nell'elenco a sinistra scegli la pagina corrispondente: Video, Immagine,
+   Web, Testo e così via.
 2. Scegli il file o digita l'indirizzo.
 3. Premi il pulsante di avvio di quella pagina.
 
@@ -44,7 +45,7 @@ Presentazione, finché il disegno è attivo.
 Gestirne diversi insieme
 ========================
 
-La scheda **Centro di controllo** raggiunge ogni overlay, da qualunque pagina
+La pagina **Centro di controllo** raggiunge ogni overlay, da qualunque pagina
 sia stato aperto. Può nasconderli tutti per un momento, silenziarli, bloccarli,
 rimettere a posto le loro posizioni, o abbassare la qualità quando conta la
 batteria. Per spostarne uno sbloccalo prima: si ricorda dove lo hai lasciato.
@@ -80,7 +81,7 @@ Le schede
 Mettere qualcosa sullo schermo
 
 * :doc:`video`, :doc:`image`, :doc:`web`, :doc:`gif_and_webp`, :doc:`sound`,
-  :doc:`text` - un tipo per scheda.
+  :doc:`text` - un tipo per pagina.
 * :doc:`scene` - più di uno insieme, salvati in un file.
 * :doc:`particle` - un effetto a particelle sopra la scrivania.
 * :doc:`pet` - un compagno che cammina, si arrampica e reagisce.

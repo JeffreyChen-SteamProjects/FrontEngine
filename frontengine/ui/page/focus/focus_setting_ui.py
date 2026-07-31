@@ -10,7 +10,9 @@ from typing import List
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QGuiApplication
-from PySide6.QtWidgets import QComboBox, QGridLayout, QLabel, QPushButton, QSlider, QWidget
+from PySide6.QtWidgets import QComboBox, QLabel, QPushButton, QSlider
+
+from frontengine.ui.page.layout_kit import SettingPage
 
 from frontengine.show.focus_shield.focus_shield_widget import (
     DimBackgroundWidget, DistractionMaskWidget,
@@ -24,14 +26,13 @@ from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import retranslator, tr
 
 
-class FocusSettingUI(QWidget):
+class FocusSettingUI(SettingPage):
     """專注設定頁 / The focus settings page."""
 
     def __init__(self):
         front_engine_logger.info("[FocusSettingUI] Init")
-        super().__init__()
-        self.grid_layout = QGridLayout(self)
-        self.grid_layout.setContentsMargins(0, 0, 0, 0)
+        super().__init__("tab_focus_text", "page_subtitle_focus",
+                         "Focus", "Dim or cover whatever competes for your attention.")
 
         self.dim_widget_list: List[DimBackgroundWidget] = []
         self.mask_widget_list: List[DistractionMaskWidget] = []
@@ -73,16 +74,25 @@ class FocusSettingUI(QWidget):
         self.hint_label.setWordWrap(True)
 
         # Layout
-        self.grid_layout.addWidget(self.dim_label, 0, 0)
-        self.grid_layout.addWidget(self.dim_slider, 0, 1)
-        self.grid_layout.addWidget(self.dim_button, 0, 2)
-        self.grid_layout.addWidget(self.mask_label, 1, 0)
-        self.grid_layout.addWidget(self.mask_region_combobox, 1, 1)
-        self.grid_layout.addWidget(self.mask_button, 1, 2)
-        self.grid_layout.addWidget(self.mask_percent_slider, 2, 1, 1, 2)
-        self.grid_layout.addWidget(self.target_monitor_label, 3, 0)
-        self.grid_layout.addWidget(self.target_monitor_combobox, 3, 1)
-        self.grid_layout.addWidget(self.hint_label, 4, 0, 1, 3)
+        # 「調暗其他視窗」和「遮住某一塊」是兩個獨立開關，各自有自己的按鈕，
+        # 混在一格網格裡看起來像同一組設定。
+        # Dimming the other windows and covering one region are independent
+        # switches with a button each; sharing one grid made them read as one
+        # group of settings.
+        dim = self.add_section("section_options", "Dim background windows")
+        dim.add_row(self.dim_label, self.dim_slider)
+        dim.add_inline(self.dim_button)
+
+        mask = self.add_section("section_behaviour", "Cover a distraction")
+        mask.add_row(self.mask_label, self.mask_region_combobox)
+        mask.add_row("focus_mask_size_label", self.mask_percent_slider, "Size")
+        mask.add_inline(self.mask_button)
+
+        where = self.add_section("section_where", "Where")
+        where.add_row(self.target_monitor_label, self.target_monitor_combobox)
+
+        self.add_body_widget(self.hint_label)
+        self.finish_body()
 
     # --- shared ----------------------------------------------------------
     def target_screen(self):

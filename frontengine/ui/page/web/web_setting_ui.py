@@ -1,6 +1,6 @@
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
-    QWidget, QGridLayout, QLabel, QMessageBox, QSlider, QLineEdit, QPushButton, QCheckBox,
+    QLabel, QMessageBox, QSlider, QLineEdit, QPushButton, QCheckBox,
     QComboBox, QPlainTextEdit,
 )
 
@@ -16,15 +16,15 @@ from frontengine.ui.page.utils import (
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import tr
+from frontengine.ui.page.layout_kit import SettingPage
 from frontengine.utils.web_url import next_page_index, normalize_web_url, parse_dashboard_urls
 
 
-class WEBSettingUI(QWidget):
+class WEBSettingUI(SettingPage):
     def __init__(self):
         front_engine_logger.info("[WEBSettingUI] Init")
-        super().__init__()
-        self.grid_layout = QGridLayout(self)
-        self.grid_layout.setContentsMargins(0, 0, 0, 0)
+        super().__init__("tab_web_text", "page_subtitle_web",
+                         "Web", "Keep a web page on top of everything else.")
 
         # Init variable
         self.web_widget_list = []
@@ -98,25 +98,29 @@ class WEBSettingUI(QWidget):
         self.dashboard_next_button.clicked.connect(self.show_next_dashboard_page)
 
         # Layout
-        self.grid_layout.addWidget(self.opacity_label, 0, 0)
-        self.grid_layout.addWidget(self.opacity_slider_value_label, 0, 1)
-        self.grid_layout.addWidget(self.opacity_slider, 0, 2)
-        self.grid_layout.addWidget(self.open_local_html_checkbox, 1, 0)
-        self.grid_layout.addWidget(self.enable_input_checkbox, 1, 1)
-        self.grid_layout.addWidget(self.show_on_all_screen_checkbox, 2, 0)
-        self.grid_layout.addWidget(self.show_on_bottom_checkbox, 2, 1)
-        self.grid_layout.addWidget(self.start_button, 3, 0)
-        self.grid_layout.addWidget(self.web_url_input, 3, 2)
-        self.grid_layout.addWidget(self.target_monitor_label, 4, 0)
-        self.grid_layout.addWidget(self.target_monitor_combobox, 4, 1)
-        self.grid_layout.addWidget(self.zoom_label, 5, 0)
-        self.grid_layout.addWidget(self.zoom_combobox, 5, 1)
-        self.grid_layout.addWidget(self.refresh_label, 6, 0)
-        self.grid_layout.addWidget(self.refresh_combobox, 6, 1)
-        self.grid_layout.addWidget(self.dashboard_label, 7, 0)
-        self.grid_layout.addWidget(self.dashboard_edit, 7, 1, 1, 2)
-        self.grid_layout.addWidget(self.dashboard_start_button, 8, 0)
-        self.grid_layout.addWidget(self.dashboard_next_button, 8, 1)
+        source = self.add_section("section_source", "Source")
+        source.add_row("url", self.web_url_input, "URL")
+        source.add_inline(self.open_local_html_checkbox, self.enable_input_checkbox)
+
+        appearance = self.add_section("section_appearance", "Appearance")
+        appearance.add_slider_row(
+            self.opacity_label, self.opacity_slider, self.opacity_slider_value_label)
+        appearance.add_row(self.zoom_label, self.zoom_combobox)
+        appearance.add_row(self.refresh_label, self.refresh_combobox)
+
+        # 儀表板是「一次開好幾個網址、輪流顯示」，和放單一網頁不是同一件事
+        # The dashboard opens several URLs and cycles them - a different errand
+        # from putting one page on screen.
+        dashboard = self.add_section("section_content", "Dashboard")
+        dashboard.add_widget(self.dashboard_edit, self.dashboard_label)
+        dashboard.add_inline(self.dashboard_start_button, self.dashboard_next_button)
+
+        where = self.add_section("section_where", "Where")
+        where.add_row(self.target_monitor_label, self.target_monitor_combobox)
+        where.add_inline(self.show_on_all_screen_checkbox, self.show_on_bottom_checkbox)
+
+        self.finish_body()
+        self.set_footer(primary=self.start_button)
 
     def set_show_all_screen(self) -> None:
         front_engine_logger.info("[WEBSettingUI] set_show_all_screen")

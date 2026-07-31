@@ -6,14 +6,16 @@ How to use
 FrontEngine puts things on top of your screen - a video, an image, a web page,
 some text, a desktop pet - and keeps them there while you carry on working.
 Each of those is called an overlay. You can run as many as you like at once,
-from different tabs, on different monitors.
+from different pages, on different monitors.
 
 Your first overlay
 ==================
 
-1. Pick the tab for the kind of thing you want: Video, Image, Web, Text and so on.
+1. In the list on the left, pick the page for the kind of thing you want:
+   Video, Image, Web, Text and so on. The list is grouped by what each page is
+   for, so related pages sit together.
 2. Choose the file or type the address.
-3. Press the start button on that page.
+3. Press the start button at the bottom of that page.
 
 It appears above everything else and stays there until you close it. Nothing
 else you do puts it away by accident.
@@ -44,7 +46,7 @@ is switched on.
 Managing several at once
 ========================
 
-The **Control Center** tab reaches every overlay, whichever page opened it. It
+The **Control Center** page reaches every overlay, whichever page opened it. It
 can hide them all for a moment, mute them, lock them, reset where they sit, or
 drop the quality when the battery matters. Unlock them first if you want to
 drag one somewhere else - it remembers where you dropped it.
@@ -73,8 +75,8 @@ The menu bar
   of the F12 shortcut.
 * **Doc** - opens this documentation in a browser.
 
-The tabs
-========
+The pages
+=========
 
 Putting something on screen
 

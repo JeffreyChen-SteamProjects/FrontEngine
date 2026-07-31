@@ -17,7 +17,7 @@ from typing import Dict, List
 
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import (
-    QCheckBox, QComboBox, QGridLayout, QLabel, QPushButton, QSpinBox, QWidget,
+    QCheckBox, QComboBox, QLabel, QPushButton, QSpinBox,
 )
 
 from frontengine.show.monitor.monitor_widget import NowPlayingWidget, SystemMonitorWidget
@@ -26,6 +26,7 @@ from frontengine.show.spectrum.spectrum_widget import STYLE_BARS, STYLE_RING, Sp
 from frontengine.ui.page.utils import coerce_int
 from frontengine.utils.audio_meter.loopback_capture import LoopbackSpectrum, available
 from frontengine.utils.audio_meter.spectrum_analyzer import DEFAULT_BANDS
+from frontengine.ui.page.layout_kit import SettingPage
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import tr
@@ -37,14 +38,13 @@ def _t(key: str, fallback: str) -> str:
     return language_wrapper.language_word_dict.get(key, fallback)
 
 
-class WidgetsSettingUI(QWidget):
+class WidgetsSettingUI(SettingPage):
     """桌面小工具設定頁 / The desktop widgets page."""
 
     def __init__(self):
         front_engine_logger.info("[WidgetsSettingUI] Init")
-        super().__init__()
-        self.grid_layout = QGridLayout(self)
-        self.grid_layout.setContentsMargins(0, 0, 0, 0)
+        super().__init__("tab_widgets_text", "page_subtitle_widgets",
+                         "Widgets", "Small panels that stay in view.")
 
         self.spectrum_widget_list: List[SpectrumWidget] = []
         self.monitor_widget_list: List[SystemMonitorWidget] = []
@@ -61,20 +61,26 @@ class WidgetsSettingUI(QWidget):
             "or sent - and capture stops when you stop the spectrum.")
         self.hint_label.setWordWrap(True)
 
-        self.grid_layout.addWidget(self.spectrum_label, 0, 0)
-        self.grid_layout.addWidget(self.spectrum_style_combobox, 0, 1)
-        self.grid_layout.addWidget(self.spectrum_button, 0, 2)
-        self.grid_layout.addWidget(self.spectrum_bands_label, 1, 0)
-        self.grid_layout.addWidget(self.spectrum_bands_spinbox, 1, 1)
-        self.grid_layout.addWidget(self.monitor_label, 2, 0)
-        self.grid_layout.addWidget(self.monitor_history_spinbox, 2, 1)
-        self.grid_layout.addWidget(self.monitor_button, 2, 2)
-        self.grid_layout.addWidget(self.now_playing_button, 3, 0)
-        self.grid_layout.addWidget(self.note_label, 4, 0)
-        self.grid_layout.addWidget(self.note_button, 4, 1)
-        self.grid_layout.addWidget(self.note_close_button, 4, 2)
-        self.grid_layout.addWidget(self.note_restore_checkbox, 5, 0, 1, 3)
-        self.grid_layout.addWidget(self.hint_label, 6, 0, 1, 3)
+        # 四個小工具彼此獨立，各自開關
+        # Four independent widgets, each switched on its own.
+        spectrum = self.add_section(self.spectrum_label)
+        spectrum.add_row("widgets_style", self.spectrum_style_combobox, "Style")
+        spectrum.add_row(self.spectrum_bands_label, self.spectrum_bands_spinbox)
+        spectrum.add_inline(self.spectrum_button)
+
+        monitor = self.add_section(self.monitor_label)
+        monitor.add_row("widgets_history", self.monitor_history_spinbox, "History")
+        monitor.add_inline(self.monitor_button)
+
+        playing = self.add_section("section_actions", "Now playing")
+        playing.add_inline(self.now_playing_button)
+
+        notes = self.add_section(self.note_label)
+        notes.add_inline(self.note_button, self.note_close_button)
+        notes.add_inline(self.note_restore_checkbox)
+
+        self.add_body_widget(self.hint_label)
+        self.finish_body()
 
     # --- construction helpers -------------------------------------------
     def _build_spectrum_row(self) -> None:

@@ -11,8 +11,7 @@ from typing import List, Optional
 from PySide6.QtCore import QBuffer, QIODevice, QTimer
 from PySide6.QtGui import QGuiApplication, QPixmap
 from PySide6.QtWidgets import (
-    QCheckBox, QComboBox, QFileDialog, QGridLayout, QLabel, QLineEdit, QPushButton, QSpinBox,
-    QWidget,
+    QCheckBox, QComboBox, QFileDialog, QLabel, QLineEdit, QPushButton, QSpinBox,
 )
 
 from frontengine.show.camera.camera_widget import (
@@ -28,6 +27,7 @@ from frontengine.ui.dialog.screen_text_dialog import (
 from frontengine.ui.dialog.window_pin_dialog import WindowPinDialog
 from frontengine.user_setting.user_setting_file import user_setting_dict, write_user_setting
 from frontengine.ui.page.utils import coerce_int
+from frontengine.ui.page.layout_kit import SettingPage
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.measure.measure import (
     FORMAT_CSS_VAR, FORMAT_HEX, FORMAT_HSL, FORMAT_RGB,
@@ -60,14 +60,13 @@ def _t(key: str, fallback: str) -> str:
     return language_wrapper.language_word_dict.get(key, fallback)
 
 
-class ToolsSettingUI(QWidget):
+class ToolsSettingUI(SettingPage):
     """工具設定頁 / The tools page."""
 
     def __init__(self):
         front_engine_logger.info("[ToolsSettingUI] Init")
-        super().__init__()
-        self.grid_layout = QGridLayout(self)
-        self.grid_layout.setContentsMargins(0, 0, 0, 0)
+        super().__init__("tab_tools_text", "page_subtitle_tools",
+                         "Tools", "Measure, capture, record and pin what is on screen.")
 
         self.measure_widget_list: List[MeasureWidget] = []
         self.recorder = FrameRecorder(self)
@@ -114,41 +113,51 @@ class ToolsSettingUI(QWidget):
             "clipboard. The camera is shown locally only - nothing is recorded.")
         self.hint_label.setWordWrap(True)
 
-        self.grid_layout.addWidget(self.measure_label, 0, 0)
-        self.grid_layout.addWidget(self.measure_mode_combobox, 0, 1)
-        self.grid_layout.addWidget(self.measure_button, 0, 2)
-        self.grid_layout.addWidget(self.color_format_label, 1, 0)
-        self.grid_layout.addWidget(self.color_format_combobox, 1, 1)
-        self.grid_layout.addWidget(self.capture_label, 2, 0)
-        self.grid_layout.addWidget(self.capture_button, 2, 1)
-        self.grid_layout.addWidget(self.capture_copy_button, 2, 2)
-        self.grid_layout.addWidget(self.screen_text_label, 3, 0)
-        self.grid_layout.addWidget(self.screen_text_combobox, 3, 1)
-        self.grid_layout.addWidget(self.screen_text_button, 3, 2)
-        self.grid_layout.addWidget(self.screen_text_input, 4, 1, 1, 2)
-        self.grid_layout.addWidget(self.record_label, 5, 0)
-        self.grid_layout.addWidget(self.record_fps_spinbox, 5, 1)
-        self.grid_layout.addWidget(self.record_button, 5, 2)
-        self.grid_layout.addWidget(self.record_seconds_spinbox, 6, 1)
-        self.grid_layout.addWidget(self.record_camera_checkbox, 6, 2)
-        self.grid_layout.addWidget(self.virtual_camera_label, 7, 0)
-        self.grid_layout.addWidget(self.virtual_camera_fps_spinbox, 7, 1)
-        self.grid_layout.addWidget(self.virtual_camera_button, 7, 2)
-        self.grid_layout.addWidget(self.virtual_camera_status, 8, 0, 1, 3)
-        self.grid_layout.addWidget(self.camera_label, 9, 0)
-        self.grid_layout.addWidget(self.camera_shape_combobox, 9, 1)
-        self.grid_layout.addWidget(self.camera_button, 9, 2)
-        self.grid_layout.addWidget(self.camera_device_combobox, 10, 0, 1, 2)
-        self.grid_layout.addWidget(self.camera_mirror_checkbox, 10, 2)
-        self.grid_layout.addWidget(self.camera_border_label, 11, 0)
-        self.grid_layout.addWidget(self.camera_border_spinbox, 11, 1)
-        self.grid_layout.addWidget(self.pin_button, 12, 0)
-        self.grid_layout.addWidget(self.layout_label, 13, 0)
-        self.grid_layout.addWidget(self.layout_name_edit, 13, 1)
-        self.grid_layout.addWidget(self.layout_save_button, 13, 2)
-        self.grid_layout.addWidget(self.layout_combobox, 14, 0, 1, 2)
-        self.grid_layout.addWidget(self.layout_restore_button, 14, 2)
-        self.grid_layout.addWidget(self.hint_label, 15, 0, 1, 3)
+        # 工具頁是八個彼此無關的工具。攤在同一個網格裡時，量測的設定看起來像是
+        # 錄影也要用的，其實兩者毫無關係。
+        # Eight unrelated tools. Flattened into one grid, the measuring settings
+        # looked as if recording used them too; they have nothing to do with
+        # each other.
+        measure = self.add_section(self.measure_label)
+        measure.add_row("tools_mode", self.measure_mode_combobox, "Mode")
+        measure.add_row(self.color_format_label, self.color_format_combobox)
+        measure.add_inline(self.measure_button)
+
+        capture = self.add_section(self.capture_label)
+        capture.add_inline(self.capture_button, self.capture_copy_button)
+
+        screen_text = self.add_section(self.screen_text_label)
+        screen_text.add_row("tools_action", self.screen_text_combobox, "Action")
+        screen_text.add_widget(self.screen_text_input)
+        screen_text.add_inline(self.screen_text_button)
+
+        record = self.add_section(self.record_label)
+        record.add_row("tools_fps", self.record_fps_spinbox, "Frames per second")
+        record.add_row("tools_seconds", self.record_seconds_spinbox, "Seconds")
+        record.add_inline(self.record_camera_checkbox)
+        record.add_inline(self.record_button)
+
+        virtual_camera = self.add_section(self.virtual_camera_label)
+        virtual_camera.add_row("tools_fps", self.virtual_camera_fps_spinbox,
+                               "Frames per second")
+        virtual_camera.add_inline(self.virtual_camera_button)
+        virtual_camera.add_widget(self.virtual_camera_status)
+
+        camera = self.add_section(self.camera_label)
+        camera.add_row("tools_device", self.camera_device_combobox, "Device")
+        camera.add_row("tools_shape", self.camera_shape_combobox, "Shape")
+        camera.add_row(self.camera_border_label, self.camera_border_spinbox)
+        camera.add_inline(self.camera_mirror_checkbox)
+        camera.add_inline(self.camera_button)
+
+        windows = self.add_section(self.layout_label)
+        windows.add_row("tools_name", self.layout_name_edit, "Name")
+        windows.add_inline(self.layout_save_button)
+        windows.add_row("tools_saved", self.layout_combobox, "Saved")
+        windows.add_inline(self.layout_restore_button, self.pin_button)
+
+        self.add_body_widget(self.hint_label)
+        self.finish_body()
 
     # --- construction helpers -------------------------------------------
     def _build_measure_row(self) -> None:
