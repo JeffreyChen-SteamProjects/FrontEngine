@@ -669,6 +669,9 @@ class PetMotion:
         self.vx = float(self.speed)
         self.vy = 0.0 if behaviour != BEHAVIOUR_WANDER else float(self.speed)
         self._airborne = False
+        # 打字時安分下來：True 的時候 step() 原地不動。
+        # Settled while typing: step() stays put while this is True.
+        self.settled = False
         self.state = "walk"  # walk | idle | sleep
         self._state_ticks = 0
         self._idle_count = 0
@@ -784,6 +787,13 @@ class PetMotion:
         self.follow_target_x = None
 
     def step(self) -> Tuple[int, int]:
+        # 安分的時候原地不動。閘門放在這裡而不是各個行為分支裡：每個分支都要記得
+        # 檢查的話，總有一個會漏掉，而漏掉的那個就是打字時還在跑的那隻。
+        # Settled means staying put. The gate is here rather than inside each
+        # behaviour branch: with a check per branch one of them eventually gets
+        # missed, and the missed one is the pet still running about while you type.
+        if self.settled:
+            return int(self.x), int(self.y)
         left, top, right, bottom = self.bounds
         floor_y = bottom - self.height
         if self.behaviour == BEHAVIOUR_CHASE:

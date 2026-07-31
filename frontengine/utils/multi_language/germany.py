@@ -47,6 +47,7 @@ germany_word_dict = {
     "tools_shape": "Form",
     "tools_name": "Name",
     "tools_saved": "Gespeichert",
+    "pet_settle_typing": "Beim Tippen still halten",
     "section_close": "SCHLIESSEN",
     "section_everything": "ALLES AUF EINMAL",
     "section_log": "MELDUNGEN",

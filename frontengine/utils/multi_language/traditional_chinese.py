@@ -47,6 +47,7 @@ traditional_chinese_word_dict = {
     "tools_shape": "形狀",
     "tools_name": "名稱",
     "tools_saved": "已儲存",
+    "pet_settle_typing": "打字時安分",
     "section_close": "關閉",
     "section_everything": "一次全部",
     "section_log": "訊息",

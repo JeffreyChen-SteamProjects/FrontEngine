@@ -47,6 +47,7 @@ french_word_dict = {
     "tools_shape": "Forme",
     "tools_name": "Nom",
     "tools_saved": "Enregistrés",
+    "pet_settle_typing": "Rester tranquille pendant la frappe",
     "section_close": "FERMER",
     "section_everything": "TOUT À LA FOIS",
     "section_log": "MESSAGES",

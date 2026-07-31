@@ -47,6 +47,7 @@ russian_word_dict = {
     "tools_shape": "Форма",
     "tools_name": "Имя",
     "tools_saved": "Сохранённые",
+    "pet_settle_typing": "Не двигаться при наборе текста",
     "section_close": "ЗАКРЫТЬ",
     "section_everything": "ВСЁ СРАЗУ",
     "section_log": "СООБЩЕНИЯ",

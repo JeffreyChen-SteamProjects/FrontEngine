@@ -15,6 +15,8 @@ Un compagno che vive sulla scrivania.
 * Arrampicarsi sui muri - lungo i bordi delle finestre.
 * Sedersi sulle finestre - posarsi sul bordo superiore delle altre finestre.
 * Fumetti - brevi battute secondo l'ora, quando le si dà da mangiare e così via.
+* Fermo mentre scrivi - l'animaletto si ferma mentre digiti e riparte un paio di
+  secondi dopo, così non attraversa la riga che stai leggendo.
 * Leggere ad alta voce - pronunciare quelle battute.
 * Giocare a rincorrersi - due o più mascotte si inseguono.
 * Reagire all'audio - la mascotte si muove a tempo. Può seguire gli

@@ -47,6 +47,7 @@ italian_word_dict = {
     "tools_shape": "Forma",
     "tools_name": "Nome",
     "tools_saved": "Salvati",
+    "pet_settle_typing": "Fermo mentre scrivi",
     "section_close": "CHIUDI",
     "section_everything": "TUTTO IN UNA VOLTA",
     "section_log": "MESSAGGI",

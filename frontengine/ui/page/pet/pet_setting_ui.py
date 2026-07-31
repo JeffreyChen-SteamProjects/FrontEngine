@@ -1,6 +1,6 @@
 from typing import Optional
 
-from PySide6.QtCore import QTimer
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import (
     QLabel, QPushButton, QMessageBox, QComboBox, QCheckBox, QFileDialog,
@@ -28,6 +28,8 @@ from frontengine.utils.focus_timer.focus_timer import (
     PHASE_BREAK, PHASE_FOCUS, PHASE_LONG_BREAK, FocusTimer,
 )
 from frontengine.ui.page.layout_kit import SettingPage
+from frontengine.utils.input_watch.input_watch_service import InputWatchService
+from frontengine.utils.input_watch.typing_watch import TypingWatch
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import retranslator, tr
@@ -49,6 +51,14 @@ class PetSettingUI(SettingPage):
 
         # Init variable
         self.pet_list: list = []
+        # 打字時安分：按鍵由既有的全域監聽服務推過來，這裡只記時間並在停手後放行
+        # Settling while typing: keys come from the existing global watch
+        # service; this only times them and lets the pet go once typing stops.
+        self._typing_watch = TypingWatch()
+        self._input_watch: Optional[InputWatchService] = None
+        self._settle_timer = QTimer(self)
+        self._settle_timer.setSingleShot(True)
+        self._settle_timer.timeout.connect(lambda: self._apply_settled(False))
         self.ready_to_play = False
         self.pet_image_path: Optional[str] = None
         self.pet_sound_path: Optional[str] = None
@@ -106,6 +116,13 @@ class PetSettingUI(SettingPage):
         self.sit_checkbox.setChecked(True)
         self.tag_checkbox = tr(QCheckBox(), "pet_tag_label", "Play tag with each other")
         self.tag_checkbox.toggled.connect(self._on_tag_toggled)
+        # 打字時安分：寵物在螢幕上跑過你正在看的那一行，是最常被抱怨的一點。
+        # Settle while typing: a pet walking over the line you are reading is
+        # the single thing people complain about most.
+        self.settle_typing_checkbox = tr(QCheckBox(), "pet_settle_typing",
+                                         "Settle while typing")
+        self.settle_typing_checkbox.clicked.connect(self._on_settle_typing_toggled)
+
         self.speech_checkbox = tr(QCheckBox(), "pet_speech_label", "Speak out loud")
         self.chat_checkbox = tr(QCheckBox(), "pet_chat_label", "AI chat (needs API key)")
         self.chat_checkbox.setToolTip(
@@ -169,6 +186,7 @@ class PetSettingUI(SettingPage):
         behaviour = self.add_section("section_behaviour", "Behaviour")
         behaviour.add_row(self.behaviour_label, self.behaviour_combobox)
         behaviour.add_inline(self.climb_checkbox, self.sit_checkbox)
+        behaviour.add_inline(self.settle_typing_checkbox)
 
         sound = self.add_section("section_options", "Sound and speech")
         sound.add_row(self.volume_label, self.volume_combobox)
@@ -188,6 +206,54 @@ class PetSettingUI(SettingPage):
         self.add_body_widget(self.drop_hint_label)
         self.finish_body()
         self.set_footer(primary=self.start_button, status=self.ready_label)
+
+    def _start_typing_watch(self) -> bool:
+        """開始監聽按鍵（只在第一次需要時建立）。pynput 不能用時安靜跳過。"""
+        if self._input_watch is None:
+            self._input_watch = InputWatchService(self)
+            # 按鍵在 pynput 自己的執行緒觸發，一定要排回 UI 執行緒才能碰 widget。
+            # Keys fire on pynput's own thread; this has to hop to the UI thread
+            # before touching any widget.
+            self._input_watch.key_pressed.connect(
+                self._on_key_pressed, Qt.ConnectionType.QueuedConnection)
+        # start() 本身是冪等的：已經在監聽時再呼叫不會多開一個 listener。
+        # start() is idempotent: calling it again does not add a second listener.
+        return self._input_watch.start(keyboard=True, mouse=False)
+
+    def _stop_typing_watch(self) -> None:
+        """停止監聽並讓所有寵物恢復走動。"""
+        self._settle_timer.stop()
+        self._typing_watch.clear()
+        if self._input_watch is not None:
+            self._input_watch.stop()
+        self._apply_settled(False)
+
+    def _on_settle_typing_toggled(self) -> None:
+        if self.settle_typing_checkbox.isChecked():
+            if self.pet_list:
+                self._start_typing_watch()
+        else:
+            # 關掉時一定要放行。少了這一步，剛好在打字時關掉這個選項的寵物會
+            # 永遠停在原地——看起來就是寵物壞了。
+            # Releasing on the way out matters: switched off mid-keystroke
+            # without it, the pet stays frozen for good and simply looks broken.
+            self._stop_typing_watch()
+
+    def _on_key_pressed(self, _keys) -> None:
+        """有人按了鍵：寵物先停下來，停手一段時間後再放行。"""
+        if not self.settle_typing_checkbox.isChecked():
+            return
+        self._typing_watch.note_key()
+        self._apply_settled(True)
+        self._settle_timer.start(int(self._typing_watch.settle_seconds * 1000))
+
+    def _apply_settled(self, settled: bool) -> None:
+        """把安分狀態套到目前所有寵物身上。"""
+        for pet in self.pet_list[:]:
+            try:
+                pet.motion.settled = settled
+            except RuntimeError:  # pragma: no cover - 底層物件已消失
+                continue
 
     def _spawn_pet(self) -> None:
         """建立、顯示並開始移動一隻寵物（供 Start 與右鍵複製共用）。"""
@@ -215,6 +281,9 @@ class PetSettingUI(SettingPage):
         if self.audio_react_checkbox.isChecked():
             pet.set_audio_level_provider(self._audio_provider(geometry))
         pet.set_pet_window_flag()
+        if self.settle_typing_checkbox.isChecked():
+            pet.motion.settled = self._typing_watch.typing()
+            self._start_typing_watch()
         self.pet_list.append(pet)
         pet.show()
         self._start_tag_game()

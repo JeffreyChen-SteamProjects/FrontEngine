@@ -15,6 +15,9 @@ Un compagnon qui vit sur le bureau.
 * S'asseoir sur les fenêtres - se poser sur le bord supérieur des autres fenêtres.
 * Bulles de dialogue - de courtes remarques au fil de la journée, quand on la
   nourrit, et ainsi de suite.
+* Rester tranquille pendant la frappe - le compagnon s'arrête tant que vous tapez
+  et repart une ou deux secondes après, pour ne pas traverser la ligne que vous
+  êtes en train de lire.
 * Lire à voix haute - dire ces remarques.
 * Jouer à chat - deux mascottes ou plus se poursuivent.
 * Réagir au son - la mascotte bouge en rythme. Elle peut suivre vos
