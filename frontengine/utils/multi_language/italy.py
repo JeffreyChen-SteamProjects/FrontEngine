@@ -510,6 +510,7 @@ italian_word_dict = {
     "tools_measure_start": "Inizia a misurare",
     "tools_measure_stop": "Smetti di misurare",
     "tools_color_format": "Copia il colore come",
+    "tools_capture_pin": "Fissa l'ultima",
     "tools_capture_label": "Cattura di un'area",
     "tools_capture_start": "Cattura un'area",
     "tools_capture_copy": "Copia l'ultima",

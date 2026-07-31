@@ -11,6 +11,10 @@ Werkzeuge-Seite
 
 * Bereichsaufnahme - einen Bereich aufziehen; er landet in der Zwischenablage,
   und „Letzte kopieren“ legt ihn erneut dorthin.
+
+  Letzten anheften legt die Aufnahme als kleines Fenster über alles: ziehbar, per
+  Mausrad skalierbar, mit Doppelklick oder Escape zu schließen - eine Spezifikation,
+  eine Farbreferenz oder eine Fehlermeldung neben der eigenen Arbeit.
 * Text lesen - einen Bereich aufziehen, um den Text darin zu kopieren, zu
   übersetzen oder eine Frage dazu zu stellen. Dabei geht der aufgenommene
   Bereich an die API von Anthropic, weshalb vorher gefragt wird; verwendet wird

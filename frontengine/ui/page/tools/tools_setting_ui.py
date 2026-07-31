@@ -18,6 +18,7 @@ from frontengine.show.camera.camera_widget import (
     SHAPE_CIRCLE, SHAPE_RECTANGLE, SHAPE_ROUNDED, CameraWidget, list_cameras,
 )
 from frontengine.show.capture.region_capture import RegionCaptureWidget, is_usable
+from frontengine.show.pinned.pinned_image import PinnedImageWidget
 from frontengine.show.measure.measure_widget import (
     MODE_ANGLE, MODE_COLOR, MODE_RULER, MeasureWidget,
 )
@@ -77,6 +78,9 @@ class ToolsSettingUI(SettingPage):
         self.last_screen_text: Optional[str] = None
         self.last_recording: Optional[str] = None
         self.capture_widget_list: List[RegionCaptureWidget] = []
+        # 釘住的截圖：使用者自己關掉之外，主程式結束時也要收乾淨
+        # Pinned captures: closed by the user, and swept up on shutdown too
+        self.pinned_widget_list: List[PinnedImageWidget] = []
         self.camera_widget_list: List[CameraWidget] = []
         # 存畫面本身，不要存那個覆蓋層：框選完它就自己 close() 了，而
         # WA_DeleteOnClose 會把底層物件銷毀，留下來的參考碰一下就 RuntimeError，
@@ -131,7 +135,8 @@ class ToolsSettingUI(SettingPage):
         measure.add_inline(self.measure_button)
 
         capture = self.add_section(self.capture_label)
-        capture.add_inline(self.capture_button, self.capture_copy_button)
+        capture.add_inline(self.capture_button, self.capture_copy_button,
+                           self.capture_pin_button)
 
         screen_text = self.add_section(self.screen_text_label)
         screen_text.add_row("tools_action", self.screen_text_combobox, "Action")
@@ -189,6 +194,8 @@ class ToolsSettingUI(SettingPage):
         self.capture_button = tr(QPushButton(), "tools_capture_start", "Capture area")
         self.capture_button.clicked.connect(self.start_capture)
         self.capture_copy_button = tr(QPushButton(), "tools_capture_copy", "Copy last")
+        self.capture_pin_button = tr(QPushButton(), "tools_capture_pin", "Pin last")
+        self.capture_pin_button.clicked.connect(self.pin_last_capture)
         self.capture_copy_button.clicked.connect(self.copy_last_capture)
 
     def _build_screen_text_row(self) -> None:
@@ -310,6 +317,30 @@ class ToolsSettingUI(SettingPage):
         widget.copy_to_clipboard()
         if widget in self.capture_widget_list:
             self.capture_widget_list.remove(widget)
+
+    def pin_last_capture(self) -> Optional[PinnedImageWidget]:
+        """
+        把最近一次的截圖釘在畫面上。沒有截過就什麼都不做——開一個空白視窗只會讓
+        使用者以為截圖壞了。
+        Pin the most recent capture. With nothing captured this does nothing: an
+        empty window would read as the capture having failed.
+        """
+        if self.last_capture is None or self.last_capture.isNull():
+            front_engine_logger.info("[ToolsSettingUI] nothing captured to pin")
+            return None
+        pinned = PinnedImageWidget(self.last_capture)
+        pinned.show()
+        self.pinned_widget_list.append(pinned)
+        return pinned
+
+    def close_pinned(self) -> None:
+        """關掉所有釘住的截圖（主程式關閉時呼叫）。"""
+        for pinned in list(self.pinned_widget_list):
+            try:
+                pinned.close()
+            except RuntimeError:  # pragma: no cover - 底層物件已消失
+                pass
+        self.pinned_widget_list.clear()
 
     def copy_last_capture(self) -> bool:
         """把最近一次的截圖再放進剪貼簿一次。"""

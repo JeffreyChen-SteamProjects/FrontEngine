@@ -513,6 +513,7 @@ germany_word_dict = {
     "tools_measure_start": "Messen starten",
     "tools_measure_stop": "Messen beenden",
     "tools_color_format": "Farbe kopieren als",
+    "tools_capture_pin": "Letzten anheften",
     "tools_capture_label": "Bereichsaufnahme",
     "tools_capture_start": "Bereich aufnehmen",
     "tools_capture_copy": "Letzte kopieren",

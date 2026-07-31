@@ -519,6 +519,7 @@ traditional_chinese_word_dict = {
     "tools_measure_start": '開始量測',
     "tools_measure_stop": '結束量測',
     "tools_color_format": '色碼複製格式',
+    "tools_capture_pin": "釘選上一張",
     "tools_capture_label": '區域截圖',
     "tools_capture_start": '框選截圖',
     "tools_capture_copy": '複製上一張',
