@@ -174,7 +174,10 @@ def test_nothing_is_left_in_the_previous_language(code: str, tmp_path) -> None:
         stale = {str(english_word_dict[key]) for key in english_word_dict
                  if str(english_word_dict[key]) != str(target[key])}
 
-        seen = [window.tab_widget.tabText(i) for i in range(window.tab_widget.count())]
+        # 側邊欄的每一列都算數：分頁列與群組標題都是使用者看得到的字
+        # Every sidebar row counts: page rows and group headings are both text
+        # the user can read.
+        seen = [window.sidebar.item(i).text() for i in range(window.sidebar.count())]
         seen += [w.text() for w in window.findChildren(QPushButton)
                  + window.findChildren(QLabel) + window.findChildren(QCheckBox) if w.text()]
         menus = window.menuBar().findChildren(QMenu)
@@ -232,9 +235,9 @@ def test_the_translation_lands_where_you_can_see_it(tmp_path) -> None:
     os.chdir(tmp_path)
     try:
         window = FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)
-        assert window.tab_widget.tabText(0) == english_word_dict["tab_video_text"]
+        assert window.sidebar.page_label(0) == english_word_dict["tab_video_text"]
         set_language("Deutsch", window)
-        assert window.tab_widget.tabText(0) == germany_word_dict["tab_video_text"]
+        assert window.sidebar.page_label(0) == germany_word_dict["tab_video_text"]
         assert window.control_center_ui.hide_all_button.text() == \
             germany_word_dict["control_center_hide_all"]
         titles = [m.title() for m in window.menuBar().findChildren(QMenu)]

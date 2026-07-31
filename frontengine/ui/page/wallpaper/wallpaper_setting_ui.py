@@ -12,11 +12,11 @@ from typing import Callable, Dict
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import (
-    QCheckBox, QComboBox, QFileDialog, QGridLayout, QLabel, QPushButton, QSlider, QSpinBox,
-    QWidget,
+    QCheckBox, QComboBox, QFileDialog, QLabel, QPushButton, QSlider, QSpinBox,
 )
 
 from frontengine.show.wallpaper.wallpaper_widget import WallpaperWidget
+from frontengine.ui.page.layout_kit import SettingPage
 from frontengine.ui.page.utils import (
     apply_checkbox_state, apply_combobox_text_state, apply_slider_state, apply_spinbox_state,
 )
@@ -34,14 +34,13 @@ from frontengine.utils.playlist.playlist import (
 )
 
 
-class WallpaperSettingUI(QWidget):
+class WallpaperSettingUI(SettingPage):
     """桌布設定頁 / The wallpaper settings page."""
 
     def __init__(self):
         front_engine_logger.info("[WallpaperSettingUI] Init")
-        super().__init__()
-        self.grid_layout = QGridLayout(self)
-        self.grid_layout.setContentsMargins(0, 0, 0, 0)
+        super().__init__("tab_wallpaper_text", "page_subtitle_wallpaper",
+                         "Wallpaper", "A rotating wallpaper that sits below every window.")
 
         # 每個螢幕各自的資料夾、桌布與播放清單
         # Per-monitor folder, wallpaper widget and playlist.
@@ -112,24 +111,28 @@ class WallpaperSettingUI(QWidget):
         self.hint_label.setWordWrap(True)
 
         # Layout
-        self.grid_layout.addWidget(self.monitor_label, 0, 0)
-        self.grid_layout.addWidget(self.monitor_combobox, 0, 1)
-        self.grid_layout.addWidget(self.folder_button, 0, 2)
-        self.grid_layout.addWidget(self.folder_label, 1, 0, 1, 3)
-        self.grid_layout.addWidget(self.interval_label, 2, 0)
-        self.grid_layout.addWidget(self.interval_combobox, 2, 1)
-        self.grid_layout.addWidget(self.shuffle_checkbox, 2, 2)
-        self.grid_layout.addWidget(self.recursive_checkbox, 3, 0)
-        self.grid_layout.addWidget(self.react_checkbox, 4, 0)
-        self.grid_layout.addWidget(self.react_strength_slider, 4, 1, 1, 2)
-        self.grid_layout.addWidget(self.quiet_label, 5, 0)
-        self.grid_layout.addWidget(self.quiet_start_spinbox, 5, 1)
-        self.grid_layout.addWidget(self.quiet_end_spinbox, 5, 2)
-        self.grid_layout.addWidget(self.quiet_folder_button, 6, 0)
-        self.grid_layout.addWidget(self.quiet_folder_label, 6, 1, 1, 2)
-        self.grid_layout.addWidget(self.start_button, 7, 0)
-        self.grid_layout.addWidget(self.next_button, 7, 1)
-        self.grid_layout.addWidget(self.hint_label, 8, 0, 1, 3)
+        source = self.add_section("section_source", "Source")
+        source.add_row(self.monitor_label, self.monitor_combobox)
+        source.add_inline(self.folder_button)
+        source.add_widget(self.folder_label)
+        source.add_inline(self.recursive_checkbox)
+
+        behaviour = self.add_section("section_behaviour", "Behaviour")
+        behaviour.add_row(self.interval_label, self.interval_combobox)
+        behaviour.add_inline(self.shuffle_checkbox)
+        behaviour.add_inline(self.react_checkbox)
+        behaviour.add_row("wallpaper_react_strength", self.react_strength_slider, "Strength")
+
+        # 安靜時段自成一區：它有自己的時間範圍和自己的資料夾
+        # Quiet hours is its own group: it has its own time range and folder.
+        quiet = self.add_section(self.quiet_label)
+        quiet.add_inline(self.quiet_start_spinbox, self.quiet_end_spinbox)
+        quiet.add_inline(self.quiet_folder_button)
+        quiet.add_widget(self.quiet_folder_label)
+
+        self.add_body_widget(self.hint_label)
+        self.finish_body()
+        self.set_footer(primary=self.start_button, extra=[self.next_button])
 
     # --- folders ---------------------------------------------------------
     def current_monitor(self) -> int:

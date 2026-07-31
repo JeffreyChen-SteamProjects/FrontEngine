@@ -3,7 +3,7 @@ from typing import Optional
 from PySide6.QtCore import QTimer
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import (
-    QWidget, QGridLayout, QLabel, QPushButton, QMessageBox, QComboBox, QCheckBox, QFileDialog,
+    QLabel, QPushButton, QMessageBox, QComboBox, QCheckBox, QFileDialog,
 )
 
 from frontengine.show.pet.desktop_pet import (
@@ -27,6 +27,7 @@ from frontengine.utils.pet_chat.pet_chat_service import PetChatService
 from frontengine.utils.focus_timer.focus_timer import (
     PHASE_BREAK, PHASE_FOCUS, PHASE_LONG_BREAK, FocusTimer,
 )
+from frontengine.ui.page.layout_kit import SettingPage
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import retranslator, tr
@@ -40,12 +41,11 @@ _PET_EXTENSIONS = (".gif", ".webp", ".png", ".jpg")
 _CHOOSE_PACK = "Choose pet pack..."
 
 
-class PetSettingUI(QWidget):
+class PetSettingUI(SettingPage):
     def __init__(self):
         front_engine_logger.info("[PetSettingUI] Init")
-        super().__init__()
-        self.grid_layout = QGridLayout(self)
-        self.grid_layout.setContentsMargins(0, 0, 0, 0)
+        super().__init__("tab_pet_text", "page_subtitle_pet",
+                         "Pet", "A companion that lives on your desktop.")
 
         # Init variable
         self.pet_list: list = []
@@ -157,41 +157,37 @@ class PetSettingUI(QWidget):
         self._drop_filter = enable_file_drop(self, _PET_EXTENSIONS, self._on_file_dropped)
 
         # Layout
-        self.grid_layout.addWidget(self.choose_file_button, 0, 0)
-        self.grid_layout.addWidget(self.ready_label, 0, 1)
-        self.grid_layout.addWidget(self.choose_pack_button, 0, 2)
-        self.grid_layout.addWidget(self.choose_sound_button, 1, 2)
-        self.grid_layout.addWidget(self.size_label, 1, 0)
-        self.grid_layout.addWidget(self.size_combobox, 1, 1)
-        self.grid_layout.addWidget(self.speed_label, 2, 0)
-        self.grid_layout.addWidget(self.speed_combobox, 2, 1)
-        self.grid_layout.addWidget(self.behaviour_label, 3, 0)
-        self.grid_layout.addWidget(self.behaviour_combobox, 3, 1)
-        self.grid_layout.addWidget(self.climb_checkbox, 3, 2)
-        self.grid_layout.addWidget(self.talk_checkbox, 2, 2)
-        self.grid_layout.addWidget(self.sit_checkbox, 4, 2)
-        self.grid_layout.addWidget(self.start_button, 4, 0)
-        self.grid_layout.addWidget(self.recent_files_label, 5, 0)
-        self.grid_layout.addWidget(self.recent_files_combobox, 5, 1)
-        self.grid_layout.addWidget(self.target_monitor_label, 6, 0)
-        self.grid_layout.addWidget(self.target_monitor_combobox, 6, 1)
-        self.grid_layout.addWidget(self.volume_label, 6, 2)
-        self.grid_layout.addWidget(self.volume_combobox, 7, 2)
-        self.grid_layout.addWidget(self.audio_react_checkbox, 7, 0)
-        self.grid_layout.addWidget(self.audio_source_combobox, 7, 1)
-        self.grid_layout.addWidget(self.focus_label, 8, 0)
-        self.grid_layout.addWidget(self.focus_minutes_combobox, 8, 1)
-        self.grid_layout.addWidget(self.break_minutes_combobox, 8, 2)
-        self.grid_layout.addWidget(self.focus_button, 9, 0)
-        self.grid_layout.addWidget(self.chat_checkbox, 9, 1)
-        # 這兩個原本被放在 (7,1) 與 (7,2)，正好疊在音效來源與音量的下拉選單上面，
-        # 點下拉選單只會點到勾選框，音效來源和音量因此完全改不了。
-        # These two used to sit at (7,1) and (7,2), directly on top of the audio
-        # source and volume comboboxes: clicking a dropdown hit the checkbox
-        # instead, so neither could be changed at all.
-        self.grid_layout.addWidget(self.tag_checkbox, 10, 0)
-        self.grid_layout.addWidget(self.speech_checkbox, 10, 1)
-        self.grid_layout.addWidget(self.drop_hint_label, 11, 0, 1, 3)
+        source = self.add_section("section_source", "Source")
+        source.add_inline(self.choose_file_button, self.choose_pack_button,
+                          self.choose_sound_button)
+        source.add_row(self.recent_files_label, self.recent_files_combobox)
+
+        appearance = self.add_section("section_appearance", "Appearance")
+        appearance.add_row(self.size_label, self.size_combobox)
+        appearance.add_row(self.speed_label, self.speed_combobox)
+
+        behaviour = self.add_section("section_behaviour", "Behaviour")
+        behaviour.add_row(self.behaviour_label, self.behaviour_combobox)
+        behaviour.add_inline(self.climb_checkbox, self.sit_checkbox)
+
+        sound = self.add_section("section_options", "Sound and speech")
+        sound.add_row(self.volume_label, self.volume_combobox)
+        sound.add_inline(self.talk_checkbox, self.speech_checkbox)
+        sound.add_inline(self.audio_react_checkbox, self.audio_source_combobox)
+
+        # 專注計時器是寵物幫你顧的，不是外觀設定，所以自成一區
+        # The focus timer is something the pet keeps for you rather than a look,
+        # so it gets its own group.
+        focus = self.add_section(self.focus_label)
+        focus.add_inline(self.focus_minutes_combobox, self.break_minutes_combobox)
+        focus.add_inline(self.focus_button)
+
+        together = self.add_section("section_actions", "Together")
+        together.add_inline(self.tag_checkbox, self.chat_checkbox)
+
+        self.add_body_widget(self.drop_hint_label)
+        self.finish_body()
+        self.set_footer(primary=self.start_button, status=self.ready_label)
 
     def _spawn_pet(self) -> None:
         """建立、顯示並開始移動一隻寵物（供 Start 與右鍵複製共用）。"""

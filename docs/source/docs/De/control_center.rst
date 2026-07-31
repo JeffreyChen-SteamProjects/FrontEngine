@@ -4,7 +4,7 @@ Kontrollzentrum-Seite
 .. image:: ../image/control_center/control_center.png
 
 Eine Seite, die jedes Overlay erreicht, auch die von den anderen
-Registerkarten geöffneten.
+Seiten geöffneten.
 
 Schließen
 

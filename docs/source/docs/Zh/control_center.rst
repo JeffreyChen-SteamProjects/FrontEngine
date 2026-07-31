@@ -3,7 +3,7 @@
 
 .. image:: ../image/control_center/control_center.png
 
-這一頁碰得到所有覆蓋層，包含其他分頁開出來的那些。
+這一頁碰得到所有覆蓋層，包含其他頁面開出來的那些。
 
 關閉
 

@@ -2,10 +2,11 @@ from typing import Optional
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QGuiApplication, QPixmap
-from PySide6.QtWidgets import QWidget, QGridLayout, QSlider, QLabel, QPushButton, QMessageBox, QCheckBox, QComboBox
+from PySide6.QtWidgets import QSlider, QLabel, QPushButton, QMessageBox, QCheckBox, QComboBox
 
 from frontengine.show.particle.particle_ui import ParticleOpenGLWidget
 from frontengine.ui.dialog.choose_file_dialog import choose_image
+from frontengine.ui.page.layout_kit import SettingPage
 from frontengine.ui.page.utils import (
     build_recent_combobox,
     build_target_monitor_combobox,
@@ -21,12 +22,11 @@ from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import tr
 
 
-class ParticleSettingUI(QWidget):
+class ParticleSettingUI(SettingPage):
     def __init__(self):
         front_engine_logger.info("[ParticleSettingUI] Init")
-        super().__init__()
-        self.grid_layout = QGridLayout(self)
-        self.grid_layout.setContentsMargins(0, 0, 0, 0)
+        super().__init__("tab_particle_text", "page_subtitle_particle",
+                         "Particle", "Snow, rain and other particle effects.")
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
 
         # Init variable
@@ -100,25 +100,26 @@ class ParticleSettingUI(QWidget):
         )
 
         # Layout
-        self.grid_layout.addWidget(self.opacity_label, 0, 0)
-        self.grid_layout.addWidget(self.opacity_slider_value_label, 0, 1)
-        self.grid_layout.addWidget(self.opacity_slider, 0, 2)
-        self.grid_layout.addWidget(self.choose_file_button, 1, 0)
-        self.grid_layout.addWidget(self.ready_label, 1, 1)
-        self.grid_layout.addWidget(self.choose_direction_label, 2, 0)
-        self.grid_layout.addWidget(self.choose_direction_combobox, 2, 1)
-        self.grid_layout.addWidget(self.particle_size_label, 3, 0)
-        self.grid_layout.addWidget(self.particle_size_combobox, 3, 1)
-        self.grid_layout.addWidget(self.particle_count_label, 4, 0)
-        self.grid_layout.addWidget(self.particle_count_combobox, 4, 1)
-        self.grid_layout.addWidget(self.particle_speed_label, 5, 0)
-        self.grid_layout.addWidget(self.particle_speed_combobox, 5, 1)
-        self.grid_layout.addWidget(self.start_button, 6, 0)
-        self.grid_layout.addWidget(self.show_on_all_screen_checkbox, 6, 1)
-        self.grid_layout.addWidget(self.target_monitor_label, 7, 0)
-        self.grid_layout.addWidget(self.target_monitor_combobox, 7, 1)
-        self.grid_layout.addWidget(self.recent_files_label, 8, 0)
-        self.grid_layout.addWidget(self.recent_files_combobox, 8, 1)
+        source = self.add_section("section_source", "Source")
+        source.add_inline(self.choose_file_button)
+        source.add_row(self.recent_files_label, self.recent_files_combobox)
+
+        appearance = self.add_section("section_appearance", "Appearance")
+        appearance.add_slider_row(
+            self.opacity_label, self.opacity_slider, self.opacity_slider_value_label)
+        appearance.add_row(self.particle_size_label, self.particle_size_combobox)
+        appearance.add_row(self.particle_count_label, self.particle_count_combobox)
+
+        behaviour = self.add_section("section_behaviour", "Behaviour")
+        behaviour.add_row(self.choose_direction_label, self.choose_direction_combobox)
+        behaviour.add_row(self.particle_speed_label, self.particle_speed_combobox)
+
+        where = self.add_section("section_where", "Where")
+        where.add_row(self.target_monitor_label, self.target_monitor_combobox)
+        where.add_inline(self.show_on_all_screen_checkbox)
+
+        self.finish_body()
+        self.set_footer(primary=self.start_button, status=self.ready_label)
 
     def set_show_all_screen(self) -> None:
         front_engine_logger.info("[ParticleSettingUI] set_show_all_screen")

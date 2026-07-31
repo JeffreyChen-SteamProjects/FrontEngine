@@ -4,7 +4,7 @@ Page Centre de contrôle
 .. image:: ../image/control_center/control_center.png
 
 Une page qui atteint chaque calque, y compris ceux ouverts par les autres
-onglets.
+pages.
 
 Fermeture
 

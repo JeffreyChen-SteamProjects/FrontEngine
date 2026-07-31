@@ -2,7 +2,7 @@ from typing import Callable
 
 from PySide6.QtCore import QTimer, Qt
 from PySide6.QtWidgets import (
-    QComboBox, QGridLayout, QLabel, QPushButton, QScrollArea, QTextEdit, QWidget,
+    QComboBox, QLabel, QPushButton, QScrollArea, QTextEdit, QWidget,
 )
 
 from frontengine.show.window_helpers import set_overlay_locked
@@ -16,6 +16,7 @@ from frontengine.ui.page.text.text_setting_ui import TextSettingUI
 from frontengine.ui.page.video.video_setting_ui import VideoSettingUI
 from frontengine.ui.page.web.web_setting_ui import WEBSettingUI
 from frontengine.user_setting.user_setting_file import clear_overlay_geometry, user_setting_dict
+from frontengine.ui.page.layout_kit import SettingPage
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import retranslator, tr, translate
@@ -26,7 +27,7 @@ from frontengine.utils.power_mode.power_mode import (
 from frontengine.utils.redirect_manager.redirect_manager_class import redirect_manager_instance
 
 
-class ControlCenterUI(QWidget):
+class ControlCenterUI(SettingPage):
     """
     ControlCenterUI: 控制中心面板，集中管理各種 widget 與 log panel
     ControlCenterUI: Control center panel to manage widgets and log panel
@@ -50,11 +51,11 @@ class ControlCenterUI(QWidget):
             f"gif={gif_setting_ui}, sound={sound_player_setting_ui}, text={text_setting_ui}, "
             f"scene={scene_setting_ui}, particle={particle_setting_ui}, redirect_output={redirect_output}"
         )
-        super().__init__()
+        super().__init__("tab_control_center_text", "page_subtitle_control_center",
+                         "Control Center",
+                         "Reach every overlay on screen, whichever page opened it.")
 
         # Layout
-        self.grid_layout = QGridLayout()
-        self.grid_layout.setContentsMargins(0, 0, 0, 0)
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
 
         # UI instance
@@ -125,33 +126,29 @@ class ControlCenterUI(QWidget):
         self.log_panel_scroll_area.setViewportMargins(0, 0, 0, 0)
         self.log_panel_scroll_area.setWidget(self.log_panel)
 
-        # Add to layout
-        self.grid_layout.addWidget(self.clear_video_button, 0, 0)
-        self.grid_layout.addWidget(self.clear_image_button, 1, 0)
-        self.grid_layout.addWidget(self.clear_gif_button, 2, 0)
-        self.grid_layout.addWidget(self.clear_web_button, 3, 0)
-        self.grid_layout.addWidget(self.clear_sound_button, 4, 0)
-        self.grid_layout.addWidget(self.clear_text_button, 5, 0)
-        # 這顆按鈕本來建好、翻好、也接上了處理函式，卻沒有加進版面，所以畫面上
-        # 根本沒有「只關閉場景」這個選項，只能用會一併關掉其他所有東西的「全部關閉」。
-        # This button was built, translated and wired, but never added to the
-        # layout - so there was no way to close just the scene, only the "close
-        # all" that takes every other overlay down with it.
-        self.grid_layout.addWidget(self.clear_scene_button, 6, 0)
-        self.grid_layout.addWidget(self.clear_redirect_button, 7, 0)
-        self.grid_layout.addWidget(self.hide_all_button, 8, 0)
-        self.grid_layout.addWidget(self.show_all_button, 9, 0)
-        self.grid_layout.addWidget(self.mute_all_button, 10, 0)
-        self.grid_layout.addWidget(self.lock_all_button, 11, 0)
-        self.grid_layout.addWidget(self.chroma_key_button, 12, 0)
-        self.grid_layout.addWidget(self.reset_positions_button, 13, 0)
-        self.grid_layout.addWidget(self.low_power_button, 14, 0)
-        self.grid_layout.addWidget(self.quality_label, 15, 0)
-        self.grid_layout.addWidget(self.quality_combobox, 16, 0)
-        self.grid_layout.addWidget(self.capture_button, 17, 0)
-        self.grid_layout.addWidget(self.clear_all_button, 18, 0)
-        self.grid_layout.addWidget(self.log_panel_scroll_area, 0, 1, 19, 1)  # rowSpan covers every button
-        self.setLayout(self.grid_layout)
+        # 「關掉某一種」和「一次對全部做某件事」是兩種不同的動作，先前十九顆按鈕
+        # 疊成單獨一直行，兩者混在一起而且比視窗還高。
+        # Closing one kind and doing something to everything at once are two
+        # different actions; as a single column of nineteen buttons they were
+        # mixed together and taller than the window.
+        closing = self.add_section("section_close", "Close")
+        closing.add_button_grid(
+            self.clear_video_button, self.clear_image_button, self.clear_gif_button,
+            self.clear_web_button, self.clear_sound_button, self.clear_text_button,
+            self.clear_scene_button, self.clear_redirect_button)
+
+        everything = self.add_section("section_everything", "Everything at once")
+        everything.add_button_grid(
+            self.hide_all_button, self.show_all_button, self.mute_all_button,
+            self.lock_all_button, self.chroma_key_button, self.reset_positions_button,
+            self.low_power_button, self.capture_button)
+        everything.add_row(self.quality_label, self.quality_combobox)
+
+        log = self.add_section("section_log", "Messages")
+        log.add_widget(self.log_panel_scroll_area)
+
+        self.finish_body()
+        self.set_footer(primary=self.clear_all_button)
 
         # Redirect
         if redirect_output:

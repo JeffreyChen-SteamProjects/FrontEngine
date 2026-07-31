@@ -6,13 +6,14 @@ Bedienung
 FrontEngine legt Dinge über Ihren Bildschirm - ein Video, ein Bild, eine
 Webseite, etwas Text, ein Haustier - und lässt sie dort, während Sie
 weiterarbeiten. Jedes davon heißt Overlay. Sie können beliebig viele
-gleichzeitig laufen lassen, aus verschiedenen Registerkarten und auf
+gleichzeitig laufen lassen, von verschiedenen Seiten und auf
 verschiedenen Bildschirmen.
 
 Ihr erstes Overlay
 ==================
 
-1. Wählen Sie die Registerkarte für das Gewünschte: Video, Bild, Webseite, Text
+1. Wählen Sie in der Liste links die Seite für das Gewünschte: Video, Bild,
+   Webseite, Text
    und so fort.
 2. Wählen Sie die Datei oder tippen Sie die Adresse.
 3. Drücken Sie auf dieser Seite die Start-Schaltfläche.
@@ -48,7 +49,7 @@ Präsentieren, solange das Zeichnen eingeschaltet ist.
 Mehrere auf einmal verwalten
 ============================
 
-Die Registerkarte **Kontrollzentrum** erreicht jedes Overlay, gleich von
+Die Seite **Kontrollzentrum** erreicht jedes Overlay, gleich von
 welcher Seite geöffnet. Sie kann alle kurz ausblenden, stummschalten, sperren,
 ihre Plätze zurücksetzen oder die Qualität senken, wenn der Akku zählt. Zum
 Verschieben zuerst entsperren - wo Sie es ablegen, merkt es sich.
@@ -77,13 +78,13 @@ Die Menüleiste
   Fehler-Tracker und der Hinweis auf F12.
 * **Dokumentation** - öffnet diese Dokumentation im Browser.
 
-Die Registerkarten
-==================
+Die Seiten
+==========
 
 Etwas auf den Bildschirm bringen
 
 * :doc:`video`, :doc:`image`, :doc:`web`, :doc:`gif_and_webp`, :doc:`sound`,
-  :doc:`text` - je eine Art pro Registerkarte.
+  :doc:`text` - je eine Art pro Seite.
 * :doc:`scene` - mehrere zusammen, als Datei gesichert.
 * :doc:`particle` - ein Partikeleffekt über dem Desktop.
 * :doc:`pet` - ein Begleiter, der läuft, klettert und reagiert.

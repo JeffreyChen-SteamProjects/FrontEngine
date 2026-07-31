@@ -1,11 +1,12 @@
 from typing import Optional
 
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QWidget, QGridLayout, QLabel, QSlider, QPushButton, QMessageBox
+from PySide6.QtWidgets import QLabel, QSlider, QPushButton, QMessageBox
 
 from frontengine.show.sound_player.sound_effect import SoundEffectWidget
 from frontengine.show.sound_player.sound_player import SoundPlayer
 from frontengine.ui.dialog.choose_file_dialog import choose_player_sound, choose_wav_sound
+from frontengine.ui.page.layout_kit import SettingPage
 from frontengine.ui.page.utils import coerce_int
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
@@ -17,12 +18,11 @@ from frontengine.utils.multi_language.retranslate import retranslator, tr, trans
 _NOT_READY = "Not Ready"
 
 
-class SoundPlayerSettingUI(QWidget):
+class SoundPlayerSettingUI(SettingPage):
     def __init__(self):
         front_engine_logger.info("[SoundPlayerSettingUI] Init")
-        super().__init__()
-        self.grid_layout = QGridLayout(self)
-        self.grid_layout.setContentsMargins(0, 0, 0, 0)
+        super().__init__("tab_sound_text", "page_subtitle_sound",
+                         "Sound", "Play a sound or a piece of music.")
 
         # Init variable
         self.sound_widget_list = []
@@ -67,15 +67,19 @@ class SoundPlayerSettingUI(QWidget):
         self.start_player_button.clicked.connect(self.start_play_sound)
 
         # Layout
-        self.grid_layout.addWidget(self.volume_label, 0, 0)
-        self.grid_layout.addWidget(self.volume_slider_value_label, 0, 1)
-        self.grid_layout.addWidget(self.volume_slider, 0, 2)
-        self.grid_layout.addWidget(self.choose_wav_file_button, 1, 0)
-        self.grid_layout.addWidget(self.wav_ready_label, 1, 1)
-        self.grid_layout.addWidget(self.choose_player_file_button, 2, 0)
-        self.grid_layout.addWidget(self.player_ready_label, 2, 1)
-        self.grid_layout.addWidget(self.start_wav_button, 3, 0)
-        self.grid_layout.addWidget(self.start_player_button, 3, 1)
+        # 音效與音樂是兩件事，各自有檔案與就緒狀態，所以分成兩列而不是混在一起
+        # A sound effect and a piece of music are separate errands with separate
+        # files and readiness, so they get a row each rather than one pile.
+        source = self.add_section("section_source", "Source")
+        source.add_row(self.wav_ready_label, self.choose_wav_file_button)
+        source.add_row(self.player_ready_label, self.choose_player_file_button)
+
+        options = self.add_section("section_options", "Options")
+        options.add_slider_row(
+            self.volume_label, self.volume_slider, self.volume_slider_value_label)
+
+        self.finish_body()
+        self.set_footer(primary=self.start_player_button, extra=[self.start_wav_button])
 
     def start_play_wav(self) -> None:
         front_engine_logger.info("[SoundPlayerSettingUI] start_play_wav")
