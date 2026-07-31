@@ -24,4 +24,8 @@ Tools Page
   locally only and nothing is recorded.
 * Pin a window... - keep another application's window on top, and change how
   see-through it is. Windows only.
+* Replicate a window... - a second, small window showing a chosen window live,
+  while the original stays where it is. Useful for keeping an eye on a video or
+  a build while you work in front of it. Drag the replica to move it,
+  double-click to close it. Windows only.
 * Window layout - save where your windows are and put them back later.

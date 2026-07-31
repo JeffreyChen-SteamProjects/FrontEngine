@@ -26,4 +26,8 @@ Page Outils
   miroir. Elle n'est affichée qu'en local et rien n'est enregistré.
 * Épingler une fenêtre… - garder la fenêtre d'une autre application au premier
   plan et régler sa transparence. Windows uniquement.
+* Dupliquer une fenêtre… - une seconde petite fenêtre affiche en direct la fenêtre
+  choisie, tandis que l'originale reste à sa place. Pratique pour surveiller une
+  vidéo ou une compilation tout en travaillant. Faites glisser pour la déplacer,
+  double-cliquez pour la fermer. Windows uniquement.
 * Disposition des fenêtres - retenir où sont les fenêtres et les y remettre.

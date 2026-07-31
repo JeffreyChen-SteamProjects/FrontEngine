@@ -25,4 +25,8 @@ Pagina Strumenti
   specchiatura. È mostrata solo in locale e non viene registrato nulla.
 * Fissa una finestra… - tenere in primo piano la finestra di un altro programma
   e regolarne la trasparenza. Solo su Windows.
+* Duplica una finestra… - una seconda finestra piccola mostra dal vivo quella
+  scelta, mentre l'originale resta dov'è. Comodo per tenere d'occhio un video o
+  una compilazione mentre lavori. Trascina per spostarla, doppio clic per
+  chiuderla. Solo Windows.
 * Disposizione delle finestre - ricordare dove sono le finestre e rimetterle lì.

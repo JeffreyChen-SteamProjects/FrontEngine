@@ -25,6 +25,7 @@ from frontengine.ui.dialog.screen_text_dialog import (
     ScreenTextDialog, ask_for_consent, has_consent,
 )
 from frontengine.ui.dialog.window_pin_dialog import WindowPinDialog
+from frontengine.ui.dialog.window_replica_dialog import WindowReplicaDialog
 from frontengine.user_setting.user_setting_file import user_setting_dict, write_user_setting
 from frontengine.ui.page.utils import coerce_int
 from frontengine.ui.page.layout_kit import SettingPage
@@ -85,6 +86,7 @@ class ToolsSettingUI(SettingPage):
         # raises RuntimeError on touch and "copy last" was a silent no-op.
         self.last_capture: Optional[QPixmap] = None
         self.pin_dialog: Optional[WindowPinDialog] = None
+        self.replica_dialog: Optional[WindowReplicaDialog] = None
 
         self._build_measure_row()
         self._build_capture_row()
@@ -94,6 +96,11 @@ class ToolsSettingUI(SettingPage):
         self._build_camera_row()
         self.pin_button = tr(QPushButton(), "tools_pin_window", "Pin a window...")
         self.pin_button.clicked.connect(self.open_pin_dialog)
+
+        # 視窗複本：原視窗留在原地，另外開一個小視窗顯示它的即時畫面
+        # Window replica: the original stays put, a small window shows it live
+        self.replica_button = tr(QPushButton(), "tools_replicate_window", "Replicate a window...")
+        self.replica_button.clicked.connect(self.open_replica_dialog)
 
         # 視窗版面：記下每個視窗的位置，之後一鍵擺回去
         # Window layouts: remember where the windows are and put them back later.
@@ -154,7 +161,7 @@ class ToolsSettingUI(SettingPage):
         windows.add_row("tools_name", self.layout_name_edit, "Name")
         windows.add_inline(self.layout_save_button)
         windows.add_row("tools_saved", self.layout_combobox, "Saved")
-        windows.add_inline(self.layout_restore_button, self.pin_button)
+        windows.add_inline(self.layout_restore_button, self.pin_button, self.replica_button)
 
         self.add_body_widget(self.hint_label)
         self.finish_body()
@@ -365,6 +372,20 @@ class ToolsSettingUI(SettingPage):
         self.pin_dialog = WindowPinDialog(self)
         self.pin_dialog.exec()
         return self.pin_dialog
+
+    def open_replica_dialog(self) -> WindowReplicaDialog:
+        """開視窗複本對話框（關掉主程式時會把開過的複本收乾淨）。"""
+        self.replica_dialog = WindowReplicaDialog(self)
+        self.replica_dialog.exec()
+        return self.replica_dialog
+
+    def close_replicas(self) -> None:
+        """關掉開過的視窗複本（主程式關閉時呼叫）。"""
+        if self.replica_dialog is not None:
+            try:
+                self.replica_dialog.close_all()
+            except RuntimeError:
+                self.replica_dialog = None
 
     def release_pinned_windows(self) -> None:
         """把釘過的別人視窗放開（主程式關閉時呼叫）。"""
