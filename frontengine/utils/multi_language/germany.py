@@ -171,6 +171,10 @@ germany_word_dict = {
     "web_setting_open_enable_input": "Eingabe aktivieren",
     # Szenen-UI
     "tab_scene_text": "Szene",
+    "image_board_label": "REFERENZTAFEL",
+    "image_board_choose": "Referenztafel öffnen...",
+    "image_board_close": "Tafeln schließen",
+    "image_board_hint": "Mehrere Bilder auf einmal wählen. Einzelne ziehen zum Anordnen, den Hintergrund ziehen zum Verschieben, Mausrad zum Zoomen, Entf entfernt das gewählte Bild, Escape schließt die Tafel.",
     "scene_start": "Szene starten",
     "scene_table_view_type": "Typ",
     "scene_file_path": "Dateipfad",

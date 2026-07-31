@@ -402,6 +402,10 @@ class FrontEngineMainUI(QMainWindow):
                           "pinned_widget_list"):
             self.control_center_ui.register_overlay_source(
                 lambda attribute=attribute: getattr(self.tools_setting_ui, attribute, []))
+        # 參考圖板也要進控制中心，否則「全部關閉」關不掉它
+        # The reference boards belong here too, or "close all" cannot reach them
+        self.control_center_ui.register_overlay_source(
+            lambda: getattr(self.image_setting_ui, "board_widget_list", []))
 
     # 螢幕保護能顯示哪些分頁：來源名稱 -> (頁面屬性, 啟動方法, 覆蓋層清單屬性)
     # What the screensaver can show: source -> (page attribute, start method,

@@ -171,6 +171,10 @@ french_word_dict = {
     "web_setting_open_enable_input": "Activer l'entrée",
     # Scene UI
     "tab_scene_text": "Scène",
+    "image_board_label": "PLANCHE DE RÉFÉRENCE",
+    "image_board_choose": "Ouvrir une planche...",
+    "image_board_close": "Fermer les planches",
+    "image_board_hint": "Choisissez plusieurs images à la fois. Faites glisser chacune pour l'arranger, le fond pour vous déplacer, la molette pour zoomer ; Suppr retire l'image sélectionnée et Échap ferme la planche.",
     "scene_start": "Commencer la scène",
     "scene_table_view_type": "Type",
     "scene_file_path": "Chemin du fichier",

@@ -18,3 +18,7 @@ Page Image
 
 * Écran cible - quel écran utiliser, ou demander à chaque fois.
 * Récents - les images déjà affichées.
+* Ouvrir une planche… - choisir plusieurs images à la fois et les étaler sur une
+  même surface au-dessus du bureau. Faites glisser chaque image pour l'arranger, le
+  fond pour vous déplacer, la molette pour zoomer ; Suppr retire l'image
+  sélectionnée et Échap ferme la planche. Le Centre de contrôle y accède aussi.

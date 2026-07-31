@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (
 )
 
 from frontengine.show.image.paint_image import ImageWidget
+from frontengine.show.reference.reference_board import ReferenceBoardWidget
 from frontengine.ui.dialog.choose_file_dialog import choose_image
 from frontengine.ui.page.layout_kit import SettingPage
 from frontengine.ui.page.utils import (
@@ -97,6 +98,21 @@ class ImageSettingUI(SettingPage):
         self.slideshow_interval_combobox.addItems(["3", "5", "10", "15", "30", "60"])
         self.slideshow_interval_combobox.setCurrentText("5")
         self.slideshow_shuffle_checkbox = tr(QCheckBox(), "slideshow_shuffle", "Shuffle")
+        # 參考圖板：好幾張圖攤在同一塊畫布上，各自可以搬動
+        # Reference board: several pictures on one canvas, each movable
+        self.board_widget_list: list = []
+        self.board_choose_button = tr(QPushButton(), "image_board_choose",
+                                      "Open reference board...")
+        self.board_choose_button.clicked.connect(self.open_reference_board)
+        self.board_close_button = tr(QPushButton(), "image_board_close", "Close boards")
+        self.board_close_button.clicked.connect(self.close_reference_boards)
+        self.board_hint_label = tr(
+            QLabel(), "image_board_hint",
+            "Pick several pictures at once. Drag each one to arrange it, drag the "
+            "background to pan, scroll to zoom, Delete removes the selected one and "
+            "Escape closes the board.")
+        self.board_hint_label.setWordWrap(True)
+
         self.slideshow_recursive_checkbox = tr(QCheckBox(), "slideshow_recursive",
             "Include subfolders")
 
@@ -117,6 +133,10 @@ class ImageSettingUI(SettingPage):
         slideshow.add_row(self.slideshow_interval_label, self.slideshow_interval_combobox)
         slideshow.add_inline(self.slideshow_shuffle_checkbox, self.slideshow_recursive_checkbox)
 
+        board = self.add_section("image_board_label", "Reference board")
+        board.add_inline(self.board_choose_button, self.board_close_button)
+        board.add_widget(self.board_hint_label)
+
         where = self.add_section("section_where", "Where")
         where.add_row(self.target_monitor_label, self.target_monitor_combobox)
         where.add_inline(self.show_on_all_screen_checkbox, self.show_on_bottom_checkbox,
@@ -124,6 +144,38 @@ class ImageSettingUI(SettingPage):
 
         self.finish_body()
         self.set_footer(primary=self.start_button, status=self.ready_label)
+
+    def open_reference_board(self):
+        """
+        挑幾張圖開一塊參考圖板。一張都沒挑就不要開空白畫布——那看起來像壞掉。
+        Open a board from several chosen pictures. Nothing chosen opens nothing:
+        an empty canvas reads as a fault.
+        """
+        paths, _ = QFileDialog.getOpenFileNames(
+            self,
+            language_wrapper.language_word_dict.get("image_board_choose", "Open reference board..."),
+            "",
+            "Images (*.png *.jpg *.jpeg *.webp *.bmp *.gif)")
+        if not paths:
+            return None
+        board = ReferenceBoardWidget()
+        if board.add_images(paths) == 0:
+            # 全部讀不進來就不要留一塊空畫布在畫面上。
+            # With nothing readable, do not leave an empty canvas on screen.
+            board.close()
+            return None
+        board.showMaximized()
+        self.board_widget_list.append(board)
+        return board
+
+    def close_reference_boards(self) -> None:
+        """關掉開過的參考圖板。"""
+        for board in list(self.board_widget_list):
+            try:
+                board.close()
+            except RuntimeError:  # pragma: no cover - 底層物件已消失
+                pass
+        self.board_widget_list.clear()
 
     def set_show_all_screen(self) -> None:
         front_engine_logger.info("[ImageSettingUI] set_show_all_screen")

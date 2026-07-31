@@ -171,6 +171,10 @@ english_word_dict = {
     "web_setting_open_enable_input": "Enable input",
     # Scene UI
     "tab_scene_text": "Scene",
+    "image_board_label": "REFERENCE BOARD",
+    "image_board_choose": "Open reference board...",
+    "image_board_close": "Close boards",
+    "image_board_hint": "Pick several pictures at once. Drag each one to arrange it, drag the background to pan, scroll to zoom, Delete removes the selected one and Escape closes the board.",
     "scene_start": "Start scene",
     "scene_table_view_type": "Type",
     "scene_file_path": "File path",
