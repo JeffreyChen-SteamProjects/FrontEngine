@@ -47,6 +47,7 @@ germany_word_dict = {
     "tools_shape": "Form",
     "tools_name": "Name",
     "tools_saved": "Gespeichert",
+    "target_monitor_span": "Über alle Bildschirme",
     "section_close": "SCHLIESSEN",
     "section_everything": "ALLES AUF EINMAL",
     "section_log": "MELDUNGEN",

@@ -46,6 +46,7 @@ english_word_dict = {
     "tools_shape": "Shape",
     "tools_name": "Name",
     "tools_saved": "Saved",
+    "target_monitor_span": "Span all screens",
     "section_close": "CLOSE",
     "section_everything": "EVERYTHING AT ONCE",
     "section_log": "MESSAGES",

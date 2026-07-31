@@ -15,6 +15,8 @@ from frontengine.ui.page.utils import (
     enable_file_drop,
     reload_recent_combobox,
     resolve_preferred_monitor,
+    resolve_span,
+    virtual_desktop_geometry,
 )
 from frontengine.user_setting.user_setting_file import add_recent_file
 from frontengine.utils.logging.loggin_instance import front_engine_logger
@@ -149,9 +151,19 @@ class ParticleSettingUI(SettingPage):
             message_box.exec()
             return
 
+        span = resolve_span(self.target_monitor_combobox)
+
         def factory(monitor):
-            target = monitor or QGuiApplication.primaryScreen()
-            geometry = target.availableGeometry()
+            # 粒子場的大小在建構時就固定了，所以橫跨模式必須拿整個桌面的尺寸來建，
+            # 不能建成單一螢幕大小再把視窗拉寬——那樣粒子只會落在其中一塊。
+            # The particle field is sized at construction, so spanning has to
+            # build it at the whole-desktop size. Building it screen-sized and
+            # then widening the window would leave the particles in one corner.
+            if span:
+                geometry = virtual_desktop_geometry()
+            else:
+                target = monitor or QGuiApplication.primaryScreen()
+                geometry = target.availableGeometry()
             return self._create_particle_widget(geometry.width(), geometry.height())
 
         def present_on_monitor(widget: ParticleOpenGLWidget, monitor, _idx: int) -> None:
@@ -166,6 +178,7 @@ class ParticleSettingUI(SettingPage):
             present_primary=lambda widget: widget.showMaximized(),
             present_on_monitor=present_on_monitor,
             preferred_monitor_index=resolve_preferred_monitor(self.target_monitor_combobox),
+            span_all_screens=resolve_span(self.target_monitor_combobox),
         )
 
     def choose_and_copy_file_to_cwd_image_dir_then_play(self) -> None:

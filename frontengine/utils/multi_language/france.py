@@ -47,6 +47,7 @@ french_word_dict = {
     "tools_shape": "Forme",
     "tools_name": "Nom",
     "tools_saved": "Enregistrés",
+    "target_monitor_span": "Sur tous les écrans",
     "section_close": "FERMER",
     "section_everything": "TOUT À LA FOIS",
     "section_log": "MESSAGES",

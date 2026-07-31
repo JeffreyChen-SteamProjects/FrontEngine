@@ -47,6 +47,7 @@ simplified_chinese_word_dict = {
     "tools_shape": "形状",
     "tools_name": "名称",
     "tools_saved": "已保存",
+    "target_monitor_span": "横跨所有屏幕",
     "section_close": "关闭",
     "section_everything": "一次全部",
     "section_log": "消息",

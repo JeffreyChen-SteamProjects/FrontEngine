@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Callable, Optional
 
-from PySide6.QtCore import QEvent, QObject
+from PySide6.QtCore import QEvent, QObject, QRect
 from PySide6.QtGui import QGuiApplication, QScreen
 from PySide6.QtWidgets import QCheckBox, QComboBox, QDialog, QGridLayout, QLabel, QPushButton, QWidget
 
@@ -96,6 +96,8 @@ def dispatch_to_monitors(
     present_primary: Callable[[QWidget], None],
     present_on_monitor: Callable[[QWidget, QScreen, int], None],
     preferred_monitor_index: Optional[int] = None,
+    span_all_screens: bool = False,
+    screens: Optional[list] = None,
 ) -> None:
     """
     Run the canonical monitor-dispatch flow the setting pages share:
@@ -108,7 +110,21 @@ def dispatch_to_monitors(
     monitor so the user is not prompted; out-of-range values fall back
     to the prompt flow.
     """
-    monitors = QGuiApplication.screens()
+    monitors = QGuiApplication.screens() if screens is None else screens
+
+    # 橫跨模式：一個覆蓋層蓋滿整個桌面，而不是每個螢幕各一個。要放在最前面判斷，
+    # 因為它和「問使用者要哪一個螢幕」是互斥的——已經選了全部就沒什麼好問的。
+    # Spanning: one overlay over the whole desktop rather than one per screen.
+    # It is decided first because it rules out asking which screen to use: the
+    # user has already said all of them.
+    if span_all_screens and len(monitors) > 1:
+        widget = factory(None)
+        geometry = virtual_desktop_geometry(monitors)
+        widget.setGeometry(geometry)
+        widget.show()
+        widget.raise_()
+        return
+
     if not show_all_screen and len(monitors) <= 1:
         widget = factory(None)
         present_primary(widget)
@@ -138,17 +154,54 @@ def dispatch_to_monitors(
         present_on_monitor(widget, monitor, index)
 
 
-def build_target_monitor_combobox() -> QComboBox:
+# 「橫跨所有螢幕」在下拉選單裡用這個值標記，和「第 N 個螢幕」的整數區分開。
+# The "span every screen" entry carries this instead of a monitor index.
+SPAN_ALL_DATA = "span"
+
+
+def virtual_desktop_geometry(screens=None) -> QRect:
+    """
+    所有螢幕聯集起來的矩形，也就是整個桌面的範圍。
+
+    橫跨模式要的是一個蓋滿這塊範圍的覆蓋層，而不是每個螢幕各一個。螢幕不一定排成
+    一直線也不一定同樣高，所以要用聯集而不是把寬度加起來。
+    The union of every screen: the whole desktop. Spanning wants one overlay
+    covering that, not one per screen. Screens are not necessarily in a row or
+    the same height, so this unites rather than summing widths.
+    """
+    geometry = QRect()
+    for screen in (QGuiApplication.screens() if screens is None else screens):
+        geometry = geometry.united(screen.geometry())
+    return geometry
+
+
+def build_target_monitor_combobox(screens=None) -> QComboBox:
     """
     Build a combobox listing the current monitors plus an initial "Ask"
     entry. Selection "Ask" (data=None) preserves today's prompt flow;
     selecting a monitor index pre-selects that screen.
+
+    多螢幕時多一個「橫跨所有螢幕」。只有一個螢幕時不提供——那和一般顯示完全一樣，
+    列出來只會讓人以為自己漏掉了什麼。
+    On a multi-monitor system there is also a "span every screen" entry. It is
+    not offered on a single screen, where it would do exactly what the normal
+    path does and only leave the user wondering what they missed.
     """
+    monitors = QGuiApplication.screens() if screens is None else screens
     combobox = QComboBox()
     combobox.addItem(language_wrapper.language_word_dict.get("target_monitor_ask", "Ask"), None)
-    for index, _ in enumerate(QGuiApplication.screens()):
+    for index, _ in enumerate(monitors):
         combobox.addItem(str(index), index)
+    if len(monitors) > 1:
+        combobox.addItem(
+            language_wrapper.language_word_dict.get("target_monitor_span", "Span all screens"),
+            SPAN_ALL_DATA)
     return combobox
+
+
+def resolve_span(combobox: Optional[QComboBox]) -> bool:
+    """使用者是不是選了「橫跨所有螢幕」。"""
+    return combobox is not None and combobox.currentData() == SPAN_ALL_DATA
 
 
 def resolve_preferred_monitor(combobox: Optional[QComboBox]) -> Optional[int]:
