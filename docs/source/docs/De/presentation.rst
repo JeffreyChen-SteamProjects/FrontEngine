@@ -13,6 +13,10 @@ Präsentieren-Seite
 * Tastenanzeige - zeigt die gedrückten Tasten, für Aufnahmen und Vorführungen.
 * Lupe - folgt dem Cursor, von 1,5x bis 6x.
 * Whiteboard - eine endlose Fläche.
+* Bild einfrieren - den gewählten Bildschirm mit einer Aufnahme seiner selbst
+  überdecken, damit das Projizierte oder Geteilte stehen bleibt, während Sie etwas
+  anderes öffnen. Erneut die Schaltfläche oder das Kürzel drücken hebt es auf; jede
+  Taste und ein Doppelklick auf das Standbild ebenfalls.
 
     * Mit der mittleren Maustaste ziehen verschiebt, Scrollen zoomt.
     * Striche liegen in Flächenkoordinaten, Verschieben und Zoomen lässt sie
