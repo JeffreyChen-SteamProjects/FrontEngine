@@ -110,7 +110,8 @@ def test_battery_state_says_which_way_it_is_going() -> None:
 def test_a_machine_without_a_battery_reports_nothing() -> None:
     """桌機沒有電池，欄位要是 None 而不是 0——0% 會被畫成「快沒電了」。"""
     sample = SystemStats(battery_reader=lambda: None).sample()
-    assert sample["battery"] is None and sample["battery_state"] is None
+    assert sample["battery"] is None
+    assert sample["battery_state"] is None
 
 
 def test_a_failing_battery_reader_does_not_break_the_sample() -> None:

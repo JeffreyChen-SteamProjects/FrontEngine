@@ -84,6 +84,49 @@ def rate_per_second(previous, current, elapsed: float, counter_bits: int = 32) -
     return max(0.0, delta / elapsed)
 
 
+def _usage_fields(prefix: str, reading) -> Dict[str, object]:
+    """
+    「用了多少 / 總共多少」那一組欄位：百分比與兩個易讀的大小。讀不到時三個
+    欄位都是 None——半套的讀數比沒有讀數更難處理。
+    The used/total trio: a percentage and two readable sizes. An unavailable
+    reading gives three Nones; half a reading is worse than none.
+    """
+    used, total = (reading or (None, None))[:2]
+    if used is None or total is None:
+        return {prefix: None, f"{prefix}_used": None, f"{prefix}_total": None}
+    return {
+        prefix: percentage(used, total),
+        f"{prefix}_used": format_bytes(used),
+        f"{prefix}_total": format_bytes(total),
+    }
+
+
+def _throughput_fields(reading) -> Dict[str, object]:
+    """
+    網路速率的四個欄位。同一個數字給兩種形態：格式化字串給文字覆蓋層，
+    原始 bytes/s 給折線圖。
+    The four throughput fields. One number in two shapes: formatted for text
+    overlays, raw bytes per second for the sparklines.
+    """
+    down, up = (reading or (None, None))[:2]
+    fields: Dict[str, object] = {}
+    for name, value in (("down", down), ("up", up)):
+        fields[name] = f"{format_bytes(value)}/s" if value is not None else None
+        fields[f"{name}_bytes"] = float(value) if value is not None else None
+    return fields
+
+
+def _battery_fields(reading) -> Dict[str, object]:
+    """電池的兩個欄位；沒有電池（桌機）兩個都是 None，不是 0%。"""
+    if not reading:
+        return {"battery": None, "battery_state": None}
+    level, charging = reading[0], reading[1]
+    return {
+        "battery": float(level),
+        "battery_state": STATE_CHARGING if charging else STATE_ON_BATTERY,
+    }
+
+
 class SystemStats:
     """
     取樣系統負載。sample() 回傳可直接套進文字樣板的欄位；取不到的欄位為 None。
@@ -108,28 +151,12 @@ class SystemStats:
         `up_bytes`) for the sparklines, because a graph needs a number where a
         template needs "1.2MB/s".
         """
-        memory = self.memory()
-        disk = self.disk()
-        network = self.network()
-        battery = self.battery()
-        down_bytes = network[0] if network else None
-        up_bytes = network[1] if network else None
-        return {
-            "cpu": self.cpu_percent(),
-            "ram": percentage(memory[0], memory[1]) if memory else None,
-            "ram_used": format_bytes(memory[0]) if memory else None,
-            "ram_total": format_bytes(memory[1]) if memory else None,
-            "disk": percentage(disk[0], disk[1]) if disk else None,
-            "disk_used": format_bytes(disk[0]) if disk else None,
-            "disk_total": format_bytes(disk[1]) if disk else None,
-            "down": f"{format_bytes(down_bytes)}/s" if down_bytes is not None else None,
-            "up": f"{format_bytes(up_bytes)}/s" if up_bytes is not None else None,
-            "down_bytes": float(down_bytes) if down_bytes is not None else None,
-            "up_bytes": float(up_bytes) if up_bytes is not None else None,
-            "battery": float(battery[0]) if battery else None,
-            "battery_state": (STATE_CHARGING if battery[1] else STATE_ON_BATTERY)
-            if battery else None,
-        }
+        fields: Dict[str, object] = {"cpu": self.cpu_percent()}
+        fields.update(_usage_fields("ram", self.memory()))
+        fields.update(_usage_fields("disk", self.disk()))
+        fields.update(_throughput_fields(self.network()))
+        fields.update(_battery_fields(self.battery()))
+        return fields
 
     # --- battery ---------------------------------------------------------
     def battery(self):

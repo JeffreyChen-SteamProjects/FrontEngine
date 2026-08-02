@@ -181,6 +181,45 @@ def has_any_condition(condition: Dict[str, Any]) -> bool:
     return any(condition.get(flag) is not None for flag in ("fullscreen", "battery"))
 
 
+def _matches_clock(condition: Dict[str, Any], now: Any) -> bool:
+    """星期與時段。兩者都需要一個真的 datetime，沒有就不算符合。"""
+    days = condition.get("days")
+    wants_window = condition.get("from") is not None or condition.get("to") is not None
+    if not days and not wants_window:
+        return True
+    if not isinstance(now, datetime):
+        return False
+    if days and now.weekday() not in days:
+        return False
+    if wants_window and not in_time_window(now.hour * 60 + now.minute,
+                                           condition.get("from"), condition.get("to")):
+        return False
+    return True
+
+
+def _matches_flags(condition: Dict[str, Any], context: Dict[str, Any]) -> bool:
+    """全螢幕與電池。讀不到（不是 bool）一律不算符合。"""
+    for flag, key in (("fullscreen", "fullscreen"), ("battery", "on_battery")):
+        wanted = condition.get(flag)
+        if wanted is None:
+            continue
+        actual = context.get(key)
+        if not isinstance(actual, bool) or actual is not wanted:
+            return False
+    return True
+
+
+def _matches_idle(condition: Dict[str, Any], context: Dict[str, Any]) -> bool:
+    """閒置時間是門檻（至少 N 分鐘），不是相等比較。"""
+    idle_minutes = condition.get("idle_minutes")
+    if idle_minutes is None:
+        return True
+    idle_seconds = context.get("idle_seconds")
+    if not isinstance(idle_seconds, (int, float)) or isinstance(idle_seconds, bool):
+        return False
+    return idle_seconds >= idle_minutes * 60
+
+
 def evaluate(rule: Dict[str, Any], context: Dict[str, Any]) -> bool:
     """
     這條規則此刻成立嗎。context 的欄位缺了就當「這一項不符合」——讀不到前景
@@ -194,32 +233,11 @@ def evaluate(rule: Dict[str, Any], context: Dict[str, Any]) -> bool:
     condition = rule.get("when") or {}
     if not has_any_condition(condition):
         return False
-
-    now = context.get("now")
-    if condition.get("days"):
-        if not isinstance(now, datetime) or now.weekday() not in condition["days"]:
-            return False
-    if condition.get("from") is not None or condition.get("to") is not None:
-        if not isinstance(now, datetime):
-            return False
-        if not in_time_window(now.hour * 60 + now.minute,
-                              condition.get("from"), condition.get("to")):
-            return False
+    if not _matches_clock(condition, context.get("now")):
+        return False
     if condition.get("apps") and not app_matches(context.get("app"), condition["apps"]):
         return False
-    for flag, key in (("fullscreen", "fullscreen"), ("battery", "on_battery")):
-        wanted = condition.get(flag)
-        if wanted is None:
-            continue
-        actual = context.get(key)
-        if not isinstance(actual, bool) or actual is not wanted:
-            return False
-    idle_minutes = condition.get("idle_minutes")
-    if idle_minutes is not None:
-        idle_seconds = context.get("idle_seconds")
-        if not isinstance(idle_seconds, (int, float)) or idle_seconds < idle_minutes * 60:
-            return False
-    return True
+    return _matches_flags(condition, context) and _matches_idle(condition, context)
 
 
 class RuleTracker:

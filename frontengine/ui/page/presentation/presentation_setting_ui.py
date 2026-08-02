@@ -503,23 +503,28 @@ class PresentationSettingUI(SettingPage):
             "target_monitor": self.target_monitor_combobox.currentText(),
         }
 
+    @staticmethod
+    def _select_by(combobox, value, finder: str) -> None:
+        """
+        依附帶資料或顯示文字選取下拉選單；值缺席或找不到就不動。
+        Select a combobox entry by data or by text, leaving it alone when the
+        value is absent or unknown.
+        """
+        if value is None:
+            return
+        index = getattr(combobox, finder)(str(value))
+        if index >= 0:
+            combobox.setCurrentIndex(index)
+
     def set_state(self, state: dict) -> None:
-        if state.get("annotate_tool") is not None:
-            index = self.annotate_tool_combobox.findData(str(state["annotate_tool"]))
-            if index >= 0:
-                self.annotate_tool_combobox.setCurrentIndex(index)
-        if state.get("keystroke_position") is not None:
-            index = self.keystroke_position_combobox.findData(str(state["keystroke_position"]))
-            if index >= 0:
-                self.keystroke_position_combobox.setCurrentIndex(index)
+        for combobox, key in ((self.annotate_tool_combobox, "annotate_tool"),
+                              (self.keystroke_position_combobox, "keystroke_position")):
+            self._select_by(combobox, state.get(key), "findData")
         for combobox, key in ((self.annotate_color_combobox, "annotate_color"),
                               (self.magnifier_zoom_combobox, "magnifier_zoom"),
                               (self.keystroke_size_combobox, "keystroke_size"),
                               (self.target_monitor_combobox, "target_monitor")):
-            if state.get(key) is not None:
-                index = combobox.findText(str(state[key]))
-                if index >= 0:
-                    combobox.setCurrentIndex(index)
+            self._select_by(combobox, state.get(key), "findText")
         width = coerce_int(state.get("annotate_width"))
         if width is not None:
             self.annotate_width_slider.setValue(width)

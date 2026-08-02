@@ -123,7 +123,8 @@ def test_the_service_hides_and_restores_through_the_widgets() -> None:
     service = VirtualDesktopService(widgets_provider=lambda: [here, there],
                                     probe=on_desktops(1))
     service.poll_once()
-    assert there.hidden_times == 1 and here.hidden_times == 0
+    assert there.hidden_times == 1, "the one on the other desktop was hidden"
+    assert here.hidden_times == 0, "the one on this desktop was left alone"
     service.set_probe(on_desktops(1, 2))
     service.poll_once()
     assert there.shown_times == 1

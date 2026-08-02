@@ -193,7 +193,8 @@ def test_the_panel_sits_where_it_was_asked_to() -> None:
 def test_a_panel_wider_than_the_screen_stays_on_it() -> None:
     """字級拉到很大時，面板不能被推到負座標而跑出畫面外。"""
     x, y = panel_origin(POSITION_BOTTOM_RIGHT, (1400, 900), (1000, 600), 12)
-    assert x >= 0 and y >= 0
+    assert x >= 0
+    assert y >= 0
 
 
 def test_restyling_only_touches_what_was_given() -> None:
@@ -203,7 +204,8 @@ def test_restyling_only_touches_what_was_given() -> None:
         assert widget.position == POSITION_TOP
         assert widget.font_size == 28, "the size was not asked to change"
         widget.set_style(font_size=48)
-        assert widget.font_size == 48 and widget.position == POSITION_TOP
+        assert widget.font_size == 48
+        assert widget.position == POSITION_TOP, "the position was not asked to change"
     finally:
         widget.close()
 

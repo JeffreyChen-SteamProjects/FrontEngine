@@ -72,14 +72,16 @@ def test_a_window_moved_to_a_smaller_screen_stays_on_it() -> None:
     """從大螢幕搬到小螢幕時，不能有一半掉在畫面外。"""
     window = (1500, 800, 400, 280)
     x, y, width, height = mapped_rect(window, LEFT, SMALL)
-    assert x >= SMALL[0] and y >= SMALL[1]
+    assert x >= SMALL[0]
+    assert y >= SMALL[1]
     assert x + width <= SMALL[0] + SMALL[2]
     assert y + height <= SMALL[1] + SMALL[3]
 
 
 def test_a_window_is_never_shrunk_to_nothing() -> None:
     tiny = mapped_rect((0, 0, 1, 1), LEFT, SMALL)
-    assert tiny[2] >= MIN_SIZE and tiny[3] >= MIN_SIZE
+    assert tiny[2] >= MIN_SIZE
+    assert tiny[3] >= MIN_SIZE
 
 
 def test_planning_moves_to_the_other_screen() -> None:
@@ -165,7 +167,8 @@ def test_the_move_uses_the_injected_pieces() -> None:
         geometry_reader=lambda handle: (10, 10, 400, 300),
         mover=mover)
     assert result is True
-    assert moved and moved[0][0] == 42
+    assert moved, "the mover was called"
+    assert moved[0][0] == 42
 
 
 def test_explicit_screens_are_read_through_qt() -> None:
