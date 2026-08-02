@@ -12,24 +12,37 @@
 `py -m pytest tests/ -q` = 1175 passed，pyflakes 無輸出，offscreen 啟動測試 exit 0，
 CI 三個 Python 版本全綠，SonarCloud 通過。
 
-### Codacy 的競態（下次開大 PR 會再遇到）
+### Codacy 在 PR #216 上卡住（需要 repo 擁有者處理）
 
-第一次跑 Codacy 給了 `action_required`，但 API 回報 0 個 issue、0 個 annotation、
-summary 空白——不是程式碼問題。對照時間戳才看出來：
+Codacy 的 check 一直是 `action_required`，但**它自己回報這個 PR 沒有任何問題**：
 
-- head commit 分析 18:22:01 → 18:22:43
-- **base commit（main 的 8f56dd3）分析 18:23:18 → 18:25:05**
+| 來源 | 數字 |
+| --- | --- |
+| GitHub 看到的 PR | 68 個檔案、+9087 / -5290 |
+| Codacy 的 PR `files` 端點 | **`total: 0`** ← 症結 |
+| Codacy 的 PR `issues` 端點 | `total: 0` |
+| GitHub check 的 annotations / summary | 0 個 / 空白 |
+| 同一個 commit 的 commit 層級分析 | `newIssues: 0`、`deltaComplexity: 3`、`deltaClonesCount: 0`、**`isUpToStandards: true`** |
 
-base 是在 PR 檢查完成（18:22:53）**之後**才開始分析的。Codacy 算 diff 需要基準，
-沒有基準就給不出結論。判斷方法：拿 PR 的 analysis payload 和一個過關的 PR 比，
+Codacy 認為這個 PR 沒有變更檔案，所以算不出 diff、給不出結論。程式碼本身在
+Codacy 自己的 commit 層級 gate 是**過的**。
+
+一開始以為是競態（base commit `8f56dd3` 在第一次 PR 檢查完成之後才被分析），
+但之後兩次推 commit、Codacy 都重新分析過（`isAnalysing` true → false），
+`files` 仍然是 0——所以不只是那個原因。
+
+試過而無效的：關掉再重開 PR、推新 commit（兩次）、
+`POST check-runs/{id}/rerequest`（404，Codacy app 不支援）、
+`POST .../pull-requests/{n}/reanalyze`（404）。
+
+**剩下的手段需要帳號層級權限**：Codacy 網頁上的 Re-analyse，或帳號的 api-token。
+環境變數裡的 `CODACY_PROJECT_TOKEN` **綁的是別的 repo**——拿它查 FrontEngine 會
+回傳 automation_file 專案的 issue（`automation_file/`、`test_webdav_client.py`
+之類根本不存在的檔案），別被騙了。
+
+判斷是不是同一個狀況：拿 PR 的 analysis payload 和一個過關的 PR 比，
 完整的分析會有 `isUpToStandards` / `newIssues` / `quality` / `coverage`，
 卡住的只有 `analyzable: true`。
-
-重跑方式：`check-runs/{id}/rerequest` 會 404（Codacy app 不支援），
-Codacy 自己的 `reanalyze` 端點也是 404（而且需要帳號層級的 api-token，
-環境變數裡那個 `CODACY_PROJECT_TOKEN` **綁的是別的 repo**——拿它查 FrontEngine
-會回傳 automation_file 專案的 issue，別被騙了）。實際可行的是關掉再重開 PR，
-或推一個新 commit。
 
 1. **系統監控加電池與網路** — `system_stats.sample()` 新增 `battery` /
    `battery_state` / `down_bytes` / `up_bytes`（電池讀數借自 `platform_info`
