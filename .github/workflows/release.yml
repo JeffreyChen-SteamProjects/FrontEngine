@@ -25,11 +25,32 @@ concurrency:
 
 jobs:
   release:
-    # Only fire when the PR actually merged (a closed-without-merge PR must not publish).
-    # workflow_dispatch is allowed through so the flow can be re-run manually.
+    # 發佈只在 `dev` 合併進 `main` 時發生。
+    #
+    # 以前是「任何 PR 合併進 main 就發佈」，於是每一個功能、每一次改文件都會多發
+    # 一版：光是想把進度記錄檔的一行改掉，就得多推一個版本到 PyPI。功能現在累積
+    # 在 dev 上，要發佈時才刻意開一個 dev -> main 的 PR。
+    #
+    # 萬一有人把功能分支直接對著 main 開 PR，合併照樣會成功，只是不會發佈——
+    # 錯的方向是「少發一版」而不是「多發一版」，事後補一個 dev -> main 就好。
+    # 手動 workflow_dispatch 保留，作為重跑失敗發佈的逃生口。
+    #
+    # Releases happen only when `dev` merges into `main`.
+    #
+    # Any merge to main used to publish, so every feature - and every
+    # documentation fix - minted a version: changing one line of the progress
+    # log would have cost a PyPI release. Features now collect on dev, and a
+    # release is a deliberate dev -> main pull request.
+    #
+    # If a feature branch is aimed at main by mistake it still merges, it just
+    # does not publish. The failure direction is a missing release rather than
+    # an unwanted one, and opening dev -> main afterwards fixes it.
+    # workflow_dispatch stays as the escape hatch for re-running a failed publish.
     if: >-
       github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+      (github.event_name == 'pull_request' &&
+       github.event.pull_request.merged == true &&
+       github.event.pull_request.head.ref == 'dev')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -203,3 +224,28 @@ jobs:
             --title "${{ steps.meta.outputs.name }} ${{ steps.bump.outputs.version }}" \
             --generate-notes \
             --target "${{ steps.commit.outputs.sha }}"
+
+      # 版本號是推到 main 的，dev 不會自己拿到，下一輪就從「落後一個 commit」開始。
+      # 剛合併完的 main 一定包含 dev 的內容，所以這通常是純 fast-forward。
+      #
+      # **失敗不算發佈失敗**：套件已經上架、標籤已經建好，這一步只是省掉一次手動
+      # 同步。發佈期間有人推 dev 就會推不動，那時手動 `git push origin main:dev`
+      # 即可，所以這裡只警告不中斷。
+      #
+      # The bump lands on main; dev would otherwise start the next round one
+      # commit behind. Right after the merge main contains dev, so this is
+      # normally a plain fast-forward.
+      #
+      # **A failure here is not a failed release**: the package is published and
+      # the tag exists, and this step only saves a manual sync. It cannot push if
+      # someone commits to dev mid-release, which is what `git push origin
+      # main:dev` afterwards is for - so it warns rather than failing the job.
+      - name: Fast-forward dev to the released main
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          if git push origin "${{ steps.commit.outputs.sha }}:refs/heads/dev"; then
+            echo "::notice::dev fast-forwarded to the released commit."
+          else
+            echo "::warning::Could not fast-forward dev - it moved during the release. Run 'git push origin main:dev' once the two are reconciled."
+          fi

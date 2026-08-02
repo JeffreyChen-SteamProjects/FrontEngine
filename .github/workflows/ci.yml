@@ -15,6 +15,14 @@ on:
   pull_request:
     branches: [main, dev]
   workflow_call:
+  # 手動觸發，用來驗證任何一個分支。需要它是因為 `[skip ci]` 的 commit 會讓
+  # 分支停在「沒有 CI 紀錄」的狀態：版本號那筆與進度記錄那筆都帶 [skip ci]，
+  # dev 因此曾經停在一個從未被 CI 跑過的 HEAD 上，而且沒有辦法補跑。
+  # Manual runs, to verify any branch on demand. Needed because a `[skip ci]`
+  # commit leaves a branch with no CI record: the version bump and the progress
+  # log both carry it, which once left dev sitting on a HEAD that CI had never
+  # run against and no way to ask for one.
+  workflow_dispatch:
 
 permissions:
   contents: read

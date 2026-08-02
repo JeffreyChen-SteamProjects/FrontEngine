@@ -72,14 +72,44 @@ outside world takes an injectable source so it can be tested with a fake.
 
 ## Git workflow
 
-- **Branches**: `main` (stable releases), `dev` (active development).
+**Work flows `feature → dev → main`, and only the last step publishes.**
+
+```
+feat/xyz  ──PR──►  dev  ──PR──►  main
+                    │              │
+              CI, no release   CI + release:
+                               version bump, PyPI,
+                               GitHub release, tag
+```
+
+- Branch features off `dev` and open the PR against `dev`. Merging there runs CI
+  and publishes nothing, so features can accumulate.
+- Release by opening a PR from `dev` to `main`. Merging it is what mints a
+  version — that is the only thing that does.
+- `release.yml` enforces this: it publishes only when the merged PR's head
+  branch is `dev`. A feature PR aimed at `main` by mistake still merges, it just
+  does not release, and a later `dev → main` picks it up. The failure direction
+  is a missing release rather than an unwanted one.
+- After a release the workflow fast-forwards `dev` to the released commit. If it
+  reports that it could not (someone pushed to `dev` mid-release), run
+  `git push origin main:dev` once the two are reconciled.
+- Anything genuinely main-only — a hotfix, a released-version correction — can
+  still go straight to `main`; it will not publish on its own. Use *Actions →
+  Release → Run workflow* to publish deliberately.
+
+Other rules:
+
 - **Commits**: concise, imperative, say *what* and *why*.
   Good: `Fix particle widget memory leak on resize`. Bad: `update stuff`.
 - **Authorship**: do NOT mention any AI tool or assistant in commit messages or
   `Co-Authored-By` lines. Commits are authored by the developer.
 - **PRs**: one feature per PR, all CI green, and a structural change carries its
   `architecture_explore.md` update.
-- **Versions**: `pyproject.toml` = dev, `stable.toml` = stable.
+- **Versions**: `pyproject.toml` = dev, `stable.toml` = stable. Both are bumped
+  by the release workflow — do not edit them by hand.
+- **`[skip ci]` leaves no CI record.** The version bump and progress-log commits
+  carry it, so a branch can end up on a HEAD that CI never ran against. Use
+  *Actions → CI → Run workflow* to verify a branch on demand.
 
 ## Release announcements
 

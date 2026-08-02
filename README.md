@@ -403,16 +403,28 @@ it can be tested with a fake one.
 
 ## Continuous integration and releases
 
+Work flows `feature → dev → main`, and only the last step publishes:
+
+```
+feat/xyz  ──PR──►  dev  ──PR──►  main
+                    │              │
+              CI, no release   CI + release
+```
+
 | Workflow | Trigger | Purpose |
 | --- | --- | --- |
-| `CI` (`ci.yml`) | Push / PR to `main` or `dev`, or called by `Nightly` | Compile, run the unit tests, then build a wheel from *that checkout*, install it and start the app — on Python 3.10 / 3.11 / 3.12, Windows |
+| `CI` (`ci.yml`) | Push / PR to `main` or `dev`, manual dispatch, or called by `Nightly` | Compile, run the unit tests, then build a wheel from *that checkout*, install it and start the app — on Python 3.10 / 3.11 / 3.12, Windows |
 | `Nightly` (`nightly.yml`) | Daily cron, manual dispatch | Calls `CI`. The schedule lives here on purpose: GitHub disables workflows containing a cron after ~60 days of inactivity, and that would otherwise take the PR checks down with it |
-| `Release` (`release.yml`) | A pull request is merged into `main`, or manual dispatch | Bumps the version, commits it back with `[skip ci]`, swaps `stable.toml` → `pyproject.toml`, builds sdist + wheel, uploads to PyPI as `frontengine`, and creates a GitHub release tagged `v<version>` |
+| `Release` (`release.yml`) | A pull request **from `dev`** is merged into `main`, or manual dispatch | Bumps the version, commits it back with `[skip ci]`, swaps `stable.toml` → `pyproject.toml`, builds sdist + wheel, uploads to PyPI as `frontengine`, creates a GitHub release tagged `v<version>`, and fast-forwards `dev` |
 
-Publishing happens **only on merge to `main`** — pushing to `dev` runs CI and
-never publishes. The patch segment bumps automatically; for a minor or major
-release, run *Actions → Release → Run workflow* and pick the segment. That path
-also re-runs a failed publish without needing a new merge.
+Publishing happens **only when `dev` merges into `main`**. Features land on `dev`
+without minting a version, and a release is a deliberate `dev → main` pull
+request. A feature PR aimed at `main` by mistake still merges but does not
+publish — the failure direction is a missing release, not an unwanted one.
+
+The patch segment bumps automatically; for a minor or major release, run
+*Actions → Release → Run workflow* and pick the segment. That path also re-runs
+a failed publish without needing a new merge.
 
 Versions live in two files: `pyproject.toml` is the dev package
 (`frontengine_dev`) and `stable.toml` is the published one (`frontengine`).
