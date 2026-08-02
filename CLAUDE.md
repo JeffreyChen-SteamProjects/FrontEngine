@@ -110,6 +110,10 @@ Other rules:
 - **`[skip ci]` leaves no CI record.** The version bump and progress-log commits
   carry it, so a branch can end up on a HEAD that CI never ran against. Use
   *Actions → CI → Run workflow* to verify a branch on demand.
+- **GitHub scans the whole commit message for the skip directive, body included.**
+  Writing *about* it — explaining why a commit carries one — skips that commit's
+  CI too. Describe it in prose ("the skip-CI directive") in commit messages;
+  files may spell it out freely.
 
 ## Release announcements
 

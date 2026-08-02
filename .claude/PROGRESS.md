@@ -113,6 +113,15 @@
   安全類規則（`pythonsecurity:*`）不吃 `# NOSONAR`，只能走 API 或網頁標記。
 - **numpy 的 `reshape` 要傳 tuple**；色差平方要用 `int32`（`int16` 會溢位）。
 - **行尾**：`.gitattributes` 是 `* text=auto`、`core.autocrlf=true`。
+- **GitHub 掃整個 commit 訊息找 `[skip ci]`，包含內文**。在訊息裡「解釋」這個
+  指令會把那個 commit 自己的 CI 也跳掉——實際發生過：那個為了 `[skip ci]` 而
+  加上 `workflow_dispatch` 的 commit，就是這樣被自己跳過的。commit 訊息裡改用
+  文字描述（「skip-CI 指令」），檔案內文則不受影響，可以照寫。
+- **GitHub 上會留著已刪除 workflow 的清單項目**。`gh api .../actions/workflows`
+  現在還列著 `Release Dev`（`release-dev.yml`，2026-04-21 建立、在 dev 跑過一次
+  失敗、後來被 `b01858b` 刪掉），狀態顯示 `active` 但檔案不在任何分支上，
+  所以不會再觸發。看到不認得的 workflow 先用 `git log --all -- <path>` 查它
+  是不是遺留項目，不要以為有東西會偷跑。
 - Codacy PR issues（**不要加 `-H "project-token: $CODACY_PROJECT_TOKEN"`**）：
   `curl -s "https://app.codacy.com/api/v3/analysis/organizations/gh/JeffreyChen-SteamProjects/repositories/FrontEngine/pull-requests/<PR>/issues?limit=100"`
   環境變數裡那個 `CODACY_PROJECT_TOKEN` **綁的是別的 repo**：帶著它查 FrontEngine，
