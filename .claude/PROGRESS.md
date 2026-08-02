@@ -7,8 +7,29 @@
 
 ## 進行中 / 待辦
 
-**六項新功能已全部實作並驗證，但尚未 commit**（使用者沒有要求提交）。
-`py -m pytest tests/ -q` = 1170 passed，pyflakes 無輸出，offscreen 啟動測試 exit 0。
+**六項新功能已全部實作、驗證並開成 PR #216**（`feat/desktop-integration`），
+等待審查與合併。合併之後這一段可以整個刪掉。
+`py -m pytest tests/ -q` = 1175 passed，pyflakes 無輸出，offscreen 啟動測試 exit 0，
+CI 三個 Python 版本全綠，SonarCloud 通過。
+
+### Codacy 的競態（下次開大 PR 會再遇到）
+
+第一次跑 Codacy 給了 `action_required`，但 API 回報 0 個 issue、0 個 annotation、
+summary 空白——不是程式碼問題。對照時間戳才看出來：
+
+- head commit 分析 18:22:01 → 18:22:43
+- **base commit（main 的 8f56dd3）分析 18:23:18 → 18:25:05**
+
+base 是在 PR 檢查完成（18:22:53）**之後**才開始分析的。Codacy 算 diff 需要基準，
+沒有基準就給不出結論。判斷方法：拿 PR 的 analysis payload 和一個過關的 PR 比，
+完整的分析會有 `isUpToStandards` / `newIssues` / `quality` / `coverage`，
+卡住的只有 `analyzable: true`。
+
+重跑方式：`check-runs/{id}/rerequest` 會 404（Codacy app 不支援），
+Codacy 自己的 `reanalyze` 端點也是 404（而且需要帳號層級的 api-token，
+環境變數裡那個 `CODACY_PROJECT_TOKEN` **綁的是別的 repo**——拿它查 FrontEngine
+會回傳 automation_file 專案的 issue，別被騙了）。實際可行的是關掉再重開 PR，
+或推一個新 commit。
 
 1. **系統監控加電池與網路** — `system_stats.sample()` 新增 `battery` /
    `battery_state` / `down_bytes` / `up_bytes`（電池讀數借自 `platform_info`
