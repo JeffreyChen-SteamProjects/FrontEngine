@@ -7,88 +7,7 @@
 
 ## 進行中 / 待辦
 
-**六項新功能已全部實作、驗證並開成 PR #216**（`feat/desktop-integration`），
-等待審查與合併。合併之後這一段可以整個刪掉。
-`py -m pytest tests/ -q` = 1175 passed，pyflakes 無輸出，offscreen 啟動測試 exit 0，
-CI 三個 Python 版本全綠，SonarCloud 通過。
-
-### Codacy 在 PR #216 上卡住（需要 repo 擁有者處理）
-
-Codacy 的 check 一直是 `action_required`，但**它自己回報這個 PR 沒有任何問題**：
-
-| 來源 | 數字 |
-| --- | --- |
-| GitHub 看到的 PR | 68 個檔案、+9087 / -5290 |
-| Codacy 的 PR `files` 端點 | **`total: 0`** ← 症結 |
-| Codacy 的 PR `issues` 端點 | `total: 0` |
-| GitHub check 的 annotations / summary | 0 個 / 空白 |
-| 同一個 commit 的 commit 層級分析 | `newIssues: 0`、`deltaComplexity: 3`、`deltaClonesCount: 0`、**`isUpToStandards: true`** |
-
-Codacy 認為這個 PR 沒有變更檔案，所以算不出 diff、給不出結論。程式碼本身在
-Codacy 自己的 commit 層級 gate 是**過的**。
-
-一開始以為是競態（base commit `8f56dd3` 在第一次 PR 檢查完成之後才被分析），
-但之後兩次推 commit、Codacy 都重新分析過（`isAnalysing` true → false），
-`files` 仍然是 0——所以不只是那個原因。
-
-試過而無效的：關掉再重開 PR、推新 commit（兩次）、
-`POST check-runs/{id}/rerequest`（404，Codacy app 不支援）、
-`POST .../pull-requests/{n}/reanalyze`（404）。
-
-**剩下的手段需要帳號層級權限**：Codacy 網頁上的 Re-analyse，或帳號的 api-token。
-環境變數裡的 `CODACY_PROJECT_TOKEN` **綁的是別的 repo**——拿它查 FrontEngine 會
-回傳 automation_file 專案的 issue（`automation_file/`、`test_webdav_client.py`
-之類根本不存在的檔案），別被騙了。
-
-判斷是不是同一個狀況：拿 PR 的 analysis payload 和一個過關的 PR 比，
-完整的分析會有 `isUpToStandards` / `newIssues` / `quality` / `coverage`，
-卡住的只有 `analyzable: true`。
-
-1. **系統監控加電池與網路** — `system_stats.sample()` 新增 `battery` /
-   `battery_state` / `down_bytes` / `up_bytes`（電池讀數借自 `platform_info`
-   並快取 30 秒，因為 macOS 要 fork `pmset` 而監控是每秒取樣）。
-   `monitor_widget` 的折線改成百分比／速率兩種，使用者勾選要顯示哪幾條。
-2. **`{欄位}` 提示** — `SAMPLE_FIELDS` / `FORECAST_FIELDS` 宣告可用欄位，
-   文字分頁直接列出來。原本欄位清單寫死在翻譯字串裡而且**已經漂掉**
-   （system 列 7 個、實際 9 個；weather 列 5 個、實際 6 個），現在由測試釘住。
-3. **媒體播放控制** — `utils/media_keys/`，ctypes `keybd_event` 送 VK_MEDIA_*，
-   不需要 WinRT。接上快速鍵／手機遙控／MIDI。
-4. **按鍵顯示補滑鼠與樣式** — `InputWatchService` 新增 `mouse_pressed(str)` 訊號
-   （座標與按鍵拆兩個訊號，漣漪與按鍵顯示各取所需）；位置／字級／是否顯示滑鼠可調。
-5. **虛擬桌面感知** — `utils/virtual_desktop/`，只用有文件的
-   `IVirtualDesktopManager::IsWindowOnCurrentVirtualDesktop`。控制中心多一顆
-   「綁在這個虛擬桌面」。
-6. **視窗搬到下一個螢幕** — `utils/window_pin/monitor_move.py`，保留相對位置與大小。
-7. **條件式規則引擎** — `utils/rules/rule_engine.py` + `ui/dialog/rules_dialog.py`，
-   設定選單多一項「條件式規則…」。既有四套排程都留著，這裡補的是它們之間的組合。
-
-### 真機驗證結果（2026-08-03，Windows 11，雙螢幕 100% + 125%）
-
-三項全部實測通過。驗證腳本用的是**自己建的視窗與自己建的虛擬桌面**，
-沒有動到使用者既有的視窗。
-
-- **虛擬桌面**：自己桌面 True → 建新桌面切過去 False → 服務確實把視窗藏起來 →
-  切回來 True → 服務確實還原。整條路成立。
-- **媒體鍵**：對正在播放的 Edge 送一次播放/暫停，WASAPI 出聲工作階段消失，
-  再送一次回來。鍵真的到得了播放器。
-- **搬視窗**：位置相對比例精準對應，落地後完整在目標螢幕內，循環回第一台。
-
-**真機抓到、offscreen 抓不到的兩件事（都已修）**：
-
-1. **DPI 座標空間錯誤**（真 bug）。`screen_rects()` 原本回傳 Qt 的**邏輯**像素，
-   但 `GetWindowRect` / `SetWindowPos` 用的是**實體**像素。單一縮放比例下兩者
-   剛好相同，所以純邏輯測試永遠看不出來；在 100% + 125% 的雙螢幕上，Qt 說第二台
-   是 1536x816、Win32 說是 1920x1020，差 25%，視窗會照著一個小四分之一的螢幕擺放。
-   已改成 `EnumDisplayMonitors` + `GetMonitorInfoW` 的 rcWork。
-2. **跨 DPI 時 Windows 會在我們之後再放大視窗**（`WM_DPICHANGED`，實測 x1.25）。
-   那是對的（維持視覺大小），但發生在我們算完位置之後，貼齊右緣的視窗會被推出
-   畫面。已加 `_settle_inside_screen()`：落地後讀回實際位置再夾一次。
-   兩件事都補了單元測試（`test_monitor_move.py`）。
-
-另外修正一個測試的錯誤假設：`IsWindowOnCurrentVirtualDesktop` 對不認識的 handle
-回傳 **S_OK + True**（不是 False 也不是錯誤）。程式本來就是安全的（關掉的覆蓋層
-不會被誤藏），是我原本的預期寫錯了。`GetWindowDesktopId` 相對嚴謹，同樣的 handle
-會回 `TYPE_E_ELEMENTNOTFOUND`——拿它交叉驗證確認了 vtable 索引是對的。
+（無）
 
 ---
 
@@ -96,8 +15,18 @@ Codacy 自己的 commit 層級 gate 是**過的**。
 
 - **PyPI 上的 v1.0.39 / v1.0.40 是壞的**（缺 `__init__.py` 導致 import 失敗）。
   要不要 yank 由專案擁有者決定，需要 PyPI 憑證，我沒有動。v1.0.41 之後都正常。
-- **PyPI 上的 `frontengine_dev` 還停在 1.0.0**，pyproject 已經是 1.0.76；
+- **PyPI 上的 `frontengine_dev` 還停在 1.0.0**，pyproject 已經跟著 stable 走到 1.0.77；
   workflow 裡沒有發佈 dev 套件的步驟。要不要補由專案擁有者決定（需要 PyPI 憑證）。
+- **Codacy 對大 PR 會卡住**（PR #216，68 檔案 / +9087 −5290，最後帶著紅的 Codacy 合併）。
+  症狀：check 一直是 `action_required`，但它自己回報 0 個 issue、0 個 annotation、
+  summary 空白，而且 **PR 的 `files` 端點回傳 `total: 0`**——它認為這個 PR 沒有變更
+  檔案，所以算不出 diff。同一個 commit 在 **commit 層級**的 gate 是過的
+  （`newIssues: 0`、`isUpToStandards: true`），所以不是程式碼問題。
+  試過無效：關掉再重開 PR、推新 commit（三次，每次都真的重新分析）、
+  `POST check-runs/{id}/rerequest`（404）、`POST .../reanalyze`（404）。
+  要清掉需要帳號層級權限（Codacy 網頁的 Re-analyse 或帳號 api-token）。
+  判斷方法：完整的 PR 分析會有 `isUpToStandards` / `newIssues` / `quality` / `coverage`，
+  卡住的只有 `analyzable: true`。
 - **`pyproject.toml` / `stable.toml` 的 Homepage 指向 `Intergration-Automation-Testing`**，
   但 origin 已經是 `JeffreyChen-SteamProjects`。README 用的是 origin，套件 metadata 沒動
   （會影響 PyPI 頁面，留給擁有者決定）。
@@ -141,7 +70,7 @@ Codacy 自己的 commit 層級 gate 是**過的**。
   樣式在 `ui/style/app_style.py`，顏色一律從 qt-material 色票算出來；
   `apply_stylesheet()` 會整份覆蓋樣式表，所以自訂樣式一定要接在它後面。
 - 測試：headless（`QT_QPA_PLATFORM=offscreen`），用 `py` 不用 `python`。
-  repo 內：`py -m pytest tests/ -q`（目前 1170 passed）。
+  repo 內：`py -m pytest tests/ -q`（目前 1175 passed）。
 - **改 UI 後要一併更新 docs/**。Sphinx 文件樹有七種語言（Eng / Zh / ZhCn / De /
   Ru / Fr / It），`test_documentation.py` 會檢查七棵樹頁面一致、圖片存在、
   沒有提到已移除的功能。加分頁時七種語言都要加，只加英文會被測試擋下來。
@@ -169,12 +98,26 @@ Codacy 自己的 commit 層級 gate 是**過的**。
 - **CI 的啟動測試會先用 checkout 打包出 wheel 再安裝**，測的是眼前的程式碼。
 - **offscreen 測不到**：原生視窗 handle（Win32 `SetWindowPos`）、音效卡、攝影機、
   虛擬桌面切換。
+- **混合 DPI 的座標空間，純邏輯測試永遠看不出來**。Qt 的 `QScreen` 給的是**邏輯**
+  像素，`GetWindowRect` / `SetWindowPos` 用的是**實體**像素；單一縮放比例下兩者
+  完全相同，所以測試都會過。實機（100% + 125% 雙螢幕）上 Qt 說第二台是 1536x816、
+  Win32 說是 1920x1020，差 25%。凡是要把 Qt 的螢幕座標餵給 Win32 呼叫的地方，
+  都要改用 `EnumDisplayMonitors` + `GetMonitorInfoW` 的 rcWork（見 `monitor_move.py`）。
+  另外跨 DPI 邊界時 Windows 會在 `SetWindowPos` **之後**自己依比例放大視窗，
+  所以位置算完還要再夾一次。
+- **驗證平台限定功能時，用自己建的視窗／虛擬桌面**，不要動使用者既有的東西；
+  會有副作用的（媒體鍵、關閉虛擬桌面）用 `try/finally` 還原，並先確認狀態真的變了
+  才送「恢復」那一步（沒生效就送第二次，反而會把還在播的東西暫停掉）。
 - **`QPixmap`／`QMovie` 沒有 QApplication 會讓行程直接中止**；conftest 已建好。
 - **Sonar 的抑制註解要標在它指出的那一行**，標在上一行完全沒作用。
   安全類規則（`pythonsecurity:*`）不吃 `# NOSONAR`，只能走 API 或網頁標記。
 - **numpy 的 `reshape` 要傳 tuple**；色差平方要用 `int32`（`int16` 會溢位）。
 - **行尾**：`.gitattributes` 是 `* text=auto`、`core.autocrlf=true`。
-- Codacy PR issues：
-  `curl -s "https://app.codacy.com/api/v3/analysis/organizations/gh/JeffreyChen-SteamProjects/repositories/FrontEngine/pull-requests/<PR>/issues?limit=100" -H "project-token: $CODACY_PROJECT_TOKEN"`
+- Codacy PR issues（**不要加 `-H "project-token: $CODACY_PROJECT_TOKEN"`**）：
+  `curl -s "https://app.codacy.com/api/v3/analysis/organizations/gh/JeffreyChen-SteamProjects/repositories/FrontEngine/pull-requests/<PR>/issues?limit=100"`
+  環境變數裡那個 `CODACY_PROJECT_TOKEN` **綁的是別的 repo**：帶著它查 FrontEngine，
+  Codacy 會照 token 而不是照網址解析，回傳 `automation_file` 專案的 issue
+  （`automation_file/`、`test_webdav_client.py` 之類這裡根本不存在的檔案）。
+  公開 repo 不帶 token 就查得到，回的才是 FrontEngine 自己的。
 - SonarCloud（PR 用 `&pullRequest=<PR>`，main 省略該參數）：
   `curl -s -u "$SonarCloudToken:" "https://sonarcloud.io/api/issues/search?componentKeys=JeffreyChen-SteamProjects_FrontEngine&resolved=false&ps=100"`
