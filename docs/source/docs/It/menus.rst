@@ -16,8 +16,10 @@ Menu Preimpostazioni
 Menu Impostazioni
 
 * Scorciatoie… - combinazioni globali per nascondi tutto, mostra tutto, chiudi
-  tutto, disattiva l'audio, opacità su e giù, pagina successiva della dashboard
-  e blocco.
+  tutto, disattiva l'audio, opacità su e giù, pagina successiva della dashboard,
+  blocco, fermo immagine, elenco scorciatoie e riproduci/pausa, traccia
+  successiva e precedente, e lo spostamento della finestra in primo piano sullo
+  schermo successivo mantenendone le proporzioni.
 * Tema giorno/notte programmato - chiaro di giorno, scuro di notte.
 * Avvia con il sistema - aprire FrontEngine all'accesso.
 * Ripristina l'ultima sessione - riaprire ciò che c'era sullo schermo.
@@ -31,6 +33,11 @@ Menu Impostazioni
 * Profili applicazione… - applicare una preimpostazione quando una data
   applicazione passa in primo piano.
 * Promemoria… - un messaggio ogni tot minuti, o a un'ora precisa.
+* Regole… - «quando valgono queste condizioni, fai questo». Giorno della
+  settimana, fascia oraria e applicazione in primo piano si combinano; l'azione
+  applica un preset, nasconde, mostra o chiude gli overlay, oppure imposta la
+  qualità. Una condizione vuota significa «qualsiasi», e una regola parte una
+  volta quando le condizioni iniziano a valere, non di continuo.
 * Salvaschermo… - dopo tot minuti senza mouse né tastiera, mette a schermo
   l'overlay di una pagina scelta; muovere il mouse lo toglie. Usa quella pagina
   così come l'hai impostata e chiude solo ciò che ha aperto: quello che avevi

@@ -57,16 +57,38 @@ def combo_with_modifiers(name: str, held: List[str]) -> List[str]:
     return combo
 
 
+def button_name(button) -> str:
+    """
+    把 pynput 的滑鼠鍵物件轉成名稱（`Button.left` -> `left`）；取不到就用 str()。
+    Turn a pynput mouse button into a name (`Button.left` -> `left`), falling
+    back to str().
+    """
+    name = getattr(button, "name", None)
+    if isinstance(name, str) and name:
+        return name
+    text = str(button or "")
+    return text.rsplit(".", 1)[-1] if text else ""
+
+
 class InputWatchService(QObject):
     """
     監聽全域按鍵與滑鼠點擊，並以 Qt signal 送出：
       - key_pressed(list)：按鍵組合（例如 ["ctrl", "s"]）
       - mouse_clicked(int, int)：點擊座標
+      - mouse_pressed(str)：按下的是哪一顆鍵（left / right / middle …）
+
+    座標與按鍵分成兩個訊號，是因為兩邊要的東西不一樣：漣漪只需要座標，
+    按鍵顯示只需要鍵名。合成一個訊號就得讓兩邊都收下自己用不到的參數。
+    Coordinates and button are separate signals because the two consumers want
+    different things: a ripple needs the point, the keystroke display needs the
+    button. One signal would force each to accept what it has no use for.
+
     pynput 不可用時 start() 回傳 False，其餘功能照常。
     """
 
     key_pressed = Signal(list)
     mouse_clicked = Signal(int, int)
+    mouse_pressed = Signal(str)
 
     def __init__(self, parent: Optional[QObject] = None) -> None:
         super().__init__(parent)
@@ -125,6 +147,10 @@ class InputWatchService(QObject):
         if name in self._held:
             self._held.remove(name)
 
-    def _on_click(self, x, y, _button, pressed) -> None:
-        if pressed:
-            self.mouse_clicked.emit(int(x), int(y))
+    def _on_click(self, x, y, button, pressed) -> None:
+        if not pressed:
+            return
+        self.mouse_clicked.emit(int(x), int(y))
+        name = button_name(button)
+        if name:
+            self.mouse_pressed.emit(name)

@@ -10,7 +10,9 @@ Presenting Page
 
 * Cursor emphasis - Highlight puts a ring around the pointer, Click ripple
   shows where you clicked, Spotlight darkens everything but the pointer.
-* Keystroke display - show the keys you press, for recordings and demos.
+* Keystroke display - show the keys you press, and the mouse buttons you
+  click, for recordings and demos. Choose where the panel sits and how big the
+  text is; mouse clicks can be turned off on their own.
 * Magnifier - a lens that follows the cursor, from 1.5x to 6x.
 * Whiteboard - an endless canvas.
 * Freeze screen - cover the chosen screen with a photograph of itself, so what is

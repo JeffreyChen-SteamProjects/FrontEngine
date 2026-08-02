@@ -19,6 +19,19 @@ default_hotkeys: Dict[str, str] = {
     "toggle_lock": "<ctrl>+<shift>+l",
     "show_shortcuts": "<ctrl>+<shift>+<f8>",
     "toggle_freeze": "<ctrl>+<shift>+<f7>",
+    # 媒體控制。鍵盤上本來就有媒體鍵的人不需要這些，但綁定存在才輪得到
+    # 手機遙控與 MIDI 用同一組動作名稱。
+    # Media transport. Anyone with media keys on their keyboard does not need
+    # these, but the bindings have to exist for the phone remote and MIDI to
+    # reach the same action names.
+    "media_play_pause": "<ctrl>+<shift>+<f6>",
+    "media_next": "<ctrl>+<shift>+<f5>",
+    "media_previous": "<ctrl>+<shift>+<f4>",
+    # 把前景視窗搬到下一個螢幕。Windows 內建的 Win+Shift+方向鍵只會整個貼過去，
+    # 這個保留視窗原本的相對位置與大小。
+    # Move the foreground window to the next screen. Windows' own
+    # Win+Shift+Arrow snaps it across; this keeps its proportions.
+    "move_window_next_monitor": "<ctrl>+<shift>+<f3>",
 }
 
 user_setting_dict: Dict[str, Any] = {
@@ -52,6 +65,11 @@ user_setting_dict: Dict[str, Any] = {
     # 自訂提醒：[{"label", "kind": "every"/"at", "minutes"/"at", "enabled"}]
     # Custom reminders, shown as a toast when they come due.
     "reminders": [],
+    # 條件式規則：[{"label", "enabled", "when": {...}, "action", "value"}]
+    # 「當 <條件> 成立時，做 <動作>」，補既有四套排程之間的組合。
+    # Conditional rules: "when <conditions> hold, do <action>", filling the gaps
+    # between the four single-condition schedulers.
+    "overlay_rules": [],
     # 便利貼內容與位置，以及要不要在啟動時開回來
     # Sticky note contents and positions, and whether to reopen them on launch.
     "sticky_notes": [],

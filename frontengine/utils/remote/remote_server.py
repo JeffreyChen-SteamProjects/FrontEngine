@@ -37,7 +37,8 @@ DEFAULT_PORT = 8770
 # The only actions the page may ask for. They are the main window's existing
 # hotkey actions, so the remote can do exactly what a hotkey can do - no more.
 ALLOWED_ACTIONS = ("hide_all", "show_all", "close_all", "mute_all",
-                   "opacity_up", "opacity_down", "dashboard_next", "toggle_lock")
+                   "opacity_up", "opacity_down", "dashboard_next", "toggle_lock",
+                   "media_previous", "media_play_pause", "media_next")
 _TOKEN_BYTES = 16
 _PLAIN_TEXT = "text/plain"
 # 用來問「要連外網的話會從哪張網卡出去」。這個位址只拿來讓作業系統挑

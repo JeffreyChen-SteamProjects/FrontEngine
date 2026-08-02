@@ -7,11 +7,14 @@ sampling is only checked for shape and range — values differ per machine and
 may be unavailable entirely.
 """
 from frontengine.utils.system_stats.system_stats import (
-    SystemStats, format_bytes, percentage, rate_per_second, system_stats,
+    SAMPLE_FIELDS, STATE_CHARGING, STATE_ON_BATTERY, SystemStats, format_bytes, percentage,
+    rate_per_second, system_stats,
 )
 
-NUMERIC_FIELDS = ("cpu", "ram", "disk")
-TEXT_FIELDS = ("ram_used", "ram_total", "disk_used", "disk_total", "down", "up")
+PERCENT_FIELDS = ("cpu", "ram", "disk", "battery")
+RATE_FIELDS = ("down_bytes", "up_bytes")
+TEXT_FIELDS = ("ram_used", "ram_total", "disk_used", "disk_total", "down", "up",
+               "battery_state")
 
 
 def test_percentage_rounds_and_clamps() -> None:
@@ -50,14 +53,74 @@ def test_rate_per_second_handles_counter_wrap() -> None:
 
 def test_sample_has_every_field() -> None:
     sample = SystemStats().sample()
-    assert set(sample) == set(NUMERIC_FIELDS) | set(TEXT_FIELDS)
+    assert set(sample) == set(PERCENT_FIELDS) | set(RATE_FIELDS) | set(TEXT_FIELDS)
+
+
+def test_declared_fields_match_what_sample_returns() -> None:
+    """
+    SAMPLE_FIELDS 是文字覆蓋層拿去顯示「可以寫哪些 {欄位}」的清單。之前那份清單
+    寫死在翻譯字串裡，結果 sample() 加了欄位而清單沒跟上，畫面上就少列了兩個。
+    SAMPLE_FIELDS is what the text overlay shows as the available `{fields}`.
+    The previous list lived in the translation strings, so sample() grew fields
+    the hint never mentioned. Pinning the two together is the point of it.
+    """
+    assert set(SAMPLE_FIELDS) == set(SystemStats().sample())
 
 
 def test_numeric_fields_are_percentages_or_unavailable() -> None:
     sample = SystemStats().sample()
-    for field in NUMERIC_FIELDS:
+    for field in PERCENT_FIELDS:
         value = sample[field]
         assert value is None or 0.0 <= value <= 100.0, field
+
+
+def test_rate_fields_are_non_negative_numbers_or_unavailable() -> None:
+    sample = SystemStats().sample()
+    for field in RATE_FIELDS:
+        value = sample[field]
+        assert value is None or (isinstance(value, float) and value >= 0.0), field
+
+
+def test_battery_reading_is_cached() -> None:
+    """
+    macOS 讀電池要 fork 一個 pmset，而監控覆蓋層每秒取樣一次。
+    Reading the battery on macOS spawns pmset, and the monitor samples once a
+    second — so the reading has to be cached, not re-read per sample.
+    """
+    calls = []
+
+    def reader():
+        calls.append(1)
+        return (55, False)
+
+    stats = SystemStats(battery_reader=reader)
+    for _ in range(5):
+        stats.sample()
+    assert len(calls) == 1, "the battery was read once per sample"
+    assert stats.sample()["battery"] == 55.0
+
+
+def test_battery_state_says_which_way_it_is_going() -> None:
+    charging = SystemStats(battery_reader=lambda: (80, True)).sample()
+    assert charging["battery_state"] == STATE_CHARGING
+    draining = SystemStats(battery_reader=lambda: (80, False)).sample()
+    assert draining["battery_state"] == STATE_ON_BATTERY
+
+
+def test_a_machine_without_a_battery_reports_nothing() -> None:
+    """桌機沒有電池，欄位要是 None 而不是 0——0% 會被畫成「快沒電了」。"""
+    sample = SystemStats(battery_reader=lambda: None).sample()
+    assert sample["battery"] is None
+    assert sample["battery_state"] is None
+
+
+def test_a_failing_battery_reader_does_not_break_the_sample() -> None:
+    def broken():
+        raise OSError("no battery service")
+
+    sample = SystemStats(battery_reader=broken).sample()
+    assert sample["battery"] is None
+    assert sample["cpu"] is None or 0.0 <= sample["cpu"] <= 100.0, "the rest still sampled"
 
 
 def test_text_fields_are_strings_or_unavailable() -> None:
@@ -88,4 +151,4 @@ def test_a_missing_disk_path_degrades() -> None:
 
 
 def test_module_helper_returns_a_sample() -> None:
-    assert set(system_stats()) == set(NUMERIC_FIELDS) | set(TEXT_FIELDS)
+    assert set(system_stats()) == set(PERCENT_FIELDS) | set(RATE_FIELDS) | set(TEXT_FIELDS)

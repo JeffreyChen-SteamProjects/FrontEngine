@@ -1,142 +1,101 @@
 # CLAUDE.md - FrontEngine
 
-## Session Progress Log (check first)
+PySide6 desktop overlay app (Python 3.10+, qt-material, PyOpenGL, numpy).
+Published on PyPI as `frontengine` (stable, `stable.toml`) and `frontengine_dev`
+(dev, `pyproject.toml`). What it does and how to run it: `README.md`.
 
-At the start of every session, check `.claude/PROGRESS.md` — a scratch record of
-in-flight / unfinished work. Read it before planning so you can resume where the
-last session left off.
+## Session progress log (check first)
 
-- While working: record in-progress and pending items there.
-- When **all** listed items are done (merged/verified), **clear the file** — reset it
-  to just its header/instructions, leaving no stale entries.
-- It is tracked, so it survives a fresh clone and reaches other machines. Commit
-  changes to it like any other file, and keep it free of anything that should not
-  be public. Only `.claude/settings.local.json` stays ignored — that one holds
-  machine-local permissions.
+`.claude/PROGRESS.md` records in-flight / unfinished work. Read it before
+planning so you resume where the last session stopped.
 
-## Project Overview
-
-FrontEngine is a PySide6-based desktop overlay framework for displaying GIFs, images, videos, web content, particles, text, and sound on screen. It supports Windows, macOS, and Linux. Published on PyPI as `frontengine` (stable) and `frontengine_dev` (dev).
-
-- **Language**: Python 3.10+
-- **UI Framework**: PySide6, qt-material theme
-- **Graphics**: PyOpenGL, numpy
-- **Build**: setuptools via `pyproject.toml` (dev) / `stable.toml` (stable)
+- While working, record in-progress and pending items there.
+- When **all** listed items are done, **clear the file** back to its header —
+  leave no stale entries.
+- It is tracked, so keep it free of anything that should not be public. Only
+  `.claude/settings.local.json` stays ignored.
 
 ## Architecture
 
-```
-frontengine/
-  show/          # Display widgets (GIF, image, video, web, particle, text, sound, scene)
-    base_widget.py   # Abstract base for all overlay widgets
-  ui/            # Main UI, settings pages, menus, dialogs
-    main_ui.py       # Application main window
-    page/            # Tabbed setting pages per feature
-    menu/            # Help, how-to, language menus
-    dialog/          # File chooser, save dialogs
-  system_tray/   # System tray integration
-  worker/        # QThread-based background workers
-  user_setting/  # User preference persistence
-  utils/         # Browser, logging, JSON, i18n, file, exception utilities
-```
+`architecture_explore.md` (repository root) is the authoritative map: every
+module, the layering and dependency direction, the overlay contract, the
+cross-cutting conventions and the extension points. **Read it before planning
+structural work** — it lists what has to change together (the control-center
+registry, seven language dictionaries, seven documentation trees).
 
-## Design Patterns & Principles
+**Keep it current.** Any structural change updates it **in the same commit as
+the code**:
 
-- **Template Method**: `BaseWidget` defines the skeleton; subclasses override rendering.
-- **Strategy**: Each show widget (GIF, video, web, etc.) is an interchangeable display strategy.
-- **Observer**: Qt signal/slot for decoupled UI event handling.
-- **Single Responsibility**: Each module under `show/`, `ui/page/`, `utils/` owns one concern.
-- **Open/Closed**: Add new widget types by extending `BaseWidget`, not modifying existing code.
-- **DRY**: Shared logic lives in `base_widget.py` and `utils/`.
+- adding, removing, renaming or moving a module, package, page or overlay
+- changing what a module is responsible for, or the dependency direction
+- changing a cross-cutting convention (`BaseWidget` contract, control-center
+  registration, threading rules, settings persistence)
+- adding or removing an extension point
 
-## Coding Standards
+Behaviour changes inside a module that keep its stated responsibility need no
+edit. When unsure, open the file and check whether it is still true — a stale
+map gets trusted before anyone notices it drifted. Line counts there are
+indicative; refresh them when you touch the surrounding entry, don't chase them.
 
-### Security (Mandatory)
+## Conventions
 
-- **No eval/exec**: Never use `eval()`, `exec()`, or `__import__()` with user input.
-- **Path traversal**: Always validate and sanitize file paths. Use `pathlib.Path` and reject paths containing `..` when handling user-supplied paths.
-- **Input validation**: Validate all external input (file dialogs, user settings JSON, command-line args) at system boundaries.
-- **No hardcoded secrets**: Never commit API keys, tokens, or credentials.
-- **Dependency awareness**: Pin dependency versions. Review CVEs before upgrading.
-- **Subprocess safety**: If calling subprocesses, never pass unsanitized user input. Use list form, never shell=True with user data.
-- **Deserialization**: Never use `pickle.loads()` or `yaml.load()` on untrusted data. Use `json.loads()` or `yaml.safe_load()`.
+**Security** — the boundaries that actually exist in this code:
 
-### Performance
+- User-supplied paths (media, pet packs, capture targets) go through
+  `pathlib.Path` and must stay inside their intended directory. Preset packages
+  take only the final path segment when extracting (zip-slip).
+- External data — scene JSON, `user_setting.json`, Workshop items, plugin
+  manifests — is validated at the boundary; malformed entries are skipped or
+  rejected explicitly, never trusted through.
+- Subprocess calls use list form with `shell=False` and a fixed allow-list of
+  absolute paths (see `utils/platform_info`). Never interpolate user input.
+- API keys come from the environment only and are never written to a settings
+  file. No secrets in the repository.
 
-- **Lazy loading**: Load heavy resources (videos, images, OpenGL contexts) only when needed.
-- **Object pooling**: Reuse widget instances where possible instead of recreating.
-- **Minimize paint calls**: Batch UI updates; avoid redundant `update()` / `repaint()`.
-- **Use Qt timers**: Prefer `QTimer` over Python `time.sleep()` to avoid blocking the event loop.
-- **Memory management**: Set `Qt.WA_DeleteOnClose`; explicitly release large buffers and media resources.
-- **Thread offloading**: Use `QThread` workers for I/O and computation; never block the main thread.
+**Qt / performance**:
 
-### Code Style
+- `QTimer` over `time.sleep()`; never block the GUI thread. Cross-thread
+  signals need an explicit `QueuedConnection`.
+- Overlays set `WA_TranslucentBackground` + `WA_DeleteOnClose`, default to
+  opacity 0.2, and take their refresh interval from `utils/power_mode` so the
+  quality tier reaches them.
+- Release media, timers and native handles in `closeEvent` — closing is what
+  runs it, dropping a Python reference is not.
 
-- Follow PEP 8. Use snake_case for functions/variables, PascalCase for classes.
-- Type hints on all public function signatures.
-- Bilingual comments (Chinese/English) where they already exist; English-only for new code.
-- Keep functions under 50 lines. Extract helpers when complexity grows.
-- No unused imports, dead code, or commented-out blocks.
+**Style** — type hints on public signatures; bilingual (Chinese/English)
+comments where they already exist, English-only for new code; functions under
+50 lines.
 
-### Testing
+**Testing** — `python -m pytest tests/ -q`, headless (`QT_QPA_PLATFORM=offscreen`,
+set by `conftest.py`). Everything must pass before a PR. Anything touching the
+outside world takes an injectable source so it can be tested with a fake.
 
-- Tests live in `tests/unit_test/`.
-- All tests must pass before opening a PR.
-- Ensure cross-platform compatibility (Windows, macOS, Linux).
-
-## Git Workflow
+## Git workflow
 
 - **Branches**: `main` (stable releases), `dev` (active development).
-- **Commit messages**: Concise, imperative mood. Describe *what* and *why*.
-  - Good: `Fix particle widget memory leak on resize`
-  - Good: `Add WebP animation support to GIF widget`
-  - Bad: `update stuff`
-- **Commit authorship**: Do NOT mention any AI tool or assistant in commit messages or Co-Authored-By lines. Commits are authored by the developer.
-- **PR rules**: One feature per PR. All CI checks must pass.
-- **Version updates**: `pyproject.toml` = dev version, `stable.toml` = stable version.
+- **Commits**: concise, imperative, say *what* and *why*.
+  Good: `Fix particle widget memory leak on resize`. Bad: `update stuff`.
+- **Authorship**: do NOT mention any AI tool or assistant in commit messages or
+  `Co-Authored-By` lines. Commits are authored by the developer.
+- **PRs**: one feature per PR, all CI green, and a structural change carries its
+  `architecture_explore.md` update.
+- **Versions**: `pyproject.toml` = dev, `stable.toml` = stable.
 
-## Release Announcements
+## Release announcements
 
-`Update Note.txt` is the announcement posted to Steam. It is **BBCode, not
-Markdown** — Steam renders no Markdown, so `**bold**` and `### heading` would
-appear literally in the announcement.
+`Update Note.txt` is the Steam announcement. It is **BBCode, not Markdown** —
+`**bold**` and `### heading` would appear literally.
 
-- `[h2]…[/h2]`, `[b]…[/b]`, `[list]` / `[*]` / `[/list]`, `[hr][/hr]`.
-- There is no inline code. Write variable names and formats as plain prose, or
-  leave them out — for a reader on Steam they are noise either way.
+- Tags: `[h2]`, `[b]`, `[list]`/`[*]`, `[hr][/hr]`. There is no inline code —
+  write formats and variable names as prose, or leave them out.
 - **One paragraph per line, however long.** Steam turns a single newline into a
-  hard line break, so text wrapped at 80 columns arrives broken mid-sentence.
-- The file is `.txt` on purpose: BBCode in a `.md` renders as noise on GitHub.
-- No title inside the file — Steam has its own title field.
-- **Do not pin a version number in it.** The file lives in this repository, so
-  correcting the number is a merge, and every merge to `main` bumps the version;
-  whatever number is written is wrong the moment it lands. State the window the
-  announcement covers instead — the start of that window does not move.
-- Screenshots have to be uploaded to Steam first and referenced by the URL it
-  returns, so `[img]` tags are added by whoever posts it, not here.
+  hard line break, so 80-column wrapping arrives broken mid-sentence.
+- `.txt` on purpose: BBCode in a `.md` renders as noise on GitHub.
+- No title inside the file (Steam has its own field) and no `[img]` tags —
+  screenshots are uploaded to Steam first and referenced by the URL it returns.
+- **No version number.** Every merge to `main` bumps the version, so whatever is
+  written is wrong the moment it lands. State the window the announcement
+  covers instead.
 
-Announce what a user can see. A change that only affects the repository —
-workflow fixes, lint debt, tracked files — does not belong in it.
-
-## Build & Run
-
-```bash
-# Install dependencies
-pip install -r requirements.txt
-
-# Install in dev mode
-pip install -e .
-
-# Run tests
-python -m pytest tests/
-
-# Build package
-python -m build
-```
-
-## Key Conventions
-
-- Widget opacity defaults to 0.2 (translucent overlay).
-- All overlay windows use `WA_TranslucentBackground` and `WA_DeleteOnClose`.
-- User settings are stored as JSON via `user_setting/` module.
-- Multi-language support via `utils/multi_language/`.
+Announce what a user can see. Workflow fixes, lint debt and tracked files do
+not belong in it.

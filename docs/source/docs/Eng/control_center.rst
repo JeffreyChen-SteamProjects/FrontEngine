@@ -24,3 +24,6 @@ Everything at once
 * Hide from capture - keep the overlays on your own screen but leave them out
   of what a screen share records. Windows only. A cover from the Focus page
   stays visible, since covering something is the one thing it is for.
+* Pin to this desktop - keep the overlays on the virtual desktop they were
+  opened on. Switch to another desktop and they step aside; come back and they
+  return. Unpinning brings back whatever it had put away. Windows only.

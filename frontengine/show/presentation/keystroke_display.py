@@ -21,6 +21,30 @@ from frontengine.utils.logging.loggin_instance import front_engine_logger
 
 DEFAULT_HOLD_SECONDS = 2.0
 MAX_KEYS_SHOWN = 6
+MIN_FONT_SIZE = 8
+MAX_FONT_SIZE = 96
+
+# 顯示位置。底部置中是預設，但簡報者的投影片字幕常常也在底部，
+# 所以要能挪開。
+# Where the panel sits. Bottom centre is the default, but a presenter's own
+# subtitles often live there too, so it has to be movable.
+POSITION_BOTTOM = "bottom"
+POSITION_TOP = "top"
+POSITION_BOTTOM_LEFT = "bottom_left"
+POSITION_BOTTOM_RIGHT = "bottom_right"
+POSITIONS = (POSITION_BOTTOM, POSITION_TOP, POSITION_BOTTOM_LEFT, POSITION_BOTTOM_RIGHT)
+
+# 滑鼠鍵的顯示名稱 / How mouse buttons are shown
+_MOUSE_NAMES = {
+    "left": "Left Click",
+    "right": "Right Click",
+    "middle": "Middle Click",
+    "button8": "Mouse 4",
+    "button9": "Mouse 5",
+    "x1": "Mouse 4",
+    "x2": "Mouse 5",
+}
+_SCROLL_NAMES = {"up": "Scroll Up", "down": "Scroll Down"}
 
 # 修飾鍵的顯示名稱 / How modifier keys are shown
 _MODIFIER_NAMES = {
@@ -70,6 +94,61 @@ def format_combo(keys) -> str:
     return " + ".join(parts)
 
 
+def format_mouse_button(name) -> str:
+    """
+    把滑鼠鍵名稱轉成畫面上的字。認不得的鍵原樣顯示（側鍵的名稱各家不同，
+    寧可顯示一個怪名字，也不要什麼都不顯示讓人以為壞掉了）。
+    A mouse button as shown on screen. An unknown button keeps its own name -
+    side buttons are named differently per backend, and showing something odd
+    beats showing nothing and looking broken.
+    """
+    text = str(name or "").strip()
+    if not text:
+        return ""
+    lowered = text.lower()
+    if lowered in _MOUSE_NAMES:
+        return _MOUSE_NAMES[lowered]
+    if lowered.startswith("button."):
+        return format_mouse_button(text.split(".", 1)[1])
+    return text.replace("_", " ").title()
+
+
+def normalize_position(position) -> str:
+    """把顯示位置正規化；不認得的一律當底部置中。"""
+    return position if position in POSITIONS else POSITION_BOTTOM
+
+
+def clamp_font_size(value, fallback: int = 28) -> int:
+    """字級夾在看得見又不至於蓋滿螢幕的範圍。"""
+    try:
+        return max(MIN_FONT_SIZE, min(MAX_FONT_SIZE, int(value)))
+    except (TypeError, ValueError):
+        return fallback
+
+
+def panel_origin(position: str, panel: Tuple[int, int], area: Tuple[int, int],
+                 padding: int) -> Tuple[int, int]:
+    """
+    依位置算出面板左上角座標。純算術，所以排版不必開視窗就驗得了。
+    The panel's top-left for a position. Pure arithmetic, so the layout is
+    testable without showing a window.
+    """
+    panel_width, panel_height = panel
+    area_width, area_height = area
+    centre_x = max(0, (area_width - panel_width) // 2)
+    left_x = padding
+    right_x = max(0, area_width - panel_width - padding)
+    bottom_y = max(0, area_height - panel_height - padding)
+    place = normalize_position(position)
+    if place == POSITION_TOP:
+        return centre_x, padding
+    if place == POSITION_BOTTOM_LEFT:
+        return left_x, bottom_y
+    if place == POSITION_BOTTOM_RIGHT:
+        return right_x, bottom_y
+    return centre_x, bottom_y
+
+
 def visible_keys(entries, now: float, hold_seconds: float = DEFAULT_HOLD_SECONDS,
                  limit: int = MAX_KEYS_SHOWN) -> List[str]:
     """
@@ -90,14 +169,17 @@ class KeystrokeDisplayWidget(BaseWidget):
     PADDING = 12
 
     def __init__(self, hold_seconds: float = DEFAULT_HOLD_SECONDS, font_size: int = 28,
-                 color: str = "#ffffff", background: str = "#000000") -> None:
+                 color: str = "#ffffff", background: str = "#000000",
+                 position: str = POSITION_BOTTOM, show_mouse: bool = True) -> None:
         front_engine_logger.info(f"[KeystrokeDisplayWidget] Init | hold={hold_seconds}s")
         super().__init__()
         self.opacity = 1.0
         self.hold_seconds = max(0.2, float(hold_seconds))
         self.text_color = QColor(color) if QColor(color).isValid() else QColor("#ffffff")
         self.background_color = QColor(background) if QColor(background).isValid() else QColor("#000000")
-        self.font_size = max(8, int(font_size))
+        self.font_size = clamp_font_size(font_size)
+        self.position = normalize_position(position)
+        self.show_mouse = bool(show_mouse)
         self.entries: List[Tuple[str, float]] = []
         self._now = time.monotonic
         self._timer = QTimer(self)
@@ -106,6 +188,26 @@ class KeystrokeDisplayWidget(BaseWidget):
     def set_clock(self, clock) -> None:
         """注入時間來源（測試用）。"""
         self._now = clock
+
+    def set_style(self, font_size=None, color=None, background=None,
+                  position=None) -> None:
+        """
+        改外觀。給 None 的欄位不動——呼叫端常常只想改一項。
+        Restyle. A None field is left alone: callers usually change one thing.
+        """
+        if font_size is not None:
+            self.font_size = clamp_font_size(font_size, self.font_size)
+        if color is not None and QColor(color).isValid():
+            self.text_color = QColor(color)
+        if background is not None and QColor(background).isValid():
+            self.background_color = QColor(background)
+        if position is not None:
+            self.position = normalize_position(position)
+        self.update()
+
+    def set_show_mouse(self, enabled: bool) -> None:
+        """要不要把滑鼠點擊也顯示出來。"""
+        self.show_mouse = bool(enabled)
 
     def start(self, interval_ms: int = REFRESH_MS) -> None:
         """開始定期清掉過期的按鍵。"""
@@ -117,6 +219,21 @@ class KeystrokeDisplayWidget(BaseWidget):
         Record one keypress (single key or combination); blanks are ignored.
         """
         text = format_combo(keys if isinstance(keys, (list, tuple, set)) else [keys])
+        self._push_text(text)
+
+    def push_mouse(self, button) -> None:
+        """
+        推入一次滑鼠點擊。關掉顯示滑鼠時直接忽略——教學影片裡滑鼠移動本來就
+        看得到，但按了哪一顆看不到，所以這是可選的而不是硬塞的。
+        Record one mouse click, ignored while mouse display is off: a tutorial
+        already shows the pointer moving, only which button was pressed is
+        invisible, so this is opt-out rather than forced.
+        """
+        if not self.show_mouse:
+            return
+        self._push_text(format_mouse_button(button))
+
+    def _push_text(self, text: str) -> None:
         if not text:
             return
         self.entries.append((text, self._now()))
@@ -153,8 +270,9 @@ class KeystrokeDisplayWidget(BaseWidget):
         metrics = QFontMetrics(font)
         width = metrics.horizontalAdvance(text) + self.PADDING * 2
         height = metrics.height() + self.PADDING
-        box = QRect(max(0, (self.width() - width) // 2),
-                    max(0, self.height() - height - self.PADDING), width, height)
+        origin = panel_origin(self.position, (width, height),
+                              (self.width(), self.height()), self.PADDING)
+        box = QRect(origin[0], origin[1], width, height)
         background = QColor(self.background_color)
         background.setAlpha(170)
         painter.setPen(Qt.PenStyle.NoPen)

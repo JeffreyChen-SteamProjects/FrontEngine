@@ -27,3 +27,6 @@ Tutto insieme
 * Nascondi dalla cattura - gli overlay restano sul tuo schermo ma spariscono da
   ciò che registra una condivisione. Solo su Windows. Una copertura della pagina
   Concentrazione resta visibile, dato che coprire è la sua unica ragione d'essere.
+* Fissa a questo desktop - gli overlay restano sul desktop virtuale in cui sono
+  stati aperti. Su un altro desktop si tolgono di mezzo e al ritorno ricompaiono.
+  Sganciando torna tutto ciò che era stato messo via. Solo su Windows.

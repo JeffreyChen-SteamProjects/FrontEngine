@@ -28,3 +28,6 @@ Tout d'un coup
 * Masquer de la capture - les calques restent sur votre écran mais disparaissent
   de ce qu'enregistre un partage d'écran. Windows uniquement. Un cache de la page
   Concentration reste visible, puisque recouvrir est sa seule raison d'être.
+* Épingler à ce bureau - les calques restent sur le bureau virtuel où ils ont
+  été ouverts. Sur un autre bureau ils s'effacent, et reviennent au retour.
+  Détacher ramène tout ce qui avait été rangé. Windows uniquement.

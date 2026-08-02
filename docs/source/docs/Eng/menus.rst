@@ -17,7 +17,9 @@ Presets menu
 Settings menu
 
 * Hotkeys... - global shortcuts for hide all, show all, close all, mute all,
-  opacity up and down, next dashboard page and lock.
+  opacity up and down, next dashboard page, lock, freeze the screen, the
+  shortcut list, media play/pause, next and previous track, and moving the
+  foreground window to the next monitor with its proportions kept.
 * Scheduled day/night theme - a light theme by day and a dark one at night.
 * Start with the system - launch FrontEngine at login.
 * Restore last session - reopen what was on screen last time.
@@ -31,6 +33,11 @@ Settings menu
 * App profiles... - apply a preset automatically when a given application comes
   to the front.
 * Reminders... - a message every so many minutes, or at a time of day.
+* Rules... - "when these conditions hold, do this". Combine a weekday, a time
+  window, and which application has focus, then apply a preset, hide, show or
+  close the overlays, or set the quality. A blank condition means "any", and a
+  rule runs once when its conditions start holding rather than repeatedly while
+  they do.
 * Screensaver... - after so many minutes with no mouse or keyboard, put a
   chosen page's overlay on screen; moving the mouse takes it away again. It
   uses that page as you have it set up, and closes only what it opened, so

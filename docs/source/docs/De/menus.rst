@@ -16,7 +16,10 @@ Menü „Voreinstellungen“
 Menü „Einstellungen“
 
 * Tastenkürzel… - global für alle ausblenden, anzeigen, schließen,
-  stummschalten, Deckkraft hoch und runter, nächste Dashboard-Seite und sperren.
+  stummschalten, Deckkraft hoch und runter, nächste Dashboard-Seite, sperren,
+  Bildschirm einfrieren, die Kürzelliste sowie Medien abspielen/pausieren,
+  nächster und vorheriger Titel sowie das Verschieben des Vordergrundfensters
+  auf den nächsten Bildschirm unter Beibehaltung seiner Proportionen.
 * Tag-/Nacht-Design nach Zeitplan - tagsüber hell, nachts dunkel.
 * Mit dem System starten - FrontEngine bei der Anmeldung starten.
 * Letzte Sitzung wiederherstellen - wieder öffnen, was zuletzt zu sehen war.
@@ -30,6 +33,11 @@ Menü „Einstellungen“
 * App-Profile… - eine Voreinstellung anwenden, sobald eine bestimmte Anwendung
   nach vorn kommt.
 * Erinnerungen… - eine Meldung alle so viele Minuten oder zu einer Uhrzeit.
+* Regeln… - „wenn diese Bedingungen gelten, tu das“. Wochentag, Zeitfenster und
+  das Programm im Vordergrund lassen sich kombinieren; als Aktion eine
+  Voreinstellung anwenden, die Overlays aus- oder einblenden, schließen oder die
+  Qualität setzen. Eine leere Bedingung heißt „beliebig“, und eine Regel läuft
+  einmal, wenn ihre Bedingungen zu gelten beginnen, nicht laufend.
 * Bildschirmschoner… - nach so vielen Minuten ohne Maus und Tastatur das Overlay
   einer gewählten Seite anzeigen; eine Mausbewegung nimmt es wieder weg. Es nutzt
   die Seite so, wie sie eingerichtet ist, und schließt nur, was es selbst geöffnet

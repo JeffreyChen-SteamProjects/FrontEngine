@@ -10,8 +10,9 @@ Pagina Presentazione
 
 * Evidenziazione del cursore - l'alone disegna un anello attorno al puntatore,
   l'onda al clic mostra dove hai premuto, il riflettore oscura il resto.
-* Visualizzazione dei tasti - mostra i tasti premuti, utile per registrazioni e
-  dimostrazioni.
+* Visualizzazione dei tasti - mostra i tasti premuti e i pulsanti del mouse
+  cliccati, utile per registrazioni e dimostrazioni. Posizione del pannello e
+  dimensione del testo sono a scelta; i clic del mouse si disattivano a parte.
 * Lente - segue il cursore, da 1,5x a 6x.
 * Lavagna - una tela senza fine.
 * Congela lo schermo - coprire lo schermo scelto con una sua fotografia, così ciò
