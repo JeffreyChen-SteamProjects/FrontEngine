@@ -20,7 +20,10 @@ from frontengine.show.presentation.annotation_overlay import (
     PEN_COLORS, TOOL_ERASER, TOOL_HIGHLIGHTER, TOOL_PEN, AnnotationOverlay,
 )
 from frontengine.show.presentation.cursor_effects import CursorEffectWidget
-from frontengine.show.presentation.keystroke_display import KeystrokeDisplayWidget
+from frontengine.show.presentation.keystroke_display import (
+    POSITION_BOTTOM, POSITION_BOTTOM_LEFT, POSITION_BOTTOM_RIGHT, POSITION_TOP,
+    KeystrokeDisplayWidget,
+)
 from frontengine.show.presentation.magnifier import MagnifierWidget
 from frontengine.show.freeze.freeze_widget import FreezeWidget, capture_screen
 from frontengine.ui.page.utils import build_target_monitor_combobox, coerce_int, resolve_preferred_monitor
@@ -49,6 +52,7 @@ class PresentationSettingUI(SettingPage):
         self.input_watch = InputWatchService(self)
         self.input_watch.key_pressed.connect(self._on_key_pressed, Qt.ConnectionType.QueuedConnection)
         self.input_watch.mouse_clicked.connect(self._on_mouse_clicked, Qt.ConnectionType.QueuedConnection)
+        self.input_watch.mouse_pressed.connect(self._on_mouse_pressed, Qt.ConnectionType.QueuedConnection)
 
         # Annotation
         self.annotate_label = tr(QLabel(), "annotate_label", "Screen annotation")
@@ -88,6 +92,24 @@ class PresentationSettingUI(SettingPage):
 
         # Keystroke display
         self.keystroke_label = tr(QLabel(), "keystroke_label", "Keystroke display")
+        self.keystroke_position_combobox = QComboBox()
+        for place, fallback in ((POSITION_BOTTOM, "Bottom centre"),
+                                (POSITION_TOP, "Top centre"),
+                                (POSITION_BOTTOM_LEFT, "Bottom left"),
+                                (POSITION_BOTTOM_RIGHT, "Bottom right")):
+            self.keystroke_position_combobox.addItem(
+                language_wrapper.language_word_dict.get(f"keystroke_position_{place}", fallback),
+                place)
+        self.keystroke_position_combobox.currentIndexChanged.connect(
+            self._apply_keystroke_settings)
+        self.keystroke_size_combobox = QComboBox()
+        self.keystroke_size_combobox.addItems(["18", "24", "28", "36", "48", "64"])
+        self.keystroke_size_combobox.setCurrentText("28")
+        self.keystroke_size_combobox.currentIndexChanged.connect(self._apply_keystroke_settings)
+        self.keystroke_mouse_checkbox = tr(QCheckBox(), "keystroke_show_mouse",
+                                           "Show mouse clicks")
+        self.keystroke_mouse_checkbox.setChecked(True)
+        self.keystroke_mouse_checkbox.stateChanged.connect(self._apply_keystroke_settings)
         self.keystroke_button = tr(QPushButton(), "keystroke_start", "Show keystrokes")
         self.keystroke_button.clicked.connect(self.toggle_keystrokes)
 
@@ -136,6 +158,9 @@ class PresentationSettingUI(SettingPage):
         cursor.add_inline(self.cursor_button)
 
         keystroke = self.add_section(self.keystroke_label)
+        keystroke.add_row("keystroke_position", self.keystroke_position_combobox, "Position")
+        keystroke.add_row("keystroke_size", self.keystroke_size_combobox, "Text size")
+        keystroke.add_inline(self.keystroke_mouse_checkbox)
         keystroke.add_inline(self.keystroke_button)
 
         magnifier = self.add_section(self.magnifier_label)
@@ -278,7 +303,10 @@ class PresentationSettingUI(SettingPage):
     def start_keystrokes(self) -> None:
         front_engine_logger.info("[PresentationSettingUI] start_keystrokes")
         self.stop_keystrokes()
-        widget = KeystrokeDisplayWidget()
+        widget = KeystrokeDisplayWidget(
+            font_size=coerce_int(self.keystroke_size_combobox.currentText()) or 28,
+            position=self.keystroke_position_combobox.currentData(),
+            show_mouse=self.keystroke_mouse_checkbox.isChecked())
         widget.set_ui_window_flag(show_on_bottom=False)
         self.keystroke_widget_list.append(widget)
         self._present(widget)
@@ -293,10 +321,27 @@ class PresentationSettingUI(SettingPage):
         retranslator.set_text(
             self.keystroke_button, "keystroke_start", "Show keystrokes")
 
+    def _apply_keystroke_settings(self) -> None:
+        for widget in self.keystroke_widget_list[:]:
+            try:
+                widget.set_style(
+                    font_size=coerce_int(self.keystroke_size_combobox.currentText()),
+                    position=self.keystroke_position_combobox.currentData())
+                widget.set_show_mouse(self.keystroke_mouse_checkbox.isChecked())
+            except RuntimeError:
+                self.keystroke_widget_list.remove(widget)
+
     def _on_key_pressed(self, keys) -> None:
         for widget in self.keystroke_widget_list[:]:
             try:
                 widget.push_keys(keys)
+            except RuntimeError:
+                self.keystroke_widget_list.remove(widget)
+
+    def _on_mouse_pressed(self, button: str) -> None:
+        for widget in self.keystroke_widget_list[:]:
+            try:
+                widget.push_mouse(button)
             except RuntimeError:
                 self.keystroke_widget_list.remove(widget)
 
@@ -452,6 +497,9 @@ class PresentationSettingUI(SettingPage):
             "cursor_ripple": self.cursor_ripple_checkbox.isChecked(),
             "cursor_spotlight": self.cursor_spotlight_checkbox.isChecked(),
             "magnifier_zoom": self.magnifier_zoom_combobox.currentText(),
+            "keystroke_position": self.keystroke_position_combobox.currentData(),
+            "keystroke_size": self.keystroke_size_combobox.currentText(),
+            "keystroke_mouse": self.keystroke_mouse_checkbox.isChecked(),
             "target_monitor": self.target_monitor_combobox.currentText(),
         }
 
@@ -460,8 +508,13 @@ class PresentationSettingUI(SettingPage):
             index = self.annotate_tool_combobox.findData(str(state["annotate_tool"]))
             if index >= 0:
                 self.annotate_tool_combobox.setCurrentIndex(index)
+        if state.get("keystroke_position") is not None:
+            index = self.keystroke_position_combobox.findData(str(state["keystroke_position"]))
+            if index >= 0:
+                self.keystroke_position_combobox.setCurrentIndex(index)
         for combobox, key in ((self.annotate_color_combobox, "annotate_color"),
                               (self.magnifier_zoom_combobox, "magnifier_zoom"),
+                              (self.keystroke_size_combobox, "keystroke_size"),
                               (self.target_monitor_combobox, "target_monitor")):
             if state.get(key) is not None:
                 index = combobox.findText(str(state[key]))
@@ -472,6 +525,7 @@ class PresentationSettingUI(SettingPage):
             self.annotate_width_slider.setValue(width)
         for checkbox, key in ((self.cursor_ring_checkbox, "cursor_ring"),
                               (self.cursor_ripple_checkbox, "cursor_ripple"),
-                              (self.cursor_spotlight_checkbox, "cursor_spotlight")):
+                              (self.cursor_spotlight_checkbox, "cursor_spotlight"),
+                              (self.keystroke_mouse_checkbox, "keystroke_mouse")):
             if key in state:
                 checkbox.setChecked(bool(state[key]))

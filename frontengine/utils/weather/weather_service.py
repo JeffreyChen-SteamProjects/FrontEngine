@@ -60,6 +60,16 @@ def build_geocode_url(city: str) -> str:
     return f"{_GEOCODE_URL}?{query}"
 
 
+# parse_forecast() 產生的欄位名稱，供文字覆蓋層的樣板提示顯示。
+# 和 system_stats.SAMPLE_FIELDS 同樣由測試釘住，避免和實際回傳的內容脫節。
+# The field names parse_forecast() produces, for the text overlay's template
+# hint. Pinned by a test like system_stats.SAMPLE_FIELDS, so the list shown and
+# the dict returned cannot drift apart.
+FORECAST_FIELDS: tuple = (
+    "temperature", "unit", "humidity", "wind", "code", "description",
+)
+
+
 def parse_forecast(payload) -> Dict[str, object]:
     """把 Open-Meteo 的回應轉成樣板欄位；缺欄位以 None 表示。"""
     current = (payload or {}).get("current") or {}

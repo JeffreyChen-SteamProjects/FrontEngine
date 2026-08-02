@@ -1,12 +1,15 @@
 """
-讀取系統負載（CPU、記憶體、磁碟、網路流量）供覆蓋層顯示。Windows 走 ctypes
+讀取系統負載（CPU、記憶體、磁碟、網路流量、電池）供覆蓋層顯示。Windows 走 ctypes
 （GetSystemTimes / GlobalMemoryStatusEx / GetDiskFreeSpaceExW / GetIfTable），
 Linux 走 /proc，其餘平台或失敗時對應欄位為 None，不新增任何相依套件。
+電池讀數借用 platform_info（三個平台都已實作），這裡只負責快取與併進取樣結果。
 
-Read system load (CPU, memory, disk, network throughput) for the overlays.
-Windows uses ctypes (GetSystemTimes / GlobalMemoryStatusEx /
+Read system load (CPU, memory, disk, network throughput, battery) for the
+overlays. Windows uses ctypes (GetSystemTimes / GlobalMemoryStatusEx /
 GetDiskFreeSpaceExW / GetIfTable), Linux reads /proc, and anything else leaves
-the field as None. No extra dependencies.
+the field as None. No extra dependencies. The battery reading comes from
+platform_info, which already implements all three platforms; this module only
+caches it and folds it into the sample.
 """
 from __future__ import annotations
 
@@ -15,11 +18,34 @@ import time
 from typing import Dict, Optional
 
 from frontengine.utils.logging.loggin_instance import front_engine_logger
+from frontengine.utils.platform_info.platform_info import read_battery
 
 _ERROR_INSUFFICIENT_BUFFER = 122
 _MAX_INTERFACE_NAME_LEN = 256
 _MAXLEN_PHYSADDR = 8
 _IF_TYPE_SOFTWARE_LOOPBACK = 24
+# 電池快取秒數。macOS 的讀數要開一個 pmset 子行程，而監控覆蓋層是每秒取樣的；
+# 電量不會秒秒在變，快取讓每秒取樣不會每秒 fork 一次。
+# Battery cache. Reading it on macOS spawns pmset, and the monitor overlay
+# samples once a second; the charge does not move that fast, so the cache keeps
+# a per-second sample from forking a process per second.
+_BATTERY_CACHE_SECONDS = 30.0
+STATE_CHARGING = "AC"
+STATE_ON_BATTERY = "BAT"
+
+# sample() 產生的欄位名稱。文字覆蓋層的樣板寫 `{cpu}`、`{down}` 就是查這些，
+# 但畫面上原本沒有任何地方列出來，等於使用者得讀原始碼才知道能寫什麼。
+# 這份清單是給 UI 顯示用的，和 sample() 的內容由測試釘在一起。
+# The field names sample() produces. A text overlay template writes `{cpu}` or
+# `{down}` to reach them, but nothing in the UI ever listed them - so knowing
+# what could be written meant reading the source. This list is what the UI
+# shows, and a test pins it to what sample() actually returns.
+SAMPLE_FIELDS: tuple = (
+    "cpu", "ram", "ram_used", "ram_total",
+    "disk", "disk_used", "disk_total",
+    "down", "up", "down_bytes", "up_bytes",
+    "battery", "battery_state",
+)
 
 
 def percentage(part: float, whole: float) -> Optional[float]:
@@ -65,16 +91,29 @@ class SystemStats:
     value cannot be read on this platform.
     """
 
-    def __init__(self, disk_path: Optional[str] = None) -> None:
+    def __init__(self, disk_path: Optional[str] = None, battery_reader=None) -> None:
         self.disk_path = disk_path or ("C:\\" if sys.platform == "win32" else "/")
         self._previous_cpu = None          # (idle, total)
         self._previous_network = None      # (received, sent, timestamp)
+        self._battery_reader = battery_reader or read_battery
+        self._battery_cache = None         # (monotonic timestamp, reading)
 
     def sample(self) -> Dict[str, object]:
-        """回傳 {cpu, ram, ram_used, ram_total, disk, disk_used, disk_total, down, up}。"""
+        """
+        回傳可直接套進文字樣板的欄位。速率同時給格式化字串（`down` / `up`，
+        給文字覆蓋層看）與原始 bytes/s（`down_bytes` / `up_bytes`，給折線圖用），
+        因為折線需要的是數字，而樣板需要的是「1.2MB/s」。
+        Template-ready fields. Throughput appears twice: formatted (`down` /
+        `up`) for text overlays and raw bytes per second (`down_bytes` /
+        `up_bytes`) for the sparklines, because a graph needs a number where a
+        template needs "1.2MB/s".
+        """
         memory = self.memory()
         disk = self.disk()
         network = self.network()
+        battery = self.battery()
+        down_bytes = network[0] if network else None
+        up_bytes = network[1] if network else None
         return {
             "cpu": self.cpu_percent(),
             "ram": percentage(memory[0], memory[1]) if memory else None,
@@ -83,9 +122,34 @@ class SystemStats:
             "disk": percentage(disk[0], disk[1]) if disk else None,
             "disk_used": format_bytes(disk[0]) if disk else None,
             "disk_total": format_bytes(disk[1]) if disk else None,
-            "down": f"{format_bytes(network[0])}/s" if network and network[0] is not None else None,
-            "up": f"{format_bytes(network[1])}/s" if network and network[1] is not None else None,
+            "down": f"{format_bytes(down_bytes)}/s" if down_bytes is not None else None,
+            "up": f"{format_bytes(up_bytes)}/s" if up_bytes is not None else None,
+            "down_bytes": float(down_bytes) if down_bytes is not None else None,
+            "up_bytes": float(up_bytes) if up_bytes is not None else None,
+            "battery": float(battery[0]) if battery else None,
+            "battery_state": (STATE_CHARGING if battery[1] else STATE_ON_BATTERY)
+            if battery else None,
         }
+
+    # --- battery ---------------------------------------------------------
+    def battery(self):
+        """
+        (電量百分比, 是否充電中)；沒有電池或讀不到回傳 None。讀數快取
+        `_BATTERY_CACHE_SECONDS` 秒，理由見該常數。
+        (charge percent, charging) or None when there is no battery or it
+        cannot be read. Cached — see `_BATTERY_CACHE_SECONDS`.
+        """
+        now = time.monotonic()
+        cached = self._battery_cache
+        if cached is not None and now - cached[0] < _BATTERY_CACHE_SECONDS:
+            return cached[1]
+        try:
+            reading = self._battery_reader()
+        except Exception as error:  # pragma: no cover - defensive around the platform call
+            front_engine_logger.warning(f"[SystemStats] battery read failed: {error!r}")
+            reading = None
+        self._battery_cache = (now, reading)
+        return reading
 
     # --- CPU -------------------------------------------------------------
     def cpu_percent(self) -> Optional[float]:

@@ -20,12 +20,14 @@ from frontengine.ui.page.layout_kit import SettingPage
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import retranslator, tr
-from frontengine.utils.system_stats.system_stats import system_stats
+from frontengine.utils.system_stats.system_stats import SAMPLE_FIELDS, system_stats
 from frontengine.utils.text_source.text_source import (
     DEFAULT_TEMPLATES, SOURCE_CLOCK, SOURCE_COUNTDOWN, SOURCE_DATE, SOURCE_STATIC,
     SOURCE_STOPWATCH, SOURCE_SYSTEM, SOURCE_WEATHER, TextSource,
 )
-from frontengine.utils.weather.weather_service import current_weather, lookup_city, weather_service
+from frontengine.utils.weather.weather_service import (
+    FORECAST_FIELDS, current_weather, lookup_city, weather_service,
+)
 
 # 名稱 -> HEX 顏色 / Named text colors -> hex
 _TEXT_COLORS = [
@@ -33,6 +35,19 @@ _TEXT_COLORS = [
     ("Green", "#00ff00"), ("Blue", "#0000ff"), ("Yellow", "#ffff00"),
     ("Cyan", "#00ffff"), ("Magenta", "#ff00ff"),
 ]
+
+# 哪些來源吃 `{欄位}` 樣板，以及各自有哪些欄位。時鐘與日期走 strftime 而不是
+# format，所以不在這裡。
+# Which sources take a `{field}` template, and which fields each offers. Clock
+# and date go through strftime rather than format, so they are not listed.
+TEMPLATE_FIELDS = {
+    SOURCE_SYSTEM: SAMPLE_FIELDS,
+    SOURCE_WEATHER: FORECAST_FIELDS,
+}
+
+
+def _t(key: str, fallback: str) -> str:
+    return language_wrapper.language_word_dict.get(key, fallback)
 
 
 class TextSettingUI(SettingPage):
@@ -170,11 +185,24 @@ class TextSettingUI(SettingPage):
         self.show_all_screen = self.show_on_all_screen_checkbox.isChecked()
 
     def _update_source_hint(self) -> None:
-        """依所選來源說明文字欄位的意義（樣板、倒數分鐘數…）。"""
+        """
+        依所選來源說明文字欄位的意義（樣板、倒數分鐘數…），並列出可用的
+        `{欄位}`。欄位一直都能用，只是以前沒有任何地方寫出來，等於要讀原始碼
+        才知道除了 {cpu} {ram} 還有什麼。
+        Explain what the text field means for the chosen source, and list the
+        `{placeholders}` it accepts. They always worked; nothing ever named
+        them, so knowing there was more than {cpu} and {ram} meant reading the
+        source.
+        """
         kind = self.text_source_combobox.currentData() or SOURCE_STATIC
         default = DEFAULT_TEMPLATES.get(kind, "")
         hint = language_wrapper.language_word_dict.get(f"text_source_hint_{kind}", "")
-        self.text_source_hint_label.setText(f"{hint}  ({default})" if default else hint)
+        text = f"{hint}  ({default})" if default else hint
+        fields = TEMPLATE_FIELDS.get(kind)
+        if fields:
+            label = _t("text_source_fields", "Fields")
+            text = f"{text}\n{label}: " + "  ".join(f"{{{name}}}" for name in fields)
+        self.text_source_hint_label.setText(text)
         self.weather_location_label.setVisible(kind == SOURCE_WEATHER)
         self.weather_location_edit.setVisible(kind == SOURCE_WEATHER)
 

@@ -11,10 +11,14 @@ from frontengine.show.presentation.cursor_effects import (
     RIPPLE_STEPS, clamp_radius, ripple_alpha, ripple_radius,
 )
 from frontengine.show.presentation.keystroke_display import (
-    format_combo, format_key, visible_keys,
+    MAX_FONT_SIZE, MIN_FONT_SIZE, POSITION_BOTTOM, POSITION_BOTTOM_LEFT,
+    POSITION_BOTTOM_RIGHT, POSITION_TOP, KeystrokeDisplayWidget, clamp_font_size, format_combo,
+    format_key, format_mouse_button, normalize_position, panel_origin, visible_keys,
 )
 from frontengine.show.presentation.magnifier import MAX_ZOOM, MIN_ZOOM, clamp_zoom, source_rect
-from frontengine.utils.input_watch.input_watch_service import combo_with_modifiers, is_modifier
+from frontengine.utils.input_watch.input_watch_service import (
+    button_name, combo_with_modifiers, is_modifier,
+)
 
 
 # --- annotation -----------------------------------------------------------
@@ -122,6 +126,86 @@ def test_held_modifiers_join_the_next_key() -> None:
     assert combo_with_modifiers("s", ["ctrl", "shift"]) == ["ctrl", "shift", "s"]
     assert combo_with_modifiers("a", []) == ["a"]
     assert combo_with_modifiers("ctrl", ["ctrl"]) == ["ctrl"], "a modifier alone is not doubled"
+
+
+class _FakeButton:
+    """pynput 的 Button 是 enum，有 .name；這裡只需要那一個屬性。"""
+
+    def __init__(self, name: str) -> None:
+        self.name = name
+
+    def __str__(self) -> str:
+        return f"Button.{self.name}"
+
+
+def test_a_mouse_button_is_named_from_the_enum() -> None:
+    assert button_name(_FakeButton("left")) == "left"
+    assert button_name("Button.right") == "right", "a plain string still yields a name"
+    assert button_name(None) == ""
+
+
+# --- keystroke display: mouse and styling ---------------------------------
+def test_mouse_buttons_are_written_for_a_viewer() -> None:
+    assert format_mouse_button("left") == "Left Click"
+    assert format_mouse_button("Button.right") == "Right Click"
+    assert format_mouse_button("middle") == "Middle Click"
+
+
+def test_an_unknown_button_still_shows_something() -> None:
+    """側鍵的名稱各家不同。顯示一個怪名字，好過什麼都不顯示讓人以為壞了。"""
+    assert format_mouse_button("button12") == "Button12"
+    assert format_mouse_button("") == ""
+
+
+def test_a_mouse_click_reaches_the_display_only_when_wanted() -> None:
+    widget = KeystrokeDisplayWidget(show_mouse=True)
+    try:
+        widget.push_mouse("left")
+        assert "Left Click" in widget.current_text()
+        widget.set_show_mouse(False)
+        widget.push_mouse("right")
+        assert "Right Click" not in widget.current_text()
+    finally:
+        widget.close()
+
+
+def test_font_size_is_clamped() -> None:
+    assert clamp_font_size(36) == 36
+    assert clamp_font_size(1) == MIN_FONT_SIZE
+    assert clamp_font_size(9999) == MAX_FONT_SIZE
+    assert clamp_font_size("big", 28) == 28
+
+
+def test_an_unknown_position_falls_back_to_the_bottom() -> None:
+    assert normalize_position(POSITION_TOP) == POSITION_TOP
+    assert normalize_position("sideways") == POSITION_BOTTOM
+    assert normalize_position(None) == POSITION_BOTTOM
+
+
+def test_the_panel_sits_where_it_was_asked_to() -> None:
+    panel, area, padding = (200, 50), (1000, 600), 12
+    assert panel_origin(POSITION_BOTTOM, panel, area, padding) == (400, 538)
+    assert panel_origin(POSITION_TOP, panel, area, padding) == (400, 12)
+    assert panel_origin(POSITION_BOTTOM_LEFT, panel, area, padding) == (12, 538)
+    assert panel_origin(POSITION_BOTTOM_RIGHT, panel, area, padding) == (788, 538)
+
+
+def test_a_panel_wider_than_the_screen_stays_on_it() -> None:
+    """字級拉到很大時，面板不能被推到負座標而跑出畫面外。"""
+    x, y = panel_origin(POSITION_BOTTOM_RIGHT, (1400, 900), (1000, 600), 12)
+    assert x >= 0 and y >= 0
+
+
+def test_restyling_only_touches_what_was_given() -> None:
+    widget = KeystrokeDisplayWidget(font_size=28, position=POSITION_BOTTOM)
+    try:
+        widget.set_style(position=POSITION_TOP)
+        assert widget.position == POSITION_TOP
+        assert widget.font_size == 28, "the size was not asked to change"
+        widget.set_style(font_size=48)
+        assert widget.font_size == 48 and widget.position == POSITION_TOP
+    finally:
+        widget.close()
 
 
 # --- magnifier ------------------------------------------------------------

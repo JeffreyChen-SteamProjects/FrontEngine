@@ -10,7 +10,9 @@ Page Présentation
 
 * Mise en valeur du curseur - le halo entoure le pointeur, l'onde au clic
   montre où vous avez cliqué, le projecteur assombrit tout le reste.
-* Affichage des touches - montre les touches frappées, utile en démonstration.
+* Affichage des touches - montre les touches frappées et les boutons de souris
+  cliqués, utile en démonstration. La position du panneau et la taille du texte
+  se choisissent ; les clics de souris se désactivent séparément.
 * Loupe - suit le curseur, de 1,5x à 6x.
 * Tableau blanc - une toile sans fin.
 * Figer l'écran - recouvrir l'écran choisi par une photo de lui-même, pour que ce

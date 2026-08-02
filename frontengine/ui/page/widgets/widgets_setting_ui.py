@@ -20,7 +20,9 @@ from PySide6.QtWidgets import (
     QCheckBox, QComboBox, QLabel, QPushButton, QSpinBox,
 )
 
-from frontengine.show.monitor.monitor_widget import NowPlayingWidget, SystemMonitorWidget
+from frontengine.show.monitor.monitor_widget import (
+    DEFAULT_LINES, LINES, NowPlayingWidget, SystemMonitorWidget, normalize_lines,
+)
 from frontengine.show.notes.sticky_note_widget import StickyNoteWidget, note_state, restore_notes
 from frontengine.show.spectrum.spectrum_widget import STYLE_BARS, STYLE_RING, SpectrumWidget
 from frontengine.ui.page.utils import coerce_int
@@ -36,6 +38,20 @@ from frontengine.user_setting.user_setting_file import user_setting_dict, write_
 
 def _t(key: str, fallback: str) -> str:
     return language_wrapper.language_word_dict.get(key, fallback)
+
+
+# 監控折線的勾選框文字。用 system_stats 的欄位名當鍵，但顯示的是人看的名字：
+# 使用者要挑的是「下載」，不是 down_bytes。
+# Labels for the monitor line checkboxes. Keyed by the system_stats field, but
+# what is shown is the human name: the user picks "Download", not down_bytes.
+MONITOR_LINE_LABELS: Dict[str, tuple] = {
+    "cpu": ("widgets_monitor_cpu", "CPU"),
+    "ram": ("widgets_monitor_ram", "RAM"),
+    "disk": ("widgets_monitor_disk", "Disk"),
+    "battery": ("widgets_monitor_battery", "Battery"),
+    "down_bytes": ("widgets_monitor_download", "Download"),
+    "up_bytes": ("widgets_monitor_upload", "Upload"),
+}
 
 
 class WidgetsSettingUI(SettingPage):
@@ -70,6 +86,7 @@ class WidgetsSettingUI(SettingPage):
 
         monitor = self.add_section(self.monitor_label)
         monitor.add_row("widgets_history", self.monitor_history_spinbox, "History")
+        monitor.add_inline(*self.monitor_line_checkboxes.values())
         monitor.add_inline(self.monitor_button)
 
         playing = self.add_section("section_actions", "Now playing")
@@ -107,6 +124,18 @@ class WidgetsSettingUI(SettingPage):
         self.monitor_history_spinbox.setRange(10, 300)
         self.monitor_history_spinbox.setValue(60)
         self.monitor_history_spinbox.valueChanged.connect(self._apply_monitor_settings)
+        # 每條線一個勾選框，從 LINES 生出來，之後加新的線不必再改這裡。
+        # 電池那條在桌機上沒有讀數，所以預設不勾——預設維持原本的 CPU/RAM/磁碟。
+        # One checkbox per line, generated from LINES so a new line needs no edit
+        # here. Battery has no reading on a desktop, so it is off by default;
+        # the default stays the original CPU / RAM / disk.
+        self.monitor_line_checkboxes: Dict[str, QCheckBox] = {}
+        for key, _label, _color, _kind in LINES:
+            lang_key, fallback = MONITOR_LINE_LABELS[key]
+            checkbox = tr(QCheckBox(), lang_key, fallback)
+            checkbox.setChecked(key in DEFAULT_LINES)
+            checkbox.stateChanged.connect(self._apply_monitor_settings)
+            self.monitor_line_checkboxes[key] = checkbox
         self.monitor_button = tr(QPushButton(), "widgets_monitor_start", "Start monitor")
         self.monitor_button.clicked.connect(self.toggle_monitor)
         self.now_playing_button = tr(QPushButton(), "widgets_now_playing_start",
@@ -184,9 +213,20 @@ class WidgetsSettingUI(SettingPage):
         else:
             self.start_monitor()
 
+    def selected_monitor_lines(self) -> tuple:
+        """
+        勾起來的線。一條都沒勾時 normalize_lines 會退回預設——空的監控視窗
+        只是一塊看不懂的方框，不如維持原本三條。
+        The ticked lines. With none ticked normalize_lines falls back to the
+        default: an empty monitor is just an unreadable box.
+        """
+        return normalize_lines(
+            [key for key, box in self.monitor_line_checkboxes.items() if box.isChecked()])
+
     def start_monitor(self) -> None:
         front_engine_logger.info("[WidgetsSettingUI] start_monitor")
-        widget = SystemMonitorWidget(self.monitor_history_spinbox.value())
+        widget = SystemMonitorWidget(self.monitor_history_spinbox.value(),
+                                     lines=self.selected_monitor_lines())
         widget.set_ui_window_flag(show_on_bottom=False)
         screen = QGuiApplication.primaryScreen()
         if screen is not None:
@@ -207,9 +247,11 @@ class WidgetsSettingUI(SettingPage):
         self.monitor_button.setText(_t("widgets_monitor_start", "Start monitor"))
 
     def _apply_monitor_settings(self) -> None:
+        lines = self.selected_monitor_lines()
         for widget in self.monitor_widget_list[:]:
             try:
                 widget.set_history(self.monitor_history_spinbox.value())
+                widget.set_lines(lines)
             except RuntimeError:
                 self.monitor_widget_list.remove(widget)
 
@@ -295,6 +337,7 @@ class WidgetsSettingUI(SettingPage):
             "spectrum_style": self.spectrum_style_combobox.currentData(),
             "spectrum_bands": self.spectrum_bands_spinbox.value(),
             "monitor_history": self.monitor_history_spinbox.value(),
+            "monitor_lines": list(self.selected_monitor_lines()),
             "notes_restore": self.note_restore_checkbox.isChecked(),
         }
 
@@ -309,5 +352,9 @@ class WidgetsSettingUI(SettingPage):
             value = coerce_int(state.get(key))
             if value is not None:
                 spinbox.setValue(max(spinbox.minimum(), min(spinbox.maximum(), value)))
+        if "monitor_lines" in state:
+            wanted = set(normalize_lines(state.get("monitor_lines")))
+            for key, checkbox in self.monitor_line_checkboxes.items():
+                checkbox.setChecked(key in wanted)
         if "notes_restore" in state:
             self.note_restore_checkbox.setChecked(bool(state["notes_restore"]))

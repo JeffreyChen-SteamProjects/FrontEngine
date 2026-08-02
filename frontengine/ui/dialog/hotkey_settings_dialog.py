@@ -34,6 +34,11 @@ _ACTION_LABELS: Dict[str, Tuple[str, str]] = {
     "toggle_lock": ("hotkey_toggle_lock", "Lock / unlock overlays"),
     "show_shortcuts": ("hotkey_show_shortcuts", "Show this shortcut list"),
     "toggle_freeze": ("hotkey_toggle_freeze", "Freeze / unfreeze the screen"),
+    "media_play_pause": ("hotkey_media_play_pause", "Play / pause media"),
+    "media_next": ("hotkey_media_next", "Next track"),
+    "media_previous": ("hotkey_media_previous", "Previous track"),
+    "move_window_next_monitor": ("hotkey_move_window_next_monitor",
+                                 "Move window to the next monitor"),
 }
 
 

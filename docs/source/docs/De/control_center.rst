@@ -28,3 +28,7 @@ Alles auf einmal
   aber in dem, was eine Bildschirmfreigabe aufzeichnet. Nur unter Windows. Eine
   Abdeckung von der Fokus-Seite bleibt sichtbar, denn etwas zu verdecken ist
   genau ihr Zweck.
+* An diese Arbeitsfläche binden - die Overlays bleiben auf der virtuellen
+  Arbeitsfläche, auf der sie geöffnet wurden. Auf einer anderen treten sie
+  beiseite und kehren bei der Rückkehr wieder. Beim Lösen kommt alles zurück,
+  was weggeräumt wurde. Nur unter Windows.

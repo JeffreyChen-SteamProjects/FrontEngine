@@ -10,7 +10,9 @@ Präsentieren-Seite
 
 * Cursor hervorheben - Hervorhebung legt einen Ring um den Zeiger, Klick-Welle
   zeigt, wo geklickt wurde, Spotlight dunkelt alles andere ab.
-* Tastenanzeige - zeigt die gedrückten Tasten, für Aufnahmen und Vorführungen.
+* Tastenanzeige - zeigt die gedrückten Tasten und die geklickten Maustasten,
+  für Aufnahmen und Vorführungen. Position und Schriftgröße sind wählbar,
+  Mausklicks lassen sich einzeln abschalten.
 * Lupe - folgt dem Cursor, von 1,5x bis 6x.
 * Whiteboard - eine endlose Fläche.
 * Bild einfrieren - den gewählten Bildschirm mit einer Aufnahme seiner selbst

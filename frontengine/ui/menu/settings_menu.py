@@ -10,6 +10,7 @@ from frontengine.ui.dialog.app_profile_dialog import AppProfileDialog
 from frontengine.ui.dialog.clipboard_dialog import ClipboardDialog
 from frontengine.ui.dialog.hotkey_settings_dialog import HotkeySettingsDialog
 from frontengine.ui.dialog.reminder_dialog import ReminderDialog
+from frontengine.ui.dialog.rules_dialog import RulesDialog
 from frontengine.ui.dialog.remote_control_dialog import RemoteControlDialog
 from frontengine.ui.dialog.screen_privacy_dialog import ScreenPrivacyDialog
 from frontengine.ui.dialog.preset_schedule_dialog import PresetScheduleDialog
@@ -118,6 +119,14 @@ def build_settings_menu(ui: "FrontEngineMainUI") -> None:
     reminder_action.triggered.connect(lambda: _open_dialog(ui, ReminderDialog))
     menu.addAction(reminder_action)
     ui.reminder_action = reminder_action
+
+    # 條件式規則。規則是每次輪詢重讀的，所以存檔後不必重啟服務。
+    # The rules are re-read on every poll, so saving needs no service restart.
+    rules_action = QAction(_t("settings_menu_rules", "Rules..."), menu)
+    retranslator.bind(rules_action, "settings_menu_rules", "Rules...")
+    rules_action.triggered.connect(lambda: _open_dialog(ui, RulesDialog))
+    menu.addAction(rules_action)
+    ui.rules_action = rules_action
 
     screensaver_action = QAction(_t("settings_menu_screensaver", "Screensaver..."), menu)
     retranslator.bind(screensaver_action, "settings_menu_screensaver", "Screensaver...")

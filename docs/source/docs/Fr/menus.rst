@@ -16,8 +16,10 @@ Menu Préréglages
 Menu Réglages
 
 * Raccourcis clavier… - raccourcis globaux pour tout masquer, tout afficher,
-  tout fermer, tout couper, l'opacité, la page suivante du tableau de bord et le
-  verrouillage.
+  tout fermer, tout couper, l'opacité, la page suivante du tableau de bord, le
+  verrouillage, le gel de l'écran, la liste des raccourcis, ainsi que
+  lecture/pause, piste suivante et précédente, et le déplacement de la fenêtre
+  active vers l'écran suivant en conservant ses proportions.
 * Thème jour/nuit programmé - clair le jour, sombre la nuit.
 * Lancer au démarrage du système - ouvrir FrontEngine à l'ouverture de session.
 * Restaurer la dernière session - rouvrir ce qui était affiché la dernière fois.
@@ -33,6 +35,11 @@ Menu Réglages
 * Profils d'application… - appliquer un préréglage dès qu'une application donnée
   passe devant.
 * Rappels… - un message toutes les tant de minutes, ou à une heure donnée.
+* Règles… - « quand ces conditions sont réunies, fais ceci ». Un jour de la
+  semaine, une plage horaire et l'application au premier plan se combinent ;
+  l'action applique un préréglage, masque, affiche ou ferme les calques, ou
+  définit la qualité. Une condition vide signifie « indifférent », et une règle
+  s'exécute une fois quand ses conditions deviennent vraies, pas en continu.
 * Économiseur d'écran… - après tant de minutes sans souris ni clavier, afficher le
   calque d'une page choisie ; un mouvement de souris le retire. Il utilise la page
   telle que vous l'avez réglée et ne ferme que ce qu'il a ouvert : ce que vous

@@ -54,6 +54,7 @@ from frontengine.utils.critical_exit.critical_exit import CriticalExit
 from frontengine.utils.critical_exit.win32_vk import keyboard_keys_table
 from frontengine.utils.hotkey.hotkey_service import HotkeyService
 from frontengine.utils.keep_awake.keep_awake import KeepAwake
+from frontengine.utils.media_keys.media_keys import is_media_action, send_media_key
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import retranslator, translate
@@ -80,6 +81,17 @@ from frontengine.utils.usage_tracking.usage_tracker import USAGE_FILE, UsageTrac
 from frontengine.utils.reminder.reminder_service import ReminderService
 from frontengine.utils.smart_pause.smart_pause_service import SmartPauseService
 from frontengine.utils.theme_schedule.theme_schedule_service import ThemeScheduleService
+from frontengine.utils.rules.rule_engine import (
+    ACTION_APPLY_PRESET as RULE_ACTION_APPLY_PRESET,
+    ACTION_CLOSE_ALL as RULE_ACTION_CLOSE_ALL,
+    ACTION_HIDE_ALL as RULE_ACTION_HIDE_ALL,
+    ACTION_QUALITY_TIER as RULE_ACTION_QUALITY_TIER,
+    ACTION_SHOW_ALL as RULE_ACTION_SHOW_ALL,
+    RuleEngineService,
+)
+from frontengine.ui.dialog.rules_dialog import SETTING_KEY as RULES_SETTING_KEY
+from frontengine.utils.virtual_desktop.virtual_desktop import VirtualDesktopService
+from frontengine.utils.window_pin.monitor_move import move_to_next_monitor
 
 # 可擴充的外部 Tab 註冊表
 # Registry for external tabs
@@ -338,6 +350,22 @@ class FrontEngineMainUI(QMainWindow):
         self.keep_awake = KeepAwake()
         if user_setting_dict.get("keep_awake"):
             self.keep_awake.enable()
+
+        # 條件式規則：「當 <條件> 成立時，做 <動作>」。既有的四套排程各自只認得
+        # 一種條件，這裡補的是它們之間的組合。
+        # Conditional rules. The four existing schedulers each know one kind of
+        # condition; this fills in the combinations between them.
+        self.rule_engine_service = RuleEngineService(
+            rules_provider=lambda: user_setting_dict.get(RULES_SETTING_KEY, []))
+        self.rule_engine_service.rule_fired.connect(self._on_rule_fired)
+        self.rule_engine_service.start()
+
+        # 把覆蓋層綁在目前的虛擬桌面（預設關閉，使用者在控制中心切換）
+        # Pin the overlays to the current virtual desktop; off by default and
+        # toggled from the control center.
+        self.virtual_desktop_service = VirtualDesktopService(
+            widgets_provider=self.control_center_ui.all_overlays)
+        self.control_center_ui.desktop_pin_changed.connect(self._on_desktop_pin_changed)
 
         # 閒置夠久就把選定的覆蓋層放上來 / Show the chosen overlay once idle
         self._screensaver_overlays: list = []
@@ -705,6 +733,16 @@ class FrontEngineMainUI(QMainWindow):
             # buttons cannot be reached; this shortcut is the way out that is
             # always available.
             self.presentation_setting_ui.toggle_freeze()
+        elif action == "move_window_next_monitor":
+            # 搬的是別人的視窗，不是覆蓋層，所以也不經過控制中心。
+            # This moves someone else's window rather than an overlay, so it too
+            # bypasses the control center.
+            move_to_next_monitor()
+        elif is_media_action(action):
+            # 媒體鍵是送給播放器的，和覆蓋層無關，所以不經過控制中心。
+            # A media key goes to the player, not to an overlay, so it does not
+            # pass through the control center.
+            send_media_key(action)
 
     def toggle_shortcut_sheet(self) -> None:
         """
@@ -730,6 +768,42 @@ class FrontEngineMainUI(QMainWindow):
         sheet.set_ui_window_flag()
         sheet.showFullScreen()
         self.shortcut_sheet = sheet
+
+    def _on_rule_fired(self, rule: dict) -> None:
+        """
+        一條規則剛剛成立。動作全部對應到既有的能力，所以規則引擎不會做出
+        使用者在別的地方做不到的事。
+        A rule just became true. Every action maps to something already
+        available elsewhere, so the engine can do nothing the user cannot.
+        """
+        action = rule.get("action")
+        value = str(rule.get("value", ""))
+        front_engine_logger.info(
+            f"[FrontEngineMainUI] rule '{rule.get('label')}' -> {action} {value}")
+        if action == RULE_ACTION_APPLY_PRESET:
+            apply_named_preset(self, value)
+        elif action == RULE_ACTION_HIDE_ALL:
+            self.control_center_ui.hide_all()
+        elif action == RULE_ACTION_SHOW_ALL:
+            self.control_center_ui.show_all()
+        elif action == RULE_ACTION_CLOSE_ALL:
+            self.control_center_ui.clear_all()
+        elif action == RULE_ACTION_QUALITY_TIER:
+            self.control_center_ui.set_quality_tier(value)
+
+    def _on_desktop_pin_changed(self, pinned: bool) -> None:
+        """
+        控制中心切換了「綁在虛擬桌面」。停止時服務會把自己藏起來的放回來，
+        所以關掉之後不會留下一堆看不見的覆蓋層。
+        The control center toggled the virtual desktop pin. Stopping restores
+        what the service hid, so switching it off leaves nothing invisible
+        behind.
+        """
+        front_engine_logger.info(f"[FrontEngineMainUI] desktop pin | pinned={pinned}")
+        if pinned:
+            self.virtual_desktop_service.start()
+        else:
+            self.virtual_desktop_service.stop()
 
     def _on_smart_pause_changed(self, paused: bool, reason: str) -> None:
         """
@@ -871,7 +945,8 @@ class FrontEngineMainUI(QMainWindow):
         "preset_schedule_service", "theme_schedule_service", "usage_service",
         "signage_service", "screensaver_service",
         "remote_server", "midi_input", "share_watch_service", "reminder_service",
-        "app_profile_service", "smart_pause_service", "hotkey_service",
+        "app_profile_service", "smart_pause_service", "virtual_desktop_service",
+        "rule_engine_service", "hotkey_service",
     )
     # 關閉時要清空的覆蓋層清單
     # The overlay lists to empty on close.

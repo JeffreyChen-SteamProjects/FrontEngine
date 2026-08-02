@@ -1,6 +1,6 @@
 from typing import Callable
 
-from PySide6.QtCore import QTimer, Qt
+from PySide6.QtCore import QTimer, Qt, Signal
 from PySide6.QtWidgets import (
     QComboBox, QLabel, QPushButton, QScrollArea, QTextEdit, QWidget,
 )
@@ -21,6 +21,7 @@ from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import retranslator, tr, translate
 from frontengine.utils.screen_privacy import capture_affinity
+from frontengine.utils.virtual_desktop import virtual_desktop
 from frontengine.utils.power_mode.power_mode import (
     TIER_BALANCED, TIER_HIGH, TIER_SAVER, normalize_tier,
 )
@@ -32,6 +33,13 @@ class ControlCenterUI(SettingPage):
     ControlCenterUI: 控制中心面板，集中管理各種 widget 與 log panel
     ControlCenterUI: Control center panel to manage widgets and log panel
     """
+
+    # 「綁在目前的虛擬桌面」的開關。實際的隱藏／還原是主視窗上的服務在做，
+    # 這個頁面只負責狀態；用訊號通知才不必讓分頁反過來抓住主視窗。
+    # The virtual-desktop pin toggle. The hiding and restoring belongs to the
+    # main window's service; a signal keeps this page from reaching back up to
+    # the main window to reach it.
+    desktop_pin_changed = Signal(bool)
 
     def __init__(
             self,
@@ -103,6 +111,13 @@ class ControlCenterUI(SettingPage):
         self.capture_button = self._create_button(
             "control_center_hide_from_capture", self.toggle_hide_from_capture)
         self.capture_button.setEnabled(capture_affinity.available())
+        # 綁在虛擬桌面上：切到別的桌面就把覆蓋層收起來，切回來再放出來。
+        # Pin to this virtual desktop: put the overlays away on another desktop
+        # and bring them back on return.
+        self._desktop_pinned = False
+        self.desktop_pin_button = self._create_button(
+            "control_center_desktop_pin_on", self.toggle_desktop_pin)
+        self.desktop_pin_button.setEnabled(virtual_desktop.available())
         self.clear_all_button = self._create_button("control_center_close_all", self.clear_all)
 
         # 畫質檔位：比省電模式更細，一次套用到所有覆蓋層
@@ -141,7 +156,7 @@ class ControlCenterUI(SettingPage):
         everything.add_button_grid(
             self.hide_all_button, self.show_all_button, self.mute_all_button,
             self.lock_all_button, self.chroma_key_button, self.reset_positions_button,
-            self.low_power_button, self.capture_button)
+            self.low_power_button, self.capture_button, self.desktop_pin_button)
         everything.add_row(self.quality_label, self.quality_combobox)
 
         log = self.add_section("section_log", "Messages")
@@ -256,6 +271,39 @@ class ControlCenterUI(SettingPage):
         just costs for nothing.
         """
         self._cleanup_callbacks.append(callback)
+
+    def all_overlays(self) -> list:
+        """
+        目前所有還活著的覆蓋層（每次都重新問各分頁）。給需要逐一處理覆蓋層的
+        服務用，例如虛擬桌面綁定。
+        Every live overlay right now, re-asked from the pages each time. For
+        services that work overlay by overlay, such as the virtual desktop pin.
+        """
+        widgets = []
+        for widget_list in self._all_overlay_widget_lists():
+            widgets.extend(widget_list)
+        return widgets
+
+    def set_desktop_pin(self, pinned: bool) -> None:
+        """
+        開關「綁在目前的虛擬桌面」。真正的隱藏／還原由主視窗上的服務執行，
+        這裡只負責狀態與按鈕文字。
+        Toggle pinning to the current virtual desktop. The hiding and restoring
+        is the main window's service; this owns the state and the button text.
+        """
+        self._desktop_pinned = bool(pinned) and virtual_desktop.available()
+        retranslator.set_text(
+            self.desktop_pin_button,
+            "control_center_desktop_pin_off" if self._desktop_pinned
+            else "control_center_desktop_pin_on",
+            "Unpin from this desktop" if self._desktop_pinned else "Pin to this desktop")
+        self.desktop_pin_changed.emit(self._desktop_pinned)
+
+    def desktop_pinned(self) -> bool:
+        return self._desktop_pinned
+
+    def toggle_desktop_pin(self) -> None:
+        self.set_desktop_pin(not self._desktop_pinned)
 
     def _all_overlay_widget_lists(self) -> list:
         """回傳所有覆蓋層 widget 清單 / All overlay widget lists."""

@@ -4,9 +4,12 @@ Pure-logic tests for the spectrum, now playing, system monitor and sticky
 notes - no sound card required.
 """
 import numpy
+import pytest
 
 from frontengine.show.monitor.monitor_widget import (
-    DEFAULT_HISTORY, MAX_HISTORY, MIN_HISTORY, clamp_history, sparkline_path, stat_percent,
+    DEFAULT_HISTORY, DEFAULT_LINES, MAX_HISTORY, MIN_HISTORY, SystemMonitorWidget,
+    clamp_history, format_row_value, normalize_lines, rate_scale, sparkline_path,
+    stat_for, stat_percent, stat_rate,
 )
 from frontengine.show.notes.sticky_note_widget import (
     DEFAULT_COLOR, DEFAULT_HEIGHT, DEFAULT_WIDTH, MIN_SIZE, clamp_size, normalize_note_states,
@@ -211,6 +214,81 @@ def test_a_sparkline_needs_at_least_two_points() -> None:
 def test_a_sparkline_puts_a_high_value_near_the_top() -> None:
     path = sparkline_path([0.0, 100.0], 100, 20)
     assert path.elementAt(0).y > path.elementAt(1).y
+
+
+def test_a_rate_field_is_read_without_a_ceiling() -> None:
+    """速率沒有 100 這個上限，10MB/s 就是 10MB/s，不能被夾成 100。"""
+    assert stat_rate({"down_bytes": 10 * 1024 ** 2}, "down_bytes") == 10 * 1024 ** 2
+    assert stat_rate({"down_bytes": -1}, "down_bytes") is None
+    assert stat_rate({"down_bytes": None}, "down_bytes") is None
+
+
+def test_a_line_is_read_according_to_its_kind() -> None:
+    stats = {"cpu": 140, "down_bytes": 10 * 1024 ** 2}
+    assert stat_for(stats, "cpu") == 100.0, "a percentage is clamped"
+    assert stat_for(stats, "down_bytes") == 10 * 1024 ** 2, "a rate is not"
+    assert stat_for(stats, "not_a_line") is None
+
+
+def test_a_rate_axis_follows_the_peak_but_has_a_floor() -> None:
+    """
+    閒置時若照視窗最大值縮放，幾百 bytes 的背景流量會被畫成滿格尖峰。
+    Scaling to the window peak while idle would draw background chatter as a
+    full-height spike, so the axis has a floor.
+    """
+    assert rate_scale([100.0, 200.0]) == pytest.approx(64 * 1024.0), "floored while idle"
+    busy = 5 * 1024 ** 2
+    assert rate_scale([1000.0, busy]) == pytest.approx(busy), "follows the real peak"
+
+
+def test_a_row_reading_is_written_in_its_own_units() -> None:
+    assert format_row_value("cpu", 42.4) == "42%"
+    assert format_row_value("down_bytes", 1536) == "1.5KB/s"
+
+
+def test_requested_lines_are_tidied_into_a_known_order() -> None:
+    assert normalize_lines(["up_bytes", "cpu"]) == ("cpu", "up_bytes"), "LINES order wins"
+    assert normalize_lines(["cpu", "cpu"]) == ("cpu",), "de-duplicated"
+    assert normalize_lines(["nonsense"]) == DEFAULT_LINES, "a monitor with no lines is a blank box"
+    assert normalize_lines(None) == DEFAULT_LINES
+    assert normalize_lines("cpu") == DEFAULT_LINES, "a bare string is not a list of keys"
+
+
+def test_the_default_lines_are_the_original_three() -> None:
+    """升級不該讓使用者多出兩條沒要求過的線。"""
+    assert DEFAULT_LINES == ("cpu", "ram", "disk")
+
+
+def test_the_monitor_graphs_the_lines_it_was_given() -> None:
+    readings = {"cpu": 20.0, "ram": 30.0, "disk": 40.0,
+                "battery": 90.0, "down_bytes": 2048.0, "up_bytes": 1024.0}
+    widget = SystemMonitorWidget(stats_provider=lambda: readings,
+                                 lines=("cpu", "down_bytes"))
+    try:
+        widget.sample()
+        assert widget.lines == ("cpu", "down_bytes")
+        assert widget.latest("down_bytes") == 2048.0
+        # 沒有顯示的線也照樣取樣，關掉再打開才看得到這段時間發生的事
+        # Hidden lines keep sampling, so turning one back on shows the meantime.
+        assert widget.latest("battery") == 90.0
+        assert widget.axis_maximum("cpu") == 100.0
+        assert widget.axis_maximum("down_bytes") >= 2048.0
+    finally:
+        widget.close()
+
+
+def test_changing_the_lines_keeps_the_history() -> None:
+    readings = {"cpu": 20.0, "ram": 30.0, "disk": 40.0,
+                "battery": 90.0, "down_bytes": 2048.0, "up_bytes": 1024.0}
+    widget = SystemMonitorWidget(stats_provider=lambda: readings, lines=("cpu",))
+    try:
+        widget.sample()
+        widget.sample()
+        widget.set_lines(("cpu", "ram"))
+        assert widget.lines == ("cpu", "ram")
+        assert len(widget.series("ram")) == 2, "the hidden line kept its samples"
+    finally:
+        widget.close()
 
 
 # --- sticky notes ---------------------------------------------------------
