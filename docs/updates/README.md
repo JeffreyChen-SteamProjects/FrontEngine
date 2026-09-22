@@ -54,6 +54,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20260922-04 | 2026-09-22 | Point project URLs at JeffreyChen-SteamProjects/FrontEngine | #done #metadata | [2026-09](2026-09.md) |
 | U-20260922-03 | 2026-09-22 | SonarCloud S6549 on pet sound paths marked WONTFIX | #decision #sonarcloud | [2026-09](2026-09.md) |
 | U-20260922-02 | 2026-09-22 | Codacy stalls on very large PRs (PR #216) | #incident #ci | [2026-09](2026-09.md) |
 | U-20260922-01 | 2026-09-22 | Adopt progress/architecture/docs-updates rules | #docs #migration | [2026-09](2026-09.md) |
@@ -62,4 +63,4 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-09.md](2026-09.md) | 2026-09 | 3 |
+| [2026-09.md](2026-09.md) | 2026-09 | 4 |

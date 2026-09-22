@@ -29,8 +29,8 @@ classifiers = [
 frontengine = "frontengine.ui.main_ui:main"
 
 [project.urls]
-Homepage = "https://github.com/Intergration-Automation-Testing/FrontEngine"
-Code = "https://github.com/Intergration-Automation-Testing/FrontEngine"
+Homepage = "https://github.com/JeffreyChen-SteamProjects/FrontEngine"
+Code = "https://github.com/JeffreyChen-SteamProjects/FrontEngine"
 
 [project.readme]
 file = "README.md"

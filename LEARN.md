@@ -51,6 +51,6 @@
 ---
 > Require Windows 10 or 11. \
 > If you want to use this on a Unix-like system, you need to compile the source code.
-- [Download](https://github.com/Intergration-Automation-Testing/FrontEngine/releases)
+- [Download](https://github.com/JeffreyChen-SteamProjects/FrontEngine/releases)
 
 > PYPI package: pip install frontengine
