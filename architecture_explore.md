@@ -259,7 +259,7 @@ FrontEngine 是一個 PySide6 桌面**覆蓋層（overlay）框架**：把影片
 
 | 模組 | 行數 | 功用 |
 | --- | ---: | --- |
-| `logging/loggin_instance.py` | 80 | 全域 logger（RotatingFileHandler）。日誌優先寫工作目錄，寫不了退到家目錄，再不行就不寫檔。 |
+| `logging/loggin_instance.py` | 130 | 全域 logger（RotatingFileHandler）。日誌寫在 `$FRONTENGINE_LOG_FILE` 或 `~/.frontengine/logs/FrontEngine.log`，第一筆紀錄才開檔（import 不寫檔）、附加、UTF-8；開不了就改寫到 `os.devnull`。 |
 | `json/json_file.py` | 61 | `read_json` / `write_json`，寫入為**原子操作**（先序列化 → 寫暫存 → 置換）。 |
 | `json/json_repository.py` | 53 | `JsonRepository`：單一 JSON 文件的 Repository 包裝（`load` / `load_into` / `save`）。 |
 | `exception/exceptions.py` | 26 | 五個自訂例外；`FrontEngineJsonFileException` 刻意繼承 `OSError`。 |

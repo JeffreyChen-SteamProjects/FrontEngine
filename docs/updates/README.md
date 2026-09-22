@@ -58,6 +58,8 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20260923-02 | 2026-09-23 | PySide6 6.11.2; Dependabot targets dev | #done #deps #ci | [2026-09](2026-09.md) |
+| U-20260923-01 | 2026-09-23 | FrontEngine.log moves out of the working directory | #done #logging | [2026-09](2026-09.md) |
 | U-20260922-04 | 2026-09-22 | Point project URLs at JeffreyChen-SteamProjects/FrontEngine | #done #metadata | [2026-09](2026-09.md) |
 | U-20260922-03 | 2026-09-22 | SonarCloud S6549 on pet sound paths marked WONTFIX | #decision #sonarcloud | [2026-09](2026-09.md) |
 | U-20260922-02 | 2026-09-22 | Codacy stalls on very large PRs (PR #216) | #incident #ci | [2026-09](2026-09.md) |
@@ -67,4 +69,4 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-09.md](2026-09.md) | 2026-09 | 4 |
+| [2026-09.md](2026-09.md) | 2026-09 | 6 |

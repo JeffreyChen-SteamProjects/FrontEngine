@@ -11,7 +11,6 @@
 - **#4** `dev_requirements.txt` 沒有 pyflakes，但專案用它做靜態檢查；README 標成需另外安裝，可以改成加進 dev_requirements。
 - **#5** `stable.toml` 開頭的註解寫「dev version」，但它是穩定通道 `frontengine` 的設定，會誤導。
 - **#6** `architecture_explore.md` 把 `system_tray` 列在 `ui/` 底下，實際套件在 `frontengine/system_tray/`。
-- **#7** dependabot 的 `pyside6-6.11.2` 沒合併；JEditor 與 PyBreeze 要同步對齊（工作區 X-1、X-16）。
 - **#8** 〔候選〕本機離線 OCR（Windows.Media.Ocr）需要 WinRT 投影套件，目前沒有。
 - **#9** 〔候選〕音訊頻譜、視窗釘選／版面、螢幕錄影只有 Windows 完整支援。
 - **#10** 〔候選〕「正在播放」的歌名需要選用套件 `winsdk`。
