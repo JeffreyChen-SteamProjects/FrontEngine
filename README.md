@@ -375,7 +375,7 @@ pip install -e .
 python -m pytest tests/ -q          # the whole suite, headless (Qt offscreen)
 ```
 
-Static checking uses pyflakes (`pip install pyflakes`), and a clean tree prints
+Static checking uses pyflakes (in `dev_requirements.txt`), and a clean tree prints
 nothing at all:
 
 ```bash

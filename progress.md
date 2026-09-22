@@ -8,9 +8,6 @@
 
 - **#1** 〔決定〕PyPI 上的 v1.0.39 / v1.0.40 是壞的（缺 `__init__.py`，import 失敗）；要不要 yank 需要 PyPI 憑證。v1.0.41 之後都正常。
 - **#2** 〔決定〕PyPI 上的 `frontengine_dev` 停在 1.0.0，`pyproject.toml` 已到 1.0.77，workflow 沒有發佈 dev 套件的步驟（工作區 X-13）。
-- **#4** `dev_requirements.txt` 沒有 pyflakes，但專案用它做靜態檢查；README 標成需另外安裝，可以改成加進 dev_requirements。
-- **#5** `stable.toml` 開頭的註解寫「dev version」，但它是穩定通道 `frontengine` 的設定，會誤導。
-- **#6** `architecture_explore.md` 把 `system_tray` 列在 `ui/` 底下，實際套件在 `frontengine/system_tray/`。
 - **#8** 〔候選〕本機離線 OCR（Windows.Media.Ocr）需要 WinRT 投影套件，目前沒有。
 - **#9** 〔候選〕音訊頻譜、視窗釘選／版面、螢幕錄影只有 Windows 完整支援。
 - **#10** 〔候選〕「正在播放」的歌名需要選用套件 `winsdk`。
