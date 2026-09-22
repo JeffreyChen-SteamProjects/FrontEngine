@@ -7,5 +7,8 @@ version: 2
 updates:
   - package-ecosystem: "pip" # See documentation for possible values
     directory: "/" # Location of package manifests
+    # Work flows feature -> dev -> main and only the last step publishes, so
+    # updates belong on dev; a PR opened against main just sits there.
+    target-branch: "dev"
     schedule:
       interval: "daily"
