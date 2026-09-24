@@ -1,5 +1,4 @@
-# Rename to dev version
-# This is dev version
+# Stable channel: the frontengine package. pyproject.toml builds frontengine_dev.
 [build-system]
 requires = ["setuptools>=82.0.1"]
 build-backend = "setuptools.build_meta"

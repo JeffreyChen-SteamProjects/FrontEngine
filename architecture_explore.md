@@ -35,7 +35,7 @@ FrontEngine 是一個 PySide6 桌面**覆蓋層（overlay）框架**：把影片
                     └──────────────┬──────────────┘
         ┌──────────────┬───────────┼────────────┬──────────────┐
         ▼              ▼           ▼            ▼              ▼
-   ui/nav  ui/style  ui/menu   ui/page/*   ui/dialog/*   system_tray
+   ui/nav  ui/style  ui/menu   ui/page/*   ui/dialog/*   system_tray/（ui 之外）
                                     │
                                     ▼
                          show/*（覆蓋層 widget）
@@ -176,7 +176,7 @@ FrontEngine 是一個 PySide6 桌面**覆蓋層（overlay）框架**：把影片
 | `nav/sidebar.py` | 112 | `NavigationSidebar(QListWidget)`：分組的分頁清單（On screen / Desktop / Work / Control / Extensions），選取時送 `page_requested`。 |
 | `style/app_style.py` | 200 | 疊在 qt-material 之上的樣式表。顏色全部由主題色票算出（含對比色計算），**必須接在 `apply_stylesheet()` 之後**，否則會被整份覆蓋。 |
 | `color/global_color.py` | 4 | 兩個常數：log 面板的一般與錯誤顏色。 |
-| `system_tray/extend_system_tray.py` | 111 | `ExtendSystemTray`：系統匣選單（顯示／隱藏主視窗、全部關閉、退出），文字接 `retranslator`。 |
+| `frontengine/system_tray/extend_system_tray.py`（在 `ui/` 之外，自成一個套件） | 111 | `ExtendSystemTray`：系統匣選單（顯示／隱藏主視窗、全部關閉、退出），文字接 `retranslator`。 |
 
 #### 分頁共用元件
 
