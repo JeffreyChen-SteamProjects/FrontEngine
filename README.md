@@ -1,5 +1,18 @@
 # FrontEngine
 
+<p align="center">
+  <strong>English</strong> ·
+  <a href="README/README_zh-TW.md">繁體中文</a> ·
+  <a href="README/README_zh-CN.md">简体中文</a> ·
+  <a href="README/README_ja.md">日本語</a> ·
+  <a href="README/README_ko.md">한국어</a> ·
+  <a href="README/README_es.md">Español</a> ·
+  <a href="README/README_fr.md">Français</a> ·
+  <a href="README/README_de.md">Deutsch</a> ·
+  <a href="README/README_pt-BR.md">Português (BR)</a> ·
+  <a href="README/README_ru.md">Русский</a>
+</p>
+
 [![CI](https://github.com/JeffreyChen-SteamProjects/FrontEngine/actions/workflows/ci.yml/badge.svg)](https://github.com/JeffreyChen-SteamProjects/FrontEngine/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/frontengine)](https://pypi.org/project/frontengine/)
 [![Python](https://img.shields.io/pypi/pyversions/frontengine)](https://pypi.org/project/frontengine/)
