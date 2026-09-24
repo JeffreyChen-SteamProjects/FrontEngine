@@ -71,16 +71,20 @@ comments where they already exist, English-only for new code; functions under
 set by `conftest.py`). Everything must pass before a PR. Anything touching the
 outside world takes an injectable source so it can be tested with a fake.
 
-## README (keep current)
+## README / docs stay current (HARD)
 
-**`README.md` must stay in sync with the code.** It is the only README this repo ships, and it is
-what tells users what the app does and how to run it. Any user-facing change — features, commands,
-CLI flags, install/setup, configuration or requirements — updates `README.md` in the same commit.
-If translated READMEs are ever added, they are kept in lockstep with `README.md`: every such change
-lands in `README.md` and every language variant in the same commit, structure and content aligned,
-never one language ahead of the others. No test guards this, so it is a manual check. (The
-seven-language Sphinx documentation trees are a separate concern with their own rule under
-"Environment notes" and `test_documentation.py`.)
+**`README.md`, every translated README, and the docs must stay in sync with the code.** This repo
+ships `README.md` plus nine translations under `README/` (`README_zh-TW.md`, `README_zh-CN.md`,
+`README_ja.md`, `README_ko.md`, `README_de.md`, `README_es.md`, `README_fr.md`, `README_pt-BR.md`,
+`README_ru.md`). Any user-facing change — features, commands, CLI flags, install/setup, configuration
+or requirements — updates `README.md` **and every language variant in the same commit**, section
+structure and content aligned across languages, never one language ahead of the others and never
+`README.md` alone. The translations must reflect the English content, not merely match its headings.
+No test guards the READMEs, so it is a manual check.
+
+The Sphinx documentation trees are the docs half of the same rule and are updated in the same commit
+too: they cover seven languages (Eng / Zh / ZhCn / De / Ru / Fr / It) and `test_documentation.py`
+checks the seven trees stay page-consistent — details under "Environment notes".
 
 ## Deliberately removed (do not re-add)
 
