@@ -63,3 +63,31 @@ def test_dependabot_keeps_pins_current_on_dev():
     assert {"pip", "github-actions"} <= ecosystems
     assert all(re.search(r"^\s*target-branch:\s*\"dev\"", block, re.MULTILINE)
                for block in blocks)
+
+
+def _checkout_steps(path: Path) -> list[tuple[int, str]]:
+    """Return ``(line number, step text)`` for each ``actions/checkout`` step."""
+    lines = path.read_text(encoding="utf-8").splitlines()
+    steps = []
+    for index, line in enumerate(lines):
+        if not re.search(r"uses:\s*actions/checkout@", line):
+            continue
+        column = line.index("uses:")
+        body = [line]
+        for following in lines[index + 1:]:
+            indent = len(following) - len(following.lstrip())
+            if following.strip() and (indent < column or following.lstrip().startswith("- ")):
+                break
+            body.append(following)
+        steps.append((index + 1, "\n".join(body)))
+    return steps
+
+
+@pytest.mark.parametrize("workflow", _WORKFLOWS, ids=lambda p: p.name)
+def test_every_checkout_decides_on_persisted_credentials(workflow):
+    # actions/checkout leaves the job token in .git/config unless told not
+    # to, where every later step (and any uploaded workspace) can read it.
+    # Only jobs that push keep it, and they say so.
+    bad = [f"{workflow.name}:{number}" for number, step in _checkout_steps(workflow)
+           if not re.search(r"^\s*persist-credentials:\s*(true|false)\b", step, re.MULTILINE)]
+    assert bad == []
