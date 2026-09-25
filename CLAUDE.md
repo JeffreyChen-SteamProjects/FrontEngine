@@ -167,6 +167,7 @@ checks the seven trees stay page-consistent — details under "Environment notes
   公開 repo 不帶 token 就查得到，回的才是 FrontEngine 自己的。
 - SonarCloud（PR 用 `&pullRequest=<PR>`，main 省略該參數）：
   `curl -s -u "$SonarCloudToken:" "https://sonarcloud.io/api/issues/search?componentKeys=JeffreyChen-SteamProjects_FrontEngine&resolved=false&ps=100"`
+- **查 SonarCloud／Codacy 時絕不能洩漏任何金鑰或個人憑證**：只用變數名稱引用（`$SonarCloudToken`），不 echo、不印出值，也不寫進檔案、commit 訊息、PR／issue 內文、log 或任何會離開本機的輸出。
 - **Codacy 可能卡在很大的 PR 上**（check 一直 `action_required`、PR 的 `files` 端點回 `total: 0`）。症狀、試過無效的做法與判斷方法見 `docs/updates/2026-09.md` U-20260922-02。
 
 ## Stage commits, `progress.md`, `docs/updates/` and `architecture.md`
