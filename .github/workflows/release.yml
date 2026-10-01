@@ -199,8 +199,15 @@ jobs:
         run: |
           python -m pip install --require-hashes --only-binary :all: -r .github/requirements/publish.txt
 
+      # --no-isolation：用上一步裝好、鎖在 publish.txt 裡的 setuptools 建置。不加的話，
+      # build 會另開一個隔離環境，下載當下最新的 setuptools——在鎖定清單之外，而且就在
+      # 這個握有 PyPI token 的 job 裡執行。
+      # --no-isolation: build with the setuptools the step above installed, the one
+      # locked in publish.txt. Without it, build creates an isolated environment and
+      # downloads whatever setuptools is newest at that moment: outside the lock, and
+      # run in this job, which holds the PyPI token.
       - name: Build sdist + wheel
-        run: python -m build
+        run: python -m build --no-isolation
 
       - name: Verify distributions
         run: python -m twine check dist/*

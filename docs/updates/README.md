@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261001-04 | 2026-10-01 | Release job builds with the locked setuptools | #done #ci #security #X-13 | [2026-10](2026-10.md) |
 | U-20261001-03 | 2026-10-01 | Release job installs hash-locked build tooling | #done #ci #security #X-13 | [2026-10](2026-10.md) |
 | U-20261001-02 | 2026-10-01 | The sdist carries no tests; discovery limited to frontengine | #done #packaging #X-13 | [2026-10](2026-10.md) |
 | U-20261001-01 | 2026-10-01 | Every workflow job has a timeout | #ci #tests | [2026-10](2026-10.md) |
@@ -77,5 +78,5 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-10.md](2026-10.md) | 2026-10 | 3 |
+| [2026-10.md](2026-10.md) | 2026-10 | 4 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

@@ -30,7 +30,7 @@ on Steam (app 2793470) with Workshop import. JEditor embeds its main window as a
 | `steam_assets/`, `Update Note.txt` | Steam store-art generator; Steam announcement (BBCode) |
 | `pyproject.toml`, `stable.toml`, `MANIFEST.in` | Dev (`frontengine_dev`) and stable (`frontengine`) metadata; `release.yml` bumps both. Package discovery is limited to `frontengine`, and `MANIFEST.in` keeps `tests/` out of the sdist |
 | `.github/workflows/` | `ci.yml` (compile, tests, wheel smoke run), `nightly.yml` (cron only), `release.yml` |
-| `.github/requirements/` | `publish.in` and the hash-locked `publish.txt` generated from it: the only packages the `release.yml` job, which holds the PyPI token, installs. `tests/test_workflow_actions.py` guards it; Dependabot keeps it current |
+| `.github/requirements/` | `publish.in` and the hash-locked `publish.txt` generated from it: the only packages the `release.yml` job, which holds the PyPI token, installs. The build backend (`setuptools`) is in the lock too and the job builds with `python -m build --no-isolation`, so the build downloads nothing outside it. `tests/test_workflow_actions.py` guards it; Dependabot keeps it current |
 
 Dependencies point downwards: `ui/` → `show/` → `user_setting/` + `utils/`. The one known inversion
 is `user_setting/scene_setting.py`, which imports `ui/dialog/choose_file_dialog`.

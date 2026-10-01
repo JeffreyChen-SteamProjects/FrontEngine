@@ -7,3 +7,7 @@
 # one here and regenerate; Dependabot does both when it proposes a newer release.
 build==1.4.2
 twine==6.2.0
+# The build backend. The job runs `python -m build --no-isolation`, so the backend is this locked one and
+# not whatever is newest on PyPI when the job runs. It must satisfy `build-system.requires` in stable.toml,
+# which the job builds from, and in pyproject.toml (tests/test_workflow_actions.py).
+setuptools==84.0.0
