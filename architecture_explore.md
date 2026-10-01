@@ -444,7 +444,7 @@ Qt 訊號 + `QueuedConnection`** 回到 UI 執行緒。另外：
 5. `main_ui._CLOSING_WIDGET_LISTS`（若需關閉時收尾）
 6. **七份語言字典**都要加鍵（`test_translations.py` 會擋）
 7. **七棵文件樹**都要加頁（`test_documentation.py` 會擋）
-8. 該資料夾要有 `__init__.py`（`find = { namespaces = false }`，少一個就不會進 wheel，
+8. 該資料夾要有 `__init__.py`（`find` 設定是 `namespaces = false`，少一個就不會進 wheel，
    `test_public_api.py` 有守著）
 
 **其他擴充點**：

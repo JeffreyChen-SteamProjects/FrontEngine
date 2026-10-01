@@ -130,7 +130,7 @@ checks the seven trees stay page-consistent — details under "Environment notes
   按下播放鍵，把開發者正在聽的音樂暫停掉。測試一律注入假的 sender。
 - **重構行為邏輯時的驗證方式**：用 `git show HEAD:<file>` 把舊版寫到暫存目錄、
   載成另一個模組，然後用相同的亂數種子逐步比對兩邊的狀態。
-- **每個放 .py 的資料夾都要有 `__init__.py`**（`find = { namespaces = false }`）。
+- **每個放 .py 的資料夾都要有 `__init__.py`**（`find` 設定是 `namespaces = false`，而且只收 `frontengine` 與 `frontengine.*`）。
 - **`requirements.txt` 要和 `pyproject.toml` 的 dependencies 一致**，也不能列 `frontengine` 自己。
 - **CI 的啟動測試會先用 checkout 打包出 wheel 再安裝**，測的是眼前的程式碼。
 - **offscreen 測不到**：原生視窗 handle（Win32 `SetWindowPos`）、音效卡、攝影機、

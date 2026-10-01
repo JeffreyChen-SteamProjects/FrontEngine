@@ -28,7 +28,7 @@ on Steam (app 2793470) with Workshop import. JEditor embeds its main window as a
 | `docs/source/docs/` | Sphinx docs, one tree per UI language |
 | `exe/` | Packaged entry `start_front_engine.py`; Nuitka build `build_exe.py` |
 | `steam_assets/`, `Update Note.txt` | Steam store-art generator; Steam announcement (BBCode) |
-| `pyproject.toml`, `stable.toml` | Dev (`frontengine_dev`) and stable (`frontengine`) metadata; `release.yml` bumps both |
+| `pyproject.toml`, `stable.toml`, `MANIFEST.in` | Dev (`frontengine_dev`) and stable (`frontengine`) metadata; `release.yml` bumps both. Package discovery is limited to `frontengine`, and `MANIFEST.in` keeps `tests/` out of the sdist |
 | `.github/workflows/` | `ci.yml` (compile, tests, wheel smoke run), `nightly.yml` (cron only), `release.yml` |
 
 Dependencies point downwards: `ui/` → `show/` → `user_setting/` + `utils/`. The one known inversion
