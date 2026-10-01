@@ -428,6 +428,7 @@ Qt 訊號 + `QueuedConnection`** 回到 UI 執行緒。另外：
 | `tests/unit_test/` | 50 個測試檔、約 5,400 行。`conftest.py` 強制 `QT_QPA_PLATFORM=offscreen`、整個 session 跑在暫存目錄、共用一個 `QApplication`（`QPixmap`/`QMovie` 沒有 QApplication 會讓行程直接中止）。 |
 | `steam_assets/` | Steam 商店素材產生器。 |
 | `.github/workflows/` | `ci.yml`（多版本 Python：編譯 → 單元測試 → 打 wheel 安裝後啟動煙霧測試）、`nightly.yml`（只放 cron，避免排程被停用時連 PR CI 一起停）、`release.yml`（PR 合併到 main 後自動 bump 版本並發佈）。 |
+| `.github/requirements/` | `publish.in` 與由它產生、鎖定版本與雜湊的 `publish.txt`：`release.yml` 那個握有 PyPI token 的 job 只裝這一份（`tests/test_workflow_actions.py` 有守著，Dependabot 負責更新）。 |
 | `progress.md` | 只放未完成的待辦（跨 session 交接）；規則與環境備忘在 `CLAUDE.md`，完成紀錄在 `docs/updates/`。 |
 
 ---

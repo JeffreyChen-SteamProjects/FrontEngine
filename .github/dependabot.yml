@@ -6,7 +6,12 @@
 version: 2
 updates:
   - package-ecosystem: "pip" # See documentation for possible values
-    directory: "/" # Location of package manifests
+    # Location of package manifests: the project's own at the root, and the
+    # hash-locked tool set the release job installs (publish.txt). Dependabot
+    # does not look that deep from the root, so the directory is named.
+    directories:
+      - "/"
+      - "/.github/requirements"
     # Work flows feature -> dev -> main and only the last step publishes, so
     # updates belong on dev; a PR opened against main just sits there.
     target-branch: "dev"

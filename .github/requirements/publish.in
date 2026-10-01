@@ -1,0 +1,9 @@
+# The release job of release.yml holds the PyPI token; it builds and uploads with these and installs nothing else.
+# publish.txt is generated from this file:
+# uv pip compile .github/requirements/publish.in --generate-hashes --python-version 3.12 --python-platform x86_64-manylinux_2_28 --only-binary :all: --exclude-newer <7 days ago> -o .github/requirements/publish.txt
+# (--python-version is the one the job sets up. --exclude-newer keeps the 7-day wait Dependabot uses:
+# nothing uploaded in the last week.)
+# The versions are the ones release.yml has named since 2026-07-26; the 1.0.81 release ran with them. Change
+# one here and regenerate; Dependabot does both when it proposes a newer release.
+build==1.4.2
+twine==6.2.0
