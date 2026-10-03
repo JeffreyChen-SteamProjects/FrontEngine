@@ -51,7 +51,7 @@ Steam 版則是同一套應用程式，另外附帶 Workshop 支援。
 
 > **怎麼離開。** 覆蓋層可以蓋滿整個螢幕，包括 FrontEngine 自己的視窗，
 > 所以有兩條不需要用滑鼠的逃生通道：`Ctrl+Shift+F12` 會關閉每一個覆蓋層，
-> 而 **F12 會直接結束整個應用程式**，在任何地方都能用（僅限 Windows——
+> 而 **F12 會直接結束整個應用程式**，在任何地方都能用（Windows；macOS 需輔助使用權限——
 > 見 *Help → How to force close*）。
 
 ---
@@ -181,8 +181,7 @@ Steam 版則是同一套應用程式，另外附帶 Workshop 支援。
   `rgb(...)`、`hsl(...)` 或一個 CSS 自訂屬性。
 - **區域擷取（Region capture）**——拖出一塊區域；它會進到剪貼簿、可存成
   檔案，或**釘**在最上層成為一份可縮放的浮動副本。
-- **錄製區域（Record area）**——把一塊區域錄成動畫 GIF，並把相機合成到角落，
-  做出反應影片的效果。長度與影格數兩者都有上限，因為每一格都保存在記憶體裡。
+- **錄製區域（Record area）** — 錄製：框選範圍後，先選擇輸出 GIF 才開始擷取；取消不會啟動錄製。影格由背景執行緒逐張寫入，佇列上限為三張與 64 MiB，單張超限會拒絕。佇列已滿時略過擷取，並保留實際經過的播放時間。仍保留幀率、時長、影格數上限與攝影機子母畫面。停止後非同步完成寫檔，只有成功時才原子替換目標；取消與寫入失敗會清除暫存檔，保留既有目標檔。
 - **相機（Camera）**——把你的網路攝影機放進一個圓形、圓角方框或矩形，
   只在本機顯示，絕不錄下。任何視訊輸入都能用，包括擷取卡，而且裝置清單
   不用重新啟動就會刷新，因為擷取卡通常是在應用程式已經在跑的時候才插上。
@@ -190,9 +189,7 @@ Steam 版則是同一套應用程式，另外附帶 Workshop 支援。
   網路攝影機，讓 Zoom、Teams 或 Discord 能把它選為視訊來源。需要選用的
   `pyvirtualcam` 套件與一個虛擬攝影機驅動程式（OBS 會裝一個）；少了任一項，
   按鈕會明講，而不是默默失敗。
-- **讀取文字（Read text）**——拖出一塊區域，複製其中的文字、翻譯它，或
-  針對它提問。這一個會把選取範圍送出這台機器；見
-  [有什麼會離開這台機器](#有什麼會離開這台機器)。
+- **讀取文字（Read text）** — 畫面文字：Tools → Read text 優先使用本機 OCR：Windows 的 Windows.Media.Ocr、macOS 的 Vision，或已安裝且具有語言資料的 Tesseract 執行檔。本機擷取文字不需雲端同意或 ANTHROPIC_API_KEY；成功但沒有文字時不會上傳截圖。翻譯與提問只有在另行同意傳送文字且提供金鑰時，才會將辨識文字送至 Anthropic。本機失敗後的截圖回退需要獨立的畫面傳送同意與金鑰。結果會顯示後端及錯誤，也能撤回同意。
 - **釘住視窗（Pin a window）**——在你對照它工作時，把另一個程式的視窗保持
   在最上層，或讓它淡出。只動到堆疊順序與不透明度，絕不碰視窗內容。
 - **視窗複本（Window replica）**——另一個視窗的一份小小的、永遠置頂的即時
@@ -225,7 +222,7 @@ Steam 版則是同一套應用程式，另外附帶 Workshop 支援。
 | `Ctrl+Shift+F7` | 凍結／解除凍結螢幕 |
 | `Ctrl+Shift+F6` / `F5` / `F4` | 媒體播放/暫停、下一首與上一首 |
 | `Ctrl+Shift+F3` | 把前景視窗移到下一台螢幕 |
-| `F12` | 立即結束（Windows） |
+| `F12` | 立即結束（Windows / macOS*） |
 
 媒體傳輸送的是系統媒體鍵，所以它能觸及任何會監聽這些鍵的播放器。移動視窗
 時會保持它的比例，而不是把它硬切過去，後者正是 Windows 自己的
@@ -235,10 +232,7 @@ Steam 版則是同一套應用程式，另外附帶 Workshop 支援。
 
 - **你的手機**（Settings → Remote control）——FrontEngine 會在你的區域網路
   上提供一個小頁面；在手機上打開那個連結，按鈕就會驅動那些動作。
-- **一個 MIDI 控制器**——按下 *Learn*、轉動一個旋鈕或按一個 pad，就綁定它。
-  它用的是 Windows 內建的 winmm，所以不需要額外套件。旋鈕是在轉到頂端時
-  觸發一次，而不是在轉的過程中反覆觸發，而且放開一個 pad 不會被算成第二次
-  按下。
+- **一個 MIDI 控制器** — 按 Learn，轉動旋鈕或按 pad 即可綁定。Windows 使用內建 winmm；macOS 透過 macos extra 使用 CoreMIDI。旋鈕到頂端只觸發一次，放開 pad 不算再次按下。
 
 ---
 
@@ -288,19 +282,16 @@ FrontEngine 裡的一切都是在本機進行的,除非它在這份清單上。�
 
 | 功能 | 送到哪裡 | 防護 |
 | --- | --- | --- |
-| **Read text**(Tools) | 選取的區域會送到 Anthropic 的 API | 第一次送出前會詢問一次並記住答案;可從結果視窗撤回同意。使用你自己的 `ANTHROPIC_API_KEY`,從環境變數讀取,絕不寫進任何設定檔。缺了其中任一項就什麼都不會送。 |
+| **Read text**(Tools) | Anthropic API | 畫面文字：Tools → Read text 優先使用本機 OCR：Windows 的 Windows.Media.Ocr、macOS 的 Vision，或已安裝且具有語言資料的 Tesseract 執行檔。本機擷取文字不需雲端同意或 ANTHROPIC_API_KEY；成功但沒有文字時不會上傳截圖。翻譯與提問只有在另行同意傳送文字且提供金鑰時，才會將辨識文字送至 Anthropic。本機失敗後的截圖回退需要獨立的畫面傳送同意與金鑰。結果會顯示後端及錯誤，也能撤回同意。 |
 | **Pet chat** | 你的訊息會送到 Anthropic 的 API | 同一把金鑰、同一條規則;預設關閉。 |
 | **Weather**(文字來源) | 座標會送到 Open-Meteo | 不需要金鑰、不需要帳號、沒有任何可識別身分的資料;只有你當成地點輸入的那些內容。 |
-| **Phone remote** | 在你的區域網路上提供一個頁面 | 預設關閉。連結帶著一個每次啟動都會重新產生的權杖,所以舊連結會失效,而且該頁面只能請求那份固定的動作清單。它是純 HTTP:同一個網路上的其他人可以讀到權杖並按下相同的按鈕——以那些按鈕能做的事來說,這是一種困擾而非資安漏洞,但在你不信任的網路上還是別開它。 |
+| **Phone remote** | HTTPS | 手機操控：Settings → Remote control 只提供 HTTPS，權杖每次啟動都會更換，可執行動作採固定清單。手機不會自動信任本機自簽憑證。請先匯出公開憑證，比對顯示的 SHA-256 指紋，再依手機或瀏覽器設定匯入或信任。私鑰留在使用者資料目錄。IP 變更、到期或重新產生憑證時，可能需信任新憑證。TLS 啟動失敗不會退回 HTTP。 |
 
 音訊功能只讀取一個輸出**音量計**——單一個數字——只有頻譜例外,它需要真正的
 取樣來計算頻率,因此會擷取系統輸出串流。那些取樣是在記憶體裡分析的,絕不
 寫到磁碟或送到任何地方,而且你一停止頻譜,擷取就立刻停止。
 
-**外掛(Plugins)**是 Python,並以和 FrontEngine 相同的權限執行——它們無法
-被沙箱隔離。載入功能預設關閉(Settings → Load plugins),每一次載入都會被
-記錄,而且一個壞掉的外掛會被略過,而不是讓整個應用程式停擺。只安裝你信任的
-外掛。
+外掛：啟用載入不代表授權外掛。plugin.json 或單檔 sidecar 宣告版本、身分、入口與能力；Python import 前檢查同意，授權綁定內容摘要。程式或宣告改變就需重新同意；舊外掛需明確完全信任。Settings → Revoke plugin grants 可撤銷保存的授權；已在執行的程式需重新啟動才能卸載。Python 外掛仍具有完整應用程式權限，宣告與同意不是作業系統沙箱。
 
 ### 螢幕分享隱私
 
@@ -328,20 +319,51 @@ FrontEngine 裡的一切都是在本機進行的,除非它在這份清單上。�
 
 | 功能 | Windows | macOS | Linux |
 | --- | :---: | :---: | :---: |
-| 覆蓋層、寵物、桌布、簡報、護螢幕、擷取、錄製 | ✅ | ✅ | ✅ |
-| 音訊反應、頻譜、對嘴(WASAPI) | ✅ | — | — |
-| 正在播放(媒體控制) | ✅ | — | — |
-| 釘住／淡出另一個視窗、視窗版面、即時複本 | ✅ | — | — |
-| 把覆蓋層排除在螢幕擷取之外 | ✅ | — | — |
-| MIDI 控制(winmm) | ✅ | — | — |
-| 媒體傳輸鍵 | ✅ | — | — |
-| 把覆蓋層釘到某個虛擬桌面 | ✅ | — | — |
-| 把視窗移到下一台螢幕 | ✅ | — | — |
-| `F12` 緊急離開 | ✅ | — | — |
-| 把*作用中*視窗周圍調暗 | ✅ | 整個螢幕 | 整個螢幕 |
-| 寵物站在其他視窗上 | ✅ | — | 需要 `wmctrl` |
+| 一般覆蓋層與介面 | ✅ | ✅ | ✅ |
+| 系統音訊、頻譜與麥克風 | ✅ | backend* | — |
+| 正在播放的曲目資訊 | ✅ | — | — |
+| 視窗幾何、版面與跨螢幕移動 | ✅ | backend* | — |
+| 即時視窗複本 | ✅ | backend* | — |
+| 其他視窗強制置頂／不透明度 | ✅ | — | — |
+| 擷取時排除覆蓋層 | ✅ | — | — |
+| MIDI 控制 | ✅ | backend* | — |
+| 媒體操作鍵 | ✅ | backend* | — |
+| 虛擬桌面／Space 指定 | ✅ | — | — |
+| F12 緊急退出 | ✅ | backend* | — |
+| 寵物站在其他視窗上 | ✅ | backend* | wmctrl |
+
+* macOS 標示 backend 的項目需 macos extra、macOS 13+ 與對應權限。這表示已實作公開 framework 路徑，並非已在本 Windows 環境完成 macOS 實機驗證；見下方執行環境說明。
 
 在某個功能無法運作的地方,按鈕會明講,而不是默默失敗。
+
+---
+
+## 執行環境、隱私與互通
+
+錄製：框選範圍後，先選擇輸出 GIF 才開始擷取；取消不會啟動錄製。影格由背景執行緒逐張寫入，佇列上限為三張與 64 MiB，單張超限會拒絕。佇列已滿時略過擷取，並保留實際經過的播放時間。仍保留幀率、時長、影格數上限與攝影機子母畫面。停止後非同步完成寫檔，只有成功時才原子替換目標；取消與寫入失敗會清除暫存檔，保留既有目標檔。
+
+手機操控：Settings → Remote control 只提供 HTTPS，權杖每次啟動都會更換，可執行動作採固定清單。手機不會自動信任本機自簽憑證。請先匯出公開憑證，比對顯示的 SHA-256 指紋，再依手機或瀏覽器設定匯入或信任。私鑰留在使用者資料目錄。IP 變更、到期或重新產生憑證時，可能需信任新憑證。TLS 啟動失敗不會退回 HTTP。
+
+畫面文字：Tools → Read text 優先使用本機 OCR：Windows 的 Windows.Media.Ocr、macOS 的 Vision，或已安裝且具有語言資料的 Tesseract 執行檔。本機擷取文字不需雲端同意或 ANTHROPIC_API_KEY；成功但沒有文字時不會上傳截圖。翻譯與提問只有在另行同意傳送文字且提供金鑰時，才會將辨識文字送至 Anthropic。本機失敗後的截圖回退需要獨立的畫面傳送同意與金鑰。結果會顯示後端及錯誤，也能撤回同意。
+
+Puppet 寵物：安裝選用的 puppet extra 與可用的 Imervue runtime，再於寵物頁選擇或拖入原始 Imervue .puppet v1 檔案。既有圖片與 sprite 寵物包仍可使用。Puppet 寵物使用 Imervue 畫布、動作與表情，可複製或關閉，並支援 FrontEngine 覆蓋層控制與預設集。可另選 .petscript.json 使用 Imervue 原有腳本引擎；FrontEngine pet.json 寵物包不是 puppet 檔。未知版本、不安全的封存路徑與無效資源會在載入 runtime 前拒絕。
+
+場景：場景頁支援舊 entry mapping JSON、有版本的 frontengine.scene envelope，以及可攜式 .fescene 套件。PUPPET 項目可設定位置、大小、不透明度、有限數值參數，以及選用動作、表情與腳本。JSON 路徑相對於場景檔解析。.fescene 包含引用媒體、原始 .puppet 與選用 .petscript.json，可移到其他電腦。匯入會檢查路徑、符號連結、版本與解壓上限。FrontEngine 場景維持場景套件；.puppet 維持單一 Imervue 角色。
+
+macOS：選用 macos extra 以 macOS 13+ 與公開 PyObjC framework 為基準。後端提供 ScreenCaptureKit 螢幕／視窗擷取與系統音訊、麥克風擷取、Quartz 視窗幾何、Accessibility 視窗版面與移動、CoreMIDI、媒體鍵及 F12 退出。螢幕錄製、輔助使用與麥克風權限分別檢查；請到系統設定 → 隱私權與安全性，依提示重新啟動。其他程式視窗的透明度／強制置頂、Space 指定，以及讓其他程式擷取時排除覆蓋層仍不可用。本 Windows 開發環境尚未驗證 macOS 原生授權、硬體與效能。 Settings → macOS 權限與能力會逐項列出可用、不可用或不支援，並顯示權限或安裝原因。
+
+外掛：啟用載入不代表授權外掛。plugin.json 或單檔 sidecar 宣告版本、身分、入口與能力；Python import 前檢查同意，授權綁定內容摘要。程式或宣告改變就需重新同意；舊外掛需明確完全信任。Settings → Revoke plugin grants 可撤銷保存的授權；已在執行的程式需重新啟動才能卸載。Python 外掛仍具有完整應用程式權限，宣告與同意不是作業系統沙箱。
+
+算圖：Settings → Overlay rendering 可選 Auto、GPU 或 Software，並查看實際後端。GPU 合成器以 OpenGL texture、shader 與 framebuffer 處理圖層順序、變換、不透明度與裁切；初始化失敗時回退軟體並顯示原因。既有 QPainter 內容仍可能先由 CPU 轉成點陣圖再上傳；web／video／原生 widget 可能使用獨立視窗。擷取與錄製可能將 GPU 畫面讀回 CPU，這不代表零拷貝擷取或已測得效能提升。 場景 GPU 合成目前涵蓋 IMAGE、GIF 與 TEXT；puppet 使用自己的 Imervue 視窗繪製。
+
+Windows OCR 的 WinRT 投影套件包含於 FrontEngine 的一般 Windows 安裝；請安裝需要的 Windows 辨識語言。Tesseract 的執行檔與訓練語言資料需另行安裝。選用 puppet extra 會安裝 Imervue>=1.0.90；macos extra 安裝 macOS 13+ 的公開 PyObjC framework。請使用下列指令。docs/formats/ 提供 puppet、pet.json、petscript 與場景範例。
+
+```bash
+pip install "frontengine[puppet]"
+pip install "frontengine[macos]"
+```
+
+[.puppet / pet.json / .petscript.json / .fescene](../docs/formats/interoperability.md)
 
 ---
 

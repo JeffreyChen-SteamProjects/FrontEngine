@@ -8,7 +8,7 @@ from PySide6.QtCore import QByteArray, QTimer
 from PySide6.QtGui import QIcon, Qt
 from PySide6.QtWidgets import (
     QMainWindow, QApplication, QGridLayout, QHBoxLayout, QStackedWidget, QStyle,
-    QMenuBar, QWidget,
+    QMenuBar, QWidget, QMessageBox,
 )
 from qt_material import apply_stylesheet
 
@@ -211,9 +211,12 @@ class FrontEngineMainUI(QMainWindow):
         # 使用者明確開啟時才載入外掛（外掛與本程式同權限，無法沙箱化）
         # Plugins load only when explicitly enabled; they run with our privileges.
         loaded_plugins = load_plugins(
-            FrontEngine_EXTEND_TAB, enabled=bool(user_setting_dict.get("load_plugins")))
+            FrontEngine_EXTEND_TAB, enabled=bool(user_setting_dict.get('load_plugins')),
+            grants=self._plugin_grants(), authorizer=self._authorize_plugin)
         if loaded_plugins:
             front_engine_logger.info(f"[FrontEngineMainUI] plugin tabs: {loaded_plugins}")
+        if user_setting_dict.get('load_plugins'):
+            write_user_setting()
 
         # 加入各 Tab
         # Add tabs
@@ -961,6 +964,27 @@ class FrontEngineMainUI(QMainWindow):
         ("pet_setting_ui", "pet_list"),
     )
 
+    def _plugin_grants(self) -> dict:
+        grants = user_setting_dict.get('plugin_grants')
+        if not isinstance(grants, dict):
+            grants = {}
+            user_setting_dict['plugin_grants'] = grants
+        return grants
+
+    def _authorize_plugin(self, manifest) -> bool:
+        words = language_wrapper.language_word_dict
+        body = words.get('plugin_grant_body',
+                        'Plugin: {name}\nDeclared capabilities: {permissions}\n'
+                        'Digest: {digest}\n\nThis Python plugin runs with full application '
+                        'privileges. The declaration is not an OS sandbox. Trust this version?')
+        response = QMessageBox.question(
+            self, words.get('plugin_grant_title', 'Plugin permissions'),
+            body.format(name=manifest.plugin_id, permissions=', '.join(manifest.permissions) or 'ui',
+                        digest=manifest.digest),
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No)
+        return response == QMessageBox.StandardButton.Yes
+
     def _shutdown(self) -> None:
         """
         存檔並停掉所有服務。放在這裡而不是 close() 裡面，是因為 Qt 的
@@ -981,6 +1005,12 @@ class FrontEngineMainUI(QMainWindow):
         if user_setting_dict.get("restore_last_session"):
             save_last_session(self)
         self._stop_services()
+        from frontengine.user_setting.scene_setting import release_scene_packages
+        if hasattr(self, 'tools_setting_ui'):
+            self.tools_setting_ui.recorder.close()
+        # Assets must outlive all scene/pet widgets that may still read them.
+        self.scene_setting_ui.close_scene()
+        release_scene_packages()
         # 執行緒執行狀態跟著行程活著，不放開的話關掉程式之後螢幕還是不會睡。
         # The execution state lives with the process: without releasing it the
         # display keeps refusing to sleep after the application is gone.

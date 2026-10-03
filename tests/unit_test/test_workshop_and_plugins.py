@@ -146,7 +146,7 @@ def test_a_plugin_can_register_tabs(tmp_path) -> None:
     (tmp_path / "tabs.py").write_text(
         "class Widget:\n    pass\n\nFRONTENGINE_TABS = {'Demo': Widget}\n", encoding="utf-8")
     registry = {}
-    assert load_plugins(registry, enabled=True, base=str(tmp_path)) == ["Demo"]
+    assert load_plugins(registry, enabled=True, base=str(tmp_path), authorizer=lambda manifest: True) == ["Demo"]
     assert "Demo" in registry
 
 
@@ -155,7 +155,7 @@ def test_a_plugin_can_use_a_register_function(tmp_path) -> None:
         "class Widget:\n    pass\n\ndef register(registry):\n    registry['Hooked'] = Widget\n",
         encoding="utf-8")
     registry = {}
-    assert load_plugins(registry, enabled=True, base=str(tmp_path)) == ["Hooked"]
+    assert load_plugins(registry, enabled=True, base=str(tmp_path), authorizer=lambda manifest: True) == ["Hooked"]
 
 
 def test_one_broken_plugin_does_not_stop_the_others(tmp_path) -> None:
@@ -163,7 +163,7 @@ def test_one_broken_plugin_does_not_stop_the_others(tmp_path) -> None:
     (tmp_path / "b_good.py").write_text(
         "class Widget:\n    pass\n\nFRONTENGINE_TABS = {'Good': Widget}\n", encoding="utf-8")
     registry = {}
-    assert load_plugins(registry, enabled=True, base=str(tmp_path)) == ["Good"]
+    assert load_plugins(registry, enabled=True, base=str(tmp_path), authorizer=lambda manifest: True) == ["Good"]
 
 
 def test_malformed_tab_declarations_are_ignored(tmp_path) -> None:

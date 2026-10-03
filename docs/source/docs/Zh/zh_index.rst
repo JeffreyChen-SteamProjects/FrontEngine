@@ -22,5 +22,6 @@ FrontEngine 繁體中文 文件
     tools.rst
     control_center.rst
     menus.rst
+    runtime_interoperability.rst
     how_to_extend_ui.rst
     release_process.rst

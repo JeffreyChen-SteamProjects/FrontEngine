@@ -107,6 +107,18 @@ class WebOverlayFactory(OverlayFactory):
         return widget
 
 
+class PuppetOverlayFactory(OverlayFactory):
+    def create(self, setting_dict: Dict[str, Any]) -> QWidget:
+        from frontengine.show.pet.puppet_pet import PuppetPetWidget
+        return PuppetPetWidget(
+            _require(setting_dict, 'file_path', 'puppet'),
+            size=tuple(setting_dict.get('size', [320, 480])),
+            parameters=setting_dict.get('parameters', {}),
+            motion=setting_dict.get('motion'), expression=setting_dict.get('expression'),
+            script_path=setting_dict.get('script_path'),
+            opacity=_normalize_percent(setting_dict.get('opacity'), 1.0))
+
+
 OVERLAY_FACTORY_REGISTRY: Dict[str, Type[OverlayFactory]] = {
     "image": ImageOverlayFactory,
     "gif": GifOverlayFactory,
@@ -114,6 +126,7 @@ OVERLAY_FACTORY_REGISTRY: Dict[str, Type[OverlayFactory]] = {
     "text": TextOverlayFactory,
     "video": VideoOverlayFactory,
     "web": WebOverlayFactory,
+    "puppet": PuppetOverlayFactory,
 }
 
 

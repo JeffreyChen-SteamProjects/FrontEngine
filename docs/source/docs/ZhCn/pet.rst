@@ -18,9 +18,13 @@
 * 把话说出来 - 用语音把那些话念出来。
 * 玩捉迷藏 - 两只以上的宠物会互相追逐。
 * 跟着声音反应 - 宠物会随声音起伏动作。可以跟着**扬声器**或**麦克风**；
-  两者都只读取音量电平（一个数字），不会捕获说话内容。仅 Windows 有效。
+  两者都只读取音量电平（一个数字），不会捕获说话内容。Windows 与 macOS（macos extra 与权限；此处未验证 macOS 实机）。
 * AI 聊天（需要 API 密钥） - 和它对话。会读取 ANTHROPIC_API_KEY 环境变量，
   密钥不会被保存。
 * 专注计时（分） - 宠物帮你看着的工作计时器，中间会安排休息。
 
 把文件拖到宠物身上就是喂它；拖图片或宠物包则是换造型。
+
+Puppet 宠物：安装可选的 puppet extra 与可用的 Imervue runtime，再于宠物页选择或拖入原始 Imervue .puppet v1 文件。已有图片与 sprite 宠物包仍可使用。Puppet 宠物使用 Imervue 画布、动作与表情，可复制或关闭，并支持 FrontEngine 覆盖层控制与预设集。可另选 .petscript.json 使用 Imervue 原有脚本引擎；FrontEngine pet.json 宠物包不是 puppet 文件。未知版本、不安全的归档路径与无效资源会在加载 runtime 前拒绝。
+
+:doc:`runtime_interoperability`

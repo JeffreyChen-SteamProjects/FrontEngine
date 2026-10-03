@@ -16,3 +16,7 @@
 * 載入場景檔 - 把存過的場景叫回來。
 * 清除所有腳本 - 重新開始。
 * 顯示在所有螢幕 - 每個螢幕各一份。
+
+場景：場景頁支援舊 entry mapping JSON、有版本的 frontengine.scene envelope，以及可攜式 .fescene 套件。PUPPET 項目可設定位置、大小、不透明度、有限數值參數，以及選用動作、表情與腳本。JSON 路徑相對於場景檔解析。.fescene 包含引用媒體、原始 .puppet 與選用 .petscript.json，可移到其他電腦。匯入會檢查路徑、符號連結、版本與解壓上限。FrontEngine 場景維持場景套件；.puppet 維持單一 Imervue 角色。
+
+:doc:`runtime_interoperability`

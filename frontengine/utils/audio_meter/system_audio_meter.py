@@ -220,6 +220,9 @@ def list_output_devices() -> List[Tuple[str, str]]:
     列出目前啟用中的輸出端點 [(device_id, friendly_name)]；非 Windows 或失敗回傳 []。
     List active output endpoints as (device_id, friendly_name); [] when unavailable.
     """
+    if sys.platform == 'darwin':
+        # ScreenCaptureKit captures the mix; it does not enumerate audio endpoints.
+        return []
     if sys.platform != "win32":
         return []
     enumerator = None
@@ -285,6 +288,10 @@ class SystemAudioMeter:
         self._device = None
         self._enumerator = None
         self._get_peak = None
+        self._mac_meter = None
+        if sys.platform == 'darwin':
+            from frontengine.utils.macos.audio import MacSystemAudioMeter
+            self._mac_meter = MacSystemAudioMeter(device_id)
         if sys.platform == "win32":
             try:
                 self._init()
@@ -317,6 +324,8 @@ class SystemAudioMeter:
 
     def level(self) -> Optional[float]:
         """回傳目前輸出峰值 0~1，或 None。"""
+        if self._mac_meter is not None:
+            return self._mac_meter.level()
         if not self._ok or self._meter is None or self._get_peak is None:
             return None
         try:
@@ -329,6 +338,9 @@ class SystemAudioMeter:
 
     def close(self) -> None:
         """釋放 COM 介面；可重複呼叫 / Release COM interfaces; safe to call twice."""
+        if self._mac_meter is not None:
+            self._mac_meter.close()
+            self._mac_meter = None
         for iface in (self._meter, self._device, self._enumerator):
             if self._tools is None:
                 break
@@ -349,7 +361,7 @@ _meter_singleton: Optional[SystemAudioMeter] = None
 def system_audio_level() -> Optional[float]:
     """便利函式：以單例電表回傳預設輸出裝置的峰值 0~1，或 None。"""
     global _meter_singleton
-    if sys.platform != "win32":
+    if sys.platform not in ('win32', 'darwin'):
         return None
     if _meter_singleton is None:
         _meter_singleton = SystemAudioMeter()

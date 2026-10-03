@@ -50,10 +50,7 @@ Menu Réglages
 * Mode affichage… - faire défiler une liste de préréglages sur minuterie, pour
   une machine laissée en vitrine. La fenêtre principale peut alors partir dans
   la zone de notification - mais seulement s'il y en a une pour la ramener.
-* Télécommande… - piloter FrontEngine depuis un téléphone du même réseau, et
-  associer un contrôleur MIDI. Le lien porte un jeton à usage unique qui change
-  à chaque démarrage, et seuls les boutons de la page peuvent être déclenchés.
-  C'est du HTTP en clair : laissez-la désactivée sur les réseaux inconnus.
+* Commande par téléphone : Paramètres → Commande à distance propose uniquement HTTPS, un jeton renouvelé à chaque démarrage et une liste fixe d’actions. Le téléphone ne fait pas automatiquement confiance au certificat autosigné. Exportez le certificat public et comparez l’empreinte SHA-256 affichée avant l’importation ou l’approbation dans les réglages du téléphone/navigateur. La clé privée reste dans le dossier de données utilisateur. Un changement d’IP, l’expiration ou une régénération peuvent nécessiter une nouvelle approbation. Un échec de TLS ne revient jamais à HTTP.
 * Confidentialité du partage d'écran… - masquer les calques d'une capture tant
   qu'une application de réunion est ouverte. La comparaison porte sur les titres
   de fenêtres, ce qui attrape aussi une réunion dans un onglet. Windows
@@ -73,3 +70,11 @@ Menu Aide
   attribués, affichés par-dessus l'écran. Les réattribuer met aussi cette liste à
   jour. Appuyez de nouveau sur le raccourci, ou sur Échap, pour la retirer.
 * Le suivi des problèmes, et le rappel que F12 ferme FrontEngine aussitôt.
+
+Plugins : activer leur chargement ne les autorise pas. plugin.json ou le fichier associé à un plugin unique déclare version, identité, point d’entrée et capacités ; l’accord est vérifié avant l’import Python et lié à l’empreinte du contenu. Code ou déclaration modifiés demandent un nouvel accord ; les anciens plugins exigent une confiance totale explicite. Paramètres → Révoquer les autorisations des plugins efface les accords stockés ; redémarrez pour décharger le code en cours. Les plugins Python gardent tous les privilèges de l’application : déclaration et consentement ne sont pas un bac à sable système.
+
+Rendu : Paramètres → Rendu des superpositions propose Automatique, GPU ou Logiciel et affiche le moteur réellement utilisé. Le compositeur GPU utilise textures OpenGL, shaders et framebuffers pour l’ordre, les transformations, l’opacité et le découpage ; un échec d’initialisation revient au logiciel avec une raison. Le contenu QPainter peut encore être rasterisé sur CPU avant l’envoi ; les widgets web/vidéo/natifs peuvent utiliser des fenêtres séparées. La capture et l’enregistrement peuvent relire les images GPU vers le CPU. Cela ne promet ni capture sans copie ni accélération mesurée. La composition GPU des scènes couvre actuellement IMAGE, GIF et TEXT ; les puppets utilisent leur propre fenêtre Imervue.
+
+:doc:`runtime_interoperability`
+
+Paramètres → Autorisations et capacités macOS indique pour chaque fonction disponible, indisponible ou non prise en charge, avec la raison liée à l’autorisation ou à l’installation.

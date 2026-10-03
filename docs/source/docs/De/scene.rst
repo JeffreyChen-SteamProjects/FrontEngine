@@ -16,3 +16,7 @@ Eine Szene fasst mehrere Overlays zusammen und lässt sich als Datei sichern.
 * Szenendatei laden - eine gesicherte Szene zurückholen.
 * Alle Skripte löschen - von vorn anfangen.
 * Auf allen Bildschirmen zeigen - eine Kopie je Monitor.
+
+Szenen: Die Szenenseite liest alte JSON-Eintragslisten, versionierte frontengine.scene-Dokumente und portable .fescene-Pakete. PUPPET-Einträge enthalten Position, Größe, Deckkraft, endliche numerische Parameter sowie optionale Bewegung, Ausdruck und Skript. JSON-Pfade beziehen sich auf die Szenendatei. .fescene enthält die referenzierten Medien, die originale .puppet und optionale .petscript.json für andere Rechner. Import prüft Pfade, symbolische Links, Versionen und Entpackgrenzen. Eine FrontEngine-Szene bleibt ein Szenenpaket; .puppet bleibt eine einzelne Imervue-Figur.
+
+:doc:`runtime_interoperability`

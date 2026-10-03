@@ -2,11 +2,11 @@ from abc import abstractmethod
 from typing import Optional
 
 from PySide6.QtCore import Qt, QTimer
-from PySide6.QtGui import QColor, QPainter
+from PySide6.QtGui import QColor, QImage, QPainter
 from PySide6.QtWidgets import QWidget
 
 from frontengine.show.window_helpers import apply_overlay_window_flags, load_overlay_icon
-from frontengine.user_setting.user_setting_file import get_overlay_geometry, save_overlay_geometry
+from frontengine.user_setting.user_setting_file import get_overlay_geometry, save_overlay_geometry, user_setting_dict
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.power_mode.power_mode import DEFAULT_TIER, normalize_tier, tier_render_scale
 
@@ -56,6 +56,11 @@ class BaseWidget(QWidget):
         self.keep_in_capture: bool = False
         self._drag_origin = None
         self._geometry_restored = False
+        self._compositor = None
+        self._render_revision = 0
+        self._raster_cache = None
+        self._raster_signature = None
+        self._requested_render_backend = user_setting_dict.get('render_backend', 'auto')
 
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
@@ -139,6 +144,8 @@ class BaseWidget(QWidget):
 
     def showEvent(self, event) -> None:
         super().showEvent(event)
+        if self._compositor is None and self._requested_render_backend in ('auto', 'gpu'):
+            self.set_render_backend(self._requested_render_backend)
         if not self._geometry_restored:
             self._geometry_restored = True
             # 顯示流程結束後再套用，避免和 showFullScreen 打架
@@ -165,6 +172,9 @@ class BaseWidget(QWidget):
             return
 
     def paintEvent(self, event) -> None:
+        if self._compositor is not None:
+            self._update_compositor()
+            return
         front_engine_logger.debug(f"{self.__class__.__name__} paintEvent | event: {event}")
         painter = QPainter(self)
         if self.background_color is not None:
@@ -179,3 +189,71 @@ class BaseWidget(QWidget):
     @abstractmethod
     def draw_content(self, painter: QPainter) -> None:
         """Subclass hook that renders the widget content onto the shared painter."""
+
+    def set_render_backend(self, backend: str = 'auto') -> None:
+        """Compose the existing painter content as a texture; rasterization remains CPU work."""
+        from frontengine.show.compositor import CompositorWidget
+
+        if self._compositor is not None:
+            self._compositor.shutdown()
+            self._compositor.deleteLater()
+        self._compositor = CompositorWidget(self, backend)
+        self._compositor.setGeometry(self.rect())
+        self._compositor.show()
+        self._update_compositor()
+        self.update()
+
+    @property
+    def render_backend(self) -> str:
+        return self._compositor.actual_backend if self._compositor else 'software'
+
+    @property
+    def render_failure_reason(self) -> str:
+        return self._compositor.failure_reason if self._compositor else ''
+
+    def _raster_content(self) -> QImage:
+        ratio = self.devicePixelRatioF()
+        background = self.background_color.rgba() if self.background_color is not None else None
+        signature = (self._render_revision, self.width(), self.height(), ratio,
+                     self.opacity, background, self.quality_tier)
+        if self._raster_cache is not None and signature == self._raster_signature:
+            return QImage(self._raster_cache)
+        image = QImage(max(1, round(self.width() * ratio)), max(1, round(self.height() * ratio)),
+                       QImage.Format.Format_RGBA8888_Premultiplied)
+        image.setDevicePixelRatio(ratio)
+        image.fill(Qt.GlobalColor.transparent)
+        painter = QPainter(image)
+        if self.background_color is not None:
+            painter.fillRect(self.rect(), self.background_color)
+        painter.setOpacity(self.opacity)
+        try:
+            self.draw_content(painter)
+        finally:
+            painter.end()
+        self._raster_cache = image
+        self._raster_signature = signature
+        return QImage(image)
+
+    def update(self, *args) -> None:
+        # QWidget.update is not virtual; Python content setters all call this hook.
+        self._render_revision = getattr(self, '_render_revision', 0) + 1
+        super().update(*args)
+
+    def _update_compositor(self) -> None:
+        from frontengine.show.compositor import Layer
+
+        self._compositor.setGeometry(self.rect())
+        self._compositor.set_layers([Layer('content', self._raster_content())])
+
+    def output_frame(self) -> QImage:
+        """Return RGBA output for recording or the virtual camera (GPU output is read back)."""
+        if self._compositor is not None:
+            self._update_compositor()
+            return self._compositor.output_frame()
+        return self._raster_content()
+
+    def closeEvent(self, event) -> None:
+        if self._compositor is not None:
+            self._compositor.shutdown()
+        self._raster_cache = None
+        super().closeEvent(event)

@@ -52,7 +52,7 @@ et la version Steam livre la même application avec la prise en charge du Worksh
 > **Comment sortir.** Les superpositions peuvent couvrir tout l'écran, y compris la
 > propre fenêtre de FrontEngine, il existe donc deux issues de secours qui ne nécessitent pas la souris :
 > `Ctrl+Shift+F12` ferme toutes les superpositions, et **F12 quitte l'application
-> purement et simplement** depuis n'importe où (Windows uniquement — voir *Aide → Comment forcer la fermeture*).
+> purement et simplement** depuis n'importe où (Windows ; macOS nécessite l’autorisation Accessibilité — voir *Aide → Comment forcer la fermeture*).
 
 ---
 
@@ -193,9 +193,7 @@ si bien que ce qu'elles couvrent continue de fonctionner — cela cesse simpleme
   une propriété CSS personnalisée.
 - **Capture de région** — tracez une zone ; elle atterrit dans le presse-papiers, peut être enregistrée
   dans un fichier, ou **épinglée** au-dessus comme une copie flottante et zoomable.
-- **Enregistrer une zone** — enregistrez une région en un GIF animé, avec la caméra
-  incrustée dans le coin pour un rendu de vidéo-réaction. Plafonné à la fois par la durée
-  et le nombre d'images, car chaque image est conservée en mémoire.
+- **Enregistrer une zone** — Enregistrement : sélectionnez une zone puis le GIF de destination avant le début de la capture. Annuler ne lance pas l’enregistrement. Les images sont écrites progressivement en arrière-plan ; la file est limitée à trois images et 64 MiB. Une image trop grande est refusée. Une file pleine ignore des captures tout en conservant le temps de lecture écoulé. Cadence, limites de durée et de nombre d’images et incrustation de caméra sont conservées. L’arrêt finalise de façon asynchrone ; le fichier remplace atomiquement la destination seulement après réussite. Annulation et erreurs suppriment le temporaire et préservent la destination existante.
 - **Caméra** — votre webcam dans un cercle, une boîte arrondie ou un rectangle, affichée localement
   et jamais enregistrée. Toute entrée vidéo fonctionne, y compris les cartes d'acquisition, et la
   liste des périphériques se rafraîchit sans redémarrer puisque les cartes sont généralement branchées
@@ -204,9 +202,7 @@ si bien que ce qu'elles couvrent continue de fonctionner — cela cesse simpleme
   Teams ou Discord peuvent sélectionner comme source vidéo. Nécessite le paquet optionnel
   `pyvirtualcam` et un pilote de caméra virtuelle (OBS en installe un) ; sans
   l'un ou l'autre, le bouton l'indique plutôt que d'échouer en silence.
-- **Lire le texte** — tracez une zone pour copier le texte qu'elle contient, le traduire, ou poser
-  une question à son sujet. Celui-ci envoie la sélection hors de la machine ; voir
-  [Ce qui quitte la machine](#ce-qui-quitte-la-machine).
+- **Lire le texte** — Texte à l’écran : Outils → Lire du texte utilise d’abord l’OCR locale : Windows.Media.Ocr sous Windows, Vision sous macOS, ou Tesseract installé avec ses données linguistiques. L’extraction locale ne demande ni consentement cloud ni ANTHROPIC_API_KEY ; un résultat vide réussi n’envoie pas de capture. Traductions et questions peuvent envoyer le texte reconnu à Anthropic seulement avec votre clé et un consentement distinct pour le texte. Le recours aux captures après un échec local demande son propre consentement et la clé. Le résultat indique le moteur et les erreurs ; le consentement peut y être retiré.
 - **Épingler une fenêtre** — gardez la fenêtre d'un autre programme au-dessus, ou estompez-la, pendant que vous
   travaillez en la regardant. Seuls l'empilement et l'opacité sont touchés, jamais le contenu de la fenêtre.
 - **Réplique de fenêtre** — une petite copie en direct, toujours au premier plan, d'une autre fenêtre, afin que
@@ -241,7 +237,7 @@ Raccourcis globaux par défaut, tous réassignables depuis **Paramètres → Rac
 | `Ctrl+Shift+F7` | Figer / défiger l'écran |
 | `Ctrl+Shift+F6` / `F5` / `F4` | Lecture/pause média, piste suivante et précédente |
 | `Ctrl+Shift+F3` | Déplacer la fenêtre de premier plan vers le moniteur suivant |
-| `F12` | Quitter immédiatement (Windows) |
+| `F12` | Quitter immédiatement (Windows / macOS*) |
 
 Le transport média envoie les touches multimédias du système, il atteint donc tout lecteur qui
 les écoute. Déplacer une fenêtre conserve ses proportions au lieu de la faire claquer
@@ -252,10 +248,7 @@ Les mêmes actions — et rien de plus — sont ce que pilotent les télécomman
 - **Votre téléphone** (Paramètres → Télécommande) — FrontEngine sert une petite page sur
   votre réseau local ; ouvrez le lien sur un téléphone et les boutons pilotent ces
   actions.
-- **Un contrôleur MIDI** — appuyez sur *Apprendre*, bougez un potentiomètre ou un pad, et associez-le. Il utilise
-  le winmm intégré de Windows, donc aucun paquet supplémentaire n'est nécessaire. Un potentiomètre se déclenche une fois qu'il
-  atteint le sommet plutôt que de façon répétée en chemin, et relâcher un pad ne
-  compte pas comme une seconde pression.
+- **Un contrôleur MIDI** — Appuyez sur Learn, actionnez un potentiomètre ou un pad et associez une action. Windows utilise winmm intégré ; macOS utilise CoreMIDI avec l’option macos. Le potentiomètre déclenche une fois en haut ; relâcher un pad ne compte pas comme un nouvel appui.
 
 ---
 
@@ -264,8 +257,7 @@ Les mêmes actions — et rien de plus — sont ce que pilotent les télécomman
 Les **Préréglages** capturent les réglages de chaque page d'un seul coup. Enregistrez, chargez, supprimez,
 exportez et importez-les depuis le menu **Préréglages**, appliquez-en un au lancement, ou
 restaurez automatiquement la session précédente. Un préréglage peut être exporté comme un
-**paquet** — un zip transportant les médias qu'il référence — afin qu'il s'ouvre sur une machine
-qui ne possède pas ces fichiers.
+Plugins : activer leur chargement ne les autorise pas. plugin.json ou le fichier associé à un plugin unique déclare version, identité, point d’entrée et capacités ; l’accord est vérifié avant l’import Python et lié à l’empreinte du contenu. Code ou déclaration modifiés demandent un nouvel accord ; les anciens plugins exigent une confiance totale explicite. Paramètres → Révoquer les autorisations des plugins efface les accords stockés ; redémarrez pour décharger le code en cours. Les plugins Python gardent tous les privilèges de l’application : déclaration et consentement ne sont pas un bac à sable système.
 
 Des choses qui décident ensuite d'elles-mêmes, toutes depuis le menu **Paramètres**. La pause
 intelligente est la seule qui démarre activée ; tout le reste est désactivé jusqu'à ce que vous
@@ -308,10 +300,10 @@ exceptions, toutes optionnelles (opt-in) :
 
 | Feature | Where it goes | Guard |
 | --- | --- | --- |
-| **Lire le texte** (Outils) | La région sélectionnée est envoyée à l'API d'Anthropic | Demande une fois avant le premier envoi et retient la réponse ; le consentement peut être retiré depuis la fenêtre de résultat. Utilise votre propre `ANTHROPIC_API_KEY`, lue depuis l'environnement et jamais écrite dans un fichier de réglages. Rien n'est envoyé sans les deux. |
+| **Lire le texte** (Outils) | Anthropic API | Texte à l’écran : Outils → Lire du texte utilise d’abord l’OCR locale : Windows.Media.Ocr sous Windows, Vision sous macOS, ou Tesseract installé avec ses données linguistiques. L’extraction locale ne demande ni consentement cloud ni ANTHROPIC_API_KEY ; un résultat vide réussi n’envoie pas de capture. Traductions et questions peuvent envoyer le texte reconnu à Anthropic seulement avec votre clé et un consentement distinct pour le texte. Le recours aux captures après un échec local demande son propre consentement et la clé. Le résultat indique le moteur et les erreurs ; le consentement peut y être retiré. |
 | **Chat de l'animal** | Votre message va à l'API d'Anthropic | Même clé, même règle ; désactivé par défaut. |
 | **Météo** (source de texte) | Les coordonnées vont à Open-Meteo | Pas de clé, pas de compte, aucune donnée identifiante ; seulement ce que vous avez saisi comme lieu. |
-| **Télécommande téléphone** | Sert une page sur votre réseau local | Désactivée par défaut. Le lien porte un jeton régénéré à chaque démarrage, si bien qu'un ancien lien cesse de fonctionner, et la page ne peut demander que la liste d'actions fixe. C'est du HTTP en clair : quelqu'un d'autre sur le même réseau pourrait lire le jeton et appuyer sur les mêmes boutons — une nuisance plutôt qu'une brèche vu ce que font ces boutons, mais laissez-la désactivée sur les réseaux auxquels vous ne faites pas confiance. |
+| **Télécommande téléphone** | HTTPS | Commande par téléphone : Paramètres → Commande à distance propose uniquement HTTPS, un jeton renouvelé à chaque démarrage et une liste fixe d’actions. Le téléphone ne fait pas automatiquement confiance au certificat autosigné. Exportez le certificat public et comparez l’empreinte SHA-256 affichée avant l’importation ou l’approbation dans les réglages du téléphone/navigateur. La clé privée reste dans le dossier de données utilisateur. Un changement d’IP, l’expiration ou une régénération peuvent nécessiter une nouvelle approbation. Un échec de TLS ne revient jamais à HTTP. |
 
 Les fonctions audio ne lisent qu'un **vumètre** de sortie — un seul nombre — sauf le
 spectre, qui a besoin d'échantillons réels pour calculer les fréquences et capture donc le
@@ -349,20 +341,51 @@ Tout ce qui n'est pas listé ici fonctionne sur les trois plateformes.
 
 | Feature | Windows | macOS | Linux |
 | --- | :---: | :---: | :---: |
-| Superpositions, animal, fond d'écran, présentation, soin des yeux, capture, enregistrement | ✅ | ✅ | ✅ |
-| Réaction au son, spectre, synchro labiale (WASAPI) | ✅ | — | — |
-| Lecture en cours (contrôles multimédias) | ✅ | — | — |
-| Épingler / estomper une autre fenêtre, dispositions de fenêtres, réplique en direct | ✅ | — | — |
-| Masquer les superpositions de la capture d'écran | ✅ | — | — |
-| Contrôle MIDI (winmm) | ✅ | — | — |
-| Touches de transport média | ✅ | — | — |
-| Épingler les superpositions à un bureau virtuel | ✅ | — | — |
-| Déplacer une fenêtre vers le moniteur suivant | ✅ | — | — |
-| Sortie d'urgence `F12` | ✅ | — | — |
-| Assombrir l'arrière-plan autour de la fenêtre *active* | ✅ | écran entier | écran entier |
-| Animal se tenant sur d'autres fenêtres | ✅ | — | avec `wmctrl` |
+| Superpositions et interface communes | ✅ | ✅ | ✅ |
+| Audio système, spectre et microphone | ✅ | backend* | — |
+| Métadonnées de lecture en cours | ✅ | — | — |
+| Géométrie, disposition et déplacement entre écrans | ✅ | backend* | — |
+| Copie de fenêtre en direct | ✅ | backend* | — |
+| Fenêtres tierces : premier plan / opacité | ✅ | — | — |
+| Exclure les superpositions des captures | ✅ | — | — |
+| Commande MIDI | ✅ | backend* | — |
+| Touches multimédias | ✅ | backend* | — |
+| Bureau virtuel / choix du Space | ✅ | — | — |
+| Sortie d’urgence F12 | ✅ | backend* | — |
+| Animal sur les autres fenêtres | ✅ | backend* | wmctrl |
+
+* Les entrées macOS « backend » nécessitent l’option macos, macOS 13+ et les autorisations correspondantes. Elles décrivent des frameworks publics implémentés, pas une validation native depuis ce poste Windows ; voir les notes ci-dessous.
 
 Là où une fonction ne peut pas fonctionner, le bouton l'indique plutôt que d'échouer en silence.
+
+---
+
+## Exécution, confidentialité et interopérabilité
+
+Enregistrement : sélectionnez une zone puis le GIF de destination avant le début de la capture. Annuler ne lance pas l’enregistrement. Les images sont écrites progressivement en arrière-plan ; la file est limitée à trois images et 64 MiB. Une image trop grande est refusée. Une file pleine ignore des captures tout en conservant le temps de lecture écoulé. Cadence, limites de durée et de nombre d’images et incrustation de caméra sont conservées. L’arrêt finalise de façon asynchrone ; le fichier remplace atomiquement la destination seulement après réussite. Annulation et erreurs suppriment le temporaire et préservent la destination existante.
+
+Commande par téléphone : Paramètres → Commande à distance propose uniquement HTTPS, un jeton renouvelé à chaque démarrage et une liste fixe d’actions. Le téléphone ne fait pas automatiquement confiance au certificat autosigné. Exportez le certificat public et comparez l’empreinte SHA-256 affichée avant l’importation ou l’approbation dans les réglages du téléphone/navigateur. La clé privée reste dans le dossier de données utilisateur. Un changement d’IP, l’expiration ou une régénération peuvent nécessiter une nouvelle approbation. Un échec de TLS ne revient jamais à HTTP.
+
+Texte à l’écran : Outils → Lire du texte utilise d’abord l’OCR locale : Windows.Media.Ocr sous Windows, Vision sous macOS, ou Tesseract installé avec ses données linguistiques. L’extraction locale ne demande ni consentement cloud ni ANTHROPIC_API_KEY ; un résultat vide réussi n’envoie pas de capture. Traductions et questions peuvent envoyer le texte reconnu à Anthropic seulement avec votre clé et un consentement distinct pour le texte. Le recours aux captures après un échec local demande son propre consentement et la clé. Le résultat indique le moteur et les erreurs ; le consentement peut y être retiré.
+
+Animaux puppet : installez l’option puppet et un moteur Imervue disponible, puis choisissez ou déposez un fichier original Imervue .puppet v1 sur la page Animal. Les anciens packs d’images et de sprites restent utilisables. Les puppets utilisent le canevas, les animations et les expressions d’Imervue, peuvent être clonés ou fermés et suivent les contrôles de superposition et préréglages. Un .petscript.json facultatif utilise le moteur de script existant d’Imervue ; les packs FrontEngine pet.json ne sont pas des puppets. Versions inconnues, chemins dangereux et ressources invalides sont refusés avant le chargement du moteur.
+
+Scènes : la page Scène accepte l’ancien JSON de correspondance des entrées, un document versionné frontengine.scene et les paquets portables .fescene. Une entrée PUPPET contient position, taille, opacité, paramètres numériques finis et animation, expression ou script facultatifs. Les chemins JSON sont relatifs au fichier de scène. .fescene inclut les médias référencés, le .puppet original et le .petscript.json facultatif pour changer d’ordinateur. L’importation vérifie chemins, liens symboliques, versions et limites d’extraction. Une scène FrontEngine reste un paquet de scène ; .puppet reste un personnage Imervue.
+
+macOS : l’option macos vise macOS 13+ et les frameworks publics PyObjC. Les moteurs proposent ScreenCaptureKit pour l’écran/fenêtre et l’audio système, le microphone, la géométrie Quartz, le déplacement/disposition des fenêtres via Accessibilité, CoreMIDI, les touches média et la sortie F12. Enregistrement de l’écran, Accessibilité et Microphone sont vérifiés séparément ; suivez Réglages Système → Confidentialité et sécurité et redémarrez si demandé. Opacité/premier plan forcé des fenêtres d’autres apps, choix des Spaces et exclusion des captures d’autres apps restent indisponibles. Les autorisations natives, le matériel et les performances macOS n’ont pas été vérifiés depuis ce poste Windows. Paramètres → Autorisations et capacités macOS indique pour chaque fonction disponible, indisponible ou non prise en charge, avec la raison liée à l’autorisation ou à l’installation.
+
+Plugins : activer leur chargement ne les autorise pas. plugin.json ou le fichier associé à un plugin unique déclare version, identité, point d’entrée et capacités ; l’accord est vérifié avant l’import Python et lié à l’empreinte du contenu. Code ou déclaration modifiés demandent un nouvel accord ; les anciens plugins exigent une confiance totale explicite. Paramètres → Révoquer les autorisations des plugins efface les accords stockés ; redémarrez pour décharger le code en cours. Les plugins Python gardent tous les privilèges de l’application : déclaration et consentement ne sont pas un bac à sable système.
+
+Rendu : Paramètres → Rendu des superpositions propose Automatique, GPU ou Logiciel et affiche le moteur réellement utilisé. Le compositeur GPU utilise textures OpenGL, shaders et framebuffers pour l’ordre, les transformations, l’opacité et le découpage ; un échec d’initialisation revient au logiciel avec une raison. Le contenu QPainter peut encore être rasterisé sur CPU avant l’envoi ; les widgets web/vidéo/natifs peuvent utiliser des fenêtres séparées. La capture et l’enregistrement peuvent relire les images GPU vers le CPU. Cela ne promet ni capture sans copie ni accélération mesurée. La composition GPU des scènes couvre actuellement IMAGE, GIF et TEXT ; les puppets utilisent leur propre fenêtre Imervue.
+
+Les projections WinRT de l’OCR sont incluses dans l’installation normale de FrontEngine sous Windows ; installez les langues de reconnaissance Windows nécessaires. Tesseract demande un exécutable et des données linguistiques installés séparément. L’option puppet installe Imervue>=1.0.90 ; macos installe les frameworks publics PyObjC pour macOS 13+. Utilisez les commandes ci-dessous. docs/formats/ contient les exemples puppet, pet.json, petscript et scènes.
+
+```bash
+pip install "frontengine[puppet]"
+pip install "frontengine[macos]"
+```
+
+[.puppet / pet.json / .petscript.json / .fescene](../docs/formats/interoperability.md)
 
 ---
 

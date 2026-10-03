@@ -20,13 +20,23 @@ class SceneManager:
         self.graphic_scene: ExtendGraphicScene = ExtendGraphicScene()
         self.widget_list: List[QGraphicsProxyWidget] = []
         self.view_list: List[ExtendGraphicView] = []
+        self.native_widgets: list = []
+        self.puppet_settings: list[dict] = []
 
     def _add(self, kind: str, setting_dict: Dict) -> QGraphicsProxyWidget:
         front_engine_logger.info(f"[SceneManager] add_{kind} | settings={setting_dict}")
         widget = build_overlay(kind, setting_dict)
+        if hasattr(widget, 'set_render_backend'):
+            widget.set_render_backend('software')
         proxy_widget = self.graphic_scene.addWidget(widget)
+        proxy_widget.setPos(float(setting_dict.get('x', 0)), float(setting_dict.get('y', 0)))
+        proxy_widget.setZValue(float(setting_dict.get('z', 0)))
         self.widget_list.append(proxy_widget)
         return proxy_widget
+
+    def supports_composition(self) -> bool:
+        return bool(self.widget_list) and all(
+            hasattr(proxy.widget(), 'output_frame') for proxy in self.widget_list)
 
     def add_image(self, setting_dict: Dict) -> QGraphicsProxyWidget:
         return self._add("image", setting_dict)
@@ -46,6 +56,24 @@ class SceneManager:
     def add_web(self, setting_dict: Dict) -> QGraphicsProxyWidget:
         return self._add("web", setting_dict)
 
+    def add_puppet(self, setting_dict: Dict) -> None:
+        from frontengine.utils.imervue.puppet_asset import validate_puppet, finite_parameters
+        validate_puppet(setting_dict.get('file_path', ''))
+        finite_parameters(setting_dict.get('parameters', {}))
+        self.puppet_settings.append(dict(setting_dict))
+
+    def open_native_widgets(self, monitor=None) -> None:
+        for setting in self.puppet_settings:
+            widget = build_overlay('puppet', setting)
+            origin = monitor.availableGeometry().topLeft() if monitor else None
+            if monitor:
+                widget.setScreen(monitor)
+            x, y = setting.get('x', 0), setting.get('y', 0)
+            widget.move(int(x) + (origin.x() if origin else 0),
+                        int(y) + (origin.y() if origin else 0))
+            self.native_widgets.append(widget)
+            widget.show()
+
     def clear(self) -> None:
         """
         真的把場景清空。只清 widget_list 不夠：項目還掛在 QGraphicsScene 上，
@@ -55,6 +83,14 @@ class SceneManager:
         window on screen and restarting the scene stacks the old items on top.
         """
         front_engine_logger.info("[SceneManager] clear")
+        native_widgets = tuple(self.native_widgets)
+        self.native_widgets.clear()
+        for widget in native_widgets:
+            try:
+                widget.close()
+            except RuntimeError:  # WA_DeleteOnClose may have already deleted it.
+                continue
+        self.puppet_settings.clear()
         for proxy_widget in self.widget_list:
             try:
                 widget = proxy_widget.widget()

@@ -48,10 +48,7 @@ Menu Impostazioni
 * Modalità vetrina… - ruotare una lista di preimpostazioni a tempo, per una
   macchina lasciata accesa come display. La finestra principale può intanto
   andare nell'area di notifica - ma solo se ce n'è una da cui richiamarla.
-* Telecomando… - comandare FrontEngine da un telefono sulla stessa rete e
-  associare un controller MIDI. Il link porta un token monouso che cambia a ogni
-  avvio, e solo i pulsanti della pagina possono essere attivati. È HTTP in
-  chiaro: sulle reti di cui non ti fidi lascialo spento.
+* Controllo dal telefono: Impostazioni → Controllo remoto usa solo HTTPS, un token nuovo a ogni avvio e un elenco fisso di azioni. Il telefono non considera automaticamente attendibile il certificato autofirmato. Esporta il certificato pubblico e confronta l’impronta SHA-256 visualizzata prima di importarlo o approvarlo nelle impostazioni del telefono/browser. La chiave privata resta nella cartella dati dell’utente. Cambi IP, scadenza o rigenerazione possono richiedere una nuova approvazione. Se TLS non parte, non si torna a HTTP.
 * Privacy nella condivisione schermo… - nascondere gli overlay da una cattura
   mentre è aperta un'applicazione per riunioni. Il confronto è sui titoli delle
   finestre, così viene individuata anche una riunione in una scheda del browser.
@@ -71,3 +68,11 @@ Menu Aiuto
   mostrate sopra lo schermo. Riassegnarle aggiorna anche questo elenco. Premi di
   nuovo la scorciatoia, o Esc, per toglierlo.
 * La segnalazione problemi, e il promemoria che F12 chiude subito FrontEngine.
+
+Plugin: abilitare il caricamento non autorizza un plugin. plugin.json o un sidecar per un singolo file dichiara versione, identità, punto d’ingresso e capacità; il consenso viene controllato prima dell’import Python e legato all’impronta del contenuto. Cambi a codice o dichiarazione richiedono nuovo consenso; i plugin vecchi richiedono fiducia completa esplicita. Impostazioni → Revoca autorizzazioni dei plugin elimina le approvazioni salvate; riavvia per scaricare il codice attivo. I plugin Python conservano tutti i privilegi dell’applicazione: dichiarazione e consenso non sono una sandbox del sistema operativo.
+
+Rendering: Impostazioni → Rendering delle sovrapposizioni offre Automatico, GPU o Software e mostra il backend effettivo. Il compositore GPU usa texture OpenGL, shader e framebuffer per ordine, trasformazioni, opacità e ritaglio; errori di inizializzazione passano al software con una motivazione. I contenuti QPainter possono ancora essere rasterizzati sulla CPU prima del caricamento; widget web/video/nativi possono usare finestre separate. Cattura e registrazione possono leggere i fotogrammi GPU sulla CPU. Non è una promessa di cattura senza copie o accelerazione misurata. La composizione GPU delle scene comprende attualmente IMAGE, GIF e TEXT; i puppet usano una propria finestra Imervue.
+
+:doc:`runtime_interoperability`
+
+Impostazioni → Permessi e capacità macOS elenca ogni funzione come disponibile, non disponibile o non supportata, indicando il motivo legato a permessi o installazione.

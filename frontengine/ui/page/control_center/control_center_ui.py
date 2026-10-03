@@ -318,6 +318,12 @@ class ControlCenterUI(SettingPage):
         ]
         if self.pet_setting_ui is not None:
             lists.append(self.pet_setting_ui.pet_list)
+        native_scene_widgets = getattr(getattr(self.scene_setting_ui, 'scene', None), 'native_widgets', None)
+        if native_scene_widgets is not None:
+            lists.append(native_scene_widgets)
+        scene_views = getattr(getattr(self.scene_setting_ui, 'scene', None), 'view_list', None)
+        if scene_views is not None:
+            lists.append(scene_views)
         for provider in self._extra_overlay_sources:
             try:
                 widgets = provider()

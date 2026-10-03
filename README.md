@@ -53,7 +53,7 @@ and the Steam build ships the same application with Workshop support.
 > **Getting out.** Overlays can cover the whole screen, including FrontEngine's
 > own window, so there are two escape hatches that do not need the mouse:
 > `Ctrl+Shift+F12` closes every overlay, and **F12 quits the application
-> outright** from anywhere (Windows only — see *Help → How to force close*).
+> outright** from anywhere (Windows; macOS needs Accessibility permission — see *Help → How to force close*).
 
 ---
 
@@ -194,9 +194,7 @@ through, so what they cover still works — it just stops pulling your eye.
   a CSS custom property.
 - **Region capture** — drag out an area; it lands on the clipboard, can be saved
   to a file, or **pinned** on top as a floating, zoomable copy.
-- **Record area** — record a region to an animated GIF, with the camera
-  composited into the corner for the reaction-video look. Capped by both length
-  and frame count, because every frame is held in memory.
+- **Record area** — Recording: select an area and choose the output GIF before capture starts. Cancelling does not start recording. Frames are written incrementally on a background thread with a queue limited to three frames and 64 MiB; a single oversized frame is rejected. A full queue drops captures and preserves elapsed playback timing. Frame-rate, duration and frame-count limits and the optional camera inset remain. Stop finalizes asynchronously; the final file replaces the destination atomically only after success. Cancellation and write errors clean up the temporary file and preserve an existing destination.
 - **Camera** — your webcam in a circle, rounded box or rectangle, shown locally
   and never recorded. Any video input works, including capture cards, and the
   device list refreshes without a restart since cards are usually plugged in
@@ -205,9 +203,7 @@ through, so what they cover still works — it just stops pulling your eye.
   Teams or Discord can select as their video source. Needs the optional
   `pyvirtualcam` package and a virtual camera driver (OBS installs one); without
   either, the button says so rather than failing quietly.
-- **Read text** — drag out an area to copy the text in it, translate it, or ask
-  a question about it. This one sends the selection off the machine; see
-  [What leaves the machine](#what-leaves-the-machine).
+- **Read text** — Screen text: Tools → Read text first uses local OCR: Windows.Media.Ocr on Windows, Vision on macOS, or an installed Tesseract executable with language data. Local extraction needs neither cloud consent nor ANTHROPIC_API_KEY; an empty successful result does not upload a screenshot. Translation and questions can send recognized text to Anthropic only with separate text consent and your key. Screenshot fallback after local failure needs its own capture consent and the key. The result shows the backend and errors; consent can be withdrawn there.
 - **Pin a window** — keep another program's window on top, or fade it, while you
   work against it. Only stacking and opacity are touched, never window content.
 - **Window replica** — a small always-on-top live copy of another window, so you
@@ -242,7 +238,7 @@ Default global hotkeys, all rebindable from **Settings → Hotkeys**:
 | `Ctrl+Shift+F7` | Freeze / unfreeze the screen |
 | `Ctrl+Shift+F6` / `F5` / `F4` | Media play/pause, next and previous track |
 | `Ctrl+Shift+F3` | Move the foreground window to the next monitor |
-| `F12` | Quit immediately (Windows) |
+| `F12` | Quit immediately (Windows / macOS*) |
 
 Media transport sends the system media keys, so it reaches any player that
 listens for them. Moving a window keeps its proportions rather than snapping it
@@ -253,10 +249,7 @@ The same actions — and nothing beyond them — are what the remote controls dr
 - **Your phone** (Settings → Remote control) — FrontEngine serves a small page on
   your local network; open the link on a phone and the buttons drive those
   actions.
-- **A MIDI controller** — press *Learn*, move a knob or pad, and bind it. It uses
-  Windows' built-in winmm, so no extra package is needed. A knob fires once it
-  reaches the top rather than repeatedly on the way, and releasing a pad does not
-  count as a second press.
+- **A MIDI controller** — Press Learn, move a knob or pad, and bind it. Windows uses built-in winmm; macOS uses CoreMIDI with the macos extra. A knob fires once at the top, and releasing a pad does not count as another press.
 
 ---
 
@@ -309,20 +302,17 @@ exceptions, all opt-in:
 
 | Feature | Where it goes | Guard |
 | --- | --- | --- |
-| **Read text** (Tools) | The selected region is sent to Anthropic's API | Asks once before the first send and remembers the answer; consent can be withdrawn from the result window. Uses your own `ANTHROPIC_API_KEY`, read from the environment and never written to a settings file. Nothing is sent without both. |
+| **Read text** (Tools) | Anthropic API | Screen text: Tools → Read text first uses local OCR: Windows.Media.Ocr on Windows, Vision on macOS, or an installed Tesseract executable with language data. Local extraction needs neither cloud consent nor ANTHROPIC_API_KEY; an empty successful result does not upload a screenshot. Translation and questions can send recognized text to Anthropic only with separate text consent and your key. Screenshot fallback after local failure needs its own capture consent and the key. The result shows the backend and errors; consent can be withdrawn there. |
 | **Pet chat** | Your message goes to Anthropic's API | Same key, same rule; off by default. |
 | **Weather** (text source) | Coordinates go to Open-Meteo | No key, no account, no identifying data; only what you typed as a location. |
-| **Phone remote** | Serves a page on your local network | Off by default. The link carries a token regenerated on every start, so an old link stops working, and the page can only ask for the fixed action list. It is plain HTTP: someone else on the same network could read the token and press the same buttons — a nuisance rather than a breach given what those buttons do, but leave it off on networks you do not trust. |
+| **Phone remote** | HTTPS | Phone control: Settings → Remote control serves HTTPS only, with a token that changes on every start and a fixed action list. The local self-signed certificate is not automatically trusted by a phone. Export the public certificate and compare the displayed SHA-256 fingerprint before importing or trusting it through your phone/browser settings. The private key stays in the user data directory. Changed IP addresses, expiry or regeneration may require trusting a new certificate. TLS startup failure does not fall back to HTTP. |
 
 The audio features read only an output **meter** — a single number — except the
 spectrum, which needs real samples to compute frequencies and so captures the
 system output stream. Those samples are analysed in memory, never written to
 disk or sent anywhere, and capture stops the moment you stop the spectrum.
 
-**Plugins** are Python and run with the same privileges as FrontEngine — they
-cannot be sandboxed. Loading is off by default (Settings → Load plugins), every
-load is logged, and one broken plugin is skipped rather than stopping the app.
-Install only plugins you trust.
+Plugins: enabling loading does not authorize a plugin. A plugin.json or single-file sidecar declares version, identity, entrypoint and capabilities; approval is checked before Python import and tied to the content digest. Changed code or declarations require approval again; legacy plugins require explicit full trust. Settings → Revoke plugin grants removes stored approvals; restart to unload already running code. Python plugins still run with full application privileges: declarations and consent are not an OS sandbox.
 
 ### Screen-sharing privacy
 
@@ -350,20 +340,51 @@ Everything not listed here works on all three platforms.
 
 | Feature | Windows | macOS | Linux |
 | --- | :---: | :---: | :---: |
-| Overlays, pet, wallpaper, presenting, screen care, capture, recording | ✅ | ✅ | ✅ |
-| Audio reaction, spectrum, lip-sync (WASAPI) | ✅ | — | — |
-| Now playing (media controls) | ✅ | — | — |
-| Pin / fade another window, window layouts, live replica | ✅ | — | — |
-| Hide overlays from screen capture | ✅ | — | — |
-| MIDI control (winmm) | ✅ | — | — |
-| Media transport keys | ✅ | — | — |
-| Pin overlays to a virtual desktop | ✅ | — | — |
-| Move a window to the next monitor | ✅ | — | — |
-| `F12` emergency exit | ✅ | — | — |
-| Dim background around the *active* window | ✅ | whole screen | whole screen |
-| Pet standing on other windows | ✅ | — | with `wmctrl` |
+| Common overlays and UI | ✅ | ✅ | ✅ |
+| System audio, spectrum and microphone | ✅ | backend* | — |
+| Now-playing metadata | ✅ | — | — |
+| Window geometry, layouts and monitor move | ✅ | backend* | — |
+| Live window replica | ✅ | backend* | — |
+| Foreign-window topmost / opacity | ✅ | — | — |
+| Exclude overlays from capture | ✅ | — | — |
+| MIDI control | ✅ | backend* | — |
+| Media transport keys | ✅ | backend* | — |
+| Virtual desktop / Space selection | ✅ | — | — |
+| F12 emergency exit | ✅ | backend* | — |
+| Pet standing on other windows | ✅ | backend* | wmctrl |
+
+* macOS entries marked “backend” require the macos extra, macOS 13+ and the indicated permissions. They describe implemented public-framework paths, not native validation on this Windows host; see the runtime notes below.
 
 Where a feature cannot work, the button says so rather than failing quietly.
+
+---
+
+## Runtime, privacy and interoperability
+
+Recording: select an area and choose the output GIF before capture starts. Cancelling does not start recording. Frames are written incrementally on a background thread with a queue limited to three frames and 64 MiB; a single oversized frame is rejected. A full queue drops captures and preserves elapsed playback timing. Frame-rate, duration and frame-count limits and the optional camera inset remain. Stop finalizes asynchronously; the final file replaces the destination atomically only after success. Cancellation and write errors clean up the temporary file and preserve an existing destination.
+
+Phone control: Settings → Remote control serves HTTPS only, with a token that changes on every start and a fixed action list. The local self-signed certificate is not automatically trusted by a phone. Export the public certificate and compare the displayed SHA-256 fingerprint before importing or trusting it through your phone/browser settings. The private key stays in the user data directory. Changed IP addresses, expiry or regeneration may require trusting a new certificate. TLS startup failure does not fall back to HTTP.
+
+Screen text: Tools → Read text first uses local OCR: Windows.Media.Ocr on Windows, Vision on macOS, or an installed Tesseract executable with language data. Local extraction needs neither cloud consent nor ANTHROPIC_API_KEY; an empty successful result does not upload a screenshot. Translation and questions can send recognized text to Anthropic only with separate text consent and your key. Screenshot fallback after local failure needs its own capture consent and the key. The result shows the backend and errors; consent can be withdrawn there.
+
+Puppet pets: install the optional puppet extra and an available Imervue runtime, then choose an original Imervue .puppet v1 file on the Pet page or drop it there. Existing image/sprite pet packs still work. Puppet pets use Imervue's canvas, motions and expressions, can be cloned or closed, and participate in FrontEngine's overlay controls and presets. Choose an optional .petscript.json for Imervue's existing script engine; do not treat FrontEngine pet.json packs as puppet files. Unknown versions, unsafe archive paths and invalid assets are rejected before runtime loading.
+
+Scenes: the Scene page accepts old entry-mapping JSON, a versioned frontengine.scene envelope, and portable .fescene packages. Add a PUPPET entry with position, size, opacity, finite numeric parameters, optional motion, expression and script. Paths in JSON resolve relative to the scene file. A .fescene includes the referenced media, original .puppet and optional .petscript.json so it can move between machines. Import checks paths, symlinks, versions and extraction limits. A FrontEngine scene remains a scene package; .puppet remains one Imervue character.
+
+macOS: the optional macos extra targets macOS 13+ with public PyObjC frameworks. Backends provide ScreenCaptureKit screen/window capture and system audio, microphone capture, Quartz window geometry, Accessibility window layout/movement, CoreMIDI, media keys and the F12 exit path. Screen Recording, Accessibility and Microphone permissions are checked separately; follow System Settings → Privacy & Security and restart when requested. Foreign-window opacity/topmost changes, Space selection and excluding overlays from other apps' captures remain unavailable. Native macOS permissions, hardware and performance have not been verified on this Windows development host. Settings → macOS permissions and capabilities lists each feature as available, unavailable or unsupported and shows the permission or installation reason.
+
+Plugins: enabling loading does not authorize a plugin. A plugin.json or single-file sidecar declares version, identity, entrypoint and capabilities; approval is checked before Python import and tied to the content digest. Changed code or declarations require approval again; legacy plugins require explicit full trust. Settings → Revoke plugin grants removes stored approvals; restart to unload already running code. Python plugins still run with full application privileges: declarations and consent are not an OS sandbox.
+
+Rendering: Settings → Overlay rendering selects Auto, GPU or Software and shows the backend actually used. The GPU compositor uses OpenGL textures, shaders and framebuffers for layer order, transforms, opacity and clipping; initialization failure falls back to software with a reason. Existing QPainter content can still be rasterized on the CPU before texture upload; web/video/native widgets may use separate windows. Capture or recording may read a GPU frame back to the CPU. These paths are not a promise of zero-copy capture or measured speed gains. Scene GPU composition currently covers IMAGE, GIF and TEXT; puppet rendering uses its own Imervue window.
+
+Windows OCR WinRT projections are included in a normal FrontEngine installation on Windows; install the Windows recognition languages you need. Tesseract requires its executable and trained language data installed separately. The optional puppet extra installs Imervue>=1.0.90; the macos extra installs the public PyObjC frameworks for macOS 13+. Use the commands below. See docs/formats/ for puppet, pet.json, petscript and scene examples.
+
+```bash
+pip install "frontengine[puppet]"
+pip install "frontengine[macos]"
+```
+
+[.puppet / pet.json / .petscript.json / .fescene](docs/formats/interoperability.md)
 
 ---
 

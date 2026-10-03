@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from pathlib import Path
+import sys
 from typing import TYPE_CHECKING
 
-from PySide6.QtGui import QAction
+from PySide6.QtGui import QAction, QActionGroup
 from PySide6.QtWidgets import QDialog, QFileDialog, QMessageBox
 
 from frontengine.ui.dialog.app_profile_dialog import AppProfileDialog
@@ -100,6 +101,34 @@ def build_settings_menu(ui: "FrontEngineMainUI") -> None:
     plugins_action.toggled.connect(lambda checked: _toggle_plugins(ui, checked))
     menu.addAction(plugins_action)
     ui.plugins_action = plugins_action
+    revoke_action = QAction(_t('plugin_revoke', 'Revoke plugin grants...'), menu)
+    retranslator.bind(revoke_action, 'plugin_revoke', 'Revoke plugin grants...')
+    revoke_action.triggered.connect(lambda: _revoke_plugin_grants(ui))
+    menu.addAction(revoke_action)
+
+    render_menu = menu.addMenu(_t('render_backend', 'Overlay rendering'))
+    retranslator.bind(render_menu, 'render_backend', 'Overlay rendering', 'setTitle')
+    render_group = QActionGroup(render_menu)
+    render_group.setExclusive(True)
+    for backend in ('auto', 'gpu', 'software'):
+        action = QAction(_t('render_' + backend, backend.title()), render_menu)
+        retranslator.bind(action, 'render_' + backend, backend.title())
+        action.setCheckable(True)
+        action.setChecked(user_setting_dict.get('render_backend', 'auto') == backend)
+        render_group.addAction(action)
+        render_menu.addAction(action)
+        action.triggered.connect(lambda checked=False, mode=backend: _set_render_backend(ui, mode))
+
+    status_action = QAction(_t('render_status', 'Rendering status...'), menu)
+    retranslator.bind(status_action, 'render_status', 'Rendering status...')
+    status_action.triggered.connect(lambda: _show_render_status(ui))
+    render_menu.addAction(status_action)
+
+    if sys.platform == 'darwin':
+        macos_action = QAction(_t('macos_permissions', 'macOS permissions and capabilities'), menu)
+        retranslator.bind(macos_action, 'macos_permissions', 'macOS permissions and capabilities')
+        macos_action.triggered.connect(lambda: _show_macos_capabilities(ui))
+        menu.addAction(macos_action)
 
     menu.addSeparator()
     smart_pause_action = QAction(_t("settings_menu_smart_pause", "Smart pause..."), menu)
@@ -328,6 +357,34 @@ def _toggle_plugins(ui: "FrontEngineMainUI", enabled: bool) -> None:
         )
 
 
+def _revoke_plugin_grants(ui) -> None:
+    user_setting_dict['plugin_grants'] = {}
+    write_user_setting()
+    QMessageBox.information(ui, _t('plugin_grant_title', 'Plugin permissions'),
+                            _t('plugin_revoked', 'Plugin grants revoked. Restart to unload running plugins.'))
+
+
+def _set_render_backend(ui, backend: str) -> None:
+    user_setting_dict['render_backend'] = backend
+    write_user_setting()
+    def apply(widget):
+        setter = getattr(widget, 'set_render_backend', None)
+        if setter:
+            setter(backend)
+    ui.control_center_ui._for_each_overlay(apply)
+
+
+def _show_render_status(ui) -> None:
+    lines = []
+    def collect(widget):
+        if hasattr(widget, 'render_backend'):
+            lines.append(f'{type(widget).__name__}: {widget.render_backend} '
+                         f'{getattr(widget, "render_failure_reason", "")}')
+    ui.control_center_ui._for_each_overlay(collect)
+    QMessageBox.information(ui, _t('render_status', 'Rendering status...'),
+                            '\n'.join(lines) or _t('render_no_overlays', 'No composited overlays are open.'))
+
+
 def _toggle_theme_schedule(ui: "FrontEngineMainUI", enabled: bool) -> None:
     """啟用/停用排程主題並立即套用 / Enable/disable scheduled theme and apply now."""
     front_engine_logger.info(f"[SettingsMenu] toggle theme schedule | enabled={enabled}")
@@ -384,3 +441,19 @@ def _import_settings(ui: "FrontEngineMainUI") -> None:
     QMessageBox.information(
         ui, title, _t("settings_imported", "Settings imported. Restart to apply theme/language.")
     )
+
+
+def _show_macos_capabilities(ui) -> None:
+    """Show current TCC permissions and unsupported public API operations."""
+    from frontengine.utils.macos.backend import get_backend
+    backend = get_backend()
+    lines = []
+    for name in ('screen_capture', 'system_audio', 'window_geometry', 'window_move',
+                 'microphone', 'midi', 'media_keys', 'global_hotkey', 'foreign_opacity',
+                 'foreign_topmost', 'spaces', 'capture_exclusion'):
+        capability = backend.capability(name)
+        status = ('available' if capability.available else
+                  'unavailable' if capability.supported else 'unsupported')
+        lines.append(f"{_t('macos_' + name, name)}: {_t('macos_status_' + status, status)}"
+                     + (f"\n  {capability.reason}" if capability.reason else ''))
+    QMessageBox.information(ui, _t('macos_permissions', 'macOS permissions and capabilities'), '\n'.join(lines))

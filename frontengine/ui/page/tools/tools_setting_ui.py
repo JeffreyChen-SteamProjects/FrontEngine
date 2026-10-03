@@ -11,7 +11,7 @@ from typing import List, Optional
 from PySide6.QtCore import QBuffer, QIODevice, QTimer
 from PySide6.QtGui import QGuiApplication, QPixmap
 from PySide6.QtWidgets import (
-    QCheckBox, QComboBox, QFileDialog, QLabel, QLineEdit, QPushButton, QSpinBox,
+    QCheckBox, QComboBox, QFileDialog, QLabel, QLineEdit, QPushButton, QSpinBox, QMessageBox,
 )
 
 from frontengine.show.camera.camera_widget import (
@@ -23,7 +23,7 @@ from frontengine.show.measure.measure_widget import (
     MODE_ANGLE, MODE_COLOR, MODE_RULER, MeasureWidget,
 )
 from frontengine.ui.dialog.screen_text_dialog import (
-    ScreenTextDialog, ask_for_consent, has_consent,
+    ScreenTextDialog, ask_for_consent, has_consent, has_text_consent, ask_for_text_consent,
 )
 from frontengine.ui.dialog.window_pin_dialog import WindowPinDialog
 from frontengine.ui.dialog.window_replica_dialog import WindowReplicaDialog
@@ -37,7 +37,7 @@ from frontengine.utils.measure.measure import (
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import retranslator, tr
 from frontengine.utils.screen_text.screen_text_service import (
-    ACTION_ASK, ACTION_EXTRACT, ACTION_TRANSLATE, DEFAULT_LANGUAGE, ScreenTextService,
+    ACTION_ASK, ACTION_EXTRACT, ACTION_TRANSLATE, DEFAULT_LANGUAGE, ScreenTextService, api_key,
 )
 from frontengine.utils.virtual_camera import virtual_camera
 from frontengine.utils.virtual_camera.camera_feed import VirtualCameraFeed
@@ -47,8 +47,7 @@ from frontengine.utils.virtual_camera.virtual_camera import (
 from frontengine.utils.recording.frame_recorder import (
     DEFAULT_FPS, DEFAULT_MAX_SECONDS, MAX_FPS, MIN_FPS, FrameRecorder,
 )
-from frontengine.utils.window_pin import window_pin
-from frontengine.utils.window_pin.window_layout import capture_layout, restore_layout
+from frontengine.utils.window_pin.window_layout import capture_layout, restore_layout, available as layout_available
 
 
 # 三個地方共用的英文備援字串（翻譯缺漏時才會看到）
@@ -74,7 +73,8 @@ class ToolsSettingUI(SettingPage):
         self.recorder = FrameRecorder(self)
         self.virtual_camera_feed = VirtualCameraFeed(self)
         self.virtual_camera_feed.failed.connect(self._on_virtual_camera_failed)
-        self.screen_text_service = ScreenTextService(consent_provider=has_consent)
+        self.screen_text_service = ScreenTextService(consent_provider=has_consent,
+                                                     text_consent_provider=has_text_consent)
         self.last_screen_text: Optional[str] = None
         self.last_recording: Optional[str] = None
         self.capture_widget_list: List[RegionCaptureWidget] = []
@@ -117,7 +117,7 @@ class ToolsSettingUI(SettingPage):
         self.layout_restore_button = tr(QPushButton(), "tools_layout_restore", "Restore")
         self.layout_restore_button.clicked.connect(self.restore_selected_layout)
         for button in (self.layout_save_button, self.layout_restore_button):
-            button.setEnabled(window_pin.available())
+            button.setEnabled(layout_available())
         self.reload_layouts()
         self.hint_label = tr(QLabel(), "tools_hint",
             "Click to measure; right-click clears. What you measure is copied to the "
@@ -148,6 +148,7 @@ class ToolsSettingUI(SettingPage):
         record.add_row("tools_seconds", self.record_seconds_spinbox, "Seconds")
         record.add_inline(self.record_camera_checkbox)
         record.add_inline(self.record_button)
+        record.add_inline(self.record_status)
 
         virtual_camera = self.add_section(self.virtual_camera_label)
         virtual_camera.add_row("tools_fps", self.virtual_camera_fps_spinbox,
@@ -223,6 +224,12 @@ class ToolsSettingUI(SettingPage):
         self.record_camera_checkbox = tr(QCheckBox(), "tools_record_camera", "Include camera")
         self.record_button = tr(QPushButton(), "tools_record_start", _RECORD_AN_AREA)
         self.record_button.clicked.connect(self.toggle_recording)
+        self.record_status = tr(QLabel(), "tools_record_ready", "Ready")
+        self._recording_error = ""
+        retranslator.bind_call(self._update_recording_error)
+        self.recorder.finished.connect(self._on_recording_stopped)
+        self.recorder.completed.connect(self._on_recording_completed)
+        self.recorder.failed.connect(self._on_recording_failed)
 
     def _build_virtual_camera_row(self) -> None:
         self.virtual_camera_label = tr(QLabel(), "tools_vcam_label", "Virtual camera")
@@ -303,6 +310,7 @@ class ToolsSettingUI(SettingPage):
         front_engine_logger.info("[ToolsSettingUI] start_capture")
         widget = RegionCaptureWidget(
             on_captured=lambda pixmap, rect: self._on_captured(widget, pixmap))
+        widget.failed.connect(self._on_capture_failed)
         screen = QGuiApplication.primaryScreen()
         if screen is not None:
             widget.setGeometry(screen.geometry())
@@ -495,10 +503,8 @@ class ToolsSettingUI(SettingPage):
         without it: this is the only feature that sends screen content off the
         machine.
         """
-        if not ask_for_consent(self):
-            front_engine_logger.info("[ToolsSettingUI] screen text cancelled: no consent")
-            return None
         picker = RegionCaptureWidget(on_captured=lambda pixmap, rect: self._read_capture(pixmap))
+        picker.failed.connect(self._on_capture_failed)
         screen = QGuiApplication.primaryScreen()
         if screen is not None:
             picker.setGeometry(screen.geometry())
@@ -512,11 +518,32 @@ class ToolsSettingUI(SettingPage):
         data = pixmap_to_png(pixmap)
         if not data:
             return
-        self.screen_text_service.read_async(
-            data, self.show_screen_text,
-            action=self.screen_text_combobox.currentData(),
-            language=self.screen_text_input.text(),
-            question=self.screen_text_input.text())
+        action = self.screen_text_combobox.currentData()
+        value = self.screen_text_input.text()
+        self._request_screen_text(data, action, value, value)
+
+    def _request_screen_text(self, data, action, language, question) -> None:
+        def reply(result):
+            QTimer.singleShot(0, self, lambda: self._handle_screen_text_result(
+                result, data, action, language, question))
+        self.screen_text_service.read_result_async(data, reply, action=action,
+                                                  language=language, question=question)
+
+    def _handle_screen_text_result(self, result, data, action, language, question) -> None:
+        if result.consent_required and api_key() is not None:
+            consent = ask_for_text_consent(self) if result.consent_required == 'text' else ask_for_consent(self)
+            if consent:
+                self._request_screen_text(data, action, language, question)
+                return
+        self.last_screen_text = result.text if result.status == 'success' else None
+        self._present_screen_text_result(result)
+
+    def _present_screen_text_result(self, result) -> None:
+        ScreenTextDialog(parent=self, result=result).exec()
+
+    def _on_capture_failed(self, reason: str) -> None:
+        QMessageBox.warning(self, _t('tab_tools_text', 'Tools'),
+                            _t('tools_capture_failed', 'Capture failed: {reason}').format(reason=reason))
 
     def show_screen_text(self, text) -> None:
         """收到結果：切回 UI 執行緒再開視窗（回呼來自背景執行緒）。"""
@@ -538,7 +565,7 @@ class ToolsSettingUI(SettingPage):
     def toggle_recording(self) -> None:
         if self.recorder.running:
             self.finish_recording()
-        else:
+        elif not self.recorder.busy:
             self.start_recording()
 
     def start_recording(self) -> RegionCaptureWidget:
@@ -556,12 +583,20 @@ class ToolsSettingUI(SettingPage):
 
     def begin_recording(self, region) -> bool:
         """對指定範圍開始錄製。"""
+        if self.recorder.busy:
+            return False
+        target = QFileDialog.getSaveFileName(
+            self, _t("tools_record_save", "Save recording"), "recording.gif", "GIF (*.gif)")[0]
+        if not target:
+            return False
+        self._recording_error = ""
         inset = self.camera_inset if self.record_camera_checkbox.isChecked() else None
         self.recorder.set_inset_provider(inset)
-        started = self.recorder.start(region, self.record_fps_spinbox.value(),
-                                      self.record_seconds_spinbox.value())
-        if started:
-            self.record_button.setText(_t("tools_record_stop", "Stop recording"))
+        started = self.recorder.start(region, target, self.record_fps_spinbox.value(),
+                                     self.record_seconds_spinbox.value())
+        if started and self.recorder.running:
+            retranslator.set_text(self.record_button, "tools_record_stop", "Stop recording")
+            retranslator.set_text(self.record_status, "tools_record_active", "Recording")
         return started
 
     def camera_inset(self) -> Optional[object]:
@@ -574,20 +609,36 @@ class ToolsSettingUI(SettingPage):
                 self.camera_widget_list.remove(widget)
         return None
 
-    def finish_recording(self) -> Optional[str]:
-        """停止錄製並存成 GIF，回傳檔案路徑。"""
+    def finish_recording(self) -> None:
+        """Stop capture; the background writer reports the finalized path."""
         self.recorder.stop()
-        self.record_button.setText(_t("tools_record_start", _RECORD_AN_AREA))
-        if not self.recorder.frames:
-            return None
-        target = QFileDialog.getSaveFileName(
-            self, _t("tools_record_save", "Save recording"), "recording.gif", "GIF (*.gif)")[0]
-        if not target:
-            self.recorder.clear()
-            return None
-        self.last_recording = self.recorder.save_gif(target)
-        self.recorder.clear()
-        return self.last_recording
+
+    def _on_recording_stopped(self, _count: int) -> None:
+        self.record_button.setEnabled(False)
+        retranslator.set_text(self.record_button, "tools_record_finalizing", "Saving recording…")
+        retranslator.set_text(self.record_status, "tools_record_finalizing", "Saving recording…")
+
+    def _on_recording_completed(self, path: Optional[str]) -> None:
+        self._recording_error = ""
+        self.last_recording = path
+        self.record_button.setEnabled(True)
+        retranslator.set_text(self.record_button, "tools_record_start", _RECORD_AN_AREA)
+        key = "tools_record_saved" if path else "tools_record_ready"
+        fallback = "Recording saved" if path else "Ready"
+        retranslator.set_text(self.record_status, key, fallback)
+
+    def _on_recording_failed(self, reason: str) -> None:
+        self.record_button.setEnabled(True)
+        retranslator.set_text(self.record_button, "tools_record_start", _RECORD_AN_AREA)
+        self._recording_error = reason
+        retranslator.forget(self.record_status)
+        self._update_recording_error()
+
+    def _update_recording_error(self) -> None:
+        if self._recording_error:
+            self.record_status.setText(
+                _t("tools_record_failed", "Recording failed: {reason}").format(
+                    reason=self._recording_error))
 
     # --- window layouts --------------------------------------------------
     def saved_layouts(self) -> dict:

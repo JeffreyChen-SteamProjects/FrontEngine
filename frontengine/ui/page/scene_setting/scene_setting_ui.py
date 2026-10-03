@@ -39,8 +39,13 @@ class SceneSettingUI(SettingPage):
 
     def close_scene(self) -> None:
         front_engine_logger.info("[SceneSettingUI] close_scene")
-        self.scene.clear()
-        for view in self.scene.view_list:
-            view.close()
-            view.deleteLater()
+        views = tuple(self.scene.view_list)
         self.scene.view_list.clear()
+        for view in views:
+            try:
+                view.close()
+                view.deleteLater()
+            except RuntimeError:  # A manually closed view may already be deleted.
+                continue
+        # Stop render timers before deleting the proxies they read.
+        self.scene.clear()

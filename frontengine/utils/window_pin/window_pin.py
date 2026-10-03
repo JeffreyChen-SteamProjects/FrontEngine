@@ -64,6 +64,9 @@ def list_windows() -> List[Tuple[int, str]]:
     列出可以釘選的視窗 [(handle, 標題)]；非 Windows 或失敗時回傳空清單。
     Pinnable windows as (handle, title); [] when unavailable.
     """
+    if sys.platform == 'darwin':
+        from frontengine.utils.macos import get_backend
+        return get_backend().list_windows()
     if not available():
         return []
     try:

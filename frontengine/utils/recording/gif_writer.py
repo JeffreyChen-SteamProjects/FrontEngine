@@ -21,7 +21,14 @@ and avoids re-quantising every frame.
 """
 from __future__ import annotations
 
-from typing import Iterable, List, Optional, Sequence, Tuple
+from collections import deque
+from io import BytesIO
+import os
+from pathlib import Path
+import tempfile
+import threading
+import time
+from typing import Callable, Iterable, List, Optional, Sequence, Tuple
 
 import numpy
 
@@ -220,7 +227,7 @@ def encode_gif(frames: Iterable[numpy.ndarray], delay_ms: int = 100,
     frame sets the size; later frames of a different size are skipped rather
     than drawn misaligned.
     """
-    stream = bytearray(_HEADER)
+    stream = BytesIO()
     width = height = 0
     written = 0
     for frame in frames:
@@ -229,17 +236,218 @@ def encode_gif(frames: Iterable[numpy.ndarray], delay_ms: int = 100,
             continue
         if width == 0:
             height, width = int(data.shape[0]), int(data.shape[1])
-            stream.extend(_screen_descriptor(width, height))
+            stream.write(_HEADER + _screen_descriptor(width, height))
             if loop:
-                stream.extend(_loop_extension())
+                stream.write(_loop_extension())
         elif data.shape[0] != height or data.shape[1] != width:
             continue
-        stream.extend(_graphic_control(delay_ms))
-        stream.extend(_image_descriptor(width, height))
-        stream.append(_MIN_CODE_SIZE)
-        stream.extend(_blocks(lzw_encode(quantize(data).reshape(-1).tolist())))
+        _write_frame(stream, data, delay_ms)
         written += 1
     if written == 0:
         return None
-    stream.extend(_TRAILER)
-    return bytes(stream)
+    stream.write(_TRAILER)
+    return stream.getvalue()
+
+
+def _write_frame(stream, data: numpy.ndarray, delay_ms: int) -> int:
+    """Write one image block; return its seekable delay field offset."""
+    height, width = data.shape[:2]
+    delay_offset = stream.tell() + 4
+    stream.write(_graphic_control(delay_ms))
+    stream.write(_image_descriptor(width, height))
+    stream.write(bytes([_MIN_CODE_SIZE]))
+    compressed = lzw_encode(quantize(data).reshape(-1))
+    for start in range(0, len(compressed), 255):
+        chunk = compressed[start:start + 255]
+        stream.write(bytes([len(chunk)]))
+        stream.write(chunk)
+    stream.write(b"\x00")
+    return delay_offset
+
+
+class IncrementalGifWriter:
+    """Flush each frame to a sibling temporary file, then atomically publish it."""
+
+    def __init__(self, target: str | Path, delay_ms: int = 100) -> None:
+        self.target = Path(target)
+        self.target.parent.mkdir(parents=True, exist_ok=True)
+        descriptor, name = tempfile.mkstemp(prefix=f".{self.target.name}.",
+                                           suffix=".part", dir=self.target.parent)
+        self.temp_path = Path(name)
+        self._stream = os.fdopen(descriptor, "w+b")
+        self._delay_ms = delay_ms
+        self.frame_count = 0
+        self._shape = None
+        self._previous_timestamp = None
+        self._delay_offset = None
+        self._result = None
+        self._cancel_requested = threading.Event()
+
+    def _patch_delay(self, timestamp: float | None) -> None:
+        if timestamp is None or self._delay_offset is None:
+            return
+        delay_ms = round((timestamp - self._previous_timestamp) * 1000)
+        position = self._stream.tell()
+        self._stream.seek(self._delay_offset)
+        self._stream.write((clamp_delay(delay_ms) // 10).to_bytes(2, "little"))
+        self._stream.seek(position)
+
+    def append(self, frame: numpy.ndarray, timestamp: float | None = None) -> None:
+        if self._stream.closed:
+            raise RuntimeError("GIF writer is closed")
+        data = numpy.asarray(frame)
+        if data.ndim != 3 or data.shape[2] != 3 or data.dtype != numpy.uint8:
+            raise ValueError("frame must be an H x W x 3 uint8 array")
+        height, width = data.shape[:2]
+        if not (0 < width <= 65535 and 0 < height <= 65535):
+            raise ValueError("GIF dimensions must be between 1 and 65535")
+        if self._shape is not None and self._shape != data.shape:
+            raise ValueError("recording frame size changed")
+        timestamp = time.monotonic() if timestamp is None else timestamp
+        if self._shape is None:
+            self._stream.write(_HEADER + _screen_descriptor(width, height) + _loop_extension())
+            self._shape = data.shape
+        self._patch_delay(timestamp)
+        self._delay_offset = _write_frame(self._stream, data, self._delay_ms)
+        self._previous_timestamp = timestamp
+        self.frame_count += 1
+        self._stream.flush()
+
+    def finish(self, timestamp: float | None = None) -> Optional[str]:
+        if self._stream.closed:
+            return self._result
+        if not self.frame_count:
+            self.cancel()
+            return None
+        try:
+            self._patch_delay(timestamp)
+            self._stream.write(_TRAILER)
+            self._stream.flush()
+            os.fsync(self._stream.fileno())
+            self._stream.close()
+            if self._cancel_requested.is_set():
+                self.cancel()
+                return None
+            os.replace(self.temp_path, self.target)
+            self._result = str(self.target)
+            return self._result
+        except Exception:
+            self.cancel()
+            raise
+
+    def cancel(self) -> None:
+        try:
+            self._stream.close()
+        finally:
+            self.temp_path.unlink(missing_ok=True)
+
+
+MAX_QUEUED_FRAMES = 3
+MAX_QUEUED_BYTES = 64 * 1024 * 1024
+
+
+class AsyncGifWriter:
+    """Own the file on a worker thread; never wait for encoding on the GUI thread."""
+
+    def __init__(self, target: str | Path, delay_ms: int = 100,
+                 callback: Optional[Callable] = None,
+                 writer_factory: Callable = IncrementalGifWriter,
+                 max_frames: int = MAX_QUEUED_FRAMES,
+                 max_bytes: int = MAX_QUEUED_BYTES) -> None:
+        self._condition = threading.Condition()
+        self._queue = deque()
+        self._bytes = 0
+        self._max_frames, self._max_bytes = max_frames, max_bytes
+        self._stopping = self._cancelled = False
+        self._end_timestamp = None
+        self._callback = callback
+        self._done = threading.Event()
+        self._cancel_requested = threading.Event()
+        self.error = None
+        self.result = None
+        self.temp_path = None
+        self._thread = threading.Thread(target=self._run,
+                                        args=(target, delay_ms, writer_factory), daemon=True)
+        self._thread.start()
+
+    @property
+    def done(self) -> bool:
+        return self._done.is_set()
+
+    @property
+    def queued_frames(self) -> int:
+        with self._condition:
+            return len(self._queue)
+
+    @property
+    def queued_bytes(self) -> int:
+        with self._condition:
+            return self._bytes
+
+    def can_accept(self, size: int) -> bool:
+        with self._condition:
+            return (not self._stopping and not self.done
+                    and len(self._queue) < self._max_frames
+                    and self._bytes + size <= self._max_bytes)
+
+    def submit(self, pixels: numpy.ndarray, timestamp: float) -> bool:
+        """Transfer ownership of a copied RGB frame; False means it was dropped."""
+        with self._condition:
+            if not self.can_accept(pixels.nbytes):
+                return False
+            self._queue.append((pixels, timestamp))
+            self._bytes += pixels.nbytes
+            self._condition.notify()
+            return True
+
+    def stop(self, timestamp: float | None = None) -> None:
+        with self._condition:
+            if not self._stopping:
+                self._stopping = True
+                self._end_timestamp = timestamp
+            self._condition.notify()
+
+    def cancel(self) -> None:
+        self._cancel_requested.set()
+        with self._condition:
+            self._cancelled = self._stopping = True
+            self._queue.clear()
+            self._bytes = 0
+            self._condition.notify()
+
+    def _drain(self, writer: IncrementalGifWriter) -> None:
+        while True:
+            with self._condition:
+                self._condition.wait_for(lambda: self._queue or self._stopping)
+                if self._cancelled:
+                    return
+                if not self._queue:
+                    break
+                pixels, timestamp = self._queue.popleft()
+                self._bytes -= pixels.nbytes
+            writer.append(pixels, timestamp)
+        if not self._cancel_requested.is_set():
+            self.result = writer.finish(self._end_timestamp)
+
+    def _run(self, target, delay_ms, factory) -> None:
+        writer = None
+        try:
+            writer = factory(target, delay_ms=delay_ms)
+            writer._cancel_requested = self._cancel_requested
+            self.temp_path = writer.temp_path
+            self._drain(writer)
+        except Exception as error:
+            self.error = str(error)
+        finally:
+            if writer is not None and self.result is None:
+                try:
+                    writer.cancel()
+                except OSError as error:
+                    self.error = self.error or str(error)
+            with self._condition:
+                self._queue.clear()
+                self._bytes = 0
+                self._stopping = True
+            self._done.set()
+            if self._callback is not None:
+                self._callback(self, self.result, self.error)

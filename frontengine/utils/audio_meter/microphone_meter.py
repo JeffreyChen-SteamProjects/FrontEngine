@@ -34,6 +34,9 @@ def list_input_devices() -> List[Tuple[str, str]]:
     目前啟用中的輸入裝置 [(device_id, 顯示名稱)]；非 Windows 或失敗回傳 []。
     Active input devices as (device_id, friendly_name); [] when unavailable.
     """
+    if sys.platform == 'darwin':
+        from frontengine.utils.macos import get_backend
+        return [('default', 'Default microphone')] if get_backend().capability('microphone').available else []
     if sys.platform != "win32":
         return []
     enumerator = None
@@ -75,6 +78,10 @@ class MicrophoneMeter:
         self._enumerator = None
         self._get_peak = None
         self._ok = False
+        self._mac_meter = None
+        if sys.platform == 'darwin':
+            from frontengine.utils.macos.audio import MacMicrophoneMeter
+            self._mac_meter = MacMicrophoneMeter(device_id)
         if sys.platform == "win32":
             try:
                 self._open()
@@ -110,6 +117,8 @@ class MicrophoneMeter:
 
     def level(self) -> Optional[float]:
         """目前麥克風的峰值 0~1；不可用時回傳 None。"""
+        if self._mac_meter is not None:
+            return self._mac_meter.level()
         if not self._ok or self._meter is None or self._get_peak is None:
             return None
         try:
@@ -122,6 +131,9 @@ class MicrophoneMeter:
 
     def close(self) -> None:
         """釋放 COM 介面；可重複呼叫。"""
+        if self._mac_meter is not None:
+            self._mac_meter.close()
+            self._mac_meter = None
         for interface in (self._meter, self._device, self._enumerator):
             if self._tools is None:
                 break
@@ -140,7 +152,7 @@ _meter_singleton: Optional[MicrophoneMeter] = None
 def microphone_level() -> Optional[float]:
     """便利函式：以共用電表回傳預設麥克風的峰值 0~1，或 None。"""
     global _meter_singleton
-    if sys.platform != "win32":
+    if sys.platform not in ('win32', 'darwin'):
         return None
     if _meter_singleton is None:
         _meter_singleton = MicrophoneMeter()

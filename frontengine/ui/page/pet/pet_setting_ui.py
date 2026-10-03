@@ -1,4 +1,6 @@
 from typing import Optional
+from pathlib import Path
+import sys
 
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QGuiApplication
@@ -34,7 +36,7 @@ from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import retranslator, tr
 
-_PET_EXTENSIONS = (".gif", ".webp", ".png", ".jpg")
+_PET_EXTENSIONS = (".gif", ".webp", ".png", ".jpg", ".puppet")
 
 
 # 多處共用的英文備援字串（只有在翻譯缺漏時才會看到）
@@ -62,6 +64,7 @@ class PetSettingUI(SettingPage):
         self.ready_to_play = False
         self.pet_image_path: Optional[str] = None
         self.pet_sound_path: Optional[str] = None
+        self.puppet_script_path: Optional[str] = None
         # 鬼抓人：由本頁統一驅動，寵物只負責套用被指派的角色
         # Tag game: driven from this page, pets only apply the role they are given.
         self.tag_game = PetTagGame()
@@ -83,6 +86,8 @@ class PetSettingUI(SettingPage):
         self.choose_pack_button.clicked.connect(self.choose_pack)
         self.choose_sound_button = tr(QPushButton(), "pet_choose_sound", "Choose sound (optional)")
         self.choose_sound_button.clicked.connect(self.choose_sound)
+        self.choose_script_button = tr(QPushButton(), 'pet_choose_script', 'Choose puppet script...')
+        self.choose_script_button.clicked.connect(self.choose_puppet_script)
         self.ready_label = tr(QLabel(), "Not Ready")
 
         # Size
@@ -177,6 +182,7 @@ class PetSettingUI(SettingPage):
         source = self.add_section("section_source", "Source")
         source.add_inline(self.choose_file_button, self.choose_pack_button,
                           self.choose_sound_button)
+        source.add_inline(self.choose_script_button)
         source.add_row(self.recent_files_label, self.recent_files_combobox)
 
         appearance = self.add_section("section_appearance", "Appearance")
@@ -251,13 +257,19 @@ class PetSettingUI(SettingPage):
         """把安分狀態套到目前所有寵物身上。"""
         for pet in self.pet_list[:]:
             try:
-                pet.motion.settled = settled
+                if hasattr(pet, 'set_settled'):
+                    pet.set_settled(settled)
+                else:
+                    pet.motion.settled = settled
             except RuntimeError:  # pragma: no cover - 底層物件已消失
                 continue
 
     def _spawn_pet(self) -> None:
         """建立、顯示並開始移動一隻寵物（供 Start 與右鍵複製共用）。"""
         if not self.pet_image_path:
+            return
+        if Path(self.pet_image_path).suffix.lower() == '.puppet':
+            self._spawn_puppet()
             return
         pet = DesktopPetWidget(
             image_path=self.pet_image_path,
@@ -291,6 +303,32 @@ class PetSettingUI(SettingPage):
             pet.setScreen(geometry[1])
             bounds = geometry[0]
             pet.start_moving((bounds.left(), bounds.top(), bounds.right(), bounds.bottom()))
+
+    def _spawn_puppet(self) -> None:
+        from frontengine.show.pet.puppet_pet import PuppetPetWidget
+        try:
+            width = max(64, int(self.size_combobox.currentText()))
+            pet = PuppetPetWidget(self.pet_image_path, (width, int(width * 1.5)),
+                                  script_path=self.puppet_script_path)
+        except (ValueError, OSError, RuntimeError) as error:
+            QMessageBox.warning(self, 'Imervue puppet', str(error))
+            return
+        pet.clone_requested.connect(self._spawn_pet)
+        geometry = self._target_geometry()
+        if geometry is not None:
+            pet.setScreen(geometry[1])
+            bounds = geometry[0]
+            pet.move(bounds.left(), bounds.bottom() - pet.height())
+        self.pet_list.append(pet)
+        pet.show()
+        if self.settle_typing_checkbox.isChecked():
+            pet.set_settled(self._typing_watch.typing())
+            self._start_typing_watch()
+
+    def choose_puppet_script(self) -> None:
+        path, _ = QFileDialog.getOpenFileName(self, 'Imervue pet script', '', 'Pet script (*.petscript.json)')
+        if path:
+            self.puppet_script_path = path
 
     def chat_service(self) -> PetChatService:
         """共用的 AI 對話服務（懶建立；沒有金鑰時它自己會回報不可用）。"""
@@ -388,17 +426,19 @@ class PetSettingUI(SettingPage):
         self.tag_timer.stop()
         self.tag_game.reset()
         for pet in self._alive_pets():
-            pet.apply_tag_role(None)
+            if hasattr(pet, 'apply_tag_role'):
+                pet.apply_tag_role(None)
 
     def _start_tag_game(self) -> None:
         """有兩隻以上寵物且已勾選時才需要開錶 / Only run the game with 2+ pets."""
-        if self.tag_checkbox.isChecked() and len(self._alive_pets()) >= 2:
+        eligible = [pet for pet in self._alive_pets() if hasattr(pet, 'apply_tag_role')]
+        if self.tag_checkbox.isChecked() and len(eligible) >= 2:
             if not self.tag_timer.isActive():
                 self.tag_timer.start(self.TAG_INTERVAL_MS)
 
     def _tick_tag_game(self) -> None:
         """每一拍把座標餵給遊戲，再把角色發回各隻寵物。"""
-        pets = self._alive_pets()
+        pets = [pet for pet in self._alive_pets() if hasattr(pet, 'apply_tag_role')]
         if len(pets) < 2:
             self.tag_timer.stop()
             self.tag_game.reset()
@@ -489,6 +529,9 @@ class PetSettingUI(SettingPage):
         microphone so it only moves while you talk. Both read a meter value and
         capture no audio content.
         """
+        if sys.platform == 'darwin':
+            from frontengine.utils.macos.audio import MacAudioLevelProvider
+            return MacAudioLevelProvider(microphone=self.audio_source_combobox.currentData() == 'microphone')
         if self.audio_source_combobox.currentData() == "microphone":
             return microphone_level
         # 跟隨寵物所在螢幕的音源（比對不到就用系統預設輸出裝置）
@@ -498,6 +541,7 @@ class PetSettingUI(SettingPage):
     def get_state(self) -> dict:
         return {
             "pet_image_path": self.pet_image_path,
+            'puppet_script': self.puppet_script_path,
             "size": self.size_combobox.currentText(),
             "speed": self.speed_combobox.currentText(),
             "behaviour": self.behaviour_combobox.currentData(),
@@ -547,6 +591,7 @@ class PetSettingUI(SettingPage):
             self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
         if state.get("sound"):
             self.pet_sound_path = str(state["sound"])
+        self.puppet_script_path = state.get('puppet_script') or None
 
     @staticmethod
     def _behaviour_from(state: dict):

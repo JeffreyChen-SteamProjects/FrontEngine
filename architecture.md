@@ -1,7 +1,7 @@
 # FrontEngine Architecture
 
 > Short overview for people and agents. Per-module detail lives in [`architecture_explore.md`](architecture_explore.md).
-> Last verified: 2026-09-22 against `cee1fe6` on `main`.
+> Last verified: 2026-10-03; macOS native operations require target-host verification.
 
 ## 1. Purpose
 
@@ -21,6 +21,9 @@ on Steam (app 2793470) with Workshop import. JEditor embeds its main window as a
 | `frontengine/ui/page/` | One folder per feature page, built on `layout_kit.py` (`SettingPage`, `Section`). `control_center/` provides batch control, `scene_setting/` is the scene editor, and `utils.py` handles multi-monitor dispatch |
 | `frontengine/ui/nav/`, `menu/`, `dialog/`, `style/` | Sidebar navigation; language/help/how-to/preset/settings menus; dialogs (file choosers, rules, schedules, remote, privacy, …); stylesheet layered on qt-material |
 | `frontengine/show/` | Overlay widgets. Shared base `base_widget.py` (`BaseWidget`), `window_helpers.py`, and `overlay_factory.py` (scene JSON → widget) |
+| `frontengine/show/compositor/` | Shared layers, real OpenGL shader/texture renderer, software fallback and RGBA output; BaseWidget caches CPU raster content |
+| `frontengine/utils/imervue/`, `scene_format/` | Validated puppet container, optional upstream runtime, scene envelopes and portable package extraction leases |
+| `frontengine/utils/macos/` | Public-framework capability/permission checks, capture, audio and MIDI sessions; native operations isolated behind injectable boundaries |
 | `frontengine/system_tray/` | Tray icon and menu |
 | `frontengine/user_setting/` | `user_setting.json` (`user_setting_file.py`), preset repository (`presets/*.json` and zip packages), scene files |
 | `frontengine/utils/` | Services and pure logic: platform info, hotkeys, input watch, remote/MIDI, audio, rules/schedules/state machines, recording, virtual camera, window pinning, translations with live retranslation (`multi_language/`), `plugins/`, `steam/`, `workshop/`, logging, JSON |
@@ -75,7 +78,8 @@ feature page (ui/page/<kind>/) → dispatch_to_monitors() (ui/page/utils.py)
 
 ```
 closeEvent() | close() → _shutdown() (runs once) → save session if enabled → stop _CLOSING_SERVICES
-  → save page state and geometry → write_user_setting() → close overlays → close scene
+  → cancel recording/native sessions → close scenes → release scene extraction leases
+  → save page state and geometry → write_user_setting() → close overlays
 ```
 
 ## 5. Extension points
@@ -84,7 +88,7 @@ closeEvent() | close() → _shutdown() (runs once) → save session if enabled �
   `plugins/<name>.py` under the working directory. A module exposes
   `FRONTENGINE_TABS = {name: QWidget subclass}` and/or `register(registry)`; both fill
   `FrontEngine_EXTEND_TAB`. Loading is off by default (`load_plugins` setting, toggled in
-  `ui/menu/settings_menu.py`) because plugins run with full app privileges.
+  `ui/menu/settings_menu.py`) because plugins run with full app privileges. A versioned permission declaration (or explicit legacy full-trust approval) is checked before import; grants are bound to plugin content and location. See `docs/formats/interoperability.md`.
 - **Host-supplied tabs**: add to `FrontEngine_EXTEND_TAB` before start
   (see `tests/unit_test/start/extend_front_engine.py`).
 - **Control-center registry**: `ControlCenterUI.register_overlay_source(provider)` and
@@ -103,6 +107,16 @@ closeEvent() | close() → _shutdown() (runs once) → save session if enabled �
   `main_ui._handle_hotkey()`.
 
 ## 6. Cross-project boundaries
+
+- **Imervue (optional upstream)**: the `puppet` extra installs `Imervue>=1.0.90`.
+  `utils/imervue/runtime.py` consumes `Imervue.puppet.document_io.load_puppet`,
+  `Imervue.puppet.canvas.PuppetCanvas`, the motion/idle/input controllers and
+  `Imervue.desktop_pet.pet_script` loader/engine. Version 1 `.puppet` ZIP resources are validated
+  before invoking the reader. FrontEngine owns window geometry, lifecycle and settings;
+  it does not instantiate Imervue's PetWindow or write Imervue preferences.
+  Scenes reference puppets via version 1 PUPPET entries; `.fescene` bundles referenced
+  resources. Imervue is not expected to read the FrontEngine scene envelope.
+  Detailed formats and capability boundaries: `docs/formats/interoperability.md`.
 
 - **JEditor (downstream)**: JEditor lists `frontengine` as a dependency and embeds
   `FrontEngineMainUI` as a tab (`je_editor/pyside_ui/main_ui/menu/tab_menu/build_tab_tools_menu.py`,

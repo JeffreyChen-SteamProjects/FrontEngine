@@ -9,7 +9,7 @@ Ein Hintergrund liegt unter allen Fenstern und steht damit nie im Weg.
 * Zufällig - gemischte Reihenfolge.
 * Unterordner einbeziehen.
 * Auf Audio reagieren - der Hintergrund folgt dem, was die Lautsprecher
-  wiedergeben. Gelesen wird ein Pegel, nicht der Ton selbst. Nur unter Windows.
+  wiedergeben. Gelesen wird ein Pegel, nicht der Ton selbst. Windows und macOS (macos-Extra und Berechtigung; native macOS-Prüfung steht aus).
 * Ruhezeiten - zwischen den beiden angegebenen Zeiten den Ruhe-Ordner nehmen,
   für etwas Ruhigeres während der Arbeit.
 * Hintergrund starten / Nächster Hintergrund.

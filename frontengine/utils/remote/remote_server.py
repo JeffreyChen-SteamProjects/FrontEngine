@@ -22,14 +22,17 @@ from __future__ import annotations
 import json
 import secrets
 import socket
+import ssl
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 from urllib.parse import parse_qs, urlparse
 
 from PySide6.QtCore import QObject, Signal
 
 from frontengine.utils.logging.loggin_instance import front_engine_logger
+from frontengine.utils.remote.tls_certificate import Certificate, CertificateStore
 
 DEFAULT_PORT = 8770
 # 網頁端唯一能要求的動作。名字對應主視窗既有的快速鍵動作，
@@ -100,7 +103,8 @@ def parse_request(path: str) -> Tuple[str, Dict[str, str]]:
 
 def remote_url(address: str, port: int, token: str) -> str:
     """手機要開的網址（權杖在網址裡，所以掃了 QR 就能用）。"""
-    return f"http://{address}:{int(port)}/?token={token}"
+    host = f"[{address}]" if ":" in address else address
+    return f"https://{host}:{int(port)}/?token={token}"
 
 
 PAGE = """<!doctype html><html><head><meta charset="utf-8">
@@ -129,13 +133,22 @@ for(const name of actions){
 </script></body></html>"""
 
 
+class _TLSHTTPServer(ThreadingHTTPServer):
+    daemon_threads = True
+
+    def get_request(self):
+        request, address = super().get_request()
+        request.settimeout(5.0)
+        return request, address
+
+
 class RemoteServer(QObject):
     """
-    小型 HTTP 伺服器。請求是在 HTTP 執行緒上處理的，所以動作是以 Qt 訊號送出，
+    小型 HTTPS 伺服器。請求是在 HTTPS 執行緒上處理的，所以動作是以 Qt 訊號送出，
     由呼叫端用 QueuedConnection 接到 UI 執行緒——直接在那條執行緒上碰 Qt
     物件會壞掉，而在那裡開 QTimer 更是完全不會觸發（那條執行緒沒有事件迴圈）。
 
-    A small HTTP server. Requests are handled on the HTTP thread, so actions
+    A small HTTPS server. Requests are handled on the HTTPS thread, so actions
     leave as a Qt signal for the caller to take onto the UI thread with a
     QueuedConnection: touching Qt objects from that thread is unsafe, and
     starting a QTimer there simply never fires - it has no event loop.
@@ -144,7 +157,8 @@ class RemoteServer(QObject):
     action_requested = Signal(str)
 
     def __init__(self, on_action=None, port: int = DEFAULT_PORT,
-                 parent: Optional[QObject] = None) -> None:
+                 parent: Optional[QObject] = None,
+                 certificate_dir: Optional[Path] = None) -> None:
         super().__init__(parent)
         self.port = int(port)
         self.token = make_token()
@@ -153,6 +167,8 @@ class RemoteServer(QObject):
         self._on_action = on_action
         self._server: Optional[ThreadingHTTPServer] = None
         self._thread: Optional[threading.Thread] = None
+        self._certificate_store = CertificateStore(certificate_dir)
+        self.certificate: Optional[Certificate] = None
 
     @property
     def running(self) -> bool:
@@ -170,9 +186,19 @@ class RemoteServer(QObject):
         # A new token every start, so an old link stops working by itself.
         self.token = make_token()
         self.address = local_address()
+        listener = None
         try:
-            self._server = ThreadingHTTPServer((self.address, self.port), self._handler())
-        except OSError as error:
+            self.certificate = self._certificate_store.provision(self.address)
+            context = self._certificate_store.ssl_context()
+            listener = _TLSHTTPServer((self.address, self.port), self._handler())
+            listener.socket = context.wrap_socket(listener.socket, server_side=True,
+                                                  do_handshake_on_connect=False)
+            self.port = listener.server_address[1]
+            self._server = listener
+            self.last_error = ""
+        except (OSError, ValueError, ssl.SSLError) as error:
+            if listener is not None:
+                listener.server_close()
             self._server = None
             self.last_error = str(error)
             front_engine_logger.warning(f"[RemoteServer] cannot listen: {error!r}")
@@ -182,6 +208,26 @@ class RemoteServer(QObject):
         self._thread.start()
         front_engine_logger.info(f"[RemoteServer] listening on {self.address}:{self.port}")
         return True
+
+    def export_certificate(self, target: Path) -> bool:
+        try:
+            if self.certificate is None:
+                self.certificate = self._certificate_store.provision(local_address())
+            self._certificate_store.export(target)
+            return True
+        except (OSError, ValueError) as error:
+            self.last_error = str(error)
+            return False
+
+    def regenerate_certificate(self) -> bool:
+        was_running = self.running
+        self.stop()
+        try:
+            self.certificate = self._certificate_store.provision(local_address(), regenerate=True)
+        except (OSError, ValueError, ssl.SSLError) as error:
+            self.last_error = str(error)
+            return False
+        return self.start() if was_running else True
 
     def stop(self) -> None:
         """停止服務並關閉連線埠。"""
@@ -222,6 +268,8 @@ class RemoteServer(QObject):
                 self.send_response(status)
                 self.send_header("Content-Type", content_type)
                 self.send_header("Content-Length", str(len(body)))
+                self.send_header("Cache-Control", "no-store")
+                self.send_header("Referrer-Policy", "no-referrer")
                 self.end_headers()
                 self.wfile.write(body)
 

@@ -8,8 +8,7 @@
 
 - **#1** 〔決定〕PyPI 上的 v1.0.39 / v1.0.40 是壞的（缺 `__init__.py`，import 失敗）；要不要 yank 需要 PyPI 憑證。v1.0.41 之後都正常。
 - **#2** 〔決定〕PyPI 上的 `frontengine_dev` 停在 1.0.0，`pyproject.toml` 已到 1.0.77，workflow 沒有發佈 dev 套件的步驟（工作區 X-13）。
-- **#8** 〔候選〕本機離線 OCR（Windows.Media.Ocr）需要 WinRT 投影套件，目前沒有。
-- **#9** 〔候選〕音訊頻譜、視窗釘選／版面、螢幕錄影只有 Windows 完整支援。
+- **#9** macOS 的原生擷取、TCC 權限、音訊、MIDI 與多螢幕仍須在 Mac 實機驗證（`tests/integration/macos_native_smoke.py`）；Linux 的音訊與視窗控制尚未補齊。
 - **#10** 〔候選〕「正在播放」的歌名需要選用套件 `winsdk`。
 - **#11** 〔阻塞〕Steam Workshop 的**發布**需要 Steamworks SDK 與 App 憑證。
 - **#12** 〔候選〕Steam 商店頁只有 2 則評論、討論區 0 個主題，沒有真實使用者的需求訊號；目前功能取捨是靠 Lively、Rainmeter、PowerToys、DisplayFusion 等鄰近產品推論的。

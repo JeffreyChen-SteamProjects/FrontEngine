@@ -16,3 +16,7 @@
 * 载入场景文件 - 把保存过的场景调回来。
 * 清除所有脚本 - 重新开始。
 * 显示在所有屏幕 - 每个屏幕各一份。
+
+场景：场景页支持旧 entry mapping JSON、有版本的 frontengine.scene envelope，以及便携式 .fescene 包。PUPPET 项目可设置位置、大小、不透明度、有限数值参数，以及可选动作、表情与脚本。JSON 路径相对于场景文件解析。.fescene 包含引用媒体、原始 .puppet 与可选 .petscript.json，可移到其他电脑。导入会检查路径、符号链接、版本与解压上限。FrontEngine 场景保持为场景包；.puppet 保持为单一 Imervue 角色。
+
+:doc:`runtime_interoperability`

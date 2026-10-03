@@ -474,3 +474,26 @@ Qt 訊號 + `QueuedConnection`** 回到 UI 執行緒。另外：
    其他平台安靜降級，但功能落差在 UI 上不一定看得出來。
 6. **語言字典的規模** — 七份各約 680 行、共約 4,750 行，佔全專案 16%。加一個欄位
    就是七處要改；目前靠測試守住一致性，長期可考慮改成單一來源 + 產生器。
+
+
+## Runtime interchange and platform services (2026-10-03)
+
+| Module | Boundary and lifecycle |
+|---|---|
+| `utils/recording/gif_writer.py` / `frame_recorder.py` | Incremental GIF encoder; copied RGB transfer to a bounded writer queue; timestamp-aware dropped frames; nonblocking stop/cancel; atomic output replacement |
+| `utils/remote/tls_certificate.py` / `remote_server.py` | Persistent SAN-aware self-signed credentials, owner-protected private key, HTTPS token-authenticated commands; Qt receives queued events |
+| `utils/screen_text/local_ocr.py` / `screen_text_service.py` | Windows OCR, Vision, optional Tesseract; structured empty success/unavailable/failure; separate cloud image/text consent |
+| `utils/imervue/puppet_asset.py` / `runtime.py` | Version/resource/path validation before optional upstream imports; no local repository path mutation |
+| `show/pet/puppet_pet.py` | FrontEngine native pet window with upstream Canvas, motion/expression/idle/input/script; hide pauses, close clears document and native drivers |
+| `utils/scene_format/` / `user_setting/scene_setting.py` | Legacy and versioned scene JSON, relative resources, portable ZIP copies; extraction leases survive until closed scene shutdown |
+| `show/scene/compositor_view.py` | IMAGE/GIF/TEXT layer textures, scene transforms/z/opacity, quality-aware refresh; native puppets remain separate windows |
+| `utils/plugins/plugin_manifest.py` / `plugin_loader.py` | Permissions and SHA-256 content/location grants checked before import; imported settings cannot grant executable code; full application privileges after approval |
+| `utils/macos/` | Lazy public PyObjC bindings; explicit TCC availability; ScreenCaptureKit frames/system audio, AVFoundation microphone, Quartz/AX geometry and movement, CoreMIDI lifetime |
+| `show/compositor/` / `show/base_widget.py` | Software reference and actual OpenGL renderer; DPR-aware RGBA output; premultiplied alpha, clip, transforms/depth; persistent texture resources and CPU raster revision cache |
+| `tests/integration/` | Real desktop OpenGL/puppet smoke checks; macOS capability report and own-window capture/movement with permission-dependent skips |
+
+Capture uses a single selected display in logical coordinates. ScreenCaptureKit callbacks
+copy the latest frame/audio state; Qt accesses it through region/audio adapters. Foreign
+window opacity/forced stacking, Spaces and capture exclusion are unavailable on macOS.
+The capability menu reports permission, missing-binding and unsupported states distinctly.
+Mac hardware/TCC verification remains a target-host check rather than an injected-test claim.

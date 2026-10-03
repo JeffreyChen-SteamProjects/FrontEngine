@@ -4,7 +4,7 @@ Pagina Widget
 * Spettro audio - barre o un anello che si muovono con ciò che riproducono gli
   altoparlanti, con numero di bande regolabile. Questo cattura davvero l'audio,
   ma solo in memoria per calcolarne le frequenze; nulla viene registrato o
-  inviato, e la cattura finisce insieme allo spettro. Solo su Windows.
+  inviato, e la cattura finisce insieme allo spettro. Windows e macOS (opzione macos e permesso; macOS nativo non verificato qui).
 * Monitor di sistema - processore, memoria, disco, batteria e traffico di rete
   in un piccolo pannello sempre visibile. Spunta le linee che vuoi; una linea
   nascosta continua a registrare e al ritorno mostra cosa è successo nel

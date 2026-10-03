@@ -48,10 +48,7 @@ Settings menu
 * Signage mode... - rotate through a list of presets on a timer, for a machine
   left running as a display. The main window can go to the tray while it runs -
   but only when there is a tray to bring it back from.
-* Remote control... - control FrontEngine from a phone on the same network, and
-  bind a MIDI controller. The link carries a one-time token that changes at
-  every start, and only the buttons on the page can be triggered. It is plain
-  HTTP, so leave it off on networks you do not trust.
+* Phone control: Settings → Remote control serves HTTPS only, with a token that changes on every start and a fixed action list. The local self-signed certificate is not automatically trusted by a phone. Export the public certificate and compare the displayed SHA-256 fingerprint before importing or trusting it through your phone/browser settings. The private key stays in the user data directory. Changed IP addresses, expiry or regeneration may require trusting a new certificate. TLS startup failure does not fall back to HTTP.
 * Screen-sharing privacy... - hide the overlays from a screen capture while a
   meeting application is open. Matched against window titles, so a meeting held
   in a browser tab is caught too. Windows only.
@@ -70,3 +67,11 @@ Help menu
   over the screen. Rebinding them changes this list too. Press the shortcut for it
   again, or Escape, to put it away.
 * Open issue tracker, and a reminder that F12 closes FrontEngine at once.
+
+Plugins: enabling loading does not authorize a plugin. A plugin.json or single-file sidecar declares version, identity, entrypoint and capabilities; approval is checked before Python import and tied to the content digest. Changed code or declarations require approval again; legacy plugins require explicit full trust. Settings → Revoke plugin grants removes stored approvals; restart to unload already running code. Python plugins still run with full application privileges: declarations and consent are not an OS sandbox.
+
+Rendering: Settings → Overlay rendering selects Auto, GPU or Software and shows the backend actually used. The GPU compositor uses OpenGL textures, shaders and framebuffers for layer order, transforms, opacity and clipping; initialization failure falls back to software with a reason. Existing QPainter content can still be rasterized on the CPU before texture upload; web/video/native widgets may use separate windows. Capture or recording may read a GPU frame back to the CPU. These paths are not a promise of zero-copy capture or measured speed gains. Scene GPU composition currently covers IMAGE, GIF and TEXT; puppet rendering uses its own Imervue window.
+
+:doc:`runtime_interoperability`
+
+Settings → macOS permissions and capabilities lists each feature as available, unavailable or unsupported and shows the permission or installation reason.

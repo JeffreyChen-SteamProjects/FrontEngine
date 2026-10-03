@@ -9,7 +9,7 @@ Uno sfondo sta sotto ogni finestra, quindi non è mai d'intralcio.
 * Casuale - ordine mescolato.
 * Includi le sottocartelle.
 * Reagisci all'audio - lo sfondo risponde a ciò che riproducono gli
-  altoparlanti. Ne legge un livello, non il suono stesso. Solo su Windows.
+  altoparlanti. Ne legge un livello, non il suono stesso. Windows e macOS (opzione macos e permesso; macOS nativo non verificato qui).
 * Ore di quiete - fra i due orari indicati passa alla cartella «quiete», per
   qualcosa di più sobrio mentre si lavora.
 * Avvia lo sfondo / Sfondo successivo.

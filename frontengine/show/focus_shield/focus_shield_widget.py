@@ -32,6 +32,11 @@ def active_window_rect() -> Optional[Tuple[int, int, int, int]]:
     The active window's rectangle, or None off Windows — where the dimmer simply
     shades the whole screen instead.
     """
+    if sys.platform == 'darwin':
+        from frontengine.utils.macos import get_backend
+        backend = get_backend()
+        handle = backend.foreground_window()
+        return backend.window_geometry(handle) if handle else None
     if sys.platform != "win32":
         return None
     try:
@@ -96,6 +101,9 @@ class DimBackgroundWidget(BaseWidget):
         """
         if rect is None:
             return None
+        if sys.platform == 'darwin':
+            # Quartz and Qt both use global display points on macOS.
+            return rect
         ratio = self.devicePixelRatio() or 1.0
         return tuple(int(round(value / ratio)) for value in rect)
 

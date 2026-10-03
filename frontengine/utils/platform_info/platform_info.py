@@ -298,7 +298,8 @@ def standable_windows(exclude_handles=()) -> List[Tuple[int, int, int]]:
     if sys.platform == "win32":
         return _standable_windows_windows(exclude_handles)
     if sys.platform == "darwin":
-        return []  # needs a native API binding; degrades to "floor only"
+        from frontengine.utils.macos import get_backend
+        return get_backend().standable_windows(exclude_handles)
     output = run_command("linux_windows")
     return parse_wmctrl_geometry(output) if output else []
 

@@ -48,10 +48,7 @@ Menü „Einstellungen“
 * Anzeigetafel-Modus… - eine Liste von Voreinstellungen auf Zeit durchwechseln,
   für einen Rechner, der als Anzeige läuft. Das Hauptfenster kann dabei in die
   Taskleiste - aber nur, wenn es eine gibt, die es zurückholen kann.
-* Fernsteuerung… - FrontEngine vom Telefon im selben Netzwerk steuern und einen
-  MIDI-Controller binden. Der Link trägt ein Einmal-Token, das sich bei jedem
-  Start ändert, und nur die Schaltflächen der Seite lassen sich auslösen. Es
-  ist einfaches HTTP, lassen Sie es in fremden Netzwerken aus.
+* Telefonsteuerung: Einstellungen → Fernsteuerung verwendet ausschließlich HTTPS, ein bei jedem Start neues Token und eine feste Aktionsliste. Das Telefon vertraut dem selbstsignierten Zertifikat nicht automatisch. Exportieren Sie das öffentliche Zertifikat und vergleichen Sie den angezeigten SHA-256-Fingerabdruck, bevor Sie es in den Telefon-/Browsereinstellungen importieren oder ihm vertrauen. Der private Schlüssel bleibt im Benutzerdatenordner. IP-Änderung, Ablauf oder Neuerstellung können ein neues Zertifikat erfordern. Ein TLS-Startfehler führt nicht zu HTTP.
 * Privatsphäre beim Bildschirmteilen… - Overlays vor einer Bildschirmaufnahme
   verbergen, solange eine Meeting-Anwendung offen ist. Verglichen wird mit
   Fenstertiteln, damit auch ein Meeting im Browser-Tab erkannt wird. Nur unter
@@ -71,3 +68,11 @@ Menü „Hilfe“
   belegt sind, über dem Bildschirm. Neu belegen ändert auch diese Liste. Erneut
   das Kürzel drücken oder Escape blendet sie aus.
 * Fehler-Tracker, und der Hinweis, dass F12 FrontEngine sofort beendet.
+
+Plugins: Aktiviertes Laden ist noch keine Freigabe. plugin.json oder eine Begleitdatei für ein einzelnes Plugin deklariert Version, Identität, Einstiegspunkt und Fähigkeiten. Zustimmung wird vor Python-Import geprüft und an die Inhaltsprüfsumme gebunden. Geänderter Code oder geänderte Deklarationen erfordern neue Zustimmung; alte Plugins benötigen ausdrückliches volles Vertrauen. Einstellungen → Plugin-Freigaben widerrufen löscht gespeicherte Freigaben; laufenden Code entlädt erst ein Neustart. Python-Plugins haben weiterhin alle Anwendungsrechte; Deklaration und Zustimmung sind keine Betriebssystem-Sandbox.
+
+Darstellung: Einstellungen → Overlay-Darstellung bietet Automatisch, GPU oder Software und zeigt den tatsächlich verwendeten Dienst. Der GPU-Compositor verwendet OpenGL-Texturen, Shader und Framebuffer für Reihenfolge, Transformation, Deckkraft und Ausschnitt; bei Initialisierungsfehler wird mit Begründung auf Software zurückgefallen. QPainter-Inhalte können weiter auf der CPU rasterisiert und hochgeladen werden; Web-/Video-/native Widgets können eigene Fenster verwenden. Aufnahme kann GPU-Bilder zur CPU zurücklesen. Das verspricht weder kopierfreie Aufnahme noch gemessene Leistungsgewinne. GPU-Szenenkomposition umfasst derzeit IMAGE, GIF und TEXT; Puppet-Darstellung verwendet ein eigenes Imervue-Fenster.
+
+:doc:`runtime_interoperability`
+
+Einstellungen → macOS-Berechtigungen und Fähigkeiten zeigt jede Funktion als verfügbar, nicht verfügbar oder nicht unterstützt, mit Berechtigungs- oder Installationsgrund.

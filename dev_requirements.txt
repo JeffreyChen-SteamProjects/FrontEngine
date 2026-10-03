@@ -9,3 +9,4 @@ PyOpenGL_accelerate
 numpy
 pynput
 pyflakes
+-r requirements.txt

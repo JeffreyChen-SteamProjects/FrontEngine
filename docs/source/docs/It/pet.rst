@@ -21,7 +21,7 @@ Un compagno che vive sulla scrivania.
 * Giocare a rincorrersi - due o più mascotte si inseguono.
 * Reagire all'audio - la mascotte si muove a tempo. Può seguire gli
   **altoparlanti** o il **microfono**; in entrambi i casi legge solo un livello,
-  un singolo numero, e non registra mai ciò che viene detto. Solo su Windows.
+  un singolo numero, e non registra mai ciò che viene detto. Windows e macOS (opzione macos e permesso; macOS nativo non verificato qui).
 * Chat IA (serve una chiave API) - parlarle. Legge la variabile d'ambiente
   ANTHROPIC_API_KEY; la chiave non viene mai salvata.
 * Timer di concentrazione (min) - un timer di lavoro che la mascotte tiene per
@@ -29,3 +29,7 @@ Un compagno che vive sulla scrivania.
 
 Trascina un file sulla mascotte per darle da mangiare, oppure un'immagine o un
 pacchetto per cambiarle aspetto.
+
+Animali puppet: installa l’opzione puppet e un runtime Imervue disponibile, poi scegli o trascina un file originale Imervue .puppet v1 sulla pagina Animale. I vecchi pacchetti di immagini e sprite restano disponibili. I puppet usano canvas, movimenti ed espressioni di Imervue, si possono clonare o chiudere e seguono controlli delle sovrapposizioni e preset. Un .petscript.json facoltativo usa il motore di script esistente di Imervue; i pacchetti FrontEngine pet.json non sono file puppet. Versioni sconosciute, percorsi di archivio pericolosi e risorse invalide sono rifiutati prima del caricamento.
+
+:doc:`runtime_interoperability`

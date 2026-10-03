@@ -23,6 +23,7 @@ from types import ModuleType
 from typing import Dict, List, Optional
 
 from frontengine.utils.logging.loggin_instance import front_engine_logger
+from frontengine.utils.plugins.plugin_manifest import authorize_plugin, read_manifest
 
 PLUGIN_DIR_NAME = "plugins"
 MANIFEST_NAME = "plugin.json"
@@ -117,7 +118,8 @@ def register_plugin_tabs(module, registry: Dict[str, type]) -> List[str]:
 
 
 def load_plugins(registry: Dict[str, type], enabled: bool = False,
-                 base: Optional[str] = None) -> List[str]:
+                 base: Optional[str] = None, *, grants: Optional[dict] = None,
+                 authorizer=None) -> List[str]:
     """
     載入所有外掛並註冊它們的分頁；`enabled` 為 False（預設）時完全不載入。
     回傳成功註冊的分頁名稱。
@@ -133,6 +135,22 @@ def load_plugins(registry: Dict[str, type], enabled: bool = False,
             f"[plugins] loading {len(paths)} plugin(s) with full application privileges; "
             "only install plugins you trust")
     registered: List[str] = []
+    approvals = grants if isinstance(grants, dict) else {}
     for path in paths:
-        registered.extend(register_plugin_tabs(load_plugin_module(path), registry))
+        try:
+            manifest = read_manifest(path)
+            if not authorize_plugin(manifest, approvals, authorizer):
+                front_engine_logger.info(f'[plugins] not authorized: {path}')
+                continue
+        except (OSError, ValueError) as error:
+            front_engine_logger.warning(f'[plugins] invalid declaration: {path}: {error}')
+            continue
+        previous_bytecode_policy = sys.dont_write_bytecode
+        try:
+            # Existing bytecode is approved content. Do not create new caches
+            # during import or registration and silently invalidate that grant.
+            sys.dont_write_bytecode = True
+            registered.extend(register_plugin_tabs(load_plugin_module(path), registry))
+        finally:
+            sys.dont_write_bytecode = previous_bytecode_policy
     return registered

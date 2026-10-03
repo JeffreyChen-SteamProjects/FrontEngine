@@ -1,4 +1,5 @@
 import ctypes
+import sys
 from typing import Union
 
 def check_key_is_press(keycode: Union[int, str]) -> bool:
@@ -6,6 +7,9 @@ def check_key_is_press(keycode: Union[int, str]) -> bool:
     檢查指定的鍵是否被按下 (Windows only)
     Check if the specified key is currently pressed
     """
+    if sys.platform == 'darwin':
+        from frontengine.utils.macos.input import key_is_pressed
+        return key_is_pressed(keycode)
     if isinstance(keycode, int):
         # 使用虛擬鍵碼檢查
         state: int = ctypes.windll.user32.GetAsyncKeyState(keycode)

@@ -21,7 +21,7 @@ Ein Begleiter, der auf dem Desktop lebt.
 * Fangen spielen - zwei oder mehr Haustiere jagen einander.
 * Auf Audio reagieren - das Haustier bewegt sich zum Ton. Es folgt wahlweise
   den **Lautsprechern** oder dem **Mikrofon**; beides liest nur einen Pegel,
-  eine einzelne Zahl, und nimmt nie auf, was gesagt wird. Nur unter Windows.
+  eine einzelne Zahl, und nimmt nie auf, was gesagt wird. Windows und macOS (macos-Extra und Berechtigung; native macOS-Prüfung steht aus).
 * KI-Chat (API-Schlüssel nötig) - mit ihm sprechen. Liest die Umgebungsvariable
   ANTHROPIC_API_KEY; der Schlüssel wird nie gespeichert.
 * Fokus-Timer (Min.) - eine Arbeitsuhr, die das Haustier für Sie führt, mit
@@ -29,3 +29,7 @@ Ein Begleiter, der auf dem Desktop lebt.
 
 Ziehen Sie eine Datei auf das Haustier, um es zu füttern, oder ein Bild bzw.
 ein Haustier-Paket, um sein Aussehen zu ändern.
+
+Puppet-Haustiere: Installieren Sie das optionale puppet-Extra und eine verfügbare Imervue-Laufzeit; wählen oder ziehen Sie eine originale Imervue-.puppet-v1-Datei auf die Haustierseite. Bild- und Sprite-Pakete bleiben nutzbar. Puppet-Haustiere verwenden Imervues Canvas, Bewegungen und Ausdrücke, können dupliziert oder geschlossen werden und folgen Overlay-Steuerung und Voreinstellungen. Eine optionale .petscript.json verwendet Imervues Skriptengine; FrontEngine-pet.json-Pakete sind keine Puppet-Dateien. Unbekannte Versionen, unsichere Archivpfade und ungültige Medien werden vor dem Laden abgewiesen.
+
+:doc:`runtime_interoperability`

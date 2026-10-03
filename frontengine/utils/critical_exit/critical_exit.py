@@ -4,6 +4,7 @@ from threading import Thread
 from typing import Union
 
 from PySide6.QtWidgets import QApplication
+from PySide6.QtCore import QMetaObject, Qt
 
 from frontengine.utils.critical_exit.check_key_is_press import check_key_is_press
 from frontengine.utils.critical_exit.win32_vk import keyboard_keys_table
@@ -60,6 +61,9 @@ class CriticalExit(Thread):
         Whether this platform supports it: check_key_is_press goes through Win32's
         GetAsyncKeyState and raises AttributeError anywhere else.
         """
+        if sys.platform == 'darwin':
+            from frontengine.utils.macos import get_backend
+            return get_backend().capability('global_hotkey').available
         return sys.platform == "win32"
 
     def run(self) -> None:
@@ -71,7 +75,7 @@ class CriticalExit(Thread):
             while True:
                 time.sleep(0.1)
                 if check_key_is_press(self._exit_check_key):
-                    QApplication.exit(0)
+                    QMetaObject.invokeMethod(QApplication.instance(), 'quit', Qt.ConnectionType.QueuedConnection)
                     sys.exit(0)
         except SystemExit:
             raise

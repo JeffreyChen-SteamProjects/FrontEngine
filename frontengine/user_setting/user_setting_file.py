@@ -160,7 +160,8 @@ def export_user_setting(destination: Path) -> Path:
     """將目前所有設定寫出到指定路徑 / Write all current settings to `destination`."""
     destination = Path(destination)
     destination.parent.mkdir(parents=True, exist_ok=True)
-    return JsonRepository(destination).save(user_setting_dict)
+    data = {key: value for key, value in user_setting_dict.items() if key != 'plugin_grants'}
+    return JsonRepository(destination).save(data)
 
 
 def import_user_setting(source: Path) -> None:
@@ -175,7 +176,7 @@ def import_user_setting(source: Path) -> None:
     data = repo.load()
     if not isinstance(data, dict):
         raise ValueError("Settings file must contain a JSON object")
-    user_setting_dict.update(data)
+    user_setting_dict.update({key: value for key, value in data.items() if key != 'plugin_grants'})
     write_user_setting()
 
 

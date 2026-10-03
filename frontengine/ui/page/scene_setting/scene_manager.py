@@ -9,6 +9,8 @@ from frontengine.ui.page.utils import create_monitor_selection_dialog
 from frontengine.user_setting.scene_setting import choose_scene_json, write_scene_file, scene_json
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.retranslate import tr
+from frontengine.utils.scene_format.scene_document import normalize_scene
+from frontengine.user_setting.user_setting_file import user_setting_dict
 
 
 class SceneManagerUI(QWidget):
@@ -95,8 +97,8 @@ class SceneManagerUI(QWidget):
             # An empty script means "nothing to open", not a syntax error.
             return {}
         try:
-            scene = json.loads(text)
-        except json.JSONDecodeError as error:
+            scene = normalize_scene(json.loads(text))
+        except ValueError as error:
             QMessageBox.critical(self, "JSON Error", f"Invalid JSON: {error}")
             return None
         if not isinstance(scene, dict):
@@ -115,6 +117,7 @@ class SceneManagerUI(QWidget):
             "SOUND": self.scene.add_sound,
             "VIDEO": self.scene.add_video,
             "WEB": self.scene.add_web,
+            'PUPPET': self.scene.add_puppet,
         }
         for scene_dict in scene.values():
             if not isinstance(scene_dict, dict):
@@ -158,20 +161,45 @@ class SceneManagerUI(QWidget):
             return None
         return [monitors[index]]
 
-    def _open_view(self, monitor) -> None:
-        """開一個場景視窗；給了螢幕就擺到那台上面。"""
-        graphic_view = ExtendGraphicView(self.scene.graphic_scene)
-        if monitor is not None:
-            graphic_view.setScreen(monitor)
-            graphic_view.move(monitor.availableGeometry().topLeft())
-        self.scene.view_list.append(graphic_view)
-        graphic_view.showMaximized()
+    def _open_view(self, monitor) -> bool:
+        """Start one monitor transaction without changing windows on earlier monitors."""
+        native_count = len(self.scene.native_widgets)
+        graphic_view = None
+        try:
+            self.scene.open_native_widgets(monitor)
+            if not self.scene.widget_list:
+                return True
+            if self.scene.supports_composition():
+                from frontengine.show.scene.compositor_view import SceneCompositorView
+                graphic_view = SceneCompositorView(self.scene.graphic_scene,
+                                                   user_setting_dict.get('render_backend', 'auto'))
+            else:
+                graphic_view = ExtendGraphicView(self.scene.graphic_scene)
+            if monitor is not None:
+                graphic_view.setScreen(monitor)
+                graphic_view.move(monitor.availableGeometry().topLeft())
+            graphic_view.showMaximized()
+            self.scene.view_list.append(graphic_view)
+            return True
+        except (ValueError, OSError, RuntimeError) as error:
+            failed_windows = self.scene.native_widgets[native_count:]
+            del self.scene.native_widgets[native_count:]
+            if graphic_view is not None:
+                failed_windows.append(graphic_view)
+            for widget in failed_windows:
+                try:
+                    widget.close()
+                    widget.deleteLater()
+                except RuntimeError:
+                    continue
+            QMessageBox.warning(self, 'Puppet Error', str(error))
+            return False
 
     def update_scene_json(self):
         front_engine_logger.info("[SceneManagerUI] update_scene_json")
         try:
             choose_scene_json(self)
-        except OSError as error:
+        except (OSError, ValueError) as error:
             # 選到壞掉或讀不到的場景檔。不接住的話畫面完全沒反應，
             # 使用者只會覺得那個按鈕壞了。
             # A scene file that is corrupt or unreadable. Uncaught, nothing at all

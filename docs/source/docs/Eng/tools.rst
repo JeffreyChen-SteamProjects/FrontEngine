@@ -15,11 +15,8 @@ Tools Page
   Pin last puts that capture on top of everything as a small window you can drag,
   scroll to resize, and close with a double-click or Escape - a specification, a
   colour reference or an error message kept beside what you are working on.
-* Read text - drag out an area to copy the text in it, translate it, or ask a
-  question about it. This sends the captured area to Anthropic's API, so it
-  asks for consent first and uses your own ANTHROPIC_API_KEY.
-* Record area - record part of the screen, with an adjustable frame rate and
-  length, optionally with the camera in the corner.
+* Screen text: Tools → Read text first uses local OCR: Windows.Media.Ocr on Windows, Vision on macOS, or an installed Tesseract executable with language data. Local extraction needs neither cloud consent nor ANTHROPIC_API_KEY; an empty successful result does not upload a screenshot. Translation and questions can send recognized text to Anthropic only with separate text consent and your key. Screenshot fallback after local failure needs its own capture consent and the key. The result shows the backend and errors; consent can be withdrawn there.
+* Recording: select an area and choose the output GIF before capture starts. Cancelling does not start recording. Frames are written incrementally on a background thread with a queue limited to three frames and 64 MiB; a single oversized frame is rejected. A full queue drops captures and preserves elapsed playback timing. Frame-rate, duration and frame-count limits and the optional camera inset remain. Stop finalizes asynchronously; the final file replaces the destination atomically only after success. Cancellation and write errors clean up the temporary file and preserve an existing destination.
 * Virtual camera - send an area, overlays and all, as a webcam that Zoom, Teams
   or Discord can pick as their video source. Needs the optional pyvirtualcam
   package and a virtual camera driver; without either, the button says so.
@@ -31,10 +28,12 @@ Tools Page
 * Replicate a window... - a second, small window showing a chosen window live,
   while the original stays where it is. Useful for keeping an eye on a video or
   a build while you work in front of it. Drag the replica to move it,
-  double-click to close it. Windows only.
+  double-click to close it. Windows and macOS (optional macos extra and permission; native macOS unverified here).
 
   A replica can show just part of the window - the top or bottom half, one side,
   or the centre - so a chat column or a progress bar can be pinned on its own.
   The part is kept as a proportion, so resizing the original still shows the same
   piece of it.
 * Window layout - save where your windows are and put them back later.
+
+:doc:`runtime_interoperability`

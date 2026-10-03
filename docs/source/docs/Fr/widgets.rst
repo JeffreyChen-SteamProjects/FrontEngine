@@ -4,8 +4,7 @@ Page Widgets
 * Spectre audio - des barres ou un anneau qui suivent ce que jouent les
   haut-parleurs, avec un nombre de bandes réglable. Celui-ci capte réellement
   l'audio, en mémoire seulement, pour en calculer les fréquences ; rien n'est
-  enregistré ni envoyé, et la capture s'arrête avec le spectre. Windows
-  uniquement.
+  enregistré ni envoyé, et la capture s'arrête avec le spectre. Windows et macOS (option macos et autorisation ; macOS natif non vérifié ici).
 * Moniteur système - processeur, mémoire, disque, batterie et débit réseau dans
   un petit panneau toujours visible. Cochez les lignes voulues ; une ligne
   masquée continue d'enregistrer et montre à son retour ce qui s'est passé

@@ -51,6 +51,9 @@ _POLL_SECONDS = 0.02
 
 def available() -> bool:
     """這台機器能不能做回送擷取（只有 Windows 可以）。"""
+    if sys.platform == 'darwin':
+        from frontengine.utils.macos import get_backend
+        return get_backend().capability('system_audio').available
     return sys.platform == "win32"
 
 
@@ -98,9 +101,16 @@ class LoopbackSpectrum:
         self._thread: Optional[threading.Thread] = None
         self._stop_event = threading.Event()
         self._running = False
+        self._mac_session = None
+
+    @property
+    def last_error(self) -> str:
+        return self._mac_session.last_error if self._mac_session else ''
 
     @property
     def running(self) -> bool:
+        if self._mac_session is not None:
+            return self._mac_session.running
         return self._running
 
     def set_bands(self, bands: int) -> None:
@@ -111,11 +121,20 @@ class LoopbackSpectrum:
 
     def bands(self) -> List[float]:
         """最新一組頻段強度；沒在跑或還沒讀到就是一排 0。"""
+        if self._mac_session is not None:
+            return spectrum_bands(self._mac_session.samples(), 48000, self.band_count)
         with self._lock:
             return list(self._bands)
 
     def start(self) -> bool:
         """開始擷取；平台不支援或啟動失敗回傳 False。"""
+        if sys.platform == 'darwin':
+            from frontengine.utils.macos.capture import CaptureSession
+            if self.device_id is not None:
+                return False
+            if self._mac_session is None:
+                self._mac_session = CaptureSession()
+            return self._mac_session.start(audio=True)
         if self._running:
             return True
         if not available():
@@ -130,6 +149,9 @@ class LoopbackSpectrum:
 
     def stop(self) -> None:
         """停止擷取並等背景執行緒收工。"""
+        if self._mac_session is not None:
+            self._mac_session.stop()
+            return
         if not self._running:
             return
         front_engine_logger.info("[LoopbackCapture] stop")

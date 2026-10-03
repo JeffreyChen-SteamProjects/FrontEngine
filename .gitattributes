@@ -1,2 +1,5 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Translation dictionaries must remain LF on every checkout.
+frontengine/utils/multi_language/*.py text eol=lf

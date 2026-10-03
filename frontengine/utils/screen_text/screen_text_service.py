@@ -1,26 +1,14 @@
-"""
-讀畫面上的文字：把框選到的一塊畫面交給 Claude，取出文字、翻譯它，或就它問問題。
-
-**這個功能會把螢幕截圖送到 Anthropic 的 API**，是本專案唯一會把畫面內容送出
-機器的地方。因此：必須先明確同意（UI 會先問一次並記住）、必須自己提供
-ANTHROPIC_API_KEY、而且沒有同意或沒有金鑰時整個功能都是關的。
-
-Read the text on screen: hand a captured region to Claude to pull the text out,
-translate it, or answer a question about it.
-
-**This sends a screenshot to Anthropic's API** - the only place in this project
-where screen content leaves the machine. So: it needs explicit consent (asked
-once and remembered), it needs your own ANTHROPIC_API_KEY, and without either
-the whole feature stays off.
-"""
+"""Extract screen text locally; cloud text or image processing requires explicit consent."""
 from __future__ import annotations
 
 import base64
 import os
 import threading
+from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional
 
 from frontengine.utils.logging.loggin_instance import front_engine_logger
+from frontengine.utils.screen_text.local_ocr import LocalOcr, OcrBackend, OcrResult
 
 API_KEY_ENV = "ANTHROPIC_API_KEY"
 MODEL = "claude-opus-5"
@@ -33,7 +21,7 @@ ACTIONS = (ACTION_EXTRACT, ACTION_TRANSLATE, ACTION_ASK)
 
 DEFAULT_LANGUAGE = "English"
 SYSTEM_PROMPT = (
-    "You read a screenshot the user captured and answer about its contents. "
+    "You read supplied text or a screenshot and answer about its contents. "
     "Reply with the answer itself and nothing else - no preamble, no commentary "
     "on the image quality, no markdown fences."
 )
@@ -124,22 +112,30 @@ def reply_text(response: Any) -> Optional[str]:
     return joined or None
 
 
+@dataclass(frozen=True)
+class ScreenTextResult:
+    status: str
+    text: str = ""
+    backend: str = ""
+    error: str = ""
+    consent_required: str = ""
+
+
 class ScreenTextService:
-    """
-    把截圖交給 Claude 的服務。沒有金鑰、沒有同意或沒有安裝 SDK 時 available()
-    為 False，read() 一律回傳 None——不會偷偷送出任何東西。
-    The service that hands a screenshot to Claude. Without a key, without
-    consent, or without the SDK, available() is False and read() returns None:
-    nothing is ever sent quietly.
-    """
+    """Local-first recognition with separately consented cloud text and image paths."""
 
     def __init__(self, model: str = MODEL,
                  consent_provider: Optional[Callable[[], bool]] = None,
-                 key_provider: Optional[Callable[[], Optional[str]]] = None) -> None:
+                 key_provider: Optional[Callable[[], Optional[str]]] = None,
+                 local_backend: Optional[OcrBackend] = None,
+                 text_consent_provider: Optional[Callable[[], bool]] = None) -> None:
         self.model = model
         self._consent_provider = consent_provider or (lambda: False)
         self._key_provider = key_provider or api_key
         self._client = None
+        self.local_backend = local_backend if local_backend is not None else LocalOcr()
+        self._text_consent_provider = text_consent_provider or self._consent_provider
+        self.last_result = ScreenTextResult("unavailable")
 
     def consented(self) -> bool:
         """使用者是否已經同意把畫面送出去。"""
@@ -149,8 +145,17 @@ class ScreenTextService:
             return False
 
     def available(self) -> bool:
-        """同意過、有金鑰、也裝得起 SDK 才算可用。"""
+        """Local extraction is available independently of cloud credentials or consent."""
+        return self.local_backend.available() or self.cloud_available()
+
+    def cloud_available(self) -> bool:
         return self.consented() and self._key_provider() is not None
+
+    def text_consented(self) -> bool:
+        try:
+            return bool(self._text_consent_provider())
+        except Exception:
+            return False
 
     def _build_client(self):
         if self._client is not None:
@@ -169,20 +174,57 @@ class ScreenTextService:
 
     def read(self, png_bytes: bytes, action: Any = ACTION_EXTRACT,
              language: str = DEFAULT_LANGUAGE, question: str = "") -> Optional[str]:
-        """
-        同步送出一次並回傳答案；沒同意、沒金鑰、被婉拒或失敗都回傳 None。
-        Ask once, synchronously. None when consent or key is missing, when the
-        request is declined, or when it fails.
-        """
+        """Return extracted/processed text, including empty success; failure returns None."""
+        result = self.read_result(png_bytes, action, language, question)
+        return result.text if result.status == "success" else None
+
+    def read_result(self, png_bytes: bytes, action: Any = ACTION_EXTRACT,
+                    language: str = DEFAULT_LANGUAGE, question: str = "") -> ScreenTextResult:
+        result = self._read_result(png_bytes, action, language, question)
+        self.last_result = result
+        return result
+
+    def _read_result(self, png_bytes: bytes, action: Any, language: str,
+                     question: str) -> ScreenTextResult:
+        if not png_bytes:
+            return ScreenTextResult("error", error="No captured image")
+        action = normalize_action(action)
+        if action == ACTION_ASK and not str(question or "").strip():
+            action = ACTION_EXTRACT
+        try:
+            local = self.local_backend.recognize(png_bytes)
+        except Exception as error:
+            local = OcrResult("error", backend=self.local_backend.name, error=str(error))
+        if local.successful:
+            if not local.text or action == ACTION_EXTRACT:
+                return ScreenTextResult("success", local.text, local.backend)
+            if not self.text_consented():
+                return ScreenTextResult("consent_required", local.text, local.backend,
+                                        consent_required="text")
+            instruction = prompt_for(action, language, question).replace("in this image", "below")
+            messages = [{"role": "user", "content": [
+                {"type": "text", "text": "Recognized screen text:\n" + local.text},
+                {"type": "text", "text": instruction}]}]
+            return self._request(messages, "Anthropic (text via " + local.backend + ")", "text")
         if not self.consented():
-            front_engine_logger.info("[ScreenText] refused to send: no consent recorded")
-            return None
+            return ScreenTextResult(local.status, backend=local.backend, error=local.error,
+                                    consent_required="image")
         messages = build_message(png_bytes, action, language, question)
-        if messages is None:
-            return None
+        return self._request(messages, "Anthropic (screenshot)", "image")
+
+    def _request(self, messages: List[Dict[str, Any]], backend: str,
+                 consent_kind: str) -> ScreenTextResult:
+        if self._key_provider() is None:
+            return ScreenTextResult("unavailable", backend=backend,
+                                    error=f"Set {API_KEY_ENV} to use cloud processing")
         client = self._build_client()
         if client is None:
-            return None
+            return ScreenTextResult("unavailable", backend=backend,
+                                    error="Anthropic SDK is unavailable")
+        consented = self.text_consented() if consent_kind == "text" else self.consented()
+        if not consented:
+            return ScreenTextResult("consent_required", backend=backend,
+                                    consent_required=consent_kind)
         try:
             response = client.messages.create(
                 model=self.model,
@@ -193,8 +235,19 @@ class ScreenTextService:
             )
         except Exception as error:
             front_engine_logger.warning(f"[ScreenText] request failed: {error!r}")
-            return None
-        return reply_text(response)
+            return ScreenTextResult("error", backend=backend, error=str(error))
+        answer = reply_text(response)
+        if answer is None:
+            return ScreenTextResult("error", backend=backend, error="No answer was returned")
+        return ScreenTextResult("success", answer, backend)
+
+    def read_result_async(self, png_bytes: bytes, on_reply: Callable[[ScreenTextResult], None],
+                          action: Any = ACTION_EXTRACT, language: str = DEFAULT_LANGUAGE,
+                          question: str = "") -> None:
+        def worker() -> None:
+            on_reply(self.read_result(png_bytes, action, language, question))
+
+        threading.Thread(target=worker, name="frontengine-screen-text", daemon=True).start()
 
     def read_async(self, png_bytes: bytes, on_reply: Callable[[Optional[str]], None],
                    action: Any = ACTION_EXTRACT, language: str = DEFAULT_LANGUAGE,

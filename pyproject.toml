@@ -11,7 +11,14 @@ authors = [
     { name = "JE-Chen", email = "jechenmailman@gmail.com" },
 ]
 dependencies = [
-    "PySide6==6.11.2", "qt-material", "PyOpenGL", "PyOpenGL_accelerate", "numpy", "pynput"
+    "PySide6==6.11.2", "qt-material", "PyOpenGL", "PyOpenGL_accelerate", "numpy", "pynput",
+    "cryptography>=42",
+    "winrt-Windows.Media.Ocr>=3.2.1; sys_platform == 'win32'",
+    "winrt-Windows.Graphics.Imaging>=3.2.1; sys_platform == 'win32'",
+    "winrt-Windows.Storage.Streams>=3.2.1; sys_platform == 'win32'",
+    "winrt-Windows.Globalization>=3.2.1; sys_platform == 'win32'",
+    "winrt-Windows.Foundation>=3.2.1; sys_platform == 'win32'",
+    "winrt-Windows.Foundation.Collections>=3.2.1; sys_platform == 'win32'",
 ]
 description = "FrontEngine is use-define frontview or only use like screen saver"
 requires-python = ">=3.10"
@@ -35,6 +42,19 @@ frontengine = "frontengine.ui.main_ui:main"
 [project.urls]
 Homepage = "https://github.com/JeffreyChen-SteamProjects/FrontEngine"
 Code = "https://github.com/JeffreyChen-SteamProjects/FrontEngine"
+
+[project.optional-dependencies]
+puppet = ["Imervue>=1.0.90"]
+macos = [
+    "pyobjc-framework-Cocoa>=10.3; sys_platform == 'darwin'",
+    "pyobjc-framework-Quartz>=10.3; sys_platform == 'darwin'",
+    "pyobjc-framework-Vision>=10.3; sys_platform == 'darwin'",
+    "pyobjc-framework-ScreenCaptureKit>=10.3; sys_platform == 'darwin'",
+    "pyobjc-framework-CoreMedia>=10.3; sys_platform == 'darwin'",
+    "pyobjc-framework-ApplicationServices>=11; sys_platform == 'darwin'",
+    "pyobjc-framework-AVFoundation>=10.3; sys_platform == 'darwin'",
+    "pyobjc-framework-CoreMIDI>=10.3; sys_platform == 'darwin'",
+]
 
 [project.readme]
 file = "README.md"

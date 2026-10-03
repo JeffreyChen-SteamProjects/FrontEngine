@@ -15,12 +15,8 @@ Werkzeuge-Seite
   Letzten anheften legt die Aufnahme als kleines Fenster über alles: ziehbar, per
   Mausrad skalierbar, mit Doppelklick oder Escape zu schließen - eine Spezifikation,
   eine Farbreferenz oder eine Fehlermeldung neben der eigenen Arbeit.
-* Text lesen - einen Bereich aufziehen, um den Text darin zu kopieren, zu
-  übersetzen oder eine Frage dazu zu stellen. Dabei geht der aufgenommene
-  Bereich an die API von Anthropic, weshalb vorher gefragt wird; verwendet wird
-  Ihr eigener ANTHROPIC_API_KEY.
-* Bereichsaufzeichnung - einen Teil des Bildschirms aufzeichnen, mit
-  einstellbarer Bildrate und Länge, auf Wunsch mit der Kamera in der Ecke.
+* Bildschirmtext: Werkzeuge → Text lesen versucht zuerst lokale OCR: Windows.Media.Ocr unter Windows, Vision unter macOS oder ein installiertes Tesseract mit Sprachdaten. Lokale Erkennung benötigt weder Cloud-Zustimmung noch ANTHROPIC_API_KEY; ein erfolgreiches leeres Ergebnis lädt keinen Screenshot hoch. Übersetzungen und Fragen dürfen erkannten Text nur mit gesonderter Text-Zustimmung und Ihrem Schlüssel an Anthropic senden. Der Screenshot-Ersatz nach lokalem Fehler benötigt eigene Aufnahme-Zustimmung und den Schlüssel. Das Ergebnis zeigt Dienst und Fehler; dort lässt sich die Zustimmung widerrufen.
+* Aufzeichnung: Wählen Sie einen Bereich und vor dem Start die GIF-Zieldatei. Abbrechen startet keine Aufnahme. Ein Hintergrundthread schreibt Bilder einzeln; die Warteschlange ist auf drei Bilder und 64 MiB begrenzt. Ein zu großes Einzelbild wird abgewiesen. Bei voller Warteschlange werden Aufnahmen ausgelassen, ihre Zeit bleibt in der Wiedergabe erhalten. Bildrate, Dauer, Bildzahlgrenze und Kamerabild in der Ecke bleiben erhalten. Stoppen schließt die Datei asynchron ab; erst bei Erfolg wird das Ziel atomar ersetzt. Abbruch und Schreibfehler entfernen die temporäre Datei und bewahren ein vorhandenes Ziel.
 * Virtuelle Kamera - einen Bereich samt Overlays als Webcam senden, die Zoom,
   Teams oder Discord als Videoquelle wählen können. Benötigt das optionale
   Paket pyvirtualcam und einen Treiber für virtuelle Kameras; fehlt eines von
@@ -33,7 +29,7 @@ Werkzeuge-Seite
 * Fenster duplizieren… - ein zweites, kleines Fenster zeigt ein gewähltes Fenster
   live, während das Original bleibt, wo es ist. Praktisch, um ein Video oder einen
   Build im Auge zu behalten. Ziehen zum Verschieben, Doppelklick zum Schließen.
-  Nur Windows.
+  Windows und macOS (macos-Extra und Berechtigung; native macOS-Prüfung steht aus).
 
   Ein Duplikat kann auch nur einen Teil zeigen - obere oder untere Hälfte, eine
   Seite oder die Mitte - sodass eine Chatspalte oder ein Fortschrittsbalken für
@@ -41,3 +37,5 @@ Werkzeuge-Seite
   Fenstergröße derselbe Teil.
 * Fensteranordnung - merken, wo die Fenster stehen, und sie später
   zurücksetzen.
+
+:doc:`runtime_interoperability`

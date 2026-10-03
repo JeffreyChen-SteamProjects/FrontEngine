@@ -71,6 +71,9 @@ def available() -> bool:
     Whether media keys can be sent here. keybd_event is Win32; other platforms
     have no equivalent broadcast-to-the-player call to copy.
     """
+    if sys.platform == 'darwin':
+        from frontengine.utils.macos import get_backend
+        return get_backend().capability('media_keys').available
     return sys.platform == "win32"
 
 
@@ -114,6 +117,9 @@ def send_media_key(action, sender=None) -> bool:
     acted on it, see the module docstring. `sender` is injectable for tests and
     takes keybd_event's own signature.
     """
+    if sys.platform == 'darwin' and sender is None:
+        from frontengine.utils.macos.input import send_media_key as mac_send
+        return mac_send(action)
     code = key_code(action)
     if code is None:
         return False

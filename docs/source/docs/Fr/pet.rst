@@ -23,7 +23,7 @@ Un compagnon qui vit sur le bureau.
 * Réagir au son - la mascotte bouge en rythme. Elle peut suivre vos
   **haut-parleurs** ou votre **microphone** ; dans les deux cas elle ne lit
   qu'un niveau, un simple nombre, et n'enregistre jamais ce qui est dit.
-  Windows uniquement.
+  Windows et macOS (option macos et autorisation ; macOS natif non vérifié ici).
 * Discussion IA (clé API requise) - lui parler. Cela lit la variable
   d'environnement ANTHROPIC_API_KEY ; la clé n'est jamais enregistrée.
 * Minuteur de concentration (min) - un minuteur de travail que la mascotte tient
@@ -31,3 +31,7 @@ Un compagnon qui vit sur le bureau.
 
 Déposez un fichier sur la mascotte pour la nourrir, ou une image ou un pack
 pour changer son apparence.
+
+Animaux puppet : installez l’option puppet et un moteur Imervue disponible, puis choisissez ou déposez un fichier original Imervue .puppet v1 sur la page Animal. Les anciens packs d’images et de sprites restent utilisables. Les puppets utilisent le canevas, les animations et les expressions d’Imervue, peuvent être clonés ou fermés et suivent les contrôles de superposition et préréglages. Un .petscript.json facultatif utilise le moteur de script existant d’Imervue ; les packs FrontEngine pet.json ne sont pas des puppets. Versions inconnues, chemins dangereux et ressources invalides sont refusés avant le chargement du moteur.
+
+:doc:`runtime_interoperability`

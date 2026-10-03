@@ -97,6 +97,10 @@ class WallpaperWidget(BaseWidget):
 
     def set_audio_level_provider(self, provider) -> None:
         """設定音量來源（回傳 0~1 或 None）。"""
+        if provider is not self._level_provider:
+            close = getattr(self._level_provider, 'close', None)
+            if close:
+                close()
         self._level_provider = provider
         self._envelope.reset()
 
@@ -109,6 +113,9 @@ class WallpaperWidget(BaseWidget):
             self._react_timer.start(tier_interval(self.REACT_INTERVAL_MS, self.quality_tier))
         else:
             self._react_timer.stop()
+            close = getattr(self._level_provider, 'close', None)
+            if close:
+                close()
             self.scale = MIN_REACT_SCALE
             self.update()
 
@@ -163,6 +170,9 @@ class WallpaperWidget(BaseWidget):
             QRect((self.width() - width) // 2, (self.height() - height) // 2, width, height), pixmap)
 
     def closeEvent(self, event) -> None:
+        close = getattr(self._level_provider, 'close', None)
+        if close:
+            close()
         if self._react_timer.isActive():
             self._react_timer.stop()
         self._stop_movie()

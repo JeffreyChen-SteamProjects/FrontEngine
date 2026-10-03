@@ -1400,6 +1400,10 @@ class DesktopPetWidget(BaseWidget):
 
     def set_audio_level_provider(self, provider) -> None:
         """設定回傳目前音量 (0~1 或 None) 的函式 / Provider of the current audio level."""
+        if provider is not self._audio_level_provider:
+            close = getattr(self._audio_level_provider, 'close', None)
+            if close:
+                close()
         self._audio_level_provider = provider
         self._audio_envelope.reset()
 
@@ -1968,6 +1972,9 @@ class DesktopPetWidget(BaseWidget):
         self.menu.popup(event.globalPos())
 
     def closeEvent(self, event) -> None:
+        close = getattr(self._audio_level_provider, 'close', None)
+        if close:
+            close()
         if self._timer.isActive():
             self._timer.stop()
         if self._chatter_timer.isActive():
