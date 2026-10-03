@@ -2,4 +2,10 @@
 * text=auto
 
 # Translation dictionaries must remain LF on every checkout.
-frontengine/utils/multi_language/*.py text eol=lf
+frontengine/utils/multi_language/english.py text eol=lf
+frontengine/utils/multi_language/france.py text eol=lf
+frontengine/utils/multi_language/germany.py text eol=lf
+frontengine/utils/multi_language/italy.py text eol=lf
+frontengine/utils/multi_language/russian.py text eol=lf
+frontengine/utils/multi_language/simplified_chinese.py text eol=lf
+frontengine/utils/multi_language/traditional_chinese.py text eol=lf

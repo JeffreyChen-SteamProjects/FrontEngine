@@ -90,7 +90,7 @@ Files: dependencies, README plus nine translations, seven Sphinx trees/dictionar
 - [x] Reconcile tools-page recording/OCR hooks and shared shutdown behavior.
 - [x] Document formats, setup/trust/permissions/backend status and platform limitations in all supported languages.
 - [x] Run `py -m pytest tests/ -q`, `py -m pyflakes frontengine/ exe/ tests/`, `py -m sphinx -W -b html docs/source <temporary output>` and build/install wheel.
-- [ ] Review changes against spec with an independent reviewer, correct failures, commit completed stages, and return changes to the original workspace preserving user edits.
+- [x] Review changes against spec with an independent reviewer, correct failures, commit completed stages, and return changes to the original workspace preserving user edits.
 
 
 Validation boundaries: Windows real TLS, OCR and desktop OpenGL/puppet checks were exercised; macOS public API routing/lifecycle are covered through injected frameworks and a target-host smoke script. Actual macOS hardware/TCC behavior remains progress.md #9. Final verification counts and commit integration are recorded in docs/updates/2026-10.md.
