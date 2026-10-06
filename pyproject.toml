@@ -62,4 +62,4 @@ content-type = "text/markdown"
 
 
 [tool.setuptools.packages]
-find = { namespaces = false }
+find = { namespaces = false, include = ["frontengine", "frontengine.*"] }

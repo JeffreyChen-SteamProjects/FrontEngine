@@ -428,6 +428,7 @@ Qt 訊號 + `QueuedConnection`** 回到 UI 執行緒。另外：
 | `tests/unit_test/` | 50 個測試檔、約 5,400 行。`conftest.py` 強制 `QT_QPA_PLATFORM=offscreen`、整個 session 跑在暫存目錄、共用一個 `QApplication`（`QPixmap`/`QMovie` 沒有 QApplication 會讓行程直接中止）。 |
 | `steam_assets/` | Steam 商店素材產生器。 |
 | `.github/workflows/` | `ci.yml`（多版本 Python：編譯 → 單元測試 → 打 wheel 安裝後啟動煙霧測試）、`nightly.yml`（只放 cron，避免排程被停用時連 PR CI 一起停）、`release.yml`（PR 合併到 main 後自動 bump 版本並發佈）。 |
+| `.github/requirements/` | `publish.in` 與由它產生、鎖定版本與雜湊的 `publish.txt`：`release.yml` 那個握有 PyPI token 的 job 只裝這一份。建置後端 `setuptools` 也鎖在裡面，job 用 `python -m build --no-isolation` 建置，所以建置時不會再下載鎖定清單以外的東西（`tests/test_workflow_actions.py` 有守著，Dependabot 負責更新）。 |
 | `progress.md` | 只放未完成的待辦（跨 session 交接）；規則與環境備忘在 `CLAUDE.md`，完成紀錄在 `docs/updates/`。 |
 
 ---
@@ -444,7 +445,7 @@ Qt 訊號 + `QueuedConnection`** 回到 UI 執行緒。另外：
 5. `main_ui._CLOSING_WIDGET_LISTS`（若需關閉時收尾）
 6. **七份語言字典**都要加鍵（`test_translations.py` 會擋）
 7. **七棵文件樹**都要加頁（`test_documentation.py` 會擋）
-8. 該資料夾要有 `__init__.py`（`find = { namespaces = false }`，少一個就不會進 wheel，
+8. 該資料夾要有 `__init__.py`（`find` 設定是 `namespaces = false`，少一個就不會進 wheel，
    `test_public_api.py` 有守著）
 
 **其他擴充點**：

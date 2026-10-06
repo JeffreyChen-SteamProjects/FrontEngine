@@ -186,14 +186,28 @@ jobs:
           NAME=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['name'])")
           echo "name=${NAME}" >> "$GITHUB_OUTPUT"
 
-      # 建置工具釘版本：發佈流程不該因為上游今天推了新版就跟著改行為。
-      # Pin the build tooling: a publish must not change behaviour because an
-      # upstream release happened to land today.
+      # 建置工具連同它們的相依套件都鎖定版本與雜湊：發佈流程不該因為上游今天推了
+      # 新版就跟著改行為，而且這個 job 握有 PyPI token，所以只裝 wheel、只裝雜湊
+      # 對得上的檔案，其他一律不裝（pip 也不升級）。publish.txt 由 publish.in 產生，
+      # 重產的指令寫在 publish.in 裡。
+      # The build tooling and everything it depends on is locked by version and
+      # hash: a publish must not change behaviour because an upstream release
+      # happened to land today, and this job holds the PyPI token, so it installs
+      # wheels only, at the recorded hashes, and nothing else (pip is not upgraded
+      # either). publish.txt is generated from publish.in, which records the command.
       - name: Install build tooling
-        run: python -m pip install --upgrade pip "build==1.4.2" "twine==6.2.0"
+        run: |
+          python -m pip install --require-hashes --only-binary :all: -r .github/requirements/publish.txt
 
+      # --no-isolation：用上一步裝好、鎖在 publish.txt 裡的 setuptools 建置。不加的話，
+      # build 會另開一個隔離環境，下載當下最新的 setuptools——在鎖定清單之外，而且就在
+      # 這個握有 PyPI token 的 job 裡執行。
+      # --no-isolation: build with the setuptools the step above installed, the one
+      # locked in publish.txt. Without it, build creates an isolated environment and
+      # downloads whatever setuptools is newest at that moment: outside the lock, and
+      # run in this job, which holds the PyPI token.
       - name: Build sdist + wheel
-        run: python -m build
+        run: python -m build --no-isolation
 
       - name: Verify distributions
         run: python -m twine check dist/*
