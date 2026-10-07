@@ -987,4 +987,10 @@ english_word_dict = {
     'scene_media_preview_hint': 'Previews start only when enabled, are muted, and pause while hidden. Up to eight sources. Web/Puppet interaction opens their own window.',
     'scene_media_audio': '{name}\nAudio: {seconds}s',
     'scene_add_puppet': 'Add Puppet',
+    'tools_record_format': 'Output format',
+    'tools_record_pause': 'Pause',
+    'tools_record_resume': 'Resume',
+    'tools_record_cancel': 'Cancel recording',
+    'tools_record_paused': 'Paused',
+    'tools_record_detail': '{state} · {seconds:.1f}s · {frames} frames · {dropped} dropped',
 }

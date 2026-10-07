@@ -980,4 +980,10 @@ germany_word_dict = {
     'scene_media_preview_hint': 'Vorschau startet nur nach Aktivierung, stumm und pausiert verborgen. Maximal acht Quellen. Web/Puppet-Eingabe öffnet ein eigenes Fenster.',
     'scene_media_audio': '{name}\nAudio: {seconds}s',
     'scene_add_puppet': 'Puppet hinzufügen',
+    'tools_record_format': 'Ausgabeformat',
+    'tools_record_pause': 'Pause',
+    'tools_record_resume': 'Fortsetzen',
+    'tools_record_cancel': 'Aufnahme abbrechen',
+    'tools_record_paused': 'Pausiert',
+    'tools_record_detail': '{state} · {seconds:.1f}s · {frames} Bilder · {dropped} ausgelassen',
 }

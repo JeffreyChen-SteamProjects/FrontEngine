@@ -979,4 +979,10 @@ simplified_chinese_word_dict = {
     'scene_media_preview_hint': '手动启用后才开始预览，默认静音，隐藏时暂停，最多八个来源。网页／Puppet 交互会打开自己的窗口。',
     'scene_media_audio': '{name}\n音频：{seconds} 秒',
     'scene_add_puppet': '添加 Puppet',
+    'tools_record_format': '输出格式',
+    'tools_record_pause': '暂停',
+    'tools_record_resume': '继续',
+    'tools_record_cancel': '取消录制',
+    'tools_record_paused': '已暂停',
+    'tools_record_detail': '{state} · {seconds:.1f} 秒 · {frames} 帧 · 丢帧 {dropped}',
 }

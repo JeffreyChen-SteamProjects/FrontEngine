@@ -7,6 +7,7 @@ window pinning and the camera overlay. These are for measuring, grabbing and
 arranging - as opposed to the other pages, which are for showing.
 """
 from typing import List, Optional
+from pathlib import Path
 
 from PySide6.QtCore import QBuffer, QIODevice, QTimer
 from PySide6.QtGui import QGuiApplication, QPixmap
@@ -71,6 +72,19 @@ class ToolsSettingUI(SettingPage):
         super().__init__("tab_tools_text", "page_subtitle_tools",
                          "Tools", "Measure, capture, record and pin what is on screen.")
 
+        self._initialize_state()
+        self._build_measure_row()
+        self._build_capture_row()
+        self._build_screen_text_row()
+        self._build_record_row()
+        self._build_virtual_camera_row()
+        self._build_camera_row()
+        self._build_window_row()
+        self._add_tool_sections()
+        self.add_body_widget(self.hint_label)
+        self.finish_body()
+
+    def _initialize_state(self) -> None:
         self.measure_widget_list: List[MeasureWidget] = []
         self.palette = ColorPalette(user_setting_dict, write_user_setting)
         self.palette_dialog = None
@@ -96,12 +110,7 @@ class ToolsSettingUI(SettingPage):
         self.pin_dialog: Optional[WindowPinDialog] = None
         self.replica_dialog: Optional[WindowReplicaDialog] = None
 
-        self._build_measure_row()
-        self._build_capture_row()
-        self._build_screen_text_row()
-        self._build_record_row()
-        self._build_virtual_camera_row()
-        self._build_camera_row()
+    def _build_window_row(self) -> None:
         self.pin_button = tr(QPushButton(), "tools_pin_window", "Pin a window...")
         self.pin_button.clicked.connect(self.open_pin_dialog)
 
@@ -128,6 +137,7 @@ class ToolsSettingUI(SettingPage):
             "clipboard. The camera is shown locally only - nothing is recorded.")
         self.hint_label.setWordWrap(True)
 
+    def _add_tool_sections(self) -> None:
         # 工具頁是八個彼此無關的工具。攤在同一個網格裡時，量測的設定看起來像是
         # 錄影也要用的，其實兩者毫無關係。
         # Eight unrelated tools. Flattened into one grid, the measuring settings
@@ -148,12 +158,7 @@ class ToolsSettingUI(SettingPage):
         screen_text.add_widget(self.screen_text_input)
         screen_text.add_inline(self.screen_text_button)
 
-        record = self.add_section(self.record_label)
-        record.add_row("tools_fps", self.record_fps_spinbox, "Frames per second")
-        record.add_row("tools_seconds", self.record_seconds_spinbox, "Seconds")
-        record.add_inline(self.record_camera_checkbox)
-        record.add_inline(self.record_button)
-        record.add_inline(self.record_status)
+        self._add_record_section()
 
         virtual_camera = self.add_section(self.virtual_camera_label)
         virtual_camera.add_row("tools_fps", self.virtual_camera_fps_spinbox,
@@ -173,9 +178,6 @@ class ToolsSettingUI(SettingPage):
         windows.add_inline(self.layout_save_button)
         windows.add_row("tools_saved", self.layout_combobox, "Saved")
         windows.add_inline(self.layout_restore_button, self.pin_button, self.replica_button)
-
-        self.add_body_widget(self.hint_label)
-        self.finish_body()
 
     # --- construction helpers -------------------------------------------
     def _build_measure_row(self) -> None:
@@ -233,15 +235,68 @@ class ToolsSettingUI(SettingPage):
         self.record_seconds_spinbox = QSpinBox()
         self.record_seconds_spinbox.setRange(1, 120)
         self.record_seconds_spinbox.setValue(DEFAULT_MAX_SECONDS)
+        self.record_format = QComboBox()
+        self.record_format.addItem('GIF', 'gif')
+        self.record_format.addItem('AVI (Motion JPEG)', 'avi')
+        self.record_format.currentIndexChanged.connect(self._record_format_changed)
         self.record_camera_checkbox = tr(QCheckBox(), "tools_record_camera", "Include camera")
         self.record_button = tr(QPushButton(), "tools_record_start", _RECORD_AN_AREA)
         self.record_button.clicked.connect(self.toggle_recording)
+        self.record_pause = tr(QPushButton(), 'tools_record_pause')
+        self.record_pause.clicked.connect(self._toggle_record_pause)
+        self.record_pause.setEnabled(False)
+        self.record_cancel = tr(QPushButton(), 'tools_record_cancel')
+        self.record_cancel.clicked.connect(self.recorder.close)
+        self.record_cancel.setEnabled(False)
         self.record_status = tr(QLabel(), "tools_record_ready", "Ready")
         self._recording_error = ""
+        self._recording_detail = (0, 0.0, 0)
         retranslator.bind_call(self._update_recording_error)
+        retranslator.bind_call(self._update_recording_detail)
         self.recorder.finished.connect(self._on_recording_stopped)
         self.recorder.completed.connect(self._on_recording_completed)
         self.recorder.failed.connect(self._on_recording_failed)
+        self.recorder.state_changed.connect(self._recording_state_changed)
+        self.recorder.progress.connect(self._recording_progress)
+
+    def _add_record_section(self) -> None:
+        section = self.add_section(self.record_label)
+        section.add_row('tools_record_format', self.record_format)
+        section.add_row('tools_fps', self.record_fps_spinbox)
+        section.add_row('tools_seconds', self.record_seconds_spinbox)
+        section.add_inline(self.record_camera_checkbox)
+        section.add_inline(self.record_button, self.record_pause, self.record_cancel)
+        section.add_widget(self.record_status)
+
+    def _record_format_changed(self, _index: int) -> None:
+        self.record_seconds_spinbox.setMaximum(3600 if self.record_format.currentData() == 'avi' else 120)
+
+    def _toggle_record_pause(self) -> None:
+        self.recorder.resume() if self.recorder.state == 'paused' else self.recorder.pause()
+
+    def _recording_state_changed(self, state: str) -> None:
+        editable = state == 'idle'
+        for widget in (self.record_format, self.record_fps_spinbox, self.record_seconds_spinbox,
+                       self.record_camera_checkbox):
+            widget.setEnabled(editable)
+        self.record_button.setEnabled(state in ('idle', 'recording', 'paused'))
+        self.record_pause.setEnabled(state in ('recording', 'paused'))
+        self.record_cancel.setEnabled(state in ('recording', 'paused', 'finalizing'))
+        retranslator.set_text(self.record_pause, 'tools_record_resume' if state == 'paused' else 'tools_record_pause')
+        self._update_recording_detail()
+
+    def _recording_progress(self, frames: int, seconds: float, dropped: int) -> None:
+        self._recording_detail = (frames, seconds, dropped)
+        self._update_recording_detail()
+
+    def _update_recording_detail(self) -> None:
+        if self.recorder.state not in ('recording', 'paused'):
+            return
+        frames, seconds, dropped = self._recording_detail
+        label = _t('tools_record_paused', 'Paused') if self.recorder.state == 'paused' else _t('tools_record_active', 'Recording')
+        retranslator.forget(self.record_status)
+        self.record_status.setText(_t('tools_record_detail', '{state} · {seconds:.1f}s · {frames} frames · {dropped} dropped').format(
+            state=label, seconds=seconds, frames=frames, dropped=dropped))
 
     def _build_virtual_camera_row(self) -> None:
         self.virtual_camera_label = tr(QLabel(), "tools_vcam_label", "Virtual camera")
@@ -618,7 +673,7 @@ class ToolsSettingUI(SettingPage):
 
     # --- recording -------------------------------------------------------
     def toggle_recording(self) -> None:
-        if self.recorder.running:
+        if self.recorder.state in ('recording', 'paused'):
             self.finish_recording()
         elif not self.recorder.busy:
             self.start_recording()
@@ -640,18 +695,21 @@ class ToolsSettingUI(SettingPage):
         """對指定範圍開始錄製。"""
         if self.recorder.busy:
             return False
+        output_format = self.record_format.currentData()
+        file_filter = 'AVI (*.avi)' if output_format == 'avi' else 'GIF (*.gif)'
         target = QFileDialog.getSaveFileName(
-            self, _t("tools_record_save", "Save recording"), "recording.gif", "GIF (*.gif)")[0]
+            self, _t("tools_record_save", "Save recording"), 'recording.' + output_format, file_filter)[0]
         if not target:
             return False
+        target = str(Path(target).with_suffix('.' + output_format))
         self._recording_error = ""
         inset = self.camera_inset if self.record_camera_checkbox.isChecked() else None
         self.recorder.set_inset_provider(inset)
         started = self.recorder.start(region, target, self.record_fps_spinbox.value(),
-                                     self.record_seconds_spinbox.value())
+                                     self.record_seconds_spinbox.value(), output_format=output_format)
         if started and self.recorder.running:
             retranslator.set_text(self.record_button, "tools_record_stop", "Stop recording")
-            retranslator.set_text(self.record_status, "tools_record_active", "Recording")
+            self._update_recording_detail()
         return started
 
     def camera_inset(self) -> Optional[object]:

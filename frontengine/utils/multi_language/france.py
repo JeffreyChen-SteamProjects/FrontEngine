@@ -977,4 +977,10 @@ french_word_dict = {
     'scene_media_preview_hint': 'Démarrage uniquement sur activation, muet et suspendu si masqué. Huit sources maximum. Web/Puppet ouvre sa propre fenêtre pour interagir.',
     'scene_media_audio': '{name}\nAudio : {seconds}s',
     'scene_add_puppet': 'Ajouter Puppet',
+    'tools_record_format': 'Format de sortie',
+    'tools_record_pause': 'Pause',
+    'tools_record_resume': 'Reprendre',
+    'tools_record_cancel': 'Annuler l’enregistrement',
+    'tools_record_paused': 'En pause',
+    'tools_record_detail': '{state} · {seconds:.1f}s · {frames} images · {dropped} ignorées',
 }

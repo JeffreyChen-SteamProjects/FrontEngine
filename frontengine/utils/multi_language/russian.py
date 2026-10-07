@@ -977,4 +977,10 @@ russian_word_dict = {
     'scene_media_preview_hint': 'Запуск только при включении, без звука и с паузой при скрытии. До восьми источников. Web/Puppet открывает своё окно для ввода.',
     'scene_media_audio': '{name}\nАудио: {seconds}с',
     'scene_add_puppet': 'Добавить Puppet',
+    'tools_record_format': 'Формат вывода',
+    'tools_record_pause': 'Пауза',
+    'tools_record_resume': 'Продолжить',
+    'tools_record_cancel': 'Отменить запись',
+    'tools_record_paused': 'Приостановлено',
+    'tools_record_detail': '{state} · {seconds:.1f}с · {frames} кадров · {dropped} пропущено',
 }

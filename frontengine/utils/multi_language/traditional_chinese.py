@@ -986,4 +986,10 @@ traditional_chinese_word_dict = {
     'scene_media_preview_hint': '手動啟用後才開始預覽，預設靜音，隱藏時暫停，最多八個來源。網頁／Puppet 互動會開啟自己的視窗。',
     'scene_media_audio': '{name}\n音訊：{seconds} 秒',
     'scene_add_puppet': '加入 Puppet',
+    'tools_record_format': '輸出格式',
+    'tools_record_pause': '暫停',
+    'tools_record_resume': '繼續',
+    'tools_record_cancel': '取消錄製',
+    'tools_record_paused': '已暫停',
+    'tools_record_detail': '{state} · {seconds:.1f} 秒 · {frames} 影格 · 丟幀 {dropped}',
 }

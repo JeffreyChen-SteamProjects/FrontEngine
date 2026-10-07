@@ -977,4 +977,10 @@ italian_word_dict = {
     'scene_media_preview_hint': 'Avvio solo dopo abilitazione, senza audio e in pausa se nascosto. Massimo otto sorgenti. Web/Puppet apre una finestra propria per interagire.',
     'scene_media_audio': '{name}\nAudio: {seconds}s',
     'scene_add_puppet': 'Aggiungi Puppet',
+    'tools_record_format': 'Formato di uscita',
+    'tools_record_pause': 'Pausa',
+    'tools_record_resume': 'Riprendi',
+    'tools_record_cancel': 'Annulla registrazione',
+    'tools_record_paused': 'In pausa',
+    'tools_record_detail': '{state} · {seconds:.1f}s · {frames} fotogrammi · {dropped} saltati',
 }
