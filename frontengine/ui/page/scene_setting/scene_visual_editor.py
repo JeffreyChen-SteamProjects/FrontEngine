@@ -17,6 +17,7 @@ from frontengine.user_setting.scene_setting import scene_json, write_scene_file
 from frontengine.utils.multi_language.retranslate import tr, translate, retranslator
 from frontengine.utils.scene_format.scene_editor_document import SceneEditorDocument
 from frontengine.ui.page.scene_setting.scene_media_preview import SceneMediaPreview
+from frontengine.show.scene.timeline import SceneTimeline
 
 
 class SceneCanvas(QGraphicsView):
@@ -128,6 +129,8 @@ class SceneVisualEditor(SettingPage):
         QShortcut(QKeySequence.StandardKey.Redo, self, activated=self.document.undo.redo)
         self.syncing = False
         self.media_preview = SceneMediaPreview(self)
+        self.timeline = SceneTimeline(self, self._apply_animation_preview)
+        self.animation_dialog = None
         self.canvas = QGraphicsScene(self)
         self.canvas.setSceneRect(0, 0, 1920, 1080)
         self.view = SceneCanvas(self.canvas)
@@ -143,6 +146,7 @@ class SceneVisualEditor(SettingPage):
         self._build_actions()
         self._build_media_actions()
         self._build_properties()
+        self._build_animation_actions()
         self.document.changed.connect(self._changed)
         manager.entries_changed.connect(self.load_entries)
         self.layers.itemSelectionChanged.connect(self._list_selected)
@@ -207,6 +211,80 @@ class SceneVisualEditor(SettingPage):
         retranslator.forget(self.media_status)
         self.media_status.setText(message)
 
+    def _build_animation_actions(self) -> None:
+        section = self.add_section('scene_animation_title')
+        self.timeline_position = QDoubleSpinBox()
+        self.timeline_position.setDecimals(2)
+        self.timeline_position.setRange(0, 3600)
+        self.timeline_position.editingFinished.connect(lambda: self.timeline.seek(self.timeline_position.value()))
+        section.add_row('scene_animation_time', self.timeline_position)
+        section.add_inline(self._button('scene_animation_edit', self._edit_animation),
+            self._button('scene_animation_play', lambda: self.timeline.play()),
+            self._button('scene_animation_pause', self.timeline.pause),
+            self._button('scene_animation_replay', lambda: self.timeline.play(restart=True)),
+            self._button('scene_animation_reset', self.timeline.reset))
+        section.add_inline(self._button('scene_animation_playback_pause', lambda: self._playback_animation('pause')),
+            self._button('scene_animation_playback_resume', lambda: self._playback_animation('play')),
+            self._button('scene_animation_playback_replay', lambda: self._playback_animation('replay')))
+        hint = tr(QLabel(), 'scene_animation_hint')
+        hint.setWordWrap(True)
+        section.add_widget(hint)
+        self.timeline.changed.connect(self._animation_position)
+        self.timeline.state_changed.connect(self._animation_state)
+
+    def _animation_position(self, seconds: float) -> None:
+        self.timeline_position.setValue(seconds)
+
+    def _animation_state(self, state: str) -> None:
+        self.view.setInteractive(not self.timeline.previewing)
+        self._show_properties()
+        for item in self.canvas.items():
+            if item.movie is not None:
+                item.movie.setPaused(state in ('paused', 'finished'))
+        if state in ('paused', 'finished'):
+            self.media_preview.suspend()
+        elif self.isVisible():
+            self.media_preview.resume()
+
+    def _apply_animation_preview(self, values: dict) -> None:
+        for item in self.canvas.items():
+            if item.key in values:
+                value = values[item.key]
+                item.setPos(value['x'], value['y'])
+                item.setOpacity(value['opacity'] / 100 if item.entry.get('visible', True) else .15)
+
+    def _edit_animation(self) -> None:
+        keys = self._selected_keys()
+        if len(keys) != 1 or self.document.entries[keys[0]].get('locked'):
+            return
+        if self.animation_dialog is not None:
+            self.animation_dialog.raise_()
+            return
+        from frontengine.ui.dialog.scene_animation_dialog import SceneAnimationDialog
+        dialog = SceneAnimationDialog(self.document, keys[0], self)
+        self.animation_dialog = dialog
+        dialog.finished.connect(self._animation_dialog_closed)
+        dialog.show()
+
+    def _animation_dialog_closed(self, _result: int) -> None:
+        dialog, self.animation_dialog = self.animation_dialog, None
+        dialog.deleteLater()
+
+    def _playback_animation(self, operation: str) -> None:
+        seen = set()
+        from shiboken6 import isValid
+        for view in self.manager.scene.view_list:
+            if not isValid(view):
+                continue
+            timeline = getattr(view, 'timeline', None)
+            if timeline is None or id(timeline) in seen:
+                continue
+            seen.add(id(timeline))
+            if operation == 'replay':
+                timeline.play(restart=True)
+            else:
+                getattr(timeline, operation)()
+
     def _media_changed(self, key: str) -> None:
         for item in self.canvas.items():
             if item.key == key:
@@ -252,6 +330,7 @@ class SceneVisualEditor(SettingPage):
             self.canvas.blockSignals(False)
             self.syncing = False
         self._show_properties()
+        self.timeline.configure(entries, reset=True)
 
     def _selected_keys(self) -> list[str]:
         return [item.data(Qt.ItemDataRole.UserRole) for item in self.layers.selectedItems()]
@@ -278,13 +357,15 @@ class SceneVisualEditor(SettingPage):
         entry = self.document.entries[keys[0]] if len(keys) == 1 else None
         defaults = {"width": 320, "height": 180, "scale": 1, "opacity": 100}
         for name, field in self.fields.items():
-            field.setEnabled(entry is not None and not entry.get("locked", False))
+            field.setEnabled(entry is not None and not entry.get("locked", False) and not self.timeline.previewing)
             field.setValue(entry.get(name, defaults.get(name, 0)) if entry else defaults.get(name, 0))
         for checkbox, key, default in ((self.locked, "locked", False), (self.visible, "visible", True)):
-            checkbox.setEnabled(entry is not None)
+            checkbox.setEnabled(entry is not None and not self.timeline.previewing)
             checkbox.setChecked(entry.get(key, default) if entry else default)
 
     def _apply_properties(self) -> None:
+        if self.timeline.previewing:
+            return
         keys = self._selected_keys()
         if len(keys) == 1:
             changes = {name: field.value() for name, field in self.fields.items()}
@@ -292,6 +373,8 @@ class SceneVisualEditor(SettingPage):
             self.document.update(keys[0], changes)
 
     def commit_canvas(self) -> None:
+        if self.timeline.previewing:
+            return
         after = copy.deepcopy(self.document.entries)
         for item in self.canvas.items():
             if item.isSelected() and not item.entry.get("locked"):
@@ -357,6 +440,7 @@ class SceneVisualEditor(SettingPage):
         self.view.fitInView(self.canvas.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
 
     def showEvent(self, event) -> None:
+        self.timeline.set_active(True)
         self.media_preview.resume()
         self._fit()
         for item in self.canvas.items():
@@ -365,6 +449,7 @@ class SceneVisualEditor(SettingPage):
         super().showEvent(event)
 
     def hideEvent(self, event) -> None:
+        self.timeline.set_active(False)
         self.media_preview.suspend()
         for item in self.canvas.items():
             if item.movie:
@@ -372,6 +457,7 @@ class SceneVisualEditor(SettingPage):
         super().hideEvent(event)
 
     def closeEvent(self, event) -> None:
+        self.timeline.shutdown()
         self.media_preview.shutdown()
         self.canvas.clear()
         super().closeEvent(event)

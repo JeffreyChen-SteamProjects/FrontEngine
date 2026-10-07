@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 
 from frontengine.utils.imervue.puppet_asset import finite_parameters
+from frontengine.utils.scene_format.scene_animation import validate_animation
 
 SCENE_FORMAT = 'frontengine.scene'
 SCENE_VERSION = 1
@@ -39,6 +40,8 @@ def normalize_scene(data: object, base_dir: Path | None = None) -> dict:
     for entry in entries.values():
         if not isinstance(entry, dict):
             raise ValueError('Each scene entry must be an object')
+        if 'animation' in entry:
+            entry['animation'] = validate_animation(entry['animation'])
         for field in ASSET_FIELDS:
             if field in entry and entry[field] is not None:
                 entry[field] = resolve_asset(entry[field], base_dir)

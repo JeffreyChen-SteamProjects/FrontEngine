@@ -7,7 +7,7 @@ from pathlib import Path
 from threading import Event
 
 from PySide6.QtCore import QObject, QRunnable, QThreadPool, Qt, Signal
-from PySide6.QtGui import QGuiApplication
+from PySide6.QtGui import QGuiApplication, QImage
 
 from frontengine.show.scene.scene import SceneManager
 from frontengine.show.scene.compositor_view import SceneCompositorView
@@ -30,6 +30,16 @@ def close_playback(manager: SceneManager) -> None:
             continue
     manager.view_list.clear()
     manager.clear()
+
+
+def transition_frames(manager: SceneManager) -> dict[str, QImage]:
+    """Retain bounded outgoing surfaces before their native resources close."""
+    from shiboken6 import isValid
+    frames = {}
+    for view in manager.view_list[:8]:
+        if isValid(view) and isinstance(view, SceneCompositorView) and view.isVisible():
+            frames[view.screen().name()] = view.output_frame().scaled(1920, 1080, Qt.AspectRatioMode.KeepAspectRatio)
+    return frames
 
 
 def prepare_playback(entries: dict, monitors: list) -> SceneManager:
@@ -188,6 +198,7 @@ class SceneActions(QObject):
             raise ValueError('The editor changed while scene playback was being prepared')
         candidate = None if load_only else self.builder(prepared.entries, self._monitors(screen))
         manager = self.page.scene
+        previous_frames = transition_frames(manager) if candidate is not None else {}
         close_playback(manager)
         if candidate is not None:
             manager.graphic_scene = candidate.graphic_scene
@@ -202,6 +213,8 @@ class SceneActions(QObject):
         else:
             prepared.close()
         for view in manager.view_list:
+            if isinstance(view, SceneCompositorView):
+                view.begin_transition(previous_frames.get(view.screen().name()))
             view.showMaximized()
         for widget in manager.native_widgets:
             setting = manager.layer_settings.get(widget.scene_layer_key, {})
@@ -275,6 +288,7 @@ class SceneActions(QObject):
         self.closed = True
         self.stop_playback()
         self.page.visual_editor.media_preview.shutdown()
+        self.page.visual_editor.timeline.shutdown()
         self.page.visual_editor.canvas.clear()
         if self.prepared is not None:
             self.prepared.close()

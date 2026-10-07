@@ -36,6 +36,7 @@ class SceneManager:
         if kind in ('image', 'gif', 'sound', 'text', 'video', 'web', 'puppet'):
             proxy = self._add(kind, entry)
             proxy.setData(0, key)
+            proxy.setData(1, deepcopy(entry))
         else:
             raise ValueError(f'Unsupported scene type: {entry.get("type")}')
         self.layer_settings[key] = deepcopy(entry)
@@ -58,8 +59,12 @@ class SceneManager:
                     self._update_native(widget, setting)
             if current is not None:
                 self.layer_settings[key] = deepcopy(current)
+        timeline = getattr(self.graphic_scene, '_scene_timeline', None)
+        if timeline is not None:
+            timeline.configure(self.layer_settings)
 
     def _update_proxy(self, proxy: QGraphicsProxyWidget, setting: dict) -> None:
+        proxy.setData(1, deepcopy(setting))
         proxy.setPos(setting.get('x', 0), setting.get('y', 0))
         proxy.setScale(setting.get('scale', 1))
         proxy.setRotation(setting.get('rotation', 0))
@@ -163,6 +168,11 @@ class SceneManager:
         window on screen and restarting the scene stacks the old items on top.
         """
         front_engine_logger.info("[SceneManager] clear")
+        timeline = getattr(self.graphic_scene, '_scene_timeline', None)
+        if timeline is not None:
+            timeline.shutdown()
+            timeline.deleteLater()
+            del self.graphic_scene._scene_timeline
         native_widgets = tuple(self.native_widgets)
         for widget in native_widgets:
             try:
