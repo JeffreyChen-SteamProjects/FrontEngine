@@ -322,6 +322,7 @@ class FrontEngineMainUI(QMainWindow):
         if user_setting_dict.get("clipboard_persist"):
             self.clipboard_history.load(user_setting_dict.get("clipboard_entries"))
         self.clipboard_watcher = ClipboardWatcher(self.clipboard_history)
+        self._initialize_image_history()
         if user_setting_dict.get("clipboard_history"):
             self.clipboard_watcher.start()
 
@@ -1004,7 +1005,31 @@ class FrontEngineMainUI(QMainWindow):
         self.workshop_dialog.raise_()
         self.workshop_dialog.activateWindow()
 
+    def _initialize_image_history(self) -> None:
+        """Create a lazy image history owner; defaults do not read the clipboard or start a worker."""
+        from frontengine.utils.image_history.service import ImageHistoryService
+        config = user_setting_dict.get('image_clipboard_history')
+        config = config if isinstance(config, dict) else {}
+        self.image_history_service = ImageHistoryService(Path(getcwd()) / 'clipboard-images.sqlite3', config, self)
+        self.image_history_service.result.connect(self._image_history_result)
+        self.image_history_dialog = None
+
+    def _image_history_result(self, kind: str, value) -> None:
+        if kind == 'configure':
+            user_setting_dict['image_clipboard_history'] = dict(value)
+            write_user_setting()
+
+    def open_image_history(self) -> None:
+        """Open explicit image reuse/settings without enabling clipboard recording."""
+        from frontengine.ui.dialog.image_history_dialog import ImageHistoryDialog
+        if self.image_history_dialog is None:
+            self.image_history_dialog = ImageHistoryDialog(self.image_history_service, self)
+        self.image_history_dialog.show()
+        self.image_history_dialog.raise_()
+        self.image_history_dialog.activateWindow()
+
     _CLOSING_SERVICES = (
+        "image_history_service",
         "workshop_service",
         "preset_schedule_service", "theme_schedule_service", "usage_service",
         "signage_service", "screensaver_service",
@@ -1067,6 +1092,8 @@ class FrontEngineMainUI(QMainWindow):
             self.command_palette.close()
         if getattr(self, "preset_versions_dialog", None) is not None:
             self.preset_versions_dialog.close()
+        if getattr(self, 'image_history_dialog', None) is not None:
+            self.image_history_dialog.close()
         if user_setting_dict.get("restore_last_session"):
             save_last_session(self)
         self._stop_services()

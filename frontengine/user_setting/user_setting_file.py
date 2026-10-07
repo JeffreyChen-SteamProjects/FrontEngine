@@ -96,6 +96,7 @@ user_setting_dict: Dict[str, Any] = {
     "clipboard_persist": False,
     "clipboard_entries": [],
     "clipboard_limit": 50,
+    "image_clipboard_history": {"enabled": False, "persistent": False, "limit": 50, "capacity_mib": 64},
     # 已儲存的視窗版面：名稱 -> [{title, x, y, width, height}]
     # Saved window layouts: name -> [{title, x, y, width, height}]
     "window_layouts": {},

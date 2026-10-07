@@ -181,6 +181,17 @@ class ImageSettingUI(SettingPage):
                 pass
         self.board_widget_list.clear()
 
+    def add_reference_image(self, image) -> None:
+        """Place an explicitly reused history image into a registered reference board."""
+        from PySide6.QtGui import QPixmap
+        board = ReferenceBoardWidget()
+        if board.add_pixmap(QPixmap.fromImage(image)):
+            board.resize(640, 480)
+            board.show()
+            self.board_widget_list.append(board)
+        else:
+            board.close()
+
     def open_image_compare(self) -> None:
         """Open a fresh comparison dialog after a previous one released its images."""
         from frontengine.ui.dialog.image_compare_dialog import ImageCompareDialog
