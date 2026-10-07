@@ -47,6 +47,11 @@ def audio_probe(directory: Path) -> dict:
         peak_hz = int(numpy.argmax(abs(numpy.fft.rfft(frame))) * 48000 / len(frame))
         assert 950 <= peak_hz <= 1050
         value = {'frame_samples': len(frame), 'peak': capture.level(), 'peak_hz': peak_hz}
+        wait_for(lambda: not microphone.started and not microphone.capture.running)
+        wait_for(lambda: not microphone.capture.thread.is_alive())
+        microphone.level()
+        wait_for(lambda: microphone.capture.level() is not None and microphone.capture.level() > .3)
+        value['meter_demand_stop_restart'] = True
         failed = PulseCapture('frontengine-missing-own-fixture')
         failed.start()
         wait_for(lambda: bool(failed.last_error) and not failed.running)

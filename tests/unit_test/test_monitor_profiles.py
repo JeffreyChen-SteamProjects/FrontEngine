@@ -11,6 +11,35 @@ from frontengine.utils.window_pin.topology_profiles import (
 from frontengine.ui.dialog.monitor_profiles_dialog import MonitorProfilesDialog
 
 
+@pytest.fixture(autouse=True)
+def injected_desktop_session(monkeypatch):
+    """Geometry tests run offscreen; inject native prerequisites rather than using host display access."""
+    from frontengine.utils.linux import capabilities
+    monkeypatch.setattr(capabilities, 'x11_reason', lambda: '')
+
+
+def test_wayland_guard_rejects_restore_and_reports_auto_failure(tmp_path, monkeypatch):
+    import sys
+    from frontengine.utils.linux import capabilities
+    first = widget('note', (10, 20, 120, 80))
+    service = MonitorProfileService(tmp_path / 'profiles.json', lambda: [[first]])
+    failures = []
+    service.failed.connect(failures.append)
+    try:
+        service.save_current()
+        before = first.geometry()
+        monkeypatch.setattr(sys, 'platform', 'linux')
+        monkeypatch.setattr(capabilities, 'x11_reason', lambda: 'Wayland arbitrary positioning is unavailable')
+        with pytest.raises(ValueError, match='Wayland'):
+            service.restore_current()
+        service.set_enabled(True)
+        service.adapt()
+        assert failures == ['Wayland arbitrary positioning is unavailable']
+        assert first.geometry() == before
+    finally:
+        cleanup(service, first)
+
+
 def widget(title, rect):
     value = QWidget()
     value.setWindowFlag(Qt.WindowType.FramelessWindowHint)
