@@ -281,7 +281,10 @@ class ToolsSettingUI(SettingPage):
         self.record_seconds_spinbox.setMaximum(3600 if self.record_format.currentData() == 'avi' else 120)
 
     def _toggle_record_pause(self) -> None:
-        self.recorder.resume() if self.recorder.state == 'paused' else self.recorder.pause()
+        if self.recorder.state == 'paused':
+            self.recorder.resume()
+        else:
+            self.recorder.pause()
 
     def _recording_state_changed(self, state: str) -> None:
         editable = state == 'idle'

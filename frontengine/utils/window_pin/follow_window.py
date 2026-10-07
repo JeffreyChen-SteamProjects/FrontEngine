@@ -15,6 +15,9 @@ from frontengine.utils.window_pin.monitor_move import clamp_into
 class Win32FollowBackend:
     """Tag only explicitly selected targets; a destroyed/reused HWND loses the private cookie."""
 
+    def __init__(self) -> None:
+        self._user = None
+
     @staticmethod
     def available() -> bool:
         """Require Windows rather than claiming an unverified cross-platform identity adapter."""

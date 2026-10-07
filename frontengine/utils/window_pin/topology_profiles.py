@@ -160,8 +160,8 @@ class MonitorProfileService(QObject):
         entries = {}
         for name, widget in unique_overlays(self.provider, self.excluded):
             rect = widget.geometry()
-            screen = max(screens, key=lambda s: rect.intersected(QRect(*s['work'])).width() *
-                         rect.intersected(QRect(*s['work'])).height())
+            screen = max(screens, key=lambda s, area=rect: area.intersected(QRect(*s['work'])).width() *
+                         area.intersected(QRect(*s['work'])).height())
             x, y, width, height = screen['work']
             entries[name] = {'screen': screen['id'], 'anchor': [(rect.x() - x) / max(1, width),
                                                               (rect.y() - y) / max(1, height)],

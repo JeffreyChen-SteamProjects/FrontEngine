@@ -144,7 +144,10 @@ class SceneCompositorView(QWidget):
 
     def _set_media_active(self, active: bool) -> None:
         owners = getattr(self.scene, '_media_view_owners', set())
-        owners.add(id(self)) if active else owners.discard(id(self))
+        if active:
+            owners.add(id(self))
+        else:
+            owners.discard(id(self))
         self.scene._media_view_owners = owners
         self.timeline.set_active(bool(owners))
         self._timeline_state(self.timeline.state)

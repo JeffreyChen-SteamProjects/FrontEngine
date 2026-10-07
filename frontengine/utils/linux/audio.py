@@ -1,7 +1,7 @@
 """Opt-in PulseAudio capture: one bounded float frame, never disk/network output."""
 from __future__ import annotations
 import math
-import subprocess
+import subprocess  # nosec B404 - owned parec from an absolute allow-list, argv only, shell=False.
 import threading
 import weakref
 from typing import Callable

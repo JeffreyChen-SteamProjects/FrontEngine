@@ -66,3 +66,14 @@ def test_packaged_normal_entry_keeps_preset_debug_arguments(monkeypatch):
     monkeypatch.setattr(main_ui, 'main', lambda: calls.append(sys.argv[:]))
     entry.main()
     assert calls == [arguments]
+
+
+def test_acceptance_failure_survives_optimized_python():
+    import subprocess
+    from pathlib import Path
+    result = subprocess.run([sys.executable, '-O', '-c',
+        "from exe.scene_build_acceptance import _require; _require(False, 'probe failed')"],
+        capture_output=True, text=True, shell=False, check=False,
+        cwd=Path(acceptance.__file__).resolve().parents[1])
+    assert result.returncode != 0
+    assert 'ValueError: probe failed' in result.stderr

@@ -68,7 +68,10 @@ class SoundPlayer(QWidget):
     def set_active(self, active: bool) -> None:
         """Scene view ownership controls playback; standalone playback stays unchanged."""
         if hasattr(self, 'media_player'):
-            self.media_player.play() if active else self.media_player.pause()
+            if active:
+                self.media_player.play()
+            else:
+                self.media_player.pause()
 
     def closeEvent(self, event) -> None:
         front_engine_logger.info(f"[SoundPlayer] closeEvent | event={event}")

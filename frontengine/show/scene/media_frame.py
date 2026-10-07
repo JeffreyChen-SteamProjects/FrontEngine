@@ -175,16 +175,26 @@ class SceneMediaFrame(BaseWidget):
             return
         self.active = active
         if self.media_player is not None:
-            self.media_player.play() if active else self.media_player.pause()
-        if self.host is not None and isValid(self.host):
-            if not active:
-                self.host.hide()
-            if self.profile_pet is None:
-                state = QWebEnginePage.LifecycleState.Active if active else QWebEnginePage.LifecycleState.Frozen
-                self.host.page().setLifecycleState(state)
             if active:
-                self.host.show()
-        self.timer.start() if active else self.timer.stop()
+                self.media_player.play()
+            else:
+                self.media_player.pause()
+        self._set_host_active(active)
+        if active:
+            self.timer.start()
+        else:
+            self.timer.stop()
+
+    def _set_host_active(self, active: bool) -> None:
+        if self.host is None or not isValid(self.host):
+            return
+        if not active:
+            self.host.hide()
+        if self.profile_pet is None:
+            state = QWebEnginePage.LifecycleState.Active if active else QWebEnginePage.LifecycleState.Frozen
+            self.host.page().setLifecycleState(state)
+        if active:
+            self.host.show()
 
     def interact(self) -> None:
         """Expose the same live native renderer for web forms or puppet hit areas."""

@@ -20,11 +20,11 @@ from frontengine.show.compositor import Layer, CompositorWidget
 
 def fixture() -> list[Layer]:
     """Seeded fixed twelve-layer 1280x720 scene shared by both implementations."""
-    rng = random.Random(20261008)
+    rng = random.Random(20261008)  # nosec B311 - deterministic fixture colors, no security use.
     layers = []
     for index in range(12):
         image = QImage(320, 180, QImage.Format.Format_RGBA8888_Premultiplied)
-        image.fill(QColor(rng.randrange(256), rng.randrange(256), rng.randrange(256), 210))
+        image.fill(QColor(rng.randrange(256), rng.randrange(256), rng.randrange(256), 210))  # nosec B311 - fixture colors
         layers.append(Layer(str(index), image, QTransform.fromTranslate((index % 4) * 250,
                                                                       (index // 4) * 200), index, .8))
     return layers
@@ -76,7 +76,8 @@ def main() -> None:
                                         for name, factory in factories.items()}
         values = result['measurements'][mode]
         if 'baseline' in values:
-            assert values['current']['sha256'] == values['baseline']['sha256'], 'Pixel outputs differ'
+            if values['current']['sha256'] != values['baseline']['sha256']:
+                raise ValueError('Pixel outputs differ')
     args.output.write_text(json.dumps(result, indent=2) + '\n', encoding='utf-8')
     print(json.dumps(result, indent=2))
 

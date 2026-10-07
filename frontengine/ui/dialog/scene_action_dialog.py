@@ -73,7 +73,10 @@ class SceneActionDialog(QDialog):
             names = ()
         for name in names:
             field = QDoubleSpinBox()
-            field.setRange(0, 100) if name == 'opacity' else field.setRange(-100000, 100000)
+            if name == 'opacity':
+                field.setRange(0, 100)
+            else:
+                field.setRange(-100000, 100000)
             field.setDecimals(2)
             self.fields[name] = field
             self.form.addRow(translate('scene_property_' + name), field)
