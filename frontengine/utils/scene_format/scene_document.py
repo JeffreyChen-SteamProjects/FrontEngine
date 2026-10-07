@@ -10,7 +10,7 @@ from frontengine.utils.imervue.puppet_asset import finite_parameters
 
 SCENE_FORMAT = 'frontengine.scene'
 SCENE_VERSION = 1
-ASSET_FIELDS = ('file_path', 'script_path')
+ASSET_FIELDS = ('text_file', 'file_path', 'script_path')
 
 
 def resolve_asset(value: str, base_dir: Path | None) -> str:

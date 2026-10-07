@@ -1039,6 +1039,7 @@ class FrontEngineMainUI(QMainWindow):
         if user_setting_dict.get("restore_last_session"):
             save_last_session(self)
         self._stop_services()
+        self.text_setting_ui.stop_file_preview()
         from frontengine.user_setting.scene_setting import release_scene_packages
         if hasattr(self, 'tools_setting_ui'):
             self.tools_setting_ui.recorder.close()

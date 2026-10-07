@@ -82,7 +82,13 @@ class SoundOverlayFactory(OverlayFactory):
 
 class TextOverlayFactory(OverlayFactory):
     def create(self, setting_dict: Dict[str, Any]) -> QWidget:
-        widget = TextWidget(_require(setting_dict, "text", "text"))
+        local_file = setting_dict.get("text_source") == "local_file"
+        widget = TextWidget(str(setting_dict.get("text", "")) if local_file else _require(setting_dict, "text", "text"))
+        if local_file:
+            from frontengine.utils.text_source.local_file_source import LocalFileTextSource
+            widget.set_text_source(LocalFileTextSource(
+                _require(setting_dict, "text_file", "text"), str(setting_dict.get("text_file_field", "")),
+                _normalize_int(setting_dict.get("text_file_interval"), 1) * 1000))
         widget.set_ui_variable(_normalize_percent(setting_dict.get("opacity"), 0.2))
         widget.set_font_variable(_normalize_int(setting_dict.get("font_size"), 100))
         widget.set_alignment(setting_dict.get("alignment", "Center"))

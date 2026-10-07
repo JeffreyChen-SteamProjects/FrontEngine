@@ -20,3 +20,5 @@ Text-Seite
       die unter „Wetter-Stadt“ genannte Stadt.
 
 * Auf allen Bildschirmen / Unter allen Fenstern / Zielbildschirm - wie sonst auch.
+
+Text → Lokale TXT / JSON / CSV zeigt UTF-8-Dateien mit Feldwahl und 1–3600 Sekunden Intervall. JSON: /Schlüssel/Index (etwa /build/tasks); CSV: eindeutige Spaltennamen, Spalte zeilenweise. Leer zeigt die ganze Datei. Hintergrundlesen: ein Auftrag je Quelle, maximal 1 MiB und 65.536 Ausgabezeichen. Fehlende Dateien/Felder, Format-, Zugriffs- und Größenfehler werden angezeigt; Korrekturen stellen die Anzeige wieder her. Presets speichern Datei/Feld/Intervall. Portable Szenen kopieren die Datendatei; das Teilen gibt diesen Datenstand weiter.
