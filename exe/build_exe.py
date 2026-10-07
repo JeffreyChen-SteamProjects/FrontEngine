@@ -31,7 +31,7 @@ OUTPUT_DIR = PROJECT_ROOT / "build" / "nuitka"
 # half-initialised Cython module aborts start-up with
 # KeyError('__reduce_cython__').
 DYNAMIC_PACKAGES = ("frontengine", "qt_material", "pynput", "OpenGL",
-                    "OpenGL_accelerate")
+                    "OpenGL_accelerate", "winrt")
 
 
 def read_version() -> str:

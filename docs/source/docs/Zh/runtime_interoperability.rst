@@ -27,3 +27,5 @@ Windows OCR 的 WinRT 投影套件包含於 FrontEngine 的一般 Windows 安裝
 Workshop 內容宣告採版本化格式，使用前會驗證；未知的中繼資料 JSON 不會當成預設集。預設集封包會拒絕不安全的封存路徑、超出資源上限及媒體檔名碰撞。
 
 預設集 → 管理創意工坊可開啟 Steam 管理介面；場景與寵物頁也提供入口。Windows x64 需已連線 Steam 客戶端、App 2793470 工作階段及 steam_api64.dll。可發布已儲存的 .fescene／場景 JSON、預設集 ZIP 或 sprite 寵物資料夾，並附小於 1 MB 的 PNG/JPEG 預覽。新項目預設私人，更新時核對擁有者。上傳顯示進度與條款狀態，保存項目 ID 供重試，隱藏管理視窗仍繼續；中斷後須在 Steam 確認結果。訂閱內容先驗證並複製到獨立版本資料夾，本機修改衝突可選下載版本或本機版本。載入會填入對應功能頁，播放從該頁啟動；預設集匯入須使用新名稱。既有離線資料夾匯入保留。Steam 封裝時於 exe/build_exe.py 加上 --steam-runtime DLL路徑，選定 DLL 放在執行檔旁（--onefile 亦同），不包含整套 SDK 或開發用 steam_appid.txt。
+
+Windows 安裝現在包含 winrt-Windows.Media.Control，讓「正在播放」小工具透過 SMTC 顯示歌名與演出者；舊 winsdk 仍可備援。沒有媒體工作階段時回傳空結果，並保留既有音訊程式名稱備援。

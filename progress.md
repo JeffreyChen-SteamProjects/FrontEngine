@@ -15,9 +15,6 @@
 - **#9** macOS 的原生擷取、TCC 權限、音訊、MIDI 與多螢幕仍須在 Mac 實機驗證（`tests/integration/macos_native_smoke.py`）；Linux 的音訊與視窗控制尚未補齊。
 <br>
   - [Answer] 讓其他平台也支援
-- **#10** 「正在播放」的歌名需要選用套件 `winsdk`。
-<br>
-  - [Answer] 安裝
 - **#11** Steam Workshop 剩餘交付验收見 #43／#44；私人發布、更新、訂閱下載與場景渲染已通過 Steam 實測。一般使用者透過 Steam 客戶端工作階段操作，不需提供開發者帳密。
 <br>
   - [Answer] 已添加 SDK 與 APP id

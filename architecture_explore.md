@@ -501,6 +501,8 @@ Mac hardware/TCC verification remains a target-host check rather than an injecte
 
 ## Workshop publication boundaries
 
+Windows installs include `winrt-Windows.Media.Control`; Now playing prefers its modern namespace and retains legacy winsdk fallback. Nuitka explicitly includes the `winrt` namespace for dynamically selected projections.
+
 `tests/integration/steam_workshop_private.py` explicitly publishes or updates private test content and persists operation IDs. `steam_workshop_download.py` verifies ownership/private visibility, subscribes only that item, downloads/validates/renders its scene and restores its prior subscription status. `steam_workshop_smoke.py` reads App-license and Cloud-quota diagnostics; these scripts require the real client and are excluded from unit-test side effects.
 
 `ui/dialog/workshop_dialog.py` owns management controls, publisher/subscription controllers and background file jobs. Opening it does not connect Steam; Connect initializes the main-owned service. Closing hides the window and leaves submitted uploads running. Main shutdown stops workers/controllers before the runtime. Scene/Pet buttons and the Presets menu share one dialog. Scene packages loaded by a worker are installed through `user_setting/scene_setting.adopt_scene_entries`, which retains their extraction leases on the GUI thread. Preset media imports get isolated persistent directories and require unused local names. `exe/build_exe.py` optionally validates a selected x64 Steam DLL and copies it beside standalone/onefile output.
