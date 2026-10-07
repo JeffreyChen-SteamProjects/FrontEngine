@@ -501,6 +501,7 @@ Mac hardware/TCC verification remains a target-host check rather than an injecte
 
 ## Workshop publication boundaries
 
+
 Windows installs include `winrt-Windows.Media.Control`; Now playing prefers its modern namespace and retains legacy winsdk fallback. Nuitka explicitly includes the `winrt` namespace for dynamically selected projections.
 
 `exe/build_exe.check_dependencies` evaluates project requirements and environment markers against installed distribution versions before compilation; missing or incompatible runtime requirements stop the build with an installation instruction.
@@ -516,3 +517,7 @@ Windows installs include `winrt-Windows.Media.Control`; Now playing prefers its 
 `utils/workshop/workshop_manifest.py` validates versioned scene/preset/pet-pack declarations and confines resources. `workshop_package.py` creates validated publication snapshots with explicit media only. Native publishing is implemented separately. Legacy empty/known presets remain readable; arbitrary metadata JSON cannot become preset settings. Preset ZIP imports validate archive limits and reject flat-name collisions before extraction.
 
 `utils/steam/steam_runtime.py` lazily loads the Windows x64 flat API, checks interface 021 and App identity, owns copied manual-dispatch events and shuts down exactly once. `utils/workshop/workshop_service.py` pumps a bounded callback batch through a Qt timer. Native ABI and read-only initialization checks are explicit tools in `tests/integration/steam_workshop_abi.cpp` and `steam_workshop_smoke.py`; native availability is not inferred from fake tests.
+
+## Visual scene editing
+
+`utils/scene_format/scene_editor_document.py` validates finite geometry and owns a bounded QUndoStack of deep-copied scene edits while preserving existing fields. `ui/page/scene_setting/scene_visual_editor.py` provides QGraphicsObject previews, image/GIF/text layers, group movement, corner resizing, properties/alignment/lock/visibility and export. SceneManagerUI emits `entries_changed`; the visual editor updates shared scene_json and Script text with a recursion guard. Applying external JSON resets undo history. SceneManager resizes and transforms playback proxies; legacy entries without dimensions retain their previous sizing. Non-previewed scene kinds remain as placeholders and keep their original data. QMovie previews pause while hidden and are destroyed with scene items.

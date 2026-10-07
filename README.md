@@ -481,3 +481,5 @@ Presets → Manage Workshop opens the Steam manager; Scene and Pet also provide 
 Windows installations now include winrt-Windows.Media.Control for the Now playing widget (song title and artist through SMTC); older winsdk remains a fallback. No active media session yields an empty result, with the existing audio-application fallback retained.
 
 Executable builds check all required dependencies and versions before compilation; install requirements.txt in the build environment first.
+
+Scene → Visual editor provides an image/GIF/text layer list and preview, group dragging, corner resizing, position/size/scale/rotation/order/opacity controls, canvas alignment, layout locking, visibility, duplication and 100-step undo/redo (Ctrl+Z/Ctrl+Y). Other existing scene types are preserved with placeholders. Export portable .fescene packages directly; the Script tab also supports editing and applying JSON. Explicit dimensions, scale, rotation and visibility are restored during scene playback. Loading/applying external JSON starts a new undo history; existing scene fields remain intact.

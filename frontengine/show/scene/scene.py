@@ -25,12 +25,21 @@ class SceneManager:
 
     def _add(self, kind: str, setting_dict: Dict) -> QGraphicsProxyWidget:
         front_engine_logger.info(f"[SceneManager] add_{kind} | settings={setting_dict}")
+        from frontengine.utils.scene_format.scene_editor_document import validate_geometry
+        validate_geometry({"layer": setting_dict})
         widget = build_overlay(kind, setting_dict)
+        widget.overlay_remembers_geometry = False
+        if "width" in setting_dict or "height" in setting_dict:
+            widget.resize(int(setting_dict.get("width", widget.width())),
+                          int(setting_dict.get("height", widget.height())))
         if hasattr(widget, 'set_render_backend'):
             widget.set_render_backend('software')
         proxy_widget = self.graphic_scene.addWidget(widget)
         proxy_widget.setPos(float(setting_dict.get('x', 0)), float(setting_dict.get('y', 0)))
         proxy_widget.setZValue(float(setting_dict.get('z', 0)))
+        proxy_widget.setScale(float(setting_dict.get("scale", 1)))
+        proxy_widget.setRotation(float(setting_dict.get("rotation", 0)))
+        proxy_widget.setVisible(setting_dict.get("visible", True))
         self.widget_list.append(proxy_widget)
         return proxy_widget
 

@@ -481,3 +481,5 @@ Preajustes → Gestionar Workshop abre el gestor de Steam; Escena y Mascota tamb
 Windows incluye winrt-Windows.Media.Control para mostrar canción y artista mediante SMTC en el widget de reproducción; winsdk antiguo sigue como alternativa. Sin sesión multimedia el resultado está vacío; se conserva la alternativa del nombre de la aplicación de audio.
 
 La compilación del ejecutable comprueba dependencias y versiones antes de compilar; instale primero requirements.txt en ese entorno.
+
+Escena → Editor visual ofrece lista y vista previa de capas de imagen/GIF/texto, arrastre grupal, tamaño desde la esquina, posición/tamaño/escala/rotación/orden/opacidad, alineación, bloqueo, visibilidad, duplicado y 100 pasos de deshacer/rehacer (Ctrl+Z/Ctrl+Y). Los demás tipos se conservan como marcadores. Exporte .fescene directamente; Script permite editar y aplicar JSON. La reproducción restaura tamaño, escala, rotación y visibilidad explícitos. El JSON externo inicia un historial nuevo y conserva los campos existentes.

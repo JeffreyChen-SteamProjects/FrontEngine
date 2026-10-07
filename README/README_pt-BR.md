@@ -504,3 +504,5 @@ Predefinições → Gerenciar Workshop abre o gerenciador Steam; Cena e Pet tamb
 Windows inclui winrt-Windows.Media.Control para mostrar música e artista via SMTC no widget de reprodução; winsdk antigo permanece como alternativa. Sem sessão de mídia, o resultado fica vazio; a alternativa do nome do aplicativo de áudio é mantida.
 
 A construção do executável verifica dependências e versões antes de compilar; instale requirements.txt no ambiente de construção primeiro.
+
+Cena → Editor visual oferece lista e prévia de camadas de imagem/GIF/texto, arraste em grupo, tamanho pelo canto, posição/tamanho/escala/rotação/ordem/opacidade, alinhamento, bloqueio, visibilidade, duplicação e 100 etapas de desfazer/refazer (Ctrl+Z/Ctrl+Y). Outros tipos são preservados como marcadores. Exporte .fescene diretamente; Script permite editar e aplicar JSON. A reprodução restaura tamanho, escala, rotação e visibilidade explícitos. JSON externo inicia novo histórico e preserva os campos existentes.

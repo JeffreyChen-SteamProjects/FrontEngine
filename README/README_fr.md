@@ -482,3 +482,5 @@ Préréglages → Gérer le Workshop ouvre le gestionnaire Steam ; Scène et Ani
 Windows inclut désormais winrt-Windows.Media.Control pour afficher titre et artiste via SMTC dans le widget de lecture ; l’ancien winsdk reste une alternative. Sans session multimédia, le résultat est vide ; le nom de l’application audio reste disponible en secours.
 
 La construction de l’exécutable vérifie dépendances et versions avant compilation ; installez d’abord requirements.txt dans cet environnement.
+
+Scène → Éditeur visuel propose liste et aperçu des calques image/GIF/texte, déplacement groupé, redimensionnement par le coin, position/taille/échelle/rotation/ordre/opacité, alignement, verrouillage, visibilité, duplication et 100 annulations/rétablissements (Ctrl+Z/Ctrl+Y). Les autres types sont conservés comme cadres. Exportez directement .fescene ; l’onglet Script permet aussi de modifier et appliquer le JSON. La lecture restitue taille, échelle, rotation et visibilité explicites. Le JSON externe ouvre un nouvel historique ; les champs existants restent intacts.

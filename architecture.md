@@ -4,6 +4,8 @@ Windows requirements include the PyWinRT Media.Control projection for song metad
 
 The executable builder checks platform-filtered dependency metadata and version constraints before invoking Nuitka, preventing incomplete build environments from silently producing broken distributions.
 
+Scene editing uses `utils/scene_format/scene_editor_document.py` for validated undoable entry snapshots and `ui/page/scene_setting/scene_visual_editor.py` for image/GIF/text preview, layer selection and transforms. It synchronizes with the existing Script tab and portable scene formats. `SceneManager` applies explicit dimensions, scale, rotation and visibility to playback proxies.
+
 Workshop publications use account-scoped durable records in `utils/workshop/workshop_publications.py`. `workshop_publisher.py` verifies remote ownership before updates, preserves created IDs before uploading and retains snapshots for interrupted operations; Qt service shutdown marks pending outcomes uncertain before releasing Steam.
 
 Subscription install flags and callbacks are reconciled by `workshop_subscriptions.py`. `workshop_jobs.py` runs at most two validation/copy jobs per controller; `workshop_cache.py` keeps validated content versions outside Steam folders, retains old versions for scene leases and requires explicit activation for local-change conflicts.

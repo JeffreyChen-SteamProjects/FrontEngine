@@ -8,6 +8,8 @@ from frontengine.ui.page.scene_setting.scene_manager import SceneManagerUI
 from frontengine.ui.page.scene_setting.scene_page.registry import SCENE_PAGE_REGISTRY
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
+from frontengine.ui.page.scene_setting.scene_visual_editor import SceneVisualEditor
+from frontengine.utils.multi_language.retranslate import retranslator
 
 
 class SceneSettingUI(SettingPage):
@@ -23,6 +25,9 @@ class SceneSettingUI(SettingPage):
         # Tab
         self.tab_widget = QTabWidget(self)
         self.scene_manager_ui = SceneManagerUI(self.scene)
+        self.visual_editor = SceneVisualEditor(self.scene_manager_ui)
+        visual_index = self.tab_widget.addTab(self.visual_editor, "")
+        retranslator.bind(self.tab_widget, "scene_visual_editor", "", "setTabText", visual_index)
         self.tab_widget.addTab(
             self.scene_manager_ui, language_wrapper.language_word_dict.get("scene_script")
         )

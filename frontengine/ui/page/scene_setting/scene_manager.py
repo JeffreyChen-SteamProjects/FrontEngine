@@ -15,6 +15,7 @@ from frontengine.user_setting.user_setting_file import user_setting_dict
 
 class SceneManagerUI(QWidget):
     workshop_requested = Signal()
+    entries_changed = Signal(object)
     def __init__(self, scene_manager):
         front_engine_logger.info("[SceneManagerUI] Init")
         super().__init__()
@@ -33,7 +34,7 @@ class SceneManagerUI(QWidget):
 
         # Json plaintext
         self.json_plaintext = QPlainTextEdit()
-        self.json_plaintext.setReadOnly(True)
+        self.json_plaintext.setReadOnly(False)
         self.json_plaintext.appendPlainText("{}")
 
         # Start button
@@ -41,6 +42,8 @@ class SceneManagerUI(QWidget):
         self.start_button.clicked.connect(self.start_scene)
         self.workshop_button = tr(QPushButton(), "workshop_manage")
         self.workshop_button.clicked.connect(self.workshop_requested.emit)
+        self.apply_json_button = tr(QPushButton(), "scene_apply_json")
+        self.apply_json_button.clicked.connect(self.apply_json)
 
         # Show on all screen
         self.show_on_all_screen_checkbox = tr(QCheckBox(), "Show on all screen")
@@ -58,6 +61,7 @@ class SceneManagerUI(QWidget):
         self.grid_layout.addWidget(self.clear_json_button, 5, 1)
         self.grid_layout.addWidget(self.start_button, 6, 0)
         self.grid_layout.addWidget(self.workshop_button, 6, 1)
+        self.grid_layout.addWidget(self.apply_json_button, 7, 0)
 
     def set_show_all_screen(self) -> None:
         front_engine_logger.info("[SceneManagerUI] set_show_all_screen")
@@ -75,6 +79,20 @@ class SceneManagerUI(QWidget):
         front_engine_logger.info("[SceneManagerUI] clear_json")
         scene_json.clear()
         self.json_plaintext.clear()
+        self.entries_changed.emit({})
+
+    def apply_json(self) -> None:
+        entries = self._parse_scene_json()
+        if entries is not None:
+            from frontengine.utils.scene_format.scene_editor_document import validate_geometry
+            try:
+                entries = validate_geometry(entries)
+            except ValueError as error:
+                QMessageBox.warning(self, "Scene Error", str(error))
+                return
+            scene_json.clear()
+            scene_json.update(entries)
+            self.renew_json_plain_text()
 
     def start_scene(self):
         front_engine_logger.info("[SceneManagerUI] start_scene")
@@ -215,3 +233,4 @@ class SceneManagerUI(QWidget):
     def renew_json_plain_text(self):
         front_engine_logger.info("[SceneManagerUI] renew_json_plain_text")
         self.json_plaintext.setPlainText(json.dumps(scene_json, indent=4))
+        self.entries_changed.emit(dict(scene_json))

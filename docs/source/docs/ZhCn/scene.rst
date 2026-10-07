@@ -20,3 +20,5 @@
 场景：场景页支持旧 entry mapping JSON、有版本的 frontengine.scene envelope，以及便携式 .fescene 包。PUPPET 项目可设置位置、大小、不透明度、有限数值参数，以及可选动作、表情与脚本。JSON 路径相对于场景文件解析。.fescene 包含引用媒体、原始 .puppet 与可选 .petscript.json，可移到其他电脑。导入会检查路径、符号链接、版本与解压上限。FrontEngine 场景保持为场景包；.puppet 保持为单一 Imervue 角色。
 
 :doc:`runtime_interoperability`
+
+场景 → 视觉编辑提供图片／GIF／文字图层列表与预览、群组拖动、角落缩放、位置／尺寸／倍率／旋转／顺序／透明度控制、画布对齐、位置锁定、显示、复制及 100 步撤销／重做（Ctrl+Z／Ctrl+Y）。其他类型保留并显示占位。可直接导出便携 .fescene，脚本页也能编辑并应用 JSON。播放还原明确尺寸、倍率、旋转与显示状态。载入／应用外部 JSON 时开始新撤销历史，并保留现有字段。

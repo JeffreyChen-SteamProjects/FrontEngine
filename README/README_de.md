@@ -524,3 +524,5 @@ Presets → Workshop verwalten öffnet den Steam-Manager; Szene und Tier bieten 
 Windows-Installationen enthalten jetzt winrt-Windows.Media.Control für Titel und Interpret im Wiedergabe-Widget über SMTC; älteres winsdk bleibt eine Alternative. Ohne Mediensitzung bleibt das Ergebnis leer; die bisherige Anzeige des Audio-App-Namens bleibt erhalten.
 
 EXE-Builds prüfen benötigte Abhängigkeiten und Versionen vor der Kompilierung; zuerst requirements.txt in der Build-Umgebung installieren.
+
+Szene → Visueller Editor bietet Bild/GIF/Text-Ebenenliste und Vorschau, Gruppenziehen, Eckenskalierung, Position/Größe/Skalierung/Drehung/Reihenfolge/Deckkraft, Leinwandausrichtung, Layoutsperre, Sichtbarkeit, Duplizieren und 100 Undo/Redo-Schritte (Ctrl+Z/Ctrl+Y). Andere Typen bleiben als Platzhalter erhalten. Portable .fescene direkt exportieren; im Skript-Tab JSON bearbeiten und anwenden. Wiedergabe übernimmt explizite Größe, Skalierung, Drehung und Sichtbarkeit. Externes JSON beginnt eine neue Undo-Historie; vorhandene Felder bleiben erhalten.
