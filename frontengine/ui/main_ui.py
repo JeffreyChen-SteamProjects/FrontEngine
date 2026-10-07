@@ -324,6 +324,7 @@ class FrontEngineMainUI(QMainWindow):
         self.clipboard_watcher = ClipboardWatcher(self.clipboard_history)
         self._initialize_image_history()
         self._initialize_capture_history()
+        self._initialize_tasks()
         if user_setting_dict.get("clipboard_history"):
             self.clipboard_watcher.start()
 
@@ -433,7 +434,7 @@ class FrontEngineMainUI(QMainWindow):
         self.control_center_ui.register_cleanup(
             self.presentation_setting_ui.release_input_watch)
         for attribute in ("spectrum_widget_list", "monitor_widget_list",
-                          "now_playing_widget_list", "note_widget_list"):
+                          "now_playing_widget_list", "note_widget_list", "todo_widget_list"):
             self.control_center_ui.register_overlay_source(
                 lambda attribute=attribute: getattr(self.widgets_setting_ui, attribute, []))
         for attribute in ("measure_widget_list", "capture_widget_list", "camera_widget_list",
@@ -1039,6 +1040,12 @@ class FrontEngineMainUI(QMainWindow):
         self.capture_history_service.result.connect(self._capture_history_result)
         self.capture_history_dialog = None
 
+    def _initialize_tasks(self) -> None:
+        """Own local task persistence without a timer/thread until a user opens it."""
+        from frontengine.utils.todo.service import TodoService
+        self.todo_service = TodoService(Path(getcwd()) / 'tasks.json', self)
+        self.widgets_setting_ui.configure_tasks(self.todo_service)
+
     def _capture_history_result(self, kind: str, value) -> None:
         if kind == 'configure':
             user_setting_dict['capture_history'] = dict(value)
@@ -1056,6 +1063,7 @@ class FrontEngineMainUI(QMainWindow):
     _CLOSING_SERVICES = (
         "image_history_service",
         "capture_history_service",
+        "todo_service",
         "workshop_service",
         "preset_schedule_service", "theme_schedule_service", "usage_service",
         "signage_service", "screensaver_service",
@@ -1080,6 +1088,7 @@ class FrontEngineMainUI(QMainWindow):
         ("text_setting_ui", "text_widget_list"),
         ("particle_setting_ui", "particle_list"),
         ("pet_setting_ui", "pet_list"),
+        ("widgets_setting_ui", "todo_widget_list"),
     )
 
     def _plugin_grants(self) -> dict:
@@ -1134,6 +1143,7 @@ class FrontEngineMainUI(QMainWindow):
         self.tools_setting_ui.close_palette()
         self.tools_setting_ui.close_capture_editor()
         self.tools_setting_ui.close_live_ocr()
+        self.widgets_setting_ui.close_task_editor()
         from frontengine.user_setting.scene_setting import release_scene_packages
         if hasattr(self, 'tools_setting_ui'):
             self.tools_setting_ui.recorder.close()
