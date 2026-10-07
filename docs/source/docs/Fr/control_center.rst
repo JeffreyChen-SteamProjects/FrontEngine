@@ -31,3 +31,5 @@ Tout d'un coup
 * Épingler à ce bureau - les calques restent sur le bureau virtuel où ils ont
   été ouverts. Sur un autre bureau ils s'effacent, et reviennent au retour.
   Détacher ramène tout ce qui avait été rangé. Windows uniquement.
+
+Centre de contrôle → Suivre une fenêtre choisit overlay enregistré de premier niveau et cible Windows visible. Décalage initial proportionnel suit déplacement/taille ; taille logique overlay, position physique sans activation/redimensionnement, bornée au moniteur, vérifiée 250 ms. Minimiser masque ; retour respecte masquage manuel/global ; fermer/masquer/perdre identité détache. Propriété unique réversible + PID/thread bloque réutilisation HWND ; UIPI/cible élevée peut refuser. Détacher avant nouveau décalage. 64 liaisons temporaires sans restauration ; fermer/tout fermer/quitter retire cookies/arrête timer. Adaptateur Windows vérifié uniquement, autre plateforme indique raison. Fenêtres propres sur écran 125% vérifiées ; DPI mixtes multi-écran nécessitent second écran.

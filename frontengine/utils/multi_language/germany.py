@@ -1136,4 +1136,13 @@ germany_word_dict = {
     'assets_kind_pet': 'Sprite-Pet',
     'assets_kind_puppet': 'Puppet-Textur',
     'assets_kind_scene': 'Szene',
+    'follow_title': 'Einem Fenster folgen',
+    'follow_overlay': 'Registriertes Overlay',
+    'follow_target': 'Zielfenster',
+    'follow_refresh': 'Listen aktualisieren',
+    'follow_bind': 'Aktuellen Versatz binden',
+    'follow_detach': 'Lösen',
+    'follow_hint': 'Windows: anfänglichen relativen Versatz halten, bei Minimieren verbergen, bei Schließen/Verbergen/Identitätsverlust lösen. Alles verbergen bleibt verborgen. Temporär; vor neuer Position lösen. Erhöhte Fenster können Registrierung verweigern.',
+    'follow_unsupported': 'Fensterfolgen benötigt den geprüften Windows-Adapter; Plattform nicht unterstützt.',
+    'follow_bound': 'Gebunden; folgt dem gewählten Ziel.',
 }

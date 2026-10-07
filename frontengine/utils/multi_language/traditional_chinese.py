@@ -1142,4 +1142,13 @@ traditional_chinese_word_dict = {
     'assets_kind_pet': '精靈寵物',
     'assets_kind_puppet': 'Puppet 貼圖',
     'assets_kind_scene': '場景',
+    'follow_title': '跟隨指定視窗',
+    'follow_overlay': '已登錄覆蓋層',
+    'follow_target': '目標視窗',
+    'follow_refresh': '更新清單',
+    'follow_bind': '綁定目前相對位置',
+    'follow_detach': '解除綁定',
+    'follow_hint': 'Windows：保持初始比例位置，目標最小化時隱藏，關閉／隱藏或識別失效即解除。全部隱藏會保持隱藏。僅暫時綁定；要拖曳到新偏移請先解除。較高權限視窗可能拒絕登錄。',
+    'follow_unsupported': '視窗跟隨需已驗證的 Windows 介面，此平台不支援。',
+    'follow_bound': '已綁定，位置會跟隨所選目標。',
 }

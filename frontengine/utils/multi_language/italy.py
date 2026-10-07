@@ -1133,4 +1133,13 @@ italian_word_dict = {
     'assets_kind_pet': 'Animale sprite',
     'assets_kind_puppet': 'Texture Puppet',
     'assets_kind_scene': 'Scena',
+    'follow_title': 'Segui una finestra',
+    'follow_overlay': 'Overlay registrato',
+    'follow_target': 'Finestra destinazione',
+    'follow_refresh': 'Aggiorna elenchi',
+    'follow_bind': 'Collega offset attuale',
+    'follow_detach': 'Scollega',
+    'follow_hint': 'Windows: offset proporzionale iniziale, nascondi se minimizzata, scollega se chiusa/nascosta/identità persa. Nascondi tutto resta nascosto. Temporaneo; scollega prima di nuovo offset. Finestre elevate possono negare registrazione.',
+    'follow_unsupported': 'Serve adattatore Windows verificato; piattaforma non supportata.',
+    'follow_bound': 'Collegato; segue destinazione scelta.',
 }

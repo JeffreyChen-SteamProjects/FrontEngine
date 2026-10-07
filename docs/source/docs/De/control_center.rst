@@ -32,3 +32,5 @@ Alles auf einmal
   Arbeitsfläche, auf der sie geöffnet wurden. Auf einer anderen treten sie
   beiseite und kehren bei der Rückkehr wieder. Beim Lösen kommt alles zurück,
   was weggeräumt wurde. Nur unter Windows.
+
+Kontrollzentrum → Einem Fenster folgen wählt registriertes Top-Level-Overlay und sichtbares Windows-Ziel. Proportionalen Anfangsversatz bei Bewegen/Skalieren halten; Overlay logische Größe, native physische Position ohne Aktivierung/Größenanforderung, im Ziel-Arbeitsbereich geklemmt, 250-ms-Poll. Minimieren verbirgt, Wiederherstellen respektiert manuelles/globales Verbergen, Schließen/Verbergen/Identitätsverlust löst. Einzigartige rücknehmbare Fenstereigenschaft plus PID/Thread verhindert HWND-Wiederverwendung; UIPI/erhöhtes Ziel kann verweigern. Vor neuem Versatz lösen. Maximal 64 temporäre Bindungen ohne Sitzungswiederherstellung; Schließen/Alle schließen/Beenden entfernt Cookies und stoppt Timer. Nur geprüfter Windows-Adapter, andere Plattform mit Grund. Eigene Fenster auf einem 125%-Display geprüft; gemischte DPI über Monitore benötigt zweites Display.

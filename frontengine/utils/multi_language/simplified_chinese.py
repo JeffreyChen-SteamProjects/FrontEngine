@@ -1135,4 +1135,13 @@ simplified_chinese_word_dict = {
     'assets_kind_pet': '精灵宠物',
     'assets_kind_puppet': 'Puppet 贴图',
     'assets_kind_scene': '场景',
+    'follow_title': '跟随指定窗口',
+    'follow_overlay': '已登记覆盖层',
+    'follow_target': '目标窗口',
+    'follow_refresh': '更新列表',
+    'follow_bind': '绑定当前相对位置',
+    'follow_detach': '解除绑定',
+    'follow_hint': 'Windows：保持初始比例位置，目标最小化时隐藏，关闭／隐藏或身份失效即解除。全部隐藏保持隐藏。仅临时绑定；拖到新偏移请先解除。较高权限窗口可能拒绝登记。',
+    'follow_unsupported': '窗口跟随需已验证的 Windows 接口，此平台不支持。',
+    'follow_bound': '已绑定，位置会跟随选择的目标。',
 }

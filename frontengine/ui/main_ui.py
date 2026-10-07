@@ -326,6 +326,7 @@ class FrontEngineMainUI(QMainWindow):
         self._initialize_capture_history()
         self._initialize_tasks()
         self._initialize_asset_library()
+        self._initialize_window_follow()
         if user_setting_dict.get("clipboard_history"):
             self.clipboard_watcher.start()
 
@@ -1053,6 +1054,24 @@ class FrontEngineMainUI(QMainWindow):
         self.asset_library_service = AssetLibraryService(Path(getcwd()), self)
         self.asset_library_dialog = None
 
+    def _initialize_window_follow(self) -> None:
+        """Keep temporary native target bindings under the shared batch lifecycle."""
+        from frontengine.utils.window_pin.follow_window import WindowFollowService
+        self.window_follow_service = WindowFollowService(self)
+        self.window_follow_dialog = None
+        self.control_center_ui.overlay_visibility_changed.connect(self.window_follow_service.set_group_hidden)
+        self.control_center_ui.window_follow_requested.connect(self.open_window_follow)
+        self.control_center_ui.register_cleanup(self.window_follow_service.detach_all)
+
+    def open_window_follow(self) -> None:
+        """Choose a registered overlay and explicit native window in one reusable manager."""
+        from frontengine.ui.dialog.window_follow_dialog import WindowFollowDialog
+        if self.window_follow_dialog is None:
+            self.window_follow_dialog = WindowFollowDialog(self.window_follow_service,
+                                                          self.control_center_ui._all_overlay_widget_lists, self)
+        self.window_follow_dialog.show()
+        self.window_follow_dialog.raise_()
+
     def open_asset_library(self) -> None:
         """Manage selected assets and review exact scene/preset reference repairs."""
         from frontengine.ui.dialog.asset_library_dialog import AssetLibraryDialog
@@ -1087,6 +1106,7 @@ class FrontEngineMainUI(QMainWindow):
         "capture_history_service",
         "todo_service",
         "asset_library_service",
+        "window_follow_service",
         "workshop_service",
         "preset_schedule_service", "theme_schedule_service", "usage_service",
         "signage_service", "screensaver_service",
@@ -1096,7 +1116,7 @@ class FrontEngineMainUI(QMainWindow):
     )
 
     def _close_history_dialogs(self) -> None:
-        for attribute in ('image_history_dialog', 'capture_history_dialog'):
+        for attribute in ('image_history_dialog', 'capture_history_dialog', 'window_follow_dialog'):
             dialog = getattr(self, attribute, None)
             if dialog is not None:
                 dialog.close()

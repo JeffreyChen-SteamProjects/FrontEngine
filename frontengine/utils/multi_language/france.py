@@ -1133,4 +1133,13 @@ french_word_dict = {
     'assets_kind_pet': 'Animal sprite',
     'assets_kind_puppet': 'Texture Puppet',
     'assets_kind_scene': 'Scène',
+    'follow_title': 'Suivre une fenêtre',
+    'follow_overlay': 'Overlay enregistré',
+    'follow_target': 'Fenêtre cible',
+    'follow_refresh': 'Actualiser listes',
+    'follow_bind': 'Lier décalage actuel',
+    'follow_detach': 'Détacher',
+    'follow_hint': 'Windows : décalage proportionnel initial, masquer si minimisée, détacher si fermée/masquée/identité perdue. Masquage global conservé. Temporaire ; détacher avant nouveau déplacement. Cibles élevées peuvent refuser inscription.',
+    'follow_unsupported': 'Suivi nécessite adaptateur Windows vérifié ; plateforme non prise en charge.',
+    'follow_bound': 'Lié ; suit la cible choisie.',
 }

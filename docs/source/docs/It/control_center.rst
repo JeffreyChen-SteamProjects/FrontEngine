@@ -30,3 +30,5 @@ Tutto insieme
 * Fissa a questo desktop - gli overlay restano sul desktop virtuale in cui sono
   stati aperti. Su un altro desktop si tolgono di mezzo e al ritorno ricompaiono.
   Sganciando torna tutto ciò che era stato messo via. Solo su Windows.
+
+Centro controllo → Segui una finestra sceglie overlay registrato top-level e destinazione Windows visibile. Offset iniziale proporzionale segue movimento/scala; overlay dimensione logica, posizione fisica senza attivazione/ridimensionamento, limitata area monitor, verifica 250 ms. Minimizzare nasconde; ripristino rispetta nascondi manuale/globale; chiusura/nascondi/identità persa scollega. Proprietà unica reversibile + PID/thread evita riuso HWND; UIPI/destinazione elevata può rifiutare. Scollega prima di nuovo offset. 64 legami temporanei senza ripristino sessione; chiudi/tutti/esci elimina cookie/ferma timer. Solo adattatore Windows verificato, altre piattaforme indicano motivo. Finestre proprie su schermo 125% verificate; DPI misti multi-monitor richiedono secondo display.

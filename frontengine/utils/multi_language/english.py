@@ -1143,4 +1143,13 @@ english_word_dict = {
     'assets_kind_pet': 'Sprite pet',
     'assets_kind_puppet': 'Puppet texture',
     'assets_kind_scene': 'Scene',
+    'follow_title': 'Follow a window',
+    'follow_overlay': 'Registered overlay',
+    'follow_target': 'Target window',
+    'follow_refresh': 'Refresh lists',
+    'follow_bind': 'Bind current offset',
+    'follow_detach': 'Detach',
+    'follow_hint': 'Windows: keep initial proportional offset, hide on target minimize, detach on close/hidden target or lost identity. Explicit hide-all stays hidden. Temporary bindings only; detach before dragging to a new offset. Elevated targets may deny registration.',
+    'follow_unsupported': 'Window following needs the verified Windows adapter; this platform is unsupported.',
+    'follow_bound': 'Bound; position follows the chosen target.',
 }
