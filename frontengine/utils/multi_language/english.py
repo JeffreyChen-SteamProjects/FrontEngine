@@ -831,7 +831,7 @@ english_word_dict = {
     'workshop_state_conflict': 'Local changes; choose a version',
     'workshop_state_invalid': 'Invalid / unsupported content',
     'scene_visual_editor': 'Visual editor',
-    'scene_visual_hint': 'Select layers, drag to position and drag the lower-right corner to resize. Image, GIF and text previews; other types use placeholders. Hold Ctrl and scroll to zoom.',
+    'scene_visual_hint': 'Select layers, drag to position and drag the lower-right corner to resize. Image, GIF and text preview directly; enable live previews for video, web, Puppet and muted audio status. Hold Ctrl and scroll to zoom.',
     'scene_duplicate': 'Duplicate layer',
     'scene_remove_layer': 'Remove layer',
     'scene_undo': 'Undo',

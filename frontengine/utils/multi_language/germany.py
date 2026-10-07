@@ -824,7 +824,7 @@ germany_word_dict = {
     'workshop_state_conflict': 'Lokale Änderungen; Version wählen',
     'workshop_state_invalid': 'Ungültiger / nicht unterstützter Inhalt',
     'scene_visual_editor': 'Visueller Editor',
-    'scene_visual_hint': 'Ebenen auswählen und ziehen; unten rechts Größe ändern. Vorschau für Bild, GIF und Text, Platzhalter für andere Typen. Mit Strg und Mausrad zoomen.',
+    'scene_visual_hint': 'Ebenen auswählen und ziehen; unten rechts Größe ändern. Bilder, GIF und Text direkt; Live-Vorschau für Video, Web, Puppet und stummen Audiostatus aktivieren. Strg und Mausrad zum Zoomen.',
     'scene_duplicate': 'Ebene duplizieren',
     'scene_remove_layer': 'Ebene entfernen',
     'scene_undo': 'Rückgängig',

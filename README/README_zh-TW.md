@@ -513,3 +513,5 @@ Windows 安裝現在包含 winrt-Windows.Media.Control，讓「正在播放」�
 說明 → 平台能力唯讀顯示必要條件與最近原生失敗，不啟動擷取或監聽。Linux 音訊需要發行版 pulseaudio-utils（parec）與 PulseAudio／PipeWire Pulse 相容服務，頻譜／音訊反應使用預設輸出 monitor、對嘴使用預設麥克風。與 Windows 只讀峰值不同，Linux 電表／反應會讀實際音訊取樣；首次啟用取樣才建立自己的工作執行緒與子行程，只在記憶體保留 2048 個清理後 float 取樣、丟棄過期資料，不存檔或傳送。停止、關閉及退出只收回自己的擷取子行程，不在 GUI join，裝置、服務及權限失敗明確顯示。Linux 視窗幾何／配置／置頂／螢幕移動使用 Linux 安裝的 python-xlib、EWMH 與實體 XRandR 工作区，透明度另需合成管理器。X11 pynput 需 DISPLAY／伺服器權限；原生 Wayland 任意視窗定位及桌面全域 pynput 輸入不可用，即使有 Xwayland，介面顯示原因並拒絕螢幕恢復操作，不宣稱可監聽其他 Wayland 程式。Linux 協定驗收使用隔離 X11／Wayland 伺服器與虛擬 Pulse 裝置；Linux 實體音效／多螢幕及 macOS 實機驗收仍保留。
 
 音訊反應停止取樣後，電表會在 1.25 秒內停止自己的擷取；重新啟用取樣可再次啟動。
+
+Windows 封裝共用 Python CLI 的 --preset 與 --debug。原生封裝驗收前，於建置環境安裝選用 frontengine[puppet] 執行期（包含 Pillow 動態解碼外掛及已安裝 Imervue 的套件資料）。用 `py tests/integration/scene_build_fixtures.py FIXTURES --puppet SAMPLE.puppet` 產生本機合成素材（產生影片另需 PyAV）。在原生桌面執行 `FrontEngine.exe --verify-scene-build FIXTURES REPORT`，REPORT 必須是新目錄。固定驗收以暫存目錄隔離設定、保持預覽靜音，只建立自己的場景／編輯器視窗，驗證七種類型、舊／版本化 JSON、匯出再載入、GIF 動畫、網頁互動、復原重做、暫停恢復與清理，寫入 result.json 及預覽 PNG 後退出；不執行傳入的 Python 測試腳本。請檢查報告及退出碼，缺少執行期或原生渲染會明確失敗。

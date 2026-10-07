@@ -14,6 +14,7 @@ import subprocess  # nosec B404 - only ever runs the argv that build_command ass
 import argparse
 import shutil
 from importlib import metadata
+from importlib.util import find_spec
 import sys
 import tomllib
 from pathlib import Path
@@ -68,6 +69,7 @@ def build_command(version: str, onefile: bool) -> list[str]:
         sys.executable, "-m", "nuitka",
         "--standalone",
         "--enable-plugin=pyside6",
+        "--include-qt-plugins=multimedia,vectorimageformats",
         "--windows-console-mode=disable",
         f"--windows-icon-from-ico={ICON}",
         "--output-filename=FrontEngine.exe",
@@ -84,6 +86,11 @@ def build_command(version: str, onefile: bool) -> list[str]:
         "--remove-output",
     ]
     command += [f"--include-package={package}" for package in DYNAMIC_PACKAGES]
+    # Pillow loads decoder plugins dynamically; optional puppet assets may need package data.
+    if find_spec('PIL') is not None:
+        command.append('--include-package=PIL')
+    if find_spec('Imervue') is not None:
+        command.append('--include-package-data=Imervue')
     if onefile:
         command.append("--onefile")
     command.append(str(ENTRY_POINT))

@@ -821,7 +821,7 @@ italian_word_dict = {
     'workshop_state_conflict': 'Modifiche locali; scegli una versione',
     'workshop_state_invalid': 'Contenuto non valido / non supportato',
     'scene_visual_editor': 'Editor visuale',
-    'scene_visual_hint': 'Seleziona e trascina i livelli; ridimensiona dall’angolo inferiore destro. Anteprime di immagini, GIF e testo; altri tipi mostrano segnaposti. Ctrl e rotella per lo zoom.',
+    'scene_visual_hint': 'Seleziona e trascina i livelli; ridimensiona dal basso a destra. Immagini, GIF e testo direttamente; abilita anteprime video, web, Puppet e stato audio silenzioso. Ctrl e rotella per lo zoom.',
     'scene_duplicate': 'Duplica livello',
     'scene_remove_layer': 'Rimuovi livello',
     'scene_undo': 'Annulla',

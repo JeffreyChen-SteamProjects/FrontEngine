@@ -823,7 +823,7 @@ simplified_chinese_word_dict = {
     'workshop_state_conflict': '本地有修改；请选择版本',
     'workshop_state_invalid': '内容无效／不支持',
     'scene_visual_editor': '视觉编辑',
-    'scene_visual_hint': '选取图层后拖动定位，拖右下角调整大小。图片、GIF、文字可预览，其他类型显示占位。 按住 Ctrl 并滚动鼠标缩放画布。',
+    'scene_visual_hint': '选取图层后拖动定位，拖右下角调整大小。图片、GIF、文字直接预览；启用实时预览可查看视频、网页、Puppet 和静音音频状态。按住 Ctrl 并滚动鼠标缩放画布。',
     'scene_duplicate': '复制图层',
     'scene_remove_layer': '移除图层',
     'scene_undo': '撤销',

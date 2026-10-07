@@ -550,3 +550,5 @@ Windows 版は winrt-Windows.Media.Control を含み、再生中ウィジェッ�
 ヘルプ → プラットフォーム機能は条件/最新失敗を読取り表示、録音/監視を開始しません。Linux はpulseaudio-utils(parec)とPulseAudio/PipeWire Pulse、スペクトル/反応は既定出力monitor、口パクは既定マイク。Windows peak専用と異なり実音声sampleを読み、最初の有効な取得で自前worker/子プロセス開始、RAMに2048清浄floatだけ、古いもの破棄、保存/送信なし。停止/閉じる/終了は自分の子だけ終了しGUI joinなし、機器/サーバー/権限失敗を表示。Linux窓/配置/最前面/画面移動はLinuxのpython-xlibとEWMH/実体XRandR、透明度にはcompositor必要。X11 pynputはDISPLAY/権限必要。Wayland任意窓位置と全域pynputはXwayland含め未対応、理由表示/配置復元拒否、他Waylandアプリの全域監視は主張なし。隔離X11/Waylandと仮想Pulseで協定検証、Linux物理音声/多画面とMac実機は保留。
 
 音声反応のサンプリング終了後、メーターは1.25秒以内に自身のキャプチャを停止し、再度有効なサンプリングで起動できます。
+
+WindowsビルドはPython CLIの--presetと--debugを共有します。ネイティブ検証にはビルド環境へfrontengine[puppet]を導入し、Pillowデコーダーと導入済みImervueデータを同梱します。`py tests/integration/scene_build_fixtures.py FIXTURES --puppet SAMPLE.puppet`でローカル素材を生成（動画生成にはPyAVも必要）。ネイティブデスクトップで`FrontEngine.exe --verify-scene-build FIXTURES REPORT`を新規レポートフォルダーで実行します。固定テストは一時設定、消音、自身のシーン／エディターウィンドウを使用。七種類、旧／バージョン付きJSON、書き出し再読込、GIFアニメ、Web操作、取消再実行、一時停止再開と解放を確認し、result.jsonとPNGを保存して終了。渡されたPythonスクリプトは実行しません。レポートと終了コードを確認し、ランタイム／ネイティブ描画がなければ明示的に失敗します。

@@ -830,7 +830,7 @@ traditional_chinese_word_dict = {
     'workshop_state_conflict': '本機有修改；請選擇版本',
     'workshop_state_invalid': '內容無效／不支援',
     'scene_visual_editor': '視覺編輯',
-    'scene_visual_hint': '選取圖層後拖曳定位，拖右下角縮放。提供圖片、GIF、文字預覽，其他類型以佔位顯示。 按住 Ctrl 並滾動滑鼠縮放畫布。',
+    'scene_visual_hint': '選取圖層後拖曳定位，拖右下角調整大小。圖片、GIF、文字直接預覽；啟用即時預覽可檢視影片、網頁、Puppet 與靜音音訊狀態。按住 Ctrl 並滾動滑鼠縮放畫布。',
     'scene_duplicate': '複製圖層',
     'scene_remove_layer': '移除圖層',
     'scene_undo': '復原',

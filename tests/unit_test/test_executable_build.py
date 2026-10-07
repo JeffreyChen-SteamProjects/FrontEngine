@@ -33,4 +33,16 @@ def test_incompatible_qt_version_is_reported(builder):
 def test_dynamic_projection_is_packaged_and_appid_is_not(builder):
     command = builder.build_command("1.0.81", False)
     assert "--include-package=winrt" in command
+    assert '--include-qt-plugins=multimedia,vectorimageformats' in command
     assert not any("steam_appid" in argument or "steam_sdk" in argument for argument in command)
+
+
+def test_installed_optional_image_plugins_and_puppet_data_are_packaged(builder, monkeypatch):
+    monkeypatch.setattr(builder, 'find_spec', lambda name: object())
+    command = builder.build_command('1.0.81', False)
+    assert '--include-package=PIL' in command
+    assert '--include-package-data=Imervue' in command
+    monkeypatch.setattr(builder, 'find_spec', lambda name: None)
+    command = builder.build_command('1.0.81', False)
+    assert '--include-package=PIL' not in command
+    assert '--include-package-data=Imervue' not in command

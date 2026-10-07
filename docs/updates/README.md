@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261008-18 | 2026-10-08 | Verify all scene types in the current standalone Windows build | #done #packaging #scene | [2026-10](2026-10.md) |
 | U-20261008-17 | 2026-10-08 | Verify composited Linux opacity pixels and restoration | #done #linux #native | [2026-10](2026-10.md) |
 | U-20261008-16 | 2026-10-08 | Verify native Steam initialization failure without stopping client | #done #steam #native | [2026-10](2026-10.md) |
 | U-20261008-15 | 2026-10-08 | Inject desktop prerequisites in monitor profile regression tests | #done #linux #tests | [2026-10](2026-10.md) |
@@ -122,5 +123,5 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-10.md](2026-10.md) | 2026-10 | 47 |
+| [2026-10.md](2026-10.md) | 2026-10 | 48 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

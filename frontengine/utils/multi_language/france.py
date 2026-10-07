@@ -821,7 +821,7 @@ french_word_dict = {
     'workshop_state_conflict': 'Modifications locales ; choisissez une version',
     'workshop_state_invalid': 'Contenu invalide / non pris en charge',
     'scene_visual_editor': 'Éditeur visuel',
-    'scene_visual_hint': 'Sélectionnez et déplacez les calques ; redimensionnez au coin inférieur droit. Aperçu images, GIF et texte ; autres types représentés par un cadre. Ctrl + molette pour zoomer.',
+    'scene_visual_hint': 'Sélectionnez et déplacez les calques ; redimensionnez au coin inférieur droit. Images, GIF et texte directement ; activez les aperçus vidéo, web, Puppet et état audio muet. Ctrl + molette pour zoomer.',
     'scene_duplicate': 'Dupliquer le calque',
     'scene_remove_layer': 'Supprimer le calque',
     'scene_undo': 'Annuler',
