@@ -15,6 +15,42 @@ from frontengine.utils.macos import get_backend
 from frontengine.utils.macos.region_capture import RegionCaptureAdapter
 
 
+def own_window_number(widget) -> int:
+    """Qt's cocoa winId is an owned NSView pointer; use its NSWindow identifier."""
+    import ctypes
+    import objc
+    view = objc.objc_object(c_void_p=ctypes.c_void_p(int(widget.winId())))
+    return int(view.window().windowNumber())
+
+
+def move_and_restore_owned_window(widget, backend) -> bool:
+    """Check native geometry after moving and restoring only this probe's NSWindow."""
+    from PySide6.QtTest import QTest
+    handle = own_window_number(widget)
+    original = backend.window_geometry(handle)
+    if original is None:
+        raise RuntimeError('Owned native window geometry is unavailable')
+    target = (original[0] + 10, original[1] + 10, *original[2:])
+    moved = False
+    try:
+        moved = backend.move_window(handle, *target)
+        if not moved:
+            raise RuntimeError(backend.last_error)
+        QTest.qWait(150)
+        actual = backend.window_geometry(handle)
+        if actual is None or any(abs(a - b) > 2 for a, b in zip(actual, target)):
+            raise RuntimeError(f'Native move did not reach its target: {actual} versus {target}')
+        return True
+    finally:
+        if moved:
+            if not backend.move_window(handle, *original):
+                raise RuntimeError('Owned window restoration failed: ' + backend.last_error)
+            QTest.qWait(150)
+            actual = backend.window_geometry(handle)
+            if actual is None or any(abs(a - b) > 2 for a, b in zip(actual, original)):
+                raise RuntimeError('Owned window geometry was not restored')
+
+
 def main() -> None:
     if sys.platform != 'darwin':
         print(json.dumps({'status': 'skipped', 'reason': 'macOS is required'}))
@@ -58,14 +94,7 @@ def main() -> None:
         assert color.red() > 240 and color.blue() > 240 and color.green() < 15, color
         moved = False
         if status['window_move']['available']:
-            handle = next(handle for handle, title in backend.list_windows() if title == widget.windowTitle())
-            original = backend.window_geometry(handle)
-            try:
-                moved = backend.move_window(handle, original[0] + 10, original[1] + 10, *original[2:])
-                assert moved, backend.last_error
-            finally:
-                if moved:
-                    assert backend.move_window(handle, *original), backend.last_error
+            moved = move_and_restore_owned_window(widget, backend)
         print(json.dumps({'status': 'passed', 'screen_pixels': True, 'own_window_move': moved,
                           'capabilities': status}))
     finally:

@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261008-22 | 2026-10-08 | Resolve owned Mac windows without depending on Quartz titles | #done #macos #ci | [2026-10](2026-10.md) |
 | U-20261008-21 | 2026-10-08 | Make native acceptance failures explicit and clarify media lifecycle | #done #quality #packaging | [2026-10](2026-10.md) |
 | U-20261008-20 | 2026-10-08 | Keep Python 3.10 builds compatible and isolate Mac unit frameworks | #done #ci #platform | [2026-10](2026-10.md) |
 | U-20261008-19 | 2026-10-08 | Fix scene extraction aliases and platform-specific CI tests | #done #ci #scene | [2026-10](2026-10.md) |
@@ -126,5 +127,5 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-10.md](2026-10.md) | 2026-10 | 51 |
+| [2026-10.md](2026-10.md) | 2026-10 | 52 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
