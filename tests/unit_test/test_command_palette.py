@@ -104,6 +104,7 @@ def test_main_palette_shortcut_opens_and_page_command_routes(monkeypatch):
     window.tools_setting_ui = SimpleNamespace(start_capture=Mock(), open_palette=Mock())
     window.widgets_setting_ui = SimpleNamespace(add_note=Mock())
     window.screen_care_setting_ui = SimpleNamespace(toggle_filter=Mock())
+    window.scene_setting_ui = SimpleNamespace(open_templates=Mock())
     window.open_workshop = Mock()
     window.open_command_palette = MethodType(FrontEngineMainUI.open_command_palette, window)
     window._open_command_page = MethodType(FrontEngineMainUI._open_command_page, window)

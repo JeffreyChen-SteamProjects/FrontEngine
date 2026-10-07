@@ -15,6 +15,7 @@ from frontengine.user_setting.user_setting_file import user_setting_dict
 
 class SceneManagerUI(QWidget):
     workshop_requested = Signal()
+    templates_requested = Signal()
     entries_changed = Signal(object)
     def __init__(self, scene_manager):
         front_engine_logger.info("[SceneManagerUI] Init")
@@ -44,6 +45,8 @@ class SceneManagerUI(QWidget):
         self.workshop_button.clicked.connect(self.workshop_requested.emit)
         self.apply_json_button = tr(QPushButton(), "scene_apply_json")
         self.apply_json_button.clicked.connect(self.apply_json)
+        self.templates_button = tr(QPushButton(), 'scene_templates')
+        self.templates_button.clicked.connect(self.templates_requested.emit)
 
         # Show on all screen
         self.show_on_all_screen_checkbox = tr(QCheckBox(), "Show on all screen")
@@ -53,7 +56,9 @@ class SceneManagerUI(QWidget):
         self.clear_json_button = tr(QPushButton(), "scene_script_clear")
         self.clear_json_button.clicked.connect(self.clear_json)
 
-        # Layout
+        self._build_layout()
+
+    def _build_layout(self) -> None:
         self.grid_layout.addWidget(self.json_plaintext, 0, 0, 4, 2)
         self.grid_layout.addWidget(self.read_scene_json_button, 4, 0)
         self.grid_layout.addWidget(self.write_scene_json_button, 4, 1)
@@ -62,6 +67,7 @@ class SceneManagerUI(QWidget):
         self.grid_layout.addWidget(self.start_button, 6, 0)
         self.grid_layout.addWidget(self.workshop_button, 6, 1)
         self.grid_layout.addWidget(self.apply_json_button, 7, 0)
+        self.grid_layout.addWidget(self.templates_button, 7, 1)
 
     def set_show_all_screen(self) -> None:
         front_engine_logger.info("[SceneManagerUI] set_show_all_screen")

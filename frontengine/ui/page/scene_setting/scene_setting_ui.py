@@ -43,6 +43,8 @@ class SceneSettingUI(SettingPage):
         # them would hide that they belong to one scene.
         self.add_body_widget(self.tab_widget, 1)
         self.actions = SceneActions(self)
+        self.templates_dialog = None
+        self.scene_manager_ui.templates_requested.connect(self.open_templates)
         self.action_status = QLabel()
         self.action_status.setWordWrap(True)
         self.add_body_widget(self.action_status)
@@ -62,7 +64,18 @@ class SceneSettingUI(SettingPage):
 
     def shutdown_scene(self) -> None:
         """Close playback and previews before releasing extracted scene resources."""
+        if self.templates_dialog is not None:
+            self.templates_dialog.close()
         self.actions.shutdown()
+
+    def open_templates(self) -> None:
+        """Reuse one local template library with layout preview and screen choice."""
+        from frontengine.ui.dialog.scene_templates_dialog import SceneTemplatesDialog
+        if self.templates_dialog is None:
+            self.templates_dialog = SceneTemplatesDialog(self)
+        self.templates_dialog.show()
+        self.templates_dialog.raise_()
+        self.templates_dialog.activateWindow()
 
     def closeEvent(self, event) -> None:
         self.shutdown_scene()

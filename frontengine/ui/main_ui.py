@@ -763,6 +763,7 @@ class FrontEngineMainUI(QMainWindow):
             ("new_note", "widgets_note_add", "New note", self.widgets_setting_ui.add_note),
             ("toggle_filter", "screen_filter_start", "Turn filter on", self.screen_care_setting_ui.toggle_filter),
             ("workshop", "workshop_manage", "Workshop", self.open_workshop),
+            ('scene_templates', 'scene_templates', 'Scene templates', self.scene_setting_ui.open_templates),
         ):
             self.action_registry.register(Action(identifier, key, fallback, lambda _value, run=callback: run()))
         self.command_history = CommandHistory(user_setting_dict, write_user_setting)

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
+import json
 from pathlib import Path
 from threading import Event
 
@@ -98,16 +99,41 @@ class SceneActions(QObject):
         if self.closed:
             raise ValueError('Scene actions are closed')
         path, screen = scene_request(value, load_only=load_only)
+        entries = deepcopy(self.page.visual_editor.document.entries) if not path else None
+        return self._enqueue(path, screen, load_only, entries, not path)
+
+    def request_entries(self, entries: dict, screen: str | int = 'primary') -> DeferredAction:
+        """Play validated in-memory templates through the same candidate transaction."""
+        if self.closed:
+            raise ValueError('Scene actions are closed')
+        _path, screen = scene_request(json.dumps({'screen': screen}))
+        validated = validate_geometry(entries)
+        if len(validated) > 256:
+            raise ValueError('Automated scenes support at most 256 layers')
+        return self._enqueue('', screen, False, validated, False)
+
+    def cancel_request(self, operation: DeferredAction) -> None:
+        """Cancel one owner request without stopping existing or newer playback."""
+        if self.wanted is not None and self.wanted[0] is operation:
+            self.wanted = None
+            operation.finish(False, 'Scene request cancelled')
+            self._cancel_layers('Scene request cancelled')
+        elif self.pending is not None and self.pending['request'][0] is operation:
+            self.pending['cancel'].set()
+            operation.finish(False, 'Scene request cancelled')
+            if self.wanted is None:
+                self._cancel_layers('Scene request cancelled')
+
+    def _enqueue(self, path: str, screen, load_only: bool, entries, current: bool) -> DeferredAction:
         self._cancel_layers('Superseded by a newer scene request')
         operation = DeferredAction(self)
         operation.finished.connect(lambda _success, _error: operation.deleteLater())
-        entries = deepcopy(self.page.visual_editor.document.entries) if not path else None
         if self.wanted is not None:
             self.wanted[0].finish(False, 'Superseded by a newer scene request')
         if self.pending is not None:
             self.pending['cancel'].set()
             self.pending['request'][0].finish(False, 'Superseded by a newer scene request')
-        self.wanted = (operation, path, screen, load_only, entries)
+        self.wanted = (operation, path, screen, load_only, entries, current)
         self._launch()
         return operation
 
@@ -115,7 +141,7 @@ class SceneActions(QObject):
         if self.pending is not None or self.wanted is None or self.closed:
             return
         request, self.wanted = self.wanted, None
-        operation, path, _screen, _load, entries = request
+        _operation, path, _screen, _load, entries, _current = request
         cancel, signals = Event(), _SceneSignals()
         signals.finished.connect(self._finished, Qt.ConnectionType.QueuedConnection)
         self.pending = {'request': request, 'cancel': cancel, 'signals': signals}
@@ -135,7 +161,7 @@ class SceneActions(QObject):
 
     def _finished(self, prepared: PreparedScene | None, error: str) -> None:
         pending, self.pending = self.pending, None
-        operation, _path, screen, load_only, entries = pending['request']
+        operation, _path, screen, load_only, _entries, current = pending['request']
         if pending['cancel'].is_set() or self.closed:
             if prepared is not None:
                 prepared.close()
@@ -144,7 +170,7 @@ class SceneActions(QObject):
             self.status_changed.emit(error)
         else:
             try:
-                self._adopt(prepared, screen, load_only, entries is not None)
+                self._adopt(prepared, screen, load_only, current)
             except (OSError, ValueError, RuntimeError) as exception:
                 prepared.close()
                 operation.finish(False, str(exception))
