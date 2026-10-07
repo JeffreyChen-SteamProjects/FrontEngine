@@ -38,7 +38,7 @@ def safe_path(root: Path, relative: str) -> Path:
 
 def checked_tree(root: Path) -> list[Path]:
     """Return bounded regular resources; reject executable content and links."""
-    if root.is_symlink() or not root.is_dir():
+    if root.is_symlink() or not root.is_dir() or getattr(root.lstat(), "st_file_attributes", 0) & 0x400:
         raise ValueError("Workshop item must be a regular directory")
     pending, files, total = [root], [], 0
     count = 0
@@ -73,7 +73,7 @@ def validate_manifest(value: object, root: Path) -> dict:
     if value.get("kind") not in KINDS:
         raise ValueError("Unsupported Workshop content kind")
     title = value.get("title")
-    if not isinstance(title, str) or not title.strip() or len(title.encode("utf-8")) > 128:
+    if not isinstance(title, str) or not title.strip() or "\0" in title or len(title.encode("utf-8")) > 128:
         raise ValueError("Workshop title must contain 1–128 UTF-8 bytes")
     entry = safe_path(root, value.get("entry"))
     if not (entry.is_dir() if value["kind"] == "pet_pack" else entry.is_file()):

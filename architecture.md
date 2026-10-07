@@ -1,5 +1,7 @@
 # FrontEngine Architecture
 
+Workshop publications use account-scoped durable records in `utils/workshop/workshop_publications.py`. `workshop_publisher.py` verifies remote ownership before updates, preserves created IDs before uploading and retains snapshots for interrupted operations; Qt service shutdown marks pending outcomes uncertain before releasing Steam.
+
 > Short overview for people and agents. Per-module detail lives in [`architecture_explore.md`](architecture_explore.md).
 > Last verified: 2026-10-03; macOS native operations require target-host verification.
 

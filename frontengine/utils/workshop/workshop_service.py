@@ -8,6 +8,7 @@ class WorkshopService(QObject):
     """Drive native callbacks on the UI thread; never initialize at import."""
     event_received = Signal(object)
     availability_changed = Signal(bool, str)
+    stopping = Signal()
 
     def __init__(self, parent=None, backend=None) -> None:
         super().__init__(parent)
@@ -35,4 +36,5 @@ class WorkshopService(QObject):
     def stop(self) -> None:
         """Stop callbacks before shutting down the native runtime."""
         self.timer.stop()
+        self.stopping.emit()
         self.backend.shutdown()

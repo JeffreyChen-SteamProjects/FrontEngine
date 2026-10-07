@@ -93,7 +93,8 @@ def create_snapshot(kind: str, source: Path, title: str, preview: Path,
                     destination: Path) -> dict:
     """Publish only explicit resources into a new directory; never overwrite a snapshot."""
     from PySide6.QtGui import QImageReader
-    if preview.is_symlink() or not preview.is_file() or preview.stat().st_size >= 1_000_000:
+    if (preview.is_symlink() or not preview.is_file() or preview.stat().st_size >= 1_000_000 or
+            getattr(preview.lstat(), "st_file_attributes", 0) & 0x400):
         raise ValueError("Preview must be a regular image smaller than 1 MB")
     if not QImageReader(str(preview)).canRead():
         raise ValueError("Preview is not a readable image")
