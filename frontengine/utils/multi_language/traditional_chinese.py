@@ -979,4 +979,11 @@ traditional_chinese_word_dict = {
     'template_focus_title': '專注',
     'template_focus_task': '一次只做一件事',
     'template_focus_break': '記得適時休息',
+    'scene_media_preview_title': '即時媒體預覽',
+    'scene_media_preview_enable': '啟用即時預覽',
+    'scene_media_interact': '與選取媒體互動',
+    'scene_media_audition': '試聽選取媒體',
+    'scene_media_preview_hint': '手動啟用後才開始預覽，預設靜音，隱藏時暫停，最多八個來源。網頁／Puppet 互動會開啟自己的視窗。',
+    'scene_media_audio': '{name}\n音訊：{seconds} 秒',
+    'scene_add_puppet': '加入 Puppet',
 }

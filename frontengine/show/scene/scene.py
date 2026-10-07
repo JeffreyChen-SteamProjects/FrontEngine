@@ -33,10 +33,7 @@ class SceneManager:
         if not isinstance(kind, str):
             raise ValueError('Scene type must be a string')
         kind = kind.lower()
-        if kind == 'puppet':
-            self.add_puppet(entry)
-            self.puppet_settings[-1]['_layer_key'] = key
-        elif kind in ('image', 'gif', 'sound', 'text', 'video', 'web'):
+        if kind in ('image', 'gif', 'sound', 'text', 'video', 'web', 'puppet'):
             proxy = self._add(kind, entry)
             proxy.setData(0, key)
         else:
@@ -69,8 +66,11 @@ class SceneManager:
         proxy.setZValue(setting.get('z', 0))
         proxy.setVisible(setting.get('visible', True))
         widget = proxy.widget()
+        if widget is not None and hasattr(widget, 'set_active'):
+            widget.set_active(bool(getattr(self.graphic_scene, '_media_view_owners', set()))
+                              and setting.get('visible', True))
         if widget is not None and hasattr(widget, 'set_ui_variable'):
-            widget.set_ui_variable(setting.get('opacity', 20) / 100)
+            widget.set_ui_variable(setting.get('opacity', 100 if setting.get('type') == 'PUPPET' else 20) / 100)
             widget.update()
 
     def _update_native(self, widget, setting: dict) -> None:
@@ -86,7 +86,11 @@ class SceneManager:
         front_engine_logger.info(f"[SceneManager] add_{kind} | settings={setting_dict}")
         from frontengine.utils.scene_format.scene_editor_document import validate_geometry
         validate_geometry({"layer": setting_dict})
-        widget = build_overlay(kind, setting_dict)
+        if kind in ('video', 'web', 'puppet'):
+            from frontengine.show.scene.media_frame import SceneMediaFrame
+            widget = SceneMediaFrame({'type': kind.upper(), **setting_dict})
+        else:
+            widget = build_overlay(kind, setting_dict)
         try:
             widget.overlay_remembers_geometry = False
             if "width" in setting_dict or "height" in setting_dict:
@@ -168,6 +172,7 @@ class SceneManager:
         self.native_widgets.clear()
         self.puppet_settings.clear()
         self.layer_settings.clear()
+        self.graphic_scene._media_view_owners = set()
         for proxy_widget in self.widget_list:
             try:
                 widget = proxy_widget.widget()

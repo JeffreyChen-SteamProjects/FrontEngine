@@ -970,4 +970,11 @@ russian_word_dict = {
     'template_focus_title': 'Сосредоточение',
     'template_focus_task': 'Одна задача за раз',
     'template_focus_break': 'Не забывайте об отдыхе',
+    'scene_media_preview_title': 'Просмотр медиа в реальном времени',
+    'scene_media_preview_enable': 'Включить просмотр медиа',
+    'scene_media_interact': 'Взаимодействовать с выбранным медиа',
+    'scene_media_audition': 'Прослушать выбранное медиа',
+    'scene_media_preview_hint': 'Запуск только при включении, без звука и с паузой при скрытии. До восьми источников. Web/Puppet открывает своё окно для ввода.',
+    'scene_media_audio': '{name}\nАудио: {seconds}с',
+    'scene_add_puppet': 'Добавить Puppet',
 }

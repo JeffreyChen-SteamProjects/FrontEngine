@@ -973,4 +973,11 @@ germany_word_dict = {
     'template_focus_title': 'Fokus',
     'template_focus_task': 'Eine Aufgabe nach der anderen',
     'template_focus_break': 'Pausen nicht vergessen',
+    'scene_media_preview_title': 'Live-Medienvorschau',
+    'scene_media_preview_enable': 'Live-Vorschau aktivieren',
+    'scene_media_interact': 'Mit ausgewählten Medien interagieren',
+    'scene_media_audition': 'Ausgewählte Medien anhören',
+    'scene_media_preview_hint': 'Vorschau startet nur nach Aktivierung, stumm und pausiert verborgen. Maximal acht Quellen. Web/Puppet-Eingabe öffnet ein eigenes Fenster.',
+    'scene_media_audio': '{name}\nAudio: {seconds}s',
+    'scene_add_puppet': 'Puppet hinzufügen',
 }

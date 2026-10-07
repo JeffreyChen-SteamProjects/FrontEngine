@@ -970,4 +970,11 @@ french_word_dict = {
     'template_focus_title': 'Concentration',
     'template_focus_task': 'Une tâche à la fois',
     'template_focus_break': 'Pensez à faire des pauses',
+    'scene_media_preview_title': 'Aperçu multimédia en direct',
+    'scene_media_preview_enable': 'Activer les aperçus en direct',
+    'scene_media_interact': 'Interagir avec le média sélectionné',
+    'scene_media_audition': 'Écouter le média sélectionné',
+    'scene_media_preview_hint': 'Démarrage uniquement sur activation, muet et suspendu si masqué. Huit sources maximum. Web/Puppet ouvre sa propre fenêtre pour interagir.',
+    'scene_media_audio': '{name}\nAudio : {seconds}s',
+    'scene_add_puppet': 'Ajouter Puppet',
 }

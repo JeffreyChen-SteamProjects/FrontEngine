@@ -80,11 +80,13 @@ class SceneCompositorView(QWidget):
         self._refresh()
 
     def showEvent(self, event) -> None:
+        self._set_media_active(True)
         self._refresh()
         self.timer.start()
         super().showEvent(event)
 
     def hideEvent(self, event) -> None:
+        self._set_media_active(False)
         self.timer.stop()
         super().hideEvent(event)
 
@@ -111,6 +113,32 @@ class SceneCompositorView(QWidget):
         self._drag_position = None
 
     def closeEvent(self, event) -> None:
+        self._set_media_active(False)
         self.timer.stop()
         self.compositor.shutdown()
         super().closeEvent(event)
+
+    def _set_media_active(self, active: bool) -> None:
+        owners = getattr(self.scene, '_media_view_owners', set())
+        owners.add(id(self)) if active else owners.discard(id(self))
+        self.scene._media_view_owners = owners
+        for proxy in self.scene.items():
+            widget = proxy.widget() if hasattr(proxy, 'widget') else None
+            if widget is not None and hasattr(widget, 'set_active'):
+                widget.set_active(bool(owners) and proxy.isVisible())
+
+    def mouseDoubleClickEvent(self, event) -> None:
+        transform = QTransform().scale(self._zoom, self._zoom) * self._pan
+        inverse, valid = transform.inverted()
+        proxy = self.scene.itemAt(inverse.map(event.position()), QTransform()) if valid else None
+        widget = proxy.widget() if proxy is not None and hasattr(proxy, 'widget') else None
+        if widget is not None and hasattr(widget, 'interact'):
+            widget.interact()
+        super().mouseDoubleClickEvent(event)
+
+    def set_muted(self, muted: bool) -> None:
+        """Forward control-center mute to media retained by this scene."""
+        for proxy in self.scene.items():
+            widget = proxy.widget() if hasattr(proxy, 'widget') else None
+            if widget is not None and hasattr(widget, 'set_muted'):
+                widget.set_muted(muted)

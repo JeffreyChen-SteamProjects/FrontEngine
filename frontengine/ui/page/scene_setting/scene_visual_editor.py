@@ -2,19 +2,21 @@
 from __future__ import annotations
 
 import copy
+from pathlib import Path
 
 from PySide6.QtCore import Qt, QRectF, QTimer, QSize
 from PySide6.QtGui import QColor, QImageReader, QMovie, QPen, QFont, QShortcut, QKeySequence
 from PySide6.QtWidgets import (
     QCheckBox, QDoubleSpinBox, QFileDialog, QGraphicsItem, QGraphicsObject,
     QGraphicsScene, QGraphicsView, QInputDialog, QListWidget,
-    QListWidgetItem, QMessageBox, QPushButton, QSplitter,
+    QListWidgetItem, QMessageBox, QPushButton, QSplitter, QLabel,
 )
 
 from frontengine.ui.page.layout_kit import SettingPage
 from frontengine.user_setting.scene_setting import scene_json, write_scene_file
-from frontengine.utils.multi_language.retranslate import tr, translate
+from frontengine.utils.multi_language.retranslate import tr, translate, retranslator
 from frontengine.utils.scene_format.scene_editor_document import SceneEditorDocument
+from frontengine.ui.page.scene_setting.scene_media_preview import SceneMediaPreview
 
 
 class SceneCanvas(QGraphicsView):
@@ -35,7 +37,8 @@ class SceneLayerItem(QGraphicsObject):
     def __init__(self, editor, key: str, entry: dict) -> None:
         super().__init__()
         self.editor, self.key, self.entry = editor, key, entry
-        self.width, self.height = float(entry.get("width", 320)), float(entry.get("height", 180))
+        size = entry.get('size', (320, 480)) if entry.get('type') == 'PUPPET' else (320, 180)
+        self.width, self.height = float(entry.get("width", size[0])), float(entry.get("height", size[1]))
         self.image = None
         self.movie = None
         self.resizing = False
@@ -73,6 +76,9 @@ class SceneLayerItem(QGraphicsObject):
         rect = self.boundingRect()
         painter.fillRect(rect, QColor(45, 48, 54))
         image = self.movie.currentImage() if self.movie else self.image
+        preview = getattr(self.editor, 'media_preview', None)
+        if preview is not None and self.entry.get('type') in ('VIDEO', 'WEB', 'PUPPET', 'SOUND'):
+            image = preview.image(self.key)
         if image is not None and not image.isNull():
             painter.drawImage(rect, image)
         else:
@@ -121,6 +127,7 @@ class SceneVisualEditor(SettingPage):
         QShortcut(QKeySequence.StandardKey.Undo, self, activated=self.document.undo.undo)
         QShortcut(QKeySequence.StandardKey.Redo, self, activated=self.document.undo.redo)
         self.syncing = False
+        self.media_preview = SceneMediaPreview(self)
         self.canvas = QGraphicsScene(self)
         self.canvas.setSceneRect(0, 0, 1920, 1080)
         self.view = SceneCanvas(self.canvas)
@@ -134,6 +141,7 @@ class SceneVisualEditor(SettingPage):
         split.setStretchFactor(1, 1)
         self.add_body_widget(split, 1)
         self._build_actions()
+        self._build_media_actions()
         self._build_properties()
         self.document.changed.connect(self._changed)
         manager.entries_changed.connect(self.load_entries)
@@ -160,6 +168,9 @@ class SceneVisualEditor(SettingPage):
                            self._button("scene_output", lambda: write_scene_file(self)))
         section.add_inline(*(self._button("scene_align_" + direction, lambda checked=False, value=direction: self._align(value))
                              for direction in ("left", "center", "right", "top", "middle", "bottom")))
+        section.add_inline(*(self._button('scene_add_' + kind.lower(),
+            lambda checked=False, value=kind: self._add_native_media(value))
+            for kind in ('VIDEO', 'WEB', 'PUPPET', 'SOUND')))
 
     def _build_properties(self) -> None:
         section = self.add_section("scene_layer_properties")
@@ -179,6 +190,36 @@ class SceneVisualEditor(SettingPage):
         self.visible.clicked.connect(self._apply_properties)
         section.add_inline(self.locked, self.visible)
 
+    def _build_media_actions(self) -> None:
+        section = self.add_section('scene_media_preview_title')
+        self.media_enabled = tr(QCheckBox(), 'scene_media_preview_enable')
+        self.media_enabled.toggled.connect(self.media_preview.set_enabled)
+        section.add_inline(self.media_enabled,
+            self._button('scene_media_interact', self._interact_media),
+            self._button('scene_media_audition', self._audition_media))
+        self.media_status = tr(QLabel(), 'scene_media_preview_hint')
+        self.media_status.setWordWrap(True)
+        section.add_widget(self.media_status)
+        self.media_preview.changed.connect(self._media_changed)
+        self.media_preview.failed.connect(self._media_failed)
+
+    def _media_failed(self, message: str) -> None:
+        retranslator.forget(self.media_status)
+        self.media_status.setText(message)
+
+    def _media_changed(self, key: str) -> None:
+        for item in self.canvas.items():
+            if item.key == key:
+                item.update()
+
+    def _interact_media(self) -> None:
+        for key in self._selected_keys():
+            self.media_preview.interact(key)
+
+    def _audition_media(self) -> None:
+        for key in self._selected_keys():
+            self.media_preview.audition(key)
+
     def load_entries(self, entries: dict) -> None:
         if not self.syncing and entries != self.document.entries:
             try:
@@ -187,6 +228,7 @@ class SceneVisualEditor(SettingPage):
                 QMessageBox.warning(self, translate("scene_visual_editor"), str(error))
 
     def _changed(self, entries: dict) -> None:
+        self.media_preview.sync(entries)
         selected = self._selected_keys()
         self.syncing = True
         try:
@@ -270,6 +312,27 @@ class SceneVisualEditor(SettingPage):
         if ok and text:
             self._select_layer(self.document.add({"type": "TEXT", "text": text, "font_size": 32}))
 
+    def _add_native_media(self, kind: str) -> None:
+        if kind == 'WEB':
+            url, accepted = QInputDialog.getText(self, translate('scene_add_web'), translate('web_url'))
+            if accepted and url.strip():
+                self._select_layer(self.document.add({'type': 'WEB', 'url': url.strip()}))
+            return
+        filters = {'VIDEO': 'Video (*.mp4 *.webm *.avi *.mov *.mkv)',
+                   'SOUND': 'Audio (*.wav *.mp3 *.ogg *.flac *.m4a)', 'PUPPET': 'Puppet (*.puppet)'}
+        path, _filter = QFileDialog.getOpenFileName(self, translate('scene_add_' + kind.lower()), '', filters[kind])
+        if not path:
+            return
+        try:
+            if not Path(path).is_file():
+                raise ValueError(translate('scene_invalid_media'))
+            if kind == 'PUPPET':
+                from frontengine.utils.imervue.puppet_asset import validate_puppet
+                validate_puppet(path)
+            self._select_layer(self.document.add({'type': kind, 'file_path': path}))
+        except (OSError, ValueError) as error:
+            QMessageBox.warning(self, translate('scene_visual_editor'), str(error))
+
     def _select_layer(self, key: str) -> None:
         self.layers.clearSelection()
         for index in range(self.layers.count()):
@@ -294,6 +357,7 @@ class SceneVisualEditor(SettingPage):
         self.view.fitInView(self.canvas.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
 
     def showEvent(self, event) -> None:
+        self.media_preview.resume()
         self._fit()
         for item in self.canvas.items():
             if item.movie:
@@ -301,7 +365,13 @@ class SceneVisualEditor(SettingPage):
         super().showEvent(event)
 
     def hideEvent(self, event) -> None:
+        self.media_preview.suspend()
         for item in self.canvas.items():
             if item.movie:
                 item.movie.stop()
         super().hideEvent(event)
+
+    def closeEvent(self, event) -> None:
+        self.media_preview.shutdown()
+        self.canvas.clear()
+        super().closeEvent(event)

@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from PySide6.QtCore import Qt, QUrl
+from PySide6.QtGui import QImage
 from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PySide6.QtWidgets import QWidget, QMessageBox
 
@@ -57,6 +58,17 @@ class SoundPlayer(QWidget):
         front_engine_logger.info(f"[SoundPlayer] set_muted | muted={muted}")
         if hasattr(self, "media_player_audio"):
             self.media_player_audio.setMuted(bool(muted))
+
+    def output_frame(self) -> QImage:
+        """Audio-only scene layers contribute a transparent pixel to composition."""
+        image = QImage(1, 1, QImage.Format.Format_RGBA8888)
+        image.fill(Qt.GlobalColor.transparent)
+        return image
+
+    def set_active(self, active: bool) -> None:
+        """Scene view ownership controls playback; standalone playback stays unchanged."""
+        if hasattr(self, 'media_player'):
+            self.media_player.play() if active else self.media_player.pause()
 
     def closeEvent(self, event) -> None:
         front_engine_logger.info(f"[SoundPlayer] closeEvent | event={event}")

@@ -274,6 +274,7 @@ class SceneActions(QObject):
         """Cancel work, stop playback/previews, then release the editor asset lease."""
         self.closed = True
         self.stop_playback()
+        self.page.visual_editor.media_preview.shutdown()
         self.page.visual_editor.canvas.clear()
         if self.prepared is not None:
             self.prepared.close()

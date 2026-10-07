@@ -972,4 +972,11 @@ simplified_chinese_word_dict = {
     'template_focus_title': '专注',
     'template_focus_task': '一次只做一件事',
     'template_focus_break': '记得适时休息',
+    'scene_media_preview_title': '实时媒体预览',
+    'scene_media_preview_enable': '启用实时预览',
+    'scene_media_interact': '与选定媒体交互',
+    'scene_media_audition': '试听选定媒体',
+    'scene_media_preview_hint': '手动启用后才开始预览，默认静音，隐藏时暂停，最多八个来源。网页／Puppet 交互会打开自己的窗口。',
+    'scene_media_audio': '{name}\n音频：{seconds} 秒',
+    'scene_add_puppet': '添加 Puppet',
 }

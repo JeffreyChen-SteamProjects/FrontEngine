@@ -970,4 +970,11 @@ italian_word_dict = {
     'template_focus_title': 'Concentrazione',
     'template_focus_task': 'Un’attività alla volta',
     'template_focus_break': 'Ricorda di fare pause',
+    'scene_media_preview_title': 'Anteprima media dal vivo',
+    'scene_media_preview_enable': 'Abilita anteprime dal vivo',
+    'scene_media_interact': 'Interagisci con il media selezionato',
+    'scene_media_audition': 'Ascolta il media selezionato',
+    'scene_media_preview_hint': 'Avvio solo dopo abilitazione, senza audio e in pausa se nascosto. Massimo otto sorgenti. Web/Puppet apre una finestra propria per interagire.',
+    'scene_media_audio': '{name}\nAudio: {seconds}s',
+    'scene_add_puppet': 'Aggiungi Puppet',
 }

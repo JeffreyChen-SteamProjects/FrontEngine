@@ -980,4 +980,11 @@ english_word_dict = {
     'template_focus_title': 'Focus',
     'template_focus_task': 'One task at a time',
     'template_focus_break': 'Remember to take breaks',
+    'scene_media_preview_title': 'Live media preview',
+    'scene_media_preview_enable': 'Enable live previews',
+    'scene_media_interact': 'Interact with selected media',
+    'scene_media_audition': 'Listen to selected media',
+    'scene_media_preview_hint': 'Previews start only when enabled, are muted, and pause while hidden. Up to eight sources. Web/Puppet interaction opens their own window.',
+    'scene_media_audio': '{name}\nAudio: {seconds}s',
+    'scene_add_puppet': 'Add Puppet',
 }
