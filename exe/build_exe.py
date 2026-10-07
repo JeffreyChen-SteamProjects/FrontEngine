@@ -13,9 +13,12 @@ from __future__ import annotations
 import subprocess  # nosec B404 - only ever runs the argv that build_command assembles
 import argparse
 import shutil
+from importlib import metadata
 import sys
 import tomllib
 from pathlib import Path
+
+from packaging.requirements import Requirement
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 ENTRY_POINT = PROJECT_ROOT / "exe" / "start_front_engine.py"
@@ -38,6 +41,25 @@ def read_version() -> str:
     """Return the version declared in pyproject.toml."""
     with (PROJECT_ROOT / "pyproject.toml").open("rb") as toml_file:
         return tomllib.load(toml_file)["project"]["version"]
+
+
+def check_dependencies(version_lookup=None) -> list[str]:
+    """Fail before a costly compile when the build environment lacks runtime requirements."""
+    lookup = version_lookup or metadata.version
+    with (PROJECT_ROOT / "pyproject.toml").open("rb") as stream:
+        requirements = tomllib.load(stream)["project"]["dependencies"]
+    missing = []
+    for specification in requirements:
+        requirement = Requirement(specification)
+        if requirement.marker and not requirement.marker.evaluate():
+            continue
+        try:
+            installed = lookup(requirement.name)
+            if installed not in requirement.specifier:
+                missing.append(f"{specification} (installed {installed})")
+        except metadata.PackageNotFoundError:
+            missing.append(specification)
+    return missing
 
 
 def build_command(version: str, onefile: bool) -> list[str]:
@@ -89,6 +111,9 @@ def main() -> int:
     parser.add_argument("--onefile", action="store_true")
     parser.add_argument("--steam-runtime", help="Explicit steam_api64.dll to ship beside the executable")
     args = parser.parse_args()
+    missing = check_dependencies()
+    if missing:
+        parser.error("Install requirements.txt in this Python environment before building: " + "; ".join(missing))
     try:
         runtime = validated_runtime(args.steam_runtime) if args.steam_runtime else None
     except (OSError, ValueError) as error:
