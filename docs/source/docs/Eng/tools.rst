@@ -37,3 +37,5 @@ Tools Page
 * Window layout - save where your windows are and put them back later.
 
 :doc:`runtime_interoperability`
+
+Tools → Color palette collects consecutive picker clicks when Collect colors is enabled. Name and group swatches, edit exact hex values, search, copy and remove colors; recent samples remain reusable. Up to 512 swatches and 50 distinct recent colors are saved locally and survive restart. Names are unique within each group (case insensitive); duplicate names are rejected. CSS and JSON export preserve RGB values; CSS variable name collisions get numeric suffixes. Export writes atomically. The Commands palette can also open Color palette.

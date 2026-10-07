@@ -38,3 +38,5 @@ Page Outils
 * Disposition des fenêtres - retenir où sont les fenêtres et les y remettre.
 
 :doc:`runtime_interoperability`
+
+Outils → Palette de couleurs collecte les clics si la collecte est activée. Nommez/groupez, modifiez les hex exacts, recherchez, copiez et supprimez ; les échantillons récents sont réutilisables. Jusqu’à 512 couleurs et 50 échantillons distincts sont sauvegardés localement. Les noms sont uniques par groupe, sans distinction de casse ; les doublons sont refusés. CSS/JSON conservent RGB ; les collisions CSS reçoivent un numéro. Export atomique. Commandes ouvre aussi la palette.

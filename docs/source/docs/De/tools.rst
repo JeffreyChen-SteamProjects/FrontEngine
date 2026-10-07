@@ -39,3 +39,5 @@ Werkzeuge-Seite
   zurücksetzen.
 
 :doc:`runtime_interoperability`
+
+Werkzeuge → Farbpalette sammelt aufeinanderfolgende Klicks, wenn Farben sammeln aktiv ist. Farben benennen/gruppieren, Hex bearbeiten, suchen, kopieren und entfernen; letzte Proben bleiben nutzbar. Bis zu 512 Farben und 50 verschiedene letzte Proben werden lokal gespeichert. Namen sind je Gruppe ohne Beachtung der Großschreibung eindeutig. CSS/JSON bewahren RGB; CSS-Namenskollisionen erhalten Nummern. Export ersetzt die Datei atomar. Die Befehlspalette öffnet auch die Farbpalette.

@@ -749,6 +749,7 @@ class FrontEngineMainUI(QMainWindow):
                 lambda _value, page=index: self._open_command_page(page)))
         for identifier, key, fallback, callback in (
             ("capture_area", "tools_capture_start", "Capture area", self.tools_setting_ui.start_capture),
+            ("palette", "palette_title", "Color palette", self.tools_setting_ui.open_palette),
             ("new_note", "widgets_note_add", "New note", self.widgets_setting_ui.add_note),
             ("toggle_filter", "screen_filter_start", "Turn filter on", self.screen_care_setting_ui.toggle_filter),
             ("workshop", "workshop_manage", "Workshop", self.open_workshop),
@@ -1040,6 +1041,7 @@ class FrontEngineMainUI(QMainWindow):
             save_last_session(self)
         self._stop_services()
         self.text_setting_ui.stop_file_preview()
+        self.tools_setting_ui.close_palette()
         from frontengine.user_setting.scene_setting import release_scene_packages
         if hasattr(self, 'tools_setting_ui'):
             self.tools_setting_ui.recorder.close()

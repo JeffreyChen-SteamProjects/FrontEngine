@@ -38,3 +38,5 @@ Pagina Strumenti
 * Disposizione delle finestre - ricordare dove sono le finestre e rimetterle lì.
 
 :doc:`runtime_interoperability`
+
+Strumenti → Tavolozza colori raccoglie clic consecutivi quando attivata. Assegna nomi/gruppi, modifica hex esatti, cerca, copia e rimuovi; riutilizza i campioni recenti. Fino a 512 colori e 50 campioni distinti vengono salvati localmente. Nomi unici per gruppo senza distinzione tra maiuscole/minuscole; duplicati rifiutati. CSS/JSON mantengono RGB; collisioni CSS ricevono numeri. Esportazione atomica. Anche Comandi apre la tavolozza.

@@ -101,7 +101,7 @@ def test_main_palette_shortcut_opens_and_page_command_routes(monkeypatch):
     window.sidebar = NavigationSidebar(window)
     window.sidebar.add_page("tab_tools_text", 0)
     window.command_pages = [(QWidget(window), "tab_tools_text", 0)]
-    window.tools_setting_ui = SimpleNamespace(start_capture=Mock())
+    window.tools_setting_ui = SimpleNamespace(start_capture=Mock(), open_palette=Mock())
     window.widgets_setting_ui = SimpleNamespace(add_note=Mock())
     window.screen_care_setting_ui = SimpleNamespace(toggle_filter=Mock())
     window.open_workshop = Mock()

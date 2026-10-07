@@ -25,6 +25,8 @@ from frontengine.show.measure.measure_widget import (
 from frontengine.ui.dialog.screen_text_dialog import (
     ScreenTextDialog, ask_for_consent, has_consent, has_text_consent, ask_for_text_consent,
 )
+from frontengine.ui.dialog.color_palette_dialog import ColorPaletteDialog
+from frontengine.utils.measure.color_palette import ColorPalette
 from frontengine.ui.dialog.window_pin_dialog import WindowPinDialog
 from frontengine.ui.dialog.window_replica_dialog import WindowReplicaDialog
 from frontengine.user_setting.user_setting_file import user_setting_dict, write_user_setting
@@ -70,6 +72,8 @@ class ToolsSettingUI(SettingPage):
                          "Tools", "Measure, capture, record and pin what is on screen.")
 
         self.measure_widget_list: List[MeasureWidget] = []
+        self.palette = ColorPalette(user_setting_dict, write_user_setting)
+        self.palette_dialog = None
         self.recorder = FrameRecorder(self)
         self.virtual_camera_feed = VirtualCameraFeed(self)
         self.virtual_camera_feed.failed.connect(self._on_virtual_camera_failed)
@@ -132,7 +136,8 @@ class ToolsSettingUI(SettingPage):
         measure = self.add_section(self.measure_label)
         measure.add_row("tools_mode", self.measure_mode_combobox, "Mode")
         measure.add_row(self.color_format_label, self.color_format_combobox)
-        measure.add_inline(self.measure_button)
+        measure.add_inline(self.measure_button, self.palette_collect, self.palette_button)
+        measure.add_widget(self.palette_status)
 
         capture = self.add_section(self.capture_label)
         capture.add_inline(self.capture_button, self.capture_copy_button,
@@ -189,6 +194,13 @@ class ToolsSettingUI(SettingPage):
         self.color_format_combobox.currentIndexChanged.connect(self._apply_measure_settings)
         self.measure_button = tr(QPushButton(), "tools_measure_start", "Start measuring")
         self.measure_button.clicked.connect(self.toggle_measure)
+        self.palette_collect = tr(QCheckBox(), "palette_collect")
+        self.palette_collect.setChecked(user_setting_dict.get("color_palette_collect") is True)
+        self.palette_collect.toggled.connect(self._save_palette_collect)
+        self.palette_button = tr(QPushButton(), "palette_title")
+        self.palette_button.clicked.connect(self.open_palette)
+        self.palette_status = QLabel()
+        self.palette_status.setWordWrap(True)
 
     def _build_capture_row(self) -> None:
         self.capture_label = tr(QLabel(), "tools_capture_label", "Region capture")
@@ -282,6 +294,7 @@ class ToolsSettingUI(SettingPage):
         screen = QGuiApplication.primaryScreen()
         if screen is not None:
             widget.setGeometry(screen.geometry())
+        widget.color_sampled.connect(self._record_palette_color)
         widget.setMouseTracking(True)
         widget.show()
         self.measure_widget_list.append(widget)
@@ -303,6 +316,48 @@ class ToolsSettingUI(SettingPage):
                 widget.set_color_format(self.color_format_combobox.currentData())
             except RuntimeError:
                 self.measure_widget_list.remove(widget)
+
+    def open_palette(self) -> None:
+        """Show one persistent manager for stored colors and recent samples."""
+        if self.palette_dialog is None:
+            self.palette_dialog = ColorPaletteDialog(self, self.palette)
+        self.palette_dialog.show()
+        self.palette_dialog.raise_()
+        self.palette_dialog.activateWindow()
+
+    def start_palette_pick(self) -> None:
+        """Enable consecutive color collection using the existing picker overlay."""
+        self.palette_collect.setChecked(True)
+        self.measure_mode_combobox.setCurrentIndex(self.measure_mode_combobox.findData(MODE_COLOR))
+        if not self.measure_widget_list:
+            self.start_measure()
+
+    def _save_palette_collect(self, enabled: bool) -> None:
+        user_setting_dict["color_palette_collect"] = enabled
+        try:
+            write_user_setting()
+        except OSError as error:
+            self.palette_status.setText(str(error))
+
+    def _record_palette_color(self, color: str) -> None:
+        if not self.palette_collect.isChecked():
+            return
+        try:
+            self.palette.sample(color)
+            self.palette_status.clear()
+        except (OSError, ValueError) as error:
+            self.palette_status.setText(str(error))
+        if self.palette_dialog is not None:
+            self.palette_dialog.refresh()
+
+    def close_palette(self) -> None:
+        """Hide the management dialog during application shutdown."""
+        if self.palette_dialog is not None:
+            self.palette_dialog.close()
+
+    def closeEvent(self, event) -> None:
+        self.close_palette()
+        super().closeEvent(event)
 
     # --- region capture --------------------------------------------------
     def start_capture(self) -> RegionCaptureWidget:
