@@ -16,7 +16,10 @@ import shutil
 from importlib import metadata
 from importlib.util import find_spec
 import sys
-import tomllib
+try:
+    import tomllib
+except ModuleNotFoundError:  # Python 3.10 development builds use the TOML backport.
+    import tomli as tomllib
 from pathlib import Path
 
 from packaging.requirements import Requirement
