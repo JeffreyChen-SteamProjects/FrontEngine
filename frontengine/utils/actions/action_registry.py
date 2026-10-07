@@ -54,9 +54,8 @@ class ActionRegistry:
         self.register(Action(identifier, key, fallback, callback, takes_value))
 
     def execute(self, identifier: str, value: str = "") -> bool:
-        """Return False for unknown actions or missing required values."""
+        """Return False for unknown/missing input or an explicitly failed callback."""
         action = self.actions.get(identifier)
         if action is None or (action.takes_value and not value.strip()):
             return False
-        action.callback(value)
-        return True
+        return action.callback(value) is not False

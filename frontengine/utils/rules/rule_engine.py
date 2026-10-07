@@ -30,6 +30,12 @@ goes false again.
 from __future__ import annotations
 
 from datetime import datetime
+from collections import deque
+from copy import deepcopy
+from hashlib import sha256
+import json
+import re
+from time import monotonic
 from typing import Any, Dict, List, Optional
 
 from PySide6.QtCore import QObject, QTimer, Signal
@@ -127,6 +133,10 @@ def normalize_rule(entry: Any) -> Optional[Dict[str, Any]]:
     value = str(entry.get("value", "")).strip()
     if action in VALUE_ACTIONS and not value:
         return None
+    priority = _bounded_integer(entry.get('priority', 0), -1000, 1000)
+    cooldown = _bounded_integer(entry.get('cooldown', 0), 0, 86400)
+    if priority is None or cooldown is None or len(label) > 128 or len(value) > 2048:
+        return None
     when = entry.get("when") if isinstance(entry.get("when"), dict) else {}
     condition: Dict[str, Any] = {
         "days": normalize_days(when.get("days")),
@@ -137,13 +147,32 @@ def normalize_rule(entry: Any) -> Optional[Dict[str, Any]]:
     }
     for flag in ("fullscreen", "battery"):
         condition[flag] = bool(when[flag]) if isinstance(when.get(flag), bool) else None
-    return {
+    result = {
         "label": label,
         "enabled": bool(entry.get("enabled", True)),
         "action": action,
         "value": value,
         "when": condition,
+        'priority': priority,
+        'cooldown': cooldown,
     }
+    identifier = entry.get('id')
+    if identifier is None:
+        identifier = sha256(json.dumps(result, sort_keys=True).encode('utf-8')).hexdigest()[:32]
+    if not isinstance(identifier, str) or not re.fullmatch(r'[0-9a-f]{32}', identifier):
+        return None
+    result['id'] = identifier
+    return result
+
+
+def _bounded_integer(value: Any, minimum: int, maximum: int) -> Optional[int]:
+    if type(value) is not int and not isinstance(value, str):
+        return None
+    try:
+        parsed = int(value)
+    except (ValueError, OverflowError):
+        return None
+    return parsed if minimum <= parsed <= maximum else None
 
 
 def _coerce_positive(value: Any) -> Optional[int]:
@@ -159,10 +188,12 @@ def normalize_rules(entries: Any) -> List[Dict[str, Any]]:
     if not isinstance(entries, (list, tuple)):
         return []
     rules = []
-    for entry in entries:
+    seen = set()
+    for entry in entries[:200]:
         rule = normalize_rule(entry)
-        if rule is not None:
+        if rule is not None and rule['id'] not in seen:
             rules.append(rule)
+            seen.add(rule['id'])
     return rules
 
 
@@ -250,31 +281,54 @@ class RuleTracker:
     transitions. Pure logic; the clock and environment arrive in the context.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, clock=None) -> None:
         self._active: Dict[str, bool] = {}
+        self._labels = {}
+        self._last_fired = {}
+        self._clock = clock or monotonic
+        self.decisions = []
 
     def reset(self) -> None:
         self._active = {}
+        self._last_fired = {}
+        self._labels = {}
+        self.decisions = []
 
     def active(self, label: str) -> bool:
-        return self._active.get(label, False)
+        return any(self._active.get(identifier, False) for identifier, name in self._labels.items() if name == label)
+
+    def remaining(self, rule: dict) -> float:
+        """Read monotonic cooldown without changing edge state or firing anything."""
+        previous = self._last_fired.get(rule['id'])
+        return max(0, rule['cooldown'] - (self._clock() - previous)) if previous is not None else 0
 
     def tick(self, rules: Any, context: Dict[str, Any]) -> List[Dict[str, Any]]:
         """回傳這一刻剛剛成立、需要執行的規則。"""
         fired = []
         seen = set()
-        for rule in normalize_rules(rules):
-            label = rule["label"]
-            seen.add(label)
+        self.decisions = []
+        # Higher priorities execute last so their settings win; equal priorities
+        # preserve table order. Suppressed edges are consumed, never delayed.
+        for rule in sorted(normalize_rules(rules), key=lambda entry: entry['priority']):
+            identifier = rule['id']
+            seen.add(identifier)
+            self._labels[identifier] = rule['label']
             holds = evaluate(rule, context)
-            if holds and not self._active.get(label, False):
-                fired.append(rule)
-            self._active[label] = holds
+            if holds and not self._active.get(identifier, False):
+                remaining = self.remaining(rule)
+                status = 'cooldown' if remaining else 'dispatched'
+                self.decisions.append({'rule': rule, 'status': status, 'remaining': remaining})
+                if not remaining:
+                    fired.append(rule)
+                    self._last_fired[identifier] = self._clock()
+            self._active[identifier] = holds
         # 已經被刪掉的規則要忘掉，否則同名規則之後再建立時會被當成「還在成立」
         # 而永遠不觸發。
         # Forget deleted rules: otherwise recreating one with the same label
         # would look like it was still true and never fire again.
         self._active = {label: holds for label, holds in self._active.items() if label in seen}
+        self._last_fired = {key: value for key, value in self._last_fired.items() if key in seen}
+        self._labels = {key: value for key, value in self._labels.items() if key in seen}
         return fired
 
 
@@ -291,11 +345,13 @@ class RuleEngineService(QObject):
 
     def __init__(self, rules_provider=None, context_provider=None,
                  interval_ms: int = DEFAULT_INTERVAL_MS,
-                 parent: Optional[QObject] = None) -> None:
+                 parent: Optional[QObject] = None, clock=None) -> None:
         super().__init__(parent)
         self._rules_provider = rules_provider or (lambda: [])
         self._context_provider = context_provider or default_context
-        self.tracker = RuleTracker()
+        self.tracker = RuleTracker(clock)
+        self.history = deque(maxlen=200)
+        self._sequence = 0
         self._timer = QTimer(self)
         self._timer.setInterval(max(1000, int(interval_ms)))
         self._timer.timeout.connect(self.poll_once)
@@ -320,11 +376,43 @@ class RuleEngineService(QObject):
             front_engine_logger.warning(f"[RuleEngineService] source failed: {error!r}")
             return []
         fired = self.tracker.tick(rules, context)
+        for decision in self.tracker.decisions:
+            self._sequence += 1
+            decision['rule']['_receipt'] = self._sequence
+            self.history.append({'at': str(context.get('now', datetime.now())),
+                                 **deepcopy(decision), 'context': self._context_summary(context)})
         for rule in fired:
             front_engine_logger.info(
                 f"[RuleEngineService] fired {rule['label']} -> {rule['action']}")
             self.rule_fired.emit(rule)
         return fired
+
+    @staticmethod
+    def _context_summary(context: dict) -> dict:
+        return {key: str(context.get(key, ''))[:260] for key in
+                ('now', 'app', 'fullscreen', 'on_battery', 'idle_seconds')}
+
+    def preview(self, rules=None) -> list[dict]:
+        """Inspect current conditions/cooldown without consuming an edge or executing."""
+        context = self._context_provider() or {}
+        values = self._rules_provider() if rules is None else rules
+        rows = []
+        for rule in sorted(normalize_rules(values), key=lambda entry: entry['priority']):
+            rows.append({'rule': rule, 'matches': evaluate(rule, context),
+                         'active': self.tracker._active.get(rule['id'], False),
+                         'cooldown_remaining': self.tracker.remaining(rule),
+                         'context': self._context_summary(context)})
+        return rows
+
+    def record_execution(self, rule: dict, success: bool, error: str = '') -> None:
+        """Attach an application outcome to the newest matching dispatch receipt."""
+        for entry in reversed(self.history):
+            same_receipt = entry['rule'].get('_receipt') == rule.get('_receipt')
+            if (same_receipt and entry['rule']['id'] == rule.get('id')
+                    and entry['status'] == 'dispatched'):
+                entry['status'] = 'executed' if success else 'failed'
+                entry['error'] = error[:500]
+                return
 
 
 def default_context() -> Dict[str, Any]:

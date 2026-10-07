@@ -814,7 +814,15 @@ class FrontEngineMainUI(QMainWindow):
         value = str(rule.get("value", ""))
         front_engine_logger.info(
             f"[FrontEngineMainUI] rule '{rule.get('label')}' -> {action} {value}")
-        self.action_registry.execute(action, value)
+        try:
+            success = self.action_registry.execute(action, value)
+            error = '' if success else 'Action did not complete'
+        except (OSError, ValueError, RuntimeError) as exception:
+            success, error = False, str(exception)
+            front_engine_logger.warning(f"[MainUI] rule action failed: {exception!r}")
+        service = getattr(self, 'rule_engine_service', None)
+        if service is not None:
+            service.record_execution(rule, success, error)
 
     def _on_desktop_pin_changed(self, pinned: bool) -> None:
         """
