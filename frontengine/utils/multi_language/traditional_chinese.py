@@ -1011,4 +1011,12 @@ traditional_chinese_word_dict = {
     'scene_animation_playback_resume': '繼續場景動畫',
     'scene_animation_playback_replay': '重播場景動畫',
     'scene_animation_hint': '選取一個未鎖定圖層，編輯 x／y／透明度關鍵影格。空白欄位保留該屬性。時間軸預覽不儲存暫時位置；編輯前請重設預覽。切換場景時以 0.5 秒淡入淡出。',
+    'scene_camera_output': '場景獨立輸出',
+    'scene_output_preview': '開始預覽',
+    'scene_output_send': '送至虛擬攝影機',
+    'scene_output_stop': '停止輸出',
+    'scene_output_hint': '以固定解析度預覽目前編輯器場景。音訊靜音且不傳送，不擷取桌面。編輯場景會停止輸出，重新啟動即可套用。最多八個原生媒體來源，圖層點陣圖總計 1600 萬像素。',
+    'scene_output_previewing': '正在預覽場景；攝影機未開啟',
+    'scene_output_starting': '正在開啟虛擬攝影機…',
+    'scene_output_changed': '場景已變更，輸出已停止；重新啟動即可套用新場景。',
 }

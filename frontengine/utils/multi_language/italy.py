@@ -1002,4 +1002,12 @@ italian_word_dict = {
     'scene_animation_playback_resume': 'Riprendi animazione scena',
     'scene_animation_playback_replay': 'Ripeti animazione scena',
     'scene_animation_hint': 'Seleziona un livello sbloccato per x/y/opacità. Celle vuote: canale invariato. L’anteprima non salva posizioni temporanee; reimposta prima di modificare. Cambio scena: dissolvenza di 0,5 secondi.',
+    'scene_camera_output': 'Uscita scena indipendente',
+    'scene_output_preview': 'Avvia anteprima',
+    'scene_output_send': 'Invia a videocamera virtuale',
+    'scene_output_stop': 'Ferma uscita',
+    'scene_output_hint': 'Anteprima scena corrente a risoluzione fissa. Audio muto e non inviato; nessuna cattura desktop. Modifiche fermano l’uscita; riavvia. Massimo otto sorgenti native e 16 megapixel di livelli.',
+    'scene_output_previewing': 'Anteprima scena; videocamera spenta',
+    'scene_output_starting': 'Apertura videocamera virtuale…',
+    'scene_output_changed': 'Scena modificata. Uscita fermata; riavvia per applicare.',
 }

@@ -1002,4 +1002,12 @@ french_word_dict = {
     'scene_animation_playback_resume': 'Reprendre animation scène',
     'scene_animation_playback_replay': 'Relire animation scène',
     'scene_animation_hint': 'Choisissez un calque déverrouillé et modifiez x/y/opacité. Cellules vides : canal inchangé. L’aperçu n’enregistre pas les positions temporaires ; réinitialisez avant modification. Fondu de scène : 0,5 seconde.',
+    'scene_camera_output': 'Sortie de scène indépendante',
+    'scene_output_preview': 'Démarrer aperçu',
+    'scene_output_send': 'Envoyer à la caméra virtuelle',
+    'scene_output_stop': 'Arrêter sortie',
+    'scene_output_hint': 'Aperçu de la scène courante à résolution fixe. Audio muet et non transmis ; sans capture du bureau. Modifier la scène arrête la sortie ; redémarrez. Huit sources natives et 16 mégapixels de calques maximum.',
+    'scene_output_previewing': 'Aperçu scène ; caméra éteinte',
+    'scene_output_starting': 'Ouverture caméra virtuelle…',
+    'scene_output_changed': 'Scène modifiée. Sortie arrêtée ; redémarrez pour appliquer.',
 }

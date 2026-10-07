@@ -1,5 +1,5 @@
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QTabWidget, QLabel
+from PySide6.QtWidgets import QTabWidget, QLabel, QPushButton
 
 from frontengine.ui.page.layout_kit import SettingPage
 
@@ -9,7 +9,7 @@ from frontengine.ui.page.scene_setting.scene_page.registry import SCENE_PAGE_REG
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.ui.page.scene_setting.scene_visual_editor import SceneVisualEditor
-from frontengine.utils.multi_language.retranslate import retranslator
+from frontengine.utils.multi_language.retranslate import retranslator, tr
 from frontengine.ui.page.scene_setting.scene_actions import SceneActions
 
 
@@ -44,6 +44,10 @@ class SceneSettingUI(SettingPage):
         self.add_body_widget(self.tab_widget, 1)
         self.actions = SceneActions(self)
         self.templates_dialog = None
+        self.output_dialog = None
+        output_button = tr(QPushButton(), 'scene_camera_output')
+        output_button.clicked.connect(self.open_output)
+        self.add_body_widget(output_button)
         self.scene_manager_ui.templates_requested.connect(self.open_templates)
         self.action_status = QLabel()
         self.action_status.setWordWrap(True)
@@ -66,7 +70,18 @@ class SceneSettingUI(SettingPage):
         """Close playback and previews before releasing extracted scene resources."""
         if self.templates_dialog is not None:
             self.templates_dialog.close()
+        if self.output_dialog is not None:
+            self.output_dialog.close()
         self.actions.shutdown()
+
+    def open_output(self) -> None:
+        """Preview/send a snapshot of the editor independently of desktop playback."""
+        from frontengine.ui.dialog.scene_output_dialog import SceneOutputDialog
+        if self.output_dialog is None:
+            self.output_dialog = SceneOutputDialog(self.visual_editor.document, self)
+        self.output_dialog.show()
+        self.output_dialog.raise_()
+        self.output_dialog.activateWindow()
 
     def open_templates(self) -> None:
         """Reuse one local template library with layout preview and screen choice."""

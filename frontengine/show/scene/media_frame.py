@@ -207,7 +207,7 @@ class SceneMediaFrame(BaseWidget):
     def draw_content(self, painter) -> None:
         if not self.frame.isNull():
             painter.drawImage(self.rect(), self.frame)
-        elif self.entry.get('type') == 'SOUND' and self.media_player is not None:
+        elif self.preview and self.entry.get('type') == 'SOUND' and self.media_player is not None:
             painter.setPen(QColor('white'))
             label = translate('scene_media_audio').format(
                 name=Path(self.entry.get('file_path', '')).name,

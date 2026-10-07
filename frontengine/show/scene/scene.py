@@ -34,7 +34,7 @@ class SceneManager:
             raise ValueError('Scene type must be a string')
         kind = kind.lower()
         if kind in ('image', 'gif', 'sound', 'text', 'video', 'web', 'puppet'):
-            proxy = self._add(kind, entry)
+            proxy = self._add(kind, entry, frame_source=True)
             proxy.setData(0, key)
             proxy.setData(1, deepcopy(entry))
         else:
@@ -87,11 +87,11 @@ class SceneManager:
         widget.set_ui_variable(setting.get('opacity', 100) / 100)
         widget.setVisible(setting.get('visible', True))
 
-    def _add(self, kind: str, setting_dict: Dict) -> QGraphicsProxyWidget:
+    def _add(self, kind: str, setting_dict: Dict, *, frame_source: bool = False) -> QGraphicsProxyWidget:
         front_engine_logger.info(f"[SceneManager] add_{kind} | settings={setting_dict}")
         from frontengine.utils.scene_format.scene_editor_document import validate_geometry
         validate_geometry({"layer": setting_dict})
-        if kind in ('video', 'web', 'puppet'):
+        if kind in ('video', 'web', 'puppet') or (frame_source and kind == 'sound'):
             from frontengine.show.scene.media_frame import SceneMediaFrame
             widget = SceneMediaFrame({'type': kind.upper(), **setting_dict})
         else:

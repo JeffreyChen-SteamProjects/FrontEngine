@@ -1004,4 +1004,12 @@ simplified_chinese_word_dict = {
     'scene_animation_playback_resume': '继续场景动画',
     'scene_animation_playback_replay': '重播场景动画',
     'scene_animation_hint': '选择一个未锁定图层，编辑 x／y／透明度关键帧。空白单元格保留该属性。时间轴预览不保存临时位置；编辑前请重置预览。切换场景时以 0.5 秒淡入淡出。',
+    'scene_camera_output': '场景独立输出',
+    'scene_output_preview': '开始预览',
+    'scene_output_send': '发送至虚拟摄像头',
+    'scene_output_stop': '停止输出',
+    'scene_output_hint': '以固定分辨率预览当前编辑器场景。音频静音且不发送，不捕获桌面。编辑场景会停止输出，重新启动即可应用。最多八个原生媒体来源，图层位图总计 1600 万像素。',
+    'scene_output_previewing': '正在预览场景；摄像头未开启',
+    'scene_output_starting': '正在打开虚拟摄像头…',
+    'scene_output_changed': '场景已变更，输出已停止；重新启动即可应用新场景。',
 }

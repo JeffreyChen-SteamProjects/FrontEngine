@@ -1012,4 +1012,12 @@ english_word_dict = {
     'scene_animation_playback_resume': 'Resume scene animation',
     'scene_animation_playback_replay': 'Replay scene animation',
     'scene_animation_hint': 'Select one unlocked layer to edit x/y/opacity keyframes. Blank cells keep that channel unchanged. Scrub or play without saving temporary positions; reset preview before editing. Scene switches dissolve over 0.5 seconds.',
+    'scene_camera_output': 'Independent scene output',
+    'scene_output_preview': 'Start preview',
+    'scene_output_send': 'Send to virtual camera',
+    'scene_output_stop': 'Stop output',
+    'scene_output_hint': 'Preview the current editor scene at a fixed resolution. Audio is muted and not sent. No desktop capture. Editing the scene stops output; restart to apply changes. Maximum eight native media sources and 16 megapixels of layer rasters.',
+    'scene_output_previewing': 'Previewing scene; camera is off',
+    'scene_output_starting': 'Opening virtual camera…',
+    'scene_output_changed': 'Scene changed. Output stopped; restart to apply the new scene.',
 }

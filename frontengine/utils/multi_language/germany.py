@@ -1005,4 +1005,12 @@ germany_word_dict = {
     'scene_animation_playback_resume': 'Szenenanimation fortsetzen',
     'scene_animation_playback_replay': 'Szenenanimation neu starten',
     'scene_animation_hint': 'Eine entsperrte Ebene wählen, x/y/Deckkraft bearbeiten. Leere Zellen ändern den Kanal nicht. Vorschau speichert keine temporären Positionen; vor Bearbeitung zurücksetzen. Szenenwechsel überblenden 0,5 Sekunden.',
+    'scene_camera_output': 'Unabhängige Szenenausgabe',
+    'scene_output_preview': 'Vorschau starten',
+    'scene_output_send': 'An virtuelle Kamera senden',
+    'scene_output_stop': 'Ausgabe stoppen',
+    'scene_output_hint': 'Aktuelle Editorszene in fester Auflösung ansehen. Audio stumm und nicht übertragen; keine Desktopaufnahme. Szenenänderungen stoppen Ausgabe; neu starten. Maximal acht native Quellen und 16 Megapixel Ebenenraster.',
+    'scene_output_previewing': 'Szenenvorschau; Kamera aus',
+    'scene_output_starting': 'Virtuelle Kamera öffnen…',
+    'scene_output_changed': 'Szene geändert. Ausgabe gestoppt; für neue Szene neu starten.',
 }
