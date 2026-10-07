@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261008-05 | 2026-10-08 | Persist select and edit multi-page whiteboards | #done #whiteboard #editor | [2026-10](2026-10.md) |
 | U-20261008-04 | 2026-10-08 | Crop annotate and flatten captured images | #done #capture #editor | [2026-10](2026-10.md) |
 | U-20261008-03 | 2026-10-08 | Create and preview portable sprite pet packs | #done #pets #editor | [2026-10](2026-10.md) |
 | U-20261008-02 | 2026-10-08 | Send independent fixed-size scenes to a virtual camera | #done #scene #camera | [2026-10](2026-10.md) |
@@ -109,5 +110,5 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-10.md](2026-10.md) | 2026-10 | 34 |
+| [2026-10.md](2026-10.md) | 2026-10 | 35 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
