@@ -55,6 +55,7 @@ class PetSettingUI(SettingPage):
 
         # Init variable
         self.pet_list: list = []
+        self.pack_editor = None
         # 打字時安分：按鍵由既有的全域監聽服務推過來，這裡只記時間並在停手後放行
         # Settling while typing: keys come from the existing global watch
         # service; this only times them and lets the pet go once typing stops.
@@ -187,6 +188,9 @@ class PetSettingUI(SettingPage):
         source.add_inline(self.choose_file_button, self.choose_pack_button,
                           self.choose_sound_button)
         source.add_inline(self.choose_script_button, self.workshop_button)
+        self.pack_editor_button = tr(QPushButton(), 'pack_editor_title')
+        self.pack_editor_button.clicked.connect(self.open_pack_editor)
+        source.add_inline(self.pack_editor_button)
         source.add_row(self.recent_files_label, self.recent_files_combobox)
         self.profile_controls = PetProfileControls(self)
 
@@ -522,6 +526,30 @@ class PetSettingUI(SettingPage):
         self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
         add_recent_file("pet", folder)
         reload_recent_combobox(self.recent_files_combobox, "pet")
+
+    def open_pack_editor(self) -> None:
+        """Open the sprite-only mapping editor without spawning a desktop pet."""
+        if self.pack_editor is None:
+            from frontengine.ui.dialog.pet_pack_editor import PetPackEditor
+            self.pack_editor = PetPackEditor(self)
+            self.pack_editor.pack_selected.connect(self._use_edited_pack)
+        self.pack_editor.show()
+        self.pack_editor.raise_()
+        self.pack_editor.activateWindow()
+
+    def _use_edited_pack(self, folder: str) -> None:
+        if not scan_pet_pack(folder):
+            return
+        self.pet_image_path = folder
+        self.ready_to_play = True
+        retranslator.set_text(self.ready_label, 'Ready')
+        add_recent_file('pet', folder)
+        reload_recent_combobox(self.recent_files_combobox, 'pet')
+
+    def close_pack_editor(self) -> None:
+        """Cancel file work and release animation resources before application shutdown."""
+        if self.pack_editor is not None:
+            self.pack_editor.close()
 
     def _apply_recent_file(self, _index: int = 0) -> None:
         path = self.recent_files_combobox.currentData()
