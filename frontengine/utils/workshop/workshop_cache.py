@@ -6,6 +6,7 @@ import json
 import os
 import shutil
 import tempfile
+import uuid
 from pathlib import Path
 
 from frontengine.utils.workshop.workshop_content import classify_item, preset_files, read_item_title
@@ -108,3 +109,23 @@ class WorkshopCache:
         if (root / "workshop.json").exists():
             return safe_path(root, read_manifest(root)["entry"])
         return root
+
+    def import_preset(self, item: dict, name: str, repository) -> str:
+        """Import media into a separate lease directory, without overwriting presets."""
+        from frontengine.user_setting.preset_repository import PresetRepository
+        validate_installed(Path(item["path"]))
+        if repository.exists(name):
+            raise ValueError("A preset with this name already exists")
+        imports = safe_path(self.root.parent, "imports")
+        imports.mkdir(exist_ok=True)
+        isolated = PresetRepository(imports / uuid.uuid4().hex)
+        entry = self.entry(item)
+        if entry.is_file():
+            imported = isolated.import_package(entry)
+        else:
+            files = preset_files(entry)
+            if len(files) != 1:
+                raise ValueError("Select a legacy item with exactly one preset")
+            imported = isolated.import_preset(Path(files[0]))
+        repository.save(name, isolated.load(imported))
+        return name

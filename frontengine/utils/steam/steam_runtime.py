@@ -81,6 +81,10 @@ BASE_FUNCTIONS = {
     "SteamAPI_ISteamUtils_GetAppID": (U32, [PTR]),
     "SteamAPI_ISteamUser_GetSteamID": (U64, [PTR]),
     "SteamAPI_ISteamUser_BLoggedOn": (c.c_bool, [PTR]),
+    "SteamAPI_SteamRemoteStorage_v016": (PTR, []),
+    "SteamAPI_ISteamRemoteStorage_GetQuota": (c.c_bool, [PTR, c.POINTER(U64), c.POINTER(U64)]),
+    "SteamAPI_SteamApps_v009": (PTR, []),
+    "SteamAPI_ISteamApps_BIsSubscribedApp": (c.c_bool, [PTR, U32]),
     "SteamAPI_ManualDispatch_Init": (None, []),
     "SteamAPI_ManualDispatch_RunFrame": (None, [I32]),
     "SteamAPI_ManualDispatch_GetNextCallback": (c.c_bool, [I32, c.POINTER(CallbackMessage)]),
@@ -106,6 +110,8 @@ UGC_FUNCTIONS = {
     "GetItemState": (U32, [U64]),
     "GetItemInstallInfo": (c.c_bool, [U64, c.POINTER(U64), c.c_char_p, U32, c.POINTER(U32)]),
     "DownloadItem": (c.c_bool, [U64, c.c_bool]),
+    "SubscribeItem": (U64, [U64]),
+    "UnsubscribeItem": (U64, [U64]),
 }
 
 
@@ -250,3 +256,17 @@ class SteamRuntime:
         if initialized and self.library is not None:
             self.library.SteamAPI_Shutdown()
         self.ugc = self.user = self.utils = self.pipe = self.user_id = 0
+
+    def diagnostics(self) -> dict:
+        """Read the application's license and preview Cloud quota without account secrets."""
+        if not self.initialized:
+            return {"available": False, "reason": self.reason}
+        storage = self.library.SteamAPI_SteamRemoteStorage_v016()
+        apps = self.library.SteamAPI_SteamApps_v009()
+        total, available = U64(), U64()
+        quota_known = bool(storage and self.library.SteamAPI_ISteamRemoteStorage_GetQuota(
+            storage, c.byref(total), c.byref(available)))
+        return {"available": True, "app_id": APP_ID,
+                "app_license": bool(apps and self.library.SteamAPI_ISteamApps_BIsSubscribedApp(apps, APP_ID)),
+                "cloud_quota_known": quota_known, "cloud_total_bytes": total.value,
+                "cloud_available_bytes": available.value}

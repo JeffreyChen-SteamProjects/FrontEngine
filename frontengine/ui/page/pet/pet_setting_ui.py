@@ -2,7 +2,7 @@ from typing import Optional
 from pathlib import Path
 import sys
 
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import Qt, QTimer, Signal
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import (
     QLabel, QPushButton, QMessageBox, QComboBox, QCheckBox, QFileDialog,
@@ -46,6 +46,7 @@ _CHOOSE_PACK = "Choose pet pack..."
 
 
 class PetSettingUI(SettingPage):
+    workshop_requested = Signal()
     def __init__(self):
         front_engine_logger.info("[PetSettingUI] Init")
         super().__init__("tab_pet_text", "page_subtitle_pet",
@@ -84,6 +85,8 @@ class PetSettingUI(SettingPage):
         self.choose_file_button.clicked.connect(self.choose_and_play)
         self.choose_pack_button = tr(QPushButton(), "pet_choose_pack", _CHOOSE_PACK)
         self.choose_pack_button.clicked.connect(self.choose_pack)
+        self.workshop_button = tr(QPushButton(), "workshop_manage")
+        self.workshop_button.clicked.connect(self.workshop_requested.emit)
         self.choose_sound_button = tr(QPushButton(), "pet_choose_sound", "Choose sound (optional)")
         self.choose_sound_button.clicked.connect(self.choose_sound)
         self.choose_script_button = tr(QPushButton(), 'pet_choose_script', 'Choose puppet script...')
@@ -182,7 +185,7 @@ class PetSettingUI(SettingPage):
         source = self.add_section("section_source", "Source")
         source.add_inline(self.choose_file_button, self.choose_pack_button,
                           self.choose_sound_button)
-        source.add_inline(self.choose_script_button)
+        source.add_inline(self.choose_script_button, self.workshop_button)
         source.add_row(self.recent_files_label, self.recent_files_combobox)
 
         appearance = self.add_section("section_appearance", "Appearance")

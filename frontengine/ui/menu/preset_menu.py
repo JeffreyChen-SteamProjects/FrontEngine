@@ -380,6 +380,7 @@ def build_preset_menu(ui: "FrontEngineMainUI") -> None:
         ("preset_menu_set_startup", "Set as startup preset...", _set_startup_action),
         ("preset_menu_clear_startup", "Clear startup preset", _clear_startup_action),
         ("workshop_menu_import", "Import Workshop content...", _workshop_action),
+        ("workshop_manage", "Manage Workshop...", lambda window: lambda: window.open_workshop("preset")),
     ):
         action = QAction(_t(label_key, fallback), menu)
         retranslator.bind(action, label_key, fallback)

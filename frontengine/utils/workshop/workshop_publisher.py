@@ -37,12 +37,19 @@ class WorkshopPublisher(QObject):
         return self.record is not None and self.record["state"] in PENDING
 
     def start(self, operation: str) -> None:
+        """Validate synchronously for scripts; UI callers use worker-verified records."""
+        self.start_verified(self.store.load(operation))
+
+    def start_verified(self, verified: dict) -> None:
+        """Start after a worker has verified the snapshot; recheck journal identity."""
         if self.busy:
             raise RuntimeError("Another Workshop publication is still running")
         backend = self.service.backend
         if not backend.initialized or backend.user_id != self.store.user_id:
             raise RuntimeError("The publication belongs to another or unavailable Steam session")
-        record = self.store.load(operation)
+        record = self.store.load(verified["operation"], verify_snapshot=False)
+        if record != verified:
+            raise ValueError("Publication changed after verification; retry")
         if record["state"] in PENDING:
             raise ValueError("Recover interrupted operations before retrying")
         if record["state"] == "outcome_unknown" and not record["published_id"]:

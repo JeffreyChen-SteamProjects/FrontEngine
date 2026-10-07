@@ -1,6 +1,6 @@
 import json
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import QWidget, QGridLayout, QPlainTextEdit, QPushButton, QCheckBox, QDialog, QMessageBox
 
@@ -14,6 +14,7 @@ from frontengine.user_setting.user_setting_file import user_setting_dict
 
 
 class SceneManagerUI(QWidget):
+    workshop_requested = Signal()
     def __init__(self, scene_manager):
         front_engine_logger.info("[SceneManagerUI] Init")
         super().__init__()
@@ -38,6 +39,8 @@ class SceneManagerUI(QWidget):
         # Start button
         self.start_button = tr(QPushButton(), "scene_start")
         self.start_button.clicked.connect(self.start_scene)
+        self.workshop_button = tr(QPushButton(), "workshop_manage")
+        self.workshop_button.clicked.connect(self.workshop_requested.emit)
 
         # Show on all screen
         self.show_on_all_screen_checkbox = tr(QCheckBox(), "Show on all screen")
@@ -54,6 +57,7 @@ class SceneManagerUI(QWidget):
         self.grid_layout.addWidget(self.show_on_all_screen_checkbox, 5, 0)
         self.grid_layout.addWidget(self.clear_json_button, 5, 1)
         self.grid_layout.addWidget(self.start_button, 6, 0)
+        self.grid_layout.addWidget(self.workshop_button, 6, 1)
 
     def set_show_all_screen(self) -> None:
         front_engine_logger.info("[SceneManagerUI] set_show_all_screen")

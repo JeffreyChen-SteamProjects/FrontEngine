@@ -4,6 +4,8 @@ Workshop publications use account-scoped durable records in `utils/workshop/work
 
 Subscription install flags and callbacks are reconciled by `workshop_subscriptions.py`. `workshop_jobs.py` runs at most two validation/copy jobs per controller; `workshop_cache.py` keeps validated content versions outside Steam folders, retains old versions for scene leases and requires explicit activation for local-change conflicts.
 
+`ui/dialog/workshop_dialog.py` is a persistent, hideable management window reached from Presets, Scene and Pet. Main UI owns the lazy Steam service and stops it during shutdown. File preparation/import runs through Qt workers; scene extraction leases are adopted on the GUI thread. `exe/build_exe.py --steam-runtime PATH` validates and copies the selected Windows x64 DLL beside the built executable without shipping the SDK or a development App ID file.
+
 > Short overview for people and agents. Per-module detail lives in [`architecture_explore.md`](architecture_explore.md).
 > Last verified: 2026-10-03; macOS native operations require target-host verification.
 

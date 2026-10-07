@@ -3,16 +3,14 @@ Steam 創意工坊內容匯入：Steam 會把訂閱的項目下載到
 `steamapps/workshop/content/<appid>/<itemid>/`，這裡就掃那個資料夾，把每個
 項目辨識成「寵物動作包」或「預設集」，讓使用者訂閱後直接能用。
 
-注意範圍：**發布**到創意工坊需要 Steamworks SDK 與 App 憑證，不在這裡；
-本模組只做免相依、唯讀的「已訂閱內容 -> 可用內容」那一半。
+本模組保留免相依、唯讀的離線資料夾辨識；原生發布與同步由 Workshop 服務處理。
 
 Import Steam Workshop content. Steam downloads subscribed items to
 `steamapps/workshop/content/<appid>/<itemid>/`, so this scans that folder and
 recognises each item as a pet pack or a preset — subscribe in Steam, use it here.
 
-Scope note: *publishing* to the Workshop needs the Steamworks SDK and app
-credentials and is deliberately not attempted. This is the dependency-free,
-read-only half: installed items become usable content.
+This remains the dependency-free, read-only offline folder recognizer.
+Native publishing and synchronization are handled by the separate Workshop service.
 """
 from __future__ import annotations
 

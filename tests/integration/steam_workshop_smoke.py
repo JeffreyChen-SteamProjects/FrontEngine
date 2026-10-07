@@ -26,6 +26,7 @@ def main() -> int:
             available = runtime.initialize()
             result = {"available": available, "reason": runtime.reason}
             if available:
+                result.update(runtime.diagnostics())
                 result["subscription_count"] = len(runtime.subscribed_items())
                 result["callbacks_processed"] = len(runtime.poll())
             print(json.dumps(result, ensure_ascii=False))

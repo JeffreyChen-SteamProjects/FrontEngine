@@ -50,6 +50,7 @@ from frontengine.user_setting.user_setting_file import (
     write_user_setting,
 )
 from frontengine.utils.steam.steam_language import steam_language
+from frontengine.utils.workshop.workshop_service import WorkshopService
 from frontengine.utils.critical_exit.critical_exit import CriticalExit
 from frontengine.utils.critical_exit.win32_vk import keyboard_keys_table
 from frontengine.utils.hotkey.hotkey_service import HotkeyService
@@ -224,6 +225,11 @@ class FrontEngineMainUI(QMainWindow):
 
         # 建立選單
         # Build menus
+        self.workshop_service = WorkshopService(self)
+        self.workshop_dialog = None
+        self.scene_setting_ui.scene_manager_ui.workshop_requested.connect(lambda: self.open_workshop("scene"))
+        self.pet_setting_ui.workshop_requested.connect(
+            lambda: self.open_workshop("pet_pack", self.pet_setting_ui.pet_image_path or ""))
         build_language_menu(self)
         build_help_menu(self)
         build_how_to_menu(self)
@@ -944,7 +950,18 @@ class FrontEngineMainUI(QMainWindow):
 
     # 關閉時要停掉的背景服務，依相依性由外而內排列
     # The background services to stop on close, outermost first.
+    def open_workshop(self, kind: str = "scene", path: str = "") -> None:
+        """Show one persistent manager; hiding it leaves an upload running."""
+        from frontengine.ui.dialog.workshop_dialog import WorkshopDialog
+        if self.workshop_dialog is None:
+            self.workshop_dialog = WorkshopDialog(self, self.workshop_service)
+        self.workshop_dialog.select_source(kind, path)
+        self.workshop_dialog.show()
+        self.workshop_dialog.raise_()
+        self.workshop_dialog.activateWindow()
+
     _CLOSING_SERVICES = (
+        "workshop_service",
         "preset_schedule_service", "theme_schedule_service", "usage_service",
         "signage_service", "screensaver_service",
         "remote_server", "midi_input", "share_watch_service", "reminder_service",

@@ -422,3 +422,5 @@ feat/xyz  ──PR──►  dev  ──PR──►  main
 [`Contributor_Covenant_Code_of_Conduct.md`](../Contributor_Covenant_Code_of_Conduct.md) 里。
 
 Workshop 内容声明采用版本化格式，使用前会验证；未知的元数据 JSON 不会被当作预设。预设包会拒绝不安全的归档路径、超出资源上限以及媒体文件名冲突。
+
+预设集 → 管理创意工坊打开 Steam 管理界面；场景与宠物页也有入口。Windows x64 需在线 Steam 客户端、App 2793470 会话及 steam_api64.dll。可发布已保存的 .fescene／场景 JSON、预设集 ZIP 或 sprite 宠物文件夹，附小于 1 MB 的 PNG/JPEG 预览。新项目默认为私人，更新核对所有者。上传显示进度与条款状态，保存 ID 供重试，隐藏窗口仍继续；中断后须在 Steam 确认结果。订阅先验证并复制到独立版本文件夹，本地修改冲突可选下载或本地版本。载入填入对应页面，播放从该页启动；预设集导入须用新名称。保留离线文件夹导入。Steam 打包时在 exe/build_exe.py 添加 --steam-runtime DLL路径，DLL 位于可执行文件旁（--onefile 亦同）；不包含 SDK 或开发用 steam_appid.txt。
