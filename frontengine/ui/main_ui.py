@@ -325,6 +325,7 @@ class FrontEngineMainUI(QMainWindow):
         self._initialize_image_history()
         self._initialize_capture_history()
         self._initialize_tasks()
+        self._initialize_asset_library()
         if user_setting_dict.get("clipboard_history"):
             self.clipboard_watcher.start()
 
@@ -1046,6 +1047,27 @@ class FrontEngineMainUI(QMainWindow):
         self.todo_service = TodoService(Path(getcwd()) / 'tasks.json', self)
         self.widgets_setting_ui.configure_tasks(self.todo_service)
 
+    def _initialize_asset_library(self) -> None:
+        """Own a lazy local catalog; do not scan files until the user opens it."""
+        from frontengine.utils.asset_library.service import AssetLibraryService
+        self.asset_library_service = AssetLibraryService(Path(getcwd()), self)
+        self.asset_library_dialog = None
+
+    def open_asset_library(self) -> None:
+        """Manage selected assets and review exact scene/preset reference repairs."""
+        from frontengine.ui.dialog.asset_library_dialog import AssetLibraryDialog
+        if self.asset_library_dialog is None:
+            self.asset_library_dialog = AssetLibraryDialog(self.asset_library_service,
+                                                         self.scene_setting_ui.visual_editor.document, self)
+        self.asset_library_dialog.show()
+        self.asset_library_dialog.raise_()
+
+    def _close_asset_library(self) -> None:
+        dialog = getattr(self, 'asset_library_dialog', None)
+        if dialog is not None:
+            dialog.abort_repair()
+            dialog.close()
+
     def _capture_history_result(self, kind: str, value) -> None:
         if kind == 'configure':
             user_setting_dict['capture_history'] = dict(value)
@@ -1064,6 +1086,7 @@ class FrontEngineMainUI(QMainWindow):
         "image_history_service",
         "capture_history_service",
         "todo_service",
+        "asset_library_service",
         "workshop_service",
         "preset_schedule_service", "theme_schedule_service", "usage_service",
         "signage_service", "screensaver_service",
@@ -1134,6 +1157,7 @@ class FrontEngineMainUI(QMainWindow):
         if getattr(self, "preset_versions_dialog", None) is not None:
             self.preset_versions_dialog.close()
         self._close_history_dialogs()
+        self._close_asset_library()
         if user_setting_dict.get("restore_last_session"):
             save_last_session(self)
         self._stop_services()

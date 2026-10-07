@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261008-10 | 2026-10-08 | Organize static assets and review reference repair | #done #assets #scene | [2026-10](2026-10.md) |
 | U-20261008-09 | 2026-10-08 | Persist local tasks and import calendar into Today widget | #done #widgets #calendar | [2026-10](2026-10.md) |
 | U-20261008-08 | 2026-10-08 | Search opt-in capture history with local OCR | #done #capture #ocr | [2026-10](2026-10.md) |
 | U-20261008-07 | 2026-10-08 | Pin live OCR with explicit local/cloud refresh | #done #ocr #capture | [2026-10](2026-10.md) |
@@ -114,5 +115,5 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-10.md](2026-10.md) | 2026-10 | 39 |
+| [2026-10.md](2026-10.md) | 2026-10 | 40 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
