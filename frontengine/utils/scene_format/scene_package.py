@@ -52,7 +52,7 @@ def _write_assets(data: dict, archive: zipfile.ZipFile) -> None:
 
 def load_package(path: str | Path) -> tuple[dict, tempfile.TemporaryDirectory]:
     lease = tempfile.TemporaryDirectory(prefix='frontengine-scene-')
-    root = Path(lease.name)
+    root = Path(lease.name).resolve()
     try:
         with zipfile.ZipFile(path) as archive:
             members = checked_members(archive)

@@ -157,7 +157,9 @@ def test_screen_hints_survives_a_raising_attribute() -> None:
 
 
 # --- ScreenAudioMeters ----------------------------------------------------
-def test_no_screen_falls_back_to_the_default_meter() -> None:
+def test_no_screen_falls_back_to_the_default_meter(monkeypatch) -> None:
+    from frontengine.utils.audio_meter import screen_audio
+    monkeypatch.setattr(screen_audio.sys, 'platform', 'win32')
     meters = ScreenAudioMeters()
     assert meters.device_for_screen(None) is None
     assert meters.provider_for_screen(None) is system_audio_level

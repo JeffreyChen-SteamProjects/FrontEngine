@@ -73,7 +73,7 @@ def test_a_failing_sender_is_reported_not_raised() -> None:
     assert send_media_key(ACTION_PLAY_PAUSE, sender=broken) is False
 
 
-def test_it_degrades_quietly_when_the_platform_cannot_send() -> None:
+def test_it_degrades_quietly_when_the_platform_cannot_send(monkeypatch) -> None:
     """
     非 Windows 上不該丟例外，只是什麼都不做——和其他平台限定功能一致。
 
@@ -87,6 +87,7 @@ def test_it_degrades_quietly_when_the_platform_cannot_send() -> None:
     would really press play/pause and pause whatever the developer is listening
     to, once per test run. Failing the sender lookup exercises the same path.
     """
+    monkeypatch.setattr(sys, 'platform', 'win32')
     def unavailable(code, scan, flags, extra):
         raise OSError("media keys are Windows only")
 

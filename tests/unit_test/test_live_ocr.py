@@ -151,7 +151,9 @@ def test_overlapping_float_is_rejected_before_capture():
         cleanup(widget)
 
 
-def test_qt_source_uses_screen_local_coordinates_and_rejects_cross_screen():
+def test_qt_source_uses_screen_local_coordinates_and_rejects_cross_screen(monkeypatch):
+    from frontengine.utils.screen_text import live_ocr
+    monkeypatch.setattr(live_ocr.sys, 'platform', 'win32')
     class Screen:
         def geometry(self):
             return QRect(1280,0,1280,1024)
