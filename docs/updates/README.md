@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261008-16 | 2026-10-08 | Verify native Steam initialization failure without stopping client | #done #steam #native | [2026-10](2026-10.md) |
 | U-20261008-15 | 2026-10-08 | Inject desktop prerequisites in monitor profile regression tests | #done #linux #tests | [2026-10](2026-10.md) |
 | U-20261008-14 | 2026-10-08 | Add opt-in Linux audio and explicit X11 Wayland capabilities | #done #linux #platform | [2026-10](2026-10.md) |
 | U-20261008-13 | 2026-10-08 | Cache static composition and share overlay plugin cleanup | #done #performance #plugins | [2026-10](2026-10.md) |
@@ -120,5 +121,5 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-10.md](2026-10.md) | 2026-10 | 45 |
+| [2026-10.md](2026-10.md) | 2026-10 | 46 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
