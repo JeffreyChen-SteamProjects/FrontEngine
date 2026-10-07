@@ -26,9 +26,10 @@ from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import tr
 from frontengine.utils.rules.rule_engine import (
-    ACTION_APPLY_PRESET, ACTION_CLOSE_ALL, ACTION_HIDE_ALL, ACTION_QUALITY_TIER,
-    ACTION_SHOW_ALL, VALUE_ACTIONS, normalize_rule, normalize_rules,
+    ACTION_APPLY_PRESET, ACTIONS, VALUE_ACTIONS, normalize_rule, normalize_rules,
 )
+
+from frontengine.utils.actions.action_registry import ACTION_LABELS
 
 SETTING_KEY = "overlay_rules"
 
@@ -41,13 +42,7 @@ _COLUMN_ACTION = 5
 _COLUMN_VALUE = 6
 
 _DAY_LETTERS = ("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
-_ACTION_LABELS = (
-    (ACTION_APPLY_PRESET, "rules_action_apply_preset", "Apply preset"),
-    (ACTION_HIDE_ALL, "control_center_hide_all", "Hide all"),
-    (ACTION_SHOW_ALL, "control_center_show_all", "Show all"),
-    (ACTION_CLOSE_ALL, "control_center_close_all", "Close all"),
-    (ACTION_QUALITY_TIER, "rules_action_quality", "Set quality"),
-)
+_ACTION_LABELS = tuple((action, *ACTION_LABELS[action]) for action in ACTIONS)
 
 
 def _t(key: str, fallback: str) -> str:

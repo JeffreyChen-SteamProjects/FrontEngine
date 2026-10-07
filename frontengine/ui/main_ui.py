@@ -54,8 +54,9 @@ from frontengine.utils.workshop.workshop_service import WorkshopService
 from frontengine.utils.critical_exit.critical_exit import CriticalExit
 from frontengine.utils.critical_exit.win32_vk import keyboard_keys_table
 from frontengine.utils.hotkey.hotkey_service import HotkeyService
+from frontengine.utils.actions.action_registry import ActionRegistry
 from frontengine.utils.keep_awake.keep_awake import KeepAwake
-from frontengine.utils.media_keys.media_keys import is_media_action, send_media_key
+from frontengine.utils.media_keys.media_keys import send_media_key
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import retranslator, translate
@@ -82,14 +83,7 @@ from frontengine.utils.usage_tracking.usage_tracker import USAGE_FILE, UsageTrac
 from frontengine.utils.reminder.reminder_service import ReminderService
 from frontengine.utils.smart_pause.smart_pause_service import SmartPauseService
 from frontengine.utils.theme_schedule.theme_schedule_service import ThemeScheduleService
-from frontengine.utils.rules.rule_engine import (
-    ACTION_APPLY_PRESET as RULE_ACTION_APPLY_PRESET,
-    ACTION_CLOSE_ALL as RULE_ACTION_CLOSE_ALL,
-    ACTION_HIDE_ALL as RULE_ACTION_HIDE_ALL,
-    ACTION_QUALITY_TIER as RULE_ACTION_QUALITY_TIER,
-    ACTION_SHOW_ALL as RULE_ACTION_SHOW_ALL,
-    RuleEngineService,
-)
+from frontengine.utils.rules.rule_engine import RuleEngineService
 from frontengine.ui.dialog.rules_dialog import SETTING_KEY as RULES_SETTING_KEY
 from frontengine.utils.virtual_desktop.virtual_desktop import VirtualDesktopService
 from frontengine.utils.window_pin.monitor_move import move_to_next_monitor
@@ -204,6 +198,7 @@ class FrontEngineMainUI(QMainWindow):
             pet_setting_ui=self.pet_setting_ui,
         )
         self._register_extra_overlays()
+        self.action_registry = self._build_action_registry()
 
         # Menu Bar
         self.menu_bar = QMenuBar()
@@ -712,46 +707,33 @@ class FrontEngineMainUI(QMainWindow):
         )
         self.hotkey_service.start()
 
+    def _build_action_registry(self) -> ActionRegistry:
+        """Bind shared action IDs once; every input route uses these callbacks."""
+        registry = ActionRegistry()
+        callbacks = {
+            "close_all": self.control_center_ui.clear_all,
+            "hide_all": self.control_center_ui.hide_all,
+            "show_all": self.control_center_ui.show_all,
+            "mute_all": self.control_center_ui.toggle_mute_all,
+            "opacity_up": lambda: self.control_center_ui.step_opacity_all(0.1),
+            "opacity_down": lambda: self.control_center_ui.step_opacity_all(-0.1),
+            "dashboard_next": self.web_setting_ui.show_next_dashboard_page,
+            "toggle_lock": self.control_center_ui.toggle_lock_all,
+            "show_shortcuts": self.toggle_shortcut_sheet,
+            "toggle_freeze": self.presentation_setting_ui.toggle_freeze,
+            "move_window_next_monitor": move_to_next_monitor,
+        }
+        for identifier, callback in callbacks.items():
+            registry.bind(identifier, lambda _value, run=callback: run())
+        for identifier in ("media_play_pause", "media_next", "media_previous"):
+            registry.bind(identifier, lambda _value, action=identifier: send_media_key(action))
+        registry.bind("apply_preset", lambda value: apply_named_preset(self, value), takes_value=True)
+        registry.bind("quality_tier", self.control_center_ui.set_quality_tier, takes_value=True)
+        return registry
+
     def _handle_hotkey(self, action: str) -> None:
-        """
-        分派全域快速鍵到對應動作。
-        Dispatch global hotkey to the matching action on the UI thread.
-        """
-        if action == "close_all":
-            self.control_center_ui.clear_all()
-        elif action == "hide_all":
-            self.control_center_ui.hide_all()
-        elif action == "show_all":
-            self.control_center_ui.show_all()
-        elif action == "mute_all":
-            self.control_center_ui.toggle_mute_all()
-        elif action == "opacity_up":
-            self.control_center_ui.step_opacity_all(0.1)
-        elif action == "opacity_down":
-            self.control_center_ui.step_opacity_all(-0.1)
-        elif action == "dashboard_next":
-            self.web_setting_ui.show_next_dashboard_page()
-        elif action == "toggle_lock":
-            self.control_center_ui.toggle_lock_all()
-        elif action == "show_shortcuts":
-            self.toggle_shortcut_sheet()
-        elif action == "toggle_freeze":
-            # 畫面被凍結時，主視窗就在那張靜止圖後面，按鈕點不到——所以這個
-            # 快速鍵是唯一保證按得到的解除方式。
-            # While frozen the main window is behind the still image and its
-            # buttons cannot be reached; this shortcut is the way out that is
-            # always available.
-            self.presentation_setting_ui.toggle_freeze()
-        elif action == "move_window_next_monitor":
-            # 搬的是別人的視窗，不是覆蓋層，所以也不經過控制中心。
-            # This moves someone else's window rather than an overlay, so it too
-            # bypasses the control center.
-            move_to_next_monitor()
-        elif is_media_action(action):
-            # 媒體鍵是送給播放器的，和覆蓋層無關，所以不經過控制中心。
-            # A media key goes to the player, not to an overlay, so it does not
-            # pass through the control center.
-            send_media_key(action)
+        """Dispatch hotkey, remote and MIDI actions on the GUI thread."""
+        self.action_registry.execute(action)
 
     def toggle_shortcut_sheet(self) -> None:
         """
@@ -789,16 +771,7 @@ class FrontEngineMainUI(QMainWindow):
         value = str(rule.get("value", ""))
         front_engine_logger.info(
             f"[FrontEngineMainUI] rule '{rule.get('label')}' -> {action} {value}")
-        if action == RULE_ACTION_APPLY_PRESET:
-            apply_named_preset(self, value)
-        elif action == RULE_ACTION_HIDE_ALL:
-            self.control_center_ui.hide_all()
-        elif action == RULE_ACTION_SHOW_ALL:
-            self.control_center_ui.show_all()
-        elif action == RULE_ACTION_CLOSE_ALL:
-            self.control_center_ui.clear_all()
-        elif action == RULE_ACTION_QUALITY_TIER:
-            self.control_center_ui.set_quality_tier(value)
+        self.action_registry.execute(action, value)
 
     def _on_desktop_pin_changed(self, pinned: bool) -> None:
         """
