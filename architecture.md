@@ -170,3 +170,5 @@ re-check this file.
 ## Workshop publication boundaries
 
 `utils/workshop/workshop_manifest.py` validates versioned scene/preset/pet-pack declarations and confines resources. `workshop_package.py` creates validated publication snapshots with explicit media only. Native publishing is implemented separately. Legacy empty/known presets remain readable; arbitrary metadata JSON cannot become preset settings. Preset ZIP imports validate archive limits and reject flat-name collisions before extraction.
+
+`utils/steam/steam_runtime.py` lazily loads the Windows x64 flat API, checks interface 021 and App identity, owns copied manual-dispatch events and shuts down exactly once. `utils/workshop/workshop_service.py` pumps a bounded callback batch through a Qt timer. Native ABI and read-only initialization checks are explicit tools in `tests/integration/steam_workshop_abi.cpp` and `steam_workshop_smoke.py`; native availability is not inferred from fake tests.

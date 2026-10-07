@@ -108,7 +108,6 @@
 
 承接 #11、#13、#15；使用者已要求開始規劃。詳細計畫：`docs/superpowers/plans/2026-10-07-steam-workshop.md`。
 
-- **#40** **Steam runtime 與能力檢查**：先接 Windows x64 flat API／manual dispatch，確認 App ID、Steam 工作階段與 ABI；加入 Qt 回呼服務及完整關閉流程，非 Steam 功能可獨立使用。
 - **#41** **發布與更新**：完成私人初始項目、預覽、標題／說明／標籤、非同步上傳進度、條款狀態、published ID 保存與更新重試；送出上傳後清楚呈現不可取消狀態。
 - **#42** **訂閱內容同步**：透過 UGC 取得訂閱與安裝位置，驗證下載完成事件、隔離匯入與更新衝突，保留既有離線資料夾匯入。
 - **#43** **介面、封裝與文件整合**：加入 Workshop 管理入口，整合 #14 場景／預設集／寵物頁；打包指定 Steam runtime，更新語系、README、Sphinx 與架構文件。
