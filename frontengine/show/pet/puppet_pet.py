@@ -10,6 +10,9 @@ from frontengine.show.draggable_window import DraggableTopWindow
 from frontengine.utils.imervue.puppet_asset import finite_parameters, validate_puppet
 from frontengine.utils.imervue.runtime import puppet_runtime
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
+from frontengine.show.pet.pet_profile_session import PetProfileSession
+from frontengine.user_setting.pet_profiles import PetProfiles
+from frontengine.utils.multi_language.retranslate import translate
 
 
 class PuppetPetWidget(DraggableTopWindow):
@@ -19,7 +22,8 @@ class PuppetPetWidget(DraggableTopWindow):
     def __init__(self, path: str | Path, size: tuple[int, int] = (320, 480), *,
                  parameters: dict | None = None, motion: str | None = None,
                  expression: str | None = None, script_path: str | None = None,
-                 opacity: float = 1.0, parent=None) -> None:
+                 opacity: float = 1.0, parent=None, profile_id: str | None = None,
+                 profiles: PetProfiles | None = None, profile_name: str = "") -> None:
         validate_puppet(path)
         values = finite_parameters(parameters or {})
         if (len(size) != 2 or any(type(v) is not int or not 16 <= v <= 4096 for v in size)):
@@ -56,6 +60,12 @@ class PuppetPetWidget(DraggableTopWindow):
         self.script_timer.timeout.connect(self._script_tick)
         self.set_ui_variable(opacity)
         self._configure_initial(motion, expression)
+        try:
+            self.profile_session = PetProfileSession(self, profile_id, profiles, profile_name)
+        except (OSError, ValueError):
+            self.shutdown()
+            self.close()
+            raise
 
     def _configure_initial(self, motion, expression) -> None:
         try:
@@ -146,9 +156,28 @@ class PuppetPetWidget(DraggableTopWindow):
             action.toggled.connect(lambda on, name=expression.name: self.canvas.add_expression(name)
                                    if on else self.canvas.remove_expression(name))
         menu.addAction(words.get('pet_puppet_clone', 'Clone'), self.clone_requested.emit)
+        menu.addAction(words.get('pet_status', 'Status'), self.show_profile_status)
+        menu.addAction(words.get('pet_feed', 'Feed'), self.feed)
         menu.addAction(words.get('pet_puppet_close', 'Close'), self.close)
         menu.exec(event.globalPos())
         menu.deleteLater()
+
+    def show_profile_status(self) -> None:
+        """Show the same saved identity fields without altering puppet geometry."""
+        record = self.profile_session.state()
+        self.say(record['name'] + ' · ' + translate('pet_profile_stats').format(**record))
+
+    def feed(self) -> None:
+        """Persist feeding stats without changing upstream puppet motion state."""
+        record = self.profile_session.state()
+        try:
+            self.profile_session.profiles.update(record['id'], {
+                'mood': min(100, record['mood'] + 12), 'fullness': min(100, record['fullness'] + 30),
+                'affection': min(1000000, record['affection'] + 5)})
+        except (OSError, ValueError):
+            self.say(translate('pet_profile_save_failed'))
+            return
+        self.show_profile_status()
 
     def showEvent(self, event) -> None:
         super().showEvent(event)
@@ -167,6 +196,9 @@ class PuppetPetWidget(DraggableTopWindow):
         if self._closed:
             return
         self._closed = True
+        session = getattr(self, 'profile_session', None)
+        if session is not None:
+            session.close()
         self.script_timer.stop()
         self.idle.set_enabled(False)
         self.idle.shutdown()

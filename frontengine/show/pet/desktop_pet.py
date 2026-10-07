@@ -13,6 +13,8 @@ from PySide6.QtWidgets import QMenu, QMessageBox, QWidget
 from frontengine.show.base_widget import BaseWidget
 from frontengine.show.window_helpers import apply_overlay_window_flags
 from frontengine.user_setting.user_setting_file import user_setting_dict
+from frontengine.user_setting.pet_profiles import PetProfiles
+from frontengine.show.pet.pet_profile_session import PetProfileSession
 from frontengine.utils.audio_meter.audio_envelope import AudioEnvelope
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.power_mode.power_mode import scaled_interval
@@ -1096,13 +1098,17 @@ class DesktopPetWidget(BaseWidget):
     def __init__(self, image_path: str, size: int = 128, speed: int = 3,
                  behaviour: str = BEHAVIOUR_FLOOR, climb: bool = True, talk: bool = True,
                  sound_path: Optional[str] = None, sit_on_windows: bool = True,
-                 volume: float = 1.0, audio_react: bool = False):
+                 volume: float = 1.0, audio_react: bool = False, *,
+                 profile_id: Optional[str] = None, profiles: Optional[PetProfiles] = None,
+                 profile_name: str = ""):
         front_engine_logger.info(
             f"[DesktopPetWidget] Init | path={image_path}, size={size}, speed={speed}, "
             f"behaviour={behaviour}, climb={climb}, talk={talk}, sound={sound_path}, "
             f"sit_on_windows={sit_on_windows}"
         )
         super().__init__()
+        self.profile_session = PetProfileSession(self, profile_id, profiles, profile_name)
+        record = self.profile_session.initial
         self.opacity = 1.0
         # 寵物自己處理拖曳，位置與大小也由 PetMotion 決定。交給基底記憶的話，
         # 拖過一次之後那個「位置＋大小」會套到之後每一隻寵物身上——尺寸下拉選單
@@ -1116,7 +1122,7 @@ class DesktopPetWidget(BaseWidget):
         self.overlay_remembers_geometry = False
         # 基礎尺寸依已存等級放大 / Base size grown by the persisted level.
         self._base_size: int = max(16, int(size))
-        self._growth = PetGrowth(user_setting_dict.get("pet_affection", 0))
+        self._growth = PetGrowth(record["affection"])
         self.pet_size: int = size_for_level(self._base_size, self._growth.level())
         self.image_path: Path = Path(image_path)
         self._dragging: bool = False
@@ -1151,8 +1157,10 @@ class DesktopPetWidget(BaseWidget):
         self._talk = bool(talk)
         self._moved = False
         self._chatter_rng = _random_module.SystemRandom()
-        self._mood = PetMood(user_setting_dict.get("pet_mood", 60))
-        self._hunger = PetHunger(user_setting_dict.get("pet_hunger", 70))
+        self._mood = PetMood(record["mood"])
+        self._hunger = PetHunger(record["fullness"])
+        self.profile_session.reader = lambda: {"mood": self._mood.value, "fullness": self._hunger.value,
+                                               "affection": min(1000000, self._growth.affection)}
         self._hunger_warned = False
         self._messages = self._load_messages()
         # 動作包自帶的設定（可含台詞、速度、體型、音效）
@@ -1547,7 +1555,7 @@ class DesktopPetWidget(BaseWidget):
     def _gain_affection(self, amount: int) -> None:
         """互動累加親密度；升級時長大、慶祝一下並保存。"""
         leveled = self._growth.add(amount)
-        user_setting_dict["pet_affection"] = self._growth.affection
+        self.profile_session.schedule()
         if leveled:
             self._apply_growth_size()
             if self._talk:
@@ -1568,6 +1576,7 @@ class DesktopPetWidget(BaseWidget):
             PetHunger.HUNGRY: get("pet_hunger_hungry", "hungry"),
         }
         text = format_status(self._growth.level(), self._mood.level(), self._hunger.level(), labels)
+        text = self.profile_session.state()["name"] + " · " + text
         self._bubble.show_message(text, self, duration_ms=8000)
 
     def _apply_growth_size(self) -> None:
@@ -1581,7 +1590,7 @@ class DesktopPetWidget(BaseWidget):
         self.motion.height = new_size
 
     def _persist_mood(self) -> None:
-        user_setting_dict["pet_mood"] = self._mood.value
+        self.profile_session.schedule()
 
     def add_reminder(self, text: str, minutes: int) -> None:
         """在 minutes 分鐘後提醒 text / Remind `text` in `minutes` minutes."""
@@ -1760,7 +1769,7 @@ class DesktopPetWidget(BaseWidget):
         return False
 
     def _persist_hunger(self) -> None:
-        user_setting_dict["pet_hunger"] = self._hunger.value
+        self.profile_session.schedule()
 
     def feed(self, kind: str = FOOD_SNACK) -> None:
         """餵食：依食物種類調整飽足與心情，並說一句對應的話。"""
@@ -1972,6 +1981,7 @@ class DesktopPetWidget(BaseWidget):
         self.menu.popup(event.globalPos())
 
     def closeEvent(self, event) -> None:
+        self.profile_session.close()
         close = getattr(self._audio_level_provider, 'close', None)
         if close:
             close()

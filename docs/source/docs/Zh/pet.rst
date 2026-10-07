@@ -28,3 +28,5 @@
 Puppet 寵物：安裝選用的 puppet extra 與可用的 Imervue runtime，再於寵物頁選擇或拖入原始 Imervue .puppet v1 檔案。既有圖片與 sprite 寵物包仍可使用。Puppet 寵物使用 Imervue 畫布、動作與表情，可複製或關閉，並支援 FrontEngine 覆蓋層控制與預設集。可另選 .petscript.json 使用 Imervue 原有腳本引擎；FrontEngine pet.json 寵物包不是 puppet 檔。未知版本、不安全的封存路徑與無效資源會在載入 runtime 前拒絕。
 
 :doc:`runtime_interoperability`
+
+寵物 → 寵物身分與存檔會為每隻 sprite 或 Puppet 寵物保存獨立 UUID、名字、心情、飽足及好感度。重開後於生成前選取已保存身分即可接續狀態；「新寵物」建立新狀態。第一個身分只遷移一次原共用數值。複製會將目前數值複製到新身分，餵食不會改到其他寵物。可重新命名、整理、匯出或匯入單隻 JSON 存檔，匯入一定建立新身分。同一個身分同時只能啟用一次。存檔不含圖片、腳本或對話紀錄，可攜預設集不寫入本機身分 ID。使用者設定最多保存 256 個身分；sprite 數值變更稍後合併存檔，關閉時也會保存。Puppet 餵食只更新存檔數值，不改變 Imervue 動作及尺寸。

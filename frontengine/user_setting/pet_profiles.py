@@ -60,7 +60,10 @@ class PetProfiles:
 
     def get(self, identifier: str) -> dict:
         """Load a stable identity or fail explicitly; never silently reuse another."""
-        return copy.deepcopy(self._read()["records"][identifier])
+        record = self._read()["records"].get(identifier)
+        if record is None:
+            raise ValueError("Saved pet identity was not found")
+        return copy.deepcopy(record)
 
     def _commit(self, data: dict) -> None:
         if len(json.dumps(data, allow_nan=False).encode("utf-8")) > MAX_BYTES:
