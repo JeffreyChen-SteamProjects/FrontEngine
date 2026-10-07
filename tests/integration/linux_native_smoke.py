@@ -90,10 +90,43 @@ def input_probe(handle: int) -> tuple[list, list]:
         watch.stop()
 
 
+def own_pixel(handle: int) -> list[int]:
+    """Read one pixel of our red fixture on the isolated X server, never a host desktop."""
+    from Xlib import X
+    rect = windows.geometry(handle)
+    with windows.connection() as (_client, root):
+        data = root.get_image(rect[0] + 30, rect[1] + 50, 1, 1, X.ZPixmap, 0xffffffff).data
+        blue, green, red = data[:3]
+        return [red, green, blue]
+
+
+def opacity_probe(handle: int) -> dict:
+    """Start only an owned isolated compositor; verify displayed opacity and restore it."""
+    compositor = subprocess.Popen(['/usr/bin/xcompmgr', '-n'], stdout=subprocess.DEVNULL,
+                                  stderr=subprocess.DEVNULL, shell=False)
+    try:
+        def ready():
+            with windows.connection() as (client, _root):
+                return bool(client.get_selection_owner(client.intern_atom('_NET_WM_CM_S0')))
+        wait_for(ready)
+        wait_for(lambda: own_pixel(handle)[0] == 255)
+        assert windows.opacity(handle, 80), windows.last_error
+        wait_for(lambda: 150 < own_pixel(handle)[0] < 250)
+        faded = own_pixel(handle)
+        assert windows.opacity(handle, 100), windows.last_error
+        wait_for(lambda: own_pixel(handle) == [255, 0, 0])
+        return {'faded_rgb': faded, 'restored_rgb': own_pixel(handle)}
+    finally:
+        windows.opacity(handle, 100)
+        compositor.terminate()
+        compositor.wait(timeout=3)
+
+
 def x11_probe(directory: Path) -> dict:
     """Own Qt target, EWMH WM and own X server only; synthetic input stays inside that server."""
     target = QLabel('FrontEngine isolated X11 fixture')
     target.setWindowTitle('FrontEngine isolated X11 fixture')
+    target.setStyleSheet('background:#ff0000;color:#ffffff')
     target.resize(300, 180)
     target.show()
     try:
@@ -114,6 +147,7 @@ def x11_probe(directory: Path) -> dict:
         assert windows.pin(handle, False)
         wait_for(lambda: not pinned())
         assert not windows.opacity(handle, 80) and 'compositing manager' in windows.last_error
+        opacity = opacity_probe(handle)
         assert windows.screen_rects(), windows.last_error
         keys, actions = input_probe(handle)
         profiles = MonitorProfileService(directory / 'profiles.json', lambda: [[target]])
@@ -124,6 +158,7 @@ def x11_probe(directory: Path) -> dict:
         profiles.stop()
         return {'window_move': True, 'layout_restore': True, 'pin_and_restore': True,
                 'opacity_without_compositor': 'explicit failure', 'global_input': bool(keys),
+                'opacity_with_owned_compositor': opacity,
                 'global_hotkey': actions, 'physical_work_areas': windows.screen_rects()}
     finally:
         target.close()
