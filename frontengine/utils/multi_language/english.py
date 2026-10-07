@@ -892,4 +892,12 @@ english_word_dict = {
     'palette_recent': 'Recent sampled colors',
     'palette_load_error': '{count} invalid saved colors could not be loaded.',
     'palette_collect': 'Collect colors',
+    'preset_versions_title': 'Preset versions…',
+    'preset_versions_hint': 'Settings snapshots only; media files are referenced, not copied. Preview changes page controls without opening overlays. Up to 50 distinct versions are retained.',
+    'preset_versions_preview': 'Preview settings',
+    'preset_versions_cancel': 'Cancel preview',
+    'preset_versions_restore': 'Restore version',
+    'preset_versions_select': 'Select a version.',
+    'preset_versions_previewing': 'Preview active; closing cancels it.',
+    'preset_versions_restored': 'Version restored.',
 }

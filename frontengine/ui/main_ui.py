@@ -1037,6 +1037,8 @@ class FrontEngineMainUI(QMainWindow):
         front_engine_logger.info("[FrontEngineMainUI] shutdown")
         if getattr(self, "command_palette", None) is not None:
             self.command_palette.close()
+        if getattr(self, "preset_versions_dialog", None) is not None:
+            self.preset_versions_dialog.close()
         if user_setting_dict.get("restore_last_session"):
             save_last_session(self)
         self._stop_services()

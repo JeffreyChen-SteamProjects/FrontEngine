@@ -882,4 +882,12 @@ russian_word_dict = {
     'palette_recent': 'Недавние образцы цветов',
     'palette_load_error': 'Не удалось загрузить {count} неверных сохранённых цветов.',
     'palette_collect': 'Собирать цвета',
+    'preset_versions_title': 'Версии наборов настроек…',
+    'preset_versions_hint': 'Снимки содержат только настройки и пути к медиафайлам, без копирования файлов. Предпросмотр меняет настройки страниц, не открывая наложения. Хранятся до 50 разных версий.',
+    'preset_versions_preview': 'Предпросмотр настроек',
+    'preset_versions_cancel': 'Отменить предпросмотр',
+    'preset_versions_restore': 'Восстановить версию',
+    'preset_versions_select': 'Выберите версию.',
+    'preset_versions_previewing': 'Предпросмотр активен; закрытие отменит его.',
+    'preset_versions_restored': 'Версия восстановлена.',
 }

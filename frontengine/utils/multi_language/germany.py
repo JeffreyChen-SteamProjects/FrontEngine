@@ -885,4 +885,12 @@ germany_word_dict = {
     'palette_recent': 'Zuletzt aufgenommene Farben',
     'palette_load_error': '{count} ungültige gespeicherte Farben konnten nicht geladen werden.',
     'palette_collect': 'Farben sammeln',
+    'preset_versions_title': 'Vorlagenversionen…',
+    'preset_versions_hint': 'Momentaufnahmen enthalten nur Einstellungen und Medienverweise, keine Mediendateien. Die Vorschau ändert Seiteneinstellungen, ohne Overlays zu öffnen. Bis zu 50 verschiedene Versionen bleiben erhalten.',
+    'preset_versions_preview': 'Einstellungen ansehen',
+    'preset_versions_cancel': 'Vorschau abbrechen',
+    'preset_versions_restore': 'Version wiederherstellen',
+    'preset_versions_select': 'Version auswählen.',
+    'preset_versions_previewing': 'Vorschau aktiv; Schließen bricht sie ab.',
+    'preset_versions_restored': 'Version wiederhergestellt.',
 }

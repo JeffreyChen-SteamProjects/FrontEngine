@@ -882,4 +882,12 @@ italian_word_dict = {
     'palette_recent': 'Colori campionati recenti',
     'palette_load_error': '{count} colori salvati non validi non sono stati caricati.',
     'palette_collect': 'Raccogli colori',
+    'preset_versions_title': 'Versioni delle preimpostazioni…',
+    'preset_versions_hint': 'Le istantanee salvano solo le impostazioni e i percorsi dei media, senza copiare i file. L’anteprima modifica le impostazioni delle pagine senza aprire sovrapposizioni. Si conservano fino a 50 versioni distinte.',
+    'preset_versions_preview': 'Anteprima impostazioni',
+    'preset_versions_cancel': 'Annulla anteprima',
+    'preset_versions_restore': 'Ripristina versione',
+    'preset_versions_select': 'Seleziona una versione.',
+    'preset_versions_previewing': 'Anteprima attiva; chiudendo viene annullata.',
+    'preset_versions_restored': 'Versione ripristinata.',
 }

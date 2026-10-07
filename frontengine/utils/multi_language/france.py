@@ -882,4 +882,12 @@ french_word_dict = {
     'palette_recent': 'Couleurs échantillonnées récentes',
     'palette_load_error': '{count} couleurs enregistrées invalides n’ont pas été chargées.',
     'palette_collect': 'Collecter les couleurs',
+    'preset_versions_title': 'Versions des préréglages…',
+    'preset_versions_hint': 'Les instantanés conservent les réglages et les chemins des médias, sans copier les fichiers. L’aperçu modifie les réglages des pages sans ouvrir de superpositions. Jusqu’à 50 versions distinctes sont conservées.',
+    'preset_versions_preview': 'Aperçu des réglages',
+    'preset_versions_cancel': 'Annuler l’aperçu',
+    'preset_versions_restore': 'Restaurer la version',
+    'preset_versions_select': 'Sélectionnez une version.',
+    'preset_versions_previewing': 'Aperçu actif ; fermer l’annule.',
+    'preset_versions_restored': 'Version restaurée.',
 }

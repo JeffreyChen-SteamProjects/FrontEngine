@@ -884,4 +884,12 @@ simplified_chinese_word_dict = {
     'palette_recent': '近期采样颜色',
     'palette_load_error': '{count} 个保存的色板无效，无法加载。',
     'palette_collect': '收集颜色',
+    'preset_versions_title': '预设集版本…',
+    'preset_versions_hint': '快照只保存设置，媒体文件保留引用路径，不复制素材。预览会更改页面设置，不打开覆盖层。最多保留 50 个不同版本。',
+    'preset_versions_preview': '预览设置',
+    'preset_versions_cancel': '取消预览',
+    'preset_versions_restore': '恢复版本',
+    'preset_versions_select': '请选择版本。',
+    'preset_versions_previewing': '正在预览；关闭窗口会取消预览。',
+    'preset_versions_restored': '已恢复版本。',
 }

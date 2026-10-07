@@ -891,4 +891,12 @@ traditional_chinese_word_dict = {
     'palette_recent': '近期取樣顏色',
     'palette_load_error': '{count} 筆儲存的色票無效，無法載入。',
     'palette_collect': '收集色票',
+    'preset_versions_title': '預設集版本…',
+    'preset_versions_hint': '快照只保存設定，媒體檔保留引用路徑，不複製素材。預覽會變更分頁設定，不開啟覆蓋層。最多保留 50 個不同版本。',
+    'preset_versions_preview': '預覽設定',
+    'preset_versions_cancel': '取消預覽',
+    'preset_versions_restore': '回復版本',
+    'preset_versions_select': '請選擇版本。',
+    'preset_versions_previewing': '正在預覽；關閉視窗會取消預覽。',
+    'preset_versions_restored': '已回復版本。',
 }
