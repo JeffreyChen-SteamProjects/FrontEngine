@@ -107,6 +107,7 @@ class ToolsSettingUI(SettingPage):
         # is made and WA_DeleteOnClose destroys it, so the surviving reference
         # raises RuntimeError on touch and "copy last" was a silent no-op.
         self.last_capture: Optional[QPixmap] = None
+        self.capture_editor = None
         self.pin_dialog: Optional[WindowPinDialog] = None
         self.replica_dialog: Optional[WindowReplicaDialog] = None
 
@@ -151,7 +152,7 @@ class ToolsSettingUI(SettingPage):
 
         capture = self.add_section(self.capture_label)
         capture.add_inline(self.capture_button, self.capture_copy_button,
-                           self.capture_pin_button)
+                           self.capture_pin_button, self.capture_edit_button)
 
         screen_text = self.add_section(self.screen_text_label)
         screen_text.add_row("tools_action", self.screen_text_combobox, "Action")
@@ -212,6 +213,8 @@ class ToolsSettingUI(SettingPage):
         self.capture_pin_button = tr(QPushButton(), "tools_capture_pin", "Pin last")
         self.capture_pin_button.clicked.connect(self.pin_last_capture)
         self.capture_copy_button.clicked.connect(self.copy_last_capture)
+        self.capture_edit_button = tr(QPushButton(), 'capture_edit_title')
+        self.capture_edit_button.clicked.connect(self.edit_last_capture)
 
     def _build_screen_text_row(self) -> None:
         self.screen_text_label = tr(QLabel(), "tools_screen_text_label", "Read text")
@@ -450,6 +453,33 @@ class ToolsSettingUI(SettingPage):
         pinned.show()
         self.pinned_widget_list.append(pinned)
         return pinned
+
+    def edit_last_capture(self) -> None:
+        """Edit a detached copy so the last original capture stays available."""
+        if self.last_capture is None or self.last_capture.isNull():
+            return
+        from frontengine.ui.dialog.capture_editor import CaptureEditor
+        self.close_capture_editor()
+        self.capture_editor = CaptureEditor(self.last_capture.toImage(), self)
+        self.capture_editor.pin_requested.connect(self._pin_edited_capture)
+        editor = self.capture_editor
+        editor.finished.connect(lambda _result: self._capture_editor_finished(editor))
+        self.capture_editor.show()
+
+    def _capture_editor_finished(self, editor) -> None:
+        if self.capture_editor is editor:
+            self.capture_editor = None
+
+    def _pin_edited_capture(self, image) -> None:
+        pinned = PinnedImageWidget(QPixmap.fromImage(image))
+        pinned.show()
+        self.pinned_widget_list.append(pinned)
+
+    def close_capture_editor(self) -> None:
+        """Close the capture document before releasing its owner."""
+        if self.capture_editor is not None:
+            self.capture_editor.close()
+            self.capture_editor = None
 
     def close_pinned(self) -> None:
         """關掉所有釘住的截圖（主程式關閉時呼叫）。"""

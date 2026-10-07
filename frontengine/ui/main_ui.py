@@ -1074,6 +1074,7 @@ class FrontEngineMainUI(QMainWindow):
         self.image_setting_ui.close_image_compare()
         self.pet_setting_ui.close_pack_editor()
         self.tools_setting_ui.close_palette()
+        self.tools_setting_ui.close_capture_editor()
         from frontengine.user_setting.scene_setting import release_scene_packages
         if hasattr(self, 'tools_setting_ui'):
             self.tools_setting_ui.recorder.close()
