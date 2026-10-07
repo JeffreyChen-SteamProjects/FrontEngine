@@ -25,7 +25,7 @@ Pagina Strumenti
   acquisizione, come cerchio, rettangolo arrotondato o rettangolo, con bordo e
   specchiatura. È mostrata solo in locale e non viene registrato nulla.
 * Fissa una finestra… - tenere in primo piano la finestra di un altro programma
-  e regolarne la trasparenza. Solo su Windows.
+  e regolarne la trasparenza. Windows o Linux X11 (EWMH; trasparenza richiede compositor).
 * Duplica una finestra… - una seconda finestra piccola mostra dal vivo quella
   scelta, mentre l'originale resta dov'è. Comodo per tenere d'occhio un video o
   una compilazione mentre lavori. Trascina per spostarla, doppio clic per

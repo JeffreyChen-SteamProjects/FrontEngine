@@ -324,12 +324,12 @@ Screen-sharing privacy**에서 FrontEngine은 회의 앱이 열려 있는 동안
 
 | Feature | Windows | macOS | Linux |
 | --- | :---: | :---: | :---: |
-| 공통 오버레이와 UI | ✅ | ✅ | ✅ |
-| 시스템 오디오, 스펙트럼, 마이크 | ✅ | backend* | — |
+| 공통 오버레이와 UI | ✅ | ✅ | Qt / X11 |
+| 시스템 오디오, 스펙트럼, 마이크 | ✅ | backend* | Pulse† |
 | 재생 중 트랙 정보 | ✅ | — | — |
-| 창 기하, 배치, 모니터 이동 | ✅ | backend* | — |
+| 창 기하, 배치, 모니터 이동 | ✅ | backend* | X11† |
 | 실시간 창 복제 | ✅ | backend* | — |
-| 다른 창 최상위 / 불투명도 | ✅ | — | — |
+| 다른 창 최상위 / 불투명도 | ✅ | — | X11† |
 | 캡처에서 오버레이 제외 | ✅ | — | — |
 | MIDI 제어 | ✅ | backend* | — |
 | 미디어 키 | ✅ | backend* | — |
@@ -517,3 +517,7 @@ Windows 설치에 winrt-Windows.Media.Control이 포함되어 재생 중 위젯�
 제어 센터 → 모니터 프로필은 장비 조합별 위치 저장/복원(20 프로필·200 창·로컬 monitor-profiles.json 512 KiB). 작업 영역 비율 위치로 해상도/주 화면/DPI 변화 대응, 논리 크기 유지, 새 조합은 화면 밖 창을 주 화면으로 복귀. 자동 조정은 별도 선택·기본 꺼짐, 새 창/Qt 화면 이벤트 500 ms 병합, OS 설정 변경 없음. 장비 식별 모호함은 오류, 같은 종류/이름은 저장 제외하되 화면 복귀 가능. 전체 화면/장면/대상 추종 제외, 새 창 생성/handle 추측 없음. Qt 논리 좌표만 사용. Windows 한 대125% 네이티브 복원 검증; 실제 연결/해제, 주 화면·혼합 DPI는 추가 장비 필요.
 
 정적 소프트웨어 합성은16 MP까지 한 프레임 재사용, 내용/DPR·변환·투명도·순서·clip·출력 크기/DPI 변경 시 갱신. 변경 없으면 재그리기 생략, 영상/애니메이션 갱신, GPU 읽기 변경 없음. 종료/모두 닫기는 같은 등록 원본에서 한 번씩 닫고 목록/배경 재설정·정리 후 장면 자산 해제. 취소된 로컬 파일/그리기 작업 완료까지 비차단 타이머로 Qt 유지. manifest API v1, examples/plugins/clock은 QWidget overlay_widgets, 선택 release_overlay_resources/shutdown, get_state/set_state 예제. 로드된 플러그인 preset은 plugin:<페이지명>, 트랜잭션 롤백, 코드 로드 없음. 폴더를plugins/에 복사, 명시 활성화/다이제스트 승인, OS 샌드박스 아님. 측정 py -m benchmarks.scene_composition --output build/scene-benchmark.json, 신뢰 --baseline-file 픽셀 비교, docs/benchmarks/README.md 참고.
+
+도움말 → 플랫폼 기능은 조건/최근 실패만 읽으며 녹음/감시 시작 없음. Linux pulseaudio-utils(parec)와 PulseAudio/PipeWire Pulse, 스펙트럼/반응은 기본 출력monitor, 입모양은 기본 마이크. Windows peak와 달리 실제 오디오 샘플 읽기, 첫 활성 조회에 자체worker/자식 시작, RAM2048 정제float, 오래된 것 제거, 저장/전송 없음. 중지/닫기/종료는 자기 자식만 종료, GUI join없음, 장치/서버/권한 오류 표시. Linux 창/배치/최상위/화면 이동은Linux python-xlib와 EWMH/물리XRandR, 투명도엔compositor 필요. X11 pynput은 DISPLAY/접근 필요; Wayland 임의 창 위치/전체입력은Xwayland도불가, 이유표시/배치복원거부, 다른Wayland앱 전체감시 주장 없음. 격리 X11/Wayland·가상Pulse 프로토콜 검증, Linux 물리오디오/다중화면과Mac 실기는 보류.
+
+오디오 반응 샘플링이 끝나면 미터가 1.25초 이내에 자체 캡처를 중지하며, 활성화된 샘플링을 다시 요청하면 재시작할 수 있습니다.

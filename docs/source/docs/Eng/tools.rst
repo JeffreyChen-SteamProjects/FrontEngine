@@ -24,7 +24,7 @@ Tools Page
   rectangle or rectangle, with an optional border and mirroring. It is shown
   locally only and nothing is recorded.
 * Pin a window... - keep another application's window on top, and change how
-  see-through it is. Windows only.
+  see-through it is. Windows or Linux X11 (EWMH; opacity requires a compositor).
 * Replicate a window... - a second, small window showing a chosen window live,
   while the original stays where it is. Useful for keeping an eye on a video or
   a build while you work in front of it. Drag the replica to move it,

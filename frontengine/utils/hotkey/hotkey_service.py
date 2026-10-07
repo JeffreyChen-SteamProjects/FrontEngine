@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Any, Dict, Optional
+import sys
 
 from PySide6.QtCore import QObject, Signal
 
@@ -50,11 +51,19 @@ class HotkeyService(QObject):
         super().__init__(parent)
         self._bindings: Dict[str, str] = dict(bindings)
         self._listener: Optional[Any] = None
+        self.reason = ''
 
     def start(self) -> bool:
+        if sys.platform.startswith('linux'):
+            from frontengine.utils.linux.capabilities import x11_reason
+            self.reason = x11_reason()
+            if self.reason:
+                front_engine_logger.warning('[HotkeyService] ' + self.reason)
+                return False
         if self._listener is not None:
             return True
         if _pynput_keyboard is None:
+            self.reason = str(_PYNPUT_ERROR)
             front_engine_logger.warning(
                 f"[HotkeyService] pynput unavailable, hotkeys disabled ({_PYNPUT_ERROR!r})"
             )
@@ -85,6 +94,7 @@ class HotkeyService(QObject):
             )
             return True
         except Exception as error:
+            self.reason = str(error)
             front_engine_logger.warning(f"[HotkeyService] Failed to start: {error!r}")
             self._listener = None
             return False

@@ -340,12 +340,12 @@ Everything not listed here works on all three platforms.
 
 | Feature | Windows | macOS | Linux |
 | --- | :---: | :---: | :---: |
-| Common overlays and UI | ✅ | ✅ | ✅ |
-| System audio, spectrum and microphone | ✅ | backend* | — |
+| Common overlays and UI | ✅ | ✅ | Qt / X11 |
+| System audio, spectrum and microphone | ✅ | backend* | Pulse† |
 | Now-playing metadata | ✅ | — | — |
-| Window geometry, layouts and monitor move | ✅ | backend* | — |
+| Window geometry, layouts and monitor move | ✅ | backend* | X11† |
 | Live window replica | ✅ | backend* | — |
-| Foreign-window topmost / opacity | ✅ | — | — |
+| Foreign-window topmost / opacity | ✅ | — | X11† |
 | Exclude overlays from capture | ✅ | — | — |
 | MIDI control | ✅ | backend* | — |
 | Media transport keys | ✅ | backend* | — |
@@ -533,3 +533,7 @@ Control Center → Follow a window selects an existing registered top-level over
 Control Center → Monitor profiles explicitly saves/restores positions for each hardware monitor combination (20 profiles, 200 windows, 512 KiB local monitor-profiles.json). Proportional work-area positions adapt to resolution/primary/DPI changes while preserving logical window sizes; unavailable profiles clamp existing windows onto the primary work area. Automatic adaptation is separately opt-in, debounced 500 ms, and observes new overlays and Qt screen changes without modifying OS display settings. Hardware identity ambiguity is reported; same-kind/title duplicates are excluded from saved restoration but can be brought back into view. Fullscreen/scene windows and active target-follow bindings are excluded. It never creates overlays or guesses native handles. Movement stays entirely in Qt logical coordinates. Native save/restore/off-screen recovery passed on one Windows 125% display; real monitor plug/unplug, primary changes and mixed DPI still require additional hardware.
 
 Static software composition now reuses one cached frame (up to 16 MP); image content/DPR, transforms, opacity, stacking, clip, output size and output DPI invalidate it. Unchanged layer submissions skip repaint; animated/video frames still refresh. GPU readback is unchanged. App exit and Close all share the registered overlay sources, close each object once before clearing, reset wallpaper playlists and run cleanup before releasing scene assets. Qt stays alive while canceled local file/raster workers finish, using a nonblocking timer. Plugin API v1 remains the supported manifest version; examples/plugins/clock provides a trusted QWidget page with overlay_widgets, optional release_overlay_resources/shutdown and get_state/set_state. Loaded plugin state is namespaced as plugin:<page name> in presets, including transactional rollback; presets never load code. Copy the selected example folder into plugins/, then explicitly enable and approve its content digest. Declarations/grants do not create an OS sandbox. Developer software benchmark: py -m benchmarks.scene_composition --output build/scene-benchmark.json; an optional trusted --baseline-file compares exact output pixels. Measurements and baseline procedure are in docs/benchmarks/README.md.
+
+Help → Platform capabilities shows read-only adapter prerequisites and precise latest failures without starting capture/listeners. Linux audio uses distro pulseaudio-utils (parec) with PulseAudio or PipeWire Pulse compatibility: default output monitor for spectrum/reactivity, default microphone for lip sync. Unlike the Windows peak-only meter, Linux meter/reactivity reads actual audio samples; lazy first enabled sample starts one owned worker/child, keeps only 2048 sanitized float samples in memory, drops stale data and never writes/sends audio. Stop/close/app shutdown reaps only owned capture children without GUI joins. Device/server/permission failures are explicit. Linux foreign-window geometry/layout/topmost/monitor movement uses python-xlib (installed on Linux), EWMH and physical XRandR work areas; opacity requires a compositing manager. X11 pynput supports desktop input with DISPLAY/server access. Native Wayland arbitrary-window positioning and desktop-wide pynput input are unavailable, even with Xwayland; the UI gives this reason and monitor restoration refuses unsupported movement. Other native Wayland applications are never described as globally monitored. Linux protocol acceptance uses an isolated X11/Wayland server and virtual Pulse devices; physical Linux audio/multi-monitor and macOS hardware acceptance remain pending.
+
+A meter stops its owned capture within 1.25 seconds after reactive sampling ends; a new enabled sample can restart it.

@@ -376,12 +376,12 @@ Alles, was hier nicht aufgeführt ist, funktioniert auf allen drei Plattformen.
 
 | Funktion | Windows | macOS | Linux |
 | --- | :---: | :---: | :---: |
-| Gemeinsame Overlays und Oberfläche | ✅ | ✅ | ✅ |
-| Systemaudio, Spektrum und Mikrofon | ✅ | backend* | — |
+| Gemeinsame Overlays und Oberfläche | ✅ | ✅ | Qt / X11 |
+| Systemaudio, Spektrum und Mikrofon | ✅ | backend* | Pulse† |
 | Metadaten des laufenden Titels | ✅ | — | — |
-| Fenstergeometrie, Anordnung und Monitorwechsel | ✅ | backend* | — |
+| Fenstergeometrie, Anordnung und Monitorwechsel | ✅ | backend* | X11† |
 | Live-Fensterduplikat | ✅ | backend* | — |
-| Fremde Fenster: Vordergrund / Deckkraft | ✅ | — | — |
+| Fremde Fenster: Vordergrund / Deckkraft | ✅ | — | X11† |
 | Overlays von Aufnahme ausschließen | ✅ | — | — |
 | MIDI-Steuerung | ✅ | backend* | — |
 | Medientasten | ✅ | backend* | — |
@@ -576,3 +576,7 @@ Kontrollzentrum → Einem Fenster folgen wählt registriertes Top-Level-Overlay 
 Kontrollzentrum → Monitorprofile speichert/restauriert Hardwarekombinationen (20 Profile/200 Fenster/512 KiB lokale monitor-profiles.json). Proportionale Arbeitsbereichpositionen passen Auflösung/Primärmonitor/DPI an, logische Größen bleiben. Unbekannte Kombinationen holen Fenster auf den Hauptmonitor. Automatik separat opt-in, 500-ms-Bündelung neuer Overlays/Qt-Bildschirmereignisse, keine OS-Anzeigeänderungen. Mehrdeutige Hardware meldet Fehler; gleiche Art/Titel nicht gespeichert, aber rückholbar. Vollbild/Szenen/Zielfolger ausgenommen; keine neuen Overlays/Handle-Vermutung. Nur logische Qt-Koordinaten. Native Wiederherstellung auf einem Windows-125%-Monitor geprüft; reales An-/Abstecken, Primärwechsel und gemischte DPI brauchen weitere Hardware.
 
 Statische Softwarekomposition behält ein Bild bis 16 MP; Inhalt/DPR, Transformation, Deckkraft, Reihenfolge, Clip, Größe/DPI invalidieren. Unveränderte Ebenen ohne Neuzeichnen, Animation/Video aktualisieren, GPU-Readback unverändert. Beenden/Alle schließen teilen registrierte Quellen: einmal schließen, Listen/Wallpaper zurücksetzen, Cleanup vor Szenenassets. Qt bleibt per nicht blockierendem Timer bis abgebrochene lokale Datei/Rasterjobs enden. Manifest-API v1 unterstützt; examples/plugins/clock zeigt QWidget mit overlay_widgets, optional release_overlay_resources/shutdown und get_state/set_state. Geladene Plugin-Presets nutzen plugin:<Seitenname> mit Transaktionsrollback und laden keinen Code. Beispiel nach plugins/ kopieren, aktivieren und Digest genehmigen; keine OS-Sandbox. Benchmark: py -m benchmarks.scene_composition --output build/scene-benchmark.json, optional vertrauenswürdige --baseline-file für exakte Pixel; docs/benchmarks/README.md beschreibt Daten/Ablauf.
+
+Hilfe → Plattformfähigkeiten zeigt Voraussetzungen/letzte Fehler ohne Capture/Listener. Linux: pulseaudio-utils (parec) und PulseAudio/PipeWire-Pulse; Standard-Ausgabemonitor für Spektrum/Reaktion, Standardmikrofon für Lippensync. Anders als Windows-Peakmeter liest Linux echte Samples; erst aktivierte Abfrage startet eigenen Worker/Prozess, 2048 bereinigte Float-Samples im RAM, veraltete verworfen, keine Speicherung/Übertragung. Stop/Schließen/Exit beendet nur eigene Kinder ohne GUI-Join, Geräte/Server/Rechtefehler sichtbar. Linux-Fenstergeometrie/Layout/Topmost/Monitorwechsel via python-xlib (Linux installiert), EWMH/physischem XRandR; Deckkraft braucht Compositor. X11-pynput braucht DISPLAY/Zugriff. Native Wayland-Positionierung/fremde Fenster und desktopweite pynput-Eingabe fehlen auch mit Xwayland; UI erklärt, Profilbewegung verweigert. Keine globale Beobachtungsbehauptung für andere Wayland-Apps. Protokollabnahme nutzt isolierte X11/Wayland-Server/virtuelle Pulse-Geräte; physische Linux-Audio/Mehrmonitor- und Mac-Abnahme offen.
+
+Ein Pegelmesser beendet seine eigene Aufnahme innerhalb von 1,25 Sekunden nach Ende der reaktiven Abfragen; eine neue aktivierte Abfrage kann sie neu starten.

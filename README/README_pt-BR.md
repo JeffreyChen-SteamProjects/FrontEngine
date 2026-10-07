@@ -360,12 +360,12 @@ Tudo o que não estiver listado aqui funciona nas três plataformas.
 
 | Recurso | Windows | macOS | Linux |
 | --- | :---: | :---: | :---: |
-| Sobreposições e interface comuns | ✅ | ✅ | ✅ |
-| Áudio do sistema, espectro e microfone | ✅ | backend* | — |
+| Sobreposições e interface comuns | ✅ | ✅ | Qt / X11 |
+| Áudio do sistema, espectro e microfone | ✅ | backend* | Pulse† |
 | Metadados da reprodução atual | ✅ | — | — |
-| Geometria, disposição e mudança de monitor | ✅ | backend* | — |
+| Geometria, disposição e mudança de monitor | ✅ | backend* | X11† |
 | Cópia de janela ao vivo | ✅ | backend* | — |
-| Janelas alheias: primeiro plano / opacidade | ✅ | — | — |
+| Janelas alheias: primeiro plano / opacidade | ✅ | — | X11† |
 | Excluir sobreposições da captura | ✅ | — | — |
 | Controle MIDI | ✅ | backend* | — |
 | Teclas de mídia | ✅ | backend* | — |
@@ -556,3 +556,7 @@ Centro de controle → Seguir janela escolhe overlay registrado top-level e alvo
 Centro de controle → Perfis de monitor salva/restaura combinações (20 perfis/200 janelas/512 KiB local monitor-profiles.json). Posição proporcional adapta resolução/principal/DPI, tamanho lógico preservado; combinação nova devolve janelas ao principal. Automático opt-in separado, eventos Qt/novos overlays agrupados 500 ms, sem alterar OS. Hardware ambíguo gera erro; mesmo tipo/nome não é salvo mas pode voltar. Tela cheia/cenas/seguidores excluídos; não cria overlays nem adivinha handles. Apenas coordenadas lógicas Qt. Nativo verificado num Windows125%; conexão/remoção, principal e DPI mistos requerem hardware adicional.
 
 Composição estática software reutiliza um frame ≤16 MP; conteúdo/DPR, transformação, opacidade, ordem, clip, tamanho/DPI invalidam. Sem mudanças não redesenha, vídeo/animação atualiza; GPU readback igual. Sair/Fechar todos compartilham registro: fechar uma vez antes de limpar, reset de fundos/cleanup antes dos assets. Timer sem bloqueio mantém Qt até trabalhos locais cancelados terminarem. Manifest API v1; examples/plugins/clock mostra QWidget overlay_widgets, release_overlay_resources/shutdown opcionais e get_state/set_state. Presets dos plugins carregados sob plugin:<nome página>, rollback transacional, sem carregar código. Copiar a plugins/, ativar e aprovar digest, sem sandbox OS. Benchmark py -m benchmarks.scene_composition --output build/scene-benchmark.json, --baseline-file confiável opcional compara pixels; dados/procedimento docs/benchmarks/README.md.
+
+Ajuda → Capacidades plataforma lê requisitos/erros sem captura/listeners. Linux requer pulseaudio-utils (parec), PulseAudio/PipeWire-Pulse; monitor saída padrão para espectro/reação, micro para lábios. Diferente do peak Windows lê amostras reais; primeira consulta ativada inicia worker/filho próprio, só2048 float saneados RAM, descarta antigos, sem salvar/enviar. Stop/fechar/sair termina só filhos próprios sem GUI join, erros de dispositivo/servidor/permissão visíveis. Janelas/layout/topmost/monitor via python-xlib Linux, EWMH/XRandR físico, opacidade requer compositor. X11 pynput precisa DISPLAY/acesso; posicionamento Wayland arbitrário/input global não disponível mesmo Xwayland, UI explica/recusa perfis, não afirma observar outros apps Wayland. Validação protocolos usa X11/Wayland isolados/Pulse virtual, hardware áudio/multimonitor Linux e Mac pendentes.
+
+O medidor encerra sua captura em até 1,25 segundo após cessarem as consultas reativas; uma nova consulta ativada pode reiniciá-la.

@@ -351,12 +351,12 @@ FrontEngine のすべては、このリストに載っていない限りロー�
 
 | Feature | Windows | macOS | Linux |
 | --- | :---: | :---: | :---: |
-| 共通オーバーレイと UI | ✅ | ✅ | ✅ |
-| システム音声、スペクトル、マイク | ✅ | backend* | — |
+| 共通オーバーレイと UI | ✅ | ✅ | Qt / X11 |
+| システム音声、スペクトル、マイク | ✅ | backend* | Pulse† |
 | 再生中の曲情報 | ✅ | — | — |
-| 形状、配置、モニター間の移動 | ✅ | backend* | — |
+| 形状、配置、モニター間の移動 | ✅ | backend* | X11† |
 | ライブウィンドウ複製 | ✅ | backend* | — |
-| 他のウィンドウの最前面／透明度 | ✅ | — | — |
+| 他のウィンドウの最前面／透明度 | ✅ | — | X11† |
 | キャプチャからオーバーレイを除外 | ✅ | — | — |
 | MIDI 制御 | ✅ | backend* | — |
 | メディアキー | ✅ | backend* | — |
@@ -546,3 +546,7 @@ Windows 版は winrt-Windows.Media.Control を含み、再生中ウィジェッ�
 コントロールセンター → モニタープロファイルで機器構成ごとの位置を保存/復元（20 構成・200 窓・ローカル monitor-profiles.json 512 KiB）。作業域比例位置は解像度/主画面/DPI に対応し論理サイズを維持、未保存構成では画面外の窓を主画面に戻します。自動対応は初期無効の個別選択、500 ms で新表示/Qt 画面イベントを集約し OS 設定は変更しません。機器識別が曖昧ならエラー、同種同名は保存しませんが画面内へ回復可能。全画面/シーン/目標追従は除外、表示の新規作成や handle 推測なし。Qt 論理座標のみ。Windows 一台125%でネイティブ復元確認、接続/切断・主画面変更・混合 DPI は追加機器待ち。
 
 静的ソフトウェア合成は16 MPまで一枚を再利用、内容/DPR・変換・透明度・順序・clip・出力サイズ/DPIで無効化。未変更層は再描画なし、動画/アニメは更新、GPU読戻しは変更なし。終了/全閉じは共通登録源から一度ずつ閉じてから一覧と壁紙を清掃し場景資産を解放。取消済みローカルファイル/描画処理完了まで非停止タイマーでQtを維持。manifest API v1、examples/plugins/clockは QWidget のoverlay_widgets、任意release_overlay_resources/shutdown、get_state/set_state例。ロード済み拡張のプリセットはplugin:<頁名>と交易ロールバック、コードをロードしません。例フォルダをplugins/にコピー、明示有効化と摘要承認、OS沙箱ではありません。計測py -m benchmarks.scene_composition --output build/scene-benchmark.json、信頼済--baseline-fileで画素比較、docs/benchmarks/README.md参照。
+
+ヘルプ → プラットフォーム機能は条件/最新失敗を読取り表示、録音/監視を開始しません。Linux はpulseaudio-utils(parec)とPulseAudio/PipeWire Pulse、スペクトル/反応は既定出力monitor、口パクは既定マイク。Windows peak専用と異なり実音声sampleを読み、最初の有効な取得で自前worker/子プロセス開始、RAMに2048清浄floatだけ、古いもの破棄、保存/送信なし。停止/閉じる/終了は自分の子だけ終了しGUI joinなし、機器/サーバー/権限失敗を表示。Linux窓/配置/最前面/画面移動はLinuxのpython-xlibとEWMH/実体XRandR、透明度にはcompositor必要。X11 pynputはDISPLAY/権限必要。Wayland任意窓位置と全域pynputはXwayland含め未対応、理由表示/配置復元拒否、他Waylandアプリの全域監視は主張なし。隔離X11/Waylandと仮想Pulseで協定検証、Linux物理音声/多画面とMac実機は保留。
+
+音声反応のサンプリング終了後、メーターは1.25秒以内に自身のキャプチャを停止し、再度有効なサンプリングで起動できます。

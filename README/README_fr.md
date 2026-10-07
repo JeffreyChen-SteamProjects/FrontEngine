@@ -341,12 +341,12 @@ Tout ce qui n'est pas listé ici fonctionne sur les trois plateformes.
 
 | Feature | Windows | macOS | Linux |
 | --- | :---: | :---: | :---: |
-| Superpositions et interface communes | ✅ | ✅ | ✅ |
-| Audio système, spectre et microphone | ✅ | backend* | — |
+| Superpositions et interface communes | ✅ | ✅ | Qt / X11 |
+| Audio système, spectre et microphone | ✅ | backend* | Pulse† |
 | Métadonnées de lecture en cours | ✅ | — | — |
-| Géométrie, disposition et déplacement entre écrans | ✅ | backend* | — |
+| Géométrie, disposition et déplacement entre écrans | ✅ | backend* | X11† |
 | Copie de fenêtre en direct | ✅ | backend* | — |
-| Fenêtres tierces : premier plan / opacité | ✅ | — | — |
+| Fenêtres tierces : premier plan / opacité | ✅ | — | X11† |
 | Exclure les superpositions des captures | ✅ | — | — |
 | Commande MIDI | ✅ | backend* | — |
 | Touches multimédias | ✅ | backend* | — |
@@ -534,3 +534,7 @@ Centre de contrôle → Suivre une fenêtre choisit overlay enregistré de premi
 Centre de contrôle → Profils de moniteurs sauvegarde/restaure combinaisons matérielles (20 profils/200 fenêtres/512 KiB, monitor-profiles.json local). Positions proportionnelles suivent résolution/principal/DPI, tailles logiques conservées ; combinaison inconnue ramène fenêtres au principal. Automatique opt-in séparé, regroupement 500 ms des overlays/événements Qt, aucun réglage système modifié. Matériel ambigu signalé ; mêmes type/nom exclus mais ramenables. Plein écran/scènes/suivi exclus ; aucun overlay créé ni handle deviné. Coordonnées Qt logiques uniquement. Vérifié nativement sur un écran Windows 125% ; branchement/débranchement, principal et DPI mixtes nécessitent matériel supplémentaire.
 
 Composition logicielle statique garde une image ≤16 MP ; contenu/DPR, transformation, opacité, ordre, clip, taille/DPI invalident. Pas de repaint si inchangé, animation/vidéo restent actives ; GPU readback inchangé. Quitter/Tout fermer partagent sources : fermer une fois avant vider, réinitialiser fonds, cleanup avant assets. Timer non bloquant conserve Qt pendant fin des jobs locaux annulés. Manifest API v1 ; examples/plugins/clock montre QWidget avec overlay_widgets, release_overlay_resources/shutdown facultatifs, get_state/set_state. Préréglages des plugins chargés sous plugin:<nom page>, rollback transactionnel, sans charger code. Copier exemple dans plugins/, activer et approuver digest ; pas de sandbox OS. Benchmark : py -m benchmarks.scene_composition --output build/scene-benchmark.json, --baseline-file fiable optionnel compare pixels ; procédure/données docs/benchmarks/README.md.
+
+Aide → Capacités plateforme lit prérequis/derniers échecs sans capture/écoute. Linux : pulseaudio-utils (parec), PulseAudio/PipeWire-Pulse ; moniteur sortie défaut pour spectre/réaction, micro défaut pour lèvres. Contrairement au peak Windows, vrais samples Linux ; première requête activée démarre worker/enfant propre, 2048 float nettoyés en RAM, périmés jetés, sans fichier/transfert. Stop/fermer/quitter termine enfants propres sans join GUI ; erreurs appareil/serveur/droits visibles. Géométrie/layout/topmost/moniteur Linux via python-xlib installé Linux, EWMH/XRandR physique, opacité exige compositor. X11 pynput exige DISPLAY/accès ; fenêtres natives Wayland positionnement/arbitraire et entrée desktop-wide impossibles même Xwayland, UI explique/refuse restauration. Autres apps Wayland non globalement surveillées. Validation protocole sur serveurs X11/Wayland isolés et Pulse virtuel ; audio physique/multimoniteur Linux et Mac restent en attente.
+
+Le compteur arrête sa capture dans les 1,25 seconde suivant la fin des lectures réactives ; une nouvelle lecture activée peut la relancer.

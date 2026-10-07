@@ -207,7 +207,11 @@ class PresentationSettingUI(SettingPage):
     def _ensure_input_watch(self) -> None:
         """需要按鍵或點擊事件時才啟動全域監聽。"""
         if self.keystroke_widget_list or self.cursor_widget_list:
-            self.input_watch.start()
+            if not self.input_watch.start():
+                import sys
+                if sys.platform.startswith('linux'):
+                    from frontengine.utils.linux.capabilities import x11_reason
+                    self.hint_label.setText(x11_reason() or 'Global input listener failed; check X11 server permissions.')
 
     def release_input_watch(self) -> None:
         """沒有覆蓋層要聽了就收掉全域輸入監聽（批次關閉之後也會呼叫）。"""

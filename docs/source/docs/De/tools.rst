@@ -25,7 +25,7 @@ Werkzeuge-Seite
   abgerundetes Rechteck oder Rechteck, mit Rahmen und Spiegelung. Sie wird nur
   lokal gezeigt, nichts wird aufgezeichnet.
 * Fenster anheften… - das Fenster einer anderen Anwendung im Vordergrund halten
-  und seine Durchsichtigkeit ändern. Nur unter Windows.
+  und seine Durchsichtigkeit ändern. Windows oder Linux X11 (EWMH; Transparenz braucht einen Compositor).
 * Fenster duplizieren… - ein zweites, kleines Fenster zeigt ein gewähltes Fenster
   live, während das Original bleibt, wo es ist. Praktisch, um ein Video oder einen
   Build im Auge zu behalten. Ziehen zum Verschieben, Doppelklick zum Schließen.

@@ -25,7 +25,7 @@ Page Outils
   d'acquisition, en cercle, rectangle arrondi ou rectangle, avec bordure et
   miroir. Elle n'est affichée qu'en local et rien n'est enregistré.
 * Épingler une fenêtre… - garder la fenêtre d'une autre application au premier
-  plan et régler sa transparence. Windows uniquement.
+  plan et régler sa transparence. Windows ou Linux X11 (EWMH ; transparence exige un compositor).
 * Dupliquer une fenêtre… - une seconde petite fenêtre affiche en direct la fenêtre
   choisie, tandis que l'originale reste à sa place. Pratique pour surveiller une
   vidéo ou une compilation tout en travaillant. Faites glisser pour la déplacer,

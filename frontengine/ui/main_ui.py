@@ -1156,7 +1156,7 @@ class FrontEngineMainUI(QMainWindow):
 
     def _close_history_dialogs(self) -> None:
         for attribute in ('image_history_dialog', 'capture_history_dialog', 'window_follow_dialog',
-                          'monitor_profiles_dialog'):
+                          'monitor_profiles_dialog', 'platform_capabilities_dialog'):
             dialog = getattr(self, attribute, None)
             if dialog is not None:
                 dialog.close()
@@ -1221,6 +1221,9 @@ class FrontEngineMainUI(QMainWindow):
         # Assets must outlive all scene/pet widgets that may still read them.
         self.scene_setting_ui.shutdown_scene()
         self._clear_overlays()
+        if sys.platform.startswith('linux'):
+            from frontengine.utils.linux.audio import stop_all
+            stop_all()
         from frontengine.ui.plugin_pages import shutdown_pages
         shutdown_pages(self)
         release_scene_packages()
@@ -1252,6 +1255,10 @@ class FrontEngineMainUI(QMainWindow):
         from PySide6.QtCore import QThreadPool
         if QThreadPool.globalInstance().activeThreadCount():
             return True
+        if sys.platform.startswith('linux'):
+            from frontengine.utils.linux.audio import pending
+            if pending():
+                return True
         for name in ('asset_library_service', 'todo_service', 'image_history_service', 'capture_history_service'):
             service = getattr(self, name, None)
             worker = getattr(service, 'worker', service)

@@ -1,24 +1,7 @@
-"""
-WASAPI 回送擷取：把「正在播出去的聲音」讀進來做頻譜。
+"""Windows WASAPI meters/capture, macOS framework adapter and lazy Linux Pulse samples.
 
-**請注意這和本專案其他音訊功能不同。** 寵物與桌布的律動只讀 WASAPI 的
-*電表數值*（一個 0~1 的音量），完全沒有音訊內容；頻譜視覺化做不到這件事——
-要算頻率就必須真的拿到取樣資料，所以這個模組會擷取系統輸出的音訊串流。
-
-擷取到的樣本只留在記憶體裡、只用來算 FFT，**不會寫檔、不會傳出去**，關掉
-視覺化就停止擷取。僅 Windows 有效，其他平台 available() 一律為 False。
-
-WASAPI loopback capture: read what is being played so it can be turned into a
-spectrum.
-
-**This differs from the rest of the audio features here.** The pet and the
-wallpaper read only WASAPI's *meter* (a single 0..1 number) and never see audio
-content. A spectrum cannot work that way - computing frequencies needs the
-actual samples - so this module captures the system output stream.
-
-Captured samples stay in memory, are used only for the FFT, are **never written
-to disk or sent anywhere**, and capture stops the moment the visualiser is
-turned off. Windows only; available() is False everywhere else.
+Linux reads actual samples in memory after opt-in; it is not the Windows peak-only path.
+Native device/server errors and physical-hardware acceptance are separate.
 """
 from __future__ import annotations
 
@@ -51,6 +34,9 @@ _POLL_SECONDS = 0.02
 
 def available() -> bool:
     """這台機器能不能做回送擷取（只有 Windows 可以）。"""
+    if sys.platform.startswith('linux'):
+        from frontengine.utils.linux.capabilities import audio_reason
+        return not audio_reason()
     if sys.platform == 'darwin':
         from frontengine.utils.macos import get_backend
         return get_backend().capability('system_audio').available
@@ -102,13 +88,18 @@ class LoopbackSpectrum:
         self._stop_event = threading.Event()
         self._running = False
         self._mac_session = None
+        self._linux_session = None
 
     @property
     def last_error(self) -> str:
+        if self._linux_session is not None:
+            return self._linux_session.last_error
         return self._mac_session.last_error if self._mac_session else ''
 
     @property
     def running(self) -> bool:
+        if self._linux_session is not None:
+            return self._linux_session.running
         if self._mac_session is not None:
             return self._mac_session.running
         return self._running
@@ -121,6 +112,8 @@ class LoopbackSpectrum:
 
     def bands(self) -> List[float]:
         """最新一組頻段強度；沒在跑或還沒讀到就是一排 0。"""
+        if self._linux_session is not None:
+            return spectrum_bands(self._linux_session.samples(), 48000, self.band_count)
         if self._mac_session is not None:
             return spectrum_bands(self._mac_session.samples(), 48000, self.band_count)
         with self._lock:
@@ -128,6 +121,11 @@ class LoopbackSpectrum:
 
     def start(self) -> bool:
         """開始擷取；平台不支援或啟動失敗回傳 False。"""
+        if sys.platform.startswith('linux'):
+            from frontengine.utils.linux.audio import PulseCapture
+            if self._linux_session is None:
+                self._linux_session = PulseCapture(self.device_id)
+            return self._linux_session.start()
         if sys.platform == 'darwin':
             from frontengine.utils.macos.capture import CaptureSession
             if self.device_id is not None:
@@ -149,6 +147,9 @@ class LoopbackSpectrum:
 
     def stop(self) -> None:
         """停止擷取並等背景執行緒收工。"""
+        if self._linux_session is not None:
+            self._linux_session.stop()
+            return
         if self._mac_session is not None:
             self._mac_session.stop()
             return

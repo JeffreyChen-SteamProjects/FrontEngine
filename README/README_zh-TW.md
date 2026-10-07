@@ -319,12 +319,12 @@ FrontEngine 裡的一切都是在本機進行的,除非它在這份清單上。�
 
 | 功能 | Windows | macOS | Linux |
 | --- | :---: | :---: | :---: |
-| 一般覆蓋層與介面 | ✅ | ✅ | ✅ |
-| 系統音訊、頻譜與麥克風 | ✅ | backend* | — |
+| 一般覆蓋層與介面 | ✅ | ✅ | Qt / X11 |
+| 系統音訊、頻譜與麥克風 | ✅ | backend* | Pulse† |
 | 正在播放的曲目資訊 | ✅ | — | — |
-| 視窗幾何、版面與跨螢幕移動 | ✅ | backend* | — |
+| 視窗幾何、版面與跨螢幕移動 | ✅ | backend* | X11† |
 | 即時視窗複本 | ✅ | backend* | — |
-| 其他視窗強制置頂／不透明度 | ✅ | — | — |
+| 其他視窗強制置頂／不透明度 | ✅ | — | X11† |
 | 擷取時排除覆蓋層 | ✅ | — | — |
 | MIDI 控制 | ✅ | backend* | — |
 | 媒體操作鍵 | ✅ | backend* | — |
@@ -509,3 +509,7 @@ Windows 安裝現在包含 winrt-Windows.Media.Control，讓「正在播放」�
 控制中心 → 螢幕配置可明確儲存／恢復每組硬體螢幕的位置（20 組、200 視窗、本機 monitor-profiles.json 上限 512 KiB）。工作區比例位置適應解析度、主螢幕及 DPI 變更，保留邏輯尺寸；無該組配置時將螢幕外視窗移回主螢幕工作區。自動調整另行選用、預設關閉，以 500 ms 合併新覆蓋層及 Qt 螢幕事件，不更改系統顯示設定。硬體識別不明會報錯；同類同名視窗不儲存恢復，但可移回可見範圍。略過全螢幕／場景及正在跟隨目標的覆蓋層，不建立覆蓋層或猜測 handle。移動全程使用 Qt 邏輯座標。單台 Windows 125% 螢幕原生儲存、恢復及移回已通過；實際接拔、切換主螢幕及混合 DPI 仍需其他設備。
 
 靜態軟體合成重用一張上限 16 MP 的快取；影像／DPR、轉換、透明度、堆疊、裁切、輸出尺寸與 DPI 變更都會重繪，未變動的圖層提交不要求重繪，動畫／影片仍更新，GPU 讀回不變。退出與全部關閉共用覆蓋層登錄來源，先各關閉一次再清清單、重設桌布播放及執行清理，之後才釋放場景素材；取消中的本機檔案／算圖工作完成前用非阻塞計時器保留 Qt。支援的外掛 manifest 為 API v1，examples/plugins/clock 示範 QWidget 的 overlay_widgets、選用 release_overlay_resources／shutdown 及 get_state／set_state；已載入外掛的預設集使用 plugin:<頁名> 命名並支援交易回復，預設集不載入程式碼。把選定範例資料夾複製至 plugins/，明確啟用並授權內容摘要；宣告與授權不是系統沙箱。開發量測：py -m benchmarks.scene_composition --output build/scene-benchmark.json，選用受信任 --baseline-file 比較精確像素；數據與重現方式見 docs/benchmarks/README.md。
+
+說明 → 平台能力唯讀顯示必要條件與最近原生失敗，不啟動擷取或監聽。Linux 音訊需要發行版 pulseaudio-utils（parec）與 PulseAudio／PipeWire Pulse 相容服務，頻譜／音訊反應使用預設輸出 monitor、對嘴使用預設麥克風。與 Windows 只讀峰值不同，Linux 電表／反應會讀實際音訊取樣；首次啟用取樣才建立自己的工作執行緒與子行程，只在記憶體保留 2048 個清理後 float 取樣、丟棄過期資料，不存檔或傳送。停止、關閉及退出只收回自己的擷取子行程，不在 GUI join，裝置、服務及權限失敗明確顯示。Linux 視窗幾何／配置／置頂／螢幕移動使用 Linux 安裝的 python-xlib、EWMH 與實體 XRandR 工作区，透明度另需合成管理器。X11 pynput 需 DISPLAY／伺服器權限；原生 Wayland 任意視窗定位及桌面全域 pynput 輸入不可用，即使有 Xwayland，介面顯示原因並拒絕螢幕恢復操作，不宣稱可監聽其他 Wayland 程式。Linux 協定驗收使用隔離 X11／Wayland 伺服器與虛擬 Pulse 裝置；Linux 實體音效／多螢幕及 macOS 實機驗收仍保留。
+
+音訊反應停止取樣後，電表會在 1.25 秒內停止自己的擷取；重新啟用取樣可再次啟動。

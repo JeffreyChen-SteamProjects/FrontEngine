@@ -174,6 +174,12 @@ class MonitorProfileService(QObject):
 
     def restore_current(self) -> int:
         """Restore saved positions, or clamp existing positions if this combination is new."""
+        import sys
+        if sys.platform.startswith('linux'):
+            from frontengine.utils.linux.capabilities import x11_reason
+            reason = x11_reason()
+            if reason:
+                raise ValueError(reason)
         screens = self.screens()
         key = topology_key(screens)
         self.repository.load()

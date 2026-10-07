@@ -160,6 +160,10 @@ class WidgetsSettingUI(SettingPage):
             self.spectrum_button.setEnabled(False)
             self.spectrum_button.setToolTip(
                 _t("widgets_spectrum_unavailable", "Audio capture is Windows only."))
+            import sys
+            if sys.platform.startswith('linux'):
+                from frontengine.utils.linux.capabilities import audio_reason
+                self.spectrum_button.setToolTip(audio_reason())
 
     def _build_monitor_row(self) -> None:
         self.monitor_label = tr(QLabel(), "widgets_monitor_label", "System monitor")

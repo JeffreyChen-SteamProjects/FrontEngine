@@ -1,17 +1,7 @@
-"""
-麥克風音量電表：讀輸入裝置的峰值，用來讓寵物跟著你說話開合嘴巴。
+"""Windows WASAPI meters/capture, macOS framework adapter and lazy Linux Pulse samples.
 
-和喇叭那支電表一樣，**只讀電表數值、不擷取任何音訊內容**——這裡拿到的是一個
-0~1 的數字，不是聲音。頻譜那種需要取樣資料的功能才會真的擷取音訊，兩者是
-不同的東西。僅 Windows 有效，其餘平台一律回傳 None。
-
-A microphone meter: read the input device's peak so the pet can move its mouth
-while you talk.
-
-Like the speaker meter, this **reads a meter value and captures no audio
-content** - what comes back is a number between 0 and 1, not sound. Only the
-spectrum, which needs samples, actually captures audio; these are different
-things. Windows only; None everywhere else.
+Linux reads actual samples in memory after opt-in; it is not the Windows peak-only path.
+Native device/server errors and physical-hardware acceptance are separate.
 """
 from __future__ import annotations
 
@@ -34,6 +24,9 @@ def list_input_devices() -> List[Tuple[str, str]]:
     目前啟用中的輸入裝置 [(device_id, 顯示名稱)]；非 Windows 或失敗回傳 []。
     Active input devices as (device_id, friendly_name); [] when unavailable.
     """
+    if sys.platform.startswith('linux'):
+        from frontengine.utils.linux.capabilities import audio_reason
+        return [('@DEFAULT_SOURCE@', 'Default microphone')] if not audio_reason() else []
     if sys.platform == 'darwin':
         from frontengine.utils.macos import get_backend
         return [('default', 'Default microphone')] if get_backend().capability('microphone').available else []
@@ -79,6 +72,10 @@ class MicrophoneMeter:
         self._get_peak = None
         self._ok = False
         self._mac_meter = None
+        self._linux_meter = None
+        if sys.platform.startswith('linux'):
+            from frontengine.utils.linux.audio import PulseMeter
+            self._linux_meter = PulseMeter(device_id, microphone=True)
         if sys.platform == 'darwin':
             from frontengine.utils.macos.audio import MacMicrophoneMeter
             self._mac_meter = MacMicrophoneMeter(device_id)
@@ -117,6 +114,8 @@ class MicrophoneMeter:
 
     def level(self) -> Optional[float]:
         """目前麥克風的峰值 0~1；不可用時回傳 None。"""
+        if self._linux_meter is not None:
+            return self._linux_meter.level()
         if self._mac_meter is not None:
             return self._mac_meter.level()
         if not self._ok or self._meter is None or self._get_peak is None:
@@ -131,6 +130,8 @@ class MicrophoneMeter:
 
     def close(self) -> None:
         """釋放 COM 介面；可重複呼叫。"""
+        if self._linux_meter is not None:
+            self._linux_meter.close()
         if self._mac_meter is not None:
             self._mac_meter.close()
             self._mac_meter = None
@@ -152,7 +153,7 @@ _meter_singleton: Optional[MicrophoneMeter] = None
 def microphone_level() -> Optional[float]:
     """便利函式：以共用電表回傳預設麥克風的峰值 0~1，或 None。"""
     global _meter_singleton
-    if sys.platform not in ('win32', 'darwin'):
+    if sys.platform not in ('win32', 'darwin', 'linux'):
         return None
     if _meter_singleton is None:
         _meter_singleton = MicrophoneMeter()

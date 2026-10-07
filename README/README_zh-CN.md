@@ -295,12 +295,12 @@ Screen-sharing privacy**，FrontEngine 可以在会议应用打开时把它们�
 
 | Feature | Windows | macOS | Linux |
 | --- | :---: | :---: | :---: |
-| 一般覆盖层与界面 | ✅ | ✅ | ✅ |
-| 系统音频、频谱与麦克风 | ✅ | backend* | — |
+| 一般覆盖层与界面 | ✅ | ✅ | Qt / X11 |
+| 系统音频、频谱与麦克风 | ✅ | backend* | Pulse† |
 | 正在播放的曲目信息 | ✅ | — | — |
-| 窗口几何、布局与跨屏移动 | ✅ | backend* | — |
+| 窗口几何、布局与跨屏移动 | ✅ | backend* | X11† |
 | 实时窗口副本 | ✅ | backend* | — |
-| 其他窗口强制置顶／不透明度 | ✅ | — | — |
+| 其他窗口强制置顶／不透明度 | ✅ | — | X11† |
 | 捕获时排除覆盖层 | ✅ | — | — |
 | MIDI 控制 | ✅ | backend* | — |
 | 媒体操作键 | ✅ | backend* | — |
@@ -480,3 +480,7 @@ Windows 安装现在包含 winrt-Windows.Media.Control，让「正在播放」�
 控制中心 → 屏幕配置可保存／恢复每组硬件屏幕位置（20 组、200 窗口、本地 monitor-profiles.json 上限 512 KiB）。工作区比例位置适应分辨率、主屏及 DPI 变化，保留逻辑尺寸；无配置时把屏幕外窗口移回主屏。自动调整单独启用、默认关闭，500 ms 合并新覆盖层和 Qt 屏幕事件，不修改系统显示设置。硬件身份不明报错；同类同名窗口不保存恢复，但可移回可见区。跳过全屏／场景及正在跟随目标的覆盖层，不创建覆盖层或猜 handle。全程 Qt 逻辑坐标。单台 Windows 125% 屏幕原生保存、恢复及移回通过；真实接拔、主屏切换和混合 DPI 待其他设备。
 
 静态软件合成复用一张上限 16 MP 缓存；图像／DPR、变换、透明度、堆叠、裁剪、输出尺寸与 DPI 变化重绘，无变化提交跳过重绘，动画／视频仍更新，GPU 读回不变。退出与全部关闭共用覆盖层登记来源，先各关闭一次再清列表、重置壁纸播放和清理，然后释放场景资源；取消中的本地文件／绘图工作完成前用非阻塞定时器保留 Qt。外挂 manifest 支持 API v1，examples/plugins/clock 示例 QWidget 的 overlay_widgets、可选 release_overlay_resources／shutdown 和 get_state／set_state；已加载插件预设以 plugin:<页名> 命名并支持事务回滚，预设不加载代码。复制示例目录到 plugins/，明确启用和授权内容摘要；声明／授权不是 OS 沙箱。开发测量：py -m benchmarks.scene_composition --output build/scene-benchmark.json，可选可信 --baseline-file 比较准确像素；数据和复现见 docs/benchmarks/README.md。
+
+帮助 → 平台能力只读显示必要条件和最近原生失败，不启动捕获或监听。Linux 音频需 pulseaudio-utils（parec）和 PulseAudio／PipeWire Pulse 服务，频谱／反应用默认输出 monitor、对嘴用默认麦克风。不同于 Windows 峰值电表，Linux 读取实际音频采样；首次启用采样才建立自己的线程／子进程，仅内存保留 2048 个清理 float 采样，丢弃过期，不存储或发送。停止／关闭／退出只收回自身捕获进程，无 GUI join；设备／服务／权限失败明确显示。Linux 窗口几何／布局／置顶／屏幕移动使用 Linux 安装 python-xlib、EWMH 和物理 XRandR 工作区，透明度需合成管理器。X11 pynput 需 DISPLAY／服务权限；原生 Wayland 任意窗口定位和全桌面 pynput 不可用，即使 Xwayland，界面显示原因并拒绝屏幕恢复，不宣称监听其他 Wayland 程序。Linux 协议验收用隔离 X11／Wayland 和虚拟 Pulse 设备；Linux 物理音频／多屏及 macOS 实机仍待验收。
+
+音频反应停止采样后，电表会在 1.25 秒内停止自己的采集；重新启用采样可再次启动。
