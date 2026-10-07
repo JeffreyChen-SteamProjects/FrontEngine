@@ -1152,4 +1152,10 @@ english_word_dict = {
     'follow_hint': 'Windows: keep initial proportional offset, hide on target minimize, detach on close/hidden target or lost identity. Explicit hide-all stays hidden. Temporary bindings only; detach before dragging to a new offset. Elevated targets may deny registration.',
     'follow_unsupported': 'Window following needs the verified Windows adapter; this platform is unsupported.',
     'follow_bound': 'Bound; position follows the chosen target.',
+    'monitors_title': 'Monitor profiles',
+    'monitors_hint': 'Save positions for this monitor combination. Restore uses proportional positions and logical sizes. Duplicate overlay names, fullscreen/scene windows and target-follow bindings are excluded from saved restoration; off-screen duplicates can still be clamped. No overlays are created.',
+    'monitors_auto': 'Automatically adapt when monitors change (off by default)',
+    'monitors_save': 'Save current combination',
+    'monitors_restore': 'Restore / bring into view',
+    'monitors_result': 'Processed overlays: {count}',
 }

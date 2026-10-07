@@ -1142,4 +1142,10 @@ italian_word_dict = {
     'follow_hint': 'Windows: offset proporzionale iniziale, nascondi se minimizzata, scollega se chiusa/nascosta/identità persa. Nascondi tutto resta nascosto. Temporaneo; scollega prima di nuovo offset. Finestre elevate possono negare registrazione.',
     'follow_unsupported': 'Serve adattatore Windows verificato; piattaforma non supportata.',
     'follow_bound': 'Collegato; segue destinazione scelta.',
+    'monitors_title': 'Profili monitor',
+    'monitors_hint': 'Salva questa combinazione; ripristina posizioni proporzionali e dimensioni logiche. Nomi duplicati, schermo intero/scene e finestre seguite esclusi; duplicati fuori schermo possono rientrare. Nessun nuovo overlay.',
+    'monitors_auto': 'Adatta automaticamente ai cambi monitor (disattivato)',
+    'monitors_save': 'Salva combinazione attuale',
+    'monitors_restore': 'Ripristina / rendi visibile',
+    'monitors_result': 'Overlay elaborati: {count}',
 }

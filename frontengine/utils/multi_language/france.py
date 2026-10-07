@@ -1142,4 +1142,10 @@ french_word_dict = {
     'follow_hint': 'Windows : décalage proportionnel initial, masquer si minimisée, détacher si fermée/masquée/identité perdue. Masquage global conservé. Temporaire ; détacher avant nouveau déplacement. Cibles élevées peuvent refuser inscription.',
     'follow_unsupported': 'Suivi nécessite adaptateur Windows vérifié ; plateforme non prise en charge.',
     'follow_bound': 'Lié ; suit la cible choisie.',
+    'monitors_title': 'Profils de moniteurs',
+    'monitors_hint': 'Enregistrer cette combinaison ; restaurer positions proportionnelles et tailles logiques. Noms identiques, plein écran/scènes et suivi de fenêtre exclus ; doublons hors écran peuvent être ramenés. Aucun overlay créé.',
+    'monitors_auto': 'Adapter aux changements de moniteurs (désactivé par défaut)',
+    'monitors_save': 'Enregistrer combinaison',
+    'monitors_restore': 'Restaurer / ramener à vue',
+    'monitors_result': 'Overlays traités : {count}',
 }

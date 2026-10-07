@@ -1145,4 +1145,10 @@ germany_word_dict = {
     'follow_hint': 'Windows: anfänglichen relativen Versatz halten, bei Minimieren verbergen, bei Schließen/Verbergen/Identitätsverlust lösen. Alles verbergen bleibt verborgen. Temporär; vor neuer Position lösen. Erhöhte Fenster können Registrierung verweigern.',
     'follow_unsupported': 'Fensterfolgen benötigt den geprüften Windows-Adapter; Plattform nicht unterstützt.',
     'follow_bound': 'Gebunden; folgt dem gewählten Ziel.',
+    'monitors_title': 'Monitorprofile',
+    'monitors_hint': 'Positionen für diese Kombination speichern; proportionale Positionen und logische Größen wiederherstellen. Gleiche Overlay-Namen, Vollbild/Szenen und Fensterbindungen werden ausgelassen; doppelte Fenster außerhalb bleiben rückholbar. Keine neuen Overlays.',
+    'monitors_auto': 'Bei Monitoränderung automatisch anpassen (standardmäßig aus)',
+    'monitors_save': 'Aktuelle Kombination speichern',
+    'monitors_restore': 'Wiederherstellen / sichtbar machen',
+    'monitors_result': 'Bearbeitete Overlays: {count}',
 }

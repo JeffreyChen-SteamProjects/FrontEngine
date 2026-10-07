@@ -42,6 +42,7 @@ class ControlCenterUI(SettingPage):
     desktop_pin_changed = Signal(bool)
     overlay_visibility_changed = Signal(bool)
     window_follow_requested = Signal()
+    monitor_profiles_requested = Signal()
 
     def __init__(
             self,
@@ -163,6 +164,9 @@ class ControlCenterUI(SettingPage):
         self.follow_button = tr(QPushButton(), 'follow_title')
         self.follow_button.clicked.connect(self.window_follow_requested.emit)
         everything.add_inline(self.follow_button)
+        self.monitor_profiles_button = tr(QPushButton(), 'monitors_title')
+        self.monitor_profiles_button.clicked.connect(self.monitor_profiles_requested.emit)
+        everything.add_inline(self.monitor_profiles_button)
 
         log = self.add_section("section_log", "Messages")
         log.add_widget(self.log_panel_scroll_area)

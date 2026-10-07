@@ -54,6 +54,7 @@ user_setting_dict: Dict[str, Any] = {
     # 使用者拖曳過的覆蓋層位置：類別名稱 -> [x, y, 寬, 高]
     # Overlay positions the user dragged into place: class name -> [x, y, w, h]
     "overlay_geometry": {},
+    "monitor_profiles_auto": False,
     # 啟動時還原上次的頁面設定
     # Restore the previous session's page settings on launch
     "restore_last_session": False,

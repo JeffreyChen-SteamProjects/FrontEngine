@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261008-12 | 2026-10-08 | Save bounded monitor profiles and adapt registered Qt overlays | #done #monitors #overlays | [2026-10](2026-10.md) |
 | U-20261008-11 | 2026-10-08 | Follow selected Windows targets with temporary identity bindings | #done #windows #overlays | [2026-10](2026-10.md) |
 | U-20261008-10 | 2026-10-08 | Organize static assets and review reference repair | #done #assets #scene | [2026-10](2026-10.md) |
 | U-20261008-09 | 2026-10-08 | Persist local tasks and import calendar into Today widget | #done #widgets #calendar | [2026-10](2026-10.md) |
@@ -116,5 +117,5 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-10.md](2026-10.md) | 2026-10 | 41 |
+| [2026-10.md](2026-10.md) | 2026-10 | 42 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

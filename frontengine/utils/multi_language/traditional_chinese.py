@@ -1151,4 +1151,10 @@ traditional_chinese_word_dict = {
     'follow_hint': 'Windows：保持初始比例位置，目標最小化時隱藏，關閉／隱藏或識別失效即解除。全部隱藏會保持隱藏。僅暫時綁定；要拖曳到新偏移請先解除。較高權限視窗可能拒絕登錄。',
     'follow_unsupported': '視窗跟隨需已驗證的 Windows 介面，此平台不支援。',
     'follow_bound': '已綁定，位置會跟隨所選目標。',
+    'monitors_title': '螢幕配置',
+    'monitors_hint': '儲存此螢幕組合的位置；恢復採比例位置及邏輯尺寸。同名覆蓋層、全螢幕／場景及視窗跟隨綁定不納入儲存恢復；螢幕外的同名視窗仍可移回。此功能不建立覆蓋層。',
+    'monitors_auto': '螢幕變更時自動調整（預設關閉）',
+    'monitors_save': '儲存目前組合',
+    'monitors_restore': '恢復／移回可見範圍',
+    'monitors_result': '已處理覆蓋層：{count}',
 }

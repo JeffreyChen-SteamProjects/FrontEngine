@@ -327,6 +327,7 @@ class FrontEngineMainUI(QMainWindow):
         self._initialize_tasks()
         self._initialize_asset_library()
         self._initialize_window_follow()
+        self._initialize_monitor_profiles()
         if user_setting_dict.get("clipboard_history"):
             self.clipboard_watcher.start()
 
@@ -1072,6 +1073,29 @@ class FrontEngineMainUI(QMainWindow):
         self.window_follow_dialog.show()
         self.window_follow_dialog.raise_()
 
+    def _initialize_monitor_profiles(self) -> None:
+        """Adapt only registered Qt windows, respecting active target-follow bindings."""
+        from frontengine.utils.window_pin.topology_profiles import MonitorProfileService
+        self.monitor_profiles_service = MonitorProfileService(
+            Path(getcwd()) / 'monitor-profiles.json', self.control_center_ui._all_overlay_widget_lists,
+            self, excluded=lambda widget: id(widget) in self.window_follow_service.bindings)
+        self.monitor_profiles_dialog = None
+        self.monitor_profiles_service.set_enabled(bool(user_setting_dict.get('monitor_profiles_auto')))
+        self.control_center_ui.monitor_profiles_requested.connect(self.open_monitor_profiles)
+
+    def _monitor_profiles_enabled(self, enabled: bool) -> None:
+        user_setting_dict['monitor_profiles_auto'] = bool(enabled)
+        write_user_setting()
+
+    def open_monitor_profiles(self) -> None:
+        """Review explicit save/restore and separate automatic adaptation opt-in."""
+        from frontengine.ui.dialog.monitor_profiles_dialog import MonitorProfilesDialog
+        if self.monitor_profiles_dialog is None:
+            self.monitor_profiles_dialog = MonitorProfilesDialog(
+                self.monitor_profiles_service, self, enabled_changed=self._monitor_profiles_enabled)
+        self.monitor_profiles_dialog.show()
+        self.monitor_profiles_dialog.raise_()
+
     def open_asset_library(self) -> None:
         """Manage selected assets and review exact scene/preset reference repairs."""
         from frontengine.ui.dialog.asset_library_dialog import AssetLibraryDialog
@@ -1107,6 +1131,7 @@ class FrontEngineMainUI(QMainWindow):
         "todo_service",
         "asset_library_service",
         "window_follow_service",
+        "monitor_profiles_service",
         "workshop_service",
         "preset_schedule_service", "theme_schedule_service", "usage_service",
         "signage_service", "screensaver_service",
@@ -1116,7 +1141,8 @@ class FrontEngineMainUI(QMainWindow):
     )
 
     def _close_history_dialogs(self) -> None:
-        for attribute in ('image_history_dialog', 'capture_history_dialog', 'window_follow_dialog'):
+        for attribute in ('image_history_dialog', 'capture_history_dialog', 'window_follow_dialog',
+                          'monitor_profiles_dialog'):
             dialog = getattr(self, attribute, None)
             if dialog is not None:
                 dialog.close()

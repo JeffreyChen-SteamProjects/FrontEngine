@@ -1144,4 +1144,10 @@ simplified_chinese_word_dict = {
     'follow_hint': 'Windows：保持初始比例位置，目标最小化时隐藏，关闭／隐藏或身份失效即解除。全部隐藏保持隐藏。仅临时绑定；拖到新偏移请先解除。较高权限窗口可能拒绝登记。',
     'follow_unsupported': '窗口跟随需已验证的 Windows 接口，此平台不支持。',
     'follow_bound': '已绑定，位置会跟随选择的目标。',
+    'monitors_title': '屏幕配置',
+    'monitors_hint': '保存此屏幕组合的位置；恢复采用比例位置和逻辑尺寸。同名覆盖层、全屏／场景和窗口跟随绑定不参与保存恢复；屏幕外的同名窗口仍可移回。不创建覆盖层。',
+    'monitors_auto': '屏幕变更时自动调整（默认关闭）',
+    'monitors_save': '保存当前组合',
+    'monitors_restore': '恢复／移回可见范围',
+    'monitors_result': '已处理覆盖层：{count}',
 }
