@@ -250,6 +250,11 @@ class WallpaperSettingUI(SettingPage):
                 widget.close()
             except RuntimeError:
                 pass
+        self.release_overlay_resources()
+
+    def release_overlay_resources(self) -> None:
+        """Reset the playlist owner after the shared registry has closed all wallpaper windows."""
+        self.advance_timer.stop()
         self.wallpaper_widgets.clear()
         self.playlists.clear()
         retranslator.set_text(

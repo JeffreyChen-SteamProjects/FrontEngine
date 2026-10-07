@@ -430,6 +430,9 @@ class FrontEngineMainUI(QMainWindow):
         # The wallpaper page keys its widgets by monitor, so hand over the values.
         self.control_center_ui.register_overlay_source(
             lambda: list(self.wallpaper_setting_ui.wallpaper_widgets.values()))
+        cleanup = getattr(self.wallpaper_setting_ui, 'release_overlay_resources', None)
+        if callable(cleanup):
+            self.control_center_ui.register_cleanup(cleanup)
         self.control_center_ui.register_overlay_source(
             lambda: getattr(self.web_setting_ui, "dashboard_widgets", []))
         # 批次關閉之後，沒有覆蓋層在聽就把全域輸入監聽收掉
@@ -551,6 +554,7 @@ class FrontEngineMainUI(QMainWindow):
         read through.
         """
         self.command_pages = []
+        self.plugin_pages = {}
         groups = [
             ("nav_group_on_screen", "On screen", [
                 (self.video_setting_ui, "tab_video_text"),
@@ -591,10 +595,19 @@ class FrontEngineMainUI(QMainWindow):
         if FrontEngine_EXTEND_TAB:
             self.sidebar.add_group("nav_group_extensions", "Extensions")
             for widget_name, widget in FrontEngine_EXTEND_TAB.items():
-                index = self.page_stack.addWidget(widget())
-                self.sidebar.add_page(widget_name, index, widget_name)
+                self._add_plugin_tab(widget_name, widget)
 
         self.sidebar.select_page(0)
+
+    def _add_plugin_tab(self, name: str, factory: type) -> None:
+        from frontengine.ui.plugin_pages import attach_page
+        try:
+            page = attach_page(name, factory, self.control_center_ui)
+            self.plugin_pages[name] = page
+            index = self.page_stack.addWidget(page)
+            self.sidebar.add_page(name, index, name)
+        except Exception as error:
+            front_engine_logger.warning(f'[plugins] invalid page: {name}: {error}')
 
     def _setup_icon(self, show_system_tray_ray: bool) -> None:
         """設定視窗 Icon 與系統托盤 / Setup window icon and system tray"""
@@ -694,7 +707,7 @@ class FrontEngineMainUI(QMainWindow):
         # 托盤有可能沒建起來（平台不支援、或啟動時關掉了），沒有就照一般關閉走
         # The tray may not exist at all - unsupported platform, or switched off at
         # startup - in which case this is an ordinary close.
-        if self.system_tray is not None and self.system_tray.isVisible():
+        if not self._shutdown_done and self.system_tray is not None and self.system_tray.isVisible():
             self.hide()
             event.ignore()
             return
@@ -702,6 +715,7 @@ class FrontEngineMainUI(QMainWindow):
         # This branch really is closing - X button, logout, closeAllWindows - so
         # the teardown belongs here.
         self._shutdown()
+        self._request_exit()
         super().closeEvent(event)
 
     def reload_hotkeys(self) -> None:
@@ -1146,20 +1160,6 @@ class FrontEngineMainUI(QMainWindow):
             dialog = getattr(self, attribute, None)
             if dialog is not None:
                 dialog.close()
-    # 關閉時要清空的覆蓋層清單
-    # The overlay lists to empty on close.
-    _CLOSING_WIDGET_LISTS = (
-        ("video_setting_ui", "video_widget_list"),
-        ("image_setting_ui", "image_widget_list"),
-        ("web_setting_ui", "web_widget_list"),
-        ("gif_setting_ui", "gif_widget_list"),
-        ("sound_player_setting_ui", "sound_widget_list"),
-        ("text_setting_ui", "text_widget_list"),
-        ("particle_setting_ui", "particle_list"),
-        ("pet_setting_ui", "pet_list"),
-        ("widgets_setting_ui", "todo_widget_list"),
-    )
-
     def _plugin_grants(self) -> dict:
         grants = user_setting_dict.get('plugin_grants')
         if not isinstance(grants, dict):
@@ -1217,26 +1217,48 @@ class FrontEngineMainUI(QMainWindow):
         from frontengine.user_setting.scene_setting import release_scene_packages
         if hasattr(self, 'tools_setting_ui'):
             self.tools_setting_ui.recorder.close()
+        self._save_page_state()
         # Assets must outlive all scene/pet widgets that may still read them.
         self.scene_setting_ui.shutdown_scene()
+        self._clear_overlays()
+        from frontengine.ui.plugin_pages import shutdown_pages
+        shutdown_pages(self)
         release_scene_packages()
         # 執行緒執行狀態跟著行程活著，不放開的話關掉程式之後螢幕還是不會睡。
         # The execution state lives with the process: without releasing it the
         # display keeps refusing to sleep after the application is gone.
         if getattr(self, "keep_awake", None) is not None:
             self.keep_awake.disable()
-        self._save_page_state()
         self._save_window_geometry()
         write_user_setting()
-        self._clear_overlays()
         self.scene_setting_ui.close_scene()
 
     def close(self) -> None:
         """關閉程式並清理資源 / Close application and clear resources"""
         self._shutdown()
         super().close()
-        if self.main_app:
-            self.main_app.exit(0)
+        self._request_exit()
+
+    def _request_exit(self) -> None:
+        """Keep Qt alive until canceled local raster/file workers release their resources."""
+        if self.main_app is None or getattr(self, '_exit_barrier', None) is not None:
+            return
+        from frontengine.utils.shutdown_barrier import ShutdownBarrier
+        self.main_app.setQuitOnLastWindowClosed(False)
+        self._exit_barrier = ShutdownBarrier(self._workers_pending, lambda: self.main_app.exit(0), self.main_app)
+        self._exit_barrier.start()
+
+    def _workers_pending(self) -> bool:
+        from PySide6.QtCore import QThreadPool
+        if QThreadPool.globalInstance().activeThreadCount():
+            return True
+        for name in ('asset_library_service', 'todo_service', 'image_history_service', 'capture_history_service'):
+            service = getattr(self, name, None)
+            worker = getattr(service, 'worker', service)
+            thread = getattr(worker, 'thread', None)
+            if thread is not None and thread.is_alive():
+                return True
+        return False
 
     def _stop_services(self) -> None:
         """停掉所有背景服務（沒建立起來的就跳過）。"""
@@ -1270,17 +1292,8 @@ class FrontEngineMainUI(QMainWindow):
         Close the overlays each page is holding, then empty the lists. close()
         comes first because closeEvent is what stops timers and releases media.
         """
-        for page_name, attribute in self._CLOSING_WIDGET_LISTS:
-            page = getattr(self, page_name, None)
-            widget_list = getattr(page, attribute, None) if page is not None else None
-            if widget_list is None:
-                continue
-            for widget in widget_list[:]:
-                try:
-                    widget.close()
-                except RuntimeError:  # 使用者已經關掉，C++ 物件不在了
-                    continue
-            widget_list.clear()
+        self.control_center_ui.clear_all()
+        self.wallpaper_setting_ui.wallpaper_widgets.clear()
 
     @classmethod
     def debug_close(cls) -> None:

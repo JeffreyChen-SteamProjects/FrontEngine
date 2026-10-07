@@ -42,6 +42,9 @@ def _collect_state(ui: "FrontEngineMainUI") -> dict:
         page = getattr(ui, attribute, None)
         if page is not None and hasattr(page, "get_state"):
             state[name] = page.get_state()
+    from frontengine.ui.plugin_pages import preset_pages
+    for name, page in preset_pages(ui):
+        state[name] = page.get_state()
     return state
 
 
@@ -58,6 +61,13 @@ def _apply_state(ui: "FrontEngineMainUI", state: dict) -> None:
                 front_engine_logger.warning(
                     f"[PresetMenu] Failed to apply '{name}' preset section: {error!r}"
                 )
+    from frontengine.ui.plugin_pages import preset_pages
+    for name, page in preset_pages(ui):
+        if isinstance(state.get(name), dict):
+            try:
+                page.set_state(deepcopy(state[name]))
+            except Exception as error:
+                front_engine_logger.warning(f"[PresetMenu] Failed to apply '{name}': {error!r}")
 
 
 def apply_state_transaction(ui: "FrontEngineMainUI", state: dict) -> None:
@@ -71,6 +81,12 @@ def apply_state_transaction(ui: "FrontEngineMainUI", state: dict) -> None:
             raise ValueError(f"Invalid preset section: {name}")
         targets.append((page, deepcopy(state[name]), deepcopy(page.get_state())))
     touched = []
+    from frontengine.ui.plugin_pages import preset_pages
+    for name, page in preset_pages(ui):
+        if name in state:
+            if not isinstance(state[name], dict):
+                raise ValueError(f'Invalid preset section: {name}')
+            targets.append((page, deepcopy(state[name]), deepcopy(page.get_state())))
     try:
         for page, section, original in targets:
             touched.append((page, original))

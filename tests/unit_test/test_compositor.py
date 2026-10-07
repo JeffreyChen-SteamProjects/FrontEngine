@@ -121,3 +121,59 @@ def test_gif_frame_change_invalidates_cached_overlay_frame(tmp_path):
     assert second.cacheKey() != first.cacheKey()
     assert second.pixelColor(0, 0).blue() > 240
     widget.close()
+
+
+def test_software_composition_reuses_static_frames_and_invalidates_every_visual_field(monkeypatch):
+    from frontengine.show.compositor import CompositorWidget, Layer
+    from frontengine.show.compositor import widget as module
+    original, compositions = module.compose_frame, []
+    def compose(*args):
+        compositions.append(True)
+        return original(*args)
+    monkeypatch.setattr(module, 'compose_frame', compose)
+    widget = CompositorWidget(backend='software')
+    widget.resize(20, 20)
+    layer = Layer('one', solid('red'))
+    try:
+        widget.set_layers([layer])
+        first = widget.output_frame()
+        assert widget.output_frame().cacheKey() == first.cacheKey()
+        widget.set_layers([layer])
+        assert widget.output_frame().cacheKey() == first.cacheKey()
+        assert len(compositions) == 1
+        first.fill(QColor('blue'))
+        assert widget.output_frame().pixelColor(0, 0) == QColor('red')
+        mutations = [lambda: layer.image.fill(QColor('green')),
+                     lambda: layer.transform.translate(2, 3),
+                     lambda: setattr(layer, 'opacity', .5), lambda: setattr(layer, 'z', 2),
+                     lambda: setattr(layer, 'clip', QRectF(0, 0, 4, 4)),
+                     lambda: layer.clip.translate(1, 1), lambda: widget.resize(30, 20)]
+        for mutation in mutations:
+            previous = len(compositions)
+            mutation()
+            widget.set_layers([layer])
+            image = widget.output_frame()
+            assert len(compositions) == previous + 1
+            expected = original([layer], widget.size(), widget.devicePixelRatioF())
+            assert bytes(image.constBits()) == bytes(expected.constBits())
+        widget.shutdown()
+        assert widget._cached_frame.isNull() and widget._frame_signature is None
+    finally:
+        widget.close()
+
+
+def test_same_z_reordering_and_dpr_change_recompose_without_stale_pixels():
+    from frontengine.show.compositor import CompositorWidget, Layer
+    widget = CompositorWidget(backend='software')
+    widget.resize(8, 4)
+    red, blue = Layer('red', solid('red')), Layer('blue', solid('blue'))
+    try:
+        widget.set_layers([red, blue])
+        assert widget.output_frame().pixelColor(0, 0) == QColor('blue')
+        widget.set_layers([blue, red])
+        assert widget.output_frame().pixelColor(0, 0) == QColor('red')
+        red.image.setDevicePixelRatio(2)
+        widget.set_layers([blue, red])
+        assert widget.output_frame().pixelColor(3, 0) == QColor('blue')
+    finally:
+        widget.close()

@@ -1,0 +1,59 @@
+{
+  "python": "3.14.4",
+  "os": "Windows-11-10.0.26300-SP0",
+  "qt_platform": "windows",
+  "screen_dpr": 1.25,
+  "logical_size": [
+    1280,
+    720
+  ],
+  "layer_count": 12,
+  "seed": 20261008,
+  "backend": "software",
+  "measurements": {
+    "static": {
+      "current": {
+        "median_ms": 0.0213,
+        "p95_ms": 0.0365,
+        "frames": 560,
+        "physical_size": [
+          1600,
+          900
+        ],
+        "sha256": "c7ad50c760f81d67e250f811e501d85d9521ab991f851371951ec36eef07d7c9"
+      },
+      "baseline": {
+        "median_ms": 3.98485,
+        "p95_ms": 6.2389,
+        "frames": 560,
+        "physical_size": [
+          1600,
+          900
+        ],
+        "sha256": "c7ad50c760f81d67e250f811e501d85d9521ab991f851371951ec36eef07d7c9"
+      }
+    },
+    "changing": {
+      "current": {
+        "median_ms": 3.9997499999999997,
+        "p95_ms": 5.9868,
+        "frames": 560,
+        "physical_size": [
+          1600,
+          900
+        ],
+        "sha256": "5d79109eba371958119193a9ca6a45af6963a9f2d5b51c0fb8b8d44a9a55da28"
+      },
+      "baseline": {
+        "median_ms": 3.8081,
+        "p95_ms": 5.6362,
+        "frames": 560,
+        "physical_size": [
+          1600,
+          900
+        ],
+        "sha256": "5d79109eba371958119193a9ca6a45af6963a9f2d5b51c0fb8b8d44a9a55da28"
+      }
+    }
+  }
+}

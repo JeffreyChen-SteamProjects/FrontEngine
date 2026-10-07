@@ -357,8 +357,12 @@ class ControlCenterUI(SettingPage):
         reference lingers in the list, so calls raise RuntimeError — each is
         guarded and the dead reference is pruned so one cannot crash the batch.
         """
+        seen = set()
         for widget_list in self._all_overlay_widget_lists():
             for widget in widget_list[:]:
+                if id(widget) in seen:
+                    continue
+                seen.add(id(widget))
                 try:
                     action(widget)
                 except RuntimeError:
@@ -367,6 +371,8 @@ class ControlCenterUI(SettingPage):
                         widget_list.remove(widget)
                     except ValueError:
                         pass
+                except Exception as error:
+                    front_engine_logger.warning(f'[ControlCenterUI] overlay action failed: {error!r}')
 
     def hide_all(self) -> None:
         """暫時隱藏所有覆蓋層 / Temporarily hide every overlay."""

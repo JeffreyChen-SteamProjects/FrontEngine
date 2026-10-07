@@ -394,7 +394,7 @@ FrontEngine 是一個 PySide6 桌面**覆蓋層（overlay）框架**：把影片
 `control_center_ui.register_overlay_source(lambda: page.xxx_widget_list)` 註冊，
 否則「全部隱藏／關閉／鎖定／畫質」會漏掉它。註冊點集中在
 `main_ui._register_extra_overlays()`。關閉時的清理另外列在
-`_CLOSING_WIDGET_LISTS` 與 `_CLOSING_SERVICES`。
+`control_center_ui.clear_all()` 共用登錄來源；背景服務仍列在 `_CLOSING_SERVICES`。
 
 ### 5.3 執行緒
 
@@ -442,7 +442,7 @@ Qt 訊號 + `QueuedConnection`** 回到 UI 執行緒。另外：
    `add_row()` 描述欄位，實作 `get_state()` / `set_state()`
 3. `main_ui._add_tabs()` — 加進對應的導覽分組
 4. `main_ui._register_extra_overlays()` — 把 widget 清單註冊給控制中心
-5. `main_ui._CLOSING_WIDGET_LISTS`（若需關閉時收尾）
+5. 共用覆蓋層登錄來源與 `register_cleanup`（批次關閉及退出共用）；頁面／工作執行緒於退出清理
 6. **七份語言字典**都要加鍵（`test_translations.py` 會擋）
 7. **七棵文件樹**都要加頁（`test_documentation.py` 會擋）
 8. 該資料夾要有 `__init__.py`（`find` 設定是 `namespaces = false`，少一個就不會進 wheel，
@@ -571,3 +571,5 @@ Cancellation tombstones count toward the 500-record limit and prevent stale impo
 `utils/window_pin/follow_window.py` isolates Win32 selected-target identity cookies/PID/thread checks and physical frame/move/monitor geometry. SetProp registration is reversible and may fail under UIPI; absence on HWND reuse stops following. WindowFollowService holds at most 64 weak temporary overlay bindings, polls only while bound, preserves initial proportional anchor, moves without native size/activation and clamps physical work areas. Event filters detach closing overlays and preserve manual visibility; ControlCenterUI.overlay_visibility_changed prevents target restoration undoing hide-all. MainUI owns/stops service, registers detach_all cleanup and reuses window_follow_dialog with existing overlay registry. Dialog never persists target handles; only verified Windows backend is enabled. Target hidden/closed/lost cookie detaches; minimize temporarily hides. Current native environment has one 125% display, so cross-monitor mixed-DPI remains explicit acceptance work.
 
 `utils/window_pin/topology_profiles.py` keeps bounded versioned atomic monitor-profiles.json (20 hardware combinations/200 overlays/512 KiB). Hardware name/manufacturer/model/serial identities reject ambiguity; topology identity ignores resolution/DPI/primary, placements store proportional Qt work-area anchors and logical sizes. Existing registered unique kind/title windows only; ambiguous duplicates excluded from saved placement but clamped when outside. Fullscreen/scene windows and active WindowFollowService bindings excluded. MonitorProfileService observes Qt screen changes and newly shown registered overlays only after separate opt-in, debounces 500 ms, clamps new combinations onto primary work area, disconnects screen signals on shutdown. No native handle guessing or Qt-to-Win32 coordinate conversion. MainUI owns service/dialog/settings; ControlCenter requests reusable monitor_profiles_dialog. Native current acceptance limited to single Windows125% screen; real hotplug/primary/mixed-DPI stays pending.
+
+`show/compositor/widget.py` signatures image cacheKey/DPR, copied transforms/clips, z/order/opacity and physical output geometry; identical set_layers skips both repaint requests and static software frame composition. One detached-return software cache is bounded to 16 MP (larger surfaces uncached); mutation/resize/DPI/shutdown invalidates. GPU readback path unchanged. benchmarks/scene_composition.py is a seeded developer-only baseline module comparison with exact pixel hashes and static/changing timing distributions, no timing CI assertions. App shutdown shares ControlCenterUI.clear_all registry with id-deduplicated close-before-clear and wallpaper owner cleanup; notes/state save first, scene resources release afterward. ui/plugin_pages.py attaches trusted QWidget overlay_widgets and optional release_overlay_resources/shutdown; preset_menu includes loaded API-v1 get_state/set_state pages in plugin:<name> namespace with strict transaction rollback and no code loading. examples/plugins/clock demonstrates API-v1 lifecycle, preset bounds, hide/close timers; plugin manifests already reject other API versions. utils/shutdown_barrier.py polls canceled local worker threads/global Qt jobs before owned QApplication exit without GUI joins; does not terminate unrelated apps.
