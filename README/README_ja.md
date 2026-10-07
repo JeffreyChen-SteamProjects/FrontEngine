@@ -486,3 +486,5 @@ feat/xyz  ──PR──►  dev  ──PR──►  main
 [`LICENSE`](../LICENSE) を参照。コミュニティへの期待は
 [`Contributor_Covenant_Code_of_Conduct.md`](../Contributor_Covenant_Code_of_Conduct.md)
 にあります。
+
+Workshop コンテンツのマニフェストはバージョン管理され、使用前に検証されます。不明なメタデータ JSON はプリセットとして扱われません。プリセットパッケージは危険なアーカイブパス、リソース上限の超過、メディア名の衝突を拒否します。

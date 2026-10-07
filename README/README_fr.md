@@ -474,3 +474,5 @@ seul le jeton lui-même a besoin d'être stocké.
 
 Voir [`LICENSE`](../LICENSE). Les attentes de la communauté sont dans
 [`Contributor_Covenant_Code_of_Conduct.md`](../Contributor_Covenant_Code_of_Conduct.md).
+
+Les manifestes Workshop sont versionnés et validés avant utilisation. Les fichiers JSON de métadonnées inconnues ne sont pas considérés comme des préréglages. Les paquets refusent les chemins dangereux, le dépassement des limites de ressources et les collisions de noms de médias.

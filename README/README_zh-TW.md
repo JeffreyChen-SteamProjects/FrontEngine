@@ -449,3 +449,5 @@ feat/xyz  ──PR──►  dev  ──PR──►  main
 
 見 [`LICENSE`](../LICENSE)。社群期待寫在
 [`Contributor_Covenant_Code_of_Conduct.md`](../Contributor_Covenant_Code_of_Conduct.md)。
+
+Workshop 內容宣告採版本化格式，使用前會驗證；未知的中繼資料 JSON 不會當成預設集。預設集封包會拒絕不安全的封存路徑、超出資源上限及媒體檔名碰撞。

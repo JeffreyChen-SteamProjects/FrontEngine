@@ -23,3 +23,5 @@ Les projections WinRT de l’OCR sont incluses dans l’installation normale de 
 
     pip install "frontengine[puppet]"
     pip install "frontengine[macos]"
+
+Les manifestes Workshop sont versionnés et validés avant utilisation. Les fichiers JSON de métadonnées inconnues ne sont pas considérés comme des préréglages. Les paquets refusent les chemins dangereux, le dépassement des limites de ressources et les collisions de noms de médias.

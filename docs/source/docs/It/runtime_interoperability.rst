@@ -23,3 +23,5 @@ Le proiezioni WinRT dell’OCR sono incluse nell’installazione normale di Fron
 
     pip install "frontengine[puppet]"
     pip install "frontengine[macos]"
+
+I manifesti Workshop hanno una versione e vengono verificati prima dell’uso. I JSON di metadati sconosciuti non sono trattati come preset. I pacchetti rifiutano percorsi non sicuri, limiti di risorse superati e nomi di file multimediali in conflitto.

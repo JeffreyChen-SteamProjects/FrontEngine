@@ -473,3 +473,5 @@ only the token itself needs storing.
 
 See [`LICENSE`](LICENSE). Community expectations are in
 [`Contributor_Covenant_Code_of_Conduct.md`](Contributor_Covenant_Code_of_Conduct.md).
+
+Workshop content manifests are versioned and validated before use. Unknown metadata JSON is not treated as a preset. Preset packages reject unsafe archive paths, resource-limit violations and colliding media filenames.

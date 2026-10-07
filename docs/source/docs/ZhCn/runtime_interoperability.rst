@@ -23,3 +23,5 @@ Windows OCR 的 WinRT 投影包包含于 FrontEngine 的一般 Windows 安装；
 
     pip install "frontengine[puppet]"
     pip install "frontengine[macos]"
+
+Workshop 内容声明采用版本化格式，使用前会验证；未知的元数据 JSON 不会被当作预设。预设包会拒绝不安全的归档路径、超出资源上限以及媒体文件名冲突。

@@ -516,3 +516,5 @@ als Twine-Benutzernamen, sodass nur das Token selbst gespeichert werden muss.
 
 Siehe [`LICENSE`](../LICENSE). Community-Erwartungen finden Sie in
 [`Contributor_Covenant_Code_of_Conduct.md`](../Contributor_Covenant_Code_of_Conduct.md).
+
+Workshop-Manifeste sind versioniert und werden vor der Verwendung geprüft. Unbekannte Metadaten-JSON-Dateien gelten nicht als Presets. Preset-Pakete weisen unsichere Archivpfade, überschrittene Ressourcenlimits und kollidierende Mediendateinamen zurück.

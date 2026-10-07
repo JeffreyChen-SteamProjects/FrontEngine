@@ -457,3 +457,5 @@ Run workflow*를 실행해 세그먼트를 고르세요. 그 경로는 실패한
 [`LICENSE`](../LICENSE)를 참조하세요. 커뮤니티 기대 사항은
 [`Contributor_Covenant_Code_of_Conduct.md`](../Contributor_Covenant_Code_of_Conduct.md)에
 있습니다.
+
+Workshop 콘텐츠 매니페스트는 버전을 포함하며 사용 전에 검증됩니다. 알 수 없는 메타데이터 JSON은 프리셋으로 처리하지 않습니다. 프리셋 패키지는 안전하지 않은 경로, 리소스 한도 초과 및 미디어 파일 이름 충돌을 거부합니다.

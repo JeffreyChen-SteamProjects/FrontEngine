@@ -496,3 +496,5 @@ usuário do twine, então apenas o próprio token precisa ser armazenado.
 
 Veja [`LICENSE`](../LICENSE). As expectativas da comunidade estão em
 [`Contributor_Covenant_Code_of_Conduct.md`](../Contributor_Covenant_Code_of_Conduct.md).
+
+Os manifestos do Workshop têm versão e são validados antes do uso. JSON de metadados desconhecidos não é tratado como predefinição. Os pacotes rejeitam caminhos inseguros, limites de recursos excedidos e nomes de mídia conflitantes.

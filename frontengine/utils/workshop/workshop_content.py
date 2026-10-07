@@ -22,6 +22,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from frontengine.utils.logging.loggin_instance import front_engine_logger
+from frontengine.utils.workshop.workshop_manifest import is_legacy_preset, read_manifest
 
 # FrontEngine 的 Steam App ID（商店頁 /app/2793470/）
 # FrontEngine's Steam App ID, from its store page.
@@ -30,6 +31,7 @@ APP_ID = "2793470"
 KIND_PET_PACK = "pet_pack"
 KIND_PRESET = "preset"
 KIND_MEDIA = "media"
+KIND_SCENE = "scene"
 
 _PET_STATE_FILES = ("walk", "idle", "sleep", "climb", "fall", "drag")
 _IMAGE_SUFFIXES = (".gif", ".webp", ".png", ".jpg", ".jpeg")
@@ -78,15 +80,17 @@ def classify_item(folder) -> Optional[str]:
         path = Path(folder)
         if not path.is_dir():
             return None
+        if (path / "workshop.json").exists():
+            return read_manifest(path)["kind"]
         names = [entry.name.lower() for entry in path.iterdir() if entry.is_file()]
-    except OSError:
+    except (OSError, ValueError, UnicodeError):
         return None
     if _MANIFEST_NAME in names:
         return KIND_PET_PACK
     stems = {Path(name).stem for name in names}
     if stems & set(_PET_STATE_FILES):
         return KIND_PET_PACK
-    if any(name.endswith(".json") for name in names):
+    if any(name.endswith(".json") and is_legacy_preset(path / name) for name in names):
         return KIND_PRESET
     if any(name.endswith(_IMAGE_SUFFIXES) for name in names):
         return KIND_MEDIA
@@ -98,6 +102,8 @@ def read_item_title(folder) -> str:
     取項目名稱：優先用動作包 pet.json 裡的 name，其次用資料夾名稱（項目 ID）。
     """
     try:
+        if (Path(folder) / "workshop.json").exists():
+            return read_manifest(Path(folder))["title"]
         manifest = Path(folder) / _MANIFEST_NAME
         if manifest.is_file():
             data = json.loads(manifest.read_text(encoding="utf-8"))
@@ -144,6 +150,6 @@ def preset_files(item_path) -> List[str]:
             return []
         return sorted(str(path) for path in base.iterdir()
                       if path.is_file() and path.suffix.lower() == ".json"
-                      and path.name.lower() != _MANIFEST_NAME)
+                      and is_legacy_preset(path))
     except OSError:
         return []

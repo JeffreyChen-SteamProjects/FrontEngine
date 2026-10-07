@@ -473,3 +473,5 @@ que solo hace falta almacenar el propio token.
 
 Consulta [`LICENSE`](../LICENSE). Las expectativas de la comunidad están en
 [`Contributor_Covenant_Code_of_Conduct.md`](../Contributor_Covenant_Code_of_Conduct.md).
+
+Los manifiestos de Workshop tienen versión y se validan antes de usarlos. Los JSON de metadatos desconocidos no se consideran ajustes predefinidos. Los paquetes rechazan rutas de archivo inseguras, límites de recursos excedidos y nombres de medios duplicados.

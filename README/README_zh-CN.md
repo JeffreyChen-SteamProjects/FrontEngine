@@ -420,3 +420,5 @@ feat/xyz  ──PR──►  dev  ──PR──►  main
 
 见 [`LICENSE`](../LICENSE)。社区期望写在
 [`Contributor_Covenant_Code_of_Conduct.md`](../Contributor_Covenant_Code_of_Conduct.md) 里。
+
+Workshop 内容声明采用版本化格式，使用前会验证；未知的元数据 JSON 不会被当作预设。预设包会拒绝不安全的归档路径、超出资源上限以及媒体文件名冲突。

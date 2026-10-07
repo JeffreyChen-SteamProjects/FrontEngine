@@ -163,6 +163,12 @@ class PresetRepository:
         if not source.exists() or not zipfile.is_zipfile(source):
             raise ValueError(f"Not a valid preset package: {source}")
         with zipfile.ZipFile(source, "r") as archive:
+            from frontengine.utils.imervue.puppet_asset import checked_members
+            checked_members(archive)
+            media_names = [Path(item.filename).name.casefold() for item in archive.infolist()
+                           if item.filename.startswith(_MEDIA_PREFIX) and not item.is_dir()]
+            if len(media_names) != len(set(media_names)):
+                raise ValueError("Preset package contains colliding media filenames")
             document = _read_package_preset(archive)
             name = _package_name(document, source)
             media_dir = self._dir / "media" / _sanitize(name)

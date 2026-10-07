@@ -23,3 +23,5 @@ WinRT-Projektionen für Windows-OCR sind in der normalen FrontEngine-Installatio
 
     pip install "frontengine[puppet]"
     pip install "frontengine[macos]"
+
+Workshop-Manifeste sind versioniert und werden vor der Verwendung geprüft. Unbekannte Metadaten-JSON-Dateien gelten nicht als Presets. Preset-Pakete weisen unsichere Archivpfade, überschrittene Ressourcenlimits und kollidierende Mediendateinamen zurück.

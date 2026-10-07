@@ -166,3 +166,7 @@ Update it in the same commit when any of these changes:
 
 Per-module changes go to `architecture_explore.md`. Refresh the "Last verified" line when you
 re-check this file.
+
+## Workshop publication boundaries
+
+`utils/workshop/workshop_manifest.py` validates versioned scene/preset/pet-pack declarations and confines resources. `workshop_package.py` creates validated publication snapshots with explicit media only. Native publishing is implemented separately. Legacy empty/known presets remain readable; arbitrary metadata JSON cannot become preset settings. Preset ZIP imports validate archive limits and reject flat-name collisions before extraction.

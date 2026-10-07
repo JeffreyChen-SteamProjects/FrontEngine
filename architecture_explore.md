@@ -498,3 +498,7 @@ copy the latest frame/audio state; Qt accesses it through region/audio adapters.
 window opacity/forced stacking, Spaces and capture exclusion are unavailable on macOS.
 The capability menu reports permission, missing-binding and unsupported states distinctly.
 Mac hardware/TCC verification remains a target-host check rather than an injected-test claim.
+
+## Workshop publication boundaries
+
+`utils/workshop/workshop_manifest.py` validates versioned scene/preset/pet-pack declarations and confines resources. `workshop_package.py` creates validated publication snapshots with explicit media only. Native publishing is implemented separately. Legacy empty/known presets remain readable; arbitrary metadata JSON cannot become preset settings. Preset ZIP imports validate archive limits and reject flat-name collisions before extraction.
