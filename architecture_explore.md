@@ -501,6 +501,8 @@ Mac hardware/TCC verification remains a target-host check rather than an injecte
 
 ## Workshop publication boundaries
 
+`workshop_jobs.py` delivers file-work results through explicit queued Qt connections with no UI updates after shutdown. `workshop_cache.py` validates installed content, atomically copies content-addressed versions, detects local modifications and switches an active pointer without deleting old content. `workshop_subscriptions.py` checks App IDs/result layouts, waits for install flags, re-queries native install locations and schedules at most two file-validation jobs at a time. Legacy offline preset/pet/media recognition remains available; new manifests use strict payload validation.
+
 `workshop_publications.py` owns account/App-scoped publication journals, validated snapshots and content fingerprints. `workshop_publisher.py` consumes call-result events, verifies item ownership, configures private-by-default uploads and reports progress/terms/failures. Created IDs are persisted before upload; interrupted creation without an ID cannot be blindly retried. `WorkshopService.stopping` lets publishers persist uncertain outcomes before native shutdown. Snapshot preparation can run outside the GUI thread; native operations and callback handling stay with the Qt service.
 
 `utils/workshop/workshop_manifest.py` validates versioned scene/preset/pet-pack declarations and confines resources. `workshop_package.py` creates validated publication snapshots with explicit media only. Native publishing is implemented separately. Legacy empty/known presets remain readable; arbitrary metadata JSON cannot become preset settings. Preset ZIP imports validate archive limits and reject flat-name collisions before extraction.

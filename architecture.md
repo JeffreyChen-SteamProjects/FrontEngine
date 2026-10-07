@@ -2,6 +2,8 @@
 
 Workshop publications use account-scoped durable records in `utils/workshop/workshop_publications.py`. `workshop_publisher.py` verifies remote ownership before updates, preserves created IDs before uploading and retains snapshots for interrupted operations; Qt service shutdown marks pending outcomes uncertain before releasing Steam.
 
+Subscription install flags and callbacks are reconciled by `workshop_subscriptions.py`. `workshop_jobs.py` runs at most two validation/copy jobs per controller; `workshop_cache.py` keeps validated content versions outside Steam folders, retains old versions for scene leases and requires explicit activation for local-change conflicts.
+
 > Short overview for people and agents. Per-module detail lives in [`architecture_explore.md`](architecture_explore.md).
 > Last verified: 2026-10-03; macOS native operations require target-host verification.
 

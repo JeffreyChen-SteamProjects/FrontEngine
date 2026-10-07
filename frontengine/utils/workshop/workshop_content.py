@@ -82,7 +82,8 @@ def classify_item(folder) -> Optional[str]:
             return None
         if (path / "workshop.json").exists():
             return read_manifest(path)["kind"]
-        names = [entry.name.lower() for entry in path.iterdir() if entry.is_file()]
+        files = [entry for entry in path.iterdir() if entry.is_file()]
+        names = [entry.name.lower() for entry in files]
     except (OSError, ValueError, UnicodeError):
         return None
     if _MANIFEST_NAME in names:
@@ -90,7 +91,7 @@ def classify_item(folder) -> Optional[str]:
     stems = {Path(name).stem for name in names}
     if stems & set(_PET_STATE_FILES):
         return KIND_PET_PACK
-    if any(name.endswith(".json") and is_legacy_preset(path / name) for name in names):
+    if any(entry.suffix.lower() == ".json" and is_legacy_preset(entry) for entry in files):
         return KIND_PRESET
     if any(name.endswith(_IMAGE_SUFFIXES) for name in names):
         return KIND_MEDIA

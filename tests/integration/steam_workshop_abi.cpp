@@ -9,7 +9,9 @@ int main() {
                 "\"CreateResult\":[%zu,%zu,%zu],"
                 "\"SubmitResult\":[%zu,%zu,%zu],"
                 "\"ItemDetails\":[%zu,%zu,%zu],"
-                "\"DetailsResult\":[%zu,%zu,%zu]}\n",
+                "\"DetailsResult\":[%zu,%zu,%zu],"
+                "\"DownloadResult\":[%zu,%zu,%zu],"
+                "\"InstalledResult\":[%zu,%zu,%zu]}\n",
         sizeof(CallbackMsg_t), offsetof(CallbackMsg_t, m_pubParam), offsetof(CallbackMsg_t, m_cubParam),
         sizeof(SteamAPICallCompleted_t), offsetof(SteamAPICallCompleted_t, m_iCallback),
         offsetof(SteamAPICallCompleted_t, m_cubParam),
@@ -20,6 +22,10 @@ int main() {
         sizeof(SteamUGCDetails_t), offsetof(SteamUGCDetails_t, m_ulSteamIDOwner),
         offsetof(SteamUGCDetails_t, m_nConsumerAppID),
         sizeof(SteamUGCRequestUGCDetailsResult_t), offsetof(SteamUGCRequestUGCDetailsResult_t, m_details),
-        offsetof(SteamUGCRequestUGCDetailsResult_t, m_bCachedData));
+        offsetof(SteamUGCRequestUGCDetailsResult_t, m_bCachedData),
+        sizeof(DownloadItemResult_t), offsetof(DownloadItemResult_t, m_nPublishedFileId),
+        offsetof(DownloadItemResult_t, m_eResult),
+        sizeof(ItemInstalled_t), offsetof(ItemInstalled_t, m_nPublishedFileId),
+        offsetof(ItemInstalled_t, m_unManifestID));
     return 0;
 }
