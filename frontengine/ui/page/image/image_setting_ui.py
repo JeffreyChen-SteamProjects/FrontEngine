@@ -106,6 +106,9 @@ class ImageSettingUI(SettingPage):
         self.board_choose_button.clicked.connect(self.open_reference_board)
         self.board_close_button = tr(QPushButton(), "image_board_close", "Close boards")
         self.board_close_button.clicked.connect(self.close_reference_boards)
+        self.compare_dialog = None
+        self.compare_button = tr(QPushButton(), 'image_compare_title')
+        self.compare_button.clicked.connect(self.open_image_compare)
         self.board_hint_label = tr(
             QLabel(), "image_board_hint",
             "Pick several pictures at once. Drag each one to arrange it, drag the "
@@ -135,6 +138,7 @@ class ImageSettingUI(SettingPage):
 
         board = self.add_section("image_board_label", "Reference board")
         board.add_inline(self.board_choose_button, self.board_close_button)
+        board.add_inline(self.compare_button)
         board.add_widget(self.board_hint_label)
 
         where = self.add_section("section_where", "Where")
@@ -176,6 +180,28 @@ class ImageSettingUI(SettingPage):
             except RuntimeError:  # pragma: no cover - 底層物件已消失
                 pass
         self.board_widget_list.clear()
+
+    def open_image_compare(self) -> None:
+        """Open a fresh comparison dialog after a previous one released its images."""
+        from frontengine.ui.dialog.image_compare_dialog import ImageCompareDialog
+        if self.compare_dialog is None or self.compare_dialog._closed:
+            if self.compare_dialog is not None:
+                self.compare_dialog.deleteLater()
+            self.compare_dialog = ImageCompareDialog(self)
+        self.compare_dialog.show()
+        self.compare_dialog.raise_()
+        self.compare_dialog.activateWindow()
+
+    def close_image_compare(self) -> None:
+        """Release every comparison pixmap and reject pending worker deliveries."""
+        if self.compare_dialog is not None:
+            self.compare_dialog.close()
+            self.compare_dialog.deleteLater()
+            self.compare_dialog = None
+
+    def closeEvent(self, event) -> None:
+        self.close_image_compare()
+        super().closeEvent(event)
 
     def set_show_all_screen(self) -> None:
         front_engine_logger.info("[ImageSettingUI] set_show_all_screen")
