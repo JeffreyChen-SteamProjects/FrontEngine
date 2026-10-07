@@ -846,4 +846,12 @@ russian_word_dict = {
     'scene_layer_visible': 'Видимый',
     'scene_apply_json': 'Применить изменённый JSON',
     'scene_invalid_media': 'Не удалось прочитать изображение.',
+    'command_palette_title': 'Команды',
+    'command_palette_search': 'Поиск… (Ctrl+K / Ctrl+Shift+P)',
+    'command_palette_value': 'Имя профиля или уровень качества',
+    'command_palette_favorites_only': 'Только избранное',
+    'command_palette_run': 'Выполнить',
+    'command_palette_favorite': 'Изменить избранное',
+    'command_palette_recent': 'Недавние',
+    'command_palette_empty': 'Подходящих команд нет',
 }

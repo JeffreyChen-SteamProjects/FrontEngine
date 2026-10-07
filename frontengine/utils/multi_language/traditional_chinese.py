@@ -855,4 +855,12 @@ traditional_chinese_word_dict = {
     'scene_layer_visible': '顯示',
     'scene_apply_json': '套用編輯後的 JSON',
     'scene_invalid_media': '無法讀取選取的圖片。',
+    'command_palette_title': '功能搜尋',
+    'command_palette_search': '搜尋功能…（Ctrl+K／Ctrl+Shift+P）',
+    'command_palette_value': '預設集名稱或畫質檔位',
+    'command_palette_favorites_only': '只顯示收藏',
+    'command_palette_run': '執行',
+    'command_palette_favorite': '切換收藏',
+    'command_palette_recent': '最近使用',
+    'command_palette_empty': '沒有符合的功能',
 }

@@ -78,3 +78,5 @@ Rendu : Paramètres → Rendu des superpositions propose Automatique, GPU ou Log
 :doc:`runtime_interoperability`
 
 Paramètres → Autorisations et capacités macOS indique pour chaque fonction disponible, indisponible ou non prise en charge, avec la raison liée à l’autorisation ou à l’installation.
+
+Ouvrez Commandes dans le menu ou utilisez Ctrl+K / Ctrl+Maj+P dans FrontEngine. Recherchez dans la langue actuelle, les libellés anglais ou les noms stables ; les flèches sélectionnent et Entrée exécute. Navigation, capture, notes, filtre, Workshop et actions globales sont disponibles. Les actions préréglage/qualité acceptent une valeur. Favoris et 20 dernières commandes persistent ; paramètres et recherche ne sont pas enregistrés.

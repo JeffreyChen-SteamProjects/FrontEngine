@@ -60,3 +60,5 @@
 :doc:`runtime_interoperability`
 
 Settings → macOS 權限與能力會逐項列出可用、不可用或不支援，並顯示權限或安裝原因。
+
+從選單列開啟「功能搜尋」，或在 FrontEngine 按 Ctrl+K／Ctrl+Shift+P。可搜尋目前介面語言、英文名稱或固定命令名稱；上下鍵選取，Enter 執行。包含頁面導覽、擷取、便利貼、護眼濾鏡、Workshop 與既有全域動作。預設集／畫質動作可輸入值。收藏及最近 20 個命令會在重開後保留；參數及搜尋文字不會保存。

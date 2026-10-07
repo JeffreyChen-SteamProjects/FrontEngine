@@ -848,4 +848,12 @@ simplified_chinese_word_dict = {
     'scene_layer_visible': '显示',
     'scene_apply_json': '应用编辑后的 JSON',
     'scene_invalid_media': '无法读取所选图片。',
+    'command_palette_title': '功能搜索',
+    'command_palette_search': '搜索功能…（Ctrl+K／Ctrl+Shift+P）',
+    'command_palette_value': '预设集名称或画质档位',
+    'command_palette_favorites_only': '只显示收藏',
+    'command_palette_run': '执行',
+    'command_palette_favorite': '切换收藏',
+    'command_palette_recent': '最近使用',
+    'command_palette_empty': '没有匹配的功能',
 }

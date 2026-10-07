@@ -849,4 +849,12 @@ germany_word_dict = {
     'scene_layer_visible': 'Sichtbar',
     'scene_apply_json': 'Bearbeitetes JSON anwenden',
     'scene_invalid_media': 'Das gewählte Bild ist nicht lesbar.',
+    'command_palette_title': 'Befehle',
+    'command_palette_search': 'Befehle suchen… (Strg+K / Strg+Umschalt+P)',
+    'command_palette_value': 'Preset-Name oder Qualitätsstufe',
+    'command_palette_favorites_only': 'Nur Favoriten',
+    'command_palette_run': 'Ausführen',
+    'command_palette_favorite': 'Favorit umschalten',
+    'command_palette_recent': 'Zuletzt verwendet',
+    'command_palette_empty': 'Keine passenden Befehle',
 }

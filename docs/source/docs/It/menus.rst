@@ -76,3 +76,5 @@ Rendering: Impostazioni → Rendering delle sovrapposizioni offre Automatico, GP
 :doc:`runtime_interoperability`
 
 Impostazioni → Permessi e capacità macOS elenca ogni funzione come disponibile, non disponibile o non supportata, indicando il motivo legato a permessi o installazione.
+
+Apri Comandi dal menu o premi Ctrl+K / Ctrl+Maiusc+P in FrontEngine. Cerca nella lingua attuale, nelle etichette inglesi o nei nomi stabili; frecce per selezionare, Invio per eseguire. Include navigazione, cattura, note, filtro, Workshop e azioni globali. Preset/qualità accettano un valore. Preferiti e ultimi 20 comandi restano dopo il riavvio; parametri e ricerche non vengono salvati.

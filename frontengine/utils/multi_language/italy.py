@@ -846,4 +846,12 @@ italian_word_dict = {
     'scene_layer_visible': 'Visibile',
     'scene_apply_json': 'Applica JSON modificato',
     'scene_invalid_media': 'Impossibile leggere l’immagine.',
+    'command_palette_title': 'Comandi',
+    'command_palette_search': 'Cerca… (Ctrl+K / Ctrl+Maiusc+P)',
+    'command_palette_value': 'Nome preset o livello qualità',
+    'command_palette_favorites_only': 'Solo preferiti',
+    'command_palette_run': 'Esegui',
+    'command_palette_favorite': 'Cambia preferito',
+    'command_palette_recent': 'Recente',
+    'command_palette_empty': 'Nessun comando corrispondente',
 }

@@ -75,3 +75,5 @@ Rendering: Settings → Overlay rendering selects Auto, GPU or Software and show
 :doc:`runtime_interoperability`
 
 Settings → macOS permissions and capabilities lists each feature as available, unavailable or unsupported and shows the permission or installation reason.
+
+Open Commands from the menu bar or press Ctrl+K / Ctrl+Shift+P inside FrontEngine. Search the current interface language, English labels or stable command names; Up/Down selects and Enter runs. Commands include page navigation, capture, notes, the screen filter, Workshop and existing global actions. Preset/quality actions accept a value. Favorites and the last 20 commands survive restart; arguments and search text are not saved.

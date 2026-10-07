@@ -506,3 +506,5 @@ Windows inclui winrt-Windows.Media.Control para mostrar música e artista via SM
 A construção do executável verifica dependências e versões antes de compilar; instale requirements.txt no ambiente de construção primeiro.
 
 Cena → Editor visual oferece lista e prévia de camadas de imagem/GIF/texto, arraste em grupo, tamanho pelo canto, posição/tamanho/escala/rotação/ordem/opacidade, alinhamento, bloqueio, visibilidade, duplicação e 100 etapas de desfazer/refazer (Ctrl+Z/Ctrl+Y). Outros tipos são preservados como marcadores. Exporte .fescene diretamente; Script permite editar e aplicar JSON. A reprodução restaura tamanho, escala, rotação e visibilidade explícitos. JSON externo inicia novo histórico e preserva os campos existentes.
+
+Abra Comandos no menu ou pressione Ctrl+K / Ctrl+Shift+P no FrontEngine. Pesquise no idioma atual, rótulos ingleses ou nomes estáveis; as setas selecionam e Enter executa. Inclui navegação, captura, notas, filtro, Workshop e ações globais. Predefinição/qualidade aceitam um valor. Favoritos e últimos 20 comandos persistem; argumentos e buscas não são salvos.

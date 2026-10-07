@@ -41,6 +41,7 @@ user_setting_dict: Dict[str, Any] = {
     # 啟動時自動套用的預設集名稱（空字串表示停用）
     # Preset auto-applied on launch (empty string disables it)
     "startup_preset": "",
+    "command_palette": {"favorites": [], "recent": []},
     # 偵測到全螢幕程式時自動隱藏覆蓋層
     # Auto-hide overlays while a fullscreen app is running
     "smart_pause": True,

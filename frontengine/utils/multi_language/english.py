@@ -856,4 +856,12 @@ english_word_dict = {
     'scene_layer_visible': 'Visible',
     'scene_apply_json': 'Apply edited JSON',
     'scene_invalid_media': 'The selected image cannot be read.',
+    'command_palette_title': 'Commands',
+    'command_palette_search': 'Search commands… (Ctrl+K / Ctrl+Shift+P)',
+    'command_palette_value': 'Preset name or quality tier',
+    'command_palette_favorites_only': 'Favorites only',
+    'command_palette_run': 'Run',
+    'command_palette_favorite': 'Toggle favorite',
+    'command_palette_recent': 'Recent',
+    'command_palette_empty': 'No matching commands',
 }

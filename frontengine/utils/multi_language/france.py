@@ -846,4 +846,12 @@ french_word_dict = {
     'scene_layer_visible': 'Visible',
     'scene_apply_json': 'Appliquer le JSON modifié',
     'scene_invalid_media': 'Impossible de lire cette image.',
+    'command_palette_title': 'Commandes',
+    'command_palette_search': 'Rechercher… (Ctrl+K / Ctrl+Maj+P)',
+    'command_palette_value': 'Nom du préréglage ou qualité',
+    'command_palette_favorites_only': 'Favoris seulement',
+    'command_palette_run': 'Exécuter',
+    'command_palette_favorite': 'Basculer favori',
+    'command_palette_recent': 'Récent',
+    'command_palette_empty': 'Aucune commande correspondante',
 }

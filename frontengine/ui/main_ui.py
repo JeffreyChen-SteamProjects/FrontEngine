@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Type
 
 from PySide6.QtCore import QByteArray, QTimer
-from PySide6.QtGui import QIcon, Qt
+from PySide6.QtGui import QIcon, Qt, QAction, QKeySequence
 from PySide6.QtWidgets import (
     QMainWindow, QApplication, QGridLayout, QHBoxLayout, QStackedWidget, QStyle,
     QMenuBar, QWidget, QMessageBox,
@@ -54,7 +54,9 @@ from frontengine.utils.workshop.workshop_service import WorkshopService
 from frontengine.utils.critical_exit.critical_exit import CriticalExit
 from frontengine.utils.critical_exit.win32_vk import keyboard_keys_table
 from frontengine.utils.hotkey.hotkey_service import HotkeyService
-from frontengine.utils.actions.action_registry import ActionRegistry
+from frontengine.utils.actions.action_registry import Action, ActionRegistry
+from frontengine.utils.actions.command_history import CommandHistory
+from frontengine.ui.dialog.command_palette_dialog import CommandPaletteDialog
 from frontengine.utils.keep_awake.keep_awake import KeepAwake
 from frontengine.utils.media_keys.media_keys import send_media_key
 from frontengine.utils.logging.loggin_instance import front_engine_logger
@@ -230,6 +232,7 @@ class FrontEngineMainUI(QMainWindow):
         build_how_to_menu(self)
         build_preset_menu(self)
         build_settings_menu(self)
+        self._setup_command_palette()
 
         # 致命退出設定
         # Critical exit setting
@@ -540,6 +543,7 @@ class FrontEngineMainUI(QMainWindow):
         concentrate" are visibly different errands rather than sixteen words to
         read through.
         """
+        self.command_pages = []
         groups = [
             ("nav_group_on_screen", "On screen", [
                 (self.video_setting_ui, "tab_video_text"),
@@ -572,6 +576,7 @@ class FrontEngineMainUI(QMainWindow):
             for widget, lang_key in entries:
                 index = self.page_stack.addWidget(widget)
                 self.sidebar.add_page(lang_key, index)
+                self.command_pages.append((widget, lang_key, index))
 
         # 外掛註冊的分頁自成一組，使用者才看得出哪些不是內建的
         # Plugin tabs get their own group, so it is visible which pages did not
@@ -734,6 +739,43 @@ class FrontEngineMainUI(QMainWindow):
     def _handle_hotkey(self, action: str) -> None:
         """Dispatch hotkey, remote and MIDI actions on the GUI thread."""
         self.action_registry.execute(action)
+
+    def _setup_command_palette(self) -> None:
+        """Expose existing actions and built-in pages with stable searchable IDs."""
+        self.command_palette = None
+        for _widget, key, index in self.command_pages:
+            self.action_registry.register(Action(
+                "page." + key, key, self.sidebar.page_label(index),
+                lambda _value, page=index: self._open_command_page(page)))
+        for identifier, key, fallback, callback in (
+            ("capture_area", "tools_capture_start", "Capture area", self.tools_setting_ui.start_capture),
+            ("new_note", "widgets_note_add", "New note", self.widgets_setting_ui.add_note),
+            ("toggle_filter", "screen_filter_start", "Turn filter on", self.screen_care_setting_ui.toggle_filter),
+            ("workshop", "workshop_manage", "Workshop", self.open_workshop),
+        ):
+            self.action_registry.register(Action(identifier, key, fallback, lambda _value, run=callback: run()))
+        self.command_history = CommandHistory(user_setting_dict, write_user_setting)
+        action = QAction(self)
+        retranslator.bind(action, "command_palette_title")
+        action.setShortcuts([QKeySequence("Ctrl+K"), QKeySequence("Ctrl+Shift+P")])
+        action.setShortcutContext(Qt.ShortcutContext.ApplicationShortcut)
+        action.triggered.connect(self.open_command_palette)
+        self.menu_bar.addAction(action)
+        self.command_palette_action = action
+
+    def _open_command_page(self, index: int) -> None:
+        self.showNormal()
+        self.sidebar.select_page(index)
+        self.raise_()
+        self.activateWindow()
+
+    def open_command_palette(self) -> None:
+        """Show one persistent palette; reopening never duplicates dialogs."""
+        if self.command_palette is None:
+            self.command_palette = CommandPaletteDialog(self.action_registry, self.command_history, self)
+        self.command_palette.show()
+        self.command_palette.raise_()
+        self.command_palette.activateWindow()
 
     def toggle_shortcut_sheet(self) -> None:
         """
@@ -992,6 +1034,8 @@ class FrontEngineMainUI(QMainWindow):
             return
         self._shutdown_done = True
         front_engine_logger.info("[FrontEngineMainUI] shutdown")
+        if getattr(self, "command_palette", None) is not None:
+            self.command_palette.close()
         if user_setting_dict.get("restore_last_session"):
             save_last_session(self)
         self._stop_services()
