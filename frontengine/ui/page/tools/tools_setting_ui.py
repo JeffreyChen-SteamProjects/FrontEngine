@@ -8,8 +8,9 @@ arranging - as opposed to the other pages, which are for showing.
 """
 from typing import List, Optional
 from pathlib import Path
+import sys
 
-from PySide6.QtCore import QBuffer, QIODevice, QTimer
+from PySide6.QtCore import QBuffer, QIODevice, QTimer, QRect
 from PySide6.QtGui import QGuiApplication, QPixmap
 from PySide6.QtWidgets import (
     QCheckBox, QComboBox, QFileDialog, QLabel, QLineEdit, QPushButton, QSpinBox, QMessageBox,
@@ -108,6 +109,7 @@ class ToolsSettingUI(SettingPage):
         # raises RuntimeError on touch and "copy last" was a silent no-op.
         self.last_capture: Optional[QPixmap] = None
         self.capture_editor = None
+        self.ocr_widget_list = []
         self.pin_dialog: Optional[WindowPinDialog] = None
         self.replica_dialog: Optional[WindowReplicaDialog] = None
 
@@ -158,6 +160,9 @@ class ToolsSettingUI(SettingPage):
         screen_text.add_row("tools_action", self.screen_text_combobox, "Action")
         screen_text.add_widget(self.screen_text_input)
         screen_text.add_inline(self.screen_text_button)
+        self.live_ocr_button = tr(QPushButton(), 'live_ocr_title')
+        self.live_ocr_button.clicked.connect(self.start_live_ocr)
+        screen_text.add_inline(self.live_ocr_button)
 
         self._add_record_section()
 
@@ -652,6 +657,58 @@ class ToolsSettingUI(SettingPage):
         picker.show()
         self.capture_widget_list.append(picker)
         return picker
+
+    def start_live_ocr(self) -> RegionCaptureWidget | None:
+        """Select one fixed screen region for a manual-first, locally recognized OCR window."""
+        if len(self.ocr_widget_list) >= 4:
+            self.ocr_widget_list = [widget for widget in self.ocr_widget_list if not widget.closed]
+        if len(self.ocr_widget_list) >= 4:
+            self._on_capture_failed(_t('live_ocr_limit', 'Close an OCR window before opening another (maximum four).'))
+            return None
+        picker = RegionCaptureWidget(on_captured=lambda pixmap, rect: self._live_ocr_selected(picker, rect))
+        picker.failed.connect(self._on_capture_failed)
+        screen = QGuiApplication.primaryScreen()
+        if screen is not None:
+            picker.setGeometry(screen.geometry())
+        picker.setMouseTracking(True)
+        picker.show()
+        self.capture_widget_list.append(picker)
+        return picker
+
+    def _live_ocr_selected(self, picker, rect: QRect) -> None:
+        from frontengine.show.pinned.live_ocr_widget import LiveOcrWidget
+        from frontengine.utils.screen_text.live_ocr import make_live_reader
+        region = QRect(rect) if sys.platform == 'darwin' else QRect(picker.mapToGlobal(rect.topLeft()), rect.size())
+        widget = LiveOcrWidget(region, make_live_reader(self.screen_text_service))
+        widget.consent_requested.connect(lambda kind: self._review_ocr_consent(widget, kind))
+        screen = QGuiApplication.screenAt(region.center())
+        if screen is not None:
+            available = screen.availableGeometry()
+            x = max(available.left(), min(available.right()-widget.width()+1, region.right()+12))
+            y = max(available.top(), min(available.bottom()-widget.height()+1, region.top()))
+            widget.move(x, y)
+        widget.show()
+        self.ocr_widget_list.append(widget)
+        if picker in self.capture_widget_list:
+            self.capture_widget_list.remove(picker)
+        QTimer.singleShot(100, widget, widget.refresh)
+
+    def _review_ocr_consent(self, widget, kind: str) -> None:
+        if api_key() is None:
+            widget._failed('Set ANTHROPIC_API_KEY to enable explicitly requested cloud fallback')
+            return
+        granted = ask_for_text_consent(widget) if kind == 'text' else ask_for_consent(widget)
+        if granted:
+            widget.refresh()
+
+    def close_live_ocr(self) -> None:
+        """Stop region sources and late OCR result delivery before clearing the widget registry."""
+        for widget in self.ocr_widget_list[:]:
+            try:
+                widget.close()
+            except RuntimeError:
+                pass
+        self.ocr_widget_list.clear()
 
     def _read_capture(self, pixmap) -> None:
         """把框到的畫面送出去讀（在背景執行緒，UI 不會卡住）。"""

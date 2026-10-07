@@ -436,7 +436,7 @@ class FrontEngineMainUI(QMainWindow):
             self.control_center_ui.register_overlay_source(
                 lambda attribute=attribute: getattr(self.widgets_setting_ui, attribute, []))
         for attribute in ("measure_widget_list", "capture_widget_list", "camera_widget_list",
-                          "pinned_widget_list"):
+                          "pinned_widget_list", "ocr_widget_list"):
             self.control_center_ui.register_overlay_source(
                 lambda attribute=attribute: getattr(self.tools_setting_ui, attribute, []))
         # 參考圖板也要進控制中心，否則「全部關閉」關不掉它
@@ -1102,6 +1102,7 @@ class FrontEngineMainUI(QMainWindow):
         self.pet_setting_ui.close_pack_editor()
         self.tools_setting_ui.close_palette()
         self.tools_setting_ui.close_capture_editor()
+        self.tools_setting_ui.close_live_ocr()
         from frontengine.user_setting.scene_setting import release_scene_packages
         if hasattr(self, 'tools_setting_ui'):
             self.tools_setting_ui.recorder.close()
