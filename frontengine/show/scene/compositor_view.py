@@ -46,6 +46,8 @@ class SceneCompositorView(QWidget):
         layers = []
         # Keep Qt's stacking order for siblings that share the same z value.
         for index, proxy in enumerate(self.scene.items(Qt.SortOrder.AscendingOrder)):
+            if not proxy.isVisible():
+                continue
             widget = proxy.widget() if hasattr(proxy, 'widget') else None
             if widget is None or not hasattr(widget, 'output_frame'):
                 continue

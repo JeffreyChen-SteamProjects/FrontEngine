@@ -146,6 +146,9 @@ class RulesDialog(QDialog):
         self.button_box.accepted.connect(self.accept)
         self.button_box.rejected.connect(self.reject)
     def _build_diagnostics(self) -> None:
+        self.target_button = tr(QPushButton(), 'rules_choose_target')
+        self.target_button.setAutoDefault(False)
+        self.target_button.clicked.connect(self.choose_target)
         self.preview_button = tr(QPushButton(), 'rules_preview')
         self.history_button = tr(QPushButton(), 'rules_history')
         self.preview_button.clicked.connect(self.preview_conditions)
@@ -168,10 +171,30 @@ class RulesDialog(QDialog):
         layout.addWidget(self.order_hint, 3, 0, 1, 2)
         layout.addWidget(self.preview_button, 4, 0)
         layout.addWidget(self.history_button, 4, 1)
-        layout.addWidget(self.diagnostics, 5, 0, 1, 2)
-        layout.addWidget(self.status, 6, 0, 1, 2)
-        layout.addWidget(self.button_box, 7, 0, 1, 2)
+        layout.addWidget(self.target_button, 5, 0, 1, 2)
+        layout.addWidget(self.diagnostics, 6, 0, 1, 2)
+        layout.addWidget(self.status, 7, 0, 1, 2)
+        layout.addWidget(self.button_box, 8, 0, 1, 2)
         self.resize(1050, 700)
+
+    def choose_target(self) -> None:
+        """Edit the selected scene/layer action with file and layer selectors."""
+        from frontengine.ui.dialog.scene_action_dialog import SceneActionDialog
+        row = self.table.currentRow()
+        if row < 0:
+            return
+        action = self.table.cellWidget(row, _COLUMN_ACTION).currentData()
+        if action == 'scene_stop':
+            self.table.item(row, _COLUMN_VALUE).setText('')
+            return
+        if not (action in ('scene_load', 'scene_start') or action.startswith('layer_')):
+            retranslator.set_text(self.status, 'rules_target_hint')
+            return
+        from frontengine.user_setting.scene_setting import scene_json
+        dialog = SceneActionDialog(action, self._cell_text(row, _COLUMN_VALUE), scene_json, self)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            self.table.item(row, _COLUMN_VALUE).setText(dialog.action_value())
+        dialog.deleteLater()
 
 
     def add_row(self, rule: Optional[Dict[str, Any]] = None) -> None:

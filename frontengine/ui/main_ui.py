@@ -55,6 +55,7 @@ from frontengine.utils.critical_exit.critical_exit import CriticalExit
 from frontengine.utils.critical_exit.win32_vk import keyboard_keys_table
 from frontengine.utils.hotkey.hotkey_service import HotkeyService
 from frontengine.utils.actions.action_registry import Action, ActionRegistry
+from frontengine.utils.actions.deferred_action import DeferredAction
 from frontengine.utils.actions.command_history import CommandHistory
 from frontengine.ui.dialog.command_palette_dialog import CommandPaletteDialog
 from frontengine.utils.keep_awake.keep_awake import KeepAwake
@@ -734,7 +735,16 @@ class FrontEngineMainUI(QMainWindow):
             registry.bind(identifier, lambda _value, action=identifier: send_media_key(action))
         registry.bind("apply_preset", lambda value: apply_named_preset(self, value), takes_value=True)
         registry.bind("quality_tier", self.control_center_ui.set_quality_tier, takes_value=True)
+        FrontEngineMainUI._bind_scene_actions(self, registry)
         return registry
+
+    def _bind_scene_actions(self, registry: ActionRegistry) -> None:
+        actions = self.scene_setting_ui.actions
+        registry.bind('scene_load', lambda value: actions.request(value, load_only=True), takes_value=True)
+        registry.bind('scene_start', actions.request, takes_value=True, optional_value=True)
+        registry.bind('scene_stop', actions.stop_playback)
+        for identifier in ('layer_show', 'layer_hide', 'layer_opacity', 'layer_position'):
+            registry.bind(identifier, lambda value, action=identifier: actions.layer(action, value), takes_value=True)
 
     def _handle_hotkey(self, action: str) -> None:
         """Dispatch hotkey, remote and MIDI actions on the GUI thread."""
@@ -815,7 +825,16 @@ class FrontEngineMainUI(QMainWindow):
         front_engine_logger.info(
             f"[FrontEngineMainUI] rule '{rule.get('label')}' -> {action} {value}")
         try:
-            success = self.action_registry.execute(action, value)
+            result = self.action_registry.invoke(action, value)
+            service = getattr(self, 'rule_engine_service', None)
+            if isinstance(result, DeferredAction):
+                if service is not None:
+                    if result.result is None:
+                        result.finished.connect(lambda success, error: service.record_execution(rule, success, error))
+                    else:
+                        service.record_execution(rule, result.result, result.error)
+                return
+            success = result is not False
             error = '' if success else 'Action did not complete'
         except (OSError, ValueError, RuntimeError) as exception:
             success, error = False, str(exception)
@@ -1057,7 +1076,7 @@ class FrontEngineMainUI(QMainWindow):
         if hasattr(self, 'tools_setting_ui'):
             self.tools_setting_ui.recorder.close()
         # Assets must outlive all scene/pet widgets that may still read them.
-        self.scene_setting_ui.close_scene()
+        self.scene_setting_ui.shutdown_scene()
         release_scene_packages()
         # 執行緒執行狀態跟著行程活著，不放開的話關掉程式之後螢幕還是不會睡。
         # The execution state lives with the process: without releasing it the

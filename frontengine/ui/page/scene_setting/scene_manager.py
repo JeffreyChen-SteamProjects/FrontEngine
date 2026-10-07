@@ -132,29 +132,19 @@ class SceneManagerUI(QWidget):
 
     def _add_scene_widgets(self, scene: dict) -> None:
         """把場景描述裡的每個項目加進場景；不認得的型別會提醒使用者。"""
-        scene_add_function = {
-            "TEXT": self.scene.add_text,
-            "IMAGE": self.scene.add_image,
-            "GIF": self.scene.add_gif,
-            "SOUND": self.scene.add_sound,
-            "VIDEO": self.scene.add_video,
-            "WEB": self.scene.add_web,
-            'PUPPET': self.scene.add_puppet,
-        }
-        for scene_dict in scene.values():
+        for key, scene_dict in scene.items():
             if not isinstance(scene_dict, dict):
                 QMessageBox.warning(
                     self, "Invalid Scene Entry",
                     f"A scene entry must be an object, not {type(scene_dict).__name__}")
                 continue
             scene_widget_type = scene_dict.get("type")
-            function = scene_add_function.get(scene_widget_type)
-            if function is None:
+            if scene_widget_type not in ('TEXT', 'IMAGE', 'GIF', 'SOUND', 'VIDEO', 'WEB', 'PUPPET'):
                 QMessageBox.warning(
                     self, "Unknown Type", f"Unsupported scene type: {scene_widget_type}")
                 continue
             try:
-                function(setting_dict=scene_dict)
+                self.scene.add_entry(key, scene_dict)
             except ValueError as error:
                 # 手寫的場景檔漏欄位是常態，指出哪一項壞掉就好，不要整個中斷
                 # A hand-written scene file missing a field is routine: name the

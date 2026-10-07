@@ -22,6 +22,13 @@ ACTION_LABELS = {
     "move_window_next_monitor": ("hotkey_move_window_next_monitor", "Move window to the next monitor"),
     "apply_preset": ("rules_action_apply_preset", "Apply preset"),
     "quality_tier": ("rules_action_quality", "Set quality"),
+    "scene_load": ("rules_action_scene_load", "Load scene"),
+    "scene_start": ("rules_action_scene_start", "Play scene"),
+    "scene_stop": ("rules_action_scene_stop", "Stop scene"),
+    "layer_show": ("rules_action_layer_show", "Show layer"),
+    "layer_hide": ("rules_action_layer_hide", "Hide layer"),
+    "layer_opacity": ("rules_action_layer_opacity", "Set layer opacity"),
+    "layer_position": ("rules_action_layer_position", "Move layer"),
 }
 
 
@@ -34,6 +41,7 @@ class Action:
     fallback: str
     callback: Callable[[str], object]
     takes_value: bool = False
+    optional_value: bool = False
 
 
 class ActionRegistry:
@@ -48,14 +56,19 @@ class ActionRegistry:
             raise ValueError("Duplicate or empty action identifier")
         self.actions[action.identifier] = action
 
-    def bind(self, identifier: str, callback: Callable[[str], object], takes_value: bool = False) -> None:
+    def bind(self, identifier: str, callback: Callable[[str], object], takes_value: bool = False,
+             *, optional_value: bool = False) -> None:
         """Bind a built-in definition to its owning application instance."""
         key, fallback = ACTION_LABELS[identifier]
-        self.register(Action(identifier, key, fallback, callback, takes_value))
+        self.register(Action(identifier, key, fallback, callback, takes_value, optional_value))
 
     def execute(self, identifier: str, value: str = "") -> bool:
         """Return False for unknown/missing input or an explicitly failed callback."""
+        return self.invoke(identifier, value) is not False
+
+    def invoke(self, identifier: str, value: str = "") -> object:
+        """Return the callback receipt so async callers can observe completion."""
         action = self.actions.get(identifier)
-        if action is None or (action.takes_value and not value.strip()):
+        if action is None or (action.takes_value and not action.optional_value and not value.strip()):
             return False
-        return action.callback(value) is not False
+        return action.callback(value)

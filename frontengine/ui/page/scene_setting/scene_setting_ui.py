@@ -1,5 +1,5 @@
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QTabWidget
+from PySide6.QtWidgets import QTabWidget, QLabel
 
 from frontengine.ui.page.layout_kit import SettingPage
 
@@ -10,6 +10,7 @@ from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.ui.page.scene_setting.scene_visual_editor import SceneVisualEditor
 from frontengine.utils.multi_language.retranslate import retranslator
+from frontengine.ui.page.scene_setting.scene_actions import SceneActions
 
 
 class SceneSettingUI(SettingPage):
@@ -41,16 +42,28 @@ class SceneSettingUI(SettingPage):
         # a different kind of choice from the main navigation, and flattening
         # them would hide that they belong to one scene.
         self.add_body_widget(self.tab_widget, 1)
+        self.actions = SceneActions(self)
+        self.action_status = QLabel()
+        self.action_status.setWordWrap(True)
+        self.add_body_widget(self.action_status)
+        self.actions.status_changed.connect(self._action_status)
+        self._action_status('')
+
+    def _action_status(self, error: str) -> None:
+        if error:
+            self.action_status.setText(error)
+        else:
+            key = 'scene_action_loading' if self.actions.pending is not None else 'scene_action_ready'
+            retranslator.set_text(self.action_status, key)
 
     def close_scene(self) -> None:
         front_engine_logger.info("[SceneSettingUI] close_scene")
-        views = tuple(self.scene.view_list)
-        self.scene.view_list.clear()
-        for view in views:
-            try:
-                view.close()
-                view.deleteLater()
-            except RuntimeError:  # A manually closed view may already be deleted.
-                continue
-        # Stop render timers before deleting the proxies they read.
-        self.scene.clear()
+        self.actions.stop_playback()
+
+    def shutdown_scene(self) -> None:
+        """Close playback and previews before releasing extracted scene resources."""
+        self.actions.shutdown()
+
+    def closeEvent(self, event) -> None:
+        self.shutdown_scene()
+        super().closeEvent(event)

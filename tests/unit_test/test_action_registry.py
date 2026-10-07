@@ -29,6 +29,8 @@ def test_main_bindings_preserve_all_hotkey_and_rule_routes(monkeypatch):
     window = SimpleNamespace(control_center_ui=controls,
                              web_setting_ui=SimpleNamespace(show_next_dashboard_page=Mock()),
                              presentation_setting_ui=SimpleNamespace(toggle_freeze=Mock()),
+                             scene_setting_ui=SimpleNamespace(actions=SimpleNamespace(
+                                 request=Mock(), stop_playback=Mock(), layer=Mock())),
                              toggle_shortcut_sheet=Mock())
     media, monitor, preset = Mock(), Mock(), Mock()
     monkeypatch.setattr(module, "send_media_key", media)

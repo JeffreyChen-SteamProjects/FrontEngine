@@ -42,6 +42,7 @@ from PySide6.QtCore import QObject, QTimer, Signal
 
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.smart_pause.pause_rules import app_matches, parse_app_list
+from frontengine.utils.scene_format.scene_action_values import scene_request, layer_changes
 
 DEFAULT_INTERVAL_MS = 5000
 
@@ -54,10 +55,12 @@ ACTION_SHOW_ALL = "show_all"
 ACTION_CLOSE_ALL = "close_all"
 ACTION_QUALITY_TIER = "quality_tier"
 ACTIONS = (ACTION_APPLY_PRESET, ACTION_HIDE_ALL, ACTION_SHOW_ALL,
-           ACTION_CLOSE_ALL, ACTION_QUALITY_TIER)
+           ACTION_CLOSE_ALL, ACTION_QUALITY_TIER, 'scene_load', 'scene_start', 'scene_stop',
+           'layer_show', 'layer_hide', 'layer_opacity', 'layer_position')
 # 需要附帶一個值的動作（預設集名稱、畫質檔位）
 # Actions that carry a value: a preset name, a quality tier.
-VALUE_ACTIONS = (ACTION_APPLY_PRESET, ACTION_QUALITY_TIER)
+VALUE_ACTIONS = (ACTION_APPLY_PRESET, ACTION_QUALITY_TIER, 'scene_load', 'scene_start',
+                 'layer_show', 'layer_hide', 'layer_opacity', 'layer_position')
 
 
 def parse_minute_of_day(text: Any) -> Optional[int]:
@@ -116,6 +119,20 @@ def normalize_days(value: Any) -> List[int]:
     return sorted(days)
 
 
+def valid_action_value(action: str, value: str) -> bool:
+    """Reject malformed scene/layer values; playback may omit its path."""
+    if action in VALUE_ACTIONS and action != 'scene_start' and not value:
+        return False
+    try:
+        if action in ('scene_start', 'scene_load'):
+            scene_request(value, load_only=action == 'scene_load')
+        elif action.startswith('layer_'):
+            layer_changes(action, value)
+    except (ValueError, RecursionError):
+        return False
+    return True
+
+
 def normalize_rule(entry: Any) -> Optional[Dict[str, Any]]:
     """
     整理一條規則；缺標籤、動作不認得、或該帶值卻沒帶值的一律回傳 None
@@ -131,7 +148,7 @@ def normalize_rule(entry: Any) -> Optional[Dict[str, Any]]:
     if not label or action not in ACTIONS:
         return None
     value = str(entry.get("value", "")).strip()
-    if action in VALUE_ACTIONS and not value:
+    if not valid_action_value(action, value):
         return None
     priority = _bounded_integer(entry.get('priority', 0), -1000, 1000)
     cooldown = _bounded_integer(entry.get('cooldown', 0), 0, 86400)

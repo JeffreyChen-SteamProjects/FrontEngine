@@ -96,7 +96,7 @@ class CommandPaletteDialog(QDialog):
         if action is None:
             return
         value = self.value_input.text().strip() if action.takes_value else ""
-        if action.takes_value and not value:
+        if action.takes_value and not action.optional_value and not value:
             self.value_input.setFocus()
             return
         self.hide()
