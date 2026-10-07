@@ -55,9 +55,11 @@ VALUE_ACTIONS = (ACTION_APPLY_PRESET, ACTION_QUALITY_TIER)
 
 
 def parse_minute_of_day(text: Any) -> Optional[int]:
-    """把 "19:30" 解析成從午夜起算的分鐘數；格式不對回傳 None。"""
+    """Accept HH:MM input or already-normalized minutes; reject invalid values."""
     if text is None:
         return None
+    if type(text) is int:
+        return text if 0 <= text < 1440 else None
     parts = str(text).strip().split(":")
     if len(parts) != 2:
         return None
@@ -101,7 +103,7 @@ def normalize_days(value: Any) -> List[int]:
     for item in value:
         try:
             day = int(item)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             continue
         if 0 <= day <= 6:
             days.add(day)
@@ -147,7 +149,7 @@ def normalize_rule(entry: Any) -> Optional[Dict[str, Any]]:
 def _coerce_positive(value: Any) -> Optional[int]:
     try:
         number = int(value)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return None
     return number if number > 0 else None
 
