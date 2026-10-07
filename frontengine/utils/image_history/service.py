@@ -11,12 +11,13 @@ from typing import Callable
 from PySide6.QtCore import QObject, QTimer, Signal
 from PySide6.QtGui import QGuiApplication, QImage
 
-from frontengine.utils.image_history.repository import ImageHistoryRepository, MAX_IMAGE_PIXELS
+from frontengine.utils.image_history.repository import ImageHistoryRepository, MAX_IMAGE_PIXELS, encode_image
 
 
 class _Worker:
-    def __init__(self, path: Path, config: dict) -> None:
+    def __init__(self, path: Path, config: dict, indexer: Callable | None = None) -> None:
         self.path, self.config = path, dict(config)
+        self.indexer = indexer
         self.condition = Condition()
         self.commands, self.results = OrderedDict(), OrderedDict()
         self.image, self.stopping = None, False
@@ -116,10 +117,26 @@ class _Worker:
         elif kind == 'capture':
             if not self.config['enabled']:
                 return None
-            repository.add(args['image'])
+            return self._capture(repository, args['image'])
         else:
             raise ValueError('Unknown image history operation')
         return True
+
+    def _capture(self, repository: ImageHistoryRepository, image: QImage):
+        text, error = '', ''
+        if self.indexer is not None:
+            try:
+                result = self.indexer(encode_image(image))
+                if result.status != 'success':
+                    error = result.error or result.status
+                elif not isinstance(result.text, str) or len(result.text) > 20000:
+                    error = 'Local OCR text exceeds 20000 characters'
+                else:
+                    text = result.text
+            except Exception as failure:
+                error = str(failure)[:2000]
+        identity = repository.add(image, text=text)
+        return {'id': identity, 'indexed': self.indexer is not None and not error, 'error': str(error)[:2000]}
 
 
 class ImageHistoryService(QObject):
@@ -129,7 +146,8 @@ class ImageHistoryService(QObject):
     failed = Signal(str, str)
 
     def __init__(self, path: str | Path, config: dict | None = None, parent=None,
-                 *, clipboard_provider: Callable = QGuiApplication.clipboard) -> None:
+                 *, clipboard_provider: Callable = QGuiApplication.clipboard,
+                 indexer: Callable | None = None) -> None:
         super().__init__(parent)
         source = config or {}
         self.config = {'enabled': source.get('enabled') is True, 'persistent': source.get('persistent') is True,
@@ -139,6 +157,7 @@ class ImageHistoryService(QObject):
         if type(self.config['capacity_mib']) is not int or not 8 <= self.config['capacity_mib'] <= 128:
             self.config['capacity_mib'] = 64
         self.path = Path(path)
+        self.indexer = indexer
         self.clipboard_provider, self.clipboard = clipboard_provider, None
         self.worker, self.closed = None, False
         self.timer = QTimer(self)
@@ -152,7 +171,7 @@ class ImageHistoryService(QObject):
         if self.closed:
             raise ValueError('Image history service is closed')
         if self.worker is None:
-            self.worker = _Worker(self.path, self.config)
+            self.worker = _Worker(self.path, self.config, self.indexer)
             self.timer.start()
 
     def request(self, kind: str, **arguments) -> None:

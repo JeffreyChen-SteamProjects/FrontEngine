@@ -110,8 +110,8 @@ class ImageHistoryRepository:
         for identity, at, pinned, recognized in rows:
             if not isinstance(identity, str) or len(identity) != 64 or not isinstance(at, str) or len(at) > 64 or not isinstance(recognized, str) or len(recognized) > 20000 or pinned not in (0, 1):
                 raise ValueError('Saved history metadata is invalid')
-            datetime.fromisoformat(at)
-            if text.casefold() not in recognized.casefold() or (date and not at.startswith(date)):
+            local_date = datetime.fromisoformat(at).astimezone().date().isoformat()
+            if text.casefold() not in recognized.casefold() or (date and local_date != date):
                 continue
             image = self.image(identity)
             thumbnail = image.scaled(160, 120, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)

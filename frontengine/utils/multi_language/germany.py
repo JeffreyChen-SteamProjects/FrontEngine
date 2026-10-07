@@ -1091,4 +1091,11 @@ germany_word_dict = {
     'live_ocr_unchanged': 'Text unverändert · {backend}',
     'live_ocr_overlap': 'OCR-Fenster vor Aktualisierung außerhalb des Bereichs bewegen.',
     'live_ocr_limit': 'Zuerst ein OCR-Fenster schließen (maximal vier).',
+    'capture_history_title': 'Aufnahmeverlauf und Suche',
+    'capture_history_enable': 'Aufnahmen mit lokaler OCR speichern',
+    'capture_history_text': 'Erkannter Text',
+    'capture_history_date': 'Lokales Datum YYYY-MM-DD',
+    'capture_history_indexed': 'Aufnahme lokal gespeichert und indiziert',
+    'capture_history_unindexed': 'Aufnahme ohne Textindex gespeichert; Grund im Tooltip',
+    'capture_history_hint': 'Standardmäßig aus. Nur Bereichsaufnahmen aus Werkzeuge, keine Zwischenablageüberwachung. Nur lokale OCR, keine Uploads. Optional dauerhaft, 10–200 Bilder / 8–128 MiB. Datum in lokaler Zeitzone. Löschen entfernt Bild und Text; Speichern abschalten löscht die Datenbank.',
 }

@@ -1097,4 +1097,11 @@ traditional_chinese_word_dict = {
     'live_ocr_unchanged': '文字未變更 · {backend}',
     'live_ocr_overlap': '請將 OCR 浮窗移到選定區域之外再刷新。',
     'live_ocr_limit': '請先關閉一個 OCR 浮窗（最多四個）。',
+    'capture_history_title': '截圖歷史與搜尋',
+    'capture_history_enable': '保存截圖並建立本機 OCR 索引',
+    'capture_history_text': '辨識文字',
+    'capture_history_date': '本地日期 YYYY-MM-DD',
+    'capture_history_indexed': '已保存截圖與本機文字索引',
+    'capture_history_unindexed': '已保存截圖，未建立文字索引；移入查看原因',
+    'capture_history_hint': '預設關閉，僅保存工具頁框選截圖，不監看剪貼簿。只用本機 OCR，不會上傳。可選跨工作階段保存，10–200 張／8–128 MiB。日期依本地時區；刪除同時移除圖片與文字，取消保存會刪除資料庫。',
 }

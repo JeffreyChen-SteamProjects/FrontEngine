@@ -2,9 +2,9 @@
 from __future__ import annotations
 from datetime import datetime
 
-from PySide6.QtCore import QSize, Qt
+from PySide6.QtCore import QSize, Qt, QTimer
 from PySide6.QtGui import QGuiApplication, QIcon, QPixmap
-from PySide6.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLabel, QCheckBox, QSpinBox, QPushButton, QListWidget, QListWidgetItem, QAbstractItemView
+from PySide6.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLabel, QCheckBox, QSpinBox, QPushButton, QListWidget, QListWidgetItem, QAbstractItemView, QLineEdit
 
 from frontengine.utils.multi_language.retranslate import tr, retranslator
 
@@ -12,14 +12,17 @@ from frontengine.utils.multi_language.retranslate import tr, retranslator
 class ImageHistoryDialog(QDialog):
     """Explicit settings and one reusable owner window; no history recording on open."""
 
-    def __init__(self, service, parent=None, *, clipboard_provider=QGuiApplication.clipboard) -> None:
+    def __init__(self, service, parent=None, *, clipboard_provider=QGuiApplication.clipboard,
+                 capture_mode: bool = False) -> None:
         super().__init__(parent)
         self.service, self.clipboard_provider = service, clipboard_provider
+        self.capture_mode = capture_mode
         self.image_busy = False
-        tr(self, 'image_history_title', setter='setWindowTitle')
+        tr(self, 'capture_history_title' if capture_mode else 'image_history_title', setter='setWindowTitle')
         self.resize(800, 600)
         layout = QVBoxLayout(self)
         self._build_settings(layout)
+        self._build_search(layout)
         self.entries = QListWidget()
         self.entries.setViewMode(QListWidget.ViewMode.IconMode)
         self.entries.setIconSize(QSize(160, 120))
@@ -38,7 +41,7 @@ class ImageHistoryDialog(QDialog):
             row.addWidget(button)
             self.action_buttons.append(button)
         layout.addLayout(row)
-        self.status = tr(QLabel(), 'image_history_hint')
+        self.status = tr(QLabel(), 'capture_history_hint' if capture_mode else 'image_history_hint')
         self.status.setWordWrap(True)
         self.status.setTextFormat(Qt.TextFormat.PlainText)
         layout.addWidget(self.status)
@@ -47,7 +50,7 @@ class ImageHistoryDialog(QDialog):
 
     def _build_settings(self, layout) -> None:
         row = QHBoxLayout()
-        self.enabled = tr(QCheckBox(), 'image_history_enable')
+        self.enabled = tr(QCheckBox(), 'capture_history_enable' if self.capture_mode else 'image_history_enable')
         self.persist = tr(QCheckBox(), 'image_history_persist')
         self.limit, self.capacity = QSpinBox(), QSpinBox()
         self.limit.setRange(10, 200)
@@ -57,6 +60,22 @@ class ImageHistoryDialog(QDialog):
         for widget in (self.enabled, self.persist, tr(QLabel(), 'image_history_limit'), self.limit,
                        tr(QLabel(), 'image_history_capacity'), self.capacity, self.apply_button):
             row.addWidget(widget)
+        layout.addLayout(row)
+
+    def _build_search(self, layout) -> None:
+        self.search, self.date = QLineEdit(), QLineEdit()
+        self.search_timer = QTimer(self)
+        self.search_timer.setSingleShot(True)
+        self.search_timer.setInterval(250)
+        self.search_timer.timeout.connect(self.reload)
+        if not self.capture_mode:
+            return
+        row = QHBoxLayout()
+        for label, field in (('capture_history_text', self.search), ('capture_history_date', self.date)):
+            field.setMaxLength(256)
+            row.addWidget(tr(QLabel(), label))
+            row.addWidget(field)
+            field.textChanged.connect(lambda: self.search_timer.start())
         layout.addLayout(row)
 
     def _config_fields(self) -> None:
@@ -77,7 +96,7 @@ class ImageHistoryDialog(QDialog):
 
     def reload(self) -> None:
         """Read thumbnails on the worker; the GUI list never opens full image files."""
-        self.service.request('list')
+        self.service.request('list', text=self.search.text().strip(), date=self.date.text().strip())
 
     def _get_image(self, action: str) -> None:
         selected = self._selected()
@@ -111,6 +130,13 @@ class ImageHistoryDialog(QDialog):
         elif kind == 'image':
             self._use_image(value)
         elif kind in ('capture', 'configure', 'clear', 'remove', 'pin'):
+            if kind == 'capture' and self.capture_mode and isinstance(value, dict):
+                if value['error']:
+                    retranslator.set_text(self.status, 'capture_history_unindexed')
+                    self.status.setToolTip(value['error'])
+                else:
+                    retranslator.set_text(self.status, 'capture_history_indexed')
+                    self.status.setToolTip('')
             self.reload()
 
     def _show_entries(self, values: list) -> None:
@@ -120,7 +146,7 @@ class ImageHistoryDialog(QDialog):
             at = datetime.fromisoformat(entry['at']).astimezone().strftime('%Y-%m-%d %H:%M:%S')
             item = QListWidgetItem(QIcon(QPixmap.fromImage(entry['thumbnail'])), ('★ ' if entry['pinned'] else '') + at)
             item.setData(Qt.ItemDataRole.UserRole, {'id': entry['id'], 'pinned': entry['pinned']})
-            item.setToolTip(entry['at'])
+            item.setToolTip(entry['at'] + '\n' + entry['text'][:500])
             self.entries.addItem(item)
             if selected is not None and selected['id'] == entry['id']:
                 self.entries.setCurrentItem(item)
@@ -159,10 +185,12 @@ class ImageHistoryDialog(QDialog):
         super().showEvent(event)
 
     def done(self, result: int) -> None:
+        self.search_timer.stop()
         self.entries.clear()
         self.image_busy = False
         super().done(result)
 
     def closeEvent(self, event) -> None:
+        self.search_timer.stop()
         self.entries.clear()
         super().closeEvent(event)

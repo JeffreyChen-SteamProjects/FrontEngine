@@ -1088,4 +1088,11 @@ french_word_dict = {
     'live_ocr_unchanged': 'Texte inchangé · {backend}',
     'live_ocr_overlap': 'Déplacez la fenêtre OCR hors de la zone avant d’actualiser.',
     'live_ocr_limit': 'Fermez une fenêtre OCR avant une autre (maximum quatre).',
+    'capture_history_title': 'Historique et recherche de captures',
+    'capture_history_enable': 'Enregistrer avec OCR locale',
+    'capture_history_text': 'Texte reconnu',
+    'capture_history_date': 'Date locale YYYY-MM-DD',
+    'capture_history_indexed': 'Capture enregistrée et indexée localement',
+    'capture_history_unindexed': 'Capture sans index texte ; raison au survol',
+    'capture_history_hint': 'Désactivé par défaut. Captures de zone des Outils uniquement, aucun suivi du presse-papiers. OCR locale, aucun envoi. Conservation facultative, 10–200 images / 8–128 MiB. Date locale. Supprimer efface image et texte ; désactiver la conservation efface la base.',
 }

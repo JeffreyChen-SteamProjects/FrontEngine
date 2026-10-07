@@ -1090,4 +1090,11 @@ simplified_chinese_word_dict = {
     'live_ocr_unchanged': '文字未变化 · {backend}',
     'live_ocr_overlap': '请将 OCR 浮窗移到所选区域之外再刷新。',
     'live_ocr_limit': '请先关闭一个 OCR 浮窗（最多四个）。',
+    'capture_history_title': '截图历史与搜索',
+    'capture_history_enable': '保存截图并建立本地 OCR 索引',
+    'capture_history_text': '识别文字',
+    'capture_history_date': '本地日期 YYYY-MM-DD',
+    'capture_history_indexed': '已保存截图与本地文字索引',
+    'capture_history_unindexed': '已保存截图，未建立文字索引；悬停查看原因',
+    'capture_history_hint': '默认关闭，仅保存工具页框选截图，不监看剪贴板。只用本地 OCR，不会上传。可选跨会话保存，10–200 张／8–128 MiB。日期依本地时区；删除同时移除图片与文字，取消保存会删除数据库。',
 }

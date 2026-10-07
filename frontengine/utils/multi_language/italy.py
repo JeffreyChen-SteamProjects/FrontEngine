@@ -1088,4 +1088,11 @@ italian_word_dict = {
     'live_ocr_unchanged': 'Testo invariato · {backend}',
     'live_ocr_overlap': 'Sposta la finestra OCR fuori dall’area prima di aggiornare.',
     'live_ocr_limit': 'Chiudi una finestra OCR prima di un’altra (massimo quattro).',
+    'capture_history_title': 'Cronologia e ricerca catture',
+    'capture_history_enable': 'Salva catture con OCR locale',
+    'capture_history_text': 'Testo riconosciuto',
+    'capture_history_date': 'Data locale YYYY-MM-DD',
+    'capture_history_indexed': 'Cattura salvata e indicizzata localmente',
+    'capture_history_unindexed': 'Cattura senza indice testo; motivo al passaggio',
+    'capture_history_hint': 'Disattivato inizialmente. Solo catture di area da Strumenti, nessun monitoraggio appunti. OCR locale, nessun invio. Salvataggio facoltativo, 10–200 immagini / 8–128 MiB. Data locale. Eliminare rimuove immagine e testo; disattivare salvataggio elimina database.',
 }

@@ -1098,4 +1098,11 @@ english_word_dict = {
     'live_ocr_unchanged': 'Text unchanged · {backend}',
     'live_ocr_overlap': 'Move this OCR window outside the selected region before refreshing.',
     'live_ocr_limit': 'Close an OCR window before opening another (maximum four).',
+    'capture_history_title': 'Capture history and search',
+    'capture_history_enable': 'Save captures with local OCR',
+    'capture_history_text': 'Recognized text',
+    'capture_history_date': 'Local date YYYY-MM-DD',
+    'capture_history_indexed': 'Capture saved and indexed locally',
+    'capture_history_unindexed': 'Capture saved without text index; hover for reason',
+    'capture_history_hint': 'Off by default. Saves only Tools region captures, never monitors clipboard. Local OCR only; no uploads. Optional persistence, 10–200 images / 8–128 MiB. Dates use your local timezone. Delete removes image and text together; disabling persistence deletes the database.',
 }

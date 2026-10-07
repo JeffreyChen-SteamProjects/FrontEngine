@@ -10,8 +10,8 @@ from typing import List, Optional
 from pathlib import Path
 import sys
 
-from PySide6.QtCore import QBuffer, QIODevice, QTimer, QRect
-from PySide6.QtGui import QGuiApplication, QPixmap
+from PySide6.QtCore import QBuffer, QIODevice, QTimer, QRect, Signal
+from PySide6.QtGui import QGuiApplication, QPixmap, QImage
 from PySide6.QtWidgets import (
     QCheckBox, QComboBox, QFileDialog, QLabel, QLineEdit, QPushButton, QSpinBox, QMessageBox,
 )
@@ -67,6 +67,7 @@ def _t(key: str, fallback: str) -> str:
 
 class ToolsSettingUI(SettingPage):
     """工具設定頁 / The tools page."""
+    captured = Signal(QImage)
 
     def __init__(self):
         front_engine_logger.info("[ToolsSettingUI] Init")
@@ -441,6 +442,7 @@ class ToolsSettingUI(SettingPage):
         """擷取完成：記住畫面並直接複製到剪貼簿。"""
         self.last_capture = pixmap
         widget.copy_to_clipboard()
+        self.captured.emit(pixmap.toImage())
         if widget in self.capture_widget_list:
             self.capture_widget_list.remove(widget)
 

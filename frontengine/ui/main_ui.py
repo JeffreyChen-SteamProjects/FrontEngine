@@ -323,6 +323,7 @@ class FrontEngineMainUI(QMainWindow):
             self.clipboard_history.load(user_setting_dict.get("clipboard_entries"))
         self.clipboard_watcher = ClipboardWatcher(self.clipboard_history)
         self._initialize_image_history()
+        self._initialize_capture_history()
         if user_setting_dict.get("clipboard_history"):
             self.clipboard_watcher.start()
 
@@ -1028,8 +1029,33 @@ class FrontEngineMainUI(QMainWindow):
         self.image_history_dialog.raise_()
         self.image_history_dialog.activateWindow()
 
+    def _initialize_capture_history(self) -> None:
+        """Subscribe only explicit region captures to an independently opted-in local index."""
+        from frontengine.utils.image_history.capture_service import CaptureHistoryService
+        config = user_setting_dict.get('capture_history')
+        config = config if isinstance(config, dict) else {}
+        self.capture_history_service = CaptureHistoryService(Path(getcwd()) / 'capture-history.sqlite3', config, self)
+        self.tools_setting_ui.captured.connect(self.capture_history_service.capture)
+        self.capture_history_service.result.connect(self._capture_history_result)
+        self.capture_history_dialog = None
+
+    def _capture_history_result(self, kind: str, value) -> None:
+        if kind == 'configure':
+            user_setting_dict['capture_history'] = dict(value)
+            write_user_setting()
+
+    def open_capture_history(self) -> None:
+        """Review/search saved captures; opening alone never enables saving or OCR."""
+        from frontengine.ui.dialog.image_history_dialog import ImageHistoryDialog
+        if self.capture_history_dialog is None:
+            self.capture_history_dialog = ImageHistoryDialog(self.capture_history_service, self, capture_mode=True)
+        self.capture_history_dialog.show()
+        self.capture_history_dialog.raise_()
+        self.capture_history_dialog.activateWindow()
+
     _CLOSING_SERVICES = (
         "image_history_service",
+        "capture_history_service",
         "workshop_service",
         "preset_schedule_service", "theme_schedule_service", "usage_service",
         "signage_service", "screensaver_service",
@@ -1037,6 +1063,12 @@ class FrontEngineMainUI(QMainWindow):
         "app_profile_service", "smart_pause_service", "virtual_desktop_service",
         "rule_engine_service", "hotkey_service",
     )
+
+    def _close_history_dialogs(self) -> None:
+        for attribute in ('image_history_dialog', 'capture_history_dialog'):
+            dialog = getattr(self, attribute, None)
+            if dialog is not None:
+                dialog.close()
     # 關閉時要清空的覆蓋層清單
     # The overlay lists to empty on close.
     _CLOSING_WIDGET_LISTS = (
@@ -1092,8 +1124,7 @@ class FrontEngineMainUI(QMainWindow):
             self.command_palette.close()
         if getattr(self, "preset_versions_dialog", None) is not None:
             self.preset_versions_dialog.close()
-        if getattr(self, 'image_history_dialog', None) is not None:
-            self.image_history_dialog.close()
+        self._close_history_dialogs()
         if user_setting_dict.get("restore_last_session"):
             save_last_session(self)
         self._stop_services()
