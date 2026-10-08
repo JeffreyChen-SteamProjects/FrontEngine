@@ -8,7 +8,7 @@
 
 - **#1** 〔阻塞〕Yank PyPI 的 v1.0.39／v1.0.40；瀏覽器工具的 pypi.org 存取被已儲存的網站權限設定封鎖。
 - **#2** 〔阻塞〕刪除 PyPI 的 `frontengine_dev`；瀏覽器工具的 pypi.org 存取被已儲存的網站權限設定封鎖（工作區 X-13）。
-- **#9** macOS 的原生擷取、TCC 權限、音訊、MIDI 與多螢幕實機驗證〔阻塞：目前沒有 Mac 測試主機，使用者要求保留待驗證〕（`tests/integration/macos_native_smoke.py`）。
+- **#9** macOS 的 TCC 權限拒絕／變更／重新啟動流程、原生音訊、MIDI 與多螢幕實機驗證〔阻塞：目前沒有可互動的 Mac 測試主機，使用者要求保留待驗證〕（`tests/integration/macos_native_smoke.py`）。
 <br>
   - [Answer] 讓其他平台也支援
 - **#11** Steam Workshop 的剩餘實機驗收見 #44。
@@ -47,7 +47,3 @@
 剩餘驗收承接 #11、#13。初始計畫：`docs/superpowers/plans/2026-10-07-steam-workshop.md`。
 
 - **#44** **Steam 離線／無客戶端實機驗收**〔阻塞：目前只有使用者使用中的 Steam 工作階段〕。須在獨立 Steam 測試工作階段完成無客戶端與離線驗證；不得中斷使用者目前的 Steam。
-
-## 交付檢查
-
-- **#45** 完成 PR #222 的品質檢查、跨平台 CI 與修正後的 Windows 封裝重驗。
