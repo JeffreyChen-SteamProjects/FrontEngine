@@ -7,10 +7,9 @@ What is playing: ask Windows' media controls (SMTC) first for a title and
 artist. Without the WinRT bindings, fall back to WASAPI's audio sessions to at
 least name the app making sound. When neither works, return None.
 
-SMTC 需要 `winsdk`（或舊的 `winrt`）套件，本專案不強制安裝，因此只在有裝時
-啟用；這是刻意的取捨，避免為了一個小功能增加必要相依。
-SMTC needs the `winsdk` (or legacy `winrt`) package. It is deliberately not a
-required dependency here - the feature simply uses it when present.
+Windows 安裝包含現代 PyWinRT 的 Media.Control projection；舊 winsdk 仍可備援。
+Windows installations include the modern PyWinRT Media.Control projection;
+older winsdk installations remain supported as a fallback.
 """
 from __future__ import annotations
 
@@ -53,7 +52,7 @@ def format_now_playing(title: Optional[str], artist: Optional[str] = None,
 
 def _winrt_media_module():
     """匯入 SMTC 綁定；沒安裝就回傳 None（這是預期情況，不是錯誤）。"""
-    for module_name in ("winsdk.windows.media.control", "winrt.windows.media.control"):
+    for module_name in ("winrt.windows.media.control", "winsdk.windows.media.control"):
         try:
             return __import__(module_name, fromlist=["*"])
         except ImportError:

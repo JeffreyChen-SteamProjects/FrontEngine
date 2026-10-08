@@ -58,6 +58,54 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261008-24 | 2026-10-08 | Complete delivery checks and verify the final compiled source | #done #ci #packaging | [2026-10](2026-10.md) |
+| U-20261008-23 | 2026-10-08 | Check the native Mac fixture before exiting its Qt event loop | #done #macos #ci | [2026-10](2026-10.md) |
+| U-20261008-22 | 2026-10-08 | Resolve owned Mac windows without depending on Quartz titles | #done #macos #ci | [2026-10](2026-10.md) |
+| U-20261008-21 | 2026-10-08 | Make native acceptance failures explicit and clarify media lifecycle | #done #quality #packaging | [2026-10](2026-10.md) |
+| U-20261008-20 | 2026-10-08 | Keep Python 3.10 builds compatible and isolate Mac unit frameworks | #done #ci #platform | [2026-10](2026-10.md) |
+| U-20261008-19 | 2026-10-08 | Fix scene extraction aliases and platform-specific CI tests | #done #ci #scene | [2026-10](2026-10.md) |
+| U-20261008-18 | 2026-10-08 | Verify all scene types in the current standalone Windows build | #done #packaging #scene | [2026-10](2026-10.md) |
+| U-20261008-17 | 2026-10-08 | Verify composited Linux opacity pixels and restoration | #done #linux #native | [2026-10](2026-10.md) |
+| U-20261008-16 | 2026-10-08 | Verify native Steam initialization failure without stopping client | #done #steam #native | [2026-10](2026-10.md) |
+| U-20261008-15 | 2026-10-08 | Inject desktop prerequisites in monitor profile regression tests | #done #linux #tests | [2026-10](2026-10.md) |
+| U-20261008-14 | 2026-10-08 | Add opt-in Linux audio and explicit X11 Wayland capabilities | #done #linux #platform | [2026-10](2026-10.md) |
+| U-20261008-13 | 2026-10-08 | Cache static composition and share overlay plugin cleanup | #done #performance #plugins | [2026-10](2026-10.md) |
+| U-20261008-12 | 2026-10-08 | Save bounded monitor profiles and adapt registered Qt overlays | #done #monitors #overlays | [2026-10](2026-10.md) |
+| U-20261008-11 | 2026-10-08 | Follow selected Windows targets with temporary identity bindings | #done #windows #overlays | [2026-10](2026-10.md) |
+| U-20261008-10 | 2026-10-08 | Organize static assets and review reference repair | #done #assets #scene | [2026-10](2026-10.md) |
+| U-20261008-09 | 2026-10-08 | Persist local tasks and import calendar into Today widget | #done #widgets #calendar | [2026-10](2026-10.md) |
+| U-20261008-08 | 2026-10-08 | Search opt-in capture history with local OCR | #done #capture #ocr | [2026-10](2026-10.md) |
+| U-20261008-07 | 2026-10-08 | Pin live OCR with explicit local/cloud refresh | #done #ocr #capture | [2026-10](2026-10.md) |
+| U-20261008-06 | 2026-10-08 | Reuse bounded opt-in image clipboard history | #done #clipboard #images | [2026-10](2026-10.md) |
+| U-20261008-05 | 2026-10-08 | Persist select and edit multi-page whiteboards | #done #whiteboard #editor | [2026-10](2026-10.md) |
+| U-20261008-04 | 2026-10-08 | Crop annotate and flatten captured images | #done #capture #editor | [2026-10](2026-10.md) |
+| U-20261008-03 | 2026-10-08 | Create and preview portable sprite pet packs | #done #pets #editor | [2026-10](2026-10.md) |
+| U-20261008-02 | 2026-10-08 | Send independent fixed-size scenes to a virtual camera | #done #scene #camera | [2026-10](2026-10.md) |
+| U-20261008-01 | 2026-10-08 | Edit replay and crossfade scene animation timelines | #done #scene #animation | [2026-10](2026-10.md) |
+| U-20261007-24 | 2026-10-07 | Record silent AVI with pause resume and bounded streaming | #done #recording #video | [2026-10](2026-10.md) |
+| U-20261007-23 | 2026-10-07 | Compose and interact with bounded live scene media previews | #done #scene #media | [2026-10](2026-10.md) |
+| U-20261007-22 | 2026-10-07 | Preview and apply editable work teaching and focus scene templates | #done #templates #scene | [2026-10](2026-10.md) |
+| U-20261007-21 | 2026-10-07 | Automate scene playback and named layer edits with deferred receipts | #done #rules #scene | [2026-10](2026-10.md) |
+| U-20261007-20 | 2026-10-07 | Prioritize cooldown and diagnose edge-triggered automation rules | #done #rules #diagnostics | [2026-10](2026-10.md) |
+| U-20261007-19 | 2026-10-07 | Preserve saved rule time windows during repeated normalization | #done #rules #fix | [2026-10](2026-10.md) |
+| U-20261007-18 | 2026-10-07 | Compare aligned reference images with shared zoom wipe and RGB differences | #done #images #compare | [2026-10](2026-10.md) |
+| U-20261007-17 | 2026-10-07 | Resume clone and manage independent sprite and puppet pet saves | #done #pets #ui | [2026-10](2026-10.md) |
+| U-20261007-16 | 2026-10-07 | Store independent validated pet identities and portable saves | #done #pets #storage | [2026-10](2026-10.md) |
+| U-20261007-15 | 2026-10-07 | Preview and restore bounded preset configuration versions | #done #presets #versions | [2026-10](2026-10.md) |
+| U-20261007-14 | 2026-10-07 | Collect and manage exact RGB color palettes | #done #palette #tools | [2026-10](2026-10.md) |
+| U-20261007-13 | 2026-10-07 | Resolve roadmap decision and retain only outstanding work | #decision #roadmap | [2026-10](2026-10.md) |
+| U-20261007-12 | 2026-10-07 | Add asynchronous local file text feeds and field selection | #done #text #data | [2026-10](2026-10.md) |
+| U-20261007-11 | 2026-10-07 | Add localized keyboard command search with favorites | #done #commands #ui | [2026-10](2026-10.md) |
+| U-20261007-10 | 2026-10-07 | Share action definitions across existing input routes | #done #actions #refactor | [2026-10](2026-10.md) |
+| U-20261007-09 | 2026-10-07 | Verify packaged Windows startup and Workshop runtime | #done #packaging #workshop | [2026-10](2026-10.md) |
+| U-20261007-08 | 2026-10-07 | Add undoable visual scene editing and playback transforms | #done #scene #ui | [2026-10](2026-10.md) |
+| U-20261007-07 | 2026-10-07 | Reject incomplete executable build environments before compiling | #done #packaging | [2026-10](2026-10.md) |
+| U-20261007-06 | 2026-10-07 | Include and verify Windows Now playing projections | #done #windows #dependencies | [2026-10](2026-10.md) |
+| U-20261007-05 | 2026-10-07 | Integrate Workshop management and validate private Steam sharing | #done #workshop #ui | [2026-10](2026-10.md) |
+| U-20261007-04 | 2026-10-07 | Validate and retain isolated Workshop subscription versions | #done #workshop | [2026-10](2026-10.md) |
+| U-20261007-03 | 2026-10-07 | Persist Workshop publication IDs and recover interrupted uploads | #done #workshop | [2026-10](2026-10.md) |
+| U-20261007-02 | 2026-10-07 | Add native Steam runtime and validate SDK callback ABI | #done #steam #workshop | [2026-10](2026-10.md) |
+| U-20261007-01 | 2026-10-07 | Validate Workshop publication snapshots and preset archives | #done #workshop #security | [2026-10](2026-10.md) |
 | U-20261003-02 | 2026-10-03 | Track selected Steam SDK examples and application configuration | #steam #configuration | [2026-10](2026-10.md) |
 | U-20261003-01 | 2026-10-03 | Add streaming capture and platform interoperability | #done #interop | [2026-10](2026-10.md) |
 | U-20261001-04 | 2026-10-01 | Release job builds with the locked setuptools | #done #ci #security #X-13 | [2026-10](2026-10.md) |
@@ -81,5 +129,5 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-10.md](2026-10.md) | 2026-10 | 6 |
+| [2026-10.md](2026-10.md) | 2026-10 | 54 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

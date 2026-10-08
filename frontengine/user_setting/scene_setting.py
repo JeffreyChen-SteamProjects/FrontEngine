@@ -16,6 +16,14 @@ scene_json: Dict[str, Any] = {}
 _package_leases: list = []
 
 
+def adopt_scene_entries(entries: dict, lease=None) -> None:
+    """Apply worker-loaded scene data on the GUI thread and retain its extraction lease."""
+    if lease is not None:
+        _package_leases.append(lease)
+    scene_json.clear()
+    scene_json.update(entries)
+
+
 def load_scene_file(path: str | Path) -> dict:
     source = Path(path)
     if source.suffix.lower() == '.fescene':

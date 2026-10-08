@@ -1,12 +1,7 @@
-"""
-以 WASAPI 的 IAudioMeterInformation::GetPeakValue 讀取輸出裝置的峰值電表 (0~1)。
-可讀「預設輸出裝置」，也可指定某個輸出端點（例如某台螢幕的喇叭）。這只是讀取
-電表數值，不擷取或錄製任何音訊內容（隱私友善），僅 Windows 有效，任何失敗都退化為 None。
+"""Windows WASAPI meters/capture, macOS framework adapter and lazy Linux Pulse samples.
 
-Read an output device's peak meter (0..1) via WASAPI's
-IAudioMeterInformation::GetPeakValue — either the default endpoint or a named
-one (e.g. a particular monitor's speakers). This only reads a meter value — it
-does NOT capture or record any audio content. Windows only; degrades to None.
+Linux reads actual samples in memory after opt-in; it is not the Windows peak-only path.
+Native device/server errors and physical-hardware acceptance are separate.
 """
 from __future__ import annotations
 
@@ -223,6 +218,9 @@ def list_output_devices() -> List[Tuple[str, str]]:
     if sys.platform == 'darwin':
         # ScreenCaptureKit captures the mix; it does not enumerate audio endpoints.
         return []
+    if sys.platform.startswith('linux'):
+        from frontengine.utils.linux.capabilities import audio_reason
+        return [('@DEFAULT_MONITOR@', 'Default output monitor')] if not audio_reason() else []
     if sys.platform != "win32":
         return []
     enumerator = None
@@ -289,6 +287,10 @@ class SystemAudioMeter:
         self._enumerator = None
         self._get_peak = None
         self._mac_meter = None
+        self._linux_meter = None
+        if sys.platform.startswith('linux'):
+            from frontengine.utils.linux.audio import PulseMeter
+            self._linux_meter = PulseMeter(device_id)
         if sys.platform == 'darwin':
             from frontengine.utils.macos.audio import MacSystemAudioMeter
             self._mac_meter = MacSystemAudioMeter(device_id)
@@ -324,6 +326,8 @@ class SystemAudioMeter:
 
     def level(self) -> Optional[float]:
         """回傳目前輸出峰值 0~1，或 None。"""
+        if self._linux_meter is not None:
+            return self._linux_meter.level()
         if self._mac_meter is not None:
             return self._mac_meter.level()
         if not self._ok or self._meter is None or self._get_peak is None:
@@ -338,6 +342,8 @@ class SystemAudioMeter:
 
     def close(self) -> None:
         """釋放 COM 介面；可重複呼叫 / Release COM interfaces; safe to call twice."""
+        if self._linux_meter is not None:
+            self._linux_meter.close()
         if self._mac_meter is not None:
             self._mac_meter.close()
             self._mac_meter = None
@@ -361,7 +367,7 @@ _meter_singleton: Optional[SystemAudioMeter] = None
 def system_audio_level() -> Optional[float]:
     """便利函式：以單例電表回傳預設輸出裝置的峰值 0~1，或 None。"""
     global _meter_singleton
-    if sys.platform not in ('win32', 'darwin'):
+    if sys.platform not in ('win32', 'darwin', 'linux'):
         return None
     if _meter_singleton is None:
         _meter_singleton = SystemAudioMeter()

@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from frontengine.utils.json.json_repository import JsonRepository
+from frontengine.user_setting.preset_history import PresetHistory, checked_state
 
 _FILENAME_SAFE = re.compile(r"[^A-Za-z0-9_\- ]+")
 # 打包時媒體檔在 zip 內的資料夾前綴
@@ -55,10 +56,26 @@ class PresetRepository:
         return self._path_for(name).exists()
 
     def save(self, name: str, data: Dict[str, Any]) -> Path:
+        data, _digest = checked_state(data)
         self._dir.mkdir(parents=True, exist_ok=True)
+        history = self.history(name)
+        if self.exists(name):
+            history.snapshot(self.load(name))
+        identifier, created = history.snapshot(data)
         payload: Dict[str, Any] = {"__preset_name__": name}
         payload.update(data)
-        return JsonRepository(self._path_for(name)).save(payload)
+        try:
+            result = JsonRepository(self._path_for(name)).save(payload)
+        except OSError:
+            if created:
+                history.discard(identifier)
+            raise
+        history.prune()
+        return result
+
+    def history(self, name: str) -> PresetHistory:
+        """Return the bounded settings history for a sanitized preset name."""
+        return PresetHistory(self._dir / ".versions" / _sanitize(name))
 
     def load(self, name: str) -> Dict[str, Any]:
         repo = JsonRepository(self._path_for(name))
@@ -163,6 +180,12 @@ class PresetRepository:
         if not source.exists() or not zipfile.is_zipfile(source):
             raise ValueError(f"Not a valid preset package: {source}")
         with zipfile.ZipFile(source, "r") as archive:
+            from frontengine.utils.imervue.puppet_asset import checked_members
+            checked_members(archive)
+            media_names = [Path(item.filename).name.casefold() for item in archive.infolist()
+                           if item.filename.startswith(_MEDIA_PREFIX) and not item.is_dir()]
+            if len(media_names) != len(set(media_names)):
+                raise ValueError("Preset package contains colliding media filenames")
             document = _read_package_preset(archive)
             name = _package_name(document, source)
             media_dir = self._dir / "media" / _sanitize(name)

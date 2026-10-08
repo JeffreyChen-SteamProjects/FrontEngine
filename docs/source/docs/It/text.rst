@@ -21,3 +21,5 @@ Pagina Testo
       città indicata in «Città per il meteo».
 
 * Tutti gli schermi / Sotto tutte le finestre / Schermo di destinazione - come altrove.
+
+Testo → TXT / JSON / CSV locale visualizza file UTF-8 con campo e intervallo di 1–3600 secondi. JSON: /chiave/indice (es. /build/tasks); CSV: intestazioni uniche, colonna per righe. Campo vuoto: intero file. Lettura in background, un lavoro per sorgente, massimo 1 MiB e 65.536 caratteri. Errori di file/campo, formato, accesso e dimensione sono espliciti; le correzioni ripristinano il risultato. I preset salvano file/campo/intervallo. Le scene portabili copiano il file: condividere il pacchetto condivide quella copia dei dati.

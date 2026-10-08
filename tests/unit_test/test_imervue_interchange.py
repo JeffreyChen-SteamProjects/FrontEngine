@@ -82,6 +82,36 @@ def test_reference_imervue_reader_round_trip(tmp_path):
     assert validate_puppet(tmp_path / 'reference.puppet')['size'] == [16, 16]
 
 
+def test_scene_package_canonicalizes_extraction_directory_alias(tmp_path, monkeypatch):
+    from pathlib import Path
+    from frontengine.utils.scene_format import scene_package
+
+    original = scene_package.tempfile.TemporaryDirectory
+
+    class AliasedDirectory:
+        def __init__(self, **kwargs):
+            self.owner = original(dir=tmp_path, **kwargs)
+            nested = Path(self.owner.name) / 'nested'
+            nested.mkdir()
+            self.name = str(nested / '..')
+
+        def cleanup(self):
+            self.owner.cleanup()
+
+    source = write_puppet(tmp_path / 'tiny.puppet')
+    package = tmp_path / 'scene.fescene'
+    scene_package.save_package({'pet': {'type': 'PUPPET', 'file_path': str(source)}}, package)
+    monkeypatch.setattr(scene_package.tempfile, 'TemporaryDirectory', AliasedDirectory)
+    entries, lease = scene_package.load_package(package)
+    resource = Path(entries['pet']['file_path'])
+    try:
+        assert resource.is_relative_to(Path(lease.name).resolve())
+        assert zipfile.is_zipfile(resource)
+    finally:
+        lease.cleanup()
+    assert not resource.exists()
+
+
 def test_puppet_pet_uses_reference_canvas_without_imervue_preferences(tmp_path):
     pytest.importorskip('Imervue.puppet.document_io')
     from frontengine.show.pet.puppet_pet import PuppetPetWidget

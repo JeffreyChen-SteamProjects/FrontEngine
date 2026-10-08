@@ -201,6 +201,19 @@ def build_settings_menu(ui: "FrontEngineMainUI") -> None:
     menu.addAction(clipboard_action)
     ui.clipboard_action = clipboard_action
 
+    image_history_action = QAction(menu)
+    retranslator.bind(image_history_action, 'image_history_title')
+    image_history_action.triggered.connect(ui.open_image_history)
+    menu.addAction(image_history_action)
+    capture_history_action = QAction(menu)
+    retranslator.bind(capture_history_action, 'capture_history_title')
+    capture_history_action.triggered.connect(ui.open_capture_history)
+    menu.addAction(capture_history_action)
+    assets_action = QAction(menu)
+    retranslator.bind(assets_action, 'assets_title')
+    assets_action.triggered.connect(ui.open_asset_library)
+    menu.addAction(assets_action)
+
     clipboard_toggle = QAction(_t("settings_menu_clipboard_record", "Record clipboard"), menu)
     retranslator.bind(clipboard_toggle, "settings_menu_clipboard_record", "Record clipboard")
     clipboard_toggle.setCheckable(True)

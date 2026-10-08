@@ -126,6 +126,9 @@ def plan_move(rect: Rect, screens: Sequence[Rect], step: int = 1) -> Optional[Re
 
 def available() -> bool:
     """這個平台能不能搬別的程式的視窗。"""
+    if sys.platform.startswith('linux'):
+        from frontengine.utils.linux.windows import available as x11_available
+        return x11_available()
     if sys.platform == 'darwin':
         from frontengine.utils.macos import get_backend
         return get_backend().capability('window_move').available
@@ -134,6 +137,9 @@ def available() -> bool:
 
 def foreground_window() -> Optional[int]:
     """目前前景視窗的 handle；取不到或非 Windows 回傳 None。"""
+    if sys.platform.startswith('linux'):
+        from frontengine.utils.linux.windows import foreground
+        return foreground()
     if sys.platform == 'darwin':
         from frontengine.utils.macos import get_backend
         return get_backend().foreground_window()
@@ -173,6 +179,9 @@ def win32_screen_rects() -> List[Rect]:
     Sizing a SetWindowPos call from Qt's numbers lays the window out against a
     screen a quarter smaller than the real one.
     """
+    if sys.platform.startswith('linux'):
+        from frontengine.utils.linux.windows import screen_rects as x11_rects
+        return x11_rects()
     if not available():
         return []
     try:
@@ -230,8 +239,10 @@ def screen_rects(screens=None) -> List[Rect]:
     """
     if screens is not None:
         return qt_screen_rects(screens)
-    if sys.platform == 'win32':
+    if sys.platform in ('win32', 'linux'):
         rects = win32_screen_rects()
+        if sys.platform == 'linux':
+            return rects
         if rects:
             return rects
     from PySide6.QtGui import QGuiApplication

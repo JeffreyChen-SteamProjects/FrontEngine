@@ -40,6 +40,9 @@ class ControlCenterUI(SettingPage):
     # main window's service; a signal keeps this page from reaching back up to
     # the main window to reach it.
     desktop_pin_changed = Signal(bool)
+    overlay_visibility_changed = Signal(bool)
+    window_follow_requested = Signal()
+    monitor_profiles_requested = Signal()
 
     def __init__(
             self,
@@ -158,6 +161,12 @@ class ControlCenterUI(SettingPage):
             self.lock_all_button, self.chroma_key_button, self.reset_positions_button,
             self.low_power_button, self.capture_button, self.desktop_pin_button)
         everything.add_row(self.quality_label, self.quality_combobox)
+        self.follow_button = tr(QPushButton(), 'follow_title')
+        self.follow_button.clicked.connect(self.window_follow_requested.emit)
+        everything.add_inline(self.follow_button)
+        self.monitor_profiles_button = tr(QPushButton(), 'monitors_title')
+        self.monitor_profiles_button.clicked.connect(self.monitor_profiles_requested.emit)
+        everything.add_inline(self.monitor_profiles_button)
 
         log = self.add_section("section_log", "Messages")
         log.add_widget(self.log_panel_scroll_area)
@@ -348,8 +357,12 @@ class ControlCenterUI(SettingPage):
         reference lingers in the list, so calls raise RuntimeError — each is
         guarded and the dead reference is pruned so one cannot crash the batch.
         """
+        seen = set()
         for widget_list in self._all_overlay_widget_lists():
             for widget in widget_list[:]:
+                if id(widget) in seen:
+                    continue
+                seen.add(id(widget))
                 try:
                     action(widget)
                 except RuntimeError:
@@ -358,16 +371,20 @@ class ControlCenterUI(SettingPage):
                         widget_list.remove(widget)
                     except ValueError:
                         pass
+                except Exception as error:
+                    front_engine_logger.warning(f'[ControlCenterUI] overlay action failed: {error!r}')
 
     def hide_all(self) -> None:
         """暫時隱藏所有覆蓋層 / Temporarily hide every overlay."""
         front_engine_logger.info("ControlCenterUI hide_all")
+        self.overlay_visibility_changed.emit(True)
         self._for_each_overlay(lambda widget: widget.hide())
 
     def show_all(self) -> None:
         """重新顯示所有覆蓋層 / Re-show every overlay."""
         front_engine_logger.info("ControlCenterUI show_all")
         self._for_each_overlay(lambda widget: widget.show())
+        self.overlay_visibility_changed.emit(False)
 
     def set_mute_all(self, muted: bool) -> None:
         """靜音／取消靜音所有支援的覆蓋層 / Mute or unmute every overlay that supports it."""

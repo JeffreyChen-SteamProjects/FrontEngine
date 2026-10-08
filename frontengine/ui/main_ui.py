@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Type
 
 from PySide6.QtCore import QByteArray, QTimer
-from PySide6.QtGui import QIcon, Qt
+from PySide6.QtGui import QIcon, Qt, QAction, QKeySequence
 from PySide6.QtWidgets import (
     QMainWindow, QApplication, QGridLayout, QHBoxLayout, QStackedWidget, QStyle,
     QMenuBar, QWidget, QMessageBox,
@@ -50,11 +50,16 @@ from frontengine.user_setting.user_setting_file import (
     write_user_setting,
 )
 from frontengine.utils.steam.steam_language import steam_language
+from frontengine.utils.workshop.workshop_service import WorkshopService
 from frontengine.utils.critical_exit.critical_exit import CriticalExit
 from frontengine.utils.critical_exit.win32_vk import keyboard_keys_table
 from frontengine.utils.hotkey.hotkey_service import HotkeyService
+from frontengine.utils.actions.action_registry import Action, ActionRegistry
+from frontengine.utils.actions.deferred_action import DeferredAction
+from frontengine.utils.actions.command_history import CommandHistory
+from frontengine.ui.dialog.command_palette_dialog import CommandPaletteDialog
 from frontengine.utils.keep_awake.keep_awake import KeepAwake
-from frontengine.utils.media_keys.media_keys import is_media_action, send_media_key
+from frontengine.utils.media_keys.media_keys import send_media_key
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import retranslator, translate
@@ -81,14 +86,7 @@ from frontengine.utils.usage_tracking.usage_tracker import USAGE_FILE, UsageTrac
 from frontengine.utils.reminder.reminder_service import ReminderService
 from frontengine.utils.smart_pause.smart_pause_service import SmartPauseService
 from frontengine.utils.theme_schedule.theme_schedule_service import ThemeScheduleService
-from frontengine.utils.rules.rule_engine import (
-    ACTION_APPLY_PRESET as RULE_ACTION_APPLY_PRESET,
-    ACTION_CLOSE_ALL as RULE_ACTION_CLOSE_ALL,
-    ACTION_HIDE_ALL as RULE_ACTION_HIDE_ALL,
-    ACTION_QUALITY_TIER as RULE_ACTION_QUALITY_TIER,
-    ACTION_SHOW_ALL as RULE_ACTION_SHOW_ALL,
-    RuleEngineService,
-)
+from frontengine.utils.rules.rule_engine import RuleEngineService
 from frontengine.ui.dialog.rules_dialog import SETTING_KEY as RULES_SETTING_KEY
 from frontengine.utils.virtual_desktop.virtual_desktop import VirtualDesktopService
 from frontengine.utils.window_pin.monitor_move import move_to_next_monitor
@@ -203,6 +201,7 @@ class FrontEngineMainUI(QMainWindow):
             pet_setting_ui=self.pet_setting_ui,
         )
         self._register_extra_overlays()
+        self.action_registry = self._build_action_registry()
 
         # Menu Bar
         self.menu_bar = QMenuBar()
@@ -224,11 +223,17 @@ class FrontEngineMainUI(QMainWindow):
 
         # 建立選單
         # Build menus
+        self.workshop_service = WorkshopService(self)
+        self.workshop_dialog = None
+        self.scene_setting_ui.scene_manager_ui.workshop_requested.connect(lambda: self.open_workshop("scene"))
+        self.pet_setting_ui.workshop_requested.connect(
+            lambda: self.open_workshop("pet_pack", self.pet_setting_ui.pet_image_path or ""))
         build_language_menu(self)
         build_help_menu(self)
         build_how_to_menu(self)
         build_preset_menu(self)
         build_settings_menu(self)
+        self._setup_command_palette()
 
         # 致命退出設定
         # Critical exit setting
@@ -317,6 +322,12 @@ class FrontEngineMainUI(QMainWindow):
         if user_setting_dict.get("clipboard_persist"):
             self.clipboard_history.load(user_setting_dict.get("clipboard_entries"))
         self.clipboard_watcher = ClipboardWatcher(self.clipboard_history)
+        self._initialize_image_history()
+        self._initialize_capture_history()
+        self._initialize_tasks()
+        self._initialize_asset_library()
+        self._initialize_window_follow()
+        self._initialize_monitor_profiles()
         if user_setting_dict.get("clipboard_history"):
             self.clipboard_watcher.start()
 
@@ -419,6 +430,9 @@ class FrontEngineMainUI(QMainWindow):
         # The wallpaper page keys its widgets by monitor, so hand over the values.
         self.control_center_ui.register_overlay_source(
             lambda: list(self.wallpaper_setting_ui.wallpaper_widgets.values()))
+        cleanup = getattr(self.wallpaper_setting_ui, 'release_overlay_resources', None)
+        if callable(cleanup):
+            self.control_center_ui.register_cleanup(cleanup)
         self.control_center_ui.register_overlay_source(
             lambda: getattr(self.web_setting_ui, "dashboard_widgets", []))
         # 批次關閉之後，沒有覆蓋層在聽就把全域輸入監聽收掉
@@ -426,11 +440,11 @@ class FrontEngineMainUI(QMainWindow):
         self.control_center_ui.register_cleanup(
             self.presentation_setting_ui.release_input_watch)
         for attribute in ("spectrum_widget_list", "monitor_widget_list",
-                          "now_playing_widget_list", "note_widget_list"):
+                          "now_playing_widget_list", "note_widget_list", "todo_widget_list"):
             self.control_center_ui.register_overlay_source(
                 lambda attribute=attribute: getattr(self.widgets_setting_ui, attribute, []))
         for attribute in ("measure_widget_list", "capture_widget_list", "camera_widget_list",
-                          "pinned_widget_list"):
+                          "pinned_widget_list", "ocr_widget_list"):
             self.control_center_ui.register_overlay_source(
                 lambda attribute=attribute: getattr(self.tools_setting_ui, attribute, []))
         # 參考圖板也要進控制中心，否則「全部關閉」關不掉它
@@ -539,6 +553,8 @@ class FrontEngineMainUI(QMainWindow):
         concentrate" are visibly different errands rather than sixteen words to
         read through.
         """
+        self.command_pages = []
+        self.plugin_pages = {}
         groups = [
             ("nav_group_on_screen", "On screen", [
                 (self.video_setting_ui, "tab_video_text"),
@@ -571,6 +587,7 @@ class FrontEngineMainUI(QMainWindow):
             for widget, lang_key in entries:
                 index = self.page_stack.addWidget(widget)
                 self.sidebar.add_page(lang_key, index)
+                self.command_pages.append((widget, lang_key, index))
 
         # 外掛註冊的分頁自成一組，使用者才看得出哪些不是內建的
         # Plugin tabs get their own group, so it is visible which pages did not
@@ -578,10 +595,19 @@ class FrontEngineMainUI(QMainWindow):
         if FrontEngine_EXTEND_TAB:
             self.sidebar.add_group("nav_group_extensions", "Extensions")
             for widget_name, widget in FrontEngine_EXTEND_TAB.items():
-                index = self.page_stack.addWidget(widget())
-                self.sidebar.add_page(widget_name, index, widget_name)
+                self._add_plugin_tab(widget_name, widget)
 
         self.sidebar.select_page(0)
+
+    def _add_plugin_tab(self, name: str, factory: type) -> None:
+        from frontengine.ui.plugin_pages import attach_page
+        try:
+            page = attach_page(name, factory, self.control_center_ui)
+            self.plugin_pages[name] = page
+            index = self.page_stack.addWidget(page)
+            self.sidebar.add_page(name, index, name)
+        except Exception as error:
+            front_engine_logger.warning(f'[plugins] invalid page: {name}: {error}')
 
     def _setup_icon(self, show_system_tray_ray: bool) -> None:
         """設定視窗 Icon 與系統托盤 / Setup window icon and system tray"""
@@ -681,7 +707,7 @@ class FrontEngineMainUI(QMainWindow):
         # 托盤有可能沒建起來（平台不支援、或啟動時關掉了），沒有就照一般關閉走
         # The tray may not exist at all - unsupported platform, or switched off at
         # startup - in which case this is an ordinary close.
-        if self.system_tray is not None and self.system_tray.isVisible():
+        if not self._shutdown_done and self.system_tray is not None and self.system_tray.isVisible():
             self.hide()
             event.ignore()
             return
@@ -689,6 +715,7 @@ class FrontEngineMainUI(QMainWindow):
         # This branch really is closing - X button, logout, closeAllWindows - so
         # the teardown belongs here.
         self._shutdown()
+        self._request_exit()
         super().closeEvent(event)
 
     def reload_hotkeys(self) -> None:
@@ -706,46 +733,81 @@ class FrontEngineMainUI(QMainWindow):
         )
         self.hotkey_service.start()
 
+    def _build_action_registry(self) -> ActionRegistry:
+        """Bind shared action IDs once; every input route uses these callbacks."""
+        registry = ActionRegistry()
+        callbacks = {
+            "close_all": self.control_center_ui.clear_all,
+            "hide_all": self.control_center_ui.hide_all,
+            "show_all": self.control_center_ui.show_all,
+            "mute_all": self.control_center_ui.toggle_mute_all,
+            "opacity_up": lambda: self.control_center_ui.step_opacity_all(0.1),
+            "opacity_down": lambda: self.control_center_ui.step_opacity_all(-0.1),
+            "dashboard_next": self.web_setting_ui.show_next_dashboard_page,
+            "toggle_lock": self.control_center_ui.toggle_lock_all,
+            "show_shortcuts": self.toggle_shortcut_sheet,
+            "toggle_freeze": self.presentation_setting_ui.toggle_freeze,
+            "move_window_next_monitor": move_to_next_monitor,
+        }
+        for identifier, callback in callbacks.items():
+            registry.bind(identifier, lambda _value, run=callback: run())
+        for identifier in ("media_play_pause", "media_next", "media_previous"):
+            registry.bind(identifier, lambda _value, action=identifier: send_media_key(action))
+        registry.bind("apply_preset", lambda value: apply_named_preset(self, value), takes_value=True)
+        registry.bind("quality_tier", self.control_center_ui.set_quality_tier, takes_value=True)
+        FrontEngineMainUI._bind_scene_actions(self, registry)
+        return registry
+
+    def _bind_scene_actions(self, registry: ActionRegistry) -> None:
+        actions = self.scene_setting_ui.actions
+        registry.bind('scene_load', lambda value: actions.request(value, load_only=True), takes_value=True)
+        registry.bind('scene_start', actions.request, takes_value=True, optional_value=True)
+        registry.bind('scene_stop', actions.stop_playback)
+        for identifier in ('layer_show', 'layer_hide', 'layer_opacity', 'layer_position'):
+            registry.bind(identifier, lambda value, action=identifier: actions.layer(action, value), takes_value=True)
+
     def _handle_hotkey(self, action: str) -> None:
-        """
-        分派全域快速鍵到對應動作。
-        Dispatch global hotkey to the matching action on the UI thread.
-        """
-        if action == "close_all":
-            self.control_center_ui.clear_all()
-        elif action == "hide_all":
-            self.control_center_ui.hide_all()
-        elif action == "show_all":
-            self.control_center_ui.show_all()
-        elif action == "mute_all":
-            self.control_center_ui.toggle_mute_all()
-        elif action == "opacity_up":
-            self.control_center_ui.step_opacity_all(0.1)
-        elif action == "opacity_down":
-            self.control_center_ui.step_opacity_all(-0.1)
-        elif action == "dashboard_next":
-            self.web_setting_ui.show_next_dashboard_page()
-        elif action == "toggle_lock":
-            self.control_center_ui.toggle_lock_all()
-        elif action == "show_shortcuts":
-            self.toggle_shortcut_sheet()
-        elif action == "toggle_freeze":
-            # 畫面被凍結時，主視窗就在那張靜止圖後面，按鈕點不到——所以這個
-            # 快速鍵是唯一保證按得到的解除方式。
-            # While frozen the main window is behind the still image and its
-            # buttons cannot be reached; this shortcut is the way out that is
-            # always available.
-            self.presentation_setting_ui.toggle_freeze()
-        elif action == "move_window_next_monitor":
-            # 搬的是別人的視窗，不是覆蓋層，所以也不經過控制中心。
-            # This moves someone else's window rather than an overlay, so it too
-            # bypasses the control center.
-            move_to_next_monitor()
-        elif is_media_action(action):
-            # 媒體鍵是送給播放器的，和覆蓋層無關，所以不經過控制中心。
-            # A media key goes to the player, not to an overlay, so it does not
-            # pass through the control center.
-            send_media_key(action)
+        """Dispatch hotkey, remote and MIDI actions on the GUI thread."""
+        self.action_registry.execute(action)
+
+    def _setup_command_palette(self) -> None:
+        """Expose existing actions and built-in pages with stable searchable IDs."""
+        self.command_palette = None
+        for _widget, key, index in self.command_pages:
+            self.action_registry.register(Action(
+                "page." + key, key, self.sidebar.page_label(index),
+                lambda _value, page=index: self._open_command_page(page)))
+        for identifier, key, fallback, callback in (
+            ("capture_area", "tools_capture_start", "Capture area", self.tools_setting_ui.start_capture),
+            ("palette", "palette_title", "Color palette", self.tools_setting_ui.open_palette),
+            ("new_note", "widgets_note_add", "New note", self.widgets_setting_ui.add_note),
+            ("toggle_filter", "screen_filter_start", "Turn filter on", self.screen_care_setting_ui.toggle_filter),
+            ("workshop", "workshop_manage", "Workshop", self.open_workshop),
+            ('scene_templates', 'scene_templates', 'Scene templates', self.scene_setting_ui.open_templates),
+        ):
+            self.action_registry.register(Action(identifier, key, fallback, lambda _value, run=callback: run()))
+        self.command_history = CommandHistory(user_setting_dict, write_user_setting)
+        action = QAction(self)
+        retranslator.bind(action, "command_palette_title")
+        action.setShortcuts([QKeySequence("Ctrl+K"), QKeySequence("Ctrl+Shift+P")])
+        action.setShortcutContext(Qt.ShortcutContext.ApplicationShortcut)
+        action.triggered.connect(self.open_command_palette)
+        self.menu_bar.addAction(action)
+        self.command_palette_action = action
+
+    def _open_command_page(self, index: int) -> None:
+        self.showNormal()
+        self.sidebar.select_page(index)
+        self.raise_()
+        self.activateWindow()
+
+    def open_command_palette(self) -> None:
+        """Show one persistent palette; reopening never duplicates dialogs."""
+        if self.command_palette is None:
+            self.command_palette = CommandPaletteDialog(self.action_registry, self.command_history, self)
+        self.command_palette.show()
+        self.command_palette.raise_()
+        self.command_palette.activateWindow()
 
     def toggle_shortcut_sheet(self) -> None:
         """
@@ -783,16 +845,24 @@ class FrontEngineMainUI(QMainWindow):
         value = str(rule.get("value", ""))
         front_engine_logger.info(
             f"[FrontEngineMainUI] rule '{rule.get('label')}' -> {action} {value}")
-        if action == RULE_ACTION_APPLY_PRESET:
-            apply_named_preset(self, value)
-        elif action == RULE_ACTION_HIDE_ALL:
-            self.control_center_ui.hide_all()
-        elif action == RULE_ACTION_SHOW_ALL:
-            self.control_center_ui.show_all()
-        elif action == RULE_ACTION_CLOSE_ALL:
-            self.control_center_ui.clear_all()
-        elif action == RULE_ACTION_QUALITY_TIER:
-            self.control_center_ui.set_quality_tier(value)
+        try:
+            result = self.action_registry.invoke(action, value)
+            service = getattr(self, 'rule_engine_service', None)
+            if isinstance(result, DeferredAction):
+                if service is not None:
+                    if result.result is None:
+                        result.finished.connect(lambda success, error: service.record_execution(rule, success, error))
+                    else:
+                        service.record_execution(rule, result.result, result.error)
+                return
+            success = result is not False
+            error = '' if success else 'Action did not complete'
+        except (OSError, ValueError, RuntimeError) as exception:
+            success, error = False, str(exception)
+            front_engine_logger.warning(f"[MainUI] rule action failed: {exception!r}")
+        service = getattr(self, 'rule_engine_service', None)
+        if service is not None:
+            service.record_execution(rule, success, error)
 
     def _on_desktop_pin_changed(self, pinned: bool) -> None:
         """
@@ -944,26 +1014,152 @@ class FrontEngineMainUI(QMainWindow):
 
     # 關閉時要停掉的背景服務，依相依性由外而內排列
     # The background services to stop on close, outermost first.
+    def open_workshop(self, kind: str = "scene", path: str = "") -> None:
+        """Show one persistent manager; hiding it leaves an upload running."""
+        from frontengine.ui.dialog.workshop_dialog import WorkshopDialog
+        if self.workshop_dialog is None:
+            self.workshop_dialog = WorkshopDialog(self, self.workshop_service)
+        self.workshop_dialog.select_source(kind, path)
+        self.workshop_dialog.show()
+        self.workshop_dialog.raise_()
+        self.workshop_dialog.activateWindow()
+
+    def _initialize_image_history(self) -> None:
+        """Create a lazy image history owner; defaults do not read the clipboard or start a worker."""
+        from frontengine.utils.image_history.service import ImageHistoryService
+        config = user_setting_dict.get('image_clipboard_history')
+        config = config if isinstance(config, dict) else {}
+        self.image_history_service = ImageHistoryService(Path(getcwd()) / 'clipboard-images.sqlite3', config, self)
+        self.image_history_service.result.connect(self._image_history_result)
+        self.image_history_dialog = None
+
+    def _image_history_result(self, kind: str, value) -> None:
+        if kind == 'configure':
+            user_setting_dict['image_clipboard_history'] = dict(value)
+            write_user_setting()
+
+    def open_image_history(self) -> None:
+        """Open explicit image reuse/settings without enabling clipboard recording."""
+        from frontengine.ui.dialog.image_history_dialog import ImageHistoryDialog
+        if self.image_history_dialog is None:
+            self.image_history_dialog = ImageHistoryDialog(self.image_history_service, self)
+        self.image_history_dialog.show()
+        self.image_history_dialog.raise_()
+        self.image_history_dialog.activateWindow()
+
+    def _initialize_capture_history(self) -> None:
+        """Subscribe only explicit region captures to an independently opted-in local index."""
+        from frontengine.utils.image_history.capture_service import CaptureHistoryService
+        config = user_setting_dict.get('capture_history')
+        config = config if isinstance(config, dict) else {}
+        self.capture_history_service = CaptureHistoryService(Path(getcwd()) / 'capture-history.sqlite3', config, self)
+        self.tools_setting_ui.captured.connect(self.capture_history_service.capture)
+        self.capture_history_service.result.connect(self._capture_history_result)
+        self.capture_history_dialog = None
+
+    def _initialize_tasks(self) -> None:
+        """Own local task persistence without a timer/thread until a user opens it."""
+        from frontengine.utils.todo.service import TodoService
+        self.todo_service = TodoService(Path(getcwd()) / 'tasks.json', self)
+        self.widgets_setting_ui.configure_tasks(self.todo_service)
+
+    def _initialize_asset_library(self) -> None:
+        """Own a lazy local catalog; do not scan files until the user opens it."""
+        from frontengine.utils.asset_library.service import AssetLibraryService
+        self.asset_library_service = AssetLibraryService(Path(getcwd()), self)
+        self.asset_library_dialog = None
+
+    def _initialize_window_follow(self) -> None:
+        """Keep temporary native target bindings under the shared batch lifecycle."""
+        from frontengine.utils.window_pin.follow_window import WindowFollowService
+        self.window_follow_service = WindowFollowService(self)
+        self.window_follow_dialog = None
+        self.control_center_ui.overlay_visibility_changed.connect(self.window_follow_service.set_group_hidden)
+        self.control_center_ui.window_follow_requested.connect(self.open_window_follow)
+        self.control_center_ui.register_cleanup(self.window_follow_service.detach_all)
+
+    def open_window_follow(self) -> None:
+        """Choose a registered overlay and explicit native window in one reusable manager."""
+        from frontengine.ui.dialog.window_follow_dialog import WindowFollowDialog
+        if self.window_follow_dialog is None:
+            self.window_follow_dialog = WindowFollowDialog(self.window_follow_service,
+                                                          self.control_center_ui._all_overlay_widget_lists, self)
+        self.window_follow_dialog.show()
+        self.window_follow_dialog.raise_()
+
+    def _initialize_monitor_profiles(self) -> None:
+        """Adapt only registered Qt windows, respecting active target-follow bindings."""
+        from frontengine.utils.window_pin.topology_profiles import MonitorProfileService
+        self.monitor_profiles_service = MonitorProfileService(
+            Path(getcwd()) / 'monitor-profiles.json', self.control_center_ui._all_overlay_widget_lists,
+            self, excluded=lambda widget: id(widget) in self.window_follow_service.bindings)
+        self.monitor_profiles_dialog = None
+        self.monitor_profiles_service.set_enabled(bool(user_setting_dict.get('monitor_profiles_auto')))
+        self.control_center_ui.monitor_profiles_requested.connect(self.open_monitor_profiles)
+
+    def _monitor_profiles_enabled(self, enabled: bool) -> None:
+        user_setting_dict['monitor_profiles_auto'] = bool(enabled)
+        write_user_setting()
+
+    def open_monitor_profiles(self) -> None:
+        """Review explicit save/restore and separate automatic adaptation opt-in."""
+        from frontengine.ui.dialog.monitor_profiles_dialog import MonitorProfilesDialog
+        if self.monitor_profiles_dialog is None:
+            self.monitor_profiles_dialog = MonitorProfilesDialog(
+                self.monitor_profiles_service, self, enabled_changed=self._monitor_profiles_enabled)
+        self.monitor_profiles_dialog.show()
+        self.monitor_profiles_dialog.raise_()
+
+    def open_asset_library(self) -> None:
+        """Manage selected assets and review exact scene/preset reference repairs."""
+        from frontengine.ui.dialog.asset_library_dialog import AssetLibraryDialog
+        if self.asset_library_dialog is None:
+            self.asset_library_dialog = AssetLibraryDialog(self.asset_library_service,
+                                                         self.scene_setting_ui.visual_editor.document, self)
+        self.asset_library_dialog.show()
+        self.asset_library_dialog.raise_()
+
+    def _close_asset_library(self) -> None:
+        dialog = getattr(self, 'asset_library_dialog', None)
+        if dialog is not None:
+            dialog.abort_repair()
+            dialog.close()
+
+    def _capture_history_result(self, kind: str, value) -> None:
+        if kind == 'configure':
+            user_setting_dict['capture_history'] = dict(value)
+            write_user_setting()
+
+    def open_capture_history(self) -> None:
+        """Review/search saved captures; opening alone never enables saving or OCR."""
+        from frontengine.ui.dialog.image_history_dialog import ImageHistoryDialog
+        if self.capture_history_dialog is None:
+            self.capture_history_dialog = ImageHistoryDialog(self.capture_history_service, self, capture_mode=True)
+        self.capture_history_dialog.show()
+        self.capture_history_dialog.raise_()
+        self.capture_history_dialog.activateWindow()
+
     _CLOSING_SERVICES = (
+        "image_history_service",
+        "capture_history_service",
+        "todo_service",
+        "asset_library_service",
+        "window_follow_service",
+        "monitor_profiles_service",
+        "workshop_service",
         "preset_schedule_service", "theme_schedule_service", "usage_service",
         "signage_service", "screensaver_service",
         "remote_server", "midi_input", "share_watch_service", "reminder_service",
         "app_profile_service", "smart_pause_service", "virtual_desktop_service",
         "rule_engine_service", "hotkey_service",
     )
-    # 關閉時要清空的覆蓋層清單
-    # The overlay lists to empty on close.
-    _CLOSING_WIDGET_LISTS = (
-        ("video_setting_ui", "video_widget_list"),
-        ("image_setting_ui", "image_widget_list"),
-        ("web_setting_ui", "web_widget_list"),
-        ("gif_setting_ui", "gif_widget_list"),
-        ("sound_player_setting_ui", "sound_widget_list"),
-        ("text_setting_ui", "text_widget_list"),
-        ("particle_setting_ui", "particle_list"),
-        ("pet_setting_ui", "pet_list"),
-    )
 
+    def _close_history_dialogs(self) -> None:
+        for attribute in ('image_history_dialog', 'capture_history_dialog', 'window_follow_dialog',
+                          'monitor_profiles_dialog', 'platform_capabilities_dialog'):
+            dialog = getattr(self, attribute, None)
+            if dialog is not None:
+                dialog.close()
     def _plugin_grants(self) -> dict:
         grants = user_setting_dict.get('plugin_grants')
         if not isinstance(grants, dict):
@@ -1002,32 +1198,74 @@ class FrontEngineMainUI(QMainWindow):
             return
         self._shutdown_done = True
         front_engine_logger.info("[FrontEngineMainUI] shutdown")
+        if getattr(self, "command_palette", None) is not None:
+            self.command_palette.close()
+        if getattr(self, "preset_versions_dialog", None) is not None:
+            self.preset_versions_dialog.close()
+        self._close_history_dialogs()
+        self._close_asset_library()
         if user_setting_dict.get("restore_last_session"):
             save_last_session(self)
         self._stop_services()
+        self.text_setting_ui.stop_file_preview()
+        self.image_setting_ui.close_image_compare()
+        self.pet_setting_ui.close_pack_editor()
+        self.tools_setting_ui.close_palette()
+        self.tools_setting_ui.close_capture_editor()
+        self.tools_setting_ui.close_live_ocr()
+        self.widgets_setting_ui.close_task_editor()
         from frontengine.user_setting.scene_setting import release_scene_packages
         if hasattr(self, 'tools_setting_ui'):
             self.tools_setting_ui.recorder.close()
+        self._save_page_state()
         # Assets must outlive all scene/pet widgets that may still read them.
-        self.scene_setting_ui.close_scene()
+        self.scene_setting_ui.shutdown_scene()
+        self._clear_overlays()
+        if sys.platform.startswith('linux'):
+            from frontengine.utils.linux.audio import stop_all
+            stop_all()
+        from frontengine.ui.plugin_pages import shutdown_pages
+        shutdown_pages(self)
         release_scene_packages()
         # 執行緒執行狀態跟著行程活著，不放開的話關掉程式之後螢幕還是不會睡。
         # The execution state lives with the process: without releasing it the
         # display keeps refusing to sleep after the application is gone.
         if getattr(self, "keep_awake", None) is not None:
             self.keep_awake.disable()
-        self._save_page_state()
         self._save_window_geometry()
         write_user_setting()
-        self._clear_overlays()
         self.scene_setting_ui.close_scene()
 
     def close(self) -> None:
         """關閉程式並清理資源 / Close application and clear resources"""
         self._shutdown()
         super().close()
-        if self.main_app:
-            self.main_app.exit(0)
+        self._request_exit()
+
+    def _request_exit(self) -> None:
+        """Keep Qt alive until canceled local raster/file workers release their resources."""
+        if self.main_app is None or getattr(self, '_exit_barrier', None) is not None:
+            return
+        from frontengine.utils.shutdown_barrier import ShutdownBarrier
+        self.main_app.setQuitOnLastWindowClosed(False)
+        self._exit_barrier = ShutdownBarrier(self._workers_pending, lambda: self.main_app.exit(0), self.main_app)
+        self._exit_barrier.start()
+
+    def _workers_pending(self) -> bool:
+        from PySide6.QtCore import QThreadPool
+        if QThreadPool.globalInstance().activeThreadCount():
+            return True
+        if sys.platform.startswith('linux'):
+            from frontengine.utils.linux.audio import pending
+            if pending():
+                return True
+        for name in ('asset_library_service', 'todo_service', 'image_history_service', 'capture_history_service'):
+            service = getattr(self, name, None)
+            worker = getattr(service, 'worker', service)
+            thread = getattr(worker, 'thread', None)
+            if thread is not None and thread.is_alive():
+                return True
+        return False
 
     def _stop_services(self) -> None:
         """停掉所有背景服務（沒建立起來的就跳過）。"""
@@ -1061,17 +1299,8 @@ class FrontEngineMainUI(QMainWindow):
         Close the overlays each page is holding, then empty the lists. close()
         comes first because closeEvent is what stops timers and releases media.
         """
-        for page_name, attribute in self._CLOSING_WIDGET_LISTS:
-            page = getattr(self, page_name, None)
-            widget_list = getattr(page, attribute, None) if page is not None else None
-            if widget_list is None:
-                continue
-            for widget in widget_list[:]:
-                try:
-                    widget.close()
-                except RuntimeError:  # 使用者已經關掉，C++ 物件不在了
-                    continue
-            widget_list.clear()
+        self.control_center_ui.clear_all()
+        self.wallpaper_setting_ui.wallpaper_widgets.clear()
 
     @classmethod
     def debug_close(cls) -> None:

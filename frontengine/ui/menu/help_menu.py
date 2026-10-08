@@ -47,6 +47,7 @@ def build_help_menu(ui_we_want_to_set: FrontEngineMainUI) -> None:
         lambda: ui_we_want_to_set.toggle_shortcut_sheet(),
         "Shortcut list..."
     )
+    _add_action(help_menu, 'platform_title', lambda: _show_platform(ui_we_want_to_set))
 
     _add_action(
         help_menu,
@@ -72,6 +73,17 @@ def _add_action(menu, key: str, callback, fallback: str = "") -> QAction:
     action.triggered.connect(callback)
     menu.addAction(action)
     return action
+
+
+def _show_platform(ui: FrontEngineMainUI) -> None:
+    from frontengine.ui.dialog.platform_capabilities_dialog import PlatformCapabilitiesDialog
+    dialog = getattr(ui, 'platform_capabilities_dialog', None)
+    if dialog is None:
+        dialog = PlatformCapabilitiesDialog(ui)
+        ui.platform_capabilities_dialog = dialog
+    dialog.refresh()
+    dialog.show()
+    dialog.raise_()
 
 
 def show_how_to_use(ui_we_want_to_set: FrontEngineMainUI) -> None:

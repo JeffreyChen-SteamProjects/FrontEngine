@@ -2,7 +2,7 @@ from typing import Optional
 from pathlib import Path
 import sys
 
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import Qt, QTimer, Signal
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import (
     QLabel, QPushButton, QMessageBox, QComboBox, QCheckBox, QFileDialog,
@@ -35,6 +35,7 @@ from frontengine.utils.input_watch.typing_watch import TypingWatch
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import retranslator, tr
+from frontengine.ui.page.pet.pet_profile_controls import PetProfileControls
 
 _PET_EXTENSIONS = (".gif", ".webp", ".png", ".jpg", ".puppet")
 
@@ -46,6 +47,7 @@ _CHOOSE_PACK = "Choose pet pack..."
 
 
 class PetSettingUI(SettingPage):
+    workshop_requested = Signal()
     def __init__(self):
         front_engine_logger.info("[PetSettingUI] Init")
         super().__init__("tab_pet_text", "page_subtitle_pet",
@@ -53,6 +55,7 @@ class PetSettingUI(SettingPage):
 
         # Init variable
         self.pet_list: list = []
+        self.pack_editor = None
         # 打字時安分：按鍵由既有的全域監聽服務推過來，這裡只記時間並在停手後放行
         # Settling while typing: keys come from the existing global watch
         # service; this only times them and lets the pet go once typing stops.
@@ -84,6 +87,8 @@ class PetSettingUI(SettingPage):
         self.choose_file_button.clicked.connect(self.choose_and_play)
         self.choose_pack_button = tr(QPushButton(), "pet_choose_pack", _CHOOSE_PACK)
         self.choose_pack_button.clicked.connect(self.choose_pack)
+        self.workshop_button = tr(QPushButton(), "workshop_manage")
+        self.workshop_button.clicked.connect(self.workshop_requested.emit)
         self.choose_sound_button = tr(QPushButton(), "pet_choose_sound", "Choose sound (optional)")
         self.choose_sound_button.clicked.connect(self.choose_sound)
         self.choose_script_button = tr(QPushButton(), 'pet_choose_script', 'Choose puppet script...')
@@ -182,8 +187,12 @@ class PetSettingUI(SettingPage):
         source = self.add_section("section_source", "Source")
         source.add_inline(self.choose_file_button, self.choose_pack_button,
                           self.choose_sound_button)
-        source.add_inline(self.choose_script_button)
+        source.add_inline(self.choose_script_button, self.workshop_button)
+        self.pack_editor_button = tr(QPushButton(), 'pack_editor_title')
+        self.pack_editor_button.clicked.connect(self.open_pack_editor)
+        source.add_inline(self.pack_editor_button)
         source.add_row(self.recent_files_label, self.recent_files_combobox)
+        self.profile_controls = PetProfileControls(self)
 
         appearance = self.add_section("section_appearance", "Appearance")
         appearance.add_row(self.size_label, self.size_combobox)
@@ -264,12 +273,22 @@ class PetSettingUI(SettingPage):
             except RuntimeError:  # pragma: no cover - 底層物件已消失
                 continue
 
-    def _spawn_pet(self) -> None:
+    def _spawn_pet(self, clone_source: dict | None = None) -> None:
         """建立、顯示並開始移動一隻寵物（供 Start 與右鍵複製共用）。"""
         if not self.pet_image_path:
             return
+        try:
+            identifier = self.profile_controls.selector.currentData()
+            if clone_source is not None:
+                identifier = self.profile_controls.profiles.create(source=clone_source)['id']
+            self._spawn_profile_pet(identifier)
+            self.profile_controls.refresh()
+        except (OSError, ValueError, RuntimeError) as error:
+            self.profile_controls.status.setText(str(error))
+
+    def _spawn_profile_pet(self, identifier: str | None) -> None:
         if Path(self.pet_image_path).suffix.lower() == '.puppet':
-            self._spawn_puppet()
+            self._spawn_puppet(identifier)
             return
         pet = DesktopPetWidget(
             image_path=self.pet_image_path,
@@ -282,8 +301,10 @@ class PetSettingUI(SettingPage):
             sit_on_windows=self.sit_checkbox.isChecked(),
             volume=int(self.volume_combobox.currentData()) / 100.0,
             audio_react=self.audio_react_checkbox.isChecked(),
+            profile_id=identifier, profiles=self.profile_controls.profiles,
+            profile_name=self.profile_controls.name.text(),
         )
-        pet.clone_requested.connect(self._spawn_pet)
+        pet.clone_requested.connect(lambda: self._spawn_pet(pet.profile_session.state()))
         pet.set_peers_provider(lambda me=pet: self._peer_centers(me))
         if self.speech_checkbox.isChecked():
             pet.set_speech_enabled(True)
@@ -304,16 +325,18 @@ class PetSettingUI(SettingPage):
             bounds = geometry[0]
             pet.start_moving((bounds.left(), bounds.top(), bounds.right(), bounds.bottom()))
 
-    def _spawn_puppet(self) -> None:
+    def _spawn_puppet(self, identifier: str | None = None) -> None:
         from frontengine.show.pet.puppet_pet import PuppetPetWidget
         try:
             width = max(64, int(self.size_combobox.currentText()))
             pet = PuppetPetWidget(self.pet_image_path, (width, int(width * 1.5)),
-                                  script_path=self.puppet_script_path)
+                                  script_path=self.puppet_script_path, profile_id=identifier,
+                                  profiles=self.profile_controls.profiles,
+                                  profile_name=self.profile_controls.name.text())
         except (ValueError, OSError, RuntimeError) as error:
             QMessageBox.warning(self, 'Imervue puppet', str(error))
             return
-        pet.clone_requested.connect(self._spawn_pet)
+        pet.clone_requested.connect(lambda: self._spawn_pet(pet.profile_session.state()))
         geometry = self._target_geometry()
         if geometry is not None:
             pet.setScreen(geometry[1])
@@ -503,6 +526,30 @@ class PetSettingUI(SettingPage):
         self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
         add_recent_file("pet", folder)
         reload_recent_combobox(self.recent_files_combobox, "pet")
+
+    def open_pack_editor(self) -> None:
+        """Open the sprite-only mapping editor without spawning a desktop pet."""
+        if self.pack_editor is None:
+            from frontengine.ui.dialog.pet_pack_editor import PetPackEditor
+            self.pack_editor = PetPackEditor(self)
+            self.pack_editor.pack_selected.connect(self._use_edited_pack)
+        self.pack_editor.show()
+        self.pack_editor.raise_()
+        self.pack_editor.activateWindow()
+
+    def _use_edited_pack(self, folder: str) -> None:
+        if not scan_pet_pack(folder):
+            return
+        self.pet_image_path = folder
+        self.ready_to_play = True
+        retranslator.set_text(self.ready_label, 'Ready')
+        add_recent_file('pet', folder)
+        reload_recent_combobox(self.recent_files_combobox, 'pet')
+
+    def close_pack_editor(self) -> None:
+        """Cancel file work and release animation resources before application shutdown."""
+        if self.pack_editor is not None:
+            self.pack_editor.close()
 
     def _apply_recent_file(self, _index: int = 0) -> None:
         path = self.recent_files_combobox.currentData()

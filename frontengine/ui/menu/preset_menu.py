@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from copy import deepcopy
 from typing import TYPE_CHECKING, Callable
 
 from PySide6.QtGui import QAction
@@ -41,6 +42,9 @@ def _collect_state(ui: "FrontEngineMainUI") -> dict:
         page = getattr(ui, attribute, None)
         if page is not None and hasattr(page, "get_state"):
             state[name] = page.get_state()
+    from frontengine.ui.plugin_pages import preset_pages
+    for name, page in preset_pages(ui):
+        state[name] = page.get_state()
     return state
 
 
@@ -57,6 +61,61 @@ def _apply_state(ui: "FrontEngineMainUI", state: dict) -> None:
                 front_engine_logger.warning(
                     f"[PresetMenu] Failed to apply '{name}' preset section: {error!r}"
                 )
+    from frontengine.ui.plugin_pages import preset_pages
+    for name, page in preset_pages(ui):
+        if isinstance(state.get(name), dict):
+            try:
+                page.set_state(deepcopy(state[name]))
+            except Exception as error:
+                front_engine_logger.warning(f"[PresetMenu] Failed to apply '{name}': {error!r}")
+
+
+def apply_state_transaction(ui: "FrontEngineMainUI", state: dict) -> None:
+    """Apply settings strictly and restore touched pages if any page fails."""
+    targets = []
+    for name, attribute in _PRESET_PAGES:
+        page = getattr(ui, attribute, None)
+        if name not in state or page is None:
+            continue
+        if not isinstance(state[name], dict):
+            raise ValueError(f"Invalid preset section: {name}")
+        targets.append((page, deepcopy(state[name]), deepcopy(page.get_state())))
+    touched = []
+    from frontengine.ui.plugin_pages import preset_pages
+    for name, page in preset_pages(ui):
+        if name in state:
+            if not isinstance(state[name], dict):
+                raise ValueError(f'Invalid preset section: {name}')
+            targets.append((page, deepcopy(state[name]), deepcopy(page.get_state())))
+    try:
+        for page, section, original in targets:
+            touched.append((page, original))
+            page.set_state(section)
+    except Exception as error:
+        failures = []
+        for page, original in reversed(touched):
+            try:
+                page.set_state(original)
+            except Exception as rollback_error:
+                failures.append(str(rollback_error))
+        if failures:
+            raise RuntimeError("Preset rollback failed: " + "; ".join(failures)) from error
+        raise RuntimeError(f"Preset application failed: {error}") from error
+
+
+def _versions_action(ui: "FrontEngineMainUI") -> Callable[[], None]:
+    def handler() -> None:
+        from frontengine.ui.dialog.preset_versions_dialog import PresetVersionsDialog
+        dialog = getattr(ui, "preset_versions_dialog", None)
+        if dialog is None:
+            dialog = PresetVersionsDialog(PresetRepository(), lambda: _collect_state(ui),
+                                          lambda state: apply_state_transaction(ui, state), ui)
+            ui.preset_versions_dialog = dialog
+        dialog.reload_presets()
+        dialog.show()
+        dialog.raise_()
+        dialog.activateWindow()
+    return handler
 
 
 def _pick_preset(ui: "FrontEngineMainUI", title: str) -> str:
@@ -372,6 +431,7 @@ def build_preset_menu(ui: "FrontEngineMainUI") -> None:
     for label_key, fallback, callback_factory in (
         ("preset_menu_save", "Save preset...", _save_action),
         ("preset_menu_load", "Load preset...", _load_action),
+        ("preset_versions_title", "Preset versions...", _versions_action),
         ("preset_menu_delete", "Delete preset...", _delete_action),
         ("preset_menu_export", "Export preset...", _export_action),
         ("preset_menu_import", "Import preset...", _import_action),
@@ -380,6 +440,7 @@ def build_preset_menu(ui: "FrontEngineMainUI") -> None:
         ("preset_menu_set_startup", "Set as startup preset...", _set_startup_action),
         ("preset_menu_clear_startup", "Clear startup preset", _clear_startup_action),
         ("workshop_menu_import", "Import Workshop content...", _workshop_action),
+        ("workshop_manage", "Manage Workshop...", lambda window: lambda: window.open_workshop("preset")),
     ):
         action = QAction(_t(label_key, fallback), menu)
         retranslator.bind(action, label_key, fallback)

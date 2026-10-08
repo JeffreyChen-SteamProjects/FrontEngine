@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from typing import List, Optional, Tuple
 
-from PySide6.QtCore import QPoint, QRect, Qt
+from PySide6.QtCore import QPoint, QRect, Qt, Signal
 from PySide6.QtGui import QColor, QFont, QGuiApplication, QPainter, QPen
 
 from frontengine.show.base_widget import BaseWidget
@@ -59,6 +59,8 @@ class MeasureWidget(BaseWidget):
     """
     量測覆蓋層。螢幕擷取函式可注入（測試用假的），所以整個互動流程都測得到。
     """
+
+    color_sampled = Signal(str)
 
     def __init__(self, mode: str = MODE_COLOR, color_format: str = FORMAT_HEX) -> None:
         front_engine_logger.info(f"[MeasureWidget] Init | mode={mode}")
@@ -140,6 +142,7 @@ class MeasureWidget(BaseWidget):
                 return None
             self.picked_color = color
             self.readout = self.color_text(color)
+            self.color_sampled.emit(color.name(QColor.NameFormat.HexRgb))
             self.update()
             return self.readout
         needed = 2 if self.mode == MODE_RULER else 3

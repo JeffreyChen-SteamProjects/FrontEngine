@@ -41,6 +41,7 @@ user_setting_dict: Dict[str, Any] = {
     # 啟動時自動套用的預設集名稱（空字串表示停用）
     # Preset auto-applied on launch (empty string disables it)
     "startup_preset": "",
+    "command_palette": {"favorites": [], "recent": []},
     # 偵測到全螢幕程式時自動隱藏覆蓋層
     # Auto-hide overlays while a fullscreen app is running
     "smart_pause": True,
@@ -53,6 +54,7 @@ user_setting_dict: Dict[str, Any] = {
     # 使用者拖曳過的覆蓋層位置：類別名稱 -> [x, y, 寬, 高]
     # Overlay positions the user dragged into place: class name -> [x, y, w, h]
     "overlay_geometry": {},
+    "monitor_profiles_auto": False,
     # 啟動時還原上次的頁面設定
     # Restore the previous session's page settings on launch
     "restore_last_session": False,
@@ -95,6 +97,8 @@ user_setting_dict: Dict[str, Any] = {
     "clipboard_persist": False,
     "clipboard_entries": [],
     "clipboard_limit": 50,
+    "image_clipboard_history": {"enabled": False, "persistent": False, "limit": 50, "capacity_mib": 64},
+    "capture_history": {"enabled": False, "persistent": False, "limit": 50, "capacity_mib": 64},
     # 已儲存的視窗版面：名稱 -> [{title, x, y, width, height}]
     # Saved window layouts: name -> [{title, x, y, width, height}]
     "window_layouts": {},

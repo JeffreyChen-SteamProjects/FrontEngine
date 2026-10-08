@@ -21,25 +21,7 @@ from frontengine.utils.hotkey.hotkey_service import is_valid_hotkey
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
-# 動作名稱 -> (i18n key, 英文 fallback)，用於顯示較友善的標籤
-# Action name -> (i18n key, English fallback) for friendlier row labels.
-_ACTION_LABELS: Dict[str, Tuple[str, str]] = {
-    "close_all": ("control_center_close_all", "Close all"),
-    "hide_all": ("control_center_hide_all", "Hide all"),
-    "show_all": ("control_center_show_all", "Show all"),
-    "mute_all": ("control_center_mute_all", "Mute all"),
-    "opacity_up": ("hotkey_opacity_up", "Opacity up"),
-    "opacity_down": ("hotkey_opacity_down", "Opacity down"),
-    "dashboard_next": ("web_dashboard_next", "Next page"),
-    "toggle_lock": ("hotkey_toggle_lock", "Lock / unlock overlays"),
-    "show_shortcuts": ("hotkey_show_shortcuts", "Show this shortcut list"),
-    "toggle_freeze": ("hotkey_toggle_freeze", "Freeze / unfreeze the screen"),
-    "media_play_pause": ("hotkey_media_play_pause", "Play / pause media"),
-    "media_next": ("hotkey_media_next", "Next track"),
-    "media_previous": ("hotkey_media_previous", "Previous track"),
-    "move_window_next_monitor": ("hotkey_move_window_next_monitor",
-                                 "Move window to the next monitor"),
-}
+from frontengine.utils.actions.action_registry import ACTION_LABELS as _ACTION_LABELS
 
 
 def _t(key: str, fallback: str) -> str:

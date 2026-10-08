@@ -13,7 +13,9 @@ PyOpenGL_accelerate
 numpy
 pynput
 cryptography>=42
+python-xlib>=0.33; sys_platform == 'linux'
 winrt-Windows.Media.Ocr>=3.2.1; sys_platform == 'win32'
+winrt-Windows.Media.Control>=3.2.1; sys_platform == 'win32'
 winrt-Windows.Graphics.Imaging>=3.2.1; sys_platform == 'win32'
 winrt-Windows.Storage.Streams>=3.2.1; sys_platform == 'win32'
 winrt-Windows.Globalization>=3.2.1; sys_platform == 'win32'

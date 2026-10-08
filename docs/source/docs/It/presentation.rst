@@ -24,3 +24,5 @@ Pagina Presentazione
     * I tratti sono tenuti in coordinate della tela, quindi spostarsi e
       ingrandire li lascia dove devono stare.
     * «Salva la lavagna» scrive un'immagine della sola area disegnata.
+
+Presentazione → Lavagna ha pagine modificabili indipendenti, modalità disegno/selezione, selezione multipla Maiusc, spostamento/eliminazione tratti e 20 stati annullabili complessivi. Tasto centrale sposta, rotella ingrandisce; selezione/movimento in coordinate della tela, vista per pagina. Salva/apri .fewhiteboard JSON con versione conserva tratti vettoriali/viste per continuare. Un worker valida e legge/scrive; errori conservano lavagna/file. PNG pagina esclude controlli/selezione/trasformazione con margini completi. Limiti: 50 pagine, 2000 tratti/pagina, 100000 punti, otto MiB JSON; PNG 8192 pixel/lato e 16 megapixel. Chiusura/Escape annulla scritture e ignora letture tardive.

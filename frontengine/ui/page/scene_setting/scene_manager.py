@@ -1,6 +1,6 @@
 import json
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import QWidget, QGridLayout, QPlainTextEdit, QPushButton, QCheckBox, QDialog, QMessageBox
 
@@ -14,6 +14,9 @@ from frontengine.user_setting.user_setting_file import user_setting_dict
 
 
 class SceneManagerUI(QWidget):
+    workshop_requested = Signal()
+    templates_requested = Signal()
+    entries_changed = Signal(object)
     def __init__(self, scene_manager):
         front_engine_logger.info("[SceneManagerUI] Init")
         super().__init__()
@@ -32,12 +35,18 @@ class SceneManagerUI(QWidget):
 
         # Json plaintext
         self.json_plaintext = QPlainTextEdit()
-        self.json_plaintext.setReadOnly(True)
+        self.json_plaintext.setReadOnly(False)
         self.json_plaintext.appendPlainText("{}")
 
         # Start button
         self.start_button = tr(QPushButton(), "scene_start")
         self.start_button.clicked.connect(self.start_scene)
+        self.workshop_button = tr(QPushButton(), "workshop_manage")
+        self.workshop_button.clicked.connect(self.workshop_requested.emit)
+        self.apply_json_button = tr(QPushButton(), "scene_apply_json")
+        self.apply_json_button.clicked.connect(self.apply_json)
+        self.templates_button = tr(QPushButton(), 'scene_templates')
+        self.templates_button.clicked.connect(self.templates_requested.emit)
 
         # Show on all screen
         self.show_on_all_screen_checkbox = tr(QCheckBox(), "Show on all screen")
@@ -47,13 +56,18 @@ class SceneManagerUI(QWidget):
         self.clear_json_button = tr(QPushButton(), "scene_script_clear")
         self.clear_json_button.clicked.connect(self.clear_json)
 
-        # Layout
+        self._build_layout()
+
+    def _build_layout(self) -> None:
         self.grid_layout.addWidget(self.json_plaintext, 0, 0, 4, 2)
         self.grid_layout.addWidget(self.read_scene_json_button, 4, 0)
         self.grid_layout.addWidget(self.write_scene_json_button, 4, 1)
         self.grid_layout.addWidget(self.show_on_all_screen_checkbox, 5, 0)
         self.grid_layout.addWidget(self.clear_json_button, 5, 1)
         self.grid_layout.addWidget(self.start_button, 6, 0)
+        self.grid_layout.addWidget(self.workshop_button, 6, 1)
+        self.grid_layout.addWidget(self.apply_json_button, 7, 0)
+        self.grid_layout.addWidget(self.templates_button, 7, 1)
 
     def set_show_all_screen(self) -> None:
         front_engine_logger.info("[SceneManagerUI] set_show_all_screen")
@@ -71,6 +85,20 @@ class SceneManagerUI(QWidget):
         front_engine_logger.info("[SceneManagerUI] clear_json")
         scene_json.clear()
         self.json_plaintext.clear()
+        self.entries_changed.emit({})
+
+    def apply_json(self) -> None:
+        entries = self._parse_scene_json()
+        if entries is not None:
+            from frontengine.utils.scene_format.scene_editor_document import validate_geometry
+            try:
+                entries = validate_geometry(entries)
+            except ValueError as error:
+                QMessageBox.warning(self, "Scene Error", str(error))
+                return
+            scene_json.clear()
+            scene_json.update(entries)
+            self.renew_json_plain_text()
 
     def start_scene(self):
         front_engine_logger.info("[SceneManagerUI] start_scene")
@@ -110,29 +138,19 @@ class SceneManagerUI(QWidget):
 
     def _add_scene_widgets(self, scene: dict) -> None:
         """把場景描述裡的每個項目加進場景；不認得的型別會提醒使用者。"""
-        scene_add_function = {
-            "TEXT": self.scene.add_text,
-            "IMAGE": self.scene.add_image,
-            "GIF": self.scene.add_gif,
-            "SOUND": self.scene.add_sound,
-            "VIDEO": self.scene.add_video,
-            "WEB": self.scene.add_web,
-            'PUPPET': self.scene.add_puppet,
-        }
-        for scene_dict in scene.values():
+        for key, scene_dict in scene.items():
             if not isinstance(scene_dict, dict):
                 QMessageBox.warning(
                     self, "Invalid Scene Entry",
                     f"A scene entry must be an object, not {type(scene_dict).__name__}")
                 continue
             scene_widget_type = scene_dict.get("type")
-            function = scene_add_function.get(scene_widget_type)
-            if function is None:
+            if scene_widget_type not in ('TEXT', 'IMAGE', 'GIF', 'SOUND', 'VIDEO', 'WEB', 'PUPPET'):
                 QMessageBox.warning(
                     self, "Unknown Type", f"Unsupported scene type: {scene_widget_type}")
                 continue
             try:
-                function(setting_dict=scene_dict)
+                self.scene.add_entry(key, scene_dict)
             except ValueError as error:
                 # 手寫的場景檔漏欄位是常態，指出哪一項壞掉就好，不要整個中斷
                 # A hand-written scene file missing a field is routine: name the
@@ -211,3 +229,4 @@ class SceneManagerUI(QWidget):
     def renew_json_plain_text(self):
         front_engine_logger.info("[SceneManagerUI] renew_json_plain_text")
         self.json_plaintext.setPlainText(json.dumps(scene_json, indent=4))
+        self.entries_changed.emit(dict(scene_json))

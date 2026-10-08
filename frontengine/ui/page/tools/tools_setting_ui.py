@@ -7,9 +7,11 @@ window pinning and the camera overlay. These are for measuring, grabbing and
 arranging - as opposed to the other pages, which are for showing.
 """
 from typing import List, Optional
+from pathlib import Path
+import sys
 
-from PySide6.QtCore import QBuffer, QIODevice, QTimer
-from PySide6.QtGui import QGuiApplication, QPixmap
+from PySide6.QtCore import QBuffer, QIODevice, QTimer, QRect, Signal
+from PySide6.QtGui import QGuiApplication, QPixmap, QImage
 from PySide6.QtWidgets import (
     QCheckBox, QComboBox, QFileDialog, QLabel, QLineEdit, QPushButton, QSpinBox, QMessageBox,
 )
@@ -25,6 +27,8 @@ from frontengine.show.measure.measure_widget import (
 from frontengine.ui.dialog.screen_text_dialog import (
     ScreenTextDialog, ask_for_consent, has_consent, has_text_consent, ask_for_text_consent,
 )
+from frontengine.ui.dialog.color_palette_dialog import ColorPaletteDialog
+from frontengine.utils.measure.color_palette import ColorPalette
 from frontengine.ui.dialog.window_pin_dialog import WindowPinDialog
 from frontengine.ui.dialog.window_replica_dialog import WindowReplicaDialog
 from frontengine.user_setting.user_setting_file import user_setting_dict, write_user_setting
@@ -63,13 +67,29 @@ def _t(key: str, fallback: str) -> str:
 
 class ToolsSettingUI(SettingPage):
     """工具設定頁 / The tools page."""
+    captured = Signal(QImage)
 
     def __init__(self):
         front_engine_logger.info("[ToolsSettingUI] Init")
         super().__init__("tab_tools_text", "page_subtitle_tools",
                          "Tools", "Measure, capture, record and pin what is on screen.")
 
+        self._initialize_state()
+        self._build_measure_row()
+        self._build_capture_row()
+        self._build_screen_text_row()
+        self._build_record_row()
+        self._build_virtual_camera_row()
+        self._build_camera_row()
+        self._build_window_row()
+        self._add_tool_sections()
+        self.add_body_widget(self.hint_label)
+        self.finish_body()
+
+    def _initialize_state(self) -> None:
         self.measure_widget_list: List[MeasureWidget] = []
+        self.palette = ColorPalette(user_setting_dict, write_user_setting)
+        self.palette_dialog = None
         self.recorder = FrameRecorder(self)
         self.virtual_camera_feed = VirtualCameraFeed(self)
         self.virtual_camera_feed.failed.connect(self._on_virtual_camera_failed)
@@ -89,15 +109,12 @@ class ToolsSettingUI(SettingPage):
         # is made and WA_DeleteOnClose destroys it, so the surviving reference
         # raises RuntimeError on touch and "copy last" was a silent no-op.
         self.last_capture: Optional[QPixmap] = None
+        self.capture_editor = None
+        self.ocr_widget_list = []
         self.pin_dialog: Optional[WindowPinDialog] = None
         self.replica_dialog: Optional[WindowReplicaDialog] = None
 
-        self._build_measure_row()
-        self._build_capture_row()
-        self._build_screen_text_row()
-        self._build_record_row()
-        self._build_virtual_camera_row()
-        self._build_camera_row()
+    def _build_window_row(self) -> None:
         self.pin_button = tr(QPushButton(), "tools_pin_window", "Pin a window...")
         self.pin_button.clicked.connect(self.open_pin_dialog)
 
@@ -124,6 +141,7 @@ class ToolsSettingUI(SettingPage):
             "clipboard. The camera is shown locally only - nothing is recorded.")
         self.hint_label.setWordWrap(True)
 
+    def _add_tool_sections(self) -> None:
         # 工具頁是八個彼此無關的工具。攤在同一個網格裡時，量測的設定看起來像是
         # 錄影也要用的，其實兩者毫無關係。
         # Eight unrelated tools. Flattened into one grid, the measuring settings
@@ -132,23 +150,22 @@ class ToolsSettingUI(SettingPage):
         measure = self.add_section(self.measure_label)
         measure.add_row("tools_mode", self.measure_mode_combobox, "Mode")
         measure.add_row(self.color_format_label, self.color_format_combobox)
-        measure.add_inline(self.measure_button)
+        measure.add_inline(self.measure_button, self.palette_collect, self.palette_button)
+        measure.add_widget(self.palette_status)
 
         capture = self.add_section(self.capture_label)
         capture.add_inline(self.capture_button, self.capture_copy_button,
-                           self.capture_pin_button)
+                           self.capture_pin_button, self.capture_edit_button)
 
         screen_text = self.add_section(self.screen_text_label)
         screen_text.add_row("tools_action", self.screen_text_combobox, "Action")
         screen_text.add_widget(self.screen_text_input)
         screen_text.add_inline(self.screen_text_button)
+        self.live_ocr_button = tr(QPushButton(), 'live_ocr_title')
+        self.live_ocr_button.clicked.connect(self.start_live_ocr)
+        screen_text.add_inline(self.live_ocr_button)
 
-        record = self.add_section(self.record_label)
-        record.add_row("tools_fps", self.record_fps_spinbox, "Frames per second")
-        record.add_row("tools_seconds", self.record_seconds_spinbox, "Seconds")
-        record.add_inline(self.record_camera_checkbox)
-        record.add_inline(self.record_button)
-        record.add_inline(self.record_status)
+        self._add_record_section()
 
         virtual_camera = self.add_section(self.virtual_camera_label)
         virtual_camera.add_row("tools_fps", self.virtual_camera_fps_spinbox,
@@ -169,9 +186,6 @@ class ToolsSettingUI(SettingPage):
         windows.add_row("tools_saved", self.layout_combobox, "Saved")
         windows.add_inline(self.layout_restore_button, self.pin_button, self.replica_button)
 
-        self.add_body_widget(self.hint_label)
-        self.finish_body()
-
     # --- construction helpers -------------------------------------------
     def _build_measure_row(self) -> None:
         self.measure_label = tr(QLabel(), "tools_measure_label", "Measure")
@@ -189,6 +203,13 @@ class ToolsSettingUI(SettingPage):
         self.color_format_combobox.currentIndexChanged.connect(self._apply_measure_settings)
         self.measure_button = tr(QPushButton(), "tools_measure_start", "Start measuring")
         self.measure_button.clicked.connect(self.toggle_measure)
+        self.palette_collect = tr(QCheckBox(), "palette_collect")
+        self.palette_collect.setChecked(user_setting_dict.get("color_palette_collect") is True)
+        self.palette_collect.toggled.connect(self._save_palette_collect)
+        self.palette_button = tr(QPushButton(), "palette_title")
+        self.palette_button.clicked.connect(self.open_palette)
+        self.palette_status = QLabel()
+        self.palette_status.setWordWrap(True)
 
     def _build_capture_row(self) -> None:
         self.capture_label = tr(QLabel(), "tools_capture_label", "Region capture")
@@ -198,6 +219,8 @@ class ToolsSettingUI(SettingPage):
         self.capture_pin_button = tr(QPushButton(), "tools_capture_pin", "Pin last")
         self.capture_pin_button.clicked.connect(self.pin_last_capture)
         self.capture_copy_button.clicked.connect(self.copy_last_capture)
+        self.capture_edit_button = tr(QPushButton(), 'capture_edit_title')
+        self.capture_edit_button.clicked.connect(self.edit_last_capture)
 
     def _build_screen_text_row(self) -> None:
         self.screen_text_label = tr(QLabel(), "tools_screen_text_label", "Read text")
@@ -221,15 +244,71 @@ class ToolsSettingUI(SettingPage):
         self.record_seconds_spinbox = QSpinBox()
         self.record_seconds_spinbox.setRange(1, 120)
         self.record_seconds_spinbox.setValue(DEFAULT_MAX_SECONDS)
+        self.record_format = QComboBox()
+        self.record_format.addItem('GIF', 'gif')
+        self.record_format.addItem('AVI (Motion JPEG)', 'avi')
+        self.record_format.currentIndexChanged.connect(self._record_format_changed)
         self.record_camera_checkbox = tr(QCheckBox(), "tools_record_camera", "Include camera")
         self.record_button = tr(QPushButton(), "tools_record_start", _RECORD_AN_AREA)
         self.record_button.clicked.connect(self.toggle_recording)
+        self.record_pause = tr(QPushButton(), 'tools_record_pause')
+        self.record_pause.clicked.connect(self._toggle_record_pause)
+        self.record_pause.setEnabled(False)
+        self.record_cancel = tr(QPushButton(), 'tools_record_cancel')
+        self.record_cancel.clicked.connect(self.recorder.close)
+        self.record_cancel.setEnabled(False)
         self.record_status = tr(QLabel(), "tools_record_ready", "Ready")
         self._recording_error = ""
+        self._recording_detail = (0, 0.0, 0)
         retranslator.bind_call(self._update_recording_error)
+        retranslator.bind_call(self._update_recording_detail)
         self.recorder.finished.connect(self._on_recording_stopped)
         self.recorder.completed.connect(self._on_recording_completed)
         self.recorder.failed.connect(self._on_recording_failed)
+        self.recorder.state_changed.connect(self._recording_state_changed)
+        self.recorder.progress.connect(self._recording_progress)
+
+    def _add_record_section(self) -> None:
+        section = self.add_section(self.record_label)
+        section.add_row('tools_record_format', self.record_format)
+        section.add_row('tools_fps', self.record_fps_spinbox)
+        section.add_row('tools_seconds', self.record_seconds_spinbox)
+        section.add_inline(self.record_camera_checkbox)
+        section.add_inline(self.record_button, self.record_pause, self.record_cancel)
+        section.add_widget(self.record_status)
+
+    def _record_format_changed(self, _index: int) -> None:
+        self.record_seconds_spinbox.setMaximum(3600 if self.record_format.currentData() == 'avi' else 120)
+
+    def _toggle_record_pause(self) -> None:
+        if self.recorder.state == 'paused':
+            self.recorder.resume()
+        else:
+            self.recorder.pause()
+
+    def _recording_state_changed(self, state: str) -> None:
+        editable = state == 'idle'
+        for widget in (self.record_format, self.record_fps_spinbox, self.record_seconds_spinbox,
+                       self.record_camera_checkbox):
+            widget.setEnabled(editable)
+        self.record_button.setEnabled(state in ('idle', 'recording', 'paused'))
+        self.record_pause.setEnabled(state in ('recording', 'paused'))
+        self.record_cancel.setEnabled(state in ('recording', 'paused', 'finalizing'))
+        retranslator.set_text(self.record_pause, 'tools_record_resume' if state == 'paused' else 'tools_record_pause')
+        self._update_recording_detail()
+
+    def _recording_progress(self, frames: int, seconds: float, dropped: int) -> None:
+        self._recording_detail = (frames, seconds, dropped)
+        self._update_recording_detail()
+
+    def _update_recording_detail(self) -> None:
+        if self.recorder.state not in ('recording', 'paused'):
+            return
+        frames, seconds, dropped = self._recording_detail
+        label = _t('tools_record_paused', 'Paused') if self.recorder.state == 'paused' else _t('tools_record_active', 'Recording')
+        retranslator.forget(self.record_status)
+        self.record_status.setText(_t('tools_record_detail', '{state} · {seconds:.1f}s · {frames} frames · {dropped} dropped').format(
+            state=label, seconds=seconds, frames=frames, dropped=dropped))
 
     def _build_virtual_camera_row(self) -> None:
         self.virtual_camera_label = tr(QLabel(), "tools_vcam_label", "Virtual camera")
@@ -282,6 +361,7 @@ class ToolsSettingUI(SettingPage):
         screen = QGuiApplication.primaryScreen()
         if screen is not None:
             widget.setGeometry(screen.geometry())
+        widget.color_sampled.connect(self._record_palette_color)
         widget.setMouseTracking(True)
         widget.show()
         self.measure_widget_list.append(widget)
@@ -304,6 +384,48 @@ class ToolsSettingUI(SettingPage):
             except RuntimeError:
                 self.measure_widget_list.remove(widget)
 
+    def open_palette(self) -> None:
+        """Show one persistent manager for stored colors and recent samples."""
+        if self.palette_dialog is None:
+            self.palette_dialog = ColorPaletteDialog(self, self.palette)
+        self.palette_dialog.show()
+        self.palette_dialog.raise_()
+        self.palette_dialog.activateWindow()
+
+    def start_palette_pick(self) -> None:
+        """Enable consecutive color collection using the existing picker overlay."""
+        self.palette_collect.setChecked(True)
+        self.measure_mode_combobox.setCurrentIndex(self.measure_mode_combobox.findData(MODE_COLOR))
+        if not self.measure_widget_list:
+            self.start_measure()
+
+    def _save_palette_collect(self, enabled: bool) -> None:
+        user_setting_dict["color_palette_collect"] = enabled
+        try:
+            write_user_setting()
+        except OSError as error:
+            self.palette_status.setText(str(error))
+
+    def _record_palette_color(self, color: str) -> None:
+        if not self.palette_collect.isChecked():
+            return
+        try:
+            self.palette.sample(color)
+            self.palette_status.clear()
+        except (OSError, ValueError) as error:
+            self.palette_status.setText(str(error))
+        if self.palette_dialog is not None:
+            self.palette_dialog.refresh()
+
+    def close_palette(self) -> None:
+        """Hide the management dialog during application shutdown."""
+        if self.palette_dialog is not None:
+            self.palette_dialog.close()
+
+    def closeEvent(self, event) -> None:
+        self.close_palette()
+        super().closeEvent(event)
+
     # --- region capture --------------------------------------------------
     def start_capture(self) -> RegionCaptureWidget:
         """開一層框選截圖（放開滑鼠就擷取並自己關掉）。"""
@@ -323,6 +445,7 @@ class ToolsSettingUI(SettingPage):
         """擷取完成：記住畫面並直接複製到剪貼簿。"""
         self.last_capture = pixmap
         widget.copy_to_clipboard()
+        self.captured.emit(pixmap.toImage())
         if widget in self.capture_widget_list:
             self.capture_widget_list.remove(widget)
 
@@ -340,6 +463,33 @@ class ToolsSettingUI(SettingPage):
         pinned.show()
         self.pinned_widget_list.append(pinned)
         return pinned
+
+    def edit_last_capture(self) -> None:
+        """Edit a detached copy so the last original capture stays available."""
+        if self.last_capture is None or self.last_capture.isNull():
+            return
+        from frontengine.ui.dialog.capture_editor import CaptureEditor
+        self.close_capture_editor()
+        self.capture_editor = CaptureEditor(self.last_capture.toImage(), self)
+        self.capture_editor.pin_requested.connect(self._pin_edited_capture)
+        editor = self.capture_editor
+        editor.finished.connect(lambda _result: self._capture_editor_finished(editor))
+        self.capture_editor.show()
+
+    def _capture_editor_finished(self, editor) -> None:
+        if self.capture_editor is editor:
+            self.capture_editor = None
+
+    def _pin_edited_capture(self, image) -> None:
+        pinned = PinnedImageWidget(QPixmap.fromImage(image))
+        pinned.show()
+        self.pinned_widget_list.append(pinned)
+
+    def close_capture_editor(self) -> None:
+        """Close the capture document before releasing its owner."""
+        if self.capture_editor is not None:
+            self.capture_editor.close()
+            self.capture_editor = None
 
     def close_pinned(self) -> None:
         """關掉所有釘住的截圖（主程式關閉時呼叫）。"""
@@ -513,6 +663,58 @@ class ToolsSettingUI(SettingPage):
         self.capture_widget_list.append(picker)
         return picker
 
+    def start_live_ocr(self) -> RegionCaptureWidget | None:
+        """Select one fixed screen region for a manual-first, locally recognized OCR window."""
+        if len(self.ocr_widget_list) >= 4:
+            self.ocr_widget_list = [widget for widget in self.ocr_widget_list if not widget.closed]
+        if len(self.ocr_widget_list) >= 4:
+            self._on_capture_failed(_t('live_ocr_limit', 'Close an OCR window before opening another (maximum four).'))
+            return None
+        picker = RegionCaptureWidget(on_captured=lambda pixmap, rect: self._live_ocr_selected(picker, rect))
+        picker.failed.connect(self._on_capture_failed)
+        screen = QGuiApplication.primaryScreen()
+        if screen is not None:
+            picker.setGeometry(screen.geometry())
+        picker.setMouseTracking(True)
+        picker.show()
+        self.capture_widget_list.append(picker)
+        return picker
+
+    def _live_ocr_selected(self, picker, rect: QRect) -> None:
+        from frontengine.show.pinned.live_ocr_widget import LiveOcrWidget
+        from frontengine.utils.screen_text.live_ocr import make_live_reader
+        region = QRect(rect) if sys.platform == 'darwin' else QRect(picker.mapToGlobal(rect.topLeft()), rect.size())
+        widget = LiveOcrWidget(region, make_live_reader(self.screen_text_service))
+        widget.consent_requested.connect(lambda kind: self._review_ocr_consent(widget, kind))
+        screen = QGuiApplication.screenAt(region.center())
+        if screen is not None:
+            available = screen.availableGeometry()
+            x = max(available.left(), min(available.right()-widget.width()+1, region.right()+12))
+            y = max(available.top(), min(available.bottom()-widget.height()+1, region.top()))
+            widget.move(x, y)
+        widget.show()
+        self.ocr_widget_list.append(widget)
+        if picker in self.capture_widget_list:
+            self.capture_widget_list.remove(picker)
+        QTimer.singleShot(100, widget, widget.refresh)
+
+    def _review_ocr_consent(self, widget, kind: str) -> None:
+        if api_key() is None:
+            widget._failed('Set ANTHROPIC_API_KEY to enable explicitly requested cloud fallback')
+            return
+        granted = ask_for_text_consent(widget) if kind == 'text' else ask_for_consent(widget)
+        if granted:
+            widget.refresh()
+
+    def close_live_ocr(self) -> None:
+        """Stop region sources and late OCR result delivery before clearing the widget registry."""
+        for widget in self.ocr_widget_list[:]:
+            try:
+                widget.close()
+            except RuntimeError:
+                pass
+        self.ocr_widget_list.clear()
+
     def _read_capture(self, pixmap) -> None:
         """把框到的畫面送出去讀（在背景執行緒，UI 不會卡住）。"""
         data = pixmap_to_png(pixmap)
@@ -563,7 +765,7 @@ class ToolsSettingUI(SettingPage):
 
     # --- recording -------------------------------------------------------
     def toggle_recording(self) -> None:
-        if self.recorder.running:
+        if self.recorder.state in ('recording', 'paused'):
             self.finish_recording()
         elif not self.recorder.busy:
             self.start_recording()
@@ -585,18 +787,21 @@ class ToolsSettingUI(SettingPage):
         """對指定範圍開始錄製。"""
         if self.recorder.busy:
             return False
+        output_format = self.record_format.currentData()
+        file_filter = 'AVI (*.avi)' if output_format == 'avi' else 'GIF (*.gif)'
         target = QFileDialog.getSaveFileName(
-            self, _t("tools_record_save", "Save recording"), "recording.gif", "GIF (*.gif)")[0]
+            self, _t("tools_record_save", "Save recording"), 'recording.' + output_format, file_filter)[0]
         if not target:
             return False
+        target = str(Path(target).with_suffix('.' + output_format))
         self._recording_error = ""
         inset = self.camera_inset if self.record_camera_checkbox.isChecked() else None
         self.recorder.set_inset_provider(inset)
         started = self.recorder.start(region, target, self.record_fps_spinbox.value(),
-                                     self.record_seconds_spinbox.value())
+                                     self.record_seconds_spinbox.value(), output_format=output_format)
         if started and self.recorder.running:
             retranslator.set_text(self.record_button, "tools_record_stop", "Stop recording")
-            retranslator.set_text(self.record_status, "tools_record_active", "Recording")
+            self._update_recording_detail()
         return started
 
     def camera_inset(self) -> Optional[object]:

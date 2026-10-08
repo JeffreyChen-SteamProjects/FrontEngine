@@ -24,3 +24,5 @@ Presenting Page
     * Strokes are kept in canvas coordinates, so panning and zooming leaves
       them where they belong.
     * Save whiteboard writes an image of the area you actually drew on.
+
+Presentation → Whiteboard now has independent editable pages, drawing/selection modes, Shift multi-selection, stroke movement and deletion, and twenty undo states across pages. Middle drag pans and wheel zooms; hit testing and movement stay in canvas coordinates. Each page retains its own view. Save/Open editable file uses versioned .fewhiteboard JSON with all vector strokes and views, allowing edits after reopening; save/read validation runs on one background worker and failures preserve the current board or existing file. Export this page PNG flattens only that page, excluding controls, selection and view transforms, with full pen margins. Bounds: 50 pages, 2000 strokes/page, 100000 total points, eight MiB JSON; PNG up to 8192 pixels/side and 16 megapixels. Closing/Escape cancels pending writes and ignores late read results.

@@ -19,6 +19,31 @@ def asset(tmp_path):
     return path
 
 
+def test_puppet_profiles_feed_resume_and_close_independently(tmp_path):
+    pytest.importorskip("Imervue.puppet.document_io")
+    from frontengine.user_setting.pet_profiles import PetProfiles
+    from frontengine.show.pet.puppet_pet import PuppetPetWidget
+    profiles = PetProfiles({}, lambda: None)
+    first = PuppetPetWidget(asset(tmp_path), profiles=profiles, profile_name='Amber')
+    second = PuppetPetWidget(asset(tmp_path), profiles=profiles, profile_name='Blue')
+    identifier = first.profile_session.identifier
+    try:
+        first.feed()
+        assert first.profile_session.state()['affection'] == 5
+        assert second.profile_session.state()['affection'] == 0
+        first.close()
+        assert not first.profile_session.timer.isActive()
+        resumed = PuppetPetWidget(asset(tmp_path), profiles=profiles, profile_id=identifier)
+        try:
+            assert resumed.profile_session.state()['affection'] == 5
+            assert resumed.size() == second.size()
+        finally:
+            resumed.close()
+    finally:
+        first.close()
+        second.close()
+
+
 @pytest.mark.parametrize("malformed", [False, True])
 def test_reference_runtime_script_failure_allocates_no_child_window(tmp_path, malformed):
     pytest.importorskip("Imervue.puppet.document_io")

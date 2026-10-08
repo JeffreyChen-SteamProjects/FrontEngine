@@ -113,7 +113,6 @@ def test_private_key_and_directory_are_owner_only(tmp_path):
 def test_windows_private_key_has_a_protected_current_user_only_dacl(tmp_path):
     import csv
     import ctypes
-    import re
     import subprocess
     from ctypes import wintypes
     from frontengine.utils.remote.tls_certificate import CertificateStore
@@ -140,9 +139,34 @@ def test_windows_private_key_has_a_protected_current_user_only_dacl(tmp_path):
         buffer, 1, 4, ctypes.byref(sddl), None)
     try:
         assert sddl.value.startswith("D:P")
-        assert re.findall(r"\(([^)]+)\)", sddl.value) == ["A;;FA;;;" + sid]
+        assert sddl.value == _canonical_windows_dacl("D:P(A;;FA;;;" + sid + ")")
     finally:
         kernel.LocalFree(ctypes.cast(sddl, ctypes.c_void_p))
+
+
+def _canonical_windows_dacl(descriptor: str) -> str:
+    """Compare the exact owner-only ACL using Windows' canonical SID aliases."""
+    import ctypes
+    from ctypes import wintypes
+
+    advapi = ctypes.WinDLL("advapi32", use_last_error=True)
+    kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+    advapi.ConvertStringSecurityDescriptorToSecurityDescriptorW.argtypes = [
+        wintypes.LPCWSTR, wintypes.DWORD, ctypes.POINTER(ctypes.c_void_p), ctypes.c_void_p]
+    advapi.ConvertSecurityDescriptorToStringSecurityDescriptorW.argtypes = [
+        ctypes.c_void_p, wintypes.DWORD, wintypes.DWORD, ctypes.POINTER(wintypes.LPWSTR),
+        ctypes.POINTER(wintypes.DWORD)]
+    kernel.LocalFree.argtypes = [ctypes.c_void_p]
+    security, text = ctypes.c_void_p(), wintypes.LPWSTR()
+    assert advapi.ConvertStringSecurityDescriptorToSecurityDescriptorW(
+        descriptor, 1, ctypes.byref(security), None)
+    try:
+        assert advapi.ConvertSecurityDescriptorToStringSecurityDescriptorW(
+            security, 1, 4, ctypes.byref(text), None)
+        return text.value
+    finally:
+        kernel.LocalFree(ctypes.cast(text, ctypes.c_void_p))
+        kernel.LocalFree(security)
 
 
 def test_untrusted_tls_certificate_is_rejected_by_default_client(tmp_path, monkeypatch):
