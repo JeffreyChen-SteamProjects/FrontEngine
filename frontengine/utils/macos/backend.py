@@ -63,13 +63,14 @@ class MacOSBackend:
             q = self.framework('Quartz')
             return [item for item in q.CGWindowListCopyWindowInfo(q.kCGWindowListOptionOnScreenOnly,
                                                                  q.kCGNullWindowID) or []
-                    if item.get('kCGWindowLayer') == 0 and item.get('kCGWindowName')]
+                    if item.get('kCGWindowLayer') == 0 and item.get('kCGWindowNumber')]
         except (ImportError, AttributeError, OSError) as error:
             self.last_error = str(error)
             return []
 
     def list_windows(self) -> list[tuple[int, str]]:
-        return [(int(w['kCGWindowNumber']), str(w['kCGWindowName'])) for w in self._windows()]
+        return [(int(w['kCGWindowNumber']), str(w['kCGWindowName'])) for w in self._windows()
+                if w.get('kCGWindowName')]
 
     @staticmethod
     def _rect(window):
@@ -97,7 +98,7 @@ class MacOSBackend:
         target = self._rect(window)
         for candidate in candidates or []:
             err, title = ax.AXUIElementCopyAttributeValue(candidate, ax.kAXTitleAttribute, None)
-            if err or title != window['kCGWindowName']:
+            if err or (window.get('kCGWindowName') and title != window['kCGWindowName']):
                 continue
             ep, position = ax.AXUIElementCopyAttributeValue(candidate, ax.kAXPositionAttribute, None)
             es, size = ax.AXUIElementCopyAttributeValue(candidate, ax.kAXSizeAttribute, None)

@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261012-03 | 2026-10-12 | Verify native macOS capture with an owned window identifier | #done #ci #tests | [2026-10](2026-10.md) |
 | U-20261012-02 | 2026-10-12 | Isolate native unit-test frameworks and canonicalize Windows ACLs | #done #ci #tests | [2026-10](2026-10.md) |
 | U-20261012-01 | 2026-10-12 | Fix macOS CI platform assumptions and scene extraction roots | #done #ci #tests | [2026-10](2026-10.md) |
 | U-20261003-02 | 2026-10-03 | Track selected Steam SDK examples and application configuration | #steam #configuration | [2026-10](2026-10.md) |
@@ -83,5 +84,5 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-10.md](2026-10.md) | 2026-10 | 8 |
+| [2026-10.md](2026-10.md) | 2026-10 | 9 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
