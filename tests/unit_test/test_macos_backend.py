@@ -46,6 +46,31 @@ def test_missing_framework_has_actionable_reason():
     assert 'macos' in MacOSBackend(loader=missing).capability('screen_capture').reason
 
 
+def test_untitled_native_geometry_keeps_pid_bounds_and_unique_ax_matching():
+    from frontengine.utils.macos.backend import MacOSBackend
+    mapping = frameworks()
+    q, ax = mapping['Quartz'], mapping['ApplicationServices']
+    q.kCGWindowListOptionOnScreenOnly, q.kCGNullWindowID = 1, 0
+    q.CGWindowListCopyWindowInfo = lambda *_: [
+        {'kCGWindowNumber': 7, 'kCGWindowOwnerPID': 100, 'kCGWindowLayer': 0,
+         'kCGWindowBounds': {'X': 10, 'Y': 20, 'Width': 300, 'Height': 200}}]
+    ax.kAXWindowsAttribute, ax.kAXTitleAttribute = 'windows', 'title'
+    ax.kAXPositionAttribute, ax.kAXSizeAttribute = 'position', 'size'
+    ax.kAXValueCGPointType, ax.kAXValueCGSizeType = 1, 2
+    ax.AXUIElementCreateApplication = lambda pid: pid
+    candidates = ['owned']
+    values = {'windows': candidates, 'title': 'Not exposed by Quartz',
+              'position': (10, 20), 'size': (300, 200)}
+    ax.AXUIElementCopyAttributeValue = lambda element, attr, output: (0, values[attr])
+    ax.AXValueGetValue = lambda value, kind, output: (True, value)
+    backend = MacOSBackend(loader=lambda name: mapping[name])
+    assert backend.list_windows() == []
+    assert backend.window_geometry(7) == (10, 20, 300, 200)
+    assert backend._ax_window(7) == 'owned'
+    candidates.append('ambiguous')
+    assert backend._ax_window(7) is None
+
+
 def test_midi_parser_handles_running_status_realtime_and_split_packets():
     from frontengine.utils.macos.midi import MIDIParser
     parser = MIDIParser()
