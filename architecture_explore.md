@@ -172,9 +172,9 @@ FrontEngine 是一個 PySide6 桌面**覆蓋層（overlay）框架**：把影片
 
 | 檔案 | 行數 | 功用 |
 | --- | ---: | --- |
-| `main_ui.py` | 1,015 | `FrontEngineMainUI(QMainWindow)`。組裝分頁、選單、系統匣，持有並協調全部背景服務，分派全域快速鍵／手機遙控／MIDI 動作，處理智慧暫停、看板輪播、螢幕保護、分享隱私、提醒、主題排程，最後負責關閉時的完整收尾。另有 `start_front_engine()` 與 CLI `main()`。 |
-| `nav/sidebar.py` | 112 | `NavigationSidebar(QListWidget)`：分組的分頁清單（On screen / Desktop / Work / Control / Extensions），選取時送 `page_requested`。 |
-| `style/app_style.py` | 200 | 疊在 qt-material 之上的樣式表。顏色全部由主題色票算出（含對比色計算），**必須接在 `apply_stylesheet()` 之後**，否則會被整份覆蓋。 |
+| `main_ui.py` | 1,364 | `FrontEngineMainUI(QMainWindow)`。組裝帶功能搜尋入口的側欄、分頁、選單與系統匣，持有背景服務並分派全域快速鍵／手機遙控／MIDI 動作，負責關閉時完整收尾。另有 `start_front_engine()` 與 CLI `main()`。 |
+| `nav/sidebar.py` | 114 | `NavigationSidebar(QListWidget)`：分組的分頁清單（On screen / Desktop / Work / Control / Extensions），選取時送 `page_requested`，完整名稱以工具提示顯示。 |
+| `style/app_style.py` | 320 | 疊在 qt-material 上的主題樣式：卡片、側欄選取、次要操作選單、收合控制、主要動作與窄捲軸。顏色來自主題色票；**必須接在 `apply_stylesheet()` 之後**，否則會被覆蓋。 |
 | `color/global_color.py` | 4 | 兩個常數：log 面板的一般與錯誤顏色。 |
 | `frontengine/system_tray/extend_system_tray.py`（在 `ui/` 之外，自成一個套件） | 111 | `ExtendSystemTray`：系統匣選單（顯示／隱藏主視窗、全部關閉、退出），文字接 `retranslator`。 |
 
@@ -182,7 +182,9 @@ FrontEngine 是一個 PySide6 桌面**覆蓋層（overlay）框架**：把影片
 
 | 檔案 | 行數 | 功用 |
 | --- | ---: | --- |
-| `page/layout_kit.py` | 316 | **分頁的版面語彙**：`SettingPage`（頁首 + 可捲動內容 + 底部動作列）與 `Section`（`add_row` / `add_slider_row` / `add_button_grid`）。控制項寬度統一收在 260–460px。所有分頁都用它描述欄位，不要再自己寫 `QGridLayout` 座標。 |
+| `page/layout_kit.py` | 363 | **分頁的版面語彙**：`SettingPage`（頁首、捲動內容與固定底部動作列）與卡片式 `Section`。`QFormLayout.WrapLongRows` 在窄視窗將標籤移到欄位上方；`add_inline` 自動換行，`add_actions` 只顯示常用按鈕，次要操作收進選單。進階設定可收合，獨立編輯器可用 compact 頁面；無法縮小的內容仍可橫向捲動。寬控制項維持 260–460px。 |
+| `page/flow_layout.py` | 83 | `FlowLayout`：依可用寬度排列按鈕與勾選框，保留鍵盤順序，排除已隱藏控制項，並回報換行後的高度與最小尺寸。 |
+| `page/action_menu.py` | 49 | `ActionMenu`：以 QAction 代理既有 QPushButton 的操作，原按鈕由選單持有並隱藏。開啟選單與換語言時同步文字、圖示、勾選及可用狀態；執行仍走原按鈕的 callback。 |
 | `page/utils.py` | 374 | 分頁的共用行為：多螢幕分派（`dispatch_to_monitors`、`resolve_span`、`virtual_desktop_geometry`）、最近使用檔案下拉選單、拖放檔案過濾器、以及一整組 `apply_*_state()`（把預設集載回控制項）。 |
 
 #### 功能分頁（每頁都有 `get_state()` / `set_state()`，預設集就是靠這對方法存取）
@@ -520,11 +522,11 @@ Windows installs include `winrt-Windows.Media.Control`; Now playing prefers its 
 
 ## Visual scene editing
 
-`utils/scene_format/scene_editor_document.py` validates finite geometry and owns a bounded QUndoStack of deep-copied scene edits while preserving existing fields. `ui/page/scene_setting/scene_visual_editor.py` provides QGraphicsObject previews, image/GIF/text layers, group movement, corner resizing, properties/alignment/lock/visibility and export. SceneManagerUI emits `entries_changed`; the visual editor updates shared scene_json and Script text with a recursion guard. Applying external JSON resets undo history. SceneManager resizes and transforms playback proxies; legacy entries without dimensions retain their previous sizing. Video/web/Puppet/audio previews are explicitly enabled and preserve original fields. QMovie previews pause while hidden and are destroyed with scene items.
+`utils/scene_format/scene_editor_document.py` validates finite geometry and owns a bounded QUndoStack of deep-copied scene edits while preserving existing fields. `ui/page/scene_setting/scene_visual_editor.py` provides QGraphicsObject previews, image/GIF/text layers, group movement, corner resizing, properties/alignment/lock/visibility and export. Add layer/Edit/Align menus share the original callbacks; a horizontal splitter places the layer list and canvas beside Properties/Preview/Animation inspector tabs. Independent scene output stays in the page footer. SceneManagerUI emits `entries_changed`; the visual editor updates shared scene_json and Script text with a recursion guard. Applying external JSON resets undo history. SceneManager resizes and transforms playback proxies; legacy entries without dimensions retain their previous sizing. Video/web/Puppet/audio previews are explicitly enabled and preserve original fields. QMovie previews pause while hidden and are destroyed with scene items.
 
 Application actions: `utils/actions/action_registry.py` owns stable built-in IDs and translated labels. MainUI binds instance callbacks once; hotkeys, authenticated remote commands, MIDI and rule dispatch use the same registry. Existing remote/rule allow-lists remain at their input boundaries. Duplicate IDs are rejected, unknown IDs are ignored, and parameterized actions require values. Hotkey/rule dialogs share these label definitions.
 
-`utils/actions/command_history.py` validates bounded recent/favorite stable IDs in user settings and searches localized labels plus English/IDs with Unicode folding. `ui/dialog/command_palette_dialog.py` provides keyboard search/selection/value input and queued-free GUI-thread dispatch through ActionRegistry. MainUI registers built-in page and tool commands, owns one persistent dialog, installs Ctrl+K/Ctrl+Shift+P application shortcuts and closes the palette on shutdown. Arguments/search queries are not persisted.
+`utils/actions/command_history.py` validates bounded recent/favorite stable IDs in user settings and searches localized labels plus English/IDs with Unicode folding. `ui/dialog/command_palette_dialog.py` provides keyboard search/selection/value input and GUI-thread dispatch through ActionRegistry. Failed synchronous dispatch restores the dialog without clearing input and displays plain-text errors; changing the selected command clears its previous argument. List rebuilds preserve the same command's argument and synchronize favorite state. MainUI owns one persistent palette, exposes it in the sidebar and menu, installs Ctrl+K/Ctrl+Shift+P shortcuts and closes it on shutdown. Arguments/search queries are not persisted.
 
 `utils/text_source/local_file_source.py` reads bounded regular UTF-8 TXT/JSON/CSV files with a single pending QRunnable per QObject feed, explicit queued delivery, metadata cache and recoverable status codes. LocalFileTextSource owns its polling timer; TextWidget adopts its lifetime and stops it on replacement/close. TextSettingUI exposes file/field/interval and bounded previews; MainUI stops page previews during shutdown. Scene text factories accept the same local source fields; scene asset normalization/packages include text_file explicitly. Preset state preserves source configuration. No file I/O occurs on the GUI thread.
 

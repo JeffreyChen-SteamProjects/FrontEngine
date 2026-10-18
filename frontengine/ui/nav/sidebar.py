@@ -73,8 +73,9 @@ class NavigationSidebar(QListWidget):
         """加一列分頁。page_index 對應 QStackedWidget 裡的索引。"""
         item = QListWidgetItem(translate(title_key, fallback))
         item.setData(ROLE_KIND, KIND_PAGE)
+        item.setToolTip(item.text())
         item.setData(ROLE_PAGE_INDEX, page_index)
-        item.setSizeHint(QSize(SIDEBAR_WIDTH, 32))
+        item.setSizeHint(QSize(SIDEBAR_WIDTH, 35))
         self.addItem(item)
         self._labels.append((item, title_key, fallback))
         return item
@@ -108,5 +109,6 @@ class NavigationSidebar(QListWidget):
         for item, key, fallback in self._labels:
             try:
                 item.setText(translate(key, fallback))
+                item.setToolTip(item.text())
             except RuntimeError:  # pragma: no cover - 底層物件已消失
                 continue

@@ -8,7 +8,7 @@ from PySide6.QtCore import QByteArray, QTimer
 from PySide6.QtGui import QIcon, Qt, QAction, QKeySequence
 from PySide6.QtWidgets import (
     QMainWindow, QApplication, QGridLayout, QHBoxLayout, QStackedWidget, QStyle,
-    QMenuBar, QWidget, QMessageBox,
+    QMenuBar, QWidget, QMessageBox, QLabel, QPushButton, QVBoxLayout,
 )
 from qt_material import apply_stylesheet
 
@@ -164,7 +164,22 @@ class FrontEngineMainUI(QMainWindow):
         central_layout = QHBoxLayout(central)
         central_layout.setContentsMargins(0, 0, 0, 0)
         central_layout.setSpacing(0)
-        central_layout.addWidget(self.sidebar)
+        navigation = QWidget(self)
+        navigation.setObjectName("navigationPanel")
+        navigation_layout = QVBoxLayout(navigation)
+        navigation_layout.setContentsMargins(12, 20, 12, 12)
+        navigation_layout.setSpacing(14)
+        brand = QLabel("FrontEngine")
+        brand.setObjectName("appBrand")
+        navigation_layout.addWidget(brand)
+        self.command_search_button = QPushButton()
+        self.command_search_button.setObjectName("commandSearch")
+        retranslator.bind(self.command_search_button, "command_palette_title")
+        retranslator.bind(self.command_search_button, "command_palette_search", setter="setToolTip")
+        self.command_search_button.clicked.connect(self.open_command_palette)
+        navigation_layout.addWidget(self.command_search_button)
+        navigation_layout.addWidget(self.sidebar, 1)
+        central_layout.addWidget(navigation)
         central_layout.addWidget(self.page_stack, 1)
         self.setCentralWidget(central)
 

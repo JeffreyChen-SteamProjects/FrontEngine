@@ -1,7 +1,7 @@
 """Keyboard-accessible localized command search with recent/favorite commands."""
 from __future__ import annotations
 
-from PySide6.QtCore import QEvent, Qt
+from PySide6.QtCore import QEvent, QSignalBlocker, Qt
 from PySide6.QtWidgets import (
     QCheckBox, QDialog, QHBoxLayout, QLabel, QLineEdit,
     QListWidget, QListWidgetItem, QPushButton, QVBoxLayout,
@@ -18,24 +18,34 @@ class CommandPaletteDialog(QDialog):
     def __init__(self, registry: ActionRegistry, history: CommandHistory, parent=None) -> None:
         super().__init__(parent)
         self.registry, self.history = registry, history
+        self._value_action_id = ""
+        self._recovering = False
         self.resize(620, 480)
         retranslator.bind(self, "command_palette_title", setter="setWindowTitle")
         layout = QVBoxLayout(self)
         self.search_input = QLineEdit()
         retranslator.bind(self.search_input, "command_palette_search", setter="setPlaceholderText")
+        retranslator.bind(self.search_input, "command_palette_title", setter="setAccessibleName")
         self.search_input.installEventFilter(self)
         self.results = QListWidget()
         self.value_input = QLineEdit()
         retranslator.bind(self.value_input, "command_palette_value", setter="setPlaceholderText")
+        retranslator.bind(self.value_input, "command_palette_value", setter="setAccessibleName")
         self.favorites_only = tr(QCheckBox(), "command_palette_favorites_only")
         self.run_button = tr(QPushButton(), "command_palette_run")
         self.favorite_button = tr(QPushButton(), "command_palette_favorite")
+        self.favorite_button.setCheckable(True)
+        self.run_button.setObjectName("primaryAction")
         self.run_button.setAutoDefault(False)
         self.favorite_button.setAutoDefault(False)
         self.status = QLabel()
+        self.status.setTextFormat(Qt.TextFormat.PlainText)
         self.status.setWordWrap(True)
         for widget in (self.search_input, self.favorites_only, self.results, self.value_input, self.status):
             layout.addWidget(widget)
+        self.keyboard_hint = tr(QLabel(), "command_palette_hint")
+        self.keyboard_hint.setWordWrap(True)
+        layout.addWidget(self.keyboard_hint)
         buttons = QHBoxLayout()
         buttons.addWidget(self.favorite_button)
         buttons.addStretch()
@@ -69,24 +79,35 @@ class CommandPaletteDialog(QDialog):
         recent = self.history.values("recent", known)
         actions = self.history.search(self.registry, self.search_input.text(), self._label,
                                       self.favorites_only.isChecked())
-        self.results.clear()
-        for action in actions:
-            marker = "★ " if action.identifier in favorites else ""
-            suffix = " · " + translate("command_palette_recent") if action.identifier in recent else ""
-            item = QListWidgetItem(marker + self._label(action) + suffix)
-            item.setData(Qt.ItemDataRole.UserRole, action.identifier)
-            self.results.addItem(item)
-            if action.identifier == selected:
-                self.results.setCurrentItem(item)
-        if self.results.currentRow() < 0 and self.results.count():
-            self.results.setCurrentRow(0)
-        self.status.setText("" if actions else translate("command_palette_empty"))
+        # Rebuilding the list is not a selection change: keep an argument when
+        # favoriting or translating the same command.
+        with QSignalBlocker(self.results):
+            self.results.clear()
+            for action in actions:
+                marker = "★ " if action.identifier in favorites else ""
+                suffix = " · " + translate("command_palette_recent") if action.identifier in recent else ""
+                item = QListWidgetItem(marker + self._label(action) + suffix)
+                item.setToolTip(self._label(action))
+                item.setData(Qt.ItemDataRole.UserRole, action.identifier)
+                self.results.addItem(item)
+                if action.identifier == selected:
+                    self.results.setCurrentItem(item)
+            if self.results.currentRow() < 0 and self.results.count():
+                self.results.setCurrentRow(0)
         self._selection_changed()
+        self.status.setText("" if actions else translate("command_palette_empty"))
 
     def _selection_changed(self, *_args) -> None:
         action = self.registry.actions.get(self.selected_id())
+        identifier = action.identifier if action else ""
+        if identifier != self._value_action_id:
+            self.value_input.clear()
+            self.status.clear()
+            self._value_action_id = identifier
         self.run_button.setEnabled(action is not None)
         self.favorite_button.setEnabled(action is not None)
+        self.favorite_button.setChecked(
+            identifier in self.history.values("favorites", set(self.registry.actions)))
         self.value_input.setVisible(bool(action and action.takes_value))
 
     def execute_selected(self, *_args) -> None:
@@ -97,15 +118,26 @@ class CommandPaletteDialog(QDialog):
             return
         value = self.value_input.text().strip() if action.takes_value else ""
         if action.takes_value and not action.optional_value and not value:
+            self.status.setText(translate("command_palette_value_required"))
             self.value_input.setFocus()
             return
         self.hide()
         try:
             if self.registry.execute(identifier, value):
                 self.history.record(identifier, set(self.registry.actions))
+                return
+            message = translate("command_palette_failed")
         except (OSError, ValueError, RuntimeError) as error:
+            message = str(error) or translate("command_palette_failed")
+        self._recovering = True
+        try:
             self.show()
-            self.status.setText(str(error))
+        finally:
+            self._recovering = False
+        self.status.setText(message)
+        target = self.value_input if action.takes_value else self.search_input
+        target.setFocus()
+        target.selectAll()
 
     def toggle_favorite(self) -> None:
         """Persist the selected favorite without executing its action."""
@@ -121,8 +153,9 @@ class CommandPaletteDialog(QDialog):
         return super().eventFilter(watched, event)
 
     def showEvent(self, event) -> None:
-        self.value_input.clear()
-        self.refresh()
-        self.search_input.setFocus()
-        self.search_input.selectAll()
+        if not self._recovering:
+            self.value_input.clear()
+            self.refresh()
+            self.search_input.setFocus()
+            self.search_input.selectAll()
         super().showEvent(event)

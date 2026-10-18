@@ -98,3 +98,31 @@ def test_empty_properties_disabled_and_bad_legacy_font_can_render():
     QCoreApplication.processEvents()
     assert not editor.view.grab().isNull()
     page.close()
+
+
+def test_scene_toolbar_menus_keep_layer_edits_and_inspector_state(monkeypatch):
+    from PySide6.QtWidgets import QInputDialog
+    from frontengine.ui.page.action_menu import ActionMenu
+    from frontengine.utils.multi_language.retranslate import translate
+
+    page = make_page()
+    editor = page.visual_editor
+    monkeypatch.setattr(QInputDialog, "getMultiLineText", lambda *_args, **_kwargs: ("New text", True))
+    try:
+        menus = editor.findChildren(ActionMenu)
+        add = next(menu for menu in menus if menu.text() == translate("ui_add_layer"))
+        assert len(add.menu().actions()) == 7
+        next(action for action in add.menu().actions()
+             if action.text() == translate("scene_add_text")).trigger()
+        assert len(editor.document.entries) == 1
+        editor.fields["width"].setValue(640)
+        editor.inspector_tabs.setCurrentIndex(1)
+        editor.inspector_tabs.setCurrentIndex(2)
+        editor.inspector_tabs.setCurrentIndex(0)
+        assert editor.fields["width"].value() == 640
+        edit = next(menu for menu in menus if menu.text() == translate("ui_edit_layers"))
+        next(action for action in edit.menu().actions()
+             if action.text() == translate("scene_undo")).trigger()
+        assert not editor.document.entries
+    finally:
+        page.close()

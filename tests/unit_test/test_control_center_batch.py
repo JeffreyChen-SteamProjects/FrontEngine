@@ -121,6 +121,26 @@ def test_hiding_and_showing_reach_a_registered_overlay(centre) -> None:
     assert registered[0].isVisible() is True
 
 
+def test_control_center_keeps_four_direct_buttons_and_menu_actions(centre) -> None:
+    from PySide6.QtWidgets import QApplication, QPushButton
+    from frontengine.ui.page.action_menu import ActionMenu
+    from frontengine.utils.multi_language.retranslate import translate
+
+    centre.resize(1000, 800)
+    centre.show()
+    QApplication.processEvents()
+    assert len([button for button in centre.findChildren(QPushButton) if button.isVisible()]) == 4
+    menus = centre.findChildren(ActionMenu)
+    actions = [action for menu in menus for action in menu.menu().actions()]
+    assert len(actions) == 15
+    marker = _overlay()
+    centre.video_setting_ui.video_widget_list.append(marker)
+    close_video = next(action for action in actions
+                       if action.text() == translate("control_center_close_all_video"))
+    close_video.trigger()
+    assert not marker.isVisible() and not centre.video_setting_ui.video_widget_list
+
+
 def test_a_source_that_hands_back_a_copy_still_gets_its_widgets_closed(centre) -> None:
     """
     桌布頁是以螢幕編號為鍵的 dict，交回來的是新的 list——清空那份複本沒有

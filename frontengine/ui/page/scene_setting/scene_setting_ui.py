@@ -47,11 +47,10 @@ class SceneSettingUI(SettingPage):
         self.output_dialog = None
         output_button = tr(QPushButton(), 'scene_camera_output')
         output_button.clicked.connect(self.open_output)
-        self.add_body_widget(output_button)
         self.scene_manager_ui.templates_requested.connect(self.open_templates)
         self.action_status = QLabel()
         self.action_status.setWordWrap(True)
-        self.add_body_widget(self.action_status)
+        self.set_footer(primary=output_button, status=self.action_status)
         self.actions.status_changed.connect(self._action_status)
         self._action_status('')
 

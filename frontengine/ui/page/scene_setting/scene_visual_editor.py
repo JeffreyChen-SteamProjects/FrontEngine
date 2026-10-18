@@ -9,10 +9,11 @@ from PySide6.QtGui import QColor, QImageReader, QMovie, QPen, QFont, QShortcut, 
 from PySide6.QtWidgets import (
     QCheckBox, QDoubleSpinBox, QFileDialog, QGraphicsItem, QGraphicsObject,
     QGraphicsScene, QGraphicsView, QInputDialog, QListWidget,
-    QListWidgetItem, QMessageBox, QPushButton, QSplitter, QLabel,
+    QListWidgetItem, QMessageBox, QPushButton, QSplitter, QLabel, QTabWidget,
 )
 
 from frontengine.ui.page.layout_kit import SettingPage
+from frontengine.ui.page.action_menu import ActionMenu
 from frontengine.user_setting.scene_setting import scene_json, write_scene_file
 from frontengine.utils.multi_language.retranslate import tr, translate, retranslator
 from frontengine.utils.scene_format.scene_editor_document import SceneEditorDocument
@@ -121,7 +122,7 @@ class SceneLayerItem(QGraphicsObject):
 
 class SceneVisualEditor(SettingPage):
     def __init__(self, manager, parent=None) -> None:
-        super().__init__("scene_visual_editor", "scene_visual_hint")
+        super().__init__("scene_visual_editor", "scene_visual_hint", compact=True)
         self.setParent(parent)
         self.manager = manager
         self.document = SceneEditorDocument(self)
@@ -134,25 +135,49 @@ class SceneVisualEditor(SettingPage):
         self.canvas = QGraphicsScene(self)
         self.canvas.setSceneRect(0, 0, 1920, 1080)
         self.view = SceneCanvas(self.canvas)
-        self.view.setMinimumSize(360, 240)
+        retranslator.bind(self.view, "scene_visual_hint", setter="setToolTip")
+        self.view.setMinimumSize(280, 320)
         self.layers = QListWidget()
-        self.layers.setMaximumWidth(240)
+        self.layers.setMinimumWidth(100)
+        self.layers.setMaximumWidth(180)
         self.layers.setSelectionMode(QListWidget.SelectionMode.ExtendedSelection)
         split = QSplitter()
         split.addWidget(self.layers)
         split.addWidget(self.view)
         split.setStretchFactor(1, 1)
-        self.add_body_widget(split, 1)
         self._build_actions()
+        self._build_workspace(split)
         self._build_media_actions()
         self._build_properties()
         self._build_animation_actions()
+        for page in (self.properties_page, self.preview_page, self.animation_page):
+            page.finish_body()
         self.document.changed.connect(self._changed)
         manager.entries_changed.connect(self.load_entries)
         self.layers.itemSelectionChanged.connect(self._list_selected)
         self.canvas.selectionChanged.connect(self._canvas_selected)
         self.load_entries(scene_json)
         self._show_properties()
+
+    def _build_workspace(self, canvas: QSplitter) -> None:
+        """Keep the canvas alongside one inspector instead of stacked toolbars."""
+        self.inspector_tabs = QTabWidget()
+        self.inspector_tabs.setObjectName("sceneInspector")
+        self.inspector_tabs.setMinimumWidth(320)
+        self.properties_page = SettingPage("scene_layer_properties", compact=True)
+        self.preview_page = SettingPage("scene_media_preview_title", compact=True)
+        self.animation_page = SettingPage("scene_animation_title", compact=True)
+        for page, key in ((self.properties_page, "ui_properties"),
+                          (self.preview_page, "ui_preview"),
+                          (self.animation_page, "ui_animation")):
+            index = self.inspector_tabs.addTab(page, "")
+            retranslator.bind(self.inspector_tabs, key, "", "setTabText", index)
+        workspace = QSplitter()
+        workspace.addWidget(canvas)
+        workspace.addWidget(self.inspector_tabs)
+        workspace.setStretchFactor(0, 1)
+        workspace.setSizes([760, 340])
+        self.add_body_widget(workspace, 1)
 
     def _button(self, key: str, callback) -> QPushButton:
         button = tr(QPushButton(), key)
@@ -161,23 +186,28 @@ class SceneVisualEditor(SettingPage):
 
     def _build_actions(self) -> None:
         section = self.add_section("section_actions")
-        section.add_inline(self._button("scene_add_image", lambda: self._add_media("IMAGE")),
-                           self._button("scene_add_gif", lambda: self._add_media("GIF")),
-                           self._button("scene_add_text", self._add_text),
-                           self._button("scene_duplicate", self._duplicate),
-                           self._button("scene_remove_layer", self._remove))
-        section.add_inline(self._button("scene_undo", self.document.undo.undo),
-                           self._button("scene_redo", self.document.undo.redo),
-                           self._button("scene_fit_canvas", self._fit),
-                           self._button("scene_output", lambda: write_scene_file(self)))
-        section.add_inline(*(self._button("scene_align_" + direction, lambda checked=False, value=direction: self._align(value))
-                             for direction in ("left", "center", "right", "top", "middle", "bottom")))
-        section.add_inline(*(self._button('scene_add_' + kind.lower(),
+        media = (self._button("scene_add_image", lambda: self._add_media("IMAGE")),
+                 self._button("scene_add_gif", lambda: self._add_media("GIF")),
+                 self._button("scene_add_text", self._add_text))
+        native = tuple(self._button('scene_add_' + kind.lower(),
             lambda checked=False, value=kind: self._add_native_media(value))
-            for kind in ('VIDEO', 'WEB', 'PUPPET', 'SOUND')))
+            for kind in ('VIDEO', 'WEB', 'PUPPET', 'SOUND'))
+        editing = (self._button("scene_undo", self.document.undo.undo),
+                   self._button("scene_redo", self.document.undo.redo),
+                   self._button("scene_duplicate", self._duplicate),
+                   self._button("scene_remove_layer", self._remove),
+                   self._button("scene_fit_canvas", self._fit),
+                   self._button("scene_output", lambda: write_scene_file(self)))
+        alignment = tuple(self._button("scene_align_" + direction,
+            lambda checked=False, value=direction: self._align(value))
+            for direction in ("left", "center", "right", "top", "middle", "bottom"))
+        section.add_inline(ActionMenu(media + native, "ui_add_layer"),
+                           ActionMenu(editing, "ui_edit_layers"),
+                           ActionMenu(alignment, "ui_align_layers"))
 
     def _build_properties(self) -> None:
-        section = self.add_section("scene_layer_properties")
+        section = self.properties_page.add_section("scene_layer_properties")
+        section.set_stacked()
         self.fields = {}
         for name, minimum, maximum in (("x", -100000, 100000), ("y", -100000, 100000),
                                        ("width", 16, 8192), ("height", 16, 8192), ("scale", 0.01, 100),
@@ -195,7 +225,7 @@ class SceneVisualEditor(SettingPage):
         section.add_inline(self.locked, self.visible)
 
     def _build_media_actions(self) -> None:
-        section = self.add_section('scene_media_preview_title')
+        section = self.preview_page.add_section('scene_media_preview_title')
         self.media_enabled = tr(QCheckBox(), 'scene_media_preview_enable')
         self.media_enabled.toggled.connect(self.media_preview.set_enabled)
         section.add_inline(self.media_enabled,
@@ -212,18 +242,18 @@ class SceneVisualEditor(SettingPage):
         self.media_status.setText(message)
 
     def _build_animation_actions(self) -> None:
-        section = self.add_section('scene_animation_title')
+        section = self.animation_page.add_section('scene_animation_title')
         self.timeline_position = QDoubleSpinBox()
         self.timeline_position.setDecimals(2)
         self.timeline_position.setRange(0, 3600)
         self.timeline_position.editingFinished.connect(lambda: self.timeline.seek(self.timeline_position.value()))
         section.add_row('scene_animation_time', self.timeline_position)
-        section.add_inline(self._button('scene_animation_edit', self._edit_animation),
+        section.add_actions(self._button('scene_animation_edit', self._edit_animation),
             self._button('scene_animation_play', lambda: self.timeline.play()),
             self._button('scene_animation_pause', self.timeline.pause),
             self._button('scene_animation_replay', lambda: self.timeline.play(restart=True)),
             self._button('scene_animation_reset', self.timeline.reset))
-        section.add_inline(self._button('scene_animation_playback_pause', lambda: self._playback_animation('pause')),
+        section.add_actions(self._button('scene_animation_playback_pause', lambda: self._playback_animation('pause')),
             self._button('scene_animation_playback_resume', lambda: self._playback_animation('play')),
             self._button('scene_animation_playback_replay', lambda: self._playback_animation('replay')))
         hint = tr(QLabel(), 'scene_animation_hint')

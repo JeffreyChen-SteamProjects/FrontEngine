@@ -185,12 +185,11 @@ class PetSettingUI(SettingPage):
 
         # Layout
         source = self.add_section("section_source", "Source")
-        source.add_inline(self.choose_file_button, self.choose_pack_button,
-                          self.choose_sound_button)
-        source.add_inline(self.choose_script_button, self.workshop_button)
         self.pack_editor_button = tr(QPushButton(), 'pack_editor_title')
         self.pack_editor_button.clicked.connect(self.open_pack_editor)
-        source.add_inline(self.pack_editor_button)
+        source.add_actions(self.choose_file_button, self.choose_pack_button,
+                           self.choose_sound_button, self.choose_script_button,
+                           self.workshop_button, self.pack_editor_button)
         source.add_row(self.recent_files_label, self.recent_files_combobox)
         self.profile_controls = PetProfileControls(self)
 

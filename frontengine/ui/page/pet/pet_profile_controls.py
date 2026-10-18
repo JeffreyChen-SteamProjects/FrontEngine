@@ -27,7 +27,7 @@ class PetProfileControls:
         section = page.add_section('pet_profile_title', 'Pet identities')
         section.add_row(tr(QLabel(), 'pet_profile_select'), self.selector)
         section.add_row(tr(QLabel(), 'pet_profile_name'), self.name)
-        section.add_inline(self.rename, self.export, self.import_button, self.refresh_button)
+        section.add_actions(self.rename, self.export, self.import_button, self.refresh_button)
         hint = tr(QLabel(), 'pet_profile_hint')
         hint.setWordWrap(True)
         section.add_widget(hint)

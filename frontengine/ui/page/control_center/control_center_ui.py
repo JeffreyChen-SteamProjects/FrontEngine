@@ -17,6 +17,7 @@ from frontengine.ui.page.video.video_setting_ui import VideoSettingUI
 from frontengine.ui.page.web.web_setting_ui import WEBSettingUI
 from frontengine.user_setting.user_setting_file import clear_overlay_geometry, user_setting_dict
 from frontengine.ui.page.layout_kit import SettingPage
+from frontengine.ui.page.action_menu import ActionMenu
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import retranslator, tr, translate
@@ -149,30 +150,32 @@ class ControlCenterUI(SettingPage):
         # Closing one kind and doing something to everything at once are two
         # different actions; as a single column of nineteen buttons they were
         # mixed together and taller than the window.
-        closing = self.add_section("section_close", "Close")
-        closing.add_button_grid(
-            self.clear_video_button, self.clear_image_button, self.clear_gif_button,
-            self.clear_web_button, self.clear_sound_button, self.clear_text_button,
-            self.clear_scene_button, self.clear_redirect_button)
-
         everything = self.add_section("section_everything", "Everything at once")
-        everything.add_button_grid(
+        everything.add_actions(
             self.hide_all_button, self.show_all_button, self.mute_all_button,
             self.lock_all_button, self.chroma_key_button, self.reset_positions_button,
-            self.low_power_button, self.capture_button, self.desktop_pin_button)
+            self.low_power_button, self.capture_button, self.desktop_pin_button,
+            prominent=3)
         everything.add_row(self.quality_label, self.quality_combobox)
         self.follow_button = tr(QPushButton(), 'follow_title')
         self.follow_button.clicked.connect(self.window_follow_requested.emit)
-        everything.add_inline(self.follow_button)
         self.monitor_profiles_button = tr(QPushButton(), 'monitors_title')
         self.monitor_profiles_button.clicked.connect(self.monitor_profiles_requested.emit)
-        everything.add_inline(self.monitor_profiles_button)
+        everything.add_actions(self.follow_button, self.monitor_profiles_button,
+                               prominent=0, menu_key="ui_window_actions")
 
-        log = self.add_section("section_log", "Messages")
+        close_by_type = ActionMenu((
+            self.clear_video_button, self.clear_image_button, self.clear_gif_button,
+            self.clear_web_button, self.clear_sound_button, self.clear_text_button,
+            self.clear_scene_button), "ui_close_by_type")
+
+        log = self.add_section("section_log", "Messages", collapsed=True)
+        log.add_actions(self.clear_redirect_button)
         log.add_widget(self.log_panel_scroll_area)
 
         self.finish_body()
-        self.set_footer(primary=self.clear_all_button)
+        self.set_footer(primary=self.clear_all_button, extra=(close_by_type,))
+        self.clear_all_button.setProperty("tone", "danger")
 
         # Redirect
         if redirect_output:

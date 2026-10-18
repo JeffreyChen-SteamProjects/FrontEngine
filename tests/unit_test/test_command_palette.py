@@ -1,4 +1,5 @@
 """Localized command selection, bounded preferences and keyboard dispatch."""
+import pytest
 from PySide6.QtCore import Qt
 from PySide6.QtTest import QTest
 
@@ -7,7 +8,7 @@ from frontengine.utils.actions.action_registry import Action, ActionRegistry
 from frontengine.utils.actions.command_history import CommandHistory
 from frontengine.utils.json.json_repository import JsonRepository
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
-from frontengine.utils.multi_language.retranslate import retranslator
+from frontengine.utils.multi_language.retranslate import retranslator, translate
 
 
 def make_registry(calls):
@@ -83,6 +84,68 @@ def test_current_language_search_and_favorite_filter():
     finally:
         language_wrapper.reset_language(previous)
         retranslator.apply()
+        dialog.close()
+
+
+@pytest.mark.parametrize("failure", [False, ValueError("<b>Invalid preset</b>")])
+def test_failed_command_keeps_input_and_can_be_retried(failure):
+    calls, settings = [], {}
+
+    def apply(value):
+        calls.append(value)
+        if len(calls) == 1:
+            if isinstance(failure, Exception):
+                raise failure
+            return failure
+        return True
+
+    registry = ActionRegistry()
+    registry.register(Action("preset", "rules_action_apply_preset", "Apply preset", apply, True))
+    dialog = CommandPaletteDialog(registry, CommandHistory(settings, lambda: None))
+    try:
+        dialog.show()
+        dialog.search_input.setText("preset")
+        dialog.value_input.setText("Work")
+        QTest.keyClick(dialog.value_input, Qt.Key.Key_Return)
+        assert dialog.isVisible()
+        assert dialog.value_input.text() == "Work"
+        assert dialog.search_input.text() == "preset"
+        assert dialog.selected_id() == "preset"
+        assert dialog.status.text() == (str(failure) if isinstance(failure, Exception)
+                                        else translate("command_palette_failed"))
+        assert dialog.status.textFormat() == Qt.TextFormat.PlainText
+        assert not settings
+        dialog.value_input.setText("Corrected")
+        QTest.keyClick(dialog.value_input, Qt.Key.Key_Return)
+        assert calls == ["Work", "Corrected"]
+        assert not dialog.isVisible()
+        assert settings["command_palette"]["recent"] == ["preset"]
+    finally:
+        dialog.close()
+
+
+def test_argument_is_kept_for_same_command_and_cleared_for_another():
+    calls = []
+    registry = make_registry(calls)
+    registry.register(Action("scene", "rules_action_scene_load", "Load scene", calls.append, True))
+    dialog = CommandPaletteDialog(registry, CommandHistory({}, lambda: None))
+    try:
+        dialog.show()
+        dialog.search_input.setText("preset")
+        dialog.value_input.setText("Work")
+        dialog.favorite_button.click()
+        assert dialog.favorite_button.isChecked()
+        assert dialog.value_input.text() == "Work"
+        dialog.refresh()
+        assert dialog.value_input.text() == "Work"
+        dialog.search_input.setText("scene")
+        assert dialog.selected_id() == "scene"
+        assert dialog.value_input.text() == ""
+        assert not dialog.favorite_button.isChecked()
+        dialog.execute_selected()
+        assert dialog.status.text() == translate("command_palette_value_required")
+        assert dialog.isVisible() and not calls
+    finally:
         dialog.close()
 
 

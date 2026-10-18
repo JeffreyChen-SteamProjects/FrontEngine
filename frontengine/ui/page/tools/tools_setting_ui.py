@@ -154,26 +154,28 @@ class ToolsSettingUI(SettingPage):
         measure.add_widget(self.palette_status)
 
         capture = self.add_section(self.capture_label)
-        capture.add_inline(self.capture_button, self.capture_copy_button,
+        capture.add_actions(self.capture_button, self.capture_copy_button,
                            self.capture_pin_button, self.capture_edit_button)
 
         screen_text = self.add_section(self.screen_text_label)
+        screen_text.set_collapsible()
         screen_text.add_row("tools_action", self.screen_text_combobox, "Action")
         screen_text.add_widget(self.screen_text_input)
-        screen_text.add_inline(self.screen_text_button)
         self.live_ocr_button = tr(QPushButton(), 'live_ocr_title')
         self.live_ocr_button.clicked.connect(self.start_live_ocr)
-        screen_text.add_inline(self.live_ocr_button)
+        screen_text.add_actions(self.screen_text_button, self.live_ocr_button)
 
         self._add_record_section()
 
         virtual_camera = self.add_section(self.virtual_camera_label)
+        virtual_camera.set_collapsible()
         virtual_camera.add_row("tools_fps", self.virtual_camera_fps_spinbox,
                                "Frames per second")
         virtual_camera.add_inline(self.virtual_camera_button)
         virtual_camera.add_widget(self.virtual_camera_status)
 
         camera = self.add_section(self.camera_label)
+        camera.set_collapsible()
         camera.add_row("tools_device", self.camera_device_combobox, "Device")
         camera.add_row("tools_shape", self.camera_shape_combobox, "Shape")
         camera.add_row(self.camera_border_label, self.camera_border_spinbox)
@@ -181,10 +183,11 @@ class ToolsSettingUI(SettingPage):
         camera.add_inline(self.camera_button)
 
         windows = self.add_section(self.layout_label)
+        windows.set_collapsible()
         windows.add_row("tools_name", self.layout_name_edit, "Name")
         windows.add_inline(self.layout_save_button)
         windows.add_row("tools_saved", self.layout_combobox, "Saved")
-        windows.add_inline(self.layout_restore_button, self.pin_button, self.replica_button)
+        windows.add_actions(self.layout_restore_button, self.pin_button, self.replica_button)
 
     # --- construction helpers -------------------------------------------
     def _build_measure_row(self) -> None:
