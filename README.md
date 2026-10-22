@@ -469,6 +469,10 @@ only the token itself needs storing.
 
 ---
 
+## Security
+
+Report vulnerabilities privately. The policy, supported versions, and operator notes are in [SECURITY.md](SECURITY.md).
+
 ## License
 
 See [`LICENSE`](LICENSE). Community expectations are in

@@ -469,6 +469,10 @@ que solo hace falta almacenar el propio token.
 
 ---
 
+## Seguridad
+
+Informe las vulnerabilidades en privado. La política, las versiones compatibles y las notas para operadores están en [SECURITY.md](../SECURITY.md).
+
 ## Licencia
 
 Consulta [`LICENSE`](../LICENSE). Las expectativas de la comunidad están en

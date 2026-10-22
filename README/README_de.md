@@ -512,6 +512,10 @@ als Twine-Benutzernamen, sodass nur das Token selbst gespeichert werden muss.
 
 ---
 
+## Sicherheit
+
+Bitte melden Sie Schwachstellen vertraulich. Die Richtlinie, die unterstützten Versionen und die Hinweise für Betreiber stehen in [SECURITY.md](../SECURITY.md).
+
 ## Lizenz
 
 Siehe [`LICENSE`](../LICENSE). Community-Erwartungen finden Sie in

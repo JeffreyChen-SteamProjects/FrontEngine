@@ -492,6 +492,10 @@ usuário do twine, então apenas o próprio token precisa ser armazenado.
 
 ---
 
+## Segurança
+
+Reporte vulnerabilidades em particular. A política, as versões suportadas e as notas para operadores estão em [SECURITY.md](../SECURITY.md).
+
 ## Licença
 
 Veja [`LICENSE`](../LICENSE). As expectativas da comunidade estão em

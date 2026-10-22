@@ -470,6 +470,10 @@ seul le jeton lui-même a besoin d'être stocké.
 
 ---
 
+## Sécurité
+
+Signalez les vulnérabilités en privé. La politique, les versions prises en charge et les notes destinées aux opérateurs se trouvent dans [SECURITY.md](../SECURITY.md).
+
 ## Licence
 
 Voir [`LICENSE`](../LICENSE). Les attentes de la communauté sont dans

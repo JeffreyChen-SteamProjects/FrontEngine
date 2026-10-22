@@ -416,6 +416,10 @@ feat/xyz  ──PR──►  dev  ──PR──►  main
 
 ---
 
+## 安全
+
+请私下报告漏洞。政策、支持版本与操作者注意事项见 [SECURITY.md](../SECURITY.md)。
+
 ## 许可证
 
 见 [`LICENSE`](../LICENSE)。社区期望写在
