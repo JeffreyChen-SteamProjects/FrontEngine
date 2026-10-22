@@ -1,4 +1,5 @@
 from typing import Dict, List
+from copy import deepcopy
 
 from PySide6.QtWidgets import QGraphicsProxyWidget
 
@@ -22,17 +23,97 @@ class SceneManager:
         self.view_list: List[ExtendGraphicView] = []
         self.native_widgets: list = []
         self.puppet_settings: list[dict] = []
+        self.layer_settings: dict[str, dict] = {}
 
-    def _add(self, kind: str, setting_dict: Dict) -> QGraphicsProxyWidget:
+    def add_entry(self, key: str, entry: dict) -> None:
+        """Build a named layer; keys identify all of its playback instances."""
+        if not isinstance(key, str) or not key or key in self.layer_settings:
+            raise ValueError('Scene layer keys must be unique nonempty strings')
+        kind = entry.get('type')
+        if not isinstance(kind, str):
+            raise ValueError('Scene type must be a string')
+        kind = kind.lower()
+        if kind in ('image', 'gif', 'sound', 'text', 'video', 'web', 'puppet'):
+            proxy = self._add(kind, entry, frame_source=True)
+            proxy.setData(0, key)
+            proxy.setData(1, deepcopy(entry))
+        else:
+            raise ValueError(f'Unsupported scene type: {entry.get("type")}')
+        self.layer_settings[key] = deepcopy(entry)
+
+    def synchronize_layers(self, entries: dict) -> None:
+        """Apply geometry/visibility/opacity edits and undo to existing playback."""
+        from frontengine.utils.scene_format.scene_editor_document import validate_geometry
+        from shiboken6 import isValid
+        validated = validate_geometry(entries)
+        for key, previous in tuple(self.layer_settings.items()):
+            current = validated.get(key)
+            if current is not None and current.get('type') != previous.get('type'):
+                current = None
+            setting = current or {**previous, 'visible': False}
+            for proxy in self.widget_list:
+                if isValid(proxy) and proxy.data(0) == key:
+                    self._update_proxy(proxy, setting)
+            for widget in self.native_widgets:
+                if getattr(widget, 'scene_layer_key', None) == key:
+                    self._update_native(widget, setting)
+            if current is not None:
+                self.layer_settings[key] = deepcopy(current)
+        timeline = getattr(self.graphic_scene, '_scene_timeline', None)
+        if timeline is not None:
+            timeline.configure(self.layer_settings)
+
+    def _update_proxy(self, proxy: QGraphicsProxyWidget, setting: dict) -> None:
+        proxy.setData(1, deepcopy(setting))
+        proxy.setPos(setting.get('x', 0), setting.get('y', 0))
+        proxy.setScale(setting.get('scale', 1))
+        proxy.setRotation(setting.get('rotation', 0))
+        proxy.setZValue(setting.get('z', 0))
+        proxy.setVisible(setting.get('visible', True))
+        widget = proxy.widget()
+        if widget is not None and hasattr(widget, 'set_active'):
+            widget.set_active(bool(getattr(self.graphic_scene, '_media_view_owners', set()))
+                              and setting.get('visible', True))
+        if widget is not None and hasattr(widget, 'set_ui_variable'):
+            widget.set_ui_variable(setting.get('opacity', 100 if setting.get('type') == 'PUPPET' else 20) / 100)
+            widget.update()
+
+    def _update_native(self, widget, setting: dict) -> None:
+        from shiboken6 import isValid
+        if not isValid(widget):
+            return
+        origin = widget.scene_monitor_origin
+        widget.move(int(setting.get('x', 0)) + origin[0], int(setting.get('y', 0)) + origin[1])
+        widget.set_ui_variable(setting.get('opacity', 100) / 100)
+        widget.setVisible(setting.get('visible', True))
+
+    def _add(self, kind: str, setting_dict: Dict, *, frame_source: bool = False) -> QGraphicsProxyWidget:
         front_engine_logger.info(f"[SceneManager] add_{kind} | settings={setting_dict}")
-        widget = build_overlay(kind, setting_dict)
-        if hasattr(widget, 'set_render_backend'):
-            widget.set_render_backend('software')
-        proxy_widget = self.graphic_scene.addWidget(widget)
-        proxy_widget.setPos(float(setting_dict.get('x', 0)), float(setting_dict.get('y', 0)))
-        proxy_widget.setZValue(float(setting_dict.get('z', 0)))
-        self.widget_list.append(proxy_widget)
-        return proxy_widget
+        from frontengine.utils.scene_format.scene_editor_document import validate_geometry
+        validate_geometry({"layer": setting_dict})
+        if kind in ('video', 'web', 'puppet') or (frame_source and kind == 'sound'):
+            from frontengine.show.scene.media_frame import SceneMediaFrame
+            widget = SceneMediaFrame({'type': kind.upper(), **setting_dict})
+        else:
+            widget = build_overlay(kind, setting_dict)
+        try:
+            widget.overlay_remembers_geometry = False
+            if "width" in setting_dict or "height" in setting_dict:
+                widget.resize(int(setting_dict.get("width", widget.width())),
+                              int(setting_dict.get("height", widget.height())))
+            if hasattr(widget, 'set_render_backend'):
+                widget.set_render_backend('software')
+            proxy_widget = self.graphic_scene.addWidget(widget)
+            proxy_widget.setPos(float(setting_dict.get('x', 0)), float(setting_dict.get('y', 0)))
+            proxy_widget.setZValue(float(setting_dict.get('z', 0)))
+            proxy_widget.setScale(float(setting_dict.get("scale", 1)))
+            proxy_widget.setRotation(float(setting_dict.get("rotation", 0)))
+            proxy_widget.setVisible(setting_dict.get("visible", True))
+            self.widget_list.append(proxy_widget)
+            return proxy_widget
+        except (OSError, ValueError, RuntimeError):
+            widget.close()
+            raise
 
     def supports_composition(self) -> bool:
         return bool(self.widget_list) and all(
@@ -62,9 +143,10 @@ class SceneManager:
         finite_parameters(setting_dict.get('parameters', {}))
         self.puppet_settings.append(dict(setting_dict))
 
-    def open_native_widgets(self, monitor=None) -> None:
+    def open_native_widgets(self, monitor=None, *, show: bool = True) -> None:
         for setting in self.puppet_settings:
             widget = build_overlay('puppet', setting)
+            widget.overlay_remembers_geometry = False
             origin = monitor.availableGeometry().topLeft() if monitor else None
             if monitor:
                 widget.setScreen(monitor)
@@ -72,7 +154,10 @@ class SceneManager:
             widget.move(int(x) + (origin.x() if origin else 0),
                         int(y) + (origin.y() if origin else 0))
             self.native_widgets.append(widget)
-            widget.show()
+            widget.scene_layer_key = setting.get('_layer_key')
+            widget.scene_monitor_origin = (origin.x(), origin.y()) if origin else (0, 0)
+            if show and setting.get('visible', True):
+                widget.show()
 
     def clear(self) -> None:
         """
@@ -83,14 +168,21 @@ class SceneManager:
         window on screen and restarting the scene stacks the old items on top.
         """
         front_engine_logger.info("[SceneManager] clear")
+        timeline = getattr(self.graphic_scene, '_scene_timeline', None)
+        if timeline is not None:
+            timeline.shutdown()
+            timeline.deleteLater()
+            del self.graphic_scene._scene_timeline
         native_widgets = tuple(self.native_widgets)
-        self.native_widgets.clear()
         for widget in native_widgets:
             try:
                 widget.close()
             except RuntimeError:  # WA_DeleteOnClose may have already deleted it.
                 continue
+        self.native_widgets.clear()
         self.puppet_settings.clear()
+        self.layer_settings.clear()
+        self.graphic_scene._media_view_owners = set()
         for proxy_widget in self.widget_list:
             try:
                 widget = proxy_widget.widget()

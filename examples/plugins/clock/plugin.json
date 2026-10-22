@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "id": "example.clock",
+  "api_version": 1,
+  "entrypoint": "plugin.py",
+  "permissions": ["ui"]
+}

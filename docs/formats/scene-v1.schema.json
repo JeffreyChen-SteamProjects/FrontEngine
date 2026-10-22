@@ -88,6 +88,30 @@
           "additionalProperties": {
             "type": "number"
           }
+        },
+        "width": {
+          "type": "number",
+          "minimum": 16,
+          "maximum": 8192
+        },
+        "height": {
+          "type": "number",
+          "minimum": 16,
+          "maximum": 8192
+        },
+        "scale": {
+          "type": "number",
+          "minimum": 0.01,
+          "maximum": 100
+        },
+        "rotation": {
+          "type": "number"
+        },
+        "visible": {
+          "type": "boolean"
+        },
+        "locked": {
+          "type": "boolean"
         }
       },
       "allOf": [

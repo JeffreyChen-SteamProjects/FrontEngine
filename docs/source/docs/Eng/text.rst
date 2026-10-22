@@ -20,3 +20,5 @@ Text Page
       for the city named in Weather city.
 
 * Show on all screen / Show on all window bottom / Target monitor - as elsewhere.
+
+Text → Local TXT / JSON / CSV displays a UTF-8 file with a selectable field and 1–3600 second refresh. JSON fields use /key/index paths (for example /build/tasks); CSV uses unique headers and displays the selected column as lines. An empty field displays the whole file. Reads run in a worker with one pending read per feed, a 1 MiB input limit and 65,536 output characters. Missing files/fields, invalid format, permissions and size limits have explicit states; corrected files recover automatically. Presets save the file/field/interval. Portable scenes copy the selected data file, so sharing a package shares that snapshot.

@@ -1,0 +1,11 @@
+{
+  "date": "2026-10-08",
+  "source_commit": "abcb8c3020f10c3830beeb3d89cec466ce59c8bf",
+  "platform": "Owned Debian bookworm / Python 3.12 container, Qt offscreen",
+  "regression": {
+    "passed": 1745,
+    "skipped": 12
+  },
+  "pyflakes": "passed",
+  "scope": "Current source mounted read-only; temporary settings/tests remain inside the owned container. Headless regression only; native X11/Wayland/Pulse/opacity evidence is recorded in U-20261008-14/-15/-17, physical devices still pending."
+}

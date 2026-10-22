@@ -1,4 +1,4 @@
-from PySide6.QtCore import Qt, QRect, QTimer
+from PySide6.QtCore import Qt, QRect, QTimer, QObject
 from PySide6.QtGui import QPainter, QFont, QColor, QFontMetrics
 
 from frontengine.show.base_widget import BaseWidget
@@ -96,9 +96,15 @@ class TextWidget(BaseWidget):
         """
         front_engine_logger.info(f"[TextWidget] set_text_source | kind={getattr(source, 'kind', None)}")
         self._source_timer.stop()
+        if self.text_source is not None and callable(getattr(self.text_source, "stop", None)):
+            self.text_source.stop()
         self.text_source = source
         if source is None:
             return
+        if isinstance(source, QObject):
+            source.setParent(self)
+        if hasattr(source, "changed"):
+            source.changed.connect(self.refresh_text)
         source.start()
         self.refresh_text()
         interval = getattr(source, "refresh_interval_ms", 0)
@@ -121,6 +127,8 @@ class TextWidget(BaseWidget):
     def set_low_power(self, enabled: bool) -> None:
         """省電模式：拉慢文字來源與跑馬燈的更新，降低重繪次數。"""
         self.low_power = bool(enabled)
+        if callable(getattr(self.text_source, "set_low_power", None)):
+            self.text_source.set_low_power(self.low_power)
         if self._source_timer.isActive() and self.text_source is not None:
             self._source_timer.start(scaled_interval(
                 getattr(self.text_source, "refresh_interval_ms", 1000), self.low_power))
@@ -148,6 +156,8 @@ class TextWidget(BaseWidget):
             )
 
     def closeEvent(self, event) -> None:
+        if callable(getattr(self.text_source, "stop", None)):
+            self.text_source.stop()
         for timer in (self._marquee_timer, self._source_timer):
             if timer.isActive():
                 timer.stop()

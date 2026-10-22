@@ -1,0 +1,17 @@
+FrontEngine Workshop
+Make your desktop yours.
+
+Find a new idea for your desktop. Share a little of your own style.
+FrontEngine Workshop is a home for sharing scenes, desktop pets and presets. From a quiet workspace to a playful composition, give every screen a look of its own.
+
+What to share
+• Scenes: combine images, animation, text and other supported media into your own desktop composition.
+• Desktop pets: share original sprite packs that bring a little company to your screen.
+• Presets: share your favorite overlay and tool settings for work, focus or teaching.
+
+Creating and using content
+Use assets you have permission to share. Include the creator, content type, FrontEngine version and any required optional packages in your description. Adjust downloaded content to suit your screens and preferences.
+
+FrontEngine currently imports downloaded Workshop presets and lists pet-pack locations for manual selection. In-app publishing, updates, scene imports and automatic synchronization are still being planned. Existing file import and export remain available while those workflows are developed.
+
+Start with a small desktop idea. Make it your own with FrontEngine.

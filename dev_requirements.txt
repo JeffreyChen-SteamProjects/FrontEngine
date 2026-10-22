@@ -9,4 +9,5 @@ PyOpenGL_accelerate
 numpy
 pynput
 pyflakes
+tomli; python_version < "3.11"
 -r requirements.txt

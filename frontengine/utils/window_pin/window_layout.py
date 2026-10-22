@@ -26,6 +26,9 @@ MIN_SIZE = 40
 
 
 def available() -> bool:
+    if sys.platform.startswith('linux'):
+        from frontengine.utils.linux.windows import available as x11_available
+        return x11_available()
     if sys.platform == 'darwin':
         from frontengine.utils.macos import get_backend
         return get_backend().capability('window_move').available
@@ -39,6 +42,9 @@ def normalize_title(title: Any) -> str:
 
 def window_geometry(handle: int) -> Optional[Tuple[int, int, int, int]]:
     """某個視窗目前的 (x, y, 寬, 高)；取不到回傳 None。"""
+    if sys.platform.startswith('linux'):
+        from frontengine.utils.linux.windows import geometry
+        return geometry(handle)
     if sys.platform == 'darwin':
         from frontengine.utils.macos import get_backend
         return get_backend().window_geometry(handle)
@@ -59,6 +65,9 @@ def window_geometry(handle: int) -> Optional[Tuple[int, int, int, int]]:
 
 def move_window(handle: int, x: int, y: int, width: int, height: int) -> bool:
     """把視窗搬到指定位置與大小；成功回傳 True。"""
+    if sys.platform.startswith('linux'):
+        from frontengine.utils.linux.windows import move
+        return move(handle, x, y, width, height)
     if sys.platform == 'darwin':
         from frontengine.utils.macos import get_backend
         return get_backend().move_window(handle, x, y, width, height)

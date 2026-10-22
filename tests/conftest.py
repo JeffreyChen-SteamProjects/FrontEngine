@@ -8,6 +8,7 @@ working directory so the log file created on import does not land in the repo.
 import os
 import tempfile
 import sys
+import gc
 
 import pytest
 
@@ -53,3 +54,11 @@ def _qt_application():
 
     application = QApplication.instance() or QApplication([])
     yield application
+
+
+@pytest.fixture(autouse=True, scope="module")
+def _release_test_widget_cycles(_qt_application):
+    """Release cyclic test widgets on their GUI thread before another module starts workers."""
+    gc.collect()
+    yield
+    gc.collect()

@@ -8,6 +8,7 @@ work against it. Only display attributes are touched - never window content.
 from __future__ import annotations
 
 from typing import List, Optional, Tuple
+import sys
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
@@ -63,6 +64,10 @@ class WindowPinDialog(QDialog):
         self.hint_label = QLabel(_t(hint_key, hint_fallback))
         retranslator.bind(self.hint_label, hint_key, hint_fallback)
         self.hint_label.setWordWrap(True)
+        if sys.platform.startswith('linux'):
+            retranslator.forget(self.hint_label)
+            retranslator.bind_call(self._linux_hint)
+            self._linux_hint()
 
         self.button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)
         self.button_box.rejected.connect(self.reject)
@@ -82,6 +87,12 @@ class WindowPinDialog(QDialog):
             widget.setEnabled(window_pin.available())
         self.reload_windows()
 
+    def _linux_hint(self) -> None:
+        from frontengine.utils.linux.capabilities import x11_reason
+        from frontengine.utils.linux import windows
+        self.hint_label.setText(x11_reason() or windows.last_error or
+                                _t('platform_x11_hint', 'X11 EWMH; opacity requires a compositor.'))
+
     def reload_windows(self) -> List[Tuple[int, str]]:
         """重新抓一次視窗清單。"""
         self.window_list.clear()
@@ -90,6 +101,8 @@ class WindowPinDialog(QDialog):
             item = QListWidgetItem(title)
             item.setData(Qt.ItemDataRole.UserRole, int(handle))
             self.window_list.addItem(item)
+        if sys.platform.startswith('linux'):
+            self._linux_hint()
         return windows
 
     def selected_handle(self) -> Optional[int]:
@@ -109,6 +122,8 @@ class WindowPinDialog(QDialog):
             self.pinned.append(handle)
         elif applied and not on_top and handle in self.pinned:
             self.pinned.remove(handle)
+        if sys.platform.startswith('linux'):
+            self._linux_hint()
         return applied
 
     def apply_opacity(self) -> bool:
@@ -124,6 +139,8 @@ class WindowPinDialog(QDialog):
             # window that was merely faded stuck that way for good: FrontEngine
             # exits and someone else's window is still see-through.
             self.faded.append(handle)
+        if sys.platform.startswith('linux'):
+            self._linux_hint()
         return applied
 
     def release_all(self) -> None:

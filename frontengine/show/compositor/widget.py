@@ -1,6 +1,6 @@
 """A real OpenGL texture compositor with a visible software fallback."""
-from PySide6.QtCore import Qt, Signal, QTimer
-from PySide6.QtGui import QGuiApplication, QPainter
+from PySide6.QtCore import Qt, Signal, QTimer, QRectF
+from PySide6.QtGui import QGuiApplication, QPainter, QImage, QTransform
 from PySide6.QtWidgets import QWidget
 
 from .layers import compose_frame
@@ -17,6 +17,9 @@ class CompositorWidget(QWidget):
         self.actual_backend = 'software'
         self.failure_reason = ''
         self._gl = None
+        self._layer_signature = None
+        self._frame_signature = None
+        self._cached_frame = QImage()
         self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
         if backend != 'software':
             if QGuiApplication.platformName() in ('offscreen', 'minimal'):
@@ -53,6 +56,10 @@ class CompositorWidget(QWidget):
 
     def set_layers(self, layers) -> None:
         self.layers = list(layers)
+        signature = self._signature()
+        if signature == self._layer_signature:
+            return
+        self._layer_signature = signature
         if self._gl is not None:
             self._gl.layers = self.layers
             self._gl.update()
@@ -61,7 +68,24 @@ class CompositorWidget(QWidget):
     def output_frame(self):
         if self.actual_backend == 'gpu' and self._gl is not None:
             return self._gl.grabFramebuffer()
-        return compose_frame(self.layers, self.size(), self.devicePixelRatioF())
+        return self._software_frame()
+
+    def _signature(self) -> tuple:
+        return tuple((layer.key, layer.image.cacheKey(), layer.image.devicePixelRatio(),
+                      QTransform(layer.transform), layer.z, layer.opacity,
+                      QRectF(layer.clip) if layer.clip is not None else None) for layer in self.layers)
+
+    def _software_frame(self) -> QImage:
+        """Reuse unchanged composition; returned shallow copies isolate caller mutations."""
+        signature = (self.width(), self.height(), self.devicePixelRatioF(), self._signature())
+        if self.width() * self.height() * self.devicePixelRatioF() ** 2 > 16_777_216:
+            self._cached_frame = QImage()
+            self._frame_signature = None
+            return compose_frame(self.layers, self.size(), self.devicePixelRatioF())
+        if self._frame_signature != signature:
+            self._cached_frame = compose_frame(self.layers, self.size(), self.devicePixelRatioF())
+            self._frame_signature = signature
+        return QImage(self._cached_frame)
 
     def resizeEvent(self, event) -> None:
         if self._gl is not None:
@@ -71,12 +95,14 @@ class CompositorWidget(QWidget):
     def paintEvent(self, event) -> None:
         if self.actual_backend == 'software':
             painter = QPainter(self)
-            painter.drawImage(0, 0, compose_frame(self.layers, self.size(), self.devicePixelRatioF()))
+            painter.drawImage(0, 0, self._software_frame())
 
     def shutdown(self) -> None:
         if self._gl is not None:
             self._gl.cleanup()
         self.layers.clear()
+        self._cached_frame = QImage()
+        self._layer_signature = self._frame_signature = None
 
     def closeEvent(self, event) -> None:
         self.shutdown()

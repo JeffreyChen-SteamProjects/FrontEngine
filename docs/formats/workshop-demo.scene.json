@@ -1,0 +1,16 @@
+{
+  "format": "frontengine.scene",
+  "version": 1,
+  "entries": {
+    "welcome": {
+      "type": "TEXT",
+      "text": "FrontEngine Workshop",
+      "font_size": 32,
+      "color": "#FFD740",
+      "x": 100,
+      "y": 100,
+      "z": 0,
+      "opacity": 100
+    }
+  }
+}

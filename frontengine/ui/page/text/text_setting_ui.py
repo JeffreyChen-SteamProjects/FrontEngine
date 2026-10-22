@@ -3,7 +3,7 @@ import threading
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QSlider, QLabel, QLineEdit, QPushButton, QCheckBox, QComboBox, \
-    QFontComboBox, QMessageBox
+    QFontComboBox, QMessageBox, QFileDialog, QSpinBox
 
 from frontengine.show.text.draw_text import TextWidget
 from frontengine.ui.page.utils import (
@@ -21,6 +21,7 @@ from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import retranslator, tr
 from frontengine.utils.system_stats.system_stats import SAMPLE_FIELDS, system_stats
+from frontengine.utils.text_source.local_file_source import LocalFileTextSource
 from frontengine.utils.text_source.text_source import (
     DEFAULT_TEMPLATES, SOURCE_CLOCK, SOURCE_COUNTDOWN, SOURCE_DATE, SOURCE_STATIC,
     SOURCE_STOPWATCH, SOURCE_SYSTEM, SOURCE_WEATHER, TextSource,
@@ -134,7 +135,7 @@ class TextSettingUI(SettingPage):
         for kind, fallback in (
             (SOURCE_STATIC, "Static text"), (SOURCE_CLOCK, "Clock"), (SOURCE_DATE, "Date"),
             (SOURCE_COUNTDOWN, "Countdown"), (SOURCE_STOPWATCH, "Stopwatch"),
-            (SOURCE_SYSTEM, "System stats"), (SOURCE_WEATHER, "Weather"),
+            (SOURCE_SYSTEM, "System stats"), (SOURCE_WEATHER, "Weather"), ("local_file", "Local file"),
         ):
             self.text_source_combobox.addItem(
                 language_wrapper.language_word_dict.get(f"text_source_{kind}", fallback), kind)
@@ -151,12 +152,34 @@ class TextSettingUI(SettingPage):
         self.weather_location_edit.setPlaceholderText(
             language_wrapper.language_word_dict.get("weather_location_hint", "e.g. Taipei"))
 
+        self.file_path_edit = QLineEdit()
+        self.file_field_combo = QComboBox()
+        self.file_field_combo.setEditable(True)
+        self.file_interval_spin = QSpinBox()
+        self.file_interval_spin.setRange(1, 3600)
+        self.file_interval_spin.setValue(1)
+        self.file_choose_button = tr(QPushButton(), "text_file_choose")
+        self.file_choose_button.clicked.connect(self._choose_text_file)
+        self.file_status = QLabel()
+        self.file_status.setWordWrap(True)
+        self._file_preview = None
+        self.file_path_edit.editingFinished.connect(self._restart_file_preview)
+        self.file_field_combo.currentTextChanged.connect(self._restart_file_preview)
+        self.file_interval_spin.valueChanged.connect(self._restart_file_preview)
+
         # Layout
         content = self.add_section("section_content", "Content")
         content.add_row("text", self.line_edit, "Text")
         content.add_row(self.text_source_label, self.text_source_combobox)
         content.add_row(self.weather_location_label, self.weather_location_edit)
         content.add_widget(self.text_source_hint_label)
+
+        self.file_section = self.add_section("text_source_local_file")
+        self.file_section.add_row("text_file_path", self.file_path_edit)
+        self.file_section.add_inline(self.file_choose_button)
+        self.file_section.add_row("text_file_field", self.file_field_combo)
+        self.file_section.add_row("text_file_interval", self.file_interval_spin)
+        self.file_section.add_widget(self.file_status)
 
         appearance = self.add_section("section_appearance", "Appearance")
         appearance.add_slider_row(
@@ -195,6 +218,9 @@ class TextSettingUI(SettingPage):
         source.
         """
         kind = self.text_source_combobox.currentData() or SOURCE_STATIC
+        for index in range(self.text_source_combobox.count()):
+            source_kind = self.text_source_combobox.itemData(index)
+            self.text_source_combobox.setItemText(index, _t("text_source_" + source_kind, source_kind))
         default = DEFAULT_TEMPLATES.get(kind, "")
         hint = language_wrapper.language_word_dict.get(f"text_source_hint_{kind}", "")
         text = f"{hint}  ({default})" if default else hint
@@ -205,10 +231,16 @@ class TextSettingUI(SettingPage):
         self.text_source_hint_label.setText(text)
         self.weather_location_label.setVisible(kind == SOURCE_WEATHER)
         self.weather_location_edit.setVisible(kind == SOURCE_WEATHER)
+        if hasattr(self, "file_section"):
+            self.file_section.setVisible(kind == "local_file")
+            self._restart_file_preview()
 
-    def _build_text_source(self) -> TextSource:
+    def _build_text_source(self) -> TextSource | LocalFileTextSource:
         """依目前設定組出文字來源；天氣來源會先把地名解析成座標。"""
         kind = self.text_source_combobox.currentData() or SOURCE_STATIC
+        if kind == "local_file":
+            return LocalFileTextSource(self.file_path_edit.text(), self.file_field_combo.currentText(),
+                                       self.file_interval_spin.value() * 1000)
         if kind == SOURCE_WEATHER:
             self._apply_weather_location()
         return TextSource(
@@ -217,6 +249,46 @@ class TextSettingUI(SettingPage):
             stats_provider=system_stats,
             weather_provider=current_weather,
         )
+
+    def stop_file_preview(self) -> None:
+        """Release polling and ignore any pending read during application teardown."""
+        if self._file_preview is not None:
+            self._file_preview.stop()
+            self._file_preview.deleteLater()
+            self._file_preview = None
+
+    def _restart_file_preview(self, *_args) -> None:
+        self.stop_file_preview()
+        if self.text_source_combobox.currentData() != "local_file":
+            return
+        self._file_preview = self._build_text_source()
+        self._file_preview.setParent(self)
+        self._file_preview.result_changed.connect(self._file_result)
+        self.file_status.setText(self._file_preview.text())
+        self._file_preview.start()
+
+    def _file_result(self, result) -> None:
+        self.file_status.setText(_t("text_file_ready", "Ready") + "\n" + result.value[:256]
+                                 if result.status == "ready" else self._file_preview.text())
+        if result.status == "ready":
+            selected = self.file_field_combo.currentText()
+            self.file_field_combo.blockSignals(True)
+            self.file_field_combo.clear()
+            self.file_field_combo.addItems(["", *result.fields])
+            self.file_field_combo.setCurrentText(selected)
+            self.file_field_combo.blockSignals(False)
+
+    def _choose_text_file(self) -> None:
+        path, _ = QFileDialog.getOpenFileName(self, _t("text_file_choose", "Choose file"), "",
+                                             "Data (*.txt *.json *.csv)")
+        if path:
+            self.file_path_edit.setText(path)
+            self.file_field_combo.setCurrentText("")
+            self._restart_file_preview()
+
+    def closeEvent(self, event) -> None:
+        self.stop_file_preview()
+        super().closeEvent(event)
 
     def _apply_weather_location(self) -> None:
         """
@@ -297,6 +369,9 @@ class TextSettingUI(SettingPage):
             "outline_color": self.outline_color_combobox.currentText(),
             "text_source": self.text_source_combobox.currentData(),
             "weather_location": self.weather_location_edit.text(),
+            "text_file": self.file_path_edit.text(),
+            "text_file_field": self.file_field_combo.currentText(),
+            "text_file_interval": self.file_interval_spin.value(),
         }
 
     def set_state(self, state: dict) -> None:
@@ -327,6 +402,21 @@ class TextSettingUI(SettingPage):
             self.font_family_combobox.setCurrentFont(QFont(str(state["font_family"])))
         if state.get("weather_location") is not None:
             self.weather_location_edit.setText(str(state["weather_location"]))
+
+        self._restore_file_source(state)
+
+    def _restore_file_source(self, state: dict) -> None:
+        """Restore validated file-feed controls before restarting the preview."""
+        if "text_file" in state:
+            self.file_path_edit.setText(str(state["text_file"]))
+        if "text_file_field" in state:
+            self.file_field_combo.setCurrentText(str(state["text_file_field"]))
+        if "text_file_interval" in state:
+            try:
+                self.file_interval_spin.setValue(int(state["text_file_interval"]))
+            except (ValueError, TypeError, OverflowError):
+                self.file_interval_spin.setValue(1)
+        self._restart_file_preview()
 
     def start_draw_text_on_screen(self) -> None:
         front_engine_logger.info("[TextSettingUI] start_draw_text_on_screen")

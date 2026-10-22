@@ -1,4 +1,4 @@
-"""GUI-thread region capture with bounded asynchronous GIF output."""
+"""GUI-thread region capture with bounded asynchronous GIF/AVI output."""
 from __future__ import annotations
 
 import time
@@ -14,6 +14,7 @@ from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.recording.gif_writer import (
     AsyncGifWriter, IncrementalGifWriter, MAX_QUEUED_BYTES,
 )
+from frontengine.utils.recording.avi_writer import IncrementalAviWriter, MAX_AVI_SECONDS, MAX_AVI_FRAMES
 
 DEFAULT_FPS = 8
 MIN_FPS = 1
@@ -34,17 +35,19 @@ def clamp_fps(value, fallback: int = DEFAULT_FPS) -> int:
         return fallback
 
 
-def clamp_max_seconds(value, fallback: int = DEFAULT_MAX_SECONDS) -> int:
+def clamp_max_seconds(value, fallback: int = DEFAULT_MAX_SECONDS, maximum: int = 120) -> int:
     """單次錄製長度夾在 1~120 秒。"""
     try:
-        return max(1, min(120, int(value)))
+        return max(1, min(maximum, int(value)))
     except (TypeError, ValueError):
         return fallback
 
 
-def frame_budget(fps: int, max_seconds: int) -> int:
+def frame_budget(fps: int, max_seconds: int, *, video: bool = False) -> int:
     """這次錄製最多可以留幾張（同時受總張數上限限制）。"""
-    return max(1, min(MAX_FRAMES, clamp_fps(fps) * clamp_max_seconds(max_seconds)))
+    limit = MAX_AVI_FRAMES if video else MAX_FRAMES
+    seconds = clamp_max_seconds(max_seconds, maximum=MAX_AVI_SECONDS if video else 120)
+    return max(1, min(limit, clamp_fps(fps) * seconds))
 
 
 def image_to_rgb(image: QImage) -> Optional[numpy.ndarray]:
@@ -84,6 +87,8 @@ class FrameRecorder(QObject):
     finished = Signal(int)
     completed = Signal(object)
     failed = Signal(str)
+    state_changed = Signal(str)
+    progress = Signal(int, float, int)
     _writer_done = Signal(object, object, object)
 
     def __init__(self, parent: Optional[QObject] = None,
@@ -107,6 +112,11 @@ class FrameRecorder(QObject):
         self._writer_factory = writer_factory
         self._clock = clock
         self._started_at = 0.0
+        self._paused_at = None
+        self._paused_duration = 0.0
+        self._elapsed = 0.0
+        self.state = 'idle'
+        self.output_format = 'gif'
         self._attempts = 0
         self._capture_error = None
         self._timer = QTimer(self)
@@ -146,8 +156,48 @@ class FrameRecorder(QObject):
     def set_inset_provider(self, provider: Optional[Callable]) -> None:
         self._inset_provider = provider
 
+    @property
+    def elapsed_seconds(self) -> float:
+        """Captured duration excludes pauses and remains fixed after stop."""
+        return self._elapsed
+
+    def _set_state(self, state: str) -> None:
+        self.state = state
+        self.state_changed.emit(state)
+
+    def _effective_stamp(self) -> float:
+        now = self._clock() if self._paused_at is None else self._paused_at
+        return now - self._paused_duration
+
+    def pause(self) -> bool:
+        """Stop region capture without finalizing; exclude paused wall time."""
+        if self.state != 'recording':
+            return False
+        self._paused_at = self._clock()
+        self._elapsed = max(0, self._effective_stamp() - self._started_at)
+        self._timer.stop()
+        self._stop_native_capture()
+        self._set_state('paused')
+        self.progress.emit(self.frame_count, self._elapsed, self.dropped_frames)
+        return True
+
+    def resume(self) -> bool:
+        """Resume the same clip and effective monotonic timeline."""
+        if self.state != 'paused':
+            return False
+        if not self._start_native_capture():
+            self._capture_error = 'Native capture could not resume'
+            self.close()
+            return False
+        self._paused_duration += self._clock() - self._paused_at
+        self._paused_at = None
+        self._set_state('recording')
+        self._timer.start(max(1, 1000 // self.fps))
+        self.capture_frame()
+        return True
+
     def start(self, region: QRect, target: Optional[str | Path] = None, fps: int = DEFAULT_FPS,
-              max_seconds: int = DEFAULT_MAX_SECONDS) -> bool:
+              max_seconds: int = DEFAULT_MAX_SECONDS, *, output_format: str | None = None) -> bool:
         if self.busy or not target or region is None:
             return False
         width, height = region.width(), region.height()
@@ -156,30 +206,41 @@ class FrameRecorder(QObject):
         if width > 65535 or height > 65535 or width * height * 3 > MAX_QUEUED_BYTES:
             self.failed.emit("Selected region exceeds the 64 MiB frame limit")
             return False
+        self.output_format = output_format or ('avi' if Path(target).suffix.lower() == '.avi' else 'gif')
+        if self.output_format not in ('gif', 'avi'):
+            self.failed.emit('Unsupported recording format')
+            return False
         self.frame_count = self.dropped_frames = self._attempts = 0
         self.result_path = None
         self._capture_error = None
         self.region = QRect(region)
-        self.fps, self.max_seconds = clamp_fps(fps), clamp_max_seconds(max_seconds)
+        self.fps = clamp_fps(fps)
+        self.max_seconds = clamp_max_seconds(max_seconds, maximum=MAX_AVI_SECONDS if self.output_format == 'avi' else 120)
         self._started_at = self._clock()
+        self._paused_at, self._paused_duration, self._elapsed = None, 0.0, 0.0
         if not self._start_native_capture():
             return False
+        factory = IncrementalAviWriter if self.output_format == 'avi' else self._writer_factory
         self._writer = AsyncGifWriter(target, delay_ms=1000 // self.fps,
                                       callback=self._notify_done,
-                                      writer_factory=self._writer_factory)
+                                      writer_factory=factory)
         # Destruction must cancel independently of the Python QObject wrapper.
         worker = self._writer
         self._destroy_cleanup = lambda *_args: worker.cancel()
         self.destroyed.connect(self._destroy_cleanup)
+        self._set_state('recording')
         self._timer.start(max(1, 1000 // self.fps))
         self.capture_frame()
         return True
 
     def stop(self) -> int:
         self._stop_native_capture()
-        if self.running:
+        if self.state in ('recording', 'paused') and self._writer is not None:
             self._timer.stop()
-            self._writer.stop(self._clock())
+            stamp = self._effective_stamp()
+            self._elapsed = max(0, stamp - self._started_at)
+            self._set_state('finalizing')
+            self._writer.stop(stamp)
             self.finished.emit(self.frame_count)
         return self.frame_count
 
@@ -188,6 +249,7 @@ class FrameRecorder(QObject):
         self._timer.stop()
         self._stop_native_capture()
         if self._writer is not None:
+            self._set_state('cancelling')
             self._writer.cancel()
 
     def clear(self) -> None:
@@ -223,9 +285,11 @@ class FrameRecorder(QObject):
     def capture_frame(self) -> bool:
         if not self.running:
             return False
-        stamp = self._clock()
+        stamp = self._effective_stamp()
+        self._elapsed = max(0, stamp - self._started_at)
+        budget = frame_budget(self.fps, self.max_seconds, video=self.output_format == 'avi')
         if (stamp - self._started_at >= self.max_seconds
-                or self._attempts >= frame_budget(self.fps, self.max_seconds)):
+                or self._attempts >= budget):
             self.stop()
             return False
         self._attempts += 1
@@ -234,7 +298,8 @@ class FrameRecorder(QObject):
             captured = False
         else:
             captured = self._capture(stamp)
-        if self._attempts >= frame_budget(self.fps, self.max_seconds):
+        self.progress.emit(self.frame_count, self._elapsed, self.dropped_frames)
+        if self._attempts >= budget:
             self.stop()
         return captured
 
@@ -278,6 +343,7 @@ class FrameRecorder(QObject):
         self.destroyed.disconnect(self._destroy_cleanup)
         self._destroy_cleanup = None
         self._writer = None
+        self._set_state('idle')
         self.result_path = result
         error = error or self._capture_error
         if error:

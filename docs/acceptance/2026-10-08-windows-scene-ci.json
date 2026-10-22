@@ -1,0 +1,131 @@
+{
+  "date": "2026-10-08",
+  "platform": "Windows x64, native Qt, one display at 125%",
+  "executable": {
+    "path": "build/nuitka/start_front_engine.dist/FrontEngine.exe",
+    "bytes": 94899200,
+    "sha256": "6faa3975c78339ee3fe14586e2312211421ddde167659a3a38378e8d90ff1783"
+  },
+  "source_sha256_normalized_lf": "de9860b6f1764dfa9b72b652e4039f1de538ccdd400e18be263feeb1ff18d94d",
+  "build": {
+    "python": "3.14.4",
+    "nuitka": "4.1.3",
+    "qt": "6.11.2",
+    "imervue": "1.0.93",
+    "pillow": "12.3.0",
+    "mode": "standalone",
+    "compiler": "MSVC 14.5",
+    "c_files": 3798,
+    "clcache_hits": 0,
+    "clcache_misses": 3798,
+    "qt_plugins": [
+      "iconengines",
+      "imageformats",
+      "multimedia",
+      "platforms",
+      "styles",
+      "tls",
+      "vectorimageformats"
+    ],
+    "python_314_support": "experimental in this Nuitka version; this artifact passed the native probe"
+  },
+  "steam_runtime": {
+    "included": true,
+    "sha256": "e6d9bafb9a41e42fba7b21553db49f8719027af3f0deb23ff86cfc44d60e776d",
+    "appid_file_included": false
+  },
+  "scene_acceptance": {
+    "success": true,
+    "types": [
+      "GIF",
+      "IMAGE",
+      "PUPPET",
+      "SOUND",
+      "TEXT",
+      "VIDEO",
+      "WEB"
+    ],
+    "image_video_web_pixels": true,
+    "puppet_native_fbo": true,
+    "muted_preview": true,
+    "qt_screen_dpr": 1.25,
+    "legacy_json": true,
+    "versioned_json": true,
+    "portable_export_reload": true,
+    "web_interaction": true,
+    "undo_redo": true,
+    "pause_resume": true,
+    "resources_released": true
+  },
+  "exit_code": 0,
+  "regression": {
+    "windows": {
+      "passed": 1756,
+      "skipped": 1
+    },
+    "isolated_linux": {
+      "passed": 1745,
+      "skipped": 12
+    },
+    "macos_ci": {
+      "passed": 1745,
+      "skipped": 12
+    }
+  },
+  "scope": "Local synthetic PNG/GIF/silent video/WAV/HTML and selected sample puppet; no host capture, input listening or account operations. Physical hardware acceptance remains in progress.md.",
+  "source_commit": "abcb8c3020f10c3830beeb3d89cec466ce59c8bf",
+  "ci": {
+    "url": "https://github.com/JeffreyChen-SteamProjects/FrontEngine/actions/runs/37703250680",
+    "source_commit": "abcb8c3020f10c3830beeb3d89cec466ce59c8bf",
+    "checks": [
+      {
+        "bucket": "pass",
+        "link": "https://app.codacy.com/gh/JeffreyChen-SteamProjects/FrontEngine/pull-requests/222",
+        "name": "Codacy Static Code Analysis",
+        "state": "SUCCESS"
+      },
+      {
+        "bucket": "pass",
+        "link": "https://github.com/JeffreyChen-SteamProjects/FrontEngine/actions/runs/37703250680/job/113071465425",
+        "name": "macos",
+        "state": "SUCCESS"
+      },
+      {
+        "bucket": "pass",
+        "link": "https://sonarcloud.io/dashboard?id=JeffreyChen-SteamProjects_FrontEngine&pullRequest=222",
+        "name": "SonarCloud Code Analysis",
+        "state": "SUCCESS"
+      },
+      {
+        "bucket": "pass",
+        "link": "https://github.com/JeffreyChen-SteamProjects/FrontEngine/actions/runs/37703250680/job/113071465589",
+        "name": "smoke (3.12)",
+        "state": "SUCCESS"
+      },
+      {
+        "bucket": "pass",
+        "link": "https://github.com/JeffreyChen-SteamProjects/FrontEngine/actions/runs/37703250680/job/113071465624",
+        "name": "smoke (3.13)",
+        "state": "SUCCESS"
+      },
+      {
+        "bucket": "pass",
+        "link": "https://github.com/JeffreyChen-SteamProjects/FrontEngine/actions/runs/37703250680/job/113071465772",
+        "name": "smoke (3.14)",
+        "state": "SUCCESS"
+      },
+      {
+        "bucket": "pass",
+        "link": "https://github.com/JeffreyChen-SteamProjects/FrontEngine/actions/runs/37703250680/job/113071465692",
+        "name": "smoke (3.10)",
+        "state": "SUCCESS"
+      },
+      {
+        "bucket": "pass",
+        "link": "https://github.com/JeffreyChen-SteamProjects/FrontEngine/actions/runs/37703250680/job/113071465629",
+        "name": "smoke (3.11)",
+        "state": "SUCCESS"
+      }
+    ]
+  }
+}

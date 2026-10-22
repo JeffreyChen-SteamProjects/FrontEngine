@@ -39,6 +39,9 @@ _LWA_ALPHA = 0x00000002
 
 def available() -> bool:
     """這個平台能不能操作別的視窗。"""
+    if sys.platform.startswith('linux'):
+        from frontengine.utils.linux.windows import available as x11_available
+        return x11_available()
     return sys.platform == "win32"
 
 
@@ -64,6 +67,9 @@ def list_windows() -> List[Tuple[int, str]]:
     列出可以釘選的視窗 [(handle, 標題)]；非 Windows 或失敗時回傳空清單。
     Pinnable windows as (handle, title); [] when unavailable.
     """
+    if sys.platform.startswith('linux'):
+        from frontengine.utils.linux.windows import list_windows as x11_windows
+        return x11_windows()
     if sys.platform == 'darwin':
         from frontengine.utils.macos import get_backend
         return get_backend().list_windows()
@@ -116,6 +122,9 @@ def _list_windows_windows() -> List[Tuple[int, str]]:  # pragma: no cover - Win3
 
 def set_always_on_top(handle: int, on_top: bool) -> bool:
     """把某個視窗設成（或取消）永遠在最上層；成功回傳 True。"""
+    if sys.platform.startswith('linux'):
+        from frontengine.utils.linux.windows import pin
+        return pin(handle, on_top)
     if not available() or not handle:
         return False
     try:
@@ -149,6 +158,9 @@ def set_opacity(handle: int, percent) -> bool:
     Set a window's opacity (20..100%). The layered flag stays on at 100% so it
     can be adjusted again without flicker.
     """
+    if sys.platform.startswith('linux'):
+        from frontengine.utils.linux.windows import opacity
+        return opacity(handle, clamp_opacity(percent))
     if not available() or not handle:
         return False
     try:

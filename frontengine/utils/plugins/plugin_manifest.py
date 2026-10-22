@@ -46,7 +46,7 @@ def _content_digest(root: Path, files: list[Path]) -> str:
 
 def read_manifest(entrypoint: Path) -> PluginManifest:
     entrypoint = Path(entrypoint).absolute()
-    if entrypoint.is_symlink() or entrypoint.parent.is_symlink():
+    if not entrypoint.is_file() or entrypoint.is_symlink() or entrypoint.parent.is_symlink():
         raise ValueError('Plugin paths cannot be symbolic links')
     packaged = entrypoint.name == 'plugin.py'
     root = entrypoint.parent

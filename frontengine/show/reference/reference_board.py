@@ -145,6 +145,19 @@ class ReferenceBoardWidget(ExtendGraphicView):
                 removed += 1
         return removed
 
+    def add_pixmap(self, pixmap: QPixmap) -> bool:
+        """Add a bounded in-memory reference without creating a temporary image file."""
+        if pixmap.isNull() or pixmap.width() * pixmap.height() > 16_777_216 or len(self.items) >= 200:
+            return False
+        item = QGraphicsPixmapItem(pixmap.scaled(self.item_size, self.item_size,
+                                  Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+        item.setFlag(QGraphicsPixmapItem.GraphicsItemFlag.ItemIsMovable, True)
+        item.setFlag(QGraphicsPixmapItem.GraphicsItemFlag.ItemIsSelectable, True)
+        item.setPos(*grid_positions(len(self.items)+1, self.item_size, self.columns)[-1])
+        self.board_scene.addItem(item)
+        self.items.append(item)
+        return True
+
     def keyPressEvent(self, event) -> None:
         if event.key() == Qt.Key.Key_Escape:
             self.close()
