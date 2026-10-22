@@ -6,6 +6,11 @@ Tests for the audio meter helpers: envelope smoothing, screen-to-endpoint
 matching, and graceful degradation when no audio device is available — none of
 which needs real hardware.
 """
+from types import SimpleNamespace
+
+import pytest
+
+from frontengine.utils.audio_meter import system_audio_meter
 from frontengine.utils.audio_meter.audio_envelope import AudioEnvelope, clamp_level
 from frontengine.utils.audio_meter.screen_audio import (
     ScreenAudioMeters, audio_level_provider_for_screen, match_device_for_screen, name_tokens,
@@ -174,10 +179,30 @@ def test_unknown_device_degrades_instead_of_raising() -> None:
     meters.close()  # idempotent
 
 
-def test_enumeration_shape_and_default_level() -> None:
+def test_enumeration_shape_and_default_level(monkeypatch) -> None:
+    monkeypatch.setattr(system_audio_meter, 'sys', SimpleNamespace(platform='linux'))
     devices = list_output_devices()
     assert isinstance(devices, list)
     assert all(isinstance(device, tuple) and len(device) == 2 for device in devices)
     assert all(isinstance(device[0], str) and device[0] for device in devices)
     level = system_audio_level()
     assert level is None or 0.0 <= level <= 1.0
+
+
+@pytest.mark.parametrize('platform', ['win32', 'darwin'])
+def test_default_level_uses_the_meter_without_opening_native_capture(monkeypatch, platform):
+    calls = []
+
+    class Meter:
+        def __init__(self):
+            calls.append('open')
+
+        def level(self):
+            return 0.25
+
+    monkeypatch.setattr(system_audio_meter, 'sys', SimpleNamespace(platform=platform))
+    monkeypatch.setattr(system_audio_meter, 'SystemAudioMeter', Meter)
+    monkeypatch.setattr(system_audio_meter, '_meter_singleton', None)
+    assert system_audio_level() == 0.25
+    assert system_audio_level() == 0.25
+    assert calls == ['open']

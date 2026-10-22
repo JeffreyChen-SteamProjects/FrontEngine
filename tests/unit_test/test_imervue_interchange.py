@@ -1,5 +1,6 @@
 import json
 import zipfile
+from pathlib import Path
 
 import pytest
 
@@ -189,3 +190,50 @@ def test_corrupt_scene_package_has_boundary_error(tmp_path):
     source.write_bytes(b'not a zip')
     with pytest.raises(ValueError, match='Invalid scene package'):
         load_package(source)
+
+
+@pytest.mark.parametrize('root_kind', ['parent-segments', 'directory-symlink'])
+@pytest.mark.parametrize('member, error', [
+    ('assets/present.png', None),
+    ('assets/missing.png', 'resource'),
+    ('assets/', 'resource'),
+    ('../escape.png', 'outside'),
+    ('absolute', 'outside'),
+])
+def test_package_import_through_noncanonical_temporary_root(
+        tmp_path, monkeypatch, member, error, root_kind):
+    from frontengine.utils.scene_format import scene_package
+
+    physical = tmp_path / 'physical'
+    physical.mkdir()
+    alias = physical / '..' / physical.name
+    if root_kind == 'directory-symlink':
+        alias = tmp_path / 'alias'
+        try:
+            alias.symlink_to(physical, target_is_directory=True)
+        except OSError as failure:
+            pytest.skip(f'Directory symlinks are unavailable: {failure}')
+    factory = scene_package.tempfile.TemporaryDirectory
+    monkeypatch.setattr(scene_package.tempfile, 'TemporaryDirectory',
+                        lambda **kwargs: factory(dir=alias, **kwargs))
+    external = tmp_path / 'external.png'
+    external.write_bytes(b'external')
+    value = str(external) if member == 'absolute' else member
+    package = tmp_path / 'alias.fescene'
+    with zipfile.ZipFile(package, 'w') as archive:
+        archive.writestr('scene.json', json.dumps({'image': {'type': 'IMAGE', 'file_path': value}}))
+        archive.writestr('assets/', b'')
+        archive.writestr('assets/present.png', b'asset')
+    if error is not None:
+        with pytest.raises(ValueError, match=error):
+            scene_package.load_package(package)
+        assert external.read_bytes() == b'external'
+        return
+    entries, lease = scene_package.load_package(package)
+    resource = Path(entries['image']['file_path'])
+    try:
+        assert resource.is_relative_to(physical.resolve())
+        assert resource.read_bytes() == b'asset'
+    finally:
+        lease.cleanup()
+    assert not resource.exists()
