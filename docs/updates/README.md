@@ -107,6 +107,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 | U-20261007-03 | 2026-10-07 | Persist Workshop publication IDs and recover interrupted uploads | #done #workshop | [2026-10](2026-10.md) |
 | U-20261007-02 | 2026-10-07 | Add native Steam runtime and validate SDK callback ABI | #done #steam #workshop | [2026-10](2026-10.md) |
 | U-20261007-01 | 2026-10-07 | Validate Workshop publication snapshots and preset archives | #done #workshop #security | [2026-10](2026-10.md) |
+| U-20261022-01 | 2026-10-22 | Keep dependency metadata aligned | #bugfix #deps #ci | [2026-10](2026-10.md) |
 | U-20261012-03 | 2026-10-12 | Verify native macOS capture with an owned window identifier | #done #ci #tests | [2026-10](2026-10.md) |
 | U-20261012-02 | 2026-10-12 | Isolate native unit-test frameworks and canonicalize Windows ACLs | #done #ci #tests | [2026-10](2026-10.md) |
 | U-20261012-01 | 2026-10-12 | Fix macOS CI platform assumptions and scene extraction roots | #done #ci #tests | [2026-10](2026-10.md) |
