@@ -124,6 +124,7 @@ def compare_states(before: dict, after: dict) -> str:
                 escaped = key.replace("~", "~0").replace("/", "~1")
                 pending.append((path + "/" + escaped, old.get(key, missing), new.get(key, missing)))
         elif old != new:
-            render = lambda value: "∅" if value is missing else json.dumps(value, ensure_ascii=False)
+            def render(value):
+                return "∅" if value is missing else json.dumps(value, ensure_ascii=False)
             lines.append(f"{path}: {render(old)} → {render(new)}")
     return "\n".join(lines)
