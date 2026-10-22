@@ -19,7 +19,7 @@ def test_missing_cryptography_is_reported_before_compile(builder):
     def versions(name):
         if name == "cryptography":
             raise metadata.PackageNotFoundError(name)
-        return "6.11.2" if name == "PySide6" else "999.0.0"
+        return "6.12.0" if name == "PySide6" else "999.0.0"
     assert builder.check_dependencies(versions) == ["cryptography>=42"]
 
 
@@ -27,7 +27,7 @@ def test_incompatible_qt_version_is_reported(builder):
     def versions(name):
         return "6.8.0" if name == "PySide6" else "999.0.0"
     errors = builder.check_dependencies(versions)
-    assert len(errors) == 1 and "PySide6==6.11.2" in errors[0]
+    assert len(errors) == 1 and "PySide6==6.12.0" in errors[0]
 
 
 def test_dynamic_projection_is_packaged_and_appid_is_not(builder):
