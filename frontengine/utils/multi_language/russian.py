@@ -1195,6 +1195,8 @@ russian_word_dict = {
     'pet_companion_play': 'Играть вместе',
     'pet_companion_rest': 'Отдыхать',
     'pet_companion_status': '{mode} · Энергия {energy}/100',
+    'pet_close_pet': "Закрыть этого питомца",
+    'pet_command_done': "Готово.",
     'pet_bond_new': "Только познакомились",
     'pet_bond_familiar': "Знакомы",
     'pet_bond_close': "Близки",

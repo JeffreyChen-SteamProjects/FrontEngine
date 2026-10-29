@@ -559,6 +559,8 @@ La relation grandit avec l’affection en quatre étapes : Nouvelle rencontre, F
 
 Personnaliser l’animal règle aussi le Bavardage (Désactivé, Rarement, Normal, Souvent) pour les phrases que l’animal lance seul et l’Amplitude des animations (Calme, Normal, Vif) pour la pulsation audio et les courtes réactions d’atterrissage et d’attrape, indépendamment des bulles et du volume. Les réponses à vos actions restent affichées sans bavardage. Les Puppet appliquent le Bavardage aux répliques programmées du script. Les présentations enregistrées avant restent valides et utilisent Normal pour les deux.
 
+La liste d’interactions du gestionnaire propose aussi les commandes de menu de l’animal actif choisi : photo, état, rappel, discussion si un service est connecté, cloner et fermer, ainsi que chaque mouvement et expression d’un modèle Puppet. Tout le menu contextuel est donc accessible au clavier.
+
 La garde-robe propose les zones de couleur déclarées par le personnage ou le vêtement. Choisissez une zone et une couleur, ou rétablissez la couleur originale. Seuls les calques de masque désignés sont colorés ; les contours et autres détails sont conservés. Les couleurs sont prévisualisées avant application et sauvegardées par identité et tenue, y compris à l’export/import. Sans zones déclarées, ces commandes restent désactivées.
 
 Si l’enregistrement échoue à la fermeture, l’animal reste ouvert avec son état et le minuteur de nouvelle tentative. Tout fermer conserve les animaux non fermés ; quitter attend la réussite de leurs enregistrements avant de libérer les ressources. L’affection est plafonnée à la limite du format pour que les récompenses suivantes ne rendent pas le profil impossible à enregistrer.

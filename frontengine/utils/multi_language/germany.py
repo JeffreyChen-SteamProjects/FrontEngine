@@ -1198,6 +1198,8 @@ germany_word_dict = {
     'pet_companion_play': 'Zusammen spielen',
     'pet_companion_rest': 'Ausruhen',
     'pet_companion_status': '{mode} · Energie {energy}/100',
+    'pet_close_pet': "Dieses Tier schließen",
+    'pet_command_done': "Erledigt.",
     'pet_bond_new': "Gerade kennengelernt",
     'pet_bond_familiar': "Vertraut",
     'pet_bond_close': "Eng verbunden",

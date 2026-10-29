@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261029-39 | 2026-10-29 | Offer every pet menu command from the keyboard in the pet manager | #done #pets #accessibility | [2026-10](2026-10.md) |
 | U-20261029-38 | 2026-10-29 | Set chatter frequency and animation size separately per pet | #done #pets #settings | [2026-10](2026-10.md) |
 | U-20261029-37 | 2026-10-29 | Replace conflicting garments, label fit, compare looks and switch outfits safely | #done #pets #wardrobe | [2026-10](2026-10.md) |
 | U-20261029-36 | 2026-10-29 | Add relationship stages, welcome and goodbye greetings, Puppet click intent | #done #pets #puppet #interaction | [2026-10](2026-10.md) |
@@ -181,5 +182,5 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-10.md](2026-10.md) | 2026-10 | 106 |
+| [2026-10.md](2026-10.md) | 2026-10 | 107 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

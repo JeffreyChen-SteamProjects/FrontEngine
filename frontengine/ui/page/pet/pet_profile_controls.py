@@ -87,6 +87,7 @@ class PetProfileControls:
         self.interaction.addItem(translate('pet_ball_start', 'Throw a ball'), 'ball')
         self.interaction.addItem(translate('pet_light_start', 'Play with a light spot'), 'light')
         self.interaction.addItem(translate('pet_come', 'Come here'), 'call')
+        self._selected_action = selected_action
         self.interaction.setCurrentIndex(max(0, self.interaction.findData(selected_action)))
         self.selector.blockSignals(True)
         self.selector.clear()
@@ -110,6 +111,7 @@ class PetProfileControls:
         self.recover_button.setEnabled(identifier is not None)
         self.interaction.setEnabled(identifier is not None)
         self.interact_button.setEnabled(identifier is not None)
+        self._list_pet_commands(identifier)
         self._update_call_controls()
         if identifier is None:
             self.name.clear()
@@ -122,6 +124,19 @@ class PetProfileControls:
             self.status.setText(translate('pet_profile_stats').format(**record))
         except (OSError, ValueError) as error:
             self.status.setText(str(error))
+
+    def _list_pet_commands(self, identifier) -> None:
+        """Offer the selected live pet's own menu commands (photo, status, model motions...)."""
+        selected = self.interaction.currentData() or getattr(self, '_selected_action', None)
+        for index in reversed(range(self.interaction.count())):
+            if str(self.interaction.itemData(index)).startswith('cmd:'):
+                self.interaction.removeItem(index)
+        session = PetProfileSession.active(self.profiles, identifier) if identifier else None
+        commands = getattr(session.parent(), 'manager_commands', None) if session else None
+        position = self.interaction.findData('rest') + 1
+        for offset, (command, label) in enumerate(commands() if commands else ()):
+            self.interaction.insertItem(position + offset, label, 'cmd:' + command)
+        self.interaction.setCurrentIndex(max(0, self.interaction.findData(selected)))
 
     def _update_call_controls(self, *_args) -> None:
         enabled = self.selector.currentData() is not None and self.interaction.currentData() in ('call', 'light')
@@ -164,8 +179,12 @@ class PetProfileControls:
         command = self.interaction.currentData()
         if command is None:
             return
-        action, _, kind = command.partition(':')
         pet = session.parent()
+        if command.startswith('cmd:'):
+            pet.run_manager_command(command[4:])
+            self.status.setText(translate('pet_command_done', 'Done.'))
+            return
+        action, _, kind = command.partition(':')
         if action in ('call', 'light', 'ball'):
             start = getattr(pet, 'start_' + action, None)
             if start is None:

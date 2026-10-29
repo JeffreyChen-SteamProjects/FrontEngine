@@ -1195,6 +1195,8 @@ french_word_dict = {
     'pet_companion_play': 'Jouer ensemble',
     'pet_companion_rest': 'Se reposer',
     'pet_companion_status': '{mode} · Énergie {energy}/100',
+    'pet_close_pet': "Fermer cet animal",
+    'pet_command_done': "Terminé.",
     'pet_bond_new': "Nouvelle rencontre",
     'pet_bond_familiar': "Familier",
     'pet_bond_close': "Proche",

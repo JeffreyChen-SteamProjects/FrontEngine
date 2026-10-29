@@ -2017,6 +2017,20 @@ class DesktopPetWidget(BaseWidget):
             self._bubble.show_message(text, self)
             self._speak_text(text)
 
+    def manager_commands(self) -> list[tuple[str, str]]:
+        """Menu commands the pet manager offers as keyboard-reachable equivalents."""
+        get = language_wrapper.language_word_dict.get
+        commands = [('photo', translate('pet_photo_title', 'Pet photo')), ('status', get('pet_status', 'Status')),
+                    ('reminder', get('pet_set_reminder', 'Set reminder...'))]
+        if self.chat_action.isVisible():
+            commands.append(('chat', get('pet_chat_menu', 'Talk to me...')))
+        return commands + [('clone', get('pet_clone', 'Clone')), ('close', translate('pet_close_pet', 'Close this pet'))]
+
+    def run_manager_command(self, command: str) -> None:
+        handlers = {'photo': self.open_photo, 'status': self.show_status, 'reminder': self._prompt_reminder,
+                    'chat': self._prompt_chat, 'clone': self.clone_requested.emit, 'close': self.say_goodbye}
+        handlers[command]()
+
     def say_goodbye(self) -> None:
         """Closing from the pet's own menu waves goodbye briefly before the window closes."""
         if self._leaving:

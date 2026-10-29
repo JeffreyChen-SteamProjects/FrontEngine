@@ -1195,6 +1195,8 @@ italian_word_dict = {
     'pet_companion_play': 'Giocare insieme',
     'pet_companion_rest': 'Riposare',
     'pet_companion_status': '{mode} · Energia {energy}/100',
+    'pet_close_pet': "Chiudi questo animale",
+    'pet_command_done': "Fatto.",
     'pet_bond_new': "Appena conosciuti",
     'pet_bond_familiar': "Familiare",
     'pet_bond_close': "Legati",

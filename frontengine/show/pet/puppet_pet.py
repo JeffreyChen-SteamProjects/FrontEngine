@@ -355,6 +355,32 @@ class PuppetPetWidget(DraggableTopWindow):
         self.say(companion_status(self.profile_session) if result == "accepted" else translate(
             "pet_companion_" + result, result))
 
+    def manager_commands(self) -> list[tuple[str, str]]:
+        """Menu commands, including model motions and expressions, for the pet manager."""
+        words = language_wrapper.language_word_dict
+        commands = [('photo', translate('pet_photo_title', 'Pet photo')), ('status', words.get('pet_status', 'Status'))]
+        document = self.canvas.document()
+        if document is not None:
+            motion = words.get('pet_puppet_motions', 'Motions')
+            expression = words.get('pet_puppet_expressions', 'Expressions')
+            commands += [('motion:' + item.name, f'{motion}: {item.name}') for item in document.motions]
+            commands += [('expression:' + item.name, f'{expression}: {item.name}') for item in document.expressions]
+        return commands + [('clone', words.get('pet_puppet_clone', 'Clone')),
+                           ('close', translate('pet_close_pet', 'Close this pet'))]
+
+    def run_manager_command(self, command: str) -> None:
+        kind, _, name = command.partition(':')
+        if kind == 'motion':
+            self.stop_toy()
+            self._end_petting()
+            self.reactions.release()
+            self.play_motion(name)
+        elif kind == 'expression':
+            self._choose_expression(name, name not in self.canvas.active_expressions())
+        else:
+            {'photo': self.open_photo, 'status': self.show_profile_status,
+             'clone': self.clone_requested.emit, 'close': self.say_goodbye}[kind]()
+
     def say_goodbye(self) -> None:
         """Closing from the pet's own menu says goodbye briefly before the window closes."""
         if self._leaving:

@@ -558,6 +558,8 @@ La relación crece con el afecto en cuatro etapas: Recién conocidos, Familiar (
 
 Personalizar mascota también ajusta Charla (Desactivada, Rara vez, Normal, A menudo) para las frases que la mascota inicia sola y Tamaño de animación (Calma, Normal, Animada) para el pulso de audio y las breves reacciones de aterrizaje y atrapada, por separado de los bocadillos y el volumen. Las respuestas a lo que haces siguen apareciendo con la charla desactivada. Puppet aplica Charla a las frases programadas del script. Las presentaciones guardadas antes siguen funcionando con Normal en ambos.
 
+La lista de interacciones del gestor también ofrece los comandos del menú de la mascota activa seleccionada: foto, estado, recordatorio, chat si hay un servicio conectado, clonar y cerrar, además de cada movimiento y expresión de un modelo Puppet. Así, todo el menú contextual es accesible con el teclado.
+
 El armario muestra las zonas de color declaradas por el personaje o la ropa. Elige zona y color o restaura el original. Solo se tiñen las capas de máscara designadas; los contornos y otros detalles se conservan. Los colores se previsualizan antes de aplicar y se guardan por identidad y conjunto, también al exportar/importar. Sin zonas declaradas, los controles quedan desactivados.
 
 Si falla el guardado al cerrar, la mascota sigue abierta con su estado y temporizador de reintento. Cerrar todo conserva las mascotas que no se pudieron cerrar; salir espera que se guarden antes de liberar recursos. El afecto se limita al máximo admitido para que futuras recompensas no impidan guardar.

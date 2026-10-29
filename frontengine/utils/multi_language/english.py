@@ -1205,6 +1205,8 @@ english_word_dict = {
     'pet_companion_play': 'Play together',
     'pet_companion_rest': 'Rest',
     'pet_companion_status': '{mode} · Energy {energy}/100',
+    'pet_close_pet': "Close this pet",
+    'pet_command_done': "Done.",
     'pet_bond_new': "Just met",
     'pet_bond_familiar': "Familiar",
     'pet_bond_close': "Close",

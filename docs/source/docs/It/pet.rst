@@ -57,6 +57,8 @@ Il legame cresce con l’affetto in quattro fasi: Appena conosciuti, Familiare (
 
 Personalizza animale imposta anche Chiacchiere (Spento, Raramente, Normale, Spesso) per le frasi che l’animale inizia da solo e Ampiezza animazioni (Calma, Normale, Vivace) per l’impulso audio e le brevi reazioni di atterraggio e presa, separatamente da fumetti e volume. Le risposte alle tue azioni compaiono anche con le chiacchiere spente. I Puppet applicano le Chiacchiere alle frasi programmate dello script. Le impostazioni salvate prima restano valide e usano Normale per entrambe.
 
+L’elenco interazioni del gestore offre anche i comandi di menu dell’animale attivo selezionato: foto, stato, promemoria, chat se è collegato un servizio, clona e chiudi, oltre a ogni movimento ed espressione di un modello Puppet. Tutto il menu contestuale è quindi raggiungibile da tastiera.
+
 Il guardaroba mostra le zone colore dichiarate dal personaggio o dall’abito. Scegli zona e colore oppure ripristina l’originale. Si colorano solo i livelli maschera designati; contorni e altri dettagli restano invariati. I colori si vedono prima di Applica e vengono salvati per identità e completo, anche nell’esportazione/importazione. Senza zone dichiarate i controlli sono disattivati.
 
 Se il salvataggio fallisce durante la chiusura, l’animale resta aperto con lo stato attuale e il timer di ripetizione. Chiudi tutto conserva gli animali non chiusi; l’uscita attende il salvataggio prima di liberare le risorse. L’affetto si ferma al limite supportato, evitando profili non salvabili dopo ulteriori premi.

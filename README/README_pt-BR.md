@@ -581,6 +581,8 @@ O vínculo cresce com o afeto em quatro estágios: Recém-conhecidos, Familiar (
 
 Personalizar pet também ajusta Conversa (Desligada, Raramente, Normal, Frequente) para frases que o pet inicia sozinho e Tamanho da animação (Calmo, Normal, Animado) para o pulso de áudio e as breves reações de pouso e pegada, separados dos balões de fala e do volume. Respostas ao que você faz continuam aparecendo com a conversa desligada. Puppet aplica Conversa às falas programadas do script. Apresentações salvas antes continuam valendo e usam Normal para ambos.
 
+A lista de interações do gerenciador também oferece os comandos de menu do pet ativo selecionado: foto, status, lembrete, chat quando houver um serviço conectado, clonar e fechar, além de cada movimento e expressão de um modelo Puppet. Assim, todo o menu de contexto pode ser usado pelo teclado.
+
 O guarda-roupa mostra as regiões de cor declaradas pelo personagem ou roupa. Escolha região e cor ou restaure a original. Somente as camadas de máscara indicadas são tingidas; contornos e outros detalhes são preservados. As cores são exibidas antes de aplicar e salvas por identidade e conjunto, inclusive na exportação/importação. Sem regiões declaradas, os controles ficam desativados.
 
 Se o salvamento falhar ao fechar, o pet fica aberto com o estado atual e o temporizador de nova tentativa. Fechar tudo mantém os pets que não puderam fechar; sair aguarda o salvamento antes de liberar recursos. O afeto para no limite suportado para que novas recompensas não impeçam salvar.

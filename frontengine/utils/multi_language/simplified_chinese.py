@@ -1197,6 +1197,8 @@ simplified_chinese_word_dict = {
     'pet_companion_play': '一起玩耍',
     'pet_companion_rest': '休息',
     'pet_companion_status': '{mode} · 精力 {energy}/100',
+    'pet_close_pet': "关闭这只宠物",
+    'pet_command_done': "已完成。",
     'pet_bond_new': "初次见面",
     'pet_bond_familiar': "熟悉",
     'pet_bond_close': "亲近",
