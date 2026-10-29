@@ -7,7 +7,8 @@
 
 
 - **#23** **桌面寵物剩餘項目**。需求見 `docs/design/pet-interactions-wardrobe-2026-10-28.md` 與 `pet-inkside-catalog-2026-10-28.md`，執行追蹤見 `.audit/pet-implementation/todo.md`。六角色與十四套服裝已是可安裝的分層素材（U-20261029-34），尚待：
-  - 原生鍵盤導覽與手勢、真實螢幕／混合 DPI 驗收（後者受 #21、#22 阻塞）。
+  - 撫摸手勢的實機驗收〔需要有人操作滑鼠〕：Windows 依實體游標判斷進出視窗，程式送出的移動訊息每次都會觸發離開而中止手勢，自動化無法在不移動使用者游標的前提下完成（U-20261029-43）。請在寵物選單選「摸摸」後，用滑鼠在寵物上來回移動三次，確認出現撫摸反應並增加好感。
+  - 真實螢幕／混合 DPI 下的寵物移動、呼叫與找回〔受 #21、#22 阻塞〕。
 
 - **#9** **macOS 權限與裝置驗收**〔阻塞：沒有可互動的 Mac 測試主機〕。驗證 TCC 權限拒絕／變更／重新啟動流程、原生音訊、MIDI 與多螢幕；入口為 `tests/integration/macos_native_smoke.py`。既有 Windows／Linux 支援與隔離測試不能替代 macOS 實機結果。
 - **#11** **Steam Workshop 離線／無客戶端驗收**〔阻塞：沒有獨立 Steam 測試工作階段〕。在獨立環境驗證離線與未啟動客戶端時的失敗回饋、重試及資源釋放。參考 `tests/integration/steam_workshop_smoke.py` 與 `steam_failure_smoke.py`；無效 App ID 的既有測試不能替代這兩個情境。
