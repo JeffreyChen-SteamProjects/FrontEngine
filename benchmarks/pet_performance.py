@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import ctypes
 import json
+import os
 import platform
 import statistics
 import sys
@@ -114,11 +115,21 @@ def scenario(app, folder: Path, library, count: int, layered: bool, seconds: flo
         _wait(app, 0.3)
 
 
+def _output_path(value: Path) -> Path:
+    """The result file stays inside the working directory; the path comes from the command line."""
+    base = os.path.realpath(os.getcwd())
+    target = os.path.realpath(value)
+    if os.path.commonpath([base, target]) != base:
+        raise SystemExit(f'--output must be inside the working directory {base}')
+    return Path(target)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--seconds', type=float, default=10.0)
     args = parser.parse_args()
+    output = _output_path(args.output)
     if not 1 <= args.seconds <= 120:
         parser.error('seconds must be 1..120')
     app = QApplication.instance() or QApplication([])
@@ -140,7 +151,7 @@ def main() -> None:
     result = {'python': sys.version.split()[0], 'os': platform.platform(), 'qt_platform': app.platformName(),
               'screen_dpr': app.primaryScreen().devicePixelRatio(), 'seconds': args.seconds,
               'budget': BUDGET, 'within_budget': checks, 'runs': runs}
-    args.output.write_text(json.dumps(result, indent=2) + '\n', encoding='utf-8')
+    output.write_text(json.dumps(result, indent=2) + '\n', encoding='utf-8')
     print(json.dumps(result, indent=2))
 
 

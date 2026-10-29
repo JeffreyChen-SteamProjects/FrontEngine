@@ -17,19 +17,25 @@ from PySide6.QtWidgets import QApplication
 from puppet_photo_native import fixture
 
 
+def require(condition, message: str) -> None:
+    """Fail the probe with a recorded reason; unlike assert it survives -O and is not an AssertionError."""
+    if not condition:
+        raise RuntimeError(message)
+
+
 def main():
     from frontengine.show.pet.puppet_pet import PuppetPetWidget
     from frontengine.user_setting.pet_profiles import PetProfiles
 
     output = Path(sys.argv[1]).resolve()
     activity = sys.argv[2] if len(sys.argv) > 2 else 'call'
-    assert activity in ('call', 'light', 'ball')
+    require(activity in ('call', 'light', 'ball'), "activity in ('call', 'light', 'ball')")
     arrival_action, reward = {'call': ('greet', 1), 'light': ('play', 3), 'ball': (None, 1)}[activity]
     output.mkdir(parents=True, exist_ok=True)
     ctypes.windll.kernel32.SetErrorMode(3)
     app = QApplication([])
     app.setQuitOnLastWindowClosed(False)
-    assert app.platformName() == 'windows'
+    require(app.platformName() == 'windows', "app.platformName() == 'windows'")
     fixture(output / 'fixture.puppet')
     script_path = output / 'fixture.petscript.json'
     script_path.write_text(json.dumps({
@@ -55,16 +61,16 @@ def main():
 
     def observe():
         point = wintypes.POINT()
-        assert user32.GetCursorPos(ctypes.byref(point))
+        require(user32.GetCursorPos(ctypes.byref(point)), 'user32.GetCursorPos(ctypes.byref(point))')
         foreground = int(user32.GetForegroundWindow() or 0)
         observations.append({'foreground': foreground, 'cursor': [point.x, point.y],
                              'position': [pet.x(), pet.y()], 'phase': state['phase']})
-        assert foreground not in handles, 'A probe window became foreground'
+        require(foreground not in handles, 'A probe window became foreground')
         for window in (pet, pet._target.marker):
             if window is None:
                 continue
-            assert all(not window.frameGeometry().intersects(screen.geometry()) for screen in app.screens())
-            assert area.contains(window.geometry()), 'Window left the synthetic work area'
+            require(all(not window.frameGeometry().intersects(screen.geometry()) for screen in app.screens()), 'all(not window.frameGeometry().intersects(screen.geometry()) for screen in app.screens())')
+            require(area.contains(window.geometry()), 'Window left the synthetic work area')
 
     def finish(error=None):
         if state['finished']:
@@ -84,14 +90,14 @@ def main():
 
     def begin():
         try:
-            assert pet.canvas.isValid()
+            require(pet.canvas.isValid(), 'pet.canvas.isValid()')
             result['native_gl'] = True
             state['baseline'] = pet.photo_image()
-            assert state['baseline'].pixelColor(64, 64).alpha() == 128
-            assert state['baseline'].save(str(output / 'baseline.png'))
+            require(state['baseline'].pixelColor(64, 64).alpha() == 128, "state['baseline'].pixelColor(64, 64).alpha() == 128")
+            require(state['baseline'].save(str(output / 'baseline.png')), "state['baseline'].save(str(output / 'baseline.png'))")
             state['before'] = pet.profile_session.state()
             state['start'] = (pet.x(), pet.y())
-            assert start(offset=(160, 60)) == 'accepted'
+            require(start(offset=(160, 60)) == 'accepted', "start(offset=(160, 60)) == 'accepted'")
             marker = pet._target.marker
             handles.add(int(marker.winId()))
             state['target'] = marker.origin if activity == 'ball' else marker.target
@@ -113,37 +119,37 @@ def main():
                 if (pet.x(), pet.y()) != state['start'] and not state['moving_frame']:
                     moving = pet.photo_image()
                     alpha = moving.pixelColor(64, 64).alpha()
-                    assert 60 <= alpha <= 68, f'Walk binding not rendered: {alpha}'
-                    assert moving.save(str(output / 'walking.png'))
+                    require(60 <= alpha <= 68, f'Walk binding not rendered: {alpha}')
+                    require(moving.save(str(output / 'walking.png')), "moving.save(str(output / 'walking.png'))")
                     state['moving_frame'] = True
                     result['walk_alpha'] = alpha
                 return
-            assert not pet._target.timer.isActive()
-            assert state['moving_frame'], 'No rendered frame during actual movement'
-            assert pet.photo_image() == state['baseline'], 'Walk binding did not release at arrival'
+            require(not pet._target.timer.isActive(), 'not pet._target.timer.isActive()')
+            require(state['moving_frame'], 'No rendered frame during actual movement')
+            require(pet.photo_image() == state['baseline'], 'Walk binding did not release at arrival')
             cx, cy = pet.center()
             tx, ty = state['target']
-            assert (cx - tx) ** 2 + (cy - ty) ** 2 <= 4
+            require((cx - tx) ** 2 + (cy - ty) ** 2 <= 4, '(cx - tx) ** 2 + (cy - ty) ** 2 <= 4')
             if pet.profile_session.companion.growth.affection == 0:
                 return
-            assert 'return' in phases if activity == 'ball' else state['saw_arrival_action']
-            assert pet.profile_session.companion.growth.affection == reward
-            assert pet.profile_session.companion.action is None
-            assert pet.photo_image().save(str(output / 'arrived.png'))
+            require('return' in phases if activity == 'ball' else state['saw_arrival_action'], "'return' in phases if activity == 'ball' else state['saw_arrival_action']")
+            require(pet.profile_session.companion.growth.affection == reward, 'pet.profile_session.companion.growth.affection == reward')
+            require(pet.profile_session.companion.action is None, 'pet.profile_session.companion.action is None')
+            require(pet.photo_image().save(str(output / 'arrived.png')), "pet.photo_image().save(str(output / 'arrived.png'))")
             after = pet.profile_session.state()
             for key in ('id', 'name', 'appearance', 'preferences'):
-                assert after[key] == state['before'][key]
+                require(after[key] == state['before'][key], "after[key] == state['before'][key]")
             pet._choose_expression('care', True)
             manual = pet.photo_image()
-            assert start(offset=(-120, 0)) == 'accepted'
+            require(start(offset=(-120, 0)) == 'accepted', "start(offset=(-120, 0)) == 'accepted'")
             handles.add(int(pet._target.marker.winId()))
             pet.profile_session.set_mode('work')
-            assert pet._target.marker is None and not pet._target.timer.isActive()
-            assert pet.canvas.active_expressions() == ['care']
-            assert pet.photo_image() == manual, 'Cancellation removed a manual expression'
-            assert pet.profile_session.companion.growth.affection == reward
+            require(pet._target.marker is None and not pet._target.timer.isActive(), 'pet._target.marker is None and not pet._target.timer.isActive()')
+            require(pet.canvas.active_expressions() == ['care'], "pet.canvas.active_expressions() == ['care']")
+            require(pet.photo_image() == manual, 'Cancellation removed a manual expression')
+            require(pet.profile_session.companion.growth.affection == reward, 'pet.profile_session.companion.growth.affection == reward')
             pet._choose_expression('care', False)
-            assert pet.photo_image() == state['baseline']
+            require(pet.photo_image() == state['baseline'], "pet.photo_image() == state['baseline']")
             result.update(start=state['start'], end=[pet.x(), pet.y()], target=state['target'],
                           arrival_action_completed=arrival_action or 'ball_return', ball_phases=sorted(phases),
                           timer_stopped=True, manual_expression_preserved=True,

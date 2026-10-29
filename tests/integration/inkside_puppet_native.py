@@ -23,13 +23,19 @@ ACTIONS = (('greet', 'request'), ('pet_motion', 'motion:pet'), ('feed', 'request
            ('sleepy', 'expression:sleepy'))
 
 
+def require(condition, message: str) -> None:
+    """Fail the probe with a recorded reason; unlike assert it survives -O and is not an AssertionError."""
+    if not condition:
+        raise RuntimeError(message)
+
+
 def _start(pet, name: str, how: str) -> None:
     if how == 'request':
-        assert pet.profile_session.request(name) == 'accepted', name
+        require(pet.profile_session.request(name) == 'accepted', name)
     elif how == 'present':
-        assert pet.profile_session.present(name), name
+        require(pet.profile_session.present(name), name)
     elif how.startswith('motion:'):
-        assert pet.play_motion(how.split(':', 1)[1]), how
+        require(pet.play_motion(how.split(':', 1)[1]), how)
     else:
         pet._choose_expression(how.split(':', 1)[1], True)
 
@@ -92,7 +98,7 @@ def main() -> int:
             result['error'] = repr(error)
             result['traceback'] = traceback.format_exc()
         else:
-            assert area.contains(pet.geometry()), 'The pet left the real work area'
+            require(area.contains(pet.geometry()), 'The pet left the real work area')
             result.update(status='passed', native_gl=True, foreground_samples=len(observations))
         poll.stop()
         pet.close()
@@ -101,10 +107,10 @@ def main() -> int:
 
     def capture_baseline():
         try:
-            assert pet.canvas.isValid(), 'Native OpenGL context is invalid'
+            require(pet.canvas.isValid(), 'Native OpenGL context is invalid')
             state['baseline'] = pet.photo_image()
-            assert state['baseline'].pixelColor(0, 0).alpha() == 0, 'Background is not transparent'
-            assert state['baseline'].save(str(output / 'baseline.png'), 'PNG')
+            require(state['baseline'].pixelColor(0, 0).alpha() == 0, 'Background is not transparent')
+            require(state['baseline'].save(str(output / 'baseline.png'), 'PNG'), "state['baseline'].save(str(output / 'baseline.png'), 'PNG')")
             next_step()
         except Exception as error:  # report every failure in result.json
             finish(error)
@@ -124,10 +130,10 @@ def main() -> int:
         name, how = steps.pop(0)
         try:
             image = pet.photo_image()
-            assert image.save(str(output / f'{name}.png'), 'PNG')
+            require(image.save(str(output / f'{name}.png'), 'PNG'), "image.save(str(output / f'{name}.png'), 'PNG')")
             changed = _differs(state['baseline'], image)
             # Expressions only swap the eyes, which are tiny on some bodies (GILL).
-            assert changed > (8 if how.startswith('expression:') else 20), f'{name} did not change ({changed})'
+            require(changed > (8 if how.startswith('expression:') else 20), f'{name} did not change ({changed})')
             _stop(pet, how)
             QTimer.singleShot(900, lambda: confirm(name, changed))
         except Exception as error:
@@ -136,9 +142,9 @@ def main() -> int:
     def confirm(name, changed):
         try:
             after = pet.photo_image()
-            assert after.save(str(output / f'{name}-after.png'), 'PNG')
+            require(after.save(str(output / f'{name}-after.png'), 'PNG'), "after.save(str(output / f'{name}-after.png'), 'PNG')")
             restored = _differs(state['baseline'], after)
-            assert restored <= 4, f'{name} did not return to the baseline ({restored} samples differ)'
+            require(restored <= 4, f'{name} did not return to the baseline ({restored} samples differ)')
             result['reactions'][name] = {'changed_samples': changed, 'restored_difference': restored}
             next_step()
         except Exception as error:

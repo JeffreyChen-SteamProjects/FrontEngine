@@ -17,6 +17,12 @@ from PySide6.QtGui import QColor, QImage
 from PySide6.QtWidgets import QApplication
 
 
+def require(condition, message: str) -> None:
+    """Fail the probe with a recorded reason; unlike assert it survives -O and is not an AssertionError."""
+    if not condition:
+        raise RuntimeError(message)
+
+
 def fixture(path: Path) -> None:
     from Imervue.puppet.document import Drawable, Expression, ExpressionParam, Parameter, PuppetDocument
     from Imervue.puppet.document_io import save_puppet
@@ -25,7 +31,7 @@ def fixture(path: Path) -> None:
     texture.fill(QColor(255, 128, 0, 128))
     buffer = QBuffer()
     buffer.open(QIODevice.OpenModeFlag.WriteOnly)
-    assert texture.save(buffer, 'PNG')
+    require(texture.save(buffer, 'PNG'), "texture.save(buffer, 'PNG')")
     doc = PuppetDocument(size=(128, 128), drawables=[Drawable(
         'square', 'textures/square.png', [(32, 32), (96, 32), (96, 96), (32, 96)],
         [0, 1, 2, 0, 2, 3], [(0, 0), (1, 0), (1, 1), (0, 1)],
@@ -41,23 +47,23 @@ def fixture(path: Path) -> None:
 
 def verify_reaction(pet, output: Path, baseline: QImage) -> dict:
     pet.feed()
-    assert pet.profile_session.companion.action == 'feed'
+    require(pet.profile_session.companion.action == 'feed', "pet.profile_session.companion.action == 'feed'")
     active = pet.photo_image()
     alpha = active.pixelColor(64, 64).alpha()
-    assert 60 <= alpha <= 68, f'Care expression did not halve alpha: {alpha}'
-    assert active.save(str(output / 'reaction.png'), 'PNG')
+    require(60 <= alpha <= 68, f'Care expression did not halve alpha: {alpha}')
+    require(active.save(str(output / 'reaction.png'), 'PNG'), "active.save(str(output / 'reaction.png'), 'PNG')")
     pet.profile_session.advance(2)
-    assert pet.profile_session.companion.action is None
-    assert pet.photo_image() == baseline, 'Reaction completion did not restore the image'
+    require(pet.profile_session.companion.action is None, 'pet.profile_session.companion.action is None')
+    require(pet.photo_image() == baseline, 'Reaction completion did not restore the image')
     pet._choose_expression('care', True)
     pet.profile_session.advance(60)
     pet.feed()
-    assert pet.profile_session.companion.action == 'feed'
+    require(pet.profile_session.companion.action == 'feed', "pet.profile_session.companion.action == 'feed'")
     pet.profile_session.advance(2)
-    assert pet.canvas.active_expressions() == ['care'], 'Completion removed a manual expression'
-    assert pet.photo_image() == active, 'Manual expression pixels changed after completion'
+    require(pet.canvas.active_expressions() == ['care'], 'Completion removed a manual expression')
+    require(pet.photo_image() == active, 'Manual expression pixels changed after completion')
     pet._choose_expression('care', False)
-    assert pet.photo_image() == baseline
+    require(pet.photo_image() == baseline, 'pet.photo_image() == baseline')
     return {'active_alpha': alpha, 'completion_restores_image': True,
             'manual_expression_preserved': True}
 
@@ -96,26 +102,26 @@ def main() -> int:
     def verify():
         try:
             observe()
-            assert all(not pet.frameGeometry().intersects(s.geometry()) for s in app.screens())
-            assert pet.canvas.isValid(), 'Native OpenGL context is invalid'
+            require(all(not pet.frameGeometry().intersects(s.geometry()) for s in app.screens()), 'all(not pet.frameGeometry().intersects(s.geometry()) for s in app.screens())')
+            require(pet.canvas.isValid(), 'Native OpenGL context is invalid')
             before = pet.profile_session.state()
             first = pet.photo_image()
             second = pet.photo_image()
-            assert first == second, 'Repeated capture changed pixels'
-            assert before == pet.profile_session.state(), 'Photo changed profile'
-            assert first.pixelColor(0, 0).alpha() == 0, 'Background is not transparent'
+            require(first == second, 'Repeated capture changed pixels')
+            require(before == pet.profile_session.state(), 'Photo changed profile')
+            require(first.pixelColor(0, 0).alpha() == 0, 'Background is not transparent')
             center = first.pixelColor(64, 64)
-            assert 120 <= center.alpha() <= 136, center.getRgb()
-            assert center.red() > 240 and 115 <= center.green() <= 140, center.getRgb()
-            assert first.save(str(output / 'photo.png'), 'PNG')
+            require(120 <= center.alpha() <= 136, center.getRgb())
+            require(center.red() > 240 and 115 <= center.green() <= 140, center.getRgb())
+            require(first.save(str(output / 'photo.png'), 'PNG'), "first.save(str(output / 'photo.png'), 'PNG')")
             saved = QImage(str(output / 'photo.png'))
-            assert saved.convertToFormat(QImage.Format.Format_RGBA8888) == first.convertToFormat(
-                QImage.Format.Format_RGBA8888), 'Saved PNG pixels differ'
+            require(saved.convertToFormat(QImage.Format.Format_RGBA8888) == first.convertToFormat(
+                QImage.Format.Format_RGBA8888), 'Saved PNG pixels differ')
             pet.canvas.grabFramebuffer()
-            assert pet.photo_image() == first, 'Canvas repaint changed subsequent photo'
+            require(pet.photo_image() == first, 'Canvas repaint changed subsequent photo')
             result['reaction'] = verify_reaction(pet, output, first)
             own_handle = int(pet.winId())
-            assert all(item['foreground'] != own_handle for item in observations)
+            require(all(item['foreground'] != own_handle for item in observations), "all(item['foreground'] != own_handle for item in observations)")
             result.update(status='passed', center_rgba=center.getRgb(),
                           size=[first.width(), first.height()], native_gl=True,
                           fixture_only=True, pet_handle=own_handle)

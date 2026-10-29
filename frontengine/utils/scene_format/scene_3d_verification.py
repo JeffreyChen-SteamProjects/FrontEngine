@@ -2,6 +2,7 @@
 
 No pytest/conftest and no software fallback. Uses a small, noninteractive window.
 """
+import math
 import tempfile
 import time
 
@@ -195,7 +196,7 @@ def _verify_screen_recreation(candidate, app):
     app.processEvents()
     require(len(candidate.view_list) == len(original), 'Target reconnection did not restore every view')
     require(runtime.sources == sources, 'Target reconnection replaced shared media sources')
-    require(runtime.timeline.position == .75 and not runtime.timeline.requested, 'Reconnection lost paused timeline position')
+    require(math.isclose(runtime.timeline.position, .75) and not runtime.timeline.requested, 'Reconnection lost paused timeline position')
     for view in candidate.view_list:
         require(view not in original and view.viewport.isValid(), 'Reconnection did not recreate a valid native viewport')
         require(not view.output_frame().isNull(), 'Reconnected viewport returned no frame')

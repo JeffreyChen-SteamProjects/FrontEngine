@@ -259,3 +259,19 @@ def test_sprite_walk_replaces_the_layered_walk_only_for_an_undressed_default_pet
     other = next(choice for choice in spec['choices'] if choice != spec['default'])
     varied = LayeredRenderer(character, variants={group: other})
     assert _pixels(varied.render('walk', 0)) != _pixels(varied.render('walk_sprite', 0))
+
+
+def test_builtin_install_works_when_the_temp_folder_is_reached_through_a_symlink(tmp_path, monkeypatch):
+    """macOS temp lives under /var, a symlink to /private/var; layered assets reject symlinked ancestors."""
+    import tempfile
+    physical = tmp_path / 'physical'
+    physical.mkdir()
+    alias = tmp_path / 'alias'
+    try:
+        alias.symlink_to(physical, target_is_directory=True)
+    except OSError as failure:
+        pytest.skip(f'Directory symlinks are unavailable: {failure}')
+    monkeypatch.setattr(tempfile, 'tempdir', str(alias))
+    library = PetAssetLibrary(tmp_path / 'library')
+    assert install_builtin(library, 'inkside-pip') == 1 + len(GARMENTS)
+

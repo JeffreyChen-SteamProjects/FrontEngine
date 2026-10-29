@@ -9,7 +9,7 @@ because every file open is scanned by antivirus software.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from hashlib import sha1
+from hashlib import sha256
 import json
 from pathlib import Path
 from typing import Callable
@@ -52,7 +52,7 @@ class AssetWriter:
     def _store(self, name: str, image: QImage) -> str:
         """Key a crop by its pixels; identical crops share one atlas cell."""
         image = image.convertToFormat(QImage.Format.Format_ARGB32)
-        digest = sha1(bytes(image.constBits()) + f'{image.width()}x{image.height()}'.encode()).hexdigest()[:20]
+        digest = sha256(bytes(image.constBits()) + f'{image.width()}x{image.height()}'.encode()).hexdigest()[:20]
         key = name + ':' + digest
         self._crops.setdefault(key, (name, image))
         return key

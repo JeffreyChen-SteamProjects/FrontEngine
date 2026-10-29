@@ -43,7 +43,8 @@ def install_builtin(library, identifier: str, cancel: Event | None = None,
         for index, (ident, build) in enumerate(missing):
             if cancel.is_set():
                 raise InterruptedError('Asset installation cancelled')
-            sources.append(build(Path(staging) / ident))
+            # Resolved: layered assets reject symlinked ancestors, and macOS temp is /var -> /private/var.
+            sources.append(build(Path(staging).resolve() / ident))
             if progress is not None:
                 progress(index + 1, 2 * len(missing))
         library.install_many(sources, cancel=cancel)

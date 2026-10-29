@@ -196,7 +196,8 @@ def export_puppet(identifier: str, folder: str | Path) -> tuple[Path, Path]:
     folder = Path(folder)
     folder.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix='frontengine-inkside-puppet-') as staging:
-        asset = load_layered_asset(build_character(template, Path(staging) / identifier))
+        # Resolved: layered assets reject symlinked ancestors, and macOS temp is /var -> /private/var.
+        asset = load_layered_asset(build_character(template, Path(staging).resolve() / identifier))
         textures = {name: _png(_compose(asset, *frame, z_range)) for name, _order, z_range, frame in PARTS}
     size = tuple(asset.canvas)
     motions = _motions()
