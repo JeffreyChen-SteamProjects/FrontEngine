@@ -215,7 +215,8 @@ def test_scan_pet_pack_maps_aliases(tmp_path) -> None:
     (tmp_path / "sit.gif").write_bytes(b"x")
     (tmp_path / "notes.txt").write_bytes(b"x")
     pack = scan_pet_pack(str(tmp_path))
-    assert set(pack) == {STATE_WALK, STATE_IDLE}
+    # sit.gif is an idle alias and also serves the dedicated sit pose.
+    assert set(pack) == {STATE_WALK, STATE_IDLE, "sit"}
 
 
 def test_scan_pet_pack_tolerates_bad_input(tmp_path) -> None:

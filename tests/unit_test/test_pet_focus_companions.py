@@ -130,5 +130,6 @@ def test_work_and_rest_suppress_proactive_chatter(social_pets, monkeypatch):
         pet._on_chatter()
     assert lines == []
     pet.profile_session.set_mode('play')
+    pet.profile_session.advance(1.4)  # waking up is a short presentation, then chatter resumes
     pet._on_chatter()
     assert len(lines) == 1

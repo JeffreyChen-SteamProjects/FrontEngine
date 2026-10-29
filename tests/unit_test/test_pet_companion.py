@@ -39,7 +39,7 @@ def test_cancel_does_not_reward_or_start_cooldown(interrupt):
     assert pet.request("groom") == "accepted"
 
 
-@pytest.mark.parametrize("mode,visual,energy", [("play", None, 69), ("work", "idle", 70), ("rest", "sleep", 73)])
+@pytest.mark.parametrize("mode,visual,energy", [("play", None, 69), ("work", "sit", 70), ("rest", "sleep", 73)])
 def test_modes_survive_completed_actions(mode, visual, energy):
     pet = CompanionState({"mode": mode})
     assert pet.request("pet") == "accepted"
@@ -64,7 +64,8 @@ def test_elapsed_batch_matches_fractional_steps_and_care_ignores_talk():
     a.pop("preferences")
     b.pop("preferences")
     assert a == b
-    assert a == {"mood": 66, "fullness": 66, "energy": 66, "affection": 3, "mode": "play"}
+    # Four care ticks cost 4 energy and the completed play session another 4.
+    assert a == {"mood": 66, "fullness": 66, "energy": 62, "affection": 3, "mode": "play"}
     assert batch.request("play") == split.request("play") == "accepted"
 
 

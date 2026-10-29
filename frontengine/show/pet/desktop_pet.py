@@ -1,6 +1,7 @@
 import json
 import random as _random_module
 from datetime import datetime, timedelta
+from time import monotonic
 from pathlib import Path
 from urllib.parse import urlparse
 from typing import Optional, Tuple
@@ -69,6 +70,8 @@ _PACK_STATE_ALIASES = {
     STATE_DRAG: ("drag", "pinch", "grabbed", "held"),
     "greet": ("greet",), "pet": ("pet",), "groom": ("groom",),
     "feed": ("eat", "feed"), "play": ("play",),
+    "sit": ("sit",), "land": ("land",), "catch": ("catch",), "peer_greet": ("wave",),
+    "wake": ("wake",), "sleep_in": ("yawn",),
 }
 _PACK_EXTS = (".gif", ".webp", ".png", ".jpg", ".jpeg")
 
@@ -79,8 +82,14 @@ _STATE_FALLBACKS = {
     STATE_CLIMB: (STATE_WALK,),
     STATE_FALL: (STATE_WALK,),
     STATE_DRAG: (STATE_WALK,),
-    **{action: (STATE_IDLE, STATE_WALK) for action in ("greet", "pet", "groom", "feed", "play")},
+    **{action: (STATE_IDLE, STATE_WALK) for action in ("greet", "pet", "groom", "feed", "play", "sit",
+                                                       "land", "catch", "peer_greet", "wake")},
+    "sleep_in": (STATE_SLEEP, STATE_IDLE, STATE_WALK),
 }
+
+# Short physical reactions shown over autonomous movement (milliseconds). They are
+# purely visual, so they never block toys, social play or user commands.
+_FLASH_MS = {"land": 280, "catch": 580, "peer_greet": 1600}
 
 
 def scan_pet_pack(folder: str) -> dict:
@@ -586,6 +595,8 @@ class PetMotion:
         self.vx = float(self.speed)
         self.vy = 0.0 if behaviour != BEHAVIOUR_WANDER else float(self.speed)
         self._airborne = False
+        # Counts settled landings so the widget can play a landing reaction.
+        self.landings = 0
         # 打字時安分下來：True 的時候 step() 原地不動。
         # Settled while typing: step() stays put while this is True.
         self.settled = False
@@ -814,6 +825,7 @@ class PetMotion:
             return
         self.vy = 0.0
         self._airborne = False
+        self.landings += 1
         self.surface = SURFACE_FLOOR
         self.on_platform = land_span is not None
         self.platform_span = land_span
@@ -1183,6 +1195,8 @@ class DesktopPetWidget(BaseWidget):
         self.restore_appearance()
         self._petting = None
         self._toy = None
+        self._flash = None
+        self._seen_landings = 0
         self.ball_action = QAction(self)
         retranslator.bind(self.ball_action, 'pet_ball_start', 'Throw a ball')
         self.ball_action.triggered.connect(lambda _checked=False: self.start_ball())
@@ -1325,6 +1339,7 @@ class DesktopPetWidget(BaseWidget):
         if self._peer_greeted:
             return
         self._peer_greeted = True
+        self.flash("peer_greet")
         self.profile_session.reward("peer")
         self.motion.vx = (abs(self.motion.vx) if peer[0] >= my_center[0]
                           else -abs(self.motion.vx))
@@ -1980,12 +1995,33 @@ class DesktopPetWidget(BaseWidget):
             self._bubble.show_message(text, self)
             self._speak_text(text)
 
+    def flash(self, action: str) -> None:
+        """Show a short physical reaction while the pet keeps moving on its own."""
+        self._flash = (action, monotonic() + _FLASH_MS[action] / 1000)
+
+    def _autonomous_visual(self) -> str:
+        if self._flash is not None:
+            if monotonic() < self._flash[1]:
+                return self._flash[0]
+            self._flash = None
+        state = self._visual_state()
+        return "sit" if state == STATE_IDLE and self.companion.tired else state
+
+    def _watch_reactions(self, phase) -> None:
+        if self.motion.landings != self._seen_landings:
+            self._seen_landings = self.motion.landings
+            self.flash("land")
+        if phase == 'chase' and getattr(self._toy, 'phase', None) == 'return':
+            self.flash("catch")
+
     def _on_tick(self) -> None:
+        phase = getattr(self._toy, 'phase', None)
         if self._toy is not None:
             if self.can_play_with_toy:
                 self._toy.tick()
             else:
                 self.stop_toy()
+        self._watch_reactions(phase)
         if self._dragging:
             self._set_active_sprite(STATE_DRAG)
             return
@@ -2008,7 +2044,7 @@ class DesktopPetWidget(BaseWidget):
                 self.motion.set_platforms(windows_platforms(exclude_hwnds=(int(self.winId()),)))
         x, y = self.motion.step()
         self.move(x, y)
-        self._set_active_sprite(self._visual_state())
+        self._set_active_sprite(self._autonomous_visual())
         if self._audio_react:
             self._update_audio_scale()
             self.update()

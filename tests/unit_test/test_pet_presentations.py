@@ -35,6 +35,8 @@ def test_user_action_cancels_cosmetic_without_cancelling_interaction():
     assert state.visual_action is None
     state.present('celebrate')
     state.set_mode('rest')
+    assert state.visual_action == 'sleep_in'
+    state.advance(1.5)
     assert state.visual_action == 'sleep'
 
 
@@ -62,9 +64,13 @@ def test_focus_hidden_pet_has_no_celebration_and_manual_override_wins(social_pet
     focus.begin(pets)
     pets[0].hide()
     focus.transition('break', 1)
+    assert pets[0].companion.visual_action == 'sleep_in'
+    pets[0].profile_session.advance(1.5)
     assert pets[0].companion.visual_action == 'sleep'
     pets[1].profile_session.set_mode('work')
-    assert pets[1].companion.visual_action == 'idle'
+    assert pets[1].companion.visual_action == 'wake'
+    pets[1].profile_session.advance(1.4)
+    assert pets[1].companion.visual_action == 'sit'
     focus.stop()
     assert pets[1].companion.mode == 'work'
 

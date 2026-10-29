@@ -13,6 +13,13 @@ CARE_SECONDS = 30
 MODES = ("play", "work", "rest")
 _REWARDS = {"greet": (3, 1), "pet": (12, 2), "groom": (8, 3), "play": (10, 3)}
 _EVENT_AFFECTION = {"peer": 3, "tag": 1, "fetch": 1, "ball": 1}
+# Cosmetic presentations and how long each plays on the active clock. The mode
+# transitions match the length of their authored non-looping clips.
+PRESENT_SECONDS = {"celebrate": 2, "outfit_show": 2, "food_like": 2, "food_dislike": 2,
+                   "sleep_in": 1.5, "wake": 1.4}
+# Playing tires a pet; resting (care ticks in rest mode) restores energy.
+ENERGY_COST = {"play": 4, "ball": 2, "fetch": 2, "tag": 1}
+TIRED_ENERGY = 20
 
 
 def _bounded(value: object, default: int) -> int:
@@ -58,22 +65,35 @@ class CompanionState:
 
     @property
     def visual_action(self) -> str | None:
-        return self.action or self._presentation or {"rest": "sleep", "work": "idle", "play": None}[self.mode]
+        return self.action or self._presentation or {"rest": "sleep", "work": "sit", "play": None}[self.mode]
+
+    @property
+    def tired(self) -> bool:
+        """Low energy shows even when automatic rest is off; the pet still obeys the user."""
+        return self.energy <= TIRED_ENERGY
 
     def present(self, action: str) -> bool:
         """Brief cosmetic reaction on the active clock, without rewards or persistence."""
-        if action not in ('celebrate', 'outfit_show', 'food_like', 'food_dislike') or self.action is not None:
+        if action not in PRESENT_SECONDS or self.action is not None:
             return False
         self._presentation = action
-        self._presentation_end = self._now + Decimal(2)
+        self._presentation_end = self._now + Decimal(str(PRESENT_SECONDS[action]))
         return True
 
     def set_mode(self, mode: str) -> str:
         if mode not in MODES:
             return "unsupported"
         self._cancel()
-        self.mode = mode
+        self._enter(mode)
         return "accepted"
+
+    def _enter(self, mode: str) -> None:
+        """Change mode and play the transition between sleeping and awake poses."""
+        previous, self.mode = self.mode, mode
+        if mode == "rest" and previous != "rest":
+            self.present("sleep_in")
+        elif previous == "rest" and mode != "rest":
+            self.present("wake")
 
     def _cancel(self) -> None:
         self.action = None
@@ -118,6 +138,7 @@ class CompanionState:
         if self._now < self._ready.get(key, Decimal(0)):
             return "cooldown"
         self.growth.add(_EVENT_AFFECTION[kind])
+        self.energy = _bounded(self.energy - ENERGY_COST.get(kind, 0), 70)
         self._ready[key] = self._now + CARE_SECONDS
         return "accepted"
 
@@ -134,6 +155,7 @@ class CompanionState:
                 mood = max(0, mood - 6)
         else:
             mood, affection = _REWARDS[action]
+            self.energy = _bounded(self.energy - ENERGY_COST.get(action, 0), 70)
         self.mood.pet(mood)
         self.growth.add(affection)
         self._ready[action] = self._now + COOLDOWN_SECONDS[action]
@@ -142,8 +164,9 @@ class CompanionState:
             self.present(reaction)
 
     def _auto_rest(self) -> None:
-        if self.action is None and self.energy <= 10 and self.preferences.get("auto_rest") is True:
-            self.mode = "rest"
+        if (self.action is None and self.mode != "rest" and self.energy <= 10
+                and self.preferences.get("auto_rest") is True):
+            self._enter("rest")
 
     def _care(self) -> None:
         self.mood.decay()
