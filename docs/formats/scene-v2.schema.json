@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:frontengine:scene:v2",
+  "title": "FrontEngine 3D scene version 2",
+  "type": "object",
+  "required": ["format", "version", "mode", "entries", "camera"],
+  "additionalProperties": false,
+  "properties": {
+    "format": {"const": "frontengine.scene"},
+    "version": {"const": 2},
+    "mode": {"const": "3d"},
+    "canvas": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "integer", "minimum": 16, "maximum": 8192}, "default": [1920, 1080]},
+    "camera": {"type": "string", "minLength": 1},
+    "background": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "number", "minimum": 0, "maximum": 1}, "default": [0, 0, 0, 0]},
+    "playback": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "rate": {"type": "number", "minimum": 0.1, "maximum": 4, "default": 1},
+        "loop": {"type": "boolean", "default": false},
+        "duration": {"type": "number", "exclusiveMinimum": 0, "maximum": 3600},
+        "click_through": {"type": "boolean", "default": false}
+      }
+    },
+    "entries": {"type": "object", "maxProperties": 256, "propertyNames": {"minLength": 1, "maxLength": 256}, "additionalProperties": {"$ref": "#/$defs/entry"}}
+  },
+  "$defs": {
+    "vec3": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "number", "minimum": -100000, "maximum": 100000}},
+    "quat": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "number", "minimum": -100000, "maximum": 100000}},
+    "transform": {
+      "type": "object", "additionalProperties": false,
+      "properties": {"position": {"$ref": "#/$defs/vec3"}, "rotation": {"$ref": "#/$defs/quat"}, "scale": {"$ref": "#/$defs/vec3"}}
+    },
+    "track": {
+      "type": "array", "minItems": 1, "maxItems": 128,
+      "items": {"type": "object", "required": ["time", "value"], "additionalProperties": false,
+        "properties": {
+          "time": {"type": "number", "minimum": 0, "maximum": 3600},
+          "value": {"oneOf": [{"type": "number"}, {"$ref": "#/$defs/vec3"}, {"$ref": "#/$defs/quat"}]},
+          "easing": {"enum": ["linear", "smooth", "step"]}
+        }
+      }
+    },
+    "entry": {
+      "type": "object", "required": ["type"],
+      "properties": {
+        "type": {"enum": ["IMAGE", "GIF", "TEXT", "VIDEO", "WEB", "PUPPET", "SOUND", "MODEL", "PLANE", "CUBE", "SPHERE", "CAMERA", "LIGHT", "GROUP"]},
+        "file_path": {"type": "string", "minLength": 1},
+        "script_path": {"type": ["string", "null"]},
+        "x": {"type": "number"}, "y": {"type": "number"}, "z": {"type": "number"},
+        "width": {"type": "number", "minimum": 16, "maximum": 8192},
+        "height": {"type": "number", "minimum": 16, "maximum": 8192},
+        "scale": {"type": "number", "minimum": 0.01, "maximum": 100},
+        "rotation": {"type": "number"},
+        "opacity": {"type": "number", "minimum": 0, "maximum": 100},
+        "visible": {"type": "boolean"}, "locked": {"type": "boolean"},
+        "transform": {"$ref": "#/$defs/transform"},
+        "space": {"enum": ["world", "screen"]},
+        "parent": {"type": ["string", "null"]},
+        "projection": {"enum": ["perspective", "orthographic"]},
+        "fov": {"type": "number", "minimum": 0.1, "maximum": 179},
+        "near": {"type": "number", "exclusiveMinimum": 0},
+        "far": {"type": "number", "exclusiveMinimum": 0},
+        "ortho_height": {"type": "number", "exclusiveMinimum": 0},
+        "light_type": {"enum": ["directional", "point"]},
+        "intensity": {"type": "number", "minimum": 0, "maximum": 100000},
+        "metallic": {"type": "number", "minimum": 0, "maximum": 1},
+        "roughness": {"type": "number", "minimum": 0.045, "maximum": 1},
+        "color": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "number", "minimum": 0, "maximum": 1}},
+        "clip": {"type": "object", "additionalProperties": false, "properties": {
+          "index": {"type": "integer", "minimum": 0}, "start": {"type": "number", "minimum": 0, "maximum": 3600},
+          "rate": {"type": "number", "minimum": 0.1, "maximum": 4}, "loop": {"type": "boolean"}
+        }},
+        "tracks": {"type": "object", "propertyNames": {"enum": ["position", "rotation", "scale3d", "opacity", "fov", "color", "intensity"]}, "additionalProperties": {"$ref": "#/$defs/track"}}
+      },
+      "if": {"properties": {"type": {"const": "MODEL"}}},
+      "then": {"required": ["file_path"]}
+    }
+  }
+}

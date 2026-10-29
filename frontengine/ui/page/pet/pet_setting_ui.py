@@ -2,10 +2,10 @@ from typing import Optional
 from pathlib import Path
 import sys
 
-from PySide6.QtCore import Qt, QTimer, Signal
+from PySide6.QtCore import Qt, QThreadPool, QTimer, Signal
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import (
-    QLabel, QPushButton, QMessageBox, QComboBox, QCheckBox, QFileDialog,
+    QLabel, QPushButton, QMessageBox, QComboBox, QCheckBox, QFileDialog, QHBoxLayout, QWidget,
 )
 
 from frontengine.show.pet.desktop_pet import (
@@ -76,6 +76,8 @@ class PetSettingUI(SettingPage):
         # 專注計時：寵物在每個階段開始時說一句，並在旁邊陪著
         # Focus timer: the pet announces each phase and keeps you company.
         self.focus_timer = FocusTimer()
+        from frontengine.show.pet.focus_companions import FocusCompanions
+        self.focus_companions = FocusCompanions()
         self.focus_tick_timer = QTimer(self)
         self.focus_tick_timer.timeout.connect(self._tick_focus_timer)
         # AI 對話服務（懶建立，沒有金鑰就自動不可用）
@@ -93,6 +95,14 @@ class PetSettingUI(SettingPage):
         self.choose_sound_button.clicked.connect(self.choose_sound)
         self.choose_script_button = tr(QPushButton(), 'pet_choose_script', 'Choose puppet script...')
         self.choose_script_button.clicked.connect(self.choose_puppet_script)
+        from frontengine.show.pet.inkside.library import builtin_names
+        self.builtin_puppet = QComboBox()
+        tr(self.builtin_puppet, 'pet_builtin_puppet_pick', 'Built-in Puppet character', 'setAccessibleName')
+        for identifier, name in builtin_names():
+            self.builtin_puppet.addItem(name, identifier)
+        self.builtin_puppet_button = tr(QPushButton(), 'pet_builtin_puppet', 'Use built-in Puppet model')
+        self.builtin_puppet_button.clicked.connect(self.use_builtin_puppet)
+        self._puppet_export = None
         self.ready_label = tr(QLabel(), "Not Ready")
 
         # Size
@@ -191,6 +201,12 @@ class PetSettingUI(SettingPage):
                            self.choose_sound_button, self.choose_script_button,
                            self.workshop_button, self.pack_editor_button)
         source.add_row(self.recent_files_label, self.recent_files_combobox)
+        puppet_row = QWidget()
+        puppet_layout = QHBoxLayout(puppet_row)
+        puppet_layout.setContentsMargins(0, 0, 0, 0)
+        puppet_layout.addWidget(self.builtin_puppet)
+        puppet_layout.addWidget(self.builtin_puppet_button)
+        source.add_row('pet_builtin_puppet_pick', puppet_row, 'Built-in Puppet character')
         self.profile_controls = PetProfileControls(self)
 
         appearance = self.add_section("section_appearance", "Appearance")
@@ -243,9 +259,9 @@ class PetSettingUI(SettingPage):
         self._apply_settled(False)
 
     def _on_settle_typing_toggled(self) -> None:
-        if self.settle_typing_checkbox.isChecked():
-            if self.pet_list:
-                self._start_typing_watch()
+        if any(self._pet_typing_enabled(pet) for pet in self._alive_pets()):
+            self._start_typing_watch()
+            self._apply_settled(self._typing_watch.typing())
         else:
             # 關掉時一定要放行。少了這一步，剛好在打字時關掉這個選項的寵物會
             # 永遠停在原地——看起來就是寵物壞了。
@@ -255,7 +271,7 @@ class PetSettingUI(SettingPage):
 
     def _on_key_pressed(self, _keys) -> None:
         """有人按了鍵：寵物先停下來，停手一段時間後再放行。"""
-        if not self.settle_typing_checkbox.isChecked():
+        if not any(self._pet_typing_enabled(pet) for pet in self._alive_pets()):
             return
         self._typing_watch.note_key()
         self._apply_settled(True)
@@ -265,58 +281,83 @@ class PetSettingUI(SettingPage):
         """把安分狀態套到目前所有寵物身上。"""
         for pet in self.pet_list[:]:
             try:
+                pet_settled = settled and self._pet_typing_enabled(pet)
                 if hasattr(pet, 'set_settled'):
-                    pet.set_settled(settled)
+                    pet.set_settled(pet_settled)
                 else:
-                    pet.motion.settled = settled
+                    pet.motion.settled = pet_settled
             except RuntimeError:  # pragma: no cover - 底層物件已消失
                 continue
+        self._start_tag_game()
 
-    def _spawn_pet(self, clone_source: dict | None = None) -> None:
+    def _pet_typing_enabled(self, pet) -> bool:
+        session = getattr(pet, 'profile_session', None)
+        presentation = session.companion.preferences.get('presentation') if session else None
+        return (presentation['settle_typing'] if presentation is not None
+                else self.settle_typing_checkbox.isChecked())
+
+    def customization_defaults(self) -> dict:
+        return {'size': max(16, min(512, int(self.size_combobox.currentText()))),
+                'speed': max(1, min(20, int(self.speed_combobox.currentText()))),
+                'behaviour': self.behaviour_combobox.currentData(),
+                'climb': self.climb_checkbox.isChecked(),
+                'sit_on_windows': self.sit_checkbox.isChecked(),
+                'speech_bubbles': self.talk_checkbox.isChecked(),
+                'volume': int(self.volume_combobox.currentData()),
+                'settle_typing': self.settle_typing_checkbox.isChecked()}
+
+    def _spawn_pet(self, clone_source: dict | None = None, *, source_pet=None) -> None:
         """建立、顯示並開始移動一隻寵物（供 Start 與右鍵複製共用）。"""
-        if not self.pet_image_path:
+        if not self.pet_image_path and source_pet is None:
             return
         try:
             identifier = self.profile_controls.selector.currentData()
             if clone_source is not None:
                 identifier = self.profile_controls.profiles.create(source=clone_source)['id']
-            self._spawn_profile_pet(identifier)
+            self._spawn_profile_pet(identifier, source_pet=source_pet)
             self.profile_controls.refresh()
         except (OSError, ValueError, RuntimeError) as error:
             self.profile_controls.status.setText(str(error))
 
-    def _spawn_profile_pet(self, identifier: str | None) -> None:
-        if Path(self.pet_image_path).suffix.lower() == '.puppet':
-            self._spawn_puppet(identifier)
+    def _spawn_profile_pet(self, identifier: str | None, *, source_pet=None) -> None:
+        path = (getattr(source_pet, 'image_path', getattr(source_pet, 'path', None))
+                if source_pet is not None else self.pet_image_path)
+        if Path(path).suffix.lower() == '.puppet':
+            self._spawn_puppet(identifier, source_pet=source_pet)
             return
+        presentation = source_pet._presentation_defaults if source_pet is not None else self.customization_defaults()
+        sound = (source_pet._sound.source().toLocalFile() if source_pet._sound is not None else None) if source_pet is not None else self.pet_sound_path
+        audio_react = source_pet._audio_react if source_pet is not None else self.audio_react_checkbox.isChecked()
         pet = DesktopPetWidget(
-            image_path=self.pet_image_path,
-            size=int(self.size_combobox.currentText()),
-            speed=int(self.speed_combobox.currentText()),
-            behaviour=self.behaviour_combobox.currentData(),
-            climb=self.climb_checkbox.isChecked(),
-            talk=self.talk_checkbox.isChecked(),
-            sound_path=self.pet_sound_path,
-            sit_on_windows=self.sit_checkbox.isChecked(),
-            volume=int(self.volume_combobox.currentData()) / 100.0,
-            audio_react=self.audio_react_checkbox.isChecked(),
+            image_path=path,
+            size=presentation['size'], speed=presentation['speed'],
+            behaviour=presentation['behaviour'], climb=presentation['climb'],
+            talk=presentation['speech_bubbles'], sound_path=sound,
+            sit_on_windows=presentation['sit_on_windows'], volume=presentation['volume'] / 100.0,
+            audio_react=audio_react,
+            asset_library=getattr(source_pet, 'asset_library', None),
             profile_id=identifier, profiles=self.profile_controls.profiles,
             profile_name=self.profile_controls.name.text(),
         )
-        pet.clone_requested.connect(lambda: self._spawn_pet(pet.profile_session.state()))
+        pet.clone_requested.connect(lambda: self._spawn_pet(pet.profile_session.state(), source_pet=pet))
+        pet.customize_requested.connect(lambda: self.profile_controls.customize(pet.profile_session.identifier))
+        pet.profile_session.changed.connect(self._on_settle_typing_toggled)
         pet.set_peers_provider(lambda me=pet: self._peer_centers(me))
-        if self.speech_checkbox.isChecked():
+        pet.profile_session.changed.connect(self._start_tag_game)
+        pet.wardrobe_requested.connect(lambda: self.profile_controls.wardrobe(pet.profile_session.identifier))
+        speak = source_pet._speak if source_pet is not None else self.speech_checkbox.isChecked()
+        if speak:
             pet.set_speech_enabled(True)
-        if self.chat_checkbox.isChecked():
+        if source_pet is not None:
+            pet.set_chat_service(source_pet._chat_service)
+        elif self.chat_checkbox.isChecked():
             pet.set_chat_service(self.chat_service())
         geometry = self._target_geometry()
-        if self.audio_react_checkbox.isChecked():
+        if audio_react:
             pet.set_audio_level_provider(self._audio_provider(geometry))
         pet.set_pet_window_flag()
-        if self.settle_typing_checkbox.isChecked():
-            pet.motion.settled = self._typing_watch.typing()
-            self._start_typing_watch()
         self.pet_list.append(pet)
+        self._on_settle_typing_toggled()
         pet.show()
         self._start_tag_game()
         if geometry is not None:
@@ -324,18 +365,26 @@ class PetSettingUI(SettingPage):
             bounds = geometry[0]
             pet.start_moving((bounds.left(), bounds.top(), bounds.right(), bounds.bottom()))
 
-    def _spawn_puppet(self, identifier: str | None = None) -> None:
+    def _spawn_puppet(self, identifier: str | None = None, *, source_pet=None) -> None:
         from frontengine.show.pet.puppet_pet import PuppetPetWidget
         try:
             width = max(64, int(self.size_combobox.currentText()))
-            pet = PuppetPetWidget(self.pet_image_path, (width, int(width * 1.5)),
-                                  script_path=self.puppet_script_path, profile_id=identifier,
+            pet = PuppetPetWidget(source_pet.path if source_pet is not None else self.pet_image_path,
+                                  source_pet._initial_size if source_pet is not None else (width, int(width * 1.5)),
+                                  script_path=source_pet.script_path if source_pet is not None else self.puppet_script_path,
+                                  parameters=source_pet.canvas.parameter_values() if source_pet is not None else None,
+                                  profile_id=identifier,
                                   profiles=self.profile_controls.profiles,
                                   profile_name=self.profile_controls.name.text())
         except (ValueError, OSError, RuntimeError) as error:
             QMessageBox.warning(self, 'Imervue puppet', str(error))
             return
-        pet.clone_requested.connect(lambda: self._spawn_pet(pet.profile_session.state()))
+        if source_pet is not None:
+            for expression in source_pet.canvas.active_expressions():
+                pet.canvas.add_expression(expression)
+        pet.clone_requested.connect(lambda: self._spawn_pet(pet.profile_session.state(), source_pet=pet))
+        pet.customize_requested.connect(lambda: self.profile_controls.customize(pet.profile_session.identifier))
+        pet.profile_session.changed.connect(self._on_settle_typing_toggled)
         geometry = self._target_geometry()
         if geometry is not None:
             pet.setScreen(geometry[1])
@@ -343,9 +392,29 @@ class PetSettingUI(SettingPage):
             pet.move(bounds.left(), bounds.bottom() - pet.height())
         self.pet_list.append(pet)
         pet.show()
-        if self.settle_typing_checkbox.isChecked():
-            pet.set_settled(self._typing_watch.typing())
-            self._start_typing_watch()
+        self._on_settle_typing_toggled()
+
+    def use_builtin_puppet(self) -> None:
+        """Generate the chosen INKSIDE character as a Puppet model with its reaction script."""
+        from frontengine.ui.dialog.pet_asset_install import PuppetExport
+        if self._puppet_export is not None:
+            return
+        self.builtin_puppet_button.setEnabled(False)
+        job = PuppetExport(self.builtin_puppet.currentData(), Path.cwd() / 'pet-assets' / 'puppets')
+        self._puppet_export = job
+        job.signals.finished.connect(self._builtin_puppet_ready, Qt.ConnectionType.QueuedConnection)
+        QThreadPool.globalInstance().start(job)
+
+    def _builtin_puppet_ready(self, model: str, script: str, error: str) -> None:
+        self._puppet_export = None
+        self.builtin_puppet_button.setEnabled(True)
+        if error:
+            self.profile_controls.status.setText(error)
+            return
+        self.pet_image_path = model
+        self.puppet_script_path = script
+        self.ready_to_play = True
+        self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
 
     def choose_puppet_script(self) -> None:
         path, _ = QFileDialog.getOpenFileName(self, 'Imervue pet script', '', 'Pet script (*.petscript.json)')
@@ -373,6 +442,7 @@ class PetSettingUI(SettingPage):
         self.focus_timer.focus_minutes = int(self.focus_minutes_combobox.currentText())
         self.focus_timer.break_minutes = int(self.break_minutes_combobox.currentText())
         self.focus_timer.start()
+        self.focus_companions.begin(self._alive_pets())
         front_engine_logger.info(
             f"[PetSettingUI] focus started | focus={self.focus_timer.focus_minutes}, "
             f"break={self.focus_timer.break_minutes}"
@@ -386,6 +456,7 @@ class PetSettingUI(SettingPage):
         """停止專注 / Stop the focus session."""
         front_engine_logger.info("[PetSettingUI] focus stopped")
         self.focus_timer.stop()
+        self.focus_companions.stop()
         self.focus_tick_timer.stop()
         retranslator.set_text(
             self.focus_button, "pet_focus_start", "Start focus")
@@ -395,6 +466,7 @@ class PetSettingUI(SettingPage):
         phase = self.focus_timer.tick()
         if phase is None:
             return
+        self.focus_companions.transition(phase, self.focus_timer.completed_focus)
         if phase == PHASE_FOCUS:
             self._announce_focus("focus_back")
         elif phase == PHASE_BREAK:
@@ -435,7 +507,10 @@ class PetSettingUI(SettingPage):
 
     def _peer_centers(self, me) -> list:
         """回傳其他仍存活寵物的中心座標（略過已被銷毀者）。"""
-        return [pet.center() for pet in self._alive_pets() if pet is not me]
+        if not getattr(me, 'can_socialize', False):
+            return []
+        return [pet.center() for pet in self._alive_pets()
+                if pet is not me and getattr(pet, 'can_socialize', False)]
 
     TAG_INTERVAL_MS = 100
 
@@ -453,14 +528,20 @@ class PetSettingUI(SettingPage):
 
     def _start_tag_game(self) -> None:
         """有兩隻以上寵物且已勾選時才需要開錶 / Only run the game with 2+ pets."""
-        eligible = [pet for pet in self._alive_pets() if hasattr(pet, 'apply_tag_role')]
+        eligible = [pet for pet in self._alive_pets() if getattr(pet, 'can_socialize', False)]
         if self.tag_checkbox.isChecked() and len(eligible) >= 2:
             if not self.tag_timer.isActive():
                 self.tag_timer.start(self.TAG_INTERVAL_MS)
+        else:
+            self._on_tag_toggled(False)
 
     def _tick_tag_game(self) -> None:
         """每一拍把座標餵給遊戲，再把角色發回各隻寵物。"""
-        pets = [pet for pet in self._alive_pets() if hasattr(pet, 'apply_tag_role')]
+        alive = self._alive_pets()
+        pets = [pet for pet in alive if getattr(pet, 'can_socialize', False)]
+        for pet in alive:
+            if pet not in pets and hasattr(pet, 'apply_tag_role'):
+                pet.apply_tag_role(None)
         if len(pets) < 2:
             self.tag_timer.stop()
             self.tag_game.reset()

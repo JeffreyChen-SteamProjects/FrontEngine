@@ -9,6 +9,7 @@ from frontengine.utils.multi_language.italy import italian_word_dict
 from frontengine.utils.multi_language.russian import russian_word_dict
 from frontengine.utils.multi_language.simplified_chinese import simplified_chinese_word_dict
 from frontengine.utils.multi_language.traditional_chinese import traditional_chinese_word_dict
+from frontengine.utils.multi_language.scene_3d_words import ENGLISH, TRADITIONAL_CHINESE
 
 
 class LanguageWrapper:
@@ -65,6 +66,9 @@ for _name, _words in (
     ("France", french_word_dict),
     ("Italy", italian_word_dict),
 ):
+    _words.update(ENGLISH)
+    if _name == 'Traditional_Chinese':
+        _words.update(TRADITIONAL_CHINESE)
     language_wrapper.register(_name, _words)
 
 language_wrapper.reset_language(LanguageWrapper.DEFAULT_LANGUAGE)

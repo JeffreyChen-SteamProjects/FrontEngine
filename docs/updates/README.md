@@ -58,6 +58,68 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261029-47 | 2026-10-29 | Make the built-in walk and climb read as real steps at pet size | #done #pets #animation | [2026-10](2026-10.md) |
+| U-20261029-48 | 2026-10-29 | Show animated pets moving on the GPU path and walk MOCHI with generated step frames | #done #pets #animation #compositor | [2026-10](2026-10.md) |
+| U-20261029-49 | 2026-10-29 | Paint desktop pets through Qt so their frames change while they move | #done #pets #animation #compositor | [2026-10](2026-10.md) |
+| U-20261029-50 | 2026-10-29 | Stop pets jittering left and right on narrow window ledges | #done #pets #motion | [2026-10](2026-10.md) |
+| U-20261029-51 | 2026-10-29 | Generated walk and climb frames for the other five built-in characters | #done #pets #animation | [2026-10](2026-10.md) |
+| U-20261029-52 | 2026-10-29 | Clean stray specks and off-palette pink from the generated pet frames | #done #pets #animation | [2026-10](2026-10.md) |
+| U-20261029-53 | 2026-10-29 | Fix the PR #227 macOS install failure and SonarCloud findings | #done #pets #ci #quality | [2026-10](2026-10.md) |
+| U-20261030-01 | 2026-10-30 | Clean up listeners and widgets before the test process exits | #done #ci #tests | [2026-10](2026-10.md) |
+| U-20261029-46 | 2026-10-29 | Keep pets aligned and sized across monitors with different scaling | #done #pets #monitors #native | [2026-10](2026-10.md) |
+| U-20261029-45 | 2026-10-29 | Accept pet toys, calls, strokes and Puppet reactions on the real screen, isolated | #done #pets #puppet #native | [2026-10](2026-10.md) |
+| U-20261029-44 | 2026-10-29 | End grooming with a stretch and limit repeated peer greetings | #done #pets #animation | [2026-10](2026-10.md) |
+| U-20261029-43 | 2026-10-29 | Verify pet manager keyboard navigation through native Windows input on an isolated desktop | #done #pets #accessibility #native | [2026-10](2026-10.md) |
+| U-20261029-42 | 2026-10-29 | Export the built-in characters as rigged Puppet models and verify them natively | #done #puppet #art #native | [2026-10](2026-10.md) |
+| U-20261029-41 | 2026-10-29 | Localize built-in part and garment labels | #done #pets #i18n | [2026-10](2026-10.md) |
+| U-20261029-40 | 2026-10-29 | Measure one and four pets, layered against legacy, within stated budgets | #done #pets #performance | [2026-10](2026-10.md) |
+| U-20261029-39 | 2026-10-29 | Offer every pet menu command from the keyboard in the pet manager | #done #pets #accessibility | [2026-10](2026-10.md) |
+| U-20261029-38 | 2026-10-29 | Set chatter frequency and animation size separately per pet | #done #pets #settings | [2026-10](2026-10.md) |
+| U-20261029-37 | 2026-10-29 | Replace conflicting garments, label fit, compare looks and switch outfits safely | #done #pets #wardrobe | [2026-10](2026-10.md) |
+| U-20261029-36 | 2026-10-29 | Add relationship stages, welcome and goodbye greetings, Puppet click intent | #done #pets #puppet #interaction | [2026-10](2026-10.md) |
+| U-20261029-35 | 2026-10-29 | Play sit, transitions, landing, catch and peer waves on desktop pets | #done #pets #animation | [2026-10](2026-10.md) |
+| U-20261029-34 | 2026-10-29 | Ship six drawn INKSIDE characters and fourteen outfits as layered assets | #done #pets #art #wardrobe | [2026-10](2026-10.md) |
+| U-20261029-33 | 2026-10-29 | Add the Puppet ball toy | #done #puppet #toys | [2026-10](2026-10.md) |
+| U-20261029-32 | 2026-10-29 | Add the Puppet light-spot toy | #done #puppet #toys | [2026-10](2026-10.md) |
+| U-20261029-31 | 2026-10-29 | Verify Puppet call movement on native GL | #done #puppet #native | [2026-10](2026-10.md) |
+| U-20261029-30 | 2026-10-29 | Move Puppet pets on Come here | #done #puppet #interaction | [2026-10](2026-10.md) |
+| U-20261029-29 | 2026-10-29 | Choose call destinations by keyboard | #done #pets #accessibility | [2026-10](2026-10.md) |
+| U-20261029-28 | 2026-10-29 | Switch wardrobe language live | #done #pets #i18n | [2026-10](2026-10.md) |
+| U-20261029-27 | 2026-10-29 | Start interactions from the pet manager | #done #pets #ui | [2026-10](2026-10.md) |
+| U-20261029-26 | 2026-10-29 | Add the Come here command | #done #pets #interaction | [2026-10](2026-10.md) |
+| U-20261029-25 | 2026-10-29 | Store per-pet treat preferences | #done #pets #care | [2026-10](2026-10.md) |
+| U-20261029-24 | 2026-10-29 | Add the pet treat menu | #done #pets #care | [2026-10](2026-10.md) |
+| U-20261029-23 | 2026-10-29 | Add wardrobe style swatches | #done #pets #wardrobe | [2026-10](2026-10.md) |
+| U-20261029-22 | 2026-10-29 | Accept the wardrobe background-install lifecycle | #done #pets #wardrobe | [2026-10](2026-10.md) |
+| U-20261029-21 | 2026-10-29 | Run the pet regression set and native Puppet reactions | #done #pets #native | [2026-10](2026-10.md) |
+| U-20261029-20 | 2026-10-29 | Add Puppet petting gestures | #done #puppet #interaction | [2026-10](2026-10.md) |
+| U-20261029-19 | 2026-10-29 | Clean up mixed Puppet test processes | #done #puppet #tests | [2026-10](2026-10.md) |
+| U-20261029-18 | 2026-10-29 | Accept Puppet transparent photos natively | #done #puppet #native | [2026-10](2026-10.md) |
+| U-20261029-17 | 2026-10-29 | Map shared interactions to Puppet native reactions | #done #puppet #animation | [2026-10](2026-10.md) |
+| U-20261029-16 | 2026-10-29 | Recover a selected pet | #done #pets #ui | [2026-10](2026-10.md) |
+| U-20261029-15 | 2026-10-29 | Show celebration and outfit presentations | #done #pets #animation | [2026-10](2026-10.md) |
+| U-20261029-14 | 2026-10-29 | Keep the source appearance when cloning a pet | #done #pets #storage | [2026-10](2026-10.md) |
+| U-20261029-13 | 2026-10-29 | Pilot switchable MOCHI faces | #done #pets #art | [2026-10](2026-10.md) |
+| U-20261029-12 | 2026-10-29 | Add the light-spot toy | #done #pets #toys | [2026-10](2026-10.md) |
+| U-20261029-11 | 2026-10-29 | Take Puppet photos | #done #puppet #photo | [2026-10](2026-10.md) |
+| U-20261029-10 | 2026-10-29 | Integrate ball play with window perching | #done #pets #toys | [2026-10](2026-10.md) |
+| U-20261029-09 | 2026-10-29 | Throw a ball the pet fetches | #done #pets #toys | [2026-10](2026-10.md) |
+| U-20261029-08 | 2026-10-29 | Recognize direct petting gestures | #done #pets #interaction | [2026-10](2026-10.md) |
+| U-20261029-07 | 2026-10-29 | Save transparent pet photos | #done #pets #photo | [2026-10](2026-10.md) |
+| U-20261029-06 | 2026-10-29 | Choose character parts and restore them from outfits | #done #pets #wardrobe | [2026-10](2026-10.md) |
+| U-20261029-05 | 2026-10-29 | Place pets safely during focus and specify per-character customization | #done #pets #focus | [2026-10](2026-10.md) |
+| U-20261029-04 | 2026-10-29 | Drive companion modes from the focus timer | #done #pets #focus | [2026-10](2026-10.md) |
+| U-20261029-03 | 2026-10-29 | Let social play follow each pet state | #done #pets #interaction | [2026-10](2026-10.md) |
+| U-20261029-02 | 2026-10-29 | Keep pets when saving during close fails | #done #pets #storage | [2026-10](2026-10.md) |
+| U-20261029-01 | 2026-10-29 | Pilot MOCHI animation assets | #done #pets #art | [2026-10](2026-10.md) |
+| U-20261028-08 | 2026-10-28 | Recolor wardrobe regions per pet | #done #pets #wardrobe | [2026-10](2026-10.md) |
+| U-20261028-07 | 2026-10-28 | Add the wardrobe interface | #done #pets #ui | [2026-10](2026-10.md) |
+| U-20261028-06 | 2026-10-28 | Install layered assets and restore them on restart | #done #pets #assets | [2026-10](2026-10.md) |
+| U-20261028-05 | 2026-10-28 | Play layered outfits live on the desktop | #done #pets #wardrobe | [2026-10](2026-10.md) |
+| U-20261028-04 | 2026-10-28 | Make wardrobe drafts transactional | #done #pets #wardrobe | [2026-10](2026-10.md) |
+| U-20261028-03 | 2026-10-28 | Lay the layered pet rendering foundation | #done #pets #rendering | [2026-10](2026-10.md) |
+| U-20261028-02 | 2026-10-28 | Add per-pet customization | #done #pets #ui | [2026-10](2026-10.md) |
+| U-20261028-01 | 2026-10-28 | Design pet interactions, wardrobe and high-contrast chibi style | #decision #pets #design | [2026-10](2026-10.md) |
 | U-20261022-02 | 2026-10-22 | Keep packaging checks and Qt test cleanup aligned | #bugfix #deps #ci | [2026-10](2026-10.md) |
 | U-20261018-01 | 2026-10-18 | Reorganize the workspace around common actions and compact inspectors | #done #ui #ux | [2026-10](2026-10.md) |
 | U-20261008-24 | 2026-10-08 | Complete delivery checks and verify the final compiled source | #done #ci #packaging | [2026-10](2026-10.md) |
@@ -135,5 +197,5 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-10.md](2026-10.md) | 2026-10 | 9 |
+| [2026-10.md](2026-10.md) | 2026-10 | 115 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

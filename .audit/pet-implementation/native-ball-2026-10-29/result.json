@@ -1,0 +1,1503 @@
+{
+  "status": "passed",
+  "platform": "windows",
+  "activity": "ball",
+  "synthetic_work_area": true,
+  "fixture_only": true,
+  "helper_show_without_focus": true,
+  "native_gl": true,
+  "walk_alpha": 64,
+  "start": [
+    5663,
+    200
+  ],
+  "end": [
+    5663,
+    200
+  ],
+  "target": [
+    5726,
+    263
+  ],
+  "arrival_action_completed": "ball_return",
+  "ball_phases": [
+    "chase",
+    "flight",
+    "return"
+  ],
+  "timer_stopped": true,
+  "manual_expression_preserved": true,
+  "reward": 1,
+  "pixels_restored": true,
+  "observations": [
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1170,
+        1006
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1255,
+        943
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1326,
+        890
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1376,
+        852
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1411,
+        828
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1417,
+        822
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1417,
+        819
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1418,
+        818
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1401,
+        815
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1354,
+        816
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1251,
+        820
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1076,
+        821
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        947,
+        805
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        926,
+        786
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        910,
+        755
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        895,
+        743
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        888,
+        743
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        884,
+        744
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        880,
+        745
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        879,
+        745
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        894,
+        745
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1019,
+        747
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1236,
+        775
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1370,
+        810
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1457,
+        853
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1457,
+        853
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1462,
+        857
+      ],
+      "position": [
+        5671,
+        202
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1458,
+        856
+      ],
+      "position": [
+        5678,
+        200
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1396,
+        812
+      ],
+      "position": [
+        5685,
+        198
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1343,
+        751
+      ],
+      "position": [
+        5692,
+        195
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1331,
+        725
+      ],
+      "position": [
+        5706,
+        190
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1325,
+        695
+      ],
+      "position": [
+        5713,
+        188
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1322,
+        670
+      ],
+      "position": [
+        5721,
+        187
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1320,
+        660
+      ],
+      "position": [
+        5736,
+        187
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1319,
+        660
+      ],
+      "position": [
+        5743,
+        189
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1319,
+        660
+      ],
+      "position": [
+        5750,
+        191
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1319,
+        660
+      ],
+      "position": [
+        5763,
+        199
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1319,
+        660
+      ],
+      "position": [
+        5769,
+        204
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1319,
+        661
+      ],
+      "position": [
+        5774,
+        209
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1298,
+        669
+      ],
+      "position": [
+        5784,
+        220
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1269,
+        672
+      ],
+      "position": [
+        5789,
+        226
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1260,
+        670
+      ],
+      "position": [
+        5793,
+        231
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1256,
+        663
+      ],
+      "position": [
+        5801,
+        245
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1252,
+        654
+      ],
+      "position": [
+        5805,
+        251
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1249,
+        649
+      ],
+      "position": [
+        5808,
+        258
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1236,
+        616
+      ],
+      "position": [
+        5815,
+        272
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1221,
+        585
+      ],
+      "position": [
+        5818,
+        278
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1208,
+        561
+      ],
+      "position": [
+        5821,
+        285
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1183,
+        517
+      ],
+      "position": [
+        5828,
+        298
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1145,
+        466
+      ],
+      "position": [
+        5832,
+        305
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1142,
+        462
+      ],
+      "position": [
+        5836,
+        311
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1159,
+        472
+      ],
+      "position": [
+        5845,
+        323
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1240,
+        530
+      ],
+      "position": [
+        5849,
+        329
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1289,
+        565
+      ],
+      "position": [
+        5854,
+        335
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1294,
+        571
+      ],
+      "position": [
+        5865,
+        346
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1294,
+        550
+      ],
+      "position": [
+        5870,
+        351
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1288,
+        506
+      ],
+      "position": [
+        5875,
+        356
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1280,
+        469
+      ],
+      "position": [
+        5886,
+        366
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1276,
+        454
+      ],
+      "position": [
+        5892,
+        371
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1276,
+        453
+      ],
+      "position": [
+        5897,
+        376
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1276,
+        453
+      ],
+      "position": [
+        5909,
+        385
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1275,
+        453
+      ],
+      "position": [
+        5915,
+        390
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1267,
+        450
+      ],
+      "position": [
+        5921,
+        394
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1258,
+        448
+      ],
+      "position": [
+        5934,
+        402
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1239,
+        446
+      ],
+      "position": [
+        5940,
+        406
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1216,
+        433
+      ],
+      "position": [
+        5947,
+        410
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1196,
+        434
+      ],
+      "position": [
+        5960,
+        417
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1179,
+        440
+      ],
+      "position": [
+        5966,
+        421
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1174,
+        447
+      ],
+      "position": [
+        5973,
+        424
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1183,
+        459
+      ],
+      "position": [
+        5987,
+        431
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1195,
+        470
+      ],
+      "position": [
+        5994,
+        434
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1201,
+        474
+      ],
+      "position": [
+        6000,
+        437
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1194,
+        468
+      ],
+      "position": [
+        6014,
+        443
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1175,
+        461
+      ],
+      "position": [
+        6020,
+        446
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1165,
+        459
+      ],
+      "position": [
+        6028,
+        450
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1292,
+        442
+      ],
+      "position": [
+        6015,
+        441
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        1879,
+        390
+      ],
+      "position": [
+        6009,
+        437
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        2396,
+        374
+      ],
+      "position": [
+        6003,
+        433
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        2530,
+        375
+      ],
+      "position": [
+        5991,
+        424
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        2626,
+        378
+      ],
+      "position": [
+        5984,
+        420
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        2713,
+        369
+      ],
+      "position": [
+        5978,
+        416
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        2723,
+        381
+      ],
+      "position": [
+        5966,
+        407
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        2709,
+        512
+      ],
+      "position": [
+        5960,
+        403
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        2545,
+        640
+      ],
+      "position": [
+        5954,
+        399
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        2465,
+        687
+      ],
+      "position": [
+        5941,
+        390
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        2460,
+        688
+      ],
+      "position": [
+        5936,
+        387
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2460,
+        688
+      ],
+      "position": [
+        5930,
+        383
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2460,
+        688
+      ],
+      "position": [
+        5918,
+        375
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2460,
+        688
+      ],
+      "position": [
+        5912,
+        370
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2460,
+        687
+      ],
+      "position": [
+        5906,
+        366
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2460,
+        687
+      ],
+      "position": [
+        5894,
+        358
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2459,
+        686
+      ],
+      "position": [
+        5889,
+        355
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2459,
+        686
+      ],
+      "position": [
+        5882,
+        350
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2459,
+        686
+      ],
+      "position": [
+        5870,
+        342
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2459,
+        686
+      ],
+      "position": [
+        5864,
+        338
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2459,
+        686
+      ],
+      "position": [
+        5858,
+        334
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2459,
+        686
+      ],
+      "position": [
+        5845,
+        325
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2459,
+        686
+      ],
+      "position": [
+        5839,
+        321
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2459,
+        686
+      ],
+      "position": [
+        5835,
+        318
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2459,
+        686
+      ],
+      "position": [
+        5822,
+        309
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2459,
+        686
+      ],
+      "position": [
+        5815,
+        304
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2459,
+        686
+      ],
+      "position": [
+        5809,
+        300
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2459,
+        686
+      ],
+      "position": [
+        5797,
+        292
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2459,
+        685
+      ],
+      "position": [
+        5793,
+        289
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2459,
+        683
+      ],
+      "position": [
+        5786,
+        284
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2460,
+        681
+      ],
+      "position": [
+        5775,
+        277
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2469,
+        665
+      ],
+      "position": [
+        5769,
+        273
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2525,
+        571
+      ],
+      "position": [
+        5763,
+        268
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2579,
+        421
+      ],
+      "position": [
+        5751,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2551,
+        390
+      ],
+      "position": [
+        5745,
+        256
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2526,
+        385
+      ],
+      "position": [
+        5739,
+        252
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2526,
+        385
+      ],
+      "position": [
+        5727,
+        244
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2526,
+        385
+      ],
+      "position": [
+        5721,
+        240
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2529,
+        395
+      ],
+      "position": [
+        5714,
+        235
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2536,
+        404
+      ],
+      "position": [
+        5703,
+        228
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2540,
+        401
+      ],
+      "position": [
+        5697,
+        223
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2541,
+        395
+      ],
+      "position": [
+        5691,
+        219
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2538,
+        385
+      ],
+      "position": [
+        5678,
+        211
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2529,
+        379
+      ],
+      "position": [
+        5673,
+        207
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2529,
+        378
+      ],
+      "position": [
+        5666,
+        202
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2529,
+        378
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2529,
+        378
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "moving"
+    }
+  ],
+  "handles": [
+    110821884,
+    173018224,
+    173083760
+  ]
+}

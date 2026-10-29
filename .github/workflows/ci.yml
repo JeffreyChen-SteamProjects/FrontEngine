@@ -59,7 +59,7 @@ jobs:
         run: python -m compileall -q frontengine
 
       - name: Run unit tests
-        run: python -m pytest tests/ -q
+        run: python -X faulthandler -m pytest tests/ -q
 
       # 啟動測試要用「這份 checkout 打包出來的套件」，不是 PyPI 上的版本。
       # 之前 dev_requirements 會裝下published 的 frontengine，而啟動腳本從自己的
@@ -103,7 +103,7 @@ jobs:
       - name: Compile and test
         run: |
           python -m compileall -q frontengine
-          python -m pytest tests/ -q
+          python -X faulthandler -m pytest tests/ -q
       - name: Install built wheel
         run: |
           python -m build --wheel --outdir dist

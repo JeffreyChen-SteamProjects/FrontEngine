@@ -100,6 +100,8 @@ arrastraste y tiene su propia opacidad.
 
 **Mascota de escritorio** — un sprite animado que vive en tu escritorio.
 
+- El cuidado guarda energía y modos de juego/trabajo/descanso por identidad y conserva UUID y estadísticas de la versión 1. El menú del sprite añade saludos, caricias y cepillado. Las acciones temporizadas solo recompensan al completarse; las mascotas saciadas rechazan comida y las repeticiones requieren una pausa. El cuidado sigue el tiempo activo, sin acumular tiempo oculto o sin conexión. Puppet comparte sesión y reglas de alimentación; las respuestas nativas dependen del entorno y del modelo. 
+
 - **Sprites** — un solo GIF/WebP/PNG, o una carpeta de *pack de mascota* cuyos nombres de
   archivo se asignan a estados: `walk`, `idle`, `sleep`, `climb`, `fall`, `drag` (un estado
   ausente recurre a `walk`). Un `pet.json` opcional define el tamaño, la velocidad y si puede
@@ -469,6 +471,10 @@ que solo hace falta almacenar el propio token.
 
 ---
 
+## Seguridad
+
+Informe las vulnerabilidades en privado. La política, las versiones compatibles y las notas para operadores están en [SECURITY.md](../SECURITY.md).
+
 ## Licencia
 
 Consulta [`LICENSE`](../LICENSE). Las expectativas de la comunidad están en
@@ -541,3 +547,75 @@ Ayuda → Capacidades plataforma lee requisitos/errores sin captura/listeners. L
 El medidor detiene su captura en 1,25 segundos al terminar las consultas reactivas; una nueva consulta activada puede reiniciarla.
 
 Las compilaciones Windows comparten --preset y --debug con la CLI Python. Instalar frontengine[puppet] en el entorno de compilación para verificar el paquete nativo; se incluyen decodificadores Pillow y datos Imervue instalados. Generar entradas locales con `py tests/integration/scene_build_fixtures.py FIXTURES --puppet SAMPLE.puppet` (PyAV para crear vídeo). En escritorio nativo ejecutar `FrontEngine.exe --verify-scene-build FIXTURES REPORT` con carpeta nueva. La prueba fija aísla ajustes temporales, mantiene silencio y abre solo sus ventanas escena/editor. Verifica siete tipos, JSON antiguo/versionado, exportar/recargar, animación GIF, interacción web, deshacer/rehacer, pausa/reanudar y liberar; escribe result.json y PNG y sale. No ejecuta scripts Python suministrados. Revisar informe y código de salida; falta de runtime/renderizado nativo falla explícitamente.
+
+Selecciona una identidad en la página Mascota y abre Personalizar mascota, también disponible en su menú. Cada identidad conserva tamaño (16–512), velocidad (1–20), comportamiento de suelo/paseo/persecución, escalada, descanso sobre ventanas, bocadillos, volumen (0–100), calma al escribir, descanso automático, lanzamientos e interacciones sociales. Usar valores de la página hereda sus ajustes de presentación; clonar e importar conservan los ajustes individuales. Aplicar guarda de forma atómica antes de actualizar la mascota activa. Cancelar no cambia nada; restablecer los valores requiere pulsar Aplicar. Los errores de guardado o conflictos conservan el borrador. Puppet desactiva los controles no compatibles y solo aplica tamaño, bocadillos y calma al escribir entre los ajustes de presentación. El vestuario nativo y las ilustraciones por capas siguen pendientes.
+
+Identidades de mascotas → Armario abre una vista previa animada independiente. Instalar carpeta valida layered-pet.json y copia los recursos a pet-assets junto a la configuración local. Elige cabeza, cuello, cuerpo y espalda, acción y orientación; guarda hasta 20 conjuntos por mascota. Equipar una prenda reemplaza lo que ocupa los mismos espacios y lo indica; Cancelar lo restaura. Solo se ofrecen prendas para el cuerpo actual y las que no tienen todas las animaciones aparecen desactivadas. Probarse una prenda muestra un breve desfile y Fijar para comparar deja el aspecto actual junto al borrador. Una mascota que se arrastra o está en una interacción cambia de ropa al terminar. A las mascotas con Sprite de imagen completa se les indica elegir antes un personaje por capas. Aplicar guarda y actualiza el Sprite activo; Cancelar descarta los cambios desde la última aplicación. Las referencias ausentes se conservan: repara los archivos y actualiza. Puppet no admite esta ropa Sprite. Añadir personaje integrado dibuja uno de seis personajes INKSIDE (MOCHI, MOSS, PIP, BOLT, INK o GILL) con treinta prendas de catorce conjuntos ajustadas a su cuerpo y las instala en segundo plano con la misma validación; cerrar el armario lo cancela. Cada personaje ofrece variantes de ojos, boca y tres partes del cuerpo, además de zonas recoloreables, y cada prenda sigue todas sus animaciones. Los nombres de partes y prendas siguen el idioma de la interfaz.
+
+Un personaje integrado sin ropa, con sus piezas y colores predeterminados, camina y trepa con fotogramas de paso dibujados de cuerpo entero; vestido o con piezas cambiadas usa la animación por capas para que cada prenda siga ajustada.
+
+Las mascotas de escritorio siempre se dibujan con el pintado normal de Qt, sea cual sea el renderizado de superposiciones: una mascota mueve su ventana en cada tick y, por la ruta GPU, sus fotogramas dejaban de cambiar mientras se movía.
+
+Las mascotas adoptan posturas adecuadas: el modo Trabajo las sienta, entrar en Descanso reproduce un breve clip de dormirse y salir, uno de despertar. Jugar, la pelota, traer objetos y el pillapilla gastan algo de energía; por debajo de 20, una mascota inactiva se sienta aunque el descanso automático esté desactivado y sigue obedeciendo todas las órdenes. Aterrizar tras soltarla o lanzarla, atrapar una pelota lanzada y encontrarse con otra mascota muestran breves reacciones de aterrizaje, atrapada y saludo sin interrumpir el movimiento, los juguetes ni tus órdenes. Los paquetes Sprite sin estos clips usan sus imágenes de reposo o sueño. El aseo termina con un estiramiento, y las mascotas que se cruzan a menudo se saludan como mucho una vez por minuto.
+
+La relación crece con el afecto en cuatro etapas: Recién conocidos, Familiar (20), Cercano (100) y En sintonía (250). La etapa aparece en Estado. Cada etapa tiene su propio saludo, las mascotas cercanas saludan con la mano y las que están en sintonía saltan de alegría; alcanzar una etapa se celebra una sola vez y nada se bloquea ni se pierde. Una mascota guardada que vuelves a invocar te da la bienvenida, y Cerrar desde su propio menú se despide antes de cerrar la ventana. Puppet ahora distingue clic y arrastre como Sprite: un clic saluda al soltar y solo un movimiento mayor que la distancia de arrastre del sistema mueve la ventana, sin recompensas.
+
+Personalizar mascota también ajusta Charla (Desactivada, Rara vez, Normal, A menudo) para las frases que la mascota inicia sola y Tamaño de animación (Calma, Normal, Animada) para el pulso de audio y las breves reacciones de aterrizaje y atrapada, por separado de los bocadillos y el volumen. Las respuestas a lo que haces siguen apareciendo con la charla desactivada. Puppet aplica Charla a las frases programadas del script. Las presentaciones guardadas antes siguen funcionando con Normal en ambos.
+
+La lista de interacciones del gestor también ofrece los comandos del menú de la mascota activa seleccionada: foto, estado, recordatorio, chat si hay un servicio conectado, clonar y cerrar, además de cada movimiento y expresión de un modelo Puppet. Así, todo el menú contextual es accesible con el teclado.
+
+Usar modelo Puppet integrado, en la página de mascota, dibuja en segundo plano el personaje INKSIDE elegido como modelo Imervue .puppet: cabeza, brazos, cola y cuerpo con rig, diez movimientos, tres expresiones y un script que les asigna las acciones del compañero. Se guarda en pet-assets/puppets y se elige como fuente con su script, así que Iniciar lo crea como mascota Puppet.
+
+Con varios monitores a escalas distintas, una mascota arrastrada o devuelta a otro monitor conserva su tamaño, permanece dentro del área de trabajo de ese monitor y camina allí. Los bordes de ventana en monitores escalados se miden en las mismas coordenadas que la mascota, así que se posa justo encima de las ventanas.
+
+El armario muestra las zonas de color declaradas por el personaje o la ropa. Elige zona y color o restaura el original. Solo se tiñen las capas de máscara designadas; los contornos y otros detalles se conservan. Los colores se previsualizan antes de aplicar y se guardan por identidad y conjunto, también al exportar/importar. Sin zonas declaradas, los controles quedan desactivados.
+
+Si falla el guardado al cerrar, la mascota sigue abierta con su estado y temporizador de reintento. Cerrar todo conserva las mascotas que no se pudieron cerrar; salir espera que se guarden antes de liberar recursos. El afecto se limita al máximo admitido para que futuras recompensas no impidan guardar.
+
+Los saludos y las persecuciones requieren dos mascotas visibles en modo juego, sin interacción activa, con sociabilidad permitida y sin arrastre ni pausa al escribir. Las mascotas no disponibles dejan de ser objetivos o participantes. El juego pausa con menos de dos participantes aptos y se reanuda cuando vuelven. Desactivar los bocadillos solo oculta el texto, no las recompensas sociales.
+
+El temporizador de concentración pone a las mascotas visibles sin interacción activa en Trabajo y después en Descanso durante las pausas. Detener restaura sus modos anteriores salvo cambios manuales. Cada ronda completa da una vez 3 de afecto y 5 de ánimo a los compañeros visibles aptos; detener antes o esconderlos no da premio. Trabajo/Descanso silencia charlas espontáneas. El reloj usa tiempo transcurrido monótono, no cambios de hora del sistema.
+
+Al iniciar la concentración, las mascotas se sitúan abajo a la derecha de su pantalla si hay espacio. Al detenerla se restaura su posición anterior solo si no las moviste ni cambiaste su modo.
+
+Los personajes por capas pueden ofrecer variantes de cara y cuerpo. El vestuario permite previsualizarlas por mascota; Aplicar guarda la selección y los conjuntos conservan personaje y partes. Cada variante debe cubrir todos los fotogramas. El arte definitivo de los seis personajes sigue pendiente.
+
+El menú Sprite permite fotografiar la apariencia actual o elegir una pose por capas y guardar un PNG transparente. No incluye el escritorio ni bocadillos. Las fotos Puppet usan un renderizador Imervue compatible e inicializado para una imagen transparente fija sin capturar el escritorio. La validación GL nativa sigue pendiente.
+
+En mascotas Sprite elige acariciar y mueve el puntero de un lado a otro. Tres movimientos claros inician una reacción; el temblor no cuenta. Arrastre y juego social se pausan. Salir, ocultar, cambiar de modo o terminar cancela la caricia incompleta. Los premios requieren finalización y respetan la espera.
+
+Los Sprite pueden lanzar y guardar una pelota. Arrastra y suelta para relanzar; clic derecho para guardar. La mascota la devuelve al inicio y gana 1 afecto con 30 segundos activos de espera. Trabajo/descanso, otras acciones, ocultar, pausa al escribir o tiempo agotado cancelan sin premio. Puppet también recoge la pelota (ver abajo).
+
+Las mascotas de suelo bajan de las ventanas para buscar la pelota. Posarse en ventanas se pausa durante el juego y se reanuda después; regresan al suelo cerca de la posición horizontal inicial.
+
+El punto de luz es un objetivo pequeño que se arrastra dentro de una distancia limitada. Las mascotas de suelo lo siguen por el suelo. Suéltalo y deja que lo alcancen para iniciar una breve reacción, premiada al completarse con la espera habitual. Clic derecho o Guardar termina. Solo un juguete por mascota.
+
+Clonar usa imagen/modelo, apariencia, preferencias y biblioteca de la mascota original, aunque la página de ajustes seleccione otro recurso. El clon recibe una identidad nueva; sus cambios no afectan al original. Los clones Puppet conservan script, parámetros y expresiones activas.
+
+Completar una sesión válida solicita celebrate y luego Descanso. Aplicar un vestuario cambiado solicita outfit_show. Duran dos segundos activos, sin premios extra ni guardado; acciones o modos manuales interrumpen. Animaciones ausentes usan idle. El arte final y la adaptación Puppet siguen pendientes.
+
+Selecciona una identidad activa y Traer mascota para moverla al área útil del monitor elegido. Las ocultas reaparecen, acciones incompletas y juguetes se detienen y los límites Sprite se actualizan. Apariencia y valores no cambian. Inicia las inactivas y reduce las demasiado grandes.
+
+Los scripts Puppet pueden usar frontengine_actions para vincular estados a movimientos y expresiones existentes. Los nombres se validan antes de iniciar; no se adivinan animaciones. Al terminar se liberan efectos de reacción conservando elecciones manuales. Formato: docs/formats/puppet-companion-actions.md. Validación visual nativa pendiente.
+
+Tras elegir acariciar, Puppet espera movimientos del puntero de ida y vuelta. Salir, Esc, ocultar, cambiar de modo o quedarse quieto cancela la caricia incompleta. No se arrastra la ventana al acariciar. Validación nativa de gestos pendiente.
+
+El vestuario ofrece seis colores rápidos para la zona declarada seleccionada. Previsualiza y aplica; Cancelar conserva la apariencia guardada. También permite elegir libremente y restaurar el color original.
+
+Los menús Sprite y Puppet ofrecen cuatro golosinas ficticias sin arrastrar archivos. Comparten finalización, límite de saciedad y espera. Alimentar termina la caricia incompleta sin recompensa; Sprite guarda el juguete.
+
+Cada mascota puede guardar una golosina favorita y otra distinta que le guste menos. Solo cambia el ánimo al completar la comida; saciedad, afecto y espera no cambian. Las ediciones durante la comida rigen en la siguiente. Los perfiles antiguos son neutros. food_like y food_dislike son opcionales; animaciones finales pendientes.
+
+Ven aquí permite a Sprite seguir un marcador cercano arrastrable. El modo suelo sigue el suelo y los modos libres usan dos ejes. Al llegar saluda con la espera habitual. Clic derecho o Finalizar interacción cancela, igual que trabajo/reposo, ocultar, alimentar o cambiar de juguete.
+
+La sección de identidades permite elegir y ejecutar interacciones para la mascota activa seleccionada. Con teclado se puede saludar, acariciar brevemente, asear, dar golosinas, cambiar juego/trabajo/descanso o cancelar. La caricia usa las reglas temporizadas sin gestos del puntero. No inicia mascotas ocultas o inactivas.
+
+Cambiar el idioma con el vestuario abierto actualiza las opciones Ninguno, Falta y Restablecer valores. Conserva colores, piezas, nombres de conjuntos pendientes y la posición de la vista previa. Los nombres de recursos mantienen el texto del autor.
+
+Para elegir destino con teclado, selecciona Ven aquí en el gestor e introduce desplazamientos horizontal/vertical en píxeles lógicos. Los negativos indican izquierda/arriba. El destino queda en el área cercana; el modo suelo ignora el desplazamiento vertical. Ejecutar inicia la llamada y finalizar interacción la cancela. Las mascotas ocupadas o no compatibles conservan su interacción.
+
+Puppet admite Ven aquí desde su menú o los desplazamientos de teclado del gestor. La ventana completa y el marcador quedan dentro del área de trabajo. Al llegar el centro y permanecer medio segundo, comienza el saludo compartido. Arrastrar, cuidar, cambiar modo, ocultar, redimensionar, cambiar el área o dar órdenes manuales cancela. Usa la reacción walk declarada; en su ausencia conserva el aspecto nativo. El temporizador solo funciona durante la llamada. Validación nativa GL/foco pendiente.
+
+Puppet puede perseguir un punto de luz arrastrable desde el menú. El gestor permite a Sprite y Puppet colocarlo con teclado. Soltarlo cerca durante medio segundo inicia el juego compartido de tres segundos; el afecto llega solo al completar, con la espera habitual. Llamada y luz comparten un objetivo. Guardar, finalizar, cuidar, arrastrar, cambiar modo u ocultar cancela.
+
+El menú Puppet también ofrece Lanzar una pelota, y los gestores de Sprite y Puppet pueden lanzarla para la identidad elegida. La física, el relanzamiento al arrastrar, guardar con clic derecho, 1 afecto y 30 segundos de espera se comparten con Sprite; la ventana Puppet persigue la pelota, la recoge y la devuelve a su centro original sin salir del área de trabajo. Cada relanzamiento reinicia el tiempo límite. Pelota, luz y Ven aquí comparten un objetivo: iniciar uno reemplaza al otro. Cuidar, arrastrar, cambiar modo u ocultar cancelan sin premio. La animación propia de recoger sigue pendiente.

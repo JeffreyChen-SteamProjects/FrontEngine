@@ -48,6 +48,12 @@ def fit_template(entries: dict, size: tuple[int, int]) -> dict:
     """Scale an independent template proportionally within the target logical screen."""
     if len(size) != 2 or any(type(value) is not int or not 320 <= value <= 32768 for value in size):
         raise ValueError('Template screen dimensions must be between 320 and 32768')
+    from .scene_3d_document import SceneDocument
+    if isinstance(entries, SceneDocument):
+        document = entries.copy()
+        factor = min(1, 8192/max(size))
+        document.canvas = tuple(round(v*factor) for v in size)
+        return document
     result = deepcopy(validate_geometry(entries))
     scale = min(size[0] / 1280, size[1] / 720, 6)
     offset = ((size[0] - 1280 * scale) / 2, (size[1] - 720 * scale) / 2)
@@ -64,6 +70,9 @@ def fit_template(entries: dict, size: tuple[int, int]) -> dict:
 def missing_template_assets(entries: dict) -> list[str]:
     """List layer/field/path failures before replacing editor or playback."""
     missing = []
+    from .scene_3d_document import SceneDocument
+    if isinstance(entries, SceneDocument):
+        entries = entries.entries
     for key, entry in validate_geometry(entries).items():
         for field in ASSET_FIELDS:
             value = entry.get(field)

@@ -237,7 +237,18 @@ class BaseWidget(QWidget):
     def update(self, *args) -> None:
         # QWidget.update is not virtual; Python content setters all call this hook.
         self._render_revision = getattr(self, '_render_revision', 0) + 1
+        if getattr(self, '_compositor', None) is not None and not getattr(self, '_compositor_pending', False):
+            # Hand new content to the GPU compositor outside the parent's paint pass: layers
+            # submitted from inside paintEvent were not presented on screen, so animated
+            # content stayed frozen while the window moved.
+            self._compositor_pending = True
+            QTimer.singleShot(0, self, self._flush_compositor)
         super().update(*args)
+
+    def _flush_compositor(self) -> None:
+        self._compositor_pending = False
+        if self._compositor is not None:
+            self._update_compositor()
 
     def _update_compositor(self) -> None:
         from frontengine.show.compositor import Layer

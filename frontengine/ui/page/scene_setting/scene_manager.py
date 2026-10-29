@@ -9,7 +9,8 @@ from frontengine.ui.page.utils import create_monitor_selection_dialog
 from frontengine.user_setting.scene_setting import choose_scene_json, write_scene_file, scene_json
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.retranslate import tr
-from frontengine.utils.scene_format.scene_document import normalize_scene
+from frontengine.utils.scene_format.scene_3d_document import SceneDocument, read_scene_document
+from frontengine.user_setting.scene_setting import current_scene_document, adopt_scene_document
 from frontengine.user_setting.user_setting_file import user_setting_dict
 
 
@@ -17,6 +18,7 @@ class SceneManagerUI(QWidget):
     workshop_requested = Signal()
     templates_requested = Signal()
     entries_changed = Signal(object)
+    document_changed = Signal(object)
     def __init__(self, scene_manager):
         front_engine_logger.info("[SceneManagerUI] Init")
         super().__init__()
@@ -84,12 +86,17 @@ class SceneManagerUI(QWidget):
         """
         front_engine_logger.info("[SceneManagerUI] clear_json")
         scene_json.clear()
+        adopt_scene_document({})
         self.json_plaintext.clear()
         self.entries_changed.emit({})
 
     def apply_json(self) -> None:
         entries = self._parse_scene_json()
         if entries is not None:
+            if isinstance(entries, SceneDocument):
+                adopt_scene_document(entries)
+                self.renew_json_plain_text()
+                return
             from frontengine.utils.scene_format.scene_editor_document import validate_geometry
             try:
                 entries = validate_geometry(entries)
@@ -113,6 +120,12 @@ class SceneManagerUI(QWidget):
         monitors = self._choose_monitors(QGuiApplication.screens())
         if monitors is None:
             return
+        if hasattr(self, 'actions'):
+            screens = QGuiApplication.screens()
+            selection = 'all' if self.show_all_screen else (
+                screens.index(monitors[0]) if monitors and monitors[0] in screens else 'primary')
+            self.actions.request_entries(scene, selection)
+            return
         self._add_scene_widgets(scene)
         for monitor in monitors:
             self._open_view(monitor)
@@ -125,7 +138,10 @@ class SceneManagerUI(QWidget):
             # An empty script means "nothing to open", not a syntax error.
             return {}
         try:
-            scene = normalize_scene(json.loads(text))
+            document = read_scene_document(json.loads(text))
+            if document.mode == '3d':
+                return document
+            scene = document.entries
         except ValueError as error:
             QMessageBox.critical(self, "JSON Error", f"Invalid JSON: {error}")
             return None
@@ -228,5 +244,8 @@ class SceneManagerUI(QWidget):
 
     def renew_json_plain_text(self):
         front_engine_logger.info("[SceneManagerUI] renew_json_plain_text")
-        self.json_plaintext.setPlainText(json.dumps(scene_json, indent=4))
-        self.entries_changed.emit(dict(scene_json))
+        document = current_scene_document()
+        self.json_plaintext.setPlainText(json.dumps(document.envelope() if document.mode == '3d' else scene_json, indent=4))
+        if document.mode == '2d':
+            self.entries_changed.emit(dict(scene_json))
+        self.document_changed.emit(document)

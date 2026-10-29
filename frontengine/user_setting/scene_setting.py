@@ -9,19 +9,32 @@ from frontengine.ui.dialog.choose_file_dialog import choose_file
 from frontengine.utils.json.json_repository import JsonRepository
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
-from frontengine.utils.scene_format.scene_document import normalize_scene, scene_envelope
 from frontengine.utils.scene_format.scene_package import load_package, save_package
+from frontengine.utils.scene_format.scene_3d_document import SceneDocument, read_scene_document
 
 scene_json: Dict[str, Any] = {}
 _package_leases: list = []
+_scene_document = SceneDocument()
+
+
+def current_scene_document() -> SceneDocument:
+    document = _scene_document.copy()
+    document.entries = dict(scene_json)
+    return document
+
+
+def adopt_scene_document(document, lease=None) -> None:
+    global _scene_document
+    _scene_document = read_scene_document(document)
+    if lease is not None:
+        _package_leases.append(lease)
+    scene_json.clear()
+    scene_json.update(_scene_document.entries)
 
 
 def adopt_scene_entries(entries: dict, lease=None) -> None:
     """Apply worker-loaded scene data on the GUI thread and retain its extraction lease."""
-    if lease is not None:
-        _package_leases.append(lease)
-    scene_json.clear()
-    scene_json.update(entries)
+    adopt_scene_document(entries, lease)
 
 
 def load_scene_file(path: str | Path) -> dict:
@@ -36,15 +49,15 @@ def load_scene_file(path: str | Path) -> dict:
     else:
         if source.stat().st_size > 8 * 1024 * 1024:
             raise ValueError('Scene JSON exceeds the size limit')
-        entries = normalize_scene(json.loads(source.read_text(encoding='utf-8-sig')), source.parent)
-    scene_json.clear()
-    scene_json.update(entries)
-    return entries
+        entries = read_scene_document(json.loads(source.read_text(encoding='utf-8-sig')), source.parent)
+    adopt_scene_document(entries)
+    return scene_json
 
 
 def release_scene_packages() -> None:
+    from frontengine.utils.scene_format.scene_resource_reads import release_scene_lease
     for lease in _package_leases:
-        lease.cleanup()
+        release_scene_lease(lease)
     _package_leases.clear()
 
 
@@ -81,7 +94,7 @@ def write_scene_file(parent_qt_instance: QWidget,
         return None
 
     if Path(file_path).suffix.lower() == '.fescene':
-        save_package(scene_json, file_path)
+        save_package(current_scene_document(), file_path)
     else:
-        JsonRepository(file_path).save(scene_envelope(scene_json, Path(file_path).parent))
+        JsonRepository(file_path).save(current_scene_document().envelope(Path(file_path).parent))
     return file_path

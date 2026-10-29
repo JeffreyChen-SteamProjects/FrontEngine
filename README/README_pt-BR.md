@@ -103,6 +103,8 @@ lembra onde você a arrastou e tem sua própria opacidade.
 
 **Mascote de desktop** — um sprite animado que vive na sua área de trabalho.
 
+- O cuidado salva energia e modos de brincar/trabalhar/descansar por identidade, preservando UUID e estatísticas da versão 1. O menu do sprite adiciona cumprimentos, carinho e escovação. Ações com tempo só recompensam a conclusão; animais saciados recusam comida e repetições exigem uma pausa. O cuidado acompanha o tempo ativo, sem acumular tempo oculto ou offline. Puppet compartilha sessão e regras de alimentação; respostas nativas dependem do runtime e do modelo. 
+
 - **Sprites** — um único GIF/WebP/PNG, ou uma pasta *pet pack* cujos nomes de
   arquivo mapeiam para estados: `walk`, `idle`, `sleep`, `climb`, `fall`, `drag`
   (um estado ausente recai em `walk`). Um `pet.json` opcional define tamanho,
@@ -492,6 +494,10 @@ usuário do twine, então apenas o próprio token precisa ser armazenado.
 
 ---
 
+## Segurança
+
+Reporte vulnerabilidades em particular. A política, as versões suportadas e as notas para operadores estão em [SECURITY.md](../SECURITY.md).
+
 ## Licença
 
 Veja [`LICENSE`](../LICENSE). As expectativas da comunidade estão em
@@ -564,3 +570,75 @@ Ajuda → Capacidades plataforma lê requisitos/erros sem captura/listeners. Lin
 O medidor encerra sua captura em até 1,25 segundo após cessarem as consultas reativas; uma nova consulta ativada pode reiniciá-la.
 
 Builds Windows compartilham --preset e --debug com a CLI Python. Instalar frontengine[puppet] no ambiente build para validar pacote nativo; decodificadores Pillow e dados Imervue instalados são incluídos. Gerar entradas locais com `py tests/integration/scene_build_fixtures.py FIXTURES --puppet SAMPLE.puppet` (PyAV para gerar vídeo). No desktop nativo executar `FrontEngine.exe --verify-scene-build FIXTURES REPORT` com pasta nova. Teste fixo isola configurações temporárias, mantém silêncio e abre só suas janelas cena/editor. Verifica sete tipos, JSON antigo/versionado, exportação/recarga, GIF animado, interação web, desfazer/refazer, pausa/retomada e liberação; escreve result.json e PNG e sai. Não executa scripts Python fornecidos. Conferir relatório e código saída; falta de runtime/renderização nativa falha explicitamente.
+
+Selecione uma identidade na página Pet e abra Personalizar pet, também disponível no menu do pet. Cada identidade mantém tamanho (16–512), velocidade (1–20), comportamento no chão/passeio/perseguição, escalada, descanso sobre janelas, balões de fala, volume (0–100), sossego ao digitar, descanso automático, arremessos e interações sociais. Usar padrões da página herda seus ajustes de apresentação; clonagem e importação mantêm os ajustes individuais. Aplicar salva atomicamente antes de atualizar o pet ativo. Cancelar não altera nada; restaurar padrões exige Aplicar. Falhas ao salvar ou conflitos mantêm o rascunho. Puppet desativa controles incompatíveis e aplica apenas tamanho, balões de fala e sossego ao digitar entre os ajustes de apresentação. O guarda-roupa nativo e a arte em camadas ainda não foram concluídos.
+
+Identidades dos pets → Guarda-roupa abre uma prévia animada separada. Instalar pasta valida layered-pet.json e copia os recursos para pet-assets junto das configurações locais. Escolha cabeça, pescoço, corpo e costas, ação e direção; salve até 20 conjuntos por pet. Equipar uma peça substitui o que ocupa os mesmos espaços e informa o que foi trocado; Cancelar restaura. Só aparecem peças para o corpo atual, e as que não têm todas as animações ficam desativadas. Experimentar uma peça mostra um breve desfile, e Fixar para comparar mantém o visual atual ao lado do rascunho. Um pet sendo arrastado ou em interação troca de roupa ao terminar. Pets com Sprite de imagem inteira são orientados a escolher antes um personagem em camadas. Aplicar salva e atualiza o Sprite ativo; Cancelar descarta alterações desde a última aplicação. Referências ausentes são preservadas: repare os arquivos e atualize. Puppet não aceita essas roupas Sprite. Adicionar personagem integrado desenha um de seis personagens INKSIDE (MOCHI, MOSS, PIP, BOLT, INK ou GILL) com trinta peças de catorze conjuntos ajustadas ao corpo dele e as instala em segundo plano com a mesma validação; fechar o guarda-roupa cancela. Cada personagem oferece variações de olhos, boca e três partes do corpo, além de regiões recoloríveis, e cada peça acompanha todas as animações. Os nomes de partes e peças seguem o idioma da interface.
+
+Um personagem integrado sem roupa, com peças e cores padrão, anda e escala com quadros de passo desenhados de corpo inteiro; vestido ou com peças trocadas, usa a animação em camadas para que cada peça continue ajustada.
+
+Os pets de área de trabalho sempre desenham pela pintura comum do Qt, seja qual for a renderização de sobreposições: um pet move a janela a cada tick e, no caminho por GPU, seus quadros de animação paravam de mudar durante o movimento.
+
+Os pets assumem posturas adequadas: o modo Trabalho os faz sentar, entrar em Descanso toca um breve clipe de adormecer e sair dele, um de despertar. Brincar, bola, buscar e pega-pega gastam um pouco de energia; abaixo de 20, um pet ocioso se senta mesmo com o descanso automático desligado e continua obedecendo a todos os comandos. Pousar após soltar ou lançar, pegar uma bola lançada e encontrar outro pet mostram breves reações de pouso, pegada e aceno sem interromper o movimento, os brinquedos ou seus comandos. Pacotes Sprite sem esses clipes usam suas imagens de repouso ou sono. A higiene termina com um alongamento, e pets que se encontram toda hora acenam um para o outro no máximo uma vez por minuto.
+
+O vínculo cresce com o afeto em quatro estágios: Recém-conhecidos, Familiar (20), Próximo (100) e Em sintonia (250). O estágio aparece no Status. Cada estágio tem sua saudação, pets próximos acenam e os em sintonia pulam de alegria; alcançar um estágio é comemorado uma única vez e nada é bloqueado ou perdido. Um pet salvo invocado de novo dá boas-vindas, e Fechar pelo menu do próprio pet acena antes de fechar a janela. Puppet agora diferencia clique e arraste como Sprite: um clique cumprimenta ao soltar e só um movimento além da distância de arraste do sistema move a janela, sem recompensas.
+
+Personalizar pet também ajusta Conversa (Desligada, Raramente, Normal, Frequente) para frases que o pet inicia sozinho e Tamanho da animação (Calmo, Normal, Animado) para o pulso de áudio e as breves reações de pouso e pegada, separados dos balões de fala e do volume. Respostas ao que você faz continuam aparecendo com a conversa desligada. Puppet aplica Conversa às falas programadas do script. Apresentações salvas antes continuam valendo e usam Normal para ambos.
+
+A lista de interações do gerenciador também oferece os comandos de menu do pet ativo selecionado: foto, status, lembrete, chat quando houver um serviço conectado, clonar e fechar, além de cada movimento e expressão de um modelo Puppet. Assim, todo o menu de contexto pode ser usado pelo teclado.
+
+Usar modelo Puppet integrado, na página do pet, desenha em segundo plano o personagem INKSIDE escolhido como modelo Imervue .puppet: cabeça, braços, cauda e corpo com rig, dez movimentos, três expressões e um script que liga as ações do companheiro a eles. Ele é salvo em pet-assets/puppets e escolhido como fonte com seu script, então Iniciar o cria como pet Puppet.
+
+Com vários monitores em escalas diferentes, um pet arrastado ou trazido de volta para outro monitor mantém o tamanho, fica dentro da área de trabalho desse monitor e anda por lá. As bordas de janela em monitores com escala são medidas nas mesmas coordenadas do pet, que pousa exatamente sobre as janelas.
+
+O guarda-roupa mostra as regiões de cor declaradas pelo personagem ou roupa. Escolha região e cor ou restaure a original. Somente as camadas de máscara indicadas são tingidas; contornos e outros detalhes são preservados. As cores são exibidas antes de aplicar e salvas por identidade e conjunto, inclusive na exportação/importação. Sem regiões declaradas, os controles ficam desativados.
+
+Se o salvamento falhar ao fechar, o pet fica aberto com o estado atual e o temporizador de nova tentativa. Fechar tudo mantém os pets que não puderam fechar; sair aguarda o salvamento antes de liberar recursos. O afeto para no limite suportado para que novas recompensas não impeçam salvar.
+
+Saudações e pega-pega exigem dois pets visíveis em modo de brincar, sem interação ativa, com socialização permitida e sem arrasto ou pausa ao digitar. Pets indisponíveis deixam de ser alvos ou participantes. O jogo pausa com menos de dois participantes aptos e retorna quando eles ficam disponíveis. Desativar balões só oculta o texto, não as recompensas sociais.
+
+O timer de foco coloca pets visíveis sem interação ativa em Trabalho e depois Descanso nas pausas. Parar restaura os modos anteriores, exceto mudanças manuais. Cada rodada completa dá uma vez 3 de afeto e 5 de humor aos companheiros visíveis aptos; parar antes ou ocultar não dá prêmio. Trabalho/Descanso silencia conversas espontâneas. O timer usa tempo decorrido monotônico, independente do relógio do sistema.
+
+Ao iniciar o foco, os pets ficam no canto inferior direito da área útil da própria tela se houver espaço. Parar restaura a posição anterior apenas sem movimento ou mudança de modo manual.
+
+Personagens em camadas podem oferecer variantes de rosto e corpo. O guarda-roupa mostra a prévia por pet; Aplicar salva a seleção e os conjuntos guardam personagem e partes. Cada variante deve cobrir todos os quadros. A arte final dos seis personagens ainda está pendente.
+
+O menu Sprite permite fotografar a aparência atual ou escolher uma pose em camadas e salvar um PNG transparente. A área de trabalho e os balões ficam de fora. Fotos Puppet usam um renderizador Imervue compatível e inicializado para uma imagem transparente fixa sem capturar a área de trabalho. A validação GL nativa segue pendente.
+
+Nos pets Sprite escolha acariciar e mova o ponteiro de um lado para o outro. Três movimentos claros iniciam uma reação; tremores não contam. Arrastar e brincar com outros pets ficam pausados. Sair, ocultar, mudar de modo ou terminar cancela a carícia incompleta. Prêmios exigem conclusão e intervalo.
+
+Os Sprite podem lançar e guardar uma bola. Arraste e solte para relançar; botão direito para guardar. O pet a devolve ao início e ganha 1 afeto com 30 segundos ativos de intervalo. Trabalho/descanso, outras ações, ocultar, pausa ao digitar ou timeout cancelam sem prêmio. Puppet também busca a bola (veja abaixo).
+
+Pets de chão descem das janelas para buscar a bola. Pousar em janelas fica pausado durante o jogo e volta depois; o retorno é no chão perto da posição horizontal inicial.
+
+O ponto de luz é um alvo pequeno arrastável a uma distância limitada. Pets de chão o seguem pelo chão. Solte o alvo e deixe o pet alcançá-lo para iniciar uma reação curta, premiada ao terminar com o intervalo habitual. Botão direito ou Guardar encerra. Apenas um brinquedo por pet.
+
+Clonar usa imagem/modelo, aparência, preferências e biblioteca do pet original, mesmo que os ajustes selecionem outro recurso. O clone recebe nova identidade; mudanças não afetam o original. Clones Puppet mantêm script, parâmetros e expressões ativas.
+
+Concluir uma sessão válida solicita celebrate e depois Descanso. Aplicar um figurino alterado solicita outfit_show. Duram dois segundos ativos, sem prêmios extras nem salvamento; ações ou modos manuais interrompem. Animações ausentes usam idle. Arte final e adaptação Puppet seguem pendentes.
+
+Selecione uma identidade ativa e Trazer pet para movê-la à área útil do monitor escolhido. Pets ocultos reaparecem, ações incompletas e brinquedos param e os limites Sprite são atualizados. Aparência e valores não mudam. Inicie os inativos e reduza os grandes demais.
+
+Scripts Puppet podem usar frontengine_actions para ligar estados a movimentos e expressões existentes. Nomes são validados antes de iniciar; animações não são adivinhadas. Ao terminar, efeitos da reação são liberados e escolhas manuais mantidas. Formato: docs/formats/puppet-companion-actions.md. Validação visual nativa pendente.
+
+Após escolher acariciar, Puppet espera movimentos de ida e volta do ponteiro. Sair, Esc, ocultar, mudar de modo ou ficar quieto cancela o carinho incompleto. A janela não é arrastada durante o carinho. Validação nativa dos gestos pendente.
+
+O guarda-roupa oferece seis cores rápidas para a região declarada selecionada. Pré-visualize e aplique; Cancelar mantém a aparência salva. A escolha livre e a restauração da cor original continuam disponíveis.
+
+Os menus Sprite e Puppet oferecem quatro petiscos fictícios sem arrastar arquivos. Compartilham conclusão, limite de saciedade e espera. Alimentar encerra o carinho incompleto sem recompensa; Sprite guarda o brinquedo.
+
+Cada pet pode salvar um petisco favorito e outro diferente de que gosta menos. Só o humor muda após a refeição; saciedade, afeto e espera não mudam. Edições durante a refeição valem na próxima. Perfis antigos são neutros. food_like e food_dislike são opcionais; animações finais pendentes.
+
+Vem aqui faz o Sprite seguir um marcador próximo arrastável. O modo chão segue o piso e os modos livres usam dois eixos. Ao chegar, cumprimenta com a espera normal. Clique direito ou Encerrar interação cancela, assim como trabalho/descanso, ocultar, alimentar ou trocar brinquedo.
+
+A seção de identidades permite escolher e executar interações no pet ativo selecionado. Pelo teclado é possível cumprimentar, acariciar brevemente, cuidar, dar petiscos, mudar brincar/trabalhar/descansar ou cancelar. O carinho usa as regras temporizadas sem gestos do ponteiro. Pets ocultos ou inativos não são iniciados.
+
+Mudar o idioma com o guarda-roupa aberto atualiza as opções Nenhum, Ausente e Restaurar padrões. Preserva cores, peças, nomes de conjuntos pendentes e a posição da prévia. Os nomes dos recursos mantêm o texto do autor.
+
+Para escolher o destino pelo teclado, selecione Venha aqui no gerenciador e informe deslocamentos horizontal/vertical em pixels lógicos. Valores negativos indicam esquerda/cima. O destino fica na área próxima; o modo chão ignora o deslocamento vertical. Executar inicia a chamada e encerrar interação a cancela. Pets ocupados ou incompatíveis mantêm a interação atual.
+
+Puppet também aceita Vem aqui pelo menu ou pelos deslocamentos de teclado do gerenciador. A janela inteira e o marcador ficam na área de trabalho. O centro chega ao destino por meio segundo antes do cumprimento compartilhado. Arrastar, cuidar, mudar modo, ocultar, redimensionar, alterar a área ou usar comandos manuais cancela. Usa a reação walk declarada; sem ela mantém o aspecto nativo. O temporizador roda apenas durante a chamada. Validação nativa GL/foco pendente.
+
+Puppet pode perseguir um ponto de luz arrastável pelo menu. O gerenciador permite a Sprite e Puppet posicioná-lo pelo teclado. Soltá-lo perto por meio segundo inicia a brincadeira compartilhada de três segundos; o afeto chega apenas ao concluir, com a espera normal. Chamada e luz usam um alvo. Guardar, encerrar, cuidar, arrastar, mudar modo ou ocultar cancela.
+
+O menu Puppet também oferece Lançar uma bola, e os gerenciadores de Sprite e Puppet podem lançá-la para a identidade escolhida. Física, relançar arrastando, guardar com botão direito, 1 afeto e 30 segundos de intervalo são compartilhados com Sprite; a janela Puppet persegue a bola, pega e a traz de volta ao centro original sem sair da área de trabalho. Cada relançamento reinicia o tempo limite. Bola, luz e Venha cá usam um alvo: iniciar um substitui o outro. Cuidar, arrastar, mudar modo ou ocultar cancela sem prêmio. A animação própria de buscar ainda está pendente.

@@ -58,6 +58,48 @@ def _overlay() -> QWidget:
     return widget
 
 
+def test_rejected_close_remains_registered_and_keeps_cleanup_services(centre):
+    class Refusing(QWidget):
+        def closeEvent(self, event):
+            event.ignore()
+
+    retained = Refusing()
+    ordinary = _overlay()
+    registered = [retained, ordinary]
+    cleanup = []
+    centre.register_overlay_source(lambda: registered)
+    centre.register_cleanup(lambda: cleanup.append(True))
+    try:
+        centre.clear_all()
+        assert registered == [retained]
+        assert cleanup == []
+        centre._clear_widget_list(registered, 'test')
+        assert registered == [retained]
+    finally:
+        retained.deleteLater()
+        ordinary.close()
+
+
+def test_main_shutdown_checks_each_pet_before_teardown():
+    from types import SimpleNamespace
+    from frontengine.ui.main_ui import FrontEngineMainUI
+
+    calls, messages = [], []
+    first = SimpleNamespace(flush=lambda: calls.append('first') or False)
+    second = SimpleNamespace(flush=lambda: calls.append('second') or True)
+    widgets = [SimpleNamespace(profile_session=first), SimpleNamespace(profile_session=second),
+               SimpleNamespace(profile_session=first)]
+    owner = SimpleNamespace(control_center_ui=SimpleNamespace(all_overlays=lambda: widgets),
+                            statusBar=lambda: SimpleNamespace(showMessage=messages.append))
+    assert not FrontEngineMainUI._flush_pet_profiles(owner)
+    assert calls == ['first', 'second']
+    assert messages
+    owner._shutdown_done = False
+    owner._flush_pet_profiles = lambda: False
+    assert FrontEngineMainUI._shutdown(owner) is False
+    assert not owner._shutdown_done
+
+
 def test_main_window_registers_every_additional_overlay_list(centre) -> None:
     """Sentinels prove every newer page participates in batch ownership."""
     from types import SimpleNamespace

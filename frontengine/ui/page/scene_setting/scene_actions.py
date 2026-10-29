@@ -18,6 +18,7 @@ from frontengine.utils.scene_format.scene_action_values import scene_request, la
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.scene_format.scene_editor_document import validate_geometry
 from frontengine.utils.scene_format.scene_source import PreparedScene, read_scene_source
+from frontengine.utils.scene_format.scene_3d_document import SceneDocument, read_scene_document
 
 
 def close_playback(manager: SceneManager) -> None:
@@ -37,15 +38,44 @@ def transition_frames(manager: SceneManager) -> dict[str, QImage]:
     from shiboken6 import isValid
     frames = {}
     for view in manager.view_list[:8]:
-        if isValid(view) and isinstance(view, SceneCompositorView) and view.isVisible():
-            frames[view.screen().name()] = view.output_frame().scaled(1920, 1080, Qt.AspectRatioMode.KeepAspectRatio)
+        if isValid(view) and hasattr(view, 'output_frame') and view.isVisible():
+            try:
+                frames[view.screen().name()] = view.output_frame().scaled(1920, 1080, Qt.AspectRatioMode.KeepAspectRatio)
+            except Exception as error:
+                front_engine_logger.warning(f'[SceneActions] Cannot capture outgoing scene: {error}')
     return frames
 
 
-def prepare_playback(entries: dict, monitors: list) -> SceneManager:
+def prepare_playback(entries: dict, monitors: list, *, models=None) -> SceneManager:
     """Build hidden playback; failures close every candidate and preserve the old scene."""
     candidate = SceneManager()
     try:
+        if isinstance(entries, SceneDocument) and entries.mode == '3d':
+            if user_setting_dict.get('render_backend', 'auto') == 'software':
+                raise ValueError('3D scenes require OpenGL; select Auto or GPU in render settings')
+            from frontengine.show.scene.runtime3d import Scene3DRuntime
+            from frontengine.show.scene.view3d import Scene3DView, OffscreenScene3D
+            candidate.runtime3d = Scene3DRuntime(entries, models)
+            candidate.layer_settings = deepcopy(entries.entries)
+            for monitor in monitors:
+                factor = min(1, 1920/entries.canvas[0], 1080/entries.canvas[1])
+                size = tuple(max(16, round(value*factor)) for value in entries.canvas)
+                probe = OffscreenScene3D(candidate.runtime3d, size, monitor)
+                try:
+                    if probe.frame().isNull():
+                        raise RuntimeError('3D scene did not produce a first frame')
+                finally:
+                    probe.close()
+                view = Scene3DView(candidate.runtime3d)
+                candidate.view_list.append(view)
+                if monitor is not None:
+                    view.setScreen(monitor)
+                    view.move(monitor.availableGeometry().topLeft())
+                view.prime()
+            from frontengine.show.scene.screen_topology import SceneScreenTopology
+            targets = [monitor or QGuiApplication.primaryScreen() for monitor in monitors]
+            candidate.runtime3d.topology = SceneScreenTopology(candidate.runtime3d, targets, candidate.view_list)
+            return candidate
         for key, entry in entries.items():
             for field in ('file_path', 'text_file', 'script_path'):
                 if entry.get(field) and not Path(entry[field]).is_file():
@@ -62,9 +92,11 @@ def prepare_playback(entries: dict, monitors: list) -> SceneManager:
                 view.setScreen(monitor)
                 view.move(monitor.availableGeometry().topLeft())
         return candidate
-    except (OSError, ValueError, RuntimeError):
+    except Exception as error:
         close_playback(candidate)
-        raise
+        if isinstance(error, (OSError, ValueError, RuntimeError)):
+            raise
+        raise RuntimeError(f'Cannot initialize scene playback: {error}') from error
 
 
 class _SceneSignals(QObject):
@@ -102,14 +134,14 @@ class SceneActions(QObject):
         self.closed = False
         self.prepared: PreparedScene | None = None
         self.queued_layers: list[tuple[DeferredAction, str, str]] = []
-        self.page.visual_editor.document.changed.connect(self._synchronize)
+        self.page.visual_editor.document.document_changed.connect(self._synchronize_document)
 
     def request(self, value: str, *, load_only: bool = False) -> DeferredAction:
         """Load or play the latest request; superseded receipts resolve as failures."""
         if self.closed:
             raise ValueError('Scene actions are closed')
         path, screen = scene_request(value, load_only=load_only)
-        entries = deepcopy(self.page.visual_editor.document.entries) if not path else None
+        entries = self.page.visual_editor.document.scene.copy() if not path else None
         return self._enqueue(path, screen, load_only, entries, not path)
 
     def request_entries(self, entries: dict, screen: str | int = 'primary') -> DeferredAction:
@@ -117,8 +149,9 @@ class SceneActions(QObject):
         if self.closed:
             raise ValueError('Scene actions are closed')
         _path, screen = scene_request(json.dumps({'screen': screen}))
-        validated = validate_geometry(entries)
-        if len(validated) > 256:
+        validated = read_scene_document(entries)
+        validated.entries = validate_geometry(validated.entries)
+        if len(validated.entries) > 256:
             raise ValueError('Automated scenes support at most 256 layers')
         return self._enqueue('', screen, False, validated, False)
 
@@ -155,7 +188,7 @@ class SceneActions(QObject):
         cancel, signals = Event(), _SceneSignals()
         signals.finished.connect(self._finished, Qt.ConnectionType.QueuedConnection)
         self.pending = {'request': request, 'cancel': cancel, 'signals': signals}
-        function = (lambda: self.reader(path)) if path else lambda: PreparedScene(validate_geometry(entries))
+        function = (lambda: self.reader(path)) if path else lambda: PreparedScene(entries).prepare()
         QThreadPool.globalInstance().start(_SceneRead(function, cancel, signals))
         self.status_changed.emit('')
 
@@ -194,10 +227,15 @@ class SceneActions(QObject):
         self._launch()
 
     def _adopt(self, prepared: PreparedScene, screen, load_only: bool, current: bool) -> None:
-        if current and prepared.entries != self.page.visual_editor.document.entries:
+        if current and prepared.document != self.page.visual_editor.document.scene:
             raise ValueError('The editor changed while scene playback was being prepared')
-        candidate = None if load_only else self.builder(prepared.entries, self._monitors(screen))
+        data = prepared.document if prepared.document.mode == '3d' else prepared.entries
+        candidate = None if load_only else (self.builder(data, self._monitors(screen), models=prepared.models)
+                    if self.builder is prepare_playback else self.builder(data, self._monitors(screen)))
         manager = self.page.scene
+        old_runtime = manager.runtime3d
+        old_position = old_runtime.timeline.position if old_runtime is not None else 0
+        old_playing = old_runtime.timeline.requested if old_runtime is not None else True
         previous_frames = transition_frames(manager) if candidate is not None else {}
         close_playback(manager)
         if candidate is not None:
@@ -205,17 +243,25 @@ class SceneActions(QObject):
             for name in ('widget_list', 'view_list', 'native_widgets', 'puppet_settings'):
                 getattr(manager, name)[:] = getattr(candidate, name)
             manager.layer_settings.update(candidate.layer_settings)
+            manager.runtime3d = candidate.runtime3d
+            if manager.runtime3d is not None:
+                manager.runtime3d.failed.connect(self.status_changed)
+                manager.runtime3d.timeline.seek(old_position if current else 0)
+                if old_playing or not current:
+                    manager.runtime3d.timeline.play()
         if not current:
-            self.page.visual_editor.document.reset(prepared.entries)
+            self.page.visual_editor.document.reset(prepared.document)
             previous, self.prepared = self.prepared, prepared
             if previous is not None:
                 previous.close()
         else:
             prepared.close()
         for view in manager.view_list:
-            if isinstance(view, SceneCompositorView):
+            if hasattr(view, 'begin_transition') and not (current and manager.runtime3d is not None):
                 view.begin_transition(previous_frames.get(view.screen().name()))
             view.showMaximized()
+        if manager.runtime3d is not None and manager.runtime3d.topology is not None:
+            manager.runtime3d.topology.start(manager.view_list)
         for widget in manager.native_widgets:
             setting = manager.layer_settings.get(widget.scene_layer_key, {})
             widget.setVisible(setting.get('visible', True))
@@ -271,6 +317,58 @@ class SceneActions(QObject):
             front_engine_logger.warning(f'[SceneActions] playback update failed: {error}')
             self.status_changed.emit(str(error))
 
+    def _synchronize_document(self, document) -> None:
+        runtime = self.page.scene.runtime3d
+        if runtime is None:
+            self._synchronize(document.entries)
+        elif document.mode == '3d':
+            previous_lock = runtime.document.playback.get('click_through', False)
+            if runtime.update_document(document):
+                self.page.scene.layer_settings = deepcopy(document.entries)
+                from frontengine.show.window_helpers import set_overlay_locked
+                for view in self.page.scene.view_list:
+                    locked = document.playback.get('click_through', False)
+                    if previous_lock != locked:
+                        set_overlay_locked(view, locked)
+            elif self.pending is None or self.pending['request'][5]:
+                self._enqueue('', 'all' if len(self.page.scene.view_list) > 1 else
+                    self._current_screen(), False, document.copy(), True)
+        elif self.pending is None or self.pending['request'][5]:
+            self._enqueue('', 'all' if len(self.page.scene.view_list) > 1 else
+                          self._current_screen(), False, document.copy(), True)
+
+    def _current_screen(self):
+        screens = QGuiApplication.screens()
+        views = self.page.scene.view_list
+        return screens.index(views[0].screen()) if views and views[0].screen() in screens else 'primary'
+
+    def set_group_hidden(self, hidden):
+        runtime = self.page.scene.runtime3d
+        if runtime is not None and runtime.topology is not None:
+            runtime.topology.set_group_hidden(hidden)
+
+    def playback(self, operation: str, value: str = '') -> bool:
+        from frontengine.utils.scene_format.scene_action_values import playback_value
+        parsed = playback_value(operation, value)
+        seen = set()
+        for view in self.page.scene.view_list:
+            timeline = getattr(view, 'timeline', None)
+            if timeline is None or id(timeline) in seen:
+                continue
+            seen.add(id(timeline))
+            if operation == 'scene_pause':
+                timeline.pause()
+            elif operation == 'scene_resume':
+                timeline.play()
+            elif operation == 'scene_seek':
+                timeline.seek(parsed)
+            elif operation == 'scene_rate':
+                if hasattr(timeline, 'set_rate'):
+                    timeline.set_rate(parsed)
+            elif operation == 'scene_loop' and hasattr(timeline, 'set_loop'):
+                timeline.set_loop(parsed)
+        return bool(seen)
+
     def stop_playback(self, _value: str = '') -> bool:
         """Cancel pending starts and stop playback; keep editor assets available."""
         if self.pending is not None:
@@ -290,6 +388,7 @@ class SceneActions(QObject):
         self.page.visual_editor.media_preview.shutdown()
         self.page.visual_editor.timeline.shutdown()
         self.page.visual_editor.canvas.clear()
+        self.page.visual_editor.editor3d.shutdown()
         if self.prepared is not None:
             self.prepared.close()
             self.prepared = None

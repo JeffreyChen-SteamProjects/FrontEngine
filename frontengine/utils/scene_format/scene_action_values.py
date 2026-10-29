@@ -6,6 +6,24 @@ import json
 from frontengine.utils.scene_format.scene_editor_document import validate_geometry
 
 
+def playback_value(action: str, value: str):
+    from frontengine.utils.scene_format.scene_3d_document import finite
+    if action in ('scene_pause', 'scene_resume'):
+        if value.strip():
+            raise ValueError('This playback action does not take a value')
+        return None
+    data = json.loads(value)
+    if action == 'scene_loop':
+        if type(data) is not bool:
+            raise ValueError('Loop requires true or false')
+        return data
+    if action == 'scene_seek':
+        return finite(data, 'Timeline position', 0, 3600)
+    if action == 'scene_rate':
+        return finite(data, 'Playback rate', .1, 4)
+    raise ValueError('Unknown playback action')
+
+
 def scene_request(value: str, *, load_only: bool = False) -> tuple[str, str | int]:
     """Accept a path or explicit JSON path/screen; empty playback uses the editor."""
     value = value.strip()
@@ -26,6 +44,14 @@ def layer_changes(action: str, value: str) -> tuple[str, dict]:
         key, changes = value.strip(), {'visible': action == 'layer_show'}
     else:
         data = json.loads(value)
+        if action == 'layer_transform':
+            from frontengine.utils.scene_format.scene_3d_document import validate_transform
+            if not isinstance(data, dict) or set(data) != {'layer', 'transform'}:
+                raise ValueError('3D transform requires layer and transform')
+            key = data['layer']
+            if not isinstance(key, str) or not key or len(key) > 256:
+                raise ValueError('Choose an exact layer key')
+            return key, {'transform': validate_transform(data['transform'])}
         expected = {'layer', 'opacity'} if action == 'layer_opacity' else {'layer', 'x', 'y'}
         if not isinstance(data, dict) or set(data) != expected:
             raise ValueError('Layer value must contain layer plus opacity, or layer plus x and y')

@@ -5,6 +5,9 @@ import sys
 
 def main() -> None:
     """Isolate acceptance settings before importing the application."""
+    if '--verify-3d-scene-build' in sys.argv:
+        from frontengine.utils.scene_format.scene_3d_acceptance import main as verify
+        sys.exit(verify(sys.argv[1:]))
     if '--verify-scene-build' in sys.argv:
         from scene_build_acceptance import main as verify
         sys.exit(verify(sys.argv[1:]))

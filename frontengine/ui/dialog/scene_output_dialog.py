@@ -1,14 +1,36 @@
 """Explicit fixed-resolution preview and asynchronous virtual-camera output."""
 from __future__ import annotations
 
-from PySide6.QtCore import Qt, QTimer
-from PySide6.QtGui import QPixmap
-from PySide6.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QSpinBox, QPushButton
+from PySide6.QtCore import Qt, QTimer, QRunnable, QThreadPool, QObject, Signal
+from PySide6.QtGui import QPixmap, QColor
+from PySide6.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QSpinBox, QPushButton, QColorDialog
 
 from frontengine.show.scene.render_session import SceneRenderSession, OUTPUT_SIZES
 from frontengine.utils.virtual_camera.frame_sender import FrameSender
 from frontengine.utils.recording.frame_recorder import image_to_rgb
 from frontengine.utils.multi_language.retranslate import tr, retranslator, translate
+from frontengine.utils.scene_format.scene_resource_reads import SceneResourceRead
+
+
+class _PreparationSignals(QObject):
+    finished = Signal(int, object, object, str)
+
+
+class _OutputPreparation(QRunnable):
+    def __init__(self, generation, document, signals):
+        super().__init__()
+        self.generation, self.document, self.signals = generation, document, signals
+        self.read = SceneResourceRead(document)
+
+    def run(self):
+        try:
+            from frontengine.show.scene.runtime3d import prepare_models
+            models = prepare_models(self.document)
+            self.signals.finished.emit(self.generation, self.document, models, '')
+        except Exception as error:
+            self.signals.finished.emit(self.generation, self.document, None, str(error))
+        finally:
+            self.read.close()
 
 
 class SceneOutputDialog(QDialog):
@@ -18,6 +40,10 @@ class SceneOutputDialog(QDialog):
         super().__init__(parent)
         self.document, self.renderer, self.sender_factory = document, renderer, sender_factory
         self.session, self.sender = None, None
+        self.generation, self.preparing, self.send_after_prepare = 0, False, False
+        self.background = QColor('black')
+        self.preparation_signals = _PreparationSignals()
+        self.preparation_signals.finished.connect(self._prepared, Qt.ConnectionType.QueuedConnection)
         self.stopping_senders = set()
         tr(self, 'scene_camera_output', setter='setWindowTitle')
         self.resize(720, 560)
@@ -36,6 +62,9 @@ class SceneOutputDialog(QDialog):
         row.addWidget(self.resolution)
         row.addWidget(tr(QLabel(), 'tools_fps'))
         row.addWidget(self.fps)
+        background_button = tr(QPushButton(), 'scene3d_output_background', 'Camera background')
+        background_button.clicked.connect(self._background)
+        row.addWidget(background_button)
         self.buttons = {}
         for key, callback in [('scene_output_preview', self.start_preview),
                               ('scene_output_send', self.send_camera), ('scene_output_stop', self.stop)]:
@@ -54,9 +83,37 @@ class SceneOutputDialog(QDialog):
     def start_preview(self) -> None:
         """Start only on user intent; previews never open a camera or play audio."""
         self.stop()
+        if self.document.scene.mode == '3d':
+            self.preparing = True
+            self.resolution.setEnabled(False)
+            self.fps.setEnabled(False)
+            retranslator.set_text(self.status, 'scene_action_loading')
+            QThreadPool.globalInstance().start(_OutputPreparation(
+                self.generation, self.document.scene.copy(), self.preparation_signals))
+            return
+        self._start_session(self.document.entries)
+
+    def _prepared(self, generation, document, models, error):
+        if generation != self.generation or not self.preparing:
+            return
+        self.preparing = False
+        if error:
+            self.resolution.setEnabled(True)
+            self.fps.setEnabled(True)
+            self._error(error)
+            return
+        self._start_session(document, models)
+        if self.send_after_prepare and self.session is not None:
+            self.send_after_prepare = False
+            self.send_camera()
+
+    def _start_session(self, data, models=None):
         try:
-            self.session = self.renderer(self.document.entries, tuple(self.resolution.currentData()), self)
-        except (OSError, ValueError, RuntimeError) as error:
+            kwargs = {'models': models} if models is not None else {}
+            self.session = self.renderer(data, tuple(self.resolution.currentData()), self, **kwargs)
+        except Exception as error:
+            self.resolution.setEnabled(True)
+            self.fps.setEnabled(True)
             self._error(str(error))
             return
         self.session.failed.connect(self._error)
@@ -71,7 +128,10 @@ class SceneOutputDialog(QDialog):
         if self.sender is not None or self.stopping_senders:
             return
         if self.session is None:
-            self.start_preview()
+            if not self.preparing:
+                self.start_preview()
+            if self.preparing:
+                self.send_after_prepare = True
         if self.session is None:
             return
         width, height = self.resolution.currentData()
@@ -108,21 +168,41 @@ class SceneOutputDialog(QDialog):
     def _refresh(self) -> None:
         if self.session is None:
             return
-        frame = self.session.frame()
+        try:
+            frame = self.session.frame()
+        except Exception as error:
+            self.stop()
+            self._error(str(error))
+            return
         if frame.isNull():
             return
         self.preview.setPixmap(QPixmap.fromImage(frame).scaled(self.preview.size(), Qt.AspectRatioMode.KeepAspectRatio))
         if self.sender is not None:
+            if frame.hasAlphaChannel():
+                from PySide6.QtGui import QImage, QPainter
+                opaque = QImage(frame.size(), QImage.Format.Format_RGB32)
+                opaque.fill(self.background)
+                painter = QPainter(opaque)
+                painter.drawImage(0, 0, frame)
+                painter.end()
+                frame = opaque
             self.sender.submit(image_to_rgb(frame))
 
+    def _background(self):
+        color = QColorDialog.getColor(self.background, self, translate('scene3d_output_background', 'Camera background'))
+        if color.isValid():
+            self.background = color
+
     def _scene_changed(self, _entries: dict) -> None:
-        if self.session is not None or self.sender is not None:
+        if self.session is not None or self.sender is not None or self.preparing:
             self.stop()
             retranslator.set_text(self.status, 'scene_output_changed')
 
     def stop(self) -> None:
         """Stop timers/device requests before closing renderer and shared asset readers."""
         self.timer.stop()
+        self.generation += 1
+        self.preparing, self.send_after_prepare = False, False
         if self.sender is not None:
             sender, self.sender = self.sender, None
             self.stopping_senders.add(sender)

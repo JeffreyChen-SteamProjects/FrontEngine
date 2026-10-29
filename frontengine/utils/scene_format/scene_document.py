@@ -31,6 +31,8 @@ def normalize_scene(data: object, base_dir: Path | None = None) -> dict:
     if not isinstance(data, dict):
         raise ValueError('A scene must be a JSON object')
     if data.get('format') == SCENE_FORMAT:
+        if data.get('version') == 2:
+            raise ValueError('Scene version 2 requires read_scene_document; metadata must be preserved')
         if type(data.get('version')) is not int or data['version'] != SCENE_VERSION:
             raise ValueError('Unsupported scene version')
         data = data.get('entries')

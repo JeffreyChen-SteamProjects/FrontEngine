@@ -1,0 +1,514 @@
+{
+  "date": "2026-10-23",
+  "scope": "PyOpenGL 3D Scene editing, playback, persistence and output through existing Scene workflows",
+  "status": "complete_with_user_authorized_macos_skip",
+  "requirements": [
+    {
+      "name": "Existing Scene workflow and v1 compatibility",
+      "implementation": [
+        "scene_visual_editor.py",
+        "scene_editor_document.py",
+        "scene_setting_ui.py",
+        "scene_3d_document.py"
+      ],
+      "evidence": [
+        "test_scene_3d.py::test_v2_roundtrip_and_v1_compatibility",
+        "test_scene_3d_ui.py::test_mode_switch_json_and_undo_keep_camera_and_settings",
+        "test_scene_3d_ui.py::test_3d_templates_keep_full_documents_in_library",
+        "test_scene_3d_lifecycle.py::test_undo_history_releases_its_document_without_a_native_ownership_cycle"
+      ]
+    },
+    {
+      "name": "Models, primitives, materials, cameras, lights and hierarchy",
+      "implementation": [
+        "model_asset.py",
+        "math3d.py",
+        "renderer3d.py",
+        "scene_3d_editor.py"
+      ],
+      "evidence": [
+        "test_scene_3d.py::test_gltf_skin_morph_and_glb",
+        "test_scene_3d.py::test_obj_material_and_package_dependencies",
+        "test_scene_3d.py::test_hierarchy_and_quaternion_animation",
+        "test_scene_3d.py::test_primitive_winding_matches_normals",
+        "native:templates",
+        "native:animated"
+      ]
+    },
+    {
+      "name": "Selection, axis transforms, snapping, locking, camera navigation and undo",
+      "implementation": [
+        "view3d.py",
+        "scene_3d_editor.py",
+        "scene_editor_document.py"
+      ],
+      "evidence": [
+        "native:direct_transform_tools",
+        "native:editor",
+        "test_scene_3d.py::test_group_duplication_and_deletion_are_undoable"
+      ]
+    },
+    {
+      "name": "Shared clock, keyframes, clip animation and seven existing media types",
+      "implementation": [
+        "runtime3d.py",
+        "math3d.py",
+        "scene_3d_animation_dialog.py",
+        "media_frame.py"
+      ],
+      "evidence": [
+        "test_scene_3d.py::test_clock_pause_seek_rate_loop_and_hidden_views",
+        "test_scene_3d.py::test_runtime_shares_pose_and_does_not_mutate_document",
+        "test_scene_3d_ui.py::test_3d_animation_dialog_saves_numeric_rotation_with_undo",
+        "native:media"
+      ]
+    },
+    {
+      "name": "Transparent desktop, multiple monitors, transactional startup and crossfade",
+      "implementation": [
+        "view3d.py",
+        "renderer3d.py",
+        "scene_actions.py"
+      ],
+      "evidence": [
+        "native:transparent",
+        "native:monitors",
+        "native:transaction_primed",
+        "native:transition",
+        "test_scene_3d_ui.py::test_failed_gpu_request_preserves_editor_and_old_playback",
+        "test_scene_3d_ui.py::test_rapid_structural_edits_keep_latest_requested_document",
+        "native:open_ended_transition"
+      ]
+    },
+    {
+      "name": "Display reconnection and runtime quality/low-power policy",
+      "implementation": [
+        "screen_topology.py",
+        "runtime3d.py",
+        "view3d.py",
+        "control_center_ui.py"
+      ],
+      "evidence": [
+        "test_scene_3d_lifecycle.py",
+        "native:screen_recreation",
+        "native:quality_fixed_output"
+      ],
+      "limits": "Disconnect callbacks are simulated; recreated viewports use real Qt/OpenGL contexts. No physical display cable removal was performed."
+    },
+    {
+      "name": "Portable JSON/fescene, model dependencies, Workshop adapter and bounded resource ownership",
+      "implementation": [
+        "scene_package.py",
+        "scene_source.py",
+        "scene_resource_reads.py",
+        "workshop_package.py"
+      ],
+      "evidence": [
+        "test_scene_3d.py::test_gltf_package_and_background_preparation",
+        "test_scene_3d.py::test_external_texture_survives_portable_package",
+        "test_scene_3d.py::test_model_resource_resolver_rejects_escape_and_network",
+        "test_scene_3d.py::test_unsupported_required_extension_is_explicit",
+        "test_scene_3d.py::test_extracted_assets_wait_for_all_background_readers",
+        "native:stress"
+      ],
+      "limits": "Workshop serialization uses the existing tested adapter; this task does not publish a remote Workshop item."
+    },
+    {
+      "name": "Fixed-resolution offscreen rendering and actual virtual camera output",
+      "implementation": [
+        "render_session.py",
+        "view3d.py",
+        "scene_output_dialog.py"
+      ],
+      "evidence": [
+        "native:output_dialog",
+        "native:quality_fixed_output",
+        "native:camera"
+      ],
+      "limits": "Camera acceptance uses the installed Windows OBS driver, pyvirtualcam producer and PyAV DirectShow consumer; synthetic scene pixels only."
+    },
+    {
+      "name": "Dependency declarations, translations, schema and user documentation",
+      "implementation": [
+        "pyproject.toml",
+        "stable.toml",
+        "requirements.txt",
+        "dev_requirements.txt",
+        "scene_3d_words.py",
+        "scene-v2.schema.json",
+        "docs/source/docs/Eng/scene.rst",
+        "docs/source/docs/Zh/scene.rst"
+      ],
+      "evidence": [
+        "test_executable_build.py",
+        "test_scene_3d_acceptance.py",
+        "pip check",
+        "compileall",
+        "pyflakes",
+        "git diff --check"
+      ]
+    }
+  ],
+  "windows_source": {
+    "completed": true,
+    "report": "build/scene3d-source-release/result.json",
+    "tests": {
+      "passed": 1849,
+      "skipped": 6,
+      "log": "build/scene3d-windows-final-helper-regression.log"
+    },
+    "platform": "Windows 11, NVIDIA RTX 5060 Laptop GPU, desktop OpenGL 3.3, two monitors, Qt 6.11.2",
+    "additional_qt_612_reports": [
+      "build/scene3d-legacy-qt612-2/result.json",
+      "build/scene3d-camera-primed/result.json",
+      "build/scene3d-tools-quality-check-3/result.json"
+    ],
+    "native": {
+      "completed": true,
+      "timestamp_utc": "2026-10-23T15:15:10.894765+00:00",
+      "compiled": false,
+      "camera": {
+        "device": "OBS Virtual Camera",
+        "sent_frames": 43,
+        "read_frames": 13,
+        "marker_colors": 3,
+        "cube_pixels": true,
+        "background_pixels": true,
+        "size": [
+          640,
+          480
+        ]
+      },
+      "stress": {
+        "static": {
+          "vertices": 250000,
+          "triangles": 498002,
+          "load_seconds": 0.06,
+          "decoded_bytes": 27952048,
+          "gpu_bytes": 19976024,
+          "median_frame_ms": 4.41,
+          "max_frame_ms": 31.352
+        },
+        "skin_morph": {
+          "vertices": 250000,
+          "triangles": 498002,
+          "load_seconds": 0.177,
+          "decoded_bytes": 47952256,
+          "gpu_bytes": 19976024,
+          "median_frame_ms": 119.446,
+          "max_frame_ms": 126.543
+        }
+      },
+      "media": {
+        "types": [
+          "GIF",
+          "IMAGE",
+          "PUPPET",
+          "SOUND",
+          "TEXT",
+          "VIDEO",
+          "WEB"
+        ],
+        "image_video_web_pixels": true,
+        "puppet_native_fbo": true,
+        "muted_preview": true,
+        "paused_video_seek": true,
+        "gif_seek": true
+      },
+      "platform": "windows",
+      "gl_version": "3.3.0 NVIDIA 617.42",
+      "renderer": "NVIDIA GeForce RTX 5060 Laptop GPU/PCIe/SSE2",
+      "offscreen": [
+        320,
+        180
+      ],
+      "desktop": [
+        400,
+        225
+      ],
+      "transparent": true,
+      "animated": true,
+      "transaction_primed": true,
+      "editor": true,
+      "transition": true,
+      "output_dialog": true,
+      "direct_transform_tools": true,
+      "quality_fixed_output": true,
+      "templates": true,
+      "monitors": 2,
+      "screen_recreation": "native_views_simulated_disconnect",
+      "open_ended_transition": true,
+      "pyside6_version": "6.11.2"
+    }
+  },
+  "windows_executable": {
+    "status": "passed",
+    "path": "build/nuitka-scene3d-release/start_front_engine.dist/FrontEngine.exe",
+    "distribution": "build/nuitka-scene3d-release/start_front_engine.dist",
+    "bytes": 111634944,
+    "sha256": "e94f386ff592b23f9d2dc94625767354101f0dd592b2d3c9cd62d49de68cff18",
+    "build_log": "build/scene3d-nuitka-final-report-fix.log",
+    "build": {
+      "jobs": 8,
+      "python": "3.14.4",
+      "compiler": "MSVC 14.5",
+      "packages": {
+        "Nuitka": "4.3.1",
+        "PySide6": "6.11.2",
+        "Imervue": "1.0.93",
+        "PyOpenGL": "3.1.10",
+        "numpy": "2.5.1",
+        "pygltflib": "1.16.5",
+        "trimesh": "5.1.1",
+        "av": "19.0.2",
+        "pyvirtualcam": "0.15.0"
+      },
+      "c_files": 3983,
+      "cache_hits": 3981,
+      "cache_misses": 2
+    },
+    "native_report": "build/scene3d-exe-final/result.json",
+    "native": {
+      "completed": true,
+      "timestamp_utc": "2026-10-23T16:51:24.315406+00:00",
+      "compiled": true,
+      "camera": {
+        "device": "OBS Virtual Camera",
+        "sent_frames": 24,
+        "read_frames": 12,
+        "marker_colors": 3,
+        "cube_pixels": true,
+        "background_pixels": true,
+        "size": [
+          640,
+          480
+        ]
+      },
+      "stress": {
+        "static": {
+          "vertices": 250000,
+          "triangles": 498002,
+          "load_seconds": 0.024,
+          "decoded_bytes": 27952048,
+          "gpu_bytes": 19976024,
+          "median_frame_ms": 2.029,
+          "max_frame_ms": 18.406
+        },
+        "skin_morph": {
+          "vertices": 250000,
+          "triangles": 498002,
+          "load_seconds": 0.096,
+          "decoded_bytes": 47952256,
+          "gpu_bytes": 19976024,
+          "median_frame_ms": 70.107,
+          "max_frame_ms": 73.7
+        }
+      },
+      "media": {
+        "types": [
+          "GIF",
+          "IMAGE",
+          "PUPPET",
+          "SOUND",
+          "TEXT",
+          "VIDEO",
+          "WEB"
+        ],
+        "image_video_web_pixels": true,
+        "puppet_native_fbo": true,
+        "muted_preview": true,
+        "paused_video_seek": true,
+        "gif_seek": true
+      },
+      "platform": "windows",
+      "gl_version": "3.3.0 Core Profile Context 26.10.18.260513",
+      "renderer": "AMD Radeon 760M Graphics",
+      "offscreen": [
+        320,
+        180
+      ],
+      "desktop": [
+        400,
+        225
+      ],
+      "transparent": true,
+      "animated": true,
+      "transaction_primed": true,
+      "editor": true,
+      "transition": true,
+      "output_dialog": true,
+      "direct_transform_tools": true,
+      "quality_fixed_output": true,
+      "templates": true,
+      "monitors": 2,
+      "screen_recreation": "native_views_simulated_disconnect",
+      "open_ended_transition": true,
+      "pyside6_version": "6.11.2",
+      "executable_sha256": "e94f386ff592b23f9d2dc94625767354101f0dd592b2d3c9cd62d49de68cff18",
+      "executable_path": "D:\\Codes\\FrontEngine\\build\\nuitka-scene3d-release\\start_front_engine.dist\\FrontEngine.exe"
+    },
+    "legacy_report": "build/scene3d-exe-legacy-final/result.json",
+    "legacy": {
+      "success": true,
+      "types": [
+        "GIF",
+        "IMAGE",
+        "PUPPET",
+        "SOUND",
+        "TEXT",
+        "VIDEO",
+        "WEB"
+      ],
+      "image_video_web_pixels": true,
+      "puppet_native_fbo": true,
+      "muted_preview": true,
+      "qt_screen_dpr": 1.0,
+      "legacy_json": true,
+      "versioned_json": true,
+      "portable_export_reload": true,
+      "web_interaction": true,
+      "undo_redo": true,
+      "pause_resume": true,
+      "resources_released": true
+    },
+    "startup_report": "build/scene3d-exe-normal-final.result.json",
+    "startup": {
+      "completed": true,
+      "exit_code": 0,
+      "started_utc": "2026-10-23T16:52:44.3756394+00:00",
+      "elapsed_seconds": 11.866,
+      "arguments": [
+        "--debug"
+      ],
+      "executable": "D:\\Codes\\FrontEngine\\build\\nuitka-scene3d-release\\start_front_engine.dist\\FrontEngine.exe",
+      "working_directory": "D:/Codes/FrontEngine/build/scene3d-exe-normal-final"
+    },
+    "image_locator_tests": {
+      "passed": 13,
+      "log": "build/scene3d-executable-image-tests.log"
+    }
+  },
+  "linux": {
+    "status": "passed",
+    "log": "build/scene3d-linux-regression-final.log",
+    "environment": "Disposable Python 3.12 Debian container, read-only repository, Xvfb and Mesa software OpenGL",
+    "tests": {
+      "passed": 1842,
+      "skipped": 12
+    },
+    "native": {
+      "completed": true,
+      "timestamp_utc": "2026-10-23T15:15:20.249844+00:00",
+      "compiled": false,
+      "camera": "not_run",
+      "stress": "not_run",
+      "media": "not_run",
+      "platform": "xcb",
+      "gl_version": "4.5 (Core Profile) Mesa 25.0.7-2+deb13u1",
+      "renderer": "llvmpipe (LLVM 19.1.7, 256 bits)",
+      "offscreen": [
+        320,
+        180
+      ],
+      "desktop": [
+        320,
+        180
+      ],
+      "transparent": true,
+      "animated": true,
+      "transaction_primed": true,
+      "editor": true,
+      "transition": true,
+      "output_dialog": true,
+      "direct_transform_tools": true,
+      "quality_fixed_output": true,
+      "templates": true,
+      "monitors": 1,
+      "screen_recreation": "native_views_simulated_disconnect",
+      "open_ended_transition": true,
+      "pyside6_version": "6.11.2"
+    },
+    "versions": {
+      "python": "3.12.15 (main, Oct 21 2026, 01:08:20) [GCC 14.2.0]",
+      "packages": {
+        "PySide6": "6.11.2",
+        "numpy": "2.5.4",
+        "pygltflib": "1.16.5",
+        "trimesh": "5.1.1",
+        "PyOpenGL": "3.1.10",
+        "PyOpenGL_accelerate": "3.1.10",
+        "pytest": "9.1.1"
+      }
+    },
+    "native_log": "build/scene3d-linux-gl-release.log",
+    "source_sha256_at_validation": "d76278d9947c014c7cae84a4b2e36a1721d47fd368454a6fdc17f8ed65aeb704",
+    "later_change_scope": "Compiled acceptance image-path hashing only; scene runtime, renderer and editor validation remain applicable."
+  },
+  "macos": {
+    "status": "skipped_by_user",
+    "reason": "No available macOS host or runner; user explicitly requested skipping this acceptance for now."
+  },
+  "excluded_from_plan": [
+    "Draco",
+    "Meshopt",
+    "KTX2",
+    "shadows",
+    "physics",
+    "mesh authoring",
+    "wallpaper",
+    "video export"
+  ],
+  "wheel": {
+    "status": "passed",
+    "path": "build\\scene3d-wheel-final\\frontengine_dev-1.0.81-py3-none-any.whl",
+    "sha256": "baab7b91ed1ad5264991a7f2fddfd8dcaa417a0cfea82184e69bab7911580345",
+    "native": {
+      "completed": true,
+      "timestamp_utc": "2026-10-23T16:36:19.704665+00:00",
+      "compiled": false,
+      "camera": "not_run",
+      "stress": "not_run",
+      "media": "not_run",
+      "platform": "windows",
+      "gl_version": "3.3.0 NVIDIA 617.42",
+      "renderer": "NVIDIA GeForce RTX 5060 Laptop GPU/PCIe/SSE2",
+      "offscreen": [
+        320,
+        180
+      ],
+      "desktop": [
+        400,
+        225
+      ],
+      "transparent": true,
+      "animated": true,
+      "transaction_primed": true,
+      "editor": true,
+      "transition": true,
+      "output_dialog": true,
+      "direct_transform_tools": true,
+      "quality_fixed_output": true,
+      "templates": true,
+      "monitors": 2,
+      "screen_recreation": "native_views_simulated_disconnect",
+      "open_ended_transition": true,
+      "pyside6_version": "6.11.2"
+    }
+  },
+  "source": {
+    "base_commit": "891d272cdd58c52c68da24d7865f3a6517c77521",
+    "uncommitted": true,
+    "files": 411,
+    "sha256": "3abec9584b1e4748bb2045f7a73b286db0a3351347bd39b9edd98628f285c0a5",
+    "algorithm": "Sorted frontengine/exe Python paths and four dependency manifests; each UTF-8 path, NUL, LF-normalized content, NUL; SHA-256"
+  },
+  "static_checks": {
+    "compileall": "passed",
+    "pyflakes_changed_python_files": 51,
+    "pip_check": "No broken requirements found",
+    "git_diff_check": "passed",
+    "source_matches_final_build": true,
+    "external_executable_hash_matches_native_report": true
+  },
+  "completed_at_utc": "2026-10-23T16:55:04.607176+00:00"
+}

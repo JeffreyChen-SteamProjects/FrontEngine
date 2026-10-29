@@ -1,0 +1,570 @@
+{
+  "probes": [
+    "tests/integration/inkside_puppet_native.py",
+    "tests/integration/pet_mixed_dpi.py",
+    "tests/integration/pet_real_desktop.py"
+  ],
+  "isolation": "child process on a separate hidden Win32 desktop; real primary-monitor work area, real OpenGL, built-in assets; the user input desktop, cursor and foreground are never touched",
+  "leave_events": "held back during strokes only: a hidden desktop has no physical pointer, so Windows reports the pointer as gone; counts are recorded",
+  "real_screen_runs": {
+    "100%": {
+      "status": "passed",
+      "platform": "windows",
+      "work_area": [
+        0,
+        0,
+        1920,
+        1032
+      ],
+      "device_pixel_ratio": 1.0,
+      "synthetic_work_area": false,
+      "puppet_toys": {
+        "call": {
+          "affection_gained": 1,
+          "end": [
+            300,
+            779
+          ]
+        },
+        "light": {
+          "affection_gained": 3,
+          "end": [
+            120,
+            779
+          ]
+        },
+        "ball": {
+          "affection_gained": 1,
+          "end": [
+            121,
+            779
+          ]
+        }
+      },
+      "sprite_toys": {
+        "ball": {
+          "affection_gained": 1
+        },
+        "light": {
+          "affection_gained": 3
+        }
+      },
+      "stroke_events": {
+        "PuppetPetWidget": {
+          "PuppetCanvas.MouseMove": 19,
+          "PuppetCanvas.MouseButtonPress": 1,
+          "PuppetCanvas.Leave": 2,
+          "PuppetPetWidget.Leave": 17,
+          "PuppetCanvas.MouseButtonRelease": 1
+        },
+        "DesktopPetWidget": {
+          "DesktopPetWidget.MouseMove": 19,
+          "DesktopPetWidget.MouseButtonPress": 1,
+          "DesktopPetWidget.Leave": 21,
+          "DesktopPetWidget.Enter": 1,
+          "DesktopPetWidget.MouseButtonRelease": 1
+        }
+      },
+      "stroke_petting_armed": {
+        "PuppetPetWidget": true,
+        "DesktopPetWidget": true
+      },
+      "strokes": {
+        "PuppetPetWidget": {
+          "affection_gained": 2
+        },
+        "DesktopPetWidget": {
+          "affection_gained": 2
+        }
+      }
+    },
+    "125% (QT_SCALE_FACTOR)": {
+      "status": "passed",
+      "platform": "windows",
+      "work_area": [
+        0,
+        0,
+        1536,
+        826
+      ],
+      "device_pixel_ratio": 1.25,
+      "synthetic_work_area": false,
+      "puppet_toys": {
+        "call": {
+          "affection_gained": 1,
+          "end": [
+            300,
+            573
+          ]
+        },
+        "light": {
+          "affection_gained": 3,
+          "end": [
+            120,
+            573
+          ]
+        },
+        "ball": {
+          "affection_gained": 1,
+          "end": [
+            122,
+            573
+          ]
+        }
+      },
+      "sprite_toys": {
+        "ball": {
+          "affection_gained": 1
+        },
+        "light": {
+          "affection_gained": 3
+        }
+      },
+      "stroke_events": {
+        "PuppetPetWidget": {
+          "PuppetCanvas.MouseMove": 19,
+          "PuppetCanvas.MouseButtonPress": 1,
+          "PuppetCanvas.Leave": 2,
+          "PuppetPetWidget.Leave": 21,
+          "PuppetPetWidget.Enter": 1,
+          "PuppetCanvas.Enter": 1,
+          "PuppetCanvas.MouseButtonRelease": 1
+        },
+        "DesktopPetWidget": {
+          "DesktopPetWidget.MouseMove": 19,
+          "DesktopPetWidget.MouseButtonPress": 1,
+          "DesktopPetWidget.Leave": 21,
+          "DesktopPetWidget.Enter": 1,
+          "DesktopPetWidget.MouseButtonRelease": 1
+        }
+      },
+      "stroke_petting_armed": {
+        "PuppetPetWidget": true,
+        "DesktopPetWidget": true
+      },
+      "strokes": {
+        "PuppetPetWidget": {
+          "affection_gained": 2
+        },
+        "DesktopPetWidget": {
+          "affection_gained": 2
+        }
+      }
+    },
+    "150% (QT_SCALE_FACTOR)": {
+      "status": "passed",
+      "platform": "windows",
+      "work_area": [
+        0,
+        0,
+        1280,
+        688
+      ],
+      "device_pixel_ratio": 1.5,
+      "synthetic_work_area": false,
+      "puppet_toys": {
+        "call": {
+          "affection_gained": 1,
+          "end": [
+            300,
+            435
+          ]
+        },
+        "light": {
+          "affection_gained": 3,
+          "end": [
+            120,
+            435
+          ]
+        },
+        "ball": {
+          "affection_gained": 1,
+          "end": [
+            122,
+            435
+          ]
+        }
+      },
+      "sprite_toys": {
+        "ball": {
+          "affection_gained": 1
+        },
+        "light": {
+          "affection_gained": 3
+        }
+      },
+      "stroke_events": {
+        "PuppetPetWidget": {
+          "PuppetCanvas.MouseMove": 19,
+          "PuppetCanvas.MouseButtonPress": 1,
+          "PuppetCanvas.Leave": 2,
+          "PuppetPetWidget.Leave": 21,
+          "PuppetPetWidget.Enter": 1,
+          "PuppetCanvas.Enter": 1,
+          "PuppetCanvas.MouseButtonRelease": 1
+        },
+        "DesktopPetWidget": {
+          "DesktopPetWidget.MouseMove": 19,
+          "DesktopPetWidget.MouseButtonPress": 1,
+          "DesktopPetWidget.Leave": 21,
+          "DesktopPetWidget.Enter": 1,
+          "DesktopPetWidget.MouseButtonRelease": 1
+        }
+      },
+      "stroke_petting_armed": {
+        "PuppetPetWidget": true,
+        "DesktopPetWidget": true
+      },
+      "strokes": {
+        "PuppetPetWidget": {
+          "affection_gained": 2
+        },
+        "DesktopPetWidget": {
+          "affection_gained": 2
+        }
+      }
+    }
+  },
+  "inkside_puppet_reactions_real_screen": {
+    "mochi": {
+      "status": "passed",
+      "real_work_area": [
+        0,
+        0,
+        1920,
+        1032
+      ],
+      "reactions": {
+        "greet": 153,
+        "pet_motion": 534,
+        "feed": 278,
+        "groom": 317,
+        "play": 899,
+        "celebrate": 936,
+        "sleep_in": 604,
+        "happy": 47,
+        "sleepy": 49
+      },
+      "max_restored_difference": 0
+    },
+    "moss": {
+      "status": "passed",
+      "real_work_area": [
+        0,
+        0,
+        1920,
+        1032
+      ],
+      "reactions": {
+        "greet": 147,
+        "pet_motion": 705,
+        "feed": 393,
+        "groom": 447,
+        "play": 1088,
+        "celebrate": 1082,
+        "sleep_in": 807,
+        "happy": 77,
+        "sleepy": 79
+      },
+      "max_restored_difference": 0
+    },
+    "pip": {
+      "status": "passed",
+      "real_work_area": [
+        0,
+        0,
+        1920,
+        1032
+      ],
+      "reactions": {
+        "greet": 139,
+        "pet_motion": 469,
+        "feed": 363,
+        "groom": 270,
+        "play": 863,
+        "celebrate": 871,
+        "sleep_in": 645,
+        "happy": 72,
+        "sleepy": 69
+      },
+      "max_restored_difference": 0
+    },
+    "bolt": {
+      "status": "passed",
+      "real_work_area": [
+        0,
+        0,
+        1920,
+        1032
+      ],
+      "reactions": {
+        "greet": 129,
+        "pet_motion": 545,
+        "feed": 382,
+        "groom": 352,
+        "play": 970,
+        "celebrate": 996,
+        "sleep_in": 787,
+        "happy": 41,
+        "sleepy": 46
+      },
+      "max_restored_difference": 0
+    },
+    "ink": {
+      "status": "passed",
+      "real_work_area": [
+        0,
+        0,
+        1920,
+        1032
+      ],
+      "reactions": {
+        "greet": 251,
+        "pet_motion": 391,
+        "feed": 322,
+        "groom": 349,
+        "play": 688,
+        "celebrate": 737,
+        "sleep_in": 503,
+        "happy": 94,
+        "sleepy": 91
+      },
+      "max_restored_difference": 0
+    },
+    "gill": {
+      "status": "passed",
+      "real_work_area": [
+        0,
+        0,
+        1920,
+        1032
+      ],
+      "reactions": {
+        "greet": 106,
+        "pet_motion": 564,
+        "feed": 366,
+        "groom": 358,
+        "play": 1040,
+        "celebrate": 1044,
+        "sleep_in": 785,
+        "happy": 14,
+        "sleepy": 12
+      },
+      "max_restored_difference": 0
+    }
+  },
+  "two_monitor_run": {
+    "status": "passed",
+    "platform": "windows",
+    "work_area": [
+      0,
+      0,
+      1920,
+      1032
+    ],
+    "device_pixel_ratio": 1.0,
+    "synthetic_work_area": false,
+    "screens": [
+      [
+        "BenQ GW2486TC",
+        1.0,
+        [
+          0,
+          0,
+          1920,
+          1032
+        ]
+      ],
+      [
+        "BenQ GW2490",
+        1.25,
+        [
+          1920,
+          -164,
+          1536,
+          816
+        ]
+      ]
+    ],
+    "perch_edges": {
+      "BenQ GW2486TC": {
+        "logical_window": [
+          300,
+          800,
+          200
+        ],
+        "converted_edge": [
+          300,
+          800,
+          200
+        ]
+      },
+      "BenQ GW2490": {
+        "logical_window": [
+          2220,
+          2720,
+          36
+        ],
+        "converted_edge": [
+          2220,
+          2720,
+          36
+        ]
+      }
+    },
+    "puppet_toys": {
+      "call": {
+        "affection_gained": 1,
+        "end": [
+          300,
+          779
+        ]
+      },
+      "light": {
+        "affection_gained": 3,
+        "end": [
+          120,
+          779
+        ]
+      },
+      "ball": {
+        "affection_gained": 1,
+        "end": [
+          120,
+          779
+        ]
+      }
+    },
+    "sprite_toys": {
+      "ball": {
+        "affection_gained": 1
+      },
+      "light": {
+        "affection_gained": 3
+      }
+    },
+    "stroke_events": {
+      "PuppetPetWidget": {
+        "PuppetCanvas.MouseMove": 19,
+        "PuppetCanvas.MouseButtonPress": 1,
+        "PuppetCanvas.Leave": 2,
+        "PuppetPetWidget.Leave": 8,
+        "PuppetCanvas.MouseButtonRelease": 1
+      },
+      "DesktopPetWidget": {
+        "DesktopPetWidget.MouseMove": 19,
+        "DesktopPetWidget.MouseButtonPress": 1,
+        "DesktopPetWidget.Leave": 21,
+        "DesktopPetWidget.Enter": 1,
+        "DesktopPetWidget.MouseButtonRelease": 1
+      }
+    },
+    "stroke_petting_armed": {
+      "PuppetPetWidget": true,
+      "DesktopPetWidget": true
+    },
+    "strokes": {
+      "PuppetPetWidget": {
+        "affection_gained": 2
+      },
+      "DesktopPetWidget": {
+        "affection_gained": 2
+      }
+    },
+    "cross_monitor": {
+      "PuppetPetWidget": [
+        {
+          "screen": "BenQ GW2490",
+          "ratio": 1.25,
+          "physical_size": [
+            240,
+            240
+          ],
+          "arrived": [
+            2818,
+            460
+          ]
+        },
+        {
+          "screen": "BenQ GW2486TC",
+          "ratio": 1.0,
+          "physical_size": [
+            192,
+            192
+          ],
+          "arrived": [
+            1090,
+            840
+          ]
+        },
+        {
+          "screen": "BenQ GW2490",
+          "ratio": 1.25,
+          "physical_size": [
+            240,
+            240
+          ],
+          "arrived": [
+            2818,
+            460
+          ]
+        }
+      ],
+      "DesktopPetWidget": [
+        {
+          "screen": "BenQ GW2490",
+          "ratio": 1.25,
+          "physical_size": [
+            200,
+            200
+          ],
+          "ball_reward": 1
+        },
+        {
+          "screen": "BenQ GW2486TC",
+          "ratio": 1.0,
+          "physical_size": [
+            160,
+            160
+          ],
+          "ball_reward": 1
+        },
+        {
+          "screen": "BenQ GW2490",
+          "ratio": 1.25,
+          "physical_size": [
+            200,
+            200
+          ],
+          "ball_reward": 1
+        }
+      ]
+    },
+    "drag_across": {
+      "PuppetPetWidget": {
+        "screen": "BenQ GW2490",
+        "logical_size": [
+          192,
+          192
+        ],
+        "physical_size": [
+          240,
+          240
+        ],
+        "drag_steps": 8
+      },
+      "DesktopPetWidget": {
+        "screen": "BenQ GW2490",
+        "logical_size": [
+          160,
+          160
+        ],
+        "physical_size": [
+          200,
+          200
+        ],
+        "drag_steps": 4
+      }
+    }
+  }
+}

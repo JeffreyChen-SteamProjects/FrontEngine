@@ -12,7 +12,7 @@ from shiboken6 import isValid
 
 from frontengine.show.base_widget import BaseWidget
 from frontengine.utils.logging.loggin_instance import front_engine_logger
-from frontengine.utils.power_mode.power_mode import tier_interval
+from frontengine.utils.power_mode.power_mode import tier_interval, scaled_interval, tier_render_scale
 from frontengine.utils.multi_language.retranslate import translate
 
 
@@ -30,6 +30,7 @@ class SceneMediaFrame(BaseWidget):
         self.error = ''
         self.active = False
         self.closed = False
+        self.low_power = False
         self.host = None
         self.media_player = None
         self.audio_output = None
@@ -128,9 +129,10 @@ class SceneMediaFrame(BaseWidget):
         """Retain one bounded detached image; replacement invalidates the raster cache."""
         if self.closed or image.isNull():
             return
-        self.frame = (image.scaled(1280, 1280, Qt.AspectRatioMode.KeepAspectRatio,
+        edge = max(16, round(1280*tier_render_scale(self.quality_tier)))
+        self.frame = (image.scaled(edge, edge, Qt.AspectRatioMode.KeepAspectRatio,
                                   Qt.TransformationMode.SmoothTransformation)
-                      if max(image.width(), image.height()) > 1280 else image.copy())
+                      if max(image.width(), image.height()) > edge else image.copy())
         self.error = ''
         self.update()
         self.frame_changed.emit()
@@ -212,7 +214,12 @@ class SceneMediaFrame(BaseWidget):
 
     def apply_quality_tier(self) -> None:
         if hasattr(self, 'timer'):
-            self.timer.setInterval(tier_interval(100 if self.preview else 33, self.quality_tier))
+            self.timer.setInterval(scaled_interval(tier_interval(100 if self.preview else 16, self.quality_tier),
+                                                   self.low_power))
+
+    def set_low_power(self, enabled: bool) -> None:
+        self.low_power = bool(enabled)
+        self.apply_quality_tier()
 
     def draw_content(self, painter) -> None:
         if not self.frame.isNull():

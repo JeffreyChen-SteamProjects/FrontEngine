@@ -24,6 +24,7 @@ class SceneManager:
         self.native_widgets: list = []
         self.puppet_settings: list[dict] = []
         self.layer_settings: dict[str, dict] = {}
+        self.runtime3d = None
 
     def add_entry(self, key: str, entry: dict) -> None:
         """Build a named layer; keys identify all of its playback instances."""
@@ -168,6 +169,10 @@ class SceneManager:
         window on screen and restarting the scene stacks the old items on top.
         """
         front_engine_logger.info("[SceneManager] clear")
+        if self.runtime3d is not None:
+            self.runtime3d.close()
+            self.runtime3d.deleteLater()
+            self.runtime3d = None
         timeline = getattr(self.graphic_scene, '_scene_timeline', None)
         if timeline is not None:
             timeline.shutdown()

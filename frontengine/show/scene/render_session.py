@@ -10,6 +10,7 @@ from PySide6.QtGui import QImage, QImageReader
 from frontengine.show.scene.scene import SceneManager
 from frontengine.show.scene.compositor_view import SceneCompositorView
 from frontengine.utils.scene_format.scene_editor_document import validate_geometry
+from frontengine.utils.scene_format.scene_3d_document import read_scene_document
 
 OUTPUT_SIZES = ((640, 480), (1280, 720), (1920, 1080))
 
@@ -20,11 +21,33 @@ class SceneRenderSession(QObject):
     failed = Signal(str)
 
     def __init__(self, entries: dict, size: tuple[int, int], parent=None,
-                 *, manager_factory: Callable = SceneManager) -> None:
+                 *, manager_factory: Callable = SceneManager, models=None) -> None:
         super().__init__(parent)
         if size not in OUTPUT_SIZES:
             raise ValueError('Choose a supported fixed scene output resolution')
-        validated = validate_geometry(entries)
+        document = read_scene_document(entries)
+        self.offscreen3d = None
+        self.runtime3d = None
+        if document.mode == '3d':
+            from frontengine.user_setting.user_setting_file import user_setting_dict
+            if user_setting_dict.get('render_backend', 'auto') == 'software':
+                raise ValueError('3D output requires OpenGL; select Auto or GPU in render settings')
+            from frontengine.show.scene.runtime3d import Scene3DRuntime
+            from frontengine.show.scene.view3d import OffscreenScene3D
+            self.size, self.closed, self.view = QSize(*size), False, None
+            self.manager = manager_factory()
+            try:
+                self.runtime3d = Scene3DRuntime(document, models, preview=True)
+                self.runtime3d.failed.connect(self.failed)
+                self.offscreen3d = OffscreenScene3D(self.runtime3d, size)
+                self.offscreen3d.frame()
+                self.runtime3d.set_owner(id(self), True)
+                self.runtime3d.timeline.play()
+            except Exception:
+                self.close()
+                raise
+            return
+        validated = validate_geometry(document.entries)
         if not validated or len(validated) > 256:
             raise ValueError('Scene output requires 1–256 supported layers')
         if sum(entry.get('type') in ('VIDEO', 'WEB', 'PUPPET', 'SOUND') for entry in validated.values()) > 8:
@@ -59,6 +82,8 @@ class SceneRenderSession(QObject):
         """Return scene composition at the fixed logical resolution, never a screen grab."""
         if self.closed:
             return QImage()
+        if self.offscreen3d is not None:
+            return self.offscreen3d.frame()
         frame = self.view.output_frame()
         if frame.size() != self.size:
             frame = frame.scaled(self.size)
@@ -78,6 +103,13 @@ class SceneRenderSession(QObject):
         if self.closed:
             return
         self.closed = True
+        if self.offscreen3d is not None:
+            self.offscreen3d.close()
+            self.offscreen3d = None
+        if self.runtime3d is not None:
+            self.runtime3d.close()
+            self.runtime3d.deleteLater()
+            self.runtime3d = None
         if self.view is not None:
             self.view.close()
             self.view.deleteLater()
