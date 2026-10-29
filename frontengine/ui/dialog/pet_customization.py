@@ -11,7 +11,8 @@ from PySide6.QtWidgets import (
 
 from frontengine.show.pet.pet_profile_session import PetProfileSession
 from frontengine.user_setting.pet_profile_schema import (
-    checked_profile, presentation_defaults as default_presentation, profile_defaults,
+    CHATTER_LEVELS, MOTION_LEVELS, checked_profile, presentation_defaults as default_presentation,
+    profile_defaults,
 )
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.utils.multi_language.retranslate import retranslator, tr
@@ -32,8 +33,8 @@ class PetCustomizationDialog(QDialog):
         record = session.state() if session else profiles.get(identifier)
         self.expected = copy.deepcopy(record['preferences'])
         owner = session.parent() if session else None
-        self.defaults = copy.deepcopy(getattr(owner, '_presentation_defaults', None)
-                                      or presentation_defaults or default_presentation())
+        self.defaults = {**default_presentation(), **copy.deepcopy(
+            getattr(owner, '_presentation_defaults', None) or presentation_defaults or {})}
         self.supported = getattr(owner, 'customization_fields', None)
         checked_profile({**record, 'preferences': {**self.expected, 'presentation': self.defaults}})
         self.controls: dict[str, QWidget] = {}
@@ -85,12 +86,16 @@ class PetCustomizationDialog(QDialog):
             control.setRange(low, high)
             self.controls[key] = control
             form.addRow(tr(QLabel(), 'pet_' + key + '_label', key.title()), control)
-        behaviour = QComboBox()
-        for index, value in enumerate(('floor', 'wander', 'chase')):
-            behaviour.addItem('', value)
-            tr(behaviour, 'pet_behaviour_' + value, value.title(), 'setItemText', index)
-        self.controls['behaviour'] = behaviour
-        form.addRow(tr(QLabel(), 'pet_behaviour_label', 'Behaviour'), behaviour)
+        for key, values, label, fallback in (
+                ('behaviour', ('floor', 'wander', 'chase'), 'pet_behaviour_label', 'Behaviour'),
+                ('chatter', CHATTER_LEVELS, 'pet_chatter_label', 'Chatter'),
+                ('motion', MOTION_LEVELS, 'pet_motion_label', 'Animation size')):
+            control = QComboBox()
+            for index, value in enumerate(values):
+                control.addItem('', value)
+                tr(control, f'pet_{key}_{value}', value.title(), 'setItemText', index)
+            self.controls[key] = control
+            form.addRow(tr(QLabel(), label, fallback), control)
         for key, label, fallback in (
             ('climb', 'pet_climb_label', 'Climb walls'),
             ('sit_on_windows', 'pet_sit_label', 'Sit on windows'),
@@ -113,7 +118,7 @@ class PetCustomizationDialog(QDialog):
         for key in ('auto_rest', 'allow_throw', 'allow_social'):
             self.controls[key].setChecked(preferences[key])
         self.controls['use_defaults'].setChecked(preferences['presentation'] is None)
-        values = preferences['presentation'] or self.defaults
+        values = {**self.defaults, **(preferences['presentation'] or {})}
         for key, value in values.items():
             control = self.controls[key]
             if isinstance(control, QSpinBox):

@@ -25,7 +25,7 @@ class PuppetPetWidget(DraggableTopWindow):
     customize_requested = Signal()
     overlay_lockable = False
     supports_layered_wardrobe = False
-    customization_fields = frozenset({'size', 'speech_bubbles', 'settle_typing', 'auto_rest'})
+    customization_fields = frozenset({'size', 'speech_bubbles', 'settle_typing', 'auto_rest', 'chatter'})
 
     def __init__(self, path: str | Path, size: tuple[int, int] = (320, 480), *,
                  parameters: dict | None = None, motion: str | None = None,
@@ -198,6 +198,9 @@ class PuppetPetWidget(DraggableTopWindow):
     def _script_tick(self) -> None:
         if self._petting is not None or self._target.marker is not None or not self.profile_session.companion.allows_autonomy:
             return
+        values = self.profile_session.companion.preferences.get('presentation') or {}
+        if values.get('chatter') == 'off':
+            return  # scheduled script lines are proactive chatter
         line = self.script.due_scheduled_message()
         if line:
             self.say(line)

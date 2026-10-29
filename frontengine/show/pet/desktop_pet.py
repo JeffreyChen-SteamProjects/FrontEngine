@@ -90,6 +90,10 @@ _STATE_FALLBACKS = {
 # Short physical reactions shown over autonomous movement (milliseconds). They are
 # purely visual, so they never block toys, social play or user commands.
 _FLASH_MS = {"land": 280, "catch": 580, "peer_greet": 1600}
+# Proactive chatter spacing (ms) per level; responses to the user are unaffected.
+_CHATTER_MS = {"rare": (40000, 90000), "normal": (15000, 35000), "often": (8000, 18000)}
+# How strongly audio reaction and physical flashes move the pet.
+_PULSE_AMPLITUDE = {"calm": 0.12, "normal": 0.3, "lively": 0.45}
 
 
 def scan_pet_pack(folder: str) -> dict:
@@ -1187,7 +1191,10 @@ class DesktopPetWidget(BaseWidget):
             "behaviour": self.motion.behaviour, "climb": bool(self.motion.climb),
             "sit_on_windows": self._sit_on_windows, "speech_bubbles": self._talk,
             "volume": int(self._volume * 100), "settle_typing": False,
+            "chatter": "normal", "motion": "normal",
         }
+        self._chatter_level = "normal"
+        self._motion_level = "normal"
         self._applied_presentation = None
         self._last_companion_view = None
         self.asset_library = asset_library or PetAssetLibrary()
@@ -1457,7 +1464,8 @@ class DesktopPetWidget(BaseWidget):
             self._audio_scale = 1.0
             self._audio_envelope.reset()
             return
-        self._audio_scale = audio_pulse_scale(self._audio_envelope.push(level))
+        self._audio_scale = audio_pulse_scale(self._audio_envelope.push(level),
+                                              amplitude=_PULSE_AMPLITUDE[self._motion_level])
 
     def draw_content(self, painter: QPainter) -> None:
         pixmap = self._current_pixmap()
@@ -1723,6 +1731,10 @@ class DesktopPetWidget(BaseWidget):
             return
         self._applied_presentation = dict(values)
         self._base_size = values["size"]
+        if values.get("chatter", "normal") != self._chatter_level:
+            self._chatter_level = values.get("chatter", "normal")
+            self._schedule_chatter()
+        self._motion_level = values.get("motion", "normal")
         self.motion.speed = values["speed"]
         self.motion.vx = values["speed"] * (-1 if self.motion.facing_left else 1)
         self.motion.behaviour = values["behaviour"]
@@ -1911,8 +1923,11 @@ class DesktopPetWidget(BaseWidget):
             front_engine_logger.warning(f"[DesktopPetWidget] sound play failed: {error!r}")
 
     def _schedule_chatter(self) -> None:
-        if self._talk:
-            self._chatter_timer.start(self._chatter_rng.randint(15000, 35000))
+        span = _CHATTER_MS.get(getattr(self, '_chatter_level', 'normal'))
+        if self._talk and span is not None:
+            self._chatter_timer.start(self._chatter_rng.randint(*span))
+        else:
+            self._chatter_timer.stop()
 
     def _on_chatter(self) -> None:
         # priority: user idle (nap), low battery, hunger, otherwise normal chatter
@@ -2025,6 +2040,8 @@ class DesktopPetWidget(BaseWidget):
 
     def flash(self, action: str) -> None:
         """Show a short physical reaction while the pet keeps moving on its own."""
+        if self._motion_level == "calm" and action in ("land", "catch"):
+            return
         self._flash = (action, monotonic() + _FLASH_MS[action] / 1000)
 
     def _autonomous_visual(self) -> str:

@@ -23,17 +23,29 @@ def profile_defaults() -> dict:
                             "presentation": None}}
 
 
+# Proactive chatter and animation amplitude are separate from speech bubbles and
+# volume. They are optional so presentations saved before them stay valid.
+CHATTER_LEVELS = ("off", "rare", "normal", "often")
+MOTION_LEVELS = ("calm", "normal", "lively")
+_OPTIONAL_PRESENTATION = {"chatter": CHATTER_LEVELS, "motion": MOTION_LEVELS}
+
+
 def presentation_defaults() -> dict:
     """Return independent presentation values for a newly customized pet."""
     return {"size": 128, "speed": 3, "behaviour": "floor", "climb": True,
             "sit_on_windows": True, "speech_bubbles": True, "volume": 100,
-            "settle_typing": False}
+            "settle_typing": False, "chatter": "normal", "motion": "normal"}
 
 
 def _presentation(value: object) -> None:
     if value is None:
         return
-    _fields(value, set(presentation_defaults()), "pet presentation")
+    required = set(presentation_defaults()) - set(_OPTIONAL_PRESENTATION)
+    present = set(value).intersection(_OPTIONAL_PRESENTATION) if isinstance(value, dict) else set()
+    _fields(value, required | present, "pet presentation")
+    for key in present:
+        if value[key] not in _OPTIONAL_PRESENTATION[key]:
+            raise ValueError(f"Invalid pet {key}")
     for key, bounds in {"size": (16, 512), "speed": (1, 20), "volume": (0, 100)}.items():
         if type(value[key]) is not int or not bounds[0] <= value[key] <= bounds[1]:
             raise ValueError(f"Invalid pet {key}")

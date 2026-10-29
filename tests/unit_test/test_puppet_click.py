@@ -80,3 +80,17 @@ def test_click_greeting_uses_the_bond_line_and_goodbye_is_scheduled(puppet, monk
     puppet.say_goodbye()
     assert lines[-1] == translate('pet_goodbye')
     assert len(scheduled) == 1 and scheduled[0][0] == 900 and scheduled[0][1] is puppet
+
+
+def test_chatter_off_silences_scheduled_script_lines(puppet, monkeypatch):
+    lines = []
+    monkeypatch.setattr(puppet, 'say', lambda text=None: lines.append(text))
+    monkeypatch.setattr(puppet.script, 'due_scheduled_message', lambda: 'Stretch time!')
+    puppet._script_tick()
+    assert lines == ['Stretch time!']
+    before = puppet.profile_session.companion.preferences
+    values = {**puppet._presentation_defaults, 'chatter': 'off'}
+    puppet.profile_session.apply_preferences(before, {**before, 'presentation': values})
+    puppet._script_tick()
+    assert lines == ['Stretch time!']
+    assert 'chatter' in puppet.customization_fields and 'motion' not in puppet.customization_fields
