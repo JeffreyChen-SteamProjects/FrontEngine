@@ -603,6 +603,8 @@ Tier anpassen stellt außerdem Plaudern (Aus, Selten, Normal, Oft) für Sätze, 
 
 Die Interaktionsliste der Tierverwaltung bietet außerdem die Menübefehle des gewählten aktiven Tiers an: Foto, Status, Erinnerung, Chat bei angebundenem Chatdienst, Klonen und Schließen sowie jede Bewegung und jeden Ausdruck eines Puppet-Modells. Alles aus dem Rechtsklickmenü ist damit auch per Tastatur erreichbar.
 
+Integriertes Puppet-Modell verwenden auf der Tierseite zeichnet die gewählte INKSIDE-Figur im Hintergrund als Imervue-.puppet-Modell: geriggter Kopf, Arme, Schwanz und Körper, zehn Bewegungen, drei Ausdrücke und ein Tierskript, das Begleitaktionen darauf abbildet. Es wird unter pet-assets/puppets gespeichert und mit seinem Skript als Quelle gewählt, sodass Start es als Puppet-Tier erzeugt.
+
 Die Garderobe zeigt Farbbereiche an, die Figur oder Kleidung deklarieren. Wähle einen Bereich und eine Farbe oder stelle die Originalfarbe wieder her. Nur markierte Maskenebenen werden eingefärbt; Konturen und andere Details bleiben erhalten. Farben werden vor dem Anwenden angezeigt und je Identität und Outfit gespeichert, auch beim Export/Import. Ohne deklarierte Bereiche bleiben Farbregler deaktiviert.
 
 Scheitert das Speichern beim Schließen, bleiben Tier, aktueller Zustand und Wiederholungs-Timer erhalten. Alle schließen behält Tiere, die nicht geschlossen werden konnten; vor dem Beenden müssen ihre Daten gespeichert sein. Zuneigung steigt nicht über die unterstützte Speichergrenze, damit weitere Belohnungen das Profil nicht ungültig machen.

@@ -2,10 +2,10 @@ from typing import Optional
 from pathlib import Path
 import sys
 
-from PySide6.QtCore import Qt, QTimer, Signal
+from PySide6.QtCore import Qt, QThreadPool, QTimer, Signal
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import (
-    QLabel, QPushButton, QMessageBox, QComboBox, QCheckBox, QFileDialog,
+    QLabel, QPushButton, QMessageBox, QComboBox, QCheckBox, QFileDialog, QHBoxLayout, QWidget,
 )
 
 from frontengine.show.pet.desktop_pet import (
@@ -95,6 +95,14 @@ class PetSettingUI(SettingPage):
         self.choose_sound_button.clicked.connect(self.choose_sound)
         self.choose_script_button = tr(QPushButton(), 'pet_choose_script', 'Choose puppet script...')
         self.choose_script_button.clicked.connect(self.choose_puppet_script)
+        from frontengine.show.pet.inkside.library import builtin_names
+        self.builtin_puppet = QComboBox()
+        tr(self.builtin_puppet, 'pet_builtin_puppet_pick', 'Built-in Puppet character', 'setAccessibleName')
+        for identifier, name in builtin_names():
+            self.builtin_puppet.addItem(name, identifier)
+        self.builtin_puppet_button = tr(QPushButton(), 'pet_builtin_puppet', 'Use built-in Puppet model')
+        self.builtin_puppet_button.clicked.connect(self.use_builtin_puppet)
+        self._puppet_export = None
         self.ready_label = tr(QLabel(), "Not Ready")
 
         # Size
@@ -193,6 +201,12 @@ class PetSettingUI(SettingPage):
                            self.choose_sound_button, self.choose_script_button,
                            self.workshop_button, self.pack_editor_button)
         source.add_row(self.recent_files_label, self.recent_files_combobox)
+        puppet_row = QWidget()
+        puppet_layout = QHBoxLayout(puppet_row)
+        puppet_layout.setContentsMargins(0, 0, 0, 0)
+        puppet_layout.addWidget(self.builtin_puppet)
+        puppet_layout.addWidget(self.builtin_puppet_button)
+        source.add_row('pet_builtin_puppet_pick', puppet_row, 'Built-in Puppet character')
         self.profile_controls = PetProfileControls(self)
 
         appearance = self.add_section("section_appearance", "Appearance")
@@ -379,6 +393,28 @@ class PetSettingUI(SettingPage):
         self.pet_list.append(pet)
         pet.show()
         self._on_settle_typing_toggled()
+
+    def use_builtin_puppet(self) -> None:
+        """Generate the chosen INKSIDE character as a Puppet model with its reaction script."""
+        from frontengine.ui.dialog.pet_asset_install import PuppetExport
+        if self._puppet_export is not None:
+            return
+        self.builtin_puppet_button.setEnabled(False)
+        job = PuppetExport(self.builtin_puppet.currentData(), Path.cwd() / 'pet-assets' / 'puppets')
+        self._puppet_export = job
+        job.signals.finished.connect(self._builtin_puppet_ready, Qt.ConnectionType.QueuedConnection)
+        QThreadPool.globalInstance().start(job)
+
+    def _builtin_puppet_ready(self, model: str, script: str, error: str) -> None:
+        self._puppet_export = None
+        self.builtin_puppet_button.setEnabled(True)
+        if error:
+            self.profile_controls.status.setText(error)
+            return
+        self.pet_image_path = model
+        self.puppet_script_path = script
+        self.ready_to_play = True
+        self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
 
     def choose_puppet_script(self) -> None:
         path, _ = QFileDialog.getOpenFileName(self, 'Imervue pet script', '', 'Pet script (*.petscript.json)')

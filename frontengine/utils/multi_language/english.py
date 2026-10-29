@@ -1253,6 +1253,8 @@ english_word_dict = {
     'pet_wardrobe_update': "Update selected",
     'pet_wardrobe_name': "Outfit name",
     'pet_wardrobe_refresh': "Refresh assets",
+    'pet_builtin_puppet_pick': "Built-in Puppet character",
+    'pet_builtin_puppet': "Use built-in Puppet model",
     'inkside_alert': "Alert",
     'inkside_antenna': "Antenna",
     'inkside_apron': "Apron",

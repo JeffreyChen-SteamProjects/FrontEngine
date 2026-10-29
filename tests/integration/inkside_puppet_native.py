@@ -1,0 +1,148 @@
+"""Windows native GL probe for a built-in INKSIDE character exported as a Puppet model.
+
+Run with an absolute output directory. The model is generated into that
+directory; the pet window is placed beyond every screen, never activated, and
+uses in-memory profiles, so the user's pets, settings and foreground are untouched.
+"""
+from __future__ import annotations
+
+import ctypes
+from ctypes import wintypes
+import json
+from pathlib import Path
+import sys
+import traceback
+
+from PySide6.QtCore import QTimer, Qt
+from PySide6.QtWidgets import QApplication
+
+# Companion actions and the bound native reaction each should show while it runs.
+ACTIONS = (('greet', 'request'), ('pet_motion', 'motion:pet'), ('feed', 'request'), ('groom', 'request'),
+           ('play', 'request'), ('celebrate', 'present'), ('sleep_in', 'present'), ('happy', 'expression:happy'),
+           ('sleepy', 'expression:sleepy'))
+
+
+def _start(pet, name: str, how: str) -> None:
+    if how == 'request':
+        assert pet.profile_session.request(name) == 'accepted', name
+    elif how == 'present':
+        assert pet.profile_session.present(name), name
+    elif how.startswith('motion:'):
+        assert pet.play_motion(how.split(':', 1)[1]), how
+    else:
+        pet._choose_expression(how.split(':', 1)[1], True)
+
+
+def _stop(pet, how: str) -> None:
+    if how.startswith('expression:'):
+        pet._choose_expression(how.split(':', 1)[1], False)
+    elif how.startswith('motion:'):
+        pet.player.stop()
+    pet.profile_session.request('cancel')
+    pet.profile_session.advance(5)
+
+
+def _differs(first, second) -> int:
+    changed = 0
+    for y in range(0, first.height(), 4):
+        for x in range(0, first.width(), 4):
+            changed += first.pixelColor(x, y) != second.pixelColor(x, y)
+    return changed
+
+
+def main() -> int:
+    from frontengine.show.pet.inkside.puppet_export import export_puppet
+    from frontengine.show.pet.puppet_pet import PuppetPetWidget
+    from frontengine.user_setting.pet_profiles import PetProfiles
+
+    output = Path(sys.argv[1]).resolve()
+    character = sys.argv[2] if len(sys.argv) > 2 else 'inkside-mochi'
+    output.mkdir(parents=True, exist_ok=True)
+    app = QApplication([])
+    if app.platformName() != 'windows':
+        raise RuntimeError('This probe requires the native Windows Qt platform')
+    model, script = export_puppet(character, output)
+    user32 = ctypes.WinDLL('user32', use_last_error=True)
+    user32.GetForegroundWindow.restype = wintypes.HWND
+    observations = []
+    pet = PuppetPetWidget(model, size=(256, 256), script_path=str(script), profiles=PetProfiles({}, lambda: None))
+    pet.setWindowFlag(Qt.WindowType.WindowDoesNotAcceptFocus, True)
+    pet.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
+    pet.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+    pet.move(max(screen.geometry().right() for screen in app.screens()) + 1024, 0)
+    result = {'status': 'failed', 'platform': app.platformName(), 'character': character, 'reactions': {}}
+    steps = list(ACTIONS)
+    state = {}
+
+    def observe():
+        observations.append(int(user32.GetForegroundWindow() or 0))
+
+    def finish(error=None):
+        if error is not None:
+            result['error'] = repr(error)
+            result['traceback'] = traceback.format_exc()
+        else:
+            assert int(pet.winId()) not in observations, 'The probe window took the foreground'
+            result.update(status='passed', native_gl=True, foreground_samples=len(observations))
+        poll.stop()
+        pet.close()
+        (output / 'result.json').write_text(json.dumps(result, indent=2), encoding='utf-8')
+        app.quit()
+
+    def capture_baseline():
+        try:
+            assert pet.canvas.isValid(), 'Native OpenGL context is invalid'
+            state['baseline'] = pet.photo_image()
+            assert state['baseline'].pixelColor(0, 0).alpha() == 0, 'Background is not transparent'
+            assert state['baseline'].save(str(output / 'baseline.png'), 'PNG')
+            next_step()
+        except Exception as error:  # report every failure in result.json
+            finish(error)
+
+    def next_step():
+        if not steps:
+            finish()
+            return
+        name, how = steps[0]
+        try:
+            _start(pet, name, how)
+            QTimer.singleShot(350, check_step)
+        except Exception as error:
+            finish(error)
+
+    def check_step():
+        name, how = steps.pop(0)
+        try:
+            image = pet.photo_image()
+            assert image.save(str(output / f'{name}.png'), 'PNG')
+            changed = _differs(state['baseline'], image)
+            # Expressions only swap the eyes, which are tiny on some bodies (GILL).
+            assert changed > (8 if how.startswith('expression:') else 20), f'{name} did not change ({changed})'
+            _stop(pet, how)
+            QTimer.singleShot(900, lambda: confirm(name, changed))
+        except Exception as error:
+            finish(error)
+
+    def confirm(name, changed):
+        try:
+            after = pet.photo_image()
+            assert after.save(str(output / f'{name}-after.png'), 'PNG')
+            restored = _differs(state['baseline'], after)
+            assert restored <= 4, f'{name} did not return to the baseline ({restored} samples differ)'
+            result['reactions'][name] = {'changed_samples': changed, 'restored_difference': restored}
+            next_step()
+        except Exception as error:
+            finish(error)
+
+    observe()
+    pet.show()
+    poll = QTimer()
+    poll.timeout.connect(observe)
+    poll.start(50)
+    QTimer.singleShot(1500, capture_baseline)
+    app.exec()
+    return 0 if result['status'] == 'passed' else 1
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

@@ -1246,6 +1246,8 @@ germany_word_dict = {
     'pet_wardrobe_update': "Auswahl aktualisieren",
     'pet_wardrobe_name': "Outfit-Name",
     'pet_wardrobe_refresh': "Assets aktualisieren",
+    'pet_builtin_puppet_pick': "Integrierte Puppet-Figur",
+    'pet_builtin_puppet': "Integriertes Puppet-Modell verwenden",
     'inkside_alert': "Wachsam",
     'inkside_antenna': "Antenne",
     'inkside_apron': "Schürze",

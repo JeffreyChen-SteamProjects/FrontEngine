@@ -24,6 +24,28 @@ class PetAssetInstall(QRunnable):
         self.signals.finished.emit(error)
 
 
+class PuppetExport(QRunnable):
+    """Write a built-in character as a Puppet model and pet script off the GUI thread."""
+
+    def __init__(self, identifier, folder):
+        super().__init__()
+        self.identifier, self.folder = identifier, folder
+        self.signals = ExportSignals()
+
+    def run(self) -> None:
+        from frontengine.show.pet.inkside.puppet_export import export_puppet
+        try:
+            model, script = export_puppet(self.identifier, self.folder)
+        except (OSError, ValueError) as failure:
+            self.signals.finished.emit('', '', str(failure))
+            return
+        self.signals.finished.emit(str(model), str(script), '')
+
+
+class ExportSignals(QObject):
+    finished = Signal(str, str, str)
+
+
 class PetBuiltinInstall(QRunnable):
     """Draw one built-in character and its wardrobe off the GUI thread, then install them."""
 

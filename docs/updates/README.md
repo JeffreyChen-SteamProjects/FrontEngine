@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261029-42 | 2026-10-29 | Export the built-in characters as rigged Puppet models and verify them natively | #done #puppet #art #native | [2026-10](2026-10.md) |
 | U-20261029-41 | 2026-10-29 | Localize built-in part and garment labels | #done #pets #i18n | [2026-10](2026-10.md) |
 | U-20261029-40 | 2026-10-29 | Measure one and four pets, layered against legacy, within stated budgets | #done #pets #performance | [2026-10](2026-10.md) |
 | U-20261029-39 | 2026-10-29 | Offer every pet menu command from the keyboard in the pet manager | #done #pets #accessibility | [2026-10](2026-10.md) |
@@ -184,5 +185,5 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-10.md](2026-10.md) | 2026-10 | 109 |
+| [2026-10.md](2026-10.md) | 2026-10 | 110 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

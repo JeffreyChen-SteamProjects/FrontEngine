@@ -1,0 +1,104 @@
+{
+  "probe": "tests/integration/inkside_puppet_native.py",
+  "platform": "windows",
+  "native_gl": true,
+  "isolation": "window beyond every screen, WA_ShowWithoutActivating, WindowDoesNotAcceptFocus, in-memory profiles",
+  "characters": {
+    "mochi": {
+      "status": "passed",
+      "foreground_samples": 209,
+      "reactions": {
+        "greet": 153,
+        "pet_motion": 532,
+        "feed": 274,
+        "groom": 332,
+        "play": 897,
+        "celebrate": 923,
+        "sleep_in": 604,
+        "happy": 47,
+        "sleepy": 49
+      },
+      "max_restored_difference": 0
+    },
+    "moss": {
+      "status": "passed",
+      "foreground_samples": 208,
+      "reactions": {
+        "greet": 147,
+        "pet_motion": 706,
+        "feed": 389,
+        "groom": 442,
+        "play": 1089,
+        "celebrate": 1088,
+        "sleep_in": 811,
+        "happy": 77,
+        "sleepy": 79
+      },
+      "max_restored_difference": 0
+    },
+    "pip": {
+      "status": "passed",
+      "foreground_samples": 212,
+      "reactions": {
+        "greet": 139,
+        "pet_motion": 467,
+        "feed": 363,
+        "groom": 274,
+        "play": 861,
+        "celebrate": 876,
+        "sleep_in": 643,
+        "happy": 72,
+        "sleepy": 69
+      },
+      "max_restored_difference": 0
+    },
+    "bolt": {
+      "status": "passed",
+      "foreground_samples": 206,
+      "reactions": {
+        "greet": 128,
+        "pet_motion": 546,
+        "feed": 383,
+        "groom": 348,
+        "play": 969,
+        "celebrate": 995,
+        "sleep_in": 786,
+        "happy": 41,
+        "sleepy": 46
+      },
+      "max_restored_difference": 0
+    },
+    "ink": {
+      "status": "passed",
+      "foreground_samples": 208,
+      "reactions": {
+        "greet": 246,
+        "pet_motion": 390,
+        "feed": 320,
+        "groom": 357,
+        "play": 688,
+        "celebrate": 736,
+        "sleep_in": 506,
+        "happy": 94,
+        "sleepy": 91
+      },
+      "max_restored_difference": 0
+    },
+    "gill": {
+      "status": "passed",
+      "foreground_samples": 209,
+      "reactions": {
+        "greet": 106,
+        "pet_motion": 564,
+        "feed": 367,
+        "groom": 354,
+        "play": 1040,
+        "celebrate": 1042,
+        "sleep_in": 785,
+        "happy": 14,
+        "sleepy": 12
+      },
+      "max_restored_difference": 0
+    }
+  }
+}

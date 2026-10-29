@@ -583,6 +583,8 @@ Personalizar pet também ajusta Conversa (Desligada, Raramente, Normal, Frequent
 
 A lista de interações do gerenciador também oferece os comandos de menu do pet ativo selecionado: foto, status, lembrete, chat quando houver um serviço conectado, clonar e fechar, além de cada movimento e expressão de um modelo Puppet. Assim, todo o menu de contexto pode ser usado pelo teclado.
 
+Usar modelo Puppet integrado, na página do pet, desenha em segundo plano o personagem INKSIDE escolhido como modelo Imervue .puppet: cabeça, braços, cauda e corpo com rig, dez movimentos, três expressões e um script que liga as ações do companheiro a eles. Ele é salvo em pet-assets/puppets e escolhido como fonte com seu script, então Iniciar o cria como pet Puppet.
+
 O guarda-roupa mostra as regiões de cor declaradas pelo personagem ou roupa. Escolha região e cor ou restaure a original. Somente as camadas de máscara indicadas são tingidas; contornos e outros detalhes são preservados. As cores são exibidas antes de aplicar e salvas por identidade e conjunto, inclusive na exportação/importação. Sem regiões declaradas, os controles ficam desativados.
 
 Se o salvamento falhar ao fechar, o pet fica aberto com o estado atual e o temporizador de nova tentativa. Fechar tudo mantém os pets que não puderam fechar; sair aguarda o salvamento antes de liberar recursos. O afeto para no limite suportado para que novas recompensas não impeçam salvar.

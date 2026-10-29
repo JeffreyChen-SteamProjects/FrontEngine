@@ -1243,6 +1243,8 @@ italian_word_dict = {
     'pet_wardrobe_update': "Aggiorna selezione",
     'pet_wardrobe_name': "Nome completo",
     'pet_wardrobe_refresh': "Aggiorna risorse",
+    'pet_builtin_puppet_pick': "Personaggio Puppet integrato",
+    'pet_builtin_puppet': "Usa il modello Puppet integrato",
     'inkside_alert': "Vigile",
     'inkside_antenna': "Antenna",
     'inkside_apron': "Grembiule",

@@ -1243,6 +1243,8 @@ russian_word_dict = {
     'pet_wardrobe_update': "Обновить выбранное",
     'pet_wardrobe_name': "Название наряда",
     'pet_wardrobe_refresh': "Обновить ресурсы",
+    'pet_builtin_puppet_pick': "Встроенный персонаж Puppet",
+    'pet_builtin_puppet': "Использовать встроенную модель Puppet",
     'inkside_alert': "Настороже",
     'inkside_antenna': "Антенна",
     'inkside_apron': "Фартук",

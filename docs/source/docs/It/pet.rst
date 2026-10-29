@@ -59,6 +59,8 @@ Personalizza animale imposta anche Chiacchiere (Spento, Raramente, Normale, Spes
 
 L’elenco interazioni del gestore offre anche i comandi di menu dell’animale attivo selezionato: foto, stato, promemoria, chat se è collegato un servizio, clona e chiudi, oltre a ogni movimento ed espressione di un modello Puppet. Tutto il menu contestuale è quindi raggiungibile da tastiera.
 
+Usa il modello Puppet integrato nella pagina Animale disegna in background il personaggio INKSIDE scelto come modello Imervue .puppet: testa, braccia, coda e corpo con rig, dieci movimenti, tre espressioni e uno script che vi collega le azioni del compagno. Viene salvato in pet-assets/puppets e scelto come sorgente con il suo script, così Avvia lo crea come animale Puppet.
+
 Il guardaroba mostra le zone colore dichiarate dal personaggio o dall’abito. Scegli zona e colore oppure ripristina l’originale. Si colorano solo i livelli maschera designati; contorni e altri dettagli restano invariati. I colori si vedono prima di Applica e vengono salvati per identità e completo, anche nell’esportazione/importazione. Senza zone dichiarate i controlli sono disattivati.
 
 Se il salvataggio fallisce durante la chiusura, l’animale resta aperto con lo stato attuale e il timer di ripetizione. Chiudi tutto conserva gli animali non chiusi; l’uscita attende il salvataggio prima di liberare le risorse. L’affetto si ferma al limite supportato, evitando profili non salvabili dopo ulteriori premi.

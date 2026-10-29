@@ -57,6 +57,8 @@ Customize pet also sets Chatter (Off, Rarely, Normal, Often) for lines the pet s
 
 The pet manager's interaction list also offers the selected live pet's own menu commands: photo, status, reminder, chat when a chat service is attached, clone and close, plus every motion and expression of a Puppet model. Everything in a pet's right-click menu can therefore be done with the keyboard.
 
+Use built-in Puppet model on the Pet page draws the chosen INKSIDE character as an Imervue .puppet model in the background: rigged head, arms, tail and body, ten motions, three expressions and a pet script that maps companion actions to them. It is saved under pet-assets/puppets and selected as the source with its script, so Start spawns it as a Puppet pet.
+
 Wardrobe color controls appear for regions declared by the selected character or clothing asset. Choose a region and color, or restore its authored color. Only designated mask layers are tinted; outlines and unmarked details remain unchanged. Colors are previewed before Apply and saved per identity and outfit, including profile export/import. Assets without declared regions have no color controls enabled.
 
 If a pet save fails during close, the pet remains open with its current state and retry timer. Close all retains pets that could not close, and application exit waits for successful pet saves before teardown. Affection stops at the supported save limit so further rewards cannot make the profile unsaveable.

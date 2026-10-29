@@ -1243,6 +1243,8 @@ french_word_dict = {
     'pet_wardrobe_update': "Mettre à jour la sélection",
     'pet_wardrobe_name': "Nom de la tenue",
     'pet_wardrobe_refresh': "Actualiser les ressources",
+    'pet_builtin_puppet_pick': "Personnage Puppet intégré",
+    'pet_builtin_puppet': "Utiliser le modèle Puppet intégré",
     'inkside_alert': "Alerte",
     'inkside_antenna': "Antenne",
     'inkside_apron': "Tablier",
