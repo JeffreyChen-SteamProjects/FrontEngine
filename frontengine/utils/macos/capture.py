@@ -242,7 +242,7 @@ class ScreenCaptureDriver:
         fmt = cm.CMAudioFormatDescriptionGetStreamBasicDescription(description)
         if fmt is not None and not hasattr(fmt, 'mFormatID'):
             fmt = fmt[0]
-        if fmt.mFormatID != 0x6C70636D or fmt.mBitsPerChannel != 32 or not fmt.mFormatFlags & 1:
+        if fmt is None or fmt.mFormatID != 0x6C70636D or fmt.mBitsPerChannel != 32 or not fmt.mFormatFlags & 1:
             raise OSError('ScreenCaptureKit audio is not float32 PCM')
         length = cm.CMBlockBufferGetDataLength(block)
         status, raw = cm.CMBlockBufferCopyDataBytes(block, 0, length, None)
