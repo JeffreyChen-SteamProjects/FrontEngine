@@ -1,0 +1,14 @@
+{
+  "status": "passed",
+  "platform": "windows",
+  "tab_cycle_length": 31,
+  "tab_cycle_closed": true,
+  "keyboard_greet": true,
+  "keyboard_pet_command": true,
+  "keyboard_menu_command": true,
+  "foreground_samples": 65,
+  "cursor_positions": 1,
+  "probe": "tests/integration/pet_native_input.py",
+  "isolation": "child process on a separate hidden Win32 desktop; real WM_KEYDOWN/WM_KEYUP/WM_CHAR messages posted to the probe windows only",
+  "not_covered": "petting strokes: Windows sends a leave for every posted move without a physical pointer over the pet"
+}

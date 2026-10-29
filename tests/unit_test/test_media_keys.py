@@ -9,6 +9,11 @@ injected and what gets *sent* is asserted - not whether a player reacted, which
 this module cannot answer anyway.
 """
 import sys
+from types import SimpleNamespace
+
+import pytest
+
+from frontengine.utils.media_keys import media_keys
 
 from frontengine.utils.media_keys.media_keys import (
     ACTION_NEXT, ACTION_PLAY_PAUSE, ACTION_PREVIOUS, ACTION_STOP, ACTIONS,
@@ -73,7 +78,7 @@ def test_a_failing_sender_is_reported_not_raised() -> None:
     assert send_media_key(ACTION_PLAY_PAUSE, sender=broken) is False
 
 
-def test_it_degrades_quietly_when_the_platform_cannot_send() -> None:
+def test_it_degrades_quietly_when_the_platform_cannot_send(monkeypatch) -> None:
     """
     非 Windows 上不該丟例外，只是什麼都不做——和其他平台限定功能一致。
 
@@ -87,11 +92,33 @@ def test_it_degrades_quietly_when_the_platform_cannot_send() -> None:
     would really press play/pause and pause whatever the developer is listening
     to, once per test run. Failing the sender lookup exercises the same path.
     """
+    monkeypatch.setattr(sys, 'platform', 'win32')
     def unavailable(code, scan, flags, extra):
         raise OSError("media keys are Windows only")
 
     assert send_media_key(ACTION_PLAY_PAUSE, sender=unavailable) is False
     assert available() is (sys.platform == "win32")
+
+
+@pytest.mark.parametrize('platform, capability, expected', [
+    ('win32', False, True),
+    ('linux', True, False),
+    ('darwin', False, False),
+    ('darwin', True, True),
+])
+def test_availability_uses_the_platform_backend(monkeypatch, platform, capability, expected):
+    from frontengine.utils import macos
+
+    queried = []
+
+    def state(name):
+        queried.append(name)
+        return SimpleNamespace(available=capability)
+
+    monkeypatch.setattr(media_keys, 'sys', SimpleNamespace(platform=platform))
+    monkeypatch.setattr(macos, 'get_backend', lambda: SimpleNamespace(capability=state))
+    assert available() is expected
+    assert queried == (['media_keys'] if platform == 'darwin' else [])
 
 
 def test_every_action_is_reachable_from_a_hotkey() -> None:

@@ -298,12 +298,44 @@ def standable_windows(exclude_handles=()) -> List[Tuple[int, int, int]]:
     if sys.platform == "win32":
         return _standable_windows_windows(exclude_handles)
     if sys.platform == "darwin":
-        return []  # needs a native API binding; degrades to "floor only"
+        from frontengine.utils.macos import get_backend
+        return get_backend().standable_windows(exclude_handles)
     output = run_command("linux_windows")
     return parse_wmctrl_geometry(output) if output else []
 
 
-def _standable_windows_windows(exclude_handles=()) -> List[Tuple[int, int, int]]:
+def _monitor_of(user32, hwnd) -> tuple:
+    """(device name, physical monitor left, top, width, height) of the monitor nearest a window."""
+    import ctypes
+    from ctypes import wintypes
+
+    class MonitorInfoEx(ctypes.Structure):
+        _fields_ = [('cbSize', wintypes.DWORD), ('rcMonitor', wintypes.RECT), ('rcWork', wintypes.RECT),
+                    ('dwFlags', wintypes.DWORD), ('szDevice', wintypes.WCHAR * 32)]
+    user32.MonitorFromWindow.restype = wintypes.HANDLE
+    user32.MonitorFromWindow.argtypes = [wintypes.HWND, wintypes.DWORD]
+    user32.GetMonitorInfoW.argtypes = [wintypes.HANDLE, ctypes.c_void_p]
+    info = MonitorInfoEx()
+    info.cbSize = ctypes.sizeof(MonitorInfoEx)
+    monitor = user32.MonitorFromWindow(hwnd, 2)  # MONITOR_DEFAULTTONEAREST
+    if not monitor or not user32.GetMonitorInfoW(monitor, ctypes.byref(info)):
+        return '', 0, 0, 0, 0
+    area = info.rcMonitor
+    return info.szDevice, area.left, area.top, area.right - area.left, area.bottom - area.top
+
+
+def standable_windows_native(exclude_handles=()) -> List[tuple]:
+    """Windows only: (left, right, top, device, monitor left, top, width, height) in physical pixels.
+
+    GetWindowRect reports physical pixels while Qt places windows in logical ones;
+    the monitor fields let the caller convert each edge with that monitor's scale.
+    """
+    if sys.platform != "win32":
+        return []
+    return _standable_windows_windows(exclude_handles, with_monitor=True)
+
+
+def _standable_windows_windows(exclude_handles=(), with_monitor: bool = False) -> List[tuple]:
     try:
         import ctypes
         from ctypes import wintypes
@@ -330,7 +362,8 @@ def _standable_windows_windows(exclude_handles=()) -> List[Tuple[int, int, int]]
             user32.GetClassNameW(hwnd, class_buffer, 64)
             if class_buffer.value in _PLATFORM_SKIP_CLASSES:
                 return True
-            platforms.append((rect.left, rect.right, rect.top))
+            edge = (rect.left, rect.right, rect.top)
+            platforms.append(edge + _monitor_of(user32, hwnd) if with_monitor else edge)
             return True
 
         user32.EnumWindows(_collect, 0)

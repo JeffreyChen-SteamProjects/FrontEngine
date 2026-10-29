@@ -92,23 +92,45 @@ def build_stylesheet(theme: str) -> str:
     surface_light = palette["secondaryLightColor"]
     text = palette["primaryTextColor"]
     on_primary = contrast_text(primary)
-    muted = _rgba(text, 0.62)
-    divider = _rgba(surface_light, 0.55)
+    card = surface_light if _luminance(surface) > 0.55 else _rgba(text, 0.035)
+    muted = _rgba(text, 0.68)
+    divider = _rgba(text, 0.10)
 
     return f"""
 /* 側邊欄 / Sidebar */
+QWidget#navigationPanel {{
+    background-color: {surface_dark};
+    border-right: 1px solid {divider};
+}}
+QLabel#appBrand {{
+    color: {text};
+    font-size: 19px;
+    font-weight: bold;
+    padding: 2px 8px 6px 8px;
+}}
+QPushButton#commandSearch {{
+    text-transform: none;
+    color: {muted};
+    background-color: {_rgba(text, 0.05)};
+    border: 1px solid {divider};
+    border-radius: 8px;
+    text-align: left;
+    padding: 7px 12px;
+    font-weight: normal;
+}}
+QPushButton#commandSearch:hover {{ border-color: {primary}; color: {text}; }}
 QListWidget#navSidebar {{
     background-color: {surface_dark};
     border: none;
-    border-right: 1px solid {divider};
     outline: 0;
-    padding: 8px 0px;
+    padding: 0px;
 }}
 QListWidget#navSidebar::item {{
     color: {muted};
-    padding: 6px 10px 6px 18px;
+    padding: 6px 12px;
+    margin: 2px 0px;
     border: none;
-    border-left: 3px solid transparent;
+    border-radius: 8px;
 }}
 QListWidget#navSidebar::item:hover {{
     background-color: {_rgba(surface_light, 0.35)};
@@ -121,37 +143,37 @@ QListWidget#navSidebar::item:hover {{
 QListWidget#navSidebar::item:selected,
 QListWidget#navSidebar::item:selected:active,
 QListWidget#navSidebar::item:selected:!active {{
-    background-color: {_rgba(primary, 0.22)};
-    border-left: 3px solid {primary};
+    background-color: {_rgba(primary, 0.13)};
+    border: none;
     color: {primary};
     font-weight: bold;
 }}
 /* 群組標題：不可選取，比分頁列小且更淡 */
 QListWidget#navSidebar::item:disabled {{
-    color: {_rgba(text, 0.38)};
+    color: {_rgba(text, 0.48)};
     background: transparent;
-    border-left: 3px solid transparent;
-    padding: 14px 10px 4px 18px;
+    border: none;
+    padding: 12px 12px 4px 12px;
     font-size: 10px;
     font-weight: bold;
 }}
 
 /* 頁首與頁尾 / Page header and footer */
 QWidget#pageHeader {{
-    background-color: {_rgba(surface_light, 0.14)};
-    border-bottom: 1px solid {divider};
+    background-color: transparent;
+    border: none;
 }}
 QLabel#pageTitle {{
-    font-size: 20px;
+    font-size: 26px;
     font-weight: bold;
     color: {text};
 }}
 QLabel#pageSubtitle {{
-    font-size: 12px;
+    font-size: 13px;
     color: {muted};
 }}
 QWidget#pageFooter {{
-    background-color: {_rgba(surface_light, 0.14)};
+    background-color: {surface};
     border-top: 1px solid {divider};
 }}
 QLabel#pageStatus {{
@@ -160,10 +182,90 @@ QLabel#pageStatus {{
 
 /* 分區標題 / Section headings */
 QLabel#sectionHeader {{
-    color: {primary};
-    font-size: 11px;
+    color: {text};
+    font-size: 13px;
     font-weight: bold;
     padding-top: 2px;
+}}
+
+QWidget#settingSection {{
+    background-color: {card};
+    border: 1px solid {divider};
+    border-radius: 12px;
+}}
+QWidget#sectionContent {{ background: transparent; border: none; }}
+QWidget#inlineActions {{ background: transparent; border: none; }}
+QWidget[settingPage="true"], QWidget#pageContent {{ background-color: {surface}; }}
+QWidget[settingPage="true"] QSlider {{ background: transparent; }}
+QWidget[settingPage="true"] QPushButton {{
+    text-transform: none;
+    background-color: {_rgba(text, 0.055)};
+    color: {text};
+    border: 1px solid {_rgba(text, 0.14)};
+    border-radius: 8px;
+    padding: 5px 14px;
+    font-weight: normal;
+}}
+QWidget[settingPage="true"] QPushButton:hover {{
+    background-color: {_rgba(primary, 0.10)};
+    border-color: {_rgba(primary, 0.6)};
+}}
+QWidget[settingPage="true"] QPushButton:disabled {{
+    color: {_rgba(text, 0.30)};
+    background-color: transparent;
+    border-color: {divider};
+}}
+QWidget[settingPage="true"] QPushButton:checked {{
+    color: {primary};
+    background-color: {_rgba(primary, 0.12)};
+    border-color: {primary};
+}}
+QToolButton#actionMenu {{
+    text-transform: none;
+    color: {text};
+    background-color: {_rgba(text, 0.055)};
+    border: 1px solid {_rgba(text, 0.14)};
+    border-radius: 8px;
+    height: 24px;
+    padding: 9px 18px 9px 12px;
+    font-weight: normal;
+}}
+QToolButton#actionMenu:hover, QToolButton#actionMenu:focus {{
+    background-color: {_rgba(primary, 0.10)};
+    border-color: {primary};
+}}
+QToolButton#actionMenu::menu-indicator {{
+    subcontrol-origin: padding;
+    subcontrol-position: center right;
+    right: 7px;
+}}
+QToolButton#sectionToggle {{
+    text-transform: none;
+    color: {muted};
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    height: 20px;
+    padding: 2px 8px;
+    font-size: 12px;
+}}
+QToolButton#sectionToggle:hover, QToolButton#sectionToggle:focus {{
+    color: {primary};
+    background-color: {_rgba(primary, 0.10)};
+}}
+QMenu {{
+    border: 1px solid {_rgba(text, 0.18)};
+    border-radius: 8px;
+    padding: 6px;
+}}
+QMenu::item {{ padding: 8px 24px 8px 12px; border-radius: 5px; }}
+QMenu::item:selected {{ background-color: {_rgba(primary, 0.15)}; color: {text}; }}
+QTabWidget#sceneInspector::pane {{ border: 1px solid {divider}; border-radius: 10px; }}
+QTabWidget#sceneInspector QTabBar::tab {{
+    text-transform: none;
+    min-width: 54px;
+    padding: 10px 8px;
+    font-weight: normal;
 }}
 
 /* 主要動作：和其他按鈕明顯不同 / The primary action stands apart */
@@ -171,9 +273,19 @@ QPushButton#primaryAction {{
     background-color: {primary};
     color: {on_primary};
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     font-weight: bold;
     padding: 9px 26px;
+}}
+QPushButton#primaryAction[tone="danger"] {{
+    background: transparent;
+    color: {text};
+    border: 1px solid {_rgba(text, 0.24)};
+    font-weight: normal;
+}}
+QPushButton#primaryAction[tone="danger"]:hover {{
+    background-color: {_rgba(primary, 0.12)};
+    border-color: {primary};
 }}
 QPushButton#primaryAction:hover {{
     background-color: {palette['primaryLightColor']};
@@ -186,6 +298,17 @@ QPushButton#primaryAction:disabled {{
 /* 內容區的捲軸不要搶注意力 */
 QScrollArea {{ background: transparent; border: none; }}
 QWidget#pageBody {{ background: {surface}; }}
+QScrollBar:vertical {{ width: 6px; background: transparent; margin: 2px 0px; }}
+QScrollBar:horizontal {{ height: 6px; background: transparent; margin: 0px 2px; }}
+QScrollBar::handle:vertical {{
+    background: {_rgba(text, 0.20)}; border-radius: 3px; min-height: 28px;
+}}
+QScrollBar::handle:horizontal {{
+    background: {_rgba(text, 0.20)}; border-radius: 3px; min-width: 28px;
+}}
+QScrollBar::handle:hover {{ background: {_rgba(primary, 0.55)}; }}
+QScrollBar::add-line, QScrollBar::sub-line {{ width: 0px; height: 0px; }}
+QScrollBar::add-page, QScrollBar::sub-page {{ background: transparent; }}
 """
 
 

@@ -41,6 +41,7 @@ user_setting_dict: Dict[str, Any] = {
     # 啟動時自動套用的預設集名稱（空字串表示停用）
     # Preset auto-applied on launch (empty string disables it)
     "startup_preset": "",
+    "command_palette": {"favorites": [], "recent": []},
     # 偵測到全螢幕程式時自動隱藏覆蓋層
     # Auto-hide overlays while a fullscreen app is running
     "smart_pause": True,
@@ -53,6 +54,7 @@ user_setting_dict: Dict[str, Any] = {
     # 使用者拖曳過的覆蓋層位置：類別名稱 -> [x, y, 寬, 高]
     # Overlay positions the user dragged into place: class name -> [x, y, w, h]
     "overlay_geometry": {},
+    "monitor_profiles_auto": False,
     # 啟動時還原上次的頁面設定
     # Restore the previous session's page settings on launch
     "restore_last_session": False,
@@ -95,6 +97,8 @@ user_setting_dict: Dict[str, Any] = {
     "clipboard_persist": False,
     "clipboard_entries": [],
     "clipboard_limit": 50,
+    "image_clipboard_history": {"enabled": False, "persistent": False, "limit": 50, "capacity_mib": 64},
+    "capture_history": {"enabled": False, "persistent": False, "limit": 50, "capacity_mib": 64},
     # 已儲存的視窗版面：名稱 -> [{title, x, y, width, height}]
     # Saved window layouts: name -> [{title, x, y, width, height}]
     "window_layouts": {},
@@ -104,6 +108,7 @@ user_setting_dict: Dict[str, Any] = {
     # 覆蓋層畫質檔位：high / balanced / saver
     # Overlay quality tier: high / balanced / saver.
     "quality_tier": "high",
+    "low_power": False,
     # 是否載入 plugins/ 資料夾裡的外掛（外掛與本程式同權限，預設關閉）
     # Load plugins from plugins/? They run with our privileges, so: off by default.
     "load_plugins": False,
@@ -160,7 +165,8 @@ def export_user_setting(destination: Path) -> Path:
     """將目前所有設定寫出到指定路徑 / Write all current settings to `destination`."""
     destination = Path(destination)
     destination.parent.mkdir(parents=True, exist_ok=True)
-    return JsonRepository(destination).save(user_setting_dict)
+    data = {key: value for key, value in user_setting_dict.items() if key != 'plugin_grants'}
+    return JsonRepository(destination).save(data)
 
 
 def import_user_setting(source: Path) -> None:
@@ -175,7 +181,7 @@ def import_user_setting(source: Path) -> None:
     data = repo.load()
     if not isinstance(data, dict):
         raise ValueError("Settings file must contain a JSON object")
-    user_setting_dict.update(data)
+    user_setting_dict.update({key: value for key, value in data.items() if key != 'plugin_grants'})
     write_user_setting()
 
 

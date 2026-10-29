@@ -36,8 +36,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11", "3.12"]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
     runs-on: windows-latest
+    timeout-minutes: 15  # about 3x the slowest recent run, at least 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
@@ -58,7 +59,7 @@ jobs:
         run: python -m compileall -q frontengine
 
       - name: Run unit tests
-        run: python -m pytest tests/ -q
+        run: python -X faulthandler -m pytest tests/ -q
 
       # 啟動測試要用「這份 checkout 打包出來的套件」，不是 PyPI 上的版本。
       # 之前 dev_requirements 會裝下published 的 frontengine，而啟動腳本從自己的
@@ -82,3 +83,30 @@ jobs:
 
       - name: Extend FrontEngine
         run: python ./tests/unit_test/start/extend_front_engine.py
+
+  macos:
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install native dependencies
+        run: |
+          python -m pip install --upgrade pip build
+          python -m pip install -r dev_requirements.txt
+          python -m pip install '.[macos]'
+      - name: Compile and test
+        run: |
+          python -m compileall -q frontengine
+          python -X faulthandler -m pytest tests/ -q
+      - name: Install built wheel
+        run: |
+          python -m build --wheel --outdir dist
+          python -m pip install --no-deps --force-reinstall dist/*.whl
+      - name: Check native capabilities
+        run: python tests/integration/macos_native_smoke.py

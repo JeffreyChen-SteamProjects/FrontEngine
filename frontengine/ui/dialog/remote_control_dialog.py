@@ -13,10 +13,12 @@ all of which the dialog says out loud rather than hiding in the docs.
 from __future__ import annotations
 
 from typing import Any, Dict, Optional
+from pathlib import Path
 
+from PySide6.QtCore import QSignalBlocker
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import (
-    QAbstractItemView, QCheckBox, QComboBox, QDialog, QDialogButtonBox, QGridLayout, QLabel,
+    QAbstractItemView, QCheckBox, QComboBox, QDialog, QDialogButtonBox, QFileDialog, QGridLayout, QLabel,
     QPushButton, QTableWidget, QTableWidgetItem, QWidget,
 )
 
@@ -72,13 +74,24 @@ class RemoteControlDialog(QDialog):
             self.remote_url_label.textInteractionFlags().TextSelectableByMouse)
         self.remote_copy_button = tr(QPushButton(), "remote_copy", "Copy link")
         self.remote_copy_button.clicked.connect(self.copy_link)
-        self.remote_hint = tr(QLabel(), "remote_hint",
-            "This opens a port on this machine for your local network. The link carries a "
-            "one-time token that changes every time it starts, and only the buttons on the "
-            "page can be triggered - nothing else. It is plain HTTP, so treat it like any "
-            "other device on your network: someone else on the same network could read the "
-            "token and press the same buttons. Leave it off on networks you do not trust.")
+        self.remote_hint = tr(QLabel(), "remote_tls_hint",
+            "HTTPS encrypts the connection. This self-signed certificate is not automatically "
+            "trusted by your phone. Export its public certificate and compare the SHA-256 "
+            "fingerprint below before importing or trusting it on your phone. Follow your "
+            "phone/browser certificate settings; local IP addresses may change. Regenerating "
+            "changes the fingerprint and requires trusting the new certificate. The link "
+            "contains a token that changes on each start; share it only with people you trust.")
         self.remote_hint.setWordWrap(True)
+        self.certificate_label = QLabel(self.certificate_status())
+        self.certificate_label.setWordWrap(True)
+        self.certificate_label.setTextInteractionFlags(
+            self.certificate_label.textInteractionFlags().TextSelectableByMouse)
+        self.certificate_export_button = tr(QPushButton(), "remote_certificate_export",
+                                             "Export public certificate")
+        self.certificate_export_button.clicked.connect(self.export_certificate)
+        self.certificate_regenerate_button = tr(QPushButton(), "remote_certificate_regenerate",
+                                                 "Regenerate certificate")
+        self.certificate_regenerate_button.clicked.connect(self.regenerate_certificate)
 
         self.midi_label = tr(QLabel(), "remote_midi_label", "MIDI controller")
         self.midi_combobox = QComboBox()
@@ -110,12 +123,15 @@ class RemoteControlDialog(QDialog):
         layout.addWidget(self.remote_url_label, 1, 0, 1, 2)
         layout.addWidget(self.remote_copy_button, 1, 2)
         layout.addWidget(self.remote_hint, 2, 0, 1, 3)
-        layout.addWidget(self.midi_label, 3, 0)
-        layout.addWidget(self.midi_combobox, 3, 1, 1, 2)
-        layout.addWidget(self.table, 4, 0, 1, 3)
-        layout.addWidget(self.learn_button, 5, 0)
-        layout.addWidget(self.remove_button, 5, 1)
-        layout.addWidget(self.button_box, 6, 0, 1, 3)
+        layout.addWidget(self.certificate_label, 3, 0, 1, 3)
+        layout.addWidget(self.certificate_export_button, 4, 0, 1, 2)
+        layout.addWidget(self.certificate_regenerate_button, 4, 2)
+        layout.addWidget(self.midi_label, 5, 0)
+        layout.addWidget(self.midi_combobox, 5, 1, 1, 2)
+        layout.addWidget(self.table, 6, 0, 1, 3)
+        layout.addWidget(self.learn_button, 7, 0)
+        layout.addWidget(self.remove_button, 7, 1)
+        layout.addWidget(self.button_box, 8, 0, 1, 3)
 
         for control, action in current_bindings().items():
             self.add_row(control, action)
@@ -124,8 +140,43 @@ class RemoteControlDialog(QDialog):
     def remote_status(self) -> str:
         """目前該在手機上開什麼；沒開啟就說明它是關著的。"""
         if self._remote is None or not getattr(self._remote, "running", False):
+            error = getattr(self._remote, "last_error", "")
+            if error:
+                return _t("remote_tls_failed", "HTTPS could not start: {reason}").format(reason=error)
             return _t("remote_off", "Off - nothing is listening.")
         return self._remote.url()
+
+    def certificate_status(self) -> str:
+        certificate = getattr(self._remote, "certificate", None)
+        if certificate is None:
+            return _t("remote_certificate_none", "A certificate is created when HTTPS starts.")
+        return _t("remote_certificate_details", "SHA-256: {fingerprint}\nExpires: {expires}").format(
+            fingerprint=certificate.fingerprint,
+            expires=certificate.expires_at.strftime("%Y-%m-%d UTC"))
+
+    def export_certificate(self) -> bool:
+        if self._remote is None:
+            return False
+        filename, _ = QFileDialog.getSaveFileName(
+            self, _t("remote_certificate_export", "Export public certificate"),
+            "frontengine-remote.crt", "Certificate (*.crt *.pem)")
+        if not filename:
+            return False
+        success = self._remote.export_certificate(Path(filename))
+        self.remote_url_label.setText(self.remote_status())
+        self.certificate_label.setText(self.certificate_status())
+        return success
+
+    def regenerate_certificate(self) -> bool:
+        if self._remote is None:
+            return False
+        success = self._remote.regenerate_certificate()
+        self.remote_url_label.setText(self.remote_status())
+        self.certificate_label.setText(self.certificate_status())
+        if not success:
+            with QSignalBlocker(self.remote_checkbox):
+                self.remote_checkbox.setChecked(False)
+        return success
 
     def copy_link(self) -> bool:
         """把連結複製起來，方便貼到手機上。"""
@@ -152,10 +203,13 @@ class RemoteControlDialog(QDialog):
         if self._remote is None:
             return
         if enabled:
-            self._remote.start()
+            if not self._remote.start():
+                with QSignalBlocker(self.remote_checkbox):
+                    self.remote_checkbox.setChecked(False)
         else:
             self._remote.stop()
         self.remote_url_label.setText(self.remote_status())
+        self.certificate_label.setText(self.certificate_status())
 
     # --- MIDI bindings ---------------------------------------------------
     def add_row(self, control: str = "", action: str = "") -> None:

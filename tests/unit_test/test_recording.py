@@ -8,6 +8,7 @@ with Qt, because "can it actually be read" is the only thing that matters here.
 import numpy
 import pytest
 from PySide6.QtCore import QRect
+from test_recording_stream import wait_until
 from PySide6.QtGui import QColor, QImageReader, QMovie, QPixmap
 
 from frontengine.utils.recording.frame_recorder import (
@@ -128,58 +129,70 @@ def test_the_frame_budget_respects_both_limits() -> None:
     assert frame_budget(MAX_FPS, 120) == MAX_FRAMES
 
 
-def test_an_empty_region_is_refused() -> None:
+def test_an_empty_region_is_refused(tmp_path) -> None:
     recorder = FrameRecorder()
-    assert recorder.start(QRect(0, 0, 0, 0)) is False
-    assert recorder.start(None) is False
+    assert recorder.start(QRect(0, 0, 0, 0), tmp_path / "invalid.gif") is False
+    assert recorder.start(None, tmp_path / "invalid.gif") is False
 
 
-def test_recording_stops_itself_at_the_budget() -> None:
+def test_recording_stops_itself_at_the_budget(tmp_path) -> None:
     recorder = FrameRecorder()
     recorder.set_grabber(lambda rect: solid_pixmap(20, 20, "#123456"))
-    recorder.start(QRect(0, 0, 20, 20), fps=4, max_seconds=1)
+    recorder.start(QRect(0, 0, 20, 20), tmp_path / "budget.gif", fps=4, max_seconds=1)
     for _ in range(20):
         recorder.capture_frame()
-    assert len(recorder.frames) == 4
+    assert recorder.frame_count + recorder.dropped_frames == 4
+    wait_until(lambda: not recorder.busy)
     assert recorder.running is False
 
 
-def test_a_failing_grab_records_nothing_but_does_not_raise() -> None:
+def test_a_failing_grab_records_nothing_but_does_not_raise(tmp_path) -> None:
     recorder = FrameRecorder()
 
     def boom(_rect):
         raise RuntimeError("no screen")
 
     recorder.set_grabber(boom)
-    recorder.start(QRect(0, 0, 10, 10))
+    recorder.start(QRect(0, 0, 10, 10), tmp_path / "empty.gif")
     assert recorder.capture_frame() is False
-    assert recorder.frames == []
+    assert recorder.frame_count == 0
+    recorder.stop()
+    wait_until(lambda: not recorder.busy)
 
 
 def test_nothing_recorded_saves_nothing(tmp_path) -> None:
-    assert FrameRecorder().save_gif(str(tmp_path / "x.gif")) is None
+    recorder = FrameRecorder()
+    recorder.set_grabber(lambda _rect: None)
+    recorder.start(QRect(0, 0, 10, 10), tmp_path / "x.gif")
+    recorder.stop()
+    wait_until(lambda: not recorder.busy)
+    assert recorder.result_path is None
+    assert not (tmp_path / "x.gif").exists()
 
 
 def test_a_recording_saves_and_reads_back(tmp_path) -> None:
     recorder = FrameRecorder()
     recorder.set_grabber(lambda rect: solid_pixmap(24, 16, "#00cc00"))
-    recorder.start(QRect(0, 0, 24, 16), fps=5, max_seconds=1)
+    recorder.start(QRect(0, 0, 24, 16), tmp_path / "clip.gif", fps=5, max_seconds=1)
     for _ in range(3):
         recorder.capture_frame()
     recorder.stop()
-    path = recorder.save_gif(str(tmp_path / "clip.gif"))
+    wait_until(lambda: not recorder.busy)
+    path = recorder.result_path
     assert path is not None
     movie = QMovie(path)
-    assert movie.isValid() and movie.frameCount() == len(recorder.frames)
+    assert movie.isValid() and movie.frameCount() == recorder.frame_count
 
 
-def test_clearing_frees_the_frames() -> None:
+def test_cancelling_discards_the_recording(tmp_path) -> None:
     recorder = FrameRecorder()
     recorder.set_grabber(lambda rect: solid_pixmap(8, 8, "#ffffff"))
-    recorder.start(QRect(0, 0, 8, 8))
+    recorder.start(QRect(0, 0, 8, 8), tmp_path / "cancel.gif")
     recorder.capture_frame()
     recorder.clear()
-    assert recorder.frames == []
+    wait_until(lambda: not recorder.busy)
+    assert recorder.result_path is None
+    assert not (tmp_path / "cancel.gif").exists()
 
 
 # --- picture in picture ---------------------------------------------------
@@ -196,17 +209,20 @@ def test_without_a_camera_the_frame_is_untouched() -> None:
     assert composite_inset(base, QPixmap()) is base
 
 
-def test_the_recorder_composites_the_camera_when_asked() -> None:
+def test_the_recorder_composites_the_camera_when_asked(tmp_path) -> None:
     recorder = FrameRecorder()
     recorder.set_grabber(lambda rect: solid_pixmap(80, 60, "#000000"))
     recorder.set_inset_provider(lambda: solid_pixmap(20, 20, "#ffffff"))
-    recorder.start(QRect(0, 0, 80, 60))
-    frame = recorder.frames[0]
-    assert tuple(frame[35, 55]) == (255, 255, 255)
-    assert tuple(frame[5, 5]) == (0, 0, 0)
+    recorder.start(QRect(0, 0, 80, 60), tmp_path / "inset.gif")
+    recorder.stop()
+    wait_until(lambda: not recorder.busy)
+    movie = QMovie(recorder.result_path)
+    assert movie.jumpToFrame(0)
+    assert movie.currentImage().pixelColor(55, 35).name() == "#ffffff"
+    assert movie.currentImage().pixelColor(5, 5).name() == "#000000"
 
 
-def test_a_failing_camera_does_not_lose_the_frame() -> None:
+def test_a_failing_camera_does_not_lose_the_frame(tmp_path) -> None:
     recorder = FrameRecorder()
     recorder.set_grabber(lambda rect: solid_pixmap(20, 20, "#334455"))
 
@@ -214,8 +230,10 @@ def test_a_failing_camera_does_not_lose_the_frame() -> None:
         raise RuntimeError("camera died")
 
     recorder.set_inset_provider(boom)
-    recorder.start(QRect(0, 0, 20, 20))
-    assert len(recorder.frames) == 1
+    recorder.start(QRect(0, 0, 20, 20), tmp_path / "camera.gif")
+    assert recorder.frame_count == 1
+    recorder.stop()
+    wait_until(lambda: not recorder.busy)
 
 
 def test_a_null_image_converts_to_nothing() -> None:

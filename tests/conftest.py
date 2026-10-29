@@ -7,11 +7,26 @@ working directory so the log file created on import does not land in the repo.
 """
 import os
 import tempfile
+import sys
+import gc
 
 import pytest
 
 # 必須在匯入任何 Qt 模組前設定 / Must be set before any Qt module is imported.
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+
+
+@pytest.fixture(autouse=True)
+def _isolated_macos_frameworks(monkeypatch):
+    """Unit tests never start native host capture/audio or request TCC permission."""
+    if sys.platform != 'darwin':
+        return
+    from frontengine.utils.macos import backend
+
+    def unavailable(name):
+        raise ImportError('Native framework is isolated in unit tests: ' + name)
+
+    monkeypatch.setattr(backend, '_backend', backend.MacOSBackend(loader=unavailable))
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -39,3 +54,32 @@ def _qt_application():
 
     application = QApplication.instance() or QApplication([])
     yield application
+    _release_leftovers(application)
+
+
+def _release_leftovers(application) -> None:
+    """Stop listener threads and delete leftover top-level widgets while Python is still whole.
+
+    Tests leave thousands of top-level widgets and one emergency-exit listener per
+    main window. Left to interpreter shutdown, they were torn down in arbitrary order
+    and the Windows CI job sometimes exited 1 after every test had passed.
+    """
+    import threading
+    from PySide6.QtCore import QCoreApplication, QEvent
+    from frontengine.utils.critical_exit.critical_exit import CriticalExit
+    for thread in threading.enumerate():
+        if isinstance(thread, CriticalExit):
+            thread.stop()
+    for widget in application.topLevelWidgets():
+        widget.deleteLater()
+    QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+    application.processEvents()
+    gc.collect()
+
+
+@pytest.fixture(autouse=True, scope="module")
+def _release_test_widget_cycles(_qt_application):
+    """Release cyclic test widgets on their GUI thread before another module starts workers."""
+    gc.collect()
+    yield
+    gc.collect()

@@ -25,7 +25,7 @@ class GifWidget(BaseWidget):
         if self.gif_path.exists() and self.gif_path.is_file():
             front_engine_logger.info(f"Loading GIF file: {self.gif_path}")
             self.movie.setFileName(str(self.gif_path))
-            self.movie.frameChanged.connect(self.repaint)
+            self.movie.frameChanged.connect(lambda _frame: self.update())
             self.gif_label.setMovie(self.movie)
             self.movie.start()
             self.resize(self.movie.frameRect().size())

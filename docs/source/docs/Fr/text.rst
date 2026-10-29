@@ -20,3 +20,5 @@ Page Texte
       pour la ville indiquée dans « Ville pour la météo ».
 
 * Tous les écrans / Sous toutes les fenêtres / Écran cible - comme ailleurs.
+
+Texte → TXT / JSON / CSV local affiche un fichier UTF-8 avec champ et intervalle de 1–3600 secondes. JSON : /clé/index (ex. /build/tasks) ; CSV : en-têtes uniques, colonne affichée par lignes. Champ vide : fichier entier. Lecture en arrière-plan, une tâche par source, limite 1 MiB et 65 536 caractères. Les erreurs de fichier/champ, format, accès et taille sont explicites ; la correction rétablit automatiquement le résultat. Les préréglages gardent fichier/champ/intervalle. Une scène portable copie le fichier : partager le paquet partage cet instantané.

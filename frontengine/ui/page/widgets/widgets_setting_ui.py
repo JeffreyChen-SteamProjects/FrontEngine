@@ -66,6 +66,7 @@ class WidgetsSettingUI(SettingPage):
         self.monitor_widget_list: List[SystemMonitorWidget] = []
         self.now_playing_widget_list: List[NowPlayingWidget] = []
         self.note_widget_list: List[StickyNoteWidget] = []
+        self.todo_widget_list, self.todo_service, self.todo_dialog = [], None, None
         self.capture = LoopbackSpectrum(DEFAULT_BANDS)
 
         self._build_spectrum_row()
@@ -95,11 +96,53 @@ class WidgetsSettingUI(SettingPage):
         notes = self.add_section(self.note_label)
         notes.add_inline(self.note_button, self.note_close_button)
         notes.add_inline(self.note_restore_checkbox)
+        self._build_todo_section()
 
         self.add_body_widget(self.hint_label)
         self.finish_body()
 
     # --- construction helpers -------------------------------------------
+    def _build_todo_section(self) -> None:
+        section = self.add_section('todo_title', 'Tasks and calendar')
+        button = tr(QPushButton(), 'todo_manage')
+        button.clicked.connect(self.open_tasks)
+        today = tr(QPushButton(), 'todo_show_today')
+        today.clicked.connect(self.show_today)
+        section.add_inline(button, today)
+
+    def configure_tasks(self, service) -> None:
+        """Let MainUI supply a shared lazy durable owner after page construction."""
+        self.todo_service = service
+
+    def open_tasks(self) -> None:
+        """Open the local task editor without opening a desktop overlay automatically."""
+        if self.todo_service is None:
+            return
+        from frontengine.ui.dialog.todo_dialog import TodoDialog
+        if self.todo_dialog is None:
+            self.todo_dialog = TodoDialog(self.todo_service, self)
+        self.todo_dialog.show()
+        self.todo_dialog.raise_()
+
+    def show_today(self) -> None:
+        """Reuse one registered today checklist window."""
+        if self.todo_service is None:
+            return
+        self.todo_widget_list[:] = [widget for widget in self.todo_widget_list if not widget.closed]
+        if self.todo_widget_list:
+            self.todo_widget_list[0].show()
+            return
+        from frontengine.show.notes.todo_widget import TodoWidget
+        from frontengine.ui.dialog.todo_dialog import TodoPanel
+        widget = TodoWidget(lambda parent: TodoPanel(self.todo_service, parent, editor=False))
+        widget.show()
+        self.todo_widget_list.append(widget)
+
+    def close_task_editor(self) -> None:
+        """Close the owned manager; desktop widgets follow normal batch lifecycle."""
+        if self.todo_dialog is not None:
+            self.todo_dialog.close()
+
     def _build_spectrum_row(self) -> None:
         self.spectrum_label = tr(QLabel(), "widgets_spectrum_label", "Audio spectrum")
         self.spectrum_style_combobox = QComboBox()
@@ -117,6 +160,10 @@ class WidgetsSettingUI(SettingPage):
             self.spectrum_button.setEnabled(False)
             self.spectrum_button.setToolTip(
                 _t("widgets_spectrum_unavailable", "Audio capture is Windows only."))
+            import sys
+            if sys.platform.startswith('linux'):
+                from frontengine.utils.linux.capabilities import audio_reason
+                self.spectrum_button.setToolTip(audio_reason())
 
     def _build_monitor_row(self) -> None:
         self.monitor_label = tr(QLabel(), "widgets_monitor_label", "System monitor")

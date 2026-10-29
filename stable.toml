@@ -10,13 +10,26 @@ authors = [
     { name = "JE-Chen", email = "jechenmailman@gmail.com" },
 ]
 dependencies = [
-    "PySide6==6.11.2", "qt-material", "PyOpenGL", "PyOpenGL_accelerate", "numpy", "pynput"
+    "PySide6>=6.11.2,<6.13", "qt-material", "PyOpenGL", "PyOpenGL_accelerate", "numpy", "pynput",
+    "cryptography>=42", "pygltflib>=1.16.5,<2", "trimesh>=4.5,<6", "Pillow>=11",
+    "python-xlib>=0.33; sys_platform == 'linux'",
+    "winrt-Windows.Media.Ocr>=3.2.1; sys_platform == 'win32'",
+    "winrt-Windows.Media.Control>=3.2.1; sys_platform == 'win32'",
+    "winrt-Windows.Graphics.Imaging>=3.2.1; sys_platform == 'win32'",
+    "winrt-Windows.Storage.Streams>=3.2.1; sys_platform == 'win32'",
+    "winrt-Windows.Globalization>=3.2.1; sys_platform == 'win32'",
+    "winrt-Windows.Foundation>=3.2.1; sys_platform == 'win32'",
+    "winrt-Windows.Foundation.Collections>=3.2.1; sys_platform == 'win32'",
 ]
 description = "FrontEngine is use-define frontview or only use like screen saver"
 requires-python = ">=3.10"
 license-files = ["LICENSE"]
 classifiers = [
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Development Status :: 2 - Pre-Alpha",
     "Environment :: Win32 (MS Windows)",
     "Environment :: MacOS X",
@@ -31,9 +44,25 @@ frontengine = "frontengine.ui.main_ui:main"
 Homepage = "https://github.com/JeffreyChen-SteamProjects/FrontEngine"
 Code = "https://github.com/JeffreyChen-SteamProjects/FrontEngine"
 
+[project.optional-dependencies]
+puppet = ["Imervue>=1.0.90"]
+macos = [
+    "pyobjc-framework-Cocoa>=10.3; sys_platform == 'darwin'",
+    "pyobjc-framework-Quartz>=10.3; sys_platform == 'darwin'",
+    "pyobjc-framework-Vision>=10.3; sys_platform == 'darwin'",
+    "pyobjc-framework-ScreenCaptureKit>=10.3; sys_platform == 'darwin'",
+    "pyobjc-framework-CoreMedia>=10.3; sys_platform == 'darwin'",
+    "pyobjc-framework-ApplicationServices>=11; sys_platform == 'darwin'",
+    "pyobjc-framework-AVFoundation>=10.3; sys_platform == 'darwin'",
+    "pyobjc-framework-CoreMIDI>=10.3; sys_platform == 'darwin'",
+]
+
 [project.readme]
 file = "README.md"
 content-type = "text/markdown"
 
 [tool.setuptools.packages]
-find = { namespaces = false }
+find = { namespaces = false, include = ["frontengine", "frontengine.*"] }
+
+[tool.setuptools.package-data]
+"frontengine.show.pet.inkside" = ["sprites/*.png"]

@@ -1,0 +1,79 @@
+{
+  "date": "2026-10-08",
+  "source_commit": "abcb8c3020f10c3830beeb3d89cec466ce59c8bf",
+  "ci_run": "https://github.com/JeffreyChen-SteamProjects/FrontEngine/actions/runs/37703250680",
+  "platform": "GitHub-hosted macOS ARM64 / Python 3.12, Qt Cocoa native probe",
+  "headless_unit_regression": {
+    "passed": 1745,
+    "skipped": 12
+  },
+  "native_acceptance": {
+    "status": "passed",
+    "screen_pixels": true,
+    "own_window_move": true,
+    "capabilities": {
+      "screen_capture": {
+        "supported": true,
+        "available": true,
+        "reason": ""
+      },
+      "system_audio": {
+        "supported": true,
+        "available": true,
+        "reason": ""
+      },
+      "microphone": {
+        "supported": true,
+        "available": true,
+        "reason": ""
+      },
+      "window_geometry": {
+        "supported": true,
+        "available": true,
+        "reason": ""
+      },
+      "window_move": {
+        "supported": true,
+        "available": true,
+        "reason": ""
+      },
+      "midi": {
+        "supported": true,
+        "available": true,
+        "reason": ""
+      },
+      "media_keys": {
+        "supported": true,
+        "available": true,
+        "reason": ""
+      },
+      "global_hotkey": {
+        "supported": true,
+        "available": true,
+        "reason": ""
+      },
+      "foreign_topmost": {
+        "supported": false,
+        "available": false,
+        "reason": "No supported public API for foreign window control"
+      },
+      "foreign_opacity": {
+        "supported": false,
+        "available": false,
+        "reason": "No supported public API for foreign window control"
+      },
+      "spaces": {
+        "supported": false,
+        "available": false,
+        "reason": "No supported public API for foreign window control"
+      },
+      "capture_exclusion": {
+        "supported": false,
+        "available": false,
+        "reason": "No supported public API for foreign window control"
+      }
+    }
+  },
+  "own_window_geometry_checked_and_restored": true,
+  "scope": "Own synthetic magenta window, real ScreenCaptureKit capture, PID/bounds/unique AX move and native restore. Capabilities report current grants only; microphone/system audio/MIDI/media keys/global input were not exercised. Manual TCC transitions, physical devices and mixed-DPI displays remain in progress.md."
+}

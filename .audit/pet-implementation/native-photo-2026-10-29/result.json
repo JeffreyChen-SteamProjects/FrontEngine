@@ -1,0 +1,168 @@
+{
+  "status": "failed",
+  "platform": "windows",
+  "error": "AssertionError()",
+  "observations": [
+    {
+      "foreground": 73534756,
+      "cursor": [
+        3129,
+        75
+      ]
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        3129,
+        75
+      ]
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        3129,
+        75
+      ]
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        3130,
+        75
+      ]
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        3216,
+        104
+      ]
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        3220,
+        106
+      ]
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        3220,
+        106
+      ]
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        3220,
+        106
+      ]
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        3220,
+        106
+      ]
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        3220,
+        106
+      ]
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        3220,
+        106
+      ]
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        3220,
+        106
+      ]
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        3220,
+        106
+      ]
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        3201,
+        111
+      ]
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        3143,
+        125
+      ]
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        3063,
+        157
+      ]
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        3019,
+        178
+      ]
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        3006,
+        186
+      ]
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2999,
+        188
+      ]
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2995,
+        191
+      ]
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2990,
+        191
+      ]
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2988,
+        191
+      ]
+    },
+    {
+      "foreground": 73534756,
+      "cursor": [
+        2988,
+        191
+      ]
+    }
+  ]
+}

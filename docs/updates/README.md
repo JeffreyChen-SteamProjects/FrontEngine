@@ -58,6 +58,131 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261029-47 | 2026-10-29 | Make the built-in walk and climb read as real steps at pet size | #done #pets #animation | [2026-10](2026-10.md) |
+| U-20261029-48 | 2026-10-29 | Show animated pets moving on the GPU path and walk MOCHI with generated step frames | #done #pets #animation #compositor | [2026-10](2026-10.md) |
+| U-20261029-49 | 2026-10-29 | Paint desktop pets through Qt so their frames change while they move | #done #pets #animation #compositor | [2026-10](2026-10.md) |
+| U-20261029-50 | 2026-10-29 | Stop pets jittering left and right on narrow window ledges | #done #pets #motion | [2026-10](2026-10.md) |
+| U-20261029-51 | 2026-10-29 | Generated walk and climb frames for the other five built-in characters | #done #pets #animation | [2026-10](2026-10.md) |
+| U-20261029-52 | 2026-10-29 | Clean stray specks and off-palette pink from the generated pet frames | #done #pets #animation | [2026-10](2026-10.md) |
+| U-20261029-53 | 2026-10-29 | Fix the PR #227 macOS install failure and SonarCloud findings | #done #pets #ci #quality | [2026-10](2026-10.md) |
+| U-20261030-01 | 2026-10-30 | Clean up listeners and widgets before the test process exits | #done #ci #tests | [2026-10](2026-10.md) |
+| U-20261030-02 | 2026-10-30 | Clear the release PR's SonarCloud gate | #done #ci #quality #macos | [2026-10](2026-10.md) |
+| U-20261029-46 | 2026-10-29 | Keep pets aligned and sized across monitors with different scaling | #done #pets #monitors #native | [2026-10](2026-10.md) |
+| U-20261029-45 | 2026-10-29 | Accept pet toys, calls, strokes and Puppet reactions on the real screen, isolated | #done #pets #puppet #native | [2026-10](2026-10.md) |
+| U-20261029-44 | 2026-10-29 | End grooming with a stretch and limit repeated peer greetings | #done #pets #animation | [2026-10](2026-10.md) |
+| U-20261029-43 | 2026-10-29 | Verify pet manager keyboard navigation through native Windows input on an isolated desktop | #done #pets #accessibility #native | [2026-10](2026-10.md) |
+| U-20261029-42 | 2026-10-29 | Export the built-in characters as rigged Puppet models and verify them natively | #done #puppet #art #native | [2026-10](2026-10.md) |
+| U-20261029-41 | 2026-10-29 | Localize built-in part and garment labels | #done #pets #i18n | [2026-10](2026-10.md) |
+| U-20261029-40 | 2026-10-29 | Measure one and four pets, layered against legacy, within stated budgets | #done #pets #performance | [2026-10](2026-10.md) |
+| U-20261029-39 | 2026-10-29 | Offer every pet menu command from the keyboard in the pet manager | #done #pets #accessibility | [2026-10](2026-10.md) |
+| U-20261029-38 | 2026-10-29 | Set chatter frequency and animation size separately per pet | #done #pets #settings | [2026-10](2026-10.md) |
+| U-20261029-37 | 2026-10-29 | Replace conflicting garments, label fit, compare looks and switch outfits safely | #done #pets #wardrobe | [2026-10](2026-10.md) |
+| U-20261029-36 | 2026-10-29 | Add relationship stages, welcome and goodbye greetings, Puppet click intent | #done #pets #puppet #interaction | [2026-10](2026-10.md) |
+| U-20261029-35 | 2026-10-29 | Play sit, transitions, landing, catch and peer waves on desktop pets | #done #pets #animation | [2026-10](2026-10.md) |
+| U-20261029-34 | 2026-10-29 | Ship six drawn INKSIDE characters and fourteen outfits as layered assets | #done #pets #art #wardrobe | [2026-10](2026-10.md) |
+| U-20261029-33 | 2026-10-29 | Add the Puppet ball toy | #done #puppet #toys | [2026-10](2026-10.md) |
+| U-20261029-32 | 2026-10-29 | Add the Puppet light-spot toy | #done #puppet #toys | [2026-10](2026-10.md) |
+| U-20261029-31 | 2026-10-29 | Verify Puppet call movement on native GL | #done #puppet #native | [2026-10](2026-10.md) |
+| U-20261029-30 | 2026-10-29 | Move Puppet pets on Come here | #done #puppet #interaction | [2026-10](2026-10.md) |
+| U-20261029-29 | 2026-10-29 | Choose call destinations by keyboard | #done #pets #accessibility | [2026-10](2026-10.md) |
+| U-20261029-28 | 2026-10-29 | Switch wardrobe language live | #done #pets #i18n | [2026-10](2026-10.md) |
+| U-20261029-27 | 2026-10-29 | Start interactions from the pet manager | #done #pets #ui | [2026-10](2026-10.md) |
+| U-20261029-26 | 2026-10-29 | Add the Come here command | #done #pets #interaction | [2026-10](2026-10.md) |
+| U-20261029-25 | 2026-10-29 | Store per-pet treat preferences | #done #pets #care | [2026-10](2026-10.md) |
+| U-20261029-24 | 2026-10-29 | Add the pet treat menu | #done #pets #care | [2026-10](2026-10.md) |
+| U-20261029-23 | 2026-10-29 | Add wardrobe style swatches | #done #pets #wardrobe | [2026-10](2026-10.md) |
+| U-20261029-22 | 2026-10-29 | Accept the wardrobe background-install lifecycle | #done #pets #wardrobe | [2026-10](2026-10.md) |
+| U-20261029-21 | 2026-10-29 | Run the pet regression set and native Puppet reactions | #done #pets #native | [2026-10](2026-10.md) |
+| U-20261029-20 | 2026-10-29 | Add Puppet petting gestures | #done #puppet #interaction | [2026-10](2026-10.md) |
+| U-20261029-19 | 2026-10-29 | Clean up mixed Puppet test processes | #done #puppet #tests | [2026-10](2026-10.md) |
+| U-20261029-18 | 2026-10-29 | Accept Puppet transparent photos natively | #done #puppet #native | [2026-10](2026-10.md) |
+| U-20261029-17 | 2026-10-29 | Map shared interactions to Puppet native reactions | #done #puppet #animation | [2026-10](2026-10.md) |
+| U-20261029-16 | 2026-10-29 | Recover a selected pet | #done #pets #ui | [2026-10](2026-10.md) |
+| U-20261029-15 | 2026-10-29 | Show celebration and outfit presentations | #done #pets #animation | [2026-10](2026-10.md) |
+| U-20261029-14 | 2026-10-29 | Keep the source appearance when cloning a pet | #done #pets #storage | [2026-10](2026-10.md) |
+| U-20261029-13 | 2026-10-29 | Pilot switchable MOCHI faces | #done #pets #art | [2026-10](2026-10.md) |
+| U-20261029-12 | 2026-10-29 | Add the light-spot toy | #done #pets #toys | [2026-10](2026-10.md) |
+| U-20261029-11 | 2026-10-29 | Take Puppet photos | #done #puppet #photo | [2026-10](2026-10.md) |
+| U-20261029-10 | 2026-10-29 | Integrate ball play with window perching | #done #pets #toys | [2026-10](2026-10.md) |
+| U-20261029-09 | 2026-10-29 | Throw a ball the pet fetches | #done #pets #toys | [2026-10](2026-10.md) |
+| U-20261029-08 | 2026-10-29 | Recognize direct petting gestures | #done #pets #interaction | [2026-10](2026-10.md) |
+| U-20261029-07 | 2026-10-29 | Save transparent pet photos | #done #pets #photo | [2026-10](2026-10.md) |
+| U-20261029-06 | 2026-10-29 | Choose character parts and restore them from outfits | #done #pets #wardrobe | [2026-10](2026-10.md) |
+| U-20261029-05 | 2026-10-29 | Place pets safely during focus and specify per-character customization | #done #pets #focus | [2026-10](2026-10.md) |
+| U-20261029-04 | 2026-10-29 | Drive companion modes from the focus timer | #done #pets #focus | [2026-10](2026-10.md) |
+| U-20261029-03 | 2026-10-29 | Let social play follow each pet state | #done #pets #interaction | [2026-10](2026-10.md) |
+| U-20261029-02 | 2026-10-29 | Keep pets when saving during close fails | #done #pets #storage | [2026-10](2026-10.md) |
+| U-20261029-01 | 2026-10-29 | Pilot MOCHI animation assets | #done #pets #art | [2026-10](2026-10.md) |
+| U-20261028-08 | 2026-10-28 | Recolor wardrobe regions per pet | #done #pets #wardrobe | [2026-10](2026-10.md) |
+| U-20261028-07 | 2026-10-28 | Add the wardrobe interface | #done #pets #ui | [2026-10](2026-10.md) |
+| U-20261028-06 | 2026-10-28 | Install layered assets and restore them on restart | #done #pets #assets | [2026-10](2026-10.md) |
+| U-20261028-05 | 2026-10-28 | Play layered outfits live on the desktop | #done #pets #wardrobe | [2026-10](2026-10.md) |
+| U-20261028-04 | 2026-10-28 | Make wardrobe drafts transactional | #done #pets #wardrobe | [2026-10](2026-10.md) |
+| U-20261028-03 | 2026-10-28 | Lay the layered pet rendering foundation | #done #pets #rendering | [2026-10](2026-10.md) |
+| U-20261028-02 | 2026-10-28 | Add per-pet customization | #done #pets #ui | [2026-10](2026-10.md) |
+| U-20261028-01 | 2026-10-28 | Design pet interactions, wardrobe and high-contrast chibi style | #decision #pets #design | [2026-10](2026-10.md) |
+| U-20261022-02 | 2026-10-22 | Keep packaging checks and Qt test cleanup aligned | #bugfix #deps #ci | [2026-10](2026-10.md) |
+| U-20261018-01 | 2026-10-18 | Reorganize the workspace around common actions and compact inspectors | #done #ui #ux | [2026-10](2026-10.md) |
+| U-20261008-24 | 2026-10-08 | Complete delivery checks and verify the final compiled source | #done #ci #packaging | [2026-10](2026-10.md) |
+| U-20261008-23 | 2026-10-08 | Check the native Mac fixture before exiting its Qt event loop | #done #macos #ci | [2026-10](2026-10.md) |
+| U-20261008-22 | 2026-10-08 | Resolve owned Mac windows without depending on Quartz titles | #done #macos #ci | [2026-10](2026-10.md) |
+| U-20261008-21 | 2026-10-08 | Make native acceptance failures explicit and clarify media lifecycle | #done #quality #packaging | [2026-10](2026-10.md) |
+| U-20261008-20 | 2026-10-08 | Keep Python 3.10 builds compatible and isolate Mac unit frameworks | #done #ci #platform | [2026-10](2026-10.md) |
+| U-20261008-19 | 2026-10-08 | Fix scene extraction aliases and platform-specific CI tests | #done #ci #scene | [2026-10](2026-10.md) |
+| U-20261008-18 | 2026-10-08 | Verify all scene types in the current standalone Windows build | #done #packaging #scene | [2026-10](2026-10.md) |
+| U-20261008-17 | 2026-10-08 | Verify composited Linux opacity pixels and restoration | #done #linux #native | [2026-10](2026-10.md) |
+| U-20261008-16 | 2026-10-08 | Verify native Steam initialization failure without stopping client | #done #steam #native | [2026-10](2026-10.md) |
+| U-20261008-15 | 2026-10-08 | Inject desktop prerequisites in monitor profile regression tests | #done #linux #tests | [2026-10](2026-10.md) |
+| U-20261008-14 | 2026-10-08 | Add opt-in Linux audio and explicit X11 Wayland capabilities | #done #linux #platform | [2026-10](2026-10.md) |
+| U-20261008-13 | 2026-10-08 | Cache static composition and share overlay plugin cleanup | #done #performance #plugins | [2026-10](2026-10.md) |
+| U-20261008-12 | 2026-10-08 | Save bounded monitor profiles and adapt registered Qt overlays | #done #monitors #overlays | [2026-10](2026-10.md) |
+| U-20261008-11 | 2026-10-08 | Follow selected Windows targets with temporary identity bindings | #done #windows #overlays | [2026-10](2026-10.md) |
+| U-20261008-10 | 2026-10-08 | Organize static assets and review reference repair | #done #assets #scene | [2026-10](2026-10.md) |
+| U-20261008-09 | 2026-10-08 | Persist local tasks and import calendar into Today widget | #done #widgets #calendar | [2026-10](2026-10.md) |
+| U-20261008-08 | 2026-10-08 | Search opt-in capture history with local OCR | #done #capture #ocr | [2026-10](2026-10.md) |
+| U-20261008-07 | 2026-10-08 | Pin live OCR with explicit local/cloud refresh | #done #ocr #capture | [2026-10](2026-10.md) |
+| U-20261008-06 | 2026-10-08 | Reuse bounded opt-in image clipboard history | #done #clipboard #images | [2026-10](2026-10.md) |
+| U-20261008-05 | 2026-10-08 | Persist select and edit multi-page whiteboards | #done #whiteboard #editor | [2026-10](2026-10.md) |
+| U-20261008-04 | 2026-10-08 | Crop annotate and flatten captured images | #done #capture #editor | [2026-10](2026-10.md) |
+| U-20261008-03 | 2026-10-08 | Create and preview portable sprite pet packs | #done #pets #editor | [2026-10](2026-10.md) |
+| U-20261008-02 | 2026-10-08 | Send independent fixed-size scenes to a virtual camera | #done #scene #camera | [2026-10](2026-10.md) |
+| U-20261008-01 | 2026-10-08 | Edit replay and crossfade scene animation timelines | #done #scene #animation | [2026-10](2026-10.md) |
+| U-20261007-24 | 2026-10-07 | Record silent AVI with pause resume and bounded streaming | #done #recording #video | [2026-10](2026-10.md) |
+| U-20261007-23 | 2026-10-07 | Compose and interact with bounded live scene media previews | #done #scene #media | [2026-10](2026-10.md) |
+| U-20261007-22 | 2026-10-07 | Preview and apply editable work teaching and focus scene templates | #done #templates #scene | [2026-10](2026-10.md) |
+| U-20261007-21 | 2026-10-07 | Automate scene playback and named layer edits with deferred receipts | #done #rules #scene | [2026-10](2026-10.md) |
+| U-20261007-20 | 2026-10-07 | Prioritize cooldown and diagnose edge-triggered automation rules | #done #rules #diagnostics | [2026-10](2026-10.md) |
+| U-20261007-19 | 2026-10-07 | Preserve saved rule time windows during repeated normalization | #done #rules #fix | [2026-10](2026-10.md) |
+| U-20261007-18 | 2026-10-07 | Compare aligned reference images with shared zoom wipe and RGB differences | #done #images #compare | [2026-10](2026-10.md) |
+| U-20261007-17 | 2026-10-07 | Resume clone and manage independent sprite and puppet pet saves | #done #pets #ui | [2026-10](2026-10.md) |
+| U-20261007-16 | 2026-10-07 | Store independent validated pet identities and portable saves | #done #pets #storage | [2026-10](2026-10.md) |
+| U-20261007-15 | 2026-10-07 | Preview and restore bounded preset configuration versions | #done #presets #versions | [2026-10](2026-10.md) |
+| U-20261007-14 | 2026-10-07 | Collect and manage exact RGB color palettes | #done #palette #tools | [2026-10](2026-10.md) |
+| U-20261007-13 | 2026-10-07 | Resolve roadmap decision and retain only outstanding work | #decision #roadmap | [2026-10](2026-10.md) |
+| U-20261007-12 | 2026-10-07 | Add asynchronous local file text feeds and field selection | #done #text #data | [2026-10](2026-10.md) |
+| U-20261007-11 | 2026-10-07 | Add localized keyboard command search with favorites | #done #commands #ui | [2026-10](2026-10.md) |
+| U-20261007-10 | 2026-10-07 | Share action definitions across existing input routes | #done #actions #refactor | [2026-10](2026-10.md) |
+| U-20261007-09 | 2026-10-07 | Verify packaged Windows startup and Workshop runtime | #done #packaging #workshop | [2026-10](2026-10.md) |
+| U-20261007-08 | 2026-10-07 | Add undoable visual scene editing and playback transforms | #done #scene #ui | [2026-10](2026-10.md) |
+| U-20261007-07 | 2026-10-07 | Reject incomplete executable build environments before compiling | #done #packaging | [2026-10](2026-10.md) |
+| U-20261007-06 | 2026-10-07 | Include and verify Windows Now playing projections | #done #windows #dependencies | [2026-10](2026-10.md) |
+| U-20261007-05 | 2026-10-07 | Integrate Workshop management and validate private Steam sharing | #done #workshop #ui | [2026-10](2026-10.md) |
+| U-20261007-04 | 2026-10-07 | Validate and retain isolated Workshop subscription versions | #done #workshop | [2026-10](2026-10.md) |
+| U-20261007-03 | 2026-10-07 | Persist Workshop publication IDs and recover interrupted uploads | #done #workshop | [2026-10](2026-10.md) |
+| U-20261007-02 | 2026-10-07 | Add native Steam runtime and validate SDK callback ABI | #done #steam #workshop | [2026-10](2026-10.md) |
+| U-20261007-01 | 2026-10-07 | Validate Workshop publication snapshots and preset archives | #done #workshop #security | [2026-10](2026-10.md) |
+| U-20261022-01 | 2026-10-22 | Keep dependency metadata aligned | #bugfix #deps #ci | [2026-10](2026-10.md) |
+| U-20261012-03 | 2026-10-12 | Verify native macOS capture with an owned window identifier | #done #ci #tests | [2026-10](2026-10.md) |
+| U-20261012-02 | 2026-10-12 | Isolate native unit-test frameworks and canonicalize Windows ACLs | #done #ci #tests | [2026-10](2026-10.md) |
+| U-20261012-01 | 2026-10-12 | Fix macOS CI platform assumptions and scene extraction roots | #done #ci #tests | [2026-10](2026-10.md) |
+| U-20261003-02 | 2026-10-03 | Track selected Steam SDK examples and application configuration | #steam #configuration | [2026-10](2026-10.md) |
+| U-20261003-01 | 2026-10-03 | Add streaming capture and platform interoperability | #done #interop | [2026-10](2026-10.md) |
+| U-20261001-04 | 2026-10-01 | Release job builds with the locked setuptools | #done #ci #security #X-13 | [2026-10](2026-10.md) |
+| U-20261001-03 | 2026-10-01 | Release job installs hash-locked build tooling | #done #ci #security #X-13 | [2026-10](2026-10.md) |
+| U-20261001-02 | 2026-10-01 | The sdist carries no tests; discovery limited to frontengine | #done #packaging #X-13 | [2026-10](2026-10.md) |
+| U-20261001-01 | 2026-10-01 | Every workflow job has a timeout | #ci #tests | [2026-10](2026-10.md) |
+| U-20260925-02 | 2026-09-25 | CI and classifiers cover Python 3.13 and 3.14 | #ci #packaging #tests | [2026-09](2026-09.md) |
+| U-20260925-01 | 2026-09-25 | Dependabot waits 7 days before proposing a new release | #ci #security #deps | [2026-09](2026-09.md) |
 | U-20260924-02 | 2026-09-24 | Keep checkout credentials only in the job that pushes | #ci #security | [2026-09](2026-09.md) |
 | U-20260924-01 | 2026-09-24 | Move CI to Node 24 actions pinned by commit | #ci #security #deps | [2026-09](2026-09.md) |
 | U-20260923-03 | 2026-09-23 | pyflakes in dev_requirements; stable.toml header; system_tray location | #done #docs | [2026-09](2026-09.md) |
@@ -68,8 +193,10 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 | U-20260922-02 | 2026-09-22 | Codacy stalls on very large PRs (PR #216) | #incident #ci | [2026-09](2026-09.md) |
 | U-20260922-01 | 2026-09-22 | Adopt progress/architecture/docs-updates rules | #docs #migration | [2026-09](2026-09.md) |
 
+
 ## Batches
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-09.md](2026-09.md) | 2026-09 | 9 |
+| [2026-10.md](2026-10.md) | 2026-10 | 115 |
+| [2026-09.md](2026-09.md) | 2026-09 | 11 |

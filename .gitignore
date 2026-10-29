@@ -159,3 +159,5 @@ cython_debug/
 **/bing_cookies.*
 exe/pipi.png
 /.claude/settings.local.json
+/steam_sdk/
+steam_sdk

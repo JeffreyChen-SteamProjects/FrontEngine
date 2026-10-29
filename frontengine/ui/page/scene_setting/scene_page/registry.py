@@ -7,6 +7,7 @@ from frontengine.ui.page.scene_setting.scene_page.sound import SoundSceneSetting
 from frontengine.ui.page.scene_setting.scene_page.text import TextSceneSettingUI
 from frontengine.ui.page.scene_setting.scene_page.video import VideoSceneSettingUI
 from frontengine.ui.page.scene_setting.scene_page.web import WebSceneSettingUI
+from frontengine.ui.page.scene_setting.scene_page.puppet import PuppetSceneSettingUI
 
 SCENE_PAGE_REGISTRY: List[Tuple[Type[BaseSceneSettingUI], str]] = [
     (GIFSceneSettingUI, "tab_gif_text"),
@@ -15,4 +16,5 @@ SCENE_PAGE_REGISTRY: List[Tuple[Type[BaseSceneSettingUI], str]] = [
     (TextSceneSettingUI, "tab_text_text"),
     (VideoSceneSettingUI, "tab_video_text"),
     (WebSceneSettingUI, "tab_web_text"),
+    (PuppetSceneSettingUI, 'scene_puppet'),
 ]

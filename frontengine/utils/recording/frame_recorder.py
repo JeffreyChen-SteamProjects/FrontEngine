@@ -1,28 +1,20 @@
-"""
-畫面錄製：定時抓一塊螢幕，存成一連串畫面，最後寫成動畫 GIF。可以把攝影機
-畫面疊在角落（子母畫面），做成「反應影片」那種效果。
-
-錄製有硬性上限（秒數與張數），因為每一張都留在記憶體裡——沒有上限的話，
-錄久一點就會把記憶體吃光。
-
-Frame recording: grab a region on a timer, keep the frames, and write them out
-as an animated GIF. The camera can be composited into a corner for the
-picture-in-picture "reaction" look.
-
-Recording is hard-capped by seconds and frame count, because every frame is
-held in memory - without a cap a long recording would simply exhaust it.
-"""
+"""GUI-thread region capture with bounded asynchronous GIF/AVI output."""
 from __future__ import annotations
 
+import time
+import sys
 from pathlib import Path
-from typing import Callable, List, Optional
+from typing import Callable, Optional
 
 import numpy
 from PySide6.QtCore import QObject, QRect, Qt, QTimer, Signal
 from PySide6.QtGui import QGuiApplication, QImage, QPainter, QPixmap
 
 from frontengine.utils.logging.loggin_instance import front_engine_logger
-from frontengine.utils.recording.gif_writer import encode_gif
+from frontengine.utils.recording.gif_writer import (
+    AsyncGifWriter, IncrementalGifWriter, MAX_QUEUED_BYTES,
+)
+from frontengine.utils.recording.avi_writer import IncrementalAviWriter, MAX_AVI_SECONDS, MAX_AVI_FRAMES
 
 DEFAULT_FPS = 8
 MIN_FPS = 1
@@ -43,17 +35,19 @@ def clamp_fps(value, fallback: int = DEFAULT_FPS) -> int:
         return fallback
 
 
-def clamp_max_seconds(value, fallback: int = DEFAULT_MAX_SECONDS) -> int:
+def clamp_max_seconds(value, fallback: int = DEFAULT_MAX_SECONDS, maximum: int = 120) -> int:
     """單次錄製長度夾在 1~120 秒。"""
     try:
-        return max(1, min(120, int(value)))
+        return max(1, min(maximum, int(value)))
     except (TypeError, ValueError):
         return fallback
 
 
-def frame_budget(fps: int, max_seconds: int) -> int:
+def frame_budget(fps: int, max_seconds: int, *, video: bool = False) -> int:
     """這次錄製最多可以留幾張（同時受總張數上限限制）。"""
-    return max(1, min(MAX_FRAMES, clamp_fps(fps) * clamp_max_seconds(max_seconds)))
+    limit = MAX_AVI_FRAMES if video else MAX_FRAMES
+    seconds = clamp_max_seconds(max_seconds, maximum=MAX_AVI_SECONDS if video else 120)
+    return max(1, min(limit, clamp_fps(fps) * seconds))
 
 
 def image_to_rgb(image: QImage) -> Optional[numpy.ndarray]:
@@ -88,112 +82,271 @@ def composite_inset(base: QPixmap, inset: Optional[QPixmap]) -> QPixmap:
 
 
 class FrameRecorder(QObject):
-    """
-    定時抓畫面並存起來。擷取函式與子母畫面來源都可注入，所以整個錄製流程
-    不需要真的螢幕或攝影機也測得到。
-    """
+    """Capture Qt images on the GUI thread; encode copied RGB on a worker."""
 
-    finished = Signal(int)  # 錄到的張數 / how many frames were captured
+    finished = Signal(int)
+    completed = Signal(object)
+    failed = Signal(str)
+    state_changed = Signal(str)
+    progress = Signal(int, float, int)
+    _writer_done = Signal(object, object, object)
 
-    def __init__(self, parent: Optional[QObject] = None) -> None:
+    def __init__(self, parent: Optional[QObject] = None,
+                 writer_factory: Callable = IncrementalGifWriter,
+                 clock: Callable[[], float] = time.monotonic,
+                 native_capture_factory: Optional[Callable] = None) -> None:
         super().__init__(parent)
-        self.frames: List[numpy.ndarray] = []
+        self.frame_count = 0
+        self.dropped_frames = 0
+        self.result_path: Optional[str] = None
         self.fps = DEFAULT_FPS
         self.max_seconds = DEFAULT_MAX_SECONDS
         self.region = QRect()
-        self._grabber: Callable[[QRect], Optional[QPixmap]] = self._default_grabber
-        self._inset_provider: Optional[Callable[[], Optional[QPixmap]]] = None
+        self._grabber = self._default_grabber
+        self._custom_grabber = False
+        self._native_capture_factory = native_capture_factory
+        self._native_capture = None
+        self._inset_provider = None
+        self._writer = None
+        self._destroy_cleanup = None
+        self._writer_factory = writer_factory
+        self._clock = clock
+        self._started_at = 0.0
+        self._paused_at = None
+        self._paused_duration = 0.0
+        self._elapsed = 0.0
+        self.state = 'idle'
+        self.output_format = 'gif'
+        self._attempts = 0
+        self._capture_error = None
         self._timer = QTimer(self)
         self._timer.timeout.connect(self.capture_frame)
+        self._writer_done.connect(self._on_writer_done, Qt.ConnectionType.QueuedConnection)
+        application = QGuiApplication.instance()
+        if application is not None:
+            application.aboutToQuit.connect(self.close)
 
     @property
     def running(self) -> bool:
         return self._timer.isActive()
 
+    @property
+    def busy(self) -> bool:
+        return self._writer is not None
+
+    @property
+    def queued_frames(self) -> int:
+        return self._writer.queued_frames if self._writer else 0
+
+    @property
+    def queued_bytes(self) -> int:
+        return self._writer.queued_bytes if self._writer else 0
+
     @staticmethod
-    def _default_grabber(rect: QRect) -> Optional[QPixmap]:  # pragma: no cover - real screen
+    def _default_grabber(rect: QRect) -> Optional[QPixmap]:  # pragma: no cover
         screen = QGuiApplication.primaryScreen()
         if screen is None:
             return None
         return screen.grabWindow(0, rect.x(), rect.y(), rect.width(), rect.height())
 
-    def set_grabber(self, grabber) -> None:
+    def set_grabber(self, grabber: Optional[Callable]) -> None:
         self._grabber = grabber or self._default_grabber
+        self._custom_grabber = grabber is not None
 
-    def set_inset_provider(self, provider) -> None:
-        """設定子母畫面來源（回傳 QPixmap 或 None）。"""
+    def set_inset_provider(self, provider: Optional[Callable]) -> None:
         self._inset_provider = provider
 
-    def start(self, region: QRect, fps: int = DEFAULT_FPS,
-              max_seconds: int = DEFAULT_MAX_SECONDS) -> bool:
-        """開始錄製一塊區域；範圍無效時回傳 False。"""
-        if region is None or region.width() <= 0 or region.height() <= 0:
+    @property
+    def elapsed_seconds(self) -> float:
+        """Captured duration excludes pauses and remains fixed after stop."""
+        return self._elapsed
+
+    def _set_state(self, state: str) -> None:
+        self.state = state
+        self.state_changed.emit(state)
+
+    def _effective_stamp(self) -> float:
+        now = self._clock() if self._paused_at is None else self._paused_at
+        return now - self._paused_duration
+
+    def pause(self) -> bool:
+        """Stop region capture without finalizing; exclude paused wall time."""
+        if self.state != 'recording':
             return False
-        self.frames = []
+        self._paused_at = self._clock()
+        self._elapsed = max(0, self._effective_stamp() - self._started_at)
+        self._timer.stop()
+        self._stop_native_capture()
+        self._set_state('paused')
+        self.progress.emit(self.frame_count, self._elapsed, self.dropped_frames)
+        return True
+
+    def resume(self) -> bool:
+        """Resume the same clip and effective monotonic timeline."""
+        if self.state != 'paused':
+            return False
+        if not self._start_native_capture():
+            self._capture_error = 'Native capture could not resume'
+            self.close()
+            return False
+        self._paused_duration += self._clock() - self._paused_at
+        self._paused_at = None
+        self._set_state('recording')
+        self._timer.start(max(1, 1000 // self.fps))
+        self.capture_frame()
+        return True
+
+    def start(self, region: QRect, target: Optional[str | Path] = None, fps: int = DEFAULT_FPS,
+              max_seconds: int = DEFAULT_MAX_SECONDS, *, output_format: str | None = None) -> bool:
+        if self.busy or not target or region is None:
+            return False
+        width, height = region.width(), region.height()
+        if width <= 0 or height <= 0:
+            return False
+        if width > 65535 or height > 65535 or width * height * 3 > MAX_QUEUED_BYTES:
+            self.failed.emit("Selected region exceeds the 64 MiB frame limit")
+            return False
+        self.output_format = output_format or ('avi' if Path(target).suffix.lower() == '.avi' else 'gif')
+        if self.output_format not in ('gif', 'avi'):
+            self.failed.emit('Unsupported recording format')
+            return False
+        self.frame_count = self.dropped_frames = self._attempts = 0
+        self.result_path = None
+        self._capture_error = None
         self.region = QRect(region)
         self.fps = clamp_fps(fps)
-        self.max_seconds = clamp_max_seconds(max_seconds)
-        front_engine_logger.info(
-            f"[FrameRecorder] start | {self.region.width()}x{self.region.height()} "
-            f"@{self.fps}fps, max {self.max_seconds}s")
-        self.capture_frame()
+        self.max_seconds = clamp_max_seconds(max_seconds, maximum=MAX_AVI_SECONDS if self.output_format == 'avi' else 120)
+        self._started_at = self._clock()
+        self._paused_at, self._paused_duration, self._elapsed = None, 0.0, 0.0
+        if not self._start_native_capture():
+            return False
+        factory = IncrementalAviWriter if self.output_format == 'avi' else self._writer_factory
+        self._writer = AsyncGifWriter(target, delay_ms=1000 // self.fps,
+                                      callback=self._notify_done,
+                                      writer_factory=factory)
+        # Destruction must cancel independently of the Python QObject wrapper.
+        worker = self._writer
+        self._destroy_cleanup = lambda *_args: worker.cancel()
+        self.destroyed.connect(self._destroy_cleanup)
+        self._set_state('recording')
         self._timer.start(max(1, 1000 // self.fps))
+        self.capture_frame()
         return True
 
     def stop(self) -> int:
-        """停止錄製並回傳張數。"""
-        if self._timer.isActive():
+        self._stop_native_capture()
+        if self.state in ('recording', 'paused') and self._writer is not None:
             self._timer.stop()
-            front_engine_logger.info(f"[FrameRecorder] stop | {len(self.frames)} frame(s)")
-            self.finished.emit(len(self.frames))
-        return len(self.frames)
+            stamp = self._effective_stamp()
+            self._elapsed = max(0, stamp - self._started_at)
+            self._set_state('finalizing')
+            self._writer.stop(stamp)
+            self.finished.emit(self.frame_count)
+        return self.frame_count
 
-    def capture_frame(self) -> bool:
-        """抓一張（測試會直接呼叫）。到達張數上限時自動停止。"""
-        if len(self.frames) >= frame_budget(self.fps, self.max_seconds):
-            self.stop()
-            return False
-        try:
-            pixmap = self._grabber(self.region)
-        except Exception as error:  # pragma: no cover - screen grab boundary
-            front_engine_logger.warning(f"[FrameRecorder] grab failed: {error!r}")
-            return False
-        if pixmap is None or pixmap.isNull():
-            return False
-        if self._inset_provider is not None:
-            try:
-                pixmap = composite_inset(pixmap, self._inset_provider())
-            except Exception as error:  # pragma: no cover - defensive around providers
-                front_engine_logger.debug(f"[FrameRecorder] inset failed: {error!r}")
-        pixels = image_to_rgb(pixmap.toImage())
-        if pixels is None:
-            return False
-        self.frames.append(pixels)
-        if len(self.frames) >= frame_budget(self.fps, self.max_seconds):
-            self.stop()
-        return True
-
-    def save_gif(self, path: str) -> Optional[str]:
-        """
-        把錄到的畫面寫成動畫 GIF，回傳實際路徑；沒有畫面就回傳 None。
-        Write the frames out as an animated GIF and return the path; None when
-        nothing was recorded.
-        """
-        if not self.frames:
-            return None
-        data = encode_gif(self.frames, delay_ms=max(20, 1000 // max(1, self.fps)))
-        if data is None:
-            return None
-        target = Path(path)
-        try:
-            target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_bytes(data)
-        except OSError as error:
-            front_engine_logger.warning(f"[FrameRecorder] save failed: {error!r}")
-            return None
-        front_engine_logger.info(f"[FrameRecorder] saved | {target} ({len(self.frames)} frames)")
-        return str(target)
+    def close(self) -> None:
+        """Cancel outstanding work without waiting for a slow encoder or disk."""
+        self._timer.stop()
+        self._stop_native_capture()
+        if self._writer is not None:
+            self._set_state('cancelling')
+            self._writer.cancel()
 
     def clear(self) -> None:
-        """丟掉錄到的畫面（釋放記憶體）。"""
-        self.frames = []
+        self.close()
+
+    def _start_native_capture(self) -> bool:
+        if self._custom_grabber or (sys.platform != 'darwin' and self._native_capture_factory is None):
+            return True
+        if self._native_capture is None:
+            factory = self._native_capture_factory
+            if factory is None:
+                from frontengine.utils.macos.region_capture import RegionCaptureAdapter
+                factory = RegionCaptureAdapter
+            self._native_capture = factory(self)
+            self._native_capture.failed.connect(self._native_capture_failed, Qt.ConnectionType.QueuedConnection)
+            source = self._native_capture
+            self.destroyed.connect(lambda *_args: source.stop())
+        self._grabber = self._native_capture.latest_frame
+        if self._native_capture.start(self.region):
+            return True
+        self.failed.emit('Native capture could not start. Check Screen Recording permissions.')
+        return False
+
+    def _stop_native_capture(self) -> None:
+        if self._native_capture is not None:
+            self._native_capture.stop()
+
+    def _native_capture_failed(self, reason: str) -> None:
+        if self.busy:
+            self._capture_error = reason
+            self.close()
+
+    def capture_frame(self) -> bool:
+        if not self.running:
+            return False
+        stamp = self._effective_stamp()
+        self._elapsed = max(0, stamp - self._started_at)
+        budget = frame_budget(self.fps, self.max_seconds, video=self.output_format == 'avi')
+        if (stamp - self._started_at >= self.max_seconds
+                or self._attempts >= budget):
+            self.stop()
+            return False
+        self._attempts += 1
+        if not self._writer.can_accept(self.region.width() * self.region.height() * 3):
+            self.dropped_frames += 1
+            captured = False
+        else:
+            captured = self._capture(stamp)
+        self.progress.emit(self.frame_count, self._elapsed, self.dropped_frames)
+        if self._attempts >= budget:
+            self.stop()
+        return captured
+
+    def _capture(self, timestamp: float) -> bool:
+        try:
+            pixmap = self._grabber(self.region)
+            if pixmap is None or pixmap.isNull():
+                return False
+            if pixmap.width() * pixmap.height() * 3 > MAX_QUEUED_BYTES:
+                self._capture_error = "Captured frame exceeds the 64 MiB frame limit"
+                self.close()
+                return False
+            if self._inset_provider is not None:
+                try:
+                    pixmap = composite_inset(pixmap, self._inset_provider())
+                except Exception as error:
+                    front_engine_logger.debug(f"[FrameRecorder] inset failed: {error!r}")
+            pixels = image_to_rgb(pixmap.toImage())
+            if pixels is None:
+                return False
+            if not self._writer.submit(pixels, timestamp):
+                self.dropped_frames += 1
+                return False
+            self.frame_count += 1
+            return True
+        except Exception as error:
+            front_engine_logger.warning(f"[FrameRecorder] grab failed: {error!r}")
+            return False
+
+    def _notify_done(self, writer, result, error) -> None:
+        try:
+            self._writer_done.emit(writer, result, error)
+        except RuntimeError:
+            pass  # The owning window has already been destroyed.
+
+    def _on_writer_done(self, writer, result, error) -> None:
+        if writer is not self._writer:
+            return
+        self._timer.stop()
+        self._stop_native_capture()
+        self.destroyed.disconnect(self._destroy_cleanup)
+        self._destroy_cleanup = None
+        self._writer = None
+        self._set_state('idle')
+        self.result_path = result
+        error = error or self._capture_error
+        if error:
+            self.failed.emit(error)
+        else:
+            self.completed.emit(result)

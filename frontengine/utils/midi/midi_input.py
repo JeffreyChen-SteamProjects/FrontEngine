@@ -34,6 +34,9 @@ _CALLBACK_FUNCTION = 0x00030000
 
 def available() -> bool:
     """這個平台能不能收 MIDI（目前只有 Windows 的 winmm）。"""
+    if sys.platform == 'darwin':
+        from frontengine.utils.macos import get_backend
+        return get_backend().capability('midi').available
     return sys.platform == "win32"
 
 
@@ -92,6 +95,12 @@ def list_devices() -> List[Tuple[int, str]]:
     可用的 MIDI 輸入裝置 [(索引, 名稱)]；沒有或平台不支援回傳空清單。
     Available MIDI inputs as (index, name); [] when there are none.
     """
+    if sys.platform == 'darwin':
+        try:
+            from frontengine.utils.macos.midi import CoreMIDIInput
+            return CoreMIDIInput.list_devices()
+        except (ImportError, AttributeError, OSError):
+            return []
     if not available():
         return []
     try:
@@ -138,6 +147,7 @@ class MidiInput(QObject):
         self._handle = None
         self._callback = None
         self.last_error = ""
+        self._mac_input = None
 
     @property
     def running(self) -> bool:
@@ -147,6 +157,19 @@ class MidiInput(QObject):
         """開始接收；沒有裝置或開啟失敗回傳 False。"""
         if self.running:
             return True
+        if sys.platform == 'darwin':
+            try:
+                from frontengine.utils.macos.midi import CoreMIDIInput
+                self._mac_input = CoreMIDIInput(self.handle_raw)
+                self._mac_input.start(int(device_index))
+                self._handle = self._mac_input
+                return True
+            except Exception as error:
+                self.last_error = str(error)
+                if self._mac_input is not None:
+                    self._mac_input.stop()
+                self._mac_input = None
+                return False
         if not available():
             self.last_error = "MIDI input is Windows only"
             return False
@@ -192,6 +215,10 @@ class MidiInput(QObject):
 
     def stop(self) -> None:
         """停止接收並關閉裝置。"""
+        if self._mac_input is not None:
+            self._mac_input.stop()
+            self._mac_input = self._handle = None
+            return
         handle, self._handle = self._handle, None
         if handle is None:
             self._callback = None

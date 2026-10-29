@@ -10,6 +10,8 @@ the screen it lives on, falling back to the default endpoint when unmatched.
 """
 from __future__ import annotations
 
+import sys
+
 from typing import Dict, Iterable, List, Optional, Tuple
 
 from frontengine.utils.audio_meter.system_audio_meter import (
@@ -127,4 +129,7 @@ _screen_meters = ScreenAudioMeters()
 
 def audio_level_provider_for_screen(screen):
     """便利函式：取得跟隨指定螢幕音源的取樣函式（共用電表快取）。"""
+    if sys.platform == 'darwin':
+        from frontengine.utils.macos.audio import MacAudioLevelProvider
+        return MacAudioLevelProvider()
     return _screen_meters.provider_for_screen(screen)

@@ -3,16 +3,14 @@ Steam 創意工坊內容匯入：Steam 會把訂閱的項目下載到
 `steamapps/workshop/content/<appid>/<itemid>/`，這裡就掃那個資料夾，把每個
 項目辨識成「寵物動作包」或「預設集」，讓使用者訂閱後直接能用。
 
-注意範圍：**發布**到創意工坊需要 Steamworks SDK 與 App 憑證，不在這裡；
-本模組只做免相依、唯讀的「已訂閱內容 -> 可用內容」那一半。
+本模組保留免相依、唯讀的離線資料夾辨識；原生發布與同步由 Workshop 服務處理。
 
 Import Steam Workshop content. Steam downloads subscribed items to
 `steamapps/workshop/content/<appid>/<itemid>/`, so this scans that folder and
 recognises each item as a pet pack or a preset — subscribe in Steam, use it here.
 
-Scope note: *publishing* to the Workshop needs the Steamworks SDK and app
-credentials and is deliberately not attempted. This is the dependency-free,
-read-only half: installed items become usable content.
+This remains the dependency-free, read-only offline folder recognizer.
+Native publishing and synchronization are handled by the separate Workshop service.
 """
 from __future__ import annotations
 
@@ -22,6 +20,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from frontengine.utils.logging.loggin_instance import front_engine_logger
+from frontengine.utils.workshop.workshop_manifest import is_legacy_preset, read_manifest
 
 # FrontEngine 的 Steam App ID（商店頁 /app/2793470/）
 # FrontEngine's Steam App ID, from its store page.
@@ -30,6 +29,7 @@ APP_ID = "2793470"
 KIND_PET_PACK = "pet_pack"
 KIND_PRESET = "preset"
 KIND_MEDIA = "media"
+KIND_SCENE = "scene"
 
 _PET_STATE_FILES = ("walk", "idle", "sleep", "climb", "fall", "drag")
 _IMAGE_SUFFIXES = (".gif", ".webp", ".png", ".jpg", ".jpeg")
@@ -78,15 +78,18 @@ def classify_item(folder) -> Optional[str]:
         path = Path(folder)
         if not path.is_dir():
             return None
-        names = [entry.name.lower() for entry in path.iterdir() if entry.is_file()]
-    except OSError:
+        if (path / "workshop.json").exists():
+            return read_manifest(path)["kind"]
+        files = [entry for entry in path.iterdir() if entry.is_file()]
+        names = [entry.name.lower() for entry in files]
+    except (OSError, ValueError, UnicodeError):
         return None
     if _MANIFEST_NAME in names:
         return KIND_PET_PACK
     stems = {Path(name).stem for name in names}
     if stems & set(_PET_STATE_FILES):
         return KIND_PET_PACK
-    if any(name.endswith(".json") for name in names):
+    if any(entry.suffix.lower() == ".json" and is_legacy_preset(entry) for entry in files):
         return KIND_PRESET
     if any(name.endswith(_IMAGE_SUFFIXES) for name in names):
         return KIND_MEDIA
@@ -98,6 +101,8 @@ def read_item_title(folder) -> str:
     取項目名稱：優先用動作包 pet.json 裡的 name，其次用資料夾名稱（項目 ID）。
     """
     try:
+        if (Path(folder) / "workshop.json").exists():
+            return read_manifest(Path(folder))["title"]
         manifest = Path(folder) / _MANIFEST_NAME
         if manifest.is_file():
             data = json.loads(manifest.read_text(encoding="utf-8"))
@@ -144,6 +149,6 @@ def preset_files(item_path) -> List[str]:
             return []
         return sorted(str(path) for path in base.iterdir()
                       if path.is_file() and path.suffix.lower() == ".json"
-                      and path.name.lower() != _MANIFEST_NAME)
+                      and is_legacy_preset(path))
     except OSError:
         return []

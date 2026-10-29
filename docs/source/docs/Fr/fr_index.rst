@@ -22,6 +22,7 @@ Documentation FrontEngine en français
     tools.rst
     control_center.rst
     menus.rst
+    runtime_interoperability.rst
 
 ----
 

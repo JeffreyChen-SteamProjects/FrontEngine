@@ -1,0 +1,91 @@
+{
+  "format": "frontengine.layered-pet/1",
+  "id": "inkside-mochi-pilot",
+  "version": "draft-1",
+  "name": "MOCHI - animation pilot (unfinished)",
+  "kind": "character",
+  "template": "inkside-mochi-pilot-1254",
+  "canvas": [
+    1254,
+    1254
+  ],
+  "slots": [],
+  "license": "Project development draft generated with OpenAI image_gen; see ../provenance.md. Not approved production art.",
+  "actions": {
+    "idle": {
+      "loop": true,
+      "frames": [
+        {
+          "duration_ms": 1000,
+          "anchors": {},
+          "layers": [
+            {
+              "image": "idle.png",
+              "z": 0,
+              "anchor": null,
+              "offset": [
+                0,
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "walk": {
+      "loop": true,
+      "frames": [
+        {
+          "duration_ms": 220,
+          "anchors": {},
+          "layers": [
+            {
+              "image": "idle.png",
+              "z": 0,
+              "anchor": null,
+              "offset": [
+                0,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "duration_ms": 220,
+          "anchors": {},
+          "layers": [
+            {
+              "image": "walk-step.png",
+              "z": 0,
+              "anchor": null,
+              "offset": [
+                0,
+                22
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "sleep": {
+      "loop": true,
+      "frames": [
+        {
+          "duration_ms": 1000,
+          "anchors": {},
+          "layers": [
+            {
+              "image": "sleep.png",
+              "z": 0,
+              "anchor": null,
+              "offset": [
+                0,
+                24
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

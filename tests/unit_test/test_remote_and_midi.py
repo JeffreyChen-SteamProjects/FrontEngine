@@ -126,7 +126,7 @@ def test_the_remote_is_not_listening_until_started() -> None:
 
 def test_the_link_carries_the_token() -> None:
     url = remote_url("192.168.0.5", 8770, "abc")
-    assert url.startswith("http://192.168.0.5:8770/") and "token=abc" in url
+    assert url.startswith("https://192.168.0.5:8770/") and "token=abc" in url
 
 
 def test_requests_are_split_into_path_and_query() -> None:

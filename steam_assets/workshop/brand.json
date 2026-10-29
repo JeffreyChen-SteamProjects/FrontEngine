@@ -1,0 +1,58 @@
+{
+  "name": "FrontEngine Workshop",
+  "name_zh_TW": "FrontEngine 創意工坊",
+  "tagline_en": "Make your desktop yours.",
+  "tagline_zh_TW": "讓桌面成為你的創作空間。",
+  "app_id": 2793470,
+  "status": "draft_assets_publishing_not_implemented",
+  "created": "2026-10-07",
+  "palette": {
+    "background": "#121415",
+    "surface": "#1b1d1f",
+    "accent": "#ffd740",
+    "text": "#ffffff"
+  },
+  "images": [
+    {
+      "file": "workshop_brand_landscape.png",
+      "role": "landscape_brand",
+      "width": 920,
+      "height": 430,
+      "bytes": 39995,
+      "sha256": "ae5f6b57fd59f217d56a8fa22aad5b9d743d3249c0678904c6bf3c05420636df"
+    },
+    {
+      "file": "workshop_brand_landscape.jpg",
+      "role": "landscape_brand",
+      "width": 920,
+      "height": 430,
+      "bytes": 30511,
+      "sha256": "a6e5fb95c6d95e19614b6aa382c4166a242677c46725789adf08afe4b7dbe417"
+    },
+    {
+      "file": "workshop_preview_square.png",
+      "role": "square_preview",
+      "width": 512,
+      "height": 512,
+      "bytes": 36614,
+      "sha256": "30510863a7493cfb6e40ecea1029db1b1e90538f3e6e2af60c0d6d34c5cccfe6"
+    },
+    {
+      "file": "workshop_preview_square.jpg",
+      "role": "square_preview",
+      "width": 512,
+      "height": 512,
+      "bytes": 27687,
+      "sha256": "d178a4e8cdb827e14a6ea910a6b6e0d9bc3cafa9ac19ee43ba72c1bd06210cde"
+    }
+  ],
+  "descriptions": {
+    "zh_TW": "workshop_description_zh-TW.txt",
+    "en": "workshop_description_en.txt"
+  },
+  "artwork_is_product_screenshot": false,
+  "artwork_method": "programmatic_qpainter",
+  "generator": "steam_assets/generate_workshop.py",
+  "reference": "steam_assets/header_capsule_920x430.png",
+  "icon_source": "exe/frontengine.ico"
+}

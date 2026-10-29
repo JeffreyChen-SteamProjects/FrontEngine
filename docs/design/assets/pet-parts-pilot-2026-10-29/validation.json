@@ -1,0 +1,52 @@
+{
+  "base.png": {
+    "source": "exec-13b3ca6a-ac7e-44f9-8a05-9a384ad4feb0.png",
+    "size": [
+      1254,
+      1254
+    ],
+    "mode": "RGBA",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "low_alpha_pixels": 10785,
+    "sha256": "86042aa81781a351dd68c467b2504feacffebf6ebd25264f6603bff22078bbe7"
+  },
+  "deadpan.png": {
+    "source": "exec-91ba09e8-ba29-4dd0-ab48-72d5708e3985.png",
+    "size": [
+      1254,
+      1254
+    ],
+    "mode": "RGBA",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "low_alpha_pixels": 4645,
+    "sha256": "33690f2b66589dc6cf10ee71c8f56fe4181b392d774b88fe38f2e7759550db99"
+  },
+  "drowsy.png": {
+    "source": "exec-66ca5365-97c9-426b-a982-d3d7ecad664f.png",
+    "size": [
+      1254,
+      1254
+    ],
+    "mode": "RGBA",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "low_alpha_pixels": 4732,
+    "sha256": "f11df3b5da0ac1ccd0054905661d5d03c958fd84a4a826870428a55a4bde90de"
+  },
+  "runtime": {
+    "installed": true,
+    "variant_pixels_differ": true,
+    "apply_reopen_matches": true,
+    "second_identity_unchanged": true,
+    "production_art_approved": false,
+    "native_acceptance": false
+  }
+}

@@ -22,6 +22,7 @@ FrontEngine 简体中文 文档
     tools.rst
     control_center.rst
     menus.rst
+    runtime_interoperability.rst
 
 ----
 

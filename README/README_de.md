@@ -54,7 +54,7 @@ und der Steam-Build liefert dieselbe Anwendung mit Workshop-Unterstützung aus.
 > **Herauskommen.** Overlays können den gesamten Bildschirm bedecken,
 > einschließlich FrontEngines eigenem Fenster, daher gibt es zwei Notausgänge,
 > die keine Maus benötigen: `Ctrl+Shift+F12` schließt alle Overlays, und
-> **F12 beendet die Anwendung sofort** von überall (nur Windows — siehe
+> **F12 beendet die Anwendung sofort** von überall (Windows; macOS benötigt Bedienungshilfen-Berechtigung — siehe
 > *Hilfe → Wie man das Schließen erzwingt*).
 
 ---
@@ -104,6 +104,8 @@ merkt sich, wohin Sie es gezogen haben, und hat seine eigene Deckkraft.
 ### Desktop
 
 **Desktop-Haustier** — ein animiertes Sprite, das auf Ihrem Desktop lebt.
+
+- Die Pflege speichert Energie und Spiel-/Arbeits-/Ruhemodus je Identität und erhält UUIDs und Werte aus Version 1. Das Sprite-Menü ergänzt Begrüßen, Streicheln und Fellpflege. Zeitaktionen belohnen nur den Abschluss; satte Tiere lehnen Futter ab und Wiederholungen benötigen eine Pause. Pflege folgt aktiver Zeit, ohne Nachberechnung bei versteckten Tieren oder Offline-Zeit. Puppet teilt Sitzung und Fütterungsregeln; native Reaktionen hängen von Laufzeit und Modell ab. 
 
 - **Sprites** — ein einzelnes GIF/WebP/PNG oder ein *Pet-Pack*-Ordner, dessen
   Dateinamen Zuständen zugeordnet sind: `walk`, `idle`, `sleep`, `climb`,
@@ -215,10 +217,7 @@ Ihren Blick auf sich.
 - **Bereichserfassung** — ziehen Sie einen Bereich auf; er landet in der
   Zwischenablage, kann in eine Datei gespeichert oder als schwebende, zoombare
   Kopie **angeheftet** werden.
-- **Bereich aufnehmen** — nehmen Sie einen Bereich als animiertes GIF auf, mit
-  der in die Ecke eingeblendeten Kamera für den Reaktionsvideo-Look. Begrenzt
-  sowohl durch Länge als auch durch die Bildanzahl, weil jedes Bild im Speicher
-  gehalten wird.
+- **Bereich aufnehmen** — Aufzeichnung: Wählen Sie einen Bereich und vor dem Start die GIF- oder AVI-Zieldatei. Abbrechen startet keine Aufnahme. Ein Hintergrundthread schreibt Bilder einzeln; die Warteschlange ist auf drei Bilder und 64 MiB begrenzt. Ein zu großes Einzelbild wird abgewiesen. Bei voller Warteschlange werden Aufnahmen ausgelassen, ihre Zeit bleibt in der Wiedergabe erhalten. Bildrate, Dauer, Bildzahlgrenze und Kamerabild in der Ecke bleiben erhalten. Stoppen schließt die Datei asynchron ab; erst bei Erfolg wird das Ziel atomar ersetzt. Abbruch und Schreibfehler entfernen die temporäre Datei und bewahren ein vorhandenes Ziel.
 - **Kamera** — Ihre Webcam in einem Kreis, einem abgerundeten Kasten oder einem
   Rechteck, lokal angezeigt und nie aufgezeichnet. Jeder Videoeingang
   funktioniert, einschließlich Capture-Karten, und die Geräteliste
@@ -229,10 +228,7 @@ Ihren Blick auf sich.
   das optionale Paket `pyvirtualcam` und einen virtuellen Kameratreiber (OBS
   installiert einen); ohne eines von beiden sagt es die Schaltfläche, statt
   still zu versagen.
-- **Text lesen** — ziehen Sie einen Bereich auf, um den Text darin zu kopieren,
-  ihn zu übersetzen oder eine Frage dazu zu stellen. Dieses hier sendet die
-  Auswahl von der Maschine weg; siehe
-  [Was die Maschine verlässt](#was-die-maschine-verlässt).
+- **Text lesen** — Bildschirmtext: Werkzeuge → Text lesen versucht zuerst lokale OCR: Windows.Media.Ocr unter Windows, Vision unter macOS oder ein installiertes Tesseract mit Sprachdaten. Lokale Erkennung benötigt weder Cloud-Zustimmung noch ANTHROPIC_API_KEY; ein erfolgreiches leeres Ergebnis lädt keinen Screenshot hoch. Übersetzungen und Fragen dürfen erkannten Text nur mit gesonderter Text-Zustimmung und Ihrem Schlüssel an Anthropic senden. Der Screenshot-Ersatz nach lokalem Fehler benötigt eigene Aufnahme-Zustimmung und den Schlüssel. Das Ergebnis zeigt Dienst und Fehler; dort lässt sich die Zustimmung widerrufen.
 - **Ein Fenster anheften** — halten Sie das Fenster eines anderen Programms oben
   oder blenden Sie es aus, während Sie dagegen arbeiten. Nur Stapelung und
   Deckkraft werden berührt, nie der Fensterinhalt.
@@ -273,7 +269,7 @@ Hotkeys**:
 | `Ctrl+Shift+F7` | Den Bildschirm einfrieren / freigeben |
 | `Ctrl+Shift+F6` / `F5` / `F4` | Medien Wiedergabe/Pause, nächster und vorheriger Titel |
 | `Ctrl+Shift+F3` | Das Vordergrundfenster auf den nächsten Monitor verschieben |
-| `F12` | Sofort beenden (Windows) |
+| `F12` | Sofort beenden (Windows / macOS*) |
 
 Die Medientransportfunktion sendet die System-Medientasten, sodass sie jeden
 Player erreicht, der auf sie hört. Das Verschieben eines Fensters behält seine
@@ -285,11 +281,7 @@ Dieselben Aktionen — und nichts darüber hinaus — treiben die Fernsteuerunge
 - **Ihr Telefon** (Einstellungen → Fernsteuerung) — FrontEngine liefert eine
   kleine Seite in Ihrem lokalen Netzwerk aus; öffnen Sie den Link auf einem
   Telefon, und die Schaltflächen treiben diese Aktionen an.
-- **Ein MIDI-Controller** — drücken Sie *Lernen*, bewegen Sie einen Regler oder
-  ein Pad und belegen Sie ihn. Er verwendet Windows' eingebautes winmm, sodass
-  kein zusätzliches Paket benötigt wird. Ein Regler löst aus, sobald er das obere
-  Ende erreicht, statt wiederholt auf dem Weg dorthin, und das Loslassen eines
-  Pads zählt nicht als zweiter Druck.
+- **Ein MIDI-Controller** — Learn drücken, einen Regler oder ein Pad bewegen und zuweisen. Windows verwendet integriertes winmm; macOS verwendet CoreMIDI mit dem macos-Extra. Ein Regler löst oben einmal aus, das Loslassen eines Pads zählt nicht als weiterer Druck.
 
 ---
 
@@ -344,10 +336,10 @@ vier Ausnahmen, alle opt-in:
 
 | Funktion | Wohin es geht | Schutz |
 | --- | --- | --- |
-| **Text lesen** (Werkzeuge) | Der ausgewählte Bereich wird an die API von Anthropic gesendet | Fragt einmal vor dem ersten Senden und merkt sich die Antwort; die Zustimmung kann aus dem Ergebnisfenster widerrufen werden. Verwendet Ihren eigenen `ANTHROPIC_API_KEY`, aus der Umgebung gelesen und nie in eine Einstellungsdatei geschrieben. Ohne beides wird nichts gesendet. |
+| **Text lesen** (Werkzeuge) | Anthropic API | Bildschirmtext: Werkzeuge → Text lesen versucht zuerst lokale OCR: Windows.Media.Ocr unter Windows, Vision unter macOS oder ein installiertes Tesseract mit Sprachdaten. Lokale Erkennung benötigt weder Cloud-Zustimmung noch ANTHROPIC_API_KEY; ein erfolgreiches leeres Ergebnis lädt keinen Screenshot hoch. Übersetzungen und Fragen dürfen erkannten Text nur mit gesonderter Text-Zustimmung und Ihrem Schlüssel an Anthropic senden. Der Screenshot-Ersatz nach lokalem Fehler benötigt eigene Aufnahme-Zustimmung und den Schlüssel. Das Ergebnis zeigt Dienst und Fehler; dort lässt sich die Zustimmung widerrufen. |
 | **Haustier-Chat** | Ihre Nachricht geht an die API von Anthropic | Gleicher Schlüssel, gleiche Regel; standardmäßig aus. |
 | **Wetter** (Textquelle) | Koordinaten gehen an Open-Meteo | Kein Schlüssel, kein Konto, keine identifizierenden Daten; nur das, was Sie als Ort eingegeben haben. |
-| **Telefon-Fernsteuerung** | Liefert eine Seite in Ihrem lokalen Netzwerk aus | Standardmäßig aus. Der Link trägt ein Token, das bei jedem Start neu erzeugt wird, sodass ein alter Link aufhört zu funktionieren, und die Seite kann nur nach der festen Aktionsliste fragen. Es ist einfaches HTTP: jemand anderes im selben Netzwerk könnte das Token lesen und dieselben Schaltflächen drücken — ein Ärgernis statt eines Sicherheitsbruchs angesichts dessen, was diese Schaltflächen tun, aber lassen Sie es in Netzwerken aus, denen Sie nicht vertrauen. |
+| **Telefon-Fernsteuerung** | HTTPS | Telefonsteuerung: Einstellungen → Fernsteuerung verwendet ausschließlich HTTPS, ein bei jedem Start neues Token und eine feste Aktionsliste. Das Telefon vertraut dem selbstsignierten Zertifikat nicht automatisch. Exportieren Sie das öffentliche Zertifikat und vergleichen Sie den angezeigten SHA-256-Fingerabdruck, bevor Sie es in den Telefon-/Browsereinstellungen importieren oder ihm vertrauen. Der private Schlüssel bleibt im Benutzerdatenordner. IP-Änderung, Ablauf oder Neuerstellung können ein neues Zertifikat erfordern. Ein TLS-Startfehler führt nicht zu HTTP. |
 
 Die Audiofunktionen lesen nur einen Ausgabe-**Pegel** — eine einzelne Zahl —
 außer dem Spektrum, das echte Samples benötigt, um Frequenzen zu berechnen, und
@@ -355,11 +347,7 @@ daher den Systemausgabestrom erfasst. Diese Samples werden im Speicher
 analysiert, nie auf die Festplatte geschrieben oder irgendwohin gesendet, und
 die Erfassung stoppt in dem Moment, in dem Sie das Spektrum stoppen.
 
-**Plugins** sind Python und laufen mit denselben Rechten wie FrontEngine — sie
-können nicht in einer Sandbox isoliert werden. Das Laden ist standardmäßig aus
-(Einstellungen → Plugins laden), jedes Laden wird protokolliert, und ein
-defektes Plugin wird übersprungen, statt die App zu stoppen. Installieren Sie
-nur Plugins, denen Sie vertrauen.
+Plugins: Aktiviertes Laden ist noch keine Freigabe. plugin.json oder eine Begleitdatei für ein einzelnes Plugin deklariert Version, Identität, Einstiegspunkt und Fähigkeiten. Zustimmung wird vor Python-Import geprüft und an die Inhaltsprüfsumme gebunden. Geänderter Code oder geänderte Deklarationen erfordern neue Zustimmung; alte Plugins benötigen ausdrückliches volles Vertrauen. Einstellungen → Plugin-Freigaben widerrufen löscht gespeicherte Freigaben; laufenden Code entlädt erst ein Neustart. Python-Plugins haben weiterhin alle Anwendungsrechte; Deklaration und Zustimmung sind keine Betriebssystem-Sandbox.
 
 ### Datenschutz bei der Bildschirmfreigabe
 
@@ -390,21 +378,52 @@ Alles, was hier nicht aufgeführt ist, funktioniert auf allen drei Plattformen.
 
 | Funktion | Windows | macOS | Linux |
 | --- | :---: | :---: | :---: |
-| Overlays, Haustier, Hintergrundbild, Präsentieren, Bildschirmschonung, Erfassung, Aufnahme | ✅ | ✅ | ✅ |
-| Audioreaktion, Spektrum, Lippensynchronisation (WASAPI) | ✅ | — | — |
-| Aktuelle Wiedergabe (Mediensteuerung) | ✅ | — | — |
-| Ein anderes Fenster anheften / ausblenden, Fensterlayouts, Live-Replik | ✅ | — | — |
-| Overlays aus der Bildschirmerfassung ausblenden | ✅ | — | — |
-| MIDI-Steuerung (winmm) | ✅ | — | — |
-| Medientransporttasten | ✅ | — | — |
-| Overlays an einen virtuellen Desktop anheften | ✅ | — | — |
-| Ein Fenster auf den nächsten Monitor verschieben | ✅ | — | — |
-| `F12`-Notausstieg | ✅ | — | — |
-| Hintergrund um das *aktive* Fenster abdunkeln | ✅ | ganzer Bildschirm | ganzer Bildschirm |
-| Haustier steht auf anderen Fenstern | ✅ | — | mit `wmctrl` |
+| Gemeinsame Overlays und Oberfläche | ✅ | ✅ | Qt / X11 |
+| Systemaudio, Spektrum und Mikrofon | ✅ | backend* | Pulse† |
+| Metadaten des laufenden Titels | ✅ | — | — |
+| Fenstergeometrie, Anordnung und Monitorwechsel | ✅ | backend* | X11† |
+| Live-Fensterduplikat | ✅ | backend* | — |
+| Fremde Fenster: Vordergrund / Deckkraft | ✅ | — | X11† |
+| Overlays von Aufnahme ausschließen | ✅ | — | — |
+| MIDI-Steuerung | ✅ | backend* | — |
+| Medientasten | ✅ | backend* | — |
+| Virtueller Desktop / Space-Auswahl | ✅ | — | — |
+| F12-Notausstieg | ✅ | backend* | — |
+| Haustier auf anderen Fenstern | ✅ | backend* | wmctrl |
+
+* macOS-Einträge mit „backend“ benötigen das macos-Extra, macOS 13+ und die jeweiligen Berechtigungen. Sie beschreiben implementierte öffentliche Framework-Pfade, keine native Prüfung auf diesem Windows-Rechner; siehe die Laufzeithinweise unten.
 
 Wo eine Funktion nicht funktionieren kann, sagt es die Schaltfläche, statt still
 zu versagen.
+
+---
+
+## Laufzeit, Datenschutz und Interoperabilität
+
+Aufzeichnung: Wählen Sie einen Bereich und vor dem Start die GIF- oder AVI-Zieldatei. Abbrechen startet keine Aufnahme. Ein Hintergrundthread schreibt Bilder einzeln; die Warteschlange ist auf drei Bilder und 64 MiB begrenzt. Ein zu großes Einzelbild wird abgewiesen. Bei voller Warteschlange werden Aufnahmen ausgelassen, ihre Zeit bleibt in der Wiedergabe erhalten. Bildrate, Dauer, Bildzahlgrenze und Kamerabild in der Ecke bleiben erhalten. Stoppen schließt die Datei asynchron ab; erst bei Erfolg wird das Ziel atomar ersetzt. Abbruch und Schreibfehler entfernen die temporäre Datei und bewahren ein vorhandenes Ziel.
+
+Telefonsteuerung: Einstellungen → Fernsteuerung verwendet ausschließlich HTTPS, ein bei jedem Start neues Token und eine feste Aktionsliste. Das Telefon vertraut dem selbstsignierten Zertifikat nicht automatisch. Exportieren Sie das öffentliche Zertifikat und vergleichen Sie den angezeigten SHA-256-Fingerabdruck, bevor Sie es in den Telefon-/Browsereinstellungen importieren oder ihm vertrauen. Der private Schlüssel bleibt im Benutzerdatenordner. IP-Änderung, Ablauf oder Neuerstellung können ein neues Zertifikat erfordern. Ein TLS-Startfehler führt nicht zu HTTP.
+
+Bildschirmtext: Werkzeuge → Text lesen versucht zuerst lokale OCR: Windows.Media.Ocr unter Windows, Vision unter macOS oder ein installiertes Tesseract mit Sprachdaten. Lokale Erkennung benötigt weder Cloud-Zustimmung noch ANTHROPIC_API_KEY; ein erfolgreiches leeres Ergebnis lädt keinen Screenshot hoch. Übersetzungen und Fragen dürfen erkannten Text nur mit gesonderter Text-Zustimmung und Ihrem Schlüssel an Anthropic senden. Der Screenshot-Ersatz nach lokalem Fehler benötigt eigene Aufnahme-Zustimmung und den Schlüssel. Das Ergebnis zeigt Dienst und Fehler; dort lässt sich die Zustimmung widerrufen.
+
+Puppet-Haustiere: Installieren Sie das optionale puppet-Extra und eine verfügbare Imervue-Laufzeit; wählen oder ziehen Sie eine originale Imervue-.puppet-v1-Datei auf die Haustierseite. Bild- und Sprite-Pakete bleiben nutzbar. Puppet-Haustiere verwenden Imervues Canvas, Bewegungen und Ausdrücke, können dupliziert oder geschlossen werden und folgen Overlay-Steuerung und Voreinstellungen. Eine optionale .petscript.json verwendet Imervues Skriptengine; FrontEngine-pet.json-Pakete sind keine Puppet-Dateien. Unbekannte Versionen, unsichere Archivpfade und ungültige Medien werden vor dem Laden abgewiesen.
+
+Szenen: Die Szenenseite liest alte JSON-Eintragslisten, versionierte frontengine.scene-Dokumente und portable .fescene-Pakete. PUPPET-Einträge enthalten Position, Größe, Deckkraft, endliche numerische Parameter sowie optionale Bewegung, Ausdruck und Skript. JSON-Pfade beziehen sich auf die Szenendatei. .fescene enthält die referenzierten Medien, die originale .puppet und optionale .petscript.json für andere Rechner. Import prüft Pfade, symbolische Links, Versionen und Entpackgrenzen. Eine FrontEngine-Szene bleibt ein Szenenpaket; .puppet bleibt eine einzelne Imervue-Figur.
+
+macOS: Das optionale macos-Extra zielt auf macOS 13+ und öffentliche PyObjC-Frameworks. Die Backends bieten ScreenCaptureKit für Bildschirm-/Fensteraufnahme und Systemaudio, Mikrofonaufnahme, Quartz-Fenstergeometrie, Accessibility für Fensteranordnung/-bewegung, CoreMIDI, Medientasten und F12 zum Beenden. Bildschirmaufnahme, Bedienungshilfen und Mikrofon haben getrennte Berechtigungen; folgen Sie Systemeinstellungen → Datenschutz & Sicherheit und starten Sie bei Aufforderung neu. Deckkraft/erzwungener Vordergrund fremder Fenster, Space-Auswahl und Aufnahmeausschluss bleiben nicht verfügbar. Native macOS-Berechtigungen, Hardware und Leistung wurden auf diesem Windows-Entwicklungsrechner nicht geprüft. Einstellungen → macOS-Berechtigungen und Fähigkeiten zeigt jede Funktion als verfügbar, nicht verfügbar oder nicht unterstützt, mit Berechtigungs- oder Installationsgrund.
+
+Plugins: Aktiviertes Laden ist noch keine Freigabe. plugin.json oder eine Begleitdatei für ein einzelnes Plugin deklariert Version, Identität, Einstiegspunkt und Fähigkeiten. Zustimmung wird vor Python-Import geprüft und an die Inhaltsprüfsumme gebunden. Geänderter Code oder geänderte Deklarationen erfordern neue Zustimmung; alte Plugins benötigen ausdrückliches volles Vertrauen. Einstellungen → Plugin-Freigaben widerrufen löscht gespeicherte Freigaben; laufenden Code entlädt erst ein Neustart. Python-Plugins haben weiterhin alle Anwendungsrechte; Deklaration und Zustimmung sind keine Betriebssystem-Sandbox.
+
+Darstellung: Einstellungen → Overlay-Darstellung bietet Automatisch, GPU oder Software und zeigt den tatsächlich verwendeten Dienst. Der GPU-Compositor verwendet OpenGL-Texturen, Shader und Framebuffer für Reihenfolge, Transformation, Deckkraft und Ausschnitt; bei Initialisierungsfehler wird mit Begründung auf Software zurückgefallen. QPainter-Inhalte können weiter auf der CPU rasterisiert und hochgeladen werden; Web-/Video-/native Widgets können eigene Fenster verwenden. Aufnahme kann GPU-Bilder zur CPU zurücklesen. Das verspricht weder kopierfreie Aufnahme noch gemessene Leistungsgewinne.
+
+WinRT-Projektionen für Windows-OCR sind in der normalen FrontEngine-Installation unter Windows enthalten; installieren Sie die benötigten Windows-Erkennungssprachen. Tesseract benötigt separat Programm und trainierte Sprachdaten. Das optionale puppet-Extra installiert Imervue>=1.0.90; das macos-Extra installiert öffentliche PyObjC-Frameworks für macOS 13+. Verwenden Sie die Befehle unten. docs/formats/ enthält Beispiele für Puppet, pet.json, Petscript und Szenen.
+
+```bash
+pip install "frontengine[puppet]"
+pip install "frontengine[macos]"
+```
+
+[.puppet / pet.json / .petscript.json / .fescene](../docs/formats/interoperability.md)
 
 ---
 
@@ -495,7 +514,151 @@ als Twine-Benutzernamen, sodass nur das Token selbst gespeichert werden muss.
 
 ---
 
+## Sicherheit
+
+Bitte melden Sie Schwachstellen vertraulich. Die Richtlinie, die unterstützten Versionen und die Hinweise für Betreiber stehen in [SECURITY.md](../SECURITY.md).
+
 ## Lizenz
 
 Siehe [`LICENSE`](../LICENSE). Community-Erwartungen finden Sie in
 [`Contributor_Covenant_Code_of_Conduct.md`](../Contributor_Covenant_Code_of_Conduct.md).
+
+Workshop-Manifeste sind versioniert und werden vor der Verwendung geprüft. Unbekannte Metadaten-JSON-Dateien gelten nicht als Presets. Preset-Pakete weisen unsichere Archivpfade, überschrittene Ressourcenlimits und kollidierende Mediendateinamen zurück.
+
+Presets → Workshop verwalten öffnet den Steam-Manager; Szene und Tier bieten ebenfalls Zugänge. Windows x64 benötigt einen online angemeldeten Steam-Client für App 2793470 und steam_api64.dll. Gespeicherte .fescene/Szenen-JSON, Preset-ZIP und Sprite-Tierordner lassen sich mit PNG/JPEG-Vorschau unter 1 MB veröffentlichen. Neue Elemente sind standardmäßig privat; Updates prüfen den Eigentümer. Uploads zeigen Fortschritt und Vertragsstatus, speichern IDs für Wiederholungen und laufen bei verborgenem Fenster weiter. Unterbrochene Ergebnisse in Steam prüfen. Abonnements werden validiert und in getrennte Versionsordner kopiert; bei lokalen Änderungen kann die neue oder lokale Version gewählt werden. Laden füllt die Funktionsseite; dort die Wiedergabe starten. Presets benötigen einen neuen Namen. Offline-Ordnerimport bleibt verfügbar. Für Steam-Builds exe/build_exe.py mit --steam-runtime DLL_PFAD verwenden; die DLL liegt neben der EXE, auch mit --onefile. SDK und Entwicklungsdatei steam_appid.txt werden nicht mitgeliefert.
+
+Windows-Installationen enthalten jetzt winrt-Windows.Media.Control für Titel und Interpret im Wiedergabe-Widget über SMTC; älteres winsdk bleibt eine Alternative. Ohne Mediensitzung bleibt das Ergebnis leer; die bisherige Anzeige des Audio-App-Namens bleibt erhalten.
+
+EXE-Builds prüfen benötigte Abhängigkeiten und Versionen vor der Kompilierung; zuerst requirements.txt in der Build-Umgebung installieren.
+
+Szene → Visueller Editor bietet Bild/GIF/Text-Ebenenliste und Vorschau, Gruppenziehen, Eckenskalierung, Position/Größe/Skalierung/Drehung/Reihenfolge/Deckkraft, Leinwandausrichtung, Layoutsperre, Sichtbarkeit, Duplizieren und 100 Undo/Redo-Schritte (Ctrl+Z/Ctrl+Y). Portable .fescene direkt exportieren; im Skript-Tab JSON bearbeiten und anwenden. Wiedergabe übernimmt explizite Größe, Skalierung, Drehung und Sichtbarkeit. Externes JSON beginnt eine neue Undo-Historie; vorhandene Felder bleiben erhalten.
+
+Öffnen Sie Befehle in der Menüleiste oder drücken Sie in FrontEngine Strg+K / Strg+Umschalt+P. Suchen Sie in der aktuellen Sprache, mit englischen Namen oder festen Befehlsnamen; Pfeiltasten wählen, Enter führt aus. Enthalten sind Seitennavigation, Aufnahme, Notizen, Bildschirmfilter, Workshop und bestehende globale Aktionen. Preset/Qualität akzeptieren einen Wert. Favoriten und die letzten 20 Befehle bleiben erhalten; Parameter und Suchtext werden nicht gespeichert.
+
+Einstellungen sind in Karten gegliedert: häufige Aktionen bleiben sichtbar, weitere Befehle stehen unter Weitere Aktionen. Zusätzliche Werkzeuge und Meldungen öffnen sich mit Details anzeigen. Im Szeneneditor steht die Zeichenfläche neben den Reitern Eigenschaften, Vorschau und Animation. Schmale Fenster umbrechen Felder und Steuerelemente; die untere Aktion bleibt sichtbar. Die Befehlssuche zeigt Favoritenstatus und Tastaturhinweise. Nach einem Fehler bleibt die Eingabe für einen neuen Versuch erhalten; ein Befehlswechsel löscht den vorherigen Parameter.
+
+Text → Lokale TXT / JSON / CSV zeigt UTF-8-Dateien mit Feldwahl und 1–3600 Sekunden Intervall. JSON: /Schlüssel/Index (etwa /build/tasks); CSV: eindeutige Spaltennamen, Spalte zeilenweise. Leer zeigt die ganze Datei. Hintergrundlesen: ein Auftrag je Quelle, maximal 1 MiB und 65.536 Ausgabezeichen. Fehlende Dateien/Felder, Format-, Zugriffs- und Größenfehler werden angezeigt; Korrekturen stellen die Anzeige wieder her. Presets speichern Datei/Feld/Intervall. Portable Szenen kopieren die Datendatei; das Teilen gibt diesen Datenstand weiter.
+
+Werkzeuge → Farbpalette sammelt aufeinanderfolgende Klicks, wenn Farben sammeln aktiv ist. Farben benennen/gruppieren, Hex bearbeiten, suchen, kopieren und entfernen; letzte Proben bleiben nutzbar. Bis zu 512 Farben und 50 verschiedene letzte Proben werden lokal gespeichert. Namen sind je Gruppe ohne Beachtung der Großschreibung eindeutig. CSS/JSON bewahren RGB; CSS-Namenskollisionen erhalten Nummern. Export ersetzt die Datei atomar. Die Befehlspalette öffnet auch die Farbpalette.
+
+Vorlagen → Vorlagenversionen bewahrt je Vorlage bis zu 50 verschiedene Einstellungsschnappschüsse über Neustarts hinweg. Beim Speichern werden alte und neue Konfigurationen erfasst; gleiche Inhalte werden nicht doppelt gespeichert. Die Auswahl zeigt Feldänderungen gegenüber den aktuellen Seiteneinstellungen. Die Vorschau wendet diese Konfiguration auf die Steuerelemente an; Abbrechen, Escape oder Schließen stellt die ursprünglichen Einstellungen wieder her. Wiederherstellen wendet die Version an und speichert sie; bei Anwendungs- oder Speicherfehlern werden die Seiteneinstellungen zurückgesetzt. Schnappschüsse enthalten Medienpfade, keine Mediendateien; die Vorschau öffnet keine Overlays. Bestehende JSON-/ZIP-Vorlagen bleiben kompatibel. Der Verlauf liegt unter presets/.versions und bleibt beim Löschen einer Vorlage für die Wiederverwendung ihres Namens erhalten.
+
+Tier → Tieridentitäten speichert für jedes Sprite- oder Puppet-Tier eine eigene UUID, einen Namen, Stimmung, Sättigung und Zuneigung. Zum Fortsetzen nach Neustart vor dem Erzeugen eine gespeicherte Identität wählen; Neues Tier beginnt neu. Nur die erste Identität übernimmt einmal die alten gemeinsamen Werte. Klonen kopiert aktuelle Werte in eine neue Identität; Füttern verändert andere Tiere nicht. Einzelne JSON-Spielstände lassen sich umbenennen, aktualisieren, exportieren und importieren; Import erzeugt immer eine neue Identität. Eine Identität darf nur einmal aktiv sein. Spielstände enthalten keine Grafiken, Skripte oder Chatverläufe; portable Vorlagen enthalten keine lokalen IDs. Bis zu 256 Identitäten bleiben in den Benutzereinstellungen; Sprite-Änderungen werden gebündelt und beim Schließen gespeichert. Puppet-Füttern ändert nur gespeicherte Werte, keine Imervue-Bewegungen oder Größen.
+
+Bild → Bilder vergleichen zeigt zwei Referenzen in einer gemeinsam zoombaren und verschiebbaren Ansicht: nebeneinander, transparent überlagert, mit verschiebbarer Trennlinie oder als absolute RGB-Differenz. Oben links oder mittig ohne Skalierung ausrichten, oder B proportional in A einpassen. Scrollen zoomt beide; der Regler steuert B-Deckkraft oder Trennlinie. Transparenz und Ränder werden auf Weiß verglichen; Schwarz bedeutet gleiche RGB-Werte. Animationen verwenden nur das erste Bild. Ein Hintergrundauftrag decodiert, richtet aus und berechnet Differenzen; nur die neueste Auswahl wird angewendet. Deckkraft/Trennlinie verwenden vorhandene Pixmaps. Grenzen: 64 MiB je Datei, 8.192 Pixel je Seite und 16.777.216 Pixel je Bild/ausgerichteter Fläche. Fehler erhalten das vorige Paar; Schließen leert Bilder und ignoriert späte Ergebnisse.
+
+Einstellungen → Regeln ergänzt Priorität (-1000…1000), Abklingzeit (0…86400 ganze Sekunden), Bedingungsvorschau und Sitzungsverlauf. Ausgelöste Regeln laufen von niedriger zu höherer Priorität, bei Gleichstand in Tabellenreihenfolge; höhere Werte zuletzt. Eine monotone Uhr steuert die Abklingzeit: blockierte Übergänge werden verbraucht, und Ablauf führt bei weiterhin wahren Bedingungen nichts aus. Vorschau prüft ungespeicherte Zeilen ohne Aktionen oder Zustandsverbrauch. Die letzten 200 Belege enthalten Bedingungen, erfassten Kontext und Versand-/Ausführungs-/Fehler-/Abklingergebnisse nur im Speicher. Ungültige benannte Zeilen verhindern das Speichern. Bis zu 200 Regeln besitzen unabhängige Identitäten, auch bei gleichen Namen; nicht angezeigte Bedingungen bleiben beim Bearbeiten erhalten. Rückgemeldete Aktionsfehler werden protokolliert und stoppen spätere Regeln nicht.
+
+Regeln können Szenen laden, abspielen oder stoppen und benannte Ebenen zeigen, ausblenden, verschieben oder ihre Deckkraft ändern. Zeile auswählen und Szene / Ebene wählen: JSON, .fescene oder .puppet durchsuchen, Hauptbildschirm/alle/Bildschirmindex und Editorebene wählen. Ein leerer Wiedergabepfad nutzt die aktuelle Editorszene. Dateien werden im Hintergrund gelesen; ein fehlgeschlagener Kandidat erhält die laufende Szene. Die letzte Szenenanforderung ersetzt ausstehende Vorgänger; folgende Ebenenaktionen warten darauf und scheitern mit ihr. Gesperrte oder fehlende Ebenen werden abgelehnt. Änderungen sind rückgängig machbar und aktualisieren die Wiedergabe; Deckkraft 0–100, Position ±100000. Stoppen bricht Anforderungen ab und schließt die Wiedergabe; Editorressourcen bleiben bis zum Ersetzen oder Programmende. Der Verlauf erfasst den tatsächlichen asynchronen Abschluss. In der Befehlspalette: Pfad oder {"path":"scene.fescene","screen":"primary"}, Ebenenschlüssel für zeigen/ausblenden, {"layer":"title","opacity":50} oder {"layer":"title","x":20,"y":30}.
+
+Szene → Skript → Szenenvorlagen (auch in der Befehlspalette) bietet Arbeitsdesktop, Unterricht und Fokus mit übersetztem, bearbeitbarem Text. Layout ansehen, Hauptbildschirm oder Bildschirmnummer wählen und Anwenden und abspielen; Proportionen passen in dessen nutzbare logische Größe. Vorlagen enthalten alle Ressourcen. Fehlende Ressourcen werden mit Ebene/Feld/Pfad aufgeführt und verhindern Anwendung. Der Szenentransaktionsablauf ersetzt Editor und Wiedergabe; fehlgeschlagene Vorbereitung erhält die bisherige Szene. Text ändern, Medien ergänzen und als JSON oder portable .fescene exportieren. Schließen der Bibliothek bricht nur ihre ausstehende Anwendung ab. Fokus enthält bearbeitbare Erinnerungstexte; Zeitpläne und Timer bleiben eigene Werkzeuge.
+
+Szene → Visueller Editor ergänzt Video, Web, Puppet und Audio zu Bild/GIF/Text. Live-Vorschau ausdrücklich aktivieren: bis zu acht Quellen, stumm bis zum Anhören, verborgen pausiert, bei Deaktivierung/Schließen freigegeben. Bilder sind auf 1280 Pixel je Seite begrenzt; Fehler werden angezeigt. Benannte Szenen komponieren Videobilder, die eigene Web-Oberfläche und Imervue-Offscreen-Puppet-Bilder mit allen visuellen Ebenen in z-Reihenfolge; Audio ist unsichtbar. Doppelklick bei Wiedergabe oder Interagieren im Editor öffnet dasselbe native Web/Puppet-Eingabefenster. Puppet braucht natives OpenGL und die optionale Laufzeit; Vorschau führt keine Haustierskripte aus, Szenentiere verwenden temporäre Werte. Einzelne Web/Video/Puppet-Fenster bleiben verfügbar. JSON/.fescene erhält alle unterstützten Typen und Medienreferenzen.
+
+Werkzeuge → Bereichsaufzeichnung bietet GIF oder stummes AVI (Motion JPEG), 1–20 fps, Pause/Fortsetzen und Abbrechen. Status zeigt effektive Sekunden, angenommene Bilder und Auslassungen. Pausen zählen weder für Wiedergabe noch Dauergrenze; Stoppen während Pause ist möglich. AVI: bis zu einer Stunde, 72.000 Bilder und 2 GiB; GIF: 120 Sekunden/600 Bilder. Beide nutzen drei Bilder/64 MiB Hintergrundwarteschlange und atomare Ausgabe. AVI hält ein JPEG und schreibt den Index auf Datenträger; ausgelassene Intervalle wiederholen das letzte Bild. Encoder-, Größen- oder Schreibfehler und Abbruch bewahren ein bestehendes Ziel. Kein Audio.
+
+Szene → Visueller Editor → Animationszeitleiste bearbeitet x/y/Deckkraft einer entsperrten Ebene mit Einblend-/Einschubvorlagen. Eindeutige aufsteigende Zeiten: 0–3600 Sekunden, bis 128 Bilder je Ebene; Deckkraft 0–100, Position ±100000, linear oder smooth. Leere Zellen lassen Kanäle unverändert. Anwenden ist rückgängig machbar; JSON/.fescene erhält Spuren. Vorschau scrubben, abspielen, pausieren, fortsetzen und wiederholen ohne temporäre Positionen zu speichern; vor Bearbeitung zurücksetzen. Wiedergabe hat eigene Steuerung und eine gemeinsame monotone Uhr für alle Bildschirme. Verbergen hält die Zeit an; ausdrückliche Pause bleibt bestehen. Medien pausieren mit Animation; Wiederholen steuert Animationsspuren. Szenenaktionen überblenden einen alten Snapshot 0,5 Sekunden, schließen alte Renderer sofort und beginnen die neue Uhr bei null. Alte Szenen bleiben kompatibel.
+
+Szene → Unabhängige Szenenausgabe zeigt die Editorszene in 640×480, 1280×720 oder 1920×1080 Pixeln, unabhängig von Desktopposition, Überdeckung und DPI. Vorschau öffnet keine Kamera; ausdrücklich senden benötigt pyvirtualcam und kompatiblen Treiber. Öffnen/Senden/Schließen erfolgt auf einem Worker mit einem neuesten RGB-Wartebild; langsame Geräte überspringen Zwischenbilder. Ausgabe ohne Audio. IMAGE/GIF/TEXT und natives VIDEO/WEB/PUPPET folgen Ebenenreihenfolge; SOUND unsichtbar. Puppet benötigt optionale Laufzeit und natives OpenGL; Fehler werden angezeigt. Bis 256 Ebenen, acht native Quellen und insgesamt 16 Megapixel Raster. Stoppen, Escape, Dialog-/App-Schließen oder Szenenbearbeitung schließen Renderer und fordern Kameraschluss an; nach Änderungen neu starten. Leser schließen vor Freigabe von Szenenpaketen.
+
+Tier → Sprite-Tierpaket erstellt Zuordnungen für walk/idle/sleep/climb/fall/drag, zeigt Größe und Gehgeschwindigkeit und exportiert einen portablen Ordner mit pet.json. Mindestens eine Aktion; fehlende Aktionen werden gemeldet und nutzen den vorhandenen Loader-Fallback. PNG/JPEG/GIF/WebP: je 64 MiB und 16 Megapixel, insgesamt 256 MiB. Import/Export im Hintergrund, abbrechbar, keine vorhandenen Ordner überschrieben. Ordner können verschoben, auf der Tierseite gewählt und als Workshop-Tierpaket geteilt werden. Import übernimmt nur gewählte Sprites, Namen, Größe und Geschwindigkeit; keine Klänge, Skripte oder Sprache. Imervue .puppet hat ein eigenes Autorenformat. Schließen/Escape gibt Vorschaufilme frei und bricht Dateivorgänge ab.
+
+Werkzeuge → Letzte Aufnahme bearbeiten zeigt eine unabhängige Kopie mit Zuschnitt, Pfeilen, Nummern, Textfeldern und deckend schwarzer Schwärzung. Auf skalierter Vorschau ziehen; Koordinaten und Ausgabe bleiben Bildpixel. Rückgängig, Zurücksetzen und schreibgeschütztes Original sind verfügbar. Kopieren/PNG-Speichern/Anheften nutzt stets denselben abgeflachten Ausschnitt, auch bei Originalansicht. Schwärzungen werden zuletzt gezeichnet; PNG enthält keine Originale/versteckten Ebenen. Rohaufnahme bleibt separat im Speicher. Atomare PNG-Speicherung. Grenzen: 16 Megapixel, 1000 Markierungen, 2000 Zeichen/Text, 20 Undo-Zustände. Schließen/Ersetzen gibt das Dokument frei.
+
+Präsentation → Tafel hat unabhängige editierbare Seiten, Zeichen/Auswahlmodus, Shift-Mehrfachauswahl, Strichbewegung/Löschen und insgesamt 20 Undo-Zustände. Mittlere Taste verschiebt, Rad zoomt; Auswahl/Bewegung in Canvas-Koordinaten, eigene Ansicht je Seite. Speichern/Öffnen nutzt versioniertes .fewhiteboard JSON mit Vektorstrichen/Ansichten zum Weiterbearbeiten. Ein Hintergrundworker validiert und liest/schreibt; Fehler erhalten Tafel/Datei. Seiten-PNG zeigt nur die gewählte Seite ohne Bedienelemente/Auswahl/Ansichtstransform, mit vollständigen Stifträndern. Grenzen: 50 Seiten, 2000 Striche/Seite, 100000 Punkte, acht MiB JSON; PNG 8192 Pixel/Seite, 16 Megapixel. Schließen/Escape bricht Schreiben ab und ignoriert späte Lesergebnisse.
+
+Einstellungen → Bild-Zwischenablageverlauf ist separat optional und standardmäßig aus; Öffnen startet weder Überwachung noch Lesen. Anwenden aktiviert Aufnahme und optionale lokale SQLite-Sitzungsspeicherung. 10–200 Bilder, 8–128 MiB PNG-Nutzdaten; Favoriten schützen vor Verdrängung, zählen aber zu beiden Grenzen. Volle Favoriten melden Ablehnung. Je Bild 16 MP/acht MiB kodiert. Ein Worker komprimiert, erstellt Miniaturen und schreibt; nur neuestes wartendes Bild und zusammengefasste Ergebnisse, langsame Kompression überspringt Zwischenbilder. Favoriten/Löschen/Leeren, Original kopieren, Desktop anheften und Speicher-Referenztafel. Leeren entfernt auch Favoriten und Datenbankseiten; Speichern abschalten löscht Datenbank, aktuelle Speicherhistorie bleibt. clipboard-images.sqlite3 neben Einstellungen, Datenbank bis 132 MiB plus mögliche temporäre Journale. Kein Upload/automatisches OCR. Beenden trennt Überwachung und fordert asynchrone Bereinigung an.
+
+Werkzeuge → Live-OCR zeigt Text neben einem festen Bereich. Anfangs manuell/lokal; explizite Automatik 5–60 Sekunden, Kopie sichtbarer/älterer Texte, zwanzig eindeutige erfolgreiche Speicherergebnisse. Gleich/leer dupliziert nicht. Vier Fenster, je ein Job, 16 MP/acht MiB kodierte Aufnahme, 20000 Zeichen; langsame Jobs überspringen Anfragen. Lokal ruft Cloud auch mit globaler Zustimmung nie auf. Expliziter Cloud-Fallback nutzt ScreenTextService Screenshot-Zustimmung/Zugangsdaten und separate Erlaubnisprüfung; keine automatischen Zustimmungsdialoge/Übersetzung/Textuploads. Jede Fallback-Aktualisierung kann Bereich senden. Überlappung blockiert Rückkopplung. Windows/X11: screen-lokales Qt; Mac: asynchrone native Einzelaufnahme, Stream danach gestoppt. Verbergen stoppt Capture/Timer; Schließen/Escape gibt Quellen/Verlauf frei und ignoriert späte Ergebnisse ohne Warten. Bereits gesendete API-Anfragen können enden. Batch-Cleanup erfasst Fenster; kein automatischer Capture-Neustart.
+
+Einstellungen → Aufnahmeverlauf und Suche ist separat einzuschalten; Öffnen speichert/erkennt nichts. Nur explizite Bereichsaufnahmen aus Werkzeuge werden lokal im Worker erkannt, ohne Zwischenablage oder Cloud. Suche ohne Groß-/Kleinschreibung; OCR-Fehler behalten das Bild mit Grund im Tooltip. Datum genau YYYY-MM-DD in lokaler Zeitzone, leere Felder zeigen alles. Kopieren, Anheften, Referenztafel, Favoriten und Löschen. Optional capture-history.sqlite3 neben Einstellungen: 10–200 Bilder / 8–128 MiB PNG, 16 MP/acht MiB pro Bild, Datenbank bis 132 MiB plus Journale. Löschen entfernt Text, Leeren auch Favoriten, Speicherung abschalten entfernt Datei. Nur neueste wartende Aufnahme; Schließen verwirft Wartendes/Ergebnisse ohne auf aktive OCR zu warten.
+
+Widgets → Aufgaben und Kalender bietet Häkchen, optionale lokale Fälligkeit und lokalen UTF-8-.ics-Import einzelner VEVENT/VTODO. Heute zeigt unvollständige undatierte/fällige/überfällige Aufgaben und überlappende Ereignisse; ganztägige/Mitternacht-Enden exklusiv. Bekannte IANA-TZID über Qt, UTC lokal angezeigt, flottierende Zeiten lokal, Datum bleibt Datum. DST: erste Wiederholung, Offset vor Lücke; DURATION-Tage bleiben nominal lokal. UID+RECURRENCE-ID aktualisiert, niedrigere SEQUENCE überschreibt nicht, Häkchen bleiben, CANCELLED entfernt. Faltung/TEXT-Escapes; keine Links/Alarme/Anhänge geöffnet. RRULE/RDATE/EXDATE/eigene unbekannte Zonen atomar abgelehnt, einzelne Vorkommen exportieren. tasks.json neben Einstellungen: 500 Einträge/vier MiB, Titel 1000/Beschreibung 2000 Zeichen, atomar mit Erhalt bei Fehlern. Import vier MiB/Zeile 8192 Zeichen, kein Netz/Sync/Alarm. Lazy Worker serialisiert Datei-I/O, Schluss stoppt Timer/späte Ergebnisse. Heute ist in Batch-Schließen/Verbergen registriert und startet nur explizit; Daten bleiben, Widget wird nicht automatisch wiederhergestellt.
+
+Abbruchdatensätze zählen zur 500er-Grenze und verhindern Wiederherstellung durch alte Importe. Alles leeren fragt nach und entfernt Aufgaben, Termine und Abbruchdaten. Heute nutzt normale Qt-Softwarezeichnung, damit der Compositor die Bedienung nicht verdeckt.
+
+Einstellungen → Materialbibliothek: Bilder/GIF, Sprite-Pet-Ordner, .puppet-Texturen und JSON/.fescene mit statischen Vorschauen, Tags, Suche ohne Groß-/Kleinschreibung und Favoriten. Kein Kopieren/Löschen/Ausführen, Vergessen nur Katalog. asset-library.json neben Einstellungen: 200 Einträge/ein MiB, 32 Tags à 40 Zeichen; Bilder 64 MiB/16 MP, Archive 256 MiB, Szenen 256 Ebenen. Szene statisch mit Medien-Platzhaltern, Puppet erste Textur. Verweise: aktuelle Szene, aktive lokale Presets, registrierte Szene-JSON (200 Presets/16 MiB); fehlende Pfade bleiben. Neu zuordnen prüft gleichen Typ und bestätigt genaue Verweise, aktuelle Szene rückgängig editierbar, lokale schreibbare Workspace-Szenen/Presets/Katalog repariert. Literaltext, unveränderliche Historie, Pakete, externe Szenen/Workshop schreibgeschützt; lokale Importkopien möglich. Geänderte Dateien brechen ab. 50 Dateien/16 MiB mit atomarem .asset-relink.json-Rollbackjournal; Wiederherstellung vor nächstem Job, Konflikte behalten Journal. OS-Sperre .asset-library.lock schützt parallele Instanzen. Lazy Worker dekodiert/scannt/schreibt, Schluss storniert ausstehende Reparatur und stellt unveränderten Szenenedit wieder her, späte Ergebnisse verworfen. Wiedergabe nach Pfadänderung neu starten.
+
+Kontrollzentrum → Einem Fenster folgen wählt registriertes Top-Level-Overlay und sichtbares Windows-Ziel. Proportionalen Anfangsversatz bei Bewegen/Skalieren halten; Overlay logische Größe, native physische Position ohne Aktivierung/Größenanforderung, im Ziel-Arbeitsbereich geklemmt, 250-ms-Poll. Minimieren verbirgt, Wiederherstellen respektiert manuelles/globales Verbergen, Schließen/Verbergen/Identitätsverlust löst. Einzigartige rücknehmbare Fenstereigenschaft plus PID/Thread verhindert HWND-Wiederverwendung; UIPI/erhöhtes Ziel kann verweigern. Vor neuem Versatz lösen. Maximal 64 temporäre Bindungen ohne Sitzungswiederherstellung; Schließen/Alle schließen/Beenden entfernt Cookies und stoppt Timer. Nur geprüfter Windows-Adapter, andere Plattform mit Grund. Eigene Fenster auf einem 125%-Display geprüft; gemischte DPI über Monitore benötigt zweites Display.
+
+Kontrollzentrum → Monitorprofile speichert/restauriert Hardwarekombinationen (20 Profile/200 Fenster/512 KiB lokale monitor-profiles.json). Proportionale Arbeitsbereichpositionen passen Auflösung/Primärmonitor/DPI an, logische Größen bleiben. Unbekannte Kombinationen holen Fenster auf den Hauptmonitor. Automatik separat opt-in, 500-ms-Bündelung neuer Overlays/Qt-Bildschirmereignisse, keine OS-Anzeigeänderungen. Mehrdeutige Hardware meldet Fehler; gleiche Art/Titel nicht gespeichert, aber rückholbar. Vollbild/Szenen/Zielfolger ausgenommen; keine neuen Overlays/Handle-Vermutung. Nur logische Qt-Koordinaten. Native Wiederherstellung auf einem Windows-125%-Monitor geprüft; reales An-/Abstecken, Primärwechsel und gemischte DPI brauchen weitere Hardware.
+
+Statische Softwarekomposition behält ein Bild bis 16 MP; Inhalt/DPR, Transformation, Deckkraft, Reihenfolge, Clip, Größe/DPI invalidieren. Unveränderte Ebenen ohne Neuzeichnen, Animation/Video aktualisieren, GPU-Readback unverändert. Beenden/Alle schließen teilen registrierte Quellen: einmal schließen, Listen/Wallpaper zurücksetzen, Cleanup vor Szenenassets. Qt bleibt per nicht blockierendem Timer bis abgebrochene lokale Datei/Rasterjobs enden. Manifest-API v1 unterstützt; examples/plugins/clock zeigt QWidget mit overlay_widgets, optional release_overlay_resources/shutdown und get_state/set_state. Geladene Plugin-Presets nutzen plugin:<Seitenname> mit Transaktionsrollback und laden keinen Code. Beispiel nach plugins/ kopieren, aktivieren und Digest genehmigen; keine OS-Sandbox. Benchmark: py -m benchmarks.scene_composition --output build/scene-benchmark.json, optional vertrauenswürdige --baseline-file für exakte Pixel; docs/benchmarks/README.md beschreibt Daten/Ablauf.
+
+Hilfe → Plattformfähigkeiten zeigt Voraussetzungen/letzte Fehler ohne Capture/Listener. Linux: pulseaudio-utils (parec) und PulseAudio/PipeWire-Pulse; Standard-Ausgabemonitor für Spektrum/Reaktion, Standardmikrofon für Lippensync. Anders als Windows-Peakmeter liest Linux echte Samples; erst aktivierte Abfrage startet eigenen Worker/Prozess, 2048 bereinigte Float-Samples im RAM, veraltete verworfen, keine Speicherung/Übertragung. Stop/Schließen/Exit beendet nur eigene Kinder ohne GUI-Join, Geräte/Server/Rechtefehler sichtbar. Linux-Fenstergeometrie/Layout/Topmost/Monitorwechsel via python-xlib (Linux installiert), EWMH/physischem XRandR; Deckkraft braucht Compositor. X11-pynput braucht DISPLAY/Zugriff. Native Wayland-Positionierung/fremde Fenster und desktopweite pynput-Eingabe fehlen auch mit Xwayland; UI erklärt, Profilbewegung verweigert. Keine globale Beobachtungsbehauptung für andere Wayland-Apps. Protokollabnahme nutzt isolierte X11/Wayland-Server/virtuelle Pulse-Geräte; physische Linux-Audio/Mehrmonitor- und Mac-Abnahme offen.
+
+Ein Pegelmesser beendet seine eigene Aufnahme innerhalb von 1,25 Sekunden nach Ende der reaktiven Abfragen; eine neue aktivierte Abfrage kann sie neu starten.
+
+Windows-Builds teilen --preset und --debug mit der Python-CLI. Für native Paketprüfung frontengine[puppet] im Build-Umfeld installieren; Pillow-Decoder und installierte Imervue-Paketdaten werden aufgenommen. Lokale synthetische Fixtures: `py tests/integration/scene_build_fixtures.py FIXTURES --puppet SAMPLE.puppet` (PyAV zur Videoerzeugung). Auf nativem Desktop `FrontEngine.exe --verify-scene-build FIXTURES REPORT` mit neuem Berichtordner starten. Fester Test isoliert Einstellungen temporär, hält Vorschauen stumm und öffnet nur eigene Szenen-/Editorfenster. Prüft sieben Typen, altes/versioniertes JSON, Export/Neuladen, GIF-Animation, Webinteraktion, Undo/Redo, Pause/Fortsetzen und Freigabe; schreibt result.json und Vorschau-PNGs und beendet sich. Keine übergebenen Python-Skripte werden ausgeführt. Bericht und Exit-Code prüfen; fehlende Laufzeit/native Darstellung schlägt ausdrücklich fehl.
+
+Wähle eine Identität auf der Haustierseite und öffne „Haustier anpassen“ oder nutze das Menü des Haustiers. Jede Identität speichert Größe (16–512), Tempo (1–20), Boden-/Wander-/Verfolgungsverhalten, Wandklettern, Sitzen auf Fenstern, Sprechblasen, Lautstärke (0–100), Ruhe beim Tippen, automatisches Ausruhen sowie Wurf- und Sozialverhalten separat. „Seitenvorgaben verwenden“ übernimmt die Darstellungs- und Verhaltenseinstellungen der Seite; Klonen und Import behalten individuelle Einstellungen. „Anwenden“ speichert atomar vor der Aktualisierung des aktiven Haustiers. „Abbrechen“ ändert nichts; wiederhergestellte Vorgaben gelten erst nach „Anwenden“. Bei Speicherfehlern oder Bearbeitungskonflikten bleibt der Entwurf erhalten. Puppet deaktiviert nicht unterstützte Steuerelemente und übernimmt bei Darstellung und Verhalten nur Größe, Sprechblasen und Ruhe beim Tippen. Native Garderobensteuerung und geschichtete Grafiken sind noch nicht fertig.
+
+Tieridentitäten → Garderobe öffnet eine eigene animierte Vorschau installierter Figuren. Asset-Ordner installieren prüft layered-pet.json und kopiert Ressourcen nach pet-assets neben den lokalen Einstellungen. Kopf, Hals, Körper und Rücken, Aktionen und Blickrichtung sind wählbar; jede Identität speichert bis zu 20 Outfits. Ein angelegtes Teil ersetzt, was dieselben Plätze belegt, und nennt es; Abbrechen stellt es wieder her. Nur Teile für den aktuellen Körperbau werden angeboten, Teile ohne alle Animationen erscheinen deaktiviert. Anprobieren zeigt eine kurze Präsentation, und „Zum Vergleich anheften“ zeigt den aktuellen Look neben dem Entwurf. Ein Tier, das gezogen wird oder gerade interagiert, wechselt die Kleidung erst danach. Tiere mit ganzen Sprite-Bildern werden gebeten, zuerst eine mehrschichtige Figur zu wählen. Anwenden speichert und aktualisiert das aktive Sprite; Abbrechen verwirft Änderungen seit dem letzten Anwenden. Fehlende Ressourcen bleiben referenziert und können nach Reparatur neu eingelesen werden. Puppet unterstützt diese Sprite-Kleidung nicht. Integrierte Figur hinzufügen zeichnet eine von sechs INKSIDE-Figuren (MOCHI, MOSS, PIP, BOLT, INK oder GILL) samt dreißig passenden Kleidungsstücken aus vierzehn Outfits und installiert sie im Hintergrund mit derselben Prüfung; Schließen der Garderobe bricht ab. Jede Figur bietet Augen-, Mund- und drei Körperteil-Varianten sowie umfärbbare Bereiche, und jedes Teil folgt allen Animationen. Teil- und Kleidungsnamen folgen der Oberflächensprache.
+
+Eine unbekleidete integrierte Figur mit Standardteilen und -farben läuft und klettert mit handgezeichneten Ganzkörper-Schrittbildern; mit Kleidung oder geänderten Teilen nutzt sie die geschichtete Animation, damit jedes Stück passt.
+
+Desktop-Tiere zeichnen unabhängig von der Overlay-Darstellung immer über das normale Qt-Zeichnen: Ein Tier bewegt sein Fenster bei jedem Takt, und auf dem GPU-Pfad wechselten seine Animationsbilder während der Bewegung nicht mehr.
+
+Tiere nehmen passende Haltungen ein: Im Arbeitsmodus sitzen sie, beim Wechsel in Ruhe läuft ein kurzer Einschlafclip, beim Verlassen ein Aufwachclip. Spielen, Ball, Apportieren und Fangen kosten etwas Energie; unter 20 Energie setzt sich ein untätiges Tier auch ohne automatische Ruhe, gehorcht aber weiter jedem Befehl. Landung nach Ablegen oder Werfen, das Fangen eines geworfenen Balls und Begegnungen mit anderen Tieren zeigen kurze Lande-, Fang- und Winkreaktionen, ohne Bewegung, Spielzeug oder Befehle zu unterbrechen. Sprite-Pakete ohne diese Clips nutzen ihre Ruhe- oder Schlafbilder. Nach der Fellpflege streckt sich das Tier, und Tiere, die sich ständig begegnen, winken einander höchstens einmal pro Minute.
+
+Beziehungen wachsen mit der Zuneigung in vier Stufen: Gerade kennengelernt, Vertraut (20), Eng verbunden (100) und Im Einklang (250). Die Stufe erscheint im Status. Jede Stufe hat eine eigene Begrüßung, eng verbundene Tiere winken, Tiere im Einklang springen vor Freude, und eine neue Stufe wird einmal gefeiert; nichts wird gesperrt oder geht verloren. Ein gespeichertes Tier begrüßt dich beim erneuten Aufrufen, und Schließen über sein eigenes Menü winkt zum Abschied, bevor das Fenster schließt. Puppet-Tiere unterscheiden Klick und Ziehen jetzt wie Sprite-Tiere: Ein Klick grüßt beim Loslassen, erst Bewegung über die Systemziehdistanz verschiebt das Fenster, ohne Belohnung.
+
+Tier anpassen stellt außerdem Plaudern (Aus, Selten, Normal, Oft) für Sätze, die das Tier von selbst beginnt, und die Animationsstärke (Ruhig, Normal, Lebhaft) für Audiopuls und kurze Lande- und Fangreaktionen ein, getrennt von Sprechblasen und Lautstärke. Antworten auf deine Aktionen erscheinen auch bei ausgeschaltetem Plaudern. Puppet-Tiere wenden Plaudern auf geplante Skriptsätze an. Früher gespeicherte Darstellungen bleiben gültig und nutzen für beides Normal.
+
+Die Interaktionsliste der Tierverwaltung bietet außerdem die Menübefehle des gewählten aktiven Tiers an: Foto, Status, Erinnerung, Chat bei angebundenem Chatdienst, Klonen und Schließen sowie jede Bewegung und jeden Ausdruck eines Puppet-Modells. Alles aus dem Rechtsklickmenü ist damit auch per Tastatur erreichbar.
+
+Integriertes Puppet-Modell verwenden auf der Tierseite zeichnet die gewählte INKSIDE-Figur im Hintergrund als Imervue-.puppet-Modell: geriggter Kopf, Arme, Schwanz und Körper, zehn Bewegungen, drei Ausdrücke und ein Tierskript, das Begleitaktionen darauf abbildet. Es wird unter pet-assets/puppets gespeichert und mit seinem Skript als Quelle gewählt, sodass Start es als Puppet-Tier erzeugt.
+
+Bei mehreren Monitoren mit unterschiedlicher Skalierung behält ein Tier, das auf einen anderen Monitor gezogen oder dorthin zurückgeholt wird, seine Größe, bleibt in dessen Arbeitsbereich und läuft dort weiter. Fensterkanten auf skalierten Monitoren werden in denselben Koordinaten wie das Tier gemessen, sodass es genau auf Fenstern sitzt.
+
+Die Garderobe zeigt Farbbereiche an, die Figur oder Kleidung deklarieren. Wähle einen Bereich und eine Farbe oder stelle die Originalfarbe wieder her. Nur markierte Maskenebenen werden eingefärbt; Konturen und andere Details bleiben erhalten. Farben werden vor dem Anwenden angezeigt und je Identität und Outfit gespeichert, auch beim Export/Import. Ohne deklarierte Bereiche bleiben Farbregler deaktiviert.
+
+Scheitert das Speichern beim Schließen, bleiben Tier, aktueller Zustand und Wiederholungs-Timer erhalten. Alle schließen behält Tiere, die nicht geschlossen werden konnten; vor dem Beenden müssen ihre Daten gespeichert sein. Zuneigung steigt nicht über die unterstützte Speichergrenze, damit weitere Belohnungen das Profil nicht ungültig machen.
+
+Begrüßungen und Fangspiel erfordern zwei sichtbare Tiere im Spielmodus, ohne laufende Interaktion, mit erlaubtem Sozialverhalten und ohne Tragen oder Tipppause. Nicht verfügbare Tiere werden aus Zielen und Rollen entfernt. Unter zwei geeigneten Tieren pausiert das Spiel und wird später fortgesetzt. Deaktivierte Sprechblasen unterdrücken nur den Text, nicht die sozialen Belohnungen.
+
+Beim Start des Fokus-Timers wechseln sichtbare Tiere ohne laufende Interaktion in Arbeit, in Pausen in Ruhe. Stop stellt frühere Modi wieder her, sofern sie nicht manuell geändert wurden. Jede abgeschlossene Runde gibt geeigneten sichtbaren Begleitern einmal 3 Zuneigung und 5 Stimmung; vorzeitiger Stop oder Verbergen gibt keine Abschlussbelohnung. Arbeit/Ruhe unterdrückt spontane Gespräche. Der Timer nutzt monotone verstrichene Zeit statt Änderungen der Systemuhr.
+
+Beim Fokusstart werden Tiere bei ausreichend Platz unten rechts im Arbeitsbereich ihres Bildschirms angeordnet. Beim Stop wird die alte Position nur ohne manuelle Bewegung oder Modusänderung wiederhergestellt.
+
+Mehrschichtige Charaktere können Gesichts- und Körpervarianten anbieten. Die Garderobe zeigt eine Vorschau pro Tier; Anwenden speichert sie, Outfits behalten Charakter und Teile. Jede Variante muss alle Animationsbilder abdecken. Die fertigen Grafiken der sechs Charaktere fehlen noch.
+
+Das Sprite-Tiermenü bietet Tierfoto: aktuelle Ansicht einfrieren oder eine vorhandene Ebenenpose wählen und als transparentes PNG speichern. Desktop und Sprechblasen werden nicht aufgenommen. Puppet-Fotos nutzen einen kompatiblen initialisierten Imervue-Renderer für transparente Standbilder ohne Desktop-Aufnahme. Die native GL-Abnahme steht noch aus.
+
+Bei Sprite-Tieren Sanft streicheln wählen und den Zeiger hin und her bewegen. Drei deutliche Streichelbewegungen starten eine Reaktion; Zittern zählt nicht. Ziehen und Sozialspiel pausieren. Wegbewegen, Verbergen, Moduswechsel oder Interaktion beenden bricht unfertiges Streicheln ab. Belohnungen erfordern Abschluss und Abklingzeit.
+
+Sprite-Tiere können einen Ball werfen und wegräumen. Ziehen und loslassen wirft erneut, Rechtsklick entfernt ihn. Das Tier holt den begrenzten Ball zum Start zurück; Abschluss gibt 1 Zuneigung mit 30 Sekunden aktiver Abklingzeit. Arbeit/Ruhe, andere Interaktionen, Verbergen, Tippruhe oder Zeitlimit brechen ohne Belohnung ab. Puppet-Tiere holen den Ball ebenfalls (siehe unten).
+
+Bodentiere verlassen Fensterkanten zum Ballholen. Fensterplätze pausieren während des Spiels und werden danach wieder genutzt; die Rückkehr erfolgt am Boden nahe der ursprünglichen horizontalen Position.
+
+Der Lichtpunkt ist ein kleiner ziehbarer Zielpunkt in begrenzter Nähe des Tiers. Bodentiere folgen am Boden. Nach Loslassen und Erreichen beginnt eine kurze Spielreaktion, belohnt erst nach Abschluss mit der bestehenden Abklingzeit. Rechtsklick oder Spielzeug weglegen beendet sie. Pro Tier ist nur ein Ball oder Lichtpunkt aktiv.
+
+Klonen nutzt Bild/Modell, Aussehen, Einstellungen und Asset-Bibliothek des ursprünglichen Tiers, auch nach anderer Auswahl auf der Einstellungsseite. Der Klon erhält eine neue Identität; spätere Kleidungs- oder Teileänderungen betreffen das Original nicht. Puppet-Klone behalten Skript, Parameterwerte und aktive Ausdrücke.
+
+Ein geeigneter Fokusabschluss fordert kurz celebrate an, danach folgt Ruhe. Geänderte Garderoben fordern outfit_show an. Die Reaktionen dauern zwei aktive Sekunden, geben keine Zusatzbelohnung und werden nicht gespeichert; manuelle Aktionen oder Modi unterbrechen sie. Fehlende Animationen nutzen idle. Fertige Grafiken und Puppet-Zuordnung stehen aus.
+
+Aktive Identität wählen und Tier zurückholen bringt sie in den Arbeitsbereich des Zielbildschirms. Verborgene Tiere werden sichtbar, offene Interaktionen und Spielzeuge enden, Sprite-Grenzen folgen dem Bildschirm. Aussehen und Pflegewerte bleiben erhalten. Inaktive Tiere zuerst starten, zu große zuerst verkleinern.
+
+Puppet-Skripte können mit frontengine_actions Zustände auf vorhandene Bewegungen und Ausdrücke abbilden. Namen werden vor dem Start geprüft; fehlende Bindungen raten keine Animation. Abschluss gibt reaktionseigene Effekte frei und erhält manuelle Auswahl. Format: docs/formats/puppet-companion-actions.md. Native Sichtprüfung steht aus.
+
+Nach der Wahl von Streicheln startet Puppet die Interaktion erst bei Hin-und-her-Bewegungen des Zeigers. Verlassen, Esc, Ausblenden, Moduswechsel oder Ruhe brechen sie ab. Ziehen ist dabei gesperrt. Die native Gestenprüfung steht aus.
+
+Die Garderobe bietet sechs Stilfarben für den gewählten Farbbereich des Assets. Erst Vorschau, dann Anwenden; Abbrechen erhält das gespeicherte Aussehen. Freie Farbwahl und Zurücksetzen bleiben verfügbar.
+
+Sprite- und Puppet-Menüs bieten vier fiktive Leckerbissen ohne Dateiablage. Abschluss, Sättigungsgrenze und Wartezeit bleiben gemeinsam. Füttern beendet Streicheln ohne Belohnung für unvollständige Gesten; Sprite räumt Spielzeug weg.
+
+Jedes Tier kann einen beliebten und einen anderen unbeliebten Leckerbissen speichern. Nur die Stimmung nach dem Fressen ändert sich; Sättigung, Zuneigung und Wartezeit bleiben gleich. Änderungen gelten ab der nächsten Mahlzeit. Alte Profile sind neutral. food_like und food_dislike sind optionale Reaktionen; fertige Animationen stehen aus.
+
+Sprite-Tiere können mit Komm her einer nahen verschiebbaren Markierung folgen. Bodenmodus bleibt am Boden; freie Modi bewegen sich zweidimensional. Ankunft startet einen kurzen Gruß mit normaler Wartezeit. Rechtsklick oder Interaktion beenden bricht ab, ebenso Arbeit/Ruhe, Ausblenden, Füttern oder ein neues Spielzeug.
+
+Der Identitätsbereich bietet eine Interaktionsauswahl und Ausführen für das gewählte aktive Tier. Per Tastatur sind Gruß, kurzes Streicheln, Pflege, Leckerbissen, Spiel/Arbeit/Ruhe und Abbruch möglich. Streicheln nutzt die gemeinsame Zeitregel ohne Zeigergesten. Verborgene oder inaktive Tiere werden nicht gestartet.
+
+Beim Sprachwechsel in der geöffneten Garderobe werden die Optionen für keine Auswahl, fehlende Ressourcen und Standardwerte aktualisiert. Entwürfe für Farben, Teile und Outfitnamen sowie die Vorschauposition bleiben erhalten. Ressourcennamen bleiben im Original.
+
+Für ein Tastaturziel wählen Sie Komm her in der Tierverwaltung und geben horizontale/vertikale Verschiebungen in logischen Pixeln ein. Negative Werte bedeuten links/oben. Das Ziel bleibt im nahen Arbeitsbereich; der Bodenmodus ignoriert vertikale Werte. Ausführen startet, Interaktion beenden bricht ab. Beschäftigte oder nicht unterstützte Tiere behalten ihre aktuelle Interaktion.
+
+Puppet unterstützt Komm her über Menü oder Tastaturversatz im Manager. Das gesamte Tierfenster und die Markierung bleiben im Arbeitsbereich. Erreicht die Fenstermitte das Ziel für eine halbe Sekunde, startet der gemeinsame Gruß. Ziehen, Pflege, Moduswechsel, Ausblenden, Größen- oder Arbeitsbereichsänderungen und manuelle Modellbefehle brechen ab. Eine deklarierte walk-Reaktion wird verwendet; sonst bleibt die native Darstellung erhalten. Der Bewegungstimer läuft nur während des Rufs. Native GL-/Fokusprüfung steht aus.
+
+Puppet kann über sein Menü einem ziehbaren Lichtpunkt folgen. Im Manager bieten Sprite und Puppet Lichtspiel mit Tastaturversatz. Nach einer halben Sekunde losgelassen in der Nähe beginnt das gemeinsame dreisekündige Spiel; Zuneigung gibt es erst nach Abschluss mit normaler Wartezeit. Ruf und Licht teilen ein Ziel. Spielzeug weglegen, Interaktion beenden, Pflege, Ziehen, Moduswechsel oder Ausblenden brechen ab.
+
+Puppet-Tiere bieten Ball werfen ebenfalls im Menü an, und die Manager für Sprite und Puppet können für die gewählte Identität werfen. Ballphysik, erneutes Werfen per Ziehen, Entfernen per Rechtsklick, 1 Zuneigung und 30 Sekunden Abklingzeit sind mit Sprite gemeinsam; das Puppet-Fenster jagt den Ball, hebt ihn auf und trägt ihn zur ursprünglichen Mitte zurück, stets im Arbeitsbereich. Jeder neue Wurf startet ein neues Zeitlimit. Ball, Licht und Komm her teilen ein Ziel; ein neues ersetzt das alte. Pflege, Ziehen, Moduswechsel oder Ausblenden brechen ohne Belohnung ab. Eigene Apportier-Animation steht aus.

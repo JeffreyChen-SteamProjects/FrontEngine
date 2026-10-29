@@ -13,14 +13,26 @@ window that is not found is skipped rather than guessed at. Windows only.
 """
 from __future__ import annotations
 
+import sys
+
 from typing import Any, Dict, List, Optional, Tuple
 
 from frontengine.utils.logging.loggin_instance import front_engine_logger
-from frontengine.utils.window_pin.window_pin import available, list_windows
+from frontengine.utils.window_pin.window_pin import list_windows
 
 _SWP_NOZORDER = 0x0004
 _SWP_NOACTIVATE = 0x0010
 MIN_SIZE = 40
+
+
+def available() -> bool:
+    if sys.platform.startswith('linux'):
+        from frontengine.utils.linux.windows import available as x11_available
+        return x11_available()
+    if sys.platform == 'darwin':
+        from frontengine.utils.macos import get_backend
+        return get_backend().capability('window_move').available
+    return sys.platform == 'win32'
 
 
 def normalize_title(title: Any) -> str:
@@ -30,6 +42,12 @@ def normalize_title(title: Any) -> str:
 
 def window_geometry(handle: int) -> Optional[Tuple[int, int, int, int]]:
     """某個視窗目前的 (x, y, 寬, 高)；取不到回傳 None。"""
+    if sys.platform.startswith('linux'):
+        from frontengine.utils.linux.windows import geometry
+        return geometry(handle)
+    if sys.platform == 'darwin':
+        from frontengine.utils.macos import get_backend
+        return get_backend().window_geometry(handle)
     if not available() or not handle:
         return None
     try:
@@ -47,6 +65,12 @@ def window_geometry(handle: int) -> Optional[Tuple[int, int, int, int]]:
 
 def move_window(handle: int, x: int, y: int, width: int, height: int) -> bool:
     """把視窗搬到指定位置與大小；成功回傳 True。"""
+    if sys.platform.startswith('linux'):
+        from frontengine.utils.linux.windows import move
+        return move(handle, x, y, width, height)
+    if sys.platform == 'darwin':
+        from frontengine.utils.macos import get_backend
+        return get_backend().move_window(handle, x, y, width, height)
     if not available() or not handle:
         return False
     try:

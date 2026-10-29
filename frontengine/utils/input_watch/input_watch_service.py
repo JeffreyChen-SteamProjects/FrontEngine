@@ -12,6 +12,7 @@ signals and handled on the UI thread.
 from __future__ import annotations
 
 from typing import Any, List, Optional
+import sys
 
 from PySide6.QtCore import QObject, Signal
 
@@ -99,6 +100,10 @@ class InputWatchService(QObject):
     @staticmethod
     def available() -> bool:
         """pynput 是否可用 / Whether pynput loaded."""
+        if sys.platform.startswith('linux'):
+            from frontengine.utils.linux.capabilities import x11_reason
+            if x11_reason():
+                return False
         return _pynput_keyboard is not None and _pynput_mouse is not None
 
     def start(self, keyboard: bool = True, mouse: bool = True) -> bool:

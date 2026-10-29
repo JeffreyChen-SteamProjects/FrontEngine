@@ -107,8 +107,8 @@ def choose_pet(trigger_ui: QWidget) -> Optional[str]:
     """選擇桌面寵物圖片 (gif/webp/png/jpg) / Choose a desktop-pet sprite."""
     return choose_file(
         trigger_ui,
-        file_filter="Pet sprite (*.gif;*.webp;*.png;*.jpg)",
-        extensions=[_GIF, _WEBP, ".png", ".jpg"],
+        file_filter="Pet sprite / Imervue puppet (*.gif;*.webp;*.png;*.jpg;*.puppet)",
+        extensions=[_GIF, _WEBP, ".png", ".jpg", '.puppet'],
         warning_message=language_wrapper.language_word_dict.get("gif_setting_message_box")
     )
 

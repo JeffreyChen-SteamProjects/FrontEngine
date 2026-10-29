@@ -8,9 +8,10 @@ clipboard, or straight into the annotation layer to mark up.
 from __future__ import annotations
 
 from pathlib import Path
+import sys
 from typing import Callable, Optional
 
-from PySide6.QtCore import QPoint, QRect, Qt
+from PySide6.QtCore import QPoint, QRect, Qt, QTimer, Signal
 from PySide6.QtGui import QColor, QGuiApplication, QPainter, QPen, QPixmap
 
 from frontengine.show.base_widget import BaseWidget
@@ -60,7 +61,10 @@ class RegionCaptureWidget(BaseWidget):
     處理都可注入，所以整個流程不需要真的螢幕也測得到。
     """
 
-    def __init__(self, on_captured: Optional[Callable[[QPixmap, QRect], None]] = None) -> None:
+    failed = Signal(str)
+
+    def __init__(self, on_captured: Optional[Callable[[QPixmap, QRect], None]] = None,
+                 native_capture_factory=None) -> None:
         front_engine_logger.info("[RegionCaptureWidget] Init")
         super().__init__()
         self.opacity = 1.0
@@ -77,6 +81,14 @@ class RegionCaptureWidget(BaseWidget):
         self.captured: Optional[QPixmap] = None
         self._on_captured = on_captured
         self._grabber = self._default_grabber
+        self._native_factory = native_capture_factory
+        self._native_capture = None
+        self._capture_pending = False
+        self._native_rect = QRect()
+        self._native_polls = 0
+        self._capture_timer = QTimer(self)
+        self._capture_timer.setInterval(30)
+        self._capture_timer.timeout.connect(self._poll_native_capture)
         apply_overlay_window_flags(self, show_on_bottom=False, allow_input=True)
         self.setCursor(Qt.CursorShape.CrossCursor)
 
@@ -119,6 +131,13 @@ class RegionCaptureWidget(BaseWidget):
         if rect is None or not is_usable(rect):
             self.update()
             return None
+        if sys.platform == 'darwin' and self._grabber == self._default_grabber:
+            self._native_rect = QRect(self.mapToGlobal(rect.topLeft()), rect.size())
+            self._capture_pending = True
+            self.hide()
+            # Give the window server time to remove the selection overlay.
+            QTimer.singleShot(100, self, self._start_native_capture)
+            return None
         try:
             pixmap = self._grabber(rect)
         except Exception as error:  # pragma: no cover - screen grab boundary
@@ -145,8 +164,60 @@ class RegionCaptureWidget(BaseWidget):
     def mouseReleaseEvent(self, event) -> None:
         if event.button() == Qt.MouseButton.LeftButton:
             self.finish(event.position().toPoint())
-            self.close()
+            if not self._capture_pending:
+                self.close()
         super().mouseReleaseEvent(event)
+
+    def _start_native_capture(self) -> None:
+        if not self._capture_pending or self._native_capture is not None:
+            return
+        from frontengine.utils.macos.region_capture import RegionCaptureAdapter
+
+        factory = self._native_factory or RegionCaptureAdapter
+        self._native_capture = factory(self)
+        self._native_capture.failed.connect(self._native_failed, Qt.ConnectionType.QueuedConnection)
+        capture = self._native_capture
+        self.destroyed.connect(lambda *_args: capture.stop())
+        if not capture.start(self._native_rect):
+            reason = getattr(capture.session, 'last_error', '') if hasattr(capture, 'session') else ''
+            self._native_failed(reason or 'Native screen capture could not start')
+            return
+        self._native_polls = 0
+        self._capture_timer.start()
+
+    def _poll_native_capture(self) -> None:
+        if not self._capture_pending or self._native_capture is None:
+            return
+        self._native_polls += 1
+        image = self._native_capture.latest_frame()
+        if image is not None and not image.isNull():
+            self.captured = image
+            self._capture_pending = False
+            self._capture_timer.stop()
+            self._native_capture.stop()
+            if self._on_captured is not None:
+                self._on_captured(image, QRect(self._native_rect))
+            self.close()
+        elif self._native_polls >= 167:
+            self._native_failed('Screen capture timed out; check Screen Recording permission')
+
+    def _native_failed(self, reason: str) -> None:
+        if not self._capture_pending:
+            return
+        self._capture_pending = False
+        self._capture_timer.stop()
+        if self._native_capture is not None:
+            self._native_capture.stop()
+        front_engine_logger.warning(f'[RegionCaptureWidget] {reason}')
+        self.failed.emit(reason)
+        self.close()
+
+    def closeEvent(self, event) -> None:
+        self._capture_pending = False
+        self._capture_timer.stop()
+        if self._native_capture is not None:
+            self._native_capture.stop()
+        super().closeEvent(event)
 
     # --- outputs ---------------------------------------------------------
     def copy_to_clipboard(self) -> bool:

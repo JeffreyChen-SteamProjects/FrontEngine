@@ -52,6 +52,29 @@ def test_times_are_parsed_into_minutes() -> None:
     assert parse_minute_of_day(None) is None
 
 
+def test_normalized_rules_keep_time_conditions_after_save_and_reload() -> None:
+    import json
+    original = normalize_rule(rule())
+    restored = normalize_rule(json.loads(json.dumps(original)))
+    assert restored == original
+    assert evaluate(restored, context()) is True
+    assert evaluate(restored, context(now=MONDAY_EVENING.replace(hour=10))) is False
+    service = RuleEngineService(rules_provider=lambda: normalize_rules([original]),
+                                context_provider=context)
+    assert [entry['label'] for entry in service.poll_once()] == ['night']
+    assert service.poll_once() == []
+
+
+def test_normalized_clock_boundary_rejects_bool_and_out_of_range_minutes() -> None:
+    assert parse_minute_of_day(0) == 0
+    assert parse_minute_of_day(1439) == 1439
+    assert parse_minute_of_day(1440) is None
+    assert parse_minute_of_day(-1) is None
+    assert parse_minute_of_day(True) is None
+    assert normalize_days([float('inf'), 2]) == [2]
+    assert normalize_rule(rule(when={'idle_minutes': float('inf')}))['when']['idle_minutes'] is None
+
+
 def test_a_time_window_can_cross_midnight() -> None:
     """「睡前」本來就跨午夜；不支援的話那個情境根本寫不出來。"""
     assert in_time_window(23 * 60, 22 * 60, 6 * 60) is True

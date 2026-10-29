@@ -6,12 +6,22 @@
 version: 2
 updates:
   - package-ecosystem: "pip" # See documentation for possible values
-    directory: "/" # Location of package manifests
+    # Location of package manifests: the project's own at the root, and the
+    # hash-locked tool set the release job installs (publish.txt). Dependabot
+    # does not look that deep from the root, so the directory is named.
+    directories:
+      - "/"
+      - "/.github/requirements"
     # Work flows feature -> dev -> main and only the last step publishes, so
     # updates belong on dev; a PR opened against main just sits there.
     target-branch: "dev"
     schedule:
       interval: "daily"
+    # A new release waits 7 days before Dependabot proposes it, so a
+    # compromised version is more likely to be found and yanked first.
+    # Dependabot's own default is 3 days. Security updates are not delayed.
+    cooldown:
+      default-days: 7
   # Workflow actions are pinned to commit SHAs with the version as a comment
   # (test_workflow_actions.py); Dependabot moves both together.
   - package-ecosystem: "github-actions"
@@ -19,3 +29,5 @@ updates:
     target-branch: "dev"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7

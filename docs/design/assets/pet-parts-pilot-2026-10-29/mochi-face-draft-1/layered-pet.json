@@ -1,0 +1,72 @@
+{
+  "format": "frontengine.layered-pet/1",
+  "id": "inkside-mochi-face-pilot",
+  "version": "draft-1",
+  "name": "MOCHI face study \u2014 unfinished",
+  "kind": "character",
+  "template": "mochi-face-pilot",
+  "canvas": [
+    1254,
+    1254
+  ],
+  "slots": [],
+  "license": "Project-generated development artwork; see ../provenance.md",
+  "variants": {
+    "face": {
+      "name": "Face study",
+      "default": "deadpan",
+      "choices": {
+        "deadpan": "Deadpan",
+        "drowsy": "Drowsy"
+      }
+    }
+  },
+  "actions": {
+    "idle": {
+      "loop": true,
+      "frames": [
+        {
+          "duration_ms": 1000,
+          "anchors": {},
+          "layers": [
+            {
+              "image": "base.png",
+              "z": 0,
+              "anchor": null,
+              "offset": [
+                0,
+                0
+              ]
+            },
+            {
+              "image": "deadpan.png",
+              "z": 10,
+              "anchor": null,
+              "offset": [
+                -65,
+                -30
+              ],
+              "variant": [
+                "face",
+                "deadpan"
+              ]
+            },
+            {
+              "image": "drowsy.png",
+              "z": 10,
+              "anchor": null,
+              "offset": [
+                -65,
+                -30
+              ],
+              "variant": [
+                "face",
+                "drowsy"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

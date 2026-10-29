@@ -110,17 +110,17 @@ def test_without_consent_nothing_is_sent() -> None:
     assert sent == []
 
 
-def test_without_a_key_the_feature_is_unavailable() -> None:
+def test_without_a_key_cloud_processing_is_unavailable() -> None:
     service = ScreenTextService(consent_provider=lambda: True, key_provider=lambda: None)
-    assert service.available() is False
+    assert service.cloud_available() is False
     assert service.read(PNG) is None
 
 
 def test_consent_alone_is_not_enough_and_neither_is_a_key() -> None:
     assert ScreenTextService(consent_provider=lambda: True,
-                             key_provider=lambda: "k").available() is True
+                             key_provider=lambda: "k").cloud_available() is True
     assert ScreenTextService(consent_provider=lambda: False,
-                             key_provider=lambda: "k").available() is False
+                             key_provider=lambda: "k").cloud_available() is False
 
 
 def test_a_failing_consent_check_counts_as_refusal() -> None:
