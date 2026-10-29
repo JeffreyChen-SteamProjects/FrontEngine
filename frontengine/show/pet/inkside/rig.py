@@ -6,6 +6,7 @@ timeline animates all six body types and every garment follows the same frames.
 """
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field, replace
 
 PARTS = ('head', 'neck', 'body', 'tail', 'arm_l', 'arm_r', 'foot_l', 'foot_r')
@@ -22,6 +23,7 @@ class Pose:
     mouth: str = 'rest'
     fx: tuple = ()
     front: tuple = ()        # arms drawn in front of the head (paws at the mouth)
+    gaze: tuple = (0, 0)     # eyes and mouth shift toward where the pet is heading
 
     def offset(self, part: str) -> tuple[int, int]:
         dx, dy = self.moves.get(part, (0, 0))
@@ -52,14 +54,27 @@ def _idle() -> tuple[bool, list[Pose]]:
 
 
 def _walk() -> tuple[bool, list[Pose]]:
-    step = {'arm_l': 18, 'arm_r': 18}
-    back = {'arm_l': -18, 'arm_r': -18}
-    return True, [
-        pose(140, root=(0, -3), moves={'foot_l': (2, -7)}, turns=step),
-        pose(140),
-        pose(140, root=(0, -3), moves={'foot_r': (-2, -7)}, turns=back),
-        pose(140),
-    ]
+    """Six-step gait sized to read at desktop-pet size.
+
+    Each foot strides 22 px forward and back and lifts 16 px while the other plants;
+    the body bounces on every step, the head waddles side to side, arms swing against
+    the legs and the face looks ahead. One cycle (two steps) lasts 450 ms, so the feet
+    keep pace with the default walking speed instead of skating.
+    """
+    frames = []
+    for step in range(6):
+        phase = 2 * math.pi * step / 6
+        lead = round(22 * math.cos(phase))
+        lift_l = round(-16 * max(0.0, math.sin(phase)))
+        lift_r = round(-16 * max(0.0, -math.sin(phase)))
+        bounce = round(-7 * abs(math.sin(phase)))
+        swing = round(40 * math.cos(phase))
+        waddle = round(5 * math.sin(phase))
+        frames.append(pose(75, root=(0, bounce), gaze=(10, 0),
+                           moves={'foot_l': (lead, lift_l), 'foot_r': (-lead, lift_r), 'head': (3 + waddle // 2, 2)},
+                           turns={'arm_l': -swing, 'arm_r': -swing, 'head': waddle,
+                                  'tail': round(16 * math.sin(phase))}))
+    return True, frames
 
 
 def _sleep() -> tuple[bool, list[Pose]]:
@@ -76,10 +91,21 @@ def _sit() -> tuple[bool, list[Pose]]:
 
 
 def _climb() -> tuple[bool, list[Pose]]:
-    return True, [
-        pose(260, moves={'arm_l': (0, -10), 'foot_r': (0, -8)}, turns={'arm_l': 128, 'arm_r': -100}),
-        pose(260, moves={'arm_r': (0, -10), 'foot_l': (0, -8)}, turns={'arm_l': 100, 'arm_r': -128}),
-    ]
+    """Hand over hand: one paw reaches high while the other pulls, the opposite foot pushes
+    and the body hitches upward, face turned up toward the wall."""
+    reach, pull = 172, 118
+    frames = []
+    for left_high in (True, False):
+        high, low = ('arm_l', 'arm_r') if left_high else ('arm_r', 'arm_l')
+        sign = {'arm_l': 1, 'arm_r': -1}
+        push = 'foot_r' if left_high else 'foot_l'
+        rest = 'foot_l' if left_high else 'foot_r'
+        turns = {high: sign[high] * reach, low: sign[low] * pull, 'head': -6, 'tail': 18 if left_high else -18}
+        moves = {high: (0, -16), low: (0, -4), push: (0, -14), rest: (0, 2)}
+        frames.append(pose(170, root=(0, 2), moves=moves, turns=turns, gaze=(8, -6), front=(high,)))
+        frames.append(pose(150, root=(0, -6), moves={**moves, push: (0, -4)}, turns=turns, gaze=(8, -6),
+                           front=(high,)))
+    return True, frames
 
 
 def _fall() -> tuple[bool, list[Pose]]:

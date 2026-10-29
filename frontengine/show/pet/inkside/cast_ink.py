@@ -11,7 +11,7 @@ HEAD = rounded(-64, -52, 128, 100, 42)
 
 
 def _beak(choice: str) -> QPainterPath:
-    tip = {'long': 116, 'short': 82}.get(choice, 100)
+    tip = {'long': 106, 'short': 80}.get(choice, 96)  # leaves room for the walk's forward glance
     return polygon((28, -10), (tip, 14), (28, 34))
 
 
@@ -84,7 +84,7 @@ class Ink(Template):
     def _beak(b: Brush, choice: str, _context: str) -> None:
         beak = _beak(choice)
         b.shape(beak, 'beak')
-        b.outline(line((40, 12), ({'long': 100, 'short': 70}.get(choice, 86), 14)), 3)
+        b.outline(line((40, 12), ({'long': 92, 'short': 68}.get(choice, 82), 14)), 3)
 
     @staticmethod
     def _crest(b: Brush, choice: str, _context: str) -> None:

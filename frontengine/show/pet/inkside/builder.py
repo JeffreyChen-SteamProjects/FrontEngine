@@ -156,7 +156,8 @@ def frame_points(base: dict, pose: Pose, nudge=None) -> dict[str, tuple[int, int
             extra = nudge(part, pose)
             dx, dy = dx + extra[0], dy + extra[1]
         points[part] = (round(x + dx), round(y + dy))
-    points['face'] = points['head']
+    head = points['head']
+    points['face'] = (head[0] + pose.gaze[0], head[1] + pose.gaze[1])
     points['back'] = points['body']
     return points
 
