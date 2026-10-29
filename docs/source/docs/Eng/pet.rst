@@ -51,6 +51,8 @@ Pet identities → Wardrobe opens a separate animated preview for an installed l
 
 Undressed MOCHI with its default parts and colors walks and climbs with hand-drawn whole-body step frames; with clothing or changed parts it uses the layered animation so every piece stays fitted.
 
+Desktop pets always paint through ordinary Qt painting, whatever Overlay rendering is set to: a pet moves its window every tick, and on the GPU path its animation frames stopped changing while it moved.
+
 Pets now settle into poses: Work mode sits, entering Rest plays a short falling-asleep clip and leaving it plays a wake-up clip. Playing, ball and fetch games and tag cost a little energy; below 20 energy an idle pet sits even with automatic rest off, and it still obeys every command. Landing after a drop or throw, grabbing a thrown ball and meeting another pet show brief land, catch and wave reactions without interrupting movement, toys or your commands. Sprite packs without these clips fall back to their idle or sleep images. Grooming ends with a stretch, and pets that keep meeting wave to each other at most once a minute.
 
 Relationships grow with affection through four stages: Just met, Familiar (20), Close (100) and In sync (250). The stage appears in Status. Each stage has its own greeting line, Close pets wave and In sync pets jump for joy, and reaching a new stage plays a one-time celebration; nothing is locked or lost. A saved pet summoned again says welcome back, and Close from the pet’s own menu waves goodbye before the window closes. Puppet pets now separate a click from a drag the same way as Sprite pets: a click greets on release, and only movement beyond the system drag distance moves the window, without rewards.

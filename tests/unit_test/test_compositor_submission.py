@@ -47,3 +47,21 @@ def test_software_widgets_schedule_nothing_extra():
         assert not getattr(widget, '_compositor_pending', False)
     finally:
         widget.close()
+
+
+def test_desktop_pets_always_paint_through_qt(tmp_path):
+    """A pet moves its window every tick; the GPU compositor froze its frames while it moved."""
+    from PySide6.QtGui import QColor, QImage
+
+    from frontengine.show.pet.desktop_pet import DesktopPetWidget
+    image = QImage(32, 32, QImage.Format.Format_ARGB32)
+    image.fill(QColor('red'))
+    image.save(str(tmp_path / 'pet.png'))
+    pet = DesktopPetWidget(str(tmp_path / 'pet.png'), size=64, talk=False, sit_on_windows=False)
+    try:
+        pet.set_render_backend('gpu')
+        pet.show()
+        assert pet._compositor is None
+        assert pet.render_backend == 'software'
+    finally:
+        pet.close()

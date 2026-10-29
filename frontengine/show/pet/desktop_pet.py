@@ -1091,6 +1091,10 @@ class DesktopPetWidget(BaseWidget):
         self.profile_session = PetProfileSession(self, profile_id, profiles, profile_name)
         self.companion = self.profile_session.companion
         self.opacity = 1.0
+        # A pet moves its window every tick. On the GPU compositor, new frames were not
+        # presented while the window moved (the walk showed one frozen frame), and the pet
+        # content is a CPU raster anyway, so pets always paint through Qt.
+        self._requested_render_backend = 'software'
         # 寵物自己處理拖曳，位置與大小也由 PetMotion 決定。交給基底記憶的話，
         # 拖過一次之後那個「位置＋大小」會套到之後每一隻寵物身上——尺寸下拉選單
         # 就等於失效：新寵物被悄悄縮回舊尺寸，碰撞判定卻還用新的大小。
@@ -1464,6 +1468,10 @@ class DesktopPetWidget(BaseWidget):
             if fallback in self._sprites:
                 return self._sprites[fallback]
         return next(iter(self._sprites.values()), None)
+
+    def set_render_backend(self, backend: str = 'auto') -> None:
+        """Pets stay on ordinary Qt painting; see the note in ``__init__``."""
+        self._requested_render_backend = 'software'
 
     def _set_active_sprite(self, state: str) -> None:
         self._layered_playback.set_action(state)
