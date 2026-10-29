@@ -894,14 +894,20 @@ class PetMotion:
             return int(self.x), int(self.y)
         self.state = "walk"
         self.vx = float(self.speed) if self.follow_target_x >= center_x else float(-self.speed)
+        before = self.x
         self.x += self.vx
         if self.on_platform and self.platform_span is not None:
             span_left, span_right = self.platform_span
-            self.x = min(max(self.x, span_left), span_right - self.width)
+            self.x = max(min(self.x, span_right - self.width), span_left)
             self.y = float(self.ground_feet - self.height)
         else:
             self.x = min(max(self.x, float(left)), float(right - self.width))
             self.y = float(floor_y)
+        if abs(self.x - before) < 0.5:
+            # The target lies past a ledge end or the screen edge: give up instead of
+            # walking in place against it.
+            self.follow_target_x = None
+            self._new_state()
         return int(self.x), int(self.y)
 
     def _platform_under(self) -> Optional[Tuple[float, float]]:
@@ -927,6 +933,10 @@ class PetMotion:
         if self._state_ticks <= 0:
             self._new_state()
         self._state_ticks -= 1
+        if self.state == "walk" and span_right - span_left < self.width + 2 * self.speed:
+            # No room to walk on a ledge narrower than the pet: turning at both ends
+            # flipped it left and right every tick. It stands there instead.
+            self.state = "idle"
         if self.state != "walk":
             return int(self.x), int(self.y)
         self.x += self.vx

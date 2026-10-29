@@ -93,6 +93,41 @@ def test_platform_walking_turns_at_the_span_edges() -> None:
         assert 200.0 <= motion.x <= 400.0 - motion.width
 
 
+def test_a_ledge_narrower_than_the_pet_is_stood_on_not_paced() -> None:
+    """Turning at both ends of a too-narrow ledge flipped the pet left and right every tick."""
+    motion = _motion(x=200, y=236)
+    motion.set_platforms([(200.0, 240.0, 300.0)])
+    motion.on_platform = True
+    motion.ground_feet = 300.0
+    motion.surface = SURFACE_FLOOR
+    positions, headings = set(), []
+    for _ in range(300):
+        x, _y = motion.step()
+        positions.add(x)
+        headings.append(motion.vx > 0)
+        assert motion.state != "walk"
+    assert len(positions) == 1
+    # Looking around now and then is fine; flipping on consecutive ticks is the jitter.
+    flips = [index for index, (a, b) in enumerate(zip(headings, headings[1:])) if a != b]
+    assert all(later - earlier > 10 for earlier, later in zip(flips, flips[1:]))
+
+
+def test_a_follow_target_past_the_ledge_end_is_given_up() -> None:
+    motion = _motion(x=200, y=236)
+    motion.set_platforms([(200.0, 400.0, 300.0)])
+    motion.on_platform = True
+    motion.ground_feet = 300.0
+    motion.surface = SURFACE_FLOOR
+    motion.platform_span = (200.0, 400.0)
+    motion.set_follow(900.0)
+    for _ in range(200):
+        motion.step()
+        if motion.follow_target_x is None:
+            break
+    assert motion.follow_target_x is None
+    assert motion.x == 400.0 - motion.width
+
+
 def test_platform_vanishing_drops_the_pet() -> None:
     motion = _motion(x=200, y=236)
     motion.on_platform = True
