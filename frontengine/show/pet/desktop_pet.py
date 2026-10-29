@@ -1166,7 +1166,7 @@ class DesktopPetWidget(BaseWidget):
         self.chat_action.setVisible(False)  # shown only when a chat service is attached
         self.menu.addAction(self.chat_action)
         self.close_action = QAction(language_wrapper.language_word_dict.get("control_center_close_all", "Close"), self)
-        self.close_action.triggered.connect(self.close)
+        self.close_action.triggered.connect(self.say_goodbye)
         self.menu.addAction(self.close_action)
         self.customize_action = QAction(self)
         from frontengine.utils.multi_language.retranslate import retranslator
@@ -1196,6 +1196,8 @@ class DesktopPetWidget(BaseWidget):
         self._petting = None
         self._toy = None
         self._flash = None
+        self._welcomed = False
+        self._leaving = False
         self._seen_landings = 0
         self.ball_action = QAction(self)
         retranslator.bind(self.ball_action, 'pet_ball_start', 'Throw a ball')
@@ -1605,7 +1607,9 @@ class DesktopPetWidget(BaseWidget):
     def _interaction_feedback(self, result: str) -> None:
         text = companion_status(self.profile_session) if result == "accepted" else translate(
             "pet_companion_" + result, result)
-        if result == "accepted" and self.companion.action:
+        if result == "accepted" and self.companion.action == "greet":
+            text = translate("pet_greet_" + self.companion.bond, self.companion.bond)
+        elif result == "accepted" and self.companion.action:
             text = translate("pet_companion_" + self.companion.action, self.companion.action)
         elif result == 'accepted' and self._petting is not None:
             text = translate('pet_petting_hint', 'Move back and forth over the pet. Leave to stop.')
@@ -1995,6 +1999,27 @@ class DesktopPetWidget(BaseWidget):
             self._bubble.show_message(text, self)
             self._speak_text(text)
 
+    def say_goodbye(self) -> None:
+        """Closing from the pet's own menu waves goodbye briefly before the window closes."""
+        if self._leaving:
+            return
+        self._leaving = True
+        self.stop_toy()
+        self.flash("peer_greet")
+        self.say(translate("pet_goodbye", "See you soon!"))
+        QTimer.singleShot(900, self, self._finish_goodbye)
+
+    def _finish_goodbye(self) -> None:
+        if not self.close():
+            self._leaving = False
+
+    def _welcome(self) -> None:
+        """Summoning a saved identity again greets the user; nothing decays while away."""
+        self._welcomed = True
+        if self.companion.growth.affection > 0:
+            self.flash("peer_greet")
+            self.say(translate("pet_welcome_back", "Welcome back!"))
+
     def flash(self, action: str) -> None:
         """Show a short physical reaction while the pet keeps moving on its own."""
         self._flash = (action, monotonic() + _FLASH_MS[action] / 1000)
@@ -2125,6 +2150,8 @@ class DesktopPetWidget(BaseWidget):
         self._hidden_timers = []
         if self._active is not None and self._active[0] == "movie":
             self._active[1].setPaused(False)
+        if not self._welcomed:
+            self._welcome()
         self.profile_session.changed.emit()
 
     def hideEvent(self, event) -> None:

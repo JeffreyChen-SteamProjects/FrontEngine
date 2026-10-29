@@ -59,5 +59,6 @@ def add_companion_actions(menu, session, feedback, *, request=None) -> dict:
 
 def companion_status(session) -> str:
     state = session.companion
-    return translate("pet_companion_status", "{mode} · Energy {energy}/100").format(
+    status = translate("pet_companion_status", "{mode} · Energy {energy}/100").format(
         mode=translate("pet_companion_" + state.mode), energy=state.energy)
+    return status + " · " + translate("pet_bond_" + state.bond, state.bond)

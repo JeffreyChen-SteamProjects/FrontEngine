@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261029-36 | 2026-10-29 | Add relationship stages, welcome and goodbye greetings, Puppet click intent | #done #pets #puppet #interaction | [2026-10](2026-10.md) |
 | U-20261029-35 | 2026-10-29 | Play sit, transitions, landing, catch and peer waves on desktop pets | #done #pets #animation | [2026-10](2026-10.md) |
 | U-20261029-34 | 2026-10-29 | Ship six drawn INKSIDE characters and fourteen outfits as layered assets | #done #pets #art #wardrobe | [2026-10](2026-10.md) |
 | U-20261029-33 | 2026-10-29 | Add the Puppet ball toy | #done #puppet #toys | [2026-10](2026-10.md) |
@@ -178,5 +179,5 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-10.md](2026-10.md) | 2026-10 | 103 |
+| [2026-10.md](2026-10.md) | 2026-10 | 104 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

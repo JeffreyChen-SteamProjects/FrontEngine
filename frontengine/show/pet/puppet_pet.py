@@ -4,7 +4,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from PySide6.QtCore import QEvent, Qt, QTimer, Signal
-from PySide6.QtWidgets import QLabel, QMenu, QMessageBox, QVBoxLayout
+from PySide6.QtWidgets import QApplication, QLabel, QMenu, QMessageBox, QVBoxLayout
 
 from frontengine.show.draggable_window import DraggableTopWindow
 from frontengine.utils.imervue.puppet_asset import finite_parameters, validate_puppet
@@ -49,6 +49,10 @@ class PuppetPetWidget(DraggableTopWindow):
         self._photo_dialog = None
         self._settled = False
         self._petting = None
+        self._dragged = False
+        self._press_point = None
+        self._welcomed = False
+        self._leaving = False
         self._petting_revision = None
         self._target = PuppetTargetController(self)
         self.placement_revision = 0
@@ -159,17 +163,37 @@ class PuppetPetWidget(DraggableTopWindow):
                 elif event.type() == QEvent.Type.KeyPress and event.key() == Qt.Key.Key_Escape:
                     self._end_petting()
                     return True
-            if event.type() == QEvent.Type.MouseButtonPress and event.button() == Qt.MouseButton.LeftButton:
-                self.stop_toy()
-                self._drag_origin = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
-            elif (event.type() == QEvent.Type.MouseMove and self._drag_origin is not None
-                  and event.buttons() & Qt.MouseButton.LeftButton):
-                self.placement_revision += 1
-                self.move(event.globalPosition().toPoint() - self._drag_origin)
+            if self._pointer_event(event):
                 return True
-            elif event.type() == QEvent.Type.MouseButtonRelease and event.button() == Qt.MouseButton.LeftButton:
-                self._drag_origin = None
         return super().eventFilter(watched, event)
+
+    def _pointer_event(self, event) -> bool:
+        """A click greets on release; only movement past the drag distance drags, without rewards."""
+        left = getattr(event, 'button', lambda: None)() == Qt.MouseButton.LeftButton
+        if event.type() == QEvent.Type.MouseButtonPress and left:
+            self.stop_toy()
+            self._press_point = event.globalPosition().toPoint()
+            self._dragged = False
+            self._drag_origin = self._press_point - self.frameGeometry().topLeft()
+        elif (event.type() == QEvent.Type.MouseMove and self._drag_origin is not None
+              and event.buttons() & Qt.MouseButton.LeftButton):
+            point = event.globalPosition().toPoint()
+            if not self._dragged and (point - self._press_point).manhattanLength() < QApplication.startDragDistance():
+                return True
+            if not self._dragged:
+                self._dragged = True
+                self.profile_session.request('drag')
+            self.placement_revision += 1
+            self.move(point - self._drag_origin)
+            return True
+        elif event.type() == QEvent.Type.MouseButtonRelease and left and self._drag_origin is not None:
+            self._drag_origin = None
+            if self._dragged:
+                self._dragged = False
+                self.profile_session.request('cancel')
+            else:
+                self._interaction_feedback(self.profile_session.request('greet'))
+        return False
 
     def _script_tick(self) -> None:
         if self._petting is not None or self._target.marker is not None or not self.profile_session.companion.allows_autonomy:
@@ -228,7 +252,7 @@ class PuppetPetWidget(DraggableTopWindow):
         menu.addAction(translate('pet_toy_stop', 'Put toy away'), self.stop_toy)
         add_companion_actions(menu, self.profile_session, self._interaction_feedback,
                               request=self._request_interaction)
-        menu.addAction(words.get('pet_puppet_close', 'Close'), self.close)
+        menu.addAction(words.get('pet_puppet_close', 'Close'), self.say_goodbye)
         menu.exec(event.globalPos())
         menu.deleteLater()
 
@@ -322,8 +346,24 @@ class PuppetPetWidget(DraggableTopWindow):
         if result == 'accepted' and self._petting is not None:
             self.say(translate('pet_petting_hint', 'Move back and forth over the pet. Leave to stop.'))
             return
+        if result == 'accepted' and self.profile_session.companion.action == 'greet':
+            self.say(translate('pet_greet_' + self.profile_session.companion.bond))
+            return
         self.say(companion_status(self.profile_session) if result == "accepted" else translate(
             "pet_companion_" + result, result))
+
+    def say_goodbye(self) -> None:
+        """Closing from the pet's own menu says goodbye briefly before the window closes."""
+        if self._leaving:
+            return
+        self._leaving = True
+        self.stop_toy()
+        self.say(translate('pet_goodbye', 'See you soon!'))
+        QTimer.singleShot(900, self, self._finish_goodbye)
+
+    def _finish_goodbye(self) -> None:
+        if not self.close():
+            self._leaving = False
 
     def _companion_changed(self) -> None:
         if self._petting is not None and (
@@ -370,6 +410,7 @@ class PuppetPetWidget(DraggableTopWindow):
     def place_for_focus(self, x: int, y: int) -> None:
         self.stop_toy()
         self._drag_origin = None
+        self._dragged = False
         self.move(x, y)
 
     def mousePressEvent(self, event) -> None:
@@ -388,6 +429,10 @@ class PuppetPetWidget(DraggableTopWindow):
             self.profile_session.resume()
             self.set_settled(self._settled)
             self.script_timer.start()
+            if not self._welcomed:
+                self._welcomed = True
+                if self.profile_session.companion.growth.affection > 0:
+                    self.say(translate('pet_welcome_back', 'Welcome back!'))
 
     def hideEvent(self, event) -> None:
         if not self._closed:

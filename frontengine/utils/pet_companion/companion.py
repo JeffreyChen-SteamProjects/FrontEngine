@@ -4,7 +4,7 @@ from copy import deepcopy
 from decimal import Decimal, InvalidOperation
 from collections.abc import Mapping
 
-from .stats import FOOD_EFFECTS, FOOD_SNACK, PetGrowth, PetHunger, PetMood
+from .stats import FOOD_EFFECTS, FOOD_SNACK, PetGrowth, PetHunger, PetMood, bond_stage
 
 
 ACTION_SECONDS = {"greet": 0.75, "pet": 2, "groom": 3, "feed": 2, "play": 3}
@@ -13,6 +13,8 @@ CARE_SECONDS = 30
 MODES = ("play", "work", "rest")
 _REWARDS = {"greet": (3, 1), "pet": (12, 2), "groom": (8, 3), "play": (10, 3)}
 _EVENT_AFFECTION = {"peer": 3, "tag": 1, "fetch": 1, "ball": 1}
+# Closer pets greet more warmly; the semantic action and its reward stay "greet".
+GREET_VISUAL = {"new": "greet", "familiar": "greet", "close": "peer_greet", "in_sync": "celebrate"}
 # Cosmetic presentations and how long each plays on the active clock. The mode
 # transitions match the length of their authored non-looping clips.
 PRESENT_SECONDS = {"celebrate": 2, "outfit_show": 2, "food_like": 2, "food_dislike": 2,
@@ -65,7 +67,13 @@ class CompanionState:
 
     @property
     def visual_action(self) -> str | None:
+        if self.action == "greet":
+            return GREET_VISUAL[self.bond]
         return self.action or self._presentation or {"rest": "sleep", "work": "sit", "play": None}[self.mode]
+
+    @property
+    def bond(self) -> str:
+        return bond_stage(self.growth.affection)
 
     @property
     def tired(self) -> bool:
@@ -137,7 +145,9 @@ class CompanionState:
         key = "event:" + kind
         if self._now < self._ready.get(key, Decimal(0)):
             return "cooldown"
+        before = self.bond
         self.growth.add(_EVENT_AFFECTION[kind])
+        self._keepsake(before)
         self.energy = _bounded(self.energy - ENERGY_COST.get(kind, 0), 70)
         self._ready[key] = self._now + CARE_SECONDS
         return "accepted"
@@ -157,11 +167,18 @@ class CompanionState:
             mood, affection = _REWARDS[action]
             self.energy = _bounded(self.energy - ENERGY_COST.get(action, 0), 70)
         self.mood.pet(mood)
+        before = self.bond
         self.growth.add(affection)
         self._ready[action] = self._now + COOLDOWN_SECONDS[action]
         self._cancel()
         if reaction:
             self.present(reaction)
+        self._keepsake(before)
+
+    def _keepsake(self, before: str) -> None:
+        """Reaching a closer relationship stage plays a one-time celebration."""
+        if self.bond != before and self.action is None:
+            self.present("celebrate")
 
     def _auto_rest(self) -> None:
         if (self.action is None and self.mode != "rest" and self.energy <= 10

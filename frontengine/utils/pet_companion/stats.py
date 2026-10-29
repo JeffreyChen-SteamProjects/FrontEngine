@@ -90,6 +90,19 @@ class PetGrowth:
         return self.level() > before
 
 
+# Relationship stages shown to the user. They only add greeting variants and a
+# keepsake celebration; nothing is ever lost or locked away from the user.
+BOND_STAGES = (("new", 0), ("familiar", 20), ("close", 100), ("in_sync", 250))
+
+
+def bond_stage(affection: int) -> str:
+    stage = BOND_STAGES[0][0]
+    for name, threshold in BOND_STAGES:
+        if affection >= threshold:
+            stage = name
+    return stage
+
+
 class PetHunger:
     """
     寵物飽足值 0~100：餵食上升、隨時間下降；level() 回傳 full/ok/hungry。

@@ -125,3 +125,70 @@ def test_legacy_sprite_packs_fall_back_for_new_actions(social_pets):
     pet = pets[0]
     for action in ('sit', 'land', 'catch', 'peer_greet', 'wake', 'sleep_in'):
         assert pet._sprite_for(action) is not None
+
+
+def test_bond_stages_vary_greetings_and_celebrate_once_when_reached():
+    from frontengine.utils.pet_companion.stats import bond_stage
+    assert [bond_stage(value) for value in (0, 19, 20, 99, 100, 249, 250)] == [
+        'new', 'new', 'familiar', 'familiar', 'close', 'close', 'in_sync']
+    state = CompanionState({'affection': 19})
+    assert state.request('greet') == 'accepted'
+    assert state.visual_action == 'greet'
+    state.advance(0.75)
+    assert state.bond == 'familiar' and state.visual_action == 'celebrate'
+    state.advance(2)
+    assert state.visual_action is None
+    for affection, visual in ((100, 'peer_greet'), (300, 'celebrate')):
+        warm = CompanionState({'affection': affection})
+        warm.request('greet')
+        assert warm.visual_action == visual
+
+
+def test_status_names_the_relationship_stage(social_pets):
+    from frontengine.show.pet.companion_menu import companion_status
+    from frontengine.utils.multi_language.retranslate import translate
+    _, pets = social_pets
+    pets[0].companion.growth.affection = 120
+    assert companion_status(pets[0].profile_session).endswith(translate('pet_bond_close'))
+
+
+def test_resummoned_pet_welcomes_once_and_new_pet_stays_quiet(tmp_path, monkeypatch):
+    from frontengine.show.pet.desktop_pet import DesktopPetWidget
+    from frontengine.user_setting.pet_profiles import PetProfiles
+    from test_pet_profile_sessions import _sprite
+    profiles = PetProfiles({}, lambda: None)
+    known = profiles.create('Known')
+    profiles.update(known['id'], {'affection': 30})
+    lines = []
+    monkeypatch.setattr(DesktopPetWidget, 'say', lambda self, text=None: lines.append((self, text)))
+    fresh = DesktopPetWidget(_sprite(tmp_path), profiles=profiles, talk=True, sit_on_windows=False)
+    returning = DesktopPetWidget(_sprite(tmp_path), profiles=profiles, profile_id=known['id'], talk=True,
+                                 sit_on_windows=False)
+    try:
+        for pet in (fresh, returning):
+            pet.show()
+            pet.hide()
+            pet.show()
+        welcomes = [pet for pet, _ in lines]
+        assert welcomes == [returning]
+        assert returning._flash[0] == 'peer_greet'
+    finally:
+        fresh.close()
+        returning.close()
+
+
+def test_menu_close_waves_goodbye_before_closing(tmp_path, monkeypatch):
+    from PySide6.QtTest import QTest
+    from shiboken6 import isValid
+    from frontengine.show.pet.desktop_pet import DesktopPetWidget
+    from frontengine.user_setting.pet_profiles import PetProfiles
+    from test_pet_profile_sessions import _sprite
+    pet = DesktopPetWidget(_sprite(tmp_path), profiles=PetProfiles({}, lambda: None), sit_on_windows=False)
+    pet.show()
+    lines = []
+    monkeypatch.setattr(pet, 'say', lambda text=None: lines.append(text))
+    pet.close_action.trigger()
+    pet.close_action.trigger()
+    assert pet.isVisible() and len(lines) == 1 and pet._flash[0] == 'peer_greet'
+    QTest.qWait(950)
+    assert not isValid(pet) or not pet.isVisible()
