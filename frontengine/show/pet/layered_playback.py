@@ -33,10 +33,13 @@ class LayeredPlayback:
             self._elapsed += max(0.0, self.clock() - self._started)
             self._started = None
 
-    def frame(self):
-        if self.renderer is None:
-            return None
+    def elapsed_ms(self) -> int:
         elapsed = self._elapsed
         if self._started is not None:
             elapsed += max(0.0, self.clock() - self._started)
-        return self.renderer.render(self.action, int(elapsed * 1000))
+        return int(elapsed * 1000)
+
+    def frame(self):
+        if self.renderer is None:
+            return None
+        return self.renderer.render(self.action, self.elapsed_ms())

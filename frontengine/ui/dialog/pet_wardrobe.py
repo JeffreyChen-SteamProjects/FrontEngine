@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (
 
 from frontengine.show.pet.asset_library import PetAssetLibrary
 from frontengine.show.pet.layered_playback import LayeredPlayback
-from frontengine.show.pet.wardrobe import WardrobeDraft, asset_reference
+from frontengine.show.pet.wardrobe import WardrobeDraft, WardrobeError, asset_reference, garment_fit
 from frontengine.user_setting.pet_profile_schema import SLOTS
 from frontengine.utils.multi_language.retranslate import retranslator, tr, translate
 from frontengine.show.pet.inkside.library import builtin_names
@@ -35,9 +35,24 @@ class PetWardrobeDialog(QDialog):
         self.preview = QLabel()
         self.preview.setFixedSize(288, 288)
         self.preview.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        # A pinned look renders beside the draft on the same clock for comparison.
+        self.compare_preview = QLabel()
+        self.compare_preview.setFixedSize(288, 288)
+        self.compare_preview.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.compare_preview.hide()
+        self._compare = None
+        self._show_until = 0
         columns = QHBoxLayout()
         layout.addLayout(columns)
-        columns.addWidget(self.preview, alignment=Qt.AlignmentFlag.AlignTop)
+        previews = QVBoxLayout()
+        previews.addWidget(self.preview)
+        previews.addWidget(self.compare_preview)
+        self.compare_button = tr(QPushButton(), 'pet_wardrobe_compare', 'Pin for comparison')
+        self.compare_button.setCheckable(True)
+        self.compare_button.toggled.connect(self._pin_comparison)
+        previews.addWidget(self.compare_button)
+        previews.addStretch()
+        columns.addLayout(previews)
         form = QFormLayout()
         columns.addLayout(form)
         self.character = QComboBox()
@@ -185,6 +200,10 @@ class PetWardrobeDialog(QDialog):
     def _attempt(self, operation) -> bool:
         try:
             operation()
+        except WardrobeError as error:
+            self.status.setText(error.localized(translate))
+            self._refresh_controls()
+            return False
         except (OSError, ValueError, KeyError) as error:
             self.status.setText(str(error))
             self._refresh_controls()
@@ -198,11 +217,25 @@ class PetWardrobeDialog(QDialog):
     def _retranslate_choices(self) -> None:
         appearance = self.draft.appearance
         self._fill(self.character, self.draft.catalog.assets('character'), appearance['character'])
+        character = self.draft.preview.character if self.draft.preview else None
         for slot, control in self.slots.items():
-            assets = tuple(asset for asset in self.draft.catalog.assets('garment') if slot in asset.slots)
-            self._fill(control, assets, appearance['equipped'][slot])
+            fits = [(asset, garment_fit(character, asset)) for asset in self.draft.catalog.assets('garment')
+                    if slot in asset.slots]
+            # Garments for other body types are not offered; same-body garments that
+            # lack animations stay visible but disabled, with the reason.
+            self._fill(control, tuple(asset for asset, fit in fits if fit is None),
+                       appearance['equipped'][slot])
+            for asset, fit in fits:
+                if fit == 'missing_actions':
+                    control.addItem(asset.name + ' · ' + translate('pet_wardrobe_incompatible',
+                                                                     'missing animations'), asset_reference(asset))
+                    control.model().item(control.count() - 1).setEnabled(False)
+            control.setEnabled(character is not None)
         if self.variant_choice.count():
             self.variant_choice.setItemText(0, translate('pet_custom_reset', 'Reset defaults'))
+        if character is None and not self.status.text():
+            self.status.setText(translate('pet_wardrobe_legacy', 'This pet shows a whole-image sprite. Choose '
+                                          'a layered character to dress it piece by piece.'))
 
     def _refresh_controls(self) -> None:
         self._retranslate_choices()
@@ -297,7 +330,27 @@ class PetWardrobeDialog(QDialog):
 
     def _choose_slot(self, slot: str) -> None:
         reference = self.slots[slot].currentData()
-        self._attempt(lambda: self.draft.unequip(slot) if reference is None else self.draft.equip(reference))
+        if reference is None:
+            self._attempt(lambda: self.draft.unequip(slot))
+            return
+        if self._attempt(lambda: self.draft.equip(reference)):
+            self._try_on()
+            if self.draft.replaced:
+                self.status.setText(translate('pet_wardrobe_replaced', 'Replaced: {items}').format(
+                    items=', '.join(self.draft.replaced)))
+
+    def _try_on(self) -> None:
+        """Trying a garment on plays the outfit-show pose once in the preview."""
+        if self.draft.preview is not None and 'outfit_show' in self.draft.preview.character.actions:
+            self.playback.set_action('outfit_show')
+            QTimer.singleShot(900, self, lambda: self.playback.set_action(self.action.currentText() or 'idle'))
+
+    def _pin_comparison(self, pinned: bool) -> None:
+        self._compare = self.draft.preview if pinned else None
+        self.compare_preview.setVisible(self._compare is not None)
+        if self._compare is None:
+            self.compare_preview.clear()
+        self._render()
 
     def _save_outfit(self) -> None:
         self._attempt(lambda: self.draft.save_outfit(self.outfit_name.text()))
@@ -323,12 +376,18 @@ class PetWardrobeDialog(QDialog):
         image = self.playback.frame()
         if image is None:
             self.preview.clear()
-            return
+        else:
+            self._show(self.preview, image)
+        if self._compare is not None:
+            elapsed = self.playback.elapsed_ms()
+            self._show(self.compare_preview, self._compare.render(self.playback.action, elapsed))
+
+    def _show(self, label, image) -> None:
         if self.mirror.isChecked():
             from PySide6.QtGui import QTransform
             image = image.transformed(QTransform().scale(-1, 1))
-        self.preview.setPixmap(QPixmap.fromImage(image).scaled(
-            self.preview.size(), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+        label.setPixmap(QPixmap.fromImage(image).scaled(
+            label.size(), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
 
     def showEvent(self, event) -> None:
         super().showEvent(event)
@@ -346,5 +405,6 @@ class PetWardrobeDialog(QDialog):
             self._install_job.cancel.set()
         self.timer.stop()
         self.draft.cancel()
+        self._compare = None
         self.playback.set_renderer(None)
         super().done(result)

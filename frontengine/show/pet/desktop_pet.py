@@ -1692,7 +1692,10 @@ class DesktopPetWidget(BaseWidget):
                                          or self.companion.action not in (None, 'pet')):
             self._end_petting()
         renderer = self.profile_session.appearance_renderer
-        if renderer is not self._layered_playback.renderer:
+        # A new outfit waits for a safe moment: never mid-drag or mid-interaction.
+        busy = self._dragging or self.companion.action is not None
+        current = self._layered_playback.renderer
+        if renderer is not current and not (busy and current is not None and renderer is not None):
             self._layered_playback.set_renderer(renderer)
             if self._active is not None and self._active[0] == "movie":
                 self._active[1].stop()

@@ -8,7 +8,33 @@ from frontengine.show.pet.layered_renderer import LayeredRenderer
 from frontengine.show.pet.pet_profile_session import PetProfileSession
 from frontengine.user_setting.pet_profile_schema import checked_profile, SLOTS
 from frontengine.user_setting.pet_profiles import PetProfiles
-from frontengine.utils.pet_pack.layered import LayeredAsset
+from frontengine.utils.pet_pack.layered import LayeredAsset, validate_outfit
+
+MAX_OUTFITS = 20
+
+
+class WardrobeError(ValueError):
+    """A refusal the wardrobe shows to the user in their language."""
+
+    def __init__(self, key: str, fallback: str, **values) -> None:
+        super().__init__(fallback.format(**values))
+        self.key, self.fallback, self.values = key, fallback, values
+
+    def localized(self, translate) -> str:
+        return translate(self.key, self.fallback).format(**self.values)
+
+
+def garment_fit(character: LayeredAsset | None, garment: LayeredAsset) -> str | None:
+    """None when the garment fits; otherwise why: another body type or missing animations."""
+    if character is None:
+        return None
+    if garment.template != character.template or garment.canvas != character.canvas:
+        return 'other_body'
+    try:
+        validate_outfit(character, (garment,))
+    except ValueError:
+        return 'missing_actions'
+    return None
 
 
 class AssetCatalog:
@@ -37,7 +63,8 @@ class AssetCatalog:
         """Decode a complete candidate before any state is persisted."""
         if appearance['character'] is None:
             if any(appearance['equipped'].values()) or appearance.get('colors') or appearance.get('variants'):
-                raise ValueError('Choose a layered character before equipping clothes')
+                raise WardrobeError('pet_wardrobe_need_character',
+                                    'Choose a layered character before equipping clothes')
             return None
         character = self.resolve(appearance['character'], 'character')
         garments = {}
@@ -66,6 +93,7 @@ class WardrobeDraft:
         self._expected = profiles.get(identifier)['appearance']
         self._candidate = copy.deepcopy(self._expected)
         self.preview: LayeredRenderer | None = None
+        self.replaced: list[str] = []
 
     @property
     def appearance(self) -> dict:
@@ -101,15 +129,32 @@ class WardrobeDraft:
             variants[group] = choice
         self._stage(candidate)
 
-    def equip(self, reference: dict) -> None:
+    def equip(self, reference: dict) -> list[str]:
+        """Equip a garment, taking off whatever shares its slots; returns what was replaced."""
         garment = self.catalog.resolve(reference, 'garment')
         candidate = self.appearance
         occupied = candidate['equipped']
+        replaced = []
         for slot in garment.slots:
-            if occupied[slot] is not None and occupied[slot] != reference:
-                raise ValueError(f'Unequip the current item in {slot} first')
+            current = occupied[slot]
+            if current is not None and current != reference and current not in replaced:
+                replaced.append(current)
+        for old in replaced:
+            candidate.get('colors', {}).pop(old['id'] + '@' + old['version'], None)
+            for slot in SLOTS:
+                if occupied[slot] == old:
+                    occupied[slot] = None
+        for slot in garment.slots:
             occupied[slot] = copy.deepcopy(reference)
         self._stage(candidate)
+        self.replaced = [self._name(old) for old in replaced]
+        return self.replaced
+
+    def _name(self, reference: dict) -> str:
+        try:
+            return self.catalog.resolve(reference, 'garment').name
+        except ValueError:
+            return reference['id']
 
     def unequip(self, slot: str) -> None:
         if slot not in SLOTS:
@@ -139,6 +184,9 @@ class WardrobeDraft:
     def save_outfit(self, name: str, identifier: str | None = None) -> str:
         candidate = self.appearance
         outfits = candidate['saved_outfits']
+        if identifier is None and len(outfits) >= MAX_OUTFITS:
+            raise WardrobeError('pet_wardrobe_outfit_limit',
+                                'You can save up to {count} outfits. Delete one first.', count=MAX_OUTFITS)
         if identifier is None:
             identifier = uuid4().hex
             outfits.append({'id': identifier, 'name': name, 'equipped': copy.deepcopy(candidate['equipped'])})
