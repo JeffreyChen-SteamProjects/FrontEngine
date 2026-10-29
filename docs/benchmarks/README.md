@@ -55,7 +55,7 @@ plugin-owned text, independent of the application's language dictionaries.
 py -m benchmarks.pet_performance --output build/pet-benchmark.json --seconds 30
 ```
 
-It installs the built-in MOCHI into a temporary library and runs four scenarios: one and four pets, each as a plain 128-pixel legacy sprite and as MOCHI wearing three garments. Each scenario shows the pets with their normal timers. After a one-second warm-up, it records:
+`--output` names the JSON result file; only its file name is used and it is always written under `build/`. It installs the built-in MOCHI into a temporary library and runs four scenarios: one and four pets, each as a plain 128-pixel legacy sprite and as MOCHI wearing three garments. Each scenario shows the pets with their normal timers. After a one-second warm-up, it records:
 
 - process CPU over the measuring window (Windows process time ticks about every 16 ms, so use at least 30 seconds);
 - working-set growth;

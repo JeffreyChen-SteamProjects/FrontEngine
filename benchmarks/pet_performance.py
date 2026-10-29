@@ -115,18 +115,19 @@ def scenario(app, folder: Path, library, count: int, layered: bool, seconds: flo
         _wait(app, 0.3)
 
 
-def _output_path(value: Path) -> Path:
-    """The result file stays inside the working directory; the path comes from the command line."""
-    base = os.path.realpath(os.getcwd())
-    target = os.path.realpath(value)
-    if os.path.commonpath([base, target]) != base:
-        raise SystemExit(f'--output must be inside the working directory {base}')
-    return Path(target)
+def _output_path(value: str) -> Path:
+    """Results always go to build/; only the file name is taken from the command line."""
+    name = os.path.basename(value)
+    if not name.endswith('.json'):
+        raise SystemExit('--output must name a .json file')
+    folder = Path('build')
+    folder.mkdir(exist_ok=True)
+    return folder / name
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--output', required=True, help='result file name, written under build/')
     parser.add_argument('--seconds', type=float, default=10.0)
     args = parser.parse_args()
     output = _output_path(args.output)
