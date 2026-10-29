@@ -41,7 +41,24 @@ def _arm_z(part: str, pose: Pose) -> int:
     return Z['raised'] + 2 * (part == 'arm_r') if part in pose.front else Z[part]
 
 
+def _sprite_elements(template: Template, pose: Pose) -> list[Element]:
+    """One whole-body frame, plus empty part choices so every declared choice stays covered."""
+    from frontengine.show.pet.inkside.sprite_sheet import atlas_frame
+    atlas, index = pose.sprite
+    frame = atlas_frame(atlas, index)
+    body_x, body_y = template.base['body']
+    elements = [Element('body', Z['body'], lambda b: b.picture(frame, -body_x, -body_y),
+                        (template.ident, 'sprite', atlas, index))]
+    for name, group in template.groups().items():
+        for choice in group.choices:
+            elements.append(Element(group.part, group.z, lambda b: None, (template.ident, 'blank', name, choice),
+                                    variant=(name, choice)))
+    return elements
+
+
 def character_elements(template: Template, pose: Pose) -> list[Element]:
+    if pose.sprite is not None:
+        return _sprite_elements(template, pose)
     head = pose.angle('head')
     ident = template.ident
     elements = [
@@ -68,7 +85,8 @@ def build_character(template: Template, folder: Path) -> Path:
     folder.mkdir(parents=True, exist_ok=True)
     writer = AssetWriter(folder, template.palette)
     actions = build_actions(writer, template.base, template.palette,
-                            lambda pose: character_elements(template, pose), template.nudge)
+                            lambda pose: character_elements(template, pose), template.nudge,
+                            template.sprite_actions)
     variants = {name: {'name': group.name, 'default': group.default, 'choices': dict(group.choices)}
                 for name, group in template.groups().items()}
     writer.write(manifest(template.ident, template.name, 'character', template.template, [],
@@ -81,6 +99,9 @@ def garment_identifier(garment: Garment, template: Template) -> str:
 
 
 def garment_elements(garment: Garment, template: Template, pose: Pose) -> list[Element]:
+    if pose.sprite is not None:
+        # Sprite frames are only shown undressed; the garment keeps an empty matching frame.
+        return [Element('body', Z['body'], lambda b: None, (garment.ident, 'blank'), required=True)]
     elements = []
     for index, piece in enumerate(garment.pieces):
         def draw(b, piece=piece):
@@ -98,7 +119,8 @@ def build_garment(garment: Garment, template: Template, folder: Path) -> Path:
     folder.mkdir(parents=True, exist_ok=True)
     writer = AssetWriter(folder, garment.palette)
     actions = build_actions(writer, template.base, garment.palette,
-                            lambda pose: garment_elements(garment, template, pose), template.nudge)
+                            lambda pose: garment_elements(garment, template, pose), template.nudge,
+                            template.sprite_actions)
     name = f'{garment.outfit} · {garment.name}'
     writer.write(manifest(garment_identifier(garment, template), name, 'garment', template.template,
                           list(garment.slots), garment.palette, actions))

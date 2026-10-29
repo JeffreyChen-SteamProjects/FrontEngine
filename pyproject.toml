@@ -65,3 +65,6 @@ content-type = "text/markdown"
 
 [tool.setuptools.packages]
 find = { namespaces = false, include = ["frontengine", "frontengine.*"] }
+
+[tool.setuptools.package-data]
+"frontengine.show.pet.inkside" = ["sprites/*.png"]

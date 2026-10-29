@@ -78,6 +78,11 @@ class Brush:
             color = INK if region == 'ink' else PAPER if region == 'paper' else self.colors[region]
             self.painter.fillPath(path, QColor(color))
 
+    def picture(self, image, x: float, y: float) -> None:
+        """A whole pre-drawn frame (generated sprite art), kept as its own untinted layer."""
+        if self._wants('sprite'):
+            self.painter.drawImage(round(x), round(y), image)
+
     def solid(self, path: QPainterPath) -> None:
         self.fill(path, 'ink')
 

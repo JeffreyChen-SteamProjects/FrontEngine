@@ -63,6 +63,8 @@ class Template:
     mouth_default = ''
     torso_region = 'coat'
     fx_origin = (0.0, -60.0)
+    # Generated whole-body frames: {'walk_sprite': (atlas file in sprites/, frames, ms per frame)}.
+    sprite_actions: dict = {}
     fx_region = 'accent'
 
     # --- body parts -------------------------------------------------------

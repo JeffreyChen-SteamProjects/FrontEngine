@@ -16,6 +16,8 @@ ATLAS_SIDE = 2048
 ACTIONS = ('idle', 'walk', 'sleep', 'climb', 'fall', 'drag', 'greet', 'pet',
            'feed', 'groom', 'play', 'celebrate', 'outfit_show', 'wake', 'sleep_in', 'food_like', 'food_dislike',
            'sit', 'land', 'peer_greet', 'catch')
+# Optional whole-body frame alternatives; the renderer uses them only for an undressed default pet.
+SPRITE_ACTIONS = ('walk_sprite', 'climb_sprite')
 _TOKEN = re.compile(r'[A-Za-z0-9][A-Za-z0-9_.-]{0,127}')
 
 
@@ -222,7 +224,7 @@ def _frame(value, root: Path, checked: dict) -> Frame:
 
 
 def _animations(value, root: Path) -> Mapping[str, Animation]:
-    if not isinstance(value, dict) or not value or set(value) - set(ACTIONS):
+    if not isinstance(value, dict) or not value or set(value) - set(ACTIONS) - set(SPRITE_ACTIONS):
         raise ValueError('Unknown or empty layered actions')
     actions = {}
     checked = {}

@@ -24,6 +24,7 @@ class Pose:
     fx: tuple = ()
     front: tuple = ()        # arms drawn in front of the head (paws at the mouth)
     gaze: tuple = (0, 0)     # eyes and mouth shift toward where the pet is heading
+    sprite: tuple | None = None  # (atlas file, frame index) for whole-body sprite frames
 
     def offset(self, part: str) -> tuple[int, int]:
         dx, dy = self.moves.get(part, (0, 0))

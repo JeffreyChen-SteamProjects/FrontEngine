@@ -25,6 +25,10 @@ class LayeredRenderer:
         if any(choice not in character.variants[group]['choices'] for group, choice in self.variants.items()):
             raise ValueError('Unknown character part choice')
         self._palettes = self._resolve_palettes((character, *garments), {} if colors is None else colors)
+        # Whole-body sprite frames (``<action>_sprite``) only show the authored default look,
+        # so they replace a layered action only for an undressed, unrecoloured default pet.
+        defaults = {group: spec['default'] for group, spec in character.variants.items()}
+        self._whole_body = not garments and not checked_colors(colors or {}) and self.variants == defaults
         self._images = {}
         self._cache_key = None
         self._cache = None
@@ -97,6 +101,8 @@ class LayeredRenderer:
 
     def render(self, action: str, elapsed_ms: int, *, mirrored: bool = False) -> QImage:
         """Return a detached frame; unknown interaction actions explicitly use idle."""
+        if self._whole_body and action + '_sprite' in self.character.actions:
+            action += '_sprite'
         action = action if action in self.character.actions else 'idle'
         animation = self.character.actions[action]
         index = animation.frame_index(elapsed_ms)

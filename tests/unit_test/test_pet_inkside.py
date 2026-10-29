@@ -12,7 +12,7 @@ from frontengine.show.pet.inkside.cast import TEMPLATES
 from frontengine.show.pet.inkside.garments import GARMENTS, OUTFITS
 from frontengine.show.pet.inkside.library import install_builtin
 from frontengine.show.pet.layered_renderer import LayeredRenderer
-from frontengine.utils.pet_pack.layered import ACTIONS, load_layered_asset, validate_outfit
+from frontengine.utils.pet_pack.layered import ACTIONS, SPRITE_ACTIONS, load_layered_asset, validate_outfit
 
 
 def _pixels(image: QImage) -> bytes:
@@ -41,7 +41,7 @@ def built(tmp_path_factory):
 
 def test_every_character_covers_every_action_and_part_choice(built):
     for character, _ in built.values():
-        assert set(character.actions) == set(ACTIONS)
+        assert set(ACTIONS) <= set(character.actions) <= set(ACTIONS) | set(SPRITE_ACTIONS)
         assert {'eyes', 'mouth'} <= set(character.variants)
         assert len(character.variants) >= 4
         for group, spec in character.variants.items():
@@ -243,3 +243,18 @@ def test_builtin_part_and_garment_labels_follow_the_language(tmp_path):
         language_wrapper.reset_language(original)
         retranslator.apply()
         dialog.close()
+
+
+def test_sprite_walk_replaces_the_layered_walk_only_for_an_undressed_default_pet(built):
+    character, garments = built['inkside-mochi']
+    assert 'walk_sprite' in character.actions
+    bare = LayeredRenderer(character)
+    frames = {_pixels(bare.render('walk', index * 90)) for index in range(8)}
+    assert len(frames) == 8
+    assert _pixels(bare.render('walk', 0)) == _pixels(bare.render('walk_sprite', 0))
+    dressed = LayeredRenderer(character, (next(iter(garments.values())),))
+    assert _pixels(dressed.render('walk', 0)) != _pixels(dressed.render('walk_sprite', 0))
+    group, spec = next(iter(character.variants.items()))
+    other = next(choice for choice in spec['choices'] if choice != spec['default'])
+    varied = LayeredRenderer(character, variants={group: other})
+    assert _pixels(varied.render('walk', 0)) != _pixels(varied.render('walk_sprite', 0))

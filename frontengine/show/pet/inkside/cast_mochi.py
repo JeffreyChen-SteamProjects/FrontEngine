@@ -54,6 +54,8 @@ class Mochi(Template):
               'crooked': ('Crooked', MouthStyle('crooked', 20)),
               'line': ('Short line', MouthStyle('line', 14))}
     eye_default, mouth_default = 'narrow', 'tooth'
+    sprite_actions = {'walk_sprite': ('inkside-mochi-walk.png', 8, 90),
+                      'climb_sprite': ('inkside-mochi-climb.png', 8, 110)}
 
     def head(self, b: Brush) -> None:
         b.fill(HEAD, 'fur')

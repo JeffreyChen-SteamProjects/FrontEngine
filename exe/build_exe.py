@@ -79,6 +79,8 @@ def build_command(version: str, onefile: bool, output_dir: Path | None = None, j
         f"--output-dir={output_dir or OUTPUT_DIR}",
         "--include-package-data=qt_material",
         "--include-package-data=trimesh",
+        # Generated sprite atlases of the built-in pets ship inside the package.
+        "--include-package-data=frontengine.show.pet.inkside",
         # main_ui.py looks for frontengine.ico next to the working directory.
         f"--include-data-files={ICON}=frontengine.ico",
         "--company-name=JE-Chen",
