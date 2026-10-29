@@ -1,8 +1,9 @@
 """Windows native GL probe for a built-in INKSIDE character exported as a Puppet model.
 
-Run with an absolute output directory. The model is generated into that
-directory; the pet window is placed beyond every screen, never activated, and
-uses in-memory profiles, so the user's pets, settings and foreground are untouched.
+Run with an absolute output directory. The probe re-launches itself on a hidden
+Win32 desktop (hidden_desktop.py) and places the pet inside the real primary
+monitor's work area there, with in-memory profiles, so the user's pets, settings,
+screen and foreground are untouched.
 """
 from __future__ import annotations
 
@@ -55,9 +56,16 @@ def main() -> int:
     from frontengine.show.pet.puppet_pet import PuppetPetWidget
     from frontengine.user_setting.pet_profiles import PetProfiles
 
+    from hidden_desktop import is_child, run_on_hidden_desktop
+    from PySide6.QtGui import QSurfaceFormat
     output = Path(sys.argv[1]).resolve()
-    character = sys.argv[2] if len(sys.argv) > 2 else 'inkside-mochi'
+    character = sys.argv[2] if len(sys.argv) > 2 and sys.argv[2] != '--child' else 'inkside-mochi'
     output.mkdir(parents=True, exist_ok=True)
+    if not is_child(output):
+        return run_on_hidden_desktop(__file__, str(output), character)
+    surface = QSurfaceFormat.defaultFormat()
+    surface.setSwapInterval(0)  # the hidden desktop is never presented; do not wait for vsync
+    QSurfaceFormat.setDefaultFormat(surface)
     app = QApplication([])
     if app.platformName() != 'windows':
         raise RuntimeError('This probe requires the native Windows Qt platform')
@@ -69,8 +77,10 @@ def main() -> int:
     pet.setWindowFlag(Qt.WindowType.WindowDoesNotAcceptFocus, True)
     pet.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
     pet.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-    pet.move(max(screen.geometry().right() for screen in app.screens()) + 1024, 0)
-    result = {'status': 'failed', 'platform': app.platformName(), 'character': character, 'reactions': {}}
+    area = app.primaryScreen().availableGeometry()
+    pet.move(area.left() + 80, area.bottom() - pet.height())
+    result = {'status': 'failed', 'platform': app.platformName(), 'character': character, 'reactions': {},
+              'real_work_area': [area.x(), area.y(), area.width(), area.height()]}
     steps = list(ACTIONS)
     state = {}
 
@@ -82,7 +92,7 @@ def main() -> int:
             result['error'] = repr(error)
             result['traceback'] = traceback.format_exc()
         else:
-            assert int(pet.winId()) not in observations, 'The probe window took the foreground'
+            assert area.contains(pet.geometry()), 'The pet left the real work area'
             result.update(status='passed', native_gl=True, foreground_samples=len(observations))
         poll.stop()
         pet.close()

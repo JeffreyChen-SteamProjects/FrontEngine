@@ -201,51 +201,11 @@ class Probe:
         self.app.quit()
 
 
-DESKTOP = 'FrontEnginePetInputProbe'
-
-
-def _launch_on_hidden_desktop(output: Path) -> int:
-    """Run this probe in a child process whose windows live on a new desktop."""
-    kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
-    user32.CreateDesktopW.restype = wintypes.HANDLE
-    desktop = user32.CreateDesktopW(DESKTOP, None, None, 0, 0x10000000, None)
-    if not desktop:
-        raise ctypes.WinError(ctypes.get_last_error())
-
-    class StartupInfo(ctypes.Structure):
-        _fields_ = [('cb', wintypes.DWORD), ('lpReserved', wintypes.LPWSTR), ('lpDesktop', wintypes.LPWSTR),
-                    ('lpTitle', wintypes.LPWSTR)] + [(name, wintypes.DWORD) for name in (
-                        'dwX', 'dwY', 'dwXSize', 'dwYSize', 'dwXCountChars', 'dwYCountChars',
-                        'dwFillAttribute', 'dwFlags')] + [('wShowWindow', wintypes.WORD), ('cbReserved2', wintypes.WORD),
-                                                          ('lpReserved2', ctypes.c_void_p), ('hStdInput', wintypes.HANDLE),
-                                                          ('hStdOutput', wintypes.HANDLE), ('hStdError', wintypes.HANDLE)]
-
-    class ProcessInfo(ctypes.Structure):
-        _fields_ = [('hProcess', wintypes.HANDLE), ('hThread', wintypes.HANDLE),
-                    ('dwProcessId', wintypes.DWORD), ('dwThreadId', wintypes.DWORD)]
-
-    startup, process = StartupInfo(), ProcessInfo()
-    startup.cb = ctypes.sizeof(StartupInfo)
-    startup.lpDesktop = DESKTOP
-    command = ctypes.create_unicode_buffer(f'"{sys.executable}" "{Path(__file__).resolve()}" "{output}" --child')
-    try:
-        if not kernel32.CreateProcessW(None, command, None, None, False, 0, None, None,
-                                       ctypes.byref(startup), ctypes.byref(process)):
-            raise ctypes.WinError(ctypes.get_last_error())
-        kernel32.WaitForSingleObject(process.hProcess, 180000)
-        code = wintypes.DWORD()
-        kernel32.GetExitCodeProcess(process.hProcess, ctypes.byref(code))
-        kernel32.CloseHandle(process.hThread)
-        kernel32.CloseHandle(process.hProcess)
-        return code.value
-    finally:
-        user32.CloseDesktop(desktop)
-
-
 def main() -> int:
+    from hidden_desktop import is_child, run_on_hidden_desktop
     output = Path(sys.argv[1]).resolve()
-    if '--child' not in sys.argv:
-        return _launch_on_hidden_desktop(output)
+    if not is_child():
+        return run_on_hidden_desktop(__file__, str(output))
     output.mkdir(parents=True, exist_ok=True)
     app = QApplication([])
     if app.platformName() != 'windows':
