@@ -13,6 +13,7 @@ from frontengine.show.pet.layered_playback import LayeredPlayback
 from frontengine.show.pet.wardrobe import WardrobeDraft, WardrobeError, asset_reference, garment_fit
 from frontengine.user_setting.pet_profile_schema import SLOTS
 from frontengine.utils.multi_language.retranslate import retranslator, tr, translate
+from frontengine.show.pet.inkside.labels import asset_label, label
 from frontengine.show.pet.inkside.library import builtin_names
 from frontengine.ui.dialog.pet_asset_install import PetAssetInstall, PetBuiltinInstall
 
@@ -227,15 +228,28 @@ class PetWardrobeDialog(QDialog):
                        appearance['equipped'][slot])
             for asset, fit in fits:
                 if fit == 'missing_actions':
-                    control.addItem(asset.name + ' · ' + translate('pet_wardrobe_incompatible',
+                    control.addItem(asset_label(asset) + ' · ' + translate('pet_wardrobe_incompatible',
                                                                      'missing animations'), asset_reference(asset))
                     control.model().item(control.count() - 1).setEnabled(False)
             control.setEnabled(character is not None)
         if self.variant_choice.count():
             self.variant_choice.setItemText(0, translate('pet_custom_reset', 'Reset defaults'))
+        self._relabel_parts(character)
         if character is None and not self.status.text():
             self.status.setText(translate('pet_wardrobe_legacy', 'This pet shows a whole-image sprite. Choose '
                                           'a layered character to dress it piece by piece.'))
+
+    def _relabel_parts(self, character) -> None:
+        """Rename part entries in place so a language switch keeps every selection."""
+        if character is None:
+            return
+        for index in range(self.variant_group.count()):
+            group = self.variant_group.itemData(index)
+            self.variant_group.setItemText(index, label(character.identifier, character.variants[group]['name']))
+        group = self.variant_group.currentData()
+        for index in range(1, self.variant_choice.count()):
+            name = character.variants[group]['choices'][self.variant_choice.itemData(index)]
+            self.variant_choice.setItemText(index, label(character.identifier, name))
 
     def _refresh_controls(self) -> None:
         self._retranslate_choices()
@@ -257,7 +271,7 @@ class PetWardrobeDialog(QDialog):
         if self.draft.preview:
             for asset in (self.draft.preview.character, *self.draft.preview.garments):
                 for region in asset.palette:
-                    self.color_region.addItem(asset.name + ' / ' + region, (asset_reference(asset), region))
+                    self.color_region.addItem(asset_label(asset) + ' / ' + region, (asset_reference(asset), region))
         self.color_region.setCurrentIndex(max(0, self.color_region.findData(selected_region)))
         for control in (self.color_button, self.color_reset, self.color_region, *self.swatches.values()):
             control.setEnabled(self.color_region.count() > 0)
@@ -265,8 +279,9 @@ class PetWardrobeDialog(QDialog):
         self.variant_group.blockSignals(True)
         self.variant_group.clear()
         if self.draft.preview:
-            for group, spec in self.draft.preview.character.variants.items():
-                self.variant_group.addItem(spec['name'], group)
+            character = self.draft.preview.character
+            for group, spec in character.variants.items():
+                self.variant_group.addItem(label(character.identifier, spec['name']), group)
         self.variant_group.setCurrentIndex(max(0, self.variant_group.findData(selected_group)))
         self.variant_group.blockSignals(False)
         self.variant_group.setEnabled(self.variant_group.count() > 0)
@@ -279,7 +294,7 @@ class PetWardrobeDialog(QDialog):
             spec = self.draft.preview.character.variants[group]
             self.variant_choice.addItem(translate('pet_custom_reset', 'Reset defaults'), None)
             for choice, name in spec['choices'].items():
-                self.variant_choice.addItem(name, choice)
+                self.variant_choice.addItem(label(self.draft.preview.character.identifier, name), choice)
             selected = self.draft.appearance.get('variants', {}).get(group)
             self.variant_choice.setCurrentIndex(max(0, self.variant_choice.findData(selected)))
         self.variant_choice.setEnabled(self.variant_choice.count() > 0)
@@ -317,7 +332,7 @@ class PetWardrobeDialog(QDialog):
         control.clear()
         control.addItem(translate('pet_wardrobe_none', 'None'), None)
         for asset in assets:
-            control.addItem(asset.name + ' · ' + asset.version, asset_reference(asset))
+            control.addItem(asset_label(asset) + ' · ' + asset.version, asset_reference(asset))
         index = control.findData(selected)
         if index < 0 and selected is not None:
             control.addItem(translate('pet_wardrobe_missing', 'Missing') + ': ' + selected['id'], selected)

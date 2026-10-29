@@ -207,3 +207,39 @@ def test_closing_the_wardrobe_cancels_a_builtin_install(tmp_path):
     _finish_jobs()
     assert library.scan()[0].assets('character') == ()
     assert not any(path.name.startswith('.install-') for path in (tmp_path / 'library').glob('*'))
+
+
+def test_builtin_part_and_garment_labels_follow_the_language(tmp_path):
+    from frontengine.show.pet.inkside.labels import asset_label, label
+    from frontengine.ui.dialog.pet_wardrobe import PetWardrobeDialog
+    from frontengine.user_setting.pet_profiles import PetProfiles
+    from frontengine.utils.multi_language.language_wrapper import language_wrapper
+    from frontengine.utils.multi_language.retranslate import retranslator
+
+    library = PetAssetLibrary(tmp_path / 'library')
+    install_builtin(library, 'inkside-moss')
+    profiles = PetProfiles({}, lambda: None)
+    record = profiles.create()
+    original = language_wrapper.language
+    dialog = PetWardrobeDialog(profiles, record['id'], library=library)
+    try:
+        dialog.character.setCurrentIndex(dialog.character.findData({'id': 'inkside-moss', 'version': '1'}))
+        dialog._choose_character()
+        dialog.variant_group.setCurrentIndex(dialog.variant_group.findData('eyes'))
+        dialog.variant_choice.setCurrentIndex(dialog.variant_choice.findData('half'))
+        dialog._choose_variant()
+        for language, eyes, half, hat in (('Traditional_Chinese', '眼睛', '半閉眼', '遮陽帽'),
+                                          ('English', 'Eyes', 'Half closed', 'Sun hat')):
+            language_wrapper.reset_language(language)
+            retranslator.apply()
+            assert dialog.variant_group.currentText() == eyes
+            assert dialog.variant_choice.currentText() == half
+            head = dialog.slots['head']
+            sun_hat = head.findData({'id': 'inkside-moss-sun-hat', 'version': '1'})
+            assert head.itemText(sun_hat).startswith('SEED KEEPER · ' + hat)
+        assert label('third-party-pack', 'Eyes') == 'Eyes'
+        assert asset_label(type('Asset', (), {'identifier': 'other', 'name': 'A · B'})()) == 'A · B'
+    finally:
+        language_wrapper.reset_language(original)
+        retranslator.apply()
+        dialog.close()
