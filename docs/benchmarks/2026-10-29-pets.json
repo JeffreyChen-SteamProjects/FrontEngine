@@ -1,0 +1,55 @@
+{
+  "python": "3.14.4",
+  "os": "Windows-11-10.0.26300-SP0",
+  "qt_platform": "windows",
+  "screen_dpr": 1.0,
+  "seconds": 30.0,
+  "budget": {
+    "frame_p95_ms": 4.0,
+    "cpu_percent_four_pets": 8.0,
+    "layered_extra_mb_four_pets": 80.0
+  },
+  "within_budget": {
+    "frame_p95_ms": true,
+    "cpu_percent_four_pets": true,
+    "layered_extra_mb_four_pets": true
+  },
+  "runs": [
+    {
+      "pets": 1,
+      "layered": false,
+      "cpu_percent": 0.83,
+      "working_set_mb": 236.3,
+      "added_mb": 94.6,
+      "frame_median_ms": 0.005,
+      "frame_p95_ms": 0.006
+    },
+    {
+      "pets": 1,
+      "layered": true,
+      "cpu_percent": 0.42,
+      "working_set_mb": 249.2,
+      "added_mb": 49.3,
+      "frame_median_ms": 0.045,
+      "frame_p95_ms": 1.258
+    },
+    {
+      "pets": 4,
+      "layered": false,
+      "cpu_percent": 0.31,
+      "working_set_mb": 339.2,
+      "added_mb": 134.7,
+      "frame_median_ms": 0.005,
+      "frame_p95_ms": 0.005
+    },
+    {
+      "pets": 4,
+      "layered": true,
+      "cpu_percent": 0.68,
+      "working_set_mb": 406.6,
+      "added_mb": 168.2,
+      "frame_median_ms": 0.043,
+      "frame_p95_ms": 1.205
+    }
+  ]
+}

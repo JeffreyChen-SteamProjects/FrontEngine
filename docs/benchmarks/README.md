@@ -48,3 +48,31 @@ compatibility does not promise compatibility with arbitrary private app imports.
 Python plugins execute with the application's privileges; permissions and digest
 grants express trust, not an OS sandbox. Example captions are intentionally
 plugin-owned text, independent of the application's language dictionaries.
+
+# Desktop pet benchmark
+
+```powershell
+py -m benchmarks.pet_performance --output build/pet-benchmark.json --seconds 30
+```
+
+It installs the built-in MOCHI into a temporary library and runs four scenarios: one and four pets, each as a plain 128-pixel legacy sprite and as MOCHI wearing three garments. Each scenario shows the pets with their normal timers. After a one-second warm-up, it records:
+
+- process CPU over the measuring window (Windows process time ticks about every 16 ms, so use at least 30 seconds);
+- working-set growth;
+- the median and p95 of 400 calls to each pet's own `draw_content`: composition, mirroring and painting its content.
+
+`QWidget.render` is deliberately not timed, because it forces a framebuffer readback from the overlay's OpenGL compositor that the screen never pays and that is identical for every kind of sprite.
+
+The enhancement plan named no figures, so the budgets are stated in the script and checked in the output:
+
+- p95 frame work of 4 ms;
+- 8% CPU for four layered pets;
+- 80 MB more for four layered pets than for four legacy pets.
+
+Recorded native Windows results (one 100% monitor, 30 seconds): [2026-10-29-pets.json](2026-10-29-pets.json).
+
+- **Frame work:** a layered pet takes 0.04 ms per cached frame and about 1.2 ms (p95) when an animation frame recomposes; a legacy sprite takes 0.005 ms.
+- **CPU:** under 1% for four layered pets.
+- **Memory:** four layered pets use about 33 MB more than four legacy pets. The first scenario's growth also includes one-time Qt and OpenGL setup.
+
+This does not measure display refresh, the GPU compositor or mixed-DPI multi-monitor setups.
