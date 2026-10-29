@@ -58,6 +58,8 @@ class Pip(Template):
     mouths = {'grin': ('Toothy grin', MouthStyle('grin', 26)),
               'smirk': ('Closed smirk', MouthStyle('smirk', 18))}
     eye_default, mouth_default = 'provoke', 'grin'
+    sprite_actions = {'walk_sprite': ('inkside-pip-walk.png', 8, 90),
+                      'climb_sprite': ('inkside-pip-climb.png', 8, 110)}
 
     def head(self, b: Brush) -> None:
         b.fill(HEAD, 'hide')

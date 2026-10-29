@@ -49,6 +49,8 @@ class Bolt(Template):
     mouths = {'line': ('Short dash', MouthStyle('line', 14)),
               'steps': ('Steps', MouthStyle('steps', 24))}
     eye_default, mouth_default = 'uneven', 'line'
+    sprite_actions = {'walk_sprite': ('inkside-bolt-walk.png', 8, 90),
+                      'climb_sprite': ('inkside-bolt-climb.png', 8, 110)}
 
     def head(self, b: Brush) -> None:
         """The frame is a part choice, so the fixed head only has the ear pods."""

@@ -40,7 +40,8 @@ def test_frames_share_one_scale_and_stand_on_the_ground_line():
     assert heights[1] > heights[0]
 
 
-@pytest.mark.parametrize('atlas', ['inkside-mochi-walk.png', 'inkside-mochi-climb.png'])
+@pytest.mark.parametrize('atlas', [f'inkside-{name}-{kind}.png' for name in ('mochi', 'moss', 'pip', 'bolt', 'ink', 'gill')
+                                   for kind in ('walk', 'climb')])
 def test_shipped_atlases_have_eight_distinct_frames(atlas):
     assert (SPRITES / atlas).is_file()
     frames = [atlas_frame(atlas, index) for index in range(8)]

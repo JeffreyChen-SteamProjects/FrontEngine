@@ -245,9 +245,10 @@ def test_builtin_part_and_garment_labels_follow_the_language(tmp_path):
         dialog.close()
 
 
-def test_sprite_walk_replaces_the_layered_walk_only_for_an_undressed_default_pet(built):
-    character, garments = built['inkside-mochi']
-    assert 'walk_sprite' in character.actions
+@pytest.mark.parametrize('ident', [template.ident for template in TEMPLATES])
+def test_sprite_walk_replaces_the_layered_walk_only_for_an_undressed_default_pet(built, ident):
+    character, garments = built[ident]
+    assert {'walk_sprite', 'climb_sprite'} <= set(character.actions)
     bare = LayeredRenderer(character)
     frames = {_pixels(bare.render('walk', index * 90)) for index in range(8)}
     assert len(frames) == 8

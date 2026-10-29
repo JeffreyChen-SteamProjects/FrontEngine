@@ -67,6 +67,8 @@ class Moss(Template):
     mouths = {'buck': ('Buck teeth', MouthStyle('buck', 16)),
               'offset': ('Crooked teeth', MouthStyle('offset', 16))}
     eye_default, mouth_default = 'alert', 'buck'
+    sprite_actions = {'walk_sprite': ('inkside-moss-walk.png', 8, 90),
+                      'climb_sprite': ('inkside-moss-climb.png', 8, 110)}
 
     def head(self, b: Brush) -> None:
         b.fill(FACE, 'fur')

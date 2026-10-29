@@ -50,6 +50,8 @@ class Ink(Template):
     mouths = {'closed': ('Closed beak', MouthStyle('beak', 18)),
               'parted': ('Parted beak', MouthStyle('beak', 24))}
     eye_default, mouth_default = 'glance', 'closed'
+    sprite_actions = {'walk_sprite': ('inkside-ink-walk.png', 8, 90),
+                      'climb_sprite': ('inkside-ink-climb.png', 8, 110)}
 
     def head(self, b: Brush) -> None:
         b.fill(HEAD, 'feather')

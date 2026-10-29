@@ -48,6 +48,8 @@ class Gill(Template):
     mouths = {'tooth': ('Flat with tooth', MouthStyle('tooth', 26)),
               'small': ('Small open', MouthStyle('small', 10))}
     eye_default, mouth_default = 'small', 'tooth'
+    sprite_actions = {'walk_sprite': ('inkside-gill-walk.png', 8, 90),
+                      'climb_sprite': ('inkside-gill-climb.png', 8, 110)}
 
     def nudge(self, part: str, pose) -> tuple[int, int]:
         # The capsule head and gills are too wide to slide left when lying down.
