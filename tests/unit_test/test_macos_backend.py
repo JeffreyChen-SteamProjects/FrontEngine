@@ -1,5 +1,7 @@
 from types import SimpleNamespace
 
+import pytest
+
 
 def frameworks(granted=True):
     quartz = SimpleNamespace(CGPreflightScreenCaptureAccess=lambda: granted)
@@ -308,6 +310,15 @@ def test_screen_capture_audio_copy_uses_pyobjc_buffer_boundary():
                          CMBlockBufferGetDataLength=lambda block: len(raw),
                          CMBlockBufferCopyDataBytes=lambda block, offset, length, output: (0, raw))
     assert np.allclose(ScreenCaptureDriver._audio_data('sample', cm), [0.1, 0.5, -0.8])
+
+
+def test_screen_capture_audio_without_a_format_is_rejected_cleanly():
+    from frontengine.utils.macos.capture import ScreenCaptureDriver
+    cm = SimpleNamespace(CMSampleBufferGetDataBuffer=lambda sample: 'block',
+                         CMSampleBufferGetFormatDescription=lambda sample: None,
+                         CMAudioFormatDescriptionGetStreamBasicDescription=lambda desc: None)
+    with pytest.raises(OSError, match='not float32 PCM'):
+        ScreenCaptureDriver._audio_data('sample', cm)
 
 
 def test_accessibility_window_match_unboxes_tuple_geometry_and_moves_public_element():
