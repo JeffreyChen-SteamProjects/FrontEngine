@@ -48,8 +48,8 @@ then layer order. Authors should choose distinct z values when overlap matters.
 Final composition is flipped as a whole, preserving clothing alignment.
 
 Every character requires idle. Supported actions are idle, walk, sleep, climb,
-fall, drag, greet, pet, feed, groom, play, celebrate, outfit_show, wake and
-sleep_in. A missing requested interaction renders idle; a garment missing a
+fall, drag, greet, pet, feed, groom, play, celebrate, outfit_show, wake,
+sleep_in, food_like, food_dislike, sit, land, peer_greet and catch. A missing requested interaction renders idle; a garment missing a
 character action is rejected. This permits the planned three-action art pilot
 without representing it as a complete six-action character.
 
@@ -58,13 +58,20 @@ hold their final frame. The renderer has no timer and accepts nonnegative
 integer milliseconds. The caller controls pause, action changes and elapsed
 time. It caches only one composed frame and returns detached images.
 
+A layer may add `"source": [x, y, width, height]` to draw only that rectangle of
+its image, so many small cells can share one atlas PNG. An image used only through
+source rectangles may be up to 2048 pixels a side; each rectangle must fit both
+its image and the canvas. Whole-image layers must still fit the canvas. The
+built-in characters pack their cells into one atlas per layer kind, which keeps
+a character and its wardrobe to a few dozen files.
+
 Limits: 1 MiB manifest; 16–2048 pixels per canvas side; 120 frames per action,
 512 per asset; 16–10000 ms per frame; 72 layers including alternatives and 32 anchors per frame;
 four garments per outfit. PNG files are at most 16 MiB each and 64 MiB total;
 decoded unique images are limited to 16 megapixels per outfit. Each image must
 fit the canvas. Relative paths cannot contain traversal, absolute paths,
 backslashes, drive names or symlinks. Image format and dimensions are checked
-before decoding. Production configurable face artwork remains pending.
+before decoding.
 
 ## Optional palette masks
 

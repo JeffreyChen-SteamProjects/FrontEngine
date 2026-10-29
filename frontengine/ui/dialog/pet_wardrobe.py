@@ -13,7 +13,8 @@ from frontengine.show.pet.layered_playback import LayeredPlayback
 from frontengine.show.pet.wardrobe import WardrobeDraft, asset_reference
 from frontengine.user_setting.pet_profile_schema import SLOTS
 from frontengine.utils.multi_language.retranslate import retranslator, tr, translate
-from frontengine.ui.dialog.pet_asset_install import PetAssetInstall
+from frontengine.show.pet.inkside.library import builtin_names
+from frontengine.ui.dialog.pet_asset_install import PetAssetInstall, PetBuiltinInstall
 
 
 class PetWardrobeDialog(QDialog):
@@ -97,6 +98,16 @@ class PetWardrobeDialog(QDialog):
         self.install_button = tr(QPushButton(), 'pet_wardrobe_install', 'Install asset folder')
         self.install_button.clicked.connect(self._install)
         layout.addWidget(self.install_button)
+        builtin_row = QHBoxLayout()
+        self.builtin = QComboBox()
+        tr(self.builtin, 'pet_wardrobe_builtin_pick', 'Built-in character', 'setAccessibleName')
+        for identifier, name in builtin_names():
+            self.builtin.addItem(name, identifier)
+        self.builtin_button = tr(QPushButton(), 'pet_wardrobe_builtin', 'Add built-in character')
+        self.builtin_button.clicked.connect(self._install_builtin)
+        builtin_row.addWidget(self.builtin)
+        builtin_row.addWidget(self.builtin_button)
+        layout.addLayout(builtin_row)
         self._buttons(layout, (('pet_wardrobe_refresh', 'Refresh assets', self.refresh_library),))
         self._buttons(layout, (
             ('pet_custom_apply', 'Apply', self.apply_changes),
@@ -142,12 +153,31 @@ class PetWardrobeDialog(QDialog):
         job.signals.finished.connect(self._installed, Qt.ConnectionType.QueuedConnection)
         QThreadPool.globalInstance().start(job)
 
+    def _install_builtin(self) -> None:
+        if self._install_job is not None:
+            return
+        self.install_button.setEnabled(False)
+        self.builtin_button.setEnabled(False)
+        self.status.setText(translate('pet_wardrobe_builtin_busy', 'Drawing the character and its wardrobe…'))
+        job = PetBuiltinInstall(self.library, self.builtin.currentData())
+        self._install_job = job
+        job.signals.finished.connect(self._builtin_installed, Qt.ConnectionType.QueuedConnection)
+        QThreadPool.globalInstance().start(job)
+
+    @Slot(str)
+    def _builtin_installed(self, error: str) -> None:
+        self._installed(error)
+        if not error and not self._closed:
+            self.status.setText(translate('pet_wardrobe_builtin_done',
+                                          'Built-in character ready. Choose it under Character.'))
+
     @Slot(str)
     def _installed(self, error: str) -> None:
         self._install_job = None
         if self._closed:
             return
         self.install_button.setEnabled(True)
+        self.builtin_button.setEnabled(True)
         self.refresh_library()
         if error:
             self.status.setText(error)

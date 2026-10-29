@@ -1,10 +1,12 @@
 """Preloaded RGBA layers sampled together before whole-pet transforms."""
 from __future__ import annotations
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QPoint, QRect, Qt
 from PySide6.QtGui import QColor, QImage, QImageReader, QPainter, QTransform
 
-from frontengine.utils.pet_pack.layered import LayeredAsset, image_path, validate_outfit
+from frontengine.utils.pet_pack.layered import (
+    LayeredAsset, check_sources, image_bounds, image_path, validate_outfit,
+)
 from frontengine.utils.pet_pack.palette import checked_colors
 from frontengine.utils.pet_pack.variants import checked_variants
 
@@ -29,10 +31,14 @@ class LayeredRenderer:
         total_bytes = total_pixels = 0
         loaded_paths = set()
         for asset in (character, *garments):
+            paths = {}
+            bounds = image_bounds(asset)
             for animation in asset.actions.values():
                 for frame in animation.frames:
                     for layer in frame.layers:
-                        path = image_path(asset.root, layer.image)
+                        if layer.image not in paths:
+                            paths[layer.image] = image_path(asset.root, layer.image)
+                        path = paths[layer.image]
                         color = self._palettes[(asset.identifier, asset.version)].get(layer.tint)
                         key = (path, color)
                         if key in self._images:
@@ -43,7 +49,9 @@ class LayeredRenderer:
                             loaded_paths.add(path)
                         if not 0 < size <= 16 * 1024 * 1024 or total_bytes > 64 * 1024 * 1024:
                             raise ValueError('Outfit image files exceed 16 MiB each or 64 MiB total')
-                        image = self._read_image(path, asset.canvas)
+                        limit, rects = bounds[layer.image]
+                        image = self._read_image(path, limit)
+                        check_sources(image.width(), image.height(), rects)
                         total_pixels += image.width() * image.height()
                         if total_pixels > 16 * 1024 * 1024:
                             raise ValueError('Decoded outfit images exceed 16 megapixels')
@@ -70,12 +78,14 @@ class LayeredRenderer:
 
     @staticmethod
     def _read_image(path, canvas) -> QImage:
-        reader = QImageReader(str(path))
+        # Naming the format skips probing every image plugin; a file that is not
+        # really a PNG still fails to decode below.
+        reader = QImageReader(str(path), b'png')
         try:
             size = reader.size()
             if (reader.format() != b'png' or not 0 < size.width() <= canvas[0]
                     or not 0 < size.height() <= canvas[1] or reader.supportsAnimation()):
-                raise ValueError('Layers must be static PNGs within the declared canvas')
+                raise ValueError('Layers must be static PNGs within the declared canvas or atlas size')
             image = reader.read()
             if image.isNull():
                 raise ValueError('Could not decode layer image')
@@ -106,7 +116,10 @@ class LayeredRenderer:
                 point = tuple(a + b for a, b in zip(anchor, layer.offset))
                 color = self._palettes[(asset.identifier, asset.version)].get(layer.tint)
                 path = asset.root.joinpath(*layer.image.split('/'))
-                painter.drawImage(*point, self._images[(path, color)])
+                if layer.source is None:
+                    painter.drawImage(*point, self._images[(path, color)])
+                else:
+                    painter.drawImage(QPoint(*point), self._images[(path, color)], QRect(*layer.source))
         finally:
             painter.end()
         if mirrored:

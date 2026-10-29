@@ -8,7 +8,7 @@ from threading import Event
 
 from frontengine.show.pet.layered_renderer import LayeredRenderer
 from frontengine.show.pet.wardrobe import AssetCatalog
-from frontengine.utils.pet_pack.layered import image_path, load_layered_asset
+from frontengine.utils.pet_pack.layered import check_sources, image_bounds, image_path, load_layered_asset
 
 
 class PetAssetLibrary:
@@ -49,14 +49,19 @@ class PetAssetLibrary:
                 errors.append(f'{folder.name}: {error}')
         return AssetCatalog(tuple(assets)), tuple(errors)
 
-    def install(self, source: str | Path, *, cancel: Event | None = None):
+    def is_installed(self, identifier: str, version: str) -> bool:
+        return (self.root / sha256((identifier + '\0' + version).encode('utf-8')).hexdigest()).exists()
+
+    def install(self, source: str | Path, *, cancel: Event | None = None, scanned: bool = False):
         """Copy only referenced images, verify staging, then publish without overwrite."""
         self._check_root()
         cancel = cancel or Event()
         asset = load_layered_asset(source)
         self.root.mkdir(parents=True, exist_ok=True)
-        # Scan first to enforce the same bound on disk and in the picker.
-        self.scan()
+        # Scan first to enforce the same bound on disk and in the picker; a batch
+        # scans once up front instead of once per asset.
+        if not scanned:
+            self.scan()
         if sum(1 for _ in self.root.iterdir()) >= 512:
             raise ValueError('Pet asset library is full')
         target = self.root / self._folder(asset)
@@ -73,6 +78,18 @@ class PetAssetLibrary:
                 raise InterruptedError('Asset installation cancelled')
             stage.rename(target)
         return load_layered_asset(target)
+
+    def install_many(self, sources, *, cancel: Event | None = None) -> list:
+        """Install a batch after a single scan; any invalid asset stops the batch."""
+        self._check_root()
+        cancel = cancel or Event()
+        self.scan()
+        installed = []
+        for source in sources:
+            if cancel.is_set():
+                raise InterruptedError('Asset installation cancelled')
+            installed.append(self.install(source, cancel=cancel, scanned=True))
+        return installed
 
     def _copy_resources(self, asset, stage: Path, cancel: Event) -> None:
         total = 0
@@ -95,8 +112,11 @@ class PetAssetLibrary:
 
     def _validate_images(self, asset) -> None:
         pixels = 0
+        bounds = image_bounds(asset)
         for relative in self._resources(asset):
-            image = LayeredRenderer._read_image(image_path(asset.root, relative), asset.canvas)
+            limit, rects = bounds[relative]
+            image = LayeredRenderer._read_image(image_path(asset.root, relative), limit)
+            check_sources(image.width(), image.height(), rects)
             pixels += image.width() * image.height()
             if pixels > 16 * 1024 * 1024:
                 raise ValueError('Asset decoded images exceed 16 megapixels')

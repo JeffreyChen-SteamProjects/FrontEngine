@@ -6,7 +6,17 @@
 ## 實機驗收待辦
 
 
-- **#23** **完整桌面寵物互動與分件換裝實作中**。完整需求見 `docs/design/pet-interactions-wardrobe-2026-10-28.md` 與 `pet-inkside-catalog-2026-10-28.md`，執行追蹤見 `.audit/pet-implementation/todo.md`。包含獨立存檔遷移、互動與陪伴模式、分層衣櫃、六角色及服裝動畫、背景與原生驗收；概念圖不算完成素材。
+- **#23** **桌面寵物剩餘項目**。需求見 `docs/design/pet-interactions-wardrobe-2026-10-28.md` 與 `pet-inkside-catalog-2026-10-28.md`，執行追蹤見 `.audit/pet-implementation/todo.md`。六角色與十四套服裝已是可安裝的分層素材（U-20261029-34），尚待：
+  - 執行期使用 sit／land／peer_greet／catch，並在模式切換時播放 wake／sleep_in 轉場。
+  - Puppet 點擊與拖曳分離（輕點招呼、拖曳不加好感）。
+  - 道別與重新召喚的招呼；熟悉／親近／默契關係階段與解鎖。
+  - 玩耍類互動消耗能量；關閉自動休息時低能量仍有可見反應。
+  - 衣櫃：兩套並排比較、不相容配件標示、槽位衝突與 20 套上限的在地化訊息、試穿時播放展示動作、在安全動作邊界套用、舊整張素材說明不支援分件。
+  - 對話泡泡、主動發話頻率、音效與動畫幅度分開設定。
+  - 管理頁補齊拍照、提醒、對話、複製、關閉、狀態與 Puppet 動作／表情的鍵盤操作。
+  - 一隻與四隻寵物、分層與舊素材的 CPU／記憶體／幀時間量測。
+  - 內建角色部件與衣物名稱的多語系標籤。
+  - 原生鍵盤導覽與手勢、正式 Puppet 模型動作、真實螢幕／混合 DPI 驗收（後者受 #21、#22 阻塞）。
 
 - **#9** **macOS 權限與裝置驗收**〔阻塞：沒有可互動的 Mac 測試主機〕。驗證 TCC 權限拒絕／變更／重新啟動流程、原生音訊、MIDI 與多螢幕；入口為 `tests/integration/macos_native_smoke.py`。既有 Windows／Linux 支援與隔離測試不能替代 macOS 實機結果。
 - **#11** **Steam Workshop 離線／無客戶端驗收**〔阻塞：沒有獨立 Steam 測試工作階段〕。在獨立環境驗證離線與未啟動客戶端時的失敗回饋、重試及資源釋放。參考 `tests/integration/steam_workshop_smoke.py` 與 `steam_failure_smoke.py`；無效 App ID 的既有測試不能替代這兩個情境。

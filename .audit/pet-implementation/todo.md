@@ -35,9 +35,9 @@
       - [x] Six style swatches with keyboard focus and hex accessibility names, staged region-only updates, apply/reopen/cancel/reset and identity isolation verified; actual dialog render inspected.
     - [ ] Face/character-part variants and approved artwork exposing useful editable regions for all six characters.
       - [x] Asset-declared part groups, full-frame coverage validation, renderer selection, wardrobe preview/apply, portable saves and character-aware outfit snapshots.
-      - [ ] Produce and verify the six characters' actual part alternatives with clothing and complete animation coverage.
+      - [x] Produce and verify the six characters' actual part alternatives with clothing and complete animation coverage. INKSIDE drawn-in-code assets (U-20261029-34): eyes, mouth and three body groups per character, every action, every garment fitted to every body; clipping/fit/recolor tests.
         - [x] MOCHI generated base plus two grouped face choices installed/applied/reopened through the real wardrobe; runtime previews inspected.
-        - [ ] Remove remaining gradients/edge defects and proportion drift; pilot is static idle only, not production art or independent eye/mouth components.
+        - [x] Superseded by the drawn INKSIDE characters with independent eye/mouth components.
   - [ ] Complete petting, grooming, toys, peer behavior, focus and photo flows.
     - [x] Sprite Come here menu with draggable bounded destination, three movement modes, shared greeting completion/cooldown and cancellation through existing target ownership.
     - [x] Keyboard-equivalent call target selection from manager; floor ignores vertical input before distance limiting, two-axis modes retain bounded targeting.
@@ -71,11 +71,12 @@
           - [x] Synthetic native model/script expression binding changes actual GL photo alpha 128 to 64, restores exact image at completion, and preserves a preselected manual expression.
           - [ ] Production model motions, masks and authored reactions remain unverified.
       - [x] Work-area corner placement, physics synchronization and ownership-aware position restoration; offscreen tests cover negative monitor coordinates and manual placement ownership. Native mixed-DPI acceptance remains pending.
-  - [ ] Six approved-style characters, fourteen outfit concepts converted into usable layered animation assets.
+  - [x] Six approved-style characters, fourteen outfit concepts converted into usable layered animation assets (U-20261029-34; MOCHI image-generation pilot superseded).
     - [x] Generated MOCHI idle/step/sleep development keyframes and verified an installable draft against the runtime.
-    - [ ] Clean gradient/alpha defects, separate editable components, produce complete cycles and garments; draft keyframes do not satisfy production-art gates.
+    - [x] Clean gradient/alpha defects, separate editable components, produce complete cycles and garments: flat three-ink vector drawing, separate region/paper/ink layers, complete cycles.
   - [ ] Capability-aware legacy sprite and native Puppet behavior.
   - [ ] Complete unit, offscreen product and isolated native/performance acceptance.
+- [ ] Remaining scope is tracked as sub-bullets of progress.md #23.
 - [ ] Phase D: Keep the audit trail throughout implementation.
 - [ ] Phase E: Verify and hand back against every requirement, never only the implemented subset.
 
