@@ -1,98 +1,83 @@
-[i]Everything released since 8 February 2026.[/i]
+[i]Everything released since 31 July 2026.[/i]
 
-FrontEngine started out as a way to put a video, an image or a web page on top of your screen and leave it there. It still does that, and nothing about the way you do it has changed. What has changed is how much else it can put on screen, and how much of it can now happen without you.
-
-This is the largest update the project has had. A rebuilt interface, seven new pages, a preset system that travels between machines, automation that reacts to what you are doing, and a full pass over privacy for anyone who shares their screen for a living.
+Most of this update is about the desktop pet. It can now be dressed, looked after and played with, it remembers who it is between sessions, and six new characters come with it. Alongside that, scenes gained a visual editor with animation and 3D, FrontEngine can now publish to the Steam Workshop as well as import from it, and a long list of smaller tools arrived.
 
 [hr][/hr]
 
-[h2]The interface has been rebuilt[/h2]
+[h2]Six characters and a wardrobe[/h2]
 
-This is the first thing you will notice. FrontEngine had grown to sixteen tabs in a single row, which sprouted scroll arrows as soon as the window narrowed and gave no clue which of the sixteen belonged together.
+FrontEngine now comes with six drawn characters, [b]MOCHI[/b], [b]MOSS[/b], [b]PIP[/b], [b]BOLT[/b], [b]INK[/b] and [b]GILL[/b], in a three-ink style of black, vermilion and off-white. With them come fourteen outfits made of thirty pieces, each drawn to fit every one of the six. Add a character from the Pet page, then open the wardrobe to dress it.
 
-The pages now live in a grouped list down the left-hand side — [b]On screen[/b], [b]Desktop[/b], [b]Work[/b], [b]Control[/b] — so finding the right one is a matter of knowing what you want to do rather than reading sixteen words in a row. It cannot overflow, and you can always see where you are.
+The wardrobe works by slot: head, neck, body and back. Putting on a piece replaces whatever already sits in that slot and tells you what it took off. Each character also has eye, mouth and body-part choices and colour regions you can repaint, and you can pin the current look beside your changes to compare before you apply them. Each pet can keep up to twenty saved outfits, and a pet that is busy with something changes clothes once it is done.
 
-Each page was rebuilt too. Settings are grouped under headings instead of sitting in one flat list, related controls line up, and sliders no longer stretch to the full width of the window. The button that actually does the thing — Start, Spawn, Close all — now sits in its own bar at the bottom of the page and looks different from everything else, so it is obvious which control is the one you came for.
+Undressed and in its default look, a character walks and climbs with hand-drawn step frames. Dressed, it uses the layered animation that keeps every piece in place.
 
-[b]Nothing was removed and nothing moved to a different page.[/b] The same settings are in the same places, arranged so you can see them.
-
-[hr][/hr]
-
-[h2]A pet that lives on your desktop[/h2]
-
-Point it at a single image for something simple, or at a folder of walk / idle / sleep / climb / fall / drag frames for a pet that animates properly.
-
-It walks the floor, wanders freely, or chases your cursor. It climbs window edges and sits on the top edge of your windows. Spawn it more than once and two or more pets will play tag with each other. Drop a file onto it to feed it; drop an image or a pet pack onto it to change how it looks.
-
-It talks, too — short remarks as the day goes on, when it is fed, and so on — and it can read those aloud. It can move in time with your speakers or your microphone, and it will keep a focus timer for you, with breaks. If you supply your own Anthropic API key, you can hold a conversation with it.
-
-[h2]Six more pages[/h2]
+[h2]A pet you can look after[/h2]
 
 [list]
-[*][b]Eye Care[/b] — a warm, amber, rose, yellow, green, blue or grey wash over the screen with adjustable strength; a reading ruler that follows the cursor; eye breaks that dim the screen after so many minutes; and colour-vision simulation (protanopia, deuteranopia, tritanopia, achromatopsia) for checking that a design still reads.
-[*][b]Presenting[/b] — draw over whatever is on screen with a pen, highlighter and eraser, with undo. Ring the pointer, ripple your clicks, or spotlight everything but the cursor. Show the keys you press for recordings. A magnifier from 1.5x to 6x. And an endless whiteboard you can pan and zoom, which saves an image of the area you actually drew on.
-[*][b]Wallpaper[/b] — a rotating wallpaper that sits below every window, per monitor, from 30 seconds to an hour per image, with shuffle and nested folders. It can react to what your speakers are playing, and switch to a calmer folder during the quiet hours you set.
-[*][b]Focus[/b] — dim every window except the one you are working in, or cover a single distraction: the taskbar strip, a corner, an edge, or the whole screen.
-[*][b]Widgets[/b] — an audio spectrum as bars or a ring, a CPU / memory / disk / network panel, the track your media player is on, and sticky notes that can come back the next time FrontEngine starts.
-[*][b]Tools[/b] — measure things and have the answer land on your clipboard: a colour picker, a pixel ruler and a protractor. Capture a region. Record part of the screen, optionally with the camera in the corner. Show any video input, including capture cards. Pin another application's window on top and change how see-through it is. Save where your windows are and put them back later. Read the text in a region to copy, translate or ask a question about it. And send an area of your screen, overlays and all, as a webcam that Zoom, Teams or Discord can pick as their video source.
+[*][b]Stroke it[/b] with the mouse and it reacts.
+[*][b]Treats[/b] come from a menu, and each pet remembers which ones it likes.
+[*][b]Toys[/b]: throw a ball for it to fetch, even from the top of a window, or shine a light spot for it to chase.
+[*][b]Come here[/b] calls it to a place you choose, with the mouse or the keyboard.
+[*][b]Photos[/b] save a picture of your pet with a transparent background.
+[*][b]Greetings[/b]: it welcomes you back and says goodbye, and the way it treats you grows through relationship stages over time.
+[*][b]Focus timer[/b]: while the timer runs, the pet switches between play, work and rest, and keeps out of the way while you work. It also settles down while you are typing.
 [/list]
+
+Each pet is now its own saved identity, with a name, mood, fullness and affection. Choose one before spawning to pick up where it left off, start a new one, or clone a pet together with its appearance. How often a pet talks and how large its animations are can be set for each pet, and every pet command can be reached from the keyboard in the pet manager. A pet pack editor lets you map your own walk, idle, sleep, climb, fall and drag images and export them as a pack.
+
+Pets can also be Imervue Puppet models, with their own reactions, petting, toys and photos; this needs the Imervue runtime. The six built-in characters can be exported as rigged Puppet models.
+
+[b]Fixed:[/b] a walking pet's animation could freeze while it moved, so it seemed to slide across the screen. The frames now change as it walks. A pet standing on a window narrower than itself no longer shakes left and right. With monitors at different scaling, a pet moved to another monitor keeps its size and stays on that monitor.
 
 [hr][/hr]
 
-[h2]Presets that travel[/h2]
+[h2]Scenes: a visual editor, animation and 3D[/h2]
 
-Save everything the pages are set to under a name, and load it back later. Export one as a json file to move it between machines, or export a package with the images, videos and sounds it refers to as a zip. Pick one to apply automatically at startup. [b]Content you subscribe to in the Workshop can be imported directly.[/b]
+Scenes can now be built in a visual editor with undo, instead of by hand. A timeline animates each layer's position and opacity with keyframes, has fade-in and slide-in starters, and switching scenes crossfades. Three starter templates, Work desktop, Teaching and Focus, give you a layout to edit instead of an empty page. Video, web and Puppet layers can be previewed live in the editor, muted until you turn them on.
 
-[h2]It can now run itself[/h2]
+Choose 3D in the same editor to place GLB, glTF and OBJ models, planes, cubes, spheres, cameras and lights, move them with handles, and play model animations on the scene's shared clock.
 
-[list]
-[*][b]Hotkeys[/b] — global shortcuts for hide all, show all, close all, mute all, opacity up and down, next dashboard page, and lock.
-[*][b]App profiles[/b] — apply a preset automatically when a given application comes to the front.
-[*][b]Smart pause[/b] — put the overlays away while a fullscreen application is running, while on battery, or while named applications have focus.
-[*][b]Signage mode[/b] — rotate through a list of presets on a timer, for a machine left running as a display.
-[*][b]Scheduled day/night theme[/b], [b]start with the system[/b], [b]restore last session[/b], and [b]reminders[/b] on an interval or at a time of day.
-[*][b]Remote control[/b] — drive FrontEngine from a phone on the same network, and bind a MIDI controller.
-[/list]
+A scene can also be sent on its own to a virtual camera at a fixed 640x480, 1280x720 or 1920x1080, whatever is on your desktop. Rules (below) can load, play and stop scenes and change their layers.
 
-[h2]A Control Center that reaches everything[/h2]
+[h2]Publish to the Steam Workshop[/h2]
 
-One page that reaches every overlay, whichever page opened it: close by kind or close all, hide and show, mute, lock and unlock, reset positions, and chroma key for keying in OBS. Unlocked overlays can be dragged into place and remember where you dropped them. Low power and a High / Balanced / Saver quality setting cut refresh rate and render resolution when the battery matters.
+Presets, then Manage Workshop, now publishes as well as imports. Scenes, preset packages and sprite pet packs can be shared, privately too. Subscribed items are checked before they are used, and an interrupted upload can be picked up again.
 
 [hr][/hr]
 
-[h2]Privacy, taken seriously[/h2]
+[h2]New on screen and on the Tools page[/h2]
 
 [list]
-[*][b]Hide from capture[/b] keeps overlays on your own screen but leaves them out of what a screen share records.
-[*][b]Screen-sharing privacy[/b] does that automatically while a meeting application is open, matched on window titles so a meeting held in a browser tab is caught too.
-[*][b]Screen time[/b] stays on your machine and is never sent anywhere.
-[*][b]Clipboard history[/b] is kept in memory unless you explicitly ask for it to persist, because clipboards so often hold passwords.
-[*]Audio-reactive features read a [b]level[/b] — a single number — and never capture what is being said. The audio spectrum does capture audio to compute frequencies, in memory only; nothing is recorded or sent, and capture stops when you stop the spectrum.
-[*]The features that use Anthropic's API ask for consent first and use your own API key, which is never stored.
-[*]The phone remote carries a one-time token that changes at every start, and only the buttons on the page can be triggered. It is plain HTTP — leave it off on networks you do not trust.
+[*][b]Screensaver[/b]: after a set idle time, show the video, image, GIF, particles or web page you chose, and take it down when you come back.
+[*][b]Window replica[/b]: an always-on-top live copy of another window, or of just part of it.
+[*][b]Span mode[/b]: one overlay stretched across every screen.
+[*][b]Freeze[/b]: hold the current frame of a monitor while you get the next thing ready behind it. Ctrl+Shift+F7 releases it.
+[*][b]Pinned captures[/b] float on top, and a [b]reference board[/b] holds several pictures on one canvas.
+[*][b]Capture editor[/b]: crop and annotate a capture before you use it.
+[*][b]Record area[/b] now writes GIF or silent AVI, with pause and resume.
+[*][b]Live OCR window[/b]: keep the text of a screen region pinned beside it, refreshed when you ask or every few seconds.
+[*][b]Compare images[/b]: side by side, overlaid, with a sliding wipe, or as a colour difference.
+[*][b]Colour palette[/b]: collect picked colours into named, grouped swatches.
+[*][b]Whiteboard[/b] pages, with selecting, moving and deleting strokes, and undo across pages.
 [/list]
 
-[h2]Seven languages, and yours from the start[/h2]
-
-English, Traditional Chinese, Simplified Chinese, German, Russian, French and Italian. Changing language no longer needs a restart — the whole interface re-labels itself in place.
-
-[b]The first launch now follows the language your Steam client is set to[/b], so it opens in your language rather than in English and you do not have to go and find the setting. It happens once: after you pick a language yourself, yours is the one that is used. Steam is read locally — no account, no network, nothing leaves the machine.
-
-[h2]A guide inside the application[/h2]
-
-[b]Help → How to use...[/b] now explains your first overlay, the settings every page shares, and how to clear the screen again, without sending you to a website.
-
-[hr][/hr]
-
-[h2]Good to know[/h2]
+[h2]Automation and organising[/h2]
 
 [list]
-[*]Clicks still pass straight through an overlay, so the window underneath keeps working. The two exceptions are the pet and the drawing layer on the Presenting page while drawing is switched on.
-[*]Some features depend on Windows APIs and are marked as such in the application: audio-reactive overlays, the audio spectrum, pinning another window, hiding overlays from capture, and screen-sharing privacy.
-[*]The virtual camera needs the optional pyvirtualcam package and a virtual camera driver. Without either, the button tells you so.
-[*][b]F12 closes FrontEngine at once[/b], from anywhere.
+[*][b]Rules[/b]: "when these conditions hold, do this." Combine a weekday, a time window and the focused app, then apply a preset, show, hide or close the overlays, set the quality, or drive a scene. Rules have priorities, cooldowns and a history of what ran.
+[*][b]Preset schedule[/b]: apply a preset on chosen days at a set time.
+[*][b]Preset versions[/b]: each preset keeps its last fifty versions to compare and restore.
+[*][b]Keep awake[/b] stops the display sleeping while overlays are up.
+[*][b]Media keys[/b], overlays that stay on one virtual desktop, and moving a window to another monitor.
+[*][b]Follow a window[/b]: an overlay that stays attached to another program's window as it moves.
+[*][b]Monitor profiles[/b]: save and restore where windows sit for each combination of monitors.
+[*][b]Command search[/b]: Ctrl+K finds and runs any command, in your language.
+[*][b]Tasks and Today[/b]: a task list with due times, calendar import from .ics files, and a Today widget.
+[*][b]Capture history[/b], searchable by the text in your captures and recognised on your own machine, and [b]image clipboard history[/b]. Both are off until you turn them on.
+[*][b]Asset library[/b]: tag, search and favourite the images, pet packs and scenes you use.
 [/list]
 
-[h2]Under the hood[/h2]
+[h2]A tidier interface[/h2]
 
-Upgraded to PySide6 6.11.1. The static-analysis debt is cleared and the test suite now runs headless in CI, which builds and installs a package from the checked-out source so the start-up tests exercise the code in front of them rather than the one already published.
+Pages now put the action you use most first and keep the rest in menus. The Control Center leads with four direct buttons, advanced tool sections open only when you need them, and settings rows stack neatly when the window is narrow. The shortcut list shows the keys that are actually bound.
