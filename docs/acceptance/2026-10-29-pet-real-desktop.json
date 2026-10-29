@@ -1,7 +1,8 @@
 {
   "probes": [
-    "tests/integration/pet_real_desktop.py",
-    "tests/integration/inkside_puppet_native.py"
+    "tests/integration/inkside_puppet_native.py",
+    "tests/integration/pet_mixed_dpi.py",
+    "tests/integration/pet_real_desktop.py"
   ],
   "isolation": "child process on a separate hidden Win32 desktop; real primary-monitor work area, real OpenGL, built-in assets; the user input desktop, cursor and foreground are never touched",
   "leave_events": "held back during strokes only: a hidden desktop has no physical pointer, so Windows reports the pointer as gone; counts are recorded",
@@ -352,5 +353,218 @@
       "max_restored_difference": 0
     }
   },
-  "not_covered": "moving between two physical monitors with different scaling (needs a second screen; see progress #21 and #22)"
+  "two_monitor_run": {
+    "status": "passed",
+    "platform": "windows",
+    "work_area": [
+      0,
+      0,
+      1920,
+      1032
+    ],
+    "device_pixel_ratio": 1.0,
+    "synthetic_work_area": false,
+    "screens": [
+      [
+        "BenQ GW2486TC",
+        1.0,
+        [
+          0,
+          0,
+          1920,
+          1032
+        ]
+      ],
+      [
+        "BenQ GW2490",
+        1.25,
+        [
+          1920,
+          -164,
+          1536,
+          816
+        ]
+      ]
+    ],
+    "perch_edges": {
+      "BenQ GW2486TC": {
+        "logical_window": [
+          300,
+          800,
+          200
+        ],
+        "converted_edge": [
+          300,
+          800,
+          200
+        ]
+      },
+      "BenQ GW2490": {
+        "logical_window": [
+          2220,
+          2720,
+          36
+        ],
+        "converted_edge": [
+          2220,
+          2720,
+          36
+        ]
+      }
+    },
+    "puppet_toys": {
+      "call": {
+        "affection_gained": 1,
+        "end": [
+          300,
+          779
+        ]
+      },
+      "light": {
+        "affection_gained": 3,
+        "end": [
+          120,
+          779
+        ]
+      },
+      "ball": {
+        "affection_gained": 1,
+        "end": [
+          120,
+          779
+        ]
+      }
+    },
+    "sprite_toys": {
+      "ball": {
+        "affection_gained": 1
+      },
+      "light": {
+        "affection_gained": 3
+      }
+    },
+    "stroke_events": {
+      "PuppetPetWidget": {
+        "PuppetCanvas.MouseMove": 19,
+        "PuppetCanvas.MouseButtonPress": 1,
+        "PuppetCanvas.Leave": 2,
+        "PuppetPetWidget.Leave": 8,
+        "PuppetCanvas.MouseButtonRelease": 1
+      },
+      "DesktopPetWidget": {
+        "DesktopPetWidget.MouseMove": 19,
+        "DesktopPetWidget.MouseButtonPress": 1,
+        "DesktopPetWidget.Leave": 21,
+        "DesktopPetWidget.Enter": 1,
+        "DesktopPetWidget.MouseButtonRelease": 1
+      }
+    },
+    "stroke_petting_armed": {
+      "PuppetPetWidget": true,
+      "DesktopPetWidget": true
+    },
+    "strokes": {
+      "PuppetPetWidget": {
+        "affection_gained": 2
+      },
+      "DesktopPetWidget": {
+        "affection_gained": 2
+      }
+    },
+    "cross_monitor": {
+      "PuppetPetWidget": [
+        {
+          "screen": "BenQ GW2490",
+          "ratio": 1.25,
+          "physical_size": [
+            240,
+            240
+          ],
+          "arrived": [
+            2818,
+            460
+          ]
+        },
+        {
+          "screen": "BenQ GW2486TC",
+          "ratio": 1.0,
+          "physical_size": [
+            192,
+            192
+          ],
+          "arrived": [
+            1090,
+            840
+          ]
+        },
+        {
+          "screen": "BenQ GW2490",
+          "ratio": 1.25,
+          "physical_size": [
+            240,
+            240
+          ],
+          "arrived": [
+            2818,
+            460
+          ]
+        }
+      ],
+      "DesktopPetWidget": [
+        {
+          "screen": "BenQ GW2490",
+          "ratio": 1.25,
+          "physical_size": [
+            200,
+            200
+          ],
+          "ball_reward": 1
+        },
+        {
+          "screen": "BenQ GW2486TC",
+          "ratio": 1.0,
+          "physical_size": [
+            160,
+            160
+          ],
+          "ball_reward": 1
+        },
+        {
+          "screen": "BenQ GW2490",
+          "ratio": 1.25,
+          "physical_size": [
+            200,
+            200
+          ],
+          "ball_reward": 1
+        }
+      ]
+    },
+    "drag_across": {
+      "PuppetPetWidget": {
+        "screen": "BenQ GW2490",
+        "logical_size": [
+          192,
+          192
+        ],
+        "physical_size": [
+          240,
+          240
+        ],
+        "drag_steps": 8
+      },
+      "DesktopPetWidget": {
+        "screen": "BenQ GW2490",
+        "logical_size": [
+          160,
+          160
+        ],
+        "physical_size": [
+          200,
+          200
+        ],
+        "drag_steps": 4
+      }
+    }
+  }
 }

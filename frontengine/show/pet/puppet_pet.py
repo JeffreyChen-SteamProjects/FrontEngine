@@ -53,6 +53,7 @@ class PuppetPetWidget(DraggableTopWindow):
         self._press_point = None
         self._welcomed = False
         self._leaving = False
+        self._follows_screen = False
         self._petting_revision = None
         self._target = PuppetTargetController(self)
         self.placement_revision = 0
@@ -381,6 +382,28 @@ class PuppetPetWidget(DraggableTopWindow):
             {'photo': self.open_photo, 'status': self.show_profile_status,
              'clone': self.clone_requested.emit, 'close': self.say_goodbye}[kind]()
 
+    def _logical_size(self) -> tuple[int, int]:
+        values = self.profile_session.companion.preferences.get('presentation')
+        if values is None:
+            return self._initial_size
+        width = values['size']
+        return width, max(16, round(width * self._initial_size[1] / self._initial_size[0]))
+
+    def resizeEvent(self, event) -> None:
+        super().resizeEvent(event)
+        # Windows rescales a window after it crosses to a monitor with another DPI,
+        # after screenChanged; any size other than the intended one is put back.
+        if not self._closed and (self.width(), self.height()) != self._logical_size():
+            QTimer.singleShot(0, self, self._follow_screen)
+
+    def _follow_screen(self) -> None:
+        """A Puppet carried to another monitor keeps its size; an active call re-checks its bounds."""
+        from frontengine.show.pet.recovery import follow_screen
+        if self._closed:
+            return
+        follow_screen(self, self._logical_size())
+        self._target.validate()
+
     def say_goodbye(self) -> None:
         """Closing from the pet's own menu says goodbye briefly before the window closes."""
         if self._leaving:
@@ -454,6 +477,10 @@ class PuppetPetWidget(DraggableTopWindow):
 
     def showEvent(self, event) -> None:
         super().showEvent(event)
+        handle = self.windowHandle()
+        if handle is not None and not self._follows_screen:
+            self._follows_screen = True
+            handle.screenChanged.connect(lambda _screen: QTimer.singleShot(0, self, self._follow_screen))
         if not self._closed:
             self.profile_session.resume()
             self.set_settled(self._settled)

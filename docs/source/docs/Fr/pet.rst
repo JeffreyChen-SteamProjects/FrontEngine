@@ -63,6 +63,8 @@ La liste d’interactions du gestionnaire propose aussi les commandes de menu de
 
 Utiliser le modèle Puppet intégré, sur la page Animal, dessine en arrière-plan le personnage INKSIDE choisi comme modèle Imervue .puppet : tête, bras, queue et corps riggés, dix mouvements, trois expressions et un script qui y associe les actions du compagnon. Il est enregistré dans pet-assets/puppets et choisi comme source avec son script ; Démarrer le lance comme animal Puppet.
 
+Avec plusieurs écrans à des échelles différentes, un animal déplacé ou ramené sur un autre écran garde sa taille, reste dans la zone de travail de cet écran et s’y promène. Les bords de fenêtre des écrans mis à l’échelle sont mesurés dans les mêmes coordonnées que l’animal, qui se pose donc exactement sur les fenêtres.
+
 La garde-robe propose les zones de couleur déclarées par le personnage ou le vêtement. Choisissez une zone et une couleur, ou rétablissez la couleur originale. Seuls les calques de masque désignés sont colorés ; les contours et autres détails sont conservés. Les couleurs sont prévisualisées avant application et sauvegardées par identité et tenue, y compris à l’export/import. Sans zones déclarées, ces commandes restent désactivées.
 
 Si l’enregistrement échoue à la fermeture, l’animal reste ouvert avec son état et le minuteur de nouvelle tentative. Tout fermer conserve les animaux non fermés ; quitter attend la réussite de leurs enregistrements avant de libérer les ressources. L’affection est plafonnée à la limite du format pour que les récompenses suivantes ne rendent pas le profil impossible à enregistrer.

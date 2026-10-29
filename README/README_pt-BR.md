@@ -585,6 +585,8 @@ A lista de interações do gerenciador também oferece os comandos de menu do pe
 
 Usar modelo Puppet integrado, na página do pet, desenha em segundo plano o personagem INKSIDE escolhido como modelo Imervue .puppet: cabeça, braços, cauda e corpo com rig, dez movimentos, três expressões e um script que liga as ações do companheiro a eles. Ele é salvo em pet-assets/puppets e escolhido como fonte com seu script, então Iniciar o cria como pet Puppet.
 
+Com vários monitores em escalas diferentes, um pet arrastado ou trazido de volta para outro monitor mantém o tamanho, fica dentro da área de trabalho desse monitor e anda por lá. As bordas de janela em monitores com escala são medidas nas mesmas coordenadas do pet, que pousa exatamente sobre as janelas.
+
 O guarda-roupa mostra as regiões de cor declaradas pelo personagem ou roupa. Escolha região e cor ou restaure a original. Somente as camadas de máscara indicadas são tingidas; contornos e outros detalhes são preservados. As cores são exibidas antes de aplicar e salvas por identidade e conjunto, inclusive na exportação/importação. Sem regiões declaradas, os controles ficam desativados.
 
 Se o salvamento falhar ao fechar, o pet fica aberto com o estado atual e o temporizador de nova tentativa. Fechar tudo mantém os pets que não puderam fechar; sair aguarda o salvamento antes de liberar recursos. O afeto para no limite suportado para que novas recompensas não impeçam salvar.

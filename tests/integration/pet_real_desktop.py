@@ -20,7 +20,7 @@ import sys
 import tempfile
 import traceback
 
-from PySide6.QtCore import QTimer
+from PySide6.QtCore import QTimer, Qt
 from PySide6.QtGui import QColor, QImage
 from PySide6.QtWidgets import QApplication
 
@@ -61,6 +61,17 @@ class Steps:
             self.finish(error)
 
 
+def _rect(rect) -> list:
+    return [rect.x(), rect.y(), rect.width(), rect.height()]
+
+
+def _physical_size(hwnd: int) -> tuple:
+    rect = wintypes.RECT()
+    user32.GetWindowRect.argtypes = [wintypes.HWND, ctypes.POINTER(wintypes.RECT)]
+    user32.GetWindowRect(hwnd, ctypes.byref(rect))
+    return rect.right - rect.left, rect.bottom - rect.top
+
+
 def _inside(window, area) -> bool:
     return area.contains(window.geometry())
 
@@ -86,6 +97,73 @@ class Probe:
                        'work_area': [self.area.x(), self.area.y(), self.area.width(), self.area.height()],
                        'device_pixel_ratio': self.screen.devicePixelRatio(), 'synthetic_work_area': False}
         self.pets = []
+
+    def perch_edges(self):
+        """Real EnumWindows/GetWindowRect edges come back in Qt's logical coordinates on every monitor."""
+        from PySide6.QtWidgets import QWidget
+        from frontengine.show.pet.desktop_pet import windows_platforms
+        self.result['screens'] = [[screen.name(), screen.devicePixelRatio(), _rect(screen.availableGeometry())]
+                                  for screen in self.app.screens()]
+        edges = {}
+        for screen in self.app.screens():
+            area = screen.availableGeometry()
+            window = QWidget()
+            window.setWindowFlag(Qt.WindowType.FramelessWindowHint, True)
+            window.show()
+            window.setGeometry(area.left() + 300, area.top() + 200, 500, 300)
+            yield 400
+            assert window.screen().name() == screen.name(), (window.screen().name(), window.geometry())
+            expected = (window.x(), window.x() + window.width(), window.y())
+            found = windows_platforms()
+            match = min(found, key=lambda edge: sum(abs(a - b) for a, b in zip(edge, expected)))
+            window.close()
+            assert all(abs(a - b) <= 1 for a, b in zip(match, expected)), (screen.name(), match, expected)
+            edges[screen.name()] = {'logical_window': list(expected), 'converted_edge': list(match)}
+        self.result['perch_edges'] = edges
+
+    def cross_monitor(self):
+        """Move both pet kinds between the real monitors; sizes, bounds and calls follow each screen."""
+        from frontengine.show.pet.recovery import recover_pet
+        screens = self.app.screens()
+        if len(screens) < 2:
+            self.result['cross_monitor'] = 'single screen'
+            return
+        report = {}
+        for pet in self.pets:
+            kind = type(pet).__name__
+            for screen in (screens[1], screens[0], screens[1]):
+                area = screen.availableGeometry()
+                recover_pet(pet, screen)
+                yield 400
+                physical = _physical_size(int(pet.winId()))
+                ratio = screen.devicePixelRatio()
+                assert pet.screen().name() == screen.name(), (kind, pet.screen().name(), screen.name())
+                assert _inside(pet, area), (kind, pet.geometry(), area)
+                assert abs(physical[0] - round(pet.width() * ratio)) <= 2, (kind, physical, pet.width(), ratio)
+                if hasattr(pet, '_toy'):
+                    gained_before = pet.profile_session.companion.growth.affection
+                    pet.profile_session.advance(60)  # clear the ball reward cooldown
+                    assert pet.start_ball() == 'accepted'
+
+                    def contained(pet=pet, area=area):
+                        assert _inside(pet, area), (kind, 'ball', pet.geometry(), area)
+                    yield from _wait_until(lambda pet=pet: pet._toy is None
+                                           and pet.profile_session.companion.action is None, contained, 25000)
+                    report.setdefault(kind, []).append({'screen': screen.name(), 'ratio': ratio,
+                                                        'physical_size': physical,
+                                                        'ball_reward': pet.profile_session.companion.growth.affection
+                                                        - gained_before})
+                if hasattr(pet, '_target'):
+                    pet.profile_session.advance(60)
+                    assert pet.start_call(offset=(5000, 5000)) == 'accepted'
+                    assert _inside(pet._target.marker, area), 'call target left its monitor'
+
+                    def stays(pet=pet, area=area):
+                        assert _inside(pet, area), (kind, 'call', pet.geometry(), area)
+                    yield from _wait_until(lambda pet=pet: pet._target.marker is None, stays, 20000)
+                    report.setdefault(kind, []).append({'screen': screen.name(), 'ratio': ratio,
+                                                        'physical_size': physical, 'arrived': [pet.x(), pet.y()]})
+        self.result['cross_monitor'] = report
 
     def puppet_toys(self):
         from frontengine.show.pet.inkside.puppet_export import export_puppet
@@ -207,6 +285,47 @@ class Probe:
             self.result.setdefault('strokes', {})[kind] = {'affection_gained': gained}
             yield 200
 
+    def drag_across(self):
+        """Drag each pet with real mouse messages from the 100% monitor onto the 125% one."""
+        from frontengine.show.pet.recovery import recover_pet
+        screens = self.app.screens()
+        if len(screens) < 2:
+            return
+        source, target = screens[0], screens[1]
+        report = {}
+        for pet in self.pets:
+            kind = type(pet).__name__
+            pet.stop_toy()
+            recover_pet(pet, source)
+            yield 400
+            pet.profile_session.request('cancel')
+            area = source.availableGeometry()
+            pet.move(area.right() - pet.width() - 20, area.bottom() - pet.height() - 40)
+            if hasattr(pet, 'motion'):
+                pet.motion.x, pet.motion.y = float(pet.x()), float(pet.y())
+            yield 300
+            hwnd, x, y = int(pet.winId()), pet.width() // 2, pet.height() // 2
+            _mouse(hwnd, WM_LBUTTONDOWN, x, y, MK_LBUTTON)
+            yield 80
+            steps = 0
+            while pet.screen().name() != target.name() and steps < 60:
+                _mouse(hwnd, WM_MOUSEMOVE, x + 30, y, MK_LBUTTON)
+                steps += 1
+                yield 40
+            for _ in range(8):  # a little further so the pet is well inside the new monitor
+                _mouse(hwnd, WM_MOUSEMOVE, x + 30, y, MK_LBUTTON)
+                yield 40
+            _mouse(hwnd, WM_LBUTTONUP, x + 30, y, 0)
+            yield 1500
+            new_area = target.availableGeometry()
+            size = (pet.pet_size, pet.pet_size) if hasattr(pet, 'pet_size') else pet._logical_size()
+            assert pet.screen().name() == target.name(), (kind, pet.screen().name())
+            assert (pet.width(), pet.height()) == tuple(size), (kind, pet.size(), size)
+            assert _inside(pet, new_area), (kind, pet.geometry(), new_area)
+            report[kind] = {'screen': pet.screen().name(), 'logical_size': [pet.width(), pet.height()],
+                            'physical_size': list(_physical_size(hwnd)), 'drag_steps': steps}
+        self.result['drag_across'] = report
+
     def finish(self, error=None) -> None:
         if self.result.get('finished'):
             return
@@ -241,9 +360,10 @@ def main() -> int:
         raise RuntimeError('This probe requires the native Windows Qt platform')
     with tempfile.TemporaryDirectory(prefix='frontengine-real-desktop-') as folder:
         probe = Probe(app, output, Path(folder))
-        runner = Steps(app, (probe.puppet_toys, probe.sprite_toys, probe.strokes), probe.finish)
+        runner = Steps(app, (probe.perch_edges, probe.puppet_toys, probe.sprite_toys, probe.strokes,
+                             probe.cross_monitor, probe.drag_across), probe.finish)
         runner.start()  # the runner must stay referenced while its timers are pending
-        QTimer.singleShot(180000, lambda: probe.finish(TimeoutError('Probe did not finish within 3 minutes')))
+        QTimer.singleShot(280000, lambda: probe.finish(TimeoutError('Probe did not finish within 280 seconds')))
         app.exec()
     return 0 if probe.result['status'] == 'passed' else 1
 

@@ -605,6 +605,8 @@ Die Interaktionsliste der Tierverwaltung bietet außerdem die Menübefehle des g
 
 Integriertes Puppet-Modell verwenden auf der Tierseite zeichnet die gewählte INKSIDE-Figur im Hintergrund als Imervue-.puppet-Modell: geriggter Kopf, Arme, Schwanz und Körper, zehn Bewegungen, drei Ausdrücke und ein Tierskript, das Begleitaktionen darauf abbildet. Es wird unter pet-assets/puppets gespeichert und mit seinem Skript als Quelle gewählt, sodass Start es als Puppet-Tier erzeugt.
 
+Bei mehreren Monitoren mit unterschiedlicher Skalierung behält ein Tier, das auf einen anderen Monitor gezogen oder dorthin zurückgeholt wird, seine Größe, bleibt in dessen Arbeitsbereich und läuft dort weiter. Fensterkanten auf skalierten Monitoren werden in denselben Koordinaten wie das Tier gemessen, sodass es genau auf Fenstern sitzt.
+
 Die Garderobe zeigt Farbbereiche an, die Figur oder Kleidung deklarieren. Wähle einen Bereich und eine Farbe oder stelle die Originalfarbe wieder her. Nur markierte Maskenebenen werden eingefärbt; Konturen und andere Details bleiben erhalten. Farben werden vor dem Anwenden angezeigt und je Identität und Outfit gespeichert, auch beim Export/Import. Ohne deklarierte Bereiche bleiben Farbregler deaktiviert.
 
 Scheitert das Speichern beim Schließen, bleiben Tier, aktueller Zustand und Wiederholungs-Timer erhalten. Alle schließen behält Tiere, die nicht geschlossen werden konnten; vor dem Beenden müssen ihre Daten gespeichert sein. Zuneigung steigt nicht über die unterstützte Speichergrenze, damit weitere Belohnungen das Profil nicht ungültig machen.

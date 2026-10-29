@@ -76,7 +76,7 @@
     - [x] Clean gradient/alpha defects, separate editable components, produce complete cycles and garments: flat three-ink vector drawing, separate region/paper/ink layers, complete cycles.
   - [x] Capability-aware legacy sprite and native Puppet behavior. Done: legacy fallbacks (U-20261029-35), Puppet capability gating and bindings (U-20261029-42).
   - [x] Complete unit, offscreen product and isolated native/performance acceptance. Done (U-20261029-40, U-20261029-43, U-20261029-45).
-- [ ] Moving pets between two physical monitors with different scaling (progress.md #23; needs a second screen, as #21/#22).
+- [x] Moving pets between two physical monitors with different scaling: real 100%/125% monitors, recovery, drag across, perch edges and size restoration (U-20261029-46).
 - [x] Phase D: Keep the audit trail throughout implementation.
 - [x] Phase E: Verify and hand back against every requirement, never only the implemented subset.
 

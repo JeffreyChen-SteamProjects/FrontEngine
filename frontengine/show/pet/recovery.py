@@ -2,6 +2,29 @@
 from PySide6.QtCore import Qt
 
 
+def clamp_into(pet, area) -> None:
+    """Keep the whole pet inside a work area without changing its size."""
+    x = min(max(pet.x(), area.x()), area.x() + area.width() - pet.width())
+    y = min(max(pet.y(), area.y()), area.y() + area.height() - pet.height())
+    if (x, y) != (pet.x(), pet.y()):
+        pet.move(x, y)
+
+
+def follow_screen(pet, size: tuple[int, int]) -> None:
+    """After the pet changes monitor: restore its logical size and keep it on the new screen.
+
+    Windows rescales a window by the new monitor's DPI after it crosses a DPI boundary,
+    which would otherwise change the pet's logical size; the position is then clamped
+    again, because the rescale can push the pet past the work area.
+    """
+    screen = pet.screen()
+    if screen is None or pet.profile_session._closed:
+        return
+    if (pet.width(), pet.height()) != size:
+        pet.resize(*size)
+    clamp_into(pet, screen.availableGeometry())
+
+
 def recover_pet(pet, screen) -> None:
     if screen is None or pet.profile_session._closed:
         raise ValueError('No active pet or available screen')

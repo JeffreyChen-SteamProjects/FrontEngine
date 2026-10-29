@@ -1,4 +1,5 @@
 import json
+import sys
 import random as _random_module
 from datetime import datetime, timedelta
 from time import monotonic
@@ -7,7 +8,9 @@ from urllib.parse import urlparse
 from typing import Optional, Tuple
 
 from PySide6.QtCore import Qt, QRect, QTimer, QUrl, Signal
-from PySide6.QtGui import QAction, QColor, QCursor, QFont, QFontMetrics, QImage, QMovie, QPainter, QPixmap, QTransform
+from PySide6.QtGui import (
+    QAction, QColor, QCursor, QFont, QFontMetrics, QGuiApplication, QImage, QMovie, QPainter, QPixmap, QTransform,
+)
 from PySide6.QtMultimedia import QSoundEffect
 from PySide6.QtWidgets import QApplication, QMenu, QMessageBox, QWidget
 
@@ -37,6 +40,7 @@ from frontengine.utils.platform_info.platform_info import (
     idle_seconds as platform_idle_seconds,
     read_battery as platform_read_battery,
     standable_windows,
+    standable_windows_native,
 )
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
@@ -270,8 +274,51 @@ def windows_platforms(exclude_hwnds=()) -> list:
     """
     回傳目前可站立的視窗上緣 (left, right, top_y)；各平台實作見 platform_info。
     Standable window top edges; per-platform implementations live in platform_info.
+    On Windows the physical edges are converted to Qt's logical coordinates per
+    monitor, so perching stays aligned on scaled and mixed-DPI setups.
     """
+    if sys.platform == "win32":
+        return native_edges_to_logical(standable_windows_native(exclude_hwnds), QGuiApplication.screens())
     return standable_windows(exclude_hwnds)
+
+
+def _screen_for_monitor(screens, left: int, top: int, width: int, height: int):
+    """Pair a Win32 monitor with its QScreen.
+
+    QScreen.name() is the monitor's model name on Windows, not its device name, so
+    screens are matched by origin (Qt keeps each monitor's native origin) and then
+    by native size (logical size times its device pixel ratio).
+    """
+    for screen in screens:
+        origin = screen.geometry().topLeft()
+        if (origin.x(), origin.y()) == (left, top):
+            return screen
+    sized = [screen for screen in screens
+             if (round(screen.geometry().width() * (screen.devicePixelRatio() or 1.0)),
+                 round(screen.geometry().height() * (screen.devicePixelRatio() or 1.0))) == (width, height)]
+    # Several monitors can share a native size; the one placed nearest wins.
+    return min(sized, key=lambda screen: abs(screen.geometry().topLeft().x() - left)
+               + abs(screen.geometry().topLeft().y() - top), default=None)
+
+
+def native_edges_to_logical(edges, screens) -> list:
+    """Map (left, right, top, device, monitor left, top, width, height) physical edges onto Qt screens.
+
+    Qt keeps each screen's origin and scales positions inside it by its device pixel
+    ratio: logical = screen origin + (physical - monitor origin) / ratio.
+    """
+    logical = []
+    for left, right, top, _device, monitor_left, monitor_top, width, height in edges:
+        screen = _screen_for_monitor(screens, monitor_left, monitor_top, width, height)
+        if screen is None:
+            logical.append((left, right, top))
+            continue
+        ratio = screen.devicePixelRatio() or 1.0
+        origin = screen.geometry().topLeft()
+        logical.append((round(origin.x() + (left - monitor_left) / ratio),
+                        round(origin.x() + (right - monitor_left) / ratio),
+                        round(origin.y() + (top - monitor_top) / ratio)))
+    return logical
 
 
 def idle_seconds():
@@ -1207,6 +1254,7 @@ class DesktopPetWidget(BaseWidget):
         self._welcomed = False
         self._leaving = False
         self._peer_greet_ready = 0.0
+        self._follows_screen = False
         self._seen_landings = 0
         self.ball_action = QAction(self)
         retranslator.bind(self.ball_action, 'pet_ball_start', 'Throw a ball')
@@ -2037,6 +2085,25 @@ class DesktopPetWidget(BaseWidget):
                     'chat': self._prompt_chat, 'clone': self.clone_requested.emit, 'close': self.say_goodbye}
         handlers[command]()
 
+    def resizeEvent(self, event) -> None:
+        super().resizeEvent(event)
+        # Windows rescales a window after it crosses to a monitor with another DPI,
+        # after screenChanged; any size other than the pet's own is put back.
+        if not self.profile_session._closed and (self.width(), self.height()) != (self.pet_size, self.pet_size):
+            QTimer.singleShot(0, self, self._follow_screen)
+
+    def _follow_screen(self) -> None:
+        """A pet carried to another monitor keeps its size and walks within that monitor."""
+        from frontengine.show.pet.recovery import follow_screen
+        follow_screen(self, (self.pet_size, self.pet_size))
+        screen = self.screen()
+        if screen is None or self.profile_session._closed:
+            return
+        area = screen.availableGeometry()
+        self.motion.width = self.motion.height = self.pet_size
+        self.motion.set_bounds((area.x(), area.y(), area.x() + area.width(), area.y() + area.height()))
+        self.motion.x, self.motion.y = float(self.x()), float(self.y())
+
     def say_goodbye(self) -> None:
         """Closing from the pet's own menu waves goodbye briefly before the window closes."""
         if self._leaving:
@@ -2183,6 +2250,10 @@ class DesktopPetWidget(BaseWidget):
 
     def showEvent(self, event) -> None:
         super().showEvent(event)
+        handle = self.windowHandle()
+        if handle is not None and not self._follows_screen:
+            self._follows_screen = True
+            handle.screenChanged.connect(lambda _screen: QTimer.singleShot(0, self, self._follow_screen))
         self.profile_session.resume()
         self._layered_playback.resume()
         for timer, remaining in self._hidden_timers:
