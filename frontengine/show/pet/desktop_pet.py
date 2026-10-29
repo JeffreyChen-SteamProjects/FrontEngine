@@ -6,15 +6,29 @@ from urllib.parse import urlparse
 from typing import Optional, Tuple
 
 from PySide6.QtCore import Qt, QRect, QTimer, QUrl, Signal
-from PySide6.QtGui import QAction, QColor, QCursor, QFont, QFontMetrics, QMovie, QPainter, QPixmap, QTransform
+from PySide6.QtGui import QAction, QColor, QCursor, QFont, QFontMetrics, QImage, QMovie, QPainter, QPixmap, QTransform
 from PySide6.QtMultimedia import QSoundEffect
-from PySide6.QtWidgets import QMenu, QMessageBox, QWidget
+from PySide6.QtWidgets import QApplication, QMenu, QMessageBox, QWidget
 
 from frontengine.show.base_widget import BaseWidget
 from frontengine.show.window_helpers import apply_overlay_window_flags
 from frontengine.user_setting.user_setting_file import user_setting_dict
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.show.pet.pet_profile_session import PetProfileSession
+from frontengine.show.pet.companion_menu import add_companion_actions, add_food_actions, companion_status
+from frontengine.show.pet.layered_playback import LayeredPlayback
+from frontengine.show.pet.asset_library import PetAssetLibrary
+from frontengine.utils.pet_companion.petting import PettingGesture
+from frontengine.utils.multi_language.retranslate import translate
+from frontengine.utils.pet_companion.stats import (
+    PetMood as PetMood, PetHunger as PetHunger,
+    FOOD_SNACK as FOOD_SNACK, FOOD_FEAST as FOOD_FEAST, FOOD_MUSIC as FOOD_MUSIC,
+    FOOD_BOOK as FOOD_BOOK, FOOD_HARD as FOOD_HARD,
+)
+from frontengine.utils.pet_companion import stats as _care_stats
+
+PetGrowth = _care_stats.PetGrowth
+FOOD_EFFECTS = _care_stats.FOOD_EFFECTS
 from frontengine.utils.audio_meter.audio_envelope import AudioEnvelope
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.power_mode.power_mode import scaled_interval
@@ -53,6 +67,8 @@ _PACK_STATE_ALIASES = {
     STATE_CLIMB: ("climb", "grab", "wall"),
     STATE_FALL: ("fall", "jump"),
     STATE_DRAG: ("drag", "pinch", "grabbed", "held"),
+    "greet": ("greet",), "pet": ("pet",), "groom": ("groom",),
+    "feed": ("eat", "feed"), "play": ("play",),
 }
 _PACK_EXTS = (".gif", ".webp", ".png", ".jpg", ".jpeg")
 
@@ -63,6 +79,7 @@ _STATE_FALLBACKS = {
     STATE_CLIMB: (STATE_WALK,),
     STATE_FALL: (STATE_WALK,),
     STATE_DRAG: (STATE_WALK,),
+    **{action: (STATE_IDLE, STATE_WALK) for action in ("greet", "pet", "groom", "feed", "play")},
 }
 
 
@@ -147,11 +164,6 @@ def classify_drop(path) -> Optional[str]:
 
 
 # 食物種類（依副檔名猜）與各自的效果 / Food kinds guessed from the suffix
-FOOD_SNACK = "snack"    # 一般點心 / an ordinary snack
-FOOD_FEAST = "feast"    # 壓縮檔＝大餐 / an archive is a hearty meal
-FOOD_MUSIC = "music"    # 音樂檔＝聽了很開心 / music cheers it up more than it fills
-FOOD_BOOK = "book"      # 文件檔＝細嚼慢嚥 / a document is chewed slowly
-FOOD_HARD = "hard"      # 可執行檔＝咬不動 / a binary is too hard to chew
 
 _FOOD_SUFFIXES = {
     FOOD_FEAST: (".zip", ".7z", ".rar", ".tar", ".gz", ".iso"),
@@ -162,13 +174,6 @@ _FOOD_SUFFIXES = {
 
 # 每種食物的飽足／心情／親密度變化（心情為負代表不喜歡）
 # Fullness / mood / affection change per food kind (negative mood = dislikes it).
-FOOD_EFFECTS = {
-    FOOD_SNACK: {"fullness": 30, "mood": 12, "affection": 5},
-    FOOD_FEAST: {"fullness": 45, "mood": 8, "affection": 6},
-    FOOD_MUSIC: {"fullness": 15, "mood": 20, "affection": 5},
-    FOOD_BOOK: {"fullness": 20, "mood": 6, "affection": 4},
-    FOOD_HARD: {"fullness": 2, "mood": -6, "affection": 1},
-}
 
 
 def classify_food(path) -> str:
@@ -462,66 +467,8 @@ def pick_message(hour: int, rng, messages: dict, mood: Optional[str] = None) -> 
     return pool[rng.randrange(len(pool))]
 
 
-class PetMood:
-    """
-    寵物心情值 0~100：互動會上升、被忽略會慢慢下降；level() 回傳 happy/content/sad。
-    Pet happiness 0..100: petting raises it, neglect decays it; level() buckets it.
-    """
-
-    HAPPY = "happy"
-    CONTENT = "content"
-    SAD = "sad"
-
-    def __init__(self, value: int = 60) -> None:
-        self.value = self._clamp(value)
-
-    @staticmethod
-    def _clamp(value) -> int:
-        try:
-            return max(0, min(100, int(value)))
-        except (TypeError, ValueError):
-            return 60
-
-    def pet(self, amount: int = 12) -> None:
-        self.value = self._clamp(self.value + amount)
-
-    def decay(self, amount: int = 1) -> None:
-        self.value = self._clamp(self.value - amount)
-
-    def level(self) -> str:
-        if self.value >= 70:
-            return self.HAPPY
-        if self.value <= 30:
-            return self.SAD
-        return self.CONTENT
 
 
-class PetGrowth:
-    """
-    親密度累積與等級：互動會累加親密度，跨過門檻即升級。
-    Affection points accrue from interactions; crossing a threshold levels up.
-    """
-
-    THRESHOLDS = (0, 100, 250, 500, 1000, 2000)
-
-    def __init__(self, affection: int = 0) -> None:
-        self.affection = self._clamp(affection)
-
-    @staticmethod
-    def _clamp(value) -> int:
-        try:
-            return max(0, int(value))
-        except (TypeError, ValueError):
-            return 0
-
-    def level(self) -> int:
-        return max(1, sum(1 for threshold in self.THRESHOLDS if self.affection >= threshold))
-
-    def add(self, amount: int) -> bool:
-        """累加親密度；若因此升級回傳 True。"""
-        before = self.level()
-        self.affection = self._clamp(self.affection + int(amount))
-        return self.level() > before
 
 
 def format_status(level: int, mood_level: str, hunger_level: str, labels: dict) -> str:
@@ -550,38 +497,6 @@ def size_for_level(base_size: int, level: int) -> int:
     return max(16, int(round(int(base_size) * factor)))
 
 
-class PetHunger:
-    """
-    寵物飽足值 0~100：餵食上升、隨時間下降；level() 回傳 full/ok/hungry。
-    Pet fullness 0..100: feeding raises it, time lowers it; level() buckets it.
-    """
-
-    FULL = "full"
-    OK = "ok"
-    HUNGRY = "hungry"
-
-    def __init__(self, value: int = 70) -> None:
-        self.value = self._clamp(value)
-
-    @staticmethod
-    def _clamp(value) -> int:
-        try:
-            return max(0, min(100, int(value)))
-        except (TypeError, ValueError):
-            return 70
-
-    def feed(self, amount: int = 30) -> None:
-        self.value = self._clamp(self.value + amount)
-
-    def decay(self, amount: int = 1) -> None:
-        self.value = self._clamp(self.value - amount)
-
-    def level(self) -> str:
-        if self.value >= 60:
-            return self.FULL
-        if self.value <= 25:
-            return self.HUNGRY
-        return self.OK
 
 
 class SpeechBubble(QWidget):
@@ -1094,13 +1009,15 @@ class DesktopPetWidget(BaseWidget):
     """
 
     clone_requested = Signal()
+    customize_requested = Signal()
+    wardrobe_requested = Signal()
 
     def __init__(self, image_path: str, size: int = 128, speed: int = 3,
                  behaviour: str = BEHAVIOUR_FLOOR, climb: bool = True, talk: bool = True,
                  sound_path: Optional[str] = None, sit_on_windows: bool = True,
                  volume: float = 1.0, audio_react: bool = False, *,
                  profile_id: Optional[str] = None, profiles: Optional[PetProfiles] = None,
-                 profile_name: str = ""):
+                 profile_name: str = "", asset_library: Optional[PetAssetLibrary] = None):
         front_engine_logger.info(
             f"[DesktopPetWidget] Init | path={image_path}, size={size}, speed={speed}, "
             f"behaviour={behaviour}, climb={climb}, talk={talk}, sound={sound_path}, "
@@ -1108,7 +1025,7 @@ class DesktopPetWidget(BaseWidget):
         )
         super().__init__()
         self.profile_session = PetProfileSession(self, profile_id, profiles, profile_name)
-        record = self.profile_session.initial
+        self.companion = self.profile_session.companion
         self.opacity = 1.0
         # 寵物自己處理拖曳，位置與大小也由 PetMotion 決定。交給基底記憶的話，
         # 拖過一次之後那個「位置＋大小」會套到之後每一隻寵物身上——尺寸下拉選單
@@ -1122,16 +1039,20 @@ class DesktopPetWidget(BaseWidget):
         self.overlay_remembers_geometry = False
         # 基礎尺寸依已存等級放大 / Base size grown by the persisted level.
         self._base_size: int = max(16, int(size))
-        self._growth = PetGrowth(record["affection"])
+        self._growth = self.companion.growth
         self.pet_size: int = size_for_level(self._base_size, self._growth.level())
         self.image_path: Path = Path(image_path)
         self._dragging: bool = False
         self._drag_offset = None
+        self._pointer_origin = None
+        self.placement_revision = 0
         self._last_move_delta: Tuple[int, int] = (0, 0)
         # 視覺狀態 -> ("movie"|"pixmap", 物件) / state -> sprite
         self._sprites: dict = {}
         self._active = None
         self._active_state = None
+        self._layered_playback = LayeredPlayback()
+        self._hidden_timers = []
 
         self._load_sprites(self.image_path)
         if not self._sprites:
@@ -1157,10 +1078,8 @@ class DesktopPetWidget(BaseWidget):
         self._talk = bool(talk)
         self._moved = False
         self._chatter_rng = _random_module.SystemRandom()
-        self._mood = PetMood(record["mood"])
-        self._hunger = PetHunger(record["fullness"])
-        self.profile_session.reader = lambda: {"mood": self._mood.value, "fullness": self._hunger.value,
-                                               "affection": min(1000000, self._growth.affection)}
+        self._mood = self.companion.mood
+        self._hunger = self.companion.hunger
         self._hunger_warned = False
         self._messages = self._load_messages()
         # 動作包自帶的設定（可含台詞、速度、體型、音效）
@@ -1221,6 +1140,7 @@ class DesktopPetWidget(BaseWidget):
         # triggered emits checked(bool), which would arrive as feed's `kind`.
         self.feed_action.triggered.connect(lambda: self.feed())
         self.menu.addAction(self.feed_action)
+        self.food_actions = add_food_actions(self.menu, self.feed)
         self.status_action = QAction(language_wrapper.language_word_dict.get("pet_status", "Status"), self)
         self.status_action.triggered.connect(self.show_status)
         self.menu.addAction(self.status_action)
@@ -1236,6 +1156,71 @@ class DesktopPetWidget(BaseWidget):
         self.close_action = QAction(language_wrapper.language_word_dict.get("control_center_close_all", "Close"), self)
         self.close_action.triggered.connect(self.close)
         self.menu.addAction(self.close_action)
+        self.customize_action = QAction(self)
+        from frontengine.utils.multi_language.retranslate import retranslator
+        retranslator.bind(self.customize_action, "pet_custom_title", "Customize pet")
+        self.customize_action.triggered.connect(self.customize_requested.emit)
+        self.menu.addAction(self.customize_action)
+        self.wardrobe_action = QAction(self)
+        retranslator.bind(self.wardrobe_action, 'pet_wardrobe_title', 'Wardrobe')
+        self.wardrobe_action.triggered.connect(self.wardrobe_requested.emit)
+        self.menu.addAction(self.wardrobe_action)
+        self._photo_dialog = None
+        self.photo_action = QAction(self)
+        retranslator.bind(self.photo_action, 'pet_photo_title', 'Pet photo')
+        self.photo_action.triggered.connect(self.open_photo)
+        self.menu.addAction(self.photo_action)
+        self._presentation_defaults = {
+            "size": min(512, self._base_size), "speed": max(1, min(20, int(self.motion.speed))),
+            "behaviour": self.motion.behaviour, "climb": bool(self.motion.climb),
+            "sit_on_windows": self._sit_on_windows, "speech_bubbles": self._talk,
+            "volume": int(self._volume * 100), "settle_typing": False,
+        }
+        self._applied_presentation = None
+        self._last_companion_view = None
+        self.asset_library = asset_library or PetAssetLibrary()
+        self.appearance_error = None
+        self.restore_appearance()
+        self._petting = None
+        self._toy = None
+        self.ball_action = QAction(self)
+        retranslator.bind(self.ball_action, 'pet_ball_start', 'Throw a ball')
+        self.ball_action.triggered.connect(lambda _checked=False: self.start_ball())
+        self.menu.addAction(self.ball_action)
+        self.ball_stop_action = QAction(self)
+        retranslator.bind(self.ball_stop_action, 'pet_toy_stop', 'Put toy away')
+        self.ball_stop_action.triggered.connect(self.stop_toy)
+        self.menu.addAction(self.ball_stop_action)
+        self.light_action = QAction(self)
+        retranslator.bind(self.light_action, 'pet_light_start', 'Play with a light spot')
+        self.light_action.triggered.connect(lambda _checked=False: self.start_light())
+        self.menu.addAction(self.light_action)
+        self.come_action = QAction(self)
+        retranslator.bind(self.come_action, 'pet_come', 'Come here')
+        self.come_action.triggered.connect(lambda _checked=False: self.start_call())
+        self.menu.addAction(self.come_action)
+        self._petting_revision = None
+        self.companion_actions = add_companion_actions(
+            self.menu, self.profile_session, self._interaction_feedback, request=self._request_interaction)
+        self.profile_session.changed.connect(self._on_companion_changed)
+        self._on_companion_changed()
+
+    def restore_appearance(self) -> bool:
+        """Resolve the exact saved outfit; keep references intact when resources fail."""
+        appearance = self.profile_session.state()['appearance']
+        if appearance['character'] is None:
+            return True
+        try:
+            catalog, _errors = self.asset_library.scan()
+            prepared = catalog.prepare(appearance)
+        except (OSError, ValueError) as error:
+            self.appearance_error = str(error)
+            front_engine_logger.warning(f'[PetAppearance] {error}')
+            return False
+        self.appearance_error = None
+        self.profile_session.appearance_renderer = prepared
+        self.profile_session.changed.emit()
+        return True
 
     MEET_DISTANCE = 90.0
     PLAY_RANGE = 320.0
@@ -1249,15 +1234,35 @@ class DesktopPetWidget(BaseWidget):
     def center(self) -> Tuple[int, int]:
         return (self.x() + self.width() // 2, self.y() + self.height() // 2)
 
+    def place_for_focus(self, x: int, y: int) -> None:
+        """Move the pet and physics together, cancelling flight and wall attachment."""
+        self.motion.x, self.motion.y = float(x), float(y)
+        self.motion.vy = 0.0
+        self.motion._airborne = False
+        self.motion.surface = SURFACE_FLOOR
+        self.motion.clear_follow()
+        self.motion.clear_guidance()
+        self.move(x, y)
+
     def set_peers_provider(self, provider) -> None:
         """設定回傳其他寵物中心座標清單的函式 / Provider of other pets' centres."""
         self._peers_provider = provider
+
+    @property
+    def can_socialize(self) -> bool:
+        return (self.isVisible() and not self.profile_session._closed
+                and self._petting is None
+                and self._toy is None
+                and self.companion.allows_autonomy and self.companion.preferences['allow_social']
+                and not self._dragging and not self.motion.settled)
 
     def apply_tag_role(self, role) -> None:
         """
         套用鬼抓人角色 (角色, 目標 x, 目標 y)；None 代表沒在玩，恢復平常的同伴互動。
         Apply a tag role; None means the game is off and normal peer play resumes.
         """
+        if not self.can_socialize:
+            role = None
         if role is None:
             if self._tag_role is not None:
                 self._tag_role = None
@@ -1269,15 +1274,15 @@ class DesktopPetWidget(BaseWidget):
 
     def on_tagged(self) -> None:
         """換自己當鬼時喊一句 / Shout when the tag lands on this pet."""
-        self._gain_affection(1)
+        self.profile_session.reward("tag")
         pool = self._messages.get("tag") or []
         if pool:
             self.say(pool[self._chatter_rng.randrange(len(pool))])
 
     def _check_peers(self) -> None:
         """靠近其他寵物時走過去玩耍、抵達後轉向打招呼（帶遲滯，避免重複）。"""
-        if self._tag_role is not None:
-            return  # the tag game owns where this pet is heading
+        if self._tag_role is not None or not self.can_socialize:
+            return
         if self._peers_provider is None:
             return
         try:
@@ -1317,10 +1322,10 @@ class DesktopPetWidget(BaseWidget):
                 self._peer_greeted = False
             return
         self.motion.clear_follow()
-        if not self._talk or self._peer_greeted:
+        if self._peer_greeted:
             return
         self._peer_greeted = True
-        self._gain_affection(3)
+        self.profile_session.reward("peer")
         self.motion.vx = (abs(self.motion.vx) if peer[0] >= my_center[0]
                           else -abs(self.motion.vx))
         pool = self._messages.get("meet") or []
@@ -1368,7 +1373,6 @@ class DesktopPetWidget(BaseWidget):
         self._active = None
         self._active_state = None
         self._set_active_sprite(self._visual_state())
-        self._gain_affection(2)
         pool = self._messages.get("costume") or []
         if pool:
             self.say(pool[self._chatter_rng.randrange(len(pool))])
@@ -1384,6 +1388,10 @@ class DesktopPetWidget(BaseWidget):
         return next(iter(self._sprites.values()), None)
 
     def _set_active_sprite(self, state: str) -> None:
+        self._layered_playback.set_action(state)
+        if self._layered_playback.renderer is not None:
+            self.update()
+            return
         sprite = self._sprite_for(state)
         if sprite is None or sprite is self._active:
             return
@@ -1401,6 +1409,9 @@ class DesktopPetWidget(BaseWidget):
         )
 
     def _current_pixmap(self) -> Optional[QPixmap]:
+        frame = self._layered_playback.frame()
+        if frame is not None:
+            return QPixmap.fromImage(frame)
         if self._active is None:
             return None
         kind, obj = self._active
@@ -1446,6 +1457,30 @@ class DesktopPetWidget(BaseWidget):
             height = int(self.height() * scale)
             painter.drawPixmap(
                 QRect((self.width() - width) // 2, self.height() - height, width, height), pixmap)
+
+    def photo_image(self) -> QImage:
+        """Render only this pet, excluding desktop pixels, menus and speech bubbles."""
+        image = QImage(self.size(), QImage.Format.Format_ARGB32_Premultiplied)
+        image.fill(Qt.GlobalColor.transparent)
+        painter = QPainter(image)
+        try:
+            self.draw_content(painter)
+        finally:
+            painter.end()
+        return image
+
+    def open_photo(self) -> None:
+        from frontengine.ui.dialog.pet_photo import PetPhotoDialog
+
+        if self._photo_dialog is None:
+            self._photo_dialog = PetPhotoDialog(
+                self.photo_image(), self._layered_playback.renderer,
+                mirrored=self.motion.facing_left, parent=self)
+            self._photo_dialog.destroyed.connect(self._photo_closed)
+        self._photo_dialog.show()
+
+    def _photo_closed(self) -> None:
+        self._photo_dialog = None
 
     def set_low_power(self, enabled: bool) -> None:
         """省電模式：把移動更新拉慢（畫面較不順，但省電）。"""
@@ -1552,16 +1587,136 @@ class DesktopPetWidget(BaseWidget):
             "any": lines("pet_chatter_any", "Hi there!|(^_^)|Keep going!"),
         }
 
-    def _gain_affection(self, amount: int) -> None:
-        """互動累加親密度；升級時長大、慶祝一下並保存。"""
-        leveled = self._growth.add(amount)
-        self.profile_session.schedule()
-        if leveled:
-            self._apply_growth_size()
-            if self._talk:
-                pool = self._messages.get("levelup") or []
-                if pool:
-                    self.say(pool[self._chatter_rng.randrange(len(pool))])
+    def _interaction_feedback(self, result: str) -> None:
+        text = companion_status(self.profile_session) if result == "accepted" else translate(
+            "pet_companion_" + result, result)
+        if result == "accepted" and self.companion.action:
+            text = translate("pet_companion_" + self.companion.action, self.companion.action)
+        elif result == 'accepted' and self._petting is not None:
+            text = translate('pet_petting_hint', 'Move back and forth over the pet. Leave to stop.')
+        self._bubble.show_message(text, self)
+
+    def _request_interaction(self, action: str) -> str:
+        self.stop_toy()
+        if action == 'pet':
+            if self.companion.action is not None or self._dragging:
+                return 'busy'
+            self._petting = PettingGesture(max(4, self.width() * 0.08))
+            self._pointer_origin = None
+            self._petting_revision = self.profile_session.mode_revision
+            self.setMouseTracking(True)
+            self.motion.clear_guidance()
+            self.motion.clear_follow()
+            self._tag_role = None
+            self.profile_session.changed.emit()
+            return 'accepted'
+        self._end_petting()
+        return self.profile_session.request(action)
+
+    @property
+    def can_play_with_toy(self) -> bool:
+        return (self.isVisible() and not self.profile_session._closed
+                and self.companion.allows_autonomy and self._petting is None
+                and not self._dragging and not self.motion.settled)
+
+    def start_ball(self) -> str:
+        from frontengine.show.pet.ball_toy import BallToy
+        return 'accepted' if self._start_toy(BallToy) else 'busy'
+
+    def start_light(self, *, offset: tuple[int, int] | None = None) -> str:
+        from frontengine.show.pet.light_toy import LightToy
+        return 'accepted' if self._start_toy(lambda pet: LightToy(pet, offset=offset)) else 'busy'
+
+    def start_call(self, *, offset: tuple[int, int] | None = None) -> str:
+        from frontengine.show.pet.call_target import CallTarget
+        return 'accepted' if self._start_toy(lambda pet: CallTarget(pet, offset=offset)) else 'busy'
+
+    def _start_toy(self, factory) -> bool:
+        if not self.can_play_with_toy:
+            self._interaction_feedback('busy')
+            return False
+        self.stop_toy()
+        self._tag_role = None
+        self.motion.clear_guidance()
+        if self.motion.behaviour == BEHAVIOUR_FLOOR:
+            self.motion.set_platforms([])
+            if self.motion.on_platform or self.motion.surface != SURFACE_FLOOR:
+                self.motion.throw(0, 0)
+        self._toy = factory(self)
+        self._toy.show()
+        self.profile_session.changed.emit()
+        return True
+
+    def stop_toy(self) -> None:
+        toy, self._toy = self._toy, None
+        if toy is not None:
+            self.motion.clear_guidance()
+            toy.close()
+            toy.deleteLater()
+            if not self.profile_session._closed:
+                self.profile_session.changed.emit()
+
+    def _end_petting(self) -> None:
+        if self._petting is None:
+            return
+        self._petting = None
+        self.setMouseTracking(False)
+        if self.companion.action == 'pet':
+            self.profile_session.request('cancel')
+        else:
+            self.profile_session.changed.emit()
+
+    def _on_companion_changed(self) -> None:
+        if self._toy is not None and not self.can_play_with_toy:
+            self.stop_toy()
+        if self._petting is not None and (self._petting_revision != self.profile_session.mode_revision
+                                         or self.companion.action not in (None, 'pet')):
+            self._end_petting()
+        renderer = self.profile_session.appearance_renderer
+        if renderer is not self._layered_playback.renderer:
+            self._layered_playback.set_renderer(renderer)
+            if self._active is not None and self._active[0] == "movie":
+                self._active[1].stop()
+            self._active = None
+        self._apply_customization()
+        self._apply_growth_size()
+        if not self.companion.allows_autonomy or not self.companion.preferences['allow_social']:
+            self._tag_role = None
+            self.motion.clear_guidance()
+            self.motion.clear_follow()
+        view = (self.companion.mode, self.companion.action)
+        if view != self._last_companion_view:
+            self._last_companion_view = view
+            if self.companion.mode == "rest" and self.companion.action is None:
+                self.motion.sleep()
+            else:
+                self.motion.wake()
+        visual = self.companion.visual_action
+        self._set_active_sprite(visual or self._visual_state())
+        self.update()
+
+    def _apply_customization(self) -> None:
+        values = self.companion.preferences.get("presentation") or self._presentation_defaults
+        if values == self._applied_presentation:
+            return
+        self._applied_presentation = dict(values)
+        self._base_size = values["size"]
+        self.motion.speed = values["speed"]
+        self.motion.vx = values["speed"] * (-1 if self.motion.facing_left else 1)
+        self.motion.behaviour = values["behaviour"]
+        self.motion.climb = values["climb"]
+        self._sit_on_windows = values["sit_on_windows"]
+        if not self._sit_on_windows:
+            self.motion.set_platforms([])
+        self._talk = values["speech_bubbles"]
+        self._volume = values["volume"] / 100.0
+        if self._sound is not None:
+            self._sound.setVolume(self._volume)
+        if not self._talk:
+            self._chatter_timer.stop()
+            self._bubble.hide()
+        elif self.isVisible() and not self._chatter_timer.isActive():
+            self._schedule_chatter()
 
     def show_status(self) -> None:
         """顯示等級 · 心情 · 飽足 / Show level · mood · fullness."""
@@ -1576,7 +1731,7 @@ class DesktopPetWidget(BaseWidget):
             PetHunger.HUNGRY: get("pet_hunger_hungry", "hungry"),
         }
         text = format_status(self._growth.level(), self._mood.level(), self._hunger.level(), labels)
-        text = self.profile_session.state()["name"] + " · " + text
+        text = self.profile_session.state()["name"] + " · " + text + " · " + companion_status(self.profile_session)
         self._bubble.show_message(text, self, duration_ms=8000)
 
     def _apply_growth_size(self) -> None:
@@ -1738,11 +1893,9 @@ class DesktopPetWidget(BaseWidget):
             self._chatter_timer.start(self._chatter_rng.randint(15000, 35000))
 
     def _on_chatter(self) -> None:
-        self._mood.decay()  # a little neglect over time
-        self._hunger.decay()
-        self._persist_mood()
         # priority: user idle (nap), low battery, hunger, otherwise normal chatter
-        if not self._check_idle() and not self._warn_battery() and not self._warn_hungry():
+        if (self.companion.allows_autonomy and not self._check_idle()
+                and not self._warn_battery() and not self._warn_hungry()):
             self.say()
         self._schedule_chatter()
 
@@ -1750,6 +1903,8 @@ class DesktopPetWidget(BaseWidget):
 
     def _check_idle(self) -> bool:
         """使用者閒置久了打盹並說一句；回來後醒。回傳是否有反應（抑制一般閒聊）。"""
+        if not self.companion.allows_autonomy:
+            return False
         seconds = self._idle_provider()
         if seconds is None:
             return False
@@ -1772,20 +1927,9 @@ class DesktopPetWidget(BaseWidget):
         self.profile_session.schedule()
 
     def feed(self, kind: str = FOOD_SNACK) -> None:
-        """餵食：依食物種類調整飽足與心情，並說一句對應的話。"""
-        effect = FOOD_EFFECTS.get(kind, FOOD_EFFECTS[FOOD_SNACK])
-        self._hunger.feed(effect["fullness"])
-        mood_change = effect["mood"]
-        if mood_change >= 0:
-            self._mood.pet(mood_change)
-        else:
-            self._mood.decay(-mood_change)
-        self._persist_hunger()
-        self._persist_mood()
-        self._gain_affection(effect["affection"])
-        pool = self._messages.get(f"fed_{kind}") or self._messages.get("fed") or []
-        if pool:
-            self.say(pool[self._chatter_rng.randrange(len(pool))])
+        self.stop_toy()
+        self._end_petting()
+        self._interaction_feedback(self.profile_session.request("feed", kind))
 
     def _warn_hungry(self) -> bool:
         """飢餓時討食一次；吃飽後重置。回傳是否有討食。"""
@@ -1837,13 +1981,27 @@ class DesktopPetWidget(BaseWidget):
             self._speak_text(text)
 
     def _on_tick(self) -> None:
+        if self._toy is not None:
+            if self.can_play_with_toy:
+                self._toy.tick()
+            else:
+                self.stop_toy()
         if self._dragging:
             self._set_active_sprite(STATE_DRAG)
+            return
+        if self._petting is not None:
+            self._set_active_sprite(self.companion.visual_action or STATE_IDLE)
+            return
+        if not self.companion.allows_autonomy:
+            if self.motion._airborne:
+                x, y = self.motion.step()
+                self.move(x, y)
+            self._set_active_sprite(self.companion.visual_action or STATE_IDLE)
             return
         if self.motion.behaviour == BEHAVIOUR_CHASE:
             cursor = QCursor.pos()
             self.motion.set_target(cursor.x(), cursor.y())
-        elif self._sit_on_windows and self.motion.behaviour == BEHAVIOUR_FLOOR:
+        elif self._toy is None and self._sit_on_windows and self.motion.behaviour == BEHAVIOUR_FLOOR:
             self._platform_tick += 1
             if self._platform_tick >= 10:
                 self._platform_tick = 0
@@ -1863,41 +2021,92 @@ class DesktopPetWidget(BaseWidget):
 
     # --- dragging + throwing ---
     def mousePressEvent(self, event) -> None:
+        if self._petting is not None and event.button() == Qt.MouseButton.LeftButton:
+            event.accept()
+            return
         if event.button() == Qt.MouseButton.LeftButton:
-            self._dragging = True
-            self._moved = False
+            self._pointer_origin = event.globalPosition().toPoint()
+            self._drag_offset = self._pointer_origin - self.frameGeometry().topLeft()
             self._last_move_delta = (0, 0)
-            self._drag_offset = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
-            self.motion.wake()  # interacting wakes a sleeping pet
-            self.motion.clear_follow()
-            self._mood.pet()    # petting cheers it up
-            self._persist_mood()
-            self._gain_affection(2)
-            self._play_sound()
-            self._set_active_sprite(STATE_DRAG)
         super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event) -> None:
-        if self._dragging and self._drag_offset is not None:
-            new_top_left = event.globalPosition().toPoint() - self._drag_offset
-            self._last_move_delta = (new_top_left.x() - self.x(), new_top_left.y() - self.y())
-            self._moved = True
-            self.move(new_top_left)
+        if self._petting is not None:
+            point = event.position()
+            if self.rect().contains(point.toPoint()):
+                if self._petting.move(point.x(), point.y()):
+                    self._interaction_feedback(self.profile_session.request('pet'))
+            else:
+                self._end_petting()
+            event.accept()
+            return
+        if self._pointer_origin is not None and event.buttons() & Qt.MouseButton.LeftButton:
+            point = event.globalPosition().toPoint()
+            if not self._dragging and (point - self._pointer_origin).manhattanLength() >= QApplication.startDragDistance():
+                self.placement_revision += 1
+                self._dragging = True
+                self.profile_session.request("drag")
+            if self._dragging:
+                position = point - self._drag_offset
+                self._last_move_delta = (position.x() - self.x(), position.y() - self.y())
+                self.move(position)
         super().mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event) -> None:
-        if self._dragging:
-            self._dragging = False
-            self.motion.x = float(self.x())
-            self.motion.y = float(self.y())
-            if self._moved:
-                if self.motion.behaviour == BEHAVIOUR_FLOOR:
-                    # Dropping against a screen edge grabs the wall; otherwise fling.
-                    if not self.motion.grab_nearest_wall():
-                        self.motion.throw(self._last_move_delta[0], self._last_move_delta[1])
+        if self._petting is not None and event.button() == Qt.MouseButton.LeftButton:
+            event.accept()
+            return
+        if event.button() == Qt.MouseButton.LeftButton and self._pointer_origin is not None:
+            self._pointer_origin = None
+            if self._dragging:
+                self._dragging = False
+                self.motion.x, self.motion.y = float(self.x()), float(self.y())
+                self.profile_session.request("cancel")
+                if self.motion.behaviour == BEHAVIOUR_FLOOR and not self.motion.grab_nearest_wall():
+                    velocity = self._last_move_delta if self.companion.preferences["allow_throw"] else (0, 0)
+                    self.motion.throw(*velocity)
             else:
-                self.say()  # a click (no drag) makes the pet talk
+                self._interaction_feedback(self.profile_session.request("greet"))
         super().mouseReleaseEvent(event)
+
+    def leaveEvent(self, event) -> None:
+        self._end_petting()
+        super().leaveEvent(event)
+
+    def keyPressEvent(self, event) -> None:
+        if event.key() == Qt.Key.Key_Escape and self._petting is not None:
+            self._end_petting()
+            event.accept()
+            return
+        super().keyPressEvent(event)
+
+    def showEvent(self, event) -> None:
+        super().showEvent(event)
+        self.profile_session.resume()
+        self._layered_playback.resume()
+        for timer, remaining in self._hidden_timers:
+            timer.start(remaining if timer.isSingleShot() else timer.interval())
+        self._hidden_timers = []
+        if self._active is not None and self._active[0] == "movie":
+            self._active[1].setPaused(False)
+        self.profile_session.changed.emit()
+
+    def hideEvent(self, event) -> None:
+        self.stop_toy()
+        self._end_petting()
+        self._layered_playback.pause()
+        self.profile_session.pause()
+        self.profile_session.request("cancel")
+        self._pointer_origin = None
+        self._dragging = False
+        self._bubble.hide()
+        self._hidden_timers = [(timer, max(1, timer.remainingTime())) for timer in
+                               (self._timer, self._chatter_timer, self._reminder_timer) if timer.isActive()]
+        for timer, _remaining in self._hidden_timers:
+            timer.stop()
+        if self._active is not None and self._active[0] == "movie":
+            self._active[1].setPaused(True)
+        super().hideEvent(event)
 
     # --- drop a file onto the pet: wear it (image / pack) or eat it ---
     @staticmethod
@@ -1968,7 +2177,7 @@ class DesktopPetWidget(BaseWidget):
         from frontengine.utils.browser.browser import open_browser
 
         front_engine_logger.info(f"[DesktopPetWidget] fetch_link | url={url}")
-        self._gain_affection(1)
+        self.profile_session.reward("fetch")
         pool = self._messages.get("fetch") or []
         if pool:
             self.say(pool[self._chatter_rng.randrange(len(pool))])
@@ -1981,7 +2190,13 @@ class DesktopPetWidget(BaseWidget):
         self.menu.popup(event.globalPos())
 
     def closeEvent(self, event) -> None:
-        self.profile_session.close()
+        if not self.profile_session.close():
+            self._bubble.show_message(translate('pet_profile_save_failed'), self)
+            event.ignore()
+            return
+        self.stop_toy()
+        self._layered_playback.pause()
+        self._layered_playback.set_renderer(None)
         close = getattr(self._audio_level_provider, 'close', None)
         if close:
             close()

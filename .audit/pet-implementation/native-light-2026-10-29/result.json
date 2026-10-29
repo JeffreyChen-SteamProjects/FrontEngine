@@ -1,0 +1,1234 @@
+{
+  "status": "passed",
+  "platform": "windows",
+  "activity": "light",
+  "synthetic_work_area": true,
+  "fixture_only": true,
+  "helper_show_without_focus": true,
+  "native_gl": true,
+  "walk_alpha": 64,
+  "start": [
+    5663,
+    200
+  ],
+  "end": [
+    5823,
+    260
+  ],
+  "target": [
+    5886,
+    323
+  ],
+  "arrival_action_completed": "play",
+  "timer_stopped": true,
+  "manual_expression_preserved": true,
+  "reward": 3,
+  "pixels_restored": true,
+  "observations": [
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "warm"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5663,
+        200
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5670,
+        203
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5677,
+        205
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5684,
+        208
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5697,
+        213
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5704,
+        215
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5711,
+        218
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5725,
+        223
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5730,
+        225
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5738,
+        228
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5752,
+        233
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5759,
+        236
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5766,
+        239
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5780,
+        244
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5785,
+        246
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5793,
+        249
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5807,
+        254
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5814,
+        256
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        387
+      ],
+      "position": [
+        5821,
+        259
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        388
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        960,
+        389
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        962,
+        392
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    },
+    {
+      "foreground": 75043928,
+      "cursor": [
+        963,
+        394
+      ],
+      "position": [
+        5823,
+        260
+      ],
+      "phase": "moving"
+    }
+  ],
+  "handles": [
+    31656534,
+    286659434,
+    286856042
+  ]
+}

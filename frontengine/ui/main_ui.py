@@ -216,6 +216,8 @@ class FrontEngineMainUI(QMainWindow):
             pet_setting_ui=self.pet_setting_ui,
         )
         self._register_extra_overlays()
+        self.control_center_ui.performance_changed.connect(self.scene_setting_ui.apply_performance_policy)
+        self.control_center_ui.overlay_visibility_changed.connect(self.scene_setting_ui.actions.set_group_hidden)
         self.action_registry = self._build_action_registry()
 
         # Menu Bar
@@ -661,6 +663,7 @@ class FrontEngineMainUI(QMainWindow):
         # Restore the quality tier chosen last time: it was always written to the
         # settings file, just never read back.
         self.control_center_ui.set_quality_tier(user_setting_dict.get("quality_tier"))
+        self.control_center_ui.set_low_power(bool(user_setting_dict.get('low_power', False)))
         if not self._restore_window_geometry():
             self.showMaximized()
 
@@ -729,7 +732,9 @@ class FrontEngineMainUI(QMainWindow):
         # 這條路是真的要關了（X 按鈕、登出、closeAllWindows），所以收尾要在這裡做
         # This branch really is closing - X button, logout, closeAllWindows - so
         # the teardown belongs here.
-        self._shutdown()
+        if self._shutdown() is False:
+            event.ignore()
+            return
         self._request_exit()
         super().closeEvent(event)
 
@@ -778,7 +783,10 @@ class FrontEngineMainUI(QMainWindow):
         registry.bind('scene_load', lambda value: actions.request(value, load_only=True), takes_value=True)
         registry.bind('scene_start', actions.request, takes_value=True, optional_value=True)
         registry.bind('scene_stop', actions.stop_playback)
-        for identifier in ('layer_show', 'layer_hide', 'layer_opacity', 'layer_position'):
+        for identifier in ('scene_pause', 'scene_resume', 'scene_seek', 'scene_rate', 'scene_loop'):
+            registry.bind(identifier, lambda value, action=identifier: actions.playback(action, value),
+                          takes_value=identifier not in ('scene_pause', 'scene_resume'))
+        for identifier in ('layer_show', 'layer_hide', 'layer_opacity', 'layer_position', 'layer_transform'):
             registry.bind(identifier, lambda value, action=identifier: actions.layer(action, value), takes_value=True)
 
     def _handle_hotkey(self, action: str) -> None:
@@ -1196,7 +1204,21 @@ class FrontEngineMainUI(QMainWindow):
             QMessageBox.StandardButton.No)
         return response == QMessageBox.StandardButton.Yes
 
-    def _shutdown(self) -> None:
+    def _flush_pet_profiles(self) -> bool:
+        """Keep the app alive if any pet's current state cannot be saved."""
+        sessions = {}
+        for widget in self.control_center_ui.all_overlays():
+            session = getattr(widget, 'profile_session', None)
+            if session is not None and not getattr(session, '_closed', False):
+                sessions[id(session)] = session
+        success = True
+        for session in sessions.values():
+            success = session.flush() and success
+        if not success:
+            self.statusBar().showMessage(translate('pet_profile_save_failed'))
+        return success
+
+    def _shutdown(self) -> bool:
         """
         存檔並停掉所有服務。放在這裡而不是 close() 裡面，是因為 Qt 的
         QWidget::close() 不是虛擬函式：從標題列的 X、工作階段登出、或
@@ -1210,7 +1232,12 @@ class FrontEngineMainUI(QMainWindow):
         in close() alone, the tray's Quit item was the only exit that saved.
         """
         if self._shutdown_done:
-            return
+            return True
+        pet_page = getattr(self, 'pet_setting_ui', None)
+        if pet_page is not None:
+            pet_page.stop_focus_session()
+        if not self._flush_pet_profiles():
+            return False
         self._shutdown_done = True
         front_engine_logger.info("[FrontEngineMainUI] shutdown")
         if getattr(self, "command_palette", None) is not None:
@@ -1250,10 +1277,12 @@ class FrontEngineMainUI(QMainWindow):
         self._save_window_geometry()
         write_user_setting()
         self.scene_setting_ui.close_scene()
+        return True
 
     def close(self) -> None:
         """關閉程式並清理資源 / Close application and clear resources"""
-        self._shutdown()
+        if self._shutdown() is False:
+            return
         super().close()
         self._request_exit()
 
@@ -1332,6 +1361,11 @@ def start_front_engine(debug: bool = False, preset: Optional[str] = None) -> Non
     :param preset: 啟動時要套用的預設集名稱，覆蓋設定中的啟動預設集
         (Preset name to apply on launch; overrides the configured startup preset)
     """
+    if sys.platform == 'darwin':
+        # macOS needs the core format before QApplication creates internal contexts.
+        from PySide6.QtGui import QSurfaceFormat
+        from frontengine.show.scene.view3d import surface_format
+        QSurfaceFormat.setDefaultFormat(surface_format())
     main_app = QApplication(sys.argv)
     window = FrontEngineMainUI(main_app=main_app, debug=debug)
     if preset:

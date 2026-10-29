@@ -34,6 +34,7 @@ class ControlCenterUI(SettingPage):
     ControlCenterUI: 控制中心面板，集中管理各種 widget 與 log panel
     ControlCenterUI: Control center panel to manage widgets and log panel
     """
+    performance_changed = Signal(str, bool)
 
     # 「綁在目前的虛擬桌面」的開關。實際的隱藏／還原是主視窗上的服務在做，
     # 這個頁面只負責狀態；用訊號通知才不必讓分頁反過來抓住主視窗。
@@ -208,12 +209,14 @@ class ControlCenterUI(SettingPage):
         to dismiss it.
         """
         front_engine_logger.info(f"[ControlCenterUI] clear_{name}")
+        retained = []
         for widget in widget_list[:]:
             try:
-                widget.close()
+                if widget.close() is False:
+                    retained.append(widget)
             except RuntimeError:  # 已經被關掉，C++ 物件不在了 / already deleted
                 continue
-        widget_list.clear()
+        widget_list[:] = retained
 
     def clear_video(self) -> None:
         self._clear_widget_list(self.video_setting_ui.video_widget_list, "video")
@@ -253,9 +256,15 @@ class ControlCenterUI(SettingPage):
         - they stayed on screen.
         """
         front_engine_logger.info("ControlCenterUI clear_all")
-        self._for_each_overlay(lambda widget: widget.close())
+        retained = set()
+        def close_overlay(widget):
+            if widget.close() is False:
+                retained.add(id(widget))
+        self._for_each_overlay(close_overlay)
         for widget_list in self._all_overlay_widget_lists():
-            widget_list.clear()
+            widget_list[:] = [widget for widget in widget_list if id(widget) in retained]
+        if retained:
+            return
         self.scene_setting_ui.close_scene()
         for callback in self._cleanup_callbacks:
             try:
@@ -462,6 +471,7 @@ class ControlCenterUI(SettingPage):
         """省電模式：讓支援的覆蓋層把更新頻率調慢。"""
         front_engine_logger.info(f"ControlCenterUI set_low_power | enabled={enabled}")
         self._low_power = bool(enabled)
+        user_setting_dict['low_power'] = self._low_power
 
         def apply(widget) -> None:
             setter = getattr(widget, "set_low_power", None)
@@ -469,6 +479,7 @@ class ControlCenterUI(SettingPage):
                 setter(self._low_power)
 
         self._for_each_overlay(apply)
+        self.performance_changed.emit(self.current_quality_tier(), self._low_power)
         retranslator.set_text(
             self.low_power_button,
             "control_center_low_power_off" if self._low_power else "control_center_low_power_on",
@@ -540,6 +551,7 @@ class ControlCenterUI(SettingPage):
                 setter(tier)
 
         self._for_each_overlay(apply)
+        self.performance_changed.emit(tier, bool(getattr(self, '_low_power', False)))
 
     def _apply_quality_tier(self) -> None:
         self.set_quality_tier(self.current_quality_tier())

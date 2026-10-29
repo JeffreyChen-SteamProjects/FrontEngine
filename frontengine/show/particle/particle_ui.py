@@ -39,8 +39,8 @@ class ParticleOpenGLWidget(QOpenGLWidget):
         fmt.setAlphaBufferSize(8)
         fmt.setRenderableType(QSurfaceFormat.RenderableType.OpenGL)
         fmt.setProfile(QSurfaceFormat.OpenGLContextProfile.CompatibilityProfile)
-        QSurfaceFormat.setDefaultFormat(fmt)
         super().__init__()
+        self.setFormat(fmt)
 
         apply_overlay_window_flags(self, show_on_bottom=False)
 

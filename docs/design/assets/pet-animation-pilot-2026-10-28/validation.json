@@ -1,0 +1,78 @@
+{
+  "idle.png": {
+    "size": [
+      1254,
+      1254
+    ],
+    "alpha_range": [
+      0,
+      255
+    ],
+    "visible_bounds": [
+      70,
+      39,
+      1235,
+      1127
+    ],
+    "opaque_bounds": [
+      74,
+      96,
+      1230,
+      1123
+    ],
+    "translucent_pixels": 17572
+  },
+  "sleep.png": {
+    "size": [
+      1254,
+      1254
+    ],
+    "alpha_range": [
+      0,
+      255
+    ],
+    "visible_bounds": [
+      81,
+      23,
+      1214,
+      1180
+    ],
+    "opaque_bounds": [
+      95,
+      189,
+      1210,
+      1099
+    ],
+    "translucent_pixels": 16870
+  },
+  "walk-step.png": {
+    "size": [
+      1254,
+      1254
+    ],
+    "alpha_range": [
+      0,
+      255
+    ],
+    "visible_bounds": [
+      67,
+      21,
+      1235,
+      1228
+    ],
+    "opaque_bounds": [
+      71,
+      98,
+      1229,
+      1101
+    ],
+    "translucent_pixels": 16979
+  },
+  "runtime": {
+    "installed": true,
+    "restart_restored": true,
+    "walk_frames_differ": true,
+    "sleep_frame_loaded": true,
+    "native_desktop_verified": false
+  }
+}

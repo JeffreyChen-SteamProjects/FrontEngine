@@ -2,10 +2,10 @@
 from __future__ import annotations
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QGuiApplication
+from PySide6.QtGui import QGuiApplication, QPixmap
 from PySide6.QtWidgets import (
     QComboBox, QDialog, QGraphicsScene, QGraphicsView, QHBoxLayout, QLabel,
-    QListWidget, QListWidgetItem, QPushButton, QVBoxLayout,
+    QListWidget, QListWidgetItem, QPushButton, QVBoxLayout, QStackedWidget,
 )
 
 from frontengine.ui.page.scene_setting.scene_visual_editor import SceneLayerItem
@@ -13,14 +13,16 @@ from frontengine.utils.multi_language.retranslate import retranslator, tr, trans
 from frontengine.utils.scene_format.scene_templates import (
     BUILTIN_TEMPLATES, fit_template, missing_template_assets,
 )
+from frontengine.utils.scene_format.scene_3d_templates import BUILTIN_3D_TEMPLATES
+from frontengine.utils.scene_format.scene_3d_document import SceneDocument
 
 
 class SceneTemplatesDialog(QDialog):
     """Own only preview items; adoption belongs to the page's scene controller."""
 
-    def __init__(self, page, *, templates=BUILTIN_TEMPLATES) -> None:
+    def __init__(self, page, *, templates=None) -> None:
         super().__init__(page)
-        self.page, self.templates = page, tuple(templates)
+        self.page, self.templates = page, tuple(BUILTIN_TEMPLATES+BUILTIN_3D_TEMPLATES if templates is None else templates)
         self.pending = None
         self.setWindowTitle(translate('scene_templates'))
         self.resize(900, 620)
@@ -33,6 +35,11 @@ class SceneTemplatesDialog(QDialog):
         self.canvas = QGraphicsScene(self)
         self.view = QGraphicsView(self.canvas)
         self.view.setInteractive(False)
+        self.preview3d = QLabel()
+        self.preview3d.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.preview_stack = QStackedWidget()
+        self.preview_stack.addWidget(self.view)
+        self.preview_stack.addWidget(self.preview3d)
         self.description, self.status = QLabel(), QLabel()
         self.description.setWordWrap(True)
         self.status.setWordWrap(True)
@@ -60,7 +67,7 @@ class SceneTemplatesDialog(QDialog):
         layout.addWidget(hint)
         row = QHBoxLayout()
         row.addWidget(self.list)
-        row.addWidget(self.view, 1)
+        row.addWidget(self.preview_stack, 1)
         layout.addLayout(row, 1)
         layout.addWidget(self.description)
         screen_row = QHBoxLayout()
@@ -108,8 +115,25 @@ class SceneTemplatesDialog(QDialog):
             self.apply_button.setEnabled(False)
             return
         self.canvas.setSceneRect(0, 0, *size)
-        for key, entry in entries.items():
-            self.canvas.addItem(SceneLayerItem(self, key, entry))
+        self.preview_stack.setCurrentIndex(1 if isinstance(entries, SceneDocument) else 0)
+        if isinstance(entries, SceneDocument):
+            if QGuiApplication.platformName() in ('offscreen', 'minimal'):
+                self.preview3d.setText(translate('scene3d_requires_gl', '3D preview requires desktop OpenGL 3.3'))
+            else:
+                from frontengine.show.scene.render_session import SceneRenderSession
+                session = None
+                try:
+                    session = SceneRenderSession(entries, (640, 480), self)
+                    self.preview3d.setPixmap(QPixmap.fromImage(session.frame()).scaled(640, 400, Qt.AspectRatioMode.KeepAspectRatio))
+                except (ValueError, RuntimeError, OSError) as error:
+                    self.preview3d.setText(str(error))
+                finally:
+                    if session:
+                        session.close()
+                        session.deleteLater()
+        else:
+            for key, entry in entries.items():
+                self.canvas.addItem(SceneLayerItem(self, key, entry))
         self.apply_button.setEnabled(not missing and self.pending is None)
         if missing:
             retranslator.forget(self.status)

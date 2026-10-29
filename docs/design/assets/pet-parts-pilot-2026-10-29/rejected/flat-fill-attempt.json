@@ -1,0 +1,64 @@
+{
+  "file": "docs\\design\\assets\\pet-parts-pilot-2026-10-29\\rejected\\flat-fill-attempt.png",
+  "size": [
+    1254,
+    1254
+  ],
+  "opaque_rgb_count": 174,
+  "top_colors": [
+    [
+      [
+        21,
+        18,
+        15
+      ],
+      328
+    ],
+    [
+      [
+        22,
+        19,
+        16
+      ],
+      215
+    ],
+    [
+      [
+        21,
+        18,
+        16
+      ],
+      202
+    ],
+    [
+      [
+        20,
+        18,
+        15
+      ],
+      197
+    ],
+    [
+      [
+        21,
+        19,
+        16
+      ],
+      183
+    ],
+    [
+      [
+        20,
+        17,
+        15
+      ],
+      139
+    ]
+  ],
+  "alpha_extrema": [
+    0,
+    255
+  ],
+  "accepted": false,
+  "reason": "Visible gradients remain; not flat three-color production artwork"
+}

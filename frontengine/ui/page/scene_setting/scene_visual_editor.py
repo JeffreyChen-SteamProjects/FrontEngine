@@ -8,17 +8,19 @@ from PySide6.QtCore import Qt, QRectF, QTimer, QSize
 from PySide6.QtGui import QColor, QImageReader, QMovie, QPen, QFont, QShortcut, QKeySequence
 from PySide6.QtWidgets import (
     QCheckBox, QDoubleSpinBox, QFileDialog, QGraphicsItem, QGraphicsObject,
-    QGraphicsScene, QGraphicsView, QInputDialog, QListWidget,
+    QGraphicsScene, QGraphicsView, QInputDialog, QListWidget, QStackedWidget, QComboBox,
     QListWidgetItem, QMessageBox, QPushButton, QSplitter, QLabel, QTabWidget,
 )
 
 from frontengine.ui.page.layout_kit import SettingPage
 from frontengine.ui.page.action_menu import ActionMenu
-from frontengine.user_setting.scene_setting import scene_json, write_scene_file
+from frontengine.user_setting.scene_setting import write_scene_file
 from frontengine.utils.multi_language.retranslate import tr, translate, retranslator
 from frontengine.utils.scene_format.scene_editor_document import SceneEditorDocument
 from frontengine.ui.page.scene_setting.scene_media_preview import SceneMediaPreview
 from frontengine.show.scene.timeline import SceneTimeline
+from frontengine.utils.scene_format.scene_3d_document import SceneDocument, make_3d_scene, MEDIA_TYPES
+from frontengine.user_setting.scene_setting import current_scene_document, adopt_scene_document
 
 
 class SceneCanvas(QGraphicsView):
@@ -135,6 +137,11 @@ class SceneVisualEditor(SettingPage):
         self.canvas = QGraphicsScene(self)
         self.canvas.setSceneRect(0, 0, 1920, 1080)
         self.view = SceneCanvas(self.canvas)
+        from frontengine.ui.page.scene_setting.scene_3d_editor import Scene3DEditor
+        self.editor3d = Scene3DEditor(self)
+        self.viewport_stack = QStackedWidget()
+        self.viewport_stack.addWidget(self.view)
+        self.viewport_stack.addWidget(self.editor3d)
         retranslator.bind(self.view, "scene_visual_hint", setter="setToolTip")
         self.view.setMinimumSize(280, 320)
         self.layers = QListWidget()
@@ -143,10 +150,16 @@ class SceneVisualEditor(SettingPage):
         self.layers.setSelectionMode(QListWidget.SelectionMode.ExtendedSelection)
         split = QSplitter()
         split.addWidget(self.layers)
-        split.addWidget(self.view)
+        split.addWidget(self.viewport_stack)
         split.setStretchFactor(1, 1)
         self._build_actions()
         self._build_workspace(split)
+        self.three_d_page = SettingPage('scene3d_title', 'scene3d_hint', compact=True)
+        self.editor3d.build_inspector(self.three_d_page)
+        self.three_d_page.finish_body()
+        index = self.inspector_tabs.addTab(self.three_d_page, '3D')
+        retranslator.bind(self.inspector_tabs, 'scene3d_title', '3D', 'setTabText', index)
+        self.editor3d.selection_changed.connect(self._select_3d_keys)
         self._build_media_actions()
         self._build_properties()
         self._build_animation_actions()
@@ -154,9 +167,10 @@ class SceneVisualEditor(SettingPage):
             page.finish_body()
         self.document.changed.connect(self._changed)
         manager.entries_changed.connect(self.load_entries)
+        manager.document_changed.connect(self.load_document)
         self.layers.itemSelectionChanged.connect(self._list_selected)
         self.canvas.selectionChanged.connect(self._canvas_selected)
-        self.load_entries(scene_json)
+        self.load_document(current_scene_document())
         self._show_properties()
 
     def _build_workspace(self, canvas: QSplitter) -> None:
@@ -186,6 +200,11 @@ class SceneVisualEditor(SettingPage):
 
     def _build_actions(self) -> None:
         section = self.add_section("section_actions")
+        self.scene_mode = QComboBox()
+        self.scene_mode.addItem('2D', '2d')
+        self.scene_mode.addItem('3D', '3d')
+        self.scene_mode.currentIndexChanged.connect(self._change_mode)
+        section.add_inline(self.scene_mode)
         media = (self._button("scene_add_image", lambda: self._add_media("IMAGE")),
                  self._button("scene_add_gif", lambda: self._add_media("GIF")),
                  self._button("scene_add_text", self._add_text))
@@ -204,6 +223,14 @@ class SceneVisualEditor(SettingPage):
         section.add_inline(ActionMenu(media + native, "ui_add_layer"),
                            ActionMenu(editing, "ui_edit_layers"),
                            ActionMenu(alignment, "ui_align_layers"))
+        buttons = []
+        for kind in ('MODEL', 'PLANE', 'CUBE', 'SPHERE', 'CAMERA', 'LIGHT', 'GROUP'):
+            button = tr(QPushButton(), 'scene3d_add_'+kind.lower(), 'Add '+kind.title())
+            button.clicked.connect(lambda checked=False, value=kind: self.editor3d.add_object(value))
+            buttons.append(button)
+        self.add_3d_menu = ActionMenu(tuple(buttons), 'scene3d_add')
+        self.add_3d_menu.setVisible(False)
+        section.add_inline(self.add_3d_menu)
 
     def _build_properties(self) -> None:
         section = self.properties_page.add_section("scene_layer_properties")
@@ -228,12 +255,17 @@ class SceneVisualEditor(SettingPage):
         section = self.preview_page.add_section('scene_media_preview_title')
         self.media_enabled = tr(QCheckBox(), 'scene_media_preview_enable')
         self.media_enabled.toggled.connect(self.media_preview.set_enabled)
+        self.media_enabled.toggled.connect(lambda _enabled: self.editor3d.load(self.document.scene, force=True)
+                                          if self.document.scene.mode == '3d' else None)
         section.add_inline(self.media_enabled,
             self._button('scene_media_interact', self._interact_media),
             self._button('scene_media_audition', self._audition_media))
         self.media_status = tr(QLabel(), 'scene_media_preview_hint')
         self.media_status.setWordWrap(True)
         section.add_widget(self.media_status)
+        live_hint = tr(QLabel(), 'scene3d_live_hint')
+        live_hint.setWordWrap(True)
+        section.add_widget(live_hint)
         self.media_preview.changed.connect(self._media_changed)
         self.media_preview.failed.connect(self._media_failed)
 
@@ -246,13 +278,13 @@ class SceneVisualEditor(SettingPage):
         self.timeline_position = QDoubleSpinBox()
         self.timeline_position.setDecimals(2)
         self.timeline_position.setRange(0, 3600)
-        self.timeline_position.editingFinished.connect(lambda: self.timeline.seek(self.timeline_position.value()))
+        self.timeline_position.editingFinished.connect(lambda: self._preview_timeline().seek(self.timeline_position.value()))
         section.add_row('scene_animation_time', self.timeline_position)
         section.add_actions(self._button('scene_animation_edit', self._edit_animation),
-            self._button('scene_animation_play', lambda: self.timeline.play()),
-            self._button('scene_animation_pause', self.timeline.pause),
-            self._button('scene_animation_replay', lambda: self.timeline.play(restart=True)),
-            self._button('scene_animation_reset', self.timeline.reset))
+            self._button('scene_animation_play', lambda: self._preview_timeline().play()),
+            self._button('scene_animation_pause', lambda: self._preview_timeline().pause()),
+            self._button('scene_animation_replay', lambda: self._preview_timeline().play(restart=True)),
+            self._button('scene_animation_reset', lambda: self._preview_timeline().reset()))
         section.add_actions(self._button('scene_animation_playback_pause', lambda: self._playback_animation('pause')),
             self._button('scene_animation_playback_resume', lambda: self._playback_animation('play')),
             self._button('scene_animation_playback_replay', lambda: self._playback_animation('replay')))
@@ -264,6 +296,9 @@ class SceneVisualEditor(SettingPage):
 
     def _animation_position(self, seconds: float) -> None:
         self.timeline_position.setValue(seconds)
+
+    def _preview_timeline(self):
+        return self.editor3d.runtime.timeline if self.document.scene.mode == '3d' and self.editor3d.runtime else self.timeline
 
     def _animation_state(self, state: str) -> None:
         self.view.setInteractive(not self.timeline.previewing)
@@ -290,8 +325,14 @@ class SceneVisualEditor(SettingPage):
         if self.animation_dialog is not None:
             self.animation_dialog.raise_()
             return
-        from frontengine.ui.dialog.scene_animation_dialog import SceneAnimationDialog
-        dialog = SceneAnimationDialog(self.document, keys[0], self)
+        entry = self.document.entries[keys[0]]
+        world = entry.get('space', 'screen' if entry['type'] in MEDIA_TYPES else 'world') == 'world'
+        if self.document.scene.mode == '3d' and world:
+            from frontengine.ui.dialog.scene_3d_animation_dialog import Scene3DAnimationDialog
+            dialog = Scene3DAnimationDialog(self.document, keys[0], self)
+        else:
+            from frontengine.ui.dialog.scene_animation_dialog import SceneAnimationDialog
+            dialog = SceneAnimationDialog(self.document, keys[0], self)
         self.animation_dialog = dialog
         dialog.finished.connect(self._animation_dialog_closed)
         dialog.show()
@@ -322,11 +363,20 @@ class SceneVisualEditor(SettingPage):
 
     def _interact_media(self) -> None:
         for key in self._selected_keys():
-            self.media_preview.interact(key)
+            source = self.editor3d.runtime.sources.get(key) if self.document.scene.mode == '3d' and self.editor3d.runtime else None
+            if source and source.widget and hasattr(source.widget, 'interact'):
+                source.widget.interact()
+            else:
+                self.media_preview.interact(key)
 
     def _audition_media(self) -> None:
         for key in self._selected_keys():
-            self.media_preview.audition(key)
+            source = self.editor3d.runtime.sources.get(key) if self.document.scene.mode == '3d' and self.editor3d.runtime else None
+            if source:
+                source.audition = True
+                self.editor3d.runtime._time_changed(self.editor3d.runtime.timeline.position)
+            else:
+                self.media_preview.audition(key)
 
     def load_entries(self, entries: dict) -> None:
         if not self.syncing and entries != self.document.entries:
@@ -335,13 +385,45 @@ class SceneVisualEditor(SettingPage):
             except ValueError as error:
                 QMessageBox.warning(self, translate("scene_visual_editor"), str(error))
 
+    def load_document(self, document) -> None:
+        if not self.syncing and document != self.document.scene:
+            try:
+                self.document.reset(document)
+            except ValueError as error:
+                QMessageBox.warning(self, translate('scene_visual_editor'), str(error))
+
+    def _change_mode(self):
+        if self.syncing:
+            return
+        mode = self.scene_mode.currentData()
+        if mode == self.document.scene.mode:
+            return
+        if mode == '3d':
+            self.document.replace_document(make_3d_scene(self.document.entries), 'Enable 3D scene')
+        else:
+            entries = {key: copy.deepcopy(entry) for key, entry in self.document.entries.items() if entry['type'] in MEDIA_TYPES}
+            for entry in entries.values():
+                for name in ('transform', 'tracks', 'space', 'parent'):
+                    entry.pop(name, None)
+            self.document.replace_document(SceneDocument(entries), 'Convert scene to 2D')
+
+    def _select_3d_keys(self, keys):
+        self.layers.blockSignals(True)
+        for index in range(self.layers.count()):
+            row = self.layers.item(index)
+            row.setSelected(row.data(Qt.ItemDataRole.UserRole) in keys)
+        self.layers.blockSignals(False)
+        self._list_selected()
+
     def _changed(self, entries: dict) -> None:
-        self.media_preview.sync(entries)
+        self.media_preview.sync(entries if self.document.scene.mode == '2d' else {})
         selected = self._selected_keys()
         self.syncing = True
         try:
-            scene_json.clear()
-            scene_json.update(entries)
+            adopt_scene_document(self.document.scene)
+            self.scene_mode.setCurrentIndex(1 if self.document.scene.mode == '3d' else 0)
+            self.add_3d_menu.setVisible(self.document.scene.mode == '3d')
+            self.viewport_stack.setCurrentIndex(1 if self.document.scene.mode == '3d' else 0)
             self.manager.renew_json_plain_text()
             self.layers.blockSignals(True)
             self.canvas.blockSignals(True)
@@ -361,6 +443,7 @@ class SceneVisualEditor(SettingPage):
             self.syncing = False
         self._show_properties()
         self.timeline.configure(entries, reset=True)
+        self.editor3d.load(self.document.scene)
 
     def _selected_keys(self) -> list[str]:
         return [item.data(Qt.ItemDataRole.UserRole) for item in self.layers.selectedItems()]
@@ -392,6 +475,7 @@ class SceneVisualEditor(SettingPage):
         for checkbox, key, default in ((self.locked, "locked", False), (self.visible, "visible", True)):
             checkbox.setEnabled(entry is not None and not self.timeline.previewing)
             checkbox.setChecked(entry.get(key, default) if entry else default)
+        self.editor3d.select(keys)
 
     def _apply_properties(self) -> None:
         if self.timeline.previewing:
@@ -461,12 +545,20 @@ class SceneVisualEditor(SettingPage):
 
     def _remove(self) -> None:
         for key in self._selected_keys():
-            self.document.remove(key)
+            if key not in self.document.entries:
+                continue
+            try:
+                self.document.remove(key)
+            except ValueError as error:
+                QMessageBox.warning(self, translate('scene_visual_editor'), str(error))
 
     def _align(self, direction: str) -> None:
         self.document.align(self._selected_keys(), direction)
 
     def _fit(self) -> None:
+        if self.document.scene.mode == '3d':
+            self.editor3d.focus()
+            return
         self.view.fitInView(self.canvas.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
 
     def showEvent(self, event) -> None:
@@ -487,6 +579,7 @@ class SceneVisualEditor(SettingPage):
         super().hideEvent(event)
 
     def closeEvent(self, event) -> None:
+        self.editor3d.shutdown()
         self.timeline.shutdown()
         self.media_preview.shutdown()
         self.canvas.clear()

@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta
 from typing import Callable, Optional
+from time import monotonic
 
 PHASE_IDLE = "idle"
 PHASE_FOCUS = "focus"
@@ -39,7 +40,7 @@ class FocusTimer:
 
     def __init__(self, focus_minutes: int = 25, break_minutes: int = 5,
                  long_break_minutes: int = 15, rounds: int = 4,
-                 now_provider: Callable[[], datetime] = datetime.now) -> None:
+                 now_provider: Callable[[], datetime] | None = None) -> None:
         self.focus_minutes = clamp_minutes(focus_minutes, 25)
         self.break_minutes = clamp_minutes(break_minutes, 5)
         self.long_break_minutes = clamp_minutes(long_break_minutes, 15)
@@ -47,7 +48,11 @@ class FocusTimer:
             self.rounds = max(1, int(rounds))
         except (TypeError, ValueError):
             self.rounds = 4
-        self._now = now_provider
+        if now_provider is None:
+            origin, start = datetime.now(), monotonic()
+            self._now = lambda: origin + timedelta(seconds=monotonic() - start)
+        else:
+            self._now = now_provider
         self.phase = PHASE_IDLE
         self.completed_focus = 0
         self._phase_ends: Optional[datetime] = None

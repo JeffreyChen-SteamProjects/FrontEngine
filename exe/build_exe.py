@@ -38,7 +38,7 @@ OUTPUT_DIR = PROJECT_ROOT / "build" / "nuitka"
 # half-initialised Cython module aborts start-up with
 # KeyError('__reduce_cython__').
 DYNAMIC_PACKAGES = ("frontengine", "qt_material", "pynput", "OpenGL",
-                    "OpenGL_accelerate", "winrt")
+                    "OpenGL_accelerate", "winrt", "pygltflib", "trimesh")
 
 
 def read_version() -> str:
@@ -66,7 +66,7 @@ def check_dependencies(version_lookup=None) -> list[str]:
     return missing
 
 
-def build_command(version: str, onefile: bool) -> list[str]:
+def build_command(version: str, onefile: bool, output_dir: Path | None = None, jobs: int | None = None) -> list[str]:
     """Assemble the Nuitka command line."""
     command = [
         sys.executable, "-m", "nuitka",
@@ -76,8 +76,9 @@ def build_command(version: str, onefile: bool) -> list[str]:
         "--windows-console-mode=disable",
         f"--windows-icon-from-ico={ICON}",
         "--output-filename=FrontEngine.exe",
-        f"--output-dir={OUTPUT_DIR}",
+        f"--output-dir={output_dir or OUTPUT_DIR}",
         "--include-package-data=qt_material",
+        "--include-package-data=trimesh",
         # main_ui.py looks for frontengine.ico next to the working directory.
         f"--include-data-files={ICON}=frontengine.ico",
         "--company-name=JE-Chen",
@@ -94,8 +95,13 @@ def build_command(version: str, onefile: bool) -> list[str]:
         command.append('--include-package=PIL')
     if find_spec('Imervue') is not None:
         command.append('--include-package-data=Imervue')
+    for package in ('av', 'pyvirtualcam'):
+        if find_spec(package) is not None:
+            command.append('--include-package='+package)
     if onefile:
         command.append("--onefile")
+    if jobs is not None:
+        command.append(f'--jobs={jobs}')
     command.append(str(ENTRY_POINT))
     return command
 
@@ -119,8 +125,12 @@ def main() -> int:
     """Run the build and report where the executable landed."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--onefile", action="store_true")
+    parser.add_argument('--output-dir', type=Path, default=OUTPUT_DIR)
+    parser.add_argument('--jobs', type=int, help='Maximum parallel C compilation jobs')
     parser.add_argument("--steam-runtime", help="Explicit steam_api64.dll to ship beside the executable")
     args = parser.parse_args()
+    if args.jobs is not None and args.jobs < 1:
+        parser.error('--jobs must be at least 1')
     missing = check_dependencies()
     if missing:
         parser.error("Install requirements.txt in this Python environment before building: " + "; ".join(missing))
@@ -129,7 +139,7 @@ def main() -> int:
     except (OSError, ValueError) as error:
         parser.error(str(error))
     onefile = args.onefile
-    command = build_command(read_version(), onefile)
+    command = build_command(read_version(), onefile, args.output_dir.resolve(), args.jobs)
     print(" ".join(command), flush=True)
     # argv 全部在 build_command() 裡組好：sys.executable、寫死的旗標、由這個檔案
     # 位置算出來的 repo 路徑，以及 pyproject.toml 的版本字串。命令列參數只用來判斷
@@ -139,7 +149,7 @@ def main() -> int:
     result = subprocess.run(  # nosec B603 # nosemgrep - argv assembled here, shell=False
         command, cwd=PROJECT_ROOT, check=False)
     if result.returncode == 0:
-        built = OUTPUT_DIR / ("FrontEngine.exe" if onefile
+        built = args.output_dir.resolve() / ("FrontEngine.exe" if onefile
                               else "start_front_engine.dist/FrontEngine.exe")
         print(f"Built {built}")
         if runtime:

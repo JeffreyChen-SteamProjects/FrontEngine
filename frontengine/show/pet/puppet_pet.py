@@ -4,7 +4,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from PySide6.QtCore import QEvent, Qt, QTimer, Signal
-from PySide6.QtWidgets import QLabel, QMenu, QVBoxLayout
+from PySide6.QtWidgets import QLabel, QMenu, QMessageBox, QVBoxLayout
 
 from frontengine.show.draggable_window import DraggableTopWindow
 from frontengine.utils.imervue.puppet_asset import finite_parameters, validate_puppet
@@ -12,12 +12,20 @@ from frontengine.utils.imervue.runtime import puppet_runtime
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.show.pet.pet_profile_session import PetProfileSession
 from frontengine.user_setting.pet_profiles import PetProfiles
+from frontengine.user_setting.pet_profile_schema import presentation_defaults
 from frontengine.utils.multi_language.retranslate import translate
+from frontengine.show.pet.companion_menu import add_companion_actions, add_food_actions, companion_status
+from frontengine.show.pet.puppet_reactions import PuppetReactions, load_reactions
+from frontengine.utils.pet_companion.petting import PettingGesture
+from frontengine.show.pet.puppet_target import PuppetTargetController
 
 
 class PuppetPetWidget(DraggableTopWindow):
     clone_requested = Signal()
+    customize_requested = Signal()
     overlay_lockable = False
+    supports_layered_wardrobe = False
+    customization_fields = frozenset({'size', 'speech_bubbles', 'settle_typing', 'auto_rest'})
 
     def __init__(self, path: str | Path, size: tuple[int, int] = (320, 480), *,
                  parameters: dict | None = None, motion: str | None = None,
@@ -29,20 +37,31 @@ class PuppetPetWidget(DraggableTopWindow):
         if (len(size) != 2 or any(type(v) is not int or not 16 <= v <= 4096 for v in size)):
             raise ValueError('Puppet display size must be two integers between 16 and 4096')
         runtime = puppet_runtime()
-        script = runtime.Script(runtime.load_script(script_path) if script_path else None)
         document = runtime.load(path)
+        reactions = load_reactions(script_path, document)
+        script = runtime.Script(runtime.load_script(script_path) if script_path else None)
         super().__init__(parent)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.path = str(Path(path).resolve())
+        self.script_path = str(Path(script_path).resolve()) if script_path else None
         self.opacity = 1.0
         self._closed = False
+        self._photo_dialog = None
         self._settled = False
+        self._petting = None
+        self._petting_revision = None
+        self._target = PuppetTargetController(self)
+        self.placement_revision = 0
+        self._talk = True
+        self._initial_size = size
+        self._presentation_defaults = {**presentation_defaults(), 'size': min(512, size[0])}
         self._messages = {}
         self.canvas = runtime.Canvas(self, pet_mode=True)
         self.canvas.installEventFilter(self)
         self.canvas.load_document(document)
         self.canvas.set_parameter_values(values)
         self.player = runtime.Player(self.canvas, parent=self)
+        self.reactions = PuppetReactions(self.canvas, self.player, self._play_native_motion, reactions)
         self.idle = runtime.Idle(self.canvas, parent=self)
         self.inputs = runtime.Input(self.canvas, parent=self)
         self.inputs.set_blink_enabled(True)
@@ -62,6 +81,8 @@ class PuppetPetWidget(DraggableTopWindow):
         self._configure_initial(motion, expression)
         try:
             self.profile_session = PetProfileSession(self, profile_id, profiles, profile_name)
+            self.profile_session.changed.connect(self._companion_changed)
+            self._companion_changed()
         except (OSError, ValueError):
             self.shutdown()
             self.close()
@@ -87,6 +108,12 @@ class PuppetPetWidget(DraggableTopWindow):
         return point.x(), point.y()
 
     def play_motion(self, name: str) -> bool:
+        self.stop_toy()
+        self._end_petting()
+        self.reactions.release()
+        return self._play_native_motion(name)
+
+    def _play_native_motion(self, name: str) -> bool:
         motion = next((m for m in self.canvas.document().motions if m.name == name), None)
         if motion is None:
             return False
@@ -95,13 +122,16 @@ class PuppetPetWidget(DraggableTopWindow):
         return True
 
     def _hit_area(self, area: str) -> None:
+        self.stop_toy()
+        active_expressions = self.canvas.active_expressions()
+        self.reactions.release()
         document = self.canvas.document()
         hit = next((item for item in document.hit_areas if item.id == area), None) if document else None
         motion = hit.motion if hit else None
         if motion:
             self.play_motion(motion)
         if hit and hit.expression:
-            if hit.expression in self.canvas.active_expressions():
+            if hit.expression in active_expressions:
                 self.canvas.remove_expression(hit.expression)
             else:
                 self.canvas.add_expression(hit.expression)
@@ -112,10 +142,29 @@ class PuppetPetWidget(DraggableTopWindow):
 
     def eventFilter(self, watched, event) -> bool:
         if watched is self.canvas:
+            if self._petting is not None:
+                if event.type() == QEvent.Type.Leave:
+                    self._end_petting()
+                elif event.type() == QEvent.Type.MouseMove:
+                    point = event.position()
+                    if not self.canvas.rect().contains(point.toPoint()):
+                        self._end_petting()
+                    elif self._petting.move(point.x(), point.y()):
+                        self._interaction_feedback(self.profile_session.request('pet'))
+                    return True
+                elif event.type() in (QEvent.Type.MouseButtonPress, QEvent.Type.MouseButtonRelease,
+                                      QEvent.Type.MouseButtonDblClick):
+                    if event.button() == Qt.MouseButton.LeftButton:
+                        return True
+                elif event.type() == QEvent.Type.KeyPress and event.key() == Qt.Key.Key_Escape:
+                    self._end_petting()
+                    return True
             if event.type() == QEvent.Type.MouseButtonPress and event.button() == Qt.MouseButton.LeftButton:
+                self.stop_toy()
                 self._drag_origin = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
             elif (event.type() == QEvent.Type.MouseMove and self._drag_origin is not None
                   and event.buttons() & Qt.MouseButton.LeftButton):
+                self.placement_revision += 1
                 self.move(event.globalPosition().toPoint() - self._drag_origin)
                 return True
             elif event.type() == QEvent.Type.MouseButtonRelease and event.button() == Qt.MouseButton.LeftButton:
@@ -123,11 +172,15 @@ class PuppetPetWidget(DraggableTopWindow):
         return super().eventFilter(watched, event)
 
     def _script_tick(self) -> None:
+        if self._petting is not None or self._target.marker is not None or not self.profile_session.companion.allows_autonomy:
+            return
         line = self.script.due_scheduled_message()
         if line:
             self.say(line)
 
     def say(self, text: str) -> None:
+        if not self._talk:
+            return
         self.bubble.setText(str(text))
         self.bubble.adjustSize()
         self.bubble.move(4, 4)
@@ -137,9 +190,18 @@ class PuppetPetWidget(DraggableTopWindow):
 
     def set_settled(self, settled: bool) -> None:
         self._settled = bool(settled)
-        self.idle.set_enabled(self.isVisible() and not settled)
         if settled:
+            self.stop_toy()
+            self._end_petting()
+        self.idle.set_enabled(self.isVisible() and not settled
+                              and self._petting is None
+                              and self._target.marker is None
+                              and self.profile_session.companion.allows_autonomy)
+        if settled:
+            self.reactions.reset()
             self.player.stop()
+        elif self.isVisible():
+            self.reactions.update('walk' if self._target.marker is not None else self.profile_session.companion.visual_action)
 
     def contextMenuEvent(self, event) -> None:
         words = language_wrapper.language_word_dict
@@ -153,52 +215,202 @@ class PuppetPetWidget(DraggableTopWindow):
             action = expressions.addAction(expression.name)
             action.setCheckable(True)
             action.setChecked(expression.name in self.canvas.active_expressions())
-            action.toggled.connect(lambda on, name=expression.name: self.canvas.add_expression(name)
-                                   if on else self.canvas.remove_expression(name))
+            action.toggled.connect(lambda on, name=expression.name: self._choose_expression(name, on))
         menu.addAction(words.get('pet_puppet_clone', 'Clone'), self.clone_requested.emit)
         menu.addAction(words.get('pet_status', 'Status'), self.show_profile_status)
-        menu.addAction(words.get('pet_feed', 'Feed'), self.feed)
+        menu.addAction(words.get('pet_feed', 'Feed'), lambda: self.feed())
+        add_food_actions(menu, self.feed)
+        menu.addAction(translate('pet_custom_title', 'Customize pet'), self.customize_requested.emit)
+        menu.addAction(translate('pet_photo_title', 'Pet photo'), self.open_photo)
+        menu.addAction(translate('pet_come', 'Come here'), lambda: self.start_call())
+        menu.addAction(translate('pet_light_start', 'Play with a light spot'), lambda: self.start_light())
+        menu.addAction(translate('pet_ball_start', 'Throw a ball'), lambda: self.start_ball())
+        menu.addAction(translate('pet_toy_stop', 'Put toy away'), self.stop_toy)
+        add_companion_actions(menu, self.profile_session, self._interaction_feedback,
+                              request=self._request_interaction)
         menu.addAction(words.get('pet_puppet_close', 'Close'), self.close)
         menu.exec(event.globalPos())
         menu.deleteLater()
+
+    def _choose_expression(self, name, enabled):
+        self.stop_toy()
+        self._end_petting()
+        self.reactions.release()
+        if enabled:
+            self.canvas.add_expression(name)
+        else:
+            self.canvas.remove_expression(name)
+
+    def photo_image(self):
+        """Use the runtime's character-only FBO, never a desktop screenshot."""
+        render = getattr(self.canvas, 'render_offscreen_puppet', None)
+        if self._closed or not callable(render) or not self.canvas.isValid():
+            raise ValueError('Puppet photo requires an initialized compatible GL canvas')
+        image = render(self.width(), self.height(), background_rgba=(0.0, 0.0, 0.0, 0.0))
+        if image is None or image.isNull():
+            raise ValueError('Puppet renderer did not produce a photo')
+        return image.copy()
+
+    def open_photo(self) -> None:
+        from frontengine.ui.dialog.pet_photo import PetPhotoDialog
+
+        if self._photo_dialog is None:
+            try:
+                snapshot = self.photo_image()
+            except Exception:
+                # Native context/driver failures must not escape a GUI signal handler.
+                QMessageBox.warning(self, translate('pet_photo_title', 'Pet photo'), translate(
+                    'pet_photo_unavailable', 'The pet image is not ready. Show the pet and try again.'))
+                return
+            self._photo_dialog = PetPhotoDialog(snapshot, parent=self)
+            self._photo_dialog.destroyed.connect(self._photo_closed)
+        self._photo_dialog.show()
+
+    def _photo_closed(self) -> None:
+        self._photo_dialog = None
 
     def show_profile_status(self) -> None:
         """Show the same saved identity fields without altering puppet geometry."""
         record = self.profile_session.state()
         self.say(record['name'] + ' · ' + translate('pet_profile_stats').format(**record))
 
-    def feed(self) -> None:
-        """Persist feeding stats without changing upstream puppet motion state."""
-        record = self.profile_session.state()
-        try:
-            self.profile_session.profiles.update(record['id'], {
-                'mood': min(100, record['mood'] + 12), 'fullness': min(100, record['fullness'] + 30),
-                'affection': min(1000000, record['affection'] + 5)})
-        except (OSError, ValueError):
-            self.say(translate('pet_profile_save_failed'))
+    def feed(self, kind: str = 'snack') -> None:
+        """Use common care rules without inventing a model's native animation."""
+        self.stop_toy()
+        self._end_petting()
+        self._interaction_feedback(self.profile_session.request('feed', kind))
+
+    def _request_interaction(self, action: str) -> str:
+        self.stop_toy()
+        if action != 'pet':
+            self._end_petting()
+            return self.profile_session.request(action)
+        if (self._closed or not self.isVisible() or self._settled
+                or self.profile_session.companion.action is not None or self._drag_origin is not None):
+            return 'busy'
+        if self._petting is None:
+            self._petting_tracking = self.canvas.hasMouseTracking()
+        self._petting = PettingGesture(max(4, self.canvas.width() * 0.08))
+        self._petting_revision = self.profile_session.mode_revision
+        self.canvas.setMouseTracking(True)
+        self.idle.set_enabled(False)
+        return 'accepted'
+
+    def _end_petting(self) -> None:
+        if self._petting is None:
             return
-        self.show_profile_status()
+        self._petting = None
+        self._drag_origin = None
+        self.canvas.setMouseTracking(self._petting_tracking)
+        if self.profile_session.companion.action == 'pet':
+            self.profile_session.request('cancel')
+        self.idle.set_enabled(not self._closed and self.isVisible() and not self._settled
+                              and self.profile_session.companion.allows_autonomy)
+
+    def keyPressEvent(self, event) -> None:
+        if event.key() == Qt.Key.Key_Escape and self._target.marker is not None:
+            self.stop_toy()
+            event.accept()
+            return
+        if event.key() == Qt.Key.Key_Escape and self._petting is not None:
+            self._end_petting()
+            event.accept()
+            return
+        super().keyPressEvent(event)
+
+    def _interaction_feedback(self, result: str) -> None:
+        if result == 'accepted' and self._petting is not None:
+            self.say(translate('pet_petting_hint', 'Move back and forth over the pet. Leave to stop.'))
+            return
+        self.say(companion_status(self.profile_session) if result == "accepted" else translate(
+            "pet_companion_" + result, result))
+
+    def _companion_changed(self) -> None:
+        if self._petting is not None and (
+                self._petting_revision != self.profile_session.mode_revision
+                or self.profile_session.companion.action not in (None, 'pet')):
+            self._end_petting()
+        values = self.profile_session.companion.preferences.get('presentation')
+        if values is None:
+            self.resize(*self._initial_size)
+            self._talk = True
+        else:
+            width = values['size']
+            self.resize(width, max(16, round(width * self._initial_size[1] / self._initial_size[0])))
+            self._talk = values['speech_bubbles']
+        if not self._talk:
+            self.bubble.hide()
+        self.set_settled(self._settled)
+        self._target.validate()
+
+    @property
+    def can_play_with_toy(self) -> bool:
+        return (not self._closed and self.isVisible() and not self._settled
+                and not self.profile_session._closed and self._drag_origin is None
+                and self._petting is None and self.profile_session.companion.allows_autonomy)
+
+    def start_call(self, *, offset: tuple[int, int] | None = None) -> str:
+        result = self._target.start(offset=offset)
+        self._interaction_feedback(result)
+        return result
+
+    def stop_toy(self) -> None:
+        self._target.stop()
+
+    def start_light(self, *, offset: tuple[int, int] | None = None) -> str:
+        result = self._target.start(activity='light', offset=offset)
+        self._interaction_feedback(result)
+        return result
+
+    def start_ball(self) -> str:
+        result = self._target.start(activity='ball')
+        self._interaction_feedback(result)
+        return result
+
+    def place_for_focus(self, x: int, y: int) -> None:
+        self.stop_toy()
+        self._drag_origin = None
+        self.move(x, y)
+
+    def mousePressEvent(self, event) -> None:
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.stop_toy()
+        super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event) -> None:
+        if self._drag_origin is not None and event.buttons() & Qt.MouseButton.LeftButton:
+            self.placement_revision += 1
+        super().mouseMoveEvent(event)
 
     def showEvent(self, event) -> None:
         super().showEvent(event)
         if not self._closed:
-            self.idle.set_enabled(not self._settled)
+            self.profile_session.resume()
+            self.set_settled(self._settled)
             self.script_timer.start()
 
     def hideEvent(self, event) -> None:
         if not self._closed:
+            self.stop_toy()
+            self._end_petting()
+            self.reactions.reset()
+            self.profile_session.pause()
+            self.profile_session.request("cancel")
             self.idle.set_enabled(False)
             self.player.stop()
             self.script_timer.stop()
         super().hideEvent(event)
 
-    def shutdown(self) -> None:
+    def shutdown(self) -> bool:
         if self._closed:
-            return
-        self._closed = True
+            return True
         session = getattr(self, 'profile_session', None)
-        if session is not None:
-            session.close()
+        if session is not None and not session.close():
+            return False
+        self._closed = True
+        self.stop_toy()
+        self._end_petting()
+        self.reactions.reset()
         self.script_timer.stop()
         self.idle.set_enabled(False)
         self.idle.shutdown()
@@ -206,7 +418,11 @@ class PuppetPetWidget(DraggableTopWindow):
         self.player.set_motion(None)
         self.canvas.load_document(None)
         self.canvas.close()
+        return True
 
     def closeEvent(self, event) -> None:
-        self.shutdown()
+        if not self.shutdown():
+            self.say(translate('pet_profile_save_failed'))
+            event.ignore()
+            return
         super().closeEvent(event)

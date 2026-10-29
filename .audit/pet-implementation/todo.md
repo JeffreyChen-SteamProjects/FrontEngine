@@ -1,0 +1,85 @@
+# Full desktop pet implementation
+
+- [x] Read poteto-mode Principles and current specifications.
+- [x] Phase A: Frame. Full specification and six-character/fourteen-outfit catalog remain acceptance scope.
+- [x] Phase B: Design the workflow. Compare candidate-a and candidate-b; independent design verdict recorded.
+- [ ] Phase C: Run the loop.
+  - [x] Capture current pet baseline. 80 selected tests passed.
+  - [ ] Versioned independent profiles, safe migration and atomic appearance state.
+    - [x] Clone preserves source resource type/path, defaults and layered library despite page-selection changes; cloned part edits remain isolated.
+    - [x] Failed individual/batch/application close preserves unsaved pet state and retry ownership; affection rewards stay within schema bounds.
+  - [ ] Shared interaction owner, active-time care, modes, cooldowns and pointer intent.
+    - [x] Selected-identity recovery from settings, hidden-pet restore, screen/physics synchronization and focus-placement ownership; oversized/inactive feedback.
+  - [ ] User-facing interaction controls and translated documentation.
+    - [x] Selected-identity manager care/mode/treat controls for Sprite and Puppet, keyboard button activation, inactive/hidden feedback and refreshed selection retention; 84 tests pass and actual section render inspected.
+    - [x] Manager keyboard destination offsets for Sprite calls, selected identity and refusal isolation, existing target bounds and greeting completion; 95 related checks pass and actual UI inspected.
+    - [ ] Native keyboard navigation remains pending.
+  - [ ] Layered asset format, synchronized renderer and compatibility checks.
+    - [x] Bounded manifest loader, shared-frame RGBA composition and slot/template/timeline rejection; pixel tests passed.
+    - [ ] Connect the renderer to desktop playback and wardrobe previews; verify approved artwork and all actions.
+      - [x] Publish prepared renderer after persistence; live sprite pixel checks and hidden playback/timer suspension pass.
+      - [ ] Restore installed references on startup and expose wardrobe preview UI; validate approved artwork.
+        - [x] Local versioned resource installation and startup/retry resolution; missing/corrupt assets preserve saved references.
+        - [x] Expose installation, repair feedback and wardrobe preview in the UI.
+  - [ ] Wardrobe preview/cancel/apply, saved combinations and missing-resource repair.
+    - [x] Detached draft controller, exact-version asset catalog, multi-slot equips, saved outfits and conflict/save-failure checks.
+    - [ ] Wardrobe dialog, asset installation and live renderer publication with visible error feedback.
+      - [x] Character/four-slot preview dialog, outfit create/update/wear/delete, Apply/Cancel, background installation and resource refresh; identity page and sprite-menu entry points.
+      - [ ] Broader close-during-install/retranslation stress, approved-artwork usability and native desktop acceptance.
+        - [x] Real worker paused after image validation: closing retained/deleted dialog cancels publication, clears staging and leaves profile unchanged; corrupt PNG failure/retry refreshes catalog safely.
+        - [x] Seven-language switching repeated three times preserves staged palette/part/outfit selections, pending name, mirror and preview frame; dynamic None/Missing/Reset labels fixed and missing asset identity retained. 78 focused and documentation checks pass.
+        - [ ] Approved-artwork usability and native desktop acceptance remain pending.
+  - [x] Per-identity presentation/preferences dialog, atomic apply, cancel/reset, live sprite updates and Puppet capability limits.
+  - [ ] Highly customizable appearance for every character: masked palettes, face variants, character parts, four clothing slots and outfit collections.
+    - [x] Asset-declared mask palettes, independent color overrides, wardrobe color controls and saved-outfit/export retention.
+      - [x] Six style swatches with keyboard focus and hex accessibility names, staged region-only updates, apply/reopen/cancel/reset and identity isolation verified; actual dialog render inspected.
+    - [ ] Face/character-part variants and approved artwork exposing useful editable regions for all six characters.
+      - [x] Asset-declared part groups, full-frame coverage validation, renderer selection, wardrobe preview/apply, portable saves and character-aware outfit snapshots.
+      - [ ] Produce and verify the six characters' actual part alternatives with clothing and complete animation coverage.
+        - [x] MOCHI generated base plus two grouped face choices installed/applied/reopened through the real wardrobe; runtime previews inspected.
+        - [ ] Remove remaining gradients/edge defects and proportion drift; pilot is static idle only, not production art or independent eye/mouth components.
+  - [ ] Complete petting, grooming, toys, peer behavior, focus and photo flows.
+    - [x] Sprite Come here menu with draggable bounded destination, three movement modes, shared greeting completion/cooldown and cancellation through existing target ownership.
+    - [x] Keyboard-equivalent call target selection from manager; floor ignores vertical input before distance limiting, two-axis modes retain bounded targeting.
+    - [x] Puppet menu/manager call movement with shared visual marker, active-only timer, center arrival, whole-window bounds, optional walk reaction and lifecycle cancellation. 413 all-pet tests pass.
+    - [x] Windows native GL synthetic Puppet call: real timer/window translation, walk expression pixels, exact restoration, one completed greeting, cancellation/manual-expression retention; 64 foreground observations never selected a helper window.
+    - [ ] Production Puppet movement/walk artwork, actual monitor boundaries/mixed DPI and all product show-path focus acceptance remain pending; native probe used an off-screen synthetic work area and explicit helper nonactivation flags.
+    - [x] Four fictional treats selectable for Sprite/Puppet, shared completion/fullness/cooldown rules; feeding releases unfinished petting without rewards and puts away Sprite toys.
+    - [x] Optional per-identity favorite/disliked treats, staged customization, strict validation, clone/export isolation and completion-time mood effects; preference captured at feeding start, optional food_like/food_dislike presentation.
+    - [ ] Authored character-specific food reactions remain pending.
+    - [x] Throwable Sprite ball with bounded physics, chase/return, completion reward cooldown, drag rethrow, right-click/menu removal and cancellation on mode/action/hide/typing changes.
+    - [x] Bounded draggable light-point toy, single toy ownership, reach-to-play completion and existing cooldown; three movement modes and interruptions tested offscreen.
+    - [x] Puppet light target with shared call/light owner, release-to-play completion/cooldown, menu and manager offsets; 118 related tests pass. Native synthetic light/play completes with reward3, restored pixels and 100 no-helper-foreground observations.
+    - [x] Puppet ball toy through shared BallToy with explicit movement owner: corner returns, rethrow timeout, ball/light/call replacement, menu and manager entries; 143 related checks pass. Native synthetic ball probe passed (chase/flight/return, reward 1, restored pixels, no helper foreground).
+    - [ ] Authored character-specific pounce/ball interaction animation and native product focus/performance acceptance.
+    - [x] Sprite menu-armed back-and-forth petting, jitter rejection, drag exclusion, cancellation and shared completion/cooldown rewards.
+    - [ ] Native gesture acceptance, Puppet gesture adapter and authored petting/heart feedback artwork.
+      - [x] Puppet menu arms shared stroke recognizer; canvas events suppress drag/hit activation, completion uses shared cooldown, leave/Esc/hide/mode/settle/manual commands/recovery release gesture.
+      - [x] Resolve mixed recovery/Puppet test-process access violation: drain deferred widget deletion in recovery fixture before module garbage collection; original 38-test sequence passed twice. Native gesture and production artwork acceptance remain pending.
+    - [x] Sprite context-menu photo dialog, frozen transparent capture, authored layered pose/time selection and atomic PNG save/retry; pixel and profile-state checks run offscreen.
+    - [x] Puppet photo menu and compatible native offscreen-render adapter with transparent background, frozen preview, save and failure feedback.
+    - [ ] Puppet actual GL photo acceptance and production pose artwork/acceptance; adapter tests do not prove native rendering.
+      - [x] Windows native GL synthetic half-alpha mesh: transparent photo, PNG pixel roundtrip, repeated capture/repaint and unchanged profile verified; off-screen nonactivating window and foreground observations recorded.
+      - [ ] Verify production Puppet artwork, masks and animated poses; synthetic mesh acceptance does not cover these.
+    - [x] Peer/tag participant eligibility respects mode, interaction, visibility, typing and per-pet social preference; muted greeting rewards remain active.
+    - [x] Existing focus timer drives temporary Work/Rest modes, restores owned choices, deduplicates completion rewards and uses monotonic elapsed time.
+    - [ ] Focus safe-position placement and production celebration animation; toys, photos and gesture flows remain incomplete.
+      - [x] Shared active-time celebration and outfit-show presentation with expiry, interruption, no extra rewards and desktop pixel verification.
+      - [ ] Production celebrate/outfit_show artwork and Puppet native reaction mapping.
+        - [x] Explicit validated Puppet script mappings to native motion/expression APIs, ownership cleanup and manual override tests.
+        - [ ] Authored model bindings and native GL visual acceptance.
+          - [x] Synthetic native model/script expression binding changes actual GL photo alpha 128 to 64, restores exact image at completion, and preserves a preselected manual expression.
+          - [ ] Production model motions, masks and authored reactions remain unverified.
+      - [x] Work-area corner placement, physics synchronization and ownership-aware position restoration; offscreen tests cover negative monitor coordinates and manual placement ownership. Native mixed-DPI acceptance remains pending.
+  - [ ] Six approved-style characters, fourteen outfit concepts converted into usable layered animation assets.
+    - [x] Generated MOCHI idle/step/sleep development keyframes and verified an installable draft against the runtime.
+    - [ ] Clean gradient/alpha defects, separate editable components, produce complete cycles and garments; draft keyframes do not satisfy production-art gates.
+  - [ ] Capability-aware legacy sprite and native Puppet behavior.
+  - [ ] Complete unit, offscreen product and isolated native/performance acceptance.
+- [ ] Phase D: Keep the audit trail throughout implementation.
+- [ ] Phase E: Verify and hand back against every requirement, never only the implemented subset.
+
+Architecture phases: Ground and Sketch complete; Agree skipped because implementation is authorized; Implement active; Scrap only if evidence rejects the chosen shape.
+Arena phases: Frame, Fan out, Cross-judge and Pick complete; Graft/Verify occur with the first implementation.
+
+Done requires every behavior in docs/design/pet-interactions-wardrobe-2026-10-28.md and the current catalog to be implemented and evidenced. Concept images are not animation assets. Native desktop verification cannot be substituted with offscreen rendering. No shipping/merge or paid generation is authorized by this checklist.

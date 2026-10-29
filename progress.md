@@ -5,6 +5,9 @@
 
 ## 實機驗收待辦
 
+
+- **#23** **完整桌面寵物互動與分件換裝實作中**。完整需求見 `docs/design/pet-interactions-wardrobe-2026-10-28.md` 與 `pet-inkside-catalog-2026-10-28.md`，執行追蹤見 `.audit/pet-implementation/todo.md`。包含獨立存檔遷移、互動與陪伴模式、分層衣櫃、六角色及服裝動畫、背景與原生驗收；概念圖不算完成素材。
+
 - **#9** **macOS 權限與裝置驗收**〔阻塞：沒有可互動的 Mac 測試主機〕。驗證 TCC 權限拒絕／變更／重新啟動流程、原生音訊、MIDI 與多螢幕；入口為 `tests/integration/macos_native_smoke.py`。既有 Windows／Linux 支援與隔離測試不能替代 macOS 實機結果。
 - **#11** **Steam Workshop 離線／無客戶端驗收**〔阻塞：沒有獨立 Steam 測試工作階段〕。在獨立環境驗證離線與未啟動客戶端時的失敗回饋、重試及資源釋放。參考 `tests/integration/steam_workshop_smoke.py` 與 `steam_failure_smoke.py`；無效 App ID 的既有測試不能替代這兩個情境。
 - **#21** **覆蓋層跨螢幕跟隨驗收**〔阻塞：只有一台螢幕，沒有混合 DPI 測試組合〕。以兩台不同縮放的螢幕驗證跨螢幕移動後仍可見，且邏輯尺寸正確。

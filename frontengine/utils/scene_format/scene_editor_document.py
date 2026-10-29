@@ -3,11 +3,13 @@ from __future__ import annotations
 
 import copy
 import math
+import weakref
 
 from PySide6.QtCore import QObject, Signal
 from PySide6.QtGui import QUndoCommand, QUndoStack
 
 from frontengine.utils.scene_format.scene_document import normalize_scene
+from frontengine.utils.scene_format.scene_3d_document import SceneDocument, read_scene_document
 
 
 def validate_geometry(entries: dict) -> dict:
@@ -34,37 +36,55 @@ def validate_geometry(entries: dict) -> dict:
 class SceneEdit(QUndoCommand):
     def __init__(self, document, before: dict, after: dict, label: str) -> None:
         super().__init__(label)
-        self.document, self.before, self.after = document, before, after
+        # The document owns the stack and its commands; commands must not own it back.
+        self._document, self.before, self.after = weakref.ref(document), before, after
 
     def undo(self) -> None:
-        self.document._apply(self.before)
+        document = self._document()
+        if document is not None:
+            document._apply(self.before)
 
     def redo(self) -> None:
-        self.document._apply(self.after)
+        document = self._document()
+        if document is not None:
+            document._apply(self.after)
 
 
 class SceneEditorDocument(QObject):
     changed = Signal(object)
+    document_changed = Signal(object)
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
-        self.entries = {}
+        self.scene = SceneDocument()
         self.undo = QUndoStack(self)
         self.undo.setUndoLimit(100)
 
     def reset(self, entries: dict) -> None:
-        validated = validate_geometry(entries)
+        validated = read_scene_document(entries)
+        validated.entries = validate_geometry(validated.entries)
         self.undo.clear()
         self._apply(validated)
 
+    @property
+    def entries(self) -> dict:
+        return self.scene.entries
+
     def _apply(self, entries: dict) -> None:
-        self.entries = copy.deepcopy(entries)
+        self.scene = read_scene_document(entries)
         self.changed.emit(copy.deepcopy(self.entries))
+        self.document_changed.emit(self.scene.copy())
+
+    def replace_document(self, scene, label: str = 'Edit scene') -> None:
+        after = read_scene_document(scene)
+        after.entries = validate_geometry(after.entries)
+        if after != self.scene:
+            self.undo.push(SceneEdit(self, self.scene.copy(), after, label))
 
     def replace(self, entries: dict, label: str = "Edit scene") -> None:
-        after = validate_geometry(entries)
-        if after != self.entries:
-            self.undo.push(SceneEdit(self, copy.deepcopy(self.entries), after, label))
+        after = self.scene.copy()
+        after.entries = validate_geometry(entries)
+        self.replace_document(after, label)
 
     def update(self, key: str, changes: dict, label: str = "Edit layer") -> None:
         if key not in self.entries:
@@ -86,10 +106,46 @@ class SceneEditorDocument(QObject):
 
     def remove(self, key: str) -> None:
         after = copy.deepcopy(self.entries)
-        after.pop(key)
+        removed = {key}
+        if self.scene.mode == '3d':
+            while True:
+                descendants = {k for k, entry in after.items() if entry.get('parent') in removed}
+                if descendants <= removed:
+                    break
+                removed.update(descendants)
+        if self.scene.mode == '3d' and self.scene.camera in removed:
+            raise ValueError('Choose another playback camera before deleting this camera')
+        for name in removed:
+            after.pop(name, None)
         self.replace(after, "Remove layer")
 
     def duplicate(self, key: str) -> str:
+        if self.scene.mode == '3d':
+            after = copy.deepcopy(self.entries)
+            names = {key}
+            while True:
+                children = {k for k, value in after.items() if value.get('parent') in names}
+                if children <= names:
+                    break
+                names.update(children)
+            remap = {}
+            for name in self.entries:
+                if name in names:
+                    index = 1
+                    while 'layer_'+str(index) in after:
+                        index += 1
+                    new_key = 'layer_'+str(index)
+                    remap[name] = new_key
+                    after[new_key] = copy.deepcopy(after[name])
+            for name, new_key in remap.items():
+                entry = after[new_key]
+                if entry.get('parent') in remap:
+                    entry['parent'] = remap[entry['parent']]
+                if name == key:
+                    position = entry['transform']['position']
+                    entry['transform']['position'] = [position[0]+.2, position[1]+.2, position[2]]
+            self.replace(after, 'Duplicate 3D objects')
+            return remap[key]
         entry = copy.deepcopy(self.entries[key])
         entry.update(x=entry.get("x", 0) + 20, y=entry.get("y", 0) + 20)
         return self.add(entry, "Duplicate layer")

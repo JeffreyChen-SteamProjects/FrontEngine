@@ -79,8 +79,8 @@ def _copy_payload(kind: str, source: Path, content: Path) -> str:
         if source.suffix.lower() == ".fescene":
             shutil.copyfile(source, target)
         else:
-            from frontengine.utils.scene_format.scene_document import normalize_scene
-            entries = normalize_scene(json.loads(source.read_text(encoding="utf-8")), source.parent)
+            from frontengine.utils.scene_format.scene_3d_document import read_scene_document
+            entries = read_scene_document(json.loads(source.read_text(encoding="utf-8")), source.parent)
             save_package(entries, target)
         return "content/scene.fescene"
     if kind == "preset":

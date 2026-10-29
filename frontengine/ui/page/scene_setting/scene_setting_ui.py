@@ -43,6 +43,7 @@ class SceneSettingUI(SettingPage):
         # them would hide that they belong to one scene.
         self.add_body_widget(self.tab_widget, 1)
         self.actions = SceneActions(self)
+        self.scene_manager_ui.actions = self.actions
         self.templates_dialog = None
         self.output_dialog = None
         output_button = tr(QPushButton(), 'scene_camera_output')
@@ -65,6 +66,14 @@ class SceneSettingUI(SettingPage):
         front_engine_logger.info("[SceneSettingUI] close_scene")
         self.actions.stop_playback()
 
+    def apply_performance_policy(self, tier: str, low_power: bool) -> None:
+        runtimes = (self.scene.runtime3d, self.visual_editor.editor3d.runtime,
+                    getattr(getattr(self.output_dialog, 'session', None), 'runtime3d', None))
+        for runtime in runtimes:
+            if runtime is not None:
+                runtime.set_quality_tier(tier)
+                runtime.set_low_power(low_power)
+
     def shutdown_scene(self) -> None:
         """Close playback and previews before releasing extracted scene resources."""
         if self.templates_dialog is not None:
@@ -72,6 +81,7 @@ class SceneSettingUI(SettingPage):
         if self.output_dialog is not None:
             self.output_dialog.close()
         self.actions.shutdown()
+        self.visual_editor.editor3d.shutdown()
 
     def open_output(self) -> None:
         """Preview/send a snapshot of the editor independently of desktop playback."""

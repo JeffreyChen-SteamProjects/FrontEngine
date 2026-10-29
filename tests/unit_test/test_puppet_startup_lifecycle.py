@@ -19,6 +19,37 @@ def asset(tmp_path):
     return path
 
 
+def test_puppet_failed_close_keeps_native_resources_until_saved(tmp_path, monkeypatch):
+    pytest.importorskip('Imervue.puppet.document_io')
+    from frontengine.show.pet.puppet_pet import PuppetPetWidget
+    from frontengine.user_setting.pet_profiles import PetProfiles
+
+    profiles = PetProfiles({}, lambda: None)
+    pet = PuppetPetWidget(asset(tmp_path), profiles=profiles)
+    try:
+        pet.show()
+        pet.feed()
+        pet.profile_session.advance(2)
+        live = pet.profile_session.state()
+
+        def fail():
+            raise OSError('disk unavailable')
+
+        with monkeypatch.context() as patch:
+            patch.setattr(profiles, 'save', fail)
+            assert not pet.close()
+            assert not pet._closed
+            assert pet.canvas.document() is not None
+            assert pet.profile_session.state() == live
+            assert pet.profile_session.timer.isActive()
+        assert pet.close()
+        assert pet._closed
+        assert pet.canvas.document() is None
+        assert profiles.get(live['id'])['affection'] == live['affection']
+    finally:
+        pet.close()
+
+
 def test_puppet_profiles_feed_resume_and_close_independently(tmp_path):
     pytest.importorskip("Imervue.puppet.document_io")
     from frontengine.user_setting.pet_profiles import PetProfiles
@@ -29,6 +60,7 @@ def test_puppet_profiles_feed_resume_and_close_independently(tmp_path):
     identifier = first.profile_session.identifier
     try:
         first.feed()
+        first.profile_session.advance(2)
         assert first.profile_session.state()['affection'] == 5
         assert second.profile_session.state()['affection'] == 0
         first.close()
@@ -42,6 +74,37 @@ def test_puppet_profiles_feed_resume_and_close_independently(tmp_path):
     finally:
         first.close()
         second.close()
+
+
+def test_puppet_customization_preserves_aspect_and_disables_unsupported_controls(tmp_path):
+    pytest.importorskip('Imervue.puppet.document_io')
+    from frontengine.show.pet.puppet_pet import PuppetPetWidget
+    from frontengine.ui.dialog.pet_customization import PetCustomizationDialog
+    from frontengine.user_setting.pet_profiles import PetProfiles
+
+    profiles = PetProfiles({}, lambda: None)
+    pet = PuppetPetWidget(asset(tmp_path), size=(128, 192), profiles=profiles)
+    dialog = PetCustomizationDialog(profiles, pet.profile_session.identifier)
+    try:
+        dialog.controls['use_defaults'].setChecked(False)
+        for field in ('speed', 'behaviour', 'climb', 'sit_on_windows', 'volume',
+                      'allow_throw', 'allow_social'):
+            assert not dialog.controls[field].isEnabled()
+        assert dialog.controls['size'].isEnabled()
+        dialog.controls['size'].setValue(256)
+        dialog.controls['speech_bubbles'].setChecked(False)
+        assert dialog.apply_changes()
+        assert (pet.width(), pet.height()) == (256, 384)
+        pet.say('hidden')
+        assert pet.bubble.isHidden()
+        dialog.reset_defaults()
+        assert (pet.width(), pet.height()) == (256, 384)
+        assert dialog.apply_changes()
+        assert (pet.width(), pet.height()) == (128, 192)
+        assert pet._talk
+    finally:
+        dialog.close()
+        pet.close()
 
 
 @pytest.mark.parametrize("malformed", [False, True])
