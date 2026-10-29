@@ -7,6 +7,7 @@ the character keeps one size, and the feet land on the shared ground line.
 """
 from __future__ import annotations
 
+from collections import deque
 from pathlib import Path
 
 import numpy
@@ -43,10 +44,59 @@ def key_magenta(array: numpy.ndarray) -> numpy.ndarray:
     return out
 
 
+def fold_pink(array: numpy.ndarray) -> numpy.ndarray:
+    """Pink (blue above green) is not a palette ink; fold it into vermilion, keeping its darkness.
+
+    None of the three inks has more blue than green, so any milder magenta tint left on
+    an edge is clamped away too.
+    """
+    red, green, blue = array[..., 0], array[..., 1], array[..., 2]
+    pink = (array[..., 3] > 0) & (red > 120) & (blue > green + 25)
+    array[pink, 1] = red[pink] * 0.36
+    array[pink, 2] = red[pink] * 0.12
+    array[..., 2] = numpy.minimum(array[..., 2], array[..., 1] + 4)
+    return array
+
+
+def _pieces(visible: numpy.ndarray) -> list[list[tuple[int, int]]]:
+    """4-connected pieces of a boolean mask, largest first."""
+    seen = numpy.zeros(visible.shape, dtype=bool)
+    pieces = []
+    for start in zip(*numpy.nonzero(visible)):
+        if seen[start]:
+            continue
+        seen[start] = True
+        queue, piece = deque([start]), []
+        while queue:
+            y, x = queue.popleft()
+            piece.append((y, x))
+            for ny, nx in ((y + 1, x), (y - 1, x), (y, x + 1), (y, x - 1)):
+                if 0 <= ny < visible.shape[0] and 0 <= nx < visible.shape[1] and visible[ny, nx]                         and not seen[ny, nx]:
+                    seen[ny, nx] = True
+                    queue.append((ny, nx))
+        pieces.append(piece)
+    return sorted(pieces, key=len, reverse=True)
+
+
+def drop_specks(frame: numpy.ndarray, fraction: float = 0.01) -> numpy.ndarray:
+    """Clear stray dots the generator left beside the character.
+
+    Pieces under ``fraction`` of the largest one go; real separate parts (a tail drawn
+    apart from the body is about a tenth of it) stay.
+    """
+    pieces = _pieces(frame[..., 3] > 0)
+    if pieces:
+        for piece in pieces[1:]:
+            if len(piece) < fraction * len(pieces[0]):
+                rows, columns = zip(*piece)
+                frame[rows, columns] = 0
+    return frame
+
+
 def cut_frames(sheet: QImage, columns: int, rows: int) -> list[numpy.ndarray]:
-    array = key_magenta(_rgba(sheet))
+    array = fold_pink(key_magenta(_rgba(sheet)))
     height, width = array.shape[0] // rows, array.shape[1] // columns
-    return [array[row * height:(row + 1) * height, column * width:(column + 1) * width]
+    return [drop_specks(array[row * height:(row + 1) * height, column * width:(column + 1) * width].copy())
             for row in range(rows) for column in range(columns)]
 
 
