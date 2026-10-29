@@ -54,6 +54,27 @@ def _qt_application():
 
     application = QApplication.instance() or QApplication([])
     yield application
+    _release_leftovers(application)
+
+
+def _release_leftovers(application) -> None:
+    """Stop listener threads and delete leftover top-level widgets while Python is still whole.
+
+    Tests leave thousands of top-level widgets and one emergency-exit listener per
+    main window. Left to interpreter shutdown, they were torn down in arbitrary order
+    and the Windows CI job sometimes exited 1 after every test had passed.
+    """
+    import threading
+    from PySide6.QtCore import QCoreApplication, QEvent
+    from frontengine.utils.critical_exit.critical_exit import CriticalExit
+    for thread in threading.enumerate():
+        if isinstance(thread, CriticalExit):
+            thread.stop()
+    for widget in application.topLevelWidgets():
+        widget.deleteLater()
+    QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+    application.processEvents()
+    gc.collect()
 
 
 @pytest.fixture(autouse=True, scope="module")

@@ -1320,6 +1320,8 @@ class FrontEngineMainUI(QMainWindow):
         if getattr(self, "clipboard_watcher", None) is not None:
             self.clipboard_watcher.stop()
             self._persist_clipboard()
+        if getattr(self, "critical_ext", None) is not None:
+            self.critical_ext.stop()
 
     def _save_page_state(self) -> None:
         """讓幾個分頁在關閉前把自己的東西收好。"""

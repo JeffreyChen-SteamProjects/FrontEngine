@@ -1,6 +1,5 @@
 import sys
-import time
-from threading import Thread
+from threading import Event, Thread
 from typing import Union
 
 from PySide6.QtWidgets import QApplication
@@ -26,6 +25,7 @@ class CriticalExit(Thread):
         """
         super().__init__()
         self.daemon = default_daemon
+        self._stopped = Event()
         # 預設退出鍵為 F7
         # Default exit key is F7
         self._exit_check_key: int = keyboard_keys_table.get("f12")
@@ -72,8 +72,7 @@ class CriticalExit(Thread):
         Thread main loop: Continuously listens for the key, exits app when pressed
         """
         try:
-            while True:
-                time.sleep(0.1)
+            while not self._stopped.wait(0.1):
                 if check_key_is_press(self._exit_check_key):
                     QMetaObject.invokeMethod(QApplication.instance(), 'quit', Qt.ConnectionType.QueuedConnection)
                     sys.exit(0)
@@ -88,6 +87,12 @@ class CriticalExit(Thread):
             # means a fullscreen overlay has no emergency exit, which is worth a
             # record.
             front_engine_logger.error(f"[CriticalExit] listener stopped: {error!r}")
+
+    def stop(self, timeout: float = 1.0) -> None:
+        """End the listener and wait for it, so it is not still polling native key state at exit."""
+        self._stopped.set()
+        if self.is_alive():
+            self.join(timeout)
 
     def init_critical_exit(self) -> None:
         """
