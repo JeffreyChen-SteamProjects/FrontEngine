@@ -192,3 +192,30 @@ def test_menu_close_waves_goodbye_before_closing(tmp_path, monkeypatch):
     assert pet.isVisible() and len(lines) == 1 and pet._flash[0] == 'peer_greet'
     QTest.qWait(950)
     assert not isValid(pet) or not pet.isVisible()
+
+
+def test_peer_greetings_repeat_at_most_once_a_minute(social_pets, clock):
+    _, pets = social_pets
+    pet = pets[0]
+    center = (pet.x() + pet.width() / 2, pet.y() + pet.height() / 2)
+    near, far = (center[0] + 10, center[1]), (center[0] + 900, center[1])
+    pet._greet_peer(near, 10, center)
+    assert pet._flash[0] == 'peer_greet'
+    pet._flash = None
+    pet._greet_peer(far, 900, center)  # walk away, then come back quickly
+    pet._greet_peer(near, 10, center)
+    assert pet._flash is None
+    clock.now += 61
+    pet._greet_peer(far, 900, center)
+    pet._greet_peer(near, 10, center)
+    assert pet._flash[0] == 'peer_greet'
+
+
+def test_grooming_ends_in_a_stretch_that_fits_the_three_second_action():
+    from frontengine.show.pet.inkside.rig import timelines
+    from frontengine.utils.pet_companion.companion import ACTION_SECONDS
+    loop, frames = timelines()['groom']
+    assert not loop
+    assert sum(frame.duration for frame in frames) == int(ACTION_SECONDS['groom'] * 1000)
+    stretch = frames[-1]
+    assert stretch.eyes == 'happy' and stretch.angle('arm_l') > 90 and stretch.angle('arm_r') < -90

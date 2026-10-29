@@ -121,9 +121,11 @@ def _feed() -> tuple[bool, list[Pose]]:
 
 
 def _groom() -> tuple[bool, list[Pose]]:
+    """Three rubbing passes, then a stretch held until the 3-second groom completes."""
     rub = [(-14, -14), (-8, -20), (-14, -14), (-8, -20)]
-    return True, [pose(220, moves={'arm_r': rub[index]}, turns={'arm_r': -160, 'head': 4 - 8 * (index % 2)},
-                       eyes='closed', front=('arm_r',)) for index in range(4)]
+    frames = [pose(220, moves={'arm_r': rub[index % 4]}, turns={'arm_r': -160, 'head': 4 - 8 * (index % 2)},
+                   eyes='closed', front=('arm_r',)) for index in range(12)]
+    return False, frames + [pose(360, root=(0, -2), turns=ARMS_HIGH, eyes='happy', mouth='open')]
 
 
 def _play() -> tuple[bool, list[Pose]]:

@@ -90,6 +90,7 @@ _STATE_FALLBACKS = {
 # Short physical reactions shown over autonomous movement (milliseconds). They are
 # purely visual, so they never block toys, social play or user commands.
 _FLASH_MS = {"land": 280, "catch": 580, "peer_greet": 1600}
+PEER_GREET_COOLDOWN = 60.0
 # Proactive chatter spacing (ms) per level; responses to the user are unaffected.
 _CHATTER_MS = {"rare": (40000, 90000), "normal": (15000, 35000), "often": (8000, 18000)}
 # How strongly audio reaction and physical flashes move the pet.
@@ -1205,6 +1206,7 @@ class DesktopPetWidget(BaseWidget):
         self._flash = None
         self._welcomed = False
         self._leaving = False
+        self._peer_greet_ready = 0.0
         self._seen_landings = 0
         self.ball_action = QAction(self)
         retranslator.bind(self.ball_action, 'pet_ball_start', 'Throw a ball')
@@ -1348,6 +1350,10 @@ class DesktopPetWidget(BaseWidget):
         if self._peer_greeted:
             return
         self._peer_greeted = True
+        # Pets that keep bumping into each other greet at most once a minute.
+        if monotonic() < self._peer_greet_ready:
+            return
+        self._peer_greet_ready = monotonic() + PEER_GREET_COOLDOWN
         self.flash("peer_greet")
         self.profile_session.reward("peer")
         self.motion.vx = (abs(self.motion.vx) if peer[0] >= my_center[0]
