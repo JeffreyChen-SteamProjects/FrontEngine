@@ -452,6 +452,7 @@ english_word_dict = {
     'pet_motion_calm': "Calm",
     'pet_motion_normal': "Normal",
     'pet_motion_lively': "Lively",
+    "pet_behaviour_actions": "Cycle all actions (random)",
     "pet_behaviour_floor": "Walk on floor",
     "pet_behaviour_wander": "Free wander",
     "pet_behaviour_chase": "Chase cursor",

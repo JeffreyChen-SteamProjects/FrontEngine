@@ -444,6 +444,7 @@ simplified_chinese_word_dict = {
     'pet_motion_calm': "沉稳",
     'pet_motion_normal': "一般",
     'pet_motion_lively': "活泼",
+    "pet_behaviour_actions": "循环所有动作（随机）",
     "pet_behaviour_floor": "在地面走动",
     "pet_behaviour_wander": "自由漫游",
     "pet_behaviour_chase": "追着游标跑",

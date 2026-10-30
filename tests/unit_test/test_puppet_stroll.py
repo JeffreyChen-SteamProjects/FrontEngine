@@ -1,4 +1,4 @@
-"""Puppet pets stroll on their own and yield to everything that already moves them."""
+"""Puppet pets stroll or act on their own and yield to everything that already moves them."""
 import random
 
 import pytest
@@ -9,12 +9,15 @@ import test_puppet_petting as fixtures
 puppet = fixtures.puppet
 
 
-def prepare(pet, monkeypatch, x=-700):
+def prepare(pet, monkeypatch, x=-700, choice='walk'):
     class Screen:
         def availableGeometry(self):
             return QRect(-1000, -800, 1000, 800)
     monkeypatch.setattr(pet, 'screen', lambda: Screen())
     pet._stroll.rng = random.Random(4)
+    if choice is not None:
+        monkeypatch.setattr(pet._stroll, '_choose', lambda: choice)
+    pet._stroll._walk_next = False
     pet.move(x, -400)
 
 
@@ -25,8 +28,15 @@ def walk_to_end(pet, ticks=400):
         pet._stroll.tick(0.05)
 
 
-def test_a_shown_puppet_schedules_a_stroll(puppet):
-    assert puppet._stroll._rest.isActive()
+def test_a_summoned_puppet_walks_off_at_once_then_rests_between(puppet, monkeypatch):
+    assert puppet._stroll._rest.isActive() and puppet._stroll._rest.remainingTime() <= 300
+    assert puppet._stroll._walk_next
+    prepare(puppet, monkeypatch, choice='sit')
+    puppet._stroll._walk_next = True
+    puppet._stroll._rest.stop()
+    puppet._stroll._begin()
+    assert puppet._stroll.walking, 'the first stroll of a summoned pet is a walk'
+    walk_to_end(puppet)
     assert 3000 <= puppet._stroll._rest.remainingTime() <= 8000
 
 
@@ -93,3 +103,37 @@ def test_closing_stops_the_stroll(puppet, monkeypatch):
     assert puppet.shutdown()
     assert not puppet._stroll.walking
     assert not puppet._stroll._rest.isActive() and not puppet._stroll._step.isActive()
+
+
+def test_after_a_rest_the_puppet_picks_a_walk_or_any_of_its_actions(puppet, monkeypatch):
+    prepare(puppet, monkeypatch, choice=None)
+    picks = {puppet._stroll._choose() for _ in range(400)}
+    assert picks == {name for name, _weight in puppet._stroll.CHOICES}
+    assert {'sit', 'play', 'groom', 'greet', 'celebrate'} <= picks
+
+
+@pytest.mark.parametrize('action', ['sit', 'play', 'groom', 'greet', 'celebrate'])
+def test_an_action_plays_in_place_then_the_puppet_rests(puppet, monkeypatch, action):
+    prepare(puppet, monkeypatch, choice=action)
+    shown = []
+    monkeypatch.setattr(puppet.reactions, 'update', lambda name: shown.append(name))
+    before = puppet.pos()
+    puppet._stroll._begin()
+    assert puppet._stroll.acting == action and shown[-1] == action
+    held = 0.0
+    while puppet._stroll.acting is not None and held < 5:
+        puppet._stroll.tick(0.05)
+        held += 0.05
+    assert puppet.pos() == before
+    assert (2.9 <= held <= 3.1) if action == 'groom' else (1.9 <= held <= 4.1)
+    assert shown[-1] != action and puppet._stroll._rest.isActive()
+
+
+def test_an_action_yields_to_a_call(puppet, monkeypatch):
+    prepare(puppet, monkeypatch, choice='play')
+    puppet._stroll._begin()
+    assert puppet.start_call() == 'accepted'
+    puppet._stroll.tick(0.05)
+    assert puppet._stroll.acting is None
+    puppet.stop_toy()
+

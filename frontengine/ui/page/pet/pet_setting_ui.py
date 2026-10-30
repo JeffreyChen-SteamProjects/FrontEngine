@@ -9,7 +9,7 @@ from PySide6.QtWidgets import (
 )
 
 from frontengine.show.pet.desktop_pet import (
-    DesktopPetWidget, BEHAVIOUR_FLOOR, BEHAVIOUR_WANDER, BEHAVIOUR_CHASE, PetTagGame, scan_pet_pack,
+    DesktopPetWidget, BEHAVIOUR_ACTIONS, BEHAVIOUR_FLOOR, BEHAVIOUR_WANDER, BEHAVIOUR_CHASE, PetTagGame, scan_pet_pack,
 )
 from frontengine.ui.dialog.choose_file_dialog import choose_pet, choose_wav_sound
 from frontengine.ui.page.utils import (
@@ -125,6 +125,10 @@ class PetSettingUI(SettingPage):
         # Behaviour
         self.behaviour_label = tr(QLabel(), "pet_behaviour_label", "Behaviour")
         self.behaviour_combobox = QComboBox()
+        # First item is the default: the floor mode cycling through every action at random.
+        self.behaviour_combobox.addItem(
+            language_wrapper.language_word_dict.get("pet_behaviour_actions", "Cycle all actions (random)"),
+            BEHAVIOUR_ACTIONS)
         self.behaviour_combobox.addItem(
             language_wrapper.language_word_dict.get("pet_behaviour_floor", "Walk on floor"), BEHAVIOUR_FLOOR)
         self.behaviour_combobox.addItem(
@@ -458,7 +462,7 @@ class PetSettingUI(SettingPage):
         catalog, _errors = pet.asset_library.scan()
         draft = WardrobeDraft(self.profile_controls.profiles, pet.profile_session.identifier, catalog)
         draft.choose_character(reference)
-        draft.apply()
+        draft.apply(present=False)   # no outfit show: a summoned pet sets off at once
 
     def choose_puppet_script(self) -> None:
         path, _ = QFileDialog.getOpenFileName(self, 'Imervue pet script', '', 'Pet script (*.petscript.json)')

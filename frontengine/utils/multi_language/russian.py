@@ -443,6 +443,7 @@ russian_word_dict = {
     'pet_motion_calm': "Спокойно",
     'pet_motion_normal': "Обычно",
     'pet_motion_lively': "Живо",
+    "pet_behaviour_actions": "Все действия по кругу (случайно)",
     "pet_behaviour_floor": "Ходить по полу",
     "pet_behaviour_wander": "Свободно бродить",
     "pet_behaviour_chase": "Бежать за курсором",

@@ -443,6 +443,7 @@ italian_word_dict = {
     'pet_motion_calm': "Calma",
     'pet_motion_normal': "Normale",
     'pet_motion_lively': "Vivace",
+    "pet_behaviour_actions": "Ciclo di tutte le azioni (casuale)",
     "pet_behaviour_floor": "Cammina sul pavimento",
     "pet_behaviour_wander": "Vaga liberamente",
     "pet_behaviour_chase": "Insegue il cursore",

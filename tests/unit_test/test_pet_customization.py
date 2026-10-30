@@ -151,7 +151,7 @@ def test_sprite_customization_applies_independently_and_survives_reopen(tmp_path
         dialog.controls['use_defaults'].setChecked(False)
         dialog.controls['size'].setValue(192)
         dialog.controls['speed'].setValue(7)
-        dialog.controls['behaviour'].setCurrentIndex(1)
+        dialog.controls['behaviour'].setCurrentIndex(dialog.controls['behaviour'].findData('wander'))
         dialog.controls['climb'].setChecked(False)
         assert dialog.apply_changes()
         assert first._base_size == 192
