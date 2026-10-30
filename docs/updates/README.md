@@ -68,6 +68,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 | U-20261030-01 | 2026-10-30 | Clean up listeners and widgets before the test process exits | #done #ci #tests | [2026-10](2026-10.md) |
 | U-20261030-02 | 2026-10-30 | Clear the release PR's SonarCloud gate | #done #ci #quality #macos | [2026-10](2026-10.md) |
 | U-20261030-03 | 2026-10-30 | Build the executable on every CPU core by default | #done #packaging #build | [2026-10](2026-10.md) |
+| U-20261030-04 | 2026-10-30 | Puppet pets stroll on their own | #done #pets #puppet #motion | [2026-10](2026-10.md) |
 | U-20261029-46 | 2026-10-29 | Keep pets aligned and sized across monitors with different scaling | #done #pets #monitors #native | [2026-10](2026-10.md) |
 | U-20261029-45 | 2026-10-29 | Accept pet toys, calls, strokes and Puppet reactions on the real screen, isolated | #done #pets #puppet #native | [2026-10](2026-10.md) |
 | U-20261029-44 | 2026-10-29 | End grooming with a stretch and limit repeated peer greetings | #done #pets #animation | [2026-10](2026-10.md) |

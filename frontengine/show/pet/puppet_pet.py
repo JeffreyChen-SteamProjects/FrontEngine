@@ -17,6 +17,7 @@ from frontengine.utils.multi_language.retranslate import translate
 from frontengine.show.pet.companion_menu import add_companion_actions, add_food_actions, companion_status
 from frontengine.show.pet.puppet_reactions import PuppetReactions, load_reactions
 from frontengine.utils.pet_companion.petting import PettingGesture
+from frontengine.show.pet.puppet_stroll import PuppetStroll
 from frontengine.show.pet.puppet_target import PuppetTargetController
 
 
@@ -56,6 +57,7 @@ class PuppetPetWidget(DraggableTopWindow):
         self._follows_screen = False
         self._petting_revision = None
         self._target = PuppetTargetController(self)
+        self._stroll = PuppetStroll(self)
         self.placement_revision = 0
         self._talk = True
         self._initial_size = size
@@ -221,15 +223,23 @@ class PuppetPetWidget(DraggableTopWindow):
         if settled:
             self.stop_toy()
             self._end_petting()
-        self.idle.set_enabled(self.isVisible() and not settled
+            self._stroll.stop()
+        elif self.isVisible() and not self._closed:
+            self._stroll.start()
+        self._show_activity()
+
+    def _show_activity(self) -> None:
+        """Idle, walk or the companion's action, from what is currently moving the pet."""
+        moving = self._target.marker is not None or self._stroll.walking
+        self.idle.set_enabled(self.isVisible() and not self._settled
                               and self._petting is None
-                              and self._target.marker is None
+                              and not moving
                               and self.profile_session.companion.allows_autonomy)
-        if settled:
+        if self._settled:
             self.reactions.reset()
             self.player.stop()
         elif self.isVisible():
-            self.reactions.update('walk' if self._target.marker is not None else self.profile_session.companion.visual_action)
+            self.reactions.update('walk' if moving else self.profile_session.companion.visual_action)
 
     def contextMenuEvent(self, event) -> None:
         words = language_wrapper.language_word_dict
@@ -493,6 +503,7 @@ class PuppetPetWidget(DraggableTopWindow):
     def hideEvent(self, event) -> None:
         if not self._closed:
             self.stop_toy()
+            self._stroll.stop()
             self._end_petting()
             self.reactions.reset()
             self.profile_session.pause()
@@ -510,6 +521,7 @@ class PuppetPetWidget(DraggableTopWindow):
             return False
         self._closed = True
         self.stop_toy()
+        self._stroll.stop()
         self._end_petting()
         self.reactions.reset()
         self.script_timer.stop()
