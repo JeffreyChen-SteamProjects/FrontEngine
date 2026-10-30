@@ -63,7 +63,7 @@ def test_pet_page_generates_and_spawns_a_builtin_puppet(tmp_path, monkeypatch):
     page = PetSettingUI()
     try:
         page.profile_controls.profiles = PetProfiles({}, lambda: None)
-        page.builtin_puppet.setCurrentIndex(page.builtin_puppet.findData('inkside-gill'))
+        page.builtin_character.setCurrentIndex(page.builtin_character.findData('inkside-gill'))
         page.use_builtin_puppet()
         assert not page.builtin_puppet_button.isEnabled()
         assert QThreadPool.globalInstance().waitForDone(60000)

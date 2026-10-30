@@ -63,6 +63,8 @@ Customize pet also sets Chatter (Off, Rarely, Normal, Often) for lines the pet s
 
 The pet manager's interaction list also offers the selected live pet's own menu commands: photo, status, reminder, chat when a chat service is attached, clone and close, plus every motion and expression of a Puppet model. Everything in a pet's right-click menu can therefore be done with the keyboard.
 
+Use built-in character on the Pet page installs the chosen INKSIDE character and its wardrobe in the background and selects it as the source. Start then spawns an ordinary sprite pet wearing that character: it walks and climbs with the hand-drawn step frames, can be dressed in the wardrobe, and keeps its outfit when it already wears the character. Use built-in Puppet model beside it still makes the Imervue Puppet version.
+
 Use built-in Puppet model on the Pet page draws the chosen INKSIDE character as an Imervue .puppet model in the background: rigged head, arms, tail and body, ten motions, three expressions and a pet script that maps companion actions to them. It is saved under pet-assets/puppets and selected as the source with its script, so Start spawns it as a Puppet pet.
 
 On setups with several monitors at different scaling, a pet dragged or brought back to another monitor keeps its size, stays inside that monitor’s work area and walks there. Window ledges on scaled monitors are measured in the same coordinates as the pet, so it perches exactly on top of windows.

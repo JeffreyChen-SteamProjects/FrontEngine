@@ -65,6 +65,8 @@ Personalizza animale imposta anche Chiacchiere (Spento, Raramente, Normale, Spes
 
 L’elenco interazioni del gestore offre anche i comandi di menu dell’animale attivo selezionato: foto, stato, promemoria, chat se è collegato un servizio, clona e chiudi, oltre a ogni movimento ed espressione di un modello Puppet. Tutto il menu contestuale è quindi raggiungibile da tastiera.
 
+Usa il personaggio integrato nella pagina Animale installa in background il personaggio INKSIDE scelto con il suo guardaroba e lo seleziona come sorgente. Avvia crea poi un normale animale sprite con quel personaggio: cammina e si arrampica con i fotogrammi di passo disegnati a mano, si può vestire nel guardaroba e mantiene l'abito se indossa già quel personaggio. Usa il modello Puppet integrato, accanto, crea ancora la versione Imervue Puppet.
+
 Usa il modello Puppet integrato nella pagina Animale disegna in background il personaggio INKSIDE scelto come modello Imervue .puppet: testa, braccia, coda e corpo con rig, dieci movimenti, tre espressioni e uno script che vi collega le azioni del compagno. Viene salvato in pet-assets/puppets e scelto come sorgente con il suo script, così Avvia lo crea come animale Puppet.
 
 Con più monitor a scale diverse, un animale trascinato o riportato su un altro monitor mantiene le sue dimensioni, resta nell’area di lavoro di quel monitor e cammina lì. I bordi delle finestre sui monitor scalati sono misurati nelle stesse coordinate dell’animale, che si posa quindi esattamente sulle finestre.

@@ -568,6 +568,8 @@ Personnaliser l’animal règle aussi le Bavardage (Désactivé, Rarement, Norma
 
 La liste d’interactions du gestionnaire propose aussi les commandes de menu de l’animal actif choisi : photo, état, rappel, discussion si un service est connecté, cloner et fermer, ainsi que chaque mouvement et expression d’un modèle Puppet. Tout le menu contextuel est donc accessible au clavier.
 
+Utiliser le personnage intégré, sur la page Animal, installe en arrière-plan le personnage INKSIDE choisi avec sa garde-robe et le sélectionne comme source. Démarrer crée alors un animal sprite ordinaire sous ce personnage : il marche et grimpe avec les images de pas dessinées à la main, peut être habillé dans la garde-robe et garde sa tenue s'il porte déjà ce personnage. Utiliser le modèle Puppet intégré, juste à côté, produit toujours la version Imervue Puppet.
+
 Utiliser le modèle Puppet intégré, sur la page Animal, dessine en arrière-plan le personnage INKSIDE choisi comme modèle Imervue .puppet : tête, bras, queue et corps riggés, dix mouvements, trois expressions et un script qui y associe les actions du compagnon. Il est enregistré dans pet-assets/puppets et choisi comme source avec son script ; Démarrer le lance comme animal Puppet.
 
 Avec plusieurs écrans à des échelles différentes, un animal déplacé ou ramené sur un autre écran garde sa taille, reste dans la zone de travail de cet écran et s’y promène. Les bords de fenêtre des écrans mis à l’échelle sont mesurés dans les mêmes coordonnées que l’animal, qui se pose donc exactement sur les fenêtres.

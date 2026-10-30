@@ -65,6 +65,8 @@ Tier anpassen stellt außerdem Plaudern (Aus, Selten, Normal, Oft) für Sätze, 
 
 Die Interaktionsliste der Tierverwaltung bietet außerdem die Menübefehle des gewählten aktiven Tiers an: Foto, Status, Erinnerung, Chat bei angebundenem Chatdienst, Klonen und Schließen sowie jede Bewegung und jeden Ausdruck eines Puppet-Modells. Alles aus dem Rechtsklickmenü ist damit auch per Tastatur erreichbar.
 
+Integrierte Figur verwenden auf der Tierseite installiert die gewählte INKSIDE-Figur samt Garderobe im Hintergrund und wählt sie als Quelle. Start erzeugt dann ein normales Sprite-Tier in dieser Figur: Es läuft und klettert mit den handgezeichneten Schrittbildern, lässt sich in der Garderobe einkleiden und behält sein Outfit, wenn es die Figur schon trägt. Integriertes Puppet-Modell verwenden daneben erzeugt weiterhin die Imervue-Puppet-Version.
+
 Integriertes Puppet-Modell verwenden auf der Tierseite zeichnet die gewählte INKSIDE-Figur im Hintergrund als Imervue-.puppet-Modell: geriggter Kopf, Arme, Schwanz und Körper, zehn Bewegungen, drei Ausdrücke und ein Tierskript, das Begleitaktionen darauf abbildet. Es wird unter pet-assets/puppets gespeichert und mit seinem Skript als Quelle gewählt, sodass Start es als Puppet-Tier erzeugt.
 
 Bei mehreren Monitoren mit unterschiedlicher Skalierung behält ein Tier, das auf einen anderen Monitor gezogen oder dorthin zurückgeholt wird, seine Größe, bleibt in dessen Arbeitsbereich und läuft dort weiter. Fensterkanten auf skalierten Monitoren werden in denselben Koordinaten wie das Tier gemessen, sodass es genau auf Fenstern sitzt.
