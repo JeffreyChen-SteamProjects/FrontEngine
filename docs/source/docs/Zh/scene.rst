@@ -102,7 +102,7 @@ CPU 與 offscreen 單元測試可執行 ``python -m pytest tests/unit_test/test_
 distribution 資料夾。Linux 可在唯讀掛載本工作樹至 ``/workspace`` 的拋棄式
 Debian/Python 容器中執行 ``tests/integration/linux_scene3d_acceptance.sh``，
 驗證完整測試與原生 Xvfb／Mesa GL；此結果不代表所有 GPU 與視窗合成器皆已驗收。
-選用 ``--jobs`` 可限制並行編譯數，降低編譯時的記憶體需求。
+建置預設使用全部 CPU 核心（``--jobs auto``）。正數的 ``--jobs`` 可限制並行編譯數、降低編譯時的記憶體需求；負數（例如 ``--jobs -2``）則保留該數量的核心不用。
 
 Qt 支援範圍為 6.11.2 至低於 6.13。選用 Imervue 執行期固定使用 Qt 6.11.2，
 包含 Puppet 的發行版應先安裝 Puppet extra。Python 3.14 的 EXE 建置需

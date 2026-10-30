@@ -431,6 +431,7 @@ it can be tested with a fake one.
   pull request, all CI checks green.
 - **Building the Windows executable** — `python exe/build_exe.py`
   (Nuitka; add `--onefile` for a single file).
+  It compiles on every CPU core by default; `--jobs N` caps the parallel jobs (less memory), `--jobs -N` leaves N cores free.
 - **Documentation** — Sphinx sources in `docs/`, published to
   [Read the Docs](https://frontengine.readthedocs.io/en/latest/) in all seven
   languages.

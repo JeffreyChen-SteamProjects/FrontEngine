@@ -414,6 +414,7 @@ python -m pyflakes frontengine/ exe/ tests/
   하나, 모든 CI 검사 통과.
 - **Windows 실행 파일 빌드** — `python exe/build_exe.py`
   (Nuitka; 단일 파일을 원하면 `--onefile` 추가).
+  기본적으로 모든 CPU 코어로 컴파일합니다. `--jobs N`은 병렬 작업 수를 제한하고(메모리 절약), `--jobs -N`은 N개 코어를 비워 둡니다.
 - **문서** — `docs/`의 Sphinx 소스로,
   [Read the Docs](https://frontengine.readthedocs.io/en/latest/)에 일곱 가지 언어
   모두로 게시됩니다.

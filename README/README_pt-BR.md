@@ -453,6 +453,7 @@ injetável para que possa ser testada com uma falsa.
   pull request, todas as verificações de CI verdes.
 - **Compilando o executável do Windows** — `python exe/build_exe.py`
   (Nuitka; adicione `--onefile` para um único arquivo).
+  Por padrão compila em todos os núcleos da CPU; `--jobs N` limita os trabalhos paralelos (menos memória) e `--jobs -N` deixa N núcleos livres.
 - **Documentação** — fontes Sphinx em `docs/`, publicadas no
   [Read the Docs](https://frontengine.readthedocs.io/en/latest/) em todos os
   sete idiomas.

@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import subprocess  # nosec B404 - only ever runs the argv that build_command assembles
 import argparse
+import os
 import shutil
 from importlib import metadata
 from importlib.util import find_spec
@@ -108,6 +109,29 @@ def build_command(version: str, onefile: bool, output_dir: Path | None = None, j
     return command
 
 
+def resolve_jobs(value: str | None, cpu_count=os.cpu_count) -> int:
+    """Turn --jobs into a parallel C compile job count.
+
+    No value or ``auto`` uses every CPU core; a positive number caps the jobs
+    (fewer jobs use less compiler memory); a negative number leaves that many
+    cores free. The result is always at least one job.
+    """
+    cores = cpu_count() or 1
+    if value is None or value.strip().lower() == 'auto':
+        return cores
+    try:
+        jobs = int(value)
+    except ValueError:
+        raise ValueError(f"--jobs must be 'auto' or a whole number, not {value!r}") from None
+    if jobs == 0:
+        raise ValueError("--jobs cannot be 0; use 'auto', a positive cap or a negative number of cores to leave free")
+    if jobs > 0:
+        return jobs
+    if cores + jobs < 1:
+        raise ValueError(f"--jobs {jobs} leaves no core to build with on this {cores}-core machine")
+    return cores + jobs
+
+
 def validated_runtime(source: str) -> Path:
     """Require an explicitly selected Windows x64 Steam runtime, not the whole SDK."""
     path = Path(source).absolute()
@@ -128,11 +152,14 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--onefile", action="store_true")
     parser.add_argument('--output-dir', type=Path, default=OUTPUT_DIR)
-    parser.add_argument('--jobs', type=int, help='Maximum parallel C compilation jobs')
+    parser.add_argument('--jobs', help="Parallel C compilation jobs: 'auto' (default, every core), "
+                                       "a positive cap, or a negative number of cores to leave free")
     parser.add_argument("--steam-runtime", help="Explicit steam_api64.dll to ship beside the executable")
     args = parser.parse_args()
-    if args.jobs is not None and args.jobs < 1:
-        parser.error('--jobs must be at least 1')
+    try:
+        jobs = resolve_jobs(args.jobs)
+    except ValueError as error:
+        parser.error(str(error))
     missing = check_dependencies()
     if missing:
         parser.error("Install requirements.txt in this Python environment before building: " + "; ".join(missing))
@@ -141,7 +168,8 @@ def main() -> int:
     except (OSError, ValueError) as error:
         parser.error(str(error))
     onefile = args.onefile
-    command = build_command(read_version(), onefile, args.output_dir.resolve(), args.jobs)
+    command = build_command(read_version(), onefile, args.output_dir.resolve(), jobs)
+    print(f"Compiling with {jobs} parallel job(s)", flush=True)
     print(" ".join(command), flush=True)
     # argv 全部在 build_command() 裡組好：sys.executable、寫死的旗標、由這個檔案
     # 位置算出來的 repo 路徑，以及 pyproject.toml 的版本字串。命令列參數只用來判斷
