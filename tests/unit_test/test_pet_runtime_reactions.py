@@ -190,7 +190,12 @@ def test_menu_close_waves_goodbye_before_closing(tmp_path, monkeypatch):
     pet.close_action.trigger()
     pet.close_action.trigger()
     assert pet.isVisible() and len(lines) == 1 and pet._flash[0] == 'peer_greet'
-    QTest.qWait(950)
+    # The close follows the 900 ms wave; wait for it instead of a fixed 950 ms,
+    # which left 50 ms of margin and failed on a loaded macOS runner.
+    for _ in range(60):
+        QTest.qWait(50)
+        if not isValid(pet) or not pet.isVisible():
+            break
     assert not isValid(pet) or not pet.isVisible()
 
 
