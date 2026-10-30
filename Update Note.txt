@@ -6,13 +6,15 @@ Most of this update is about the desktop pet. It can now be dressed, looked afte
 
 [h2]Six characters and a wardrobe[/h2]
 
-FrontEngine now comes with six drawn characters, [b]MOCHI[/b], [b]MOSS[/b], [b]PIP[/b], [b]BOLT[/b], [b]INK[/b] and [b]GILL[/b], in a three-ink style of black, vermilion and off-white. With them come fourteen outfits made of thirty pieces, each drawn to fit every one of the six. Add a character from the Pet page, then open the wardrobe to dress it.
+FrontEngine now comes with six drawn characters, [b]MOCHI[/b], [b]MOSS[/b], [b]PIP[/b], [b]BOLT[/b], [b]INK[/b] and [b]GILL[/b], in a three-ink style of black, vermilion and off-white. With them come fourteen outfits made of thirty pieces, each drawn to fit every one of the six. On the Pet page, pick a character, press [b]Use built-in character[/b] and then [b]Spawn pet[/b]: your pet appears as that character, ready to be dressed in the wardrobe.
 
 The wardrobe works by slot: head, neck, body and back. Putting on a piece replaces whatever already sits in that slot and tells you what it took off. Each character also has eye, mouth and body-part choices and colour regions you can repaint, and you can pin the current look beside your changes to compare before you apply them. Each pet can keep up to twenty saved outfits, and a pet that is busy with something changes clothes once it is done.
 
 Undressed and in its default look, a character walks and climbs with hand-drawn step frames. Dressed, it uses the layered animation that keeps every piece in place.
 
 [h2]A pet you can look after[/h2]
+
+A pet now has a mind of its own. By default it picks what to do next at random from everything it can do: walk, sit, play, groom, climb the nearer wall, wave, nap, celebrate or show off its outfit. It sets off walking the moment you spawn it. For a quieter pet that only walks and idles, choose Walk on floor instead of Cycle all actions under Behaviour.
 
 [list]
 [*][b]Stroke it[/b] with the mouse and it reacts.
@@ -26,7 +28,7 @@ Undressed and in its default look, a character walks and climbs with hand-drawn 
 
 Each pet is now its own saved identity, with a name, mood, fullness and affection. Choose one before spawning to pick up where it left off, start a new one, or clone a pet together with its appearance. How often a pet talks and how large its animations are can be set for each pet, and every pet command can be reached from the keyboard in the pet manager. A pet pack editor lets you map your own walk, idle, sleep, climb, fall and drag images and export them as a pack.
 
-Pets can also be Imervue Puppet models, with their own reactions, petting, toys and photos; this needs the Imervue runtime. The six built-in characters can be exported as rigged Puppet models.
+Pets can also be Imervue Puppet models, with their own reactions, petting, toys and photos; this needs the Imervue runtime. The six built-in characters can be exported as rigged Puppet models with Use built-in Puppet model. Puppet pets stroll on their own too, and now and then sit, play, groom, wave or celebrate in place.
 
 [b]Fixed:[/b] a walking pet's animation could freeze while it moved, so it seemed to slide across the screen. The frames now change as it walks. A pet standing on a window narrower than itself no longer shakes left and right. With monitors at different scaling, a pet moved to another monitor keeps its size and stays on that monitor.
 
