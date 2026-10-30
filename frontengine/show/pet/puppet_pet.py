@@ -231,15 +231,16 @@ class PuppetPetWidget(DraggableTopWindow):
     def _show_activity(self) -> None:
         """Idle, walk or the companion's action, from what is currently moving the pet."""
         moving = self._target.marker is not None or self._stroll.walking
+        acting = self._stroll.acting if self._target.marker is None else None
         self.idle.set_enabled(self.isVisible() and not self._settled
                               and self._petting is None
-                              and not moving
+                              and not moving and acting is None
                               and self.profile_session.companion.allows_autonomy)
         if self._settled:
             self.reactions.reset()
             self.player.stop()
         elif self.isVisible():
-            self.reactions.update('walk' if moving else self.profile_session.companion.visual_action)
+            self.reactions.update('walk' if moving else acting or self.profile_session.companion.visual_action)
 
     def contextMenuEvent(self, event) -> None:
         words = language_wrapper.language_word_dict

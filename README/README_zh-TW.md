@@ -352,6 +352,8 @@ Puppet 寵物：安裝選用的 puppet extra 與可用的 Imervue runtime，再�
 
 Puppet 寵物也會自己散步：休息幾秒後，沿目前的高度向左或向右走一小段，並播放走路動作，不會走出螢幕的工作區，接著再休息。拖曳、撫摸、「過來」與玩具、打字時安分，以及不允許自行行動的模式都會讓散步停下。
 
+寵物預設會從整套動作中隨機挑選接下來要做什麼，不再只有走路和發呆。精靈圖寵物會在走路、發呆、坐下、玩耍、理毛、走到較近的牆邊爬牆、揮手、睡覺、慶祝和展示服裝之間挑選；Puppet 寵物則在散步，以及原地坐下、玩耍、理毛、揮手或慶祝之間挑選。姿勢動作會停在原地，沒有該姿勢圖片的寵物會顯示待機圖片。
+
 場景：場景頁支援舊 entry mapping JSON、有版本的 frontengine.scene envelope，以及可攜式 .fescene 套件。PUPPET 項目可設定位置、大小、不透明度、有限數值參數，以及選用動作、表情與腳本。JSON 路徑相對於場景檔解析。.fescene 包含引用媒體、原始 .puppet 與選用 .petscript.json，可移到其他電腦。匯入會檢查路徑、符號連結、版本與解壓上限。FrontEngine 場景維持場景套件；.puppet 維持單一 Imervue 角色。
 
 macOS：選用 macos extra 以 macOS 13+ 與公開 PyObjC framework 為基準。後端提供 ScreenCaptureKit 螢幕／視窗擷取與系統音訊、麥克風擷取、Quartz 視窗幾何、Accessibility 視窗版面與移動、CoreMIDI、媒體鍵及 F12 退出。螢幕錄製、輔助使用與麥克風權限分別檢查；請到系統設定 → 隱私權與安全性，依提示重新啟動。其他程式視窗的透明度／強制置頂、Space 指定，以及讓其他程式擷取時排除覆蓋層仍不可用。本 Windows 開發環境尚未驗證 macOS 原生授權、硬體與效能。 Settings → macOS 權限與能力會逐項列出可用、不可用或不支援，並顯示權限或安裝原因。

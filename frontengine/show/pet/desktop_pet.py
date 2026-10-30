@@ -87,9 +87,20 @@ _STATE_FALLBACKS = {
     STATE_FALL: (STATE_WALK,),
     STATE_DRAG: (STATE_WALK,),
     **{action: (STATE_IDLE, STATE_WALK) for action in ("greet", "pet", "groom", "feed", "play", "sit",
-                                                       "land", "catch", "peer_greet", "wake")},
+                                                       "land", "catch", "peer_greet", "wake",
+                                                       "celebrate", "outfit_show")},
     "sleep_in": (STATE_SLEEP, STATE_IDLE, STATE_WALK),
 }
+
+# What a free pet does on its own, picked at random whenever its current state ends:
+# (state, weight, min ticks, max ticks) at 33 ms per tick. "climb" walks to the nearer
+# wall and climbs it; the poses are held in place, and groom lasts its 3 s animation.
+AUTONOMOUS_ACTIONS = (
+    ("walk", 34, 30, 120), ("idle", 14, 20, 80), ("sit", 10, 60, 150), ("play", 8, 45, 90),
+    ("groom", 7, 91, 91), ("climb", 6, 0, 0), ("greet", 5, 30, 55), ("sleep", 5, 120, 300),
+    ("celebrate", 4, 30, 60), ("outfit_show", 3, 45, 75),
+)
+POSE_STATES = frozenset(("sit", "play", "groom", "greet", "celebrate", "outfit_show"))
 
 # Short physical reactions shown over autonomous movement (milliseconds). They are
 # purely visual, so they never block toys, social play or user commands.
@@ -267,6 +278,8 @@ def derive_visual_state(dragging: bool, airborne: bool, surface: str, motion_sta
         return STATE_SLEEP
     if surface == SURFACE_FLOOR and motion_state == "idle":
         return STATE_IDLE
+    if surface == SURFACE_FLOOR and motion_state in POSE_STATES:
+        return motion_state
     return STATE_WALK
 
 
@@ -652,8 +665,9 @@ class PetMotion:
         # 打字時安分下來：True 的時候 step() 原地不動。
         # Settled while typing: step() stays put while this is True.
         self.settled = False
-        self.state = "walk"  # walk | idle | sleep
+        self.state = "walk"  # walk | idle | sleep | one of POSE_STATES
         self._state_ticks = 0
+        self._seek_wall = False  # walking to the nearer wall to climb it
         self._idle_count = 0
         self.target: Optional[Tuple[float, float]] = None
         self.asleep = False
@@ -822,7 +836,8 @@ class PetMotion:
 
     def _turn_or_climb(self, wall: str, turned_vx: float) -> None:
         """走到邊緣了：抓上牆去爬，或是掉頭往回走。"""
-        if self.climb and self._rng.random() < self.CLIMB_CHANCE:
+        if self.climb and (self._seek_wall or self._rng.random() < self.CLIMB_CHANCE):
+            self._seek_wall = False
             self.surface = wall
             self.vy = float(-self.speed)
         else:
@@ -1001,21 +1016,32 @@ class PetMotion:
             self.vy = float(self.speed)
 
     def _new_state(self, force_walk: bool = False) -> None:
-        if force_walk or self._rng.random() < 0.65:
-            self.state = "walk"
-            self._idle_count = 0
-            if not force_walk:
-                self.vx = float(self.speed) if self._rng.random() < 0.5 else float(-self.speed)
+        """Pick what to do next at random from the whole action set (AUTONOMOUS_ACTIONS)."""
+        self._seek_wall = False
+        if force_walk:
+            self.state, self._idle_count = "walk", 0
             self._state_ticks = self._rng.randint(30, 120)
-        elif self._idle_count >= 2:
+            return
+        if self._idle_count >= 2:
             # been idling a while -> doze off
-            self.state = STATE_SLEEP
-            self._idle_count = 0
+            self.state, self._idle_count = STATE_SLEEP, 0
             self._state_ticks = self._rng.randint(120, 300)
-        else:
-            self.state = "idle"
-            self._idle_count += 1
-            self._state_ticks = self._rng.randint(20, 80)
+            return
+        options = [entry for entry in AUTONOMOUS_ACTIONS
+                   if entry[0] != STATE_CLIMB or (self.climb and not self.on_platform)]
+        name, _weight, low, high = self._rng.choices(options, weights=[entry[1] for entry in options])[0]
+        self._idle_count = self._idle_count + 1 if name == "idle" else 0
+        if name == STATE_CLIMB:
+            left, _top, right, _bottom = self.bounds
+            toward_left = self.x - left <= right - (self.x + self.width)
+            self.state, self._seek_wall = "walk", True
+            self.vx = float(-self.speed) if toward_left else float(self.speed)
+            self._state_ticks = 10 ** 6  # until the wall is reached
+            return
+        self.state = name
+        if name == "walk":
+            self.vx = float(self.speed) if self._rng.random() < 0.5 else float(-self.speed)
+        self._state_ticks = self._rng.randint(low, high)
 
     def wake(self) -> None:
         """喚醒寵物並恢復走動（互動時呼叫）/ Wake the pet and resume walking."""
