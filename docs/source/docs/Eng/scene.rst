@@ -105,7 +105,7 @@ Build with ``python exe/build_exe.py --output-dir build/nuitka-scene3d --jobs 2`
 ``FrontEngine.exe --verify-3d-scene-build REPORT --require-compiled`` with the same
 optional flags to verify the actual binary. Its report includes an executable
 SHA-256. A standalone build must retain its entire distribution folder.
-The optional ``--jobs`` limit reduces concurrent compiler memory use.
+The build compiles on every CPU core by default (``--jobs auto``). A positive ``--jobs`` limit reduces concurrent compiler memory use, and a negative value such as ``--jobs -2`` leaves that many cores free.
 On Linux, ``tests/integration/linux_scene3d_acceptance.sh`` runs the suite and a
 native Xvfb/Mesa GL smoke in a disposable Debian/Python container with this
 checkout mounted read-only at ``/workspace``. This verifies software Mesa GL,

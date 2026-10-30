@@ -67,6 +67,12 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 | U-20261029-53 | 2026-10-29 | Fix the PR #227 macOS install failure and SonarCloud findings | #done #pets #ci #quality | [2026-10](2026-10.md) |
 | U-20261030-01 | 2026-10-30 | Clean up listeners and widgets before the test process exits | #done #ci #tests | [2026-10](2026-10.md) |
 | U-20261030-02 | 2026-10-30 | Clear the release PR's SonarCloud gate | #done #ci #quality #macos | [2026-10](2026-10.md) |
+| U-20261030-03 | 2026-10-30 | Build the executable on every CPU core by default | #done #packaging #build | [2026-10](2026-10.md) |
+| U-20261030-04 | 2026-10-30 | Puppet pets stroll on their own | #done #pets #puppet #motion | [2026-10](2026-10.md) |
+| U-20261030-05 | 2026-10-30 | Start built-in characters from the Pet page as sprite pets | #done #pets #ui | [2026-10](2026-10.md) |
+| U-20261030-06 | 2026-10-30 | Pick each autonomous pet action at random from the whole action set | #done #pets #puppet #motion | [2026-10](2026-10.md) |
+| U-20261030-07 | 2026-10-30 | Name the random-actions mode in the menu and start summoned pets moving at once | #done #pets #ui #motion | [2026-10](2026-10.md) |
+| U-20261030-08 | 2026-10-30 | Accept the whole GUI on an isolated desktop | #done #ui #tests #native | [2026-10](2026-10.md) |
 | U-20261029-46 | 2026-10-29 | Keep pets aligned and sized across monitors with different scaling | #done #pets #monitors #native | [2026-10](2026-10.md) |
 | U-20261029-45 | 2026-10-29 | Accept pet toys, calls, strokes and Puppet reactions on the real screen, isolated | #done #pets #puppet #native | [2026-10](2026-10.md) |
 | U-20261029-44 | 2026-10-29 | End grooming with a stretch and limit repeated peer greetings | #done #pets #animation | [2026-10](2026-10.md) |

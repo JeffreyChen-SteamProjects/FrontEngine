@@ -30,6 +30,10 @@ how it looks.
 
 Puppet pets: install the optional puppet extra and an available Imervue runtime, then choose an original Imervue .puppet v1 file on the Pet page or drop it there. Existing image/sprite pet packs still work. Puppet pets use Imervue's canvas, motions and expressions, can be cloned or closed, and participate in FrontEngine's overlay controls and presets. Choose an optional .petscript.json for Imervue's existing script engine; do not treat FrontEngine pet.json packs as puppet files. Unknown versions, unsafe archive paths and invalid assets are rejected before runtime loading.
 
+Puppet pets also stroll on their own: after a few seconds' rest they walk a short way left or right along their current height with the walk motion, stay inside the screen's work area, then rest again. A stroll gives way to dragging, petting, Come here and toys, settling while typing, and modes that do not allow acting alone.
+
+The Behaviour menu's default, Cycle all actions (random), has a free pet pick what to do next at random from its whole set of actions; Walk on floor keeps only walking and idling. A sprite pet chooses among walking, idling, sitting, playing, grooming, climbing the nearer wall, waving, sleeping, celebrating and showing off its outfit; a Puppet pet chooses between a stroll and sitting, playing, grooming, waving or celebrating in place. A summoned pet sets off walking at once. Poses are held in place, and a pet without an image for a pose shows its idle image.
+
 :doc:`runtime_interoperability`
 
 Pet → Pet identities saves an independent UUID, name, mood, fullness and affection for every sprite or puppet pet. Choose a saved identity before spawning to resume it after restart; New pet creates fresh state. The first identity migrates the old shared values once. Cloning copies current stats to a new identity; feeding never changes another pet. Rename, refresh, export or import individual JSON saves; import always creates a new identity. One saved identity can be active only once. Saves contain no sprites, scripts or chat history, and local identity IDs are excluded from portable presets. Up to 256 identities are stored in user settings; sprite changes are saved after a short debounce and on close. Puppet feeding updates only saved stats and does not alter Imervue motions or geometry.
@@ -60,6 +64,8 @@ Relationships grow with affection through four stages: Just met, Familiar (20), 
 Customize pet also sets Chatter (Off, Rarely, Normal, Often) for lines the pet starts on its own and Animation size (Calm, Normal, Lively) for the audio pulse and quick land and catch reactions, separately from speech bubbles and volume. Replies to what you do still appear with chatter off. Puppet pets apply Chatter to scheduled script lines. Presentations saved earlier keep working and use Normal for both.
 
 The pet manager's interaction list also offers the selected live pet's own menu commands: photo, status, reminder, chat when a chat service is attached, clone and close, plus every motion and expression of a Puppet model. Everything in a pet's right-click menu can therefore be done with the keyboard.
+
+Use built-in character on the Pet page installs the chosen INKSIDE character and its wardrobe in the background and selects it as the source. Start then spawns an ordinary sprite pet wearing that character: it walks and climbs with the hand-drawn step frames, can be dressed in the wardrobe, and keeps its outfit when it already wears the character. Use built-in Puppet model beside it still makes the Imervue Puppet version.
 
 Use built-in Puppet model on the Pet page draws the chosen INKSIDE character as an Imervue .puppet model in the background: rigged head, arms, tail and body, ten motions, three expressions and a pet script that maps companion actions to them. It is saved under pet-assets/puppets and selected as the source with its script, so Start spawns it as a Puppet pet.
 

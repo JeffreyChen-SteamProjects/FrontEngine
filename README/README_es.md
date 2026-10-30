@@ -372,6 +372,10 @@ Texto en pantalla: Herramientas → Leer texto usa primero OCR local: Windows.Me
 
 Mascotas puppet: instala el extra opcional puppet y un runtime Imervue disponible, luego elige o arrastra un archivo original Imervue .puppet v1 a la página Mascota. Los paquetes de imágenes y sprites existentes siguen funcionando. Los puppets usan lienzo, movimientos y expresiones de Imervue, admiten clonado/cierre y participan en controles de superposición y ajustes preestablecidos. Un .petscript.json opcional usa el motor de scripts existente de Imervue; los paquetes FrontEngine pet.json no son archivos puppet. Versiones desconocidas, rutas peligrosas y recursos inválidos se rechazan antes de cargar el runtime.
 
+Las mascotas Puppet también pasean solas: tras unos segundos de descanso caminan un poco a la izquierda o a la derecha a su altura actual con el movimiento de caminar, se quedan dentro del área de trabajo de la pantalla y vuelven a descansar. Arrastrar, acariciar, Ven aquí y los juguetes, la calma mientras escribes y los modos que no permiten actuar solas tienen prioridad.
+
+La opción predeterminada del menú Comportamiento, Recorrer todas las acciones (al azar), hace que una mascota libre elija al azar qué hacer a continuación entre todas sus acciones; Caminar por el suelo se limita a caminar y esperar. Una mascota sprite elige entre caminar, esperar, sentarse, jugar, asearse, trepar por la pared más cercana, saludar, dormir, celebrar y lucir su atuendo; una mascota Puppet elige entre un paseo y sentarse, jugar, asearse, saludar o celebrar en el sitio. Una mascota invocada empieza a caminar enseguida. Las poses se mantienen en el sitio, y una mascota sin imagen para una pose muestra su imagen de espera.
+
 Escenas: la página Escena acepta el antiguo mapa JSON de entradas, documentos versionados frontengine.scene y paquetes portables .fescene. PUPPET contiene posición, tamaño, opacidad, parámetros numéricos finitos y movimiento, expresión o script opcionales. Las rutas JSON se resuelven respecto al archivo de escena. .fescene incluye medios referenciados, el .puppet original y .petscript.json opcional para trasladarse entre equipos. La importación comprueba rutas, enlaces simbólicos, versiones y límites de extracción. Una escena FrontEngine sigue siendo un paquete de escena; .puppet sigue siendo un personaje Imervue.
 
 macOS: el extra macos usa macOS 13+ y frameworks públicos PyObjC. Los motores proporcionan ScreenCaptureKit para pantalla/ventanas y audio del sistema, micrófono, geometría Quartz, disposición/movimiento mediante Accesibilidad, CoreMIDI, teclas multimedia y salida F12. Grabación de pantalla, Accesibilidad y Micrófono se comprueban por separado; usa Ajustes del Sistema → Privacidad y seguridad y reinicia cuando se indique. Opacidad/primer plano forzado de ventanas ajenas, selección de Spaces y exclusión de capturas ajenas siguen sin estar disponibles. Permisos nativos, hardware y rendimiento macOS no se han verificado desde este equipo Windows. Configuración → Permisos y capacidades de macOS muestra cada función como disponible, no disponible o no compatible, con el motivo de permisos o instalación.
@@ -432,6 +436,7 @@ poder probarse con una falsa.
   request, todas las comprobaciones de CI en verde.
 - **Compilar el ejecutable de Windows** — `python exe/build_exe.py` (Nuitka; añade `--onefile`
   para un solo archivo).
+  Por defecto compila en todos los núcleos de la CPU; `--jobs N` limita los trabajos en paralelo (menos memoria) y `--jobs -N` deja N núcleos libres.
 - **Documentación** — fuentes de Sphinx en `docs/`, publicadas en
   [Read the Docs](https://frontengine.readthedocs.io/en/latest/) en los siete idiomas.
 
@@ -563,6 +568,8 @@ La relación crece con el afecto en cuatro etapas: Recién conocidos, Familiar (
 Personalizar mascota también ajusta Charla (Desactivada, Rara vez, Normal, A menudo) para las frases que la mascota inicia sola y Tamaño de animación (Calma, Normal, Animada) para el pulso de audio y las breves reacciones de aterrizaje y atrapada, por separado de los bocadillos y el volumen. Las respuestas a lo que haces siguen apareciendo con la charla desactivada. Puppet aplica Charla a las frases programadas del script. Las presentaciones guardadas antes siguen funcionando con Normal en ambos.
 
 La lista de interacciones del gestor también ofrece los comandos del menú de la mascota activa seleccionada: foto, estado, recordatorio, chat si hay un servicio conectado, clonar y cerrar, además de cada movimiento y expresión de un modelo Puppet. Así, todo el menú contextual es accesible con el teclado.
+
+Usar personaje integrado, en la página de mascota, instala en segundo plano el personaje INKSIDE elegido con su guardarropa y lo selecciona como origen. Iniciar crea entonces una mascota sprite normal con ese personaje: camina y trepa con los fotogramas de paso dibujados a mano, se puede vestir en el guardarropa y conserva su atuendo si ya lleva ese personaje. Usar modelo Puppet integrado, al lado, sigue creando la versión Imervue Puppet.
 
 Usar modelo Puppet integrado, en la página de mascota, dibuja en segundo plano el personaje INKSIDE elegido como modelo Imervue .puppet: cabeza, brazos, cola y cuerpo con rig, diez movimientos, tres expresiones y un script que les asigna las acciones del compañero. Se guarda en pet-assets/puppets y se elige como fuente con su script, así que Iniciar lo crea como mascota Puppet.
 

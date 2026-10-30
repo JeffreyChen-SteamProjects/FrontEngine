@@ -408,6 +408,10 @@ Bildschirmtext: Werkzeuge → Text lesen versucht zuerst lokale OCR: Windows.Med
 
 Puppet-Haustiere: Installieren Sie das optionale puppet-Extra und eine verfügbare Imervue-Laufzeit; wählen oder ziehen Sie eine originale Imervue-.puppet-v1-Datei auf die Haustierseite. Bild- und Sprite-Pakete bleiben nutzbar. Puppet-Haustiere verwenden Imervues Canvas, Bewegungen und Ausdrücke, können dupliziert oder geschlossen werden und folgen Overlay-Steuerung und Voreinstellungen. Eine optionale .petscript.json verwendet Imervues Skriptengine; FrontEngine-pet.json-Pakete sind keine Puppet-Dateien. Unbekannte Versionen, unsichere Archivpfade und ungültige Medien werden vor dem Laden abgewiesen.
 
+Puppet-Haustiere spazieren auch von selbst: Nach einigen Sekunden Pause gehen sie mit der Gehbewegung ein kurzes Stück nach links oder rechts auf ihrer aktuellen Höhe, bleiben im Arbeitsbereich des Bildschirms und ruhen dann wieder. Ziehen, Streicheln, Komm her und Spielzeug, Ruhe beim Tippen sowie Modi ohne eigenständiges Handeln haben Vorrang.
+
+Die Standardeinstellung im Verhaltensmenü, Alle Aktionen durchlaufen (zufällig), lässt ein freies Tier zufällig aus seinem gesamten Aktionsvorrat wählen; Auf dem Boden laufen beschränkt sich auf Laufen und Stehen. Ein Sprite-Tier wählt zwischen Laufen, Stehen, Sitzen, Spielen, Fellpflege, Klettern an der näheren Wand, Winken, Schlafen, Feiern und dem Vorführen seines Outfits; ein Puppet-Tier zwischen einem Spaziergang und Sitzen, Spielen, Fellpflege, Winken oder Feiern an Ort und Stelle. Ein gerufenes Tier läuft sofort los. Posen werden an Ort und Stelle gehalten, und ein Tier ohne Bild für eine Pose zeigt sein Ruhebild.
+
 Szenen: Die Szenenseite liest alte JSON-Eintragslisten, versionierte frontengine.scene-Dokumente und portable .fescene-Pakete. PUPPET-Einträge enthalten Position, Größe, Deckkraft, endliche numerische Parameter sowie optionale Bewegung, Ausdruck und Skript. JSON-Pfade beziehen sich auf die Szenendatei. .fescene enthält die referenzierten Medien, die originale .puppet und optionale .petscript.json für andere Rechner. Import prüft Pfade, symbolische Links, Versionen und Entpackgrenzen. Eine FrontEngine-Szene bleibt ein Szenenpaket; .puppet bleibt eine einzelne Imervue-Figur.
 
 macOS: Das optionale macos-Extra zielt auf macOS 13+ und öffentliche PyObjC-Frameworks. Die Backends bieten ScreenCaptureKit für Bildschirm-/Fensteraufnahme und Systemaudio, Mikrofonaufnahme, Quartz-Fenstergeometrie, Accessibility für Fensteranordnung/-bewegung, CoreMIDI, Medientasten und F12 zum Beenden. Bildschirmaufnahme, Bedienungshilfen und Mikrofon haben getrennte Berechtigungen; folgen Sie Systemeinstellungen → Datenschutz & Sicherheit und starten Sie bei Aufforderung neu. Deckkraft/erzwungener Vordergrund fremder Fenster, Space-Auswahl und Aufnahmeausschluss bleiben nicht verfügbar. Native macOS-Berechtigungen, Hardware und Leistung wurden auf diesem Windows-Entwicklungsrechner nicht geprüft. Einstellungen → macOS-Berechtigungen und Fähigkeiten zeigt jede Funktion als verfügbar, nicht verfügbar oder nicht unterstützt, mit Berechtigungs- oder Installationsgrund.
@@ -471,6 +475,7 @@ kann.
   pro Pull Request, alle CI-Prüfungen grün.
 - **Erstellen der ausführbaren Windows-Datei** — `python exe/build_exe.py`
   (Nuitka; fügen Sie `--onefile` für eine einzelne Datei hinzu).
+  Standardmäßig wird auf allen CPU-Kernen kompiliert; `--jobs N` begrenzt die parallelen Jobs (weniger Speicher), `--jobs -N` lässt N Kerne frei.
 - **Dokumentation** — Sphinx-Quellen in `docs/`, veröffentlicht auf
   [Read the Docs](https://frontengine.readthedocs.io/en/latest/) in allen
   sieben Sprachen.
@@ -606,6 +611,8 @@ Beziehungen wachsen mit der Zuneigung in vier Stufen: Gerade kennengelernt, Vert
 Tier anpassen stellt außerdem Plaudern (Aus, Selten, Normal, Oft) für Sätze, die das Tier von selbst beginnt, und die Animationsstärke (Ruhig, Normal, Lebhaft) für Audiopuls und kurze Lande- und Fangreaktionen ein, getrennt von Sprechblasen und Lautstärke. Antworten auf deine Aktionen erscheinen auch bei ausgeschaltetem Plaudern. Puppet-Tiere wenden Plaudern auf geplante Skriptsätze an. Früher gespeicherte Darstellungen bleiben gültig und nutzen für beides Normal.
 
 Die Interaktionsliste der Tierverwaltung bietet außerdem die Menübefehle des gewählten aktiven Tiers an: Foto, Status, Erinnerung, Chat bei angebundenem Chatdienst, Klonen und Schließen sowie jede Bewegung und jeden Ausdruck eines Puppet-Modells. Alles aus dem Rechtsklickmenü ist damit auch per Tastatur erreichbar.
+
+Integrierte Figur verwenden auf der Tierseite installiert die gewählte INKSIDE-Figur samt Garderobe im Hintergrund und wählt sie als Quelle. Start erzeugt dann ein normales Sprite-Tier in dieser Figur: Es läuft und klettert mit den handgezeichneten Schrittbildern, lässt sich in der Garderobe einkleiden und behält sein Outfit, wenn es die Figur schon trägt. Integriertes Puppet-Modell verwenden daneben erzeugt weiterhin die Imervue-Puppet-Version.
 
 Integriertes Puppet-Modell verwenden auf der Tierseite zeichnet die gewählte INKSIDE-Figur im Hintergrund als Imervue-.puppet-Modell: geriggter Kopf, Arme, Schwanz und Körper, zehn Bewegungen, drei Ausdrücke und ein Tierskript, das Begleitaktionen darauf abbildet. Es wird unter pet-assets/puppets gespeichert und mit seinem Skript als Quelle gewählt, sodass Start es als Puppet-Tier erzeugt.
 

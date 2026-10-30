@@ -326,6 +326,10 @@ Screen-sharing privacy**，FrontEngine 可以在会议应用打开时把它们�
 
 Puppet 宠物：安装可选的 puppet extra 与可用的 Imervue runtime，再于宠物页选择或拖入原始 Imervue .puppet v1 文件。已有图片与 sprite 宠物包仍可使用。Puppet 宠物使用 Imervue 画布、动作与表情，可复制或关闭，并支持 FrontEngine 覆盖层控制与预设集。可另选 .petscript.json 使用 Imervue 原有脚本引擎；FrontEngine pet.json 宠物包不是 puppet 文件。未知版本、不安全的归档路径与无效资源会在加载 runtime 前拒绝。
 
+Puppet 宠物也会自己散步：休息几秒后，沿当前的高度向左或向右走一小段，并播放走路动作，不会走出屏幕的工作区，接着再休息。拖动、抚摸、“过来”与玩具、打字时安分，以及不允许自行行动的模式都会让散步停下。
+
+“行为”菜单的默认值“循环所有动作（随机）”会让宠物从整套动作中随机挑选接下来要做什么；“在地面走动”则只走路和发呆。精灵图宠物会在走路、发呆、坐下、玩耍、理毛、走到较近的墙边爬墙、挥手、睡觉、庆祝和展示服装之间挑选；Puppet 宠物则在散步，以及原地坐下、玩耍、理毛、挥手或庆祝之间挑选。召唤出来的宠物会马上开始走动。姿势动作会停在原地，没有该姿势图片的宠物会显示待机图片。
+
 场景：场景页支持旧 entry mapping JSON、有版本的 frontengine.scene envelope，以及便携式 .fescene 包。PUPPET 项目可设置位置、大小、不透明度、有限数值参数，以及可选动作、表情与脚本。JSON 路径相对于场景文件解析。.fescene 包含引用媒体、原始 .puppet 与可选 .petscript.json，可移到其他电脑。导入会检查路径、符号链接、版本与解压上限。FrontEngine 场景保持为场景包；.puppet 保持为单一 Imervue 角色。
 
 macOS：可选 macos extra 以 macOS 13+ 与公开 PyObjC framework 为基准。后端提供 ScreenCaptureKit 屏幕／窗口捕获与系统音频、麦克风捕获、Quartz 窗口几何、Accessibility 窗口布局与移动、CoreMIDI、媒体键及 F12 退出。屏幕录制、辅助功能与麦克风权限分别检查；请到系统设置 → 隐私与安全性，依提示重新启动。其他程序窗口的透明度／强制置顶、Space 指定，以及让其他程序捕获时排除覆盖层仍不可用。本 Windows 开发环境尚未验证 macOS 原生授权、硬件与性能。 Settings → macOS 权限与能力会逐项列出可用、不可用或不支持，并显示权限或安装原因。
@@ -382,6 +386,7 @@ python -m pyflakes frontengine/ exe/ tests/
   所有 CI 检查都是绿的。
 - **构建 Windows 可执行文件** — `python exe/build_exe.py`
   （Nuitka；加 `--onefile` 得到单个文件）。
+  默认使用全部 CPU 核心编译；`--jobs N` 限制并行任务数（降低内存占用），`--jobs -N` 保留 N 个核心不用。
 - **文档** — Sphinx 源码在 `docs/` 里，以全部七种语言发布到
   [Read the Docs](https://frontengine.readthedocs.io/en/latest/)。
 
@@ -510,6 +515,8 @@ Windows 封装共用 Python CLI 的 --preset 和 --debug。原生封装验收前
 “自定义宠物”还能分别设置主动说话（关闭、偶尔、一般、经常）与动画幅度（沉稳、一般、活泼），前者控制宠物自己开口的频率，后者控制声音脉动与落地、接球等短反应，与对话气泡及音量互不影响。关闭主动说话后，对你操作的回应仍会显示。Puppet 的主动说话设置用于脚本排程台词。先前保存的设置照常可用，两者均视为一般。
 
 宠物管理页的互动列表也会列出所选宠物自己的菜单指令：拍照、状态、提醒、对话（接入对话服务时）、复制与关闭，以及 Puppet 模型的每个动作与表情，因此右键菜单中的所有操作都能用键盘完成。
+
+宠物页的“使用内置角色”会在后台安装所选的 INKSIDE 角色与它的衣柜，并把它设为来源。接着按“开始”会召唤普通的精灵图宠物并穿上这个角色：它会用手绘的步伐画格走路和爬墙、可以在衣柜换装，而且已经是这个角色的宠物会保留原本的穿搭。旁边的“使用内置 Puppet 模型”仍会生成 Imervue Puppet 版本。
 
 宠物页的“使用内置 Puppet 模型”会在后台把选定的 INKSIDE 角色绘制成 Imervue .puppet 模型：头、手臂、尾巴与身体都已绑定，附十个动作、三个表情，以及把陪伴互动对应到它们的宠物脚本。模型存放在 pet-assets/puppets，并连同脚本设为来源，按开始即以 Puppet 宠物出现。
 

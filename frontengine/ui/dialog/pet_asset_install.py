@@ -63,3 +63,33 @@ class PetBuiltinInstall(QRunnable):
         except (OSError, ValueError) as failure:
             error = str(failure)
         self.signals.finished.emit(error)
+
+
+class SpriteSignals(QObject):
+    finished = Signal(str, str)   # preview image path, error
+
+
+class PetBuiltinSprite(QRunnable):
+    """Install a built-in character for sprite pets and render its idle frame as the pet image."""
+
+    def __init__(self, library, identifier, preview_folder):
+        super().__init__()
+        self.library, self.identifier, self.preview_folder = library, identifier, preview_folder
+        self.cancel = Event()
+        self.signals = SpriteSignals()
+
+    def run(self) -> None:
+        from frontengine.show.pet.inkside.library import VERSION, install_builtin
+        from frontengine.show.pet.layered_renderer import LayeredRenderer
+        try:
+            install_builtin(self.library, self.identifier, self.cancel)
+            catalog, _errors = self.library.scan()
+            character = catalog.resolve({'id': self.identifier, 'version': VERSION}, 'character')
+            self.preview_folder.mkdir(parents=True, exist_ok=True)
+            preview = self.preview_folder / f'{self.identifier}.png'
+            if not LayeredRenderer(character).render('idle', 0).save(str(preview), 'PNG'):
+                raise OSError(f'Could not write {preview}')
+        except (OSError, ValueError) as failure:
+            self.signals.finished.emit('', str(failure))
+            return
+        self.signals.finished.emit(str(preview), '')

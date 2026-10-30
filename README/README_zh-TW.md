@@ -350,6 +350,10 @@ FrontEngine 裡的一切都是在本機進行的,除非它在這份清單上。�
 
 Puppet 寵物：安裝選用的 puppet extra 與可用的 Imervue runtime，再於寵物頁選擇或拖入原始 Imervue .puppet v1 檔案。既有圖片與 sprite 寵物包仍可使用。Puppet 寵物使用 Imervue 畫布、動作與表情，可複製或關閉，並支援 FrontEngine 覆蓋層控制與預設集。可另選 .petscript.json 使用 Imervue 原有腳本引擎；FrontEngine pet.json 寵物包不是 puppet 檔。未知版本、不安全的封存路徑與無效資源會在載入 runtime 前拒絕。
 
+Puppet 寵物也會自己散步：休息幾秒後，沿目前的高度向左或向右走一小段，並播放走路動作，不會走出螢幕的工作區，接著再休息。拖曳、撫摸、「過來」與玩具、打字時安分，以及不允許自行行動的模式都會讓散步停下。
+
+「行為」選單的預設值「循環所有動作（隨機）」會讓寵物從整套動作中隨機挑選接下來要做什麼；「沿底部行走」則只走路和發呆。精靈圖寵物會在走路、發呆、坐下、玩耍、理毛、走到較近的牆邊爬牆、揮手、睡覺、慶祝和展示服裝之間挑選；Puppet 寵物則在散步，以及原地坐下、玩耍、理毛、揮手或慶祝之間挑選。叫出來的寵物會馬上開始走動。姿勢動作會停在原地，沒有該姿勢圖片的寵物會顯示待機圖片。
+
 場景：場景頁支援舊 entry mapping JSON、有版本的 frontengine.scene envelope，以及可攜式 .fescene 套件。PUPPET 項目可設定位置、大小、不透明度、有限數值參數，以及選用動作、表情與腳本。JSON 路徑相對於場景檔解析。.fescene 包含引用媒體、原始 .puppet 與選用 .petscript.json，可移到其他電腦。匯入會檢查路徑、符號連結、版本與解壓上限。FrontEngine 場景維持場景套件；.puppet 維持單一 Imervue 角色。
 
 macOS：選用 macos extra 以 macOS 13+ 與公開 PyObjC framework 為基準。後端提供 ScreenCaptureKit 螢幕／視窗擷取與系統音訊、麥克風擷取、Quartz 視窗幾何、Accessibility 視窗版面與移動、CoreMIDI、媒體鍵及 F12 退出。螢幕錄製、輔助使用與麥克風權限分別檢查；請到系統設定 → 隱私權與安全性，依提示重新啟動。其他程式視窗的透明度／強制置頂、Space 指定，以及讓其他程式擷取時排除覆蓋層仍不可用。本 Windows 開發環境尚未驗證 macOS 原生授權、硬體與效能。 Settings → macOS 權限與能力會逐項列出可用、不可用或不支援，並顯示權限或安裝原因。
@@ -408,6 +412,7 @@ python -m pyflakes frontengine/ exe/ tests/
   pull request 一個功能,所有 CI 檢查都要是綠的。
 - **建置 Windows 執行檔**——`python exe/build_exe.py`
   (Nuitka;加上 `--onefile` 產生單一檔案)。
+  預設使用全部 CPU 核心編譯；`--jobs N` 限制並行工作數（降低記憶體用量），`--jobs -N` 保留 N 個核心不用。
 - **說明文件(Documentation)**——Sphinx 原始碼在 `docs/` 裡,以全部七種
   語言發佈到 [Read the Docs](https://frontengine.readthedocs.io/en/latest/)。
 
@@ -539,6 +544,8 @@ Windows 封裝共用 Python CLI 的 --preset 與 --debug。原生封裝驗收前
 「自訂寵物」還能分別設定主動說話（關閉、偶爾、一般、經常）與動畫幅度（沉穩、一般、活潑），前者控制寵物自己開口的頻率，後者控制聲音脈動與落地、接球等短反應，與對話泡泡及音量互不影響。關閉主動說話後，對你操作的回應仍會顯示。Puppet 的主動說話設定套用於腳本排程台詞。先前保存的設定照常可用，兩者皆視為一般。
 
 寵物管理頁的互動清單也會列出所選寵物自己的選單指令：拍照、狀態、提醒、對話（接上對話服務時）、複製與關閉，以及 Puppet 模型的每個動作與表情，因此右鍵選單中的所有操作都能用鍵盤完成。
+
+寵物頁的「使用內建角色」會在背景安裝所選的 INKSIDE 角色與它的衣櫃，並把它設為來源。接著按「開始」會叫出一般的精靈圖寵物並穿上這個角色：牠會用手繪的步伐畫格走路和爬牆、可以在衣櫃換裝，而且已經是這個角色的寵物會保留原本的穿搭。旁邊的「使用內建 Puppet 模型」仍會產生 Imervue Puppet 版本。
 
 寵物頁的「使用內建 Puppet 模型」會在背景把選定的 INKSIDE 角色繪製成 Imervue .puppet 模型：頭、手臂、尾巴與身體都已綁定，附十個動作、三個表情，以及把陪伴互動對應到它們的寵物腳本。模型存放在 pet-assets/puppets，並連同腳本設為來源，按開始即以 Puppet 寵物出現。
 
