@@ -355,6 +355,8 @@ Screen-sharing privacy**에서 FrontEngine은 회의 앱이 열려 있는 동안
 
 Puppet 펫: 선택 puppet extra와 사용 가능한 Imervue runtime을 설치한 뒤 펫 페이지에서 원본 Imervue .puppet v1을 선택하거나 놓습니다. 기존 이미지와 스프라이트 팩은 계속 사용할 수 있습니다. Puppet은 Imervue 캔버스, 동작, 표정을 사용하며 복제/닫기, FrontEngine 오버레이 제어 및 프리셋을 지원합니다. 선택 .petscript.json은 기존 Imervue 스크립트 엔진을 사용합니다. FrontEngine pet.json 팩은 puppet 파일이 아닙니다. 알 수 없는 버전, 위험한 압축 경로, 잘못된 자원은 로딩 전에 거부합니다.
 
+Puppet 펫도 스스로 산책합니다. 몇 초 쉰 뒤 지금 높이에서 왼쪽이나 오른쪽으로 걷기 동작과 함께 조금 걸어가고, 화면 작업 영역 밖으로는 나가지 않으며, 다시 쉽니다. 드래그, 쓰다듬기, 이리 와와 장난감, 입력 중 얌전히 있기, 스스로 움직이지 않는 모드가 우선합니다.
+
 장면: 기존 엔트리 매핑 JSON, 버전이 있는 frontengine.scene, 이동 가능한 .fescene 패키지를 읽습니다. PUPPET에는 위치, 크기, 불투명도, 유한 숫자 매개변수와 선택 동작, 표정, 스크립트를 설정할 수 있습니다. JSON 경로는 장면 파일을 기준으로 해석합니다. .fescene은 참조 미디어, 원본 .puppet, 선택 .petscript.json을 포함해 다른 컴퓨터로 옮길 수 있습니다. 가져오기는 경로, 심볼릭 링크, 버전, 압축 해제 한도를 검사합니다. FrontEngine 장면은 장면 패키지이며 .puppet은 한 Imervue 캐릭터입니다.
 
 macOS: 선택 macos extra는 macOS 13+와 공개 PyObjC framework를 사용합니다. ScreenCaptureKit 화면/창 캡처와 시스템 오디오, 마이크, Quartz 창 기하, Accessibility 창 배치/이동, CoreMIDI, 미디어 키, F12 종료를 제공합니다. 화면 기록, 손쉬운 사용, 마이크 권한을 따로 확인합니다. 시스템 설정 → 개인정보 보호 및 보안에서 허용하고 안내에 따라 재시작하세요. 다른 앱 창의 불투명도/강제 최상위, Space 선택, 다른 앱 캡처에서 오버레이 제외는 지원하지 않습니다. 이 Windows 개발 컴퓨터에서는 macOS의 실제 권한, 하드웨어, 성능을 검증하지 않았습니다. 설정 → macOS 권한 및 기능에서 각 기능을 사용 가능, 사용 불가, 미지원으로 표시하고 권한 또는 설치 관련 이유를 안내합니다.
