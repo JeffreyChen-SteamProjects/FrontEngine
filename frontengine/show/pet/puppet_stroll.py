@@ -22,7 +22,7 @@ class PuppetStroll(QObject):
     def __init__(self, pet, rng: random.Random | None = None) -> None:
         super().__init__(pet)
         self.pet = pet
-        self.rng = rng or random.Random()
+        self.rng = rng or random.Random()  # nosec B311 - stroll timing and distance only, not security
         self.walking = False
         self.target_x: int | None = None
         self._x = 0.0
