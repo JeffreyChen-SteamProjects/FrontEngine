@@ -32,7 +32,7 @@ Puppet pets: install the optional puppet extra and an available Imervue runtime,
 
 Puppet pets also stroll on their own: after a few seconds' rest they walk a short way left or right along their current height with the walk motion, stay inside the screen's work area, then rest again. A stroll gives way to dragging, petting, Come here and toys, settling while typing, and modes that do not allow acting alone.
 
-By default a free pet picks what to do next at random from its whole set of actions, not just walking and idling. A sprite pet chooses among walking, idling, sitting, playing, grooming, climbing the nearer wall, waving, sleeping, celebrating and showing off its outfit; a Puppet pet chooses between a stroll and sitting, playing, grooming, waving or celebrating in place. Poses are held in place, and a pet without an image for a pose shows its idle image.
+The Behaviour menu's default, Cycle all actions (random), has a free pet pick what to do next at random from its whole set of actions; Walk on floor keeps only walking and idling. A sprite pet chooses among walking, idling, sitting, playing, grooming, climbing the nearer wall, waving, sleeping, celebrating and showing off its outfit; a Puppet pet chooses between a stroll and sitting, playing, grooming, waving or celebrating in place. A summoned pet sets off walking at once. Poses are held in place, and a pet without an image for a pose shows its idle image.
 
 :doc:`runtime_interoperability`
 

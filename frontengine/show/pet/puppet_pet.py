@@ -494,6 +494,8 @@ class PuppetPetWidget(DraggableTopWindow):
             handle.screenChanged.connect(lambda _screen: QTimer.singleShot(0, self, self._follow_screen))
         if not self._closed:
             self.profile_session.resume()
+            if not self._welcomed and not self._settled:
+                self._stroll.start(soon=True)   # a summoned pet sets off at once
             self.set_settled(self._settled)
             self.script_timer.start()
             if not self._welcomed:

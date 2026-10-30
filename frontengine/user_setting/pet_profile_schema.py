@@ -32,7 +32,7 @@ _OPTIONAL_PRESENTATION = {"chatter": CHATTER_LEVELS, "motion": MOTION_LEVELS}
 
 def presentation_defaults() -> dict:
     """Return independent presentation values for a newly customized pet."""
-    return {"size": 128, "speed": 3, "behaviour": "floor", "climb": True,
+    return {"size": 128, "speed": 3, "behaviour": "actions", "climb": True,
             "sit_on_windows": True, "speech_bubbles": True, "volume": 100,
             "settle_typing": False, "chatter": "normal", "motion": "normal"}
 
@@ -49,7 +49,7 @@ def _presentation(value: object) -> None:
     for key, bounds in {"size": (16, 512), "speed": (1, 20), "volume": (0, 100)}.items():
         if type(value[key]) is not int or not bounds[0] <= value[key] <= bounds[1]:
             raise ValueError(f"Invalid pet {key}")
-    if value["behaviour"] not in ("floor", "wander", "chase"):
+    if value["behaviour"] not in ("actions", "floor", "wander", "chase"):
         raise ValueError("Invalid pet behaviour")
     for key in ("climb", "sit_on_windows", "speech_bubbles", "settle_typing"):
         if type(value[key]) is not bool:

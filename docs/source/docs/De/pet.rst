@@ -34,7 +34,7 @@ Puppet-Haustiere: Installieren Sie das optionale puppet-Extra und eine verfügba
 
 Puppet-Haustiere spazieren auch von selbst: Nach einigen Sekunden Pause gehen sie mit der Gehbewegung ein kurzes Stück nach links oder rechts auf ihrer aktuellen Höhe, bleiben im Arbeitsbereich des Bildschirms und ruhen dann wieder. Ziehen, Streicheln, Komm her und Spielzeug, Ruhe beim Tippen sowie Modi ohne eigenständiges Handeln haben Vorrang.
 
-Standardmäßig wählt ein freies Tier zufällig aus seinem gesamten Aktionsvorrat, was es als Nächstes tut, statt nur zu laufen und herumzustehen. Ein Sprite-Tier wählt zwischen Laufen, Stehen, Sitzen, Spielen, Fellpflege, Klettern an der näheren Wand, Winken, Schlafen, Feiern und dem Vorführen seines Outfits; ein Puppet-Tier zwischen einem Spaziergang und Sitzen, Spielen, Fellpflege, Winken oder Feiern an Ort und Stelle. Posen werden an Ort und Stelle gehalten, und ein Tier ohne Bild für eine Pose zeigt sein Ruhebild.
+Die Standardeinstellung im Verhaltensmenü, Alle Aktionen durchlaufen (zufällig), lässt ein freies Tier zufällig aus seinem gesamten Aktionsvorrat wählen; Auf dem Boden laufen beschränkt sich auf Laufen und Stehen. Ein Sprite-Tier wählt zwischen Laufen, Stehen, Sitzen, Spielen, Fellpflege, Klettern an der näheren Wand, Winken, Schlafen, Feiern und dem Vorführen seines Outfits; ein Puppet-Tier zwischen einem Spaziergang und Sitzen, Spielen, Fellpflege, Winken oder Feiern an Ort und Stelle. Ein gerufenes Tier läuft sofort los. Posen werden an Ort und Stelle gehalten, und ein Tier ohne Bild für eine Pose zeigt sein Ruhebild.
 
 :doc:`runtime_interoperability`
 

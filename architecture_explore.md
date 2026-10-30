@@ -126,7 +126,7 @@ FrontEngine 是一個 PySide6 桌面**覆蓋層（overlay）框架**：把影片
 
 | 檔案 | 行數 | 功用 |
 | --- | ---: | --- |
-| `pet/desktop_pet.py` | 1,981 | 整個 repo 最大的檔案，內含一整組**純邏輯類別**與一個 Qt widget：<br>• `PetMotion` — 移動模型（重力、彈跳、爬牆、走天花板、站視窗、追游標、遊蕩），閒置時依 `AUTONOMOUS_ACTIONS` 權重從整套動作隨機挑選下一個（走、待機、坐、玩、理毛、爬較近的牆、揮手、睡、慶祝、展示服裝），完全不依賴 Qt<br>• `PetMood` / `PetHunger` / `PetGrowth` — 心情、飽足、親密度與等級<br>• `PetTagGame` — 多隻寵物的鬼抓人<br>• `PetTimeline` — 依秒數觸發的動作時間軸<br>• `scan_pet_pack()` / `read_pet_manifest()` — 動作包（walk/idle/sleep/climb/fall/drag + `pet.json`）<br>• `classify_drop()` / `classify_food()` — 拖檔案進來是換裝還是餵食<br>• `SpeechBubble`、`pick_message()` — 對話泡泡與時段/心情台詞<br>• `DesktopPetWidget(BaseWidget)` — 把上面全部接起來，另接麥克風對嘴、AI 對話、提醒、音效、電量警告 |
+| `pet/desktop_pet.py` | 1,981 | 整個 repo 最大的檔案，內含一整組**純邏輯類別**與一個 Qt widget：<br>• `PetMotion` — 移動模型（重力、彈跳、爬牆、走天花板、站視窗、追游標、遊蕩），行為 `actions`（預設，選單「循環所有動作（隨機）」）在內部是地面模式加 `random_actions`，閒置時依 `AUTONOMOUS_ACTIONS` 權重從整套動作隨機挑選下一個（走、待機、坐、玩、理毛、爬較近的牆、揮手、睡、慶祝、展示服裝）；`floor` 只走路與待機；`behaviour` 對外仍回報 floor 以沿用地面模式的判斷，存檔與顯示改讀 `mode`，完全不依賴 Qt<br>• `PetMood` / `PetHunger` / `PetGrowth` — 心情、飽足、親密度與等級<br>• `PetTagGame` — 多隻寵物的鬼抓人<br>• `PetTimeline` — 依秒數觸發的動作時間軸<br>• `scan_pet_pack()` / `read_pet_manifest()` — 動作包（walk/idle/sleep/climb/fall/drag + `pet.json`）<br>• `classify_drop()` / `classify_food()` — 拖檔案進來是換裝還是餵食<br>• `SpeechBubble`、`pick_message()` — 對話泡泡與時段/心情台詞<br>• `DesktopPetWidget(BaseWidget)` — 把上面全部接起來，另接麥克風對嘴、AI 對話、提醒、音效、電量警告 |
 
 #### 螢幕工具類覆蓋層
 

@@ -41,6 +41,9 @@ def test_built_in_character_spawns_a_dressed_sprite_pet(tmp_path, monkeypatch):
         assert pet.profile_session.state()['appearance']['character'] == REFERENCE
         assert pet._layered_playback.renderer is not None
         assert pet.asset_library.is_installed('inkside-pip', '1')
+        # Dressing on summon plays no outfit show, so nothing holds the pet in place.
+        assert pet.companion.visual_action is None and pet.companion.allows_autonomy
+        assert pet.motion.mode == 'actions' and pet.motion.random_actions
     finally:
         _close(page)
 

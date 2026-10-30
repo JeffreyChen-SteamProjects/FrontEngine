@@ -224,8 +224,11 @@ class WardrobeDraft:
         self._candidate = copy.deepcopy(self._expected)
         self.preview = None
 
-    def apply(self) -> LayeredRenderer | None:
-        """Preload, compare and persist. Failure leaves the draft and saved state intact."""
+    def apply(self, present: bool = True) -> LayeredRenderer | None:
+        """Preload, compare and persist. Failure leaves the draft and saved state intact.
+
+        ``present`` plays the outfit show on a live pet; summoning skips it so the pet moves at once.
+        """
         candidate = self.appearance
         self._validate(candidate)
         prepared = self.catalog.prepare(candidate)
@@ -233,7 +236,7 @@ class WardrobeDraft:
         if session:
             if not getattr(session.parent(), 'supports_layered_wardrobe', True):
                 raise ValueError('This active pet does not support layered sprite clothing')
-            session.apply_appearance(self._expected, candidate, prepared)
+            session.apply_appearance(self._expected, candidate, prepared, present=present)
         else:
             if self.profiles.get(self.identifier)['appearance'] != self._expected:
                 raise ValueError('Pet appearance changed while previewing')

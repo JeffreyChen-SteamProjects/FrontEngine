@@ -1,19 +1,20 @@
-"""A free sprite pet picks what to do next at random from the whole action set."""
+"""In the default "cycle all actions" mode a free pet picks its next action at random from the whole set."""
 import random
 from collections import Counter
 
 import pytest
 
 from frontengine.show.pet.desktop_pet import (
-    AUTONOMOUS_ACTIONS, POSE_STATES, SURFACE_FLOOR, SURFACE_LEFT, SURFACE_RIGHT, PetMotion, derive_visual_state,
+    AUTONOMOUS_ACTIONS, BEHAVIOUR_ACTIONS, BEHAVIOUR_FLOOR, POSE_STATES, SURFACE_FLOOR, SURFACE_LEFT, SURFACE_RIGHT,
+    PetMotion, derive_visual_state,
 )
 
 BOUNDS = (0, 0, 800, 600)
 
 
-def _floor_pet(seed=3, **options):
+def _floor_pet(seed=3, behaviour=BEHAVIOUR_ACTIONS, **options):
     motion = PetMotion(x=300, y=600 - 64, width=64, height=64, bounds=BOUNDS, speed=4,
-                       rng=random.Random(seed), **options)
+                       rng=random.Random(seed), behaviour=behaviour, **options)
     motion.surface = SURFACE_FLOOR
     return motion
 
@@ -83,3 +84,60 @@ def test_two_idles_in_a_row_still_lead_to_sleep(monkeypatch):
     motion._new_state()
     motion._new_state()
     assert motion.state == 'sleep'
+
+
+def test_the_actions_mode_is_the_floor_mode_with_random_actions():
+    motion = _floor_pet()
+    assert motion.behaviour == BEHAVIOUR_FLOOR and motion.random_actions and motion.mode == BEHAVIOUR_ACTIONS
+    motion.behaviour = BEHAVIOUR_FLOOR
+    assert not motion.random_actions and motion.mode == BEHAVIOUR_FLOOR
+
+
+def test_plain_floor_mode_only_walks_idles_and_sleeps():
+    assert set(_picks(_floor_pet(behaviour=BEHAVIOUR_FLOOR))) <= {'walk', 'idle'}
+
+
+def test_cycling_all_actions_is_the_default_everywhere(tmp_path):
+    from frontengine.ui.page.pet.pet_setting_ui import PetSettingUI
+    from frontengine.user_setting.pet_profile_schema import presentation_defaults
+    assert presentation_defaults()['behaviour'] == BEHAVIOUR_ACTIONS
+    page = PetSettingUI()
+    try:
+        assert page.behaviour_combobox.currentData() == BEHAVIOUR_ACTIONS
+        assert page.customization_defaults()['behaviour'] == BEHAVIOUR_ACTIONS
+    finally:
+        page.close()
+
+
+def test_a_summoned_pet_sets_off_walking_at_once(tmp_path):
+    from frontengine.show.pet.desktop_pet import DesktopPetWidget
+    from frontengine.user_setting.pet_profiles import PetProfiles
+    from test_pet_profile_sessions import _sprite
+    for seed in range(8):
+        pet = DesktopPetWidget(_sprite(tmp_path), behaviour=BEHAVIOUR_ACTIONS, sit_on_windows=False,
+                               profiles=PetProfiles({}, lambda: None))
+        try:
+            pet.motion._rng = random.Random(seed)
+            pet.start_moving((0, 0, 800, 600))
+            assert pet.motion.state == 'walk' and pet.motion._state_ticks >= 30
+            start = pet.motion.x
+            for _ in range(10):
+                pet.motion.step()
+            assert pet.motion.x != start
+        finally:
+            pet.close()
+
+
+def test_a_pet_keeps_the_chosen_mode_through_its_own_presentation_defaults(tmp_path):
+    from frontengine.show.pet.desktop_pet import DesktopPetWidget
+    from frontengine.user_setting.pet_profiles import PetProfiles
+    from test_pet_profile_sessions import _sprite
+    pet = DesktopPetWidget(_sprite(tmp_path), behaviour=BEHAVIOUR_ACTIONS, sit_on_windows=False,
+                           profiles=PetProfiles({}, lambda: None))
+    try:
+        pet._apply_customization()
+        assert pet._presentation_defaults['behaviour'] == BEHAVIOUR_ACTIONS
+        assert pet.motion.random_actions
+    finally:
+        pet.close()
+

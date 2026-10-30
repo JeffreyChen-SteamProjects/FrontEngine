@@ -443,6 +443,7 @@ french_word_dict = {
     'pet_motion_calm': "Calme",
     'pet_motion_normal': "Normal",
     'pet_motion_lively': "Vif",
+    "pet_behaviour_actions": "Enchaîner toutes les actions (au hasard)",
     "pet_behaviour_floor": "Marcher au sol",
     "pet_behaviour_wander": "Errer librement",
     "pet_behaviour_chase": "Suivre le curseur",

@@ -34,7 +34,7 @@ Animali puppet: installa l’opzione puppet e un runtime Imervue disponibile, po
 
 Gli animali Puppet passeggiano anche da soli: dopo qualche secondo di riposo camminano per un breve tratto a sinistra o a destra alla loro altezza attuale con il movimento di camminata, restano nell'area di lavoro dello schermo e poi si riposano di nuovo. Trascinamento, carezze, Vieni qui e giocattoli, la calma durante la digitazione e le modalità che non consentono di agire da soli hanno la precedenza.
 
-Per impostazione predefinita un animale libero sceglie a caso la prossima azione fra tutte le sue azioni, non solo camminare e stare fermo. Un animale sprite sceglie fra camminare, stare fermo, sedersi, giocare, pulirsi, arrampicarsi sul muro più vicino, salutare, dormire, festeggiare e mostrare l'abito; un animale Puppet sceglie fra una passeggiata e sedersi, giocare, pulirsi, salutare o festeggiare sul posto. Le pose restano sul posto e un animale senza immagine per una posa mostra la sua immagine di attesa.
+L'impostazione predefinita del menu Comportamento, Ciclo di tutte le azioni (casuale), fa scegliere a caso a un animale libero la prossima azione fra tutte le sue azioni; Cammina sul pavimento si limita a camminare e stare fermo. Un animale sprite sceglie fra camminare, stare fermo, sedersi, giocare, pulirsi, arrampicarsi sul muro più vicino, salutare, dormire, festeggiare e mostrare l'abito; un animale Puppet sceglie fra una passeggiata e sedersi, giocare, pulirsi, salutare o festeggiare sul posto. Un animale evocato si mette subito a camminare. Le pose restano sul posto e un animale senza immagine per una posa mostra la sua immagine di attesa.
 
 :doc:`runtime_interoperability`
 

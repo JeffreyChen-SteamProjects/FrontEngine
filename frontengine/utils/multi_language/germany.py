@@ -445,6 +445,7 @@ germany_word_dict = {
     'pet_motion_calm': "Ruhig",
     'pet_motion_normal': "Normal",
     'pet_motion_lively': "Lebhaft",
+    "pet_behaviour_actions": "Alle Aktionen durchlaufen (zufällig)",
     "pet_behaviour_floor": "Auf dem Boden laufen",
     "pet_behaviour_wander": "Frei umherstreifen",
     "pet_behaviour_chase": "Dem Cursor folgen",

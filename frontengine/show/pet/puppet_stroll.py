@@ -28,6 +28,7 @@ class PuppetStroll(QObject):
         self.rng = rng or random.Random()  # nosec B311 - stroll timing and distance only, not security
         self.walking = False
         self.acting: str | None = None   # action played in place
+        self._walk_next = False           # a newly summoned pet walks off first
         self._hold = 0.0
         self.target_x: int | None = None
         self._x = 0.0
@@ -50,10 +51,14 @@ class PuppetStroll(QObject):
         left, right = area.left(), area.right() + 1 - self.pet.width()
         return (left, right) if right > left else None
 
-    def start(self) -> None:
-        """Schedule the next walk or action unless one is already waiting or under way."""
+    def start(self, soon: bool = False) -> None:
+        """Schedule the next walk or action unless one is already waiting or under way.
+
+        ``soon`` is for a pet that was just summoned: it sets off walking almost at once.
+        """
         if not self.walking and self.acting is None and not self._rest.isActive():
-            self._rest.start(round(1000 * self.rng.uniform(*self.REST_SECONDS)))
+            self._walk_next = soon
+            self._rest.start(300 if soon else round(1000 * self.rng.uniform(*self.REST_SECONDS)))
 
     def stop(self) -> None:
         """Stop walking, acting and waiting; nothing resumes until start() is called."""
@@ -80,7 +85,8 @@ class PuppetStroll(QObject):
         if not self._free() or span is None:
             self.start()
             return
-        choice = self._choose()
+        choice = 'walk' if self._walk_next else self._choose()
+        self._walk_next = False
         if choice != 'walk':
             self._act(choice)
             return

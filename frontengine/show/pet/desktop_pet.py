@@ -48,6 +48,7 @@ from frontengine.utils.multi_language.language_wrapper import language_wrapper
 BEHAVIOUR_FLOOR = "floor"    # walk on the floor with gravity, throw & bounce
 BEHAVIOUR_WANDER = "wander"  # free 2D bounce, no gravity
 BEHAVIOUR_CHASE = "chase"    # chase the mouse cursor, sleep when caught
+BEHAVIOUR_ACTIONS = "actions"  # floor mode cycling through every action at random (default)
 
 # 攀爬時所在的表面 / Surface the pet is crawling on while climbing
 SURFACE_FLOOR = "floor"
@@ -655,7 +656,7 @@ class PetMotion:
         self.height = int(height)
         self.bounds = bounds  # (left, top, right, bottom)
         self.speed = max(1, int(speed))
-        self.behaviour = behaviour
+        self.behaviour = behaviour  # property: BEHAVIOUR_ACTIONS becomes floor + random_actions
         self._rng = rng if rng is not None else _random_module.SystemRandom()
         self.vx = float(self.speed)
         self.vy = 0.0 if behaviour != BEHAVIOUR_WANDER else float(self.speed)
@@ -685,6 +686,21 @@ class PetMotion:
         # Guidance point (x, y) honoured by every behaviour (used by the tag
         # game); it takes precedence over each mode's own default movement.
         self.guidance: Optional[Tuple[float, float]] = None
+
+    @property
+    def behaviour(self) -> str:
+        return self._behaviour
+
+    @behaviour.setter
+    def behaviour(self, value: str) -> None:
+        """BEHAVIOUR_ACTIONS is the floor mode with every action picked at random, so floor checks hold."""
+        self.random_actions = value == BEHAVIOUR_ACTIONS
+        self._behaviour = BEHAVIOUR_FLOOR if self.random_actions else value
+
+    @property
+    def mode(self) -> str:
+        """The behaviour as chosen, BEHAVIOUR_ACTIONS included; use this when saving or showing it."""
+        return BEHAVIOUR_ACTIONS if self.random_actions else self._behaviour
 
     @property
     def facing_left(self) -> bool:
@@ -1016,7 +1032,7 @@ class PetMotion:
             self.vy = float(self.speed)
 
     def _new_state(self, force_walk: bool = False) -> None:
-        """Pick what to do next at random from the whole action set (AUTONOMOUS_ACTIONS)."""
+        """Pick what to do next: walk or idle, or anything from AUTONOMOUS_ACTIONS in random-actions mode."""
         self._seek_wall = False
         if force_walk:
             self.state, self._idle_count = "walk", 0
@@ -1026,6 +1042,9 @@ class PetMotion:
             # been idling a while -> doze off
             self.state, self._idle_count = STATE_SLEEP, 0
             self._state_ticks = self._rng.randint(120, 300)
+            return
+        if not self.random_actions:
+            self._walk_or_idle()
             return
         options = [entry for entry in AUTONOMOUS_ACTIONS
                    if entry[0] != STATE_CLIMB or (self.climb and not self.on_platform)]
@@ -1042,6 +1061,17 @@ class PetMotion:
         if name == "walk":
             self.vx = float(self.speed) if self._rng.random() < 0.5 else float(-self.speed)
         self._state_ticks = self._rng.randint(low, high)
+
+    def _walk_or_idle(self) -> None:
+        """The plain floor mode: mostly walking, sometimes idling."""
+        if self._rng.random() < 0.65:
+            self.state, self._idle_count = "walk", 0
+            self.vx = float(self.speed) if self._rng.random() < 0.5 else float(-self.speed)
+            self._state_ticks = self._rng.randint(30, 120)
+        else:
+            self.state = "idle"
+            self._idle_count += 1
+            self._state_ticks = self._rng.randint(20, 80)
 
     def wake(self) -> None:
         """喚醒寵物並恢復走動（互動時呼叫）/ Wake the pet and resume walking."""
@@ -1276,7 +1306,7 @@ class DesktopPetWidget(BaseWidget):
         self.menu.addAction(self.photo_action)
         self._presentation_defaults = {
             "size": min(512, self._base_size), "speed": max(1, min(20, int(self.motion.speed))),
-            "behaviour": self.motion.behaviour, "climb": bool(self.motion.climb),
+            "behaviour": self.motion.mode, "climb": bool(self.motion.climb),
             "sit_on_windows": self._sit_on_windows, "speech_bubbles": self._talk,
             "volume": int(self._volume * 100), "settle_typing": False,
             "chatter": "normal", "motion": "normal",
@@ -1618,6 +1648,8 @@ class DesktopPetWidget(BaseWidget):
         self.motion.x = float(left)
         self.motion.y = float(bottom - self.pet_size)
         self.move(int(self.motion.x), int(self.motion.y))
+        # A freshly summoned pet sets off walking at once instead of rolling its first action.
+        self.motion.wake()
         self._tick_interval_ms = max(10, int(interval_ms))
         self._timer.start(scaled_interval(self._tick_interval_ms, self._low_power))
         self._schedule_chatter()
@@ -1915,7 +1947,7 @@ class DesktopPetWidget(BaseWidget):
         if action.get("status"):
             self.show_status()
         behaviour = action.get("behaviour")
-        if behaviour in (BEHAVIOUR_FLOOR, BEHAVIOUR_WANDER, BEHAVIOUR_CHASE):
+        if behaviour in (BEHAVIOUR_FLOOR, BEHAVIOUR_ACTIONS, BEHAVIOUR_WANDER, BEHAVIOUR_CHASE):
             self.motion.behaviour = behaviour
 
     def _check_reminders(self) -> None:

@@ -87,7 +87,7 @@ class PetCustomizationDialog(QDialog):
             self.controls[key] = control
             form.addRow(tr(QLabel(), 'pet_' + key + '_label', key.title()), control)
         for key, values, label, fallback in (
-                ('behaviour', ('floor', 'wander', 'chase'), 'pet_behaviour_label', 'Behaviour'),
+                ('behaviour', ('actions', 'floor', 'wander', 'chase'), 'pet_behaviour_label', 'Behaviour'),
                 ('chatter', CHATTER_LEVELS, 'pet_chatter_label', 'Chatter'),
                 ('motion', MOTION_LEVELS, 'pet_motion_label', 'Animation size')):
             control = QComboBox()

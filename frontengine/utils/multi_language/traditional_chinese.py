@@ -452,6 +452,7 @@ traditional_chinese_word_dict = {
     'pet_motion_calm': "沉穩",
     'pet_motion_normal': "一般",
     'pet_motion_lively': "活潑",
+    "pet_behaviour_actions": "循環所有動作（隨機）",
     "pet_behaviour_floor": "沿底部行走",
     "pet_behaviour_wander": "自由漫遊",
     "pet_behaviour_chase": "追逐游標",

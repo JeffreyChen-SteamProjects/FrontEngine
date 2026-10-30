@@ -125,7 +125,7 @@ class PetProfileSession(QObject):
         self.changed.emit()
         return True
 
-    def apply_appearance(self, expected: dict, candidate: dict, prepared=None) -> None:
+    def apply_appearance(self, expected: dict, candidate: dict, prepared=None, present: bool = True) -> None:
         """Persist a prevalidated/preloaded wardrobe draft without stale overwrites."""
         if self._closed:
             raise ValueError("Pet session is closed")
@@ -134,7 +134,7 @@ class PetProfileSession(QObject):
             raise ValueError("Pet appearance changed while previewing")
         self.profiles.update(self.identifier, {**self.companion.snapshot(), "appearance": candidate})
         self.appearance_renderer = prepared
-        if candidate != expected:
+        if present and candidate != expected:
             self.companion.present('outfit_show')
         self.changed.emit()
 

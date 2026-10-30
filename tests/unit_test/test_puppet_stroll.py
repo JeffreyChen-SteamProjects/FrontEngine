@@ -17,6 +17,7 @@ def prepare(pet, monkeypatch, x=-700, choice='walk'):
     pet._stroll.rng = random.Random(4)
     if choice is not None:
         monkeypatch.setattr(pet._stroll, '_choose', lambda: choice)
+    pet._stroll._walk_next = False
     pet.move(x, -400)
 
 
@@ -27,8 +28,15 @@ def walk_to_end(pet, ticks=400):
         pet._stroll.tick(0.05)
 
 
-def test_a_shown_puppet_schedules_a_stroll(puppet):
-    assert puppet._stroll._rest.isActive()
+def test_a_summoned_puppet_walks_off_at_once_then_rests_between(puppet, monkeypatch):
+    assert puppet._stroll._rest.isActive() and puppet._stroll._rest.remainingTime() <= 300
+    assert puppet._stroll._walk_next
+    prepare(puppet, monkeypatch, choice='sit')
+    puppet._stroll._walk_next = True
+    puppet._stroll._rest.stop()
+    puppet._stroll._begin()
+    assert puppet._stroll.walking, 'the first stroll of a summoned pet is a walk'
+    walk_to_end(puppet)
     assert 3000 <= puppet._stroll._rest.remainingTime() <= 8000
 
 
