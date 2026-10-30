@@ -53,6 +53,22 @@ def test_nonpositive_build_jobs_are_rejected(builder, monkeypatch):
     assert error.value.code == 2
 
 
+@pytest.mark.parametrize('value, expected', [(None, 8), ('auto', 8), ('AUTO', 8), ('3', 3), ('16', 16),
+                                             ('-1', 7), ('-7', 1)])
+def test_build_jobs_default_to_every_core_and_accept_caps_or_spare_cores(builder, value, expected):
+    assert builder.resolve_jobs(value, cpu_count=lambda: 8) == expected
+
+
+@pytest.mark.parametrize('value', ['0', '-8', '-20', 'many', '2.5'])
+def test_build_jobs_that_leave_nothing_to_build_with_are_rejected(builder, value):
+    with pytest.raises(ValueError):
+        builder.resolve_jobs(value, cpu_count=lambda: 8)
+
+
+def test_unknown_core_count_still_builds_with_one_job(builder):
+    assert builder.resolve_jobs(None, cpu_count=lambda: None) == 1
+
+
 def test_installed_optional_image_plugins_and_puppet_data_are_packaged(builder, monkeypatch):
     monkeypatch.setattr(builder, 'find_spec', lambda name: object())
     command = builder.build_command('1.0.81', False)

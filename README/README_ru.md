@@ -450,6 +450,7 @@ python -m pyflakes frontengine/ exe/ tests/
   pull request, все проверки CI зелёные.
 - **Сборка исполняемого файла Windows** — `python exe/build_exe.py`
   (Nuitka; добавьте `--onefile` для одного файла).
+  По умолчанию компиляция идёт на всех ядрах процессора; `--jobs N` ограничивает число параллельных задач (меньше памяти), `--jobs -N` оставляет N ядер свободными.
 - **Документация** — исходники Sphinx в `docs/`, опубликованные на
   [Read the Docs](https://frontengine.readthedocs.io/en/latest/) на всех семи
   языках.

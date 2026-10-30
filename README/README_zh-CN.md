@@ -382,6 +382,7 @@ python -m pyflakes frontengine/ exe/ tests/
   所有 CI 检查都是绿的。
 - **构建 Windows 可执行文件** — `python exe/build_exe.py`
   （Nuitka；加 `--onefile` 得到单个文件）。
+  默认使用全部 CPU 核心编译；`--jobs N` 限制并行任务数（降低内存占用），`--jobs -N` 保留 N 个核心不用。
 - **文档** — Sphinx 源码在 `docs/` 里，以全部七种语言发布到
   [Read the Docs](https://frontengine.readthedocs.io/en/latest/)。
 
