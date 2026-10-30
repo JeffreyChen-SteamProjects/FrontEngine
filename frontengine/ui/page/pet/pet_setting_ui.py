@@ -96,13 +96,18 @@ class PetSettingUI(SettingPage):
         self.choose_script_button = tr(QPushButton(), 'pet_choose_script', 'Choose puppet script...')
         self.choose_script_button.clicked.connect(self.choose_puppet_script)
         from frontengine.show.pet.inkside.library import builtin_names
-        self.builtin_puppet = QComboBox()
-        tr(self.builtin_puppet, 'pet_builtin_puppet_pick', 'Built-in Puppet character', 'setAccessibleName')
+        self.builtin_character = QComboBox()
+        tr(self.builtin_character, 'pet_builtin_character_pick', 'Built-in character', 'setAccessibleName')
         for identifier, name in builtin_names():
-            self.builtin_puppet.addItem(name, identifier)
+            self.builtin_character.addItem(name, identifier)
+        self.builtin_sprite_button = tr(QPushButton(), 'pet_builtin_character', 'Use built-in character')
+        self.builtin_sprite_button.clicked.connect(self.use_builtin_character)
         self.builtin_puppet_button = tr(QPushButton(), 'pet_builtin_puppet', 'Use built-in Puppet model')
         self.builtin_puppet_button.clicked.connect(self.use_builtin_puppet)
         self._puppet_export = None
+        self._sprite_install = None
+        # (character id, preview image): Start dresses a sprite pet spawned from that image as the character.
+        self._builtin_sprite: tuple[str, str] | None = None
         self.ready_label = tr(QLabel(), "Not Ready")
 
         # Size
@@ -204,9 +209,10 @@ class PetSettingUI(SettingPage):
         puppet_row = QWidget()
         puppet_layout = QHBoxLayout(puppet_row)
         puppet_layout.setContentsMargins(0, 0, 0, 0)
-        puppet_layout.addWidget(self.builtin_puppet)
+        puppet_layout.addWidget(self.builtin_character)
+        puppet_layout.addWidget(self.builtin_sprite_button)
         puppet_layout.addWidget(self.builtin_puppet_button)
-        source.add_row('pet_builtin_puppet_pick', puppet_row, 'Built-in Puppet character')
+        source.add_row('pet_builtin_character_pick', puppet_row, 'Built-in character')
         self.profile_controls = PetProfileControls(self)
 
         appearance = self.add_section("section_appearance", "Appearance")
@@ -339,6 +345,8 @@ class PetSettingUI(SettingPage):
             profile_id=identifier, profiles=self.profile_controls.profiles,
             profile_name=self.profile_controls.name.text(),
         )
+        if source_pet is None and self._builtin_sprite is not None and path == self._builtin_sprite[1]:
+            self._dress_as_builtin(pet, self._builtin_sprite[0])
         pet.clone_requested.connect(lambda: self._spawn_pet(pet.profile_session.state(), source_pet=pet))
         pet.customize_requested.connect(lambda: self.profile_controls.customize(pet.profile_session.identifier))
         pet.profile_session.changed.connect(self._on_settle_typing_toggled)
@@ -400,7 +408,7 @@ class PetSettingUI(SettingPage):
         if self._puppet_export is not None:
             return
         self.builtin_puppet_button.setEnabled(False)
-        job = PuppetExport(self.builtin_puppet.currentData(), Path.cwd() / 'pet-assets' / 'puppets')
+        job = PuppetExport(self.builtin_character.currentData(), Path.cwd() / 'pet-assets' / 'puppets')
         self._puppet_export = job
         job.signals.finished.connect(self._builtin_puppet_ready, Qt.ConnectionType.QueuedConnection)
         QThreadPool.globalInstance().start(job)
@@ -415,6 +423,42 @@ class PetSettingUI(SettingPage):
         self.puppet_script_path = script
         self.ready_to_play = True
         self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+
+    def use_builtin_character(self) -> None:
+        """Install the chosen INKSIDE character for sprite pets; Start then spawns a pet dressed as it."""
+        from frontengine.show.pet.asset_library import PetAssetLibrary
+        from frontengine.ui.dialog.pet_asset_install import PetBuiltinSprite
+        if self._sprite_install is not None:
+            return
+        self.builtin_sprite_button.setEnabled(False)
+        job = PetBuiltinSprite(PetAssetLibrary(), self.builtin_character.currentData(), Path.cwd() / 'pet-previews')
+        self._sprite_install = job
+        job.signals.finished.connect(self._builtin_character_ready, Qt.ConnectionType.QueuedConnection)
+        QThreadPool.globalInstance().start(job)
+
+    def _builtin_character_ready(self, preview: str, error: str) -> None:
+        identifier, self._sprite_install = self._sprite_install.identifier, None
+        self.builtin_sprite_button.setEnabled(True)
+        if error:
+            self.profile_controls.status.setText(error)
+            return
+        self.pet_image_path = preview
+        self.puppet_script_path = None
+        self._builtin_sprite = (identifier, preview)
+        self.ready_to_play = True
+        self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+
+    def _dress_as_builtin(self, pet, identifier: str) -> None:
+        """Give the pet's identity the built-in character, unless it already wears it."""
+        from frontengine.show.pet.inkside.library import VERSION
+        from frontengine.show.pet.wardrobe import WardrobeDraft
+        reference = {'id': identifier, 'version': VERSION}
+        if (pet.profile_session.state().get('appearance') or {}).get('character') == reference:
+            return
+        catalog, _errors = pet.asset_library.scan()
+        draft = WardrobeDraft(self.profile_controls.profiles, pet.profile_session.identifier, catalog)
+        draft.choose_character(reference)
+        draft.apply()
 
     def choose_puppet_script(self) -> None:
         path, _ = QFileDialog.getOpenFileName(self, 'Imervue pet script', '', 'Pet script (*.petscript.json)')

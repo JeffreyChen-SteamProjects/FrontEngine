@@ -590,6 +590,8 @@ Personalizar pet também ajusta Conversa (Desligada, Raramente, Normal, Frequent
 
 A lista de interações do gerenciador também oferece os comandos de menu do pet ativo selecionado: foto, status, lembrete, chat quando houver um serviço conectado, clonar e fechar, além de cada movimento e expressão de um modelo Puppet. Assim, todo o menu de contexto pode ser usado pelo teclado.
 
+Usar personagem integrado, na página do pet, instala em segundo plano o personagem INKSIDE escolhido com o guarda-roupa e o seleciona como origem. Iniciar cria então um pet sprite comum com esse personagem: ele anda e escala com os quadros de passo desenhados à mão, pode ser vestido no guarda-roupa e mantém a roupa se já usa esse personagem. Usar modelo Puppet integrado, ao lado, continua gerando a versão Imervue Puppet.
+
 Usar modelo Puppet integrado, na página do pet, desenha em segundo plano o personagem INKSIDE escolhido como modelo Imervue .puppet: cabeça, braços, cauda e corpo com rig, dez movimentos, três expressões e um script que liga as ações do companheiro a eles. Ele é salvo em pet-assets/puppets e escolhido como fonte com seu script, então Iniciar o cria como pet Puppet.
 
 Com vários monitores em escalas diferentes, um pet arrastado ou trazido de volta para outro monitor mantém o tamanho, fica dentro da área de trabalho desse monitor e anda por lá. As bordas de janela em monitores com escala são medidas nas mesmas coordenadas do pet, que pousa exatamente sobre as janelas.

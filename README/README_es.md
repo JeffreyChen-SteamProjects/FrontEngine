@@ -567,6 +567,8 @@ Personalizar mascota también ajusta Charla (Desactivada, Rara vez, Normal, A me
 
 La lista de interacciones del gestor también ofrece los comandos del menú de la mascota activa seleccionada: foto, estado, recordatorio, chat si hay un servicio conectado, clonar y cerrar, además de cada movimiento y expresión de un modelo Puppet. Así, todo el menú contextual es accesible con el teclado.
 
+Usar personaje integrado, en la página de mascota, instala en segundo plano el personaje INKSIDE elegido con su guardarropa y lo selecciona como origen. Iniciar crea entonces una mascota sprite normal con ese personaje: camina y trepa con los fotogramas de paso dibujados a mano, se puede vestir en el guardarropa y conserva su atuendo si ya lleva ese personaje. Usar modelo Puppet integrado, al lado, sigue creando la versión Imervue Puppet.
+
 Usar modelo Puppet integrado, en la página de mascota, dibuja en segundo plano el personaje INKSIDE elegido como modelo Imervue .puppet: cabeza, brazos, cola y cuerpo con rig, diez movimientos, tres expresiones y un script que les asigna las acciones del compañero. Se guarda en pet-assets/puppets y se elige como fuente con su script, así que Iniciar lo crea como mascota Puppet.
 
 Con varios monitores a escalas distintas, una mascota arrastrada o devuelta a otro monitor conserva su tamaño, permanece dentro del área de trabajo de ese monitor y camina allí. Los bordes de ventana en monitores escalados se miden en las mismas coordenadas que la mascota, así que se posa justo encima de las ventanas.
