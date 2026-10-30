@@ -192,7 +192,11 @@ def test_menu_close_waves_goodbye_before_closing(tmp_path, monkeypatch):
     assert pet.isVisible() and len(lines) == 1 and pet._flash[0] == 'peer_greet'
     # The close follows the 900 ms wave; wait for it instead of a fixed 950 ms,
     # which left 50 ms of margin and failed on a loaded macOS runner.
-    assert QTest.qWaitFor(lambda: not isValid(pet) or not pet.isVisible(), 3000)
+    for _ in range(60):
+        QTest.qWait(50)
+        if not isValid(pet) or not pet.isVisible():
+            break
+    assert not isValid(pet) or not pet.isVisible()
 
 
 def test_peer_greetings_repeat_at_most_once_a_minute(social_pets, clock):
