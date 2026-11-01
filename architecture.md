@@ -36,6 +36,7 @@ on Steam (app 2793470) with Workshop import. JEditor embeds its main window as a
 | `frontengine/show/compositor/` | Shared layers, real OpenGL shader/texture renderer, software fallback and RGBA output; BaseWidget caches CPU raster content |
 | `frontengine/utils/imervue/`, `scene_format/` | Validated puppet container, optional upstream runtime, scene envelopes and portable package extraction leases |
 | `frontengine/utils/macos/` | Public-framework capability/permission checks, capture, audio and MIDI sessions; native operations isolated behind injectable boundaries |
+| `frontengine/utils/pet_game/` | Qt-free pet home domain: catalog data, layout and reservations, residents and routines, work orders, an idempotent ledger, the 5 Hz fixed-step simulation and versioned snapshots. `user_setting/pet_game_save.py` writes it atomically with a last-good backup. No UI is wired to it yet |
 | `frontengine/system_tray/` | Tray icon and menu |
 | `frontengine/user_setting/` | `user_setting.json` (`user_setting_file.py`), preset repository (`presets/*.json` and zip packages), scene files |
 | `frontengine/utils/` | Services and pure logic: platform info, hotkeys, input watch, remote/MIDI, audio, rules/schedules/state machines, recording, virtual camera, window pinning, translations with live retranslation (`multi_language/`), `plugins/`, `steam/`, `workshop/`, logging, JSON |

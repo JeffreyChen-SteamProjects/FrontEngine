@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261101-01 | 2026-11-01 | Pet home domain layer: world, simulation, economy and saves | #done #pets #game | [2026-11](2026-11.md) |
 | U-20261029-47 | 2026-10-29 | Make the built-in walk and climb read as real steps at pet size | #done #pets #animation | [2026-10](2026-10.md) |
 | U-20261029-48 | 2026-10-29 | Show animated pets moving on the GPU path and walk MOCHI with generated step frames | #done #pets #animation #compositor | [2026-10](2026-10.md) |
 | U-20261029-49 | 2026-10-29 | Paint desktop pets through Qt so their frames change while they move | #done #pets #animation #compositor | [2026-10](2026-10.md) |
@@ -204,5 +205,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
+| [2026-11.md](2026-11.md) | 2026-11 | 1 |
 | [2026-10.md](2026-10.md) | 2026-10 | 115 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
