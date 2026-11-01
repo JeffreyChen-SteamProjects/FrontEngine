@@ -5,6 +5,7 @@ FrontEngine Deutsche Dokumentation
     :maxdepth: 4
 
     ui.rst
+    pet_home.rst
     video.rst
     image.rst
     web.rst

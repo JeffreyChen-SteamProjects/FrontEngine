@@ -235,9 +235,10 @@ def test_the_translation_lands_where_you_can_see_it(tmp_path) -> None:
     os.chdir(tmp_path)
     try:
         window = FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)
-        assert window.sidebar.page_label(0) == english_word_dict["tab_video_text"]
+        video = window.sidebar.page_index("tab_video_text")
+        assert window.sidebar.page_label(video) == english_word_dict["tab_video_text"]
         set_language("Deutsch", window)
-        assert window.sidebar.page_label(0) == germany_word_dict["tab_video_text"]
+        assert window.sidebar.page_label(video) == germany_word_dict["tab_video_text"]
         assert window.control_center_ui.hide_all_button.text() == \
             germany_word_dict["control_center_hide_all"]
         titles = [m.title() for m in window.menuBar().findChildren(QMenu)]

@@ -649,7 +649,7 @@ Puppet light play: PuppetTargetController uses a fixed call/light activity map f
 
 ## Desktop pet home (domain layer)
 
-`utils/pet_game/` is the Qt-free core of the pet life and work game (`progress.md` #23–#34). Nothing in `ui/` or `show/` uses it yet; the service, home overview and desktop presentation come in later stages. Dependency direction: UI sends commands to a `World`, only `simulation.advance` moves time, a renderer will read state and events and never touch the ledger or tasks.
+`utils/pet_game/` is the Qt-free core of the pet life and work game (`progress.md` #23–#34). The Pet home page (below) is its first user; the desktop presentation comes later. Dependency direction: UI sends commands to a `World`, only `simulation.advance` moves time, a renderer will read state and events and never touch the ledger or tasks.
 
 | Module | Responsibility |
 | --- | --- |
@@ -669,3 +669,13 @@ Puppet light play: PuppetTargetController uses a fixed call/light activity map f
 Care values start from the pet profile when a resident moves in; while the home owns the pet the world is their only writer. Offline time is never simulated.
 
 `show/pet_game/home_service.py` — `HomeService(QObject)` owns one home: one shared 200 ms timer (no per-object timers), a monotonic clock whose gaps above 5 s are dropped, named pause reasons (`pause(reason)` / `resume(reason)`; nothing runs until `start()`), and commands through `run(callable)`. Each resident holds the ordinary `PetProfileSession` lease for its UUID, so the same pet cannot also run as a desktop pet, and the session's care timer is never started. A resident whose identity is live elsewhere loads as runtime-only `away` (not simulated, not saved as parked) until `retry_leases()`. Saving: commands and settle/place/arrive events debounce a save (800 ms; 30 s periodic while dirty); the world is encoded on the GUI thread and written by one worker (`executor`, latest wins, result delivered by a queued signal); failures emit `save_failed` and retry after 5 s. After the home file succeeds, care values are mirrored into each pet profile through its session — the home save is the record of truth if that second write fails. `shutdown()` stops time, cancels activities without rewards, saves synchronously and releases every lease; it returns False (keeping everything) when the save fails. Measured: six residents, 54,000 steps (three game days) in about 1.2 s, about 22 µs per step.
+
+Pet home UI:
+
+| Module | Responsibility |
+| --- | --- |
+| `show/pet_game/home_view.py` | `HomeView(QWidget)`: draws one zone from world state (floor, entrance, restricted cells, furniture as labelled category-coloured blocks with owner dots, a placement preview that is green or red with its translated reason, residents as labelled markers with an activity glyph). Emits `resident_selected` / `furniture_selected` / `cell_clicked`; it never mutates the world, so the future desktop strip can reuse it without computing rewards |
+| `ui/page/pet_game/home_page.py` | `PetHomePage(SettingPage)`: the first page. Owns a `HomeService` (`default_service()`: `pet-home.json` in the working directory, the shared `PetProfiles`, one `pet-home-save` writer thread). Opening never creates a home; *Create a home* uses the primary screen's available width. Shows status, a damaged/newer save's recovery buttons (restore backup, set aside), Start/Pause (remembered in `user_setting_dict["pet_home_running"]`), and refreshes numbers each tick and lists on settle/place/arrive events and language changes. Esc leaves arranging. `shutdown()` delegates to the service |
+| `ui/page/pet_game/home_panels.py` | `ResidentPanel` (move in / new pet / move out, needs bars, activity and refusal text, routine, direct commands), `LayoutPanel` (storage, position, mirror, preview, place / move / put away / give bed), `ShopPanel` (buy, sell from storage), `WorkPanel` (job, units, task list with state and progress, cancel). Every action goes through `HomeService.run` and reports the translated result code |
+
+`NavigationSidebar` items also carry a stable page ID (`ROLE_PAGE_ID`, default: the title key); `page_index(page_id)` / `select_page_id(page_id)` resolve it, so inserting the Pet home page first did not break callers that need a specific page. MainUI shuts the home down after flushing desktop pet profiles; a failed home save keeps FrontEngine open with a status message.

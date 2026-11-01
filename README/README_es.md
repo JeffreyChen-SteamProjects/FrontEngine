@@ -61,6 +61,17 @@ y la versión de Steam distribuye la misma aplicación con compatibilidad con el
 
 La barra lateral agrupa las páginas por su propósito. Esta sección la sigue.
 
+### Hogar
+
+**Hogar de mascotas** — la primera página. Tus mascotas guardadas se mudan a un pequeño hogar, viven allí por su cuenta y trabajan para ganar monedas.
+
+- *Crear un hogar* da una cama, una mesa de comedor, un escritorio y 10 monedas. No se crea ni se inicia nada hasta que lo pulses, y todas las demás herramientas funcionan sin hogar.
+- *Mudarse* trae una mascota guardada; *Nueva mascota* crea una. Una mascota vive en el hogar o en el escritorio, nunca en ambos a la vez; su energía, saciedad, ánimo y afecto se conservan y vuelven a su perfil cuando se muda.
+- *Organizar* coloca muebles del almacén en el suelo. Una vista previa roja explica por qué un sitio no sirve (fuera del hogar, ya hay algo, bloquea la entrada); Esc termina. *Guardar* devuelve un mueble al almacén, y el trabajo en él se pausa conservando su progreso.
+- *Trabajo* asigna una tarea al residente seleccionado, como escribir cartas en el escritorio (2 minutos y 12 monedas cada una). Las mascotas van solas al escritorio, trabajan, se cansan, duermen, comen y vuelven; cada unidad terminada se paga exactamente una vez y una cancelada no paga nada.
+- La *Tienda* vende más muebles; al vender se recupera como mucho la mitad del precio, y la cama, la mesa y el escritorio básicos nunca se venden.
+- El tiempo solo pasa mientras el hogar está en marcha (*Iniciar* / *Pausar*); el tiempo con FrontEngine cerrado o el equipo en suspensión nunca se simula. El hogar se guarda en `pet-home.json` junto a tus ajustes, con la copia buena anterior en `pet-home.json.bak`. Una partida ilegible o de una versión más nueva nunca se sobrescribe: la página ofrece la copia de seguridad o conserva el archivo antiguo y empieza un hogar nuevo.
+
 ### En pantalla
 
 Superposiciones de medios. Cada una elige su monitor (o abarca todos), recuerda dónde la

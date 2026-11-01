@@ -36,7 +36,7 @@ on Steam (app 2793470) with Workshop import. JEditor embeds its main window as a
 | `frontengine/show/compositor/` | Shared layers, real OpenGL shader/texture renderer, software fallback and RGBA output; BaseWidget caches CPU raster content |
 | `frontengine/utils/imervue/`, `scene_format/` | Validated puppet container, optional upstream runtime, scene envelopes and portable package extraction leases |
 | `frontengine/utils/macos/` | Public-framework capability/permission checks, capture, audio and MIDI sessions; native operations isolated behind injectable boundaries |
-| `frontengine/utils/pet_game/` | Qt-free pet home domain: catalog data, layout and reservations, residents and routines, work orders, an idempotent ledger, the 5 Hz fixed-step simulation and versioned snapshots. `user_setting/pet_game_save.py` writes it atomically with a last-good backup. No UI is wired to it yet |
+| `frontengine/utils/pet_game/` | Qt-free pet home domain: catalog data, layout and reservations, residents and routines, work orders, an idempotent ledger, the 5 Hz fixed-step simulation and versioned snapshots. `user_setting/pet_game_save.py` writes it atomically with a last-good backup; `show/pet_game/` holds the `HomeService` (one clock, identity leases, background saves) and the zone drawing; `ui/page/pet_game/` is the Pet home page, the first page in the sidebar |
 | `frontengine/system_tray/` | Tray icon and menu |
 | `frontengine/user_setting/` | `user_setting.json` (`user_setting_file.py`), preset repository (`presets/*.json` and zip packages), scene files |
 | `frontengine/utils/` | Services and pure logic: platform info, hotkeys, input watch, remote/MIDI, audio, rules/schedules/state machines, recording, virtual camera, window pinning, translations with live retranslation (`multi_language/`), `plugins/`, `steam/`, `workshop/`, logging, JSON |
@@ -74,7 +74,7 @@ frontengine | python -m frontengine → main() → start_front_engine() → QApp
       [read_user_setting() → language_wrapper.reset_language() → sidebar + page stack
        → ControlCenterUI + _register_extra_overlays()
        → load_plugins(FrontEngine_EXTEND_TAB, enabled=user_setting_dict["load_plugins"])
-       → _add_tabs() → menus → CriticalExit + HotkeyService + background services
+       → _add_tabs() (Pet home first; pages also carry stable IDs) → menus → CriticalExit + HotkeyService + background services
        → restore last session / sticky notes → apply_startup_preset()]
   → apply_named_preset() if --preset → startup_setting() → sys.exit(app.exec())
 ```
@@ -91,7 +91,8 @@ feature page (ui/page/<kind>/) → dispatch_to_monitors() (ui/page/utils.py)
 **Shutdown**
 
 ```
-closeEvent() | close() → _shutdown() (runs once) → save session if enabled → stop _CLOSING_SERVICES
+closeEvent() | close() → _shutdown() (runs once) → flush pet profiles → pet home shutdown (save, release leases;
+  failure keeps the app open) → save session if enabled → stop _CLOSING_SERVICES
   → cancel recording/native sessions → close scenes → release scene extraction leases
   → save page state and geometry → write_user_setting() → close overlays
 ```

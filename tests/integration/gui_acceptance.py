@@ -190,7 +190,7 @@ def languages():
     from frontengine.utils.multi_language.language_wrapper import language_wrapper
     start = language_wrapper.language
     switched = {name: set_language(name, W) for name in language_wrapper.choose_language_dict}
-    W.sidebar.select_page(8)
+    W.sidebar.select_page_id('tab_pet_text')
     screenshot('pet-page-' + language_wrapper.language)
     set_language(start, W)
     assert all(switched.values()), switched

@@ -5,6 +5,7 @@ FrontEngine 简体中文 文档
     :maxdepth: 4
 
     ui.rst
+    pet_home.rst
     video.rst
     image.rst
     web.rst
