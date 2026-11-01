@@ -220,6 +220,7 @@ class FrontEngineMainUI(QMainWindow):
         self._register_extra_overlays()
         self.control_center_ui.register_overlay_source(lambda: self.pet_home_ui.strip_list)
         self.pet_home_ui.open_requested.connect(self._open_pet_home)
+        self.pet_home_ui.desktop_requested.connect(self.step_aside)
         self.control_center_ui.performance_changed.connect(self.scene_setting_ui.apply_performance_policy)
         self.control_center_ui.overlay_visibility_changed.connect(self.scene_setting_ui.actions.set_group_hidden)
         self.action_registry = self._build_action_registry()
@@ -735,6 +736,13 @@ class FrontEngineMainUI(QMainWindow):
         applied = retranslator.apply()
         front_engine_logger.info(f"[FrontEngineMainUI] retranslate | {applied} strings")
         return applied
+
+    def step_aside(self) -> None:
+        """Back to the desktop: into the tray when there is one, otherwise minimised."""
+        if self.system_tray is not None:
+            self.hide()
+        else:
+            self.showMinimized()
 
     def _apply_theme(self, theme: str) -> None:
         """Apply the theme the user chose (system / light / dark) and remember it."""

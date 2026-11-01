@@ -53,6 +53,7 @@ class HomeStrip(HomeView):
     mode_requested = Signal(str)
     quiet = False                          # focus mode: no bubbles and no cards
     closed = Signal()                      # at close time, before the deferred delete
+    arrange_finished = Signal()            # the strip's own way out of arranging (it takes no keys)
     overlay_lockable = False              # lock-all must not make the home unclickable
     overlay_remembers_geometry = False
 
@@ -75,6 +76,7 @@ class HomeStrip(HomeView):
         self.setWindowTitle(translate("tab_pet_home_text", "Pet home"))
         self.setFixedHeight(STRIP_HEIGHT)
         self.button = self._home_button()
+        self.done_button = self._done_button()
         self.frame_timer = QTimer(self)
         self.frame_timer.timeout.connect(self.update)
         self.set_quality_tier(tier)
@@ -205,6 +207,10 @@ class HomeStrip(HomeView):
 
     def set_arranging(self, arranging: bool) -> None:
         self.arranging = arranging
+        self.done_button.setText("✓ " + translate("pet_home_arrange_done", "Done arranging"))
+        self.done_button.adjustSize()
+        self.done_button.move(self.button.geometry().right() + 6, 2)
+        self.done_button.setVisible(arranging)
         self.update_mask()
         self.update()
 
@@ -248,6 +254,18 @@ class HomeStrip(HomeView):
         button.menu().aboutToShow.connect(self._fill_home_menu)
         button.adjustSize()
         button.move(2, 2)
+        return button
+
+    def _done_button(self) -> QToolButton:
+        """Shown only while arranging: the strip never takes focus, so Esc cannot reach it."""
+        button = QToolButton(self)
+        button.setText("✓ " + translate("pet_home_arrange_done", "Done arranging"))
+        button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        button.setStyleSheet("QToolButton { background: rgba(0,0,0,170); color: white; border-radius: 6px;"
+                             " padding: 2px 8px; font-size: 13px; }")
+        button.clicked.connect(self.arrange_finished.emit)
+        button.adjustSize()
+        button.hide()
         return button
 
     def _fill_home_menu(self) -> None:
