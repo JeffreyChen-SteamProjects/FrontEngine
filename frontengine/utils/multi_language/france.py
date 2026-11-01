@@ -1890,4 +1890,9 @@ french_word_dict = {
     "pet_home_visit_note": "Un aperçu d'une maison partagée - rien ne tourne, ne s'achète ni ne s'enregistre ici.",
     "pet_home_visit_zone": "Pièce {number}",
     "pet_home_visit_missing": "Non affiché ici (contenu manquant ou pas de place) : {items}",
+    "pet_home_packs": "Packs de meubles",
+    "pet_home_open_packs": "Ouvrir le dossier des packs",
+    "pet_home_pack_line": "{name} - {count} meubles · {source} · {license}",
+    "pet_home_pack_refused": "{name} n'a pas été chargé : {reason}",
+    "pet_home_no_packs": "Aucun pack de meubles. Placez un dossier de pack dans le dossier des packs et redémarrez.",
 }

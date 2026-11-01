@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261102-16 | 2026-11-02 | Furniture content packs, checked at the boundary | #done #pets #game #security | [2026-11](2026-11.md) |
 | U-20261102-15 | 2026-11-02 | Share a home as a blueprint and visit one read-only | #done #pets #game | [2026-11](2026-11.md) |
 | U-20261102-14 | 2026-11-02 | Seasons in the home's year, seasonal goals and advanced trades | #done #pets #game #art | [2026-11](2026-11.md) |
 | U-20261102-13 | 2026-11-02 | Event cooldowns, goal windows and furniture art as data, and choosing who moves in | #done #pets #game | [2026-11](2026-11.md) |

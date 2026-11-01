@@ -1893,4 +1893,9 @@ germany_word_dict = {
     "pet_home_visit_note": "Ein Blick in ein geteiltes Zuhause - hier läuft nichts, nichts wird gekauft oder gespeichert.",
     "pet_home_visit_zone": "Raum {number}",
     "pet_home_visit_missing": "Hier nicht gezeigt (fehlende Inhalte oder kein Platz): {items}",
+    "pet_home_packs": "Möbelpakete",
+    "pet_home_open_packs": "Paketordner öffnen",
+    "pet_home_pack_line": "{name} - {count} Stücke · {source} · {license}",
+    "pet_home_pack_refused": "{name} wurde nicht geladen: {reason}",
+    "pet_home_no_packs": "Keine Möbelpakete. Lege einen Paketordner in den Paketordner und starte neu.",
 }

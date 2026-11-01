@@ -1899,4 +1899,9 @@ traditional_chinese_word_dict = {
     "pet_home_visit_note": "看看別人分享的家園——這裡不會運作、不會購買，也不會存檔。",
     "pet_home_visit_zone": "房間 {number}",
     "pet_home_visit_missing": "這裡顯示不出來（缺少內容或沒有空間）：{items}",
+    "pet_home_packs": "家具包",
+    "pet_home_open_packs": "開啟家具包資料夾",
+    "pet_home_pack_line": "{name}——{count} 件 · {source} · {license}",
+    "pet_home_pack_refused": "{name} 沒有載入：{reason}",
+    "pet_home_no_packs": "沒有家具包。把家具包資料夾放進家具包資料夾後重新啟動。",
 }
