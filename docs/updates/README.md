@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261101-14 | 2026-11-01 | Built-in characters get drawn home poses | #done #pets #game #art #animation | [2026-11](2026-11.md) |
 | U-20261101-13 | 2026-11-01 | Furniture drawn as Blender-rendered pictures per theme | #done #pets #game #art | [2026-11](2026-11.md) |
 | U-20261101-12 | 2026-11-01 | Residents appear as their own characters | #done #pets #game #animation | [2026-11](2026-11.md) |
 | U-20261101-11 | 2026-11-01 | Home modes, a quiet inbox and the performance measurements | #done #pets #game #performance | [2026-11](2026-11.md) |

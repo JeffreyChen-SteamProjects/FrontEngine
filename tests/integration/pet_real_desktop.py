@@ -205,7 +205,7 @@ class Probe:
     def sprite_toys(self):
         from frontengine.show.pet.asset_library import PetAssetLibrary
         from frontengine.show.pet.desktop_pet import DesktopPetWidget
-        from frontengine.show.pet.inkside.library import install_builtin
+        from frontengine.show.pet.inkside.library import install_builtin, VERSION
         from frontengine.show.pet.wardrobe import WardrobeDraft
         from frontengine.user_setting.pet_profiles import PetProfiles
         library = PetAssetLibrary(self.folder / 'library')
@@ -217,9 +217,9 @@ class Probe:
                                talk=False, sit_on_windows=False, asset_library=library)
         self.pets.append(pet)
         draft = WardrobeDraft(pet.profile_session.profiles, pet.profile_session.identifier, library.scan()[0])
-        draft.choose_character({'id': 'inkside-mochi', 'version': '1'})
+        draft.choose_character({'id': 'inkside-mochi', 'version': VERSION})
         for piece in ('work-cap', 'work-jacket'):
-            draft.equip({'id': f'inkside-mochi-{piece}', 'version': '1'})
+            draft.equip({'id': f'inkside-mochi-{piece}', 'version': VERSION})
         draft.apply()
         assert pet._layered_playback.renderer is not None, 'Layered outfit was not adopted'
         pet.set_pet_window_flag()  # as PetSettingUI does when it spawns a sprite pet

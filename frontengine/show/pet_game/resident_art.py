@@ -16,6 +16,7 @@ from typing import Callable
 from PySide6.QtCore import QObject, QRunnable, Qt, QThreadPool, Signal
 from PySide6.QtGui import QImage
 
+from frontengine.show.pet.inkside.library import install_builtin, upgrade_builtin
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 
 # Semantic activity -> layered action. The renderer itself falls back to idle
@@ -23,16 +24,29 @@ from frontengine.utils.logging.loggin_instance import front_engine_logger
 USING_ACTIONS = {"sleep": "sleep", "nap": "sleep", "eat": "feed", "snack": "feed", "work": "sit",
                  "relax": "sit", "play": "play", "greet": "greet", "drag": "drag", "wait": "idle",
                  "idle": "idle", "wander": "idle"}
+# Work shown with the profession's own pose when the character has it (built-in characters
+# undressed, as whole-body frames); everyone else keeps sitting at the station.
+PROFESSION_ACTIONS = {"writing": "write", "gardening": "garden", "crafting": "craft"}
 
 
-def semantic_action(resident) -> str:
+def semantic_action(resident, world=None, renderer=None) -> str:
     """What the character should be doing: walking while on the way, otherwise the activity's pose."""
     activity = resident.activity
     if activity is None:
         return "idle"
     if activity.phase == "moving" and activity.kind != "drag":
         return "walk"
+    if activity.kind == "work" and world is not None and renderer is not None:
+        pose = PROFESSION_ACTIONS.get(_profession(world, activity.task))
+        if pose is not None and renderer.has_action(pose):
+            return pose
     return USING_ACTIONS.get(activity.kind, "idle")
+
+
+def _profession(world, task_id: str | None) -> str | None:
+    task = world.tasks.get(task_id) if task_id is not None else None
+    recipe = world.catalog.recipes.get(task.recipe) if task is not None else None
+    return recipe.profession if recipe is not None else None
 
 
 class _Prepare(QRunnable):
@@ -41,14 +55,19 @@ class _Prepare(QRunnable):
         self.owner, self.identifier, self.appearance, self.key = owner, identifier, appearance, key
 
     def run(self) -> None:
+        upgraded = None
         try:
-            catalog, _errors = self.owner.library_factory().scan()
-            renderer = catalog.prepare(self.appearance)
+            library = self.owner.library_factory()
+            upgraded = upgrade_builtin(self.appearance)
+            if upgraded is not None:          # an older built-in: install the current one first
+                install_builtin(library, upgraded["character"]["id"])
+            catalog, _errors = library.scan()
+            renderer = catalog.prepare(upgraded or self.appearance)
         except (OSError, ValueError) as error:
             front_engine_logger.warning(f"[PetHome] appearance for {self.identifier}: {error}")
-            renderer = None
+            renderer, upgraded = None, None
         try:
-            self.owner.prepared.emit(self.identifier, self.key, renderer)
+            self.owner.prepared.emit(self.identifier, self.key, (renderer, self.appearance, upgraded))
         except RuntimeError:          # the owner went away while this ran
             pass
 
@@ -90,7 +109,8 @@ class ResidentArt(QObject):
             return cached[1]
         session = self.service.sessions.get(identifier)
         live = getattr(session, "appearance_renderer", None)
-        if live is not None and (cached is None or cached[1] is not live):
+        current = upgrade_builtin(appearance) is None      # older built-ins are upgraded first
+        if current and live is not None and (cached is None or cached[1] is not live):
             self._renderers[identifier] = (key, live)      # the wardrobe or a desktop pet prepared it
             return live
         if key not in self._pending:
@@ -98,10 +118,18 @@ class ResidentArt(QObject):
             self.pool.start(_Prepare(self, identifier, appearance, key))
         return cached[1] if cached is not None else None
 
-    def _adopt(self, identifier: str, key: str, renderer) -> None:
+    def _adopt(self, identifier: str, key: str, result) -> None:
+        renderer, expected, upgraded = result
         self._pending.discard(key)
-        self._renderers[identifier] = (key, renderer)
         session = self.service.sessions.get(identifier)
+        if upgraded is not None and session is not None and renderer is not None:
+            try:                              # an explicit, stale-checked appearance change
+                session.apply_appearance(expected, upgraded, renderer, present=False)
+                key = json.dumps(upgraded, sort_keys=True)
+            except ValueError as error:       # changed meanwhile: the next frame prepares again
+                front_engine_logger.warning(f"[PetHome] upgrade for {identifier}: {error}")
+                renderer = None
+        self._renderers[identifier] = (key, renderer)
         if session is not None and renderer is not None:
             session.appearance_renderer = renderer
         self.changed.emit()
@@ -113,7 +141,8 @@ class ResidentArt(QObject):
             return None
         elapsed = 0 if still else int((monotonic() - self._started) * 1000)
         try:
-            return renderer.render(semantic_action(resident), elapsed, mirrored=resident.facing < 0)
+            action = semantic_action(resident, self.service.world, renderer)
+            return renderer.render(action, elapsed, mirrored=resident.facing < 0)
         except (KeyError, ValueError) as error:
             front_engine_logger.warning(f"[PetHome] frame for {resident.identifier}: {error}")
             return None

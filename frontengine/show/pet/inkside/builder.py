@@ -22,6 +22,8 @@ from frontengine.show.pet.inkside.ink import FIXED, Brush
 from frontengine.show.pet.inkside.rig import Pose, timelines
 
 FORMAT = 'frontengine.layered-pet/1'
+# Version of every built-in asset; 2 added the home poses as whole-body frames.
+ASSET_VERSION = '2'
 LICENSE = 'FrontEngine built-in INKSIDE artwork, generated from frontengine/show/pet/inkside (MIT)'
 CANVAS = 256
 _SCRATCH = 448
@@ -180,7 +182,7 @@ def frame_layers(writer: AssetWriter, elements: list[Element], points: dict, pal
 
 def manifest(identifier: str, name: str, kind: str, template: str, slots: list, palette: dict,
              actions: dict, variants: dict | None = None) -> dict:
-    data = {'format': FORMAT, 'id': identifier, 'version': '1', 'name': name, 'kind': kind,
+    data = {'format': FORMAT, 'id': identifier, 'version': ASSET_VERSION, 'name': name, 'kind': kind,
             'template': template, 'canvas': [CANVAS, CANVAS], 'slots': slots, 'license': LICENSE,
             'palette': palette, 'actions': actions}
     if variants:

@@ -17,7 +17,10 @@ ACTIONS = ('idle', 'walk', 'sleep', 'climb', 'fall', 'drag', 'greet', 'pet',
            'feed', 'groom', 'play', 'celebrate', 'outfit_show', 'wake', 'sleep_in', 'food_like', 'food_dislike',
            'sit', 'land', 'peer_greet', 'catch')
 # Optional whole-body frame alternatives; the renderer uses them only for an undressed default pet.
-SPRITE_ACTIONS = ('walk_sprite', 'climb_sprite')
+# The home poses after walk/climb also cover home activities with no layered counterpart
+# (write, garden, craft): a renderer without them is asked for a fallback instead.
+HOME_POSES = ('sit', 'sleep', 'feed', 'play', 'write', 'garden', 'craft')
+SPRITE_ACTIONS = ('walk_sprite', 'climb_sprite') + tuple(pose + '_sprite' for pose in HOME_POSES)
 _TOKEN = re.compile(r'[A-Za-z0-9][A-Za-z0-9_.-]{0,127}')
 
 

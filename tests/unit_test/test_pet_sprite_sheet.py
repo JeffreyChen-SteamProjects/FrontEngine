@@ -49,6 +49,21 @@ def test_shipped_atlases_have_eight_distinct_frames(atlas):
     assert len({bytes(frame.constBits()) for frame in frames}) == 8
 
 
+HOME_KINDS = ('sit', 'sleep', 'feed', 'play', 'write', 'garden', 'craft')
+
+
+@pytest.mark.parametrize('atlas', [f'inkside-{name}-{kind}.png' for name in ('mochi', 'moss', 'pip', 'bolt', 'ink', 'gill')
+                                   for kind in HOME_KINDS])
+def test_home_pose_atlases_have_four_distinct_frames_on_the_ground(atlas):
+    image = QImage(str(SPRITES / atlas))
+    assert (image.width(), image.height()) == (4 * 256, 256)
+    frames = [atlas_frame(atlas, index) for index in range(4)]
+    assert len({bytes(frame.constBits()) for frame in frames}) == 4
+    for frame in frames:
+        alpha = _rgba(frame)[..., 3]
+        assert alpha[240:250].max() > 0 and alpha[250:].max() == 0      # standing on the ground line
+
+
 def test_wall_alignment_puts_the_combined_reach_on_the_wall():
     frames = fit_frames(cut_frames(_sheet(), 2, 1), canvas=128, height=100, ground=120, wall=110)
     rightmost = max(x for frame in frames for x in range(128) for y in range(0, 128, 4)
@@ -77,8 +92,8 @@ def test_pink_and_magenta_tint_fold_into_the_three_inks():
 
 @pytest.mark.parametrize('name', ['mochi', 'moss', 'pip', 'bolt', 'ink', 'gill'])
 def test_shipped_frames_have_no_specks_or_magenta(name):
-    for kind in ('walk', 'climb'):
-        for index in range(8):
+    for kind, count in [('walk', 8), ('climb', 8)] + [(kind, 4) for kind in HOME_KINDS]:
+        for index in range(count):
             frame = _rgba(atlas_frame(f'inkside-{name}-{kind}.png', index))
             pieces = _pieces(frame[..., 3] > 24)
             assert all(len(piece) >= 0.01 * len(pieces[0]) for piece in pieces[1:]), (kind, index)
