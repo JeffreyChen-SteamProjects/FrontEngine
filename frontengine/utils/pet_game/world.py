@@ -17,7 +17,7 @@ from frontengine.utils.pet_game.catalog import (
 )
 from frontengine.utils.pet_game.jobs import MAX_TASKS, MAX_UNITS, Task
 from frontengine.utils.pet_game.layout import (
-    MAX_FURNITURE, THEMES, Furniture, Zone, placement_problem,
+    AREA_TAGS, MAX_FURNITURE, MAX_ZONE_CELLS, MIN_ZONE_CELLS, THEMES, Furniture, Zone, placement_problem,
 )
 from frontengine.utils.pet_game.ledger import Ledger
 from frontengine.utils.pet_game.resident import Resident, resident_from_profile
@@ -25,7 +25,7 @@ from frontengine.utils.pet_game.rng import GameRandom
 from frontengine.utils.pet_game.schedule import TEMPLATES, initial_time
 
 FORMAT = "frontengine.pet-home"
-VERSION = 3              # 2: comfort and social needs, relationships; 3: goals and progress
+VERSION = 4              # 2: comfort and social needs, relationships; 3: goals and progress; 4: zone areas
 RELATION_LIMIT = 100
 MODES = ("manage", "sandbox")
 MAX_RESIDENTS = 12
@@ -55,6 +55,8 @@ class World:
         # Residents take jobs and rewards are collected by themselves. Runtime only, never saved:
         # tests of the bare mechanics switch it off.
         self.automatic = True
+        self.offline_zones: set[str] = set()     # zones whose screen is disconnected (runtime only)
+        self._offline_parked: set[str] = set()
         self.residents: dict[str, Resident] = {}
         self.tasks: dict[str, Task] = {}
         self.ledger = Ledger()
@@ -98,9 +100,74 @@ class World:
         identifier = self._new_id("z")
         zone = Zone.from_dict({"id": identifier, "screen": screen, "x": x, "y": y,
                                "width_cells": width_cells, "theme": "warm_home",
-                               "entrance": 0, "restricted": []})
+                               "entrance": 0, "restricted": [], "areas": []})
         self.zones[identifier] = zone
         return identifier
+
+    def set_area(self, zone: str, first: int, last: int, tag: str | None) -> str:
+        """Label part of a zone's floor (``None`` clears it); it steers choices, never forbids them."""
+        if zone not in self.zones or (tag is not None and tag not in AREA_TAGS):
+            return "unknown"
+        self.zones[zone].areas = self.zones[zone].with_area(first, last, tag)
+        return "accepted"
+
+    def move_zone(self, zone: str, screen: str, x: int, y: int, width_cells: int) -> str:
+        """Give a zone another screen or size; pieces that no longer fit go back to storage."""
+        found = self.zones.get(zone)
+        if found is None or not isinstance(screen, str) or len(screen) > 128:
+            return "unknown"
+        if any(other.screen == screen for key, other in self.zones.items() if key != zone):
+            return "screen_taken"
+        width = max(MIN_ZONE_CELLS, min(MAX_ZONE_CELLS, int(width_cells)))
+        found.screen, found.x, found.y, found.width_cells = screen, int(x), int(y), width
+        found.areas = tuple((first, min(last, width - 1), tag) for first, last, tag in found.areas if first < width)
+        found.entrance = min(found.entrance, width - 1)
+        for piece, definition in list(self.in_zone(zone)):
+            if piece.cell + definition.width > width:
+                self.store(piece.identifier)
+        for resident in self.residents.values():
+            if resident.zone == zone:
+                resident.x_milli = min(resident.x_milli, found.width_pixels * 1000 - 1)
+        return "accepted"
+
+    def transfer_resident(self, identifier: str, zone: str) -> str:
+        """Move a pet to another zone on purpose; it arrives at that zone's entrance."""
+        resident = self.residents.get(identifier)
+        if resident is None or zone not in self.zones:
+            return "unknown"
+        if resident.zone == zone:
+            return "duplicate"
+        cancel_activity(self, resident, "moved_zone")
+        for piece in self.furniture.values():
+            if piece.owner == identifier and piece.zone != zone:
+                piece.owner = None
+        resident.zone = zone
+        entrance = self.zones[zone].entrance
+        resident.x_milli = (entrance * CELL_PIXELS + CELL_PIXELS // 2) * 1000
+        self.emit("moved_zone", resident=identifier, zone=zone)
+        return "accepted"
+
+    def set_offline(self, zones: set[str]) -> list[str]:
+        """Zones whose screen is gone: their pets wait, their furniture stays; nothing is copied.
+
+        Returns the residents whose waiting state changed. Reconnecting the screen lets them
+        carry on where they were.
+        """
+        zones = {zone for zone in zones if zone in self.zones}
+        changed = []
+        for identifier in sorted(self.residents):
+            resident = self.residents[identifier]
+            waiting = resident.zone in zones
+            if waiting and not resident.parked:
+                self.park(identifier, True)
+                self._offline_parked.add(identifier)
+                changed.append(identifier)
+            elif not waiting and identifier in self._offline_parked:
+                self.park(identifier, False)       # only pets this parked: a pet hidden on purpose stays
+                self._offline_parked.discard(identifier)
+                changed.append(identifier)
+        self.offline_zones = zones
+        return changed
 
     def grant_starter_kit(self) -> str:
         """Initial coins and basic furniture, at most once per home even if rerun."""

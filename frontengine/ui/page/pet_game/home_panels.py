@@ -22,7 +22,7 @@ from frontengine.ui.page.pet_game.home_things import ROLE_KEY, ThingGrid, thing_
 from frontengine.utils.multi_language.retranslate import retranslator, translate, tr
 from frontengine.utils.pet_game import goals
 from frontengine.utils.pet_game.catalog import FURNITURE_PREFIX
-from frontengine.utils.pet_game.layout import THEMES
+from frontengine.utils.pet_game.layout import AREA_TAGS, THEMES
 from frontengine.utils.pet_game.world import COMMANDS
 
 if TYPE_CHECKING:
@@ -74,6 +74,9 @@ class ResidentPanel:
         section.add_inline(*self.commands)
         section.add_inline(_button("pet_home_wardrobe", "Wardrobe…", self.wardrobe),
                            _button("pet_home_release", "Move out", self.release))
+        self.zone_target = QComboBox()
+        self.zone_button = _button("pet_home_move_to_zone", "Move to that zone", self.move_to_zone)
+        self.zone_row = section.add_inline(self.zone_target, self.zone_button)
         self.wardrobes: dict = {}
 
     def refresh_lists(self) -> None:
@@ -93,6 +96,16 @@ class ResidentPanel:
             if resident.identifier == selected:
                 self.list.setCurrentItem(item)
         self.list.blockSignals(False)
+        self.zone_target.clear()
+        for zone in (world.zones.values() if world else ()):
+            self.zone_target.addItem(zone.screen, zone.identifier)
+        self.zone_row.setVisible(self.zone_target.count() > 1)
+
+    def move_to_zone(self) -> None:
+        resident, zone = self.page.selected_resident, self.zone_target.currentData()
+        if resident and zone:
+            self.page.report(self.page.service.run(lambda world: world.transfer_resident(resident, zone)))
+            self.page.refresh()
 
     def refresh_live(self) -> None:
         world = self.page.service.world
@@ -196,6 +209,17 @@ class LayoutPanel:
         section.add_widget(self.layout_note)
         self.apply_layout_button = _button("pet_home_apply_layout", "Apply layout", self.apply_layout)
         section.add_inline(self.apply_layout_button)
+        self.area_tag = QComboBox()
+        self.area_tag.currentIndexChanged.connect(self._area_tool_changed)
+        self.area_paint = _button("pet_home_paint_areas", "Paint areas", self._area_tool_changed)
+        self.area_paint.setCheckable(True)
+        section.add_row("pet_home_area", self.area_tag, "Area")
+        section.add_inline(self.area_paint)
+        self.zone_screens = QComboBox()
+        self.zone_add = _button("pet_home_add_zone", "Add a zone on that screen", self.add_zone)
+        self.zone_move = _button("pet_home_move_zone", "Move this zone there", self.move_zone)
+        section.add_row("pet_home_other_screen", self.zone_screens, "Other screen")
+        section.add_inline(self.zone_add, self.zone_move)
         self._pasted: list | None = None
 
     def refresh_lists(self) -> None:
@@ -217,10 +241,47 @@ class LayoutPanel:
             self.theme.setCurrentIndex(self.theme.findData(theme))
         self.place_button.setEnabled(bool(things))
         self._refresh_presets(world)
+        self._refresh_zones()
         self.undo_button.setEnabled(self.history.can_undo())
         self.redo_button.setEnabled(self.history.can_redo())
         self._refresh_selected()
         self.update_preview()
+
+    def _refresh_zones(self) -> None:
+        self.area_tag.blockSignals(True)
+        current = self.area_tag.currentData()
+        self.area_tag.clear()
+        for tag in (*AREA_TAGS, "clear"):
+            self.area_tag.addItem(translate("pet_home_area_" + tag, tag), tag)
+        self.area_tag.setCurrentIndex(max(0, self.area_tag.findData(current)))
+        self.area_tag.blockSignals(False)
+        screens = self.page.free_screens()
+        self.zone_screens.clear()
+        for screen in screens:
+            self.zone_screens.addItem(screen.name() or "primary", screen)
+        for widget in (self.zone_screens, self.zone_add, self.zone_move):
+            widget.setEnabled(bool(screens))
+
+    def _area_tool_changed(self, *_args) -> None:
+        tag = self.area_tag.currentData()
+        self.page.view.area_tool = tag if self.area_paint.isChecked() else None
+
+    def paint_area(self, first: int, last: int) -> None:
+        tag, zone = self.area_tag.currentData(), self.page.zone
+        if zone is not None:
+            self.page.report(self.page.service.run(
+                lambda world: world.set_area(zone, first, last, None if tag == "clear" else tag)))
+            self.page.refresh()
+
+    def add_zone(self) -> None:
+        screen = self.zone_screens.currentData()
+        if screen is not None:
+            self.page.add_zone(screen)
+
+    def move_zone(self) -> None:
+        screen = self.zone_screens.currentData()
+        if screen is not None:
+            self.page.move_zone(screen)
 
     def _refresh_presets(self, world) -> None:
         current = self.presets.currentData()
