@@ -9,7 +9,10 @@ then, and for pets without a layered character, views draw the usual marker.
 """
 from __future__ import annotations
 
+import hashlib
 import json
+import tempfile
+from pathlib import Path
 from time import monotonic
 from typing import Callable
 
@@ -72,6 +75,42 @@ class _Prepare(QRunnable):
             pass
 
 
+FALLBACK_PREFIX = "fallback:"
+
+
+def fallback_character(identifier: str) -> str:
+    """The built-in character a pet without one is drawn as in the home: stable per pet, never saved."""
+    from frontengine.show.pet.inkside.library import builtin_names
+    names = [ident for ident, _name in builtin_names()]
+    return names[int(hashlib.sha256(identifier.encode("utf-8")).hexdigest(), 16) % len(names)]
+
+
+class _PrepareFallback(QRunnable):
+    """Build the built-in character in a temporary folder and load it; nothing is installed or saved."""
+
+    def __init__(self, owner: ResidentArt, identifier: str, key: str) -> None:
+        super().__init__()
+        self.owner, self.identifier, self.key = owner, identifier, key
+
+    def run(self) -> None:
+        from frontengine.show.pet.inkside.assemble import build_character
+        from frontengine.show.pet.inkside.library import _template
+        from frontengine.show.pet.layered_renderer import LayeredRenderer
+        from frontengine.utils.pet_pack.layered import load_layered_asset
+        try:
+            template = _template(self.key.removeprefix(FALLBACK_PREFIX))
+            with tempfile.TemporaryDirectory(prefix="frontengine-home-") as folder:
+                asset = load_layered_asset(build_character(template, Path(folder).resolve() / template.ident))
+                renderer = LayeredRenderer(asset)        # decodes every image now; the folder can go
+        except (OSError, ValueError) as error:
+            front_engine_logger.warning(f"[PetHome] stand-in character for {self.identifier}: {error}")
+            renderer = None
+        try:
+            self.owner.prepared.emit(self.identifier, self.key, (renderer, None, None))
+        except RuntimeError:          # the owner went away while this ran
+            pass
+
+
 class ResidentArt(QObject):
     """Per-resident renderers, prepared off the GUI thread and refreshed when an outfit changes."""
 
@@ -99,10 +138,10 @@ class ResidentArt(QObject):
             return None
 
     def renderer(self, identifier: str):
-        """The ready renderer for this resident's current outfit, or None (draw a marker)."""
+        """The ready renderer for this resident's outfit, or a built-in stand-in; None while loading."""
         appearance = self._appearance(identifier)
         if appearance is None or appearance.get("character") is None:
-            return None
+            return self._fallback(identifier)
         key = json.dumps(appearance, sort_keys=True)
         cached = self._renderers.get(identifier)
         if cached is not None and cached[0] == key:
@@ -118,9 +157,24 @@ class ResidentArt(QObject):
             self.pool.start(_Prepare(self, identifier, appearance, key))
         return cached[1] if cached is not None else None
 
+    def _fallback(self, identifier: str):
+        """Pets without a layered character (picture pets, new pets) still appear as a character here."""
+        key = FALLBACK_PREFIX + fallback_character(identifier)
+        cached = self._renderers.get(identifier)
+        if cached is not None and cached[0] == key:
+            return cached[1]
+        if key not in self._pending:
+            self._pending.add(key)
+            self.pool.start(_PrepareFallback(self, identifier, key))
+        return None
+
     def _adopt(self, identifier: str, key: str, result) -> None:
         renderer, expected, upgraded = result
         self._pending.discard(key)
+        if key.startswith(FALLBACK_PREFIX):     # a stand-in for the home only, never the pet's own look
+            self._renderers[identifier] = (key, renderer)
+            self.changed.emit()
+            return
         session = self.service.sessions.get(identifier)
         if upgraded is not None and session is not None and renderer is not None:
             try:                              # an explicit, stale-checked appearance change

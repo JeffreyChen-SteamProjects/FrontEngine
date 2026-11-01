@@ -9,10 +9,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from PySide6.QtWidgets import QCheckBox, QLabel, QListWidget, QPushButton
+from PySide6.QtWidgets import QLabel, QListWidget, QPushButton
 
 from frontengine.show.pet_game.captions import result_text
-from frontengine.user_setting.user_setting_file import user_setting_dict
 from frontengine.utils.multi_language.retranslate import translate, tr
 
 if TYPE_CHECKING:
@@ -25,7 +24,7 @@ FOLD_MS = 60000
 
 def category(event: dict) -> str | None:
     kind = event.get("kind")
-    if kind in ("settled", "commission_done"):
+    if kind in ("settled", "commission_done", "auto_job", "goal_claimed"):
         return "work"
     if kind == "interrupted" and event.get("reason") in ("tired", "hungry"):
         return "needs"
@@ -49,6 +48,12 @@ def line(world, event: dict) -> str:
             name=name, recipe=label, coins=event.get("coins", 0))
     if kind == "commission_done":
         return translate("pet_home_note_commission", "Commission delivered (+{coins})").format(coins=event["coins"])
+    if kind == "auto_job":
+        recipe = world.catalog.recipes.get(event.get("recipe"))
+        label = translate(recipe.label_key, recipe.fallback) if recipe else event.get("recipe", "")
+        return translate("pet_home_note_auto_job", "{name} took up {recipe}").format(name=name, recipe=label)
+    if kind == "goal_claimed":
+        return translate("pet_home_note_goal_claimed", "Reward collected (+{coins})").format(coins=event["coins"])
     if kind == "interrupted":
         return translate("pet_home_note_" + event["reason"], event["reason"]).format(name=name)
     if kind == "life_event":
@@ -71,20 +76,14 @@ class InboxPanel:
         self.list = QListWidget()
         self.list.setMaximumHeight(140)
         section.add_widget(self.list)
-        self.filters = {}
-        for name in CATEGORIES:
-            box = tr(QCheckBox(), "pet_home_notify_" + name, name)
-            box.setChecked(user_setting_dict.get("pet_home_notify_" + name, True) is not False)
-            box.toggled.connect(lambda checked, n=name: user_setting_dict.__setitem__("pet_home_notify_" + n, checked))
-            self.filters[name] = box
-        section.add_inline(*self.filters.values())
         done = tr(QPushButton(), "pet_home_inbox_read", "Mark all as read")
         done.clicked.connect(self.mark_read)
         section.add_inline(done)
         self.refresh_lists()
 
-    def wanted(self, name: str) -> bool:
-        return self.filters[name].isChecked()
+    @staticmethod
+    def wanted(name: str) -> bool:
+        return name in CATEGORIES
 
     def on_events(self, events: list, world) -> None:
         for event in events:

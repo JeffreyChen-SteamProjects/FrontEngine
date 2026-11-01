@@ -59,12 +59,9 @@ def test_screen_sharing_borrows_meeting_mode_and_gives_it_back(page):
     page.sharing_changed(False)
     assert page.service.running
     assert page.mode == "focus"
-    page.auto_meeting.setChecked(False)
-    page.sharing_changed(True)
-    assert page.service.running
 
 
-def test_inbox_sorts_folds_and_respects_switches(page):
+def test_inbox_sorts_and_folds_everything_that_happened(page):
     world = page.service.world
     resident = next(iter(world.residents))
     paid = {"kind": "settled", "resident": resident, "recipe": "letter", "coins": 12, "time": 1000}
@@ -73,9 +70,8 @@ def test_inbox_sorts_folds_and_respects_switches(page):
     assert page.inbox.list.count() == 1
     assert page.inbox.list.item(0).text().endswith("×2")
     assert page.inbox.unread == 2
-    page.inbox.filters["life"].setChecked(False)
     page.inbox.on_events([{"kind": "life_event", "event": "birthday", "resident": resident, "time": 40000}], world)
-    assert page.inbox.list.count() == 1
+    assert page.inbox.list.count() == 2
     page.inbox.add_error("disk full", 50000)
     assert page.inbox.list.item(0).text() == "disk full"
     page.inbox.mark_read()

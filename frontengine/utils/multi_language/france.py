@@ -1719,4 +1719,12 @@ french_word_dict = {
     "settings_menu_theme_light": "Clair",
     "settings_menu_theme_dark": "Sombre",
     "pet_home_settings_section": "Paramètres",
+    "pet_home_note_auto_job": "{name} s'est mis à {recipe}",
+    "pet_home_note_goal_claimed": "Récompense reçue (+{coins})",
+    "pet_home_result_bought_no_room": "Acheté - pas de place libre, il attend dans la réserve",
+    "pet_home_work_auto": "Pendant leurs heures de travail, les habitants se mettent d'eux-mêmes au travail que permettent leurs postes, avec seulement le matériel déjà dans le sac.",
+    "pet_home_goals_auto": "Les récompenses sont récupérées et les commandes livrées d'elles-mêmes dès qu'elles sont prêtes.",
+    "pet_home_settings_strip_hint": "Le mode et le calque sont dans le menu ⌂ de la bande du bureau ; le mode réunion s'active tout seul pendant le partage d'écran.",
+    "pet_home_result_pick_item": "Choisissez d'abord quelque chose",
+    "pet_home_result_no_room": "Pas de place libre dans la maison",
 }

@@ -160,6 +160,7 @@ def test_shutdown_pauses_work_without_paying_partial_units(tmp_path, profiles):
     record = profiles.create("Mochi")
     service = _service(tmp_path, profiles, clock)
     service.create_home("screen", 0, 900, 40, seed=3)
+    service.world.automatic = False    # only the one letter below, no jobs or rewards taken by themselves
     _furnish(service)
     service.adopt(record["id"])
     service.run(lambda world: world.create_task("letter", record["id"]))
