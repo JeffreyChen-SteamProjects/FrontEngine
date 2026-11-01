@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261101-21 | 2026-11-01 | Patch setuptools and certifi in the publish lock | #bugfix #deps #security #ci | [2026-11](2026-11.md) |
 | U-20261101-20 | 2026-11-01 | The home runs itself, with fewer settings and a picture for everything | #done #pets #game #ui #art | [2026-11](2026-11.md) |
 | U-20261101-19 | 2026-11-01 | Page-by-page review of the redesign and new documentation screenshots | #done #ui #design #docs | [2026-11](2026-11.md) |
 | U-20261101-18 | 2026-11-01 | The pet home page becomes a game screen | #done #ui #design #pets #game | [2026-11](2026-11.md) |
@@ -224,6 +225,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 12 |
-| [2026-10.md](2026-10.md) | 2026-10 | 115 |
+| [2026-11.md](2026-11.md) | 2026-11 | 21 |
+| [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
