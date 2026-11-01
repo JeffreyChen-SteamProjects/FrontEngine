@@ -1848,4 +1848,5 @@ germany_word_dict = {
     "pet_home_activity_help": "Hilft mit",
     "pet_home_reason_helping": "hilft einem Freund bei der Arbeit",
     "pet_home_paused_locked": "pausiert, solange der Computer gesperrt ist",
+    "pet_home_focus_companion": "Haustiere arbeiten in meinen Fokuszeiten mit (Fokus-Timer der Haustierseite)",
 }

@@ -10,7 +10,7 @@ from __future__ import annotations
 import re
 from collections import deque
 
-from frontengine.utils.pet_game.behaviour import cancel_activity, refusal, start
+from frontengine.utils.pet_game.behaviour import auto_task, cancel_activity, refusal, start
 from frontengine.utils.pet_game.goals import Progress, unlocked
 from frontengine.utils.pet_game.catalog import (
     CELL_PIXELS, STARTER_COINS, STARTER_KIT, Catalog, FurnitureDefinition,
@@ -66,6 +66,7 @@ class World:
         self.offline_zones: set[str] = set()     # zones whose screen is disconnected (runtime only)
         self._offline_parked: set[str] = set()
         self._interacted: dict[tuple[str, str], int] = {}     # (resident, kind) -> game time, runtime only
+        self._focus_owned: set[str] = set()                    # residents with a focus work request queued
         self.residents: dict[str, Resident] = {}
         self.tasks: dict[str, Task] = {}
         self.ledger = Ledger()
@@ -479,6 +480,38 @@ class World:
         self.progress.upgrades[definition] = self.station_level(definition) + 1
         self.emit("upgraded", definition=definition, level=self.progress.upgrades[definition])
         return "accepted"
+
+    def focus_begin(self) -> list[str]:
+        """Pets keep you company while you focus: each free pet gets a work request queued.
+
+        Nothing running is interrupted (requests wait for the pet's next choice), a pet
+        without a job takes one the normal way, and rewards are ordinary work rewards. The
+        home remembers which requests are its own so ``focus_end`` withdraws only those.
+        """
+        queued = []
+        for identifier in sorted(self.residents):
+            resident = self.residents[identifier]
+            if (resident.parked or resident.away or resident.zone in self.offline_zones
+                    or "work" in resident.commands or identifier in self._focus_owned):
+                continue
+            if not self.open_tasks(identifier) and self.automatic:
+                auto_task(self, resident)
+            if refusal(self, resident, "work") is None:      # queued, never cancelling what it is doing
+                resident.commands.append("work")
+                self._focus_owned.add(identifier)
+                queued.append(identifier)
+        return queued
+
+    def focus_end(self) -> list[str]:
+        """Take back the work requests the focus session queued and nobody has acted on yet."""
+        withdrawn = []
+        for identifier in sorted(self._focus_owned):
+            resident = self.residents.get(identifier)
+            if resident is not None and "work" in resident.commands:
+                resident.commands.remove("work")
+                withdrawn.append(identifier)
+        self._focus_owned.clear()
+        return withdrawn
 
     def interact(self, identifier: str, kind: str) -> str:
         """Feed, pat or talk to a pet; it never interrupts what the pet is doing."""

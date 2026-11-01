@@ -1855,4 +1855,5 @@ english_word_dict = {
     "pet_home_activity_help": "Lending a hand",
     "pet_home_reason_helping": "helping a friend at work",
     "pet_home_paused_locked": "paused while the computer is locked",
+    "pet_home_focus_companion": "Pets work alongside my focus sessions (the pet page's focus timer)",
 }

@@ -48,6 +48,7 @@ _CHOOSE_PACK = "Choose pet pack..."
 
 class PetSettingUI(SettingPage):
     workshop_requested = Signal()
+    focus_phase = Signal(str)           # "focus", "break", "long_break" or "stopped"
     def __init__(self):
         front_engine_logger.info("[PetSettingUI] Init")
         super().__init__("tab_pet_text", "page_subtitle_pet",
@@ -491,6 +492,7 @@ class PetSettingUI(SettingPage):
         self.focus_timer.break_minutes = int(self.break_minutes_combobox.currentText())
         self.focus_timer.start()
         self.focus_companions.begin(self._alive_pets())
+        self.focus_phase.emit("focus")
         front_engine_logger.info(
             f"[PetSettingUI] focus started | focus={self.focus_timer.focus_minutes}, "
             f"break={self.focus_timer.break_minutes}"
@@ -505,6 +507,7 @@ class PetSettingUI(SettingPage):
         front_engine_logger.info("[PetSettingUI] focus stopped")
         self.focus_timer.stop()
         self.focus_companions.stop()
+        self.focus_phase.emit("stopped")
         self.focus_tick_timer.stop()
         retranslator.set_text(
             self.focus_button, "pet_focus_start", "Start focus")
@@ -515,6 +518,7 @@ class PetSettingUI(SettingPage):
         if phase is None:
             return
         self.focus_companions.transition(phase, self.focus_timer.completed_focus)
+        self.focus_phase.emit(phase)
         if phase == PHASE_FOCUS:
             self._announce_focus("focus_back")
         elif phase == PHASE_BREAK:

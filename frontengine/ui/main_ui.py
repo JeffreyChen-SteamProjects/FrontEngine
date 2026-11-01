@@ -248,6 +248,7 @@ class FrontEngineMainUI(QMainWindow):
         self.workshop_service = WorkshopService(self)
         self.workshop_dialog = None
         self.scene_setting_ui.scene_manager_ui.workshop_requested.connect(lambda: self.open_workshop("scene"))
+        self.pet_setting_ui.focus_phase.connect(self.pet_home_ui.focus_phase_changed)
         self.pet_setting_ui.workshop_requested.connect(
             lambda: self.open_workshop("pet_pack", self.pet_setting_ui.pet_image_path or ""))
         build_language_menu(self)

@@ -8,7 +8,7 @@ from __future__ import annotations
 import uuid
 from typing import TYPE_CHECKING
 
-from PySide6.QtWidgets import QComboBox, QLabel, QListWidget, QListWidgetItem, QProgressBar, QPushButton
+from PySide6.QtWidgets import QCheckBox, QComboBox, QLabel, QListWidget, QListWidgetItem, QProgressBar, QPushButton
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QGuiApplication
 
@@ -20,6 +20,7 @@ from frontengine.utils.pet_game.arrangement import (
 )
 from frontengine.ui.page.pet_game.home_things import ROLE_KEY, ThingGrid, thing_icon, thing_pixmap
 from frontengine.utils.multi_language.retranslate import retranslator, translate, tr
+from frontengine.user_setting.user_setting_file import user_setting_dict
 from frontengine.utils.pet_game import goals
 from frontengine.utils.pet_game.catalog import FURNITURE_PREFIX
 from frontengine.utils.pet_game.layout import AREA_TAGS, THEMES
@@ -30,6 +31,7 @@ if TYPE_CHECKING:
 
 ROLE_ID = Qt.ItemDataRole.UserRole
 PASTED = "pasted"
+FOCUS_KEY = "pet_home_focus_companion"
 
 
 def furniture_name(world, definition: str) -> str:
@@ -647,6 +649,16 @@ class WorkPanel:
         self.tasks.setMinimumHeight(150)
         section.add_widget(self.tasks)
         section.add_inline(_button("pet_home_cancel_task", "Cancel job", self.cancel))
+        self.focus_check = tr(QCheckBox(), "pet_home_focus_companion",
+                              "Pets work alongside my focus sessions (the pet page's focus timer)")
+        self.focus_check.setChecked(user_setting_dict.get(FOCUS_KEY) is True)
+        self.focus_check.toggled.connect(self._focus_toggled)
+        section.add_widget(self.focus_check)
+
+    def _focus_toggled(self, checked: bool) -> None:
+        user_setting_dict[FOCUS_KEY] = bool(checked)
+        if not checked:
+            self.page.focus_phase_changed("stopped")
 
     def refresh_lists(self) -> None:
         self.refresh_live()

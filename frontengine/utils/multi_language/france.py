@@ -1845,4 +1845,5 @@ french_word_dict = {
     "pet_home_activity_help": "Donne un coup de main",
     "pet_home_reason_helping": "aide un ami au travail",
     "pet_home_paused_locked": "en pause tant que l'ordinateur est verrouillé",
+    "pet_home_focus_companion": "Les mascottes travaillent pendant mes sessions de concentration (minuteur de la page Mascotte)",
 }

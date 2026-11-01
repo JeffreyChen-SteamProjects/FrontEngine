@@ -1845,4 +1845,5 @@ italian_word_dict = {
     "pet_home_activity_help": "Dà una mano",
     "pet_home_reason_helping": "aiuta un amico al lavoro",
     "pet_home_paused_locked": "in pausa finché il computer è bloccato",
+    "pet_home_focus_companion": "Le mascotte lavorano durante le mie sessioni di concentrazione (timer della pagina Mascotte)",
 }
