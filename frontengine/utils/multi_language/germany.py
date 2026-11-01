@@ -1716,4 +1716,5 @@ germany_word_dict = {
     "pet_home_note_wish": "{name}s Wunsch ist erfüllt",
     "pet_home_note_failed": "{text}",
     "pet_home_note_times": "×{count}",
+    "pet_home_wardrobe": "Kleiderschrank …",
 }

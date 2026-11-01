@@ -25,6 +25,7 @@ COLORS = {"bed": "#7c9fd6", "table": "#c99a63", "workstation": "#8fb67a", "leisu
 FLOOR_HEIGHT = 16
 MIN_CELL = 20.0          # below this, furniture labels stop being readable
 MAX_CELL = 40.0
+SPRITE_CELLS = 2.2           # a character stands a little over two cells tall
 GLYPHS = {"sleep": "Zz", "nap": "Zz", "eat": "~", "snack": "~", "work": "✎", "play": "♪",
           "relax": "☕", "wait": "…", "wander": "", "idle": "", "drag": "✋"}
 
@@ -38,6 +39,7 @@ class HomeView(QWidget):
     """Overview drawing. Subclasses change the backdrop and where residents appear."""
 
     caption_backdrop = False      # a dark plate behind names, for drawing over any desktop
+    art = None                    # ResidentArt; without it residents are drawn as markers
     reduced_motion = False        # no in-between movement and no moving rain
     resident_selected = Signal(str)
     furniture_selected = Signal(str)
@@ -167,21 +169,52 @@ class HomeView(QWidget):
         """Where to draw a resident; the desktop strip interpolates between world steps."""
         return resident.x_milli
 
-    def resident_center(self, resident) -> QPointF:
+    def _sprite_size(self, resident) -> tuple[float, float] | None:
+        """Width and height of the resident's character on screen, or None when drawn as a marker."""
+        renderer = self.art.renderer(resident.identifier) if self.art is not None else None
+        if renderer is None:
+            return None
+        canvas_width, canvas_height = renderer.character.canvas
+        height = self.cell_width() * SPRITE_CELLS
+        return canvas_width * height / canvas_height, height
+
+    def resident_box(self, resident) -> QRectF:
+        """Where the resident is drawn and clicked: its character standing on the floor, or the marker."""
         width = self.cell_width()
         x = self.resident_x_milli(resident) / 1000 / CELL_PIXELS * width
-        return QPointF(x, self._floor_y() - max(8.0, width * 0.55))
-
-    def _paint_resident(self, painter: QPainter, resident) -> None:
-        center = self.resident_center(resident)
+        size = self._sprite_size(resident)
+        if size is not None:
+            return QRectF(x - size[0] / 2, self._floor_y() - size[1], size[0], size[1])
         radius = self.resident_radius()
+        center_y = self._floor_y() - max(8.0, width * 0.55)
+        return QRectF(x - radius, center_y - radius, radius * 2, radius * 2)
+
+    def resident_center(self, resident) -> QPointF:
+        return self.resident_box(resident).center()
+
+    def _paint_body(self, painter: QPainter, resident) -> None:
+        frame = self.art.frame(resident, still=self.reduced_motion) if self.art is not None else None
+        box = self.resident_box(resident)
+        if frame is not None and self._sprite_size(resident) is not None:
+            painter.setOpacity(0.4 if resident.away or resident.parked else 1.0)
+            painter.drawImage(box, frame)
+            painter.setOpacity(1.0)
+            if resident.identifier == self.selected:
+                painter.setPen(QPen(self.palette().highlight().color(), 2, Qt.PenStyle.DashLine))
+                painter.setBrush(Qt.BrushStyle.NoBrush)
+                painter.drawRoundedRect(box, 6, 6)
+            return
         color = resident_color(resident.identifier)
         if resident.away or resident.parked:
             color.setAlpha(90)
         painter.setPen(QPen(self.palette().highlight().color(), 3) if resident.identifier == self.selected
                        else QPen(color.darker(160), 1))
         painter.setBrush(color)
-        painter.drawEllipse(center, radius, radius)
+        painter.drawEllipse(box)
+
+    def _paint_resident(self, painter: QPainter, resident) -> None:
+        center = self.resident_center(resident)
+        self._paint_body(painter, resident)
         kind = resident.activity.kind if resident.activity is not None else "idle"
         caption = resident.name + (" " + GLYPHS.get(kind, "") if GLYPHS.get(kind) else "")
         box = self.caption_rect(resident)
@@ -205,8 +238,8 @@ class HomeView(QWidget):
         return max(7.0, self.cell_width() * 0.5)
 
     def caption_rect(self, resident) -> QRectF:
-        center = self.resident_center(resident)
-        return QRectF(center.x() - 70, center.y() - self.resident_radius() - 20, 140, 18)
+        box = self.resident_box(resident)
+        return QRectF(box.center().x() - 70, box.top() - 20, 140, 18)
 
     # ----- input -----------------------------------------------------------------------
 
@@ -215,11 +248,9 @@ class HomeView(QWidget):
             super().mousePressEvent(event)
             return
         point = event.position()
-        radius = max(7.0, self.cell_width() * 0.5) + 3
         for resident in sorted(self.world.residents.values(), key=lambda item: item.identifier):
             if resident.zone == self.zone:
-                center = self.resident_center(resident)
-                if (center - point).manhattanLength() <= radius * 1.4:
+                if self.resident_box(resident).adjusted(-3, -3, 3, 3).contains(point):
                     self.resident_selected.emit(resident.identifier)
                     return
         if self.preview is None:

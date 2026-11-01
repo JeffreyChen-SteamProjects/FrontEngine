@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261101-12 | 2026-11-01 | Residents appear as their own characters | #done #pets #game #animation | [2026-11](2026-11.md) |
 | U-20261101-11 | 2026-11-01 | Home modes, a quiet inbox and the performance measurements | #done #pets #game #performance | [2026-11](2026-11.md) |
 | U-20261101-10 | 2026-11-01 | Days, nights, weather, themes and twelve life moments | #done #pets #game #accessibility | [2026-11](2026-11.md) |
 | U-20261101-09 | 2026-11-01 | Goals, commissions, wishes, life moments and the home celebration | #done #pets #game #migration | [2026-11](2026-11.md) |
@@ -215,6 +216,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 11 |
+| [2026-11.md](2026-11.md) | 2026-11 | 12 |
 | [2026-10.md](2026-10.md) | 2026-10 | 115 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

@@ -71,7 +71,9 @@ class ResidentPanel:
         self.commands = [_button("pet_home_cmd_" + command, command.title(),
                                  lambda _checked=False, c=command: self.command(c)) for command in COMMANDS]
         section.add_inline(*self.commands)
-        section.add_inline(_button("pet_home_release", "Move out", self.release))
+        section.add_inline(_button("pet_home_wardrobe", "Wardrobe…", self.wardrobe),
+                           _button("pet_home_release", "Move out", self.release))
+        self.wardrobes: dict = {}
 
     def refresh_lists(self) -> None:
         world = self.page.service.world
@@ -136,6 +138,21 @@ class ResidentPanel:
         record = self.page.profiles.create()
         self.page.report(self.page.service.adopt(record["id"]))
         self.page.select_resident(record["id"])
+
+    def wardrobe(self) -> None:
+        """The existing wardrobe; applying goes through the home's own lease on this pet."""
+        identifier = self.page.selected_resident
+        if not identifier:
+            self.page.report("pick_resident")
+            return
+        dialog = self.wardrobes.get(identifier)
+        if dialog is None:
+            from frontengine.ui.dialog.pet_wardrobe import PetWardrobeDialog
+            dialog = PetWardrobeDialog(self.page.profiles, identifier, self.page)
+            dialog.destroyed.connect(lambda _obj=None, key=identifier: self.wardrobes.pop(key, None))
+            self.wardrobes[identifier] = dialog
+        dialog.show()
+        dialog.raise_()
 
     def release(self) -> None:
         resident = self.page.selected_resident

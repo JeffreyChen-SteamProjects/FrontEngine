@@ -17,6 +17,7 @@ from PySide6.QtWidgets import QCheckBox, QComboBox, QFrame, QLabel, QPushButton,
 from frontengine.show.pet_game.home_service import HomeService
 from frontengine.show.pet_game.home_strip import HIDDEN_REASON, HOME_MODES, LAYERS, HomeStrip
 from frontengine.show.pet_game.home_view import HomeView
+from frontengine.show.pet_game.resident_art import ResidentArt
 from frontengine.show.pet_game.themes import glyph
 from frontengine.utils.pet_game.environment import weather
 from frontengine.ui.page.layout_kit import SettingPage
@@ -60,9 +61,12 @@ class PetHomePage(SettingPage):
         self.selected_resident: str | None = None
         self.selected_furniture: str | None = None
         self.strip_list: list[HomeStrip] = []      # registered with the Control Center
+        self.art = ResidentArt(self.service)
+        self.art.changed.connect(self._art_changed)
         self._build_intro()
         self._build_status()
         self.view = HomeView()
+        self.view.art = self.art
         self.view.reduced_motion = self.motion_check.isChecked()
         self.add_body_widget(self._scroller(self.view))
         self.residents = ResidentPanel(self)
@@ -207,6 +211,8 @@ class PetHomePage(SettingPage):
         self.refresh()
 
     def shutdown(self) -> bool:
+        for dialog in list(self.residents.wardrobes.values()):
+            dialog.close()
         self.close_strip()
         return self.service.shutdown()
 
@@ -230,11 +236,19 @@ class PetHomePage(SettingPage):
             strip.set_arranging(self.layout_panel.arranging)
             self.strip_list.append(strip)
             strip.reduced_motion = self.motion_check.isChecked()
+            strip.art = self.art
             strip.mode_requested.connect(self.set_mode)
             strip.show()
             self.apply_mode()
         elif not wanted:
             self.close_strip()
+
+    def _art_changed(self) -> None:
+        """A character finished loading or changed outfit: redraw and refit the desktop input mask."""
+        self.view.update()
+        for strip in self.strip_list:
+            strip.update_mask()
+            strip.update()
 
     def _forget_strip(self, strip: HomeStrip) -> None:
         if strip in self.strip_list:

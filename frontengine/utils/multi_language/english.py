@@ -1723,4 +1723,5 @@ english_word_dict = {
     "pet_home_note_wish": "{name}'s wish came true",
     "pet_home_note_failed": "{text}",
     "pet_home_note_times": "×{count}",
+    "pet_home_wardrobe": "Wardrobe…",
 }
