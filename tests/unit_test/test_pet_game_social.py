@@ -45,7 +45,7 @@ def test_version_one_homes_gain_comfort_and_company_on_load():
     assert loaded.residents[A].needs["comfort"] == 60
     assert loaded.residents[A].needs["social"] == 60
     assert loaded.relations == {}
-    assert snapshot.to_dict(loaded)["version"] == 3
+    assert snapshot.to_dict(loaded)["version"] == snapshot.VERSION
 
 
 def test_relationships_survive_saving_and_reject_bad_pairs():

@@ -28,6 +28,8 @@ MIN_CELL = 20.0          # below this, furniture labels stop being readable
 MAX_CELL = 40.0
 SPRITE_CELLS = 2.2           # a character stands a little over two cells tall
 ZOOMS = (1.0, 1.25, 1.5, 2.0)
+AREA_COLORS = {"living": "#B8C7E6", "work": "#C9D9A5", "leisure": "#F2C6A8", "dining": "#F1DD9A",
+               "clear": "#D8D2C6"}
 GLYPHS = {"sleep": "Zz", "nap": "Zz", "eat": "~", "snack": "~", "work": "✎", "play": "♪",
           "relax": "☕", "wait": "…", "wander": "", "idle": "", "drag": "✋"}
 
@@ -47,6 +49,8 @@ class HomeView(QWidget):
     zoomable = False              # Ctrl+wheel zooms only where the page allows it
     zoom_changed = Signal(float)
     drag_enabled = False          # while arranging, pieces can be dragged to a new cell
+    area_tool: str | None = None  # an area tag (or "clear") while painting floor areas
+    area_painted = Signal(int, int)
     piece_hovered = Signal(str, int)
     piece_dropped = Signal(str, int)
     resident_selected = Signal(str)
@@ -59,6 +63,7 @@ class HomeView(QWidget):
         self.zone: str | None = None
         self.selected: str | None = None
         self.preview: tuple[str, int, bool, str | None] | None = None
+        self._painting: tuple[int, int] | None = None
         self.setFixedHeight(170)
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.setFocusPolicy(Qt.FocusPolicy.ClickFocus)
@@ -143,6 +148,7 @@ class HomeView(QWidget):
         width = self.cell_width()
         floor = QRectF(0, self._floor_y(), width * zone.width_cells, FLOOR_HEIGHT)
         painter.fillRect(floor, floor_color(zone.theme))
+        self._paint_areas(painter, floor)
         for cell in zone.restricted:
             painter.fillRect(QRectF(cell * width, floor.top(), width, FLOOR_HEIGHT),
                              QColor(200, 70, 70, 120))
@@ -153,6 +159,24 @@ class HomeView(QWidget):
             painter.setPen(QPen(self.palette().mid().color(), 1))
             for cell in range(zone.width_cells + 1):
                 painter.drawLine(QPointF(cell * width, floor.top()), QPointF(cell * width, floor.bottom()))
+
+    def _paint_areas(self, painter: QPainter, floor: QRectF) -> None:
+        """Labelled stretches of floor: a coloured band with the label, and the one being painted."""
+        zone, width = self.world.zones[self.zone], self.cell_width()
+        bands = list(zone.areas)
+        if self._painting is not None:
+            first, last = sorted(self._painting)
+            bands.append((first, last, self.area_tool))
+        font = QFont(self.font())
+        font.setPointSizeF(7.5)
+        painter.setFont(font)
+        for first, last, tag in bands:
+            color = QColor(AREA_COLORS.get(tag, "#9A9284"))
+            color.setAlpha(150)
+            band = QRectF(first * width, floor.top(), (last - first + 1) * width, FLOOR_HEIGHT)
+            painter.fillRect(band, color)
+            painter.setPen(QColor("#171715"))
+            painter.drawText(band, Qt.AlignmentFlag.AlignCenter, translate("pet_home_area_" + tag, tag))
 
     def _theme(self) -> str:
         return self.world.zones[self.zone].theme
@@ -326,13 +350,27 @@ class HomeView(QWidget):
         _identifier, grab = self._dragging
         return max(0, int(round((event.position().x() - grab) / self.cell_width())))
 
+    def _floor_cell(self, x: float) -> int:
+        cells = self.world.zones[self.zone].width_cells
+        return max(0, min(cells - 1, int(x // self.cell_width())))
+
     def mouseMoveEvent(self, event: QMouseEvent) -> None:
+        if self._painting is not None:
+            self._painting = (self._painting[0], self._floor_cell(event.position().x()))
+            self.update()
+            return
         if getattr(self, "_dragging", None) is not None:
             self.piece_hovered.emit(self._dragging[0], self._drag_cell(event))
             return
         super().mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event: QMouseEvent) -> None:
+        if self._painting is not None:
+            first, last = sorted(self._painting)
+            self._painting = None
+            self.update()
+            self.area_painted.emit(first, last)
+            return
         if getattr(self, "_dragging", None) is not None:
             identifier, cell = self._dragging[0], self._drag_cell(event)
             self._dragging = None
@@ -345,6 +383,11 @@ class HomeView(QWidget):
             super().mousePressEvent(event)
             return
         point = event.position()
+        if self.area_tool is not None:
+            cell = self._floor_cell(point.x())
+            self._painting = (cell, cell)
+            self.update()
+            return
         if self.drag_enabled:
             for piece, definition in self.world.in_zone(self.zone):
                 if self.piece_rect(piece, definition).contains(point):

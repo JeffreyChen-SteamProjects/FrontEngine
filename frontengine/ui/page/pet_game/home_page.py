@@ -13,7 +13,7 @@ from pathlib import Path
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QGuiApplication, QKeyEvent, QKeySequence
-from PySide6.QtWidgets import (QCheckBox, QFrame, QHBoxLayout, QLabel, QListWidget, QListWidgetItem,
+from PySide6.QtWidgets import (QCheckBox, QComboBox, QFrame, QHBoxLayout, QLabel, QListWidget, QListWidgetItem,
                                QPushButton, QScrollArea, QVBoxLayout, QWidget)
 
 from frontengine.show.pet_game.home_service import HomeService
@@ -123,8 +123,67 @@ class PetHomePage(SettingPage):
 
     @property
     def zone(self) -> str | None:
+        """The zone the page shows: the one chosen in the zone menu, else the first."""
         world = self.service.world
-        return next(iter(world.zones), None) if world is not None else None
+        if world is None:
+            return None
+        if getattr(self, "_zone_id", None) in world.zones:
+            return self._zone_id
+        return next(iter(world.zones), None)
+
+    @staticmethod
+    def screens() -> list:
+        """The connected screens (a method so tests can stand in other monitors)."""
+        return list(QGuiApplication.screens())
+
+    def choose_zone(self, zone: str | None) -> None:
+        self._zone_id = zone
+        self.selected_furniture = None
+        self.refresh()
+
+    def free_screens(self) -> list:
+        """Connected screens that do not hold a zone yet."""
+        world = self.service.world
+        taken = {zone.screen for zone in world.zones.values()} if world is not None else set()
+        return [screen for screen in self.screens() if (screen.name() or "primary")[:128] not in taken]
+
+    def add_zone(self, screen) -> str | None:
+        """A home zone on another screen, as wide as that screen allows."""
+        area = screen.availableGeometry()
+        width = max(16, min(60, area.width() // CELL_PIXELS))
+        name = (screen.name() or "primary")[:128]
+        try:
+            zone = self.service.run(lambda world: world.add_zone(name, area.x(), area.bottom(), width))
+        except ValueError as error:
+            self.report_text(str(error))
+            return None
+        self.choose_zone(zone)
+        self.sync_strip()
+        return zone
+
+    def move_zone(self, screen) -> str:
+        zone, area = self.zone, screen.availableGeometry()
+        width = max(16, min(60, area.width() // CELL_PIXELS))
+        result = self.service.run(lambda world: world.move_zone(zone, (screen.name() or "primary")[:128],
+                                                                area.x(), area.bottom(), width))
+        self.report(result)
+        self.close_strip()
+        self.sync_strip()
+        self.refresh()
+        return result
+
+    def screens_changed(self, *_args) -> None:
+        """A monitor came or went: zones on a missing screen wait, the rest carry on."""
+        world = self.service.world
+        if world is None:
+            return
+        names = {(screen.name() or "primary")[:128] for screen in self.screens()}
+        offline = {key for key, zone in world.zones.items() if zone.screen not in names}
+        if offline != world.offline_zones:
+            self.service.run(lambda w: w.set_offline(offline))
+        self.close_strip()
+        self.sync_strip()
+        self.refresh()
 
     def _build_intro(self) -> None:
         """Shown once: where the old tools went, and that none of them needs a home."""
@@ -208,6 +267,10 @@ class PetHomePage(SettingPage):
             button.setFixedWidth(40)
             button.clicked.connect(lambda _checked=False, s=steps: self.view.step_zoom(s))
         self.shortcuts = button_row(self.desktop_button, self.backpack_button, self.goals_button)
+        self.zone_combo = QComboBox()
+        tr(self.zone_combo, "pet_home_zone", "Zone", "setAccessibleName")
+        self.zone_combo.activated.connect(lambda _index: self.choose_zone(self.zone_combo.currentData()))
+        self.shortcuts.layout().addWidget(self.zone_combo)
         self.shortcuts.layout().addWidget(self.zoom_out)
         self.shortcuts.layout().addWidget(self.zoom_in)
         section.add_widget(self.shortcuts)
@@ -223,6 +286,18 @@ class PetHomePage(SettingPage):
         self.pending_list.itemClicked.connect(self._open_pending)
         box.addWidget(self.pending_list)
         section.add_widget(self.pending_box)
+
+    def _refresh_zone_combo(self, world) -> None:
+        zones = list(world.zones.values()) if world is not None else []
+        items = [(zone.identifier, zone.screen + (" · " + translate("pet_home_zone_offline", "screen not connected")
+                                                    if zone.identifier in world.offline_zones else ""))
+                 for zone in zones]
+        if [(self.zone_combo.itemData(i), self.zone_combo.itemText(i)) for i in range(self.zone_combo.count())] != items:
+            self.zone_combo.clear()
+            for key, text in items:
+                self.zone_combo.addItem(text, key)
+        self.zone_combo.setCurrentIndex(max(0, self.zone_combo.findData(self.zone)))
+        self.zone_combo.setVisible(len(zones) > 1)
 
     def _open_pending(self, item) -> None:
         self.tabs.select(item.data(Qt.ItemDataRole.UserRole))
@@ -311,6 +386,10 @@ class PetHomePage(SettingPage):
         self.view.cell_clicked.connect(self.layout_panel.cell_clicked)
         self.view.piece_hovered.connect(self.layout_panel.drag_hover)
         self.view.piece_dropped.connect(self.layout_panel.drop)
+        self.view.area_painted.connect(self.layout_panel.paint_area)
+        application = QGuiApplication.instance()
+        application.screenAdded.connect(self.screens_changed)
+        application.screenRemoved.connect(self.screens_changed)
 
     # ----- home lifecycle ------------------------------------------------------------
 
@@ -374,9 +453,14 @@ class PetHomePage(SettingPage):
 
     def sync_strip(self) -> None:
         """Show the home on the desktop when there is a home and the user wants it there."""
-        wanted = self.service.world is not None and self.desktop_check.isChecked()
-        if wanted and not self.strip_list:
-            strip = HomeStrip(self.service, self.zone, self.layer, str(user_setting_dict.get("quality_tier", "")))
+        world = self.service.world
+        wanted = world is not None and self.desktop_check.isChecked()
+        zones = [key for key in world.zones if key not in world.offline_zones] if wanted else []
+        for strip in [strip for strip in self.strip_list if strip.zone not in zones]:
+            strip.close()
+            self._forget_strip(strip)
+        for zone in [key for key in zones if key not in {strip.zone for strip in self.strip_list}]:
+            strip = HomeStrip(self.service, zone, self.layer, str(user_setting_dict.get("quality_tier", "")))
             strip.open_requested.connect(self.open_requested.emit)
             strip.arrange_finished.connect(self._strip_done_arranging)
             strip.layer_requested.connect(self.choose_layer)
@@ -389,8 +473,9 @@ class PetHomePage(SettingPage):
             strip.art = self.art
             strip.mode_requested.connect(self.set_mode)
             strip.show()
+        if zones:
             self.apply_mode()
-        elif not wanted:
+        else:
             self.close_strip()
 
     def _art_changed(self) -> None:
@@ -562,6 +647,7 @@ class PetHomePage(SettingPage):
         self.shortcuts.setVisible(has_home)
         self._refresh_pending()
         self.pending_box.setVisible(has_home and self.pending_list.count() > 0)
+        self._refresh_zone_combo(world)
         for panel in (self.residents, self.goals, self.layout_panel, self.shop, self.storage, self.work,
                       self.collection):
             panel.section.setEnabled(has_home)

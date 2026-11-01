@@ -10,6 +10,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from frontengine.utils.pet_game.goals import unlocked
+from frontengine.utils.pet_game.layout import AREA_FOR_ACTIVITY
 from frontengine.utils.pet_game.resident import PROFESSION_TRAITS, Activity, Resident
 from frontengine.utils.pet_game.schedule import block_at, game_hour
 
@@ -74,6 +75,14 @@ def start(world: World, resident: Resident, kind: str, reason: str, furniture: s
     world.emit("activity", resident=resident.identifier, activity=kind, reason=reason)
 
 
+def _area_rank(world: World, piece, activity: str) -> int:
+    """0 inside an area labelled for this activity, 1 unlabelled, 2 in an area meant for something else."""
+    tag = world.zones[piece.zone].area_at(piece.cell)
+    if tag is None:
+        return 1
+    return 0 if tag == AREA_FOR_ACTIVITY.get(activity) else 2
+
+
 def _free_piece(world: World, resident: Resident, activity: str,
                 owner_first: bool = False) -> tuple[str, int] | None:
     """Pick a free interaction point; beds prefer their owner and skip other owners' beds."""
@@ -86,12 +95,13 @@ def _free_piece(world: World, resident: Resident, activity: str,
         point = piece.free_point(definition)
         if point is not None:
             rank = 0 if owner_first and piece.owner == resident.identifier else 1
-            candidates.append((rank, abs(piece.point_x_milli(definition, point) - resident.x_milli),
+            candidates.append((rank, _area_rank(world, piece, activity),
+                               abs(piece.point_x_milli(definition, point) - resident.x_milli),
                                int(piece.identifier[1:]), piece.identifier, point))
     if not candidates:
         return None
     best = min(candidates)
-    return best[3], best[4]
+    return best[4], best[5]
 
 
 def _has_kind(world: World, resident: Resident, activity: str) -> bool:
@@ -135,10 +145,11 @@ def _station_for(world: World, resident: Resident, task) -> tuple[str, int] | st
         point = piece.free_point(definition)
         if point is not None:
             distance = abs(piece.point_x_milli(definition, point) - resident.x_milli)
-            candidates.append((distance, int(piece.identifier[1:]), piece.identifier, point))
+            candidates.append((_area_rank(world, piece, "work"), distance, int(piece.identifier[1:]),
+                               piece.identifier, point))
     if candidates:
         best = min(candidates)
-        return best[2], best[3]
+        return best[3], best[4]
     if task.station is not None or any(definition.profession == recipe.profession
                                        for _piece, definition in world.in_zone(resident.zone)):
         return "station_busy"

@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261102-04 | 2026-11-02 | Zones on several screens, floor areas, transfers and unplugged screens | #done #pets #game | [2026-11](2026-11.md) |
 | U-20261102-03 | 2026-11-02 | Layout editor: undo and redo, drag and nudge, layout codes, ready-made layouts | #done #pets #game #ui | [2026-11](2026-11.md) |
 | U-20261102-02 | 2026-11-02 | Thirty-one pieces of furniture, level unlocks and a Collection tab | #done #pets #game #art | [2026-11](2026-11.md) |
 | U-20261102-01 | 2026-11-02 | Free arranging: a separate home with every piece and no costs | #done #pets #game | [2026-11](2026-11.md) |
