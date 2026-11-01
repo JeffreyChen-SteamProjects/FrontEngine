@@ -124,7 +124,8 @@ def test_right_click_commands_and_drag(page):
     resident = next(iter(world.residents.values()))
     center = strip.resident_center(resident)
     strip.mousePressEvent(_mouse(QEvent.Type.MouseButtonPress, center, Qt.MouseButton.RightButton))
-    sleep = next(action for action in strip.last_menu.actions() if action.text() == "Sleep")
+    ask = next(action.menu() for action in strip.last_menu.actions() if action.text() == "Ask to")
+    sleep = next(action for action in ask.actions() if action.text() == "Sleep")
     sleep.trigger()
     assert resident.commands == ["sleep"]
     strip.last_menu.close()
