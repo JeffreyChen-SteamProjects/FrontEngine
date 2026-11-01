@@ -1882,4 +1882,12 @@ russian_word_dict = {
     "pet_game_phase_arrange": "составляет",
     "pet_game_phase_wrap": "заворачивает",
     "pet_game_phase_tune": "настраивает",
+    "pet_home_share_blueprint": "Поделиться планом…",
+    "pet_home_visit_blueprint": "Посетить план…",
+    "pet_home_blueprint_saved": "План сохранён в {path}",
+    "pet_home_blueprint_invalid": "Этот файл не является планом дома ({error}).",
+    "pet_home_visit_title": "В гостях: {name}",
+    "pet_home_visit_note": "Взгляд на чужой дом — здесь ничего не происходит, не покупается и не сохраняется.",
+    "pet_home_visit_zone": "Комната {number}",
+    "pet_home_visit_missing": "Здесь не показано (нет содержимого или места): {items}",
 }

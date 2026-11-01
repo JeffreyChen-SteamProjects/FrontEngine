@@ -1882,4 +1882,12 @@ italian_word_dict = {
     "pet_game_phase_arrange": "dispone",
     "pet_game_phase_wrap": "incarta",
     "pet_game_phase_tune": "accorda",
+    "pet_home_share_blueprint": "Condividi la planimetria…",
+    "pet_home_visit_blueprint": "Visita una planimetria…",
+    "pet_home_blueprint_saved": "Planimetria salvata in {path}",
+    "pet_home_blueprint_invalid": "Questo file non è una planimetria di casa ({error}).",
+    "pet_home_visit_title": "In visita: {name}",
+    "pet_home_visit_note": "Uno sguardo a una casa condivisa - qui nulla funziona, si compra o si salva.",
+    "pet_home_visit_zone": "Stanza {number}",
+    "pet_home_visit_missing": "Non mostrato qui (contenuto mancante o niente spazio): {items}",
 }
