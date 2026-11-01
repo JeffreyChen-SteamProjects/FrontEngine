@@ -1719,4 +1719,12 @@ russian_word_dict = {
     "settings_menu_theme_light": "Светлая",
     "settings_menu_theme_dark": "Тёмная",
     "pet_home_settings_section": "Настройки",
+    "pet_home_note_auto_job": "{name} взялся за «{recipe}»",
+    "pet_home_note_goal_claimed": "Награда получена (+{coins})",
+    "pet_home_result_bought_no_room": "Куплено, но места нет — пока на складе",
+    "pet_home_work_auto": "В рабочие часы жильцы сами берутся за работу, которую позволяют рабочие места, и используют только материалы из рюкзака.",
+    "pet_home_goals_auto": "Награды забираются, а заказы сдаются сами, как только всё готово.",
+    "pet_home_settings_strip_hint": "Режим и слой — в меню ⌂ полосы на рабочем столе; при показе экрана режим встречи включается сам.",
+    "pet_home_result_pick_item": "Сначала выберите что-нибудь",
+    "pet_home_result_no_room": "В доме нет свободного места",
 }

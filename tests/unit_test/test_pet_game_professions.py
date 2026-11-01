@@ -13,6 +13,7 @@ MINUTE = 60000
 
 def _home(coins: int = 1000) -> tuple[World, str]:
     world = World(builtin_catalog(), HOME, seed=4)
+    world.automatic = False            # these tests check the bare mechanics; automation has its own
     zone = world.add_zone("screen", 0, 900, 48)
     world.grant_starter_kit()
     world.ledger.apply("gift", "test", coins)

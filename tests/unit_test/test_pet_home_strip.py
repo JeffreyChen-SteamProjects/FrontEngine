@@ -33,13 +33,8 @@ def page(tmp_path):
                           clock=clock)
     widget = PetHomePage(service)
     widget.clock = clock
-    widget.create_home()
+    widget.create_home()                      # the starter kit is set out by itself
     widget.residents.new_pet()
-    for definition, cell in (("bed_basic", 4), ("desk_basic", 12)):
-        panel = widget.layout_panel
-        panel.storage.setCurrentIndex(panel.storage.findData(definition))
-        panel.cell.setValue(cell)
-        panel.place()
     yield widget
     widget.shutdown()
 

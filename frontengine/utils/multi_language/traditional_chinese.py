@@ -1728,4 +1728,12 @@ traditional_chinese_word_dict = {
     "settings_menu_theme_light": "淺色",
     "settings_menu_theme_dark": "深色",
     "pet_home_settings_section": "設定",
+    "pet_home_note_auto_job": "{name} 自己接了「{recipe}」",
+    "pet_home_note_goal_claimed": "已領取獎勵（+{coins}）",
+    "pet_home_result_bought_no_room": "已購買，但沒有空位，先放在倉庫",
+    "pet_home_work_auto": "居民會在工作時段，依家裡有的工作台自己接工作，只用背包裡已有的材料。",
+    "pet_home_goals_auto": "獎勵完成後會自動領取，委託在物品足夠時會自動交付。",
+    "pet_home_settings_strip_hint": "模式與圖層在桌面長條的 ⌂ 選單裡；分享螢幕時會自動切到會議模式。",
+    "pet_home_result_pick_item": "請先選一樣東西",
+    "pet_home_result_no_room": "家裡沒有可以放的空位",
 }

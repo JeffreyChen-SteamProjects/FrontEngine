@@ -364,12 +364,25 @@ def _check_events(world: World) -> None:
             _life_event(world, "birthday", identifier)
 
 
+def _automate(world: World) -> None:
+    """Rewards are taken and commissions handed in by themselves; the inbox says what happened."""
+    if not world.automatic:
+        return
+    for goal in TUTORIAL:
+        if goal_state(world, goal) == "done":
+            claim(world, goal.identifier)
+    for index, offer in enumerate(world.progress.commissions["offers"]):
+        if not offer["done"] and world.ledger.available(offer["item"]) >= offer["count"]:
+            deliver(world, index)
+
+
 def update(world: World) -> None:
     """Called from the simulation step; does real work every 30 s of world time."""
     if world.time_ms < world.progress.next_check_ms:
         return
     world.progress.next_check_ms = world.time_ms + CHECK_MS
     refresh_commissions(world)
+    _automate(world)
     for identifier in sorted(world.residents):
         resident = world.residents[identifier]
         if not resident.parked and not resident.away:

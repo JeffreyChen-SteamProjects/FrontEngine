@@ -1729,4 +1729,12 @@ english_word_dict = {
     "settings_menu_theme_light": "Light",
     "settings_menu_theme_dark": "Dark",
     "pet_home_settings_section": "Settings",
+    "pet_home_note_auto_job": "{name} took up {recipe}",
+    "pet_home_note_goal_claimed": "Reward collected (+{coins})",
+    "pet_home_result_bought_no_room": "Bought - no free spot, so it waits in storage",
+    "pet_home_work_auto": "Residents take up the work their workstations allow during their working hours, using only materials already in the backpack.",
+    "pet_home_goals_auto": "Rewards are collected and commissions handed in by themselves once they are ready.",
+    "pet_home_settings_strip_hint": "Mode and layer are on the desktop strip's ⌂ menu; meeting mode turns on by itself while the screen is shared.",
+    "pet_home_result_pick_item": "Pick something first",
+    "pet_home_result_no_room": "No free spot for it in the home",
 }

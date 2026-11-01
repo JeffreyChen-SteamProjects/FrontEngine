@@ -93,15 +93,18 @@ class HomeService(QObject):
             self.schedule_save()
         return result
 
-    def create_home(self, screen: str, x: int, y: int, width_cells: int, seed: int | None = None) -> World:
-        """Start a new home with the starter kit; refuses to replace a loaded one."""
+    def create_home(self, screen: str, x: int, y: int, width_cells: int, seed: int | None = None,
+                    furnish: bool = False) -> World:
+        """Start a new home with the starter kit (set out at once with ``furnish``); never replaces one."""
         if self.world is not None:
             raise ValueError("A home is already open")
         world = World(self.store.catalog, uuid.uuid4().hex, self.store.mode,
                       secrets.randbits(63) if seed is None else seed)
-        world.add_zone(screen, x, y, width_cells)
+        zone = world.add_zone(screen, x, y, width_cells)
         if world.mode == "manage":
             world.grant_starter_kit()
+            if furnish:
+                world.furnish(zone)
         self._adopt_world(world)
         self.save_now()
         return world

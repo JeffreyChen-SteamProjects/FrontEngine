@@ -43,7 +43,7 @@ def test_themes_fall_back_to_warm_home_and_unknown_pieces_have_none():
 def test_pictures_ship_as_package_data_in_both_manifests_and_the_executable():
     for manifest in ("pyproject.toml", "stable.toml"):
         text = (ROOT / manifest).read_text(encoding="utf-8")
-        assert re.search(r'"frontengine\.show\.pet_game" = \["furniture/\*/\*\.png"\]', text), manifest
+        assert re.search(r'"frontengine\.show\.pet_game" = \["furniture/\*/\*\.png", "items/\*\.png"\]', text), manifest
     assert "--include-package-data=frontengine.show.pet_game" in (ROOT / "exe/build_exe.py").read_text("utf-8")
 
 

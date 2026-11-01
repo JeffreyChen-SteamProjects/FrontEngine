@@ -3,6 +3,7 @@
 Run with Blender 4.2 LTS (no add-ons needed)::
 
     blender -b --factory-startup -P tools/blender_furniture.py -- frontengine/show/pet_game/furniture
+    blender -b --factory-startup -P tools/blender_furniture.py -- --items frontengine/show/pet_game/items
 
 Every piece is built from bevelled, subdivided primitives (no imported meshes),
 shaded with a cel ramp so it sits with the flat three-ink pets, outlined by
@@ -45,7 +46,10 @@ def reset_scene() -> None:
     scene.render.use_freestyle = True
     scene.render.line_thickness_mode = "ABSOLUTE"
     scene.render.line_thickness = 2.2
-    lineset = scene.view_layers[0].freestyle_settings.linesets.new("outline")
+    linesets = scene.view_layers[0].freestyle_settings.linesets
+    while len(linesets):                    # the empty default set has no line style and errors
+        linesets.remove(linesets[0])
+    lineset = linesets.new("outline")
     lineset.select_by_visibility = True
     lineset.select_by_edge_types = True
     lineset.select_silhouette = True
@@ -318,6 +322,117 @@ PIECES = {"bed_basic": (4, bed_basic), "bed_cozy": (4, bed_cozy), "table_basic":
           "workbench": (3, workbench)}
 
 
+# ----- items: materials, harvests and goods -------------------------------------------------------
+# Square icons for the backpack, shop and work lists, centred on the origin, warm-home colours.
+
+def item_wood(p: Palette) -> None:
+    for index, (y, z) in enumerate(((-0.28, 0.22), (0.28, 0.22), (0.0, 0.62))):
+        log = cylinder(0.24, 1.3, (0, y, z), p["wood"], rotation=(0, math.radians(90), math.radians(12)))
+        log.name = f"log{index}"
+        for side in (-1, 1):
+            cap = Vector((0, 0, side * 0.655))             # along the log's own axis
+            cap.rotate(log.rotation_euler)
+            cylinder(0.2, 0.02, Vector((0, y, z)) + cap, p["fabric"],
+                     rotation=(0, math.radians(90), math.radians(12)), bevel=0.0)
+    torus(0.5, 0.035, (0, 0, 0.38), p["accent"], rotation=(0, math.radians(90), math.radians(12)))
+
+
+def item_herb(p: Palette) -> None:
+    for index, angle in enumerate((-22, -8, 6, 20)):
+        stem = cylinder(0.025, 1.0, (0, 0, 0.5), p["leaf_dark"], rotation=(0, math.radians(angle), 0), bevel=0.0)
+        top = Vector((0, 0, 0.5))
+        top.rotate(stem.rotation_euler)
+        sphere(0.18, Vector((0, 0, 0.5)) + top * 1.6, p["leaf"] if index % 2 else p["leaf_dark"],
+               scale=(1.0, 0.6, 1.4))
+    torus(0.07, 0.03, (0, 0, 0.35), p["accent_2"])
+
+
+def item_flower(p: Palette) -> None:
+    cone(0.36, 0.08, 0.8, (0, 0, 0.4), p["fabric"], rotation=(math.radians(180), 0, 0))
+    for (x, y, z), color in (((-0.18, 0, 1.0), "accent"), ((0.2, 0.05, 1.05), "accent_2"), ((0.0, -0.1, 1.2), "ball")):
+        center = Vector((x, y, z))
+        for k in range(6):
+            angle = k * math.tau / 6
+            sphere(0.09, center + Vector((math.cos(angle) * 0.12, 0, math.sin(angle) * 0.12)), p[color],
+                   scale=(1, 0.5, 1))
+        sphere(0.07, center + Vector((0, -0.04, 0)), p["accent_2"] if color != "accent_2" else p["fabric"])
+    for x in (-0.1, 0.1):
+        sphere(0.12, (x, 0.05, 0.85), p["leaf"], scale=(1.2, 0.5, 0.6))
+
+
+def item_toy(p: Palette) -> None:
+    sphere(0.42, (0, 0, 0.42), p["accent_2"], scale=(1, 0.9, 1))
+    sphere(0.32, (0, 0, 1.05), p["accent_2"])
+    for side in (-1, 1):
+        sphere(0.12, (side * 0.24, 0, 1.3), p["accent_2"])
+        sphere(0.06, (side * 0.11, -0.29, 1.1), p["ink"])
+        sphere(0.13, (side * 0.38, -0.05, 0.55), p["accent_2"])
+    sphere(0.1, (0, -0.28, 0.98), p["fabric"], scale=(1.2, 0.6, 0.8))
+    torus(0.18, 0.04, (0, -0.12, 0.78), p["accent"], rotation=(math.radians(70), 0, 0))
+
+
+def item_coin(p: Palette) -> None:
+    for index in range(3):
+        cylinder(0.42, 0.11, (0.04 * index, 0, 0.06 + index * 0.12), p["accent_2"], bevel=0.03)
+    cylinder(0.3, 0.02, (0.08, 0, 0.4), p["accent"], bevel=0.0)
+
+
+def item_letter(p: Palette) -> None:
+    box((1.3, 0.06, 0.85), (0, 0, 0.43), p["paper"], bevel=0.03)
+    for side in (-1, 1):                                   # the flap's two folds
+        box((0.78, 0.02, 0.06), (side * 0.3, -0.04, 0.6), p["fabric"], bevel=0.0,
+            rotation=(0, side * math.radians(-33), 0))
+    cylinder(0.11, 0.04, (0, -0.06, 0.43), p["accent"], rotation=(math.radians(90), 0, 0))
+
+
+def item_story(p: Palette) -> None:
+    box((1.0, 0.24, 1.3), (0, 0, 0.65), p["accent"], bevel=0.05)
+    box((0.9, 0.2, 1.22), (0.06, -0.03, 0.65), p["paper"], bevel=0.02)
+    box((0.12, 0.26, 1.3), (-0.5, 0, 0.65), p["dark_wood"], bevel=0.03)
+    box((0.5, 0.02, 0.08), (0.05, -0.13, 0.95), p["accent_2"], bevel=0.0)
+
+
+ITEMS = {"wood": item_wood, "herb": item_herb, "flower": item_flower, "toy": item_toy, "coin": item_coin,
+         "letter": item_letter, "story": item_story}
+ITEM_PIXELS = 128
+
+
+def frame_icon(target: Path) -> None:
+    """A three-quarter view filling a square icon with a little margin."""
+    scene = bpy.context.scene
+    meshes = [obj for obj in scene.objects if obj.type == "MESH"]
+    camera_data = bpy.data.cameras.new("camera")
+    camera_data.type = "ORTHO"
+    camera = bpy.data.objects.new("camera", camera_data)
+    scene.collection.objects.link(camera)
+    scene.camera = camera
+    camera.rotation_euler = (math.radians(62), 0, math.radians(-24))
+    bpy.context.view_layer.update()
+    corners = [obj.matrix_world @ Vector(c) for obj in meshes for c in obj.bound_box]
+    view = camera.matrix_world.to_3x3().inverted()
+    xs = [(view @ point).x for point in corners]
+    ys = [(view @ point).y for point in corners]
+    camera_data.ortho_scale = max(max(xs) - min(xs), max(ys) - min(ys)) * 1.12
+    scene.render.resolution_x = scene.render.resolution_y = ITEM_PIXELS
+    scene.render.resolution_percentage = 100
+    center = Vector(((max(xs) + min(xs)) / 2, (max(ys) + min(ys)) / 2, 0))
+    camera.location = camera.matrix_world.to_3x3() @ center + camera.matrix_world.to_3x3() @ Vector((0, 0, 30))
+    scene.render.filepath = str(target)
+    bpy.ops.render.render(write_still=True)
+
+
+def render_items(output: Path, only: set) -> None:
+    for name, build in ITEMS.items():
+        if name not in only:
+            continue
+        reset_scene()
+        build(Palette(THEMES["warm_home"]))
+        target = output / f"{name}.png"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        frame_icon(target)
+        print(f"rendered {target}")
+
+
 # ----- framing and rendering ------------------------------------------------------------------------
 
 def frame_and_render(width_cells: int, target: Path) -> None:
@@ -356,6 +471,9 @@ def frame_and_render(width_cells: int, target: Path) -> None:
 
 def main() -> None:
     arguments = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
+    if arguments and arguments[0] == "--items":           # -- --items <folder> [names]
+        render_items(Path(arguments[1]).resolve(), set(arguments[2].split(",")) if len(arguments) > 2 else set(ITEMS))
+        return
     output = Path(arguments[0] if arguments else "furniture").resolve()
     only = set(arguments[1].split(",")) if len(arguments) > 1 else set(PIECES)
     for theme, colors in THEMES.items():

@@ -234,14 +234,8 @@ home_start = {}
 def pet_home_setup():
     page = W.pet_home_ui
     W.sidebar.select_page_id('tab_pet_home_text')
-    page.create_home()
-    page.residents.new_pet()
-    panel = page.layout_panel
-    for definition, cell in (('bed_basic', 2), ('table_basic', 8), ('desk_basic', 14)):
-        panel.storage.setCurrentIndex(panel.storage.findData(definition))
-        panel.cell.setValue(cell)
-        panel.place()
-    page.work.assign()
+    page.create_home()                      # the starter kit is set out by itself
+    page.residents.new_pet()                # and the pet takes up work by itself in work hours
     world = page.service.world
     resident = next(iter(world.residents.values()))
     home_start.update(time=world.time_ms, x=resident.x_milli)
@@ -295,7 +289,7 @@ def first_monitor(page):
 
 
 ACTIONS = [
-    ('pet home: create, furnish and give work', pet_home_setup, 0),
+    ('pet home: create (furnishes and works by itself)', pet_home_setup, 0),
     ('image: choose then start', lambda: (W.image_setting_ui.choose_and_copy_file_to_cwd_image_dir_then_play(),
                                           first_monitor(W.image_setting_ui), W.image_setting_ui.start_play_image()), 1),
     ('gif: choose then start', lambda: (W.gif_setting_ui.choose_and_copy_file_to_cwd_gif_dir_then_play(),

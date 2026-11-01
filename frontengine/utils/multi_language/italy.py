@@ -1719,4 +1719,12 @@ italian_word_dict = {
     "settings_menu_theme_light": "Chiaro",
     "settings_menu_theme_dark": "Scuro",
     "pet_home_settings_section": "Impostazioni",
+    "pet_home_note_auto_job": "{name} si è messo a {recipe}",
+    "pet_home_note_goal_claimed": "Ricompensa ricevuta (+{coins})",
+    "pet_home_result_bought_no_room": "Acquistato - nessun posto libero, resta in magazzino",
+    "pet_home_work_auto": "Nelle ore di lavoro gli abitanti si dedicano da soli al lavoro che le postazioni permettono, usando solo i materiali già nello zaino.",
+    "pet_home_goals_auto": "Le ricompense vengono ritirate e le commissioni consegnate da sole appena sono pronte.",
+    "pet_home_settings_strip_hint": "Modalità e livello sono nel menu ⌂ della striscia sul desktop; la modalità riunione si attiva da sola durante la condivisione dello schermo.",
+    "pet_home_result_pick_item": "Prima scegli qualcosa",
+    "pet_home_result_no_room": "Nessun posto libero in casa",
 }
