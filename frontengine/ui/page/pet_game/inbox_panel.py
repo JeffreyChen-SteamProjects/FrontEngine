@@ -37,9 +37,11 @@ def category(event: dict) -> str | None:
 
 
 def line(world, event: dict) -> str:
-    resident = world.residents.get(event.get("resident")) if world is not None else None
-    name = resident.name if resident else ""
     kind = event["kind"]
+    if world is None:                       # no home loaded: only problems can still arrive
+        return translate("pet_home_note_failed", "{text}").format(text=event.get("text", kind))
+    resident = world.residents.get(event.get("resident"))
+    name = resident.name if resident else ""
     if kind == "settled":
         recipe = world.catalog.recipes.get(event.get("recipe"))
         label = translate(recipe.label_key, recipe.fallback) if recipe else event.get("recipe", "")

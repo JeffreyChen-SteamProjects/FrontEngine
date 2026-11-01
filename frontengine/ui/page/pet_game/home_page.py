@@ -394,17 +394,18 @@ class PetHomePage(SettingPage):
         self.layer_combo.setEnabled(has_home)
         retranslator.set_text(self.run_button, "pet_home_pause" if self.service.running else "pet_home_start",
                               "Pause" if self.service.running else "Start")
+        self.status.setText(self._status_text(world, protected))
+
+    def _status_text(self, world, protected: bool) -> str:
         if protected:
             key = "pet_home_newer" if self.load_result.status == "newer" else "pet_home_corrupt"
-            self.status.setText(translate(key, "The home save could not be read. It has not been changed."))
-        elif not has_home:
-            self.status.setText(translate("pet_home_create_hint", "No home yet."))
-        else:
-            state = translate("pet_home_running" if self.service.running else "pet_home_paused")
-            if MEETING_REASON in self.service.pause_reasons:
-                state = translate("pet_home_paused_meeting", "paused for a meeting")
-            elif HIDDEN_REASON in self.service.pause_reasons:
-                state = translate("pet_home_paused_hidden", "paused while the home is hidden")
-            self.status.setText(translate("pet_home_status", "Day {day} · {time} · {coins} coins · {state}")
-                                .format(day=game_day(world.time_ms), time=self._time_text(world),
-                                        coins=world.ledger.coins, state=state))
+            return translate(key, "The home save could not be read. It has not been changed.")
+        if world is None:
+            return translate("pet_home_create_hint", "No home yet.")
+        state = translate("pet_home_running" if self.service.running else "pet_home_paused")
+        if MEETING_REASON in self.service.pause_reasons:
+            state = translate("pet_home_paused_meeting", "paused for a meeting")
+        elif HIDDEN_REASON in self.service.pause_reasons:
+            state = translate("pet_home_paused_hidden", "paused while the home is hidden")
+        return translate("pet_home_status", "Day {day} · {time} · {coins} coins · {state}").format(
+            day=game_day(world.time_ms), time=self._time_text(world), coins=world.ledger.coins, state=state)

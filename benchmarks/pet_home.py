@@ -155,6 +155,15 @@ def measure_long(residents: int, furniture: int) -> dict:
                                   "life_events": len(world.progress.events), "stats": len(world.progress.stats)}}
 
 
+def inside_repository(path: Path) -> Path:
+    """Results go somewhere under this checkout (normally docs/benchmarks/), never elsewhere."""
+    root = Path(__file__).resolve().parents[1]
+    resolved = path.resolve()
+    if not resolved.is_relative_to(root):
+        raise SystemExit(f"--output must be inside {root}")
+    return resolved
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--output", type=Path)
@@ -181,7 +190,7 @@ def main() -> int:
     report["investigate_memory_growth"] = report["long"]["memory_growth_percent"] > 10
     text = json.dumps(report, indent=2)
     if args.output:
-        args.output.write_text(text + "\n", encoding="utf-8")
+        inside_repository(args.output).write_text(text + "\n", encoding="utf-8")
     print(text)
     return 0 if all(report["within_budget"].values()) else 1
 
