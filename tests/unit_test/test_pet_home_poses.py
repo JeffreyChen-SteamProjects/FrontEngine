@@ -87,7 +87,8 @@ def test_builtin_renderers_have_the_home_poses_only_when_undressed(library):
     assert all(bare.has_action(pose) for pose in HOME_POSES)
     cap = {"id": "inkside-mochi-work-cap", "version": VERSION}
     dressed = catalog.prepare({"character": {"id": "inkside-mochi", "version": VERSION}, "equipped": {"head": cap}})
-    assert dressed.has_action("sit") and not dressed.has_action("write")
+    assert dressed.has_action("sit")
+    assert not dressed.has_action("write")
 
 
 def test_a_resident_wearing_an_older_builtin_is_upgraded_through_a_checked_change(tmp_path, library):
@@ -108,7 +109,8 @@ def test_a_resident_wearing_an_older_builtin_is_upgraded_through_a_checked_chang
         saved = profiles.get(record["id"])["appearance"]
         assert saved["character"] == {"id": "inkside-mochi", "version": VERSION}
         renderer = art.renderer(record["id"])
-        assert renderer is not None and renderer.has_action("garden")
+        assert renderer is not None
+        assert renderer.has_action("garden")
         assert service.sessions[record["id"]].appearance_renderer is renderer
     finally:
         service.shutdown()
@@ -129,4 +131,5 @@ def test_an_upgraded_recoloured_builtin_still_prepares(library):
     old = {"character": {"id": "inkside-mochi", "version": "1"}, "equipped": {},
            "colors": {"inkside-mochi@1": {"coat": "#00a080"}}, "variants": {}}
     renderer = catalog.prepare(upgrade_builtin(old))
-    assert renderer is not None and not renderer.has_action("write")      # recoloured: layered only
+    assert renderer is not None
+    assert not renderer.has_action("write")      # recoloured: layered only
