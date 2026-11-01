@@ -12,6 +12,7 @@ from frontengine.utils.pet_game.behaviour import (
     URGENT_ENERGY, URGENT_FULLNESS, cancel_activity, decide, greet_arrived, greet_completed, release,
     shared_completed, together,
 )
+from frontengine.utils.pet_game import goals
 from frontengine.utils.pet_game.resident import PROFESSION_TRAITS
 from frontengine.utils.pet_game.resident import Resident
 from frontengine.utils.pet_game.schedule import block_at, game_hour
@@ -56,6 +57,7 @@ def step(world: World) -> None:
             continue
         _apply_needs(world, resident)
         _act(world, resident)
+    goals.update(world)
 
 
 def _rates(world: World, resident: Resident) -> dict[str, int]:

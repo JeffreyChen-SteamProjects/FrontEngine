@@ -11,6 +11,7 @@ import re
 from collections import deque
 
 from frontengine.utils.pet_game.behaviour import cancel_activity, refusal, start
+from frontengine.utils.pet_game.goals import Progress
 from frontengine.utils.pet_game.catalog import (
     CELL_PIXELS, STARTER_COINS, STARTER_KIT, Catalog, FurnitureDefinition,
 )
@@ -24,7 +25,7 @@ from frontengine.utils.pet_game.rng import GameRandom
 from frontengine.utils.pet_game.schedule import TEMPLATES, initial_time
 
 FORMAT = "frontengine.pet-home"
-VERSION = 2              # 2: comfort and social needs, relationships
+VERSION = 3              # 2: comfort and social needs, relationships; 3: goals and progress
 RELATION_LIMIT = 100
 MODES = ("manage", "sandbox")
 MAX_RESIDENTS = 12
@@ -58,6 +59,7 @@ class World:
         self.dormant: list[dict] = []      # saved pieces whose content is not installed
         self.relations: dict[str, int] = {}  # "<uuid>|<uuid>" (sorted) -> -100..100
         self.social_ready: dict[str, int] = {}  # runtime cooldowns per pair
+        self.progress = Progress()
         self.events: deque[dict] = deque(maxlen=200)
         self.carry_ms = 0
 
@@ -71,7 +73,14 @@ class World:
         return identifier
 
     def emit(self, kind: str, **values: object) -> None:
+        """Publish an event and count it for goals (counters persist, the event queue does not)."""
         self.events.append({"kind": kind, "time": self.time_ms, **values})
+        self.progress.count(kind)
+        detail = values.get("activity") if kind == "completed" else values.get("recipe")
+        if kind in ("completed", "settled") and isinstance(detail, str):
+            self.progress.count(f"{kind}:{detail}")
+        if kind == "arrived" and isinstance(values.get("resident"), str):
+            self.progress.arrivals.setdefault(values["resident"], self.time_ms)
 
     def drain_events(self) -> list[dict]:
         events = list(self.events)
@@ -123,6 +132,8 @@ class World:
             return "accepted"
         result = self.ledger.apply(transaction, "buy:" + definition, -found.price,
                                    {furniture_item(definition): 1})
+        if result == "accepted":
+            self.emit("bought", definition=definition)
         return "insufficient_coins" if result == "insufficient" else result
 
     def sell(self, definition: str, transaction: str) -> str:
@@ -269,6 +280,8 @@ class World:
                 piece.owner = None
         for key in [key for key in self.relations if identifier in key.split("|")]:
             del self.relations[key]
+        self.progress.wishes.pop(identifier, None)
+        self.progress.arrivals.pop(identifier, None)
         del self.residents[identifier]
         return "accepted"
 
@@ -324,6 +337,7 @@ class World:
         if resident is None or routine not in TEMPLATES:
             return "unknown"
         resident.routine = routine
+        self.emit("routine_set", resident=identifier, routine=routine)
         return "accepted"
 
     # ----- work -------------------------------------------------------------------

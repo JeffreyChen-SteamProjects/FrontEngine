@@ -11,6 +11,7 @@ import json
 import re
 
 from frontengine.utils.pet_game.catalog import Catalog
+from frontengine.utils.pet_game.goals import Progress
 from frontengine.utils.pet_game.jobs import MAX_TASKS, Task
 from frontengine.utils.pet_game.layout import MAX_FURNITURE, Furniture, Zone, checked_int, placement_problem
 from frontengine.utils.pet_game.ledger import Ledger
@@ -21,7 +22,9 @@ from frontengine.utils.pet_game.world import (
 
 FIELDS_V1 = {"format", "version", "home", "mode", "time_ms", "rng", "next_id", "zones", "furniture",
              "residents", "tasks", "ledger", "flags", "dormant"}
-FIELDS = FIELDS_V1 | {"relations"}
+FIELDS_V2 = FIELDS_V1 | {"relations"}
+FIELDS = FIELDS_V2 | {"progress"}
+FIELDS_BY_VERSION = {1: FIELDS_V1, 2: FIELDS_V2, 3: FIELDS}
 _PAIR = re.compile(r"[0-9a-f]{32}\|[0-9a-f]{32}")
 MAX_TIME_MS = 10 ** 13
 MAX_DORMANT = 200
@@ -43,6 +46,7 @@ def to_dict(world: World) -> dict:
         "ledger": world.ledger.to_dict(), "flags": sorted(world.flags),
         "dormant": [dict(item) for item in world.dormant],
         "relations": dict(sorted(world.relations.items())),
+        "progress": world.progress.to_dict(),
     }
 
 
@@ -62,7 +66,7 @@ def check_header(data: object) -> None:
         raise ValueError("Invalid home save version")
     if version > VERSION:
         raise NewerSaveError(f"Home save version {version} is newer than supported {VERSION}")
-    if set(data) != (FIELDS_V1 if version == 1 else FIELDS):
+    if set(data) != FIELDS_BY_VERSION[version]:
         raise ValueError("Invalid home save fields")
 
 
@@ -139,6 +143,13 @@ def from_dict(data: object, catalog: Catalog) -> World:
     if len(world.dormant) > MAX_DORMANT:
         raise ValueError("Too many unavailable records")
     world.relations = _checked_relations(data.get("relations", {}), world)
+    world.progress = Progress.from_dict(data["progress"]) if "progress" in data else Progress()
+    for identifier in world.residents:              # homes saved before version 3 start counting now
+        world.progress.arrivals.setdefault(identifier, world.time_ms)
+    world.progress.arrivals = {key: value for key, value in world.progress.arrivals.items()
+                               if key in world.residents}
+    world.progress.wishes = {key: value for key, value in world.progress.wishes.items()
+                             if key in world.residents}
     _check_references(world)
     return world
 

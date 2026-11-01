@@ -4,6 +4,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from frontengine.utils.multi_language.retranslate import translate
+from frontengine.utils.pet_game.catalog import FURNITURE_PREFIX
 from frontengine.utils.pet_game.resident import Resident
 
 if TYPE_CHECKING:
@@ -73,9 +74,27 @@ def friends_text(world: World, resident: Resident) -> str:
     return translate("pet_home_friends", "Friends: {names}").format(names=", ".join(parts))
 
 
+def item_label(world: World, name: str) -> str:
+    """Display name of a stack: an item, or furniture kept in storage."""
+    if name.startswith(FURNITURE_PREFIX):
+        definition = world.catalog.furniture.get(name.removeprefix(FURNITURE_PREFIX))
+        return translate(definition.label_key, definition.fallback) if definition else name
+    item = world.catalog.items.get(name)
+    return translate(item.label_key, item.fallback) if item else name
+
+
+def wish_text(world: World, resident: Resident) -> str:
+    """What the resident would love right now, worded with how to make it happen."""
+    wish = world.progress.wishes.get(resident.identifier, {}).get("wish")
+    if not wish:
+        return ""
+    return translate("pet_home_wish", "Wishes for: {wish}").format(
+        wish=translate("pet_game_wish_" + wish, wish))
+
+
 def card_text(resident: Resident, world: World | None = None) -> str:
     needs = " · ".join(f"{translate(key, fallback)} {resident.needs[need]}" for need, key, fallback in NEED_KEYS)
     lines = [resident.name, activity_text(resident, world), needs, traits_text(resident)]
     if world is not None:
-        lines.append(friends_text(world, resident))
+        lines += [friends_text(world, resident), wish_text(world, resident)]
     return "\n".join(line for line in lines if line)
