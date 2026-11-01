@@ -58,6 +58,9 @@ class ExtendSystemTray(QSystemTrayIcon):
 
     def _create_actions(self) -> None:
         """建立系統匣選單動作 / Create system tray menu actions"""
+        open_home = getattr(self.main_window, "_open_pet_home", None)
+        if open_home is not None:
+            self.open_pet_home_action = self._add_action("pet_home_open", "Open Pet home", open_home)
         self.hide_main_window_action = self._add_action(
             "tray_hide_window", "Hide window", self.main_window.hide)
         self.maximized_main_window_action = self._add_action(

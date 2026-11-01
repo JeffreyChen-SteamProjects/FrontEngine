@@ -113,7 +113,8 @@ closeEvent() | close() → _shutdown() (runs once) → flush pet profiles → pe
 - **New overlay kind**: see the full checklist in `architecture_explore.md` §7. In short:
   - `show/<kind>/` (`BaseWidget` + `draw_content()`);
   - a page in `ui/page/<kind>/` (`SettingPage`, `get_state()` / `set_state()`);
-  - `main_ui._add_tabs()` and the control-center registration;
+  - `main_ui._add_tabs()`, the control-center registration and an entry in `ui/menu/features_menu.py`
+    `CATEGORIES` (`test_features_menu.py` checks every page is reachable);
   - keys in every language dictionary and a page in every docs tree;
   - an `__init__.py` in each new folder.
 - **Scene kinds**: `show/overlay_factory.py` plus `ui/page/scene_setting/scene_page/registry.py`.
