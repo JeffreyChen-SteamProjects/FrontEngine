@@ -463,6 +463,7 @@ class PetHomePage(SettingPage):
         for zone in [key for key in zones if key not in {strip.zone for strip in self.strip_list}]:
             strip = HomeStrip(self.service, zone, self.layer, str(user_setting_dict.get("quality_tier", "")))
             strip.open_requested.connect(self.open_requested.emit)
+            strip.action_requested.connect(self.strip_action)
             strip.arrange_finished.connect(self._strip_done_arranging)
             strip.layer_requested.connect(self.choose_layer)
             strip.resident_selected.connect(self.select_resident)
@@ -629,6 +630,38 @@ class PetHomePage(SettingPage):
         self.residents.refresh_live()
         self.work.refresh_live()
         self.view.update()
+        self._follow()
+
+    def strip_action(self, action: str, target: str) -> None:
+        """The desktop strip's toolbar and right-click menus: arranging stays on the desktop, the rest opens here."""
+        if action in ("arrange", "move"):
+            if action == "move":
+                self.select_furniture(target)
+            if not self.layout_panel.arranging:
+                self.layout_panel.toggle_arrange()
+            return
+        self.open_requested.emit()
+        if action == "tab":
+            self.tabs.select(target)
+            return
+        self.select_resident(target)
+        if action == "wardrobe":
+            self.residents.wardrobe()
+        elif action == "work":
+            self.tabs.select("pet_home_work_section")
+        elif action == "follow":
+            self.followed = target
+            self._follow()
+
+    def _follow(self) -> None:
+        """Keep the followed pet in view while the overview is zoomed in; it stops when the pet leaves the zone."""
+        world, identifier = self.service.world, getattr(self, "followed", None)
+        resident = world.residents.get(identifier) if world is not None and identifier else None
+        if resident is None or resident.zone != self.zone:
+            self.followed = None
+            return
+        center = self.view.resident_center(resident)
+        self.view_area.ensureVisible(round(center.x()), round(center.y()), self.view_area.width() // 3, 0)
 
     @staticmethod
     def _time_text(world) -> str:

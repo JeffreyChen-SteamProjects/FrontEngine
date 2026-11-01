@@ -20,6 +20,7 @@ from frontengine.utils.pet_game.layout import (
     AREA_TAGS, MAX_FURNITURE, MAX_ZONE_CELLS, MIN_ZONE_CELLS, THEMES, Furniture, Zone, can_climb,
     has_steps, placement_problem,
 )
+from frontengine.utils.pet_companion.stats import MAX_AFFECTION
 from frontengine.utils.pet_game.ledger import Ledger
 from frontengine.utils.pet_game.resident import Resident, resident_from_profile
 from frontengine.utils.pet_game.rng import GameRandom
@@ -32,6 +33,10 @@ MODES = ("manage", "sandbox")
 MAX_RESIDENTS = 12
 MAX_ZONES = 8
 COMMANDS = ("sleep", "eat", "play", "relax", "work", "stop")
+# The player's own care: a small, immediate lift with a cooldown per pet and kind, so it never farms.
+INTERACTIONS = {"feed": {"fullness": 15, "mood": 3}, "pat": {"mood": 8, "social": 5},
+                "talk": {"social": 12, "mood": 3}}
+INTERACT_COOLDOWN_MS = 30_000
 _HOME = re.compile(r"[0-9a-f]{32}")
 
 
@@ -58,6 +63,7 @@ class World:
         self.automatic = True
         self.offline_zones: set[str] = set()     # zones whose screen is disconnected (runtime only)
         self._offline_parked: set[str] = set()
+        self._interacted: dict[tuple[str, str], int] = {}     # (resident, kind) -> game time, runtime only
         self.residents: dict[str, Resident] = {}
         self.tasks: dict[str, Task] = {}
         self.ledger = Ledger()
@@ -447,6 +453,24 @@ class World:
         self.progress.wishes.pop(identifier, None)
         self.progress.arrivals.pop(identifier, None)
         del self.residents[identifier]
+        return "accepted"
+
+    def interact(self, identifier: str, kind: str) -> str:
+        """Feed, pat or talk to a pet; it never interrupts what the pet is doing."""
+        resident = self.residents.get(identifier)
+        if resident is None or kind not in INTERACTIONS:
+            return "unknown"
+        if resident.parked or resident.away:
+            return "parked"
+        last = self._interacted.get((identifier, kind))
+        if last is not None and self.time_ms - last < INTERACT_COOLDOWN_MS:
+            return "too_soon"
+        self._interacted[(identifier, kind)] = self.time_ms
+        for need, change in INTERACTIONS[kind].items():
+            resident.needs[need] = max(0, min(100, resident.needs[need] + change))
+        if kind == "pat":
+            resident.affection = min(MAX_AFFECTION, resident.affection + 1)
+        self.emit("interacted", resident=identifier, interaction=kind)
         return "accepted"
 
     def command(self, identifier: str, command: str) -> str:

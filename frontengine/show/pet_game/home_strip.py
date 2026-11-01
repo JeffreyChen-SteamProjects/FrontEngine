@@ -17,16 +17,17 @@ from PySide6.QtCore import QPoint, QPointF, QRect, QRectF, Qt, QTimer, Signal
 from PySide6.QtGui import (
     QCloseEvent, QColor, QGuiApplication, QHideEvent, QMouseEvent, QPainter, QPen, QRegion, QShowEvent,
 )
-from PySide6.QtWidgets import QMenu, QToolButton, QToolTip
+from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QMenu, QToolButton, QToolTip
 
-from frontengine.show.pet_game.captions import card_text
+from frontengine.show.pet_game.captions import card_text, result_text
 from frontengine.show.pet_game.home_service import HomeService
 from frontengine.show.pet_game.home_view import HomeView
 from frontengine.show.pet_game.themes import floor_color, glyph
 from frontengine.utils.multi_language.retranslate import translate
 from frontengine.utils.pet_game.catalog import CELL_PIXELS
 from frontengine.utils.pet_game.simulation import STEP_MS
-from frontengine.utils.pet_game.world import COMMANDS
+from frontengine.user_setting.user_setting_file import user_setting_dict
+from frontengine.utils.pet_game.world import COMMANDS, INTERACTIONS
 from frontengine.utils.power_mode.power_mode import normalize_tier
 
 STRIP_HEIGHT = 150
@@ -36,6 +37,15 @@ DRAG_START_PX = 6
 LAYERS = ("top", "bottom")
 HOME_MODES = ("normal", "focus", "meeting", "saver")
 HIDDEN_REASON = "hidden"
+TOOLBAR_OPEN_KEY = "pet_home_toolbar_open"
+TOOLBAR_DOCK_KEY = "pet_home_toolbar_dock"
+DOCKS = ("left", "right")
+TOOLBAR = (("pet_home_toolbar_arrange", "Arrange", "arrange", ""),
+           ("pet_home_toolbar_residents", "Residents", "tab", "pet_home_residents_section"),
+           ("pet_home_toolbar_work", "Work", "tab", "pet_home_work_section"))
+RESIDENT_ACTIONS = (("wardrobe", "pet_home_wardrobe", "Wardrobe…"),
+                    ("work", "pet_home_work_for_pet", "Work for this pet…"),
+                    ("follow", "pet_home_follow", "Follow in the overview"))
 
 
 def strip_flags(layer: str) -> Qt.WindowType:
@@ -49,6 +59,7 @@ class HomeStrip(HomeView):
 
     caption_backdrop = True
     open_requested = Signal()
+    action_requested = Signal(str, str)    # (action, pet or piece): wardrobe, work, follow, move, tab, arrange
     layer_requested = Signal(str)
     mode_requested = Signal(str)
     quiet = False                          # focus mode: no bubbles and no cards
@@ -75,8 +86,11 @@ class HomeStrip(HomeView):
         self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.setWindowTitle(translate("tab_pet_home_text", "Pet home"))
         self.setFixedHeight(STRIP_HEIGHT)
+        self.chosen: str | None = None        # the pet last clicked here, shown in the toolbar
         self.button = self._home_button()
+        self.toolbar = self._toolbar()
         self.done_button = self._done_button()
+        self.place_toolbar()
         self.frame_timer = QTimer(self)
         self.frame_timer.timeout.connect(self.update)
         self.set_quality_tier(tier)
@@ -132,7 +146,8 @@ class HomeStrip(HomeView):
         text = "⌂ " + glyph(world.home, world.time_ms)
         if self.button.text() != text:
             self.button.setText(text)
-            self.button.adjustSize()          # the glyph widens the button; never elide it
+            self.place_toolbar()              # the glyph widens the button; never elide it
+        self.refresh_info()
         self.update_mask()
 
     def resident_x_milli(self, resident) -> float:
@@ -187,6 +202,7 @@ class HomeStrip(HomeView):
         if self.arranging:
             return QRegion(self.rect())
         region = QRegion(self.button.geometry().adjusted(-2, -2, 2, 2))
+        region = region.united(QRegion(self.toolbar.geometry().adjusted(-2, -2, 2, 2)))
         world = self.service.world
         if world is None:
             return region
@@ -208,9 +224,8 @@ class HomeStrip(HomeView):
     def set_arranging(self, arranging: bool) -> None:
         self.arranging = arranging
         self.done_button.setText("✓ " + translate("pet_home_arrange_done", "Done arranging"))
-        self.done_button.adjustSize()
-        self.done_button.move(self.button.geometry().right() + 6, 2)
         self.done_button.setVisible(arranging)
+        self.place_toolbar()
         self.update_mask()
         self.update()
 
@@ -253,8 +268,90 @@ class HomeStrip(HomeView):
         button.setMenu(QMenu(button))
         button.menu().aboutToShow.connect(self._fill_home_menu)
         button.adjustSize()
-        button.move(2, 2)
         return button
+
+    def _toolbar(self) -> QFrame:
+        """Beside ⌂: a toggle that opens shortcuts and, while open, coins, the chosen pet and the jobs."""
+        bar = QFrame(self)
+        bar.setStyleSheet("QFrame { background: rgba(0,0,0,150); border-radius: 6px; }"
+                          " QToolButton, QLabel { color: white; font-size: 12px; padding: 2px 6px; }")
+        row = QHBoxLayout(bar)
+        row.setContentsMargins(2, 0, 2, 0)
+        row.setSpacing(2)
+        self.toggle = QToolButton(bar)
+        self.toggle.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.toggle.clicked.connect(lambda: self.set_toolbar_open(not self.toolbar_open))
+        row.addWidget(self.toggle)
+        self.shortcut_buttons = []
+        for key, fallback, action, target in TOOLBAR:
+            button = QToolButton(bar)
+            button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+            button.setText(translate(key, fallback))
+            button.clicked.connect(lambda _checked=False, a=action, t=target: self.action_requested.emit(a, t))
+            row.addWidget(button)
+            self.shortcut_buttons.append(button)
+        self.info = QLabel(bar)
+        row.addWidget(self.info)
+        return bar
+
+    @property
+    def toolbar_open(self) -> bool:
+        return bool(user_setting_dict.get(TOOLBAR_OPEN_KEY, False))
+
+    @property
+    def dock(self) -> str:
+        dock = user_setting_dict.get(TOOLBAR_DOCK_KEY, "left")
+        return dock if dock in DOCKS else "left"
+
+    def set_toolbar_open(self, opened: bool) -> None:
+        user_setting_dict[TOOLBAR_OPEN_KEY] = bool(opened)
+        self.place_toolbar()
+
+    def set_dock(self, dock: str) -> None:
+        if dock in DOCKS:
+            user_setting_dict[TOOLBAR_DOCK_KEY] = dock
+            self.place_toolbar()
+
+    def place_toolbar(self) -> None:
+        """⌂ and the toolbar sit at the top of the strip, on the remembered side, clear of the taskbar."""
+        opened = self.toolbar_open
+        self.toggle.setText(("‹" if self.dock == "left" else "›") if opened else ("›" if self.dock == "left" else "‹"))
+        for widget in (*self.shortcut_buttons, self.info):
+            widget.setVisible(opened)
+        self.refresh_info()
+        self.toolbar.adjustSize()
+        self.button.adjustSize()
+        if self.dock == "left":
+            self.button.move(2, 2)
+            self.toolbar.move(self.button.geometry().right() + 4, 2)
+            edge = self.toolbar.geometry().right()
+        else:
+            self.button.move(self.width() - self.button.width() - 2, 2)
+            self.toolbar.move(self.button.x() - self.toolbar.width() - 4, 2)
+            edge = self.toolbar.x() - 6
+        if hasattr(self, "done_button"):
+            self.done_button.adjustSize()
+            self.done_button.move(edge + 6 if self.dock == "left" else edge - self.done_button.width(), 2)
+        self.update_mask()
+
+    def refresh_info(self) -> None:
+        world = self.service.world
+        if world is None or not self.toolbar_open:
+            return
+        parts = [translate("pet_home_toolbar_coins", "{coins} coins").format(coins=world.ledger.coins)]
+        selected = world.residents.get(self.chosen or "")
+        if selected is not None:
+            parts.append(selected.name)
+        jobs = sum(1 for task in world.tasks.values() if task.open)
+        parts.append(translate("pet_home_toolbar_jobs", "{count} jobs").format(count=jobs))
+        text = " · ".join(parts)
+        if self.info.text() != text:
+            self.info.setText(text)
+            self.toolbar.adjustSize()
+
+    def resizeEvent(self, event) -> None:
+        super().resizeEvent(event)
+        self.place_toolbar()
 
     def _done_button(self) -> QToolButton:
         """Shown only while arranging: the strip never takes focus, so Esc cannot reach it."""
@@ -278,6 +375,9 @@ class HomeStrip(HomeView):
         other = "bottom" if self.layer == "top" else "top"
         menu.addAction(translate("pet_home_layer_to_" + other, "Move below windows" if other == "bottom"
                                  else "Move above windows"), lambda: self.layer_requested.emit(other))
+        other_dock = "right" if self.dock == "left" else "left"
+        menu.addAction(translate("pet_home_dock_" + other_dock, "Move the toolbar to the " + other_dock),
+                       lambda: self.set_dock(other_dock))
         modes = menu.addMenu(translate("pet_home_mode", "Mode"))
         for mode in HOME_MODES:
             modes.addAction(translate("pet_home_mode_" + mode, mode), lambda m=mode: self.mode_requested.emit(m))
@@ -334,6 +434,8 @@ class HomeStrip(HomeView):
             self._after[identifier] = self._before[identifier] = self.service.world.residents[identifier].x_milli
             self.update_mask()
             return
+        self.chosen = identifier
+        self.refresh_info()
         self.resident_selected.emit(identifier)
         self.show_card(identifier, event.globalPosition().toPoint())
 
@@ -347,17 +449,44 @@ class HomeStrip(HomeView):
     def _context_menu(self, resident: str | None, piece: str | None, where: QPoint) -> None:
         menu = QMenu(self)
         if resident is not None:
-            for command in COMMANDS:
-                menu.addAction(translate("pet_home_cmd_" + command, command.title()),
-                               lambda c=command: self.service.run(lambda world: world.command(resident, c)))
-            menu.addSeparator()
+            self._resident_menu(menu, resident)
         elif piece is not None:
-            menu.addAction(translate("pet_home_store", "Put away"),
-                           lambda: self.service.run(lambda world: world.store(piece)))
-            menu.addSeparator()
+            self._piece_menu(menu, piece)
+        menu.addSeparator()
         menu.addAction(translate("pet_home_open", "Open Pet home"), self.open_requested.emit)
         self.last_menu = menu
         menu.popup(where)
+
+    def _resident_menu(self, menu: QMenu, resident: str) -> None:
+        """Care first (feed, pat, talk), then what to ask, then the wardrobe, work and the camera."""
+        for kind in INTERACTIONS:
+            menu.addAction(translate("pet_home_interact_" + kind, kind.title()),
+                           lambda k=kind: self._interact(resident, k))
+        ask = menu.addMenu(translate("pet_home_ask", "Ask to"))
+        for command in COMMANDS:
+            ask.addAction(translate("pet_home_cmd_" + command, command.title()),
+                          lambda c=command: self.service.run(lambda world: world.command(resident, c)))
+        menu.addSeparator()
+        for action, key, fallback in RESIDENT_ACTIONS:
+            menu.addAction(translate(key, fallback), lambda a=action: self.action_requested.emit(a, resident))
+
+    def _interact(self, resident: str, kind: str) -> None:
+        result = self.service.run(lambda world: world.interact(resident, kind))
+        if result != "accepted":
+            self.bubbles[resident] = (result_text(result), self._clock() + BUBBLE_SECONDS)
+
+    def _piece_menu(self, menu: QMenu, piece: str) -> None:
+        """Who is using it and what it is for (as plain lines), then move or put away."""
+        world = self.service.world
+        found = world.furniture.get(piece)
+        if found is None:
+            return
+        for line in piece_lines(world, found):
+            menu.addAction(line).setEnabled(False)
+        menu.addSeparator()
+        menu.addAction(translate("pet_home_move_piece", "Move"), lambda: self.action_requested.emit("move", piece))
+        menu.addAction(translate("pet_home_store", "Put away"),
+                       lambda: self.service.run(lambda world: world.store(piece)))
 
     # ----- lifecycle ---------------------------------------------------------------------------
 
@@ -384,6 +513,25 @@ class HomeStrip(HomeView):
         super().closeEvent(event)
         self.closed.emit()
 
+def piece_lines(world, piece) -> list[str]:
+    """What a piece is for and who is using it, for its right-click menu."""
+    definition = world.definition(piece)
+    lines = [translate(definition.label_key, definition.fallback)]
+    if definition.profession is not None:
+        use = translate("pet_home_profession_" + definition.profession, definition.profession)
+    elif definition.activity is not None:
+        use = translate("pet_home_cmd_" + definition.activity, definition.activity)
+    else:
+        use = translate("pet_home_piece_decoration", "Decoration")
+    lines.append(translate("pet_home_piece_use", "For: {use}").format(use=use))
+    users = sorted(world.residents[r].name for r in piece.users.values() if r in world.residents)
+    lines.append(translate("pet_home_piece_users", "Used by: {names}").format(names=", ".join(users)) if users
+                 else translate("pet_home_piece_free", "Nobody is using it"))
+    if piece.owner in world.residents:
+        lines.append(translate("pet_home_piece_owner", "{name}'s bed").format(name=world.residents[piece.owner].name))
+    return lines
+
+
 def bubble_text(event: dict) -> str:
     """Bubble wording for a world event, or nothing for events that need no bubble."""
     kind = event.get("kind")
@@ -391,6 +539,8 @@ def bubble_text(event: dict) -> str:
         return translate("pet_home_activity_" + event["activity"], event["activity"])
     if kind == "greeted":
         return translate("pet_home_bubble_hello", "Hi!")
+    if kind == "interacted":
+        return translate("pet_home_bubble_" + event["interaction"], "♥")
     if kind == "squabble":
         return translate("pet_home_bubble_squabble", "Hmph!")
     if kind == "settled" and event.get("coins"):
