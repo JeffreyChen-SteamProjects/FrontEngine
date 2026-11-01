@@ -87,3 +87,23 @@ def test_the_main_window_theme_reaches_self_painted_widgets():
         assert build_palette("light").color(QPalette.ColorRole.Mid).name().lower() == LIGHT["border"].lower()
     finally:
         QGuiApplication.setPalette(before)
+
+
+def test_no_page_paints_a_white_platform_background_in_the_dark_theme(make_main_window):
+    """Every page drawn in the dark theme stays dark apart from its text and art (R5 sweep)."""
+    before = QGuiApplication.palette()
+    window = make_main_window({"language": "English", "theme": "dark"})
+    window.startup_setting()
+    window.showNormal()
+    window.resize(1280, 800)
+    try:
+        for index in range(window.page_stack.count()):
+            window.sidebar.select_page(index)
+            QCoreApplication.processEvents()
+            image = window.page_stack.grab().toImage()
+            samples = [image.pixelColor(x, y).lightness() for y in range(0, image.height(), 8)
+                       for x in range(0, image.width(), 8)]
+            bright = sum(1 for value in samples if value > 200) / len(samples)
+            assert bright < 0.05, (type(window.page_stack.widget(index)).__name__, bright)
+    finally:
+        QGuiApplication.setPalette(before)
