@@ -13,7 +13,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt
 
-from frontengine.show.pet_game.captions import activity_text
+from frontengine.show.pet_game.captions import NEED_KEYS, activity_text, friends_text, traits_text
 from frontengine.utils.multi_language.retranslate import retranslator, translate, tr
 from frontengine.utils.pet_game.catalog import FURNITURE_PREFIX
 from frontengine.utils.pet_game.schedule import TEMPLATES
@@ -54,13 +54,14 @@ class ResidentPanel:
         self.activity.setWordWrap(True)
         section.add_widget(self.activity)
         self.bars = {}
-        for need, key, fallback in (("energy", "pet_home_energy", "Energy"),
-                                    ("fullness", "pet_home_fullness", "Fullness"),
-                                    ("mood", "pet_home_mood", "Mood")):
+        for need, key, fallback in NEED_KEYS:
             bar = QProgressBar()
             bar.setRange(0, 100)
             self.bars[need] = bar
             section.add_row(key, bar, fallback)
+        self.character = QLabel()
+        self.character.setWordWrap(True)
+        section.add_widget(self.character)
         self.routine = QComboBox()
         self.routine.activated.connect(self._routine_chosen)
         section.add_row("pet_home_routine", self.routine, "Routine")
@@ -97,10 +98,13 @@ class ResidentPanel:
             control.setEnabled(resident is not None)
         if resident is None:
             self.activity.setText(translate("pet_home_pick_resident", "Pick a resident to see what it is doing."))
+            self.character.setText("")
             return
         for need, bar in self.bars.items():
             bar.setValue(resident.needs[need])
-        self.activity.setText(activity_text(resident))
+        self.activity.setText(activity_text(resident, world))
+        self.character.setText("\n".join(line for line in (traits_text(resident), friends_text(world, resident))
+                                          if line))
         index = self.routine.findData(resident.routine)
         if index != self.routine.currentIndex():
             self.routine.setCurrentIndex(index)

@@ -9,7 +9,8 @@ import re
 from dataclasses import dataclass, field
 
 CELL_PIXELS = 32          # one layout grid cell in logical pixels
-NEEDS = ("energy", "fullness", "mood")
+NEEDS = ("energy", "fullness", "mood", "comfort", "social")
+LEGACY_NEEDS = ("energy", "fullness", "mood")     # homes saved before version 2
 ACTIVITIES = ("sleep", "eat", "work", "play", "relax")
 CATEGORIES = ("bed", "table", "workstation", "leisure", "decoration")
 PROFESSIONS = ("writing", "crafting", "gardening")
@@ -213,20 +214,20 @@ class Catalog:
 def _furniture() -> list[FurnitureDefinition]:
     return [
         FurnitureDefinition("bed_basic", "pet_game_bed_basic", "Simple bed", "bed", 4, True, (1,),
-                            "sleep", {"energy": 30}, essential=True),
+                            "sleep", {"energy": 30, "comfort": 20}, essential=True),
         FurnitureDefinition("table_basic", "pet_game_table_basic", "Dining table", "table", 4, True,
-                            (0, 3), "eat", {"fullness": 60}, essential=True),
+                            (0, 3), "eat", {"fullness": 60, "comfort": 5}, essential=True),
         FurnitureDefinition("desk_basic", "pet_game_desk_basic", "Writing desk", "workstation", 3, True,
                             (1,), "work", essential=True, profession="writing"),
         FurnitureDefinition("plant_pot", "pet_game_plant_pot", "Potted plant", "decoration", 1, False,
                             price=15, sell_back=7, comfort=2),
-        FurnitureDefinition("toy_box", "pet_game_toy_box", "Toy box", "leisure", 2, True, (0,), "play",
+        FurnitureDefinition("toy_box", "pet_game_toy_box", "Toy box", "leisure", 2, True, (0, 1), "play",
                             {"mood": 20, "energy": -4}, price=40, sell_back=20, use_ms=(30000, 45000)),
         FurnitureDefinition("armchair", "pet_game_armchair", "Armchair", "leisure", 2, True, (0,), "relax",
-                            {"mood": 10, "energy": 6}, price=60, sell_back=30, comfort=1,
+                            {"mood": 10, "energy": 6, "comfort": 20}, price=60, sell_back=30, comfort=1,
                             use_ms=(40000, 60000)),
         FurnitureDefinition("bed_cozy", "pet_game_bed_cozy", "Cozy bed", "bed", 4, True, (1,), "sleep",
-                            {"energy": 45, "mood": 2}, price=120, sell_back=60, comfort=2),
+                            {"energy": 45, "mood": 2, "comfort": 30}, price=120, sell_back=60, comfort=2),
         FurnitureDefinition("wall_lamp", "pet_game_wall_lamp", "Wall lamp", "decoration", 1, False,
                             price=25, sell_back=12, comfort=3),
         FurnitureDefinition("planter", "pet_game_planter", "Planter", "workstation", 2, True, (0,), "work",
@@ -234,7 +235,7 @@ def _furniture() -> list[FurnitureDefinition]:
         FurnitureDefinition("workbench", "pet_game_workbench", "Workbench", "workstation", 3, True, (1,), "work",
                             price=220, sell_back=110, profession="crafting"),
         FurnitureDefinition("stool", "pet_game_stool", "Wooden stool", "leisure", 1, True, (0,), "relax",
-                            {"mood": 6, "energy": 4}, price=45, sell_back=20, use_ms=(30000, 45000)),
+                            {"mood": 6, "energy": 4, "comfort": 10}, price=45, sell_back=20, use_ms=(30000, 45000)),
     ]
 
 

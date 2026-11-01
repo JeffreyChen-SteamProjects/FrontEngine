@@ -8,6 +8,7 @@ content restores the original layout instead of losing it.
 from __future__ import annotations
 
 import json
+import re
 
 from frontengine.utils.pet_game.catalog import Catalog
 from frontengine.utils.pet_game.jobs import MAX_TASKS, Task
@@ -18,8 +19,10 @@ from frontengine.utils.pet_game.world import (
     FORMAT, MAX_RESIDENTS, MAX_ZONES, MODES, VERSION, World, furniture_item,
 )
 
-FIELDS = {"format", "version", "home", "mode", "time_ms", "rng", "next_id", "zones", "furniture",
-          "residents", "tasks", "ledger", "flags", "dormant"}
+FIELDS_V1 = {"format", "version", "home", "mode", "time_ms", "rng", "next_id", "zones", "furniture",
+             "residents", "tasks", "ledger", "flags", "dormant"}
+FIELDS = FIELDS_V1 | {"relations"}
+_PAIR = re.compile(r"[0-9a-f]{32}\|[0-9a-f]{32}")
 MAX_TIME_MS = 10 ** 13
 MAX_DORMANT = 200
 _FLAGS = 64
@@ -39,6 +42,7 @@ def to_dict(world: World) -> dict:
         "tasks": [_saved_task(task) for task in world.tasks.values()],
         "ledger": world.ledger.to_dict(), "flags": sorted(world.flags),
         "dormant": [dict(item) for item in world.dormant],
+        "relations": dict(sorted(world.relations.items())),
     }
 
 
@@ -58,7 +62,7 @@ def check_header(data: object) -> None:
         raise ValueError("Invalid home save version")
     if version > VERSION:
         raise NewerSaveError(f"Home save version {version} is newer than supported {VERSION}")
-    if set(data) != FIELDS:
+    if set(data) != (FIELDS_V1 if version == 1 else FIELDS):
         raise ValueError("Invalid home save fields")
 
 
@@ -134,8 +138,22 @@ def from_dict(data: object, catalog: Catalog) -> World:
     world.dormant = dormant_pieces + dormant_tasks
     if len(world.dormant) > MAX_DORMANT:
         raise ValueError("Too many unavailable records")
+    world.relations = _checked_relations(data.get("relations", {}), world)
     _check_references(world)
     return world
+
+
+def _checked_relations(value: object, world: World) -> dict[str, int]:
+    """Pairs of residents still living here; anything malformed rejects the save."""
+    if not isinstance(value, dict) or len(value) > 200:
+        raise ValueError("Invalid relationships")
+    relations = {}
+    for key, amount in value.items():
+        if not isinstance(key, str) or not _PAIR.fullmatch(key) or key != world.pair(*key.split("|")):
+            raise ValueError("Invalid relationship pair")
+        relations[key] = checked_int(amount, -100, 100, "relationship")
+    return {key: amount for key, amount in relations.items()
+            if all(member in world.residents for member in key.split("|"))}
 
 
 def _saved_dormant(items: list) -> dict[str, list]:

@@ -15,7 +15,7 @@ from typing import Callable
 
 from PySide6.QtCore import QPoint, QPointF, QRect, QRectF, Qt, QTimer, Signal
 from PySide6.QtGui import (
-    QCloseEvent, QColor, QGuiApplication, QHideEvent, QMouseEvent, QPen, QRegion, QShowEvent,
+    QCloseEvent, QColor, QGuiApplication, QHideEvent, QMouseEvent, QPainter, QPen, QRegion, QShowEvent,
 )
 from PySide6.QtWidgets import QMenu, QToolButton, QToolTip
 
@@ -29,6 +29,7 @@ from frontengine.utils.pet_game.world import COMMANDS
 from frontengine.utils.power_mode.power_mode import normalize_tier
 
 STRIP_HEIGHT = 150
+BUBBLE_SECONDS = 3.0
 FRAME_MS = {"high": 16, "balanced": 33, "saver": 66}
 DRAG_START_PX = 6
 LAYERS = ("top", "bottom")
@@ -73,7 +74,9 @@ class HomeStrip(HomeView):
         self.frame_timer = QTimer(self)
         self.frame_timer.timeout.connect(self.update)
         self.set_quality_tier(tier)
+        self.bubbles: dict[str, tuple[str, float]] = {}     # resident -> (text, shown until)
         service.ticked.connect(self._stepped)
+        service.events_ready.connect(self._events)
         self.set_world(service.world, zone)
         self.place_on_screen()
         self._stepped()
@@ -130,6 +133,39 @@ class HomeStrip(HomeView):
         share = min(1.0, max(0.0, (self._clock() - self._stepped_at) * 1000 / STEP_MS))
         return start + (end - start) * share
 
+    # ----- speech bubbles -----------------------------------------------------------------
+
+    def _events(self, events: list) -> None:
+        """Short bubbles say what a pet just started, who it greeted, or what it earned."""
+        for event in events:
+            text = bubble_text(event)
+            if text and event.get("resident") in self.service.world.residents:
+                self.bubbles[event["resident"]] = (text, self._clock() + BUBBLE_SECONDS)
+
+    def bubble_rect(self, resident) -> QRectF | None:
+        bubble = self.bubbles.get(resident.identifier)
+        if bubble is None or bubble[1] < self._clock():
+            return None
+        width = self.fontMetrics().horizontalAdvance(bubble[0]) + 14
+        caption = self.caption_rect(resident)
+        return QRectF(caption.center().x() - width / 2, caption.top() - 24, width, 20)
+
+    def paintEvent(self, event) -> None:
+        super().paintEvent(event)
+        if self.service.world is None:
+            return
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        for resident in self.service.world.residents.values():
+            rect = self.bubble_rect(resident) if resident.zone == self.zone else None
+            if rect is not None:
+                painter.setPen(QPen(QColor(60, 60, 60), 1))
+                painter.setBrush(QColor(255, 255, 255, 235))
+                painter.drawRoundedRect(rect, 8, 8)
+                painter.setPen(QColor(30, 30, 30))
+                painter.drawText(rect, Qt.AlignmentFlag.AlignCenter, self.bubbles[resident.identifier][0])
+        painter.end()
+
     # ----- input region ------------------------------------------------------------------
 
     def interactive_region(self) -> QRegion:
@@ -146,6 +182,9 @@ class HomeStrip(HomeView):
         for resident in world.residents.values():
             if resident.zone == self.zone:
                 box = self.caption_rect(resident).united(self._resident_box(resident))
+                bubble = self.bubble_rect(resident)
+                if bubble is not None:                     # painting is clipped to the mask too
+                    box = box.united(bubble)
                 region = region.united(box.toAlignedRect().adjusted(-reach, 0, reach, 0))
         return region
 
@@ -272,7 +311,7 @@ class HomeStrip(HomeView):
         resident = self.service.world.residents.get(identifier)
         if resident is None:
             return
-        QToolTip.showText(where, card_text(resident), self, QRect(), 6000)
+        QToolTip.showText(where, card_text(resident, self.service.world), self, QRect(), 6000)
 
     def _context_menu(self, resident: str | None, piece: str | None, where: QPoint) -> None:
         menu = QMenu(self)
@@ -305,11 +344,24 @@ class HomeStrip(HomeView):
         """Closing removes the desktop drawing only; the home keeps its state and clock."""
         self._closing = True
         self.frame_timer.stop()
-        try:
-            self.service.ticked.disconnect(self._stepped)
-        except (RuntimeError, TypeError):
-            pass
+        for signal, slot in ((self.service.ticked, self._stepped), (self.service.events_ready, self._events)):
+            try:
+                signal.disconnect(slot)
+            except (RuntimeError, TypeError):
+                pass
         self.service.resume(HIDDEN_REASON)
         super().closeEvent(event)
         self.closed.emit()
 
+def bubble_text(event: dict) -> str:
+    """Bubble wording for a world event, or nothing for events that need no bubble."""
+    kind = event.get("kind")
+    if kind == "activity" and event.get("activity") not in ("idle", "wander"):
+        return translate("pet_home_activity_" + event["activity"], event["activity"])
+    if kind == "greeted":
+        return translate("pet_home_bubble_hello", "Hi!")
+    if kind == "squabble":
+        return translate("pet_home_bubble_squabble", "Hmph!")
+    if kind == "settled" and event.get("coins"):
+        return f"+{event['coins']}"
+    return ""

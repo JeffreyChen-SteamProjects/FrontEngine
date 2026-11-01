@@ -157,6 +157,7 @@ def test_phases_split_the_work():
 def test_first_purchases_land_inside_the_balance_targets():
     world, zone = _home(coins=0)
     world.ledger.apply("reset", "test", -world.ledger.coins + 10)
+    world.residents[PET].traits = ()          # balance targets are for a resident without likings
     first_decoration = first_station = None
     for minute in range(1, 61):
         if not world.open_tasks(PET):
