@@ -1721,4 +1721,5 @@ germany_word_dict = {
     "settings_menu_theme_system": "Wie das System",
     "settings_menu_theme_light": "Hell",
     "settings_menu_theme_dark": "Dunkel",
+    "pet_home_settings_section": "Einstellungen",
 }

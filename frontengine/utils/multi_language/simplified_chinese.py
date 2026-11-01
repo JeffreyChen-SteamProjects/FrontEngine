@@ -1720,4 +1720,5 @@ simplified_chinese_word_dict = {
     "settings_menu_theme_system": "跟随系统",
     "settings_menu_theme_light": "浅色",
     "settings_menu_theme_dark": "深色",
+    "pet_home_settings_section": "设置",
 }

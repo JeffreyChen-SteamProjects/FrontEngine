@@ -1718,4 +1718,5 @@ russian_word_dict = {
     "settings_menu_theme_system": "Как в системе",
     "settings_menu_theme_light": "Светлая",
     "settings_menu_theme_dark": "Тёмная",
+    "pet_home_settings_section": "Настройки",
 }

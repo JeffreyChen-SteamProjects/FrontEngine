@@ -1718,4 +1718,5 @@ italian_word_dict = {
     "settings_menu_theme_system": "Segui il sistema",
     "settings_menu_theme_light": "Chiaro",
     "settings_menu_theme_dark": "Scuro",
+    "pet_home_settings_section": "Impostazioni",
 }

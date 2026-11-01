@@ -1728,4 +1728,5 @@ english_word_dict = {
     "settings_menu_theme_system": "Follow system",
     "settings_menu_theme_light": "Light",
     "settings_menu_theme_dark": "Dark",
+    "pet_home_settings_section": "Settings",
 }

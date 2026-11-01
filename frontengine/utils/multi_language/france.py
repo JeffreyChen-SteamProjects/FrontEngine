@@ -1718,4 +1718,5 @@ french_word_dict = {
     "settings_menu_theme_system": "Suivre le système",
     "settings_menu_theme_light": "Clair",
     "settings_menu_theme_dark": "Sombre",
+    "pet_home_settings_section": "Paramètres",
 }
