@@ -17,7 +17,7 @@ from PySide6.QtWidgets import (QCheckBox, QComboBox, QFrame, QHBoxLayout, QLabel
                                QPushButton, QScrollArea, QVBoxLayout, QWidget)
 
 from frontengine.show.pet_game.home_service import HomeService
-from frontengine.show.pet_game.home_strip import HIDDEN_REASON, HOME_MODES, LAYERS, HomeStrip
+from frontengine.show.pet_game.home_strip import HIDDEN_REASON, HOME_MODES, LAYERS, LOCKED_REASON, HomeStrip
 from frontengine.show.pet_game.home_view import HomeView
 from frontengine.show.pet_game.resident_art import ResidentArt
 from frontengine.show.pet_game.themes import glyph
@@ -29,6 +29,7 @@ from frontengine.ui.page.layout_kit import Section, SettingPage
 from frontengine.ui.page.pet_game.collection_panel import CollectionPanel
 from frontengine.ui.page.pet_game.home_pending import pending
 from frontengine.utils.browser.browser import open_browser
+from frontengine.utils.session_lock.session_lock import SessionLockWatcher
 from frontengine.ui.page.pet_game.home_stage import EmptyHome, HomeTabs, TAB_ORDER, make_tab_ready
 from frontengine.ui.page.pet_game.home_panels import (
     LayoutPanel, ResidentPanel, ShopPanel, StoragePanel, WorkPanel,
@@ -379,6 +380,9 @@ class PetHomePage(SettingPage):
     def _connect(self) -> None:
         self.service.ticked.connect(self.refresh_live)
         self.service.events_ready.connect(self._on_events)
+        self.lock_watcher = SessionLockWatcher(self)
+        self.lock_watcher.locked_changed.connect(self._session_locked)
+        self.lock_watcher.start()
         self.service.save_failed.connect(self._on_save_failed)
         self.service.running_changed.connect(lambda _running: self._refresh_status())
         self.view.resident_selected.connect(self.select_resident)
@@ -442,6 +446,7 @@ class PetHomePage(SettingPage):
         for dialog in list(self.residents.wardrobes.values()):
             dialog.close()
         self.close_strip()
+        self.lock_watcher.stop()
         self.art.shutdown()
         return self.service.shutdown()
 
@@ -578,7 +583,16 @@ class PetHomePage(SettingPage):
         self.message.setText(text)
         self.message.setVisible(bool(text))
 
+    def _session_locked(self, locked: bool) -> None:
+        """A locked session pauses the home like hiding it does; unlocking lets it carry on."""
+        if locked:
+            self.service.pause(LOCKED_REASON)
+        else:
+            self.service.resume(LOCKED_REASON)
+        self._refresh_status()
+
     def _on_events(self, events: list) -> None:
+        self.view.note_events(events)
         self.inbox.on_events(events, self.service.world)
         kinds = {event["kind"] for event in events}
         if kinds & {"settled", "placed", "arrived", "settle_failed", "life_event", "wish_granted",
@@ -702,6 +716,8 @@ class PetHomePage(SettingPage):
         state = translate("pet_home_running" if self.service.running else "pet_home_paused")
         if MEETING_REASON in self.service.pause_reasons:
             state = translate("pet_home_paused_meeting", "paused for a meeting")
+        elif LOCKED_REASON in self.service.pause_reasons:
+            state = translate("pet_home_paused_locked", "paused while the computer is locked")
         elif HIDDEN_REASON in self.service.pause_reasons:
             state = translate("pet_home_paused_hidden", "paused while the home is hidden")
         if world.sandbox:

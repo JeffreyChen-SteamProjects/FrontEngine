@@ -1854,4 +1854,5 @@ english_word_dict = {
     "pet_home_result_not_upgradable": "That cannot be upgraded any further.",
     "pet_home_activity_help": "Lending a hand",
     "pet_home_reason_helping": "helping a friend at work",
+    "pet_home_paused_locked": "paused while the computer is locked",
 }

@@ -1853,4 +1853,5 @@ traditional_chinese_word_dict = {
     "pet_home_result_not_upgradable": "這個無法再升級了。",
     "pet_home_activity_help": "幫忙中",
     "pet_home_reason_helping": "幫朋友工作",
+    "pet_home_paused_locked": "電腦鎖定時暫停",
 }
