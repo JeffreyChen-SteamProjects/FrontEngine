@@ -3,6 +3,8 @@
 只放還沒做的事。完成後移除該項，並在 `docs/updates/` 記錄驗證結果。編號不重用。
 跨專案與工作區層級的待辦另見 `D:\Codes\progress.md`。
 
+**規則：實機驗收只能放在最上方的「實機驗收待辦」。** 凡是需要實機、真人或硬體才能驗證的項目（原生視窗、DPI、螢幕、錄製遊玩、長時間實際執行、乾淨機器打包），一律寫在下一節，不得寫進下方任何實作計畫段落；計畫段落出現新的驗收需求時，移到最上方。`tests/unit_test/test_progress_layout.py` 會擋。
+
 ## 實機驗收待辦
 
 - **#9** **macOS 權限與裝置驗收**〔阻塞：沒有可互動的 Mac 測試主機〕。驗證 TCC 權限拒絕／變更／重新啟動流程、原生音訊、MIDI 與多螢幕；入口為 `tests/integration/macos_native_smoke.py`。既有 Windows／Linux 支援與隔離測試不能替代 macOS 實機結果。
@@ -54,4 +56,4 @@
 
 - [ ] 擴充 `test_command_palette.py`、`test_control_center_batch.py`、`test_pet_profile_sessions.py` 與相關寵物互動測試，證明舊入口移位後功能、保存與資源清理仍正確。
 - [ ] 測試仍留下約 3.8 萬個 widget：桌面寵物測試每個寵物視窗約 232 個（`test_pet_ball`、`test_pet_keyboard_call`、`test_pet_light`、`test_pet_call` 等只 `close()` 沒刪除）、`test_screensaver` 約 4,800 個；逐一改成 `deleteLater()` 或共用的寵物 fixture。
-- [ ] 背景驗收入口 `tests/integration/pet_game_smoke.py`：只用測試存檔與自建視窗，支援固定亂數、指定有效時間、截圖與結算紀錄，拒絕操作使用者日常視窗或真實媒體鍵。
+- [ ] 背景煙霧測試入口 `tests/integration/pet_game_smoke.py`：只用測試存檔與自建視窗，支援固定亂數、指定有效時間、截圖與結算紀錄，拒絕操作使用者日常視窗或真實媒體鍵。
