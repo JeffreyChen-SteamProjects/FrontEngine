@@ -21,6 +21,7 @@ from PySide6.QtCore import QObject, QRunnable, Qt, QThreadPool, Signal
 from PySide6.QtGui import QImage
 
 from frontengine.show.pet.inkside.library import install_builtin, upgrade_builtin
+from frontengine.utils.pet_game.catalog import wanted_poses
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 
 # Semantic activity -> layered action. The renderer itself falls back to idle
@@ -45,7 +46,12 @@ def semantic_action(resident, world=None, renderer=None) -> str:
         pose = PROFESSION_ACTIONS.get(_profession(world, activity.task))
         if pose is not None and renderer.has_action(pose):
             return pose
-    return USING_ACTIONS.get(activity.kind, "idle")
+    pose = USING_ACTIONS.get(activity.kind, "idle")
+    piece = getattr(world, "furniture", {}).get(activity.furniture or "")
+    if piece is not None and renderer is not None and not renderer.has_action(pose):
+        # The piece says what else will do: a character without a sleeping pose sits on the bed.
+        return next((other for other in wanted_poses(world.definition(piece)) if renderer.has_action(other)), "idle")
+    return pose
 
 
 def _profession(world, task_id: str | None) -> str | None:

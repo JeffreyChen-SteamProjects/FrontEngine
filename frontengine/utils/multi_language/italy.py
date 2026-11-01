@@ -1860,4 +1860,6 @@ italian_word_dict = {
     "pet_home_activity_tag": "Gioca ad acchiapparella",
     "pet_home_reason_called": "l'hai chiamata",
     "pet_home_reason_playing_tag": "con un amico",
+    "pet_home_newcomers": "Mascotte che si trasferiscono con te (spunta quelle che vuoi)",
+    "pet_home_moved_in": "{count} mascotte si sono trasferite.",
 }

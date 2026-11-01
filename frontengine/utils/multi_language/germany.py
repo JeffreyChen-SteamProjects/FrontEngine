@@ -1863,4 +1863,6 @@ germany_word_dict = {
     "pet_home_activity_tag": "Spielt Fangen",
     "pet_home_reason_called": "du hast gerufen",
     "pet_home_reason_playing_tag": "mit einem Freund",
+    "pet_home_newcomers": "Haustiere, die mit einziehen (die gewünschten ankreuzen)",
+    "pet_home_moved_in": "{count} Haustiere sind eingezogen.",
 }

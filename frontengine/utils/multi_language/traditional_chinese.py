@@ -1869,4 +1869,6 @@ traditional_chinese_word_dict = {
     "pet_home_activity_tag": "玩鬼抓人",
     "pet_home_reason_called": "你在叫牠",
     "pet_home_reason_playing_tag": "和朋友一起",
+    "pet_home_newcomers": "和你一起搬進來的寵物（勾選想要的）",
+    "pet_home_moved_in": "{count} 隻寵物搬進來了。",
 }

@@ -1862,4 +1862,6 @@ simplified_chinese_word_dict = {
     "pet_home_activity_tag": "玩捉人游戏",
     "pet_home_reason_called": "你在叫它",
     "pet_home_reason_playing_tag": "和朋友一起",
+    "pet_home_newcomers": "和你一起搬进来的宠物（勾选想要的）",
+    "pet_home_moved_in": "{count} 只宠物搬进来了。",
 }

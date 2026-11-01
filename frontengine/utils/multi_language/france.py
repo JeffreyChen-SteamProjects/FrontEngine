@@ -1860,4 +1860,6 @@ french_word_dict = {
     "pet_home_activity_tag": "Joue à chat",
     "pet_home_reason_called": "vous l'avez appelée",
     "pet_home_reason_playing_tag": "avec un ami",
+    "pet_home_newcomers": "Mascottes qui emménagent avec vous (cochez celles voulues)",
+    "pet_home_moved_in": "{count} mascottes ont emménagé.",
 }

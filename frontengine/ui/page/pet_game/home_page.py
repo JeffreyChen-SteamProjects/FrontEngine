@@ -245,6 +245,17 @@ class PetHomePage(SettingPage):
         section.add_widget(self.message)
         self.empty_home = EmptyHome()
         section.add_widget(self.empty_home)
+        self.newcomers_box = QWidget()
+        box = QVBoxLayout(self.newcomers_box)
+        box.setContentsMargins(0, 0, 0, 0)
+        caption = tr(QLabel(), "pet_home_newcomers", "Pets moving in with you (tick the ones you want)")
+        caption.setWordWrap(True)
+        self.newcomers = QListWidget()
+        self.newcomers.setMaximumHeight(140)
+        caption.setBuddy(self.newcomers)
+        box.addWidget(caption)
+        box.addWidget(self.newcomers)
+        section.add_widget(self.newcomers_box)
         self.view_area = self._scroller(self.view)
         self.view.zoomable = True
         self.view.zoom_changed.connect(self._zoom_changed)
@@ -409,9 +420,42 @@ class PetHomePage(SettingPage):
         except (OSError, ValueError) as error:
             self.report_text(str(error))
             return
+        moved = self.move_in_newcomers()
+        if moved:
+            self.report_text(translate("pet_home_moved_in", "{count} pets moved in.").format(count=moved))
         self._set_running(True)
         self.sync_strip()
         self.refresh()
+
+    def chosen_newcomers(self) -> list[str]:
+        return [self.newcomers.item(i).data(Qt.ItemDataRole.UserRole) for i in range(self.newcomers.count())
+                if self.newcomers.item(i).checkState() == Qt.CheckState.Checked]
+
+    def move_in_newcomers(self) -> int:
+        """The ticked pets move in as themselves (same identity, name, closeness, needs, look and wardrobe).
+
+        Nothing is copied or reset, and running it again later only moves in who is not living
+        here yet; the starter kit belongs to the home and is never handed out twice.
+        """
+        moved = 0
+        for identifier in self.chosen_newcomers():
+            if self.service.adopt(identifier) == "accepted":
+                moved += 1
+        return moved
+
+    def _refresh_newcomers(self, has_home: bool) -> None:
+        living = set(self.service.world.residents) if has_home else set()
+        records = [] if has_home else [r for r in self.profiles.profiles() if r["id"] not in living]
+        current = [self.newcomers.item(i).data(Qt.ItemDataRole.UserRole) for i in range(self.newcomers.count())]
+        if current != [record["id"] for record in records]:
+            self.newcomers.clear()
+            for record in records:
+                item = QListWidgetItem(record["name"])
+                item.setData(Qt.ItemDataRole.UserRole, record["id"])
+                item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
+                item.setCheckState(Qt.CheckState.Checked)
+                self.newcomers.addItem(item)
+        self.newcomers_box.setVisible(bool(records))
 
     def toggle_running(self) -> None:
         self._set_running(not self.service.running)
@@ -712,6 +756,7 @@ class PetHomePage(SettingPage):
         has_home = world is not None
         protected = self.load_result.status in ("corrupt", "newer") and not has_home
         self.create_button.setVisible(not has_home and not protected)
+        self._refresh_newcomers(has_home)
         self.run_button.setVisible(has_home)
         self.restore_button.setVisible(protected and self.load_result.backup_available)
         self.aside_button.setVisible(protected)

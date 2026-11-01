@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261102-13 | 2026-11-02 | Event cooldowns, goal windows and furniture art as data, and choosing who moves in | #done #pets #game | [2026-11](2026-11.md) |
 | U-20261102-12 | 2026-11-02 | Tests free the widgets they give up | #done #tests #fix | [2026-11](2026-11.md) |
 | U-20261102-11 | 2026-11-02 | Grooming, toys, calling a pet over, tag and pet photos in the home | #done #pets #game | [2026-11](2026-11.md) |
 | U-20261102-10 | 2026-11-02 | Pets keep you company during focus sessions, and a dropped file is only a treat | #done #pets #game | [2026-11](2026-11.md) |
