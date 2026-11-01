@@ -1727,4 +1727,5 @@ traditional_chinese_word_dict = {
     "settings_menu_theme_system": "跟隨系統",
     "settings_menu_theme_light": "淺色",
     "settings_menu_theme_dark": "深色",
+    "pet_home_settings_section": "設定",
 }

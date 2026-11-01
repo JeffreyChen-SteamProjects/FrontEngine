@@ -123,6 +123,10 @@ QWidget#settingSection {{
     background-color: {c['surface']}; border: 1px solid {c['border']}; border-radius: {RADIUS_CARD}px;
 }}
 QWidget#sectionContent, QWidget#inlineActions, QWidget#pageColumn {{ background: transparent; border: none; }}
+QLabel#homeStatus {{ font-size: 15px; font-weight: 600; color: {c['text']}; }}
+QTabWidget#homeTabs::pane {{ border: none; background: transparent; top: 0px; }}
+QTabWidget#homeTabs > QTabBar::tab {{ padding: 9px 16px; font-size: {FONT_SIZE}px; }}
+QWidget#homeTabPage, QWidget#emptyHome {{ background: transparent; }}
 """
 
 
