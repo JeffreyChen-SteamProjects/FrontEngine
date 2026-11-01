@@ -45,7 +45,8 @@ DOCKS = ("left", "right")
 TOOLBAR = (("pet_home_toolbar_arrange", "Arrange", "arrange", ""),
            ("pet_home_toolbar_residents", "Residents", "tab", "pet_home_residents_section"),
            ("pet_home_toolbar_work", "Work", "tab", "pet_home_work_section"))
-RESIDENT_ACTIONS = (("wardrobe", "pet_home_wardrobe", "Wardrobe…"),
+RESIDENT_ACTIONS = (("photo", "pet_home_photo_of", "Take a photo"),
+                    ("wardrobe", "pet_home_wardrobe", "Wardrobe…"),
                     ("work", "pet_home_work_for_pet", "Work for this pet…"),
                     ("follow", "pet_home_follow", "Follow in the overview"))
 
@@ -90,6 +91,7 @@ class HomeStrip(HomeView):
         self.setWindowTitle(translate("tab_pet_home_text", "Pet home"))
         self.setFixedHeight(STRIP_HEIGHT)
         self.chosen: str | None = None        # the pet last clicked here, shown in the toolbar
+        self._menu_x_milli = 0                # where the last right-click was, for "Come here"
         self.button = self._home_button()
         self.toolbar = self._toolbar()
         self.done_button = self._done_button()
@@ -408,6 +410,7 @@ class HomeStrip(HomeView):
         point = event.position()
         resident = self._resident_at(point)
         if event.button() == Qt.MouseButton.RightButton:
+            self._menu_x_milli = int(point.x() / self.cell_width() * CELL_PIXELS * 1000)
             self._context_menu(resident, self._piece_at(point), event.globalPosition().toPoint())
         elif event.button() == Qt.MouseButton.LeftButton and resident is not None:
             self._press = (resident, point)
@@ -490,6 +493,10 @@ class HomeStrip(HomeView):
         for kind in INTERACTIONS:
             menu.addAction(translate("pet_home_interact_" + kind, kind.title()),
                            lambda k=kind: self._interact(resident, k))
+        menu.addAction(translate("pet_home_call", "Come here"),
+                       lambda: self._ask(resident, lambda world: world.call(resident, self._menu_x_milli)))
+        menu.addAction(translate("pet_home_tag", "Play tag"),
+                       lambda: self._ask(resident, lambda world: world.play_tag(resident)))
         ask = menu.addMenu(translate("pet_home_ask", "Ask to"))
         for command in COMMANDS:
             ask.addAction(translate("pet_home_cmd_" + command, command.title()),
@@ -497,6 +504,11 @@ class HomeStrip(HomeView):
         menu.addSeparator()
         for action, key, fallback in RESIDENT_ACTIONS:
             menu.addAction(translate(key, fallback), lambda a=action: self.action_requested.emit(a, resident))
+
+    def _ask(self, resident: str, change) -> None:
+        result = self.service.run(change)
+        if result != "accepted":
+            self.bubbles[resident] = (result_text(result), self._clock() + BUBBLE_SECONDS)
 
     def _interact(self, resident: str, kind: str) -> None:
         result = self.service.run(lambda world: world.interact(resident, kind))
@@ -581,6 +593,8 @@ def bubble_text(event: dict) -> str:
         return translate("pet_home_activity_" + event["activity"], event["activity"])
     if kind == "greeted":
         return translate("pet_home_bubble_hello", "Hi!")
+    if kind == "tagged":
+        return translate("pet_home_bubble_tag", "Tag!")
     if kind == "interacted":
         return translate("pet_home_bubble_" + event["interaction"], "♥")
     if kind == "squabble":

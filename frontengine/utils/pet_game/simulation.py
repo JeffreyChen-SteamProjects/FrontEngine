@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING
 
 from frontengine.utils.pet_game.behaviour import (
     URGENT_ENERGY, URGENT_FULLNESS, cancel_activity, decide, greet_arrived, greet_completed, help_completed,
+    tag_completed,
     helpers, release,
     shared_completed, together,
 )
@@ -22,6 +23,7 @@ if TYPE_CHECKING:
     from frontengine.utils.pet_game.world import World
 
 STEP_MS = 200
+COME_WAIT_MS = 8000                 # how long a called pet waits where it was called to
 WALK_MILLI_PER_MS = 64           # 64 logical pixels per second
 MAX_ADVANCE_MS = 6 * 60 * 60 * 1000
 BASE_RATES = {"energy": -1, "fullness": -2, "mood": -1, "comfort": -1, "social": -1}
@@ -144,6 +146,8 @@ def _walk(world: World, resident: Resident) -> None:
     activity.started_ms = world.time_ms
     if activity.until_ms is not None:
         activity.until_ms = max(activity.until_ms, world.time_ms + 1000)
+    if activity.kind == "come":               # called over: the wait starts once it is there
+        activity.until_ms = world.time_ms + COME_WAIT_MS
     if activity.task is not None:
         world.tasks[activity.task].state = "working"
     if activity.kind == "eat":
@@ -198,6 +202,8 @@ def finish(world: World, resident: Resident, pause_ms: int = 1000) -> None:
         greet_completed(world, resident, activity.partner)
     if activity.kind == "help" and activity.partner is not None:
         help_completed(world, resident, activity.partner)
+    if activity.kind == "tag":
+        tag_completed(world, resident, activity.partner)
     world.emit("completed", resident=resident.identifier, activity=activity.kind)
 
 

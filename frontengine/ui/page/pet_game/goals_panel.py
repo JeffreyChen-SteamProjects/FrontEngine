@@ -126,10 +126,18 @@ class GoalsPanel:
         world = self.page.service.world
         if world is None:
             return None
+        return self.save_photo(self.page.view.grab())
+
+    def save_photo(self, pixmap, subject: str = "") -> Path | None:
+        """Save a picture of the home into the album folder, named by game day and time."""
+        world = self.page.service.world
+        if world is None:
+            return None
         folder = Path(getcwd()) / ALBUM_FOLDER
         folder.mkdir(exist_ok=True)
-        target = folder / f"day{game_day(world.time_ms)}-{datetime.now():%Y%m%d-%H%M%S}.png"
-        if not self.page.view.grab().save(str(target), "PNG"):
+        name = "".join(ch for ch in subject if ch.isalnum())[:24]
+        target = folder / f"day{game_day(world.time_ms)}-{datetime.now():%Y%m%d-%H%M%S}{'-' + name if name else ''}.png"
+        if not pixmap.save(str(target), "PNG"):
             self.page.report_text(translate("pet_home_photo_failed", "The photo could not be saved."))
             return None
         self.page.report_text(translate("pet_home_photo_saved", "Photo saved to {path}").format(path=target))

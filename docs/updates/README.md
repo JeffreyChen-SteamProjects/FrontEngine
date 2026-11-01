@@ -59,6 +59,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
 | U-20261102-12 | 2026-11-02 | Tests free the widgets they give up | #done #tests #fix | [2026-11](2026-11.md) |
+| U-20261102-11 | 2026-11-02 | Grooming, toys, calling a pet over, tag and pet photos in the home | #done #pets #game | [2026-11](2026-11.md) |
 | U-20261102-10 | 2026-11-02 | Pets keep you company during focus sessions, and a dropped file is only a treat | #done #pets #game | [2026-11](2026-11.md) |
 | U-20261102-09 | 2026-11-02 | Pause the home while the computer is locked, and badges on furniture | #done #pets #game | [2026-11](2026-11.md) |
 | U-20261102-08 | 2026-11-02 | Workstation upgrades, pets helping at work, and a stock limit for automatic jobs | #done #pets #game | [2026-11](2026-11.md) |
