@@ -83,3 +83,21 @@ def test_view_switches_pictures_with_the_theme():
     view.update()
     after = view.grab().toImage().copy(rect)
     assert before != after
+
+
+def test_residents_rest_on_the_bed_surface_while_sleeping():
+    from types import SimpleNamespace
+    from frontengine.utils.pet_game.resident import Activity
+    world, zone = _world()
+    world.place("bed_basic", zone, 2)
+    piece = next(iter(world.furniture.values()))
+    view = HomeView()
+    view.set_world(world, zone)
+    view.resize(900, 200)
+    resident = SimpleNamespace(activity=Activity("sleep", "", furniture=piece.identifier, phase="using"))
+    height = view.piece_rect(piece, CATALOG.furniture["bed_basic"]).height()
+    assert view._rest_height(resident) == pytest.approx(height * furniture_art.SURFACES["bed_basic"])
+    resident.activity = Activity("sleep", "", furniture=piece.identifier, phase="moving")
+    assert view._rest_height(resident) == 0.0
+    resident.activity = None
+    assert view._rest_height(resident) == 0.0

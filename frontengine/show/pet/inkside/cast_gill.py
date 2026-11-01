@@ -5,6 +5,7 @@ from PySide6.QtGui import QPainterPath, QTransform
 
 from frontengine.show.pet.inkside.faces import EyeStyle, MouthStyle
 from frontengine.show.pet.inkside.ink import ORANGE, PAPER, Brush, ellipse, line, polygon, rect, rounded
+from frontengine.show.pet.inkside.sprite_sheet import character_sprites
 from frontengine.show.pet.inkside.template import DEFAULT_BASE, Group, Template
 
 HEAD = rounded(-82, -42, 164, 84, 42)
@@ -48,8 +49,7 @@ class Gill(Template):
     mouths = {'tooth': ('Flat with tooth', MouthStyle('tooth', 26)),
               'small': ('Small open', MouthStyle('small', 10))}
     eye_default, mouth_default = 'small', 'tooth'
-    sprite_actions = {'walk_sprite': ('inkside-gill-walk.png', 8, 90),
-                      'climb_sprite': ('inkside-gill-climb.png', 8, 110)}
+    sprite_actions = character_sprites('gill')
 
     def nudge(self, part: str, pose) -> tuple[int, int]:
         # The capsule head and gills are too wide to slide left when lying down.

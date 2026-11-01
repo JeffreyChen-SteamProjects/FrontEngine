@@ -6,6 +6,7 @@ from PySide6.QtGui import QPainterPath, QTransform
 
 from frontengine.show.pet.inkside.faces import EyeStyle, MouthStyle
 from frontengine.show.pet.inkside.ink import INK, ORANGE, PAPER, Brush, ellipse, line, polygon, stroked
+from frontengine.show.pet.inkside.sprite_sheet import character_sprites
 from frontengine.show.pet.inkside.template import DEFAULT_BASE, Group, Template
 
 HEAD = polygon((-44, -48), (44, -48), (76, -4), (54, 40), (-54, 40), (-76, -4))
@@ -58,8 +59,7 @@ class Pip(Template):
     mouths = {'grin': ('Toothy grin', MouthStyle('grin', 26)),
               'smirk': ('Closed smirk', MouthStyle('smirk', 18))}
     eye_default, mouth_default = 'provoke', 'grin'
-    sprite_actions = {'walk_sprite': ('inkside-pip-walk.png', 8, 90),
-                      'climb_sprite': ('inkside-pip-climb.png', 8, 110)}
+    sprite_actions = character_sprites('pip')
 
     def head(self, b: Brush) -> None:
         b.fill(HEAD, 'hide')

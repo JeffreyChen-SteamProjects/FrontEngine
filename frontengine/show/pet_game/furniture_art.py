@@ -12,6 +12,9 @@ from pathlib import Path
 from PySide6.QtGui import QImage
 
 FOLDER = Path(__file__).resolve().parent / "furniture"
+# Where a pet using the piece rests, as a fraction of the picture's height above the floor:
+# a sleeping pet lies on the mattress, a relaxing one sits on the cushion.
+SURFACES = {"bed_basic": 0.42, "bed_cozy": 0.44, "armchair": 0.3}
 _CACHE: dict[tuple[str, str], QImage | None] = {}
 
 

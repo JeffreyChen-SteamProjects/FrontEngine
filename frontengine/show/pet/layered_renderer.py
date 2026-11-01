@@ -99,6 +99,11 @@ class LayeredRenderer:
             if device is not None:
                 device.close()
 
+    def has_action(self, action: str) -> bool:
+        """Whether ``render(action)`` shows that action itself rather than falling back to idle."""
+        return action in self.character.actions or (
+            self._whole_body and action + '_sprite' in self.character.actions)
+
     def render(self, action: str, elapsed_ms: int, *, mirrored: bool = False) -> QImage:
         """Return a detached frame; unknown interaction actions explicitly use idle."""
         if self._whole_body and action + '_sprite' in self.character.actions:

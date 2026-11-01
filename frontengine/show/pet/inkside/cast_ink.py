@@ -5,6 +5,7 @@ from PySide6.QtGui import QPainterPath
 
 from frontengine.show.pet.inkside.faces import EyeStyle, MouthStyle
 from frontengine.show.pet.inkside.ink import INK, ORANGE, PAPER, Brush, line, polygon, rect, rounded
+from frontengine.show.pet.inkside.sprite_sheet import character_sprites
 from frontengine.show.pet.inkside.template import DEFAULT_BASE, Group, Template
 
 HEAD = rounded(-64, -52, 128, 100, 42)
@@ -50,8 +51,7 @@ class Ink(Template):
     mouths = {'closed': ('Closed beak', MouthStyle('beak', 18)),
               'parted': ('Parted beak', MouthStyle('beak', 24))}
     eye_default, mouth_default = 'glance', 'closed'
-    sprite_actions = {'walk_sprite': ('inkside-ink-walk.png', 8, 90),
-                      'climb_sprite': ('inkside-ink-climb.png', 8, 110)}
+    sprite_actions = character_sprites('ink')
 
     def head(self, b: Brush) -> None:
         b.fill(HEAD, 'feather')

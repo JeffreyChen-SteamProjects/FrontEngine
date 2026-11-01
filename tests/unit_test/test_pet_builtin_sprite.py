@@ -1,10 +1,11 @@
 """The Pet page's built-in character starts sprite pets dressed as that character."""
 from PySide6.QtCore import QCoreApplication, QEvent, QThreadPool
 
+from frontengine.show.pet.inkside.library import VERSION
 from frontengine.show.pet.desktop_pet import DesktopPetWidget
 from frontengine.user_setting.pet_profiles import PetProfiles
 
-REFERENCE = {'id': 'inkside-pip', 'version': '1'}
+REFERENCE = {'id': 'inkside-pip', 'version': VERSION}
 
 
 def _ready_page(tmp_path, monkeypatch):
@@ -40,7 +41,7 @@ def test_built_in_character_spawns_a_dressed_sprite_pet(tmp_path, monkeypatch):
         assert type(pet) is DesktopPetWidget
         assert pet.profile_session.state()['appearance']['character'] == REFERENCE
         assert pet._layered_playback.renderer is not None
-        assert pet.asset_library.is_installed('inkside-pip', '1')
+        assert pet.asset_library.is_installed('inkside-pip', VERSION)
         # Dressing on summon plays no outfit show, so nothing holds the pet in place.
         assert pet.companion.visual_action is None and pet.companion.allows_autonomy
         assert pet.motion.mode == 'actions' and pet.motion.random_actions
