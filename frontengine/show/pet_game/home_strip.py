@@ -23,7 +23,7 @@ from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QMenu, QToolButton, Q
 from frontengine.show.pet_game.captions import card_text, result_text
 from frontengine.show.pet_game.home_service import HomeService
 from frontengine.show.pet_game.home_view import HomeView
-from frontengine.show.pet_game.themes import floor_color, glyph
+from frontengine.show.pet_game.themes import NIGHT_TINT, floor_color, glyph, night_shade
 from frontengine.utils.multi_language.retranslate import translate
 from frontengine.utils.pet_game.catalog import CELL_PIXELS
 from frontengine.utils.pet_game.simulation import STEP_MS
@@ -191,6 +191,7 @@ class HomeStrip(HomeView):
             return
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        self._paint_dusk(painter)
         for resident in self.service.world.residents.values():
             rect = self.bubble_rect(resident) if resident.zone == self.zone else None
             if rect is not None:
@@ -200,6 +201,21 @@ class HomeStrip(HomeView):
                 painter.setPen(QColor(30, 30, 30))
                 painter.drawText(rect, Qt.AlignmentFlag.AlignCenter, self.bubbles[resident.identifier][0])
         painter.end()
+
+    def _paint_dusk(self, painter: QPainter) -> None:
+        """Evening and night dim what is already drawn - only those pixels, never the clear ones.
+
+        The strip has no background: painting rain or a sky over it would make those pixels
+        catch the mouse on Windows. Source-atop tints pieces and pets only, so the click-through
+        area and the input mask stay exactly as they were.
+        """
+        shade = night_shade(self.service.world.time_ms)
+        if shade <= 0:
+            return
+        painter.save()
+        painter.setCompositionMode(QPainter.CompositionMode.CompositionMode_SourceAtop)
+        painter.fillRect(self.rect(), QColor(NIGHT_TINT.red(), NIGHT_TINT.green(), NIGHT_TINT.blue(), shade))
+        painter.restore()
 
     # ----- input region ------------------------------------------------------------------
 

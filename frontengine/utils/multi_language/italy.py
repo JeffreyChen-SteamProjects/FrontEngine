@@ -1680,6 +1680,8 @@ italian_word_dict = {
     "pet_game_wish_cozy_bed": "un letto accogliente (posizionane uno)",
     "pet_home_theme": "Tema",
     "pet_home_reduced_motion": "Riduci il movimento",
+    "pet_home_ambient": "Suoni d'ambiente (uccelli, grilli, pioggia)",
+    "pet_home_ambient_volume": "Volume dell'ambiente",
     "pet_game_theme_warm_home": "Casa accogliente",
     "pet_game_theme_green_studio": "Studio verde",
     "pet_game_theme_night_studio": "Studio notturno",

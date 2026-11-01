@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261102-20 | 2026-11-02 | Ambient sound with its own volume, and evening on the desktop strip | #done #pets #game #audio | [2026-11](2026-11.md) |
 | U-20261102-19 | 2026-11-02 | Cleanliness: pets tidy themselves up, a bath tub is quicker | #done #pets #game #art #migration | [2026-11](2026-11.md) |
 | U-20261102-18 | 2026-11-02 | Tests delete the windows they close | #done #tests #fix | [2026-11](2026-11.md) |
 | U-20261102-17 | 2026-11-02 | Real-device acceptance may only sit at the top of progress.md, checked by a test | #done #process | [2026-11](2026-11.md) |
@@ -247,6 +248,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 43 |
+| [2026-11.md](2026-11.md) | 2026-11 | 44 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

@@ -14,8 +14,9 @@ from pathlib import Path
 from PySide6.QtCore import Qt, QUrl, Signal
 from PySide6.QtGui import QDesktopServices, QGuiApplication, QKeyEvent, QKeySequence
 from PySide6.QtWidgets import (QCheckBox, QComboBox, QFrame, QHBoxLayout, QLabel, QListWidget, QListWidgetItem,
-                               QPushButton, QScrollArea, QVBoxLayout, QWidget)
+                               QPushButton, QScrollArea, QSlider, QVBoxLayout, QWidget)
 
+from frontengine.show.pet_game.ambience import DEFAULT_VOLUME, Ambience
 from frontengine.show.pet_game.home_service import HomeService
 from frontengine.show.pet_game.home_strip import HIDDEN_REASON, HOME_MODES, LAYERS, LOCKED_REASON, HomeStrip
 from frontengine.show.pet_game.home_view import HomeView
@@ -51,6 +52,8 @@ RUNNING_KEY = "pet_home_running"
 DESKTOP_KEY = "pet_home_on_desktop"
 INTRO_KEY = "pet_home_intro_seen"
 MOTION_KEY = "pet_home_reduced_motion"
+AMBIENT_KEY = "pet_home_ambient"             # ambient sound on (off by default)
+AMBIENT_VOLUME_KEY = "pet_home_ambient_volume"   # 0-100, its own volume
 MODE_KEY = "pet_home_mode"
 MEETING_REASON = "meeting"
 SAVE_MODE_KEY = "pet_home_save_mode"      # "manage" or "sandbox" (free arranging), its own save each
@@ -98,6 +101,7 @@ class PetHomePage(SettingPage):
         self.strip_list: list[HomeStrip] = []      # registered with the Control Center
         self.art = ResidentArt(self.service)
         self.art.changed.connect(self._art_changed)
+        self.ambience = Ambience(parent=self)
         self._tab_sections: dict | None = None
         self._build_intro()
         self.view = HomeView()
@@ -364,6 +368,7 @@ class PetHomePage(SettingPage):
         self.motion_check.setChecked(user_setting_dict.get(MOTION_KEY) is True)
         self.motion_check.toggled.connect(self._motion_toggled)
         section.add_widget(self.motion_check)
+        self._build_ambience_settings(section)
         where = tr(QLabel(), "pet_home_settings_strip_hint",
                    "Mode and layer are on the desktop strip's ⌂ menu; meeting mode turns on by itself while "
                    "the screen is shared.")
@@ -375,6 +380,42 @@ class PetHomePage(SettingPage):
         self.packs_button = tr(QPushButton(), "pet_home_open_packs", "Open the packs folder")
         self.packs_button.clicked.connect(self.open_packs_folder)
         section.add_inline(self.packs_button)
+
+    def _build_ambience_settings(self, section: Section) -> None:
+        """Ambient sound: off unless chosen, with a volume of its own that nothing else shares."""
+        self.ambient_check = tr(QCheckBox(), "pet_home_ambient", "Ambient sound (birds, crickets, rain)")
+        self.ambient_check.setChecked(user_setting_dict.get(AMBIENT_KEY) is True)
+        self.ambient_check.toggled.connect(self._ambient_toggled)
+        section.add_widget(self.ambient_check)
+        volume = user_setting_dict.get(AMBIENT_VOLUME_KEY, DEFAULT_VOLUME)
+        volume = volume if type(volume) is int and 0 <= volume <= 100 else DEFAULT_VOLUME
+        self.ambient_slider = QSlider(Qt.Orientation.Horizontal)
+        self.ambient_slider.setRange(0, 100)
+        self.ambient_slider.setValue(volume)
+        self.ambient_value = QLabel(f"{volume}%")
+        self.ambient_slider.valueChanged.connect(self._ambient_volume_changed)
+        section.add_slider_row(tr(QLabel(), "pet_home_ambient_volume", "Ambient volume"), self.ambient_slider,
+                               self.ambient_value)
+        self.ambience.set_enabled(self.ambient_check.isChecked())
+        self.ambience.set_volume(volume)
+        self.ambient_slider.setEnabled(self.ambient_check.isChecked())
+
+    def _ambient_toggled(self, checked: bool) -> None:
+        user_setting_dict[AMBIENT_KEY] = checked
+        self.ambient_slider.setEnabled(checked)
+        self.ambience.set_enabled(checked)
+        self.update_ambience()
+
+    def _ambient_volume_changed(self, value: int) -> None:
+        user_setting_dict[AMBIENT_VOLUME_KEY] = value
+        self.ambient_value.setText(f"{value}%")
+        self.ambience.set_volume(value)
+        self.update_ambience()
+
+    def update_ambience(self) -> None:
+        world = self.service.world
+        self.ambience.update(world.home if world is not None else None, world.time_ms if world is not None else 0,
+                             self.service.running)
 
     def open_packs_folder(self) -> None:
         folder = Path(getcwd()) / PACK_FOLDER
@@ -426,6 +467,7 @@ class PetHomePage(SettingPage):
         self.lock_watcher.start()
         self.service.save_failed.connect(self._on_save_failed)
         self.service.running_changed.connect(lambda _running: self._refresh_status())
+        self.service.running_changed.connect(lambda _running: self.update_ambience())
         self.view.resident_selected.connect(self.select_resident)
         self.view.furniture_selected.connect(self.select_furniture)
         self.view.cell_clicked.connect(self.layout_panel.cell_clicked)
@@ -522,6 +564,7 @@ class PetHomePage(SettingPage):
         self.close_strip()
         self.lock_watcher.stop()
         self.art.shutdown()
+        self.ambience.shutdown()
         return self.service.shutdown()
 
     # ----- desktop strip ---------------------------------------------------------------
@@ -730,6 +773,7 @@ class PetHomePage(SettingPage):
         self.work.refresh_live()
         self.view.update()
         self._follow()
+        self.update_ambience()
 
     def strip_action(self, action: str, target: str) -> None:
         """The desktop strip's toolbar and right-click menus: arranging stays on the desktop, the rest opens here."""

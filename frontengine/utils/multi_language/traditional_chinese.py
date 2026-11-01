@@ -1689,6 +1689,8 @@ traditional_chinese_word_dict = {
     "pet_game_wish_cozy_bed": "一張舒適的床（擺一張）",
     "pet_home_theme": "主題",
     "pet_home_reduced_motion": "減少動態",
+    "pet_home_ambient": "環境音（鳥鳴、蟲鳴、雨聲）",
+    "pet_home_ambient_volume": "環境音音量",
     "pet_game_theme_warm_home": "溫暖居家",
     "pet_game_theme_green_studio": "綠意工作室",
     "pet_game_theme_night_studio": "夜間創作室",

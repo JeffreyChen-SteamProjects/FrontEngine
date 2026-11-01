@@ -13,6 +13,9 @@ PALETTES = {
 }
 WEATHER_GLYPHS = {"clear": "☀", "cloudy": "☁", "rain": "☂", "snow": "❄"}
 NIGHT_GLYPH = "☾"
+NIGHT_TINT = QColor(28, 34, 78)
+MAX_NIGHT_SHADE = 70           # alpha at midnight: pieces stay easy to read
+DUSK_DAYLIGHT = 0.6            # the tint starts as daylight falls below this
 RAIN_DROPS = 60
 
 
@@ -32,6 +35,12 @@ def sky_color(theme: str, time_ms: int, cloudy: bool) -> QColor:
     if cloudy:
         mixed = [round(value * 0.85 + 128 * 0.15) for value in mixed]
     return QColor(*mixed)
+
+
+def night_shade(time_ms: int) -> int:
+    """Alpha for the evening tint on the desktop strip: 0 by day, up to MAX_NIGHT_SHADE at midnight."""
+    dark = max(0.0, DUSK_DAYLIGHT - daylight(time_ms)) / DUSK_DAYLIGHT
+    return round(dark * MAX_NIGHT_SHADE)
 
 
 def glyph(home: str, time_ms: int) -> str:

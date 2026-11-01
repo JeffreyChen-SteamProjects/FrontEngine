@@ -1682,6 +1682,8 @@ simplified_chinese_word_dict = {
     "pet_game_wish_cozy_bed": "一张舒适的床（摆一张）",
     "pet_home_theme": "主题",
     "pet_home_reduced_motion": "减少动态",
+    "pet_home_ambient": "环境音（鸟鸣、虫鸣、雨声）",
+    "pet_home_ambient_volume": "环境音音量",
     "pet_game_theme_warm_home": "温暖居家",
     "pet_game_theme_green_studio": "绿意工作室",
     "pet_game_theme_night_studio": "夜间创作室",

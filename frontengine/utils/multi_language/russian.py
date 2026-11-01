@@ -1680,6 +1680,8 @@ russian_word_dict = {
     "pet_game_wish_cozy_bed": "уютная кровать (поставьте её)",
     "pet_home_theme": "Тема",
     "pet_home_reduced_motion": "Меньше движения",
+    "pet_home_ambient": "Фоновые звуки (птицы, сверчки, дождь)",
+    "pet_home_ambient_volume": "Громкость фона",
     "pet_game_theme_warm_home": "Тёплый дом",
     "pet_game_theme_green_studio": "Зелёная мастерская",
     "pet_game_theme_night_studio": "Ночная студия",

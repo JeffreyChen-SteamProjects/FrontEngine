@@ -1690,6 +1690,8 @@ english_word_dict = {
     "pet_game_wish_cozy_bed": "a cozy bed (place one)",
     "pet_home_theme": "Theme",
     "pet_home_reduced_motion": "Reduce motion",
+    "pet_home_ambient": "Ambient sound (birds, crickets, rain)",
+    "pet_home_ambient_volume": "Ambient volume",
     "pet_game_theme_warm_home": "Warm home",
     "pet_game_theme_green_studio": "Green studio",
     "pet_game_theme_night_studio": "Night studio",
