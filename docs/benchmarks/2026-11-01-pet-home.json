@@ -1,0 +1,169 @@
+{
+  "machine": {
+    "platform": "Windows-11-10.0.26300-SP0",
+    "processor": "AMD64 Family 25 Model 117 Stepping 2, AuthenticAMD",
+    "cpus": 12,
+    "python": "3.14.4",
+    "pyside": "6.11.2",
+    "qt_platform": "offscreen",
+    "screen": "",
+    "device_pixel_ratio": 1.0,
+    "renderer": "software (offscreen grab)"
+  },
+  "budget": {
+    "tick_p95_ms": 5.0,
+    "feedback_p95_ms": 100.0,
+    "game_memory_mb": 200.0
+  },
+  "loads": [
+    {
+      "residents": 1,
+      "furniture": 10,
+      "world_step": {
+        "p50_ms": 0.0156,
+        "p95_ms": 0.0297,
+        "max_ms": 0.1386,
+        "mean_ms": 0.0193,
+        "samples": 3000
+      },
+      "operation_feedback": {
+        "p50_ms": 0.0085,
+        "p95_ms": 0.0312,
+        "max_ms": 0.122,
+        "mean_ms": 0.0127,
+        "samples": 100
+      },
+      "save_encode": {
+        "p50_ms": 0.568,
+        "p95_ms": 0.9354,
+        "max_ms": 0.9907,
+        "mean_ms": 0.6355,
+        "samples": 30
+      },
+      "strip_frame": {
+        "p50_ms": 1.0115,
+        "p95_ms": 1.5437,
+        "max_ms": 2.1567,
+        "mean_ms": 1.0763,
+        "samples": 120
+      },
+      "game_data_mb": 0.17,
+      "save_bytes": 4940
+    },
+    {
+      "residents": 6,
+      "furniture": 60,
+      "world_step": {
+        "p50_ms": 0.1964,
+        "p95_ms": 0.346,
+        "max_ms": 1.7421,
+        "mean_ms": 0.2195,
+        "samples": 3000
+      },
+      "operation_feedback": {
+        "p50_ms": 0.0186,
+        "p95_ms": 0.0796,
+        "max_ms": 0.2506,
+        "mean_ms": 0.0331,
+        "samples": 100
+      },
+      "save_encode": {
+        "p50_ms": 3.0545,
+        "p95_ms": 4.4438,
+        "max_ms": 4.459,
+        "mean_ms": 3.204,
+        "samples": 30
+      },
+      "strip_frame": {
+        "p50_ms": 5.7223,
+        "p95_ms": 7.8692,
+        "max_ms": 8.7568,
+        "mean_ms": 5.7931,
+        "samples": 120
+      },
+      "game_data_mb": 0.22,
+      "save_bytes": 19046
+    },
+    {
+      "residents": 12,
+      "furniture": 120,
+      "world_step": {
+        "p50_ms": 0.7656,
+        "p95_ms": 1.1819,
+        "max_ms": 2.5285,
+        "mean_ms": 0.7782,
+        "samples": 3000
+      },
+      "operation_feedback": {
+        "p50_ms": 0.0154,
+        "p95_ms": 0.1445,
+        "max_ms": 0.245,
+        "mean_ms": 0.0391,
+        "samples": 100
+      },
+      "save_encode": {
+        "p50_ms": 4.4234,
+        "p95_ms": 5.4313,
+        "max_ms": 5.723,
+        "mean_ms": 4.1933,
+        "samples": 30
+      },
+      "strip_frame": {
+        "p50_ms": 11.5242,
+        "p95_ms": 15.6294,
+        "max_ms": 18.4989,
+        "mean_ms": 11.6257,
+        "samples": 120
+      },
+      "game_data_mb": 0.29,
+      "save_bytes": 29577
+    }
+  ],
+  "long": {
+    "residents": 6,
+    "furniture": 60,
+    "at_10_min": {
+      "memory_mb": 0.1284,
+      "step": {
+        "p50_ms": 0.2239,
+        "p95_ms": 0.3798,
+        "max_ms": 1.0129,
+        "mean_ms": 0.2273,
+        "samples": 3000
+      }
+    },
+    "at_2_hours": {
+      "memory_mb": 0.1767,
+      "step": {
+        "p50_ms": 0.1365,
+        "p95_ms": 0.2736,
+        "max_ms": 0.7266,
+        "mean_ms": 0.1623,
+        "samples": 3000
+      }
+    },
+    "at_4_hours": {
+      "memory_mb": 0.185,
+      "step": {
+        "p50_ms": 0.1325,
+        "p95_ms": 0.2579,
+        "max_ms": 0.7192,
+        "mean_ms": 0.1553,
+        "samples": 3000
+      }
+    },
+    "memory_growth_percent": 37.62,
+    "bounded_histories": {
+      "ledger_ids": 305,
+      "journal": 100,
+      "life_events": 15,
+      "stats": 21
+    }
+  },
+  "within_budget": {
+    "tick_p95_ms": true,
+    "feedback_p95_ms": true,
+    "game_memory_mb": true
+  },
+  "investigate_memory_growth": true
+}

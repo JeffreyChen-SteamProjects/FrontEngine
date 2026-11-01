@@ -34,6 +34,7 @@ BUBBLE_SECONDS = 3.0
 FRAME_MS = {"high": 16, "balanced": 33, "saver": 66}
 DRAG_START_PX = 6
 LAYERS = ("top", "bottom")
+HOME_MODES = ("normal", "focus", "meeting", "saver")
 HIDDEN_REASON = "hidden"
 
 
@@ -49,6 +50,8 @@ class HomeStrip(HomeView):
     caption_backdrop = True
     open_requested = Signal()
     layer_requested = Signal(str)
+    mode_requested = Signal(str)
+    quiet = False                          # focus mode: no bubbles and no cards
     closed = Signal()                      # at close time, before the deferred delete
     overlay_lockable = False              # lock-all must not make the home unclickable
     overlay_remembers_geometry = False
@@ -141,6 +144,8 @@ class HomeStrip(HomeView):
 
     def _events(self, events: list) -> None:
         """Short bubbles say what a pet just started, who it greeted, or what it earned."""
+        if self.quiet:
+            return
         for event in events:
             text = bubble_text(event)
             if text and event.get("resident") in self.service.world.residents:
@@ -256,6 +261,9 @@ class HomeStrip(HomeView):
         other = "bottom" if self.layer == "top" else "top"
         menu.addAction(translate("pet_home_layer_to_" + other, "Move below windows" if other == "bottom"
                                  else "Move above windows"), lambda: self.layer_requested.emit(other))
+        modes = menu.addMenu(translate("pet_home_mode", "Mode"))
+        for mode in HOME_MODES:
+            modes.addAction(translate("pet_home_mode_" + mode, mode), lambda m=mode: self.mode_requested.emit(m))
         menu.addAction(translate("pet_home_hide", "Hide the home"), self.hide)
 
     # ----- mouse -------------------------------------------------------------------------------
@@ -315,7 +323,7 @@ class HomeStrip(HomeView):
     def show_card(self, identifier: str, where: QPoint) -> None:
         """A non-activating tooltip card: name, what it is doing, and its needs."""
         resident = self.service.world.residents.get(identifier)
-        if resident is None:
+        if resident is None or self.quiet:
             return
         QToolTip.showText(where, card_text(resident, self.service.world), self, QRect(), 6000)
 

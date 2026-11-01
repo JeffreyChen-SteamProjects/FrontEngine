@@ -15,7 +15,7 @@ from PySide6.QtGui import QGuiApplication, QKeyEvent
 from PySide6.QtWidgets import QCheckBox, QComboBox, QFrame, QLabel, QPushButton, QScrollArea
 
 from frontengine.show.pet_game.home_service import HomeService
-from frontengine.show.pet_game.home_strip import HIDDEN_REASON, LAYERS, HomeStrip
+from frontengine.show.pet_game.home_strip import HIDDEN_REASON, HOME_MODES, LAYERS, HomeStrip
 from frontengine.show.pet_game.home_view import HomeView
 from frontengine.show.pet_game.themes import glyph
 from frontengine.utils.pet_game.environment import weather
@@ -25,6 +25,7 @@ from frontengine.ui.page.pet_game.home_panels import (
 )
 from frontengine.show.pet_game.captions import result_text
 from frontengine.ui.page.pet_game.goals_panel import GoalsPanel
+from frontengine.ui.page.pet_game.inbox_panel import InboxPanel
 from frontengine.user_setting.pet_game_save import HomeSaveStore
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.user_setting.user_setting_file import user_setting_dict, write_user_setting
@@ -36,6 +37,9 @@ RUNNING_KEY = "pet_home_running"
 DESKTOP_KEY = "pet_home_on_desktop"
 INTRO_KEY = "pet_home_intro_seen"
 MOTION_KEY = "pet_home_reduced_motion"
+MODE_KEY = "pet_home_mode"
+AUTO_MEETING_KEY = "pet_home_auto_meeting"
+MEETING_REASON = "meeting"
 LAYER_KEY = "pet_home_layer"
 
 
@@ -63,6 +67,7 @@ class PetHomePage(SettingPage):
         self.add_body_widget(self._scroller(self.view))
         self.residents = ResidentPanel(self)
         self.goals = GoalsPanel(self)
+        self.inbox = InboxPanel(self)
         self.layout_panel = LayoutPanel(self)
         self.shop = ShopPanel(self)
         self.storage = StoragePanel(self)
@@ -73,6 +78,7 @@ class PetHomePage(SettingPage):
         if self.service.world is not None and user_setting_dict.get(RUNNING_KEY) is True:
             self.service.start()
         self.sync_strip()
+        self.apply_mode()
         retranslator.bind_call(self.refresh)
         self.refresh()
 
@@ -122,6 +128,13 @@ class PetHomePage(SettingPage):
         self.motion_check.setChecked(user_setting_dict.get(MOTION_KEY) is True)
         self.motion_check.toggled.connect(self._motion_toggled)
         section.add_widget(self.motion_check)
+        self.mode_combo = QComboBox()
+        self.mode_combo.activated.connect(lambda _index: self.set_mode(self.mode_combo.currentData()))
+        section.add_row("pet_home_mode", self.mode_combo, "Mode")
+        self.auto_meeting = tr(QCheckBox(), "pet_home_auto_meeting", "Meeting mode while sharing the screen")
+        self.auto_meeting.setChecked(user_setting_dict.get(AUTO_MEETING_KEY, True) is not False)
+        self.auto_meeting.toggled.connect(lambda checked: user_setting_dict.__setitem__(AUTO_MEETING_KEY, checked))
+        section.add_widget(self.auto_meeting)
         self.layer_combo = QComboBox()
         self.layer_combo.activated.connect(lambda _index: self.choose_layer(self.layer_combo.currentData()))
         section.add_row("pet_home_layer", self.layer_combo, "Desktop layer")
@@ -217,7 +230,9 @@ class PetHomePage(SettingPage):
             strip.set_arranging(self.layout_panel.arranging)
             self.strip_list.append(strip)
             strip.reduced_motion = self.motion_check.isChecked()
+            strip.mode_requested.connect(self.set_mode)
             strip.show()
+            self.apply_mode()
         elif not wanted:
             self.close_strip()
 
@@ -229,6 +244,38 @@ class PetHomePage(SettingPage):
         for strip in list(self.strip_list):
             strip.close()
         self.strip_list.clear()
+
+    @property
+    def mode(self) -> str:
+        mode = user_setting_dict.get(MODE_KEY, "normal")
+        return mode if mode in HOME_MODES else "normal"
+
+    def set_mode(self, mode: str) -> None:
+        """Normal; focus (quiet strip); meeting (hidden and paused); saver (slow drawing, same time)."""
+        if mode not in HOME_MODES:
+            return
+        user_setting_dict[MODE_KEY] = mode
+        self._sharing_meeting = False
+        self.apply_mode()
+
+    def apply_mode(self) -> None:
+        mode = getattr(self, "_effective_mode", None) or self.mode
+        if mode == "meeting":
+            self.service.pause(MEETING_REASON)
+        else:
+            self.service.resume(MEETING_REASON)
+        tier = "saver" if mode == "saver" else str(user_setting_dict.get("quality_tier", ""))
+        for strip in self.strip_list:
+            strip.quiet = mode in ("focus", "meeting")
+            strip.set_quality_tier(tier)
+            strip.setVisible(mode != "meeting")
+        self.mode_combo.setCurrentIndex(self.mode_combo.findData(self.mode))
+        self._refresh_status()
+
+    def sharing_changed(self, sharing: bool) -> None:
+        """Screen sharing puts the home into meeting mode for as long as it lasts, if allowed."""
+        self._effective_mode = "meeting" if sharing and self.auto_meeting.isChecked() else None
+        self.apply_mode()
 
     def _motion_toggled(self, checked: bool) -> None:
         user_setting_dict[MOTION_KEY] = checked
@@ -282,12 +329,16 @@ class PetHomePage(SettingPage):
         self.message.setText(text)
 
     def _on_events(self, events: list) -> None:
+        self.inbox.on_events(events, self.service.world)
         kinds = {event["kind"] for event in events}
         if kinds & {"settled", "placed", "arrived", "settle_failed", "life_event", "wish_granted",
                     "goal_claimed", "commission_done", "bought", "routine_set"}:
             self.refresh()
 
     def _on_save_failed(self, error: str) -> None:
+        world = self.service.world
+        self.inbox.add_error(translate("pet_home_save_failed", "The home could not be saved ({error}).")
+                             .format(error=error), world.time_ms if world else 0)
         self.report_text(translate("pet_home_save_failed",
                                    "The home could not be saved ({error}). It will retry; nothing is lost yet.")
                          .format(error=error))
@@ -304,6 +355,10 @@ class PetHomePage(SettingPage):
     def refresh(self) -> None:
         """Rebuild lists (after commands, events and language changes)."""
         self.view.set_world(self.service.world, self.zone)
+        self.mode_combo.clear()
+        for mode in HOME_MODES:
+            self.mode_combo.addItem(translate("pet_home_mode_" + mode, mode), mode)
+        self.mode_combo.setCurrentIndex(self.mode_combo.findData(self.mode))
         self.layer_combo.clear()
         for layer in LAYERS:
             self.layer_combo.addItem(translate("pet_home_layer_" + layer, layer), layer)
@@ -346,7 +401,9 @@ class PetHomePage(SettingPage):
             self.status.setText(translate("pet_home_create_hint", "No home yet."))
         else:
             state = translate("pet_home_running" if self.service.running else "pet_home_paused")
-            if HIDDEN_REASON in self.service.pause_reasons:
+            if MEETING_REASON in self.service.pause_reasons:
+                state = translate("pet_home_paused_meeting", "paused for a meeting")
+            elif HIDDEN_REASON in self.service.pause_reasons:
                 state = translate("pet_home_paused_hidden", "paused while the home is hidden")
             self.status.setText(translate("pet_home_status", "Day {day} · {time} · {coins} coins · {state}")
                                 .format(day=game_day(world.time_ms), time=self._time_text(world),
