@@ -1741,4 +1741,6 @@ germany_word_dict = {
     "pet_home_pending_materials": "{count} Arbeiten warten auf Material",
     "pet_home_pending_celebration": "Eine Feier im Zuhause ist bereit",
     "pet_home_pending_wish": "{name} hat einen Wunsch",
+    "pet_home_free_arranging": "Freies Einrichten",
+    "pet_home_free_arranging_hint": "Ein eigenes Zuhause mit allen Möbeln und ohne Kosten; nichts davon erreicht dein Zuhause, deine Münzen, Ziele oder Haustiere.",
 }

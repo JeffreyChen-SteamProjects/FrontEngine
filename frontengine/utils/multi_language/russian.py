@@ -1738,4 +1738,6 @@ russian_word_dict = {
     "pet_home_pending_materials": "Работ ждут материалов: {count}",
     "pet_home_pending_celebration": "Можно устроить праздник дома",
     "pet_home_pending_wish": "У {name} есть желание",
+    "pet_home_free_arranging": "Свободная расстановка",
+    "pet_home_free_arranging_hint": "Отдельный дом со всей мебелью и без затрат; ничего оттуда не попадает в ваш дом, монеты, цели или к питомцам.",
 }

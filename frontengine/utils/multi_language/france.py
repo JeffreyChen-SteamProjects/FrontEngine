@@ -1738,4 +1738,6 @@ french_word_dict = {
     "pet_home_pending_materials": "{count} tâches attendent du matériel",
     "pet_home_pending_celebration": "Une fête de la maison est prête",
     "pet_home_pending_wish": "{name} a un souhait",
+    "pet_home_free_arranging": "Aménagement libre",
+    "pet_home_free_arranging_hint": "Une maison à part avec tous les meubles et sans frais ; rien de ce qui s'y fait n'atteint votre maison, vos pièces, vos objectifs ou vos mascottes.",
 }

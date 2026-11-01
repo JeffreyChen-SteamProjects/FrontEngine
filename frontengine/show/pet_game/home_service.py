@@ -27,7 +27,7 @@ from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.pet_game import simulation
 from frontengine.utils.pet_game.behaviour import cancel_activity
-from frontengine.utils.pet_game.world import World
+from frontengine.utils.pet_game.world import MODES, World
 
 TICK_MS = simulation.STEP_MS
 MAX_GAP_MS = 5000             # longer gaps are not simulated
@@ -38,6 +38,9 @@ _SAVE_EVENTS = {"settled", "placed", "arrived", "settle_failed"}
 _T = TypeVar("_T")
 
 
+SWITCHING = "switching"           # pause reason while one mode's home is swapped for the other
+
+
 class HomeService(QObject):
     """Commands go through ``run``; views read ``world`` and listen to signals."""
 
@@ -46,6 +49,7 @@ class HomeService(QObject):
     save_failed = Signal(str)
     saved = Signal()
     running_changed = Signal(bool)
+    mode_changed = Signal(str)
     _written = Signal(object, int)      # emitted from the writer thread
 
     def __init__(self, parent: QObject | None, store: HomeSaveStore, profiles: PetProfiles,
@@ -84,6 +88,37 @@ class HomeService(QObject):
         result = self.store.load()
         if result.world is not None:
             self._adopt_world(result.world)
+        return result
+
+    @property
+    def mode(self) -> str:
+        return self.store.mode
+
+    def switch_mode(self, mode: str) -> LoadResult | None:
+        """Leave this home and open the other mode's own save (managing or free arranging).
+
+        Activities are cancelled without rewards, the home is saved and every pet is
+        released, so the two saves never share a resident, coins or progress. Returns
+        None when already in that mode or when the save failed (the home stays open).
+        """
+        if mode == self.store.mode or mode not in MODES:
+            return None
+        self.pause(SWITCHING)
+        if self.world is not None:
+            for identifier in sorted(self.world.residents):
+                cancel_activity(self.world, self.world.residents[identifier], "mode_switch")
+            for identifier in sorted(self.world.residents):
+                self._mirror(identifier)
+        if not self.save_now():
+            self.resume(SWITCHING)
+            return None
+        for identifier in sorted(self.sessions):
+            self.sessions.pop(identifier).close()
+        self.world = None
+        self.store = HomeSaveStore(self.store.path.parent, self.store.catalog, mode, write=self.store._write)
+        result = self.open()
+        self.resume(SWITCHING)             # runs again only if nothing else holds it paused
+        self.mode_changed.emit(mode)
         return result
 
     def restore_backup(self) -> LoadResult:
@@ -169,10 +204,13 @@ class HomeService(QObject):
         return result
 
     def _mirror(self, identifier: str) -> bool:
-        """Copy home-owned care values into the profile through its single session."""
+        """Copy home-owned care values into the profile through its single session.
+
+        Free arranging is a playground: nothing done there reaches the pet's profile.
+        """
         session = self.sessions.get(identifier)
         resident = self.world.residents.get(identifier) if self.world else None
-        if session is None or resident is None:
+        if session is None or resident is None or self.world.sandbox:
             return True
         companion = session.companion
         companion.energy = resident.needs["energy"]

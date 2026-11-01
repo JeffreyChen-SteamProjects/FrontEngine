@@ -1747,4 +1747,6 @@ traditional_chinese_word_dict = {
     "pet_home_pending_materials": "{count} 項工作在等材料",
     "pet_home_pending_celebration": "可以舉辦家園慶典了",
     "pet_home_pending_wish": "{name} 有一個願望",
+    "pet_home_free_arranging": "自由布置",
+    "pet_home_free_arranging_hint": "另一個獨立的家園，所有家具都能用、不花錢；在這裡做的事不會影響你的家園、金幣、目標或寵物。",
 }
