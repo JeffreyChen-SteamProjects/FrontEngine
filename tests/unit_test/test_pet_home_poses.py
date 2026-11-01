@@ -113,6 +113,7 @@ def test_a_resident_wearing_an_older_builtin_is_upgraded_through_a_checked_chang
         assert renderer.has_action("garden")
         assert service.sessions[record["id"]].appearance_renderer is renderer
     finally:
+        art.shutdown()
         service.shutdown()
 
 

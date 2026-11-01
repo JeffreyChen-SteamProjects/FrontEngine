@@ -12,6 +12,7 @@ from __future__ import annotations
 import hashlib
 import json
 import tempfile
+import weakref
 from pathlib import Path
 from time import monotonic
 from typing import Callable
@@ -26,7 +27,7 @@ from frontengine.utils.logging.loggin_instance import front_engine_logger
 # for any action a character does not have.
 USING_ACTIONS = {"sleep": "sleep", "nap": "sleep", "eat": "feed", "snack": "feed", "work": "sit",
                  "relax": "sit", "play": "play", "greet": "greet", "drag": "drag", "wait": "idle",
-                 "idle": "idle", "wander": "idle"}
+                 "idle": "idle", "wander": "idle", "visit": "idle"}
 # Work shown with the profession's own pose when the character has it (built-in characters
 # undressed, as whole-body frames); everyone else keeps sitting at the station.
 PROFESSION_ACTIONS = {"writing": "write", "gardening": "garden", "crafting": "craft"}
@@ -52,15 +53,31 @@ def _profession(world, task_id: str | None) -> str | None:
     return recipe.profession if recipe is not None else None
 
 
+def _deliver(owner_ref, identifier: str, key: str, result) -> None:
+    """Hand the result to the owner when it still exists.
+
+    Workers hold only a weak reference: a worker dropping the last reference would destroy a
+    GUI-thread QObject on the pool thread, which crashes the process.
+    """
+    owner = owner_ref()
+    if owner is None or owner.closed:
+        return
+    try:
+        owner.prepared.emit(identifier, key, result)
+    except RuntimeError:          # the owner went away while this ran
+        pass
+
+
 class _Prepare(QRunnable):
     def __init__(self, owner: ResidentArt, identifier: str, appearance: dict, key: str) -> None:
         super().__init__()
-        self.owner, self.identifier, self.appearance, self.key = owner, identifier, appearance, key
+        self.owner_ref, self.library_factory = weakref.ref(owner), owner.library_factory
+        self.identifier, self.appearance, self.key = identifier, appearance, key
 
     def run(self) -> None:
         upgraded = None
         try:
-            library = self.owner.library_factory()
+            library = self.library_factory()
             upgraded = upgrade_builtin(self.appearance)
             if upgraded is not None:          # an older built-in: install the current one first
                 install_builtin(library, upgraded["character"]["id"])
@@ -69,10 +86,7 @@ class _Prepare(QRunnable):
         except (OSError, ValueError) as error:
             front_engine_logger.warning(f"[PetHome] appearance for {self.identifier}: {error}")
             renderer, upgraded = None, None
-        try:
-            self.owner.prepared.emit(self.identifier, self.key, (renderer, self.appearance, upgraded))
-        except RuntimeError:          # the owner went away while this ran
-            pass
+        _deliver(self.owner_ref, self.identifier, self.key, (renderer, self.appearance, upgraded))
 
 
 FALLBACK_PREFIX = "fallback:"
@@ -90,7 +104,7 @@ class _PrepareFallback(QRunnable):
 
     def __init__(self, owner: ResidentArt, identifier: str, key: str) -> None:
         super().__init__()
-        self.owner, self.identifier, self.key = owner, identifier, key
+        self.owner_ref, self.identifier, self.key = weakref.ref(owner), identifier, key
 
     def run(self) -> None:
         from frontengine.show.pet.inkside.assemble import build_character
@@ -105,10 +119,7 @@ class _PrepareFallback(QRunnable):
         except (OSError, ValueError) as error:
             front_engine_logger.warning(f"[PetHome] stand-in character for {self.identifier}: {error}")
             renderer = None
-        try:
-            self.owner.prepared.emit(self.identifier, self.key, (renderer, None, None))
-        except RuntimeError:          # the owner went away while this ran
-            pass
+        _deliver(self.owner_ref, self.identifier, self.key, (renderer, None, None))
 
 
 class ResidentArt(QObject):
@@ -122,7 +133,11 @@ class ResidentArt(QObject):
         super().__init__()
         self.service = service
         self.library_factory = library_factory or _default_library
-        self.pool = pool or QThreadPool.globalInstance()
+        if pool is None:                  # its own pool, so closing waits only for this home's work
+            pool = QThreadPool(self)
+            pool.setMaxThreadCount(2)
+        self.pool = pool
+        self.closed = False
         self._renderers: dict[str, tuple[str, object]] = {}
         self._pending: set[str] = set()
         self._started = monotonic()
@@ -167,6 +182,12 @@ class ResidentArt(QObject):
             self._pending.add(key)
             self.pool.start(_PrepareFallback(self, identifier, key))
         return None
+
+    def shutdown(self) -> None:
+        """Drop queued work and wait for running work, so nothing outlives the home page."""
+        self.closed = True
+        self.pool.clear()
+        self.pool.waitForDone()
 
     def _adopt(self, identifier: str, key: str, result) -> None:
         renderer, expected, upgraded = result
