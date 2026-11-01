@@ -15,7 +15,7 @@ germany_word_dict = {
     "tab_video_text": "Video",
     "tab_image_text": "Bild",
     "tab_web_text": "Webseite",
-    "tab_gif_text": "GIF und WEBP",
+    "tab_gif_text": "GIF und WebP",
     "tab_sound_text": "Musik",
     "tab_text_text": "Text",
     "tab_external_ui": "Externes UI",
@@ -228,12 +228,12 @@ germany_word_dict = {
     "input_error": "Bitte geben Sie etwas ein (keine Leerzeichen)",
     "save_generation_image": "Generiertes Bild speichern",
     # Hilfe-Menü
-    "help_menu_label": "Hilfe-Menü",
+    "help_menu_label": "Hilfe",
     "help_menu_open_issue": "Problem melden",
     "how_to_critical_exit_action": "Wie erzwinge ich das Schließen",
     "how_to_critical_exit": "Drücken Sie F12, um dringend zu schließen",
     # HowTo-Menü
-    "doc_menu_label": "Dokumentations-Menü",
+    "doc_menu_label": "Dokumentation",
     "doc_menu_open_doc": "Dokumentation öffnen",
     # Voreinstellungen, Kontrollzentrum, Praesentieren, Augenschutz, Hintergrund und Fokus
     "workshop_menu_import": "Workshop-Inhalte importieren …",

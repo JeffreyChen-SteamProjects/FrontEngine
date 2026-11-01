@@ -64,6 +64,8 @@ e a versão da Steam entrega o mesmo aplicativo com suporte à Workshop.
 A barra lateral agrupa as páginas conforme a finalidade delas. Esta seção segue
 essa organização.
 
+Cada página tem um ícone na barra lateral, e a caixa de busca no topo (Ctrl+K) abre Comandos. Os menus Ajuda e Documentação da barra de menus agora têm exatamente esses nomes.
+
 ### Lar
 
 **Lar dos pets** — a primeira página. Seus pets salvos se mudam para um pequeno lar, vivem lá por conta própria e trabalham para ganhar moedas.

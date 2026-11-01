@@ -60,6 +60,8 @@ et la version Steam livre la même application avec la prise en charge du Worksh
 
 La barre latérale regroupe les pages selon leur usage. Cette section suit ce classement.
 
+Chaque page a une icône dans la barre latérale, et le champ de recherche en haut (Ctrl+K) ouvre les commandes. Les menus Aide et Documentation de la barre de menus portent simplement ces noms.
+
 ### Maison
 
 **Maison des mascottes** — la première page. Vos mascottes enregistrées emménagent dans une petite maison, y vivent seules et travaillent pour gagner des pièces.

@@ -15,7 +15,7 @@ traditional_chinese_word_dict = {
     "tab_video_text": "影片",
     "tab_image_text": "圖片",
     "tab_web_text": "網頁",
-    "tab_gif_text": "GIF 和 WEBP",
+    "tab_gif_text": "GIF 和 WebP",
     "tab_sound_text": "音樂",
     "tab_text_text": "文字",
     "tab_external_ui": "外部 UI",
@@ -228,12 +228,12 @@ traditional_chinese_word_dict = {
     "input_error": "請勿無輸入或空格",
     "save_generation_image": "儲存圖片",
     # Help Menu
-    "help_menu_label": "幫助選單",
+    "help_menu_label": "說明",
     "help_menu_open_issue": "開啟問題回報",
     "how_to_critical_exit_action": "怎麼強制關閉",
     "how_to_critical_exit": "按下 F12 可以緊急關閉",
     # HowTo Menu
-    "doc_menu_label": "文件選單",
+    "doc_menu_label": "文件",
     "doc_menu_open_doc": "開啟文件",
     # Presets
     "workshop_menu_import": "匯入創意工坊內容…",

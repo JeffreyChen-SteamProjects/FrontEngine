@@ -3,7 +3,7 @@ Préréglages et réglages
 
 Menu Fonctions
 
-**Fonctions**, le premier menu, regroupe tous les outils par usage (médias, scènes et fond d’écran, widgets, concentration et confort visuel, présentation, capture, mascottes, automatisation, contenu et Workshop, contrôle des superpositions, réglages et aide), avec *Rechercher une fonction* (Ctrl+K), *Épinglées* et *Récentes*. Les entrées ouvrent les mêmes pages et lancent les mêmes commandes qu’avant : raccourcis, préréglages, règles, télécommande sur téléphone et MIDI continuent de fonctionner ; les menus Préréglages, Réglages, Langue et Aide y figurent tels quels. Les groupes de la barre latérale se replient d’un clic sur leur titre et le restent. Le menu de la zone de notification propose *Ouvrir la maison des mascottes*.
+**Fonctions**, le premier menu, regroupe tous les outils par usage (médias, scènes et fond d’écran, widgets, concentration et confort visuel, présentation, capture, mascottes, automatisation, contenu et Workshop, contrôle des superpositions, réglages et aide), avec *Rechercher une fonction* (Ctrl+K), *Épinglées* et *Récentes*. Les entrées ouvrent les mêmes pages et lancent les mêmes commandes qu’avant : raccourcis, préréglages, règles, télécommande sur téléphone et MIDI continuent de fonctionner ; les menus Préréglages, Réglages, Langue et Aide y figurent tels quels. Les groupes de la barre latérale se replient d’un clic sur leur titre et le restent. Le menu de la zone de notification propose *Ouvrir la maison des mascottes*. Chaque page a une icône dans la barre latérale ; le champ de recherche en haut (Ctrl+K) ouvre les commandes. Les menus de la barre s'appellent Aide et Documentation.
 
 Menu Préréglages
 

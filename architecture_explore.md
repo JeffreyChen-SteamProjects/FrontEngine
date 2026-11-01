@@ -173,8 +173,10 @@ FrontEngine 是一個 PySide6 桌面**覆蓋層（overlay）框架**：把影片
 | 檔案 | 行數 | 功用 |
 | --- | ---: | --- |
 | `main_ui.py` | 1,364 | `FrontEngineMainUI(QMainWindow)`。組裝帶功能搜尋入口的側欄、分頁、選單與系統匣，持有背景服務並分派全域快速鍵／手機遙控／MIDI 動作，負責關閉時完整收尾。另有 `start_front_engine()` 與 CLI `main()`。 |
-| `nav/sidebar.py` | 114 | `NavigationSidebar(QListWidget)`：分組的分頁清單（On screen / Desktop / Work / Control / Extensions），選取時送 `page_requested`，完整名稱以工具提示顯示。 |
+| `nav/sidebar.py` | 114 | `NavigationSidebar(QListWidget)`：分組的分頁清單（On screen / Desktop / Work / Control / Extensions），選取時送 `page_requested`，完整名稱以工具提示顯示。每列頁面帶 `nav_icons` 線條圖示（`add_page(..., icon_name=)`，選取時改用文字色），群組標題一律大寫、收合箭頭是同風格的 chevron；調色盤改變時重繪圖示。 |
+| `nav/shell.py` | 110 | 外框元件：`BrandMark`（橘底墨色腳印標誌 + 名稱）與 `CommandSearchButton`（放大鏡、「指令」、Ctrl+K 提示，點擊開指令面板）；皆隨調色盤重繪。 |
 | `style/tokens.py` | 110 | 自有設計系統的色票與尺寸刻度：亮／暗兩組（INKSIDE 墨黑、紙白、橘色）、圓角、控制項高度、字級。`resolve_theme()` / `normalise_theme()` 把 system / light / dark 與舊版 qt-material 主題名稱（`dark_amber.xml` 等）對應成亮或暗。 |
+| `style/nav_icons.py` | 90 | 單一風格的 24×24 線條圖示（側欄各頁、搜尋、chevron），以 SVG 路徑保存並在執行期用 token 顏色算成圖，主題切換不需要另一套圖檔。 |
 | `style/app_style.py` | 380 | 由 tokens 產生整份樣式表（所有標準控制項、外框、分區卡片、主要／危險按鈕、選單、提示、捲軸）與 QPalette；`apply_app_style(window, theme)` 取代整份樣式表並設定調色盤，只影響該視窗與其子元件（覆蓋層不受影響）。`contrast_ratio()` 依 WCAG 計算；勾選與箭頭圖示是 `style/icons/*.svg`（套件資料）。 |
 | `color/global_color.py` | 4 | 兩個常數：log 面板的一般與錯誤顏色。 |
 | `frontengine/system_tray/extend_system_tray.py`（在 `ui/` 之外，自成一個套件） | 111 | `ExtendSystemTray`：系統匣選單（顯示／隱藏主視窗、全部關閉、退出），文字接 `retranslator`。 |

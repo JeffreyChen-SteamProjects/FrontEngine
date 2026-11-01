@@ -1,5 +1,4 @@
 """FrontEngine's own design system: light / dark tokens, a complete stylesheet and the theme choice."""
-import json
 import os
 import re
 
@@ -87,23 +86,8 @@ def test_schedule_defaults_to_light_and_dark_and_refresh_reemits():
 
 
 @pytest.fixture
-def window(tmp_path, monkeypatch):
-    from frontengine.ui.main_ui import FrontEngineMainUI
-    import frontengine.ui.main_ui as module
-    import frontengine.ui.menu.settings_menu as menu_module
-
-    (tmp_path / "user_setting.json").write_text(json.dumps({"language": "English", "theme": "dark_amber.xml"}),
-                                                encoding="utf-8")
-    original = os.getcwd()
-    os.chdir(tmp_path)
-    monkeypatch.setattr(module, "write_user_setting", lambda: None)
-    monkeypatch.setattr(menu_module, "write_user_setting", lambda: None)
-    try:
-        ui = FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)
-        yield ui
-        ui.close()
-    finally:
-        os.chdir(original)
+def window(make_main_window):
+    return make_main_window({"language": "English", "theme": "dark_amber.xml"})
 
 
 def test_startup_turns_a_legacy_theme_into_dark_and_the_menu_switches_it(window):

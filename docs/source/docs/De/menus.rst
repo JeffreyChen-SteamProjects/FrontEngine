@@ -3,7 +3,7 @@ Voreinstellungen und Einstellungen
 
 Menü Funktionen
 
-**Funktionen**, das erste Menü, enthält alle Werkzeuge nach Zweck gruppiert (Medien, Szenen und Hintergrund, Widgets, Fokus und Augenschutz, Präsentieren, Aufnahme, Haustiere, Automatisierung, Inhalte und Workshop, Overlay-Steuerung, Einstellungen und Hilfe) sowie *Funktionen suchen* (Strg+K), *Angeheftet* und *Zuletzt verwendet*. Die Einträge öffnen dieselben Seiten und führen dieselben Befehle aus wie bisher, daher funktionieren Tastenkürzel, Voreinstellungen, Regeln, die Handy-Fernbedienung und MIDI weiter; die Menüs Voreinstellungen, Einstellungen, Sprache und Hilfe erscheinen unverändert darin. Gruppen in der Seitenleiste klappen mit einem Klick auf ihre Überschrift zu und bleiben zu. Das Tray-Menü bietet *Haustier-Zuhause öffnen*.
+**Funktionen**, das erste Menü, enthält alle Werkzeuge nach Zweck gruppiert (Medien, Szenen und Hintergrund, Widgets, Fokus und Augenschutz, Präsentieren, Aufnahme, Haustiere, Automatisierung, Inhalte und Workshop, Overlay-Steuerung, Einstellungen und Hilfe) sowie *Funktionen suchen* (Strg+K), *Angeheftet* und *Zuletzt verwendet*. Die Einträge öffnen dieselben Seiten und führen dieselben Befehle aus wie bisher, daher funktionieren Tastenkürzel, Voreinstellungen, Regeln, die Handy-Fernbedienung und MIDI weiter; die Menüs Voreinstellungen, Einstellungen, Sprache und Hilfe erscheinen unverändert darin. Gruppen in der Seitenleiste klappen mit einem Klick auf ihre Überschrift zu und bleiben zu. Das Tray-Menü bietet *Haustier-Zuhause öffnen*. Jede Seite hat in der Seitenleiste ein Symbol; das Suchfeld oben (Strg+K) öffnet die Befehle. Die Menüs der Menüleiste heißen Hilfe und Dokumentation.
 
 Menü „Voreinstellungen“
 

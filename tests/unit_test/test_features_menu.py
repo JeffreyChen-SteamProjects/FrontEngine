@@ -1,7 +1,4 @@
 """Every existing tool stays reachable once the game is the main page."""
-import json
-import os
-
 import pytest
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QMenu
@@ -16,20 +13,8 @@ def _key(action: QAction) -> int:
 
 
 @pytest.fixture
-def window(tmp_path, monkeypatch):
-    from frontengine.ui.main_ui import FrontEngineMainUI
-    import frontengine.ui.main_ui as module
-
-    (tmp_path / "user_setting.json").write_text(json.dumps({"language": "English"}), encoding="utf-8")
-    original = os.getcwd()
-    os.chdir(tmp_path)
-    monkeypatch.setattr(module, "write_user_setting", lambda: None)
-    try:
-        ui = FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)
-        yield ui
-        ui.close()
-    finally:
-        os.chdir(original)
+def window(make_main_window):
+    return make_main_window()
 
 
 def _actions(menu: QMenu, seen=None) -> list[QAction]:

@@ -57,6 +57,38 @@ def _qt_application():
     _release_leftovers(application)
 
 
+@pytest.fixture
+def make_main_window(tmp_path, monkeypatch):
+    """
+    Build FrontEngineMainUI from a settings dict, in its own folder, never writing settings.
+    Every window built is closed and the working directory restored at teardown.
+    """
+    import json
+    from frontengine.ui.main_ui import FrontEngineMainUI
+    import frontengine.ui.main_ui as main_module
+    import frontengine.ui.menu.settings_menu as menu_module
+
+    monkeypatch.setattr(main_module, "write_user_setting", lambda: None)
+    monkeypatch.setattr(menu_module, "write_user_setting", lambda: None)
+    original = os.getcwd()
+    windows = []
+
+    def build(settings=None):
+        (tmp_path / "user_setting.json").write_text(json.dumps(settings or {"language": "English"}),
+                                                    encoding="utf-8")
+        os.chdir(tmp_path)
+        window = FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)
+        windows.append(window)
+        return window
+
+    try:
+        yield build
+    finally:
+        for window in windows:
+            window.close()
+        os.chdir(original)
+
+
 def _release_leftovers(application) -> None:
     """Stop listener threads and delete leftover top-level widgets while Python is still whole.
 

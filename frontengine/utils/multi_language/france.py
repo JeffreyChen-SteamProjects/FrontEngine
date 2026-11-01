@@ -15,7 +15,7 @@ french_word_dict = {
     "tab_video_text": "Vidéo",
     "tab_image_text": "Image",
     "tab_web_text": "Web",
-    "tab_gif_text": "GIF et WEBP",
+    "tab_gif_text": "GIF et WebP",
     "tab_sound_text": "Musique",
     "tab_text_text": "Texte",
     "tab_external_ui": "UI externe",
@@ -228,12 +228,12 @@ french_word_dict = {
     "input_error": "Veuillez éviter les entrées vides ou les espaces",
     "save_generation_image": "Sauvegarder l'image",
     # Help Menu
-    "help_menu_label": "Menu Aide",
+    "help_menu_label": "Aide",
     "help_menu_open_issue": "Ouvrir un rapport de problème",
     "how_to_critical_exit_action": " Comment forcer la fermeture",
     "how_to_critical_exit": "Appuyez sur F12 pour fermer d’urgence",
     # HowTo Menu
-    "doc_menu_label": "Menu Documentation",
+    "doc_menu_label": "Documentation",
     "doc_menu_open_doc": "Ouvrir la documentation",
     # Prereglages, mascotte, widgets, outils, confidentialite, telecommande et affichage
     "workshop_menu_import": "Importer du contenu Workshop…",

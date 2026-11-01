@@ -15,7 +15,7 @@ italian_word_dict = {
     "tab_video_text": "Video",
     "tab_image_text": "Immagine",
     "tab_web_text": "Web",
-    "tab_gif_text": "GIF e WEBP",
+    "tab_gif_text": "GIF e WebP",
     "tab_sound_text": "Musica",
     "tab_text_text": "Testo",
     "tab_external_ui": "UI esterna",
@@ -228,12 +228,12 @@ italian_word_dict = {
     "input_error": "Inserisci un testo valido senza spazi vuoti",
     "save_generation_image": "Salva l'immagine",
     # Help Menu
-    "help_menu_label": "Menu Aiuto",
+    "help_menu_label": "Aiuto",
     "help_menu_open_issue": "Apri un ticket di supporto",
     "how_to_critical_exit_action": "Come forzare la chiusura",
     "how_to_critical_exit": "Premere F12 per chiudere urgentemente",
     # HowTo Menu
-    "doc_menu_label": "Menu Documentazione",
+    "doc_menu_label": "Documentazione",
     "doc_menu_open_doc": "Apri la documentazione",
     # Preimpostazioni, mascotte, widget, strumenti, privacy, telecomando e vetrina
     "workshop_menu_import": "Importa contenuti Workshop…",
