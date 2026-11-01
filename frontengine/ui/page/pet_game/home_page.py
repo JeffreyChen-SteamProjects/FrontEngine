@@ -13,7 +13,8 @@ from pathlib import Path
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QGuiApplication, QKeyEvent
-from PySide6.QtWidgets import QCheckBox, QFrame, QHBoxLayout, QLabel, QPushButton, QScrollArea, QWidget
+from PySide6.QtWidgets import (QCheckBox, QFrame, QHBoxLayout, QLabel, QListWidget, QListWidgetItem,
+                               QPushButton, QScrollArea, QVBoxLayout, QWidget)
 
 from frontengine.show.pet_game.home_service import HomeService
 from frontengine.show.pet_game.home_strip import HIDDEN_REASON, HOME_MODES, LAYERS, HomeStrip
@@ -21,7 +22,11 @@ from frontengine.show.pet_game.home_view import HomeView
 from frontengine.show.pet_game.resident_art import ResidentArt
 from frontengine.show.pet_game.themes import glyph
 from frontengine.utils.pet_game.environment import weather
+from frontengine.show.pet_game.home_view import ZOOMS
+from frontengine.ui.dialog.dialog_kit import button_row
 from frontengine.ui.page.layout_kit import Section, SettingPage
+from frontengine.ui.page.pet_game.home_pending import pending
+from frontengine.utils.browser.browser import open_browser
 from frontengine.ui.page.pet_game.home_stage import EmptyHome, HomeTabs, TAB_ORDER, make_tab_ready
 from frontengine.ui.page.pet_game.home_panels import (
     LayoutPanel, ResidentPanel, ShopPanel, StoragePanel, WorkPanel,
@@ -42,6 +47,8 @@ INTRO_KEY = "pet_home_intro_seen"
 MOTION_KEY = "pet_home_reduced_motion"
 MODE_KEY = "pet_home_mode"
 MEETING_REASON = "meeting"
+# Where a newer FrontEngine comes from, when a save was written by one.
+UPDATE_URL = "https://pypi.org/project/frontengine/"
 # The overview on this page is a stage, taller than the desktop strip.
 STAGE_HEIGHT = 220
 LAYER_KEY = "pet_home_layer"
@@ -55,6 +62,7 @@ def default_service(parent) -> HomeService:
 
 class PetHomePage(SettingPage):
     open_requested = Signal()
+    desktop_requested = Signal()          # "Back to the desktop": the window steps aside
 
     def __init__(self, service: HomeService | None = None) -> None:
         super().__init__("pet_home_title", "pet_home_subtitle", "Pet home",
@@ -147,6 +155,8 @@ class PetHomePage(SettingPage):
         self.restore_button.clicked.connect(self.restore_backup)
         self.aside_button = tr(QPushButton(), "pet_home_set_aside", "Keep the old file and start over")
         self.aside_button.clicked.connect(self.set_aside)
+        self.update_button = tr(QPushButton(), "pet_home_get_update", "Get the latest FrontEngine")
+        self.update_button.clicked.connect(lambda: open_browser(UPDATE_URL))
         for button in (self.create_button, self.run_button):
             button.setObjectName("primaryAction")
         # One line on top of the stage: what is happening on the left, what you can do on the right.
@@ -156,14 +166,73 @@ class PetHomePage(SettingPage):
         row.setContentsMargins(0, 0, 0, 0)
         row.setSpacing(10)
         row.addWidget(self.status, 1)
-        for button in (self.restore_button, self.aside_button, self.create_button, self.run_button):
+        for button in (self.update_button, self.restore_button, self.aside_button, self.create_button,
+                       self.run_button):
             row.addWidget(button)
         section.add_widget(bar)
         section.add_widget(self.message)
         self.empty_home = EmptyHome()
         section.add_widget(self.empty_home)
         self.view_area = self._scroller(self.view)
+        self.view.zoomable = True
+        self.view.zoom_changed.connect(self._zoom_changed)
         section.add_widget(self.view_area)
+        self._build_shortcuts(section)
+
+    def _build_shortcuts(self, section) -> None:
+        """Under the stage: where to go next, what is waiting, and the zoom."""
+        self.desktop_button = tr(QPushButton(), "pet_home_back_to_desktop", "Back to the desktop")
+        self.desktop_button.clicked.connect(self.desktop_requested.emit)
+        self.backpack_button = tr(QPushButton(), "pet_home_storage_section", "Backpack")
+        self.backpack_button.clicked.connect(lambda: self.tabs.select("pet_home_storage_section"))
+        self.goals_button = tr(QPushButton(), "pet_home_goals_section", "Goals")
+        self.goals_button.clicked.connect(lambda: self.tabs.select("pet_home_goals_section"))
+        self.zoom_out = QPushButton("−")
+        self.zoom_in = QPushButton("+")
+        for button, steps, key, fallback in ((self.zoom_out, -1, "pet_home_zoom_out", "Zoom out"),
+                                             (self.zoom_in, 1, "pet_home_zoom_in", "Zoom in")):
+            tr(button, key, fallback, "setToolTip")
+            tr(button, key, fallback, "setAccessibleName")
+            button.setFixedWidth(40)
+            button.clicked.connect(lambda _checked=False, s=steps: self.view.step_zoom(s))
+        self.shortcuts = button_row(self.desktop_button, self.backpack_button, self.goals_button)
+        self.shortcuts.layout().addWidget(self.zoom_out)
+        self.shortcuts.layout().addWidget(self.zoom_in)
+        section.add_widget(self.shortcuts)
+        self.pending_box = QWidget()
+        self.pending_box.setObjectName("inlineActions")
+        box = QVBoxLayout(self.pending_box)
+        box.setContentsMargins(0, 0, 0, 0)
+        box.setSpacing(4)
+        box.addWidget(tr(QLabel(), "pet_home_pending", "Waiting for you"))
+        self.pending_list = QListWidget()
+        self.pending_list.setObjectName("pendingList")
+        self.pending_list.itemActivated.connect(self._open_pending)
+        self.pending_list.itemClicked.connect(self._open_pending)
+        box.addWidget(self.pending_list)
+        section.add_widget(self.pending_box)
+
+    def _open_pending(self, item) -> None:
+        self.tabs.select(item.data(Qt.ItemDataRole.UserRole))
+
+    def _refresh_pending(self) -> None:
+        items = pending(self.service.world, self.inbox.unread)
+        texts = [text for text, _key in items]
+        if [self.pending_list.item(row).text() for row in range(self.pending_list.count())] == texts:
+            return
+        self.pending_list.clear()
+        for text, key in items:
+            item = QListWidgetItem(text)
+            item.setData(Qt.ItemDataRole.UserRole, key)
+            self.pending_list.addItem(item)
+        rows = max(1, len(items))
+        self.pending_list.setFixedHeight(rows * (self.pending_list.fontMetrics().height() + 12) + 10)
+
+    def _zoom_changed(self, zoom: float) -> None:
+        self.view.setFixedHeight(round(STAGE_HEIGHT * zoom))
+        self.view_area.setFixedHeight(self.view.height() + self.view_area.horizontalScrollBar().sizeHint().height() + 2)
+        self.zoom_out.setEnabled(zoom > ZOOMS[0])
+        self.zoom_in.setEnabled(zoom < ZOOMS[-1])
 
     def _build_settings(self) -> None:
         """How the home behaves on the desktop: a tab of its own, out of the way of playing."""
@@ -193,6 +262,10 @@ class PetHomePage(SettingPage):
         area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         area.setFixedHeight(view.height() + area.horizontalScrollBar().sizeHint().height() + 2)
         return area
+
+    def _strip_done_arranging(self) -> None:
+        if self.layout_panel.arranging:
+            self.layout_panel.toggle_arrange()
 
     def _connect(self) -> None:
         self.service.ticked.connect(self.refresh_live)
@@ -269,6 +342,7 @@ class PetHomePage(SettingPage):
         if wanted and not self.strip_list:
             strip = HomeStrip(self.service, self.zone, self.layer, str(user_setting_dict.get("quality_tier", "")))
             strip.open_requested.connect(self.open_requested.emit)
+            strip.arrange_finished.connect(self._strip_done_arranging)
             strip.layer_requested.connect(self.choose_layer)
             strip.resident_selected.connect(self.select_resident)
             strip.cell_clicked.connect(self.layout_panel.cell_clicked)
@@ -435,6 +509,10 @@ class PetHomePage(SettingPage):
         self.run_button.setVisible(has_home)
         self.restore_button.setVisible(protected and self.load_result.backup_available)
         self.aside_button.setVisible(protected)
+        self.update_button.setVisible(self.load_result.status == "newer" and not has_home)
+        self.shortcuts.setVisible(has_home)
+        self._refresh_pending()
+        self.pending_box.setVisible(has_home and self.pending_list.count() > 0)
         for panel in (self.residents, self.goals, self.layout_panel, self.shop, self.storage, self.work):
             panel.section.setEnabled(has_home)
         self.empty_home.setVisible(not has_home)

@@ -27,6 +27,7 @@ FLOOR_HEIGHT = 16
 MIN_CELL = 20.0          # below this, furniture labels stop being readable
 MAX_CELL = 40.0
 SPRITE_CELLS = 2.2           # a character stands a little over two cells tall
+ZOOMS = (1.0, 1.25, 1.5, 2.0)
 GLYPHS = {"sleep": "Zz", "nap": "Zz", "eat": "~", "snack": "~", "work": "✎", "play": "♪",
           "relax": "☕", "wait": "…", "wander": "", "idle": "", "drag": "✋"}
 
@@ -42,6 +43,9 @@ class HomeView(QWidget):
     caption_backdrop = False      # a dark plate behind names, for drawing over any desktop
     art = None                    # ResidentArt; without it residents are drawn as markers
     reduced_motion = False        # no in-between movement and no moving rain
+    zoom = 1.0                    # cell size multiplier (ZOOMS); the desktop strip stays at 1
+    zoomable = False              # Ctrl+wheel zooms only where the page allows it
+    zoom_changed = Signal(float)
     resident_selected = Signal(str)
     furniture_selected = Signal(str)
     cell_clicked = Signal(int)
@@ -60,9 +64,32 @@ class HomeView(QWidget):
     def set_world(self, world: World | None, zone: str | None) -> None:
         """A wide zone keeps readable cells and scrolls instead of shrinking."""
         self.world, self.zone = world, zone
-        cells = world.zones[zone].width_cells if world is not None and zone in world.zones else 0
-        self.setMinimumWidth(int(cells * MIN_CELL) + 2)
+        self._fit_width()
         self.update()
+
+    def _fit_width(self) -> None:
+        cells = self.world.zones[self.zone].width_cells if self.world is not None and self.zone in self.world.zones else 0
+        self.setMinimumWidth(int(cells * MIN_CELL * self.zoom) + 2)
+
+    def set_zoom(self, zoom: float) -> float:
+        """Make cells (and everything on them) bigger; the overview then scrolls sideways."""
+        self.zoom = min(ZOOMS[-1], max(ZOOMS[0], zoom))
+        self._fit_width()
+        self.update()
+        self.zoom_changed.emit(self.zoom)
+        return self.zoom
+
+    def step_zoom(self, steps: int) -> float:
+        index = min(range(len(ZOOMS)), key=lambda i: abs(ZOOMS[i] - self.zoom))
+        return self.set_zoom(ZOOMS[max(0, min(len(ZOOMS) - 1, index + steps))])
+
+    def wheelEvent(self, event) -> None:
+        """Ctrl+wheel zooms; a plain wheel still scrolls the page."""
+        if event.modifiers() & Qt.KeyboardModifier.ControlModifier and self.zoomable:
+            self.step_zoom(1 if event.angleDelta().y() > 0 else -1)
+            event.accept()
+            return
+        super().wheelEvent(event)
 
     def set_selected(self, identifier: str | None) -> None:
         self.selected = identifier
@@ -77,7 +104,7 @@ class HomeView(QWidget):
         if self.world is None or self.zone not in self.world.zones:
             return MIN_CELL
         cells = self.world.zones[self.zone].width_cells
-        return max(MIN_CELL, min(MAX_CELL, (self.width() - 2) / cells))
+        return max(MIN_CELL * self.zoom, min(MAX_CELL * self.zoom, (self.width() - 2) / cells))
 
     def _floor_y(self) -> float:
         return self.height() - FLOOR_HEIGHT - 4
