@@ -547,6 +547,41 @@ def grandfather_clock(p: Palette) -> None:
     cylinder(0.12, 0.04, (0.5, -0.35, 0.9), p["accent_2"], rotation=(math.radians(90), 0, 0))
 
 
+def pet_stairs(p: Palette) -> None:
+    """Three carpeted steps rising to the right, up to perch height."""
+    for step in range(3):
+        height = 0.38 * (step + 1)
+        box((0.62, 0.8, height), (0.35 + step * 0.65, 0, height / 2), p["wood"], bevel=0.03)
+        cushion((0.58, 0.74, 0.06), (0.35 + step * 0.65, 0, height + 0.02), p["accent"], softness=1)
+
+
+def cat_tree(p: Palette) -> None:
+    """A carpeted base, a sisal trunk and a round bed on top where a pet curls up."""
+    box((1.8, 1.0, 0.16), (1.0, 0, 0.08), p["fabric"], bevel=0.04)
+    cylinder(0.14, 1.6, (0.7, 0, 0.9), p["wood"])
+    cylinder(0.12, 1.1, (1.35, 0, 0.65), p["wood"])
+    for z in range(5):
+        torus(0.15, 0.022, (0.7, 0, 0.3 + z * 0.24), p["dark_wood"])
+    box((0.8, 0.8, 0.1), (1.35, 0, 1.22), p["dark_wood"], bevel=0.03)
+    cylinder(0.62, 0.14, (0.85, 0, 1.75), p["dark_wood"])
+    torus(0.55, 0.12, (0.85, 0, 1.86), p["accent"])
+    cylinder(0.5, 0.06, (0.85, 0, 1.84), p["fabric"], bevel=0.0)
+    sphere(0.09, (1.62, -0.25, 1.05), p["ball"])
+    cylinder(0.01, 0.15, (1.62, -0.25, 1.15), p["ink"], bevel=0.0)
+
+
+def climbing_wall(p: Palette) -> None:
+    """A wall board with coloured holds and a ledge at the top to sit and look out from."""
+    box((1.9, 0.14, 2.3), (1.0, 0.3, 1.15), p["wood"], bevel=0.03)
+    holds = ((0.4, 0.4), (1.3, 0.7), (0.7, 1.05), (1.5, 1.35), (0.5, 1.6), (1.15, 1.9))
+    for index, (x, z) in enumerate(holds):
+        sphere(0.1, (x, 0.18, z), p["accent" if index % 2 else "accent_2"], scale=(1.2, 0.7, 0.9))
+    box((1.9, 0.75, 0.12), (1.0, -0.05, 2.25), p["dark_wood"], bevel=0.03)
+    cushion((1.4, 0.6, 0.1), (1.0, -0.08, 2.35), p["fabric"], softness=1)
+    box((0.12, 0.12, 0.5), (0.15, -0.3, 2.0), p["dark_wood"], bevel=0.02, rotation=(0.6, 0, 0))
+    box((0.12, 0.12, 0.5), (1.85, -0.3, 2.0), p["dark_wood"], bevel=0.02, rotation=(0.6, 0, 0))
+
+
 PIECES = {"bed_basic": (4, bed_basic), "bed_cozy": (4, bed_cozy), "table_basic": (4, table_basic),
           "desk_basic": (3, desk_basic), "plant_pot": (1, plant_pot), "wall_lamp": (1, wall_lamp),
           "toy_box": (2, toy_box), "armchair": (2, armchair), "stool": (1, stool), "planter": (2, planter),
@@ -558,7 +593,8 @@ PIECES.update({"bunk_bed": (4, bunk_bed), "hammock": (3, hammock), "pet_cushion"
                "bookshelf": (2, bookshelf), "ball_pit": (3, ball_pit), "piano": (3, piano),
                "scratching_post": (1, scratching_post), "rug": (4, rug), "easel": (1, easel),
                "aquarium": (2, aquarium), "string_lights": (3, string_lights),
-               "grandfather_clock": (1, grandfather_clock)})
+               "grandfather_clock": (1, grandfather_clock),
+               "pet_stairs": (2, pet_stairs), "cat_tree": (2, cat_tree), "climbing_wall": (2, climbing_wall)})
 
 
 # ----- items: materials, harvests and goods -------------------------------------------------------

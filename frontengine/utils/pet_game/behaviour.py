@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from frontengine.utils.pet_game.catalog import CELL_PIXELS
 from frontengine.utils.pet_game.goals import unlocked
 from frontengine.utils.pet_game.layout import AREA_FOR_ACTIVITY
 from frontengine.utils.pet_game.resident import PROFESSION_TRAITS, Activity, Resident
@@ -28,6 +29,7 @@ GREET_COOLDOWN_MS = 5 * 60 * 1000
 SQUABBLE_COOLDOWN_MS = 10 * 60 * 1000
 WAIT_MS = 5000
 FREE_WEIGHTS = {"play": 3, "relax": 3, "wander": 4, "idle": 2, "greet": 2}
+VISIT_WEIGHT = 1                 # free time over a crossing point into the linked zone
 TRAIT_WEIGHTS = {"playful": {"play": 3}, "quiet": {"relax": 3, "play": -2, "greet": -1},
                  "social": {"wander": 2, "greet": 3}}
 SHARED_COOLDOWN_MS = 10 * 60 * 1000
@@ -92,6 +94,8 @@ def _free_piece(world: World, resident: Resident, activity: str,
             continue
         if activity == "sleep" and piece.owner not in (None, resident.identifier):
             continue
+        if not world.reachable(resident, piece):
+            continue
         point = piece.free_point(definition)
         if point is not None:
             rank = 0 if owner_first and piece.owner == resident.identifier else 1
@@ -108,7 +112,24 @@ def _has_kind(world: World, resident: Resident, activity: str) -> bool:
     return any(definition.activity == activity for _piece, definition in world.in_zone(resident.zone))
 
 
+def _home_bed_elsewhere(world: World, resident: Resident) -> bool:
+    """Its own bed is across the crossing point, so going to sleep starts with walking home."""
+    target = world.crossing(resident.zone)
+    return target is not None and any(piece.owner == resident.identifier and piece.zone == target
+                                      for piece in world.furniture.values())
+
+
+def start_visit(world: World, resident: Resident, reason: str) -> None:
+    """Walk to the entrance; arriving there crosses into the linked zone."""
+    start(world, resident, "visit", reason)
+    entrance = world.zones[resident.zone].entrance
+    resident.activity.target_x = (entrance * CELL_PIXELS + CELL_PIXELS // 2) * 1000
+
+
 def start_rest(world: World, resident: Resident, reason: str) -> None:
+    if _home_bed_elsewhere(world, resident):
+        start_visit(world, resident, "going_home")
+        return
     found = _free_piece(world, resident, "sleep", owner_first=True)
     if found is None:
         start(world, resident, "nap", reason)      # resting is always possible
@@ -230,7 +251,12 @@ def _start_free(world: World, resident: Resident, reason: str = "free_time") -> 
     choices = [(kind, weight) for kind, weight in weights.items()
                if kind in ("wander", "idle") or (kind == "greet" and _greet_partner(world, resident))
                or (kind not in ("greet", "wander", "idle") and _free_piece(world, resident, kind) is not None)]
+    if world.crossing(resident.zone) is not None:
+        choices.append(("visit", VISIT_WEIGHT))
     kind = world.rng.weighted(choices)
+    if kind == "visit":
+        start_visit(world, resident, "visiting")
+        return
     if kind == "greet" and start_greet(world, resident):
         return
     if kind in ("play", "relax"):

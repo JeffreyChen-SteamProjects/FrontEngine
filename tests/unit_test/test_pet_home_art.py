@@ -35,6 +35,7 @@ def home(tmp_path):
     assert service.adopt(record["id"]) == "accepted"
     art = ResidentArt(service, library_factory=lambda: library)
     yield service, art, library, asset, record["id"]
+    art.shutdown()
     service.shutdown()
 
 

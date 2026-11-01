@@ -442,6 +442,7 @@ class PetHomePage(SettingPage):
         for dialog in list(self.residents.wardrobes.values()):
             dialog.close()
         self.close_strip()
+        self.art.shutdown()
         return self.service.shutdown()
 
     # ----- desktop strip ---------------------------------------------------------------

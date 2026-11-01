@@ -31,7 +31,7 @@ ZOOMS = (1.0, 1.25, 1.5, 2.0)
 AREA_COLORS = {"living": "#B8C7E6", "work": "#C9D9A5", "leisure": "#F2C6A8", "dining": "#F1DD9A",
                "clear": "#D8D2C6"}
 GLYPHS = {"sleep": "Zz", "nap": "Zz", "eat": "~", "snack": "~", "work": "✎", "play": "♪",
-          "relax": "☕", "wait": "…", "wander": "", "idle": "", "drag": "✋"}
+          "relax": "☕", "wait": "…", "wander": "", "visit": "", "idle": "", "drag": "✋"}
 
 
 def resident_color(identifier: str) -> QColor:
@@ -153,8 +153,11 @@ class HomeView(QWidget):
             painter.fillRect(QRectF(cell * width, floor.top(), width, FLOOR_HEIGHT),
                              QColor(200, 70, 70, 120))
         door = QRectF(zone.entrance * width, self._floor_y() - width * 2, width, width * 2)
-        painter.setPen(QPen(self.ink(), 1, Qt.PenStyle.DashLine))
+        linked = self.world.crossing(self.zone) is not None
+        painter.setPen(QPen(self.ink(), 2 if linked else 1, Qt.PenStyle.SolidLine if linked else Qt.PenStyle.DashLine))
         painter.drawRect(door)
+        if linked:                    # a crossing point: pets may walk through to the linked zone
+            painter.drawText(door, Qt.AlignmentFlag.AlignCenter, "⇄")
         if self.preview is not None:
             painter.setPen(QPen(self.palette().mid().color(), 1))
             for cell in range(zone.width_cells + 1):

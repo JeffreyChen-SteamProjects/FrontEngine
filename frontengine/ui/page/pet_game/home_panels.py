@@ -220,6 +220,9 @@ class LayoutPanel:
         self.zone_move = _button("pet_home_move_zone", "Move this zone there", self.move_zone)
         section.add_row("pet_home_other_screen", self.zone_screens, "Other screen")
         section.add_inline(self.zone_add, self.zone_move)
+        self.crossing = QComboBox()
+        self.crossing.activated.connect(self.link_zone)
+        section.add_row("pet_home_crossing", self.crossing, "Entrance leads to")
         self._pasted: list | None = None
 
     def refresh_lists(self) -> None:
@@ -261,6 +264,21 @@ class LayoutPanel:
             self.zone_screens.addItem(screen.name() or "primary", screen)
         for widget in (self.zone_screens, self.zone_add, self.zone_move):
             widget.setEnabled(bool(screens))
+        world, zone = self.page.service.world, self.page.zone
+        self.crossing.clear()
+        self.crossing.addItem(translate("pet_home_crossing_none", "Nowhere (pets stay in this zone)"), None)
+        for other in (world.zones.values() if world is not None else ()):
+            if other.identifier != zone:
+                self.crossing.addItem(other.screen, other.identifier)
+        link = world.zones[zone].link if world is not None and zone in world.zones else None
+        self.crossing.setCurrentIndex(max(0, self.crossing.findData(link)))
+        self.crossing.setEnabled(self.crossing.count() > 1)
+
+    def link_zone(self, *_args) -> None:
+        zone, other = self.page.zone, self.crossing.currentData()
+        if zone is not None:
+            self.page.report(self.page.service.run(lambda world: world.link_zones(zone, other)))
+            self.page.refresh()
 
     def _area_tool_changed(self, *_args) -> None:
         tag = self.area_tag.currentData()

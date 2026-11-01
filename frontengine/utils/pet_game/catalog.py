@@ -41,6 +41,8 @@ class FurnitureDefinition:
     profession: str | None = None
     use_ms: tuple[int, int] = (0, 0)  # leisure duration range
     unlock_level: int = 1            # home level needed before the shop sells it
+    raised: bool = False             # its point is up high: reached by climbing or by pet stairs beside it
+    steps: bool = False              # pet stairs: anyone can climb onto a raised piece next to it
 
 
 @dataclass(frozen=True)
@@ -284,6 +286,15 @@ def _furniture() -> list[FurnitureDefinition]:
                             sell_back=65, comfort=4, unlock_level=4),
         FurnitureDefinition("grandfather_clock", "pet_game_grandfather_clock", "Grandfather clock", "decoration", 1,
                             False, price=60, sell_back=30, comfort=2, unlock_level=5),
+        # Platforms: a raised point is reached by a pet that climbs, or by anyone over pet stairs beside it.
+        FurnitureDefinition("pet_stairs", "pet_game_pet_stairs", "Pet stairs", "decoration", 2, False,
+                            price=25, sell_back=12, steps=True),
+        FurnitureDefinition("cat_tree", "pet_game_cat_tree", "Cat tree", "leisure", 2, True, (0,), "relax",
+                            {"mood": 14, "energy": 6, "comfort": 14}, price=85, sell_back=40, comfort=1,
+                            use_ms=(40000, 60000), unlock_level=2, raised=True),
+        FurnitureDefinition("climbing_wall", "pet_game_climbing_wall", "Climbing wall", "leisure", 2, True, (1,),
+                            "play", {"mood": 22, "energy": -6}, price=110, sell_back=55, use_ms=(30000, 45000),
+                            unlock_level=3, raised=True),
     ]
 
 
