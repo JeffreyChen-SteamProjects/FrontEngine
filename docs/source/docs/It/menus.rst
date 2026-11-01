@@ -24,6 +24,7 @@ Menu Impostazioni
   blocco, fermo immagine, elenco scorciatoie e riproduci/pausa, traccia
   successiva e precedente, e lo spostamento della finestra in primo piano sullo
   schermo successivo mantenendone le proporzioni.
+* Tema - segui il sistema, chiaro o scuro, nel design di FrontEngine in inchiostro, carta e arancione.
 * Tema giorno/notte programmato - chiaro di giorno, scuro di notte.
 * Avvia con il sistema - aprire FrontEngine all'accesso.
 * Ripristina l'ultima sessione - riaprire ciò che c'era sullo schermo.

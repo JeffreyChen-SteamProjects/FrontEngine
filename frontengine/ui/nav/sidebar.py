@@ -23,9 +23,11 @@ from __future__ import annotations
 
 from typing import List, Optional, Tuple
 
-from PySide6.QtCore import QSize, Qt, Signal
-from PySide6.QtWidgets import QListWidget, QListWidgetItem, QStyle
+from PySide6.QtCore import QEvent, QSize, Qt, Signal
+from PySide6.QtGui import QIcon, QPalette
+from PySide6.QtWidgets import QListWidget, QListWidgetItem
 
+from frontengine.ui.style.app_style import ICONS
 from frontengine.utils.multi_language.retranslate import retranslator, translate
 
 SIDEBAR_WIDTH = 208
@@ -110,8 +112,18 @@ class NavigationSidebar(QListWidget):
     # ----- folding groups ---------------------------------------------------------------
 
     def _set_arrow(self, item: QListWidgetItem, collapsed: bool) -> None:
-        arrow = QStyle.StandardPixmap.SP_ArrowRight if collapsed else QStyle.StandardPixmap.SP_ArrowDown
-        item.setIcon(self.style().standardIcon(arrow))
+        """A small chevron in the theme's muted ink (the platform arrows vanish on a dark sidebar)."""
+        tone = "dark" if self.palette().color(QPalette.ColorRole.Window).lightness() < 128 else "light"
+        item.setIcon(QIcon(str(ICONS / f"chevron-{'right' if collapsed else 'down'}-{tone}.svg")))
+
+    def changeEvent(self, event: QEvent) -> None:
+        """A theme change swaps the palette: redraw the group chevrons in the new tone."""
+        super().changeEvent(event)
+        if event.type() == QEvent.Type.PaletteChange:
+            for row in range(self.count()):
+                item = self.item(row)
+                if item.data(ROLE_KIND) == KIND_GROUP:
+                    self._set_arrow(item, item.data(ROLE_GROUP) in self._collapsed)
 
     def _toggle_if_group(self, item: QListWidgetItem) -> None:
         if item is not None and item.data(ROLE_KIND) == KIND_GROUP:

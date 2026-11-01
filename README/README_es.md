@@ -292,6 +292,7 @@ Cosas que luego deciden por sí solas, todas desde el menú **Ajustes**. La paus
 | **Pausa inteligente** | Retira las superposiciones mientras se ejecuta una aplicación en pantalla completa, mientras la máquina está con batería, o mientras una aplicación concreta tiene el foco. *(Activada por defecto, para la regla de pantalla completa.)* |
 | **Perfiles de aplicación** | Aplica un ajuste preestablecido cuando cambias a una aplicación determinada. |
 | **Programación de ajustes preestablecidos** | Aplica un ajuste preestablecido en los días de la semana elegidos a una hora fijada. |
+| **Tema** | Seguir el sistema, o siempre claro u oscuro (*Configuración → Tema*). La ventana usa el diseño propio de FrontEngine, con la tinta, el papel y el naranja de los personajes integrados; la configuración de versiones anteriores conserva su aspecto claro u oscuro. |
 | **Programación de temas** | Alterna entre un tema de día y uno de noche según el reloj. |
 | **Modo señalización** | Rota una lista de ajustes preestablecidos con un temporizador y la ventana principal retirada, para una máquina que se deja funcionando como pantalla. |
 | **Salvapantallas** | Tras un umbral de inactividad, muestra el vídeo / imagen / GIF / partículas / página web que elegiste, y lo retira cuando vuelves. |

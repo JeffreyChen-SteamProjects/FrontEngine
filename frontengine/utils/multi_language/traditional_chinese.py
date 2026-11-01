@@ -1723,4 +1723,8 @@ traditional_chinese_word_dict = {
     "pet_home_note_failed": "{text}",
     "pet_home_note_times": "×{count}",
     "pet_home_wardrobe": "衣櫃…",
+    "settings_menu_theme": "主題",
+    "settings_menu_theme_system": "跟隨系統",
+    "settings_menu_theme_light": "淺色",
+    "settings_menu_theme_dark": "深色",
 }

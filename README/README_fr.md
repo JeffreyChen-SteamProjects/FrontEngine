@@ -290,6 +290,7 @@ l'activiez.
 | **Pause intelligente** | Mettez les superpositions au repos pendant qu'une application plein écran tourne, pendant que la machine est sur batterie, ou pendant qu'une application nommée a le focus. *(Activée par défaut, pour la règle plein écran.)* |
 | **Profils d'application** | Appliquer un préréglage lorsque vous passez à une application donnée. |
 | **Planification de préréglages** | Appliquer un préréglage certains jours de la semaine à une heure définie. |
+| **Thème** | Suivre le système, ou toujours clair ou sombre (*Paramètres → Thème*). La fenêtre utilise le design propre à FrontEngine, à l'encre, au papier et à l'orange des personnages intégrés ; les réglages des versions précédentes gardent leur aspect clair ou sombre. |
 | **Planification de thème** | Basculer entre un thème de jour et un thème de nuit selon l'horloge. |
 | **Mode affichage** | Faire tourner une liste de préréglages sur une minuterie avec la fenêtre principale rangée, pour une machine laissée en marche comme écran d'affichage. |
 | **Écran de veille** | Après un seuil d'inactivité, faire apparaître la vidéo / l'image / le GIF / les particules / la page web que vous avez choisie, et la retirer quand vous revenez. |

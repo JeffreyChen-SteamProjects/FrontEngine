@@ -308,6 +308,7 @@ você acioná-lo.
 | **Pausa inteligente** | Recolha as sobreposições enquanto um aplicativo em tela cheia estiver rodando, enquanto a máquina estiver na bateria, ou enquanto um aplicativo nomeado estiver em foco. *(Ligada por padrão, para a regra de tela cheia.)* |
 | **Perfis de aplicativo** | Aplique uma predefinição quando você mudar para um determinado aplicativo. |
 | **Agenda de predefinições** | Aplique uma predefinição em dias da semana escolhidos, em um horário definido. |
+| **Tema** | Seguir o sistema, ou sempre claro ou escuro (*Configurações → Tema*). A janela usa o design próprio do FrontEngine, com a tinta, o papel e o laranja dos personagens embutidos; configurações de versões anteriores mantêm a aparência clara ou escura. |
 | **Agenda de tema** | Alterne entre um tema de dia e um de noite pelo relógio. |
 | **Modo sinalização** | Alterne uma lista de predefinições em um temporizador com a janela principal guardada, para uma máquina deixada em execução como display. |
 | **Protetor de tela** | Após um limite de inatividade, exiba o vídeo / imagem / GIF / partícula / página web que você escolheu, e retire-o quando você voltar. |

@@ -1724,4 +1724,8 @@ english_word_dict = {
     "pet_home_note_failed": "{text}",
     "pet_home_note_times": "×{count}",
     "pet_home_wardrobe": "Wardrobe…",
+    "settings_menu_theme": "Theme",
+    "settings_menu_theme_system": "Follow system",
+    "settings_menu_theme_light": "Light",
+    "settings_menu_theme_dark": "Dark",
 }

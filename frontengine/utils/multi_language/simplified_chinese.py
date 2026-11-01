@@ -1716,4 +1716,8 @@ simplified_chinese_word_dict = {
     "pet_home_note_failed": "{text}",
     "pet_home_note_times": "×{count}",
     "pet_home_wardrobe": "衣柜…",
+    "settings_menu_theme": "主题",
+    "settings_menu_theme_system": "跟随系统",
+    "settings_menu_theme_light": "浅色",
+    "settings_menu_theme_dark": "深色",
 }

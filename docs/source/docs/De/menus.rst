@@ -24,6 +24,7 @@ Menü „Einstellungen“
   Bildschirm einfrieren, die Kürzelliste sowie Medien abspielen/pausieren,
   nächster und vorheriger Titel sowie das Verschieben des Vordergrundfensters
   auf den nächsten Bildschirm unter Beibehaltung seiner Proportionen.
+* Design - wie das System, hell oder dunkel, im eigenen FrontEngine-Design aus Tinte, Papier und Orange.
 * Tag-/Nacht-Design nach Zeitplan - tagsüber hell, nachts dunkel.
 * Mit dem System starten - FrontEngine bei der Anmeldung starten.
 * Letzte Sitzung wiederherstellen - wieder öffnen, was zuletzt zu sehen war.

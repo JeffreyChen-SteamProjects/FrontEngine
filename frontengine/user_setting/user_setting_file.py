@@ -36,7 +36,7 @@ default_hotkeys: Dict[str, str] = {
 
 user_setting_dict: Dict[str, Any] = {
     "language": "English",
-    "theme": "dark_amber.xml",
+    "theme": "system",
     "hotkeys": dict(default_hotkeys),
     # 啟動時自動套用的預設集名稱（空字串表示停用）
     # Preset auto-applied on launch (empty string disables it)
