@@ -2,7 +2,7 @@
 
 Run from the repository root::
 
-    py -m benchmarks.pet_home --output docs/benchmarks/<date>-pet-home.json
+    py -m benchmarks.pet_home --save
 
 Loads are 1 resident / 10 furniture, 6 / 60 and 12 / 120. For each the world
 warms up for ten game minutes, then this records:
@@ -23,13 +23,13 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import re
 import platform
 import statistics
 import sys
 import tempfile
 import tracemalloc
 from collections import deque
+from datetime import date
 from pathlib import Path
 from time import perf_counter_ns
 
@@ -45,7 +45,6 @@ LONG_STEPS = 2 * 60 * 60 * 5
 LONGER_STEPS = 4 * 60 * 60 * 5
 
 BENCHMARK_DOCS = Path(__file__).resolve().parents[1] / "docs" / "benchmarks"
-RESULT_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,80}\.json")
 
 
 def _percentiles(samples_ns: list[int]) -> dict:
@@ -159,17 +158,14 @@ def measure_long(residents: int, furniture: int) -> dict:
                                   "life_events": len(world.progress.events), "stats": len(world.progress.stats)}}
 
 
-def results_file(requested: Path) -> Path:
-    """Only the file name is taken; results always land in docs/benchmarks/ of this checkout."""
-    name = os.path.basename(str(requested))
-    if not RESULT_NAME.fullmatch(name):
-        raise SystemExit("--output must name a .json file, for example docs/benchmarks/2026-11-01-x.json")
-    return BENCHMARK_DOCS / name
+def results_file() -> Path:
+    """A fixed, dated name in this checkout's docs/benchmarks; nothing from the command line forms the path."""
+    return BENCHMARK_DOCS / f"{date.today():%Y-%m-%d}-pet-home.json"
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--output", type=Path)
+    parser.add_argument("--save", action="store_true", help="write docs/benchmarks/<today>-pet-home.json")
     args = parser.parse_args()
     app = QApplication.instance() or QApplication(sys.argv)
     screen = app.primaryScreen()
@@ -192,8 +188,8 @@ def main() -> int:
     # The plan treats more than 10% growth between minute 10 and hour 2 as something to investigate.
     report["investigate_memory_growth"] = report["long"]["memory_growth_percent"] > 10
     text = json.dumps(report, indent=2)
-    if args.output:
-        results_file(args.output).write_text(text + "\n", encoding="utf-8")
+    if args.save:
+        results_file().write_text(text + "\n", encoding="utf-8")
     print(text)
     return 0 if all(report["within_budget"].values()) else 1
 

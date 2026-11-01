@@ -82,7 +82,7 @@ This does not measure display refresh, the GPU compositor or mixed-DPI multi-mon
 Run from the repository root:
 
 ```powershell
-py -m benchmarks.pet_home --output docs/benchmarks/<date>-pet-home.json
+py -m benchmarks.pet_home --save
 ```
 
 Fixed loads from `progress.md` #31: 1 resident / 10 furniture, 6 / 60 and 12 / 120, each with jobs across all three professions, warmed up for ten game minutes, then timed over another ten. Budgets for 6 / 60: world step (the whole simulation cost of one 200 ms step) p95 ≤ 5 ms, operation feedback (a command through `HomeService.run`) p95 ≤ 100 ms, game data ≤ 200 MB.
@@ -104,10 +104,10 @@ Recorded results (Windows-11-10.0.26300-SP0, AMD64 Family 25 Model 117 Stepping 
 
 ```powershell
 git worktree add ../fe-baseline 0395720
-py -m benchmarks.startup_compare --baseline ../fe-baseline --rounds 8 --output docs/benchmarks/<date>-startup-compare.json
+py -m benchmarks.startup_compare --baseline ../fe-baseline --rounds 8 --save
 ```
 
-Each round starts a fresh process for the baseline and then for this checkout (interleaved), after one uncounted warm-up round each (the first run of a new worktree compiles bytecode). The rule from `progress.md` #31: p95 may grow by no more than 10% or 50 ms, whichever is larger. Recorded: [2026-11-01-startup-compare.json](2026-11-01-startup-compare.json).
+`--save` writes a dated JSON file into this folder. Each round starts a fresh spawned process for the baseline and then for this checkout (interleaved), after one uncounted warm-up round each (the first run of a new worktree compiles bytecode). The rule from `progress.md` #31: p95 may grow by no more than 10% or 50 ms, whichever is larger. Recorded: [2026-11-01-startup-compare.json](2026-11-01-startup-compare.json).
 
 | Metric | Baseline p95 (ms) | Current p95 (ms) | Allowed increase (ms) |
 |---|---:|---:|---:|

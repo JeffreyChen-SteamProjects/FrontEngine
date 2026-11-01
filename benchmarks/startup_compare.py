@@ -3,7 +3,7 @@
 Run from the repository root::
 
     git worktree add ../fe-baseline <baseline-commit>
-    py -m benchmarks.startup_compare --baseline ../fe-baseline --rounds 8 --output docs/benchmarks/<file>.json
+    py -m benchmarks.startup_compare --baseline ../fe-baseline --rounds 8 --save
 
 Each round starts a fresh spawned process for the baseline and then for this
 checkout (interleaved, so machine noise affects both), in a temporary working
@@ -20,16 +20,15 @@ import argparse
 import json
 import multiprocessing
 import os
-import re
 import sys
 import tempfile
 import time
+from datetime import date
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
 BENCHMARK_DOCS = Path(__file__).resolve().parents[1] / "docs" / "benchmarks"
-RESULT_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,80}\.json")
 
 
 def _probe(checkout: str, results) -> None:
@@ -78,12 +77,9 @@ def p95(values: list[float]) -> float:
     return ordered[min(len(ordered) - 1, int(len(ordered) * 0.95))]
 
 
-def results_file(requested: Path) -> Path:
-    """Only the file name is taken; results always land in docs/benchmarks/ of this checkout."""
-    name = os.path.basename(str(requested))
-    if not RESULT_NAME.fullmatch(name):
-        raise SystemExit("--output must name a .json file, for example docs/benchmarks/2026-11-01-x.json")
-    return BENCHMARK_DOCS / name
+def results_file() -> Path:
+    """A fixed, dated name in this checkout's docs/benchmarks; nothing from the command line forms the path."""
+    return BENCHMARK_DOCS / f"{date.today():%Y-%m-%d}-startup-compare.json"
 
 
 def main() -> int:
@@ -91,7 +87,7 @@ def main() -> int:
     parser.add_argument("--baseline", type=Path, required=True)
     parser.add_argument("--rounds", type=int, default=6)
     parser.add_argument("--warmup", type=int, default=1, help="uncounted rounds (bytecode caches, disk)")
-    parser.add_argument("--output", type=Path)
+    parser.add_argument("--save", action="store_true", help="write docs/benchmarks/<today>-startup-compare.json")
     args = parser.parse_args()
     if not (args.baseline / "frontengine" / "__init__.py").is_file():
         raise SystemExit("--baseline must be a FrontEngine checkout")
@@ -111,8 +107,8 @@ def main() -> int:
                                      "allowed_increase": round(allowed, 2), "within": now - base <= allowed}
     report["pages"] = {"baseline": samples["baseline"][0]["pages"], "current": samples["current"][0]["pages"]}
     text = json.dumps(report, indent=2)
-    if args.output:
-        results_file(args.output).write_text(text + "\n", encoding="utf-8")
+    if args.save:
+        results_file().write_text(text + "\n", encoding="utf-8")
     print(text)
     return 0 if all(metric["within"] for metric in report["metrics"].values()) else 1
 
