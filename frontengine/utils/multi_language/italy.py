@@ -1559,4 +1559,13 @@ italian_word_dict = {
     "pet_game_wall_lamp": "Lampada da parete",
     "pet_game_recipe_letter": "Scrivi una lettera",
     "pet_game_recipe_story": "Scrivi un racconto",
+    "pet_home_open": "Apri la casa delle mascotte",
+    "pet_home_hide": "Nascondi la casa",
+    "pet_home_on_desktop": "Mostra la casa sul desktop",
+    "pet_home_layer": "Livello sul desktop",
+    "pet_home_layer_top": "Sopra le finestre",
+    "pet_home_layer_bottom": "Sotto le finestre",
+    "pet_home_layer_to_top": "Porta sopra le finestre",
+    "pet_home_layer_to_bottom": "Porta sotto le finestre",
+    "pet_home_paused_hidden": "in pausa finché la casa è nascosta",
 }

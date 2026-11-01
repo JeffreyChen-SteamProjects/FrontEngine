@@ -1559,4 +1559,13 @@ french_word_dict = {
     "pet_game_wall_lamp": "Applique murale",
     "pet_game_recipe_letter": "Écrire une lettre",
     "pet_game_recipe_story": "Écrire une nouvelle",
+    "pet_home_open": "Ouvrir la maison des mascottes",
+    "pet_home_hide": "Masquer la maison",
+    "pet_home_on_desktop": "Afficher la maison sur le bureau",
+    "pet_home_layer": "Plan sur le bureau",
+    "pet_home_layer_top": "Au-dessus des fenêtres",
+    "pet_home_layer_bottom": "Sous les fenêtres",
+    "pet_home_layer_to_top": "Placer au-dessus des fenêtres",
+    "pet_home_layer_to_bottom": "Placer sous les fenêtres",
+    "pet_home_paused_hidden": "en pause tant que la maison est masquée",
 }

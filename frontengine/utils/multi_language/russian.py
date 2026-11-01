@@ -1559,4 +1559,13 @@ russian_word_dict = {
     "pet_game_wall_lamp": "Настенная лампа",
     "pet_game_recipe_letter": "Написать письмо",
     "pet_game_recipe_story": "Написать рассказ",
+    "pet_home_open": "Открыть дом питомцев",
+    "pet_home_hide": "Скрыть дом",
+    "pet_home_on_desktop": "Показывать дом на рабочем столе",
+    "pet_home_layer": "Слой на рабочем столе",
+    "pet_home_layer_top": "Поверх окон",
+    "pet_home_layer_bottom": "Под окнами",
+    "pet_home_layer_to_top": "Поместить поверх окон",
+    "pet_home_layer_to_bottom": "Поместить под окна",
+    "pet_home_paused_hidden": "на паузе, пока дом скрыт",
 }

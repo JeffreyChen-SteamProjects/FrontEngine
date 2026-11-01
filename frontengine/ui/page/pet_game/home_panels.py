@@ -13,6 +13,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt
 
+from frontengine.show.pet_game.captions import activity_text
 from frontengine.utils.multi_language.retranslate import retranslator, translate, tr
 from frontengine.utils.pet_game.schedule import TEMPLATES
 from frontengine.utils.pet_game.world import COMMANDS
@@ -21,10 +22,6 @@ if TYPE_CHECKING:
     from frontengine.ui.page.pet_game.home_page import PetHomePage
 
 ROLE_ID = Qt.ItemDataRole.UserRole
-
-
-def result_text(code: str) -> str:
-    return translate("pet_home_result_" + code, code)
 
 
 def furniture_name(world, definition: str) -> str:
@@ -102,29 +99,10 @@ class ResidentPanel:
             return
         for need, bar in self.bars.items():
             bar.setValue(resident.needs[need])
-        self.activity.setText(self._activity_text(resident))
+        self.activity.setText(activity_text(resident))
         index = self.routine.findData(resident.routine)
         if index != self.routine.currentIndex():
             self.routine.setCurrentIndex(index)
-
-    @staticmethod
-    def _activity_text(resident) -> str:
-        if resident.away:
-            text = result_text("active_elsewhere")
-        elif resident.parked:
-            text = result_text("parked")
-        else:
-            activity = resident.activity
-            kind = activity.kind if activity is not None else "idle"
-            text = translate("pet_home_activity_" + kind, kind)
-            if activity is not None and activity.reason:
-                reason = translate("pet_home_reason_" + activity.reason, activity.reason)
-                text = translate("pet_home_activity_line", "{activity} ({reason})").format(
-                    activity=text, reason=reason)
-        if resident.last_refusal:
-            text += "\n" + translate("pet_home_refused", "Declined: {reason}").format(
-                reason=result_text(resident.last_refusal))
-        return text
 
     def _list_changed(self, current, _previous) -> None:
         if current is not None:
@@ -223,16 +201,17 @@ class LayoutPanel:
         retranslator.set_text(self.arrange, "pet_home_arrange_done" if self.arranging else "pet_home_arrange",
                               "Done arranging" if self.arranging else "Arrange")
         self.hint.setVisible(self.arranging)
+        self.page.set_arranging(self.arranging)
         self.update_preview()
 
     def update_preview(self, *_args) -> None:
         world, zone = self.page.service.world, self.page.zone
         definition = self.storage.currentData()
         if not self.arranging or world is None or zone is None or definition is None:
-            self.page.view.set_preview(None)
+            self.page.set_preview(None)
             return
         problem = world.preview(definition, zone, self.cell.value())
-        self.page.view.set_preview((definition, self.cell.value(), self.flip.isChecked(), problem))
+        self.page.set_preview((definition, self.cell.value(), self.flip.isChecked(), problem))
 
     def cell_clicked(self, cell: int) -> None:
         if self.arranging:

@@ -1568,4 +1568,13 @@ traditional_chinese_word_dict = {
     "pet_game_wall_lamp": "壁燈",
     "pet_game_recipe_letter": "寫一封信",
     "pet_game_recipe_story": "寫一篇短篇故事",
+    "pet_home_open": "開啟寵物家園",
+    "pet_home_hide": "隱藏家園",
+    "pet_home_on_desktop": "在桌面顯示家園",
+    "pet_home_layer": "桌面圖層",
+    "pet_home_layer_top": "在視窗上層",
+    "pet_home_layer_bottom": "在視窗下層",
+    "pet_home_layer_to_top": "移到視窗上層",
+    "pet_home_layer_to_bottom": "移到視窗下層",
+    "pet_home_paused_hidden": "家園隱藏中，已暫停",
 }
