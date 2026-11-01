@@ -66,3 +66,4 @@ find = { namespaces = false, include = ["frontengine", "frontengine.*"] }
 
 [tool.setuptools.package-data]
 "frontengine.show.pet.inkside" = ["sprites/*.png"]
+"frontengine.show.pet_game" = ["furniture/*/*.png"]
