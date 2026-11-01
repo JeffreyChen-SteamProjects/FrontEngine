@@ -33,7 +33,7 @@ def test_every_panel_is_a_tab_in_the_planned_order(page):
     for index, panel in enumerate(panels):
         assert page.tabs.widget(index).isAncestorOf(panel.section)
         assert panel.section.title_label.isHidden()             # the tab carries the title
-    assert page.tabs.widget(7).isAncestorOf(page.desktop_check)
+    assert page.tabs.widget(TAB_ORDER.index("pet_home_settings_section")).isAncestorOf(page.desktop_check)
     assert page.tabs.tabText(0) == translate("pet_home_residents_section", "Residents")
 
 

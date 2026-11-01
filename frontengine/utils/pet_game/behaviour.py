@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from frontengine.utils.pet_game.goals import unlocked
 from frontengine.utils.pet_game.resident import PROFESSION_TRAITS, Activity, Resident
 from frontengine.utils.pet_game.schedule import block_at, game_hour
 
@@ -178,6 +179,8 @@ def auto_task(world: World, resident: Resident) -> str | None:
     best = None
     for recipe in world.catalog.recipes.values():
         if recipe.profession not in trades or resident.level(recipe.profession) < recipe.min_level:
+            continue
+        if not unlocked(world, recipe.unlock_level):
             continue
         if any(world.ledger.available(item) < count for item, count in recipe.inputs.items()):
             continue

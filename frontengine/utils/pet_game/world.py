@@ -11,7 +11,7 @@ import re
 from collections import deque
 
 from frontengine.utils.pet_game.behaviour import cancel_activity, refusal, start
-from frontengine.utils.pet_game.goals import Progress
+from frontengine.utils.pet_game.goals import Progress, unlocked
 from frontengine.utils.pet_game.catalog import (
     CELL_PIXELS, STARTER_COINS, STARTER_KIT, Catalog, FurnitureDefinition,
 )
@@ -133,6 +133,8 @@ class World:
             return "not_for_sale"
         if self.sandbox:
             return "accepted"
+        if not unlocked(self, found.unlock_level):
+            return "locked"
         result = self.ledger.apply(transaction, "buy:" + definition, -found.price,
                                    {furniture_item(definition): 1})
         if result == "accepted":
@@ -402,6 +404,8 @@ class World:
             return "invalid", None
         if member.level(found.profession) < found.min_level:
             return "skill_too_low", None
+        if not unlocked(self, found.unlock_level):
+            return "locked", None
         if station is not None:
             piece = self.furniture.get(station)
             if piece is None or self.definition(piece).profession != found.profession:

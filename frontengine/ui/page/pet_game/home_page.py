@@ -26,6 +26,7 @@ from frontengine.show.pet_game.home_view import ZOOMS
 from frontengine.utils.pet_game.world import MODES
 from frontengine.ui.dialog.dialog_kit import button_row
 from frontengine.ui.page.layout_kit import Section, SettingPage
+from frontengine.ui.page.pet_game.collection_panel import CollectionPanel
 from frontengine.ui.page.pet_game.home_pending import pending
 from frontengine.utils.browser.browser import open_browser
 from frontengine.ui.page.pet_game.home_stage import EmptyHome, HomeTabs, TAB_ORDER, make_tab_ready
@@ -92,6 +93,7 @@ class PetHomePage(SettingPage):
         self.shop = ShopPanel(self)
         self.storage = StoragePanel(self)
         self.work = WorkPanel(self)
+        self.collection = CollectionPanel(self)
         self._build_settings()
         self.view.reduced_motion = self.motion_check.isChecked()
         self.tabs = HomeTabs()
@@ -236,7 +238,8 @@ class PetHomePage(SettingPage):
             item.setData(Qt.ItemDataRole.UserRole, key)
             self.pending_list.addItem(item)
         rows = max(1, len(items))
-        self.pending_list.setFixedHeight(rows * (self.pending_list.fontMetrics().height() + 12) + 10)
+        row = self.pending_list.sizeHintForRow(0) if items else self.pending_list.fontMetrics().height() + 12
+        self.pending_list.setFixedHeight(rows * max(row, 1) + 2 * self.pending_list.frameWidth() + 12)
 
     def _zoom_changed(self, zoom: float) -> None:
         self.view.setFixedHeight(round(STAGE_HEIGHT * zoom))
@@ -513,7 +516,8 @@ class PetHomePage(SettingPage):
     def refresh(self) -> None:
         """Rebuild lists (after commands, events and language changes)."""
         self.view.set_world(self.service.world, self.zone)
-        for panel in (self.residents, self.goals, self.layout_panel, self.shop, self.storage, self.work):
+        for panel in (self.residents, self.goals, self.layout_panel, self.shop, self.storage, self.work,
+                      self.collection):
             panel.refresh_lists()
         self.refresh_live()
         for strip in self.strip_list:         # a new pet or piece must take clicks even while paused
@@ -544,7 +548,8 @@ class PetHomePage(SettingPage):
         self.shortcuts.setVisible(has_home)
         self._refresh_pending()
         self.pending_box.setVisible(has_home and self.pending_list.count() > 0)
-        for panel in (self.residents, self.goals, self.layout_panel, self.shop, self.storage, self.work):
+        for panel in (self.residents, self.goals, self.layout_panel, self.shop, self.storage, self.work,
+                      self.collection):
             panel.section.setEnabled(has_home)
         self.empty_home.setVisible(not has_home)
         self.view_area.setVisible(has_home)
