@@ -33,6 +33,9 @@ def resident_color(identifier: str) -> QColor:
 
 
 class HomeView(QWidget):
+    """Overview drawing. Subclasses change the backdrop and where residents appear."""
+
+    caption_backdrop = False      # a dark plate behind names, for drawing over any desktop
     resident_selected = Signal(str)
     furniture_selected = Signal(str)
     cell_clicked = Signal(int)
@@ -78,11 +81,11 @@ class HomeView(QWidget):
     def paintEvent(self, _event: QPaintEvent) -> None:
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        painter.fillRect(self.rect(), self.palette().base())
         if self.world is None or self.zone not in self.world.zones:
+            painter.fillRect(self.rect(), self.palette().base())
             painter.end()
             return
-        self._paint_floor(painter)
+        self.paint_backdrop(painter)
         for piece, definition in self.world.in_zone(self.zone):
             self._paint_piece(painter, piece, definition)
         if self.preview is not None:
@@ -91,6 +94,11 @@ class HomeView(QWidget):
             if resident.zone == self.zone:
                 self._paint_resident(painter, resident)
         painter.end()
+
+    def paint_backdrop(self, painter: QPainter) -> None:
+        """The overview fills its background and always shows the floor."""
+        painter.fillRect(self.rect(), self.palette().base())
+        self._paint_floor(painter)
 
     def _paint_floor(self, painter: QPainter) -> None:
         zone = self.world.zones[self.zone]
@@ -150,14 +158,18 @@ class HomeView(QWidget):
             painter.drawText(QRectF(rect.left() - 60, 2, rect.width() + 120, 18), Qt.AlignmentFlag.AlignCenter,
                              translate("pet_home_problem_" + problem, problem))
 
+    def resident_x_milli(self, resident) -> float:
+        """Where to draw a resident; the desktop strip interpolates between world steps."""
+        return resident.x_milli
+
     def resident_center(self, resident) -> QPointF:
         width = self.cell_width()
-        x = resident.x_milli / 1000 / CELL_PIXELS * width
+        x = self.resident_x_milli(resident) / 1000 / CELL_PIXELS * width
         return QPointF(x, self._floor_y() - max(8.0, width * 0.55))
 
     def _paint_resident(self, painter: QPainter, resident) -> None:
         center = self.resident_center(resident)
-        radius = max(7.0, self.cell_width() * 0.5)
+        radius = self.resident_radius()
         color = resident_color(resident.identifier)
         if resident.away or resident.parked:
             color.setAlpha(90)
@@ -165,11 +177,25 @@ class HomeView(QWidget):
                        else QPen(color.darker(160), 1))
         painter.setBrush(color)
         painter.drawEllipse(center, radius, radius)
-        painter.setPen(self.palette().text().color())
         kind = resident.activity.kind if resident.activity is not None else "idle"
         caption = resident.name + (" " + GLYPHS.get(kind, "") if GLYPHS.get(kind) else "")
-        painter.drawText(QRectF(center.x() - 70, center.y() - radius - 20, 140, 18),
-                         Qt.AlignmentFlag.AlignCenter, caption)
+        box = self.caption_rect(resident)
+        if self.caption_backdrop:
+            painter.setPen(Qt.PenStyle.NoPen)
+            painter.setBrush(QColor(0, 0, 0, 150))
+            plate = painter.fontMetrics().horizontalAdvance(caption) + 10
+            painter.drawRoundedRect(QRectF(center.x() - plate / 2, box.top(), plate, box.height()), 5, 5)
+            painter.setPen(QColor("white"))
+        else:
+            painter.setPen(self.palette().text().color())
+        painter.drawText(box, Qt.AlignmentFlag.AlignCenter, caption)
+
+    def resident_radius(self) -> float:
+        return max(7.0, self.cell_width() * 0.5)
+
+    def caption_rect(self, resident) -> QRectF:
+        center = self.resident_center(resident)
+        return QRectF(center.x() - 70, center.y() - self.resident_radius() - 20, 140, 18)
 
     # ----- input -----------------------------------------------------------------------
 

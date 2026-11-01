@@ -1561,4 +1561,13 @@ simplified_chinese_word_dict = {
     "pet_game_wall_lamp": "壁灯",
     "pet_game_recipe_letter": "写一封信",
     "pet_game_recipe_story": "写一篇短篇故事",
+    "pet_home_open": "打开宠物家园",
+    "pet_home_hide": "隐藏家园",
+    "pet_home_on_desktop": "在桌面显示家园",
+    "pet_home_layer": "桌面图层",
+    "pet_home_layer_top": "在窗口上层",
+    "pet_home_layer_bottom": "在窗口下层",
+    "pet_home_layer_to_top": "移到窗口上层",
+    "pet_home_layer_to_bottom": "移到窗口下层",
+    "pet_home_paused_hidden": "家园隐藏中，已暂停",
 }

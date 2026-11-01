@@ -1569,4 +1569,13 @@ english_word_dict = {
     "pet_game_wall_lamp": "Wall lamp",
     "pet_game_recipe_letter": "Write a letter",
     "pet_game_recipe_story": "Write a short story",
+    "pet_home_open": "Open Pet home",
+    "pet_home_hide": "Hide the home",
+    "pet_home_on_desktop": "Show the home on the desktop",
+    "pet_home_layer": "Desktop layer",
+    "pet_home_layer_top": "Above windows",
+    "pet_home_layer_bottom": "Below windows",
+    "pet_home_layer_to_top": "Move above windows",
+    "pet_home_layer_to_bottom": "Move below windows",
+    "pet_home_paused_hidden": "paused while the home is hidden",
 }

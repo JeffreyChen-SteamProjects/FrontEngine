@@ -1562,4 +1562,13 @@ germany_word_dict = {
     "pet_game_wall_lamp": "Wandlampe",
     "pet_game_recipe_letter": "Einen Brief schreiben",
     "pet_game_recipe_story": "Eine Kurzgeschichte schreiben",
+    "pet_home_open": "Haustier-Zuhause öffnen",
+    "pet_home_hide": "Zuhause ausblenden",
+    "pet_home_on_desktop": "Zuhause auf dem Desktop zeigen",
+    "pet_home_layer": "Ebene auf dem Desktop",
+    "pet_home_layer_top": "Über den Fenstern",
+    "pet_home_layer_bottom": "Unter den Fenstern",
+    "pet_home_layer_to_top": "Über die Fenster legen",
+    "pet_home_layer_to_bottom": "Unter die Fenster legen",
+    "pet_home_paused_hidden": "pausiert, solange das Zuhause ausgeblendet ist",
 }

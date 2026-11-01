@@ -10,16 +10,18 @@ from concurrent.futures import ThreadPoolExecutor
 from os import getcwd
 from pathlib import Path
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QGuiApplication, QKeyEvent
-from PySide6.QtWidgets import QFrame, QLabel, QPushButton, QScrollArea
+from PySide6.QtWidgets import QCheckBox, QComboBox, QFrame, QLabel, QPushButton, QScrollArea
 
 from frontengine.show.pet_game.home_service import HomeService
+from frontengine.show.pet_game.home_strip import HIDDEN_REASON, LAYERS, HomeStrip
 from frontengine.show.pet_game.home_view import HomeView
 from frontengine.ui.page.layout_kit import SettingPage
 from frontengine.ui.page.pet_game.home_panels import (
-    LayoutPanel, ResidentPanel, ShopPanel, WorkPanel, result_text,
+    LayoutPanel, ResidentPanel, ShopPanel, WorkPanel,
 )
+from frontengine.show.pet_game.captions import result_text
 from frontengine.user_setting.pet_game_save import HomeSaveStore
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.user_setting.user_setting_file import user_setting_dict, write_user_setting
@@ -28,6 +30,8 @@ from frontengine.utils.pet_game.catalog import CELL_PIXELS, builtin_catalog
 from frontengine.utils.pet_game.schedule import clock_text, game_day
 
 RUNNING_KEY = "pet_home_running"
+DESKTOP_KEY = "pet_home_on_desktop"
+LAYER_KEY = "pet_home_layer"
 
 
 def default_service(parent) -> HomeService:
@@ -37,6 +41,8 @@ def default_service(parent) -> HomeService:
 
 
 class PetHomePage(SettingPage):
+    open_requested = Signal()
+
     def __init__(self, service: HomeService | None = None) -> None:
         super().__init__("pet_home_title", "pet_home_subtitle", "Pet home",
                          "Your pets live, work and rest in a small home of their own.")
@@ -44,6 +50,7 @@ class PetHomePage(SettingPage):
         self.profiles = self.service.profiles
         self.selected_resident: str | None = None
         self.selected_furniture: str | None = None
+        self.strip_list: list[HomeStrip] = []      # registered with the Control Center
         self._build_status()
         self.view = HomeView()
         self.add_body_widget(self._scroller(self.view))
@@ -56,6 +63,7 @@ class PetHomePage(SettingPage):
         self.load_result = self.service.open()
         if self.service.world is not None and user_setting_dict.get(RUNNING_KEY) is True:
             self.service.start()
+        self.sync_strip()
         retranslator.bind_call(self.refresh)
         self.refresh()
 
@@ -82,6 +90,13 @@ class PetHomePage(SettingPage):
         self.aside_button = tr(QPushButton(), "pet_home_set_aside", "Keep the old file and start over")
         self.aside_button.clicked.connect(self.set_aside)
         section.add_inline(self.create_button, self.run_button, self.restore_button, self.aside_button)
+        self.desktop_check = tr(QCheckBox(), "pet_home_on_desktop", "Show the home on the desktop")
+        self.desktop_check.setChecked(user_setting_dict.get(DESKTOP_KEY, True) is not False)
+        self.desktop_check.toggled.connect(self._desktop_toggled)
+        section.add_widget(self.desktop_check)
+        self.layer_combo = QComboBox()
+        self.layer_combo.activated.connect(lambda _index: self.choose_layer(self.layer_combo.currentData()))
+        section.add_row("pet_home_layer", self.layer_combo, "Desktop layer")
 
     @staticmethod
     def _scroller(view: HomeView) -> QScrollArea:
@@ -118,6 +133,7 @@ class PetHomePage(SettingPage):
             self.report_text(str(error))
             return
         self._set_running(True)
+        self.sync_strip()
         self.refresh()
 
     def toggle_running(self) -> None:
@@ -150,7 +166,61 @@ class PetHomePage(SettingPage):
         self.refresh()
 
     def shutdown(self) -> bool:
+        self.close_strip()
         return self.service.shutdown()
+
+    # ----- desktop strip ---------------------------------------------------------------
+
+    @property
+    def layer(self) -> str:
+        layer = user_setting_dict.get(LAYER_KEY, "top")
+        return layer if layer in LAYERS else "top"
+
+    def sync_strip(self) -> None:
+        """Show the home on the desktop when there is a home and the user wants it there."""
+        wanted = self.service.world is not None and self.desktop_check.isChecked()
+        if wanted and not self.strip_list:
+            strip = HomeStrip(self.service, self.zone, self.layer, str(user_setting_dict.get("quality_tier", "")))
+            strip.open_requested.connect(self.open_requested.emit)
+            strip.layer_requested.connect(self.choose_layer)
+            strip.resident_selected.connect(self.select_resident)
+            strip.cell_clicked.connect(self.layout_panel.cell_clicked)
+            strip.closed.connect(lambda s=strip: self._forget_strip(s))
+            strip.set_arranging(self.layout_panel.arranging)
+            self.strip_list.append(strip)
+            strip.show()
+        elif not wanted:
+            self.close_strip()
+
+    def _forget_strip(self, strip: HomeStrip) -> None:
+        if strip in self.strip_list:
+            self.strip_list.remove(strip)
+
+    def close_strip(self) -> None:
+        for strip in list(self.strip_list):
+            strip.close()
+        self.strip_list.clear()
+
+    def _desktop_toggled(self, checked: bool) -> None:
+        user_setting_dict[DESKTOP_KEY] = checked
+        self.sync_strip()
+
+    def choose_layer(self, layer: str) -> None:
+        if layer not in LAYERS:
+            return
+        user_setting_dict[LAYER_KEY] = layer
+        for strip in self.strip_list:
+            strip.set_layer(layer)
+        self.layer_combo.setCurrentIndex(self.layer_combo.findData(layer))
+
+    def set_preview(self, preview) -> None:
+        self.view.set_preview(preview)
+        for strip in self.strip_list:
+            strip.set_preview(preview)
+
+    def set_arranging(self, arranging: bool) -> None:
+        for strip in self.strip_list:
+            strip.set_arranging(arranging)
 
     # ----- selection and feedback --------------------------------------------------------
 
@@ -193,6 +263,10 @@ class PetHomePage(SettingPage):
     def refresh(self) -> None:
         """Rebuild lists (after commands, events and language changes)."""
         self.view.set_world(self.service.world, self.zone)
+        self.layer_combo.clear()
+        for layer in LAYERS:
+            self.layer_combo.addItem(translate("pet_home_layer_" + layer, layer), layer)
+        self.layer_combo.setCurrentIndex(self.layer_combo.findData(self.layer))
         for panel in (self.residents, self.layout_panel, self.shop, self.work):
             panel.refresh_lists()
         self.refresh_live()
@@ -214,6 +288,8 @@ class PetHomePage(SettingPage):
         self.aside_button.setVisible(protected)
         for panel in (self.residents, self.layout_panel, self.shop, self.work):
             panel.section.setEnabled(has_home)
+        self.desktop_check.setEnabled(has_home)
+        self.layer_combo.setEnabled(has_home)
         retranslator.set_text(self.run_button, "pet_home_pause" if self.service.running else "pet_home_start",
                               "Pause" if self.service.running else "Start")
         if protected:
@@ -223,6 +299,8 @@ class PetHomePage(SettingPage):
             self.status.setText(translate("pet_home_create_hint", "No home yet."))
         else:
             state = translate("pet_home_running" if self.service.running else "pet_home_paused")
+            if HIDDEN_REASON in self.service.pause_reasons:
+                state = translate("pet_home_paused_hidden", "paused while the home is hidden")
             self.status.setText(translate("pet_home_status", "Day {day} · {time} · {coins} coins · {state}")
                                 .format(day=game_day(world.time_ms), time=clock_text(world.time_ms),
                                         coins=world.ledger.coins, state=state))

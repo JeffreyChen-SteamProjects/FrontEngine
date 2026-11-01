@@ -218,6 +218,8 @@ class FrontEngineMainUI(QMainWindow):
             pet_setting_ui=self.pet_setting_ui,
         )
         self._register_extra_overlays()
+        self.control_center_ui.register_overlay_source(lambda: self.pet_home_ui.strip_list)
+        self.pet_home_ui.open_requested.connect(self._open_pet_home)
         self.control_center_ui.performance_changed.connect(self.scene_setting_ui.apply_performance_policy)
         self.control_center_ui.overlay_visibility_changed.connect(self.scene_setting_ui.actions.set_group_hidden)
         self.action_registry = self._build_action_registry()
@@ -424,6 +426,13 @@ class FrontEngineMainUI(QMainWindow):
             self.debug_timer.setInterval(10000)
             self.debug_timer.timeout.connect(self.debug_close)
             self.debug_timer.start()
+
+    def _open_pet_home(self) -> None:
+        """The desktop home's button brings the main window back on the Pet home page."""
+        self.showNormal()
+        self.raise_()
+        self.activateWindow()
+        self.sidebar.select_page_id("tab_pet_home_text")
 
     def _register_extra_overlays(self) -> None:
         """
