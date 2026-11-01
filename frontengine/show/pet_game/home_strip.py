@@ -38,6 +38,7 @@ DRAG_START_PX = 6
 LAYERS = ("top", "bottom")
 HOME_MODES = ("normal", "focus", "meeting", "saver")
 HIDDEN_REASON = "hidden"
+LOCKED_REASON = "locked"                # the computer is locked: the home waits
 TOOLBAR_OPEN_KEY = "pet_home_toolbar_open"
 TOOLBAR_DOCK_KEY = "pet_home_toolbar_dock"
 DOCKS = ("left", "right")
@@ -167,6 +168,7 @@ class HomeStrip(HomeView):
         """Short bubbles say what a pet just started, who it greeted, or what it earned."""
         if self.quiet:
             return
+        self.note_events(events)
         for event in events:
             text = bubble_text(event)
             if text and event.get("resident") in self.service.world.residents:

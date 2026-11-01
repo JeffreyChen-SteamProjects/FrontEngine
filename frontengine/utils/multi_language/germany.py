@@ -1847,4 +1847,5 @@ germany_word_dict = {
     "pet_home_result_not_upgradable": "Das lässt sich nicht weiter verbessern.",
     "pet_home_activity_help": "Hilft mit",
     "pet_home_reason_helping": "hilft einem Freund bei der Arbeit",
+    "pet_home_paused_locked": "pausiert, solange der Computer gesperrt ist",
 }

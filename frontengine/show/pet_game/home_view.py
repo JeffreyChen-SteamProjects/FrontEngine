@@ -7,6 +7,7 @@ later, the transparent desktop strip without either one computing rewards.
 from __future__ import annotations
 
 import zlib
+from time import monotonic
 
 from PySide6.QtCore import QPointF, QRectF, Qt, Signal
 from PySide6.QtGui import QColor, QFont, QMouseEvent, QPainter, QPaintEvent, QPen
@@ -28,6 +29,8 @@ MIN_CELL = 20.0          # below this, furniture labels stop being readable
 MAX_CELL = 40.0
 SPRITE_CELLS = 2.2           # a character stands a little over two cells tall
 ZOOMS = (1.0, 1.25, 1.5, 2.0)
+TOOL_ICONS = {"writing": "✎", "gardening": "❀", "crafting": "⚒"}
+DONE_SECONDS = 4.0
 AREA_COLORS = {"living": "#B8C7E6", "work": "#C9D9A5", "leisure": "#F2C6A8", "dining": "#F1DD9A",
                "clear": "#D8D2C6"}
 GLYPHS = {"sleep": "Zz", "nap": "Zz", "eat": "~", "snack": "~", "work": "✎", "play": "♪",
@@ -64,6 +67,8 @@ class HomeView(QWidget):
         self.selected: str | None = None
         self.preview: tuple[str, int, bool, str | None] | None = None
         self._painting: tuple[int, int] | None = None
+        self.badges: dict[str, float] = {}       # piece -> until when its "finished" tick shows
+        self.badge_clock = monotonic
         self.setFixedHeight(170)
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.setFocusPolicy(Qt.FocusPolicy.ClickFocus)
@@ -217,6 +222,48 @@ class HomeView(QWidget):
             painter.setPen(QPen(QColor("#1d1d1d"), 1))
             painter.setBrush(resident_color(piece.owner))
             painter.drawEllipse(QRectF(rect.right() - 10, rect.top() + 3, 7, 7))
+        badge = self.piece_badge(piece, definition)
+        if badge:
+            self._paint_badge(painter, rect, badge)
+
+    def piece_badge(self, piece, definition) -> str:
+        """What a piece shows above it: ✓ just after a job finished there, the trade's tool while
+        someone works at it, a dot while it is in use; nothing when it is free."""
+        until = self.badges.get(piece.identifier)
+        if until is not None and until > self.badge_clock():
+            return "✓"
+        if not piece.users:
+            return ""
+        if definition.profession is not None:
+            return TOOL_ICONS.get(definition.profession, "•")
+        return "•"
+
+    def _paint_badge(self, painter: QPainter, rect: QRectF, text: str) -> None:
+        size = max(14.0, self.cell_width() * 0.55)
+        circle = QRectF(rect.right() - size, rect.top() - size * 0.6, size, size)
+        painter.save()
+        painter.setPen(QPen(QColor("#171715"), 1))
+        painter.setBrush(QColor("#FFF3D9") if text != "✓" else QColor("#C9E7B0"))
+        painter.drawEllipse(circle)
+        font = QFont(self.font())
+        font.setPointSizeF(max(7.0, size * 0.42))
+        painter.setFont(font)
+        painter.drawText(circle, Qt.AlignmentFlag.AlignCenter, text)
+        painter.restore()
+
+    def note_events(self, events: list) -> None:
+        """A finished job ticks its station for a few seconds."""
+        world = self.world
+        if world is None:
+            return
+        for event in events:
+            if event.get("kind") != "settled":
+                continue
+            resident = world.residents.get(event.get("resident"))
+            station = resident.activity.furniture if resident is not None and resident.activity else None
+            if station is not None:
+                self.badges[station] = self.badge_clock() + DONE_SECONDS
+        self.update()
 
     def _paint_block(self, painter: QPainter, rect: QRectF, definition) -> None:
         """Pieces without a picture: a block in the category's colour."""

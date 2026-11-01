@@ -29,6 +29,13 @@ def _isolated_macos_frameworks(monkeypatch):
     monkeypatch.setattr(backend, '_backend', backend.MacOSBackend(loader=unavailable))
 
 
+@pytest.fixture(autouse=True)
+def _never_read_the_real_session_lock(monkeypatch):
+    """A headless runner has no input desktop and would read as locked, pausing every home."""
+    from frontengine.utils.session_lock import session_lock
+    monkeypatch.setattr(session_lock, "is_session_locked", lambda: False)
+
+
 @pytest.fixture(scope="session", autouse=True)
 def _run_from_temporary_directory():
     """整個測試 session 在暫存目錄下執行 / Run the session from a temp directory."""

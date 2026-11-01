@@ -1844,4 +1844,5 @@ italian_word_dict = {
     "pet_home_result_not_upgradable": "Non si può migliorare oltre.",
     "pet_home_activity_help": "Dà una mano",
     "pet_home_reason_helping": "aiuta un amico al lavoro",
+    "pet_home_paused_locked": "in pausa finché il computer è bloccato",
 }

@@ -1846,4 +1846,5 @@ simplified_chinese_word_dict = {
     "pet_home_result_not_upgradable": "这个无法再升级了。",
     "pet_home_activity_help": "帮忙中",
     "pet_home_reason_helping": "帮朋友工作",
+    "pet_home_paused_locked": "电脑锁定时暂停",
 }
