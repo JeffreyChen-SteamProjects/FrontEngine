@@ -91,8 +91,11 @@ def make_main_window(tmp_path, monkeypatch):
     try:
         yield build
     finally:
+        from PySide6.QtCore import QCoreApplication, QEvent
         for window in windows:
             window.close()
+            window.deleteLater()            # closing only hides it: thousands of widgets stayed alive
+        QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
         os.chdir(original)
 
 
@@ -116,9 +119,22 @@ def _release_leftovers(application) -> None:
     gc.collect()
 
 
+def _flush_deleted_widgets() -> None:
+    """Run the pending deleteLater() calls, then collect cycles, on the GUI thread.
+
+    Tests rarely run an event loop at the level deleteLater() was called from, so without
+    this the widgets they gave up stayed alive for the rest of the session - 77,000 of them
+    by the late modules, slowing every later test and starving timer-driven ones.
+    """
+    from PySide6.QtCore import QCoreApplication, QEvent
+    QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+    gc.collect()
+    QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+
+
 @pytest.fixture(autouse=True, scope="module")
 def _release_test_widget_cycles(_qt_application):
-    """Release cyclic test widgets on their GUI thread before another module starts workers."""
-    gc.collect()
+    """Release cyclic and deleted test widgets on their GUI thread before another module starts."""
+    _flush_deleted_widgets()
     yield
-    gc.collect()
+    _flush_deleted_widgets()

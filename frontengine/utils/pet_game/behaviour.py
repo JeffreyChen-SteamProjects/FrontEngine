@@ -429,6 +429,16 @@ def help_completed(world: World, resident: Resident, worker_id: str) -> None:
         world.emit("helped", resident=resident.identifier, partner=worker_id)
 
 
+def tag_completed(world: World, resident: Resident, partner_id: str | None) -> None:
+    """Both players of a game of tag enjoy it; the chaser records the friendship once."""
+    resident.needs["mood"] = min(100, resident.needs["mood"] + 8)
+    resident.needs["social"] = min(100, resident.needs["social"] + 10)
+    resident.needs["energy"] = max(0, resident.needs["energy"] - 3)
+    if partner_id is not None and partner_id in world.residents:
+        world.adjust_relation(resident.identifier, partner_id, 2)
+        world.emit("tagged", resident=resident.identifier, partner=partner_id)
+
+
 def greet_completed(world: World, resident: Resident, partner_id: str) -> None:
     partner = world.residents.get(partner_id)
     if partner is None:

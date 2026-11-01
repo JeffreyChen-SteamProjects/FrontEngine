@@ -34,6 +34,8 @@ def page(tmp_path):
     widget.clock = clock
     yield widget
     widget.shutdown()
+    widget.close()
+    widget.deleteLater()
     widget.deleteLater()
 
 
@@ -162,7 +164,7 @@ def test_work_is_taken_up_by_itself_and_the_backpack_sells(page):
     page.shop.buy()
     assert page.service.world.ledger.count("wood") == 2
     resident = page.service.world.residents[page.selected_resident]
-    resident.traits = ("handy", "cheerful")
+    resident.traits = ("handy", "quiet")
     from frontengine.utils.pet_game import behaviour
     page.service.run(lambda world: behaviour.auto_task(world, resident))
     page.refresh()

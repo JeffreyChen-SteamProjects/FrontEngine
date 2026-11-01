@@ -36,7 +36,12 @@ MAX_ZONES = 8
 COMMANDS = ("sleep", "eat", "play", "relax", "work", "stop")
 # The player's own care: a small, immediate lift with a cooldown per pet and kind, so it never farms.
 INTERACTIONS = {"feed": {"fullness": 15, "mood": 3}, "pat": {"mood": 8, "social": 5},
-                "talk": {"social": 12, "mood": 3}}
+                "talk": {"social": 12, "mood": 3}, "groom": {"comfort": 12, "mood": 4},
+                "toy": {"mood": 10, "energy": -4}}
+# Moving a pet about is not for a pet that is busy at something that holds it in place.
+BUSY_KINDS = ("work", "eat", "snack", "sleep")
+PLAYFUL = ("toy",)
+TAG_MS = (8000, 12000)
 INTERACT_COOLDOWN_MS = 30_000
 UPGRADE_BASE_COINS = 80     # the basic desk is free, but its upgrades are not
 _HOME = re.compile(r"[0-9a-f]{32}")
@@ -481,6 +486,50 @@ class World:
         self.emit("upgraded", definition=definition, level=self.progress.upgrades[definition])
         return "accepted"
 
+    @staticmethod
+    def busy(resident) -> bool:
+        return resident.activity is not None and resident.activity.kind in BUSY_KINDS
+
+    def call(self, identifier: str, x_milli: int) -> str:
+        """Call a pet over: it walks to the spot and waits there a little, unless it is busy."""
+        resident = self.residents.get(identifier)
+        if resident is None:
+            return "unknown"
+        if resident.parked or resident.away:
+            return "parked"
+        if self.busy(resident):
+            return "busy"
+        width = self.zones[resident.zone].width_pixels * 1000
+        cancel_activity(self, resident, "called")
+        start(self, resident, "come", "called", duration=0)        # waits once it arrives
+        resident.activity.target_x = max(0, min(width - 1, int(x_milli)))
+        return "accepted"
+
+    def play_tag(self, identifier: str) -> str:
+        """Start a game of tag with the nearest free pet in the zone; never with a busy one."""
+        resident = self.residents.get(identifier)
+        if resident is None:
+            return "unknown"
+        if resident.parked or resident.away:
+            return "parked"
+        if self.busy(resident):
+            return "busy"
+        partners = sorted((abs(other.x_milli - resident.x_milli), key) for key, other in self.residents.items()
+                          if key != identifier and other.zone == resident.zone and not other.parked
+                          and not other.away and not self.busy(other))
+        if not partners:
+            return "no_partner"
+        runner = self.residents[partners[0][1]]
+        width = self.zones[resident.zone].width_pixels * 1000
+        away = width - 16000 if runner.x_milli >= resident.x_milli else 16000
+        duration = self.rng.randint(*TAG_MS)
+        for member, target in ((runner, away), (resident, away - (24000 if away > resident.x_milli else -24000))):
+            cancel_activity(self, member, "tag")
+            start(self, member, "tag", "playing_tag", duration=duration)
+            member.activity.target_x = max(0, min(width - 1, target))
+        resident.activity.partner = runner.identifier
+        return "accepted"
+
     def focus_begin(self) -> list[str]:
         """Pets keep you company while you focus: each free pet gets a work request queued.
 
@@ -520,6 +569,8 @@ class World:
             return "unknown"
         if resident.parked or resident.away:
             return "parked"
+        if kind in PLAYFUL and self.busy(resident):
+            return "busy"
         last = self._interacted.get((identifier, kind))
         if last is not None and self.time_ms - last < INTERACT_COOLDOWN_MS:
             return "too_soon"

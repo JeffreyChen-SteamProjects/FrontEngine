@@ -676,6 +676,20 @@ class PetHomePage(SettingPage):
         elif action == "follow":
             self.followed = target
             self._follow()
+        elif action == "photo":
+            self.photo_of(target)
+
+    def photo_of(self, identifier: str):
+        """A photo of one pet from the overview, saved to the album; nothing on the desktop is captured."""
+        world = self.service.world
+        resident = world.residents.get(identifier) if world is not None else None
+        if resident is None:
+            return None
+        if resident.zone != self.zone:
+            self.choose_zone(resident.zone)
+        box = self.view.resident_box(resident).adjusted(-70, -40, 70, 12)
+        area = box.toAlignedRect().intersected(self.view.rect())
+        return self.goals.save_photo(self.view.grab(area), resident.name)
 
     def _follow(self) -> None:
         """Keep the followed pet in view while the overview is zoomed in; it stops when the pet leaves the zone."""

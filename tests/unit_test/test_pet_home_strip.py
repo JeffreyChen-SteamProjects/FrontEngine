@@ -37,6 +37,7 @@ def page(tmp_path):
     widget.residents.new_pet()
     yield widget
     widget.shutdown()
+    widget.deleteLater()
 
 
 def _strip(page) -> HomeStrip:
