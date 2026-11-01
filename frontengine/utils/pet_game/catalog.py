@@ -336,6 +336,15 @@ def _recipes() -> list[Recipe]:
         Recipe("stool", "pet_game_recipe_stool", "Build a stool", "crafting", 300000, 8, 0, 12,
                inputs={"wood": 4}, outputs={"furniture:stool": 1}, min_level=2,
                phases=("choose", "shape", "finish"), unlock_level=3),
+        # Advanced trades: a skilled pet (level 4) in a grown home (level 4) makes something bigger.
+        Recipe("novel", "pet_game_recipe_novel", "Write a novel", "writing", 600000, 9, 120, 30,
+               min_level=4, phases=("outline", "write", "revise"), unlock_level=4),
+        Recipe("bouquet", "pet_game_recipe_bouquet", "Arrange a bouquet", "gardening", 240000, 5, 0, 16,
+               inputs={"flower": 3}, outputs={"bouquet": 1}, min_level=4, phases=("pick", "arrange", "wrap"),
+               unlock_level=4),
+        Recipe("music_box", "pet_game_recipe_music_box", "Build a music box", "crafting", 420000, 8, 0, 24,
+               inputs={"wood": 3, "toy": 1}, outputs={"music_box": 1}, min_level=4,
+               phases=("choose", "shape", "tune"), unlock_level=4),
     ]
 
 
@@ -345,6 +354,8 @@ def _items() -> list[ItemDefinition]:
         ItemDefinition("herb", "pet_game_item_herb", "Herbs", "food", sell_price=2),
         ItemDefinition("flower", "pet_game_item_flower", "Flowers", "goods", sell_price=6),
         ItemDefinition("toy", "pet_game_item_toy", "Toy", "goods", sell_price=24),
+        ItemDefinition("bouquet", "pet_game_item_bouquet", "Bouquet", "goods", sell_price=30),
+        ItemDefinition("music_box", "pet_game_item_music_box", "Music box", "goods", sell_price=80),
     ]
 
 

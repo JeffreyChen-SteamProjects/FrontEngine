@@ -57,8 +57,8 @@ class GoalsPanel:
             return
         goals.refresh_commissions(world)
         self.level.setText(translate("pet_home_level", "Home level {level}").format(level=goals.home_level(world)))
-        self._fill(self.tutorial, [(goal.identifier, self._goal_line(world, goal)) for goal in goals.TUTORIAL
-                                   if goals.goal_state(world, goal) != "unavailable"])
+        self._fill(self.tutorial, [(goal.identifier, self._goal_line(world, goal)) for goal in goals.ALL_GOALS
+                                   if goals.goal_state(world, goal) != "unavailable"])     # this season's too
         offers = world.progress.commissions["offers"]
         self._fill(self.commissions, [(str(index), self._offer_line(world, offer))
                                       for index, offer in enumerate(offers)])

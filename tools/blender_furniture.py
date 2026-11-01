@@ -667,8 +667,50 @@ def item_story(p: Palette) -> None:
     box((0.5, 0.02, 0.08), (0.05, -0.13, 0.95), p["accent_2"], bevel=0.0)
 
 
+def item_novel(p: Palette) -> None:
+    """A thick bound book with a ribbon: a story grown long."""
+    box((1.05, 0.5, 1.4), (0, 0, 0.7), p["dark_wood"], bevel=0.06)
+    box((0.95, 0.44, 1.3), (0.07, -0.02, 0.7), p["paper"], bevel=0.02)
+    box((0.14, 0.52, 1.4), (-0.52, 0, 0.7), p["accent"], bevel=0.04)
+    box((0.6, 0.02, 0.1), (0.08, -0.26, 1.0), p["accent_2"], bevel=0.0)
+    box((0.06, 0.02, 0.5), (0.3, -0.26, 0.15), p["accent"], bevel=0.0)
+
+
+def item_bouquet(p: Palette) -> None:
+    """A wide bunch of blooms in green wrapping with a big bow - fuller than a single stem of flowers."""
+    cone(0.55, 0.08, 0.95, (0, 0, 0.48), p["leaf_dark"], rotation=(math.radians(180), 0, 0))
+    cone(0.5, 0.07, 0.9, (0, -0.03, 0.5), p["leaf"], rotation=(math.radians(180), 0, 0))
+    blooms = ((-0.42, 1.0), (-0.2, 1.18), (0.05, 1.28), (0.3, 1.18), (0.48, 1.0), (-0.1, 0.98), (0.2, 0.98))
+    for index, (x, z) in enumerate(blooms):
+        center = Vector((x, -0.05, z))
+        color = ("accent", "accent_2", "ball", "fabric", "accent", "accent_2", "ball")[index]
+        for k in range(6):
+            angle = k * math.tau / 6
+            sphere(0.09, center + Vector((math.cos(angle) * 0.11, 0, math.sin(angle) * 0.11)), p[color],
+                   scale=(1, 0.5, 1))
+        sphere(0.06, center + Vector((0, -0.04, 0)), p["accent_2"] if color != "accent_2" else p["fabric"])
+    for side in (-1, 1):                                   # the bow's two loops and tails
+        torus(0.13, 0.05, (side * 0.15, -0.2, 0.5), p["accent"], rotation=(math.radians(90), 0, 0))
+        box((0.08, 0.04, 0.32), (side * 0.12, -0.22, 0.28), p["accent"], bevel=0.01,
+            rotation=(0, side * math.radians(20), 0))
+    sphere(0.08, (0, -0.22, 0.5), p["accent"])
+
+
+def item_music_box(p: Palette) -> None:
+    """A wooden box, lid open, with a little dancer on top and a winding key."""
+    box((1.2, 0.8, 0.6), (0, 0, 0.3), p["wood"], bevel=0.05)
+    box((1.1, 0.7, 0.04), (0, 0, 0.6), p["accent_2"], bevel=0.0)
+    box((1.2, 0.08, 0.7), (0, 0.42, 0.95), p["dark_wood"], bevel=0.04, rotation=(math.radians(-18), 0, 0))
+    cylinder(0.05, 0.3, (0, 0, 0.78), p["metal"], bevel=0.0)
+    sphere(0.12, (0, 0, 1.0), p["accent"], scale=(1, 1, 1.3))
+    sphere(0.07, (0, 0, 1.18), p["fabric"])
+    cylinder(0.04, 0.3, (0.7, 0, 0.3), p["metal"], rotation=(0, math.radians(90), 0), bevel=0.0)
+    torus(0.1, 0.03, (0.88, 0, 0.3), p["metal"], rotation=(0, math.radians(90), 0))
+
+
 ITEMS = {"wood": item_wood, "herb": item_herb, "flower": item_flower, "toy": item_toy, "coin": item_coin,
-         "letter": item_letter, "story": item_story}
+         "letter": item_letter, "story": item_story, "novel": item_novel, "bouquet": item_bouquet,
+         "music_box": item_music_box}
 ITEM_PIXELS = 128
 
 

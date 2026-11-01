@@ -21,7 +21,7 @@ from frontengine.show.pet_game.home_strip import HIDDEN_REASON, HOME_MODES, LAYE
 from frontengine.show.pet_game.home_view import HomeView
 from frontengine.show.pet_game.resident_art import ResidentArt
 from frontengine.show.pet_game.themes import glyph
-from frontengine.utils.pet_game.environment import weather
+from frontengine.utils.pet_game.environment import season, weather
 from frontengine.show.pet_game.home_view import ZOOMS
 from frontengine.utils.pet_game.world import MODES
 from frontengine.ui.dialog.dialog_kit import button_row
@@ -747,9 +747,10 @@ class PetHomePage(SettingPage):
 
     @staticmethod
     def _time_text(world) -> str:
-        current = weather(world.home, world.time_ms)
+        current, now = weather(world.home, world.time_ms), season(world.time_ms)
         return (f"{clock_text(world.time_ms)} {glyph(world.home, world.time_ms)} "
-                f"{translate('pet_game_weather_' + current, current)}")
+                f"{translate('pet_game_weather_' + current, current)} · "
+                f"{translate('pet_game_season_' + now, now)}")
 
     def _refresh_status(self) -> None:
         world = self.service.world

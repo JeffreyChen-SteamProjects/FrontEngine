@@ -37,7 +37,7 @@ class Goal:
     window: tuple[int, int] | None = None           # days of the home's year it is offered (wraps); None: always
 
 
-YEAR_DAYS = 28                                      # four seven-day seasons
+YEAR_DAYS = 28                                      # four seven-day seasons (environment.SEASONS)
 
 
 def day_of_year(world: World) -> int:
@@ -180,7 +180,7 @@ RENAMED_GOALS = {"set_routine": "decorate"}
 
 
 def _checked_goals(value: object) -> dict[str, str]:
-    known = {goal.identifier for goal in TUTORIAL} | {"celebration"} | set(RENAMED_GOALS)
+    known = {goal.identifier for goal in ALL_GOALS} | {"celebration"} | set(RENAMED_GOALS)
     if not isinstance(value, dict) or set(value) - known or any(
             state not in ("claimed", "skipped") for state in value.values()):
         raise ValueError("Invalid goal states")
@@ -236,6 +236,16 @@ def _checked_events(value: object) -> list[dict]:
 
 # ----- tutorial and level ---------------------------------------------------------------
 
+# Each season asks for one thing the home does anyway; missing it only means waiting for next year.
+SEASONAL = (
+    Goal("spring_flowers", lambda w: (_stat(w, "settled:flowers"), 2), 30, window=(1, 7)),
+    Goal("summer_play", lambda w: (_stat(w, "completed:play"), 5), 30, window=(8, 14)),
+    Goal("autumn_harvest", lambda w: (_stat(w, "settled:herbs"), 4), 30, window=(15, 21)),
+    Goal("winter_cozy", lambda w: (_stat(w, "completed:relax"), 5), 30, window=(22, 28)),
+)
+ALL_GOALS = TUTORIAL + SEASONAL
+
+
 def goal_state(world: World, goal: Goal) -> str:
     saved = world.progress.goals.get(goal.identifier)
     if saved:
@@ -246,7 +256,7 @@ def goal_state(world: World, goal: Goal) -> str:
 
 
 def claim(world: World, identifier: str) -> str:
-    goal = next((goal for goal in TUTORIAL if goal.identifier == identifier), None)
+    goal = next((goal for goal in ALL_GOALS if goal.identifier == identifier), None)
     if goal is None:
         return "unknown"
     if goal_state(world, goal) != "done":
@@ -401,7 +411,7 @@ def _daily_events(world: World, day: int) -> None:
     eating = [r for r in awake if r.activity is not None and r.activity.kind == "eat" and r.activity.phase == "using"]
     today = {
         "friends_dinner": len(eating) >= 3,
-        "rainy_day": bool(awake) and weather(world.home, world.time_ms) == "rain",
+        "rainy_day": bool(awake) and weather(world.home, world.time_ms) in ("rain", "snow"),
         "starry_night": bool(awake) and sky(world.time_ms) == "night"
         and weather(world.home, world.time_ms) == "clear",
     }
@@ -440,7 +450,7 @@ def _automate(world: World) -> None:
     """Rewards are taken and commissions handed in by themselves; the inbox says what happened."""
     if not world.automatic:
         return
-    for goal in TUTORIAL:
+    for goal in ALL_GOALS:
         if goal_state(world, goal) == "done":
             claim(world, goal.identifier)
     for index, offer in enumerate(world.progress.commissions["offers"]):

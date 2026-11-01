@@ -11,7 +11,10 @@ import hashlib
 from frontengine.utils.pet_game.schedule import DAY_MS, HOUR_MS, game_day, game_hour
 
 SKY_PHASES = ("dawn", "day", "dusk", "night")
-WEATHERS = ("clear", "cloudy", "rain")
+WEATHERS = ("clear", "cloudy", "rain", "snow")      # snow is winter's rain
+SEASONS = ("spring", "summer", "autumn", "winter")
+SEASON_DAYS = 7
+YEAR_DAYS = SEASON_DAYS * len(SEASONS)
 WEATHER_WEIGHTS = (5, 3, 2)
 WEATHER_SPAN_HOURS = 6                      # weather may change four times a game day
 
@@ -34,11 +37,21 @@ def daylight(time_ms: int) -> float:
     return max(0.0, min(1.0, 1.25 - distance * 1.5))
 
 
+def season(time_ms: int) -> str:
+    """Seven game days each; the year turns every four weeks and nothing is ever missed for good."""
+    return SEASONS[((game_day(time_ms) - 1) % YEAR_DAYS) // SEASON_DAYS]
+
+
 def weather(home: str, time_ms: int) -> str:
+    current = _weather(home, time_ms)
+    return "snow" if current == "rain" and season(time_ms) == "winter" else current
+
+
+def _weather(home: str, time_ms: int) -> str:
     span = game_hour(time_ms) // WEATHER_SPAN_HOURS
     digest = hashlib.sha256(f"{home}|weather|{game_day(time_ms)}|{span}".encode("ascii")).digest()
     roll = int.from_bytes(digest[:4], "big") % sum(WEATHER_WEIGHTS)
-    for name, weight in zip(WEATHERS, WEATHER_WEIGHTS):
+    for name, weight in zip(WEATHERS[:3], WEATHER_WEIGHTS):
         if roll < weight:
             return name
         roll -= weight
