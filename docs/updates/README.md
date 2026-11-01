@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261101-23 | 2026-11-01 | Real-device acceptance first in progress.md; finished and decided plan items closed | #done #process | [2026-11](2026-11.md) |
 | U-20261101-22 | 2026-11-01 | Dialogs join the redesign: natural-width buttons, roomy margins, an accented default | #done #ui #design | [2026-11](2026-11.md) |
 | U-20261101-21 | 2026-11-01 | Patch setuptools and certifi in the publish lock | #bugfix #deps #security #ci | [2026-11](2026-11.md) |
 | U-20261101-20 | 2026-11-01 | The home runs itself, with fewer settings and a picture for everything | #done #pets #game #ui #art | [2026-11](2026-11.md) |
