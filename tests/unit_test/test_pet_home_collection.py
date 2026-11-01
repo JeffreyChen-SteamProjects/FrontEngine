@@ -29,7 +29,7 @@ def _world(mode="manage"):
 def test_the_collection_reaches_the_1_0_target_with_every_category():
     assert len(CATALOG.furniture) >= 30
     categories = {definition.category for definition in CATALOG.furniture.values()}
-    assert categories == {"bed", "table", "workstation", "leisure", "decoration"}
+    assert categories == {"bed", "table", "workstation", "leisure", "decoration", "bath"}
     for definition in CATALOG.furniture.values():
         assert set(definition.effects) <= set(NEEDS), definition.identifier
         assert 1 <= definition.unlock_level <= 5

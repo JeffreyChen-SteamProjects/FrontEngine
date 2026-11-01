@@ -16,7 +16,8 @@ from frontengine.utils.pet_game.catalog import CELL_PIXELS, Catalog, FurnitureDe
 THEMES = ("warm_home", "green_studio", "night_studio")
 # Area labels on a zone's floor: they steer which piece a resident picks, never forbid one.
 AREA_TAGS = ("living", "work", "leisure", "dining")
-AREA_FOR_ACTIVITY = {"sleep": "living", "eat": "dining", "work": "work", "play": "leisure", "relax": "leisure"}
+AREA_FOR_ACTIVITY = {"sleep": "living", "eat": "dining", "work": "work", "play": "leisure", "relax": "leisure",
+                     "wash": "living"}
 MAX_AREAS = 16
 CLIMBING_TRAITS = ("playful",)       # pets with one of these jump onto raised pieces by themselves
 MIN_ZONE_CELLS = 8

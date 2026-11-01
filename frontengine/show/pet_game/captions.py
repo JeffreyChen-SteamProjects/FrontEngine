@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 NEED_KEYS = (("energy", "pet_home_energy", "Energy"), ("fullness", "pet_home_fullness", "Fullness"),
              ("mood", "pet_home_mood", "Mood"), ("comfort", "pet_home_comfort", "Comfort"),
-             ("social", "pet_home_social", "Company"))
+             ("social", "pet_home_social", "Company"), ("hygiene", "pet_home_hygiene", "Cleanliness"))
 FRIENDS_SHOWN = 3
 
 

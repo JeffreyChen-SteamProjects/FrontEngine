@@ -29,7 +29,7 @@ from frontengine.utils.logging.loggin_instance import front_engine_logger
 USING_ACTIONS = {"sleep": "sleep", "nap": "sleep", "eat": "feed", "snack": "feed", "work": "sit",
                  "relax": "sit", "play": "play", "greet": "greet", "drag": "drag", "wait": "idle",
                  "idle": "idle", "wander": "idle", "visit": "idle", "help": "greet",
-                 "come": "greet", "tag": "play"}
+                 "come": "greet", "tag": "play", "wash": "sit", "tidy": "idle"}
 # Work shown with the profession's own pose when the character has it (built-in characters
 # undressed, as whole-body frames); everyone else keeps sitting at the station.
 PROFESSION_ACTIONS = {"writing": "write", "gardening": "garden", "crafting": "craft"}

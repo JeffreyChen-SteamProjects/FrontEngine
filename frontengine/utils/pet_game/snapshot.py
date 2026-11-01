@@ -24,7 +24,8 @@ FIELDS_V1 = {"format", "version", "home", "mode", "time_ms", "rng", "next_id", "
              "residents", "tasks", "ledger", "flags", "dormant"}
 FIELDS_V2 = FIELDS_V1 | {"relations"}
 FIELDS = FIELDS_V2 | {"progress"}
-FIELDS_BY_VERSION = {1: FIELDS_V1, 2: FIELDS_V2, 3: FIELDS, 4: FIELDS, 5: FIELDS, 6: FIELDS}  # 4-6: inner fields
+FIELDS_BY_VERSION = {1: FIELDS_V1, 2: FIELDS_V2, 3: FIELDS, 4: FIELDS, 5: FIELDS, 6: FIELDS,
+                     7: FIELDS}  # 4-7: inner fields
 ZONE_DEFAULTS = {4: ("areas", []), 5: ("link", None)}     # fields zones gained in that version
 _PAIR = re.compile(r"[0-9a-f]{32}\|[0-9a-f]{32}")
 MAX_TIME_MS = 10 ** 13
