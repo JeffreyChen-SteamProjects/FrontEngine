@@ -12,7 +12,7 @@ from os import getcwd
 from pathlib import Path
 
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QGuiApplication, QKeyEvent
+from PySide6.QtGui import QGuiApplication, QKeyEvent, QKeySequence
 from PySide6.QtWidgets import (QCheckBox, QFrame, QHBoxLayout, QLabel, QListWidget, QListWidgetItem,
                                QPushButton, QScrollArea, QVBoxLayout, QWidget)
 
@@ -309,6 +309,8 @@ class PetHomePage(SettingPage):
         self.view.resident_selected.connect(self.select_resident)
         self.view.furniture_selected.connect(self.select_furniture)
         self.view.cell_clicked.connect(self.layout_panel.cell_clicked)
+        self.view.piece_hovered.connect(self.layout_panel.drag_hover)
+        self.view.piece_dropped.connect(self.layout_panel.drop)
 
     # ----- home lifecycle ------------------------------------------------------------
 
@@ -507,6 +509,18 @@ class PetHomePage(SettingPage):
     def keyPressEvent(self, event: QKeyEvent) -> None:
         if event.key() == Qt.Key.Key_Escape and self.layout_panel.arranging:
             self.layout_panel.toggle_arrange()
+            event.accept()
+            return
+        steps = {Qt.Key.Key_Left: -1, Qt.Key.Key_Right: 1}.get(event.key())
+        if steps and self.layout_panel.arranging and self.layout_panel.nudge(steps):
+            event.accept()
+            return
+        if event.matches(QKeySequence.StandardKey.Undo):
+            self.layout_panel.undo()
+            event.accept()
+            return
+        if event.matches(QKeySequence.StandardKey.Redo):
+            self.layout_panel.redo()
             event.accept()
             return
         super().keyPressEvent(event)
