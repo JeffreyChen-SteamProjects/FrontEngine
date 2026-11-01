@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Callable
 
 from frontengine.utils.pet_companion.stats import MAX_AFFECTION
+from frontengine.utils.pet_game.environment import sky, weather
 from frontengine.utils.pet_game.layout import RESIDENT_ID, checked_int
 from frontengine.utils.pet_game.schedule import DAY_MS, game_day
 
@@ -291,7 +292,9 @@ def _update_wish(world: World, resident) -> None:
 
 # ----- life events ---------------------------------------------------------------------------
 
-LIFE_EVENTS = ("first_creation", "friends_dinner", "birthday", "celebration")
+LIFE_EVENTS = ("first_creation", "friends_dinner", "birthday", "celebration", "rainy_day", "starry_night",
+               "new_friend", "skilled", "green_home", "full_house", "first_story", "harvest")
+FRIEND_LEVEL, SKILLED_LEVEL, GREEN_HOME_DECORATIONS, FULL_HOUSE, HARVEST_UNITS = 20, 3, 5, 4, 10
 
 
 def _life_event(world: World, kind: str, resident: str | None) -> None:
@@ -305,14 +308,54 @@ def _happened(world: World, kind: str, resident: str | None = None, day: int | N
                and (day is None or event["day"] == day) for event in world.progress.events)
 
 
+def _once_events(world: World) -> None:
+    """Home milestones that happen once in a home's life."""
+    reached = {
+        "first_creation": _stat(world, "settled:toy", "settled:stool") > 0,
+        "first_story": _stat(world, "settled:story") > 0,
+        "harvest": _stat(world, "settled:herbs", "settled:flowers") >= HARVEST_UNITS,
+        "green_home": placed(world, "decoration") >= GREEN_HOME_DECORATIONS,
+        "full_house": len(world.residents) >= FULL_HOUSE,
+    }
+    for kind, happened_now in reached.items():
+        if happened_now and not _happened(world, kind):
+            _life_event(world, kind, None)
+
+
+def _daily_events(world: World, day: int) -> None:
+    """Moments that can come back on another day: dinners and the sky."""
+    awake = [r for r in world.residents.values() if not r.parked and not r.away
+             and (r.activity is None or r.activity.kind not in ("sleep", "nap"))]
+    eating = [r for r in awake if r.activity is not None and r.activity.kind == "eat" and r.activity.phase == "using"]
+    today = {
+        "friends_dinner": len(eating) >= 3,
+        "rainy_day": bool(awake) and weather(world.home, world.time_ms) == "rain",
+        "starry_night": bool(awake) and sky(world.time_ms) == "night"
+        and weather(world.home, world.time_ms) == "clear",
+    }
+    for kind, happened_now in today.items():
+        if happened_now and not _happened(world, kind, day=day):
+            _life_event(world, kind, None)
+
+
+def _resident_events(world: World) -> None:
+    """A pet's first close friend and first skilled profession, once each."""
+    for identifier in sorted(world.residents):
+        resident = world.residents[identifier]
+        friendly = any(value >= FRIEND_LEVEL for key, value in world.relations.items()
+                       if identifier in key.split("|"))
+        if friendly and not _happened(world, "new_friend", identifier):
+            _life_event(world, "new_friend", identifier)
+        skilled = any(resident.level(profession) >= SKILLED_LEVEL for profession in resident.skills)
+        if skilled and not _happened(world, "skilled", identifier):
+            _life_event(world, "skilled", identifier)
+
+
 def _check_events(world: World) -> None:
     day = game_day(world.time_ms)
-    if _stat(world, "settled:toy", "settled:stool") and not _happened(world, "first_creation"):
-        _life_event(world, "first_creation", None)
-    eating = [r for r in world.residents.values() if r.activity is not None
-              and r.activity.kind == "eat" and r.activity.phase == "using"]
-    if len(eating) >= 3 and not _happened(world, "friends_dinner", day=day):
-        _life_event(world, "friends_dinner", None)
+    _once_events(world)
+    _daily_events(world, day)
+    _resident_events(world)
     for identifier, since in world.progress.arrivals.items():
         days = (world.time_ms - since) // DAY_MS
         if days and days % BIRTHDAY_EVERY_DAYS == 0 and identifier in world.residents \

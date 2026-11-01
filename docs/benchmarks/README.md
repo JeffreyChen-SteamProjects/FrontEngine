@@ -76,3 +76,43 @@ Recorded native Windows results (one 100% monitor, 30 seconds): [2026-10-29-pets
 - **Memory:** four layered pets use about 33 MB more than four legacy pets. The first scenario's growth also includes one-time Qt and OpenGL setup.
 
 This does not measure display refresh, the GPU compositor or mixed-DPI multi-monitor setups.
+
+# Pet home benchmark
+
+Run from the repository root:
+
+```powershell
+py -m benchmarks.pet_home --save
+```
+
+Fixed loads from `progress.md` #31: 1 resident / 10 furniture, 6 / 60 and 12 / 120, each with jobs across all three professions, warmed up for ten game minutes, then timed over another ten. Budgets for 6 / 60: world step (the whole simulation cost of one 200 ms step) p95 ≤ 5 ms, operation feedback (a command through `HomeService.run`) p95 ≤ 100 ms, game data ≤ 200 MB.
+
+Recorded results (Windows-11-10.0.26300-SP0, AMD64 Family 25 Model 117 Stepping 2, AuthenticAMD, 12 logical CPUs, Python 3.14.4, PySide6 6.11.2, offscreen software rendering): [2026-11-01-pet-home.json](2026-11-01-pet-home.json).
+
+| Residents / furniture | World step p95 (ms) | Feedback p95 (ms) | Save encode p95 (ms) | Strip frame p95 (ms) | Game data (MB) |
+|---|---:|---:|---:|---:|---:|
+| 1 / 10 | 0.0297 | 0.0312 | 0.9354 | 1.5437 | 0.17 |
+| 6 / 60 | 0.346 | 0.0796 | 4.4438 | 7.8692 | 0.22 |
+| 12 / 120 | 1.1819 | 0.1445 | 5.4313 | 15.6294 | 0.29 |
+
+- All three budgets hold with a wide margin (6 / 60: step well under 1 ms, feedback under 0.1 ms, 0.22 MB). Figures vary by a few tenths of a millisecond between runs; the strip frame is the noisiest.
+- Long run (accelerated, 6 / 60): traced world memory 0.1284 MB at minute 10, 0.1767 MB at two hours, 0.185 MB at four. The 37.62% growth to hour two is over the plan's 10% investigation line and was investigated: it is bounded histories filling up (ledger duplicate-protection IDs, up to 1,024; journal, 100; life events, 50; counters, 256), it slows to under 5% between hours two and four, and its ceiling is a few hundred kilobytes. Not a leak.
+- Save encoding on the GUI thread is serialisation only (about 4–5 ms p95 at 60–120 pieces, at most once every 0.8 s after a change); the reload check that proves the bytes load back now runs on the writer thread before anything touches the disk. Before that move the GUI-thread figure was about 9–11 ms.
+- Accelerated time measures cost per step, not two real hours of rendering; the strip frame figure is a software offscreen grab, not the screen's compositor.
+
+# Startup, search and page switching against the pre-game baseline
+
+```powershell
+git worktree add ../fe-baseline 0395720
+py -m benchmarks.startup_compare --baseline ../fe-baseline --rounds 8 --save
+```
+
+`--save` writes a dated JSON file into this folder. Each round starts a fresh spawned process for the baseline and then for this checkout (interleaved), after one uncounted warm-up round each (the first run of a new worktree compiles bytecode). The rule from `progress.md` #31: p95 may grow by no more than 10% or 50 ms, whichever is larger. Recorded: [2026-11-01-startup-compare.json](2026-11-01-startup-compare.json).
+
+| Metric | Baseline p95 (ms) | Current p95 (ms) | Allowed increase (ms) |
+|---|---:|---:|---:|
+| Main window startup | 2011.42 | 1866.77 | 201.14 |
+| Command search "pet" | 6.66 | 9.26 | 50.0 |
+| Slowest page switch | 5.61 | 7.84 | 50.0 |
+
+All within. The baseline has 16 pages, the current window 17.

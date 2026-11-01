@@ -22,6 +22,7 @@ from PySide6.QtWidgets import QMenu, QToolButton, QToolTip
 from frontengine.show.pet_game.captions import card_text
 from frontengine.show.pet_game.home_service import HomeService
 from frontengine.show.pet_game.home_view import HomeView
+from frontengine.show.pet_game.themes import floor_color, glyph
 from frontengine.utils.multi_language.retranslate import translate
 from frontengine.utils.pet_game.catalog import CELL_PIXELS
 from frontengine.utils.pet_game.simulation import STEP_MS
@@ -33,6 +34,7 @@ BUBBLE_SECONDS = 3.0
 FRAME_MS = {"high": 16, "balanced": 33, "saver": 66}
 DRAG_START_PX = 6
 LAYERS = ("top", "bottom")
+HOME_MODES = ("normal", "focus", "meeting", "saver")
 HIDDEN_REASON = "hidden"
 
 
@@ -48,6 +50,8 @@ class HomeStrip(HomeView):
     caption_backdrop = True
     open_requested = Signal()
     layer_requested = Signal(str)
+    mode_requested = Signal(str)
+    quiet = False                          # focus mode: no bubbles and no cards
     closed = Signal()                      # at close time, before the deferred delete
     overlay_lockable = False              # lock-all must not make the home unclickable
     overlay_remembers_geometry = False
@@ -123,11 +127,17 @@ class HomeStrip(HomeView):
         self._before = self._after or {key: r.x_milli for key, r in world.residents.items()}
         self._after = {key: resident.x_milli for key, resident in world.residents.items()}
         self._stepped_at = self._clock()
+        text = "⌂ " + glyph(world.home, world.time_ms)
+        if self.button.text() != text:
+            self.button.setText(text)
+            self.button.adjustSize()          # the glyph widens the button; never elide it
         self.update_mask()
 
     def resident_x_milli(self, resident) -> float:
         if self._dragging is not None and self._dragging[0] == resident.identifier:
             return self._dragging[1]
+        if self.reduced_motion:
+            return resident.x_milli
         start = self._before.get(resident.identifier, resident.x_milli)
         end = self._after.get(resident.identifier, resident.x_milli)
         share = min(1.0, max(0.0, (self._clock() - self._stepped_at) * 1000 / STEP_MS))
@@ -137,6 +147,8 @@ class HomeStrip(HomeView):
 
     def _events(self, events: list) -> None:
         """Short bubbles say what a pet just started, who it greeted, or what it earned."""
+        if self.quiet:
+            return
         for event in events:
             text = bubble_text(event)
             if text and event.get("resident") in self.service.world.residents:
@@ -181,16 +193,12 @@ class HomeStrip(HomeView):
         reach = CELL_PIXELS            # covers the step a resident may take before the next mask
         for resident in world.residents.values():
             if resident.zone == self.zone:
-                box = self.caption_rect(resident).united(self._resident_box(resident))
+                box = self.caption_rect(resident).united(self.resident_box(resident))
                 bubble = self.bubble_rect(resident)
                 if bubble is not None:                     # painting is clipped to the mask too
                     box = box.united(bubble)
                 region = region.united(box.toAlignedRect().adjusted(-reach, 0, reach, 0))
         return region
-
-    def _resident_box(self, resident) -> QRectF:
-        center, radius = self.resident_center(resident), self.resident_radius()
-        return QRectF(center.x() - radius, center.y() - radius, radius * 2, radius * 2)
 
     def update_mask(self) -> None:
         self.setMask(self.interactive_region())
@@ -210,6 +218,8 @@ class HomeStrip(HomeView):
         if not self.arranging:
             return
         painter.fillRect(self.rect(), QColor(40, 120, 200, 40))
+        painter.fillRect(QRectF(0, self._floor_y() - 4, self.width(), 4),
+                         floor_color(self.world.zones[self.zone].theme))
         painter.setPen(QPen(QColor(40, 120, 200, 200), 1, Qt.PenStyle.DashLine))
         painter.drawRect(self.rect().adjusted(0, 0, -1, -1))
         zone, width = self.world.zones[self.zone], self.cell_width()
@@ -250,6 +260,9 @@ class HomeStrip(HomeView):
         other = "bottom" if self.layer == "top" else "top"
         menu.addAction(translate("pet_home_layer_to_" + other, "Move below windows" if other == "bottom"
                                  else "Move above windows"), lambda: self.layer_requested.emit(other))
+        modes = menu.addMenu(translate("pet_home_mode", "Mode"))
+        for mode in HOME_MODES:
+            modes.addAction(translate("pet_home_mode_" + mode, mode), lambda m=mode: self.mode_requested.emit(m))
         menu.addAction(translate("pet_home_hide", "Hide the home"), self.hide)
 
     # ----- mouse -------------------------------------------------------------------------------
@@ -257,7 +270,7 @@ class HomeStrip(HomeView):
     def _resident_at(self, point: QPointF) -> str | None:
         world = self.service.world
         for resident in sorted(world.residents.values(), key=lambda item: item.identifier):
-            if resident.zone == self.zone and self._resident_box(resident).adjusted(-4, -4, 4, 4).contains(point):
+            if resident.zone == self.zone and self.resident_box(resident).adjusted(-4, -4, 4, 4).contains(point):
                 return resident.identifier
         return None
 
@@ -309,7 +322,7 @@ class HomeStrip(HomeView):
     def show_card(self, identifier: str, where: QPoint) -> None:
         """A non-activating tooltip card: name, what it is doing, and its needs."""
         resident = self.service.world.residents.get(identifier)
-        if resident is None:
+        if resident is None or self.quiet:
             return
         QToolTip.showText(where, card_text(resident, self.service.world), self, QRect(), 6000)
 

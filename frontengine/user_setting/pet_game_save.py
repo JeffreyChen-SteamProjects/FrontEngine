@@ -113,19 +113,23 @@ class HomeSaveStore:
         return target
 
     def encode(self, world: World) -> bytes:
-        """Serialize and prove the bytes load back. Pure CPU work; touches no file."""
+        """Serialize a snapshot. Cheap enough for the GUI thread; the reload check runs in the writer."""
         if world.mode != self.mode:
             raise ValueError("World mode does not match this save file")
         data = json.dumps(snapshot.to_dict(world), allow_nan=False, separators=(",", ":")).encode("utf-8")
         if len(data) > MAX_SAVE_BYTES:
             raise ValueError("Home save exceeds the size limit")
-        snapshot.from_dict(json.loads(data.decode("utf-8")), self.catalog)
         return data
 
+    def verify(self, data: bytes) -> None:
+        """Prove the bytes load back into a valid home; pure CPU work on detached data."""
+        snapshot.from_dict(json.loads(data.decode("utf-8")), self.catalog)
+
     def write_encoded(self, data: bytes) -> None:
-        """Blocking file work, safe on a worker thread: backup the last good file, then replace."""
+        """Worker-safe: verify, back up the last good file, then replace. Nothing unverified reaches disk."""
         if self.read_only:
             raise PermissionError("Home save is protected; restore a backup or update FrontEngine")
+        self.verify(data)
         self.path.parent.mkdir(parents=True, exist_ok=True)
         if self.path.is_file():
             try:

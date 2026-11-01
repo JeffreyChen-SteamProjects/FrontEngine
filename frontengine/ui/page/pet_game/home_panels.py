@@ -18,6 +18,7 @@ from frontengine.show.pet_game.captions import (
 )
 from frontengine.utils.multi_language.retranslate import retranslator, translate, tr
 from frontengine.utils.pet_game.catalog import FURNITURE_PREFIX
+from frontengine.utils.pet_game.layout import THEMES
 from frontengine.utils.pet_game.schedule import TEMPLATES
 from frontengine.utils.pet_game.world import COMMANDS
 
@@ -70,7 +71,9 @@ class ResidentPanel:
         self.commands = [_button("pet_home_cmd_" + command, command.title(),
                                  lambda _checked=False, c=command: self.command(c)) for command in COMMANDS]
         section.add_inline(*self.commands)
-        section.add_inline(_button("pet_home_release", "Move out", self.release))
+        section.add_inline(_button("pet_home_wardrobe", "Wardrobe…", self.wardrobe),
+                           _button("pet_home_release", "Move out", self.release))
+        self.wardrobes: dict = {}
 
     def refresh_lists(self) -> None:
         world = self.page.service.world
@@ -136,6 +139,21 @@ class ResidentPanel:
         self.page.report(self.page.service.adopt(record["id"]))
         self.page.select_resident(record["id"])
 
+    def wardrobe(self) -> None:
+        """The existing wardrobe; applying goes through the home's own lease on this pet."""
+        identifier = self.page.selected_resident
+        if not identifier:
+            self.page.report("pick_resident")
+            return
+        dialog = self.wardrobes.get(identifier)
+        if dialog is None:
+            from frontengine.ui.dialog.pet_wardrobe import PetWardrobeDialog
+            dialog = PetWardrobeDialog(self.page.profiles, identifier, self.page)
+            dialog.destroyed.connect(lambda _obj=None, key=identifier: self.wardrobes.pop(key, None))
+            self.wardrobes[identifier] = dialog
+        dialog.show()
+        dialog.raise_()
+
     def release(self) -> None:
         resident = self.page.selected_resident
         if resident:
@@ -156,6 +174,9 @@ class LayoutPanel:
         self.hint.setWordWrap(True)
         section.add_inline(self.arrange)
         section.add_widget(self.hint)
+        self.theme = QComboBox()
+        self.theme.activated.connect(self._theme_chosen)
+        section.add_row("pet_home_theme", self.theme, "Theme")
         self.storage = QComboBox()
         self.storage.currentIndexChanged.connect(self.update_preview)
         section.add_row("pet_home_storage", self.storage, "In storage")
@@ -189,6 +210,11 @@ class LayoutPanel:
                     self.storage.addItem(label, definition)
             zone = self.page.zone
             self.cell.setRange(0, world.zones[zone].width_cells - 1 if zone else 0)
+            self.theme.clear()
+            for theme in THEMES:
+                self.theme.addItem(translate("pet_game_theme_" + theme, theme), theme)
+            if zone:
+                self.theme.setCurrentIndex(self.theme.findData(world.zones[zone].theme))
         index = self.storage.findData(current)
         self.storage.setCurrentIndex(max(0, index))
         self.storage.blockSignals(False)
@@ -202,6 +228,12 @@ class LayoutPanel:
                               translate("pet_home_nothing_selected", "Click a piece of furniture"))
         for button in self.actions[1:]:
             button.setEnabled(piece is not None)
+
+    def _theme_chosen(self, _index: int) -> None:
+        theme, zone = self.theme.currentData(), self.page.zone
+        if theme and zone:
+            self.page.report(self.page.service.run(lambda world: world.set_theme(zone, theme)))
+            self.page.refresh()
 
     def toggle_arrange(self) -> None:
         self.arranging = not self.arranging

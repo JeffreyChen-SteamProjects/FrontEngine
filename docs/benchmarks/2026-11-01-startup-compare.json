@@ -1,0 +1,28 @@
+{
+  "rounds": 8,
+  "warmup": 1,
+  "metrics": {
+    "startup_ms": {
+      "baseline_p95": 2011.42,
+      "current_p95": 1866.77,
+      "allowed_increase": 201.14,
+      "within": true
+    },
+    "search_ms": {
+      "baseline_p95": 6.66,
+      "current_p95": 9.26,
+      "allowed_increase": 50.0,
+      "within": true
+    },
+    "page_switch_ms": {
+      "baseline_p95": 5.61,
+      "current_p95": 7.84,
+      "allowed_increase": 50.0,
+      "within": true
+    }
+  },
+  "pages": {
+    "baseline": 16,
+    "current": 17
+  }
+}

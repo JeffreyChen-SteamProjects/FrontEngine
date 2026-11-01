@@ -1008,6 +1008,7 @@ class FrontEngineMainUI(QMainWindow):
         front_engine_logger.info(
             f"[MainUI] screen sharing={sharing}" + (f" | {match}" if match else ""))
         self.control_center_ui.set_hide_from_capture(sharing)
+        self.pet_home_ui.sharing_changed(sharing)
         if sharing:
             self._last_toast = show_toast(
                 language_wrapper.language_word_dict.get(
