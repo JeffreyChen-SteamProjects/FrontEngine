@@ -127,7 +127,10 @@ class HomeStrip(HomeView):
         self._before = self._after or {key: r.x_milli for key, r in world.residents.items()}
         self._after = {key: resident.x_milli for key, resident in world.residents.items()}
         self._stepped_at = self._clock()
-        self.button.setText("⌂ " + glyph(world.home, world.time_ms))
+        text = "⌂ " + glyph(world.home, world.time_ms)
+        if self.button.text() != text:
+            self.button.setText(text)
+            self.button.adjustSize()          # the glyph widens the button; never elide it
         self.update_mask()
 
     def resident_x_milli(self, resident) -> float:
@@ -190,16 +193,12 @@ class HomeStrip(HomeView):
         reach = CELL_PIXELS            # covers the step a resident may take before the next mask
         for resident in world.residents.values():
             if resident.zone == self.zone:
-                box = self.caption_rect(resident).united(self._resident_box(resident))
+                box = self.caption_rect(resident).united(self.resident_box(resident))
                 bubble = self.bubble_rect(resident)
                 if bubble is not None:                     # painting is clipped to the mask too
                     box = box.united(bubble)
                 region = region.united(box.toAlignedRect().adjusted(-reach, 0, reach, 0))
         return region
-
-    def _resident_box(self, resident) -> QRectF:
-        center, radius = self.resident_center(resident), self.resident_radius()
-        return QRectF(center.x() - radius, center.y() - radius, radius * 2, radius * 2)
 
     def update_mask(self) -> None:
         self.setMask(self.interactive_region())
@@ -271,7 +270,7 @@ class HomeStrip(HomeView):
     def _resident_at(self, point: QPointF) -> str | None:
         world = self.service.world
         for resident in sorted(world.residents.values(), key=lambda item: item.identifier):
-            if resident.zone == self.zone and self._resident_box(resident).adjusted(-4, -4, 4, 4).contains(point):
+            if resident.zone == self.zone and self.resident_box(resident).adjusted(-4, -4, 4, 4).contains(point):
                 return resident.identifier
         return None
 

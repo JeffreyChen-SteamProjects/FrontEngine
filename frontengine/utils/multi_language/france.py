@@ -1713,4 +1713,5 @@ french_word_dict = {
     "pet_home_note_wish": "Le souhait de {name} s’est réalisé",
     "pet_home_note_failed": "{text}",
     "pet_home_note_times": "×{count}",
+    "pet_home_wardrobe": "Garde-robe…",
 }

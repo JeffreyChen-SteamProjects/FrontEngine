@@ -249,6 +249,31 @@ def pet_home_setup():
     return {'furniture': len(world.furniture), 'tasks': len(world.tasks), 'coins': world.ledger.coins}
 
 
+def pet_home_dressed():
+    """Dress the home's resident as the built-in character installed by the pet step."""
+    from frontengine.show.pet.asset_library import PetAssetLibrary
+    from frontengine.show.pet.wardrobe import WardrobeDraft, asset_reference
+    page = W.pet_home_ui
+    resident = next(iter(page.service.world.residents.values()))
+    catalog, _errors = PetAssetLibrary().scan()
+    character = catalog.assets('character')[0]
+    draft = WardrobeDraft(page.profiles, resident.identifier, catalog)
+    draft.choose_character(asset_reference(character))
+    draft.apply()
+    W.sidebar.select_page_id('tab_pet_home_text')
+    for _ in range(50):
+        app.processEvents()
+        if page.art.renderer(resident.identifier) is not None:
+            break
+        QThreadPool.globalInstance().waitForDone(100)
+    strip = page.strip_list[0]
+    assert page.art.frame(resident) is not None, 'no character frame'
+    screenshot('pet-home-dressed')
+    strip.grab().save(str(OUTPUT / 'pet-home-strip-dressed.png'))
+    return {'character': character.identifier, 'strip_box_height': round(strip.resident_box(resident).height(), 1),
+            'action': __import__('frontengine.show.pet_game.resident_art', fromlist=['x']).semantic_action(resident)}
+
+
 def pet_home_running():
     page = W.pet_home_ui
     W.sidebar.select_page_id('tab_pet_home_text')
@@ -290,6 +315,7 @@ ACTIONS = [
     ('pet: built-in character', pet_builtin, 1),
     ('pet: is moving', pet_moved, 0),
     ('pet home: time passes and the resident works', pet_home_running, 0),
+    ('pet home: the resident wears the built-in character', pet_home_dressed, 0),
     ('wallpaper: choose folder and show', lambda: (W.wallpaper_setting_ui.choose_folder(),
                                                    W.wallpaper_setting_ui.toggle_wallpaper()), 1),
     ('widgets: spectrum', lambda: W.widgets_setting_ui.toggle_spectrum(), 1),
