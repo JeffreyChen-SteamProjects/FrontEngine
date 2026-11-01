@@ -1,8 +1,4 @@
 """The redesigned window frame: sidebar icons and headings, brand mark, command search entry."""
-import json
-import os
-
-import pytest
 from PySide6.QtGui import QIcon
 
 from frontengine.ui.nav.shell import SHORTCUT_HINT, BrandMark, CommandSearchButton
@@ -34,8 +30,11 @@ def test_groups_are_uppercase_and_pages_carry_icons():
     sidebar.add_group("nav_group_home", "Home")
     sidebar.add_page("tab_video_text", 0, "Video", icon_name="video")
     group, page = _rows(sidebar)
-    assert group.data(ROLE_KIND) == KIND_GROUP and group.text() == group.text().upper()
-    assert page.data(ROLE_KIND) == KIND_PAGE and page.data(ROLE_ICON) == "video" and not page.icon().isNull()
+    assert group.data(ROLE_KIND) == KIND_GROUP
+    assert group.text() == group.text().upper()
+    assert page.data(ROLE_KIND) == KIND_PAGE
+    assert page.data(ROLE_ICON) == "video"
+    assert not page.icon().isNull()
 
 
 def test_a_theme_change_redraws_icons_in_the_new_tone():
@@ -76,27 +75,13 @@ def test_brand_and_search_follow_the_theme():
     assert not brand.mark.pixmap().isNull()
 
 
-@pytest.fixture
-def window(tmp_path, monkeypatch):
-    from frontengine.ui.main_ui import FrontEngineMainUI
-    import frontengine.ui.main_ui as module
-
-    (tmp_path / "user_setting.json").write_text(json.dumps({"language": "English"}), encoding="utf-8")
-    original = os.getcwd()
-    os.chdir(tmp_path)
-    monkeypatch.setattr(module, "write_user_setting", lambda: None)
-    try:
-        ui = FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)
-        yield ui
-        ui.close()
-    finally:
-        os.chdir(original)
-
-
-def test_every_built_in_page_has_its_own_icon_and_the_search_opens_commands(window, monkeypatch):
+def test_every_built_in_page_has_its_own_icon_and_the_search_opens_commands(make_main_window, monkeypatch):
+    window = make_main_window()
     pages = [item for item in _rows(window.sidebar) if item.data(ROLE_KIND) == KIND_PAGE]
     names = [item.data(ROLE_ICON) for item in pages]
-    assert len(names) == 17 and len(set(names)) == 17 and "extension" not in names
+    assert len(names) == 17
+    assert len(set(names)) == 17
+    assert "extension" not in names
     assert window.command_search_button.caption.text() == "Commands"
     opened = []
     monkeypatch.setattr(window, "open_command_palette", lambda: opened.append(True))
@@ -105,4 +90,5 @@ def test_every_built_in_page_has_its_own_icon_and_the_search_opens_commands(wind
     window.command_search_button.click()
     assert opened
     titles = [action.text() for action in window.menu_bar.actions()]
-    assert "Help" in titles and "Docs" in titles
+    assert "Help" in titles
+    assert "Docs" in titles
