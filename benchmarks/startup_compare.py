@@ -20,12 +20,16 @@ import argparse
 import json
 import multiprocessing
 import os
+import re
 import sys
 import tempfile
 import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+
+BENCHMARK_DOCS = Path(__file__).resolve().parents[1] / "docs" / "benchmarks"
+RESULT_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,80}\.json")
 
 
 def _probe(checkout: str, results) -> None:
@@ -74,12 +78,12 @@ def p95(values: list[float]) -> float:
     return ordered[min(len(ordered) - 1, int(len(ordered) * 0.95))]
 
 
-def inside_repository(path: Path) -> Path:
-    """Results go somewhere under this checkout (normally docs/benchmarks/), never elsewhere."""
-    resolved = path.resolve()
-    if not resolved.is_relative_to(ROOT):
-        raise SystemExit(f"--output must be inside {ROOT}")
-    return resolved
+def results_file(requested: Path) -> Path:
+    """Only the file name is taken; results always land in docs/benchmarks/ of this checkout."""
+    name = os.path.basename(str(requested))
+    if not RESULT_NAME.fullmatch(name):
+        raise SystemExit("--output must name a .json file, for example docs/benchmarks/2026-11-01-x.json")
+    return BENCHMARK_DOCS / name
 
 
 def main() -> int:
@@ -108,7 +112,7 @@ def main() -> int:
     report["pages"] = {"baseline": samples["baseline"][0]["pages"], "current": samples["current"][0]["pages"]}
     text = json.dumps(report, indent=2)
     if args.output:
-        inside_repository(args.output).write_text(text + "\n", encoding="utf-8")
+        results_file(args.output).write_text(text + "\n", encoding="utf-8")
     print(text)
     return 0 if all(metric["within"] for metric in report["metrics"].values()) else 1
 

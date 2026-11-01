@@ -23,6 +23,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import platform
 import statistics
 import sys
@@ -42,6 +43,9 @@ WARM_STEPS = 10 * 60 * 5
 MEASURE_STEPS = 10 * 60 * 5
 LONG_STEPS = 2 * 60 * 60 * 5
 LONGER_STEPS = 4 * 60 * 60 * 5
+
+BENCHMARK_DOCS = Path(__file__).resolve().parents[1] / "docs" / "benchmarks"
+RESULT_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,80}\.json")
 
 
 def _percentiles(samples_ns: list[int]) -> dict:
@@ -155,13 +159,12 @@ def measure_long(residents: int, furniture: int) -> dict:
                                   "life_events": len(world.progress.events), "stats": len(world.progress.stats)}}
 
 
-def inside_repository(path: Path) -> Path:
-    """Results go somewhere under this checkout (normally docs/benchmarks/), never elsewhere."""
-    root = Path(__file__).resolve().parents[1]
-    resolved = path.resolve()
-    if not resolved.is_relative_to(root):
-        raise SystemExit(f"--output must be inside {root}")
-    return resolved
+def results_file(requested: Path) -> Path:
+    """Only the file name is taken; results always land in docs/benchmarks/ of this checkout."""
+    name = os.path.basename(str(requested))
+    if not RESULT_NAME.fullmatch(name):
+        raise SystemExit("--output must name a .json file, for example docs/benchmarks/2026-11-01-x.json")
+    return BENCHMARK_DOCS / name
 
 
 def main() -> int:
@@ -190,7 +193,7 @@ def main() -> int:
     report["investigate_memory_growth"] = report["long"]["memory_growth_percent"] > 10
     text = json.dumps(report, indent=2)
     if args.output:
-        inside_repository(args.output).write_text(text + "\n", encoding="utf-8")
+        results_file(args.output).write_text(text + "\n", encoding="utf-8")
     print(text)
     return 0 if all(report["within_budget"].values()) else 1
 
