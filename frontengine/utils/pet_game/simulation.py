@@ -9,8 +9,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from frontengine.utils.pet_game.behaviour import (
-    URGENT_ENERGY, URGENT_FULLNESS, cancel_activity, decide, release,
+    URGENT_ENERGY, URGENT_FULLNESS, cancel_activity, decide, greet_arrived, greet_completed, release,
+    shared_completed, together,
 )
+from frontengine.utils.pet_game.resident import PROFESSION_TRAITS
 from frontengine.utils.pet_game.resident import Resident
 from frontengine.utils.pet_game.schedule import block_at, game_hour
 
@@ -20,7 +22,10 @@ if TYPE_CHECKING:
 STEP_MS = 200
 WALK_MILLI_PER_MS = 64           # 64 logical pixels per second
 MAX_ADVANCE_MS = 6 * 60 * 60 * 1000
-BASE_RATES = {"energy": -1, "fullness": -2, "mood": -1}
+BASE_RATES = {"energy": -1, "fullness": -2, "mood": -1, "comfort": -1, "social": -1}
+LOW_COMFORT = 30                    # below this, discomfort wears on mood
+TOGETHER_SOCIAL = 20                # per minute while sharing a table or a toy box with others
+LIKED_WORK_MOOD = 2                 # per minute while doing work the pet likes
 FLOOR_RATES = {"nap": {"energy": 12, "mood": 0}, "snack": {"fullness": 30, "mood": 1}}
 # Mood while doing something that is not furniture-driven (absolute points/minute).
 ACTIVITY_MOOD = {"wander": 2, "eat": 5, "sleep": 1}
@@ -55,10 +60,20 @@ def step(world: World) -> None:
 
 def _rates(world: World, resident: Resident) -> dict[str, int]:
     rates = dict(BASE_RATES)
-    rates["mood"] += world.comfort(resident.zone) // 5
+    rates["comfort"] += world.comfort(resident.zone) // 5
+    if resident.needs["comfort"] < LOW_COMFORT:
+        rates["mood"] -= 1
+    if "social" in resident.traits:
+        rates["social"] -= 1
     activity = resident.activity
-    if activity is None or activity.phase != "using":
-        return rates
+    if activity is not None and activity.phase == "using":
+        _activity_rates(world, resident, rates)
+    return rates
+
+
+def _activity_rates(world: World, resident: Resident, rates: dict[str, int]) -> None:
+    """What the current activity adds to or replaces in the base rates."""
+    activity = resident.activity
     if activity.kind in ACTIVITY_MOOD:
         rates["mood"] = ACTIVITY_MOOD[activity.kind]
     if activity.kind in FLOOR_RATES:
@@ -66,13 +81,16 @@ def _rates(world: World, resident: Resident) -> dict[str, int]:
     elif activity.kind == "work":
         recipe = world.catalog.recipes[world.tasks[activity.task].recipe]
         rates["energy"] = -recipe.energy_per_minute
+        if PROFESSION_TRAITS[recipe.profession] in resident.traits:
+            rates["mood"] += LIKED_WORK_MOOD
     elif activity.furniture is not None:
         definition = world.definition(world.furniture[activity.furniture])
         for need, rate in definition.effects.items():
             rates[need] = rates[need] + rate if need == "mood" else rate
     if activity.bonus:
         rates["mood"] += HERB_MEAL_MOOD
-    return rates
+    if together(world, resident):
+        rates["social"] += TOGETHER_SOCIAL
 
 
 def _apply_needs(world: World, resident: Resident) -> None:
@@ -122,6 +140,8 @@ def _walk(world: World, resident: Resident) -> None:
         world.tasks[activity.task].state = "working"
     if activity.kind == "eat":
         _season_meal(world, resident)
+    if activity.kind == "greet" and activity.partner is not None:
+        greet_arrived(world, resident)
 
 
 def _season_meal(world: World, resident: Resident) -> None:
@@ -161,9 +181,13 @@ def _finished(world: World, resident: Resident) -> bool:
 def finish(world: World, resident: Resident, pause_ms: int = 1000) -> None:
     """Complete normally: release furniture and decide again after a short pause."""
     activity = resident.activity
+    if activity.kind in ("eat", "play", "relax"):
+        shared_completed(world, resident, activity.furniture)
     release(world, resident)
     resident.activity = None
     resident.decide_after_ms = world.time_ms + pause_ms
+    if activity.kind == "greet" and activity.partner is not None:
+        greet_completed(world, resident, activity.partner)
     world.emit("completed", resident=resident.identifier, activity=activity.kind)
 
 
@@ -177,6 +201,8 @@ def _work(world: World, resident: Resident) -> None:
     if resident.needs["energy"] < SLOW_WORK_ENERGY or resident.needs["mood"] < SLOW_WORK_MOOD:
         rate //= 2
     if "diligent" in resident.traits:
+        rate = rate * 11 // 10
+    if PROFESSION_TRAITS[recipe.profession] in resident.traits:
         rate = rate * 11 // 10
     task.progress_ms += rate
     if task.progress_ms >= recipe.duration_ms:

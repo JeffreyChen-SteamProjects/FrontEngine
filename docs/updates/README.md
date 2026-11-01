@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261101-08 | 2026-11-01 | Pets live together: comfort, company, friendships and personality | #done #pets #game #migration | [2026-11](2026-11.md) |
 | U-20261101-07 | 2026-11-01 | Three professions with materials, goods and a backpack | #done #pets #game #economy | [2026-11](2026-11.md) |
 | U-20261101-06 | 2026-11-01 | Features menu: every tool one click from the pet home, with a measured inventory | #done #ui #game | [2026-11](2026-11.md) |
 | U-20261101-05 | 2026-11-01 | The pet home on the desktop: click-through strip, layer choice, smooth drawing | #done #pets #game #native | [2026-11](2026-11.md) |
@@ -211,6 +212,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 7 |
+| [2026-11.md](2026-11.md) | 2026-11 | 8 |
 | [2026-10.md](2026-10.md) | 2026-10 | 115 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

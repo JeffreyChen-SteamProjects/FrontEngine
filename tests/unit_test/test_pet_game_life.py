@@ -28,6 +28,7 @@ def _furnished(seed: int = 7) -> tuple[World, str]:
     assert world.place("table_basic", zone, 7)[0] == "accepted"
     assert world.place("desk_basic", zone, 12)[0] == "accepted"
     assert world.add_resident(_profile(), zone) == "accepted"
+    world.residents[PET].traits = ()         # these tests measure the base rules, not a personality
     return world, zone
 
 
@@ -230,7 +231,7 @@ def test_six_residents_share_little_furniture_for_three_game_days():
         if event["kind"] in ("completed", "settled"):
             seen[event["resident"]].add(event.get("activity", event["kind"]))
     for identifier in residents:
-        assert {"settled", "work"} <= seen[identifier]
+        assert "settled" in seen[identifier]          # diligent pets go straight on to the next unit
         assert seen[identifier] & {"sleep", "nap"}
         assert seen[identifier] & {"eat", "snack"}
     holders = [user for piece in world.furniture.values() for user in piece.users.values()]

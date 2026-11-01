@@ -24,7 +24,8 @@ from frontengine.utils.pet_game.rng import GameRandom
 from frontengine.utils.pet_game.schedule import TEMPLATES, initial_time
 
 FORMAT = "frontengine.pet-home"
-VERSION = 1
+VERSION = 2              # 2: comfort and social needs, relationships
+RELATION_LIMIT = 100
 MODES = ("manage", "sandbox")
 MAX_RESIDENTS = 12
 MAX_ZONES = 8
@@ -55,6 +56,8 @@ class World:
         self.ledger = Ledger()
         self.flags: set[str] = set()
         self.dormant: list[dict] = []      # saved pieces whose content is not installed
+        self.relations: dict[str, int] = {}  # "<uuid>|<uuid>" (sorted) -> -100..100
+        self.social_ready: dict[str, int] = {}  # runtime cooldowns per pair
         self.events: deque[dict] = deque(maxlen=200)
         self.carry_ms = 0
 
@@ -220,6 +223,22 @@ class World:
             if resident.activity is not None and resident.activity.furniture == identifier:
                 cancel_activity(self, resident, reason)
 
+    @staticmethod
+    def pair(first: str, second: str) -> str:
+        return "|".join(sorted((first, second)))
+
+    def relation(self, first: str, second: str) -> int:
+        return self.relations.get(self.pair(first, second), 0)
+
+    def adjust_relation(self, first: str, second: str, delta: int) -> int:
+        key = self.pair(first, second)
+        value = max(-RELATION_LIMIT, min(RELATION_LIMIT, self.relations.get(key, 0) + delta))
+        if value:
+            self.relations[key] = value
+        else:
+            self.relations.pop(key, None)
+        return value
+
     def comfort(self, zone: str) -> int:
         return min(10, sum(definition.comfort for _piece, definition in self.in_zone(zone)))
 
@@ -248,6 +267,8 @@ class World:
         for piece in self.furniture.values():
             if piece.owner == identifier:
                 piece.owner = None
+        for key in [key for key in self.relations if identifier in key.split("|")]:
+            del self.relations[key]
         del self.residents[identifier]
         return "accepted"
 
