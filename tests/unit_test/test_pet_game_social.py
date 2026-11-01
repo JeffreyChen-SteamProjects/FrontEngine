@@ -53,8 +53,9 @@ def test_relationships_survive_saving_and_reject_bad_pairs():
     data = snapshot.to_dict(world)
     assert snapshot.from_dict(data, builtin_catalog()).relation(B, A) == 7
     data["relations"] = {f"{B}|{A}": 3}
+    catalog = builtin_catalog()
     with pytest.raises(ValueError):
-        snapshot.from_dict(data, builtin_catalog())
+        snapshot.from_dict(data, catalog)
 
 
 def test_lonely_residents_greet_and_become_friends():
@@ -128,7 +129,8 @@ def test_discomfort_wears_on_mood():
 
 
 def test_personality_is_stable_varied_and_speeds_liked_work():
-    assert traits_for(A) == traits_for(A)
+    first, again = traits_for(A), traits_for(A)
+    assert first == again
     assert len(set(traits_for(A))) == 2
     seen = {trait for index in range(40) for trait in traits_for(f"{index:032x}")}
     assert seen == set(TRAITS)

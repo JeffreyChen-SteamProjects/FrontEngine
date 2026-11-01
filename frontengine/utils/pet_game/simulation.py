@@ -66,8 +66,14 @@ def _rates(world: World, resident: Resident) -> dict[str, int]:
     if "social" in resident.traits:
         rates["social"] -= 1
     activity = resident.activity
-    if activity is None or activity.phase != "using":
-        return rates
+    if activity is not None and activity.phase == "using":
+        _activity_rates(world, resident, rates)
+    return rates
+
+
+def _activity_rates(world: World, resident: Resident, rates: dict[str, int]) -> None:
+    """What the current activity adds to or replaces in the base rates."""
+    activity = resident.activity
     if activity.kind in ACTIVITY_MOOD:
         rates["mood"] = ACTIVITY_MOOD[activity.kind]
     if activity.kind in FLOOR_RATES:
@@ -85,7 +91,6 @@ def _rates(world: World, resident: Resident) -> dict[str, int]:
         rates["mood"] += HERB_MEAL_MOOD
     if together(world, resident):
         rates["social"] += TOGETHER_SOCIAL
-    return rates
 
 
 def _apply_needs(world: World, resident: Resident) -> None:

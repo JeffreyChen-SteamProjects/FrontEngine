@@ -222,6 +222,26 @@ def _follow_command(world: World, resident: Resident, command: str) -> None:
             start(world, resident, command, "command", *found, duration=world.rng.randint(low, high))
 
 
+def _cared_for(world: World, resident: Resident, block: str) -> bool:
+    """Urgent needs, the routine, company and mood come before work; True when one started."""
+    needs = resident.needs
+    if needs["energy"] <= URGENT_ENERGY:
+        start_rest(world, resident, "tired")
+    elif needs["fullness"] <= URGENT_FULLNESS:
+        start_meal(world, resident, "hungry")
+    elif block == "sleep" and needs["energy"] < 90:
+        start_rest(world, resident, "bedtime")
+    elif block == "meal" and needs["fullness"] < 80:
+        start_meal(world, resident, "mealtime")
+    elif needs["social"] <= LOW_SOCIAL and start_greet(world, resident):
+        pass
+    elif needs["mood"] <= LOW_MOOD:
+        _start_free(world, resident, "cheer_up")
+    else:
+        return False
+    return True
+
+
 def decide(world: World, resident: Resident) -> None:
     """Choose the next activity for an idle resident."""
     zone = world.zones[resident.zone]
@@ -229,21 +249,10 @@ def decide(world: World, resident: Resident) -> None:
     if resident.commands:
         _follow_command(world, resident, resident.commands.pop(0))
         return
-    needs = resident.needs
-    if needs["energy"] <= URGENT_ENERGY:
-        return start_rest(world, resident, "tired")
-    if needs["fullness"] <= URGENT_FULLNESS:
-        return start_meal(world, resident, "hungry")
     block = block_at(resident.routine, game_hour(world.time_ms))
-    if block == "sleep" and needs["energy"] < 90:
-        return start_rest(world, resident, "bedtime")
-    if block == "meal" and needs["fullness"] < 80:
-        return start_meal(world, resident, "mealtime")
-    if needs["social"] <= LOW_SOCIAL and start_greet(world, resident):
+    if _cared_for(world, resident, block):
         return None
-    if needs["mood"] <= LOW_MOOD:
-        return _start_free(world, resident, "cheer_up")
-    if block in ("work", "free") and needs["energy"] > WORK_MIN_ENERGY:
+    if block in ("work", "free") and resident.needs["energy"] > WORK_MIN_ENERGY:
         why = start_work(world, resident, "scheduled_work")
         if why is None:
             return None
