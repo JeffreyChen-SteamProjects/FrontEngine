@@ -226,6 +226,7 @@ FrontEngine 是一個 PySide6 桌面**覆蓋層（overlay）框架**：把影片
 
 | 檔案 | 行數 | 功用 |
 | --- | ---: | --- |
+| `dialog_kit.py` | 35 | 對話框共用版面：`button_row()` 讓按鈕維持自身寬度並靠左（不再塞進格子被拉滿），`roomy()` 給頂層版面與分頁一致的邊距與間距。對話框底部 `QDialogButtonBox` 的預設按鈕由樣式表套用強調色。規則、App 設定檔、提醒、遙控、視窗釘選／複本、文字辨識、快捷鍵與衣櫃都已改用。 |
 | `choose_file_dialog.py` | 123 | 所有選檔的單一出處，含副檔名驗證（gif/image/wav/audio/pet/video）。 |
 | `how_to_use_dialog.py` | 118 | 程式內的使用說明。 |
 | `hotkey_settings_dialog.py` | 134 | 以 pynput 語法重新綁定全域快速鍵，存檔前驗證。 |

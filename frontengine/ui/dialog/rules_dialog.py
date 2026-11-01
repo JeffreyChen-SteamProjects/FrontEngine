@@ -35,6 +35,7 @@ from frontengine.utils.rules.rule_engine import (
 )
 
 from frontengine.utils.actions.action_registry import ACTION_LABELS
+from frontengine.ui.dialog.dialog_kit import button_row, roomy
 
 SETTING_KEY = "overlay_rules"
 
@@ -163,15 +164,12 @@ class RulesDialog(QDialog):
         self.order_hint.setWordWrap(True)
 
     def _build_layout(self) -> None:
-        layout = QGridLayout(self)
+        layout = roomy(QGridLayout(self))
         layout.addWidget(self.table, 0, 0, 1, 2)
-        layout.addWidget(self.add_button, 1, 0)
-        layout.addWidget(self.remove_button, 1, 1)
+        layout.addWidget(button_row(self.add_button, self.remove_button), 1, 0, 1, 2)
         layout.addWidget(self.hint_label, 2, 0, 1, 2)
         layout.addWidget(self.order_hint, 3, 0, 1, 2)
-        layout.addWidget(self.preview_button, 4, 0)
-        layout.addWidget(self.history_button, 4, 1)
-        layout.addWidget(self.target_button, 5, 0, 1, 2)
+        layout.addWidget(button_row(self.preview_button, self.history_button, self.target_button), 4, 0, 1, 2)
         layout.addWidget(self.diagnostics, 6, 0, 1, 2)
         layout.addWidget(self.status, 7, 0, 1, 2)
         layout.addWidget(self.button_box, 8, 0, 1, 2)

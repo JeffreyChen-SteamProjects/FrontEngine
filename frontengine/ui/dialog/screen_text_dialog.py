@@ -15,6 +15,7 @@ from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import tr
 from frontengine.utils.screen_text.screen_text_service import API_KEY_ENV, ScreenTextResult, api_key
 from frontengine.utils.screen_text.local_ocr import LocalOcr
+from frontengine.ui.dialog.dialog_kit import button_row, roomy
 
 CONSENT_KEY = "screen_text_consent"
 TEXT_CONSENT_KEY = "screen_text_text_consent"
@@ -116,10 +117,9 @@ class ScreenTextDialog(QDialog):
         self.button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)
         self.button_box.rejected.connect(self.reject)
 
-        layout = QGridLayout(self)
+        layout = roomy(QGridLayout(self))
         layout.addWidget(self.text_edit, 0, 0, 1, 2)
-        layout.addWidget(self.copy_button, 1, 0)
-        layout.addWidget(self.consent_checkbox, 1, 1)
+        layout.addWidget(button_row(self.copy_button, self.consent_checkbox), 1, 0, 1, 2)
         layout.addWidget(self.text_consent_checkbox, 2, 0, 1, 2)
         layout.addWidget(self.backend_label, 3, 0, 1, 2)
         layout.addWidget(self.hint_label, 4, 0, 1, 2)

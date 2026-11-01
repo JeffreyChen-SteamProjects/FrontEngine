@@ -20,6 +20,7 @@ from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import retranslator, tr
 from frontengine.utils.window_pin import window_pin
+from frontengine.ui.dialog.dialog_kit import button_row, roomy
 
 
 def _t(key: str, fallback: str) -> str:
@@ -73,11 +74,9 @@ class WindowPinDialog(QDialog):
         self.button_box.rejected.connect(self.reject)
         self.button_box.accepted.connect(self.accept)
 
-        layout = QGridLayout(self)
+        layout = roomy(QGridLayout(self))
         layout.addWidget(self.window_list, 0, 0, 1, 3)
-        layout.addWidget(self.refresh_button, 1, 0)
-        layout.addWidget(self.pin_button, 1, 1)
-        layout.addWidget(self.unpin_button, 1, 2)
+        layout.addWidget(button_row(self.refresh_button, self.pin_button, self.unpin_button), 1, 0, 1, 3)
         layout.addWidget(self.opacity_label, 2, 0)
         layout.addWidget(self.opacity_slider, 2, 1, 1, 2)
         layout.addWidget(self.hint_label, 3, 0, 1, 3)
