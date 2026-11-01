@@ -64,7 +64,7 @@ e a versão da Steam entrega o mesmo aplicativo com suporte à Workshop.
 A barra lateral agrupa as páginas conforme a finalidade delas. Esta seção segue
 essa organização.
 
-Cada página tem um ícone na barra lateral, e a caixa de busca no topo (Ctrl+K) abre Comandos. Os menus Ajuda e Documentação da barra de menus agora têm exatamente esses nomes.
+Cada página tem um ícone na barra lateral, e a caixa de busca no topo (Ctrl+K) abre Comandos. Os menus Ajuda e Documentação da barra de menus agora têm exatamente esses nomes. Em uma janela larga, os cartões das páginas de configuração ficam em uma coluna centralizada; o lar dos pets e o editor de cenas usam a largura toda.
 
 ### Lar
 

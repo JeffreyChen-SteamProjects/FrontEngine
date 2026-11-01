@@ -185,7 +185,7 @@ FrontEngine 是一個 PySide6 桌面**覆蓋層（overlay）框架**：把影片
 
 | 檔案 | 行數 | 功用 |
 | --- | ---: | --- |
-| `page/layout_kit.py` | 363 | **分頁的版面語彙**：`SettingPage`（頁首、捲動內容與固定底部動作列）與卡片式 `Section`。`QFormLayout.WrapLongRows` 在窄視窗將標籤移到欄位上方；`add_inline` 自動換行，`add_actions` 只顯示常用按鈕，次要操作收進選單。進階設定可收合，獨立編輯器可用 compact 頁面；無法縮小的內容仍可橫向捲動。寬控制項維持 260–460px。 |
+| `page/layout_kit.py` | 363 | **分頁的版面語彙**：`SettingPage`（頁首、捲動內容與固定底部動作列）與卡片式 `Section`。`QFormLayout.WrapLongRows` 在窄視窗將標籤移到欄位上方；`add_inline` 自動換行，`add_actions` 只顯示常用按鈕，次要操作收進選單。進階設定可收合，獨立編輯器可用 compact 頁面；無法縮小的內容仍可橫向捲動。寬控制項維持 260–460px。頁首、內容與底部列放在同一條置中欄（`CONTENT_MAX_WIDTH` 960px，`_column()` 以兩側伸縮包住，不在 resizeEvent 裡改邊距——那樣會在重繪中遞迴崩潰）；`wide=True`（家園、場景）與 compact 使用全寬。`add_header_action()` 把頁面層級動作放在標題右側。 |
 | `page/flow_layout.py` | 83 | `FlowLayout`：依可用寬度排列按鈕與勾選框，保留鍵盤順序，排除已隱藏控制項，並回報換行後的高度與最小尺寸。 |
 | `page/action_menu.py` | 49 | `ActionMenu`：以 QAction 代理既有 QPushButton 的操作，原按鈕由選單持有並隱藏。開啟選單與換語言時同步文字、圖示、勾選及可用狀態；執行仍走原按鈕的 callback。 |
 | `page/utils.py` | 374 | 分頁的共用行為：多螢幕分派（`dispatch_to_monitors`、`resolve_span`、`virtual_desktop_geometry`）、最近使用檔案下拉選單、拖放檔案過濾器、以及一整組 `apply_*_state()`（把預設集載回控制項）。 |

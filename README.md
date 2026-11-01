@@ -61,7 +61,7 @@ and the Steam build ships the same application with Workshop support.
 
 The sidebar groups the pages by what they are for. This section follows it.
 
-Every page has an icon in the sidebar, and the search box at its top (Ctrl+K) opens Commands. The menu bar's Help and Docs menus are named just that.
+Every page has an icon in the sidebar, and the search box at its top (Ctrl+K) opens Commands. The menu bar's Help and Docs menus are named just that. On a wide window the setting pages keep their cards in one centred column; the pet home and the scene editor use the full width.
 
 ### Home
 

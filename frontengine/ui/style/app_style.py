@@ -122,7 +122,7 @@ QLabel#sectionHeader {{ color: {c['text']}; font-size: {FONT_SECTION}px; font-we
 QWidget#settingSection {{
     background-color: {c['surface']}; border: 1px solid {c['border']}; border-radius: {RADIUS_CARD}px;
 }}
-QWidget#sectionContent, QWidget#inlineActions {{ background: transparent; border: none; }}
+QWidget#sectionContent, QWidget#inlineActions, QWidget#pageColumn {{ background: transparent; border: none; }}
 """
 
 
@@ -139,7 +139,7 @@ QPushButton:checked {{ background-color: {c['accent_soft']}; border-color: {c['a
 QPushButton:disabled, QToolButton#actionMenu:disabled {{
     color: {c['faint']}; background-color: transparent; border-color: {c['border']};
 }}
-QToolButton#actionMenu {{ padding-right: 24px; }}
+QToolButton#actionMenu {{ padding-right: 24px; max-height: {CONTROL_HEIGHT - 12}px; }}
 QToolButton#actionMenu::menu-indicator {{
     image: {{arrow}}; subcontrol-origin: padding; subcontrol-position: center right; right: 8px;
 }}
@@ -356,10 +356,19 @@ def build_palette(theme: str | None) -> QPalette:
     return palette
 
 
-def apply_app_style(window, theme: str | None) -> None:
-    """Style ``window`` and everything parented to it; replaces any previous stylesheet."""
+def apply_app_style(window, theme: str | None, application: bool = False) -> None:
+    """Style ``window`` and everything parented to it; replaces any previous stylesheet.
+
+    With ``application`` the palette also becomes the application's. Widgets under a
+    stylesheet take the roles the sheet does not set (base, mid, highlight) from the
+    application palette, not the window's, so self-painted views such as the pet home
+    would otherwise paint the platform's white base inside a dark window.
+    """
     try:
-        window.setPalette(build_palette(theme))
+        palette = build_palette(theme)
+        if application and QGuiApplication.instance() is not None:
+            QGuiApplication.setPalette(palette)
+        window.setPalette(palette)
         window.setStyleSheet(build_stylesheet(theme))
     except Exception as error:  # pragma: no cover - a styling failure must not stop the app starting
         front_engine_logger.warning(f"[app_style] apply failed: {error!r}")

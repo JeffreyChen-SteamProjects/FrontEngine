@@ -60,7 +60,7 @@ et la version Steam livre la même application avec la prise en charge du Worksh
 
 La barre latérale regroupe les pages selon leur usage. Cette section suit ce classement.
 
-Chaque page a une icône dans la barre latérale, et le champ de recherche en haut (Ctrl+K) ouvre les commandes. Les menus Aide et Documentation de la barre de menus portent simplement ces noms.
+Chaque page a une icône dans la barre latérale, et le champ de recherche en haut (Ctrl+K) ouvre les commandes. Les menus Aide et Documentation de la barre de menus portent simplement ces noms. Sur une fenêtre large, les cartes des pages de réglages restent dans une colonne centrée ; la maison des mascottes et l'éditeur de scène utilisent toute la largeur.
 
 ### Maison
 

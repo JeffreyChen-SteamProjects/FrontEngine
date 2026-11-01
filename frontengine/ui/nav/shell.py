@@ -83,9 +83,10 @@ class CommandSearchButton(QPushButton):
         self.hint.setObjectName("shortcutHint")
         for label in (self.glass, self.caption, self.hint):
             label.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
+        self.hint.setFixedHeight(20)
         layout.addWidget(self.glass)
         layout.addWidget(self.caption, 1)
-        layout.addWidget(self.hint)
+        layout.addWidget(self.hint, 0, Qt.AlignmentFlag.AlignVCenter)
         self.setMinimumHeight(36)
         self._refresh()
 

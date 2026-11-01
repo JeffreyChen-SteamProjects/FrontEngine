@@ -684,7 +684,7 @@ class FrontEngineMainUI(QMainWindow):
         and restore the saved window geometry (maximize when none is stored)."""
         # Legacy qt-material names (dark_amber.xml, ...) become light / dark.
         user_setting_dict["theme"] = normalise_theme(user_setting_dict.get("theme"))
-        apply_app_style(self, self.active_theme())  # a running day/night schedule wins
+        apply_app_style(self, self.active_theme(), application=True)  # a running day/night schedule wins
         # 還原上次選的畫質檔位（設定檔一直有存，只是從來沒有人讀回來）
         # Restore the quality tier chosen last time: it was always written to the
         # settings file, just never read back.
@@ -742,12 +742,12 @@ class FrontEngineMainUI(QMainWindow):
         front_engine_logger.info(f"[FrontEngineMainUI] _apply_theme | theme={theme}")
         user_setting_dict["theme"] = theme
         self._scheduled_theme = None
-        apply_app_style(self, theme)
+        apply_app_style(self, theme, application=True)
 
     def _apply_scheduled_theme(self, theme: str) -> None:
         """The day/night schedule's choice: shown, but the user's own theme setting stays as it was."""
         self._scheduled_theme = normalise_theme(theme)
-        apply_app_style(self, self._scheduled_theme)
+        apply_app_style(self, self._scheduled_theme, application=True)
 
     def active_theme(self) -> str:
         """The theme name on screen now: the schedule's while it runs, else the user's choice."""
@@ -755,7 +755,7 @@ class FrontEngineMainUI(QMainWindow):
 
     def _on_system_scheme_changed(self, _scheme=None) -> None:
         if self.active_theme() == "system":
-            apply_app_style(self, "system")
+            apply_app_style(self, "system", application=True)
 
     def closeEvent(self, event) -> None:
         """關閉事件：若系統托盤可用則隱藏視窗 / Close event: hide window if system tray is available"""
