@@ -21,13 +21,14 @@ from frontengine.utils.pet_game.layout import (
     has_steps, placement_problem,
 )
 from frontengine.utils.pet_companion.stats import MAX_AFFECTION
+from frontengine.utils.pet_game.goals import MAX_STATION_LEVEL
 from frontengine.utils.pet_game.ledger import Ledger
 from frontengine.utils.pet_game.resident import Resident, resident_from_profile
 from frontengine.utils.pet_game.rng import GameRandom
 from frontengine.utils.pet_game.schedule import TEMPLATES, initial_time
 
 FORMAT = "frontengine.pet-home"
-VERSION = 5              # 2: needs, relationships; 3: goals, progress; 4: zone areas; 5: zone crossings
+VERSION = 6              # 2: needs, relationships; 3: goals, progress; 4: zone areas; 5: crossings; 6: upgrades
 RELATION_LIMIT = 100
 MODES = ("manage", "sandbox")
 MAX_RESIDENTS = 12
@@ -37,6 +38,7 @@ COMMANDS = ("sleep", "eat", "play", "relax", "work", "stop")
 INTERACTIONS = {"feed": {"fullness": 15, "mood": 3}, "pat": {"mood": 8, "social": 5},
                 "talk": {"social": 12, "mood": 3}}
 INTERACT_COOLDOWN_MS = 30_000
+UPGRADE_BASE_COINS = 80     # the basic desk is free, but its upgrades are not
 _HOME = re.compile(r"[0-9a-f]{32}")
 
 
@@ -453,6 +455,29 @@ class World:
         self.progress.wishes.pop(identifier, None)
         self.progress.arrivals.pop(identifier, None)
         del self.residents[identifier]
+        return "accepted"
+
+    def station_level(self, definition: str) -> int:
+        """Every station of a kind shares its level, so storing or rearranging never loses one."""
+        return self.progress.upgrades.get(definition, 1)
+
+    def upgrade_cost(self, definition: str) -> int | None:
+        """Coins for the next level of a workstation kind; None when it cannot go higher."""
+        found = self.catalog.furniture.get(definition)
+        if found is None or found.profession is None or self.station_level(definition) >= MAX_STATION_LEVEL:
+            return None
+        return 0 if self.sandbox else max(found.price, UPGRADE_BASE_COINS) * self.station_level(definition)
+
+    def upgrade(self, definition: str, transaction: str) -> str:
+        cost = self.upgrade_cost(definition)
+        if cost is None:
+            return "not_upgradable"
+        if cost:
+            result = self.ledger.apply(transaction, "upgrade:" + definition, -cost)
+            if result != "accepted":
+                return "insufficient_coins" if result == "insufficient" else result
+        self.progress.upgrades[definition] = self.station_level(definition) + 1
+        self.emit("upgraded", definition=definition, level=self.progress.upgrades[definition])
         return "accepted"
 
     def interact(self, identifier: str, kind: str) -> str:

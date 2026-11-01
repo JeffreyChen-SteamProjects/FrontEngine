@@ -1848,4 +1848,10 @@ english_word_dict = {
     "pet_home_toolbar_jobs": "{count} jobs",
     "pet_home_dock_left": "Move the toolbar to the left",
     "pet_home_dock_right": "Move the toolbar to the right",
+    "pet_home_upgrade": "Upgrade ({cost} coins)",
+    "pet_home_upgrade_station": "Upgrade",
+    "pet_home_station_level": "Level {level} · {speed}% speed",
+    "pet_home_result_not_upgradable": "That cannot be upgraded any further.",
+    "pet_home_activity_help": "Lending a hand",
+    "pet_home_reason_helping": "helping a friend at work",
 }

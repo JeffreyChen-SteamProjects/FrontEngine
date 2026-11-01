@@ -10,6 +10,7 @@ smoothness costs rendering only and never changes what the world computes.
 """
 from __future__ import annotations
 
+import uuid
 from time import monotonic
 from typing import Callable
 
@@ -475,6 +476,12 @@ class HomeStrip(HomeView):
         if result != "accepted":
             self.bubbles[resident] = (result_text(result), self._clock() + BUBBLE_SECONDS)
 
+    def _upgrade(self, definition: str) -> None:
+        transaction = "upgrade-" + uuid.uuid4().hex
+        result = self.service.run(lambda world: world.upgrade(definition, transaction))
+        if result != "accepted":
+            QToolTip.showText(self.mapToGlobal(self.button.geometry().bottomLeft()), result_text(result), self)
+
     def _piece_menu(self, menu: QMenu, piece: str) -> None:
         """Who is using it and what it is for (as plain lines), then move or put away."""
         world = self.service.world
@@ -484,6 +491,10 @@ class HomeStrip(HomeView):
         for line in piece_lines(world, found):
             menu.addAction(line).setEnabled(False)
         menu.addSeparator()
+        cost = world.upgrade_cost(found.definition)
+        if cost is not None:
+            menu.addAction(translate("pet_home_upgrade", "Upgrade ({cost} coins)").format(cost=cost),
+                           lambda: self._upgrade(found.definition))
         menu.addAction(translate("pet_home_move_piece", "Move"), lambda: self.action_requested.emit("move", piece))
         menu.addAction(translate("pet_home_store", "Put away"),
                        lambda: self.service.run(lambda world: world.store(piece)))
@@ -527,6 +538,10 @@ def piece_lines(world, piece) -> list[str]:
     users = sorted(world.residents[r].name for r in piece.users.values() if r in world.residents)
     lines.append(translate("pet_home_piece_users", "Used by: {names}").format(names=", ".join(users)) if users
                  else translate("pet_home_piece_free", "Nobody is using it"))
+    if definition.profession is not None:
+        level = world.station_level(piece.definition)
+        lines.append(translate("pet_home_station_level", "Level {level} · {speed}% speed").format(
+            level=level, speed=75 + 25 * level))
     if piece.owner in world.residents:
         lines.append(translate("pet_home_piece_owner", "{name}'s bed").format(name=world.residents[piece.owner].name))
     return lines

@@ -84,6 +84,19 @@ WISHES = {
 }
 
 
+MAX_STATION_LEVEL = 3
+
+
+def _checked_upgrades(value: object) -> dict[str, int]:
+    if not isinstance(value, dict) or len(value) > 64:
+        raise ValueError("Invalid station upgrades")
+    for key, level in value.items():
+        if not isinstance(key, str) or not 1 <= len(key) <= 48:
+            raise ValueError("Invalid station upgrade")
+        checked_int(level, 2, MAX_STATION_LEVEL, "station level")
+    return dict(value)
+
+
 @dataclass
 class Progress:
     stats: dict[str, int] = field(default_factory=dict)
@@ -92,6 +105,7 @@ class Progress:
     wishes: dict[str, dict] = field(default_factory=dict)        # resident -> {wish, base, ready}
     arrivals: dict[str, int] = field(default_factory=dict)       # resident -> world time it moved in
     events: list[dict] = field(default_factory=list)
+    upgrades: dict[str, int] = field(default_factory=dict)       # workstation kind -> level 2..3
     next_check_ms: int = 0                                       # runtime only
 
     def count(self, key: str) -> None:
@@ -102,12 +116,13 @@ class Progress:
         return {"stats": dict(sorted(self.stats.items())), "goals": dict(sorted(self.goals.items())),
                 "commissions": {"day": self.commissions["day"], "offers": [dict(o) for o in self.commissions["offers"]]},
                 "wishes": {key: dict(value) for key, value in sorted(self.wishes.items())},
-                "arrivals": dict(sorted(self.arrivals.items())), "events": [dict(e) for e in self.events]}
+                "arrivals": dict(sorted(self.arrivals.items())), "events": [dict(e) for e in self.events],
+                "upgrades": dict(sorted(self.upgrades.items()))}
 
     @classmethod
     def from_dict(cls, data: object) -> Progress:
         keys = {"stats", "goals", "commissions", "wishes", "arrivals", "events"}
-        if not isinstance(data, dict) or set(data) != keys:
+        if not isinstance(data, dict) or set(data) not in (keys, keys | {"upgrades"}):   # upgrades: version 6
             raise ValueError("Invalid home progress")
         progress = cls()
         progress.stats = _checked_counts(data["stats"], MAX_STATS)
@@ -117,6 +132,7 @@ class Progress:
         progress.arrivals = {key: checked_int(value, 0, 10 ** 13, "arrival")
                              for key, value in _checked_residents(data["arrivals"]).items()}
         progress.events = _checked_events(data["events"])
+        progress.upgrades = _checked_upgrades(data.get("upgrades", {}))
         return progress
 
 

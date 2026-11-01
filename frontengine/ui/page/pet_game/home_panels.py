@@ -192,6 +192,8 @@ class LayoutPanel:
         self.actions = [_button("pet_home_flip", "Mirror", self.mirror),
                         _button("pet_home_store", "Put away", self.store),
                         _button("pet_home_assign_bed", "Give bed to resident", self.assign_bed)]
+        self.upgrade_button = _button("pet_home_upgrade_station", "Upgrade", self.upgrade)
+        self.actions.append(self.upgrade_button)
         section.add_inline(*self.actions)
         self.hint.setVisible(False)
         self.preview_cell: int | None = None
@@ -321,6 +323,18 @@ class LayoutPanel:
                               translate("pet_home_nothing_selected", "Click a piece of furniture"))
         for button in self.actions:
             button.setEnabled(piece is not None)
+        cost = world.upgrade_cost(piece.definition) if piece is not None else None
+        self.upgrade_button.setEnabled(cost is not None)
+        self.upgrade_button.setText(translate("pet_home_upgrade", "Upgrade ({cost} coins)").format(cost=cost)
+                                    if cost is not None else translate("pet_home_upgrade_station", "Upgrade"))
+
+    def upgrade(self) -> None:
+        world = self.page.service.world
+        piece = world.furniture.get(self.page.selected_furniture) if world else None
+        if piece is not None:
+            transaction = "upgrade-" + uuid.uuid4().hex
+            self.page.report(self.page.service.run(lambda w: w.upgrade(piece.definition, transaction)))
+            self.page.refresh()
 
     def _theme_chosen(self, _index: int) -> None:
         theme, zone = self.theme.currentData(), self.page.zone
