@@ -487,7 +487,7 @@ class PetHomePage(SettingPage):
         self.refresh()
 
     def shutdown(self) -> bool:
-        for dialog in list(self.residents.wardrobes.values()):
+        for dialog in [*self.residents.wardrobes.values(), *self.layout_panel.visits]:
             dialog.close()
         self.close_strip()
         self.lock_watcher.stop()

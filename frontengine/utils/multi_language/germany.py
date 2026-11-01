@@ -1885,4 +1885,12 @@ germany_word_dict = {
     "pet_game_phase_arrange": "steckt",
     "pet_game_phase_wrap": "wickelt ein",
     "pet_game_phase_tune": "stimmt",
+    "pet_home_share_blueprint": "Bauplan teilen…",
+    "pet_home_visit_blueprint": "Bauplan besuchen…",
+    "pet_home_blueprint_saved": "Bauplan gespeichert unter {path}",
+    "pet_home_blueprint_invalid": "Diese Datei ist kein Bauplan eines Zuhauses ({error}).",
+    "pet_home_visit_title": "Zu Besuch: {name}",
+    "pet_home_visit_note": "Ein Blick in ein geteiltes Zuhause - hier läuft nichts, nichts wird gekauft oder gespeichert.",
+    "pet_home_visit_zone": "Raum {number}",
+    "pet_home_visit_missing": "Hier nicht gezeigt (fehlende Inhalte oder kein Platz): {items}",
 }

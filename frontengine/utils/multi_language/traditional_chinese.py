@@ -1891,4 +1891,12 @@ traditional_chinese_word_dict = {
     "pet_game_phase_arrange": "配花",
     "pet_game_phase_wrap": "包裝",
     "pet_game_phase_tune": "調音",
+    "pet_home_share_blueprint": "分享藍圖…",
+    "pet_home_visit_blueprint": "拜訪藍圖…",
+    "pet_home_blueprint_saved": "藍圖已存到 {path}",
+    "pet_home_blueprint_invalid": "這個檔案不是家園藍圖（{error}）。",
+    "pet_home_visit_title": "拜訪 {name}",
+    "pet_home_visit_note": "看看別人分享的家園——這裡不會運作、不會購買，也不會存檔。",
+    "pet_home_visit_zone": "房間 {number}",
+    "pet_home_visit_missing": "這裡顯示不出來（缺少內容或沒有空間）：{items}",
 }

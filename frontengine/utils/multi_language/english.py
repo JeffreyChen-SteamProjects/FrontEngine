@@ -1892,4 +1892,12 @@ english_word_dict = {
     "pet_game_phase_arrange": "arranging",
     "pet_game_phase_wrap": "wrapping",
     "pet_game_phase_tune": "tuning",
+    "pet_home_share_blueprint": "Share blueprint…",
+    "pet_home_visit_blueprint": "Visit a blueprint…",
+    "pet_home_blueprint_saved": "Blueprint saved to {path}",
+    "pet_home_blueprint_invalid": "That file is not a home blueprint ({error}).",
+    "pet_home_visit_title": "Visiting {name}",
+    "pet_home_visit_note": "A look at a shared home - nothing here runs, is bought or is saved.",
+    "pet_home_visit_zone": "Room {number}",
+    "pet_home_visit_missing": "Not shown here (missing content or no room): {items}",
 }

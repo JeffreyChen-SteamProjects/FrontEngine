@@ -6,9 +6,10 @@ Panels never change the world themselves; every action goes through
 from __future__ import annotations
 
 import uuid
+from pathlib import Path
 from typing import TYPE_CHECKING
 
-from PySide6.QtWidgets import QCheckBox, QComboBox, QLabel, QListWidget, QListWidgetItem, QProgressBar, QPushButton
+from PySide6.QtWidgets import QCheckBox, QComboBox, QFileDialog, QLabel, QListWidget, QListWidgetItem, QProgressBar, QPushButton
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QGuiApplication
 
@@ -18,6 +19,8 @@ from frontengine.show.pet_game.captions import (
 from frontengine.utils.pet_game.arrangement import (
     PRESETS, LayoutHistory, apply_layout, decode_layout, encode_layout, plan,
 )
+from frontengine.ui.page.pet_game.blueprint_dialog import BlueprintVisit
+from frontengine.utils.pet_game.blueprint import MAX_BLUEPRINT_BYTES, export_blueprint, visit_blueprint
 from frontengine.ui.page.pet_game.home_things import ROLE_KEY, ThingGrid, thing_icon, thing_pixmap
 from frontengine.utils.multi_language.retranslate import retranslator, translate, tr
 from frontengine.user_setting.user_setting_file import user_setting_dict
@@ -205,6 +208,10 @@ class LayoutPanel:
         self.copy_button = _button("pet_home_copy_layout", "Copy layout", self.copy_layout)
         self.paste_button = _button("pet_home_paste_layout", "Paste layout", self.paste_layout)
         section.add_inline(self.undo_button, self.redo_button, self.copy_button, self.paste_button)
+        self.share_button = _button("pet_home_share_blueprint", "Share blueprint…", self.share_blueprint)
+        self.visit_button = _button("pet_home_visit_blueprint", "Visit a blueprint…", self.visit_blueprint)
+        section.add_inline(self.share_button, self.visit_button)
+        self.visits: list = []
         self.presets = QComboBox()
         self.presets.currentIndexChanged.connect(self._preview_layout)
         section.add_row("pet_home_layouts", self.presets, "Ready-made layout")
@@ -420,6 +427,53 @@ class LayoutPanel:
             code, skipped = result
             self.page.report(code if code != "accepted" or not skipped else "layout_partly")
             self._preview_layout()
+
+    # ----- blueprints: the whole home as a file, and a look at someone else's ------------------
+
+    def choose_save_path(self) -> str:
+        path, _filter = QFileDialog.getSaveFileName(self.page, translate("pet_home_share_blueprint", "Share blueprint…"),
+                                                    "home-blueprint.json", "JSON (*.json)")
+        return path
+
+    def choose_open_path(self) -> str:
+        path, _filter = QFileDialog.getOpenFileName(self.page, translate("pet_home_visit_blueprint", "Visit a blueprint…"),
+                                                    "", "JSON (*.json)")
+        return path
+
+    def share_blueprint(self) -> Path | None:
+        """Only rooms and furniture go into the file: no pets, names, coins or anything personal."""
+        world = self.page.service.world
+        path = self.choose_save_path() if world is not None else ""
+        if not path:
+            return None
+        target = Path(path)
+        try:
+            target.write_text(export_blueprint(world), encoding="utf-8")
+        except OSError as error:
+            self.page.report_text(str(error))
+            return None
+        self.page.report_text(translate("pet_home_blueprint_saved", "Blueprint saved to {path}").format(path=target))
+        return target
+
+    def visit_blueprint(self):
+        """Open a blueprint read-only; a file that is not one is refused, never half-trusted."""
+        path = self.choose_open_path()
+        if not path:
+            return None
+        source = Path(path)
+        try:
+            with source.open("rb") as stream:
+                raw = stream.read(MAX_BLUEPRINT_BYTES + 1)
+            world, missing = visit_blueprint(raw.decode("utf-8"), self.page.service.store.catalog)
+        except (OSError, ValueError, UnicodeDecodeError) as error:
+            self.page.report_text(translate("pet_home_blueprint_invalid", "That file is not a home blueprint ({error}).")
+                                  .format(error=error))
+            return None
+        dialog = BlueprintVisit(world, missing, source.stem, self.page)
+        dialog.finished.connect(lambda _code, d=dialog: self.visits.remove(d) if d in self.visits else None)
+        self.visits.append(dialog)
+        dialog.show()
+        return dialog
 
     def drag_hover(self, identifier: str, cell: int) -> None:
         world, zone = self.page.service.world, self.page.zone

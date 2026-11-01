@@ -1882,4 +1882,12 @@ french_word_dict = {
     "pet_game_phase_arrange": "arrange",
     "pet_game_phase_wrap": "emballe",
     "pet_game_phase_tune": "accorde",
+    "pet_home_share_blueprint": "Partager le plan…",
+    "pet_home_visit_blueprint": "Visiter un plan…",
+    "pet_home_blueprint_saved": "Plan enregistré dans {path}",
+    "pet_home_blueprint_invalid": "Ce fichier n'est pas un plan de maison ({error}).",
+    "pet_home_visit_title": "Visite : {name}",
+    "pet_home_visit_note": "Un aperçu d'une maison partagée - rien ne tourne, ne s'achète ni ne s'enregistre ici.",
+    "pet_home_visit_zone": "Pièce {number}",
+    "pet_home_visit_missing": "Non affiché ici (contenu manquant ou pas de place) : {items}",
 }

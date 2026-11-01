@@ -1884,4 +1884,12 @@ simplified_chinese_word_dict = {
     "pet_game_phase_arrange": "配花",
     "pet_game_phase_wrap": "包装",
     "pet_game_phase_tune": "调音",
+    "pet_home_share_blueprint": "分享蓝图…",
+    "pet_home_visit_blueprint": "拜访蓝图…",
+    "pet_home_blueprint_saved": "蓝图已保存到 {path}",
+    "pet_home_blueprint_invalid": "这个文件不是家园蓝图（{error}）。",
+    "pet_home_visit_title": "拜访 {name}",
+    "pet_home_visit_note": "看看别人分享的家园——这里不会运作、不会购买，也不会存档。",
+    "pet_home_visit_zone": "房间 {number}",
+    "pet_home_visit_missing": "这里显示不出来（缺少内容或没有空间）：{items}",
 }
