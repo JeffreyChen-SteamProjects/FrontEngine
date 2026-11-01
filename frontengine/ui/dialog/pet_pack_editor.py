@@ -68,6 +68,7 @@ class PetPackEditor(QDialog):
         cancel = tr(QPushButton(), 'pack_editor_cancel')
         cancel.clicked.connect(self.cancel_job)
         row.addWidget(cancel)
+        row.addStretch(1)
         layout.addLayout(row)
         self.status = tr(QLabel(), 'pack_editor_hint')
         self.status.setWordWrap(True)

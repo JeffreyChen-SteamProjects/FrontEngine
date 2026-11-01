@@ -28,6 +28,7 @@ from frontengine.utils.midi.midi_input import available as midi_available, list_
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import tr
 from frontengine.utils.remote.remote_server import ALLOWED_ACTIONS
+from frontengine.ui.dialog.dialog_kit import button_row, roomy
 
 MIDI_KEY = "midi_bindings"
 REMOTE_KEY = "phone_remote"
@@ -118,19 +119,17 @@ class RemoteControlDialog(QDialog):
         self.button_box.accepted.connect(self.accept)
         self.button_box.rejected.connect(self.reject)
 
-        layout = QGridLayout(self)
+        layout = roomy(QGridLayout(self))
         layout.addWidget(self.remote_checkbox, 0, 0, 1, 3)
         layout.addWidget(self.remote_url_label, 1, 0, 1, 2)
         layout.addWidget(self.remote_copy_button, 1, 2)
         layout.addWidget(self.remote_hint, 2, 0, 1, 3)
         layout.addWidget(self.certificate_label, 3, 0, 1, 3)
-        layout.addWidget(self.certificate_export_button, 4, 0, 1, 2)
-        layout.addWidget(self.certificate_regenerate_button, 4, 2)
+        layout.addWidget(button_row(self.certificate_export_button, self.certificate_regenerate_button), 4, 0, 1, 3)
         layout.addWidget(self.midi_label, 5, 0)
         layout.addWidget(self.midi_combobox, 5, 1, 1, 2)
         layout.addWidget(self.table, 6, 0, 1, 3)
-        layout.addWidget(self.learn_button, 7, 0)
-        layout.addWidget(self.remove_button, 7, 1)
+        layout.addWidget(button_row(self.learn_button, self.remove_button), 7, 0, 1, 3)
         layout.addWidget(self.button_box, 8, 0, 1, 3)
 
         for control, action in current_bindings().items():

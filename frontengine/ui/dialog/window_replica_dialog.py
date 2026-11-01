@@ -22,6 +22,7 @@ from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import retranslator, tr
 from frontengine.utils.window_pin import window_pin
 from frontengine.utils.window_replica.dwm_thumbnail import available
+from frontengine.ui.dialog.dialog_kit import button_row, roomy
 
 # 要顯示來源的哪一塊，用比例（左, 上, 右, 下）表示。
 # 用比例而不是像素：來源視窗被調整大小之後，框到的還是同一塊。
@@ -83,10 +84,9 @@ class WindowReplicaDialog(QDialog):
         self.button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)
         self.button_box.rejected.connect(self.reject)
 
-        layout = QGridLayout(self)
+        layout = roomy(QGridLayout(self))
         layout.addWidget(self.window_list, 0, 0, 1, 2)
-        layout.addWidget(self.refresh_button, 1, 0)
-        layout.addWidget(self.show_button, 1, 1)
+        layout.addWidget(button_row(self.refresh_button, self.show_button), 1, 0, 1, 2)
         layout.addWidget(self.crop_label, 2, 0)
         layout.addWidget(self.crop_combobox, 2, 1)
         layout.addWidget(self.opacity_label, 3, 0)

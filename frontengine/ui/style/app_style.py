@@ -156,6 +156,13 @@ QPushButton#primaryAction:pressed {{ background-color: {c['accent_pressed']}; }}
 QPushButton#primaryAction:disabled {{
     background-color: {c['surface_alt']}; color: {c['faint']}; border-color: {c['border']};
 }}
+QDialogButtonBox QPushButton:default {{
+    background-color: {c['accent']}; color: {c['on_accent']}; border: 1px solid {c['accent']}; font-weight: 700;
+}}
+QDialogButtonBox QPushButton:default:hover {{ background-color: {c['accent_hover']}; border-color: {c['accent_hover']}; }}
+QDialogButtonBox QPushButton:default:disabled {{
+    background-color: {c['surface_alt']}; color: {c['faint']}; border-color: {c['border']};
+}}
 QPushButton#primaryAction[tone="danger"], QPushButton[tone="danger"] {{
     background-color: transparent; color: {c['danger']}; border: 1px solid {c['danger']}; font-weight: 600;
 }}

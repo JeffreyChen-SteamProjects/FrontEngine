@@ -22,6 +22,7 @@ from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 from frontengine.utils.actions.action_registry import ACTION_LABELS as _ACTION_LABELS
+from frontengine.ui.dialog.dialog_kit import roomy
 
 
 def _t(key: str, fallback: str) -> str:
@@ -53,7 +54,9 @@ class HotkeySettingsDialog(QDialog):
     def __init__(self, parent: QWidget = None) -> None:
         super().__init__(parent)
         self.setWindowTitle(_t("hotkey_settings_title", "Configure hotkeys"))
-        layout = QGridLayout(self)
+        layout = roomy(QGridLayout(self))
+        layout.setColumnStretch(1, 1)
+        self.setMinimumWidth(560)
 
         self._edits: Dict[str, QLineEdit] = {}
         action_map = get_hotkey_action_map()
@@ -71,6 +74,7 @@ class HotkeySettingsDialog(QDialog):
             key, fallback = _ACTION_LABELS.get(action, ("", action))
             layout.addWidget(QLabel(_t(key, fallback) if key else action), row, 0)
             edit = QLineEdit(combo)
+            edit.setMinimumWidth(260)              # whole chords such as <ctrl>+<shift>+<f12> stay readable
             self._edits[action] = edit
             layout.addWidget(edit, row, 1)
 

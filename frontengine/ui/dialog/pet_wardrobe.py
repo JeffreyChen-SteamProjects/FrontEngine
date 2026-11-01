@@ -16,6 +16,7 @@ from frontengine.utils.multi_language.retranslate import retranslator, tr, trans
 from frontengine.show.pet.inkside.labels import asset_label, label
 from frontengine.show.pet.inkside.library import builtin_names
 from frontengine.ui.dialog.pet_asset_install import PetAssetInstall, PetBuiltinInstall
+from frontengine.ui.dialog.dialog_kit import button_row, roomy
 
 
 class PetWardrobeDialog(QDialog):
@@ -31,8 +32,10 @@ class PetWardrobeDialog(QDialog):
         self.playback = LayeredPlayback()
         self._install_job = None
         self._closed = False
-        layout = QVBoxLayout(self)
-        layout.addWidget(QLabel(profiles.get(identifier)['name']))
+        layout = roomy(QVBoxLayout(self))
+        title = QLabel(profiles.get(identifier)['name'])
+        title.setObjectName('sectionHeader')
+        layout.addWidget(title)
         self.preview = QLabel()
         self.preview.setFixedSize(288, 288)
         self.preview.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -51,7 +54,7 @@ class PetWardrobeDialog(QDialog):
         self.compare_button = tr(QPushButton(), 'pet_wardrobe_compare', 'Pin for comparison')
         self.compare_button.setCheckable(True)
         self.compare_button.toggled.connect(self._pin_comparison)
-        previews.addWidget(self.compare_button)
+        previews.addWidget(self.compare_button, 0, Qt.AlignmentFlag.AlignLeft)
         previews.addStretch()
         columns.addLayout(previews)
         form = QFormLayout()
@@ -75,7 +78,7 @@ class PetWardrobeDialog(QDialog):
         self.color_reset = tr(QPushButton(), 'pet_wardrobe_color_reset', 'Restore region color')
         self.color_button.clicked.connect(self._choose_color)
         self.color_reset.clicked.connect(self._reset_color)
-        form.addRow(self.color_button, self.color_reset)
+        form.addRow(button_row(self.color_button, self.color_reset))
         swatch_row = QHBoxLayout()
         self.swatches = {}
         for value in ('#171613', '#ff7417', '#fff1cf', '#c8f141', '#24b8b0', '#f45588'):
@@ -84,9 +87,9 @@ class PetWardrobeDialog(QDialog):
             button.setAccessibleName(value)
             button.setToolTip(value)
             button.setStyleSheet(
-                f'QPushButton {{ background: {value}; border: 2px solid #777; border-radius: 4px; }}'
-                'QPushButton:focus { border: 3px solid #2487ff; }'
-                'QPushButton:disabled { background: #777; border: 2px solid #555; }')
+                f'QPushButton {{ background: {value}; border: 2px solid rgba(0, 0, 0, 0.3); border-radius: 6px; }}'
+                'QPushButton:focus { border: 3px solid #F56A24; }'
+                'QPushButton:disabled { background: #9A9284; border: 2px solid rgba(0, 0, 0, 0.2); }')
             button.clicked.connect(lambda _checked=False, color=value: self._choose_swatch(color))
             self.swatches[value] = button
             swatch_row.addWidget(button)
@@ -113,7 +116,6 @@ class PetWardrobeDialog(QDialog):
         layout.addWidget(self.status)
         self.install_button = tr(QPushButton(), 'pet_wardrobe_install', 'Install asset folder')
         self.install_button.clicked.connect(self._install)
-        layout.addWidget(self.install_button)
         builtin_row = QHBoxLayout()
         self.builtin = QComboBox()
         tr(self.builtin, 'pet_wardrobe_builtin_pick', 'Built-in character', 'setAccessibleName')
@@ -121,14 +123,18 @@ class PetWardrobeDialog(QDialog):
             self.builtin.addItem(name, identifier)
         self.builtin_button = tr(QPushButton(), 'pet_wardrobe_builtin', 'Add built-in character')
         self.builtin_button.clicked.connect(self._install_builtin)
-        builtin_row.addWidget(self.builtin)
-        builtin_row.addWidget(self.builtin_button)
+        refresh = tr(QPushButton(), 'pet_wardrobe_refresh', 'Refresh assets')
+        refresh.clicked.connect(self.refresh_library)
+        # Where characters and clothes come from, on one line at their own widths.
+        for widget in (self.builtin, self.builtin_button, self.install_button, refresh):
+            builtin_row.addWidget(widget)
+        builtin_row.addStretch(1)
         layout.addLayout(builtin_row)
-        self._buttons(layout, (('pet_wardrobe_refresh', 'Refresh assets', self.refresh_library),))
-        self._buttons(layout, (
+        apply, cancel = self._buttons(layout, (
             ('pet_custom_apply', 'Apply', self.apply_changes),
             ('pet_custom_cancel', 'Cancel', self.reject),
-        ))
+        ), right=True)
+        apply.setObjectName('primaryAction')
         self.character.activated.connect(self._choose_character)
         self.action.currentTextChanged.connect(self.playback.set_action)
         self.timer = QTimer(self)
@@ -140,13 +146,21 @@ class PetWardrobeDialog(QDialog):
         if errors:
             self.status.setText('\n'.join((*errors, self.status.text())))
 
-    def _buttons(self, layout, entries) -> None:
+    def _buttons(self, layout, entries, right: bool = False) -> list:
+        """A row of buttons at their own width: left-aligned, or on the right for the closing pair."""
         row = QHBoxLayout()
+        if right:
+            row.addStretch(1)
+        buttons = []
         for key, fallback, callback in entries:
             button = tr(QPushButton(), key, fallback)
             button.clicked.connect(callback)
             row.addWidget(button)
+            buttons.append(button)
+        if not right:
+            row.addStretch(1)
         layout.addLayout(row)
+        return buttons
 
     def refresh_library(self) -> None:
         try:

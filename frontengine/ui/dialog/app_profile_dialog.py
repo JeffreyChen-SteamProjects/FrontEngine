@@ -22,6 +22,7 @@ from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import tr
 from frontengine.utils.smart_pause.pause_rules import normalize_app_name
+from frontengine.ui.dialog.dialog_kit import button_row, roomy
 
 
 def _t(key: str, fallback: str) -> str:
@@ -64,10 +65,9 @@ class AppProfileDialog(QDialog):
         self.button_box.accepted.connect(self.accept)
         self.button_box.rejected.connect(self.reject)
 
-        layout = QGridLayout(self)
+        layout = roomy(QGridLayout(self))
         layout.addWidget(self.table, 0, 0, 1, 2)
-        layout.addWidget(self.add_button, 1, 0)
-        layout.addWidget(self.remove_button, 1, 1)
+        layout.addWidget(button_row(self.add_button, self.remove_button), 1, 0, 1, 2)
         layout.addWidget(self.hint_label, 2, 0, 1, 2)
         layout.addWidget(self.button_box, 3, 0, 1, 2)
 
