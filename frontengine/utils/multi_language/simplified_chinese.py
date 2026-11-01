@@ -15,7 +15,7 @@ simplified_chinese_word_dict = {
     "tab_video_text": "视频",
     "tab_image_text": "图片",
     "tab_web_text": "网页",
-    "tab_gif_text": "GIF 和 WEBP",
+    "tab_gif_text": "GIF 和 WebP",
     "tab_sound_text": "音乐",
     "tab_text_text": "文字",
     "tab_external_ui": "外部 UI",
@@ -228,12 +228,12 @@ simplified_chinese_word_dict = {
     "input_error": "请勿无输入或空格",
     "save_generation_image": "储存图片",
     # Help Menu
-    "help_menu_label": "帮助菜单",
+    "help_menu_label": "帮助",
     "help_menu_open_issue": "开启问题回报",
     "how_to_critical_exit_action": "怎么强制关闭",
     "how_to_critical_exit": "按下 F12 可以紧急关闭",
     # HowTo Menu
-    "doc_menu_label": "文件菜单",
+    "doc_menu_label": "文档",
     "doc_menu_open_doc": "开启文件",
     # 预设集、控制中心、简报、护眼、桌布与专注
     "workshop_menu_import": "导入创意工坊内容…",
@@ -1716,4 +1716,9 @@ simplified_chinese_word_dict = {
     "pet_home_note_failed": "{text}",
     "pet_home_note_times": "×{count}",
     "pet_home_wardrobe": "衣柜…",
+    "settings_menu_theme": "主题",
+    "settings_menu_theme_system": "跟随系统",
+    "settings_menu_theme_light": "浅色",
+    "settings_menu_theme_dark": "深色",
+    "pet_home_settings_section": "设置",
 }

@@ -1,4 +1,5 @@
-"""The Pet home page: the home overview plus residents, furniture, shop and work.
+"""The Pet home page: the home overview as a stage, with residents, work, furniture, shop,
+backpack, goals, inbox and settings in tabs underneath.
 
 Opening the page never creates a home and never starts anything with a side
 effect: it reads the save (or reports why it cannot) and waits. A home that
@@ -12,7 +13,7 @@ from pathlib import Path
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QGuiApplication, QKeyEvent
-from PySide6.QtWidgets import QCheckBox, QComboBox, QFrame, QLabel, QPushButton, QScrollArea
+from PySide6.QtWidgets import QCheckBox, QComboBox, QFrame, QHBoxLayout, QLabel, QPushButton, QScrollArea, QWidget
 
 from frontengine.show.pet_game.home_service import HomeService
 from frontengine.show.pet_game.home_strip import HIDDEN_REASON, HOME_MODES, LAYERS, HomeStrip
@@ -20,7 +21,8 @@ from frontengine.show.pet_game.home_view import HomeView
 from frontengine.show.pet_game.resident_art import ResidentArt
 from frontengine.show.pet_game.themes import glyph
 from frontengine.utils.pet_game.environment import weather
-from frontengine.ui.page.layout_kit import SettingPage
+from frontengine.ui.page.layout_kit import Section, SettingPage
+from frontengine.ui.page.pet_game.home_stage import EmptyHome, HomeTabs, TAB_ORDER, make_tab_ready
 from frontengine.ui.page.pet_game.home_panels import (
     LayoutPanel, ResidentPanel, ShopPanel, StoragePanel, WorkPanel,
 )
@@ -41,6 +43,8 @@ MOTION_KEY = "pet_home_reduced_motion"
 MODE_KEY = "pet_home_mode"
 AUTO_MEETING_KEY = "pet_home_auto_meeting"
 MEETING_REASON = "meeting"
+# The overview on this page is a stage, taller than the desktop strip.
+STAGE_HEIGHT = 220
 LAYER_KEY = "pet_home_layer"
 
 
@@ -55,7 +59,7 @@ class PetHomePage(SettingPage):
 
     def __init__(self, service: HomeService | None = None) -> None:
         super().__init__("pet_home_title", "pet_home_subtitle", "Pet home",
-                         "Your pets live, work and rest in a small home of their own.")
+                         "Your pets live, work and rest in a small home of their own.", wide=True)
         self.service = service or default_service(self)
         self.profiles = self.service.profiles
         self.selected_resident: str | None = None
@@ -63,12 +67,14 @@ class PetHomePage(SettingPage):
         self.strip_list: list[HomeStrip] = []      # registered with the Control Center
         self.art = ResidentArt(self.service)
         self.art.changed.connect(self._art_changed)
+        self._tab_sections: dict | None = None
         self._build_intro()
-        self._build_status()
         self.view = HomeView()
+        self.view.setFixedHeight(STAGE_HEIGHT)
         self.view.art = self.art
-        self.view.reduced_motion = self.motion_check.isChecked()
-        self.add_body_widget(self._scroller(self.view))
+        self._build_status()
+        # Panels ask for sections like any page; on this page they become tabs.
+        self._tab_sections = {}
         self.residents = ResidentPanel(self)
         self.goals = GoalsPanel(self)
         self.inbox = InboxPanel(self)
@@ -76,6 +82,14 @@ class PetHomePage(SettingPage):
         self.shop = ShopPanel(self)
         self.storage = StoragePanel(self)
         self.work = WorkPanel(self)
+        self._build_settings()
+        self.view.reduced_motion = self.motion_check.isChecked()
+        self.tabs = HomeTabs()
+        for key in TAB_ORDER:
+            fallback, section = self._tab_sections[key]
+            self.tabs.add_section(key, fallback, section)
+        self._tab_sections = None
+        self.add_body_widget(self.tabs)
         self.finish_body()
         self._connect()
         self.load_result = self.service.open()
@@ -85,6 +99,15 @@ class PetHomePage(SettingPage):
         self.apply_mode()
         retranslator.bind_call(self.refresh)
         self.refresh()
+
+    def add_section(self, title: "str | QLabel", fallback: str = "", *, collapsed: bool = False) -> Section:
+        """While the panels are built, their sections are collected for the tabs instead of stacked."""
+        if self._tab_sections is None or not isinstance(title, str):
+            return super().add_section(title, fallback, collapsed=collapsed)
+        section = Section(title, fallback)
+        make_tab_ready(section)
+        self._tab_sections[title] = (fallback, section)
+        return section
 
     @property
     def zone(self) -> str | None:
@@ -107,14 +130,16 @@ class PetHomePage(SettingPage):
         self.intro_section.setVisible(False)
 
     def _build_status(self) -> None:
-        section = self.add_section("pet_home_status_section", "Home")
+        """The stage: what is happening in the home, its controls, and the home itself."""
+        section = self.stage = self.add_section("pet_home_status_section", "Home")
+        section.title_label.hide()             # the page title already says it
         self.status = QLabel()
+        self.status.setObjectName("homeStatus")
         self.status.setWordWrap(True)
-        section.add_widget(self.status)
         self.message = QLabel()
         self.message.setWordWrap(True)
         self.message.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-        section.add_widget(self.message)
+        self.message.hide()                    # shown only while it has something to say
         self.create_button = tr(QPushButton(), "pet_home_create", "Create a home")
         self.create_button.clicked.connect(self.create_home)
         self.run_button = tr(QPushButton(), "pet_home_start", "Start")
@@ -123,7 +148,27 @@ class PetHomePage(SettingPage):
         self.restore_button.clicked.connect(self.restore_backup)
         self.aside_button = tr(QPushButton(), "pet_home_set_aside", "Keep the old file and start over")
         self.aside_button.clicked.connect(self.set_aside)
-        section.add_inline(self.create_button, self.run_button, self.restore_button, self.aside_button)
+        for button in (self.create_button, self.run_button):
+            button.setObjectName("primaryAction")
+        # One line on top of the stage: what is happening on the left, what you can do on the right.
+        bar = QWidget()
+        bar.setObjectName("inlineActions")
+        row = QHBoxLayout(bar)
+        row.setContentsMargins(0, 0, 0, 0)
+        row.setSpacing(10)
+        row.addWidget(self.status, 1)
+        for button in (self.restore_button, self.aside_button, self.create_button, self.run_button):
+            row.addWidget(button)
+        section.add_widget(bar)
+        section.add_widget(self.message)
+        self.empty_home = EmptyHome()
+        section.add_widget(self.empty_home)
+        self.view_area = self._scroller(self.view)
+        section.add_widget(self.view_area)
+
+    def _build_settings(self) -> None:
+        """How the home behaves on the desktop: a tab of its own, out of the way of playing."""
+        section = self.add_section("pet_home_settings_section", "Settings")
         self.desktop_check = tr(QCheckBox(), "pet_home_on_desktop", "Show the home on the desktop")
         self.desktop_check.setChecked(user_setting_dict.get(DESKTOP_KEY, True) is not False)
         self.desktop_check.toggled.connect(self._desktop_toggled)
@@ -341,6 +386,7 @@ class PetHomePage(SettingPage):
 
     def report_text(self, text: str) -> None:
         self.message.setText(text)
+        self.message.setVisible(bool(text))
 
     def _on_events(self, events: list) -> None:
         self.inbox.on_events(events, self.service.world)
@@ -404,6 +450,9 @@ class PetHomePage(SettingPage):
         self.aside_button.setVisible(protected)
         for panel in (self.residents, self.goals, self.layout_panel, self.shop, self.storage, self.work):
             panel.section.setEnabled(has_home)
+        self.empty_home.setVisible(not has_home)
+        self.view_area.setVisible(has_home)
+        self.tabs.setVisible(has_home)
         self.desktop_check.setEnabled(has_home)
         self.layer_combo.setEnabled(has_home)
         retranslator.set_text(self.run_button, "pet_home_pause" if self.service.running else "pet_home_start",

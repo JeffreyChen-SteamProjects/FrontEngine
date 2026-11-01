@@ -12,7 +12,7 @@ from PySide6.QtCore import QPointF, QRectF, Qt, Signal
 from PySide6.QtGui import QColor, QFont, QMouseEvent, QPainter, QPaintEvent, QPen
 from PySide6.QtWidgets import QSizePolicy, QWidget
 
-from frontengine.show.pet_game.furniture_art import aspect, picture
+from frontengine.show.pet_game.furniture_art import SURFACES, aspect, picture
 from frontengine.show.pet_game.themes import floor_color, paint_sky
 from frontengine.utils.pet_game.environment import daylight
 from frontengine.utils.multi_language.retranslate import translate
@@ -221,10 +221,22 @@ class HomeView(QWidget):
         x = self.resident_x_milli(resident) / 1000 / CELL_PIXELS * width
         size = self._sprite_size(resident)
         if size is not None:
-            return QRectF(x - size[0] / 2, self._floor_y() - size[1], size[0], size[1])
+            floor = self._floor_y() - self._rest_height(resident)
+            return QRectF(x - size[0] / 2, floor - size[1], size[0], size[1])
         radius = self.resident_radius()
         center_y = self._floor_y() - max(8.0, width * 0.55)
         return QRectF(x - radius, center_y - radius, radius * 2, radius * 2)
+
+    def _rest_height(self, resident) -> float:
+        """How far above the floor a resident using a bed or armchair rests (its surface in the picture)."""
+        activity = resident.activity
+        if activity is None or activity.phase != "using" or activity.furniture is None:
+            return 0.0
+        piece = self.world.furniture.get(activity.furniture)
+        surface = SURFACES.get(piece.definition) if piece is not None else None
+        if surface is None or picture(self._theme(), piece.definition) is None:
+            return 0.0
+        return self.piece_rect(piece, self.world.definition(piece)).height() * surface
 
     def resident_center(self, resident) -> QPointF:
         return self.resident_box(resident).center()

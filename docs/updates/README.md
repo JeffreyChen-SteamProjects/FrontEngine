@@ -58,7 +58,13 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
-| U-20261101-14 | 2026-11-01 | Patch setuptools and certifi in the publish lock | #bugfix #deps #security #ci | [2026-11](2026-11.md) |
+| U-20261101-20 | 2026-11-01 | Patch setuptools and certifi in the publish lock | #bugfix #deps #security #ci | [2026-11](2026-11.md) |
+| U-20261101-19 | 2026-11-01 | Page-by-page review of the redesign and new documentation screenshots | #done #ui #design #docs | [2026-11](2026-11.md) |
+| U-20261101-18 | 2026-11-01 | The pet home page becomes a game screen | #done #ui #design #pets #game | [2026-11](2026-11.md) |
+| U-20261101-17 | 2026-11-01 | Setting pages in one centred column; calm headings, even controls | #done #ui #design | [2026-11](2026-11.md) |
+| U-20261101-16 | 2026-11-01 | Redesigned window frame: sidebar icons, brand mark, search entry | #done #ui #design | [2026-11](2026-11.md) |
+| U-20261101-15 | 2026-11-01 | Own design system replaces qt-material | #done #ui #design | [2026-11](2026-11.md) |
+| U-20261101-14 | 2026-11-01 | Built-in characters get drawn home poses | #done #pets #game #art #animation | [2026-11](2026-11.md) |
 | U-20261101-13 | 2026-11-01 | Furniture drawn as Blender-rendered pictures per theme | #done #pets #game #art | [2026-11](2026-11.md) |
 | U-20261101-12 | 2026-11-01 | Residents appear as their own characters | #done #pets #game #animation | [2026-11](2026-11.md) |
 | U-20261101-11 | 2026-11-01 | Home modes, a quiet inbox and the performance measurements | #done #pets #game #performance | [2026-11](2026-11.md) |
@@ -218,6 +224,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 14 |
+| [2026-11.md](2026-11.md) | 2026-11 | 20 |
 | [2026-10.md](2026-10.md) | 2026-10 | 115 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

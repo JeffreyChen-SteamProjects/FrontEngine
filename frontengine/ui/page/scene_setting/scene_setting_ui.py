@@ -17,7 +17,7 @@ class SceneSettingUI(SettingPage):
     def __init__(self):
         front_engine_logger.info("[SceneSettingUI] Init")
         super().__init__("tab_scene_text", "page_subtitle_scene",
-                         "Scene", "Arrange several overlays together as one scene.")
+                         "Scene", "Arrange several overlays together as one scene.", wide=True)
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
 
         # scene

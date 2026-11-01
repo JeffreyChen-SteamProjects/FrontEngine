@@ -11,8 +11,8 @@ from frontengine.utils.logging.loggin_instance import front_engine_logger
 # Default day/night themes and switch hours.
 DEFAULT_THEME_SCHEDULE: Dict[str, Any] = {
     "enabled": False,
-    "day_theme": "light_blue.xml",
-    "night_theme": "dark_amber.xml",
+    "day_theme": "light",
+    "night_theme": "dark",
     "day_start_hour": 7,
     "night_start_hour": 19,
 }
@@ -91,6 +91,11 @@ class ThemeScheduleService(QObject):
         if theme and theme != self._current:
             self._current = theme
             self.theme_changed.emit(theme)
+
+    def refresh(self) -> None:
+        """Forget the last emitted theme and poll, so re-enabling the schedule applies it again."""
+        self._current = None
+        self._poll()
 
     def poll_once(self) -> None:
         """Run a single poll immediately (used by tests)."""

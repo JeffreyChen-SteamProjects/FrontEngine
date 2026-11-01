@@ -6,6 +6,7 @@ from PySide6.QtGui import QPainterPath
 
 from frontengine.show.pet.inkside.faces import EyeStyle, MouthStyle
 from frontengine.show.pet.inkside.ink import INK, ORANGE, PAPER, Brush, ellipse, line, polygon, rect, rounded, stroked
+from frontengine.show.pet.inkside.sprite_sheet import character_sprites
 from frontengine.show.pet.inkside.template import DEFAULT_BASE, Group, Template
 
 
@@ -49,8 +50,7 @@ class Bolt(Template):
     mouths = {'line': ('Short dash', MouthStyle('line', 14)),
               'steps': ('Steps', MouthStyle('steps', 24))}
     eye_default, mouth_default = 'uneven', 'line'
-    sprite_actions = {'walk_sprite': ('inkside-bolt-walk.png', 8, 90),
-                      'climb_sprite': ('inkside-bolt-climb.png', 8, 110)}
+    sprite_actions = character_sprites('bolt')
 
     def head(self, b: Brush) -> None:
         """The frame is a part choice, so the fixed head only has the ear pods."""

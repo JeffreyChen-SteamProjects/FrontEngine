@@ -6,6 +6,7 @@ from PySide6.QtGui import QPainterPath
 
 from frontengine.show.pet.inkside.faces import EyeStyle, MouthStyle
 from frontengine.show.pet.inkside.ink import ORANGE, PAPER, Brush, ellipse, polygon, rounded
+from frontengine.show.pet.inkside.sprite_sheet import character_sprites
 from frontengine.show.pet.inkside.template import DEFAULT_BASE, Group, Template
 
 
@@ -67,8 +68,7 @@ class Moss(Template):
     mouths = {'buck': ('Buck teeth', MouthStyle('buck', 16)),
               'offset': ('Crooked teeth', MouthStyle('offset', 16))}
     eye_default, mouth_default = 'alert', 'buck'
-    sprite_actions = {'walk_sprite': ('inkside-moss-walk.png', 8, 90),
-                      'climb_sprite': ('inkside-moss-climb.png', 8, 110)}
+    sprite_actions = character_sprites('moss')
 
     def head(self, b: Brush) -> None:
         b.fill(FACE, 'fur')

@@ -1,4 +1,4 @@
-GIF AND WEBP Page
+GIF & WebP Page
 -----------------
 
 .. image:: ../image/gif_and_webp/gif_and_webp.png
