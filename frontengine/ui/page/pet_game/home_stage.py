@@ -16,7 +16,7 @@ from frontengine.utils.multi_language.retranslate import retranslator, translate
 # Tab order: what the player does most often first, settings last.
 TAB_ORDER = ("pet_home_residents_section", "pet_home_work_section", "pet_home_layout_section",
              "pet_home_shop_section", "pet_home_storage_section", "pet_home_goals_section",
-             "pet_home_inbox_section", "pet_home_settings_section")
+             "pet_home_inbox_section", "pet_home_collection_section", "pet_home_settings_section")
 
 
 class HomeTabs(QTabWidget):

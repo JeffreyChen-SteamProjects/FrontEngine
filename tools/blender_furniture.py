@@ -316,10 +316,249 @@ def workbench(p: Palette) -> None:
         torus(0.06, 0.015, (x, -0.66, 1.1), p["metal"], rotation=(math.radians(90), 0, 0))
 
 
+# ----- the 1.0 collection: twenty more pieces --------------------------------------------------------
+
+def bunk_bed(p: Palette) -> None:
+    for x in (0.12, 3.88):
+        for y in (0.65, -0.65):
+            box((0.16, 0.16, 2.6), (x, y, 1.3), p["dark_wood"], bevel=0.03)
+    for z in (0.45, 1.65):
+        box((3.9, 1.5, 0.22), (2.0, 0, z), p["wood"], bevel=0.04)
+        cushion((3.5, 1.3, 0.24), (2.0, 0, z + 0.22), p["fabric"])
+        cushion((0.7, 1.0, 0.22), (0.6, 0, z + 0.42), p["fabric"])
+        cushion((2.2, 1.35, 0.1), (2.6, 0, z + 0.36), p["accent"] if z < 1 else p["accent_2"], softness=1)
+    box((3.9, 0.08, 0.2), (2.0, -0.7, 2.1), p["wood"], bevel=0.02)
+    for z in (0.9, 1.2, 1.5):
+        box((0.5, 0.06, 0.06), (3.55, -0.75, z), p["dark_wood"], bevel=0.0)
+
+
+def hammock(p: Palette) -> None:
+    for x in (0.15, 2.85):
+        box((0.18, 0.5, 1.8), (x, 0, 0.9), p["dark_wood"], bevel=0.04)
+        box((0.5, 0.7, 0.12), (x, 0, 0.06), p["dark_wood"], bevel=0.03)
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=1.0, location=(1.5, 0, 1.15), segments=48, ring_count=24)
+    sling = bpy.context.active_object
+    sling.scale = (1.35, 0.45, 0.35)
+    bpy.ops.object.transform_apply(scale=True)
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="DESELECT")
+    bpy.ops.object.mode_set(mode="OBJECT")
+    for vertex in sling.data.vertices:
+        if vertex.co.z > 1.05:
+            vertex.select = True
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.delete(type="VERT")
+    bpy.ops.object.mode_set(mode="OBJECT")
+    sling.modifiers.new("solid", "SOLIDIFY").thickness = 0.05
+    _finish(sling, p["accent"], 0, smooth=True)
+    for x in (0.25, 2.75):
+        cylinder(0.025, 0.45, (x, 0, 1.45), p["metal"], rotation=(0, math.radians(35 if x < 1 else -35), 0), bevel=0.0)
+    cushion((0.5, 0.4, 0.18), (0.7, 0, 1.0), p["fabric"])
+
+
+def pet_cushion(p: Palette) -> None:
+    cushion((1.8, 1.2, 0.35), (1.0, 0, 0.2), p["accent"])
+    torus(0.62, 0.2, (1.0, 0, 0.42), p["accent"])
+    cushion((1.0, 0.75, 0.16), (1.0, 0, 0.42), p["fabric"])
+
+
+def round_table(p: Palette) -> None:
+    cylinder(1.25, 0.12, (1.5, 0, 1.3), p["wood"], bevel=0.04)
+    cylinder(0.12, 1.2, (1.5, 0, 0.66), p["dark_wood"])
+    cylinder(0.6, 0.08, (1.5, 0, 0.05), p["dark_wood"], bevel=0.03)
+    cylinder(0.28, 0.06, (1.1, 0, 1.4), p["fabric"])
+    sphere(0.12, (1.1, 0, 1.46), p["accent"], scale=(1, 1, 0.6))
+    cylinder(0.1, 0.32, (1.95, 0.1, 1.52), p["accent_2"], bevel=0.02)
+
+
+def picnic_table(p: Palette) -> None:
+    box((4.0, 1.2, 0.12), (2.0, 0, 1.2), p["wood"], bevel=0.03)
+    for y in (0.95, -0.95):
+        box((4.0, 0.45, 0.1), (2.0, y, 0.65), p["wood"], bevel=0.03)
+    for x in (0.5, 3.5):
+        for side in (-1, 1):
+            box((0.12, 0.12, 1.5), (x, side * 0.35, 0.62), p["dark_wood"], bevel=0.02,
+                rotation=(side * math.radians(28), 0, 0))
+    box((4.0, 0.08, 0.04), (2.0, 0, 1.27), p["accent"], bevel=0.0)
+    cylinder(0.3, 0.06, (1.2, 0, 1.3), p["fabric"])
+    cylinder(0.3, 0.06, (2.8, 0, 1.3), p["fabric"])
+
+
+def snack_bar(p: Palette) -> None:
+    box((2.0, 1.0, 1.2), (1.0, 0, 0.6), p["wood"], bevel=0.05)
+    box((2.1, 1.1, 0.1), (1.0, 0, 1.25), p["dark_wood"], bevel=0.03)
+    for x in (0.55, 1.45):
+        cylinder(0.22, 0.28, (x, 0, 1.44), p["fabric"])
+        sphere(0.14, (x, 0, 1.6), p["accent"] if x < 1 else p["accent_2"])
+    box((1.8, 0.04, 0.3), (1.0, -0.52, 0.85), p["accent"], bevel=0.0)
+
+
+def typewriter_desk(p: Palette) -> None:
+    box((3.0, 1.2, 0.14), (1.5, 0, 1.55), p["dark_wood"], bevel=0.05)
+    for x in (0.15, 2.85):
+        box((0.2, 1.1, 1.5), (x, 0, 0.75), p["wood"], bevel=0.04)
+    box((1.1, 0.8, 0.3), (1.5, 0, 1.78), p["metal"], bevel=0.06)
+    cylinder(0.08, 1.2, (1.5, 0.3, 1.98), p["metal"], rotation=(0, math.radians(90), 0))
+    box((0.9, 0.04, 0.6), (1.5, 0.32, 2.2), p["paper"], bevel=0.0, rotation=(math.radians(-12), 0, 0))
+    for x in (2.35, 2.5, 2.65):
+        box((0.12, 0.6, 0.5), (x, 0.2, 1.87), p["accent"] if x < 2.4 else p["accent_2"], bevel=0.02)
+
+
+def greenhouse_shelf(p: Palette) -> None:
+    for x in (0.1, 1.9):
+        box((0.1, 0.8, 2.4), (x, 0, 1.2), p["metal"], bevel=0.02)
+    for z in (0.5, 1.2, 1.9):
+        box((1.9, 0.75, 0.06), (1.0, 0, z), p["wood"], bevel=0.02)
+        for index, x in enumerate((0.45, 1.0, 1.55)):
+            cylinder(0.16, 0.24, (x, 0, z + 0.15), p["accent"], bevel=0.02)
+            bush((x, 0, z + 0.18), 0.22, p["leaf"], p["leaf_dark"], seed=index + int(z * 10))
+
+
+def sewing_table(p: Palette) -> None:
+    box((2.0, 1.0, 0.12), (1.0, 0, 1.3), p["wood"], bevel=0.04)
+    for x in (0.12, 1.88):
+        box((0.12, 0.9, 1.25), (x, 0, 0.62), p["dark_wood"], bevel=0.02)
+    box((0.9, 0.45, 0.4), (1.0, 0, 1.56), p["fabric"], bevel=0.05)
+    box((0.25, 0.4, 0.55), (1.35, 0, 1.75), p["fabric"], bevel=0.05)
+    box((0.7, 0.4, 0.12), (1.1, 0, 2.0), p["fabric"], bevel=0.04)
+    cylinder(0.12, 0.2, (0.35, 0.1, 1.46), p["accent"], bevel=0.02)
+    cylinder(0.1, 0.18, (1.7, -0.1, 1.45), p["accent_2"], bevel=0.02)
+
+
+def sofa(p: Palette) -> None:
+    cushion((3.8, 1.3, 0.5), (2.0, 0, 0.55), p["accent"])
+    cushion((3.8, 0.4, 1.2), (2.0, 0.5, 1.0), p["accent"])
+    for x in (0.25, 3.75):
+        cushion((0.45, 1.3, 0.85), (x, 0, 0.75), p["accent"])
+    for x in (1.15, 2.85):
+        cushion((1.55, 1.0, 0.25), (x, -0.1, 0.92), p["fabric"])
+    cushion((0.6, 0.25, 0.55), (0.9, 0.25, 1.3), p["accent_2"])
+    for x in (0.3, 3.7):
+        cone(0.07, 0.04, 0.3, (x, -0.5, 0.15), p["dark_wood"])
+
+
+def bean_bag(p: Palette) -> None:
+    cushion((1.7, 1.3, 0.25), (1.0, 0, 0.13), p["accent_2"])                    # it sits flat on the floor
+    sphere(0.85, (1.0, 0, 0.55), p["accent_2"], scale=(1.15, 1.0, 0.65))
+    sphere(0.5, (1.25, 0.2, 0.95), p["accent_2"], scale=(1.0, 0.8, 0.8))
+
+
+def bookshelf(p: Palette) -> None:
+    box((2.0, 0.08, 2.6), (1.0, 0.31, 1.3), p["dark_wood"], bevel=0.02)       # back
+    for x in (0.06, 1.94):
+        box((0.12, 0.7, 2.6), (x, 0, 1.3), p["wood"], bevel=0.03)            # sides
+    box((2.0, 0.7, 0.12), (1.0, 0, 2.6), p["wood"], bevel=0.03)
+    for z in (0.35, 1.0, 1.65, 2.3):
+        box((1.8, 0.6, 0.06), (1.0, 0, z), p["wood"], bevel=0.0)
+    colors = ("accent", "accent_2", "fabric", "accent", "dark_wood", "accent_2")
+    for row, z in enumerate((0.38, 1.03, 1.68)):
+        x = 0.2
+        for index in range(7):
+            width = 0.12 + 0.04 * ((index + row) % 3)
+            height = 0.45 + 0.08 * ((index * 3 + row) % 3)
+            box((width, 0.45, height), (x + width / 2, -0.08, z + height / 2), p[colors[(index + row) % 6]],
+                bevel=0.015)
+            x += width + 0.04
+    sphere(0.16, (1.5, -0.1, 2.48), p["leaf"])
+
+
+def ball_pit(p: Palette) -> None:
+    box((3.0, 1.3, 0.75), (1.5, 0, 0.38), p["accent_2"], bevel=0.12)
+    colors = ("accent", "fabric", "leaf", "water", "ball", "accent_2")
+    for index in range(26):
+        x = 0.35 + (index * 0.37) % 2.4
+        y = -0.4 + ((index * 7) % 5) * 0.2
+        z = 0.75 + 0.1 * ((index * 3) % 2)
+        sphere(0.17, (x, y, z), p[colors[index % len(colors)]])
+
+
+def piano(p: Palette) -> None:
+    box((3.0, 1.0, 2.0), (1.5, 0.15, 1.0), p["dark_wood"], bevel=0.06)
+    box((2.8, 0.55, 0.12), (1.5, -0.55, 1.05), p["dark_wood"], bevel=0.03)
+    box((2.6, 0.4, 0.08), (1.5, -0.6, 1.13), p["paper"], bevel=0.0)
+    for index in range(17):
+        box((0.06, 0.24, 0.05), (0.35 + index * 0.145, -0.5, 1.19), p["ink"], bevel=0.0)
+    box((1.2, 0.06, 0.6), (1.5, -0.32, 1.65), p["paper"], bevel=0.0, rotation=(math.radians(-12), 0, 0))
+    cylinder(0.08, 0.9, (0.25, -0.6, 0.45), p["dark_wood"])
+    cylinder(0.08, 0.9, (2.75, -0.6, 0.45), p["dark_wood"])
+
+
+def scratching_post(p: Palette) -> None:
+    box((0.9, 0.9, 0.15), (0.5, 0, 0.08), p["fabric"], bevel=0.04)
+    cylinder(0.17, 1.5, (0.5, 0, 0.9), p["wood"])
+    for z in range(6):
+        torus(0.18, 0.025, (0.5, 0, 0.3 + z * 0.22), p["dark_wood"])
+    cushion((0.75, 0.75, 0.12), (0.5, 0, 1.7), p["accent"])
+    sphere(0.1, (0.82, -0.1, 1.35), p["ball"])
+    cylinder(0.01, 0.35, (0.82, -0.1, 1.55), p["ink"], bevel=0.0)
+
+
+def rug(p: Palette) -> None:
+    cushion((4.0, 2.0, 0.06), (2.0, 0, 0.03), p["accent"], softness=1)
+    cushion((3.4, 1.6, 0.07), (2.0, 0, 0.05), p["accent_2"], softness=1)
+    cushion((2.6, 1.0, 0.08), (2.0, 0, 0.07), p["fabric"], softness=1)
+
+
+def easel(p: Palette) -> None:
+    for side in (-1, 1):
+        box((0.08, 0.08, 2.0), (0.5 + side * 0.28, 0.0, 0.98), p["wood"], bevel=0.0,
+            rotation=(0, side * math.radians(-8), 0))
+    box((0.08, 0.08, 1.9), (0.5, 0.35, 0.93), p["wood"], bevel=0.0, rotation=(math.radians(-15), 0, 0))
+    box((0.9, 0.1, 0.06), (0.5, -0.06, 0.85), p["wood"], bevel=0.0)
+    box((0.8, 0.05, 0.8), (0.5, -0.08, 1.32), p["paper"], bevel=0.02)
+    box((0.86, 0.04, 0.86), (0.5, -0.06, 1.32), p["dark_wood"], bevel=0.02)
+    sphere(0.12, (0.4, -0.12, 1.4), p["accent"], scale=(1, 0.3, 1))
+    sphere(0.1, (0.62, -0.12, 1.22), p["leaf"], scale=(1, 0.3, 1))
+
+
+def aquarium(p: Palette) -> None:
+    box((2.0, 0.8, 0.9), (1.0, 0, 0.45), p["dark_wood"], bevel=0.04)
+    glass = box((1.9, 0.7, 1.0), (1.0, 0, 1.4), p["water"], bevel=0.03)
+    glass.name = "glass"
+    box((1.9, 0.7, 0.12), (1.0, 0, 0.96), p["accent_2"], bevel=0.0)
+    for x, color in ((0.6, "accent"), (1.35, "ball")):
+        sphere(0.13, (x, -0.36, 1.45), p[color], scale=(1.4, 0.4, 0.8))
+        cone(0.1, 0.0, 0.18, (x + 0.2, -0.36, 1.45), p[color], rotation=(0, math.radians(-90), 0))
+    for x in (0.35, 1.7):
+        cylinder(0.03, 0.6, (x, -0.2, 1.3), p["leaf_dark"], bevel=0.0)
+    box((2.0, 0.8, 0.08), (1.0, 0, 1.94), p["metal"], bevel=0.02)
+
+
+def string_lights(p: Palette) -> None:
+    for x in (0.15, 2.85):
+        cylinder(0.05, 2.2, (x, 0, 1.1), p["dark_wood"], bevel=0.0)
+        cylinder(0.25, 0.08, (x, 0, 0.04), p["dark_wood"])
+    for index in range(11):
+        t = index / 10
+        x = 0.15 + t * 2.7
+        z = 2.1 - 0.5 * math.sin(math.pi * t)
+        sphere(0.09, (x, -0.05, z - 0.1), p["accent_2"] if index % 2 else p["accent"])
+        cylinder(0.012, 0.32, (x, 0, z + 0.04), p["ink"], rotation=(0, math.radians(90), 0), bevel=0.0)
+
+
+def grandfather_clock(p: Palette) -> None:
+    box((0.9, 0.6, 2.6), (0.5, 0, 1.3), p["dark_wood"], bevel=0.05)
+    box((0.8, 0.5, 0.2), (0.5, 0, 2.7), p["wood"], bevel=0.04)
+    cylinder(0.3, 0.05, (0.5, -0.31, 2.15), p["paper"], rotation=(math.radians(90), 0, 0))
+    for angle in (0, 90):
+        box((0.03, 0.02, 0.22), (0.5, -0.35, 2.2), p["ink"], bevel=0.0, rotation=(0, math.radians(angle + 30), 0))
+    box((0.5, 0.04, 1.1), (0.5, -0.31, 1.15), p["water"], bevel=0.0)
+    cylinder(0.02, 0.8, (0.5, -0.34, 1.3), p["metal"], bevel=0.0)
+    cylinder(0.12, 0.04, (0.5, -0.35, 0.9), p["accent_2"], rotation=(math.radians(90), 0, 0))
+
+
 PIECES = {"bed_basic": (4, bed_basic), "bed_cozy": (4, bed_cozy), "table_basic": (4, table_basic),
           "desk_basic": (3, desk_basic), "plant_pot": (1, plant_pot), "wall_lamp": (1, wall_lamp),
           "toy_box": (2, toy_box), "armchair": (2, armchair), "stool": (1, stool), "planter": (2, planter),
           "workbench": (3, workbench)}
+PIECES.update({"bunk_bed": (4, bunk_bed), "hammock": (3, hammock), "pet_cushion": (2, pet_cushion),
+               "round_table": (3, round_table), "picnic_table": (4, picnic_table), "snack_bar": (2, snack_bar),
+               "typewriter_desk": (3, typewriter_desk), "greenhouse_shelf": (2, greenhouse_shelf),
+               "sewing_table": (2, sewing_table), "sofa": (4, sofa), "bean_bag": (2, bean_bag),
+               "bookshelf": (2, bookshelf), "ball_pit": (3, ball_pit), "piano": (3, piano),
+               "scratching_post": (1, scratching_post), "rug": (4, rug), "easel": (1, easel),
+               "aquarium": (2, aquarium), "string_lights": (3, string_lights),
+               "grandfather_clock": (1, grandfather_clock)})
 
 
 # ----- items: materials, harvests and goods -------------------------------------------------------

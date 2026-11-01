@@ -58,7 +58,7 @@ TUTORIAL = (
     Goal("place_station", lambda w: (placed(w, "workstation"), 1), 5),
     Goal("first_work", lambda w: (_stat(w, "settled"), 1), 10),
     Goal("buy_furniture", lambda w: (_stat(w, "bought"), 1), 10),
-    Goal("set_routine", lambda w: (_stat(w, "routine_set"), 1), 5),
+    Goal("decorate", lambda w: (placed(w, "decoration"), 1), 5),
     Goal("second_resident", lambda w: (len(w.residents), 2), 10),
     Goal("shared_moment", lambda w: (_stat(w, "greeted", "shared"), 1), 15),
 )
@@ -132,12 +132,22 @@ def _checked_counts(value: object, limit: int) -> dict[str, int]:
     return dict(value)
 
 
+# Goals that were replaced: an old save's state carries over to the new goal, so a
+# reward is never paid twice and the save still loads. "Choose a routine" went when
+# routines became automatic.
+RENAMED_GOALS = {"set_routine": "decorate"}
+
+
 def _checked_goals(value: object) -> dict[str, str]:
-    known = {goal.identifier for goal in TUTORIAL} | {"celebration"}
+    known = {goal.identifier for goal in TUTORIAL} | {"celebration"} | set(RENAMED_GOALS)
     if not isinstance(value, dict) or set(value) - known or any(
             state not in ("claimed", "skipped") for state in value.values()):
         raise ValueError("Invalid goal states")
-    return dict(value)
+    goals = dict(value)
+    for old, new in RENAMED_GOALS.items():
+        if old in goals:
+            goals.setdefault(new, goals.pop(old))
+    return goals
 
 
 def _checked_residents(value: object) -> dict:
@@ -212,6 +222,11 @@ def skip_tutorial(world: World) -> str:
 
 def home_level(world: World) -> int:
     return 1 + sum(1 for reached in MILESTONES if reached(world))
+
+
+def unlocked(world: World, level_needed: int) -> bool:
+    """Free arranging has everything; a managed home opens pieces and jobs as its level rises."""
+    return world.sandbox or level_needed <= 1 or home_level(world) >= level_needed
 
 
 # ----- celebration (the 1.0 stage goal) ---------------------------------------------------

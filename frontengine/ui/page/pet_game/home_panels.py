@@ -16,6 +16,7 @@ from frontengine.show.pet_game.captions import (
 )
 from frontengine.ui.page.pet_game.home_things import ROLE_KEY, ThingGrid, thing_icon, thing_pixmap
 from frontengine.utils.multi_language.retranslate import retranslator, translate, tr
+from frontengine.utils.pet_game import goals
 from frontengine.utils.pet_game.catalog import FURNITURE_PREFIX
 from frontengine.utils.pet_game.layout import THEMES
 from frontengine.utils.pet_game.world import COMMANDS
@@ -305,11 +306,14 @@ class ShopPanel:
         things = []
         for definition in (world.catalog.furniture.values() if world else ()):
             if not definition.essential:
+                name = translate(definition.label_key, definition.fallback)
+                if goals.unlocked(world, definition.unlock_level):
+                    text = translate("pet_home_price", "{name} — {price} coins").format(name=name, price=definition.price)
+                else:
+                    text = name + " — " + translate("pet_home_unlock_level", "home level {level}").format(
+                        level=definition.unlock_level)
                 things.append((FURNITURE_PREFIX + definition.identifier,
-                               thing_icon(FURNITURE_PREFIX + definition.identifier, theme),
-                               translate("pet_home_price", "{name} — {price} coins").format(
-                                   name=translate(definition.label_key, definition.fallback),
-                                   price=definition.price)))
+                               thing_icon(FURNITURE_PREFIX + definition.identifier, theme), text))
         for item in (world.catalog.items.values() if world else ()):
             if item.buy_price:
                 things.append((item.identifier, thing_icon(item.identifier),

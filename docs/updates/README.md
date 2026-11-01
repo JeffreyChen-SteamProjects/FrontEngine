@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261102-02 | 2026-11-02 | Thirty-one pieces of furniture, level unlocks and a Collection tab | #done #pets #game #art | [2026-11](2026-11.md) |
 | U-20261102-01 | 2026-11-02 | Free arranging: a separate home with every piece and no costs | #done #pets #game | [2026-11](2026-11.md) |
 | U-20261101-24 | 2026-11-01 | Pet home shortcuts, a waiting list, zoom and a way out of arranging on the strip | #done #pets #game #ui | [2026-11](2026-11.md) |
 | U-20261101-23 | 2026-11-01 | Real-device acceptance first in progress.md; finished and decided plan items closed | #done #process | [2026-11](2026-11.md) |
