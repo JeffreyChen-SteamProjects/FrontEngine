@@ -12,6 +12,8 @@ from PySide6.QtCore import QPointF, QRectF, Qt, Signal
 from PySide6.QtGui import QColor, QFont, QMouseEvent, QPainter, QPaintEvent, QPen
 from PySide6.QtWidgets import QSizePolicy, QWidget
 
+from frontengine.show.pet_game.themes import floor_color, paint_sky
+from frontengine.utils.pet_game.environment import daylight
 from frontengine.utils.multi_language.retranslate import translate
 from frontengine.utils.pet_game.catalog import CELL_PIXELS
 from frontengine.utils.pet_game.world import World
@@ -36,6 +38,7 @@ class HomeView(QWidget):
     """Overview drawing. Subclasses change the backdrop and where residents appear."""
 
     caption_backdrop = False      # a dark plate behind names, for drawing over any desktop
+    reduced_motion = False        # no in-between movement and no moving rain
     resident_selected = Signal(str)
     furniture_selected = Signal(str)
     cell_clicked = Signal(int)
@@ -96,20 +99,22 @@ class HomeView(QWidget):
         painter.end()
 
     def paint_backdrop(self, painter: QPainter) -> None:
-        """The overview fills its background and always shows the floor."""
-        painter.fillRect(self.rect(), self.palette().base())
+        """The overview shows the zone's theme, the time of day and the weather, then the floor."""
+        zone = self.world.zones[self.zone]
+        paint_sky(painter, QRectF(self.rect()), zone.theme, self.world.home, self.world.time_ms,
+                  not self.reduced_motion)
         self._paint_floor(painter)
 
     def _paint_floor(self, painter: QPainter) -> None:
         zone = self.world.zones[self.zone]
         width = self.cell_width()
         floor = QRectF(0, self._floor_y(), width * zone.width_cells, FLOOR_HEIGHT)
-        painter.fillRect(floor, QColor(150, 120, 90, 150))
+        painter.fillRect(floor, floor_color(zone.theme))
         for cell in zone.restricted:
             painter.fillRect(QRectF(cell * width, floor.top(), width, FLOOR_HEIGHT),
                              QColor(200, 70, 70, 120))
         door = QRectF(zone.entrance * width, self._floor_y() - width * 2, width, width * 2)
-        painter.setPen(QPen(self.palette().text().color(), 1, Qt.PenStyle.DashLine))
+        painter.setPen(QPen(self.ink(), 1, Qt.PenStyle.DashLine))
         painter.drawRect(door)
         if self.preview is not None:
             painter.setPen(QPen(self.palette().mid().color(), 1))
@@ -187,8 +192,14 @@ class HomeView(QWidget):
             painter.drawRoundedRect(QRectF(center.x() - plate / 2, box.top(), plate, box.height()), 5, 5)
             painter.setPen(QColor("white"))
         else:
-            painter.setPen(self.palette().text().color())
+            painter.setPen(self.ink())
         painter.drawText(box, Qt.AlignmentFlag.AlignCenter, caption)
+
+    def ink(self) -> QColor:
+        """Text colour that stays readable on the sky: light at night, the palette's by day."""
+        if self.world is not None and daylight(self.world.time_ms) < 0.45:
+            return QColor(240, 240, 250)
+        return self.palette().text().color()
 
     def resident_radius(self) -> float:
         return max(7.0, self.cell_width() * 0.5)

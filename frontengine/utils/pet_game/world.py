@@ -17,7 +17,7 @@ from frontengine.utils.pet_game.catalog import (
 )
 from frontengine.utils.pet_game.jobs import MAX_TASKS, MAX_UNITS, Task
 from frontengine.utils.pet_game.layout import (
-    MAX_FURNITURE, Furniture, Zone, placement_problem,
+    MAX_FURNITURE, THEMES, Furniture, Zone, placement_problem,
 )
 from frontengine.utils.pet_game.ledger import Ledger
 from frontengine.utils.pet_game.resident import Resident, resident_from_profile
@@ -249,6 +249,14 @@ class World:
         else:
             self.relations.pop(key, None)
         return value
+
+    def set_theme(self, zone: str, theme: str) -> str:
+        """Change how a zone looks; furniture, paths and storage stay exactly as they are."""
+        if zone not in self.zones or theme not in THEMES:
+            return "unknown"
+        self.zones[zone].theme = theme
+        self.emit("theme_set", zone=zone, theme=theme)
+        return "accepted"
 
     def comfort(self, zone: str) -> int:
         return min(10, sum(definition.comfort for _piece, definition in self.in_zone(zone)))
