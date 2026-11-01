@@ -43,6 +43,11 @@ def placed(world: World, category: str) -> int:
     return sum(1 for piece in world.furniture.values() if world.definition(piece).category == category)
 
 
+def goal_done(world: World, goal: Goal) -> bool:
+    current, target = goal.measure(world)
+    return current >= target
+
+
 TUTORIAL = (
     Goal("move_in", lambda w: (len(w.residents), 1), 5),
     Goal("place_bed", lambda w: (placed(w, "bed"), 1), 5),
@@ -178,11 +183,6 @@ def _checked_events(value: object) -> list[dict]:
 
 
 # ----- tutorial and level ---------------------------------------------------------------
-
-def goal_done(world: World, goal: Goal) -> bool:
-    current, target = goal.measure(world)
-    return current >= target
-
 
 def goal_state(world: World, goal: Goal) -> str:
     saved = world.progress.goals.get(goal.identifier)
