@@ -323,6 +323,7 @@ andere ist aus, bis Sie es einschalten.
 | **Intelligentes Pausieren** | Stellen Sie die Overlays zurück, während eine Vollbild-App läuft, während die Maschine im Akkubetrieb ist oder während eine benannte App den Fokus hat. *(Standardmäßig an, für die Vollbildregel.)* |
 | **App-Profile** | Wenden Sie ein Preset an, wenn Sie zu einer bestimmten App wechseln. |
 | **Preset-Zeitplan** | Wenden Sie ein Preset an ausgewählten Wochentagen zu einer festgelegten Zeit an. |
+| **Design** | Wie das System, oder immer hell oder dunkel (*Einstellungen → Design*). Das Fenster nutzt FrontEngines eigenes Design in Tinte, Papier und Orange der eingebauten Figuren; Einstellungen älterer Versionen behalten ihr helles oder dunkles Aussehen. |
 | **Themen-Zeitplan** | Wechseln Sie nach der Uhr zwischen einem Tag- und einem Nachtthema. |
 | **Beschilderungsmodus** | Rotieren Sie eine Liste von Presets per Timer mit weggeräumtem Hauptfenster, für eine als Anzeige laufengelassene Maschine. |
 | **Bildschirmschoner** | Bringen Sie nach einer Leerlaufschwelle das gewählte Video / Bild / GIF / den Partikel / die Webseite auf und nehmen Sie es herunter, wenn Sie zurückkommen. |

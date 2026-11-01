@@ -60,6 +60,8 @@ def build_settings_menu(ui: "FrontEngineMainUI") -> None:
     hotkey_action.triggered.connect(lambda: _open_hotkey_dialog(ui))
     menu.addAction(hotkey_action)
 
+    _build_theme_menu(ui, menu)
+
     schedule = user_setting_dict.get("theme_schedule")
     theme_schedule_action = QAction(_t("settings_menu_theme_schedule", "Scheduled day/night theme"), menu)
     retranslator.bind(theme_schedule_action, "settings_menu_theme_schedule", "Scheduled day/night theme")
@@ -398,6 +400,36 @@ def _show_render_status(ui) -> None:
                             '\n'.join(lines) or _t('render_no_overlays', 'No composited overlays are open.'))
 
 
+_THEME_CHOICES = (("system", "settings_menu_theme_system", "Follow system"),
+                  ("light", "settings_menu_theme_light", "Light"),
+                  ("dark", "settings_menu_theme_dark", "Dark"))
+
+
+def _build_theme_menu(ui: "FrontEngineMainUI", menu) -> None:
+    """Theme: follow the system, light or dark - one choice, remembered in the settings file."""
+    from frontengine.ui.style.tokens import normalise_theme
+    submenu = menu.addMenu(_t("settings_menu_theme", "Theme"))
+    retranslator.bind(submenu, "settings_menu_theme", "Theme", "setTitle")
+    group = QActionGroup(submenu)
+    group.setExclusive(True)
+    current = normalise_theme(user_setting_dict.get("theme"))
+    ui.theme_actions = {}
+    for name, key, fallback in _THEME_CHOICES:
+        action = QAction(_t(key, fallback), submenu)
+        retranslator.bind(action, key, fallback)
+        action.setCheckable(True)
+        action.setChecked(name == current)
+        action.triggered.connect(lambda _checked=False, name=name: _choose_theme(ui, name))
+        group.addAction(action)
+        submenu.addAction(action)
+        ui.theme_actions[name] = action
+
+
+def _choose_theme(ui: "FrontEngineMainUI", theme: str) -> None:
+    ui._apply_theme(theme)
+    write_user_setting()
+
+
 def _toggle_theme_schedule(ui: "FrontEngineMainUI", enabled: bool) -> None:
     """啟用/停用排程主題並立即套用 / Enable/disable scheduled theme and apply now."""
     front_engine_logger.info(f"[SettingsMenu] toggle theme schedule | enabled={enabled}")
@@ -410,8 +442,10 @@ def _toggle_theme_schedule(ui: "FrontEngineMainUI", enabled: bool) -> None:
     schedule["enabled"] = bool(enabled)
     write_user_setting()
     service = getattr(ui, "theme_schedule_service", None)
-    if service is not None:
-        service.poll_once()  # apply the scheduled theme immediately when enabling
+    if not enabled:
+        ui._apply_theme(user_setting_dict.get("theme"))   # back to the user's own theme
+    elif service is not None:
+        service.refresh()    # apply the scheduled theme immediately when enabling
 
 
 def _open_hotkey_dialog(ui: "FrontEngineMainUI") -> None:

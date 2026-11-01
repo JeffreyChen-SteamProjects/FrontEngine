@@ -1717,4 +1717,8 @@ germany_word_dict = {
     "pet_home_note_failed": "{text}",
     "pet_home_note_times": "×{count}",
     "pet_home_wardrobe": "Kleiderschrank …",
+    "settings_menu_theme": "Design",
+    "settings_menu_theme_system": "Wie das System",
+    "settings_menu_theme_light": "Hell",
+    "settings_menu_theme_dark": "Dunkel",
 }

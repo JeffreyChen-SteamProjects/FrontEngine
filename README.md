@@ -292,6 +292,7 @@ switch it on.
 | **Smart pause** | Stand the overlays down while a fullscreen app runs, while the machine is on battery, or while a named app has focus. *(On by default, for the fullscreen rule.)* |
 | **App profiles** | Apply a preset when you switch to a given app. |
 | **Preset schedule** | Apply a preset on chosen weekdays at a set time. |
+| **Theme** | Follow the system, or always light or dark (*Settings → Theme*). The window uses FrontEngine's own design in the ink, paper and orange of the built-in characters; settings from earlier versions keep the light or dark look they had. |
 | **Theme schedule** | Switch between a day and a night theme by the clock. |
 | **Signage mode** | Rotate a list of presets on a timer with the main window put away, for a machine left running as a display. |
 | **Screensaver** | After an idle threshold, bring up the video / image / GIF / particle / web page you chose, and take it down when you come back. |

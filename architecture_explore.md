@@ -14,7 +14,7 @@ FrontEngine 是一個 PySide6 桌面**覆蓋層（overlay）框架**：把影片
 文字、粒子、音效、桌寵等東西放到螢幕最上層（或最底層）播放，並附帶一整套
 「螢幕周邊工具」——護眼濾鏡、簡報塗鴉、量測取色、錄影、虛擬攝影機、專注遮罩等。
 
-- 執行環境：Python 3.10+、PySide6 6.11.1、qt-material、PyOpenGL、numpy、pynput
+- 執行環境：Python 3.10+、PySide6 6.11.1、PyOpenGL、numpy、pynput（介面樣式為自有設計系統，不再使用 qt-material）
 - 發佈：PyPI `frontengine`（穩定，`stable.toml`）／ `frontengine_dev`（開發，`pyproject.toml`）；
   另有 Steam 版本（`steam_assets/`、`utils/steam/`、`utils/workshop/`）
 - 進入點：
@@ -174,7 +174,8 @@ FrontEngine 是一個 PySide6 桌面**覆蓋層（overlay）框架**：把影片
 | --- | ---: | --- |
 | `main_ui.py` | 1,364 | `FrontEngineMainUI(QMainWindow)`。組裝帶功能搜尋入口的側欄、分頁、選單與系統匣，持有背景服務並分派全域快速鍵／手機遙控／MIDI 動作，負責關閉時完整收尾。另有 `start_front_engine()` 與 CLI `main()`。 |
 | `nav/sidebar.py` | 114 | `NavigationSidebar(QListWidget)`：分組的分頁清單（On screen / Desktop / Work / Control / Extensions），選取時送 `page_requested`，完整名稱以工具提示顯示。 |
-| `style/app_style.py` | 320 | 疊在 qt-material 上的主題樣式：卡片、側欄選取、次要操作選單、收合控制、主要動作與窄捲軸。顏色來自主題色票；**必須接在 `apply_stylesheet()` 之後**，否則會被覆蓋。 |
+| `style/tokens.py` | 110 | 自有設計系統的色票與尺寸刻度：亮／暗兩組（INKSIDE 墨黑、紙白、橘色）、圓角、控制項高度、字級。`resolve_theme()` / `normalise_theme()` 把 system / light / dark 與舊版 qt-material 主題名稱（`dark_amber.xml` 等）對應成亮或暗。 |
+| `style/app_style.py` | 380 | 由 tokens 產生整份樣式表（所有標準控制項、外框、分區卡片、主要／危險按鈕、選單、提示、捲軸）與 QPalette；`apply_app_style(window, theme)` 取代整份樣式表並設定調色盤，只影響該視窗與其子元件（覆蓋層不受影響）。`contrast_ratio()` 依 WCAG 計算；勾選與箭頭圖示是 `style/icons/*.svg`（套件資料）。 |
 | `color/global_color.py` | 4 | 兩個常數：log 面板的一般與錯誤顏色。 |
 | `frontengine/system_tray/extend_system_tray.py`（在 `ui/` 之外，自成一個套件） | 111 | `ExtendSystemTray`：系統匣選單（顯示／隱藏主視窗、全部關閉、退出），文字接 `retranslator`。 |
 

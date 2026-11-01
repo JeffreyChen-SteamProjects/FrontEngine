@@ -1714,4 +1714,8 @@ russian_word_dict = {
     "pet_home_note_failed": "{text}",
     "pet_home_note_times": "×{count}",
     "pet_home_wardrobe": "Гардероб…",
+    "settings_menu_theme": "Тема",
+    "settings_menu_theme_system": "Как в системе",
+    "settings_menu_theme_light": "Светлая",
+    "settings_menu_theme_dark": "Тёмная",
 }
