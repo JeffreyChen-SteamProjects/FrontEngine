@@ -73,6 +73,7 @@ def test_the_page_follows_the_focus_timer_only_when_asked(tmp_path, monkeypatch)
         assert "work" not in resident.commands
     finally:
         page.shutdown()
+        page.deleteLater()
 
 
 def test_a_file_dropped_on_a_pet_feeds_it_and_is_never_opened(tmp_path, monkeypatch):
@@ -96,6 +97,7 @@ def test_a_file_dropped_on_a_pet_feeds_it_and_is_never_opened(tmp_path, monkeypa
         assert page.service.world.ledger.to_dict() == items
     finally:
         page.shutdown()
+        page.deleteLater()
 
 
 def test_the_main_window_passes_focus_phases_to_the_home(make_main_window):

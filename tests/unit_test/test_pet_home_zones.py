@@ -115,6 +115,7 @@ def page(tmp_path, monkeypatch):
     widget.create_home()
     yield widget
     widget.shutdown()
+    widget.close()
     widget.deleteLater()
 
 
