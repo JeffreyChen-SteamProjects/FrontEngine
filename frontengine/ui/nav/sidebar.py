@@ -24,7 +24,7 @@ from __future__ import annotations
 from typing import List, Optional, Tuple
 
 from PySide6.QtCore import QSize, Qt, Signal
-from PySide6.QtWidgets import QListWidget, QListWidgetItem
+from PySide6.QtWidgets import QListWidget, QListWidgetItem, QStyle
 
 from frontengine.utils.multi_language.retranslate import retranslator, translate
 
@@ -38,6 +38,7 @@ ROLE_PAGE_INDEX = Qt.ItemDataRole.UserRole + 1
 # 穩定頁面 ID：之後插入新分頁時，堆疊索引會位移，ID 不會。
 # Stable page ID: stack indices shift when a page is inserted, IDs do not.
 ROLE_PAGE_ID = Qt.ItemDataRole.UserRole + 2
+ROLE_GROUP = Qt.ItemDataRole.UserRole + 3     # the group key a page row belongs to
 KIND_GROUP = "group"
 KIND_PAGE = "page"
 
@@ -46,6 +47,7 @@ class NavigationSidebar(QListWidget):
     """分組的分頁清單，選到某一頁時送出 page_requested。"""
 
     page_requested = Signal(int)
+    collapsed_changed = Signal(list)       # group keys that are folded, for persistence
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -59,14 +61,22 @@ class NavigationSidebar(QListWidget):
 
         # (item, key, fallback)，換語言時照這張表重寫
         self._labels: List[Tuple[QListWidgetItem, str, str]] = []
+        self._group: Optional[str] = None
+        self._collapsed: set = set()
         self.currentItemChanged.connect(self._on_current_item_changed)
+        self.itemClicked.connect(self._toggle_if_group)
+        self.itemActivated.connect(self._toggle_if_group)
         retranslator.bind_call(self._retranslate)
 
     def add_group(self, title_key: str, fallback: str = "") -> QListWidgetItem:
-        """加一列群組標題。標題不能被選取，點了也不會換頁。"""
+        """加一列群組標題。標題不能被選取；點它會收合或展開該組。
+        A group heading: never selected; clicking it folds or unfolds the group."""
         item = QListWidgetItem(translate(title_key, fallback))
         item.setData(ROLE_KIND, KIND_GROUP)
-        item.setFlags(Qt.ItemFlag.NoItemFlags)
+        item.setData(ROLE_GROUP, title_key)
+        item.setFlags(Qt.ItemFlag.ItemIsEnabled)
+        self._group = title_key
+        self._set_arrow(item, False)
         item.setSizeHint(QSize(SIDEBAR_WIDTH, 34))
         self.addItem(item)
         self._labels.append((item, title_key, fallback))
@@ -80,6 +90,7 @@ class NavigationSidebar(QListWidget):
         item.setToolTip(item.text())
         item.setData(ROLE_PAGE_INDEX, page_index)
         item.setData(ROLE_PAGE_ID, page_id or title_key)
+        item.setData(ROLE_GROUP, self._group)
         item.setSizeHint(QSize(SIDEBAR_WIDTH, 35))
         self.addItem(item)
         self._labels.append((item, title_key, fallback))
@@ -90,9 +101,44 @@ class NavigationSidebar(QListWidget):
         for row in range(self.count()):
             item = self.item(row)
             if item.data(ROLE_KIND) == KIND_PAGE and item.data(ROLE_PAGE_INDEX) == page_index:
+                if item.isHidden():
+                    self.set_group_collapsed(item.data(ROLE_GROUP), False)
                 self.setCurrentItem(item)
                 return True
         return False
+
+    # ----- folding groups ---------------------------------------------------------------
+
+    def _set_arrow(self, item: QListWidgetItem, collapsed: bool) -> None:
+        arrow = QStyle.StandardPixmap.SP_ArrowRight if collapsed else QStyle.StandardPixmap.SP_ArrowDown
+        item.setIcon(self.style().standardIcon(arrow))
+
+    def _toggle_if_group(self, item: QListWidgetItem) -> None:
+        if item is not None and item.data(ROLE_KIND) == KIND_GROUP:
+            key = item.data(ROLE_GROUP)
+            self.set_group_collapsed(key, key not in self._collapsed)
+            self.collapsed_changed.emit(sorted(self._collapsed))
+
+    def collapsed_groups(self) -> List[str]:
+        return sorted(self._collapsed)
+
+    def set_group_collapsed(self, key: str, collapsed: bool) -> None:
+        """Hide or show a group's pages; the current page is never hidden away."""
+        if collapsed:
+            current = self.currentItem()
+            if current is not None and current.data(ROLE_GROUP) == key:
+                return
+            self._collapsed.add(key)
+        else:
+            self._collapsed.discard(key)
+        for row in range(self.count()):
+            item = self.item(row)
+            if item.data(ROLE_GROUP) != key:
+                continue
+            if item.data(ROLE_KIND) == KIND_GROUP:
+                self._set_arrow(item, collapsed)
+            else:
+                item.setHidden(collapsed)
 
     def page_index(self, page_id: str) -> Optional[int]:
         """The current stack index of a stable page ID, or None."""

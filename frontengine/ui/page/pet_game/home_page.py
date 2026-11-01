@@ -31,6 +31,7 @@ from frontengine.utils.pet_game.schedule import clock_text, game_day
 
 RUNNING_KEY = "pet_home_running"
 DESKTOP_KEY = "pet_home_on_desktop"
+INTRO_KEY = "pet_home_intro_seen"
 LAYER_KEY = "pet_home_layer"
 
 
@@ -51,6 +52,7 @@ class PetHomePage(SettingPage):
         self.selected_resident: str | None = None
         self.selected_furniture: str | None = None
         self.strip_list: list[HomeStrip] = []      # registered with the Control Center
+        self._build_intro()
         self._build_status()
         self.view = HomeView()
         self.add_body_widget(self._scroller(self.view))
@@ -71,6 +73,21 @@ class PetHomePage(SettingPage):
     def zone(self) -> str | None:
         world = self.service.world
         return next(iter(world.zones), None) if world is not None else None
+
+    def _build_intro(self) -> None:
+        """Shown once: where the old tools went, and that none of them needs a home."""
+        section = self.intro_section = self.add_section("pet_home_intro_title", "Welcome to the pet home")
+        text = tr(QLabel(), "pet_home_intro", "FrontEngine now opens on your pets' home.")
+        text.setWordWrap(True)
+        section.add_widget(text)
+        done = tr(QPushButton(), "pet_home_intro_ok", "Got it")
+        done.clicked.connect(self.dismiss_intro)
+        section.add_inline(done)
+        section.setVisible(user_setting_dict.get(INTRO_KEY) is not True)
+
+    def dismiss_intro(self) -> None:
+        user_setting_dict[INTRO_KEY] = True
+        self.intro_section.setVisible(False)
 
     def _build_status(self) -> None:
         section = self.add_section("pet_home_status_section", "Home")

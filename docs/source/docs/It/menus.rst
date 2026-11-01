@@ -1,6 +1,10 @@
 Preimpostazioni e impostazioni
 ------------------------------
 
+Menu Funzioni
+
+**Funzioni**, il primo menu, raccoglie tutti gli strumenti per scopo (media, scene e sfondo, widget, concentrazione e cura degli occhi, presentazioni, acquisizione, mascotte, automazione, contenuti e Workshop, controllo delle sovrapposizioni, impostazioni e aiuto), più *Cerca funzioni* (Ctrl+K), *Fissate* e *Recenti*. Le voci aprono le stesse pagine ed eseguono gli stessi comandi di prima, quindi scorciatoie, preset, regole, telecomando dal telefono e MIDI continuano a funzionare; i menu Preset, Impostazioni, Lingua e Aiuto vi compaiono così come sono. I gruppi della barra laterale si chiudono con un clic sull’intestazione e restano chiusi. Il menu dell’area di notifica offre *Apri la casa delle mascotte*.
+
 Menu Preimpostazioni
 
 * Salva preimpostazione… - le impostazioni di tutte le pagine, sotto un nome.

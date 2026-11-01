@@ -217,6 +217,7 @@ FrontEngine 是一個 PySide6 桌面**覆蓋層（overlay）框架**：把影片
 | `menu/language_menu.py` | 64 | 七種語言切換，**即時重寫畫面文字**，不必重啟。 |
 | `menu/help_menu.py` | 93 | 說明選單 + 使用說明對話框 + 「如何強制退出」。 |
 | `menu/how_to_menu.py` | 44 | 線上文件／教學連結。 |
+| `menu/features_menu.py` | 150 | **Features** menu, first in the menu bar. `CATEGORIES` groups every page (by stable page ID), ActionRegistry command and existing menu (Presets/Settings/Language/Help, the same QMenu objects) by purpose; plugin pages appear under Extensions. Rebuilt on open and on language change, with Search (opens the palette), Pinned and Recent from `CommandHistory`; menu use is recorded as recent like palette use. `test_features_menu.py` fails if a sidebar page or menu action is not reachable from it. |
 
 #### 對話框（`ui/dialog/`）
 
@@ -437,7 +438,7 @@ Qt 訊號 + `QueuedConnection`** 回到 UI 執行緒。另外：
 
 ## 7. 擴充點
 
-**新增一種覆蓋層**要動的地方（缺一個就會出現「只有某條路徑失效」的問題）：
+**新增一種覆蓋層**要動的地方（缺一個就會出現「只有某條路徑失效」的問題；新分頁還要加進 `ui/menu/features_menu.py` 的 `CATEGORIES`，`test_features_menu.py` 會擋）：
 
 1. `show/<kind>/<widget>.py` — 繼承 `BaseWidget`，實作 `draw_content()`
 2. `ui/page/<kind>/<kind>_setting_ui.py` — 繼承 `SettingPage`，用 `add_section()` /
@@ -681,3 +682,5 @@ Pet home UI:
 | `ui/page/pet_game/home_panels.py` | `ResidentPanel` (move in / new pet / move out, needs bars, activity and refusal text, routine, direct commands), `LayoutPanel` (storage, position, mirror, preview, place / move / put away / give bed), `ShopPanel` (buy, sell from storage), `WorkPanel` (job, units, task list with state and progress, cancel). Every action goes through `HomeService.run` and reports the translated result code |
 
 `NavigationSidebar` items also carry a stable page ID (`ROLE_PAGE_ID`, default: the title key); `page_index(page_id)` / `select_page_id(page_id)` resolve it, so inserting the Pet home page first did not break callers that need a specific page. MainUI shuts the home down after flushing desktop pet profiles; a failed home save keeps FrontEngine open with a status message.
+
+Navigation after the game became the first page: sidebar group headings fold their pages (`set_group_collapsed`, persisted as `sidebar_collapsed_groups`; selecting a page in a folded group unfolds it), command-palette page commands open pages by stable ID, and the tray menu offers Open Pet home. `tests/integration/entry_inventory.py` regenerates `docs/design/entry-inventory.md`, the per-entry inventory (original entry, action ID, new entry, state saving, measured acceptance) required by `progress.md` #24.

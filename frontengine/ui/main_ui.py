@@ -33,6 +33,7 @@ from frontengine.ui.page.image.image_setting_ui import ImageSettingUI
 from frontengine.ui.page.particle.particle_setting_ui import ParticleSettingUI
 from frontengine.ui.page.pet.pet_setting_ui import PetSettingUI
 from frontengine.ui.page.pet_game.home_page import PetHomePage
+from frontengine.ui.menu.features_menu import build_features_menu, open_page
 from frontengine.ui.page.scene_setting.scene_setting_ui import SceneSettingUI
 from frontengine.ui.page.presentation.presentation_setting_ui import PresentationSettingUI
 from frontengine.ui.page.screen_care.screen_care_setting_ui import ScreenCareSettingUI
@@ -255,6 +256,7 @@ class FrontEngineMainUI(QMainWindow):
         build_preset_menu(self)
         build_settings_menu(self)
         self._setup_command_palette()
+        build_features_menu(self)
 
         # 致命退出設定
         # Critical exit setting
@@ -629,6 +631,13 @@ class FrontEngineMainUI(QMainWindow):
                 self._add_plugin_tab(widget_name, widget)
 
         self.sidebar.select_page(0)
+        for group in user_setting_dict.get("sidebar_collapsed_groups") or []:
+            if isinstance(group, str):
+                self.sidebar.set_group_collapsed(group, True)
+        self.sidebar.collapsed_changed.connect(self._remember_collapsed_groups)
+
+    def _remember_collapsed_groups(self, groups: list) -> None:
+        user_setting_dict["sidebar_collapsed_groups"] = groups
 
     def _add_plugin_tab(self, name: str, factory: type) -> None:
         from frontengine.ui.plugin_pages import attach_page
@@ -813,7 +822,7 @@ class FrontEngineMainUI(QMainWindow):
         for _widget, key, index in self.command_pages:
             self.action_registry.register(Action(
                 "page." + key, key, self.sidebar.page_label(index),
-                lambda _value, page=index: self._open_command_page(page)))
+                lambda _value, page=key: open_page(self, page)))
         for identifier, key, fallback, callback in (
             ("capture_area", "tools_capture_start", "Capture area", self.tools_setting_ui.start_capture),
             ("palette", "palette_title", "Color palette", self.tools_setting_ui.open_palette),
