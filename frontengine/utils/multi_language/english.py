@@ -1900,4 +1900,9 @@ english_word_dict = {
     "pet_home_visit_note": "A look at a shared home - nothing here runs, is bought or is saved.",
     "pet_home_visit_zone": "Room {number}",
     "pet_home_visit_missing": "Not shown here (missing content or no room): {items}",
+    "pet_home_packs": "Furniture packs",
+    "pet_home_open_packs": "Open the packs folder",
+    "pet_home_pack_line": "{name} - {count} pieces · {source} · {license}",
+    "pet_home_pack_refused": "{name} was not loaded: {reason}",
+    "pet_home_no_packs": "No furniture packs. Put a pack folder in the packs folder and restart.",
 }

@@ -1890,4 +1890,9 @@ russian_word_dict = {
     "pet_home_visit_note": "Взгляд на чужой дом — здесь ничего не происходит, не покупается и не сохраняется.",
     "pet_home_visit_zone": "Комната {number}",
     "pet_home_visit_missing": "Здесь не показано (нет содержимого или места): {items}",
+    "pet_home_packs": "Наборы мебели",
+    "pet_home_open_packs": "Открыть папку наборов",
+    "pet_home_pack_line": "{name} — предметов: {count} · {source} · {license}",
+    "pet_home_pack_refused": "{name} не загружен: {reason}",
+    "pet_home_no_packs": "Наборов мебели нет. Положите папку набора в папку наборов и перезапустите.",
 }

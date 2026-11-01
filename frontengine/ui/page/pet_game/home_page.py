@@ -11,8 +11,8 @@ from concurrent.futures import ThreadPoolExecutor
 from os import getcwd
 from pathlib import Path
 
-from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QGuiApplication, QKeyEvent, QKeySequence
+from PySide6.QtCore import Qt, QUrl, Signal
+from PySide6.QtGui import QDesktopServices, QGuiApplication, QKeyEvent, QKeySequence
 from PySide6.QtWidgets import (QCheckBox, QComboBox, QFrame, QHBoxLayout, QLabel, QListWidget, QListWidgetItem,
                                QPushButton, QScrollArea, QVBoxLayout, QWidget)
 
@@ -41,7 +41,10 @@ from frontengine.user_setting.pet_game_save import HomeSaveStore
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.user_setting.user_setting_file import user_setting_dict, write_user_setting
 from frontengine.utils.multi_language.retranslate import retranslator, translate, tr
-from frontengine.utils.pet_game.catalog import CELL_PIXELS, builtin_catalog
+from frontengine.utils.pet_game.catalog import CELL_PIXELS
+from frontengine.utils.pet_game.content_pack import PACK_FOLDER, catalog_with_packs, load_packs
+from frontengine.show.pet_game.furniture_art import register_pack_pictures
+from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.pet_game.schedule import clock_text, game_day
 
 RUNNING_KEY = "pet_home_running"
@@ -60,9 +63,25 @@ LAYER_KEY = "pet_home_layer"
 
 def default_service(parent) -> HomeService:
     mode = user_setting_dict.get(SAVE_MODE_KEY)
-    store = HomeSaveStore(Path(getcwd()), builtin_catalog(), mode if mode in MODES else "manage")
+    packs, errors = load_packs(Path(getcwd()) / PACK_FOLDER)
+    for name, reason in errors.items():
+        front_engine_logger.warning(f"[PetHome] content pack {name} refused: {reason}")
+    register_pack_pictures({key: value for pack in packs for key, value in pack.pictures.items()})
+    store = HomeSaveStore(Path(getcwd()), catalog_with_packs(packs), mode if mode in MODES else "manage")
+    store.packs, store.pack_errors = packs, errors
     return HomeService(parent, store, PetProfiles(user_setting_dict, write_user_setting),
                        executor=ThreadPoolExecutor(1, thread_name_prefix="pet-home-save"))
+
+
+def packs_text(store) -> str:
+    """Which packs are in use (with source and licence) and why any folder was refused."""
+    packs, errors = getattr(store, "packs", []), getattr(store, "pack_errors", {})
+    lines = [translate("pet_home_pack_line", "{name} - {count} pieces · {source} · {license}").format(
+        name=pack.name, count=len(pack.furniture), source=pack.source, license=pack.license) for pack in packs]
+    lines += [translate("pet_home_pack_refused", "{name} was not loaded: {reason}").format(name=name, reason=reason)
+              for name, reason in sorted(errors.items())]
+    return "\n".join(lines) or translate("pet_home_no_packs",
+                                          "No furniture packs. Put a pack folder in the packs folder and restart.")
 
 
 class PetHomePage(SettingPage):
@@ -350,6 +369,17 @@ class PetHomePage(SettingPage):
                    "the screen is shared.")
         where.setWordWrap(True)
         section.add_widget(where)
+        self.packs_label = QLabel()
+        self.packs_label.setWordWrap(True)
+        section.add_widget(self.packs_label, "pet_home_packs", "Furniture packs")
+        self.packs_button = tr(QPushButton(), "pet_home_open_packs", "Open the packs folder")
+        self.packs_button.clicked.connect(self.open_packs_folder)
+        section.add_inline(self.packs_button)
+
+    def open_packs_folder(self) -> None:
+        folder = Path(getcwd()) / PACK_FOLDER
+        folder.mkdir(exist_ok=True)
+        QDesktopServices.openUrl(QUrl.fromLocalFile(str(folder)))
 
     @staticmethod
     def _scroller(view: HomeView) -> QScrollArea:
@@ -684,6 +714,7 @@ class PetHomePage(SettingPage):
 
     def refresh(self) -> None:
         """Rebuild lists (after commands, events and language changes)."""
+        self.packs_label.setText(packs_text(self.service.store))
         self.view.set_world(self.service.world, self.zone)
         for panel in (self.residents, self.goals, self.layout_panel, self.shop, self.storage, self.work,
                       self.collection):

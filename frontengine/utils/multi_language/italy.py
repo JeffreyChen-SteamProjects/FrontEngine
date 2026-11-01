@@ -1890,4 +1890,9 @@ italian_word_dict = {
     "pet_home_visit_note": "Uno sguardo a una casa condivisa - qui nulla funziona, si compra o si salva.",
     "pet_home_visit_zone": "Stanza {number}",
     "pet_home_visit_missing": "Non mostrato qui (contenuto mancante o niente spazio): {items}",
+    "pet_home_packs": "Pacchetti di mobili",
+    "pet_home_open_packs": "Apri la cartella dei pacchetti",
+    "pet_home_pack_line": "{name} - {count} mobili · {source} · {license}",
+    "pet_home_pack_refused": "{name} non è stato caricato: {reason}",
+    "pet_home_no_packs": "Nessun pacchetto di mobili. Metti la cartella di un pacchetto nella cartella dei pacchetti e riavvia.",
 }

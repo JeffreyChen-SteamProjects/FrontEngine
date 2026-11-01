@@ -1892,4 +1892,9 @@ simplified_chinese_word_dict = {
     "pet_home_visit_note": "看看别人分享的家园——这里不会运作、不会购买，也不会存档。",
     "pet_home_visit_zone": "房间 {number}",
     "pet_home_visit_missing": "这里显示不出来（缺少内容或没有空间）：{items}",
+    "pet_home_packs": "家具包",
+    "pet_home_open_packs": "打开家具包文件夹",
+    "pet_home_pack_line": "{name}——{count} 件 · {source} · {license}",
+    "pet_home_pack_refused": "{name} 没有加载：{reason}",
+    "pet_home_no_packs": "没有家具包。把家具包文件夹放进家具包文件夹后重新启动。",
 }
