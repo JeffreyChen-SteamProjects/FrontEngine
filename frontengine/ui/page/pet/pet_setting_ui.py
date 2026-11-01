@@ -22,6 +22,7 @@ from frontengine.ui.page.utils import (
     reload_recent_combobox,
     resolve_preferred_monitor,
 )
+from frontengine.user_setting.pet_looks import remember_portrait, remember_sprite
 from frontengine.user_setting.user_setting_file import add_recent_file
 from frontengine.utils.audio_meter.microphone_meter import microphone_level
 from frontengine.utils.audio_meter.screen_audio import audio_level_provider_for_screen
@@ -44,6 +45,7 @@ _PET_EXTENSIONS = (".gif", ".webp", ".png", ".jpg", ".puppet")
 # The English fallback shared by several call sites, seen only when a
 # translation is missing.
 _CHOOSE_PACK = "Choose pet pack..."
+PORTRAIT_DELAY_MS = 1500     # let a Puppet settle into its idle pose before the home keeps a still of it
 
 
 class PetSettingUI(SettingPage):
@@ -352,6 +354,7 @@ class PetSettingUI(SettingPage):
         )
         if source_pet is None and self._builtin_sprite is not None and path == self._builtin_sprite[1]:
             self._dress_as_builtin(pet, self._builtin_sprite[0])
+        remember_sprite(self.profile_controls.profiles.settings, pet.profile_session.identifier, path)
         pet.clone_requested.connect(lambda: self._spawn_pet(pet.profile_session.state(), source_pet=pet))
         pet.customize_requested.connect(lambda: self.profile_controls.customize(pet.profile_session.identifier))
         pet.profile_session.changed.connect(self._on_settle_typing_toggled)
@@ -406,6 +409,16 @@ class PetSettingUI(SettingPage):
         self.pet_list.append(pet)
         pet.show()
         self._on_settle_typing_toggled()
+        QTimer.singleShot(PORTRAIT_DELAY_MS, pet, lambda: self._remember_portrait(pet))
+
+    def _remember_portrait(self, pet) -> None:
+        """A still of the Puppet, from its own canvas, so the pet home can show it as itself."""
+        try:
+            image = pet.photo_image()
+        except (ValueError, RuntimeError) as error:       # no GL canvas: the home uses a stand-in
+            front_engine_logger.info(f"[PetSettingUI] no portrait for the pet home: {error}")
+            return
+        remember_portrait(self.profile_controls.profiles.settings, pet.profile_session.identifier, image)
 
     def use_builtin_puppet(self) -> None:
         """Generate the chosen INKSIDE character as a Puppet model with its reaction script."""
