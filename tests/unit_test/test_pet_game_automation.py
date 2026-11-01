@@ -61,7 +61,8 @@ def test_an_idle_pet_takes_up_the_job_of_its_trade_during_work_hours():
     world.time_ms = 10 * HOUR_MS                         # inside the standard routine's work block
     events = _run(world, 60000)
     taken = [event for event in events if event["kind"] == "auto_job"]
-    assert taken and taken[0]["resident"] == PET
+    assert taken
+    assert taken[0]["resident"] == PET
     task = next(iter(world.tasks.values()))
     assert world.catalog.recipes[task.recipe].profession == "writing"   # the only workstation is the desk
 

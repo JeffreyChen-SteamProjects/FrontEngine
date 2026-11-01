@@ -65,9 +65,9 @@ def test_pets_without_a_character_appear_as_a_built_in_stand_in(home):
     renderer = art.renderer(identifier)
     assert renderer is not None
     assert renderer.character.identifier == fallback_character(identifier)
-    assert fallback_character(identifier) == fallback_character(identifier)      # stable per pet
     frame = art.frame(service.world.residents[identifier])
-    assert frame is not None and not frame.isNull()
+    assert frame is not None
+    assert not frame.isNull()
     assert service.profiles.get(identifier)["appearance"]["character"] is None   # its own look is untouched
     assert service.sessions[identifier].appearance_renderer is None              # nor the desktop pet's
 

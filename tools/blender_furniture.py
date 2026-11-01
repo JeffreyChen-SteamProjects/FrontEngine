@@ -47,8 +47,8 @@ def reset_scene() -> None:
     scene.render.line_thickness_mode = "ABSOLUTE"
     scene.render.line_thickness = 2.2
     linesets = scene.view_layers[0].freestyle_settings.linesets
-    for stale in list(linesets):            # the empty default set has no line style and errors
-        linesets.remove(stale)
+    while len(linesets):                    # the empty default set has no line style and errors
+        linesets.remove(linesets[0])
     lineset = linesets.new("outline")
     lineset.select_by_visibility = True
     lineset.select_by_edge_types = True
