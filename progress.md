@@ -55,5 +55,4 @@
 ### #32 測試
 
 - [ ] 擴充 `test_command_palette.py`、`test_control_center_batch.py`、`test_pet_profile_sessions.py` 與相關寵物互動測試，證明舊入口移位後功能、保存與資源清理仍正確。
-- [ ] 測試仍留下約 3.8 萬個 widget：桌面寵物測試每個寵物視窗約 232 個（`test_pet_ball`、`test_pet_keyboard_call`、`test_pet_light`、`test_pet_call` 等只 `close()` 沒刪除）、`test_screensaver` 約 4,800 個；逐一改成 `deleteLater()` 或共用的寵物 fixture。
 - [ ] 背景煙霧測試入口 `tests/integration/pet_game_smoke.py`：只用測試存檔與自建視窗，支援固定亂數、指定有效時間、截圖與結算紀錄，拒絕操作使用者日常視窗或真實媒體鍵。

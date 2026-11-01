@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261102-18 | 2026-11-02 | Tests delete the windows they close | #done #tests #fix | [2026-11](2026-11.md) |
 | U-20261102-17 | 2026-11-02 | Real-device acceptance may only sit at the top of progress.md, checked by a test | #done #process | [2026-11](2026-11.md) |
 | U-20261102-16 | 2026-11-02 | Furniture content packs, checked at the boundary | #done #pets #game #security | [2026-11](2026-11.md) |
 | U-20261102-15 | 2026-11-02 | Share a home as a blueprint and visit one read-only | #done #pets #game | [2026-11](2026-11.md) |
@@ -245,6 +246,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 41 |
+| [2026-11.md](2026-11.md) | 2026-11 | 42 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
