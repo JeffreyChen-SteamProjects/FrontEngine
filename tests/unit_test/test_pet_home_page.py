@@ -145,3 +145,33 @@ def test_a_wide_home_scrolls_instead_of_shrinking_its_cells(page):
     assert page.view.minimumWidth() >= cells * MIN_CELL
     page.view.resize(page.view.minimumWidth(), page.view.height())
     assert page.view.cell_width() >= MIN_CELL
+
+
+def test_work_details_stations_and_backpack(page):
+    page.create_home()
+    page.service.world.ledger.apply("gift", "test", 500)
+    page.residents.new_pet()
+    page.shop.items.setCurrentIndex(page.shop.items.findData("workbench"))
+    page.shop.buy()
+    _place(page, "workbench", 14)
+    page.shop.materials.setCurrentIndex(page.shop.materials.findData("wood"))
+    page.shop.amount.setValue(2)
+    page.shop.buy_materials()
+    assert page.service.world.ledger.count("wood") == 2
+    work = page.work
+    work.recipes.setCurrentIndex(work.recipes.findData("toy"))
+    assert translate("pet_game_item_wood") in work.details.text()
+    assert work.station.count() == 2
+    work.station.setCurrentIndex(1)
+    work.priority.setValue(8)
+    work.assign()
+    task = next(iter(page.service.world.tasks.values()))
+    assert task.station == work.station.itemData(1)
+    assert task.priority == 8
+    page.service.world.ledger.apply("toys", "test", 0, {"toy": 1})
+    page.refresh()
+    rows = [page.storage.list.item(row).data(Qt.ItemDataRole.UserRole) for row in range(page.storage.list.count())]
+    page.storage.list.setCurrentRow(rows.index("toy"))
+    coins = page.service.world.ledger.coins
+    page.storage.sell()
+    assert page.service.world.ledger.coins == coins + 24

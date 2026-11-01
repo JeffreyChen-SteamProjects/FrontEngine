@@ -19,7 +19,7 @@ from frontengine.show.pet_game.home_strip import HIDDEN_REASON, LAYERS, HomeStri
 from frontengine.show.pet_game.home_view import HomeView
 from frontengine.ui.page.layout_kit import SettingPage
 from frontengine.ui.page.pet_game.home_panels import (
-    LayoutPanel, ResidentPanel, ShopPanel, WorkPanel,
+    LayoutPanel, ResidentPanel, ShopPanel, StoragePanel, WorkPanel,
 )
 from frontengine.show.pet_game.captions import result_text
 from frontengine.user_setting.pet_game_save import HomeSaveStore
@@ -59,6 +59,7 @@ class PetHomePage(SettingPage):
         self.residents = ResidentPanel(self)
         self.layout_panel = LayoutPanel(self)
         self.shop = ShopPanel(self)
+        self.storage = StoragePanel(self)
         self.work = WorkPanel(self)
         self.finish_body()
         self._connect()
@@ -284,7 +285,7 @@ class PetHomePage(SettingPage):
         for layer in LAYERS:
             self.layer_combo.addItem(translate("pet_home_layer_" + layer, layer), layer)
         self.layer_combo.setCurrentIndex(self.layer_combo.findData(self.layer))
-        for panel in (self.residents, self.layout_panel, self.shop, self.work):
+        for panel in (self.residents, self.layout_panel, self.shop, self.storage, self.work):
             panel.refresh_lists()
         self.refresh_live()
 
@@ -303,7 +304,7 @@ class PetHomePage(SettingPage):
         self.run_button.setVisible(has_home)
         self.restore_button.setVisible(protected and self.load_result.backup_available)
         self.aside_button.setVisible(protected)
-        for panel in (self.residents, self.layout_panel, self.shop, self.work):
+        for panel in (self.residents, self.layout_panel, self.shop, self.storage, self.work):
             panel.section.setEnabled(has_home)
         self.desktop_check.setEnabled(has_home)
         self.layer_combo.setEnabled(has_home)

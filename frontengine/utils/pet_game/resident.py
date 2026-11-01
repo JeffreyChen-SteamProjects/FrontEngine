@@ -37,6 +37,7 @@ class Activity:
     target_x: int = 0               # milli-pixels
     until_ms: int | None = None     # end of a timed activity
     started_ms: int = 0
+    bonus: bool = False             # a meal with herbs from storage
 
 
 @dataclass
