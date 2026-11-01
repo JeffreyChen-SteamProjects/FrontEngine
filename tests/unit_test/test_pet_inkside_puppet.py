@@ -34,6 +34,15 @@ def test_every_character_exports_a_valid_bound_puppet(tmp_path, template):
         assert motion.fade_out_duration > 0  # stopping eases back instead of snapping to frame 0
 
 
+def _wait_until(condition, timeout_ms: int = 5000) -> bool:
+    """Process events until the condition holds; a loaded machine only makes this slower, not wrong."""
+    for _ in range(timeout_ms // 20):
+        if condition():
+            return True
+        QTest.qWait(20)
+    return condition()
+
+
 def test_reactions_move_the_rig_and_return_to_defaults(tmp_path):
     from frontengine.show.pet.puppet_pet import PuppetPetWidget
     model, script = export_puppet('inkside-mochi', tmp_path)
@@ -43,14 +52,14 @@ def test_reactions_move_the_rig_and_return_to_defaults(tmp_path):
         values = pet.canvas.parameter_values
         defaults = dict(values())
         assert pet.profile_session.request('greet') == 'accepted'
-        QTest.qWait(400)
-        assert values()['ArmR'] < -1.0
+        assert _wait_until(lambda: values()['ArmR'] < -1.0)
         assert pet.canvas.active_expressions() == ['happy']  # eyes are owned by the expression
         pet.profile_session.advance(1)
-        QTest.qWait(600)
-        assert pet.canvas.active_expressions() == []
-        assert {key: round(value, 3) for key, value in values().items()} == {
-            key: round(value, 3) for key, value in defaults.items()}
+
+        def rested():
+            return {key: round(value, 3) for key, value in values().items()} == {
+                key: round(value, 3) for key, value in defaults.items()}
+        assert _wait_until(lambda: not pet.canvas.active_expressions() and rested())
     finally:
         pet.close()
         QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)

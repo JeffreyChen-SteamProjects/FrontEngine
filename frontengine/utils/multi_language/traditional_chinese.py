@@ -1854,4 +1854,5 @@ traditional_chinese_word_dict = {
     "pet_home_activity_help": "幫忙中",
     "pet_home_reason_helping": "幫朋友工作",
     "pet_home_paused_locked": "電腦鎖定時暫停",
+    "pet_home_focus_companion": "專注時寵物陪我一起工作（寵物頁的專注計時）",
 }

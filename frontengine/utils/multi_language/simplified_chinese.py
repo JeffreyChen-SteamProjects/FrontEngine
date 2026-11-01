@@ -1847,4 +1847,5 @@ simplified_chinese_word_dict = {
     "pet_home_activity_help": "帮忙中",
     "pet_home_reason_helping": "帮朋友工作",
     "pet_home_paused_locked": "电脑锁定时暂停",
+    "pet_home_focus_companion": "专注时宠物陪我一起工作（宠物页的专注计时）",
 }

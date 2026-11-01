@@ -86,6 +86,7 @@ class HomeStrip(HomeView):
         self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.setAcceptDrops(True)
         self.setWindowTitle(translate("tab_pet_home_text", "Pet home"))
         self.setFixedHeight(STRIP_HEIGHT)
         self.chosen: str | None = None        # the pet last clicked here, shown in the toolbar
@@ -441,6 +442,30 @@ class HomeStrip(HomeView):
         self.refresh_info()
         self.resident_selected.emit(identifier)
         self.show_card(identifier, event.globalPosition().toPoint())
+
+    @staticmethod
+    def _dropped_files(mime) -> bool:
+        return mime.hasUrls() and any(url.isLocalFile() for url in mime.urls())
+
+    def dragEnterEvent(self, event) -> None:
+        if self.service.world is not None and self._dropped_files(event.mimeData()):
+            event.acceptProposedAction()
+
+    def dragMoveEvent(self, event) -> None:
+        if self._dropped_files(event.mimeData()) and self._resident_at(event.position()) is not None:
+            event.acceptProposedAction()
+        else:
+            event.ignore()
+
+    def dropEvent(self, event) -> None:
+        """A file dropped on a pet is a treat and nothing more: it is never opened, changed or
+        deleted, and it never turns into materials or coins."""
+        resident = self._resident_at(event.position()) if self.service.world is not None else None
+        if resident is None or not self._dropped_files(event.mimeData()):
+            event.ignore()
+            return
+        self._interact(resident, "feed")
+        event.acceptProposedAction()
 
     def show_card(self, identifier: str, where: QPoint) -> None:
         """A non-activating tooltip card: name, what it is doing, and its needs."""

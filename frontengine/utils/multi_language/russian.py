@@ -1845,4 +1845,5 @@ russian_word_dict = {
     "pet_home_activity_help": "Помогает",
     "pet_home_reason_helping": "помогает другу с работой",
     "pet_home_paused_locked": "на паузе, пока компьютер заблокирован",
+    "pet_home_focus_companion": "Питомцы работают вместе со мной во время фокуса (таймер на странице питомцев)",
 }

@@ -583,6 +583,16 @@ class PetHomePage(SettingPage):
         self.message.setText(text)
         self.message.setVisible(bool(text))
 
+    def focus_phase_changed(self, phase: str) -> None:
+        """The focus timer as a schedule request: work while focusing, and only our own requests
+        are taken back on a break or when it stops. Nothing reads what you type or punishes a pause."""
+        if self.service.world is None:
+            return
+        if phase == "focus" and self.work.focus_check.isChecked():
+            self.service.run(lambda world: world.focus_begin())
+        elif phase in ("break", "long_break", "stopped"):
+            self.service.run(lambda world: world.focus_end())
+
     def _session_locked(self, locked: bool) -> None:
         """A locked session pauses the home like hiding it does; unlocking lets it carry on."""
         if locked:
