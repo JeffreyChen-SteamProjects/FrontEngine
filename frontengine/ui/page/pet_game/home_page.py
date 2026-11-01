@@ -17,6 +17,8 @@ from PySide6.QtWidgets import QCheckBox, QComboBox, QFrame, QLabel, QPushButton,
 from frontengine.show.pet_game.home_service import HomeService
 from frontengine.show.pet_game.home_strip import HIDDEN_REASON, LAYERS, HomeStrip
 from frontengine.show.pet_game.home_view import HomeView
+from frontengine.show.pet_game.themes import glyph
+from frontengine.utils.pet_game.environment import weather
 from frontengine.ui.page.layout_kit import SettingPage
 from frontengine.ui.page.pet_game.home_panels import (
     LayoutPanel, ResidentPanel, ShopPanel, StoragePanel, WorkPanel,
@@ -33,6 +35,7 @@ from frontengine.utils.pet_game.schedule import clock_text, game_day
 RUNNING_KEY = "pet_home_running"
 DESKTOP_KEY = "pet_home_on_desktop"
 INTRO_KEY = "pet_home_intro_seen"
+MOTION_KEY = "pet_home_reduced_motion"
 LAYER_KEY = "pet_home_layer"
 
 
@@ -56,6 +59,7 @@ class PetHomePage(SettingPage):
         self._build_intro()
         self._build_status()
         self.view = HomeView()
+        self.view.reduced_motion = self.motion_check.isChecked()
         self.add_body_widget(self._scroller(self.view))
         self.residents = ResidentPanel(self)
         self.goals = GoalsPanel(self)
@@ -114,6 +118,10 @@ class PetHomePage(SettingPage):
         self.desktop_check.setChecked(user_setting_dict.get(DESKTOP_KEY, True) is not False)
         self.desktop_check.toggled.connect(self._desktop_toggled)
         section.add_widget(self.desktop_check)
+        self.motion_check = tr(QCheckBox(), "pet_home_reduced_motion", "Reduce motion")
+        self.motion_check.setChecked(user_setting_dict.get(MOTION_KEY) is True)
+        self.motion_check.toggled.connect(self._motion_toggled)
+        section.add_widget(self.motion_check)
         self.layer_combo = QComboBox()
         self.layer_combo.activated.connect(lambda _index: self.choose_layer(self.layer_combo.currentData()))
         section.add_row("pet_home_layer", self.layer_combo, "Desktop layer")
@@ -208,6 +216,7 @@ class PetHomePage(SettingPage):
             strip.closed.connect(lambda s=strip: self._forget_strip(s))
             strip.set_arranging(self.layout_panel.arranging)
             self.strip_list.append(strip)
+            strip.reduced_motion = self.motion_check.isChecked()
             strip.show()
         elif not wanted:
             self.close_strip()
@@ -220,6 +229,17 @@ class PetHomePage(SettingPage):
         for strip in list(self.strip_list):
             strip.close()
         self.strip_list.clear()
+
+    def _motion_toggled(self, checked: bool) -> None:
+        user_setting_dict[MOTION_KEY] = checked
+        self.apply_motion()
+
+    def apply_motion(self) -> None:
+        """Reduced motion: residents jump between world steps and the rain stands still."""
+        reduced = self.motion_check.isChecked()
+        for view in (self.view, *self.strip_list):
+            view.reduced_motion = reduced
+            view.update()
 
     def _desktop_toggled(self, checked: bool) -> None:
         user_setting_dict[DESKTOP_KEY] = checked
@@ -299,6 +319,12 @@ class PetHomePage(SettingPage):
         self.work.refresh_live()
         self.view.update()
 
+    @staticmethod
+    def _time_text(world) -> str:
+        current = weather(world.home, world.time_ms)
+        return (f"{clock_text(world.time_ms)} {glyph(world.home, world.time_ms)} "
+                f"{translate('pet_game_weather_' + current, current)}")
+
     def _refresh_status(self) -> None:
         world = self.service.world
         has_home = world is not None
@@ -323,5 +349,5 @@ class PetHomePage(SettingPage):
             if HIDDEN_REASON in self.service.pause_reasons:
                 state = translate("pet_home_paused_hidden", "paused while the home is hidden")
             self.status.setText(translate("pet_home_status", "Day {day} · {time} · {coins} coins · {state}")
-                                .format(day=game_day(world.time_ms), time=clock_text(world.time_ms),
+                                .format(day=game_day(world.time_ms), time=self._time_text(world),
                                         coins=world.ledger.coins, state=state))

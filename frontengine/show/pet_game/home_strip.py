@@ -22,6 +22,7 @@ from PySide6.QtWidgets import QMenu, QToolButton, QToolTip
 from frontengine.show.pet_game.captions import card_text
 from frontengine.show.pet_game.home_service import HomeService
 from frontengine.show.pet_game.home_view import HomeView
+from frontengine.show.pet_game.themes import floor_color, glyph
 from frontengine.utils.multi_language.retranslate import translate
 from frontengine.utils.pet_game.catalog import CELL_PIXELS
 from frontengine.utils.pet_game.simulation import STEP_MS
@@ -123,11 +124,14 @@ class HomeStrip(HomeView):
         self._before = self._after or {key: r.x_milli for key, r in world.residents.items()}
         self._after = {key: resident.x_milli for key, resident in world.residents.items()}
         self._stepped_at = self._clock()
+        self.button.setText("⌂ " + glyph(world.home, world.time_ms))
         self.update_mask()
 
     def resident_x_milli(self, resident) -> float:
         if self._dragging is not None and self._dragging[0] == resident.identifier:
             return self._dragging[1]
+        if self.reduced_motion:
+            return resident.x_milli
         start = self._before.get(resident.identifier, resident.x_milli)
         end = self._after.get(resident.identifier, resident.x_milli)
         share = min(1.0, max(0.0, (self._clock() - self._stepped_at) * 1000 / STEP_MS))
@@ -210,6 +214,8 @@ class HomeStrip(HomeView):
         if not self.arranging:
             return
         painter.fillRect(self.rect(), QColor(40, 120, 200, 40))
+        painter.fillRect(QRectF(0, self._floor_y() - 4, self.width(), 4),
+                         floor_color(self.world.zones[self.zone].theme))
         painter.setPen(QPen(QColor(40, 120, 200, 200), 1, Qt.PenStyle.DashLine))
         painter.drawRect(self.rect().adjusted(0, 0, -1, -1))
         zone, width = self.world.zones[self.zone], self.cell_width()
