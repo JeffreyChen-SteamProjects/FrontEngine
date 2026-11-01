@@ -21,7 +21,7 @@ HEIGHTS = {"bed": 1.3, "table": 1.6, "workstation": 1.9, "leisure": 1.4, "decora
 COLORS = {"bed": "#7c9fd6", "table": "#c99a63", "workstation": "#8fb67a", "leisure": "#d58fb8",
           "decoration": "#6fbfb3"}
 FLOOR_HEIGHT = 16
-MIN_CELL = 8.0
+MIN_CELL = 20.0          # below this, furniture labels stop being readable
 MAX_CELL = 40.0
 GLYPHS = {"sleep": "Zz", "nap": "Zz", "eat": "~", "snack": "~", "work": "✎", "play": "♪",
           "relax": "☕", "wait": "…", "wander": "", "idle": "", "drag": "✋"}
@@ -43,13 +43,16 @@ class HomeView(QWidget):
         self.zone: str | None = None
         self.selected: str | None = None
         self.preview: tuple[str, int, bool, str | None] | None = None
-        self.setMinimumHeight(150)
+        self.setFixedHeight(170)
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.setFocusPolicy(Qt.FocusPolicy.ClickFocus)
         self.setAccessibleName(translate("pet_home_view", "Home view"))
 
     def set_world(self, world: World | None, zone: str | None) -> None:
+        """A wide zone keeps readable cells and scrolls instead of shrinking."""
         self.world, self.zone = world, zone
+        cells = world.zones[zone].width_cells if world is not None and zone in world.zones else 0
+        self.setMinimumWidth(int(cells * MIN_CELL) + 2)
         self.update()
 
     def set_selected(self, identifier: str | None) -> None:
@@ -121,7 +124,7 @@ class HomeView(QWidget):
         painter.drawRoundedRect(rect, 4, 4)
         painter.setPen(QColor("#1d1d1d"))
         font = QFont(self.font())
-        font.setPointSizeF(max(6.5, min(9.0, self.cell_width() / 3.2)))
+        font.setPointSizeF(max(7.5, min(10.0, self.cell_width() / 2.5)))
         painter.setFont(font)
         label = painter.fontMetrics().elidedText(translate(definition.label_key, definition.fallback),
                                                  Qt.TextElideMode.ElideRight, int(rect.width()) - 4)

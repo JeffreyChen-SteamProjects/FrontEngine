@@ -131,3 +131,12 @@ def test_damaged_save_offers_recovery_without_overwriting(tmp_path):
         assert service.world is not None
     finally:
         page.shutdown()
+
+
+def test_a_wide_home_scrolls_instead_of_shrinking_its_cells(page):
+    from frontengine.show.pet_game.home_view import MIN_CELL
+    page.create_home()
+    cells = page.service.world.zones[page.zone].width_cells
+    assert page.view.minimumWidth() >= cells * MIN_CELL
+    page.view.resize(page.view.minimumWidth(), page.view.height())
+    assert page.view.cell_width() >= MIN_CELL

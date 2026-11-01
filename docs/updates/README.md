@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261101-04 | 2026-11-01 | Pet home on a real desktop: acceptance run and readable cells | #snapshot #pets #game #native | [2026-11](2026-11.md) |
 | U-20261101-03 | 2026-11-01 | Pet home page: play the first loop from the main window | #done #pets #game #ui | [2026-11](2026-11.md) |
 | U-20261101-02 | 2026-11-01 | Pet home service: one clock, identity leases, background saves | #done #pets #game | [2026-11](2026-11.md) |
 | U-20261101-01 | 2026-11-01 | Pet home domain layer: world, simulation, economy and saves | #done #pets #game | [2026-11](2026-11.md) |
@@ -207,6 +208,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 3 |
+| [2026-11.md](2026-11.md) | 2026-11 | 4 |
 | [2026-10.md](2026-10.md) | 2026-10 | 115 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

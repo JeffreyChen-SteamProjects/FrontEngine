@@ -12,7 +12,7 @@ from pathlib import Path
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QGuiApplication, QKeyEvent
-from PySide6.QtWidgets import QLabel, QPushButton
+from PySide6.QtWidgets import QFrame, QLabel, QPushButton, QScrollArea
 
 from frontengine.show.pet_game.home_service import HomeService
 from frontengine.show.pet_game.home_view import HomeView
@@ -46,7 +46,7 @@ class PetHomePage(SettingPage):
         self.selected_furniture: str | None = None
         self._build_status()
         self.view = HomeView()
-        self.add_body_widget(self.view)
+        self.add_body_widget(self._scroller(self.view))
         self.residents = ResidentPanel(self)
         self.layout_panel = LayoutPanel(self)
         self.shop = ShopPanel(self)
@@ -82,6 +82,18 @@ class PetHomePage(SettingPage):
         self.aside_button = tr(QPushButton(), "pet_home_set_aside", "Keep the old file and start over")
         self.aside_button.clicked.connect(self.set_aside)
         section.add_inline(self.create_button, self.run_button, self.restore_button, self.aside_button)
+
+    @staticmethod
+    def _scroller(view: HomeView) -> QScrollArea:
+        """Scroll a home wider than the page sideways; its height never changes."""
+        area = QScrollArea()
+        area.setWidget(view)
+        area.setWidgetResizable(True)
+        area.setFrameShape(QFrame.Shape.NoFrame)
+        area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        area.setFixedHeight(view.height() + area.horizontalScrollBar().sizeHint().height() + 2)
+        return area
 
     def _connect(self) -> None:
         self.service.ticked.connect(self.refresh_live)

@@ -24,6 +24,7 @@ import wave
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO))  # test this checkout, never an installed frontengine
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from hidden_desktop import is_child, run_on_hidden_desktop  # noqa: E402
 
@@ -121,13 +122,21 @@ video_page.choose_video = lambda *a, **k: str(VIDEO)
 sound_page.choose_wav_sound = lambda *a, **k: str(fixtures / 'quiet.wav')
 pet_page.choose_pet = lambda *a, **k: str(fixtures / 'picture.png')
 
-window = FrontEngineMainUI(main_app=app, debug=False, show_system_tray_ray=False)
+try:
+    window = FrontEngineMainUI(main_app=app, debug=False, show_system_tray_ray=False)
+except BaseException:
+    # The excepthook above only records; without this a startup failure leaves no trace.
+    (OUTPUT / 'result.json').write_text(json.dumps({'startup_failed': traceback.format_exc(), 'events': events},
+                                                   indent=1, ensure_ascii=False), encoding='utf-8')
+    raise
 window.show()
 results = []
 
 
 def overlays():
-    return [w for w in app.topLevelWidgets() if w.isVisible() and w is not window]
+    # Pet speech bubbles are their own short-lived windows; counting them made unrelated steps flaky.
+    return [w for w in app.topLevelWidgets()
+            if w.isVisible() and w is not window and type(w).__name__ != 'SpeechBubble']
 
 
 def screenshot(name):
@@ -219,6 +228,39 @@ def scene_applied():
 
 
 W = window
+home_start = {}
+
+
+def pet_home_setup():
+    page = W.pet_home_ui
+    W.sidebar.select_page_id('tab_pet_home_text')
+    page.create_home()
+    page.residents.new_pet()
+    panel = page.layout_panel
+    for definition, cell in (('bed_basic', 2), ('table_basic', 8), ('desk_basic', 14)):
+        panel.storage.setCurrentIndex(panel.storage.findData(definition))
+        panel.cell.setValue(cell)
+        panel.place()
+    page.work.assign()
+    world = page.service.world
+    resident = next(iter(world.residents.values()))
+    home_start.update(time=world.time_ms, x=resident.x_milli)
+    assert page.service.running, 'home did not start'
+    return {'furniture': len(world.furniture), 'tasks': len(world.tasks), 'coins': world.ledger.coins}
+
+
+def pet_home_running():
+    page = W.pet_home_ui
+    W.sidebar.select_page_id('tab_pet_home_text')
+    app.processEvents()
+    screenshot('pet-home-running')
+    world = page.service.world
+    resident = next(iter(world.residents.values()))
+    task = next(iter(world.tasks.values()), None)
+    assert world.time_ms > home_start['time'], 'home time did not advance'
+    assert resident.x_milli != home_start['x'], 'resident never moved'
+    return {'elapsed_ms': world.time_ms - home_start['time'], 'activity': resident.activity and resident.activity.kind,
+            'progress_ms': task and task.progress_ms, 'status': page.status.text()}
 
 
 def first_monitor(page):
@@ -228,6 +270,7 @@ def first_monitor(page):
 
 
 ACTIONS = [
+    ('pet home: create, furnish and give work', pet_home_setup, 0),
     ('image: choose then start', lambda: (W.image_setting_ui.choose_and_copy_file_to_cwd_image_dir_then_play(),
                                           first_monitor(W.image_setting_ui), W.image_setting_ui.start_play_image()), 1),
     ('gif: choose then start', lambda: (W.gif_setting_ui.choose_and_copy_file_to_cwd_gif_dir_then_play(),
@@ -246,6 +289,7 @@ ACTIONS = [
     ('pet: picture pet', lambda: (W.pet_setting_ui.choose_and_play(), W.pet_setting_ui.start_play_pet()), 1),
     ('pet: built-in character', pet_builtin, 1),
     ('pet: is moving', pet_moved, 0),
+    ('pet home: time passes and the resident works', pet_home_running, 0),
     ('wallpaper: choose folder and show', lambda: (W.wallpaper_setting_ui.choose_folder(),
                                                    W.wallpaper_setting_ui.toggle_wallpaper()), 1),
     ('widgets: spectrum', lambda: W.widgets_setting_ui.toggle_spectrum(), 1),
@@ -314,7 +358,8 @@ def finish():
     screenshot('final')
     leftovers = sorted(type(w).__name__ for w in overlays())
     closed = window.close()
-    report = {'results': results, 'events': events, 'leftover_before_close': leftovers, 'window_closed': closed}
+    report = {'results': results, 'events': events, 'leftover_before_close': leftovers, 'window_closed': closed,
+              'pet_home_saved': (WORK / 'pet-home.json').is_file()}
     (OUTPUT / 'result.json').write_text(json.dumps(report, indent=1, ensure_ascii=False), encoding='utf-8')
     QTimer.singleShot(500, app.quit)
 
