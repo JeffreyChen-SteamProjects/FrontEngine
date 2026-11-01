@@ -15,6 +15,12 @@ planning so you resume where the last session stopped.
   `.claude/settings.local.json` stays ignored.
 - Rules and standing knowledge live in this file ("Deliberately removed" and
   "Environment notes" below), never in `progress.md`.
+- **Real-device acceptance goes first.** Every item that needs a real machine,
+  a person or hardware to verify (native windows, DPI, monitors, recorded play
+  sessions, long real-time runs, packaging on a clean machine) lives in the
+  `## 實機驗收待辦` section at the very top of `progress.md`, above all
+  implementation to-dos. Plan sections never keep their own acceptance
+  paragraphs; when a new one comes up, add it to that top section instead.
 
 ## Architecture
 
