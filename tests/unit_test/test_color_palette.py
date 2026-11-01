@@ -102,8 +102,8 @@ def test_tools_collection_and_edit_dialog_share_persistent_model(monkeypatch):
     page.open_palette()
     dialog = page.palette_dialog
     assert dialog.table.rowCount() == 1
-    from qt_material import apply_stylesheet
-    apply_stylesheet(dialog, theme="dark_amber.xml")
+    from frontengine.ui.style.app_style import apply_app_style
+    apply_app_style(dialog, "dark")
     QCoreApplication.processEvents()
     rectangle = dialog.table.visualItemRect(dialog.table.item(0, 2))
     pixel = dialog.table.viewport().grab().toImage().pixelColor(rectangle.right() - 20, rectangle.center().y())

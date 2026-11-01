@@ -1,6 +1,10 @@
 Voreinstellungen und Einstellungen
 ----------------------------------
 
+Menü Funktionen
+
+**Funktionen**, das erste Menü, enthält alle Werkzeuge nach Zweck gruppiert (Medien, Szenen und Hintergrund, Widgets, Fokus und Augenschutz, Präsentieren, Aufnahme, Haustiere, Automatisierung, Inhalte und Workshop, Overlay-Steuerung, Einstellungen und Hilfe) sowie *Funktionen suchen* (Strg+K), *Angeheftet* und *Zuletzt verwendet*. Die Einträge öffnen dieselben Seiten und führen dieselben Befehle aus wie bisher, daher funktionieren Tastenkürzel, Voreinstellungen, Regeln, die Handy-Fernbedienung und MIDI weiter; die Menüs Voreinstellungen, Einstellungen, Sprache und Hilfe erscheinen unverändert darin. Gruppen in der Seitenleiste klappen mit einem Klick auf ihre Überschrift zu und bleiben zu. Das Tray-Menü bietet *Haustier-Zuhause öffnen*. Jede Seite hat in der Seitenleiste ein Symbol; das Suchfeld oben (Strg+K) öffnet die Befehle. Die Menüs der Menüleiste heißen Hilfe und Dokumentation. Auf einem breiten Fenster bleiben die Karten der Einstellungsseiten in einer zentrierten Spalte; das Haustier-Zuhause und der Szeneneditor nutzen die volle Breite.
+
 Menü „Voreinstellungen“
 
 * Voreinstellung speichern… - alle Seiteneinstellungen unter einem Namen.
@@ -20,6 +24,7 @@ Menü „Einstellungen“
   Bildschirm einfrieren, die Kürzelliste sowie Medien abspielen/pausieren,
   nächster und vorheriger Titel sowie das Verschieben des Vordergrundfensters
   auf den nächsten Bildschirm unter Beibehaltung seiner Proportionen.
+* Design - wie das System, hell oder dunkel, im eigenen FrontEngine-Design aus Tinte, Papier und Orange.
 * Tag-/Nacht-Design nach Zeitplan - tagsüber hell, nachts dunkel.
 * Mit dem System starten - FrontEngine bei der Anmeldung starten.
 * Letzte Sitzung wiederherstellen - wieder öffnen, was zuletzt zu sehen war.

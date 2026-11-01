@@ -1,4 +1,4 @@
-GIF 和 WEBP 頁面
+GIF 和 WebP 頁面
 ----------------
 
 .. image:: ../image/gif_and_webp/gif_and_webp.png

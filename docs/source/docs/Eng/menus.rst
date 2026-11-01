@@ -1,6 +1,10 @@
 Presets and Settings
 --------------------
 
+Features menu
+
+**Features**, the first menu, holds every tool grouped by purpose (media, scenes and wallpaper, widgets, focus and eye care, presenting, capture, pets, automation, content and Workshop, overlay control, settings and help), plus *Search features* (Ctrl+K), *Pinned* and *Recent*. Entries open the same pages and run the same commands as before, so hotkeys, presets, rules, the phone remote and MIDI keep working; the Presets, Settings, Language and Help menus appear inside it as they are. Sidebar groups fold with a click on their heading and stay folded. The tray menu gains *Open Pet home*. Every page has an icon in the sidebar; the search box at its top (Ctrl+K) opens Commands. The menu bar's menus are named Help and Docs. On a wide window the setting pages keep their cards in one centred column; the pet home and the scene editor use the full width.
+
 Presets menu
 
 * Save preset... - remember everything the pages are set to, under a name.
@@ -20,6 +24,7 @@ Settings menu
   opacity up and down, next dashboard page, lock, freeze the screen, the
   shortcut list, media play/pause, next and previous track, and moving the
   foreground window to the next monitor with its proportions kept.
+* Theme - follow the system, light or dark, in FrontEngine's own ink, paper and orange design.
 * Scheduled day/night theme - a light theme by day and a dark one at night.
 * Start with the system - launch FrontEngine at login.
 * Restore last session - reopen what was on screen last time.

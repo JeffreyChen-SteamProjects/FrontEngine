@@ -1,0 +1,62 @@
+{
+ "version": 1,
+ "greetings": [
+  "MOCHI!"
+ ],
+ "frontengine_actions": {
+  "greet": {
+   "motion": "wave",
+   "expression": "happy"
+  },
+  "peer_greet": {
+   "motion": "wave"
+  },
+  "pet": {
+   "motion": "pet",
+   "expression": "happy"
+  },
+  "feed": {
+   "motion": "eat"
+  },
+  "groom": {
+   "motion": "groom"
+  },
+  "play": {
+   "motion": "play"
+  },
+  "celebrate": {
+   "motion": "celebrate",
+   "expression": "happy"
+  },
+  "outfit_show": {
+   "motion": "celebrate",
+   "expression": "happy"
+  },
+  "catch": {
+   "motion": "celebrate"
+  },
+  "sleep": {
+   "motion": "nap",
+   "expression": "sleepy"
+  },
+  "sleep_in": {
+   "motion": "nap",
+   "expression": "sleepy"
+  },
+  "wake": {
+   "motion": "idle"
+  },
+  "walk": {
+   "motion": "walk"
+  },
+  "sit": {
+   "motion": "sit"
+  },
+  "food_like": {
+   "expression": "happy"
+  },
+  "food_dislike": {
+   "expression": "surprised"
+  }
+ }
+}

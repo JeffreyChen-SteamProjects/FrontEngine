@@ -58,6 +58,27 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261101-21 | 2026-11-01 | Patch setuptools and certifi in the publish lock | #bugfix #deps #security #ci | [2026-11](2026-11.md) |
+| U-20261101-20 | 2026-11-01 | The home runs itself, with fewer settings and a picture for everything | #done #pets #game #ui #art | [2026-11](2026-11.md) |
+| U-20261101-19 | 2026-11-01 | Page-by-page review of the redesign and new documentation screenshots | #done #ui #design #docs | [2026-11](2026-11.md) |
+| U-20261101-18 | 2026-11-01 | The pet home page becomes a game screen | #done #ui #design #pets #game | [2026-11](2026-11.md) |
+| U-20261101-17 | 2026-11-01 | Setting pages in one centred column; calm headings, even controls | #done #ui #design | [2026-11](2026-11.md) |
+| U-20261101-16 | 2026-11-01 | Redesigned window frame: sidebar icons, brand mark, search entry | #done #ui #design | [2026-11](2026-11.md) |
+| U-20261101-15 | 2026-11-01 | Own design system replaces qt-material | #done #ui #design | [2026-11](2026-11.md) |
+| U-20261101-14 | 2026-11-01 | Built-in characters get drawn home poses | #done #pets #game #art #animation | [2026-11](2026-11.md) |
+| U-20261101-13 | 2026-11-01 | Furniture drawn as Blender-rendered pictures per theme | #done #pets #game #art | [2026-11](2026-11.md) |
+| U-20261101-12 | 2026-11-01 | Residents appear as their own characters | #done #pets #game #animation | [2026-11](2026-11.md) |
+| U-20261101-11 | 2026-11-01 | Home modes, a quiet inbox and the performance measurements | #done #pets #game #performance | [2026-11](2026-11.md) |
+| U-20261101-10 | 2026-11-01 | Days, nights, weather, themes and twelve life moments | #done #pets #game #accessibility | [2026-11](2026-11.md) |
+| U-20261101-09 | 2026-11-01 | Goals, commissions, wishes, life moments and the home celebration | #done #pets #game #migration | [2026-11](2026-11.md) |
+| U-20261101-08 | 2026-11-01 | Pets live together: comfort, company, friendships and personality | #done #pets #game #migration | [2026-11](2026-11.md) |
+| U-20261101-07 | 2026-11-01 | Three professions with materials, goods and a backpack | #done #pets #game #economy | [2026-11](2026-11.md) |
+| U-20261101-06 | 2026-11-01 | Features menu: every tool one click from the pet home, with a measured inventory | #done #ui #game | [2026-11](2026-11.md) |
+| U-20261101-05 | 2026-11-01 | The pet home on the desktop: click-through strip, layer choice, smooth drawing | #done #pets #game #native | [2026-11](2026-11.md) |
+| U-20261101-04 | 2026-11-01 | Pet home on a real desktop: acceptance run and readable cells | #snapshot #pets #game #native | [2026-11](2026-11.md) |
+| U-20261101-03 | 2026-11-01 | Pet home page: play the first loop from the main window | #done #pets #game #ui | [2026-11](2026-11.md) |
+| U-20261101-02 | 2026-11-01 | Pet home service: one clock, identity leases, background saves | #done #pets #game | [2026-11](2026-11.md) |
+| U-20261101-01 | 2026-11-01 | Pet home domain layer: world, simulation, economy and saves | #done #pets #game | [2026-11](2026-11.md) |
 | U-20261029-47 | 2026-10-29 | Make the built-in walk and climb read as real steps at pet size | #done #pets #animation | [2026-10](2026-10.md) |
 | U-20261029-48 | 2026-10-29 | Show animated pets moving on the GPU path and walk MOCHI with generated step frames | #done #pets #animation #compositor | [2026-10](2026-10.md) |
 | U-20261029-49 | 2026-10-29 | Paint desktop pets through Qt so their frames change while they move | #done #pets #animation #compositor | [2026-10](2026-10.md) |
@@ -204,5 +225,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-10.md](2026-10.md) | 2026-10 | 115 |
+| [2026-11.md](2026-11.md) | 2026-11 | 21 |
+| [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

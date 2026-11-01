@@ -1,6 +1,10 @@
 Preimpostazioni e impostazioni
 ------------------------------
 
+Menu Funzioni
+
+**Funzioni**, il primo menu, raccoglie tutti gli strumenti per scopo (media, scene e sfondo, widget, concentrazione e cura degli occhi, presentazioni, acquisizione, mascotte, automazione, contenuti e Workshop, controllo delle sovrapposizioni, impostazioni e aiuto), più *Cerca funzioni* (Ctrl+K), *Fissate* e *Recenti*. Le voci aprono le stesse pagine ed eseguono gli stessi comandi di prima, quindi scorciatoie, preset, regole, telecomando dal telefono e MIDI continuano a funzionare; i menu Preset, Impostazioni, Lingua e Aiuto vi compaiono così come sono. I gruppi della barra laterale si chiudono con un clic sull’intestazione e restano chiusi. Il menu dell’area di notifica offre *Apri la casa delle mascotte*. Ogni pagina ha un'icona nella barra laterale; la casella di ricerca in alto (Ctrl+K) apre i comandi. I menu della barra si chiamano Aiuto e Documentazione. Su una finestra larga le schede delle pagine di impostazione restano in una colonna centrata; la casa degli animali e l'editor di scene usano tutta la larghezza.
+
 Menu Preimpostazioni
 
 * Salva preimpostazione… - le impostazioni di tutte le pagine, sotto un nome.
@@ -20,6 +24,7 @@ Menu Impostazioni
   blocco, fermo immagine, elenco scorciatoie e riproduci/pausa, traccia
   successiva e precedente, e lo spostamento della finestra in primo piano sullo
   schermo successivo mantenendone le proporzioni.
+* Tema - segui il sistema, chiaro o scuro, nel design di FrontEngine in inchiostro, carta e arancione.
 * Tema giorno/notte programmato - chiaro di giorno, scuro di notte.
 * Avvia con il sistema - aprire FrontEngine all'accesso.
 * Ripristina l'ultima sessione - riaprire ciò che c'era sullo schermo.

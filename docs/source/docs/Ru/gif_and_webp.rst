@@ -1,4 +1,4 @@
-GIF и WEBP
+GIF и WebP
 ----------
 
 .. image:: ../image/gif_and_webp/gif_and_webp.png

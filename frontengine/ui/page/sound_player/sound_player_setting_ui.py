@@ -70,9 +70,14 @@ class SoundPlayerSettingUI(SettingPage):
         # 音效與音樂是兩件事，各自有檔案與就緒狀態，所以分成兩列而不是混在一起
         # A sound effect and a piece of music are separate errands with separate
         # files and readiness, so they get a row each rather than one pile.
+        # The button first, its readiness beside it: the status is not a field label.
         source = self.add_section("section_source", "Source")
-        source.add_row(self.wav_ready_label, self.choose_wav_file_button)
-        source.add_row(self.player_ready_label, self.choose_player_file_button)
+        for label in (self.wav_ready_label, self.player_ready_label):
+            label.setObjectName("pageStatus")
+            label.setMinimumHeight(32)
+            label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+        source.add_inline(self.choose_wav_file_button, self.wav_ready_label)
+        source.add_inline(self.choose_player_file_button, self.player_ready_label)
 
         options = self.add_section("section_options", "Options")
         options.add_slider_row(

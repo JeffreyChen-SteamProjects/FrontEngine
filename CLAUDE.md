@@ -1,6 +1,6 @@
 # CLAUDE.md - FrontEngine
 
-PySide6 desktop overlay app (Python 3.10+, qt-material, PyOpenGL, numpy).
+PySide6 desktop overlay app (Python 3.10+, PyOpenGL, numpy; own design system, no qt-material).
 Published on PyPI as `frontengine` (stable, `stable.toml`) and `frontengine_dev`
 (dev, `pyproject.toml`). What it does and how to run it: `README.md`.
 
@@ -104,8 +104,9 @@ checks the seven trees stay page-consistent — details under "Environment notes
   分頁列了），各分頁繼承 `ui/page/layout_kit.py` 的 `SettingPage`，用
   `add_section()` / `add_row()` / `add_slider_row()` 描述欄位。不要再回去寫
   `QGridLayout(self)` 加格子座標——那正是滑桿被拉到 1900px 寬的原因。
-  樣式在 `ui/style/app_style.py`，顏色一律從 qt-material 色票算出來；
-  `apply_stylesheet()` 會整份覆蓋樣式表，所以自訂樣式一定要接在它後面。
+  樣式是自有設計系統：顏色與尺寸只在 `ui/style/tokens.py`（亮／暗兩組色票），
+  `ui/style/app_style.py` 由它產生整份樣式表與 QPalette，樣式表裡不寫色碼
+  （`test_design_system.py` 會擋）。勾選、箭頭等圖示是 `ui/style/icons/` 的 SVG。
 - 測試：headless（`QT_QPA_PLATFORM=offscreen`），用 `py` 不用 `python`。
   repo 內：`py -m pytest tests/ -q`。
 - **改 UI 後要一併更新 docs/**。Sphinx 文件樹有七種語言（Eng / Zh / ZhCn / De /

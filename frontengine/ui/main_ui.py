@@ -5,15 +5,16 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Type
 
 from PySide6.QtCore import QByteArray, QTimer
-from PySide6.QtGui import QIcon, Qt, QAction, QKeySequence
+from PySide6.QtGui import QGuiApplication, QIcon, Qt, QAction, QKeySequence
 from PySide6.QtWidgets import (
     QMainWindow, QApplication, QGridLayout, QHBoxLayout, QStackedWidget, QStyle,
-    QMenuBar, QWidget, QMessageBox, QLabel, QPushButton, QVBoxLayout,
+    QMenuBar, QWidget, QMessageBox, QVBoxLayout,
 )
-from qt_material import apply_stylesheet
 
 from frontengine.ui.nav.sidebar import NavigationSidebar
+from frontengine.ui.nav.shell import BrandMark, CommandSearchButton
 from frontengine.ui.style.app_style import apply_app_style
+from frontengine.ui.style.tokens import normalise_theme
 
 from frontengine.show.shortcuts.shortcut_sheet import build_sheet
 from frontengine.show.toast.toast_widget import show_toast
@@ -32,6 +33,8 @@ from frontengine.ui.page.gif.gif_setting_ui import GIFSettingUI
 from frontengine.ui.page.image.image_setting_ui import ImageSettingUI
 from frontengine.ui.page.particle.particle_setting_ui import ParticleSettingUI
 from frontengine.ui.page.pet.pet_setting_ui import PetSettingUI
+from frontengine.ui.page.pet_game.home_page import PetHomePage
+from frontengine.ui.menu.features_menu import build_features_menu, open_page
 from frontengine.ui.page.scene_setting.scene_setting_ui import SceneSettingUI
 from frontengine.ui.page.presentation.presentation_setting_ui import PresentationSettingUI
 from frontengine.ui.page.screen_care.screen_care_setting_ui import ScreenCareSettingUI
@@ -169,12 +172,10 @@ class FrontEngineMainUI(QMainWindow):
         navigation_layout = QVBoxLayout(navigation)
         navigation_layout.setContentsMargins(12, 20, 12, 12)
         navigation_layout.setSpacing(14)
-        brand = QLabel("FrontEngine")
-        brand.setObjectName("appBrand")
-        navigation_layout.addWidget(brand)
-        self.command_search_button = QPushButton()
-        self.command_search_button.setObjectName("commandSearch")
-        retranslator.bind(self.command_search_button, "command_palette_title")
+        self.brand = BrandMark()
+        navigation_layout.addWidget(self.brand)
+        self.command_search_button = CommandSearchButton()
+        retranslator.bind(self.command_search_button.caption, "command_palette_title")
         retranslator.bind(self.command_search_button, "command_palette_search", setter="setToolTip")
         self.command_search_button.clicked.connect(self.open_command_palette)
         navigation_layout.addWidget(self.command_search_button)
@@ -194,6 +195,7 @@ class FrontEngineMainUI(QMainWindow):
         self.scene_setting_ui = SceneSettingUI()
         self.particle_setting_ui = ParticleSettingUI()
         self.pet_setting_ui = PetSettingUI()
+        self.pet_home_ui = PetHomePage()
         self.screen_care_setting_ui = ScreenCareSettingUI()
         self.presentation_setting_ui = PresentationSettingUI()
         self.wallpaper_setting_ui = WallpaperSettingUI()
@@ -216,6 +218,8 @@ class FrontEngineMainUI(QMainWindow):
             pet_setting_ui=self.pet_setting_ui,
         )
         self._register_extra_overlays()
+        self.control_center_ui.register_overlay_source(lambda: self.pet_home_ui.strip_list)
+        self.pet_home_ui.open_requested.connect(self._open_pet_home)
         self.control_center_ui.performance_changed.connect(self.scene_setting_ui.apply_performance_policy)
         self.control_center_ui.overlay_visibility_changed.connect(self.scene_setting_ui.actions.set_group_hidden)
         self.action_registry = self._build_action_registry()
@@ -251,6 +255,7 @@ class FrontEngineMainUI(QMainWindow):
         build_preset_menu(self)
         build_settings_menu(self)
         self._setup_command_palette()
+        build_features_menu(self)
 
         # 致命退出設定
         # Critical exit setting
@@ -364,8 +369,14 @@ class FrontEngineMainUI(QMainWindow):
         self.theme_schedule_service = ThemeScheduleService(
             config_provider=lambda: user_setting_dict.get("theme_schedule", {})
         )
-        self.theme_schedule_service.theme_changed.connect(self._apply_theme)
+        self._scheduled_theme: Optional[str] = None
+        self.theme_schedule_service.theme_changed.connect(self._apply_scheduled_theme)
         self.theme_schedule_service.start()
+        # "Follow system" re-styles when the operating system switches light / dark.
+        try:
+            QGuiApplication.styleHints().colorSchemeChanged.connect(self._on_system_scheme_changed)
+        except AttributeError:   # Qt before 6.5
+            pass
 
         # 每天在指定時間自動套用預設集 / Scheduled daily preset apply
         self.preset_schedule_service = PresetScheduleService(
@@ -422,6 +433,13 @@ class FrontEngineMainUI(QMainWindow):
             self.debug_timer.setInterval(10000)
             self.debug_timer.timeout.connect(self.debug_close)
             self.debug_timer.start()
+
+    def _open_pet_home(self) -> None:
+        """The desktop home's button brings the main window back on the Pet home page."""
+        self.showNormal()
+        self.raise_()
+        self.activateWindow()
+        self.sidebar.select_page_id("tab_pet_home_text")
 
     def _register_extra_overlays(self) -> None:
         """
@@ -573,37 +591,40 @@ class FrontEngineMainUI(QMainWindow):
         self.command_pages = []
         self.plugin_pages = {}
         groups = [
+            ("nav_group_home", "Home", [
+                (self.pet_home_ui, "tab_pet_home_text", "home"),
+            ]),
             ("nav_group_on_screen", "On screen", [
-                (self.video_setting_ui, "tab_video_text"),
-                (self.image_setting_ui, "tab_image_text"),
-                (self.web_setting_ui, "tab_web_text"),
-                (self.gif_setting_ui, "tab_gif_text"),
-                (self.text_setting_ui, "tab_text_text"),
-                (self.sound_player_setting_ui, "tab_sound_text"),
-                (self.scene_setting_ui, "tab_scene_text"),
-                (self.particle_setting_ui, "tab_particle_text"),
+                (self.video_setting_ui, "tab_video_text", "video"),
+                (self.image_setting_ui, "tab_image_text", "image"),
+                (self.web_setting_ui, "tab_web_text", "web"),
+                (self.gif_setting_ui, "tab_gif_text", "gif"),
+                (self.text_setting_ui, "tab_text_text", "text"),
+                (self.sound_player_setting_ui, "tab_sound_text", "sound"),
+                (self.scene_setting_ui, "tab_scene_text", "scene"),
+                (self.particle_setting_ui, "tab_particle_text", "particle"),
             ]),
             ("nav_group_desktop", "Desktop", [
-                (self.pet_setting_ui, "tab_pet_text"),
-                (self.wallpaper_setting_ui, "tab_wallpaper_text"),
-                (self.widgets_setting_ui, "tab_widgets_text"),
+                (self.pet_setting_ui, "tab_pet_text", "pet"),
+                (self.wallpaper_setting_ui, "tab_wallpaper_text", "wallpaper"),
+                (self.widgets_setting_ui, "tab_widgets_text", "widgets"),
             ]),
             ("nav_group_work", "Work", [
-                (self.focus_setting_ui, "tab_focus_text"),
-                (self.screen_care_setting_ui, "tab_screen_care_text"),
-                (self.presentation_setting_ui, "tab_presentation_text"),
-                (self.tools_setting_ui, "tab_tools_text"),
+                (self.focus_setting_ui, "tab_focus_text", "focus"),
+                (self.screen_care_setting_ui, "tab_screen_care_text", "eye"),
+                (self.presentation_setting_ui, "tab_presentation_text", "present"),
+                (self.tools_setting_ui, "tab_tools_text", "tools"),
             ]),
             ("nav_group_control", "Control", [
-                (self.control_center_ui, "tab_control_center_text"),
+                (self.control_center_ui, "tab_control_center_text", "control"),
             ]),
         ]
 
         for group_key, group_fallback, entries in groups:
             self.sidebar.add_group(group_key, group_fallback)
-            for widget, lang_key in entries:
+            for widget, lang_key, icon_name in entries:
                 index = self.page_stack.addWidget(widget)
-                self.sidebar.add_page(lang_key, index)
+                self.sidebar.add_page(lang_key, index, icon_name=icon_name)
                 self.command_pages.append((widget, lang_key, index))
 
         # 外掛註冊的分頁自成一組，使用者才看得出哪些不是內建的
@@ -615,6 +636,13 @@ class FrontEngineMainUI(QMainWindow):
                 self._add_plugin_tab(widget_name, widget)
 
         self.sidebar.select_page(0)
+        for group in user_setting_dict.get("sidebar_collapsed_groups") or []:
+            if isinstance(group, str):
+                self.sidebar.set_group_collapsed(group, True)
+        self.sidebar.collapsed_changed.connect(self._remember_collapsed_groups)
+
+    def _remember_collapsed_groups(self, groups: list) -> None:
+        user_setting_dict["sidebar_collapsed_groups"] = groups
 
     def _add_plugin_tab(self, name: str, factory: type) -> None:
         from frontengine.ui.plugin_pages import attach_page
@@ -654,11 +682,9 @@ class FrontEngineMainUI(QMainWindow):
     def startup_setting(self) -> None:
         """啟動時套用樣式並還原視窗大小/位置（無記錄時最大化） / Apply stylesheet
         and restore the saved window geometry (maximize when none is stored)."""
-        theme = user_setting_dict.get("theme")
-        apply_stylesheet(self, theme=theme)
-        # qt-material 會把樣式表整份寫掉，所以自訂樣式一定要接在它後面
-        # apply_stylesheet replaces the whole stylesheet, so ours goes after it
-        apply_app_style(self, theme)
+        # Legacy qt-material names (dark_amber.xml, ...) become light / dark.
+        user_setting_dict["theme"] = normalise_theme(user_setting_dict.get("theme"))
+        apply_app_style(self, self.active_theme(), application=True)  # a running day/night schedule wins
         # 還原上次選的畫質檔位（設定檔一直有存，只是從來沒有人讀回來）
         # Restore the quality tier chosen last time: it was always written to the
         # settings file, just never read back.
@@ -711,14 +737,25 @@ class FrontEngineMainUI(QMainWindow):
         return applied
 
     def _apply_theme(self, theme: str) -> None:
-        """套用主題並記住 / Apply a theme and remember it."""
+        """Apply the theme the user chose (system / light / dark) and remember it."""
+        theme = normalise_theme(theme)
         front_engine_logger.info(f"[FrontEngineMainUI] _apply_theme | theme={theme}")
-        try:
-            apply_stylesheet(self, theme=theme)
-            apply_app_style(self, theme)
-            user_setting_dict["theme"] = theme
-        except Exception as error:
-            front_engine_logger.warning(f"[FrontEngineMainUI] apply theme failed: {error!r}")
+        user_setting_dict["theme"] = theme
+        self._scheduled_theme = None
+        apply_app_style(self, theme, application=True)
+
+    def _apply_scheduled_theme(self, theme: str) -> None:
+        """The day/night schedule's choice: shown, but the user's own theme setting stays as it was."""
+        self._scheduled_theme = normalise_theme(theme)
+        apply_app_style(self, self._scheduled_theme, application=True)
+
+    def active_theme(self) -> str:
+        """The theme name on screen now: the schedule's while it runs, else the user's choice."""
+        return self._scheduled_theme or normalise_theme(user_setting_dict.get("theme"))
+
+    def _on_system_scheme_changed(self, _scheme=None) -> None:
+        if self.active_theme() == "system":
+            apply_app_style(self, "system", application=True)
 
     def closeEvent(self, event) -> None:
         """關閉事件：若系統托盤可用則隱藏視窗 / Close event: hide window if system tray is available"""
@@ -799,7 +836,7 @@ class FrontEngineMainUI(QMainWindow):
         for _widget, key, index in self.command_pages:
             self.action_registry.register(Action(
                 "page." + key, key, self.sidebar.page_label(index),
-                lambda _value, page=index: self._open_command_page(page)))
+                lambda _value, page=key: open_page(self, page)))
         for identifier, key, fallback, callback in (
             ("capture_area", "tools_capture_start", "Capture area", self.tools_setting_ui.start_capture),
             ("palette", "palette_title", "Color palette", self.tools_setting_ui.open_palette),
@@ -985,6 +1022,7 @@ class FrontEngineMainUI(QMainWindow):
         front_engine_logger.info(
             f"[MainUI] screen sharing={sharing}" + (f" | {match}" if match else ""))
         self.control_center_ui.set_hide_from_capture(sharing)
+        self.pet_home_ui.sharing_changed(sharing)
         if sharing:
             self._last_toast = show_toast(
                 language_wrapper.language_word_dict.get(
@@ -1237,6 +1275,11 @@ class FrontEngineMainUI(QMainWindow):
         if pet_page is not None:
             pet_page.stop_focus_session()
         if not self._flush_pet_profiles():
+            return False
+        home = getattr(self, 'pet_home_ui', None)
+        if home is not None and not home.shutdown():
+            self.statusBar().showMessage(translate('pet_home_save_failed_exit',
+                                                   'The pet home could not be saved; FrontEngine stays open.'))
             return False
         self._shutdown_done = True
         front_engine_logger.info("[FrontEngineMainUI] shutdown")

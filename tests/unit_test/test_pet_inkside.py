@@ -10,7 +10,7 @@ from frontengine.show.pet.asset_library import PetAssetLibrary
 from frontengine.show.pet.inkside.assemble import build_character, build_garment, garment_identifier
 from frontengine.show.pet.inkside.cast import TEMPLATES
 from frontengine.show.pet.inkside.garments import GARMENTS, OUTFITS
-from frontengine.show.pet.inkside.library import install_builtin
+from frontengine.show.pet.inkside.library import install_builtin, VERSION
 from frontengine.show.pet.layered_renderer import LayeredRenderer
 from frontengine.utils.pet_pack.layered import ACTIONS, SPRITE_ACTIONS, load_layered_asset, validate_outfit
 
@@ -97,7 +97,7 @@ def test_garments_move_with_the_pose_and_cover_the_body(built):
 def test_palette_regions_recolor_only_their_own_pixels(built):
     character, _ = built['inkside-mochi']
     plain = _alpha(LayeredRenderer(character).render('idle', 0))
-    recolored = LayeredRenderer(character, colors={'inkside-mochi@1': {'coat': '#00a080'}}).render('idle', 0)
+    recolored = LayeredRenderer(character, colors={f'inkside-mochi@{VERSION}': {'coat': '#00a080'}}).render('idle', 0)
     original = LayeredRenderer(character).render('idle', 0)
     assert recolored != original
     assert numpy.array_equal(_alpha(recolored), plain)
@@ -176,17 +176,17 @@ def test_wardrobe_installs_dresses_and_applies_a_builtin_character(tmp_path):
         assert not dialog.builtin_button.isEnabled() and not dialog.install_button.isEnabled()
         _finish_jobs()
         assert dialog._install_job is None and dialog.builtin_button.isEnabled()
-        character = {'id': 'inkside-mochi', 'version': '1'}
+        character = {'id': 'inkside-mochi', 'version': VERSION}
         dialog.character.setCurrentIndex(dialog.character.findData(character))
         dialog._choose_character()
         for slot, piece in (('head', 'work-cap'), ('body', 'work-jacket')):
             control = dialog.slots[slot]
-            control.setCurrentIndex(control.findData({'id': f'inkside-mochi-{piece}', 'version': '1'}))
+            control.setCurrentIndex(control.findData({'id': f'inkside-mochi-{piece}', 'version': VERSION}))
             dialog._choose_slot(slot)
         assert dialog.apply_changes()
         appearance = profiles.get(record['id'])['appearance']
         assert appearance['character'] == character
-        assert appearance['equipped']['head'] == {'id': 'inkside-mochi-work-cap', 'version': '1'}
+        assert appearance['equipped']['head'] == {'id': 'inkside-mochi-work-cap', 'version': VERSION}
         assert dialog.preview.pixmap() is not None
     finally:
         dialog.close()
@@ -223,7 +223,7 @@ def test_builtin_part_and_garment_labels_follow_the_language(tmp_path):
     original = language_wrapper.language
     dialog = PetWardrobeDialog(profiles, record['id'], library=library)
     try:
-        dialog.character.setCurrentIndex(dialog.character.findData({'id': 'inkside-moss', 'version': '1'}))
+        dialog.character.setCurrentIndex(dialog.character.findData({'id': 'inkside-moss', 'version': VERSION}))
         dialog._choose_character()
         dialog.variant_group.setCurrentIndex(dialog.variant_group.findData('eyes'))
         dialog.variant_choice.setCurrentIndex(dialog.variant_choice.findData('half'))
@@ -235,7 +235,7 @@ def test_builtin_part_and_garment_labels_follow_the_language(tmp_path):
             assert dialog.variant_group.currentText() == eyes
             assert dialog.variant_choice.currentText() == half
             head = dialog.slots['head']
-            sun_hat = head.findData({'id': 'inkside-moss-sun-hat', 'version': '1'})
+            sun_hat = head.findData({'id': 'inkside-moss-sun-hat', 'version': VERSION})
             assert head.itemText(sun_hat).startswith('SEED KEEPER · ' + hat)
         assert label('third-party-pack', 'Eyes') == 'Eyes'
         assert asset_label(type('Asset', (), {'identifier': 'other', 'name': 'A · B'})()) == 'A · B'

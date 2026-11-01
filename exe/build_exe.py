@@ -38,7 +38,7 @@ OUTPUT_DIR = PROJECT_ROOT / "build" / "nuitka"
 # import then fails with ImportError (swallowed), and the second attempt at the
 # half-initialised Cython module aborts start-up with
 # KeyError('__reduce_cython__').
-DYNAMIC_PACKAGES = ("frontengine", "qt_material", "pynput", "OpenGL",
+DYNAMIC_PACKAGES = ("frontengine", "pynput", "OpenGL",
                     "OpenGL_accelerate", "winrt", "pygltflib", "trimesh")
 
 
@@ -78,10 +78,13 @@ def build_command(version: str, onefile: bool, output_dir: Path | None = None, j
         f"--windows-icon-from-ico={ICON}",
         "--output-filename=FrontEngine.exe",
         f"--output-dir={output_dir or OUTPUT_DIR}",
-        "--include-package-data=qt_material",
+        # The design system's indicator icons (check mark, arrows) are SVG files in the package.
+        "--include-package-data=frontengine.ui.style",
         "--include-package-data=trimesh",
         # Generated sprite atlases of the built-in pets ship inside the package.
         "--include-package-data=frontengine.show.pet.inkside",
+        # Blender-rendered furniture pictures of the pet home, one folder per theme.
+        "--include-package-data=frontengine.show.pet_game",
         # main_ui.py looks for frontengine.ico next to the working directory.
         f"--include-data-files={ICON}=frontengine.ico",
         "--company-name=JE-Chen",

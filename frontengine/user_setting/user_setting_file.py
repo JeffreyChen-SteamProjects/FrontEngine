@@ -36,7 +36,7 @@ default_hotkeys: Dict[str, str] = {
 
 user_setting_dict: Dict[str, Any] = {
     "language": "English",
-    "theme": "dark_amber.xml",
+    "theme": "system",
     "hotkeys": dict(default_hotkeys),
     # 啟動時自動套用的預設集名稱（空字串表示停用）
     # Preset auto-applied on launch (empty string disables it)
@@ -124,6 +124,8 @@ user_setting_dict: Dict[str, Any] = {
     # 桌面寵物場景時間軸：[{"at": 秒, "say"/"sleep"/"feed"/"behaviour": ...}, ...]
     # Desktop pet scene timeline of scheduled actions
     "pet_timeline": [],
+    # Whether the pet home was running when FrontEngine last closed
+    "pet_home_running": False,
 }
 
 

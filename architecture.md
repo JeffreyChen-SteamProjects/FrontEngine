@@ -31,11 +31,12 @@ on Steam (app 2793470) with Workshop import. JEditor embeds its main window as a
 | `frontengine/__main__.py` | `python -m frontengine` → `main()` |
 | `frontengine/ui/main_ui.py` | `FrontEngineMainUI`: assembles pages, menus and tray; owns the background services; dispatches hotkey, remote and MIDI actions; handles shutdown. Also holds `start_front_engine()` and `main()` |
 | `frontengine/ui/page/` | Feature pages share card sections, wrapping form fields, collapsible details and a persistent footer in `layout_kit.py`. `flow_layout.py` wraps inline controls; `action_menu.py` mirrors secondary button commands and live state into compact menus. `control_center/` provides batch control; the scene editor places its canvas beside a tabbed inspector. `utils.py` handles multi-monitor dispatch |
-| `frontengine/ui/nav/`, `menu/`, `dialog/`, `style/` | Grouped sidebar with a persistent command-search entry; application menus and dialogs; theme-derived card, navigation, action and focus styling layered on qt-material. Command search retains failed input for retry and clears arguments when changing commands |
+| `frontengine/ui/nav/`, `menu/`, `dialog/`, `style/` | Grouped sidebar with a persistent command-search entry; application menus and dialogs; FrontEngine's own design system (`style/tokens.py` light and dark token sets in the INKSIDE ink, paper and orange; `style/app_style.py` builds the whole stylesheet and palette; theme system / light / dark, chosen in Settings → Theme or by the day/night schedule without replacing the user's choice). Command search retains failed input for retry and clears arguments when changing commands |
 | `frontengine/show/` | Overlay widgets. Shared base `base_widget.py` (`BaseWidget`), `window_helpers.py`, and `overlay_factory.py` (scene JSON → widget) |
 | `frontengine/show/compositor/` | Shared layers, real OpenGL shader/texture renderer, software fallback and RGBA output; BaseWidget caches CPU raster content |
 | `frontengine/utils/imervue/`, `scene_format/` | Validated puppet container, optional upstream runtime, scene envelopes and portable package extraction leases |
 | `frontengine/utils/macos/` | Public-framework capability/permission checks, capture, audio and MIDI sessions; native operations isolated behind injectable boundaries |
+| `frontengine/utils/pet_game/` | Qt-free pet home domain: catalog data, layout and reservations, residents and routines, work orders, an idempotent ledger, the 5 Hz fixed-step simulation and versioned snapshots. `user_setting/pet_game_save.py` writes it atomically with a last-good backup; `show/pet_game/` holds the `HomeService` (one clock, identity leases, background saves) and the zone drawing; `ui/page/pet_game/` is the Pet home page, the first page in the sidebar |
 | `frontengine/system_tray/` | Tray icon and menu |
 | `frontengine/user_setting/` | `user_setting.json` (`user_setting_file.py`), preset repository (`presets/*.json` and zip packages), scene files |
 | `frontengine/utils/` | Services and pure logic: platform info, hotkeys, input watch, remote/MIDI, audio, rules/schedules/state machines, recording, virtual camera, window pinning, translations with live retranslation (`multi_language/`), `plugins/`, `steam/`, `workshop/`, logging, JSON |
@@ -73,7 +74,7 @@ frontengine | python -m frontengine → main() → start_front_engine() → QApp
       [read_user_setting() → language_wrapper.reset_language() → sidebar + page stack
        → ControlCenterUI + _register_extra_overlays()
        → load_plugins(FrontEngine_EXTEND_TAB, enabled=user_setting_dict["load_plugins"])
-       → _add_tabs() → menus → CriticalExit + HotkeyService + background services
+       → _add_tabs() (Pet home first; pages also carry stable IDs) → menus → CriticalExit + HotkeyService + background services
        → restore last session / sticky notes → apply_startup_preset()]
   → apply_named_preset() if --preset → startup_setting() → sys.exit(app.exec())
 ```
@@ -90,7 +91,8 @@ feature page (ui/page/<kind>/) → dispatch_to_monitors() (ui/page/utils.py)
 **Shutdown**
 
 ```
-closeEvent() | close() → _shutdown() (runs once) → save session if enabled → stop _CLOSING_SERVICES
+closeEvent() | close() → _shutdown() (runs once) → flush pet profiles → pet home shutdown (save, release leases;
+  failure keeps the app open) → save session if enabled → stop _CLOSING_SERVICES
   → cancel recording/native sessions → close scenes → release scene extraction leases
   → save page state and geometry → write_user_setting() → close overlays
 ```
@@ -111,7 +113,8 @@ closeEvent() | close() → _shutdown() (runs once) → save session if enabled �
 - **New overlay kind**: see the full checklist in `architecture_explore.md` §7. In short:
   - `show/<kind>/` (`BaseWidget` + `draw_content()`);
   - a page in `ui/page/<kind>/` (`SettingPage`, `get_state()` / `set_state()`);
-  - `main_ui._add_tabs()` and the control-center registration;
+  - `main_ui._add_tabs()`, the control-center registration and an entry in `ui/menu/features_menu.py`
+    `CATEGORIES` (`test_features_menu.py` checks every page is reachable);
   - keys in every language dictionary and a page in every docs tree;
   - an `__init__.py` in each new folder.
 - **Scene kinds**: `show/overlay_factory.py` plus `ui/page/scene_setting/scene_page/registry.py`.

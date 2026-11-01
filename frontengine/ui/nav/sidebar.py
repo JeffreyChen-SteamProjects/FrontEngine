@@ -23,18 +23,26 @@ from __future__ import annotations
 
 from typing import List, Optional, Tuple
 
-from PySide6.QtCore import QSize, Qt, Signal
+from PySide6.QtCore import QEvent, QSize, Qt, Signal
+from PySide6.QtGui import QPalette
 from PySide6.QtWidgets import QListWidget, QListWidgetItem
 
+from frontengine.ui.style.nav_icons import ICON_SIZE, icon
+from frontengine.ui.style.tokens import palette_for
 from frontengine.utils.multi_language.retranslate import retranslator, translate
 
-SIDEBAR_WIDTH = 208
+SIDEBAR_WIDTH = 216
 
 # 群組標題與分頁列用 UserRole 區分，樣式與點擊行為都看這個值。
 # Group headings and page rows are told apart by this UserRole value, which
 # drives both styling and what a click does.
 ROLE_KIND = Qt.ItemDataRole.UserRole
 ROLE_PAGE_INDEX = Qt.ItemDataRole.UserRole + 1
+# 穩定頁面 ID：之後插入新分頁時，堆疊索引會位移，ID 不會。
+# Stable page ID: stack indices shift when a page is inserted, IDs do not.
+ROLE_PAGE_ID = Qt.ItemDataRole.UserRole + 2
+ROLE_GROUP = Qt.ItemDataRole.UserRole + 3     # the group key a page row belongs to
+ROLE_ICON = Qt.ItemDataRole.UserRole + 4      # nav_icons name of a page row
 KIND_GROUP = "group"
 KIND_PAGE = "page"
 
@@ -43,6 +51,7 @@ class NavigationSidebar(QListWidget):
     """分組的分頁清單，選到某一頁時送出 page_requested。"""
 
     page_requested = Signal(int)
+    collapsed_changed = Signal(list)       # group keys that are folded, for persistence
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -53,29 +62,43 @@ class NavigationSidebar(QListWidget):
         self.setVerticalScrollMode(QListWidget.ScrollMode.ScrollPerPixel)
         # 分頁列之間不需要虛線焦點框，選取本身已經夠明顯。
         self.setUniformItemSizes(False)
+        self.setIconSize(ICON_SIZE)
 
         # (item, key, fallback)，換語言時照這張表重寫
         self._labels: List[Tuple[QListWidgetItem, str, str]] = []
+        self._group: Optional[str] = None
+        self._collapsed: set = set()
         self.currentItemChanged.connect(self._on_current_item_changed)
+        self.itemClicked.connect(self._toggle_if_group)
+        self.itemActivated.connect(self._toggle_if_group)
         retranslator.bind_call(self._retranslate)
 
     def add_group(self, title_key: str, fallback: str = "") -> QListWidgetItem:
-        """加一列群組標題。標題不能被選取，點了也不會換頁。"""
-        item = QListWidgetItem(translate(title_key, fallback))
+        """加一列群組標題。標題不能被選取；點它會收合或展開該組。
+        A group heading: never selected; clicking it folds or unfolds the group."""
+        item = QListWidgetItem(translate(title_key, fallback).upper())
         item.setData(ROLE_KIND, KIND_GROUP)
-        item.setFlags(Qt.ItemFlag.NoItemFlags)
+        item.setData(ROLE_GROUP, title_key)
+        item.setFlags(Qt.ItemFlag.ItemIsEnabled)
+        self._group = title_key
+        self._set_arrow(item, False)
         item.setSizeHint(QSize(SIDEBAR_WIDTH, 34))
         self.addItem(item)
         self._labels.append((item, title_key, fallback))
         return item
 
-    def add_page(self, title_key: str, page_index: int, fallback: str = "") -> QListWidgetItem:
-        """加一列分頁。page_index 對應 QStackedWidget 裡的索引。"""
+    def add_page(self, title_key: str, page_index: int, fallback: str = "",
+                 page_id: Optional[str] = None, icon_name: str = "extension") -> QListWidgetItem:
+        """加一列分頁。page_index 對應 QStackedWidget 裡的索引；page_id 預設為語言鍵。"""
         item = QListWidgetItem(translate(title_key, fallback))
         item.setData(ROLE_KIND, KIND_PAGE)
         item.setToolTip(item.text())
         item.setData(ROLE_PAGE_INDEX, page_index)
-        item.setSizeHint(QSize(SIDEBAR_WIDTH, 35))
+        item.setData(ROLE_PAGE_ID, page_id or title_key)
+        item.setData(ROLE_GROUP, self._group)
+        item.setData(ROLE_ICON, icon_name)
+        item.setIcon(icon(icon_name, *self._icon_colors()))
+        item.setSizeHint(QSize(SIDEBAR_WIDTH, 36))
         self.addItem(item)
         self._labels.append((item, title_key, fallback))
         return item
@@ -85,9 +108,76 @@ class NavigationSidebar(QListWidget):
         for row in range(self.count()):
             item = self.item(row)
             if item.data(ROLE_KIND) == KIND_PAGE and item.data(ROLE_PAGE_INDEX) == page_index:
+                if item.isHidden():
+                    self.set_group_collapsed(item.data(ROLE_GROUP), False)
                 self.setCurrentItem(item)
                 return True
         return False
+
+    # ----- folding groups ---------------------------------------------------------------
+
+    def _icon_colors(self) -> tuple[str, str]:
+        """Muted ink for rows, full ink for the selected row, in the current theme's tokens."""
+        tone = "dark" if self.palette().color(QPalette.ColorRole.Window).lightness() < 128 else "light"
+        colors = palette_for(tone)
+        return colors["muted"], colors["text"]
+
+    def _set_arrow(self, item: QListWidgetItem, collapsed: bool) -> None:
+        """A small chevron in the theme's muted ink (the platform arrows vanish on a dark sidebar)."""
+        muted, _text = self._icon_colors()
+        item.setIcon(icon("chevron-right" if collapsed else "chevron-down", muted))
+
+    def changeEvent(self, event: QEvent) -> None:
+        """A theme change swaps the palette: redraw chevrons and page icons in the new tone."""
+        super().changeEvent(event)
+        if event.type() == QEvent.Type.PaletteChange:
+            colors = self._icon_colors()
+            for row in range(self.count()):
+                item = self.item(row)
+                if item.data(ROLE_KIND) == KIND_GROUP:
+                    self._set_arrow(item, item.data(ROLE_GROUP) in self._collapsed)
+                else:
+                    item.setIcon(icon(item.data(ROLE_ICON) or "extension", *colors))
+
+    def _toggle_if_group(self, item: QListWidgetItem) -> None:
+        if item is not None and item.data(ROLE_KIND) == KIND_GROUP:
+            key = item.data(ROLE_GROUP)
+            self.set_group_collapsed(key, key not in self._collapsed)
+            self.collapsed_changed.emit(sorted(self._collapsed))
+
+    def collapsed_groups(self) -> List[str]:
+        return sorted(self._collapsed)
+
+    def set_group_collapsed(self, key: str, collapsed: bool) -> None:
+        """Hide or show a group's pages; the current page is never hidden away."""
+        if collapsed:
+            current = self.currentItem()
+            if current is not None and current.data(ROLE_GROUP) == key:
+                return
+            self._collapsed.add(key)
+        else:
+            self._collapsed.discard(key)
+        for row in range(self.count()):
+            item = self.item(row)
+            if item.data(ROLE_GROUP) != key:
+                continue
+            if item.data(ROLE_KIND) == KIND_GROUP:
+                self._set_arrow(item, collapsed)
+            else:
+                item.setHidden(collapsed)
+
+    def page_index(self, page_id: str) -> Optional[int]:
+        """The current stack index of a stable page ID, or None."""
+        for row in range(self.count()):
+            item = self.item(row)
+            if item.data(ROLE_KIND) == KIND_PAGE and item.data(ROLE_PAGE_ID) == page_id:
+                return item.data(ROLE_PAGE_INDEX)
+        return None
+
+    def select_page_id(self, page_id: str) -> bool:
+        """Select a page by its stable ID rather than its position."""
+        index = self.page_index(page_id)
+        return index is not None and self.select_page(index)
 
     def page_label(self, page_index: int) -> str:
         """某個堆疊索引目前顯示的文字（測試與記錄用）。"""
@@ -108,7 +198,8 @@ class NavigationSidebar(QListWidget):
         """換語言時把每一列的文字重寫一次。"""
         for item, key, fallback in self._labels:
             try:
-                item.setText(translate(key, fallback))
+                text = translate(key, fallback)
+                item.setText(text.upper() if item.data(ROLE_KIND) == KIND_GROUP else text)
                 item.setToolTip(item.text())
             except RuntimeError:  # pragma: no cover - 底層物件已消失
                 continue

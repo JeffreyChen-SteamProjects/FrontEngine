@@ -167,6 +167,17 @@ def fit_frames(frames: list[numpy.ndarray], canvas: int = 256, height: int = 225
 
 
 SPRITES = Path(__file__).resolve().parent / 'sprites'
+# Four-frame home poses drawn by Codex for every built-in character: action -> ms per frame.
+HOME_POSE_MS = {'sit': 420, 'sleep': 650, 'feed': 300, 'play': 220, 'write': 320, 'garden': 300,
+                'craft': 200}
+
+
+def character_sprites(name: str) -> dict:
+    """A built-in character's whole-body sprite actions: walk, climb and the home poses."""
+    sprites = {'walk_sprite': (f'inkside-{name}-walk.png', 8, 90),
+               'climb_sprite': (f'inkside-{name}-climb.png', 8, 110)}
+    sprites.update({f'{pose}_sprite': (f'inkside-{name}-{pose}.png', 4, ms) for pose, ms in HOME_POSE_MS.items()})
+    return sprites
 _ATLASES: dict[str, QImage] = {}
 
 
