@@ -24,6 +24,7 @@ BASE_RATES = {"energy": -1, "fullness": -2, "mood": -1}
 FLOOR_RATES = {"nap": {"energy": 12, "mood": 0}, "snack": {"fullness": 30, "mood": 1}}
 # Mood while doing something that is not furniture-driven (absolute points/minute).
 ACTIVITY_MOOD = {"wander": 2, "eat": 5, "sleep": 1}
+HERB_MEAL_MOOD = 6                  # extra mood per minute when a meal uses herbs from storage
 SLOW_WORK_ENERGY = 30
 SLOW_WORK_MOOD = 20
 BREAK_MS = (3000, 6000)
@@ -69,6 +70,8 @@ def _rates(world: World, resident: Resident) -> dict[str, int]:
         definition = world.definition(world.furniture[activity.furniture])
         for need, rate in definition.effects.items():
             rates[need] = rates[need] + rate if need == "mood" else rate
+    if activity.bonus:
+        rates["mood"] += HERB_MEAL_MOOD
     return rates
 
 
@@ -117,6 +120,17 @@ def _walk(world: World, resident: Resident) -> None:
         activity.until_ms = max(activity.until_ms, world.time_ms + 1000)
     if activity.task is not None:
         world.tasks[activity.task].state = "working"
+    if activity.kind == "eat":
+        _season_meal(world, resident)
+
+
+def _season_meal(world: World, resident: Resident) -> None:
+    """Sitting down at a table uses one herb from storage, when there is one, for a happier meal."""
+    if world.ledger.available("herb") <= 0:
+        return
+    transaction = f"meal:{resident.identifier[:12]}:{world.time_ms}"
+    if world.ledger.apply(transaction, "meal", items={"herb": -1}) == "accepted":
+        resident.activity.bonus = True
 
 
 def _interrupted_by_need(world: World, resident: Resident) -> bool:

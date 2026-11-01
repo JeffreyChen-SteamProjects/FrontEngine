@@ -15,6 +15,7 @@ from PySide6.QtCore import Qt
 
 from frontengine.show.pet_game.captions import activity_text
 from frontengine.utils.multi_language.retranslate import retranslator, translate, tr
+from frontengine.utils.pet_game.catalog import FURNITURE_PREFIX
 from frontengine.utils.pet_game.schedule import TEMPLATES
 from frontengine.utils.pet_game.world import COMMANDS
 
@@ -249,6 +250,8 @@ class LayoutPanel:
 
 
 class ShopPanel:
+    """Furniture and materials to buy; selling furniture back returns its listed amount."""
+
     def __init__(self, page: PetHomePage) -> None:
         self.page = page
         section = self.section = page.add_section("pet_home_shop_section", "Shop")
@@ -256,17 +259,29 @@ class ShopPanel:
         section.add_row("pet_home_shop_item", self.items, "Item")
         section.add_inline(_button("pet_home_buy", "Buy", self.buy),
                            _button("pet_home_sell", "Sell one from storage", self.sell))
+        self.materials = QComboBox()
+        section.add_row("pet_home_materials", self.materials, "Materials")
+        self.amount = QSpinBox()
+        self.amount.setRange(1, 99)
+        section.add_row("pet_home_amount", self.amount, "Amount")
+        section.add_inline(_button("pet_home_buy_materials", "Buy materials", self.buy_materials))
 
     def refresh_lists(self) -> None:
         world = self.page.service.world
-        current = self.items.currentData()
+        current, material = self.items.currentData(), self.materials.currentData()
         self.items.clear()
+        self.materials.clear()
         for definition in (world.catalog.furniture.values() if world else ()):
             if not definition.essential:
                 label = translate("pet_home_price", "{name} — {price} coins").format(
                     name=translate(definition.label_key, definition.fallback), price=definition.price)
                 self.items.addItem(label, definition.identifier)
+        for item in (world.catalog.items.values() if world else ()):
+            if item.buy_price:
+                self.materials.addItem(translate("pet_home_price", "{name} — {price} coins").format(
+                    name=translate(item.label_key, item.fallback), price=item.buy_price), item.identifier)
         self.items.setCurrentIndex(max(0, self.items.findData(current)))
+        self.materials.setCurrentIndex(max(0, self.materials.findData(material)))
 
     def buy(self) -> None:
         definition = self.items.currentData()
@@ -280,16 +295,99 @@ class ShopPanel:
             self.page.report(self.page.service.run(lambda world: world.sell(definition, "sell-" + uuid.uuid4().hex)))
             self.page.refresh()
 
+    def buy_materials(self) -> None:
+        name, count = self.materials.currentData(), self.amount.value()
+        if name:
+            self.page.report(self.page.service.run(
+                lambda world: world.buy_item(name, count, "buy-" + uuid.uuid4().hex)))
+            self.page.refresh()
+
+
+class StoragePanel:
+    """The backpack: every stack the home owns, with goods that can be sold."""
+
+    def __init__(self, page: PetHomePage) -> None:
+        self.page = page
+        section = self.section = page.add_section("pet_home_storage_section", "Backpack")
+        self.list = QListWidget()
+        self.list.setMaximumHeight(140)
+        section.add_widget(self.list)
+        section.add_inline(_button("pet_home_sell_item", "Sell one", self.sell))
+
+    def refresh_lists(self) -> None:
+        world = self.page.service.world
+        selected = self.list.currentItem().data(ROLE_ID) if self.list.currentItem() else None
+        self.list.clear()
+        for name, count in sorted(world.ledger.items.items()) if world else ():
+            item = QListWidgetItem(self._line(world, name, count))
+            item.setData(ROLE_ID, name)
+            self.list.addItem(item)
+            if name == selected:
+                self.list.setCurrentItem(item)
+
+    @staticmethod
+    def _line(world, name: str, count: int) -> str:
+        label = item_name(world, name)
+        reserved = world.ledger.reserved.get(name, 0)
+        text = translate("pet_home_stack", "{name} × {count}").format(name=label, count=count)
+        if reserved:
+            text += " " + translate("pet_home_reserved", "({count} set aside for work)").format(count=reserved)
+        price = world.catalog.sell_price(name)
+        if price:
+            text += " — " + translate("pet_home_sells_for", "sells for {price}").format(price=price)
+        return text
+
+    def sell(self) -> None:
+        item = self.list.currentItem()
+        if item is None:
+            return
+        name = item.data(ROLE_ID)
+        if name.startswith(FURNITURE_PREFIX):
+            code = self.page.service.run(lambda world: world.sell(name.removeprefix(FURNITURE_PREFIX),
+                                                                  "sell-" + uuid.uuid4().hex))
+        else:
+            code = self.page.service.run(lambda world: world.sell_item(name, 1, "sell-" + uuid.uuid4().hex))
+        self.page.report(code)
+        self.page.refresh()
+
+
+def item_name(world, name: str) -> str:
+    if name.startswith(FURNITURE_PREFIX):
+        return furniture_name(world, name.removeprefix(FURNITURE_PREFIX))
+    item = world.catalog.items.get(name)
+    return translate(item.label_key, item.fallback) if item else name
+
+
+def recipe_details(world, recipe) -> str:
+    """Everything a job asks for and gives, shown before it is assigned."""
+    def stacks(values: dict) -> str:
+        return ", ".join(f"{item_name(world, name)} × {count}" for name, count in values.items()) or "—"
+    return translate("pet_home_recipe_details",
+                     "Takes {minutes} min · uses {inputs} · makes {outputs} · {coins} coins · "
+                     "energy −{energy}/min · needs level {level}").format(
+        minutes=f"{recipe.duration_ms / 60000:g}", inputs=stacks(recipe.inputs), outputs=stacks(recipe.outputs),
+        coins=recipe.coins, energy=recipe.energy_per_minute, level=recipe.min_level)
+
 
 class WorkPanel:
     def __init__(self, page: PetHomePage) -> None:
         self.page = page
         section = self.section = page.add_section("pet_home_work_section", "Work")
         self.recipes = QComboBox()
+        self.recipes.currentIndexChanged.connect(self._recipe_changed)
         section.add_row("pet_home_recipe", self.recipes, "Job")
+        self.details = QLabel()
+        self.details.setWordWrap(True)
+        section.add_widget(self.details)
+        self.station = QComboBox()
+        section.add_row("pet_home_station", self.station, "Workstation")
         self.units = QSpinBox()
         self.units.setRange(1, 20)
         section.add_row("pet_home_units", self.units, "How many")
+        self.priority = QSpinBox()
+        self.priority.setRange(0, 9)
+        self.priority.setValue(5)
+        section.add_row("pet_home_priority", self.priority, "Priority")
         section.add_inline(_button("pet_home_assign_work", "Give to resident", self.assign))
         self.tasks = QListWidget()
         self.tasks.setMaximumHeight(120)
@@ -299,6 +397,7 @@ class WorkPanel:
     def refresh_lists(self) -> None:
         world = self.page.service.world
         current = self.recipes.currentData()
+        self.recipes.blockSignals(True)
         self.recipes.clear()
         for recipe in (world.catalog.recipes.values() if world else ()):
             label = translate("pet_home_recipe_line", "{name} — {minutes} min, {coins} coins").format(
@@ -306,7 +405,22 @@ class WorkPanel:
                 coins=recipe.coins)
             self.recipes.addItem(label, recipe.identifier)
         self.recipes.setCurrentIndex(max(0, self.recipes.findData(current)))
+        self.recipes.blockSignals(False)
+        self._recipe_changed()
         self.refresh_live()
+
+    def _recipe_changed(self, *_args) -> None:
+        world = self.page.service.world
+        recipe = world.catalog.recipes.get(self.recipes.currentData()) if world else None
+        self.details.setText(recipe_details(world, recipe) if recipe else "")
+        current = self.station.currentData()
+        self.station.clear()
+        self.station.addItem(translate("pet_home_any_station", "Any free workstation"), None)
+        for piece, definition in (world.in_zone(self.page.zone) if recipe and self.page.zone else ()):
+            if definition.profession == recipe.profession:
+                self.station.addItem(f"{translate(definition.label_key, definition.fallback)} ({piece.cell})",
+                                     piece.identifier)
+        self.station.setCurrentIndex(max(0, self.station.findData(current)))
 
     def refresh_live(self) -> None:
         world = self.page.service.world
@@ -329,9 +443,13 @@ class WorkPanel:
     def _task_text(world, task) -> str:
         recipe = world.catalog.recipes[task.recipe]
         resident = world.residents.get(task.resident)
+        state = translate("pet_home_state_" + task.state, task.state)
+        if task.progress_ms:
+            phase = recipe.phase_at(task.progress_ms)
+            state += " · " + translate("pet_game_phase_" + phase, phase)
         return translate("pet_home_task_line", "{resident}: {recipe} {done}/{units} — {state} {percent}%").format(
             resident=resident.name if resident else "?", recipe=translate(recipe.label_key, recipe.fallback),
-            done=task.done, units=task.units, state=translate("pet_home_state_" + task.state, task.state),
+            done=task.done, units=task.units, state=state,
             percent=task.progress_ms * 100 // recipe.duration_ms)
 
     def assign(self) -> None:
@@ -340,8 +458,9 @@ class WorkPanel:
             self.page.report("pick_resident")
             return
         if recipe:
+            station, units, priority = self.station.currentData(), self.units.value(), self.priority.value()
             result, _task = self.page.service.run(
-                lambda world: world.create_task(recipe, resident, self.units.value()))
+                lambda world: world.create_task(recipe, resident, units, station, priority))
             self.page.report(result)
             self.refresh_live()
 

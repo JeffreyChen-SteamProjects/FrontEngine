@@ -137,7 +137,7 @@ def test_missing_content_is_kept_and_restored_when_reinstalled(tmp_path):
     world.buy("toy_box", "b1")
     _status, toy = world.place("toy_box", next(iter(world.zones)), 20)
     HomeSaveStore(tmp_path, full).save(world)
-    reduced = Catalog([d for key, d in full.furniture.items() if key != "toy_box"], list(full.recipes.values()))
+    reduced = Catalog([d for key, d in full.furniture.items() if key != "toy_box"], list(full.recipes.values()), list(full.items.values()))
     store = HomeSaveStore(tmp_path, reduced)
     partial = store.load().world
     assert toy not in partial.furniture
@@ -154,7 +154,7 @@ def test_changed_footprints_return_overlapping_pieces_to_storage(tmp_path):
     HomeSaveStore(tmp_path, full).save(world)
     wider = replace(full.furniture["bed_basic"], width=8)
     catalog = Catalog([wider if key == "bed_basic" else d for key, d in full.furniture.items()],
-                      list(full.recipes.values()))
+                      list(full.recipes.values()), list(full.items.values()))
     loaded = HomeSaveStore(tmp_path, catalog).load().world
     definitions = sorted(piece.definition for piece in loaded.furniture.values())
     assert definitions == ["bed_basic", "desk_basic"]

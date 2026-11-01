@@ -134,6 +134,27 @@ class World:
                                    {furniture_item(definition): -1})
         return "none_stored" if result == "insufficient" else result
 
+    def buy_item(self, name: str, count: int, transaction: str) -> str:
+        """Buy materials the shop sells; the price is always above what selling returns."""
+        item = self.catalog.items.get(name)
+        if item is None or not item.buy_price:
+            return "not_for_sale"
+        if type(count) is not int or not 1 <= count <= 99:
+            return "invalid"
+        cost = 0 if self.sandbox else item.buy_price * count
+        result = self.ledger.apply(transaction, "buy:" + name, -cost, {name: count})
+        return "insufficient_coins" if result == "insufficient" else result
+
+    def sell_item(self, name: str, count: int, transaction: str) -> str:
+        """Sell goods from storage; reserved materials cannot be sold."""
+        item = self.catalog.items.get(name)
+        if item is None or not item.sell_price:
+            return "not_for_sale"
+        if type(count) is not int or not 1 <= count <= 999:
+            return "invalid"
+        result = self.ledger.apply(transaction, "sell:" + name, item.sell_price * count, {name: -count})
+        return "none_stored" if result == "insufficient" else result
+
     def place(self, definition: str, zone: str, cell: int, flipped: bool = False) -> tuple[str, str | None]:
         problem = self.preview(definition, zone, cell)
         if problem is not None:
