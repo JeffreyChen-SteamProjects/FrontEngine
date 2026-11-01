@@ -13,7 +13,9 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt
 
-from frontengine.show.pet_game.captions import NEED_KEYS, activity_text, friends_text, traits_text
+from frontengine.show.pet_game.captions import (
+    NEED_KEYS, activity_text, friends_text, item_label, traits_text, wish_text,
+)
 from frontengine.utils.multi_language.retranslate import retranslator, translate, tr
 from frontengine.utils.pet_game.catalog import FURNITURE_PREFIX
 from frontengine.utils.pet_game.schedule import TEMPLATES
@@ -103,8 +105,8 @@ class ResidentPanel:
         for need, bar in self.bars.items():
             bar.setValue(resident.needs[need])
         self.activity.setText(activity_text(resident, world))
-        self.character.setText("\n".join(line for line in (traits_text(resident), friends_text(world, resident))
-                                          if line))
+        lines = (traits_text(resident), friends_text(world, resident), wish_text(world, resident))
+        self.character.setText("\n".join(line for line in lines if line))
         index = self.routine.findData(resident.routine)
         if index != self.routine.currentIndex():
             self.routine.setCurrentIndex(index)
@@ -313,6 +315,8 @@ class StoragePanel:
     def __init__(self, page: PetHomePage) -> None:
         self.page = page
         section = self.section = page.add_section("pet_home_storage_section", "Backpack")
+        self.collection = QLabel()
+        section.add_widget(self.collection)
         self.list = QListWidget()
         self.list.setMaximumHeight(140)
         section.add_widget(self.list)
@@ -322,6 +326,11 @@ class StoragePanel:
         world = self.page.service.world
         selected = self.list.currentItem().data(ROLE_ID) if self.list.currentItem() else None
         self.list.clear()
+        if world is not None:
+            owned = {piece.definition for piece in world.furniture.values()}
+            owned |= {key for key in world.catalog.furniture if world.stored(key)}
+            self.collection.setText(translate("pet_home_collection", "Furniture collection: {owned} of {total}")
+                                    .format(owned=len(owned), total=len(world.catalog.furniture)))
         for name, count in sorted(world.ledger.items.items()) if world else ():
             item = QListWidgetItem(self._line(world, name, count))
             item.setData(ROLE_ID, name)
@@ -355,11 +364,7 @@ class StoragePanel:
         self.page.refresh()
 
 
-def item_name(world, name: str) -> str:
-    if name.startswith(FURNITURE_PREFIX):
-        return furniture_name(world, name.removeprefix(FURNITURE_PREFIX))
-    item = world.catalog.items.get(name)
-    return translate(item.label_key, item.fallback) if item else name
+item_name = item_label
 
 
 def recipe_details(world, recipe) -> str:

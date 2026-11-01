@@ -364,4 +364,8 @@ def bubble_text(event: dict) -> str:
         return translate("pet_home_bubble_squabble", "Hmph!")
     if kind == "settled" and event.get("coins"):
         return f"+{event['coins']}"
+    if kind == "wish_granted":
+        return translate("pet_home_bubble_wish", "Thank you!")
+    if kind == "life_event" and event.get("resident"):
+        return translate("pet_game_event_" + event["event"], event["event"])
     return ""

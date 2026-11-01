@@ -22,6 +22,7 @@ from frontengine.ui.page.pet_game.home_panels import (
     LayoutPanel, ResidentPanel, ShopPanel, StoragePanel, WorkPanel,
 )
 from frontengine.show.pet_game.captions import result_text
+from frontengine.ui.page.pet_game.goals_panel import GoalsPanel
 from frontengine.user_setting.pet_game_save import HomeSaveStore
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.user_setting.user_setting_file import user_setting_dict, write_user_setting
@@ -57,6 +58,7 @@ class PetHomePage(SettingPage):
         self.view = HomeView()
         self.add_body_widget(self._scroller(self.view))
         self.residents = ResidentPanel(self)
+        self.goals = GoalsPanel(self)
         self.layout_panel = LayoutPanel(self)
         self.shop = ShopPanel(self)
         self.storage = StoragePanel(self)
@@ -261,7 +263,8 @@ class PetHomePage(SettingPage):
 
     def _on_events(self, events: list) -> None:
         kinds = {event["kind"] for event in events}
-        if kinds & {"settled", "placed", "arrived", "settle_failed"}:
+        if kinds & {"settled", "placed", "arrived", "settle_failed", "life_event", "wish_granted",
+                    "goal_claimed", "commission_done", "bought", "routine_set"}:
             self.refresh()
 
     def _on_save_failed(self, error: str) -> None:
@@ -285,7 +288,7 @@ class PetHomePage(SettingPage):
         for layer in LAYERS:
             self.layer_combo.addItem(translate("pet_home_layer_" + layer, layer), layer)
         self.layer_combo.setCurrentIndex(self.layer_combo.findData(self.layer))
-        for panel in (self.residents, self.layout_panel, self.shop, self.storage, self.work):
+        for panel in (self.residents, self.goals, self.layout_panel, self.shop, self.storage, self.work):
             panel.refresh_lists()
         self.refresh_live()
 
@@ -304,7 +307,7 @@ class PetHomePage(SettingPage):
         self.run_button.setVisible(has_home)
         self.restore_button.setVisible(protected and self.load_result.backup_available)
         self.aside_button.setVisible(protected)
-        for panel in (self.residents, self.layout_panel, self.shop, self.storage, self.work):
+        for panel in (self.residents, self.goals, self.layout_panel, self.shop, self.storage, self.work):
             panel.section.setEnabled(has_home)
         self.desktop_check.setEnabled(has_home)
         self.layer_combo.setEnabled(has_home)

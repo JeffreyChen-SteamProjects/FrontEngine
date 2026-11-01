@@ -38,13 +38,14 @@ def test_version_one_homes_gain_comfort_and_company_on_load():
     data = snapshot.to_dict(world)
     data["version"] = 1
     del data["relations"]
+    del data["progress"]
     for resident in data["residents"]:
         resident["needs"] = {key: resident["needs"][key] for key in ("energy", "fullness", "mood")}
     loaded = snapshot.from_dict(data, builtin_catalog())
     assert loaded.residents[A].needs["comfort"] == 60
     assert loaded.residents[A].needs["social"] == 60
     assert loaded.relations == {}
-    assert snapshot.to_dict(loaded)["version"] == 2
+    assert snapshot.to_dict(loaded)["version"] == 3
 
 
 def test_relationships_survive_saving_and_reject_bad_pairs():
