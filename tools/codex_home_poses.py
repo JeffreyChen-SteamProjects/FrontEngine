@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import json
 import shutil
-import subprocess
+import subprocess  # nosec B404 - developer tool: runs only the resolved codex executable, argv list, shell=False
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -56,6 +56,14 @@ def prompt(character: str, action: str) -> str:
     )
 
 
+def codex_executable() -> str:
+    """The installed Codex CLI as an absolute path; nothing from the command line forms it."""
+    found = shutil.which("codex")
+    if found is None or not Path(found).is_absolute() or Path(found).stem.lower() != "codex":
+        raise SystemExit("The Codex CLI (codex) is not on PATH")
+    return str(Path(found).resolve())
+
+
 def run(folder_root: Path, character: str, action: str) -> tuple[str, bool]:
     folder = folder_root / f"{character}_{action}"
     target = folder / f"{character}_{action}_sheet.png"
@@ -71,11 +79,10 @@ def run(folder_root: Path, character: str, action: str) -> tuple[str, bool]:
         images.append(f"--image={folder / reference.name}")
     text = prompt(character, action)
     (folder / "prompt.txt").write_text(text, encoding="utf-8")
-    codex = shutil.which("codex") or "codex"
+    argv = [codex_executable(), "exec", "--skip-git-repo-check", "-s", "workspace-write", "-C", str(folder), *images]
     with open(folder / "codex.log", "w", encoding="utf-8") as log:
-        subprocess.run([codex, "exec", "--skip-git-repo-check", "-s", "workspace-write", "-C", str(folder), *images],
-                       input=text, text=True, stdout=log, stderr=subprocess.STDOUT, timeout=900, check=False,
-                       encoding="utf-8")
+        subprocess.run(argv, input=text, text=True, stdout=log, stderr=subprocess.STDOUT,  # nosec B603 # nosemgrep - absolute codex path, argv list, shell=False
+                       timeout=900, check=False, encoding="utf-8")
     return folder.name, target.is_file()
 
 
