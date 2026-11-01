@@ -1738,4 +1738,6 @@ italian_word_dict = {
     "pet_home_pending_materials": "{count} lavori aspettano materiali",
     "pet_home_pending_celebration": "Una festa in casa è pronta",
     "pet_home_pending_wish": "{name} ha un desiderio",
+    "pet_home_free_arranging": "Sistemazione libera",
+    "pet_home_free_arranging_hint": "Una casa separata con tutti i mobili e senza costi; nulla di ciò che vi accade raggiunge la tua casa, le monete, gli obiettivi o le mascotte.",
 }

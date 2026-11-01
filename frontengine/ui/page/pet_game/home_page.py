@@ -23,6 +23,7 @@ from frontengine.show.pet_game.resident_art import ResidentArt
 from frontengine.show.pet_game.themes import glyph
 from frontengine.utils.pet_game.environment import weather
 from frontengine.show.pet_game.home_view import ZOOMS
+from frontengine.utils.pet_game.world import MODES
 from frontengine.ui.dialog.dialog_kit import button_row
 from frontengine.ui.page.layout_kit import Section, SettingPage
 from frontengine.ui.page.pet_game.home_pending import pending
@@ -47,6 +48,7 @@ INTRO_KEY = "pet_home_intro_seen"
 MOTION_KEY = "pet_home_reduced_motion"
 MODE_KEY = "pet_home_mode"
 MEETING_REASON = "meeting"
+SAVE_MODE_KEY = "pet_home_save_mode"      # "manage" or "sandbox" (free arranging), its own save each
 # Where a newer FrontEngine comes from, when a save was written by one.
 UPDATE_URL = "https://pypi.org/project/frontengine/"
 # The overview on this page is a stage, taller than the desktop strip.
@@ -55,7 +57,8 @@ LAYER_KEY = "pet_home_layer"
 
 
 def default_service(parent) -> HomeService:
-    store = HomeSaveStore(Path(getcwd()), builtin_catalog())
+    mode = user_setting_dict.get(SAVE_MODE_KEY)
+    store = HomeSaveStore(Path(getcwd()), builtin_catalog(), mode if mode in MODES else "manage")
     return HomeService(parent, store, PetProfiles(user_setting_dict, write_user_setting),
                        executor=ThreadPoolExecutor(1, thread_name_prefix="pet-home-save"))
 
@@ -166,8 +169,15 @@ class PetHomePage(SettingPage):
         row.setContentsMargins(0, 0, 0, 0)
         row.setSpacing(10)
         row.addWidget(self.status, 1)
-        for button in (self.update_button, self.restore_button, self.aside_button, self.create_button,
-                       self.run_button):
+        self.sandbox_button = tr(QPushButton(), "pet_home_free_arranging", "Free arranging")
+        self.sandbox_button.setCheckable(True)
+        self.sandbox_button.setChecked(self.service.mode == "sandbox")
+        tr(self.sandbox_button, "pet_home_free_arranging_hint",
+           "A separate home with every piece of furniture and no costs; nothing done there reaches your "
+           "home, coins, goals or pets.", "setToolTip")
+        self.sandbox_button.toggled.connect(self.set_free_arranging)
+        for button in (self.sandbox_button, self.update_button, self.restore_button, self.aside_button,
+                       self.create_button, self.run_button):
             row.addWidget(button)
         section.add_widget(bar)
         section.add_widget(self.message)
@@ -262,6 +272,27 @@ class PetHomePage(SettingPage):
         area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         area.setFixedHeight(view.height() + area.horizontalScrollBar().sizeHint().height() + 2)
         return area
+
+    def set_free_arranging(self, free: bool) -> bool:
+        """Swap to the free-arranging home (or back); the button follows what really happened."""
+        mode = "sandbox" if free else "manage"
+        if self.service.mode == mode:
+            return True
+        if self.layout_panel.arranging:
+            self.layout_panel.toggle_arrange()
+        result = self.service.switch_mode(mode)
+        self.sandbox_button.blockSignals(True)
+        self.sandbox_button.setChecked(self.service.mode == "sandbox")
+        self.sandbox_button.blockSignals(False)
+        if result is None:
+            self.report("save_failed")
+            return False
+        user_setting_dict[SAVE_MODE_KEY] = mode
+        self.load_result = result
+        self.selected_resident = self.selected_furniture = None
+        self.sync_strip()
+        self.refresh()
+        return True
 
     def _strip_done_arranging(self) -> None:
         if self.layout_panel.arranging:
@@ -534,5 +565,7 @@ class PetHomePage(SettingPage):
             state = translate("pet_home_paused_meeting", "paused for a meeting")
         elif HIDDEN_REASON in self.service.pause_reasons:
             state = translate("pet_home_paused_hidden", "paused while the home is hidden")
+        if world.sandbox:
+            state = translate("pet_home_free_arranging", "Free arranging") + " · " + state
         return translate("pet_home_status", "Day {day} · {time} · {coins} coins · {state}").format(
             day=game_day(world.time_ms), time=self._time_text(world), coins=world.ledger.coins, state=state)

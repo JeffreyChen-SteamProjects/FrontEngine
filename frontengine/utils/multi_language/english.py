@@ -1748,4 +1748,6 @@ english_word_dict = {
     "pet_home_pending_materials": "{count} jobs wait for materials",
     "pet_home_pending_celebration": "A home celebration is ready",
     "pet_home_pending_wish": "{name} has a wish",
+    "pet_home_free_arranging": "Free arranging",
+    "pet_home_free_arranging_hint": "A separate home with every piece of furniture and no costs; nothing done there reaches your home, coins, goals or pets.",
 }

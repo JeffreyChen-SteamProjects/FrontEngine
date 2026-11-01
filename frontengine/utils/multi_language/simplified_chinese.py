@@ -1740,4 +1740,6 @@ simplified_chinese_word_dict = {
     "pet_home_pending_materials": "{count} 项工作在等材料",
     "pet_home_pending_celebration": "可以举办家园庆典了",
     "pet_home_pending_wish": "{name} 有一个愿望",
+    "pet_home_free_arranging": "自由布置",
+    "pet_home_free_arranging_hint": "另一个独立的家园，所有家具都能用、不花钱；在这里做的事不会影响你的家园、金币、目标或宠物。",
 }
