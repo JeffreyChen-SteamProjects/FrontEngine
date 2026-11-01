@@ -28,6 +28,14 @@ Path("user_setting.json").write_text(json.dumps({"language": "English"}), encodi
 from PySide6.QtWidgets import QApplication  # noqa: E402
 
 app = QApplication(sys.argv)
+from shiboken6 import getCppPointer  # noqa: E402
+
+
+def _key(action) -> int:
+    """The C++ object; Python wrapper ids are reused once a wrapper is collected."""
+    return getCppPointer(action)[0]
+
+
 from frontengine.system_tray.extend_system_tray import ExtendSystemTray  # noqa: E402
 from frontengine.ui.main_ui import FrontEngineMainUI  # noqa: E402
 from frontengine.ui.menu.features_menu import CATEGORIES, Entry, run_entry  # noqa: E402
@@ -42,9 +50,9 @@ CATEGORY_OF = {(entry.kind, entry.target): translate(key, fallback)
 def walk(menu, path, seen=None):
     seen = set() if seen is None else seen
     for action in menu.actions():
-        if action.isSeparator() or id(action) in seen:
+        if action.isSeparator() or _key(action) in seen:
             continue
-        seen.add(id(action))
+        seen.add(_key(action))
         label = action.text().replace("&", "")
         yield path + [label], action
         if action.menu() is not None:
@@ -74,14 +82,14 @@ def page_rows():
 
 
 def menu_rows():
-    features = {id(action) for _path, action in walk(ui.features_menu, [])}
+    features = {_key(action) for _path, action in walk(ui.features_menu, [])}
     rows = []
     for top in ui.menu_bar.actions():
         menu = top.menu()
         if menu is None or menu is ui.features_menu:
             continue
         for path, action in walk(menu, [menu.title().replace("&", "")]):
-            ok = id(action) in features
+            ok = _key(action) in features
             rows.append(("Menu › " + " › ".join(path), "—", "Same menu, also under Features",
                          "unchanged", "same QAction ✓" if ok else "MISSING"))
     return rows

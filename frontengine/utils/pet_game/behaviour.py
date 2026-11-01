@@ -234,7 +234,7 @@ def _cared_for(world: World, resident: Resident, block: str) -> bool:
     elif block == "meal" and needs["fullness"] < 80:
         start_meal(world, resident, "mealtime")
     elif needs["social"] <= LOW_SOCIAL and start_greet(world, resident):
-        pass
+        return True                        # walking over to say hello
     elif needs["mood"] <= LOW_MOOD:
         _start_free(world, resident, "cheer_up")
     else:

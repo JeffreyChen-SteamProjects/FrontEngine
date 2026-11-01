@@ -5,8 +5,14 @@ import os
 import pytest
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QMenu
+from shiboken6 import getCppPointer
 
 from frontengine.ui.menu.features_menu import CATEGORIES, run_entry
+
+
+def _key(action: QAction) -> int:
+    """The C++ object; Python wrapper ids are reused once a wrapper is collected."""
+    return getCppPointer(action)[0]
 
 
 @pytest.fixture
@@ -31,9 +37,9 @@ def _actions(menu: QMenu, seen=None) -> list[QAction]:
     seen = set() if seen is None else seen
     found = []
     for action in menu.actions():
-        if id(action) in seen:
+        if _key(action) in seen:
             continue
-        seen.add(id(action))
+        seen.add(_key(action))
         found.append(action)
         if action.menu() is not None:
             found += _actions(action.menu(), seen)
@@ -68,13 +74,13 @@ def test_page_entries_open_their_page_and_count_as_recent(window):
 
 
 def test_every_existing_menu_action_is_reachable_from_features(window):
-    features = {id(action) for action in _actions(window.features_menu)}
+    features = {_key(action) for action in _actions(window.features_menu)}
     for top in window.menu_bar.actions():
         menu = top.menu()
         if menu is None or menu is window.features_menu:
             continue
         missing = [action.text() for action in _actions(menu)
-                   if not action.isSeparator() and id(action) not in features]
+                   if not action.isSeparator() and _key(action) not in features]
         assert not missing, f"{menu.title()}: {missing}"
 
 
