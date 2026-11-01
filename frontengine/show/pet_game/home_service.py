@@ -287,7 +287,9 @@ class HomeService(QObject):
     def _succeeded(self, revision: int) -> bool:
         if revision == self._revision:
             self._dirty = False
-        mirrored = all([self._mirror(identifier) for identifier in sorted(self.sessions)])
+        mirrored = True
+        for identifier in sorted(self.sessions):      # every profile, even after a failure
+            mirrored = self._mirror(identifier) and mirrored
         self.saved.emit()
         return mirrored
 

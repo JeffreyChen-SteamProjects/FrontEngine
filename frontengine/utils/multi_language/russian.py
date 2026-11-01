@@ -1486,7 +1486,7 @@ russian_word_dict = {
     "pet_home_refused": "Отказ: {reason}",
     "pet_home_layout_section": "Мебель",
     "pet_home_arrange": "Расставить",
-    "pet_home_arrange_done": "Готово",
+    "pet_home_arrange_done": "Завершить расстановку",
     "pet_home_arrange_hint": "Щёлкните по полу, чтобы выбрать место. Esc завершает расстановку.",
     "pet_home_storage": "На складе",
     "pet_home_stack": "{name} × {count}",

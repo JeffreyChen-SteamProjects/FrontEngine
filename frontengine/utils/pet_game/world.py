@@ -220,9 +220,9 @@ class World:
         resident = self.residents.get(identifier)
         if resident is None:
             return "unknown"
-        for task in list(self.tasks.values()):
-            if task.resident == identifier:
-                self.cancel_task(task.identifier)
+        leaving = [task.identifier for task in self.tasks.values() if task.resident == identifier]
+        for task in leaving:          # cancel_task removes entries, so collect first
+            self.cancel_task(task)
         cancel_activity(self, resident, "left_home")
         for piece in self.furniture.values():
             if piece.owner == identifier:

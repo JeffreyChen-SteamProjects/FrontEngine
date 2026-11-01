@@ -68,23 +68,31 @@ def _check_counts(values: dict, label: str) -> None:
             raise ValueError(f"Invalid {label} amount for {key}")
 
 
+def _is_int(value: object, low: int, high: int) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool) and low <= value <= high
+
+
+def _check_footprint(definition: FurnitureDefinition) -> None:
+    if not _is_int(definition.width, 1, MAX_WIDTH_CELLS):
+        raise ValueError("Furniture width out of range")
+    if len(definition.points) > MAX_POINTS or len(set(definition.points)) != len(definition.points):
+        raise ValueError("Invalid interaction points")
+    if not all(_is_int(point, 0, definition.width - 1) for point in definition.points):
+        raise ValueError("Interaction point outside the footprint")
+
+
 def check_furniture(definition: FurnitureDefinition) -> None:
     """Reject definitions the simulation could not honour."""
     _check_identifier(definition.identifier)
     if definition.category not in CATEGORIES:
         raise ValueError("Unknown furniture category")
-    if type(definition.width) is not int or not 1 <= definition.width <= MAX_WIDTH_CELLS:
-        raise ValueError("Furniture width out of range")
-    if len(definition.points) > MAX_POINTS or len(set(definition.points)) != len(definition.points):
-        raise ValueError("Invalid interaction points")
-    if any(type(point) is not int or not 0 <= point < definition.width for point in definition.points):
-        raise ValueError("Interaction point outside the footprint")
+    _check_footprint(definition)
     if (definition.activity is None) != (not definition.points):
         raise ValueError("Furniture with an activity needs interaction points")
     if definition.activity is not None and definition.activity not in ACTIVITIES:
         raise ValueError("Unknown furniture activity")
-    if set(definition.effects) - set(NEEDS) or any(
-            type(rate) is not int or abs(rate) > 600 for rate in definition.effects.values()):
+    if set(definition.effects) - set(NEEDS) or not all(
+            _is_int(rate, -600, 600) for rate in definition.effects.values()):
         raise ValueError("Invalid furniture effects")
     if not 0 <= definition.sell_back <= definition.price // 2 or definition.price > 100000:
         raise ValueError("Sell-back must not exceed half the price")

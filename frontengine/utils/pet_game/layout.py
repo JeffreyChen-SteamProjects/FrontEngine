@@ -17,7 +17,7 @@ THEMES = ("warm_home", "green_studio", "night_studio")
 MIN_ZONE_CELLS = 8
 MAX_ZONE_CELLS = 160
 MAX_FURNITURE = 400
-_LOCAL_ID = re.compile(r"[a-z][0-9]{1,9}")
+_LOCAL_ID = re.compile(r"[a-z]\d{1,9}")
 RESIDENT_ID = re.compile(r"[0-9a-f]{32}")
 
 
@@ -27,10 +27,14 @@ def check_local_id(value: object, prefix: str) -> str:
     return value
 
 
-def _int(value: object, low: int, high: int, label: str) -> int:
-    if type(value) is not int or not low <= value <= high:
-        raise ValueError(f"Invalid {label}")
-    return value
+def checked_int(value: object, low: int, high: int, label: str) -> int:
+    """An exact int (never bool or float) inside the inclusive range."""
+    if isinstance(value, int) and not isinstance(value, bool) and low <= value <= high:
+        return value
+    raise ValueError(f"Invalid {label}")
+
+
+_int = checked_int
 
 
 @dataclass

@@ -10,7 +10,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from frontengine.utils.pet_game.catalog import Catalog
-from frontengine.utils.pet_game.layout import RESIDENT_ID, check_local_id
+from frontengine.utils.pet_game.layout import RESIDENT_ID, check_local_id, checked_int
 
 STATES = ("waiting_materials", "reserved", "travelling", "working", "paused", "settled", "cancelled")
 OPEN_STATES = ("waiting_materials", "reserved", "travelling", "working", "paused")
@@ -55,19 +55,15 @@ class Task:
             raise ValueError("Unknown recipe")
         if not isinstance(data["resident"], str) or not RESIDENT_ID.fullmatch(data["resident"]):
             raise ValueError("Invalid task resident")
-        station = None if data["station"] is None else check_local_id(data["station"], "f")
-        units, done = data["units"], data["done"]
-        if type(units) is not int or not 1 <= units <= MAX_UNITS or type(done) is not int or not 0 <= done <= units:
-            raise ValueError("Invalid task units")
-        progress = data["progress_ms"]
-        if type(progress) is not int or not 0 <= progress < recipe.duration_ms:
-            raise ValueError("Invalid task progress")
-        if data["state"] not in STATES or type(data["inputs_reserved"]) is not bool:
+        if data["state"] not in STATES or not isinstance(data["inputs_reserved"], bool):
             raise ValueError("Invalid task state")
-        if type(data["priority"]) is not int or not 0 <= data["priority"] <= 9:
-            raise ValueError("Invalid task priority")
+        station = None if data["station"] is None else check_local_id(data["station"], "f")
+        units = checked_int(data["units"], 1, MAX_UNITS, "task units")
+        done = checked_int(data["done"], 0, units, "finished units")
+        progress = checked_int(data["progress_ms"], 0, recipe.duration_ms - 1, "task progress")
+        priority = checked_int(data["priority"], 0, 9, "task priority")
         task = cls(check_local_id(data["id"], "t"), data["recipe"], data["resident"], station,
-                   units, done, progress, data["state"], data["inputs_reserved"], data["priority"])
+                   units, done, progress, data["state"], data["inputs_reserved"], priority)
         if task.open and task.state in ("travelling", "working"):
             task.state = "paused"     # nobody is walking or working right after loading
         return task

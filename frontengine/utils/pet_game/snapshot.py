@@ -11,7 +11,7 @@ import json
 
 from frontengine.utils.pet_game.catalog import Catalog
 from frontengine.utils.pet_game.jobs import MAX_TASKS, Task
-from frontengine.utils.pet_game.layout import MAX_FURNITURE, Furniture, Zone, placement_problem
+from frontengine.utils.pet_game.layout import MAX_FURNITURE, Furniture, Zone, checked_int, placement_problem
 from frontengine.utils.pet_game.ledger import Ledger
 from frontengine.utils.pet_game.resident import Resident
 from frontengine.utils.pet_game.world import (
@@ -108,12 +108,13 @@ def _split(raw_items: list, catalog: Catalog, kind: str) -> tuple[list, list]:
 
 def from_dict(data: object, catalog: Catalog) -> World:
     check_header(data)
-    if data["mode"] not in MODES or type(data["time_ms"]) is not int or not 0 <= data["time_ms"] <= MAX_TIME_MS:
-        raise ValueError("Invalid home mode or time")
-    if type(data["next_id"]) is not int or not 1 <= data["next_id"] <= 999_999_999:
-        raise ValueError("Invalid identity counter")
+    if not isinstance(data, dict):        # check_header already ensured this; keeps the type explicit
+        raise ValueError("Not a FrontEngine home save")
+    if data["mode"] not in MODES:
+        raise ValueError("Invalid home mode")
     world = World(catalog, data["home"], data["mode"], data["rng"])
-    world.time_ms, world.next_id = data["time_ms"], data["next_id"]
+    world.time_ms = checked_int(data["time_ms"], 0, MAX_TIME_MS, "home time")
+    world.next_id = checked_int(data["next_id"], 1, 999_999_999, "identity counter")
     world.zones = _unique([Zone.from_dict(raw) for raw in _list(data, "zones", MAX_ZONES)], "zone")
     revived = _saved_dormant(_list(data, "dormant", MAX_DORMANT))
     pieces, dormant_pieces = _split(_list(data, "furniture", MAX_FURNITURE) + revived["furniture"],
@@ -151,9 +152,14 @@ def _saved_dormant(items: list) -> dict[str, list]:
 def _check_references(world: World) -> None:
     """Every ID a record points at must exist; identities must stay below the counter."""
     for collection in (world.zones, world.furniture, world.tasks):
-        for identifier in collection:
-            if int(identifier[1:]) >= world.next_id:
-                raise ValueError("Identity is ahead of the counter")
+        if any(int(identifier[1:]) >= world.next_id for identifier in collection):
+            raise ValueError("Identity is ahead of the counter")
+    _check_placements(world)
+    _check_tasks(world)
+    _recover_overlaps(world)
+
+
+def _check_placements(world: World) -> None:
     for resident in world.residents.values():
         if resident.zone not in world.zones:
             raise ValueError("Resident lives in an unknown zone")
@@ -164,12 +170,14 @@ def _check_references(world: World) -> None:
             raise ValueError("Furniture stands in an unknown zone")
         if piece.owner is not None and piece.owner not in world.residents:
             piece.owner = None
+
+
+def _check_tasks(world: World) -> None:
     for task in world.tasks.values():
         if task.resident not in world.residents:
             raise ValueError("Task belongs to an unknown resident")
         if task.station is not None and task.station not in world.furniture:
             task.station = None
-    _recover_overlaps(world)
 
 
 def _recover_overlaps(world: World) -> None:

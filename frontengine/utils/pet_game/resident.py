@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 
 from frontengine.utils.pet_companion.stats import MAX_AFFECTION
 from frontengine.utils.pet_game.catalog import NEEDS, PROFESSIONS
-from frontengine.utils.pet_game.layout import RESIDENT_ID, MAX_ZONE_CELLS, check_local_id
+from frontengine.utils.pet_game.layout import RESIDENT_ID, MAX_ZONE_CELLS, check_local_id, checked_int
 from frontengine.utils.pet_game.schedule import TEMPLATES
 
 TRAITS = ("diligent", "playful", "quiet", "social")
@@ -83,10 +83,7 @@ class Resident:
                    _checked_routine(data["routine"]), _checked_bool(data["parked"]))
 
 
-def _bounded(value: object, low: int, high: int, label: str) -> int:
-    if type(value) is not int or not low <= value <= high:
-        raise ValueError(f"Invalid {label}")
-    return value
+_bounded = checked_int
 
 
 def _checked_bool(value: object) -> bool:

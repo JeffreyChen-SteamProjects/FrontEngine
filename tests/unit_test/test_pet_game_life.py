@@ -83,7 +83,8 @@ def test_first_loop_work_pays_rest_and_buy_within_fifteen_minutes():
 def test_needs_stay_in_range_and_time_only_moves_through_advance():
     world, _zone = _furnished()
     before = world.time_ms
-    assert simulation.advance(world, 199) == 0 and world.time_ms == before
+    assert simulation.advance(world, 199) == 0
+    assert world.time_ms == before
     assert simulation.advance(world, 1) == 1
     for bad in (-1, 1.5, simulation.MAX_ADVANCE_MS + 1):
         with pytest.raises(ValueError):
@@ -100,7 +101,8 @@ def test_same_seed_and_commands_replay_identically():
         world.command(PET, "eat")
         _run(world, 9 * MINUTE)
         return snapshot.to_dict(world)
-    assert play(3) == play(3)
+    first, second = play(3), play(3)
+    assert first == second
 
 
 def test_cancelled_work_never_pays_and_keeps_nothing_reserved():
@@ -123,7 +125,8 @@ def test_moving_used_furniture_interrupts_and_resumes_with_progress():
     desk = next(key for key, piece in world.furniture.items() if piece.definition == "desk_basic")
     assert world.move(desk, 20) == "accepted"
     assert world.residents[PET].activity is None
-    assert world.tasks[task].state == "paused" and world.tasks[task].progress_ms == progress
+    assert world.tasks[task].state == "paused"
+    assert world.tasks[task].progress_ms == progress
     assert not world.furniture[desk].users
     events = _run(world, 2 * MINUTE)
     assert any(event["kind"] == "settled" for event in events)
@@ -137,7 +140,8 @@ def test_storing_a_station_keeps_the_order_and_its_progress():
     progress = world.tasks[task].progress_ms
     assert world.store(desk) == "accepted"
     assert world.stored("desk_basic") == 1
-    assert world.tasks[task].state == "paused" and world.tasks[task].progress_ms == progress
+    assert world.tasks[task].state == "paused"
+    assert world.tasks[task].progress_ms == progress
     _run(world, MINUTE)
     assert world.tasks[task].progress_ms == progress     # no station, no progress
 
@@ -227,7 +231,8 @@ def test_six_residents_share_little_furniture_for_three_game_days():
             seen[event["resident"]].add(event.get("activity", event["kind"]))
     for identifier in residents:
         assert {"settled", "work"} <= seen[identifier]
-        assert seen[identifier] & {"sleep", "nap"} and seen[identifier] & {"eat", "snack"}
+        assert seen[identifier] & {"sleep", "nap"}
+        assert seen[identifier] & {"eat", "snack"}
     holders = [user for piece in world.furniture.values() for user in piece.users.values()]
     assert len(holders) == len(set(holders))
     for piece in world.furniture.values():
@@ -243,7 +248,8 @@ def test_same_identity_cannot_live_twice_and_leaving_cleans_references():
     world.create_task("letter", PET)
     _run(world, 30000)
     assert world.remove_resident(PET) == "accepted"
-    assert world.furniture[bed].owner is None and not world.tasks
+    assert world.furniture[bed].owner is None
+    assert not world.tasks
     assert not any(piece.users for piece in world.furniture.values())
 
 

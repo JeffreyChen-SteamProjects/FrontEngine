@@ -47,7 +47,8 @@ def test_new_home_is_saved_and_reopens(tmp_path, profiles):
         service.create_home("screen", 0, 900, 40)
     other = _service(tmp_path, profiles)
     result = other.open()
-    assert result.status == "loaded" and other.world.home == service.world.home
+    assert result.status == "loaded"
+    assert other.world.home == service.world.home
     assert other.world.ledger.coins == 10
 
 
@@ -57,7 +58,8 @@ def test_time_advances_only_while_running_and_drops_long_gaps(tmp_path, profiles
     service.create_home("screen", 0, 900, 40, seed=3)
     start = service.world.time_ms
     _tick(service, clock, 1.0)
-    assert service.world.time_ms == start and not service.running
+    assert service.world.time_ms == start
+    assert not service.running
     service.start()
     _tick(service, clock, 1.0)
     assert service.world.time_ms == start + 1000
@@ -120,7 +122,8 @@ def test_resident_live_elsewhere_is_away_until_released(tmp_path, profiles):
     reopened = _service(tmp_path, profiles, clock)
     reopened.open()
     resident = reopened.world.residents[record["id"]]
-    assert resident.away and not resident.parked
+    assert resident.away
+    assert not resident.parked
     before = dict(resident.needs), resident.x_milli
     reopened.start()
     for _ in range(100):
@@ -167,7 +170,8 @@ def test_shutdown_pauses_work_without_paying_partial_units(tmp_path, profiles):
     reopened = _service(tmp_path, profiles)
     world = reopened.open().world
     task = next(iter(world.tasks.values()))
-    assert task.state == "paused" and task.progress_ms > 0
+    assert task.state == "paused"
+    assert task.progress_ms > 0
     assert world.ledger.coins == 10
     reopened.shutdown()
 
@@ -223,7 +227,8 @@ def test_routine_saves_run_on_one_worker_and_coalesce(tmp_path, profiles):
     service._save_soon()          # coalesced behind the first write
     gate.set()
     _wait(lambda: len(saved) == 2)
-    assert threads == {next(iter(threads))} and next(iter(threads)).startswith("home-save")
+    assert threads == {next(iter(threads))}
+    assert next(iter(threads)).startswith("home-save")
     assert saved == [threading.current_thread().name] * 2
     reloaded = HomeSaveStore(tmp_path, builtin_catalog()).load().world
     assert reloaded.ledger.coins == 20

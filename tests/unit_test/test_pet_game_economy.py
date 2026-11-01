@@ -14,7 +14,8 @@ def test_transaction_applies_once_even_when_retried():
     ledger = Ledger()
     assert ledger.apply("t1:u0", "work", 12, {"flower": 2}) == "accepted"
     assert ledger.apply("t1:u0", "work", 12, {"flower": 2}) == "duplicate"
-    assert ledger.coins == 12 and ledger.count("flower") == 2
+    assert ledger.coins == 12
+    assert ledger.count("flower") == 2
     assert len(ledger.journal) == 1
 
 
@@ -23,15 +24,18 @@ def test_spending_is_all_or_nothing_and_never_negative():
     ledger.apply("seed", "gift", 5, {"wood": 1})
     assert ledger.apply("buy", "buy", -6, {"chair": 1}) == "insufficient"
     assert ledger.apply("use", "craft", 0, {"wood": -2, "toy": 1}) == "insufficient"
-    assert ledger.coins == 5 and ledger.items == {"wood": 1}
-    assert not ledger.applied("buy") and not ledger.applied("use")
+    assert ledger.coins == 5
+    assert ledger.items == {"wood": 1}
+    assert not ledger.applied("buy")
+    assert not ledger.applied("use")
 
 
 def test_reserved_items_stay_visible_but_cannot_be_spent_twice():
     ledger = Ledger()
     ledger.apply("seed", "gift", 0, {"wood": 3})
     assert ledger.reserve({"wood": 2})
-    assert ledger.count("wood") == 3 and ledger.available("wood") == 1
+    assert ledger.count("wood") == 3
+    assert ledger.available("wood") == 1
     assert not ledger.reserve({"wood": 2})
     assert ledger.apply("spend", "craft", 0, {"wood": -2}) == "insufficient"
     ledger.release({"wood": 2})
@@ -66,8 +70,9 @@ def test_malformed_ledger_is_rejected(change):
 
 
 def test_floats_cannot_enter_the_wallet():
+    data = {**Ledger().to_dict(), "coins": 3.0}
     with pytest.raises(ValueError):
-        Ledger.from_dict({**Ledger().to_dict(), "coins": 3.0})
+        Ledger.from_dict(data)
 
 
 @pytest.mark.parametrize("change", [
@@ -75,9 +80,9 @@ def test_floats_cannot_enter_the_wallet():
     {"effects": {"energy": 1.5}}, {"activity": None}, {"identifier": "Bad"},
 ])
 def test_invalid_furniture_definitions_are_rejected(change):
-    base = builtin_catalog().furniture["bed_basic"]
+    broken = replace(builtin_catalog().furniture["bed_basic"], **change)
     with pytest.raises(ValueError):
-        Catalog([replace(base, **change)], [])
+        Catalog([broken], [])
 
 
 def test_duplicate_catalog_identities_are_rejected():
@@ -102,7 +107,8 @@ def test_starter_kit_is_granted_once_even_when_migration_reruns():
     world = _world()
     coins, items = world.ledger.coins, dict(world.ledger.items)
     assert world.grant_starter_kit() == "duplicate"
-    assert world.ledger.coins == coins and world.ledger.items == items
+    assert world.ledger.coins == coins
+    assert world.ledger.items == items
 
 
 def test_buying_and_selling_cannot_make_money():
@@ -127,7 +133,8 @@ def test_purchase_needs_coins_and_is_idempotent():
     assert world.buy("armchair", "b1") == "insufficient_coins"
     assert world.buy("plant_pot", "b2") == "accepted"
     assert world.buy("plant_pot", "b2") == "duplicate"
-    assert world.stored("plant_pot") == 1 and world.ledger.coins == 20 - 15
+    assert world.stored("plant_pot") == 1
+    assert world.ledger.coins == 20 - 15
 
 
 def test_sandbox_layout_is_unlimited_and_free():
@@ -135,4 +142,5 @@ def test_sandbox_layout_is_unlimited_and_free():
     zone = world.add_zone("screen", 0, 0, 40)
     assert world.place("bed_cozy", zone, 4)[0] == "accepted"
     assert world.place("bed_cozy", zone, 10)[0] == "accepted"
-    assert world.ledger.coins == 0 and world.ledger.items == {}
+    assert world.ledger.coins == 0
+    assert world.ledger.items == {}

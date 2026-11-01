@@ -46,14 +46,16 @@ def _place(page, definition: str, cell: int) -> None:
 
 def test_no_home_offers_creation_and_disables_the_panels(page):
     assert page.service.world is None
-    assert not page.create_button.isHidden() and page.run_button.isHidden()
+    assert not page.create_button.isHidden()
+    assert page.run_button.isHidden()
     assert not page.residents.section.isEnabled()
     assert page.status.text() == translate("pet_home_create_hint")
 
 
 def test_first_loop_from_the_page(page):
     page.create_home()
-    assert page.service.world is not None and page.service.running
+    assert page.service.world is not None
+    assert page.service.running
     assert page.residents.section.isEnabled()
     page.residents.new_pet()
     resident = page.selected_resident
@@ -86,9 +88,11 @@ def test_arranging_shows_reasons_and_escape_leaves(page):
     panel.place()
     assert page.message.text() == translate("pet_home_result_entrance_blocked")
     page.view.cell_clicked.emit(5)
-    assert panel.cell.value() == 5 and page.view.preview[3] is None
+    assert panel.cell.value() == 5
+    assert page.view.preview[3] is None
     page.keyPressEvent(QKeyEvent(QEvent.Type.KeyPress, Qt.Key.Key_Escape, Qt.KeyboardModifier.NoModifier))
-    assert not panel.arranging and page.view.preview is None
+    assert not panel.arranging
+    assert page.view.preview is None
 
 
 def test_clicking_the_view_selects_residents_and_furniture(page):
@@ -120,7 +124,8 @@ def test_damaged_save_offers_recovery_without_overwriting(tmp_path):
                           clock=Clock())
     page = PetHomePage(service)
     try:
-        assert page.create_button.isHidden() and not page.aside_button.isHidden()
+        assert page.create_button.isHidden()
+        assert not page.aside_button.isHidden()
         assert page.status.text() == translate("pet_home_corrupt")
         page.create_home()
         assert service.world is None

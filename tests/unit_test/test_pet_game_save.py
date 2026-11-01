@@ -67,7 +67,8 @@ def test_damaged_save_is_never_overwritten_and_backup_can_be_restored(tmp_path):
     (tmp_path / "pet-home.json").write_text("{broken", encoding="utf-8")
     store = HomeSaveStore(tmp_path, builtin_catalog())
     result = store.load()
-    assert result.status == "corrupt" and result.backup_available
+    assert result.status == "corrupt"
+    assert result.backup_available
     with pytest.raises(PermissionError):
         store.save(world)
     assert (tmp_path / "pet-home.json").read_text(encoding="utf-8") == "{broken"
@@ -88,11 +89,13 @@ def test_newer_version_is_protected(tmp_path):
     original = path.read_bytes()
     store = HomeSaveStore(tmp_path, builtin_catalog())
     assert store.load().status == "newer"
+    another = _world()
     with pytest.raises(PermissionError):
-        store.save(_world())
+        store.save(another)
     assert path.read_bytes() == original
     kept = store.set_aside("newer1")
-    assert kept.read_bytes() == original and not path.exists()
+    assert kept.read_bytes() == original
+    assert not path.exists()
     store.save(_world())
     assert store.load().status == "loaded"
 
@@ -122,8 +125,9 @@ def test_free_layout_uses_its_own_file(tmp_path):
     sandbox.save(_world("sandbox"))
     assert managed.path != sandbox.path
     assert managed.load().world.ledger.coins != 0
+    managed_world = _world()
     with pytest.raises(ValueError):
-        sandbox.save(_world())
+        sandbox.save(managed_world)
 
 
 def test_missing_content_is_kept_and_restored_when_reinstalled(tmp_path):
@@ -140,7 +144,8 @@ def test_missing_content_is_kept_and_restored_when_reinstalled(tmp_path):
     assert partial.dormant[0]["record"]["id"] == toy
     store.save(partial)
     restored = HomeSaveStore(tmp_path, full).load().world
-    assert restored.furniture[toy].cell == 20 and not restored.dormant
+    assert restored.furniture[toy].cell == 20
+    assert not restored.dormant
 
 
 def test_changed_footprints_return_overlapping_pieces_to_storage(tmp_path):
