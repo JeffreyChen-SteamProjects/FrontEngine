@@ -10,9 +10,13 @@ from typing import TYPE_CHECKING
 
 from PySide6.QtWidgets import QComboBox, QLabel, QListWidget, QListWidgetItem, QProgressBar, QPushButton
 from PySide6.QtCore import QSize, Qt
+from PySide6.QtGui import QGuiApplication
 
 from frontengine.show.pet_game.captions import (
     NEED_KEYS, activity_text, friends_text, item_label, traits_text, wish_text,
+)
+from frontengine.utils.pet_game.arrangement import (
+    PRESETS, LayoutHistory, apply_layout, decode_layout, encode_layout, plan,
 )
 from frontengine.ui.page.pet_game.home_things import ROLE_KEY, ThingGrid, thing_icon, thing_pixmap
 from frontengine.utils.multi_language.retranslate import retranslator, translate, tr
@@ -25,6 +29,7 @@ if TYPE_CHECKING:
     from frontengine.ui.page.pet_game.home_page import PetHomePage
 
 ROLE_ID = Qt.ItemDataRole.UserRole
+PASTED = "pasted"
 
 
 def furniture_name(world, definition: str) -> str:
@@ -177,6 +182,21 @@ class LayoutPanel:
         section.add_inline(*self.actions)
         self.hint.setVisible(False)
         self.preview_cell: int | None = None
+        self.history = LayoutHistory()
+        self.undo_button = _button("pet_home_undo", "Undo", self.undo)
+        self.redo_button = _button("pet_home_redo", "Redo", self.redo)
+        self.copy_button = _button("pet_home_copy_layout", "Copy layout", self.copy_layout)
+        self.paste_button = _button("pet_home_paste_layout", "Paste layout", self.paste_layout)
+        section.add_inline(self.undo_button, self.redo_button, self.copy_button, self.paste_button)
+        self.presets = QComboBox()
+        self.presets.currentIndexChanged.connect(self._preview_layout)
+        section.add_row("pet_home_layouts", self.presets, "Ready-made layout")
+        self.layout_note = QLabel()
+        self.layout_note.setWordWrap(True)
+        section.add_widget(self.layout_note)
+        self.apply_layout_button = _button("pet_home_apply_layout", "Apply layout", self.apply_layout)
+        section.add_inline(self.apply_layout_button)
+        self._pasted: list | None = None
 
     def refresh_lists(self) -> None:
         world, zone = self.page.service.world, self.page.zone
@@ -196,8 +216,24 @@ class LayoutPanel:
                 self.theme.addItem(translate("pet_game_theme_" + name, name), name)
             self.theme.setCurrentIndex(self.theme.findData(theme))
         self.place_button.setEnabled(bool(things))
+        self._refresh_presets(world)
+        self.undo_button.setEnabled(self.history.can_undo())
+        self.redo_button.setEnabled(self.history.can_redo())
         self._refresh_selected()
         self.update_preview()
+
+    def _refresh_presets(self, world) -> None:
+        current = self.presets.currentData()
+        self.presets.blockSignals(True)
+        self.presets.clear()
+        for key in PRESETS:
+            self.presets.addItem(translate("pet_home_layout_" + key, key), key)
+        if self._pasted is not None:
+            self.presets.addItem(translate("pet_home_layout_pasted", "Pasted layout"), PASTED)
+        self.presets.setCurrentIndex(max(0, self.presets.findData(current)))
+        self.presets.blockSignals(False)
+        self.apply_layout_button.setEnabled(world is not None)
+        self._preview_layout()
 
     def _refresh_selected(self) -> None:
         world = self.page.service.world
@@ -214,6 +250,106 @@ class LayoutPanel:
             thing_pixmap.cache_clear()
             self.page.refresh()
 
+    # ----- whole-zone changes -----------------------------------------------------------------
+
+    def _change(self, command):
+        """Every layout change goes through here so it can be undone."""
+        world, zone = self.page.service.world, self.page.zone
+        if world is None or zone is None:
+            return None
+        self.history.record(world, zone)
+        result = self.page.service.run(command)
+        self.page.refresh()
+        return result
+
+    def undo(self) -> None:
+        zone = self.page.zone
+        if zone and self.history.can_undo():
+            self.page.service.run(lambda world: self.history.undo(world, zone))
+            self.page.refresh()
+
+    def redo(self) -> None:
+        zone = self.page.zone
+        if zone and self.history.can_redo():
+            self.page.service.run(lambda world: self.history.redo(world, zone))
+            self.page.refresh()
+
+    def copy_layout(self) -> None:
+        world, zone = self.page.service.world, self.page.zone
+        if world is not None and zone:
+            QGuiApplication.clipboard().setText(encode_layout(world, zone))
+            self.page.report("layout_copied")
+
+    def paste_layout(self) -> None:
+        world = self.page.service.world
+        if world is None:
+            return
+        try:
+            self._pasted = decode_layout(QGuiApplication.clipboard().text(), world.catalog)
+        except (ValueError, TypeError):
+            self.page.report("layout_invalid")
+            return
+        index = self.presets.findData(PASTED)
+        if index < 0:
+            self.presets.addItem(translate("pet_home_layout_pasted", "Pasted layout"), PASTED)
+            index = self.presets.count() - 1
+        self.presets.setCurrentIndex(index)
+        self._preview_layout()
+
+    def _chosen_layout(self):
+        key = self.presets.currentData()
+        return self._pasted if key == PASTED else PRESETS.get(key)
+
+    def _preview_layout(self, *_args) -> None:
+        world, zone, pieces = self.page.service.world, self.page.zone, self._chosen_layout()
+        if world is None or zone is None or pieces is None:
+            self.layout_note.setText("")
+            return
+        missing, cost, unavailable = plan(world, zone, pieces)
+        if not missing:
+            text = translate("pet_home_layout_ready", "Everything it needs is in the home or in storage.")
+        else:
+            names = ", ".join(f"{furniture_name(world, name)} × {count}" for name, count in sorted(missing.items()))
+            text = translate("pet_home_layout_missing", "Needs {items} — {cost} coins").format(items=names, cost=cost)
+            if unavailable:
+                text += " · " + translate("pet_home_layout_unavailable", "some cannot be bought yet and are left out")
+        self.layout_note.setText(text)
+
+    def apply_layout(self) -> None:
+        pieces, zone = self._chosen_layout(), self.page.zone
+        if pieces is None or zone is None:
+            return
+        result = self._change(lambda world: apply_layout(world, zone, pieces, "layout-" + uuid.uuid4().hex,
+                                                          buy_missing=True))
+        if result is not None:
+            code, skipped = result
+            self.page.report(code if code != "accepted" or not skipped else "layout_partly")
+            self._preview_layout()
+
+    def drag_hover(self, identifier: str, cell: int) -> None:
+        world, zone = self.page.service.world, self.page.zone
+        piece = world.furniture.get(identifier) if world else None
+        if piece is not None and zone:
+            problem = world.preview(piece.definition, zone, cell, moving=identifier)
+            self.page.set_preview((piece.definition, cell, piece.flipped, problem))
+
+    def drop(self, identifier: str, cell: int) -> None:
+        self.page.set_preview(None)
+        world = self.page.service.world
+        piece = world.furniture.get(identifier) if world else None
+        if piece is None or piece.cell == cell:
+            return
+        self.page.report(self._change(lambda w: w.move(identifier, cell, None)))
+
+    def nudge(self, steps: int) -> bool:
+        """Arrow keys while arranging: the selected piece moves one cell at a time."""
+        world, identifier = self.page.service.world, self.page.selected_furniture
+        piece = world.furniture.get(identifier) if world and identifier else None
+        if piece is None:
+            return False
+        self.page.report(self._change(lambda w: w.move(identifier, piece.cell + steps, None)))
+        return True
+
     def toggle_arrange(self) -> None:
         self.arranging = not self.arranging
         retranslator.set_text(self.arrange, "pet_home_arrange_done" if self.arranging else "pet_home_arrange",
@@ -221,6 +357,7 @@ class LayoutPanel:
         self.hint.setVisible(self.arranging)
         self.preview_cell = None
         self.page.set_arranging(self.arranging)
+        self.page.view.drag_enabled = self.arranging
         self.update_preview()
 
     def update_preview(self, *_args) -> None:
@@ -246,15 +383,14 @@ class LayoutPanel:
                 return
             self._place_at(definition, cell)
         elif piece:
-            self.page.report(self.page.service.run(lambda world: world.move(piece, cell, False)))
-            self.page.refresh()
+            self.page.report(self._change(lambda world: world.move(piece, cell, None)))
 
     def _place_at(self, definition: str, cell: int | None) -> None:
         zone = self.page.zone
         if cell is None:
-            result, identifier = self.page.service.run(lambda world: world.place_anywhere(definition, zone))
+            result, identifier = self._change(lambda world: world.place_anywhere(definition, zone))
         else:
-            result, identifier = self.page.service.run(lambda world: world.place(definition, zone, cell))
+            result, identifier = self._change(lambda world: world.place(definition, zone, cell))
         self.page.report(result)
         if identifier:
             self.page.selected_furniture = identifier
@@ -271,15 +407,13 @@ class LayoutPanel:
         world, piece = self.page.service.world, self.page.selected_furniture
         found = world.furniture.get(piece) if world and piece else None
         if found is not None:
-            self.page.report(self.page.service.run(lambda w: w.move(piece, found.cell, not found.flipped)))
-            self.page.refresh()
+            self.page.report(self._change(lambda w: w.move(piece, found.cell, not found.flipped)))
 
     def store(self) -> None:
         piece = self.page.selected_furniture
         if piece:
-            self.page.report(self.page.service.run(lambda world: world.store(piece)))
             self.page.selected_furniture = None
-            self.page.refresh()
+            self.page.report(self._change(lambda world: world.store(piece)))
 
     def assign_bed(self) -> None:
         piece, resident = self.page.selected_furniture, self.page.selected_resident

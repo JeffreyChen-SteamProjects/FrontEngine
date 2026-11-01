@@ -46,6 +46,9 @@ class HomeView(QWidget):
     zoom = 1.0                    # cell size multiplier (ZOOMS); the desktop strip stays at 1
     zoomable = False              # Ctrl+wheel zooms only where the page allows it
     zoom_changed = Signal(float)
+    drag_enabled = False          # while arranging, pieces can be dragged to a new cell
+    piece_hovered = Signal(str, int)
+    piece_dropped = Signal(str, int)
     resident_selected = Signal(str)
     furniture_selected = Signal(str)
     cell_clicked = Signal(int)
@@ -319,11 +322,35 @@ class HomeView(QWidget):
 
     # ----- input -----------------------------------------------------------------------
 
+    def _drag_cell(self, event: QMouseEvent) -> int:
+        _identifier, grab = self._dragging
+        return max(0, int(round((event.position().x() - grab) / self.cell_width())))
+
+    def mouseMoveEvent(self, event: QMouseEvent) -> None:
+        if getattr(self, "_dragging", None) is not None:
+            self.piece_hovered.emit(self._dragging[0], self._drag_cell(event))
+            return
+        super().mouseMoveEvent(event)
+
+    def mouseReleaseEvent(self, event: QMouseEvent) -> None:
+        if getattr(self, "_dragging", None) is not None:
+            identifier, cell = self._dragging[0], self._drag_cell(event)
+            self._dragging = None
+            self.piece_dropped.emit(identifier, cell)
+            return
+        super().mouseReleaseEvent(event)
+
     def mousePressEvent(self, event: QMouseEvent) -> None:
         if self.world is None or self.zone not in self.world.zones or event.button() != Qt.MouseButton.LeftButton:
             super().mousePressEvent(event)
             return
         point = event.position()
+        if self.drag_enabled:
+            for piece, definition in self.world.in_zone(self.zone):
+                if self.piece_rect(piece, definition).contains(point):
+                    self._dragging = (piece.identifier, point.x() - self.piece_rect(piece, definition).left())
+                    self.furniture_selected.emit(piece.identifier)
+                    return
         for resident in sorted(self.world.residents.values(), key=lambda item: item.identifier):
             if resident.zone == self.zone:
                 if self.resident_box(resident).adjusted(-3, -3, 3, 3).contains(point):
