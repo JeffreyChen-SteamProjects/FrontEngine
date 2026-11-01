@@ -15,7 +15,7 @@ russian_word_dict = {
     "tab_video_text": "Видео",
     "tab_image_text": "Изображение",
     "tab_web_text": "Веб",
-    "tab_gif_text": "GIF и WEBP",
+    "tab_gif_text": "GIF и WebP",
     "tab_sound_text": "Музыка",
     "tab_text_text": "Текст",
     "tab_external_ui": "Внешний UI",
@@ -228,12 +228,12 @@ russian_word_dict = {
     "input_error": "Не вводите пустые строки или пробелы",
     "save_generation_image": "Сохранить изображение",
     # Help Menu
-    "help_menu_label": "Меню помощи",
+    "help_menu_label": "Справка",
     "help_menu_open_issue": "Открыть жалобу",
     "how_to_critical_exit_action": "Как принудительно закрыть",
     "how_to_critical_exit": "Нажмите F12, чтобы срочно закрыть",
     # HowTo Menu
-    "doc_menu_label": "Меню документации",
+    "doc_menu_label": "Документация",
     "doc_menu_open_doc": "Открыть документацию",
     # Presety, pitomets, vidzhety, instrumenty, privatnost, pult i vitrina
     "workshop_menu_import": "Импортировать содержимое Мастерской…",

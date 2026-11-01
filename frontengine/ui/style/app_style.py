@@ -88,12 +88,17 @@ def _shell_rules(c: Dict[str, str]) -> str:
     return f"""
 QMainWindow, QDialog {{ background-color: {c['window']}; color: {c['text']}; }}
 QWidget#navigationPanel {{ background-color: {c['sidebar']}; border-right: 1px solid {c['border']}; }}
-QLabel#appBrand {{ color: {c['text']}; font-size: 18px; font-weight: 700; padding: 2px 8px 6px 8px; }}
+QLabel#appBrand {{ color: {c['text']}; font-size: 17px; font-weight: 700; }}
 QPushButton#commandSearch {{
     color: {c['muted']}; background-color: {c['surface']}; border: 1px solid {c['border']};
-    border-radius: {RADIUS}px; text-align: left; padding: 7px 12px; font-weight: 400;
+    border-radius: {RADIUS}px; text-align: left; padding: 0px; font-weight: 400; min-height: 34px;
 }}
-QPushButton#commandSearch:hover {{ border-color: {c['accent']}; color: {c['text']}; }}
+QPushButton#commandSearch:hover {{ border-color: {c['accent']}; }}
+QLabel#commandSearchCaption {{ color: {c['muted']}; }}
+QLabel#shortcutHint {{
+    color: {c['faint']}; font-size: 11px; border: 1px solid {c['border']}; border-radius: 4px; padding: 0px 5px;
+}}
+QWidget#brandMark {{ background: transparent; }}
 QListWidget#navSidebar {{ background-color: {c['sidebar']}; border: none; outline: 0; padding: 0px; }}
 QListWidget#navSidebar::item {{
     color: {c['muted']}; padding: 6px 10px; margin: 1px 0px; border: none; border-radius: {RADIUS}px;

@@ -61,6 +61,8 @@ y la versión de Steam distribuye la misma aplicación con compatibilidad con el
 
 La barra lateral agrupa las páginas por su propósito. Esta sección la sigue.
 
+Cada página tiene un icono en la barra lateral, y el cuadro de búsqueda de arriba (Ctrl+K) abre Comandos. Los menús Ayuda y Documentación de la barra de menús se llaman así sin más.
+
 ### Hogar
 
 **Hogar de mascotas** — la primera página. Tus mascotas guardadas se mudan a un pequeño hogar, viven allí por su cuenta y trabajan para ganar monedas.

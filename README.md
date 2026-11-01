@@ -61,6 +61,8 @@ and the Steam build ships the same application with Workshop support.
 
 The sidebar groups the pages by what they are for. This section follows it.
 
+Every page has an icon in the sidebar, and the search box at its top (Ctrl+K) opens Commands. The menu bar's Help and Docs menus are named just that.
+
 ### Home
 
 **Pet home** — the first page. Your saved pets move into a small home, live there on their own and work for home coins.

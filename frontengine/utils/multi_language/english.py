@@ -14,8 +14,8 @@ english_word_dict = {
     # Tab text
     "tab_video_text": "Video",
     "tab_image_text": "Image",
-    "tab_web_text": "WEB",
-    "tab_gif_text": "GIF AND WEBP",
+    "tab_web_text": "Web",
+    "tab_gif_text": "GIF & WebP",
     "tab_sound_text": "Sound",
     "tab_text_text": "Text",
     "tab_control_center_text": "Control Center",
@@ -228,12 +228,12 @@ english_word_dict = {
     "input_error": "Please input something",
     "save_generation_image": "Save Image",
     # Help Menu
-    "help_menu_label": "Help menu",
+    "help_menu_label": "Help",
     "help_menu_open_issue": "Open issue tracker",
     "how_to_critical_exit_action": "How to force close",
     "how_to_critical_exit": "Press F12 to close urgently",
     # HowTo Menu
-    "doc_menu_label": "Doc menu",
+    "doc_menu_label": "Docs",
     "doc_menu_open_doc": "Open doc",
     # Presets
     "workshop_menu_import": "Import Workshop content...",
