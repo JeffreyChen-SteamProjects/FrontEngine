@@ -134,6 +134,11 @@ def _walk(world: World, resident: Resident) -> None:
         resident.x_milli += reach * resident.facing
         return
     resident.x_milli = activity.target_x
+    if activity.kind == "visit":
+        resident.activity = None
+        world.cross(resident.identifier)
+        resident.decide_after_ms = world.time_ms
+        return
     activity.phase = "using"
     activity.started_ms = world.time_ms
     if activity.until_ms is not None:

@@ -35,6 +35,13 @@ PRESETS: dict[str, tuple[tuple[str, int, bool], ...]] = {
 }
 
 
+def _stairs_first(world: World, names) -> list[int]:
+    """Placement order: pet stairs before anything else, so a raised piece beside them is reachable."""
+    names = list(names)
+    steps = [world.catalog.furniture.get(name) is not None and world.catalog.furniture[name].steps for name in names]
+    return sorted(range(len(names)), key=lambda index: not steps[index])
+
+
 def layout_of(world: World, zone: str) -> list[tuple[str, int, bool]]:
     return sorted((piece.definition, piece.cell, piece.flipped) for piece, _definition in world.in_zone(zone))
 
@@ -50,7 +57,7 @@ def restore(world: World, zone: str, saved: list[dict]) -> int:
     for piece, _definition in list(world.in_zone(zone)):
         world.store(piece.identifier)
     missed = 0
-    for entry in saved:
+    for entry in (saved[index] for index in _stairs_first(world, (entry["definition"] for entry in saved))):
         result, identifier = world.place(entry["definition"], zone, entry["cell"], entry["flipped"])
         if result != "accepted":
             missed += 1
@@ -152,5 +159,7 @@ def apply_layout(world: World, zone: str, pieces, transaction: str, buy_missing:
                 world.buy(name, f"{transaction}:{name}:{index}")
     for piece, _definition in list(world.in_zone(zone)):
         world.store(piece.identifier)
-    skipped = sum(1 for name, cell, flipped in pieces if world.place(name, zone, cell, flipped)[0] != "accepted")
+    pieces = list(pieces)
+    ordered = (pieces[index] for index in _stairs_first(world, (name for name, _cell, _flipped in pieces)))
+    skipped = sum(1 for name, cell, flipped in ordered if world.place(name, zone, cell, flipped)[0] != "accepted")
     return "accepted", skipped

@@ -17,7 +17,8 @@ from frontengine.utils.pet_game.catalog import (
 )
 from frontengine.utils.pet_game.jobs import MAX_TASKS, MAX_UNITS, Task
 from frontengine.utils.pet_game.layout import (
-    AREA_TAGS, MAX_FURNITURE, MAX_ZONE_CELLS, MIN_ZONE_CELLS, THEMES, Furniture, Zone, placement_problem,
+    AREA_TAGS, MAX_FURNITURE, MAX_ZONE_CELLS, MIN_ZONE_CELLS, THEMES, Furniture, Zone, can_climb,
+    has_steps, placement_problem,
 )
 from frontengine.utils.pet_game.ledger import Ledger
 from frontengine.utils.pet_game.resident import Resident, resident_from_profile
@@ -25,7 +26,7 @@ from frontengine.utils.pet_game.rng import GameRandom
 from frontengine.utils.pet_game.schedule import TEMPLATES, initial_time
 
 FORMAT = "frontengine.pet-home"
-VERSION = 4              # 2: comfort and social needs, relationships; 3: goals and progress; 4: zone areas
+VERSION = 5              # 2: needs, relationships; 3: goals, progress; 4: zone areas; 5: zone crossings
 RELATION_LIMIT = 100
 MODES = ("manage", "sandbox")
 MAX_RESIDENTS = 12
@@ -100,7 +101,7 @@ class World:
         identifier = self._new_id("z")
         zone = Zone.from_dict({"id": identifier, "screen": screen, "x": x, "y": y,
                                "width_cells": width_cells, "theme": "warm_home",
-                               "entrance": 0, "restricted": [], "areas": []})
+                               "entrance": 0, "restricted": [], "areas": [], "link": None})
         self.zones[identifier] = zone
         return identifier
 
@@ -130,7 +131,32 @@ class World:
                 resident.x_milli = min(resident.x_milli, found.width_pixels * 1000 - 1)
         return "accepted"
 
-    def transfer_resident(self, identifier: str, zone: str) -> str:
+    def link_zones(self, zone: str, other: str | None) -> str:
+        """Join two zones' entrances into a crossing point (``None`` removes the zone's crossing)."""
+        if zone not in self.zones or (other is not None and (other not in self.zones or other == zone)):
+            return "unknown"
+        for key in (zone, other, self.zones[zone].link, self.zones[other].link if other else None):
+            if key in self.zones and self.zones[key].link in (zone, other):
+                self.zones[key].link = None
+        self.zones[zone].link = other
+        if other is not None:
+            self.zones[other].link = zone
+        return "accepted"
+
+    def crossing(self, zone: str) -> str | None:
+        """Where this zone's entrance leads, when that zone's screen is connected."""
+        link = self.zones[zone].link if zone in self.zones else None
+        return link if link in self.zones and link not in self.offline_zones else None
+
+    def cross(self, identifier: str) -> str:
+        """A pet walks through a crossing point by itself; it keeps its bed in the old zone."""
+        resident = self.residents.get(identifier)
+        target = self.crossing(resident.zone) if resident is not None else None
+        if target is None:
+            return "unknown"
+        return self.transfer_resident(identifier, target, keep_claims=True)
+
+    def transfer_resident(self, identifier: str, zone: str, keep_claims: bool = False) -> str:
         """Move a pet to another zone on purpose; it arrives at that zone's entrance."""
         resident = self.residents.get(identifier)
         if resident is None or zone not in self.zones:
@@ -139,7 +165,7 @@ class World:
             return "duplicate"
         cancel_activity(self, resident, "moved_zone")
         for piece in self.furniture.values():
-            if piece.owner == identifier and piece.zone != zone:
+            if piece.owner == identifier and piece.zone != zone and not keep_claims:
                 piece.owner = None
         resident.zone = zone
         entrance = self.zones[zone].entrance
@@ -190,7 +216,26 @@ class World:
         found = self.catalog.furniture.get(definition)
         if found is None or zone not in self.zones:
             return "unknown"
-        return placement_problem(self.zones[zone], found, cell, self.in_zone(zone, moving))
+        others = self.in_zone(zone, moving)
+        problem = placement_problem(self.zones[zone], found, cell, others)
+        if problem is None and not self._reachable_after(zone, found, cell, others):
+            return "unreachable"
+        return problem
+
+    def _reachable_after(self, zone: str, definition, cell: int, others) -> bool:
+        """Would every raised piece still be reachable with this piece at ``cell``?"""
+        if any(can_climb(r.traits) for r in self.residents.values() if r.zone == zone):
+            return True
+        placed = Furniture("f0", definition.identifier, zone, cell)
+        pieces = [*others, (placed, definition)]
+        raised = [(piece, d) for piece, d in pieces if d.raised] if definition.steps else [(placed, definition)]
+        return all(has_steps(piece, d, pieces) for piece, d in raised if d.raised)
+
+    def reachable(self, resident, piece) -> bool:
+        """Ground is always connected; a raised point needs climbing or pet stairs beside it."""
+        definition = self.definition(piece)
+        return (not definition.raised or can_climb(resident.traits)
+                or has_steps(piece, definition, self.in_zone(piece.zone)))
 
     def buy(self, definition: str, transaction: str) -> str:
         found = self.catalog.furniture.get(definition)

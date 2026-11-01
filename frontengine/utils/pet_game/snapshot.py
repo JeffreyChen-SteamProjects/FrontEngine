@@ -24,7 +24,8 @@ FIELDS_V1 = {"format", "version", "home", "mode", "time_ms", "rng", "next_id", "
              "residents", "tasks", "ledger", "flags", "dormant"}
 FIELDS_V2 = FIELDS_V1 | {"relations"}
 FIELDS = FIELDS_V2 | {"progress"}
-FIELDS_BY_VERSION = {1: FIELDS_V1, 2: FIELDS_V2, 3: FIELDS, 4: FIELDS}     # 4 changed zones only
+FIELDS_BY_VERSION = {1: FIELDS_V1, 2: FIELDS_V2, 3: FIELDS, 4: FIELDS, 5: FIELDS}   # 4 and 5 changed zones only
+ZONE_DEFAULTS = {4: ("areas", []), 5: ("link", None)}     # fields zones gained in that version
 _PAIR = re.compile(r"[0-9a-f]{32}\|[0-9a-f]{32}")
 MAX_TIME_MS = 10 ** 13
 MAX_DORMANT = 200
@@ -124,9 +125,10 @@ def from_dict(data: object, catalog: Catalog) -> World:
     world.time_ms = checked_int(data["time_ms"], 0, MAX_TIME_MS, "home time")
     world.next_id = checked_int(data["next_id"], 1, 999_999_999, "identity counter")
     raw_zones = _list(data, "zones", MAX_ZONES)
-    if data["version"] < 4:              # zones gained floor areas in version 4
-        raw_zones = [{**raw, "areas": []} if isinstance(raw, dict) and "areas" not in raw else raw
-                     for raw in raw_zones]
+    for version, (key, default) in ZONE_DEFAULTS.items():
+        if data["version"] < version:
+            raw_zones = [{**raw, key: default} if isinstance(raw, dict) and key not in raw else raw
+                         for raw in raw_zones]
     world.zones = _unique([Zone.from_dict(raw) for raw in raw_zones], "zone")
     revived = _saved_dormant(_list(data, "dormant", MAX_DORMANT))
     pieces, dormant_pieces = _split(_list(data, "furniture", MAX_FURNITURE) + revived["furniture"],
