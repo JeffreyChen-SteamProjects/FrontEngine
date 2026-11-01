@@ -30,6 +30,10 @@ SQUABBLE_COOLDOWN_MS = 10 * 60 * 1000
 WAIT_MS = 5000
 FREE_WEIGHTS = {"play": 3, "relax": 3, "wander": 4, "idle": 2, "greet": 2}
 VISIT_WEIGHT = 1                 # free time over a crossing point into the linked zone
+HELP_WEIGHT = 2                  # free time lending a hand to a pet at work
+MAX_HELPERS = 2                  # each helper adds a quarter to the worker's speed
+HELP_MS = (30000, 60000)
+AUTO_STOCK_LIMIT = 20            # automatic jobs stop making goods once storage holds this many
 TRAIT_WEIGHTS = {"playful": {"play": 3}, "quiet": {"relax": 3, "play": -2, "greet": -1},
                  "social": {"wander": 2, "greet": 3}}
 SHARED_COOLDOWN_MS = 10 * 60 * 1000
@@ -216,6 +220,8 @@ def auto_task(world: World, resident: Resident) -> str | None:
             continue
         if any(world.ledger.available(item) < count for item, count in recipe.inputs.items()):
             continue
+        if recipe.outputs and all(world.ledger.available(item) >= AUTO_STOCK_LIMIT for item in recipe.outputs):
+            continue                       # storage is full of these already
         rank = (PROFESSION_TRAITS.get(recipe.profession) in resident.traits, resident.level(recipe.profession),
                 recipe.min_level, recipe.coins + recipe.experience, recipe.identifier)
         if best is None or rank > best[0]:
@@ -253,9 +259,14 @@ def _start_free(world: World, resident: Resident, reason: str = "free_time") -> 
                or (kind not in ("greet", "wander", "idle") and _free_piece(world, resident, kind) is not None)]
     if world.crossing(resident.zone) is not None:
         choices.append(("visit", VISIT_WEIGHT))
+    if _help_partner(world, resident) is not None:
+        choices.append(("help", HELP_WEIGHT))
     kind = world.rng.weighted(choices)
     if kind == "visit":
         start_visit(world, resident, "visiting")
+        return
+    if kind == "help":
+        start_help(world, resident, _help_partner(world, resident))
         return
     if kind == "greet" and start_greet(world, resident):
         return
@@ -373,6 +384,49 @@ def greet_arrived(world: World, resident: Resident) -> None:
         start(world, partner, "greet", "greeted", duration=GREET_MS)
         partner.activity.phase = "using"
         partner.facing = 1 if resident.x_milli > partner.x_milli else -1
+
+
+def helpers(world: World, worker: Resident) -> int:
+    """How many pets are lending this worker a hand right now (at most ``MAX_HELPERS`` count)."""
+    count = sum(1 for other in world.residents.values()
+                if other.activity is not None and other.activity.kind == "help"
+                and other.activity.phase == "using" and other.activity.partner == worker.identifier)
+    return min(MAX_HELPERS, count)
+
+
+def _help_partner(world: World, resident: Resident) -> Resident | None:
+    """The nearest pet in this zone working at a station that still has room for a helper."""
+    candidates = []
+    for other in world.residents.values():
+        activity = other.activity
+        if (other is resident or other.zone != resident.zone or other.parked or activity is None
+                or activity.kind != "work" or activity.phase != "using"):
+            continue
+        busy = sum(1 for r in world.residents.values()
+                   if r.activity is not None and r.activity.kind == "help" and r.activity.partner == other.identifier)
+        if busy < MAX_HELPERS:
+            candidates.append((abs(other.x_milli - resident.x_milli), other.identifier, other))
+    return min(candidates)[2] if candidates else None
+
+
+def start_help(world: World, resident: Resident, worker: Resident) -> None:
+    side = 1 if resident.x_milli < worker.x_milli else -1
+    start(world, resident, "help", "helping", duration=world.rng.randint(*HELP_MS))
+    resident.activity.target_x = max(0, worker.x_milli - side * 24000)
+    resident.activity.partner = worker.identifier
+
+
+def help_completed(world: World, resident: Resident, worker_id: str) -> None:
+    """A helper learns a little of the worker's trade and enjoys the company."""
+    worker = world.residents.get(worker_id)
+    task = world.tasks.get(worker.activity.task) if worker is not None and worker.activity is not None else None
+    if task is not None and task.recipe in world.catalog.recipes:
+        trade = world.catalog.recipes[task.recipe].profession
+        resident.skills[trade] = resident.skills.get(trade, 0) + 1
+    resident.needs["social"] = min(100, resident.needs["social"] + 8)
+    if worker is not None:
+        world.adjust_relation(resident.identifier, worker_id, 1)
+        world.emit("helped", resident=resident.identifier, partner=worker_id)
 
 
 def greet_completed(world: World, resident: Resident, partner_id: str) -> None:

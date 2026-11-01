@@ -1838,4 +1838,10 @@ russian_word_dict = {
     "pet_home_toolbar_jobs": "Заданий: {count}",
     "pet_home_dock_left": "Панель влево",
     "pet_home_dock_right": "Панель вправо",
+    "pet_home_upgrade": "Улучшить ({cost} монет)",
+    "pet_home_upgrade_station": "Улучшить",
+    "pet_home_station_level": "Уровень {level} · скорость {speed}%",
+    "pet_home_result_not_upgradable": "Это больше нельзя улучшить.",
+    "pet_home_activity_help": "Помогает",
+    "pet_home_reason_helping": "помогает другу с работой",
 }

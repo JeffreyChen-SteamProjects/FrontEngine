@@ -1840,4 +1840,10 @@ simplified_chinese_word_dict = {
     "pet_home_toolbar_jobs": "{count} 项工作",
     "pet_home_dock_left": "工具栏移到左边",
     "pet_home_dock_right": "工具栏移到右边",
+    "pet_home_upgrade": "升级（{cost} 金币）",
+    "pet_home_upgrade_station": "升级",
+    "pet_home_station_level": "等级 {level} · 速度 {speed}%",
+    "pet_home_result_not_upgradable": "这个无法再升级了。",
+    "pet_home_activity_help": "帮忙中",
+    "pet_home_reason_helping": "帮朋友工作",
 }

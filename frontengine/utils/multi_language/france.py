@@ -1838,4 +1838,10 @@ french_word_dict = {
     "pet_home_toolbar_jobs": "{count} tâches",
     "pet_home_dock_left": "Barre d'outils à gauche",
     "pet_home_dock_right": "Barre d'outils à droite",
+    "pet_home_upgrade": "Améliorer ({cost} pièces)",
+    "pet_home_upgrade_station": "Améliorer",
+    "pet_home_station_level": "Niveau {level} · vitesse {speed} %",
+    "pet_home_result_not_upgradable": "Impossible de l'améliorer davantage.",
+    "pet_home_activity_help": "Donne un coup de main",
+    "pet_home_reason_helping": "aide un ami au travail",
 }

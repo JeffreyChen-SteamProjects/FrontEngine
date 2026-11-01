@@ -1847,4 +1847,10 @@ traditional_chinese_word_dict = {
     "pet_home_toolbar_jobs": "{count} 項工作",
     "pet_home_dock_left": "工具列移到左邊",
     "pet_home_dock_right": "工具列移到右邊",
+    "pet_home_upgrade": "升級（{cost} 金幣）",
+    "pet_home_upgrade_station": "升級",
+    "pet_home_station_level": "等級 {level} · 速度 {speed}%",
+    "pet_home_result_not_upgradable": "這個無法再升級了。",
+    "pet_home_activity_help": "幫忙中",
+    "pet_home_reason_helping": "幫朋友工作",
 }

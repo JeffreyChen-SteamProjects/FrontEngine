@@ -1838,4 +1838,10 @@ italian_word_dict = {
     "pet_home_toolbar_jobs": "{count} lavori",
     "pet_home_dock_left": "Barra degli strumenti a sinistra",
     "pet_home_dock_right": "Barra degli strumenti a destra",
+    "pet_home_upgrade": "Migliora ({cost} monete)",
+    "pet_home_upgrade_station": "Migliora",
+    "pet_home_station_level": "Livello {level} · velocità {speed}%",
+    "pet_home_result_not_upgradable": "Non si può migliorare oltre.",
+    "pet_home_activity_help": "Dà una mano",
+    "pet_home_reason_helping": "aiuta un amico al lavoro",
 }

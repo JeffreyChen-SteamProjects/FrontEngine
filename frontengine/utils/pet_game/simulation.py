@@ -9,7 +9,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from frontengine.utils.pet_game.behaviour import (
-    URGENT_ENERGY, URGENT_FULLNESS, cancel_activity, decide, greet_arrived, greet_completed, release,
+    URGENT_ENERGY, URGENT_FULLNESS, cancel_activity, decide, greet_arrived, greet_completed, help_completed,
+    helpers, release,
     shared_completed, together,
 )
 from frontengine.utils.pet_game import goals
@@ -195,6 +196,8 @@ def finish(world: World, resident: Resident, pause_ms: int = 1000) -> None:
     resident.decide_after_ms = world.time_ms + pause_ms
     if activity.kind == "greet" and activity.partner is not None:
         greet_completed(world, resident, activity.partner)
+    if activity.kind == "help" and activity.partner is not None:
+        help_completed(world, resident, activity.partner)
     world.emit("completed", resident=resident.identifier, activity=activity.kind)
 
 
@@ -211,6 +214,10 @@ def _work(world: World, resident: Resident) -> None:
         rate = rate * 11 // 10
     if PROFESSION_TRAITS[recipe.profession] in resident.traits:
         rate = rate * 11 // 10
+    piece = world.furniture.get(resident.activity.furniture or "")
+    if piece is not None:                       # each station level works a quarter faster
+        rate = rate * (3 + world.station_level(piece.definition)) // 4
+    rate = rate * (4 + helpers(world, resident)) // 4
     task.progress_ms += rate
     if task.progress_ms >= recipe.duration_ms:
         settle(world, resident, task)

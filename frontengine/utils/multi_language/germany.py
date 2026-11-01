@@ -1841,4 +1841,10 @@ germany_word_dict = {
     "pet_home_toolbar_jobs": "{count} Aufträge",
     "pet_home_dock_left": "Werkzeugleiste nach links",
     "pet_home_dock_right": "Werkzeugleiste nach rechts",
+    "pet_home_upgrade": "Verbessern ({cost} Münzen)",
+    "pet_home_upgrade_station": "Verbessern",
+    "pet_home_station_level": "Stufe {level} · {speed} % Tempo",
+    "pet_home_result_not_upgradable": "Das lässt sich nicht weiter verbessern.",
+    "pet_home_activity_help": "Hilft mit",
+    "pet_home_reason_helping": "hilft einem Freund bei der Arbeit",
 }
