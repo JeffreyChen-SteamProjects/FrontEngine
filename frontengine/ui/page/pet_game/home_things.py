@@ -19,7 +19,8 @@ ROLE_KEY = Qt.ItemDataRole.UserRole
 TILE_ICON = 64
 # A job without an output of its own shows what it makes.
 RECIPE_ICONS = {"letter": "letter", "story": "story", "herbs": "herb", "flowers": "flower", "toy": "toy",
-                "stool": FURNITURE_PREFIX + "stool"}
+                "stool": FURNITURE_PREFIX + "stool", "novel": "novel", "bouquet": "bouquet",
+                "music_box": "music_box"}
 
 
 def _fit(image: QImage | None, size: int) -> QPixmap:
