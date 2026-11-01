@@ -82,6 +82,8 @@ def build_command(version: str, onefile: bool, output_dir: Path | None = None, j
         "--include-package-data=trimesh",
         # Generated sprite atlases of the built-in pets ship inside the package.
         "--include-package-data=frontengine.show.pet.inkside",
+        # Blender-rendered furniture pictures of the pet home, one folder per theme.
+        "--include-package-data=frontengine.show.pet_game",
         # main_ui.py looks for frontengine.ico next to the working directory.
         f"--include-data-files={ICON}=frontengine.ico",
         "--company-name=JE-Chen",

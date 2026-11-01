@@ -12,6 +12,7 @@ from PySide6.QtCore import QPointF, QRectF, Qt, Signal
 from PySide6.QtGui import QColor, QFont, QMouseEvent, QPainter, QPaintEvent, QPen
 from PySide6.QtWidgets import QSizePolicy, QWidget
 
+from frontengine.show.pet_game.furniture_art import aspect, picture
 from frontengine.show.pet_game.themes import floor_color, paint_sky
 from frontengine.utils.pet_game.environment import daylight
 from frontengine.utils.multi_language.retranslate import translate
@@ -123,39 +124,75 @@ class HomeView(QWidget):
             for cell in range(zone.width_cells + 1):
                 painter.drawLine(QPointF(cell * width, floor.top()), QPointF(cell * width, floor.bottom()))
 
+    def _theme(self) -> str:
+        return self.world.zones[self.zone].theme
+
     def piece_rect(self, piece, definition) -> QRectF:
+        return self.footprint_rect(piece.cell, definition)
+
+    def footprint_rect(self, cell: int, definition) -> QRectF:
+        """The footprint's width; the picture's own height when there is one, else a height per category."""
         width = self.cell_width()
-        height = min(self._floor_y() - 24, HEIGHTS[definition.category] * width)
-        return QRectF(piece.cell * width, self._floor_y() - height, definition.width * width, height)
+        ratio = aspect(self._theme(), definition.identifier)
+        height = definition.width * width * ratio if ratio is not None else HEIGHTS[definition.category] * width
+        height = min(self._floor_y() - 24, height)
+        return QRectF(cell * width, self._floor_y() - height, definition.width * width, height)
 
     def _paint_piece(self, painter: QPainter, piece, definition) -> None:
         rect = self.piece_rect(piece, definition)
+        image = picture(self._theme(), definition.identifier)
+        if image is not None:
+            painter.save()
+            if piece.flipped:                          # mirrored about the piece's own centre
+                painter.translate(rect.center().x() * 2, 0)
+                painter.scale(-1, 1)
+            painter.drawImage(rect, image)
+            painter.restore()
+        else:
+            self._paint_block(painter, rect, definition)
+        if piece.identifier == self.selected:
+            painter.setPen(QPen(self.palette().highlight().color(), 2, Qt.PenStyle.DashLine))
+            painter.setBrush(Qt.BrushStyle.NoBrush)
+            painter.drawRoundedRect(rect.adjusted(-2, -2, 2, 2), 5, 5)
+        if image is None or piece.identifier == self.selected or self.preview is not None:
+            self._paint_label(painter, rect, definition, below=image is not None)
+        if piece.owner is not None and piece.owner in self.world.residents:
+            painter.setPen(QPen(QColor("#1d1d1d"), 1))
+            painter.setBrush(resident_color(piece.owner))
+            painter.drawEllipse(QRectF(rect.right() - 10, rect.top() + 3, 7, 7))
+
+    def _paint_block(self, painter: QPainter, rect: QRectF, definition) -> None:
+        """Pieces without a picture: a block in the category's colour."""
         color = QColor(COLORS[definition.category])
         if not definition.solid:
             color.setAlpha(170)
-        painter.setPen(QPen(self.palette().highlight().color(), 3) if piece.identifier == self.selected
-                       else QPen(color.darker(140), 1))
+        painter.setPen(QPen(color.darker(140), 1))
         painter.setBrush(color)
         painter.drawRoundedRect(rect, 4, 4)
-        painter.setPen(QColor("#1d1d1d"))
+
+    def _paint_label(self, painter: QPainter, rect: QRectF, definition, below: bool) -> None:
         font = QFont(self.font())
         font.setPointSizeF(max(7.5, min(10.0, self.cell_width() / 2.5)))
         painter.setFont(font)
         label = painter.fontMetrics().elidedText(translate(definition.label_key, definition.fallback),
                                                  Qt.TextElideMode.ElideRight, int(rect.width()) - 4)
+        if below:                                      # on a plate over the picture's lower edge
+            plate = QRectF(rect.left(), rect.bottom() - 18, rect.width(), 16)
+            painter.setPen(Qt.PenStyle.NoPen)
+            painter.setBrush(QColor(255, 255, 255, 200))
+            painter.drawRoundedRect(plate, 4, 4)
+            painter.setPen(QColor("#1d1d1d"))
+            painter.drawText(plate, Qt.AlignmentFlag.AlignCenter, label)
+            return
+        painter.setPen(QColor("#1d1d1d"))
         painter.drawText(rect.adjusted(2, 2, -2, -2), Qt.AlignmentFlag.AlignCenter | Qt.TextFlag.TextWordWrap, label)
-        if piece.owner is not None and piece.owner in self.world.residents:
-            painter.setBrush(resident_color(piece.owner))
-            painter.drawEllipse(QRectF(rect.right() - 9, rect.top() + 3, 6, 6))
 
     def _paint_preview(self, painter: QPainter) -> None:
         definition_id, cell, _flipped, problem = self.preview
         definition = self.world.catalog.furniture.get(definition_id)
         if definition is None:
             return
-        width = self.cell_width()
-        height = min(self._floor_y() - 24, HEIGHTS[definition.category] * width)
-        rect = QRectF(cell * width, self._floor_y() - height, definition.width * width, height)
+        rect = self.footprint_rect(cell, definition)
         color = QColor(70, 170, 90, 110) if problem is None else QColor(210, 60, 60, 120)
         painter.setPen(QPen(color.darker(150), 2, Qt.PenStyle.DashLine))
         painter.setBrush(color)
