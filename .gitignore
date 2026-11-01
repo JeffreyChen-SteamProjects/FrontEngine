@@ -161,3 +161,8 @@ exe/pipi.png
 /.claude/settings.local.json
 /steam_sdk/
 steam_sdk
+
+# The pet home save and photo album live beside the settings file when the app runs from a checkout.
+**/pet-home.json
+**/pet-home.json.bak
+**/pet-album/

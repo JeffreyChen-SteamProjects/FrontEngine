@@ -13,7 +13,7 @@ from pathlib import Path
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QGuiApplication, QKeyEvent
-from PySide6.QtWidgets import QCheckBox, QComboBox, QFrame, QHBoxLayout, QLabel, QPushButton, QScrollArea, QWidget
+from PySide6.QtWidgets import QCheckBox, QFrame, QHBoxLayout, QLabel, QPushButton, QScrollArea, QWidget
 
 from frontengine.show.pet_game.home_service import HomeService
 from frontengine.show.pet_game.home_strip import HIDDEN_REASON, HOME_MODES, LAYERS, HomeStrip
@@ -41,7 +41,6 @@ DESKTOP_KEY = "pet_home_on_desktop"
 INTRO_KEY = "pet_home_intro_seen"
 MOTION_KEY = "pet_home_reduced_motion"
 MODE_KEY = "pet_home_mode"
-AUTO_MEETING_KEY = "pet_home_auto_meeting"
 MEETING_REASON = "meeting"
 # The overview on this page is a stage, taller than the desktop strip.
 STAGE_HEIGHT = 220
@@ -177,16 +176,11 @@ class PetHomePage(SettingPage):
         self.motion_check.setChecked(user_setting_dict.get(MOTION_KEY) is True)
         self.motion_check.toggled.connect(self._motion_toggled)
         section.add_widget(self.motion_check)
-        self.mode_combo = QComboBox()
-        self.mode_combo.activated.connect(lambda _index: self.set_mode(self.mode_combo.currentData()))
-        section.add_row("pet_home_mode", self.mode_combo, "Mode")
-        self.auto_meeting = tr(QCheckBox(), "pet_home_auto_meeting", "Meeting mode while sharing the screen")
-        self.auto_meeting.setChecked(user_setting_dict.get(AUTO_MEETING_KEY, True) is not False)
-        self.auto_meeting.toggled.connect(lambda checked: user_setting_dict.__setitem__(AUTO_MEETING_KEY, checked))
-        section.add_widget(self.auto_meeting)
-        self.layer_combo = QComboBox()
-        self.layer_combo.activated.connect(lambda _index: self.choose_layer(self.layer_combo.currentData()))
-        section.add_row("pet_home_layer", self.layer_combo, "Desktop layer")
+        where = tr(QLabel(), "pet_home_settings_strip_hint",
+                   "Mode and layer are on the desktop strip's ⌂ menu; meeting mode turns on by itself while "
+                   "the screen is shared.")
+        where.setWordWrap(True)
+        section.add_widget(where)
 
     @staticmethod
     def _scroller(view: HomeView) -> QScrollArea:
@@ -218,7 +212,8 @@ class PetHomePage(SettingPage):
         area = screen.availableGeometry()
         width = max(16, min(60, area.width() // CELL_PIXELS))
         try:
-            self.service.create_home((screen.name() or "primary")[:128], area.x(), area.bottom(), width)
+            self.service.create_home((screen.name() or "primary")[:128], area.x(), area.bottom(), width,
+                                     furnish=True)
         except (OSError, ValueError) as error:
             self.report_text(str(error))
             return
@@ -328,12 +323,11 @@ class PetHomePage(SettingPage):
             strip.quiet = mode in ("focus", "meeting")
             strip.set_quality_tier(tier)
             strip.setVisible(mode != "meeting")
-        self.mode_combo.setCurrentIndex(self.mode_combo.findData(self.mode))
         self._refresh_status()
 
     def sharing_changed(self, sharing: bool) -> None:
-        """Screen sharing puts the home into meeting mode for as long as it lasts, if allowed."""
-        self._effective_mode = "meeting" if sharing and self.auto_meeting.isChecked() else None
+        """Screen sharing puts the home into meeting mode for as long as it lasts."""
+        self._effective_mode = "meeting" if sharing else None
         self.apply_mode()
 
     def _motion_toggled(self, checked: bool) -> None:
@@ -357,7 +351,6 @@ class PetHomePage(SettingPage):
         user_setting_dict[LAYER_KEY] = layer
         for strip in self.strip_list:
             strip.set_layer(layer)
-        self.layer_combo.setCurrentIndex(self.layer_combo.findData(layer))
 
     def set_preview(self, preview) -> None:
         self.view.set_preview(preview)
@@ -415,17 +408,11 @@ class PetHomePage(SettingPage):
     def refresh(self) -> None:
         """Rebuild lists (after commands, events and language changes)."""
         self.view.set_world(self.service.world, self.zone)
-        self.mode_combo.clear()
-        for mode in HOME_MODES:
-            self.mode_combo.addItem(translate("pet_home_mode_" + mode, mode), mode)
-        self.mode_combo.setCurrentIndex(self.mode_combo.findData(self.mode))
-        self.layer_combo.clear()
-        for layer in LAYERS:
-            self.layer_combo.addItem(translate("pet_home_layer_" + layer, layer), layer)
-        self.layer_combo.setCurrentIndex(self.layer_combo.findData(self.layer))
         for panel in (self.residents, self.goals, self.layout_panel, self.shop, self.storage, self.work):
             panel.refresh_lists()
         self.refresh_live()
+        for strip in self.strip_list:         # a new pet or piece must take clicks even while paused
+            strip.update_mask()
 
     def refresh_live(self) -> None:
         """Cheap per-tick update of the numbers and the drawing."""
@@ -454,7 +441,6 @@ class PetHomePage(SettingPage):
         self.view_area.setVisible(has_home)
         self.tabs.setVisible(has_home)
         self.desktop_check.setEnabled(has_home)
-        self.layer_combo.setEnabled(has_home)
         retranslator.set_text(self.run_button, "pet_home_pause" if self.service.running else "pet_home_start",
                               "Pause" if self.service.running else "Start")
         self.status.setText(self._status_text(world, protected))

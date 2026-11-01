@@ -8,7 +8,7 @@ from frontengine.show.pet.asset_library import PetAssetLibrary
 from frontengine.show.pet.wardrobe import WardrobeDraft, asset_reference
 from frontengine.show.pet_game.home_service import HomeService
 from frontengine.show.pet_game.home_view import SPRITE_CELLS, HomeView
-from frontengine.show.pet_game.resident_art import ResidentArt, semantic_action
+from frontengine.show.pet_game.resident_art import ResidentArt, fallback_character, semantic_action
 from frontengine.user_setting.pet_game_save import HomeSaveStore
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.utils.pet_game.catalog import builtin_catalog
@@ -56,10 +56,20 @@ def test_activities_map_onto_character_actions(kind, phase, action):
     assert semantic_action(Resident()) == action
 
 
-def test_pets_without_a_character_keep_the_marker(home):
+def test_pets_without_a_character_appear_as_a_built_in_stand_in(home):
     service, art, _library, _asset, identifier = home
-    assert art.renderer(identifier) is None
-    assert art.frame(service.world.residents[identifier]) is None
+    assert art.renderer(identifier) is None                      # loading in the background
+    changed = []
+    art.changed.connect(lambda: changed.append(True))
+    _wait(lambda: changed, timeout=60)
+    renderer = art.renderer(identifier)
+    assert renderer is not None
+    assert renderer.character.identifier == fallback_character(identifier)
+    assert fallback_character(identifier) == fallback_character(identifier)      # stable per pet
+    frame = art.frame(service.world.residents[identifier])
+    assert frame is not None and not frame.isNull()
+    assert service.profiles.get(identifier)["appearance"]["character"] is None   # its own look is untouched
+    assert service.sessions[identifier].appearance_renderer is None              # nor the desktop pet's
 
 
 def test_a_dressed_pet_is_prepared_in_the_background_and_drawn(home):

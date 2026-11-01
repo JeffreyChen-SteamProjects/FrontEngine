@@ -17,6 +17,7 @@ def _profile(identifier: str = PET, **values) -> dict:
 
 def _home(seed: int = 7, width: int = 40) -> tuple[World, str]:
     world = World(builtin_catalog(), HOME, seed=seed)
+    world.automatic = False            # these tests check the bare mechanics; automation has its own
     zone = world.add_zone("screen", 0, 900, width)
     world.grant_starter_kit()
     return world, zone

@@ -52,6 +52,9 @@ class World:
         self.next_id = 1
         self.zones: dict[str, Zone] = {}
         self.furniture: dict[str, Furniture] = {}
+        # Residents take jobs and rewards are collected by themselves. Runtime only, never saved:
+        # tests of the bare mechanics switch it off.
+        self.automatic = True
         self.residents: dict[str, Resident] = {}
         self.tasks: dict[str, Task] = {}
         self.ledger = Ledger()
@@ -168,6 +171,45 @@ class World:
             return "invalid"
         result = self.ledger.apply(transaction, "sell:" + name, item.sell_price * count, {name: -count})
         return "none_stored" if result == "insufficient" else result
+
+    def free_cell(self, definition: str, zone: str) -> int | None:
+        """The leftmost cell where the piece fits, preferring one free cell of space on each side.
+
+        None when the zone has no room. Pieces packed edge to edge leave the residents no
+        floor between them, so a spaced spot wins whenever there is one.
+        """
+        found = self.catalog.furniture.get(definition)
+        if found is None or zone not in self.zones:
+            return None
+        width = self.zones[zone].width_cells
+        taken = {cell for piece, other in self.in_zone(zone) for cell in range(piece.cell, piece.cell + other.width)}
+        fitting = [cell for cell in range(max(0, width - found.width + 1)) if self.preview(definition, zone, cell) is None]
+        spaced = [cell for cell in fitting if cell - 1 not in taken and cell + found.width not in taken]
+        return (spaced or fitting or [None])[0]
+
+    def place_anywhere(self, definition: str, zone: str) -> tuple[str, str | None]:
+        """Put one stored piece in the first free spot, so buying never needs a position."""
+        cell = self.free_cell(definition, zone)
+        if cell is None:
+            return ("unknown", None) if definition not in self.catalog.furniture else ("no_room", None)
+        return self.place(definition, zone, cell)
+
+    def furnish(self, zone: str) -> int:
+        """Set out the starter kit's pieces wherever they fit; returns how many were placed."""
+        placed = 0
+        for item in STARTER_KIT:
+            definition = item.removeprefix("furniture:")
+            while self.stored(definition) and self.place_anywhere(definition, zone)[0] == "accepted":
+                placed += 1
+        return placed
+
+    def buy_and_place(self, definition: str, zone: str | None, transaction: str) -> str:
+        """Buy a piece and put it straight into the home; it stays in storage only when there is no room."""
+        result = self.buy(definition, transaction)
+        if result == "accepted" and zone is not None and not self.sandbox:
+            if self.place_anywhere(definition, zone)[0] != "accepted":
+                return "bought_no_room"
+        return result
 
     def place(self, definition: str, zone: str, cell: int, flipped: bool = False) -> tuple[str, str | None]:
         problem = self.preview(definition, zone, cell)

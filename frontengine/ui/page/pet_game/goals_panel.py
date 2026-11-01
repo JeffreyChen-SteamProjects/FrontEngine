@@ -37,12 +37,14 @@ class GoalsPanel:
         self.tutorial = QListWidget()
         self.tutorial.setMaximumHeight(160)
         section.add_widget(self.tutorial, "pet_home_tutorial", "Getting started")
-        section.add_inline(_button("pet_home_claim", "Claim reward", self.claim),
-                           _button("pet_home_skip_tutorial", "Skip the tutorial", self.skip))
+        section.add_inline(_button("pet_home_skip_tutorial", "Skip the tutorial", self.skip))
         self.commissions = QListWidget()
         self.commissions.setMaximumHeight(90)
         section.add_widget(self.commissions, "pet_home_commissions", "Today's commissions")
-        section.add_inline(_button("pet_home_deliver", "Deliver", self.deliver))
+        auto = tr(QLabel(), "pet_home_goals_auto",
+                  "Rewards are collected and commissions handed in by themselves once they are ready.")
+        auto.setWordWrap(True)
+        section.add_widget(auto)
         self.celebrate_button = _button("pet_home_celebrate", "Hold a home celebration", self.celebrate)
         self.events = QLabel()
         self.events.setWordWrap(True)

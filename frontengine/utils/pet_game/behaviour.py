@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from frontengine.utils.pet_game.resident import Activity, Resident
+from frontengine.utils.pet_game.resident import PROFESSION_TRAITS, Activity, Resident
 from frontengine.utils.pet_game.schedule import block_at, game_hour
 
 if TYPE_CHECKING:
@@ -166,6 +166,34 @@ def start_work(world: World, resident: Resident, reason: str) -> str | None:
     return blocked or "no_task"
 
 
+def auto_task(world: World, resident: Resident) -> str | None:
+    """A resident with nothing to do takes a job it can do here, without anyone setting it up.
+
+    Only recipes with a matching workstation in its zone, a high enough skill and
+    every input already in storage are considered: its own trade first (the trait
+    that names it), then the trade it is best at, then what pays most. Returns the
+    new task's identifier, or None when nothing fits.
+    """
+    trades = {definition.profession for _piece, definition in world.in_zone(resident.zone) if definition.profession}
+    best = None
+    for recipe in world.catalog.recipes.values():
+        if recipe.profession not in trades or resident.level(recipe.profession) < recipe.min_level:
+            continue
+        if any(world.ledger.available(item) < count for item, count in recipe.inputs.items()):
+            continue
+        rank = (PROFESSION_TRAITS.get(recipe.profession) in resident.traits, resident.level(recipe.profession),
+                recipe.min_level, recipe.coins + recipe.experience, recipe.identifier)
+        if best is None or rank > best[0]:
+            best = (rank, recipe.identifier)
+    if best is None:
+        return None
+    result, identifier = world.create_task(best[1], resident.identifier)
+    if result == "accepted":
+        world.emit("auto_job", resident=resident.identifier, recipe=best[1])
+        return identifier
+    return None
+
+
 def refusal(world: World, resident: Resident, command: str) -> str | None:
     """Why a direct command cannot be followed right now, or None."""
     if command == "work":
@@ -254,6 +282,8 @@ def decide(world: World, resident: Resident) -> None:
         return None
     if block in ("work", "free") and resident.needs["energy"] > WORK_MIN_ENERGY:
         why = start_work(world, resident, "scheduled_work")
+        if why == "no_task" and block == "work" and world.automatic and auto_task(world, resident) is not None:
+            why = start_work(world, resident, "scheduled_work")
         if why is None:
             return None
         if why not in ("no_task",):

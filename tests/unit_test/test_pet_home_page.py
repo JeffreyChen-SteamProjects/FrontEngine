@@ -38,10 +38,13 @@ def page(tmp_path):
 
 
 def _place(page, definition: str, cell: int) -> None:
+    """Choose the stored piece and click the floor while arranging, as a player does."""
     panel = page.layout_panel
-    panel.storage.setCurrentIndex(panel.storage.findData(definition))
-    panel.cell.setValue(cell)
-    panel.place()
+    assert panel.storage.select_key(definition)
+    if not panel.arranging:
+        panel.toggle_arrange()
+    page.view.cell_clicked.emit(cell)
+    panel.toggle_arrange()
 
 
 def test_no_home_offers_creation_and_disables_the_panels(page):
@@ -60,36 +63,37 @@ def test_first_loop_from_the_page(page):
     page.residents.new_pet()
     resident = page.selected_resident
     assert resident in page.service.world.residents
-    for definition, cell in (("bed_basic", 2), ("table_basic", 7), ("desk_basic", 12)):
-        _place(page, definition, cell)
-    assert len(page.service.world.furniture) == 3
+    assert len(page.service.world.furniture) == 3          # the starter kit is set out by itself
     assert page.layout_panel.storage.count() == 0
-    page.work.units.setValue(2)
-    page.work.assign()
-    assert page.work.tasks.count() == 1
-    for _ in range(1500):                   # five effective minutes
+    for _ in range(1500):                   # five effective minutes: the pet takes up work by itself
         page.clock.now += 0.2
         page.service._tick()
+    assert page.work.tasks.count() >= 1 or page.service.world.ledger.coins > 10
     assert page.service.world.ledger.coins >= 22
     assert page.residents.bars["energy"].value() == page.service.world.residents[resident].needs["energy"]
-    page.shop.items.setCurrentIndex(page.shop.items.findData("plant_pot"))
+    assert page.shop.items.select_key("furniture:plant_pot")
     page.shop.buy()
-    assert page.service.world.stored("plant_pot") == 1
+    assert page.service.world.stored("plant_pot") == 0                 # bought straight into the home
+    assert any(piece.definition == "plant_pot" for piece in page.service.world.furniture.values())
     assert translate("pet_home_status").split("{")[0] in page.status.text()
 
 
 def test_arranging_shows_reasons_and_escape_leaves(page):
     page.create_home()
+    world = page.service.world
+    bed = next(piece.identifier for piece in world.furniture.values() if piece.definition == "bed_basic")
+    page.service.run(lambda w: w.store(bed))
+    page.refresh()
     panel = page.layout_panel
     panel.toggle_arrange()
-    panel.storage.setCurrentIndex(panel.storage.findData("bed_basic"))
-    panel.cell.setValue(0)
+    assert panel.storage.select_key("bed_basic")
+    page.view.cell_clicked.emit(0)
     assert page.view.preview[3] == "entrance_blocked"
-    panel.place()
     assert page.message.text() == translate("pet_home_result_entrance_blocked")
-    page.view.cell_clicked.emit(5)
-    assert panel.cell.value() == 5
-    assert page.view.preview[3] is None
+    assert world.stored("bed_basic") == 1
+    page.view.cell_clicked.emit(18)
+    assert world.stored("bed_basic") == 0                       # placed where it was clicked
+    assert any(p.definition == "bed_basic" and p.cell == 18 for p in world.furniture.values())
     page.keyPressEvent(QKeyEvent(QEvent.Type.KeyPress, Qt.Key.Key_Escape, Qt.KeyboardModifier.NoModifier))
     assert not panel.arranging
     assert page.view.preview is None
@@ -98,7 +102,6 @@ def test_arranging_shows_reasons_and_escape_leaves(page):
 def test_clicking_the_view_selects_residents_and_furniture(page):
     page.create_home()
     page.residents.new_pet()
-    _place(page, "bed_basic", 4)
     page.view.resize(900, 180)
     resident = page.service.world.residents[page.selected_resident]
     page.select_resident(None)
@@ -147,31 +150,27 @@ def test_a_wide_home_scrolls_instead_of_shrinking_its_cells(page):
     assert page.view.cell_width() >= MIN_CELL
 
 
-def test_work_details_stations_and_backpack(page):
+def test_work_is_taken_up_by_itself_and_the_backpack_sells(page):
     page.create_home()
     page.service.world.ledger.apply("gift", "test", 500)
     page.residents.new_pet()
-    page.shop.items.setCurrentIndex(page.shop.items.findData("workbench"))
+    assert page.shop.items.select_key("furniture:workbench")
     page.shop.buy()
-    _place(page, "workbench", 14)
-    page.shop.materials.setCurrentIndex(page.shop.materials.findData("wood"))
-    page.shop.amount.setValue(2)
-    page.shop.buy_materials()
+    assert any(p.definition == "workbench" for p in page.service.world.furniture.values())
+    assert page.shop.items.select_key("wood")
+    page.shop.buy()
+    page.shop.buy()
     assert page.service.world.ledger.count("wood") == 2
-    work = page.work
-    work.recipes.setCurrentIndex(work.recipes.findData("toy"))
-    assert translate("pet_game_item_wood") in work.details.text()
-    assert work.station.count() == 2
-    work.station.setCurrentIndex(1)
-    work.priority.setValue(8)
-    work.assign()
-    task = next(iter(page.service.world.tasks.values()))
-    assert task.station == work.station.itemData(1)
-    assert task.priority == 8
+    resident = page.service.world.residents[page.selected_resident]
+    resident.traits = ("handy", "cheerful")
+    from frontengine.utils.pet_game import behaviour
+    page.service.run(lambda world: behaviour.auto_task(world, resident))
+    page.refresh()
+    assert page.work.tasks.count() == 1
+    assert not page.work.tasks.item(0).icon().isNull()
     page.service.world.ledger.apply("toys", "test", 0, {"toy": 1})
     page.refresh()
-    rows = [page.storage.list.item(row).data(Qt.ItemDataRole.UserRole) for row in range(page.storage.list.count())]
-    page.storage.list.setCurrentRow(rows.index("toy"))
+    assert page.storage.list.select_key("toy")
     coins = page.service.world.ledger.coins
     page.storage.sell()
     assert page.service.world.ledger.coins == coins + 24
