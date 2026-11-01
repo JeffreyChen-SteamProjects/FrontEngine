@@ -1,0 +1,11 @@
+Page Maison des mascottes
+-------------------------
+
+**Maison des mascottes** — la première page. Vos mascottes enregistrées emménagent dans une petite maison, y vivent seules et travaillent pour gagner des pièces.
+
+* *Créer une maison* donne un lit, une table à manger, un bureau et 10 pièces. Rien n’est créé ni démarré avant ce clic, et tous les autres outils fonctionnent sans maison.
+* *Emménager* installe une mascotte enregistrée, *Nouvelle mascotte* en crée une. Une mascotte vit soit dans la maison, soit sur le bureau, jamais les deux à la fois ; son énergie, sa satiété, son humeur et son affection la suivent et retournent dans son profil quand elle déménage.
+* *Aménager* pose des meubles de la réserve sur le sol. Un aperçu rouge explique pourquoi un emplacement ne convient pas (hors de la maison, il y a déjà quelque chose, bloque l’entrée) ; Échap termine l’aménagement. *Ranger* remet un meuble en réserve, et le travail qui s’y faisait est mis en pause sans perdre sa progression.
+* *Travail* confie une tâche à l’habitant sélectionné, par exemple écrire des lettres au bureau (2 minutes et 12 pièces chacune). Les mascottes vont seules au bureau, travaillent, se fatiguent, dorment, mangent et reviennent ; chaque unité terminée est payée exactement une fois, une unité annulée ne rapporte rien.
+* La *Boutique* vend d’autres meubles ; la revente rend au plus la moitié du prix, et le lit, la table et le bureau de base ne se vendent jamais.
+* Le temps ne passe que lorsque la maison est en cours (*Démarrer* / *Pause*) ; le temps où FrontEngine était fermé ou l’ordinateur en veille n’est jamais rattrapé. La maison est enregistrée dans ``pet-home.json`` à côté de vos réglages, la précédente copie valide restant sous ``pet-home.json.bak``. Une sauvegarde illisible ou issue d’une version plus récente n’est jamais écrasée : la page propose la sauvegarde de secours, ou garde l’ancien fichier et crée une nouvelle maison.

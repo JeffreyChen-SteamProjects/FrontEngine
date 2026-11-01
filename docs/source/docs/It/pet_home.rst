@@ -1,0 +1,11 @@
+Pagina Casa delle mascotte
+--------------------------
+
+**Casa delle mascotte** — la prima pagina. Le mascotte salvate si trasferiscono in una piccola casa, ci vivono da sole e lavorano per guadagnare monete.
+
+* *Crea una casa* fornisce un letto, un tavolo da pranzo, una scrivania e 10 monete. Finché non lo premi non viene creato né avviato nulla, e tutti gli altri strumenti funzionano anche senza casa.
+* *Trasferisci in casa* una mascotte salvata, oppure creane una con *Nuova mascotte*. Una mascotte vive in casa oppure sul desktop, mai in entrambi; energia, sazietà, umore e affetto la seguono e tornano nel suo profilo quando esce di casa.
+* *Sistema* mette i mobili del deposito sul pavimento. Un'anteprima rossa spiega perché un punto non va bene (fuori dalla casa, c'è già qualcosa, blocca l'ingresso); Esc termina la sistemazione. *Metti via* riporta un mobile in deposito e il lavoro che vi si svolgeva viene messo in pausa conservando i progressi.
+* *Lavoro* affida un compito all'abitante selezionato, per esempio scrivere lettere alla scrivania (2 minuti e 12 monete l'una). Le mascotte vanno da sole alla scrivania, lavorano, si stancano, dormono, mangiano e tornano; ogni unità finita viene pagata esattamente una volta, una annullata non paga nulla.
+* Il *Negozio* vende altri mobili; rivendendo si recupera al massimo metà del prezzo, e letto, tavolo e scrivania di base non si vendono mai.
+* Il tempo scorre solo mentre la casa è in corso (*Avvia* / *Pausa*); il tempo in cui FrontEngine era chiuso o il computer dormiva non viene mai recuperato. La casa viene salvata in ``pet-home.json`` accanto alle impostazioni, con la precedente copia valida conservata come ``pet-home.json.bak``. Un salvataggio illeggibile o di una versione più recente non viene mai sovrascritto: la pagina propone il backup oppure conserva il vecchio file e crea una nuova casa.

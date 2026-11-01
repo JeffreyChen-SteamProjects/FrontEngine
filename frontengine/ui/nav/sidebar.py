@@ -35,6 +35,9 @@ SIDEBAR_WIDTH = 208
 # drives both styling and what a click does.
 ROLE_KIND = Qt.ItemDataRole.UserRole
 ROLE_PAGE_INDEX = Qt.ItemDataRole.UserRole + 1
+# 穩定頁面 ID：之後插入新分頁時，堆疊索引會位移，ID 不會。
+# Stable page ID: stack indices shift when a page is inserted, IDs do not.
+ROLE_PAGE_ID = Qt.ItemDataRole.UserRole + 2
 KIND_GROUP = "group"
 KIND_PAGE = "page"
 
@@ -69,12 +72,14 @@ class NavigationSidebar(QListWidget):
         self._labels.append((item, title_key, fallback))
         return item
 
-    def add_page(self, title_key: str, page_index: int, fallback: str = "") -> QListWidgetItem:
-        """加一列分頁。page_index 對應 QStackedWidget 裡的索引。"""
+    def add_page(self, title_key: str, page_index: int, fallback: str = "",
+                 page_id: Optional[str] = None) -> QListWidgetItem:
+        """加一列分頁。page_index 對應 QStackedWidget 裡的索引；page_id 預設為語言鍵。"""
         item = QListWidgetItem(translate(title_key, fallback))
         item.setData(ROLE_KIND, KIND_PAGE)
         item.setToolTip(item.text())
         item.setData(ROLE_PAGE_INDEX, page_index)
+        item.setData(ROLE_PAGE_ID, page_id or title_key)
         item.setSizeHint(QSize(SIDEBAR_WIDTH, 35))
         self.addItem(item)
         self._labels.append((item, title_key, fallback))
@@ -88,6 +93,19 @@ class NavigationSidebar(QListWidget):
                 self.setCurrentItem(item)
                 return True
         return False
+
+    def page_index(self, page_id: str) -> Optional[int]:
+        """The current stack index of a stable page ID, or None."""
+        for row in range(self.count()):
+            item = self.item(row)
+            if item.data(ROLE_KIND) == KIND_PAGE and item.data(ROLE_PAGE_ID) == page_id:
+                return item.data(ROLE_PAGE_INDEX)
+        return None
+
+    def select_page_id(self, page_id: str) -> bool:
+        """Select a page by its stable ID rather than its position."""
+        index = self.page_index(page_id)
+        return index is not None and self.select_page(index)
 
     def page_label(self, page_index: int) -> str:
         """某個堆疊索引目前顯示的文字（測試與記錄用）。"""

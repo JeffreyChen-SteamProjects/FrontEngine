@@ -32,6 +32,7 @@ from frontengine.ui.page.gif.gif_setting_ui import GIFSettingUI
 from frontengine.ui.page.image.image_setting_ui import ImageSettingUI
 from frontengine.ui.page.particle.particle_setting_ui import ParticleSettingUI
 from frontengine.ui.page.pet.pet_setting_ui import PetSettingUI
+from frontengine.ui.page.pet_game.home_page import PetHomePage
 from frontengine.ui.page.scene_setting.scene_setting_ui import SceneSettingUI
 from frontengine.ui.page.presentation.presentation_setting_ui import PresentationSettingUI
 from frontengine.ui.page.screen_care.screen_care_setting_ui import ScreenCareSettingUI
@@ -194,6 +195,7 @@ class FrontEngineMainUI(QMainWindow):
         self.scene_setting_ui = SceneSettingUI()
         self.particle_setting_ui = ParticleSettingUI()
         self.pet_setting_ui = PetSettingUI()
+        self.pet_home_ui = PetHomePage()
         self.screen_care_setting_ui = ScreenCareSettingUI()
         self.presentation_setting_ui = PresentationSettingUI()
         self.wallpaper_setting_ui = WallpaperSettingUI()
@@ -573,6 +575,9 @@ class FrontEngineMainUI(QMainWindow):
         self.command_pages = []
         self.plugin_pages = {}
         groups = [
+            ("nav_group_home", "Home", [
+                (self.pet_home_ui, "tab_pet_home_text"),
+            ]),
             ("nav_group_on_screen", "On screen", [
                 (self.video_setting_ui, "tab_video_text"),
                 (self.image_setting_ui, "tab_image_text"),
@@ -1237,6 +1242,11 @@ class FrontEngineMainUI(QMainWindow):
         if pet_page is not None:
             pet_page.stop_focus_session()
         if not self._flush_pet_profiles():
+            return False
+        home = getattr(self, 'pet_home_ui', None)
+        if home is not None and not home.shutdown():
+            self.statusBar().showMessage(translate('pet_home_save_failed_exit',
+                                                   'The pet home could not be saved; FrontEngine stays open.'))
             return False
         self._shutdown_done = True
         front_engine_logger.info("[FrontEngineMainUI] shutdown")

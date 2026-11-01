@@ -124,6 +124,8 @@ user_setting_dict: Dict[str, Any] = {
     # 桌面寵物場景時間軸：[{"at": 秒, "say"/"sleep"/"feed"/"behaviour": ...}, ...]
     # Desktop pet scene timeline of scheduled actions
     "pet_timeline": [],
+    # Whether the pet home was running when FrontEngine last closed
+    "pet_home_running": False,
 }
 
 

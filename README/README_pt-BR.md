@@ -64,6 +64,17 @@ e a versão da Steam entrega o mesmo aplicativo com suporte à Workshop.
 A barra lateral agrupa as páginas conforme a finalidade delas. Esta seção segue
 essa organização.
 
+### Lar
+
+**Lar dos pets** — a primeira página. Seus pets salvos se mudam para um pequeno lar, vivem lá por conta própria e trabalham para ganhar moedas.
+
+- *Criar um lar* dá uma cama, uma mesa de jantar, uma escrivaninha e 10 moedas. Nada é criado ou iniciado até você clicar, e todas as outras ferramentas funcionam sem um lar.
+- *Mudar para o lar* traz um pet salvo; *Novo pet* cria um. Um pet vive no lar ou na área de trabalho, nunca nos dois ao mesmo tempo; energia, saciedade, humor e afeição vêm junto e voltam ao perfil quando ele sai.
+- *Organizar* coloca móveis do depósito no chão. Uma prévia vermelha explica por que um lugar não serve (fora do lar, já tem algo ali, bloqueia a entrada); Esc encerra. *Guardar* devolve um móvel ao depósito, e o trabalho nele é pausado mantendo o progresso.
+- *Trabalho* dá uma tarefa ao morador selecionado, como escrever cartas na escrivaninha (2 minutos e 12 moedas cada). Os pets vão sozinhos até a escrivaninha, trabalham, se cansam, dormem, comem e voltam; cada unidade terminada paga exatamente uma vez, e uma cancelada não paga nada.
+- A *Loja* vende mais móveis; vender devolve no máximo metade do preço, e a cama, a mesa e a escrivaninha básicas nunca são vendidas.
+- O tempo só passa enquanto o lar está rodando (*Iniciar* / *Pausar*); o tempo com o FrontEngine fechado ou o computador em suspensão nunca é simulado. O lar é salvo em `pet-home.json` ao lado das suas configurações, com a cópia boa anterior em `pet-home.json.bak`. Um save ilegível ou de uma versão mais nova nunca é sobrescrito: a página oferece o backup ou mantém o arquivo antigo e começa um lar novo.
+
 ### Na tela
 
 Sobreposições de mídia. Cada uma escolhe seu monitor (ou abrange todos eles),
