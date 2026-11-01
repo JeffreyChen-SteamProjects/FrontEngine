@@ -55,7 +55,7 @@ class PetHomePage(SettingPage):
 
     def __init__(self, service: HomeService | None = None) -> None:
         super().__init__("pet_home_title", "pet_home_subtitle", "Pet home",
-                         "Your pets live, work and rest in a small home of their own.")
+                         "Your pets live, work and rest in a small home of their own.", wide=True)
         self.service = service or default_service(self)
         self.profiles = self.service.profiles
         self.selected_resident: str | None = None

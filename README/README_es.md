@@ -61,7 +61,7 @@ y la versión de Steam distribuye la misma aplicación con compatibilidad con el
 
 La barra lateral agrupa las páginas por su propósito. Esta sección la sigue.
 
-Cada página tiene un icono en la barra lateral, y el cuadro de búsqueda de arriba (Ctrl+K) abre Comandos. Los menús Ayuda y Documentación de la barra de menús se llaman así sin más.
+Cada página tiene un icono en la barra lateral, y el cuadro de búsqueda de arriba (Ctrl+K) abre Comandos. Los menús Ayuda y Documentación de la barra de menús se llaman así sin más. En una ventana ancha, las tarjetas de las páginas de ajustes quedan en una columna centrada; el hogar de mascotas y el editor de escenas usan todo el ancho.
 
 ### Hogar
 

@@ -64,7 +64,7 @@ und der Steam-Build liefert dieselbe Anwendung mit Workshop-Unterstützung aus.
 Die Seitenleiste gruppiert die Seiten danach, wofür sie da sind. Dieser
 Abschnitt folgt ihr.
 
-Jede Seite hat in der Seitenleiste ein Symbol, und das Suchfeld oben (Strg+K) öffnet die Befehle. Die Menüs Hilfe und Dokumentation in der Menüleiste heißen jetzt genau so.
+Jede Seite hat in der Seitenleiste ein Symbol, und das Suchfeld oben (Strg+K) öffnet die Befehle. Die Menüs Hilfe und Dokumentation in der Menüleiste heißen jetzt genau so. Auf einem breiten Fenster bleiben die Karten der Einstellungsseiten in einer zentrierten Spalte; das Haustier-Zuhause und der Szeneneditor nutzen die volle Breite.
 
 ### Zuhause
 

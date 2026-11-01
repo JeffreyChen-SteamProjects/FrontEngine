@@ -57,6 +57,10 @@ LABEL_MIN_WIDTH = 148
 
 PAGE_MARGINS = (28, 22, 28, 0)
 FOOTER_MARGINS = (28, 14, 28, 18)
+# Settings read as one centred column: on a wide window the cards stop at this
+# width instead of stretching into a band of empty space right of the controls.
+# Pages that show a large canvas (the pet home, the scene editor) opt out with wide=True.
+CONTENT_MAX_WIDTH = 960
 ROW_SPACING = 14
 SECTION_SPACING = 16
 
@@ -270,18 +274,29 @@ class SettingPage(QWidget):
     """
 
     def __init__(self, title_key: str, subtitle_key: str = "",
-                 title_fallback: str = "", subtitle_fallback: str = "", *, compact: bool = False):
+                 title_fallback: str = "", subtitle_fallback: str = "", *, compact: bool = False,
+                 wide: bool = False):
         super().__init__()
         self.setProperty("settingPage", True)
+        self._wide = wide or compact
         self._page_layout = QVBoxLayout(self)
         self._page_layout.setContentsMargins(0, 0, 0, 0)
         self._page_layout.setSpacing(0)
 
         header = QWidget()
         header.setObjectName("pageHeader")
-        header_layout = QVBoxLayout(header)
-        header_layout.setContentsMargins(*PAGE_MARGINS[:2], PAGE_MARGINS[2], 16)
+        header_outer = QHBoxLayout(header)
+        header_outer.setContentsMargins(*PAGE_MARGINS[:2], PAGE_MARGINS[2], 16)
+        header_inner = self._column(header_outer)
+        self._header_row = QHBoxLayout(header_inner)
+        self._header_row.setContentsMargins(0, 0, 0, 0)
+        self._header_row.setSpacing(16)
+        header_layout = QVBoxLayout()
         header_layout.setSpacing(4)
+        self._header_row.addLayout(header_layout, 1)
+        self._header_actions = QHBoxLayout()
+        self._header_actions.setSpacing(8)
+        self._header_row.addLayout(self._header_actions)
 
         self.title_label = tr(QLabel(), title_key, title_fallback)
         self.title_label.setObjectName("pageTitle")
@@ -303,15 +318,36 @@ class SettingPage(QWidget):
 
         body = QWidget()
         body.setObjectName("pageContent")
-        self._body_layout = QVBoxLayout(body)
-        self._body_layout.setContentsMargins(PAGE_MARGINS[0], 4, PAGE_MARGINS[2], 20)
+        body_outer = QHBoxLayout(body)
+        body_outer.setContentsMargins(PAGE_MARGINS[0], 4, PAGE_MARGINS[2], 20)
         if compact:
-            self._body_layout.setContentsMargins(12, 12, 12, 12)
+            body_outer.setContentsMargins(12, 12, 12, 12)
+        self._body_layout = QVBoxLayout(self._column(body_outer))
+        self._body_layout.setContentsMargins(0, 0, 0, 0)
         self._body_layout.setSpacing(SECTION_SPACING)
         self._scroll.setWidget(body)
         self._page_layout.addWidget(self._scroll, 1)
 
         self._footer: Optional[QWidget] = None
+        self._footer_layout: Optional[QHBoxLayout] = None
+
+    def _column(self, outer: QHBoxLayout) -> QWidget:
+        """A centred column of at most CONTENT_MAX_WIDTH inside ``outer`` (full width on wide pages)."""
+        column = QWidget()
+        column.setObjectName("pageColumn")
+        if self._wide:
+            outer.addWidget(column, 1)
+            return column
+        column.setMaximumWidth(CONTENT_MAX_WIDTH)
+        outer.addStretch(1)
+        outer.addWidget(column, 1000)
+        outer.addStretch(1)
+        return column
+
+    def add_header_action(self, widget: QWidget) -> QWidget:
+        """A page-level action beside the title (help, reset, open a related window)."""
+        self._header_actions.addWidget(widget, 0, Qt.AlignmentFlag.AlignBottom)
+        return widget
 
     def add_section(self, title: "str | QLabel", fallback: str = "", *, collapsed: bool = False) -> Section:
         """加一個分區並回傳它，欄位往回傳的物件上加。標題可傳語言鍵或現成標籤。"""
@@ -348,9 +384,12 @@ class SettingPage(QWidget):
         """
         footer = QWidget()
         footer.setObjectName("pageFooter")
-        layout = QHBoxLayout(footer)
-        layout.setContentsMargins(*FOOTER_MARGINS)
+        footer_outer = QHBoxLayout(footer)
+        footer_outer.setContentsMargins(*FOOTER_MARGINS)
+        layout = QHBoxLayout(self._column(footer_outer))
+        layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(12)
+        self._footer_layout = layout
 
         if status is not None:
             status.setObjectName("pageStatus")

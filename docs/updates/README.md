@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261101-17 | 2026-11-01 | Setting pages in one centred column; calm headings, even controls | #done #ui #design | [2026-11](2026-11.md) |
 | U-20261101-16 | 2026-11-01 | Redesigned window frame: sidebar icons, brand mark, search entry | #done #ui #design | [2026-11](2026-11.md) |
 | U-20261101-15 | 2026-11-01 | Own design system replaces qt-material | #done #ui #design | [2026-11](2026-11.md) |
 | U-20261101-14 | 2026-11-01 | Built-in characters get drawn home poses | #done #pets #game #art #animation | [2026-11](2026-11.md) |
