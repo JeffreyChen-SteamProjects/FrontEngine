@@ -43,6 +43,8 @@ class FurnitureDefinition:
     unlock_level: int = 1            # home level needed before the shop sells it
     raised: bool = False             # its point is up high: reached by climbing or by pet stairs beside it
     steps: bool = False              # pet stairs: anyone can climb onto a raised piece next to it
+    art: str = ""                    # picture name in each theme folder; empty means the identifier
+    poses: tuple[str, ...] = ()      # poses wanted from a character using it, best first; () means by activity
 
 
 @dataclass(frozen=True)
@@ -116,6 +118,21 @@ def _check_footprint(definition: FurnitureDefinition) -> None:
         raise ValueError("Interaction point outside the footprint")
 
 
+# What a character is asked to do while using a piece, best first; a character without a pose
+# falls back to the next one and finally to standing (idle), so every piece stays usable.
+POSES = ("sleep", "feed", "sit", "play", "greet", "write", "garden", "craft", "idle")
+ACTIVITY_POSES = {"sleep": ("sleep", "sit"), "eat": ("feed", "sit"), "relax": ("sit",), "play": ("play", "greet"),
+                  "work": ("sit",)}
+
+
+def art_name(definition: FurnitureDefinition) -> str:
+    return definition.art or definition.identifier
+
+
+def wanted_poses(definition: FurnitureDefinition) -> tuple[str, ...]:
+    return definition.poses or ACTIVITY_POSES.get(definition.activity or "", ())
+
+
 def check_furniture(definition: FurnitureDefinition) -> None:
     """Reject definitions the simulation could not honour."""
     _check_identifier(definition.identifier)
@@ -136,6 +153,12 @@ def check_furniture(definition: FurnitureDefinition) -> None:
     low, high = definition.use_ms
     if not 0 <= low <= high <= 3600000:
         raise ValueError("Invalid use duration")
+    if definition.art:
+        _check_identifier(definition.art)          # a plain name: never a path
+    if len(definition.poses) > len(POSES) or any(pose not in POSES for pose in definition.poses):
+        raise ValueError("Unknown furniture pose")
+    if definition.poses and definition.activity is None:
+        raise ValueError("Only furniture with an activity asks for poses")
 
 
 def check_recipe(recipe: Recipe) -> None:

@@ -1870,4 +1870,6 @@ english_word_dict = {
     "pet_home_activity_tag": "Playing tag",
     "pet_home_reason_called": "you called",
     "pet_home_reason_playing_tag": "with a friend",
+    "pet_home_newcomers": "Pets moving in with you (tick the ones you want)",
+    "pet_home_moved_in": "{count} pets moved in.",
 }

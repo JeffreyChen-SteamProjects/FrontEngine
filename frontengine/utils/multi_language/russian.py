@@ -1860,4 +1860,6 @@ russian_word_dict = {
     "pet_home_activity_tag": "Играет в догонялки",
     "pet_home_reason_called": "вы позвали",
     "pet_home_reason_playing_tag": "с другом",
+    "pet_home_newcomers": "Питомцы, которые въедут вместе с вами (отметьте нужных)",
+    "pet_home_moved_in": "Въехало питомцев: {count}.",
 }

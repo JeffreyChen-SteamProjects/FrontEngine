@@ -34,6 +34,31 @@ class Goal:
     identifier: str
     measure: Callable[[World], tuple[int, int]]     # (current, target)
     coins: int
+    window: tuple[int, int] | None = None           # days of the home's year it is offered (wraps); None: always
+
+
+YEAR_DAYS = 28                                      # four seven-day seasons
+
+
+def day_of_year(world: World) -> int:
+    return (game_day(world.time_ms) - 1) % YEAR_DAYS + 1
+
+
+def offered(world: World, goal: Goal) -> bool:
+    """Outside its window a goal is simply not shown; it is never failed or taken away."""
+    if goal.window is None:
+        return True
+    first, last = goal.window
+    today = day_of_year(world)
+    return first <= today <= last if first <= last else today >= first or today <= last
+
+
+@dataclass(frozen=True)
+class EventRule:
+    """When a life event may happen again: ``cooldown_days`` 0 means once in a home's (or a pet's) life."""
+
+    per_resident: bool
+    cooldown_days: int
 
 
 def _stat(world: World, *keys: str) -> int:
@@ -213,7 +238,11 @@ def _checked_events(value: object) -> list[dict]:
 
 def goal_state(world: World, goal: Goal) -> str:
     saved = world.progress.goals.get(goal.identifier)
-    return saved or ("done" if goal_done(world, goal) else "open")
+    if saved:
+        return saved                       # claimed or skipped stays so, whatever the day
+    if not offered(world, goal):
+        return "unavailable"
+    return "done" if goal_done(world, goal) else "open"
 
 
 def claim(world: World, identifier: str) -> str:
@@ -323,8 +352,13 @@ def _update_wish(world: World, resident) -> None:
 
 # ----- life events ---------------------------------------------------------------------------
 
-LIFE_EVENTS = ("first_creation", "friends_dinner", "birthday", "celebration", "rainy_day", "starry_night",
-               "new_friend", "skilled", "green_home", "full_house", "first_story", "harvest")
+LIFE_EVENT_RULES = {
+    "first_creation": EventRule(False, 0), "first_story": EventRule(False, 0), "harvest": EventRule(False, 0),
+    "green_home": EventRule(False, 0), "full_house": EventRule(False, 0), "celebration": EventRule(False, 0),
+    "friends_dinner": EventRule(False, 1), "rainy_day": EventRule(False, 1), "starry_night": EventRule(False, 1),
+    "new_friend": EventRule(True, 0), "skilled": EventRule(True, 0), "birthday": EventRule(True, 1),
+}
+LIFE_EVENTS = tuple(LIFE_EVENT_RULES)
 FRIEND_LEVEL, SKILLED_LEVEL, GREEN_HOME_DECORATIONS, FULL_HOUSE, HARVEST_UNITS = 20, 3, 5, 4, 10
 
 
@@ -334,9 +368,16 @@ def _life_event(world: World, kind: str, resident: str | None) -> None:
     world.emit("life_event", event=kind, resident=resident)
 
 
-def _happened(world: World, kind: str, resident: str | None = None, day: int | None = None) -> bool:
-    return any(event["kind"] == kind and (resident is None or event["resident"] == resident)
-               and (day is None or event["day"] == day) for event in world.progress.events)
+def due(world: World, kind: str, resident: str | None = None) -> bool:
+    """Whether the event's rule lets it happen today (for this pet, when it is about one pet)."""
+    rule = LIFE_EVENT_RULES[kind]
+    today = game_day(world.time_ms)
+    for event in world.progress.events:
+        if event["kind"] != kind or (rule.per_resident and event["resident"] != resident):
+            continue
+        if rule.cooldown_days == 0 or today - event["day"] < rule.cooldown_days:
+            return False
+    return True
 
 
 def _once_events(world: World) -> None:
@@ -349,7 +390,7 @@ def _once_events(world: World) -> None:
         "full_house": len(world.residents) >= FULL_HOUSE,
     }
     for kind, happened_now in reached.items():
-        if happened_now and not _happened(world, kind):
+        if happened_now and due(world, kind):
             _life_event(world, kind, None)
 
 
@@ -365,7 +406,7 @@ def _daily_events(world: World, day: int) -> None:
         and weather(world.home, world.time_ms) == "clear",
     }
     for kind, happened_now in today.items():
-        if happened_now and not _happened(world, kind, day=day):
+        if happened_now and due(world, kind):
             _life_event(world, kind, None)
 
 
@@ -375,10 +416,10 @@ def _resident_events(world: World) -> None:
         resident = world.residents[identifier]
         friendly = any(value >= FRIEND_LEVEL for key, value in world.relations.items()
                        if identifier in key.split("|"))
-        if friendly and not _happened(world, "new_friend", identifier):
+        if friendly and due(world, "new_friend", identifier):
             _life_event(world, "new_friend", identifier)
         skilled = any(resident.level(profession) >= SKILLED_LEVEL for profession in resident.skills)
-        if skilled and not _happened(world, "skilled", identifier):
+        if skilled and due(world, "skilled", identifier):
             _life_event(world, "skilled", identifier)
 
 
@@ -390,7 +431,7 @@ def _check_events(world: World) -> None:
     for identifier, since in world.progress.arrivals.items():
         days = (world.time_ms - since) // DAY_MS
         if days and days % BIRTHDAY_EVERY_DAYS == 0 and identifier in world.residents \
-                and not _happened(world, "birthday", identifier, day):
+                and due(world, "birthday", identifier):
             world.residents[identifier].needs["mood"] = min(100, world.residents[identifier].needs["mood"] + 10)
             _life_event(world, "birthday", identifier)
 

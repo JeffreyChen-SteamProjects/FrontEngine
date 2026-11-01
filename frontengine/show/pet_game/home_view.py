@@ -17,7 +17,7 @@ from frontengine.show.pet_game.furniture_art import SURFACES, aspect, picture
 from frontengine.show.pet_game.themes import floor_color, paint_sky
 from frontengine.utils.pet_game.environment import daylight
 from frontengine.utils.multi_language.retranslate import translate
-from frontengine.utils.pet_game.catalog import CELL_PIXELS
+from frontengine.utils.pet_game.catalog import CELL_PIXELS, art_name
 from frontengine.utils.pet_game.world import World
 
 # Footprint heights in cells, so a bed reads lower than a desk at a glance.
@@ -195,14 +195,14 @@ class HomeView(QWidget):
     def footprint_rect(self, cell: int, definition) -> QRectF:
         """The footprint's width; the picture's own height when there is one, else a height per category."""
         width = self.cell_width()
-        ratio = aspect(self._theme(), definition.identifier)
+        ratio = aspect(self._theme(), art_name(definition))
         height = definition.width * width * ratio if ratio is not None else HEIGHTS[definition.category] * width
         height = min(self._floor_y() - 24, height)
         return QRectF(cell * width, self._floor_y() - height, definition.width * width, height)
 
     def _paint_piece(self, painter: QPainter, piece, definition) -> None:
         rect = self.piece_rect(piece, definition)
-        image = picture(self._theme(), definition.identifier)
+        image = picture(self._theme(), art_name(definition))
         if image is not None:
             painter.save()
             if piece.flipped:                          # mirrored about the piece's own centre
@@ -338,7 +338,7 @@ class HomeView(QWidget):
             return 0.0
         piece = self.world.furniture.get(activity.furniture)
         surface = SURFACES.get(piece.definition) if piece is not None else None
-        if surface is None or picture(self._theme(), piece.definition) is None:
+        if surface is None or picture(self._theme(), art_name(self.world.definition(piece))) is None:
             return 0.0
         return self.piece_rect(piece, self.world.definition(piece)).height() * surface
 
