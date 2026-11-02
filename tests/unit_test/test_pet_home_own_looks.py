@@ -87,7 +87,8 @@ def test_a_portrait_is_saved_small_and_read_only_from_its_own_file(tmp_path):
 
 def test_a_still_picture_bounces_while_walking_and_settles_while_sleeping(tmp_path):
     renderer = load_picture("sprite", _png(tmp_path / "cat.png", "orange"), PET)
-    assert renderer.has_action("idle") and not renderer.has_action("walk")
+    assert renderer.has_action("idle")
+    assert not renderer.has_action("walk")
     resting = _lowest_opaque_row(renderer.render("idle", 0))
     bounced = _lowest_opaque_row(renderer.render("walk", 90))
     assert bounced < resting                                                # lifted off the floor
@@ -130,7 +131,8 @@ def test_mirroring_and_size_limits(tmp_path):
     assert max(frame.height() for frame, _ in renderer.actions["idle"]) == MAX_HEIGHT
     plain = renderer.render("idle", 0)
     flipped = renderer.render("idle", 0, mirrored=True)
-    assert plain.pixelColor(5, height - 5).alpha() and not flipped.pixelColor(5, height - 5).alpha()
+    assert plain.pixelColor(5, height - 5).alpha()
+    assert not flipped.pixelColor(5, height - 5).alpha()
     with pytest.raises(ValueError):
         load_picture("sprite", tmp_path / "missing.png", PET)
     with pytest.raises(ValueError):
