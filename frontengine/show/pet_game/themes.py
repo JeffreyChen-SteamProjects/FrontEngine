@@ -19,8 +19,25 @@ DUSK_DAYLIGHT = 0.6            # the tint starts as daylight falls below this
 RAIN_DROPS = 60
 
 
+# Content pack themes, already checked by content_pack: id -> palette, and id -> built-in base.
+PACK_PALETTES: dict[str, dict] = {}
+PACK_BASES: dict[str, str] = {}
+
+
+def register_themes(themes) -> None:
+    """Make content pack themes drawable; a theme whose pack is gone falls back to the warm home."""
+    for theme in themes:
+        PACK_PALETTES[theme.identifier] = {"floor": theme.floor, "day": theme.day, "night": theme.night}
+        PACK_BASES[theme.identifier] = theme.base
+
+
+def base_theme(theme: str) -> str:
+    """The built-in theme whose furniture pictures a theme uses."""
+    return theme if theme in PALETTES else PACK_BASES.get(theme, "warm_home")
+
+
 def palette(theme: str) -> dict:
-    return PALETTES.get(theme, PALETTES["warm_home"])
+    return PALETTES.get(theme) or PACK_PALETTES.get(theme) or PALETTES["warm_home"]
 
 
 def floor_color(theme: str) -> QColor:

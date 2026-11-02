@@ -8,7 +8,9 @@ A pack lives in its own folder under ``pet-home-packs``::
 
 ``pack.json`` names the pack (format, version, stable id, name, source, licence) and lists
 its furniture (id, name, category, footprint, interaction points, what it is used for, the
-poses it wants, price and comfort). Everything is checked at this boundary: unknown fields,
+poses it wants, price and comfort) and, optionally, themes (id, name, the built-in theme whose
+furniture pictures it uses, and floor / day sky / night sky colours). A pack brings at least one
+piece or one theme. Everything is checked at this boundary: unknown fields,
 paths that leave the pack (``..``, links), oversized pictures, duplicate ids and any file that
 could run (scripts or programs) reject the whole pack, and the reason is reported. Nothing in
 a pack is executed. Furniture ids become ``<pack>__<id>`` so packs never collide with the
@@ -23,8 +25,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from frontengine.utils.pet_game.catalog import (
-    ACTIVITIES, CATEGORIES, NEEDS, POSES, PROFESSIONS, Catalog, FurnitureDefinition, builtin_catalog,
-    check_furniture,
+    ACTIVITIES, CATEGORIES, NEEDS, POSES, PROFESSIONS, Catalog, FurnitureDefinition, ThemeDefinition,
+    builtin_catalog, check_furniture,
 )
 from frontengine.utils.pet_game.layout import THEMES
 
@@ -35,6 +37,7 @@ MANIFEST = "pack.json"
 MAX_MANIFEST_BYTES = 64 * 1024
 MAX_PACKS = 32
 MAX_PACK_FURNITURE = 64
+MAX_PACK_THEMES = 8
 MAX_PICTURE_BYTES = 2 * 1024 * 1024
 MAX_PACK_FILES = 400
 # Anything that could run is refused outright, whatever it claims to be.
@@ -43,6 +46,8 @@ FORBIDDEN_SUFFIXES = {".py", ".pyc", ".pyw", ".js", ".mjs", ".exe", ".dll", ".so
 _PACK_ID = re.compile(r"[a-z][a-z0-9_]{0,23}")
 _LOCAL_ID = re.compile(r"[a-z][a-z0-9_]{0,21}")
 _PACK_FIELDS = {"format", "version", "id", "name", "source", "license", "furniture"}
+_OPTIONAL_PACK_FIELDS = {"themes"}
+_THEME_FIELDS = {"id", "name", "base", "floor", "day", "night"}
 _PIECE_FIELDS = {"id", "name", "category", "width", "solid", "points", "activity", "effects", "price", "comfort",
                  "poses", "profession", "art"}
 _OPTIONAL_PIECE_FIELDS = {"points", "activity", "effects", "price", "comfort", "poses", "profession", "art"}
@@ -57,6 +62,7 @@ class ContentPack:
     root: Path
     furniture: list[FurnitureDefinition] = field(default_factory=list)
     pictures: dict[str, dict[str, Path]] = field(default_factory=dict)    # furniture id -> theme -> png
+    themes: list[ThemeDefinition] = field(default_factory=list)
 
 
 def _text(value: object, limit: int, label: str) -> str:
@@ -145,8 +151,23 @@ def _piece(raw: object, pack: str) -> tuple[FurnitureDefinition, str]:
     return definition, art
 
 
-def load_pack(root: Path) -> ContentPack:
-    """Read and check one pack folder; raises ValueError with the reason when it is refused."""
+def _color(value: object) -> tuple[int, int, int]:
+    if not isinstance(value, list) or len(value) != 3 or any(type(c) is not int or not 0 <= c <= 255 for c in value):
+        raise ValueError("Invalid pack theme colour")
+    return value[0], value[1], value[2]
+
+
+def _theme(raw: object, pack: str) -> ThemeDefinition:
+    if not isinstance(raw, dict) or set(raw) != _THEME_FIELDS:
+        raise ValueError("Invalid pack theme fields")
+    if not isinstance(raw["id"], str) or not _LOCAL_ID.fullmatch(raw["id"]) or raw["base"] not in THEMES:
+        raise ValueError("Invalid pack theme id or base")
+    return ThemeDefinition(f"{pack}__{raw['id']}", _text(raw["name"], 64, "theme name"), raw["base"],
+                           _color(raw["floor"]), _color(raw["day"]), _color(raw["night"]))
+
+
+def _manifest(root: Path) -> dict:
+    """The pack's manifest: format, version, fields and an id equal to the folder name."""
     if root.is_symlink() or not root.is_dir():
         raise ValueError("Not a pack folder")
     _check_files(root)
@@ -154,35 +175,59 @@ def load_pack(root: Path) -> ContentPack:
     if not _inside(root, manifest) or manifest.stat().st_size > MAX_MANIFEST_BYTES:
         raise ValueError("Missing or oversized pack.json")
     data = json.loads(manifest.read_text(encoding="utf-8"))
-    if (not isinstance(data, dict) or set(data) != _PACK_FIELDS or data["format"] != PACK_FORMAT
-            or data["version"] != PACK_VERSION):
+    if (not isinstance(data, dict) or not _PACK_FIELDS <= set(data) <= _PACK_FIELDS | _OPTIONAL_PACK_FIELDS
+            or data["format"] != PACK_FORMAT or data["version"] != PACK_VERSION):
         raise ValueError("Not a FrontEngine home pack (format, version or fields)")
     identifier = data["id"]
     if not isinstance(identifier, str) or not _PACK_ID.fullmatch(identifier) or identifier != root.name:
         raise ValueError("The pack id must match its folder name")
-    raw_furniture = data["furniture"]
-    if not isinstance(raw_furniture, list) or not 1 <= len(raw_furniture) <= MAX_PACK_FURNITURE:
-        raise ValueError("A pack holds 1 to 64 pieces of furniture")
-    pack = ContentPack(identifier, _text(data["name"], 64, "name"), _text(data["source"], 200, "source"),
-                       _text(data["license"], 64, "license"), root)
+    return data
+
+
+def _add_themes(pack: ContentPack, raw_themes: list) -> None:
+    for raw in raw_themes:
+        theme = _theme(raw, pack.identifier)
+        if any(other.identifier == theme.identifier for other in pack.themes):
+            raise ValueError(f"Duplicate theme id in pack: {theme.identifier}")
+        pack.themes.append(theme)
+
+
+def _add_furniture(pack: ContentPack, raw_furniture: list) -> None:
     for raw in raw_furniture:
-        definition, art = _piece(raw, identifier)
+        definition, art = _piece(raw, pack.identifier)
         if any(other.identifier == definition.identifier for other in pack.furniture):
             raise ValueError(f"Duplicate furniture id in pack: {definition.identifier}")
-        pictures = {theme: path for theme in THEMES if (path := _picture(root, theme, art)) is not None}
+        pictures = {theme: path for theme in THEMES if (path := _picture(pack.root, theme, art)) is not None}
         if "warm_home" not in pictures:
             raise ValueError(f"Pack furniture needs a warm_home picture: {art}.png")
         pack.furniture.append(definition)
         pack.pictures[definition.identifier] = pictures
+
+
+def load_pack(root: Path) -> ContentPack:
+    """Read and check one pack folder; raises ValueError with the reason when it is refused."""
+    data = _manifest(root)
+    identifier = data["id"]
+    raw_furniture, raw_themes = data["furniture"], data.get("themes", [])
+    if not isinstance(raw_furniture, list) or len(raw_furniture) > MAX_PACK_FURNITURE:
+        raise ValueError("A pack holds up to 64 pieces of furniture")
+    if not isinstance(raw_themes, list) or len(raw_themes) > MAX_PACK_THEMES:
+        raise ValueError("A pack holds up to 8 themes")
+    if not raw_furniture and not raw_themes:
+        raise ValueError("A pack brings at least one piece of furniture or one theme")
+    pack = ContentPack(identifier, _text(data["name"], 64, "name"), _text(data["source"], 200, "source"),
+                       _text(data["license"], 64, "license"), root)
+    _add_themes(pack, raw_themes)
+    _add_furniture(pack, raw_furniture)
     return pack
 
 
-def load_packs(folder: Path) -> tuple[list[ContentPack], dict[str, str]]:
-    """Every acceptable pack in the folder, and the reason each refused folder was refused."""
+def load_packs(folder: Path, extra_roots: list[Path] = ()) -> tuple[list[ContentPack], dict[str, str]]:
+    """Every acceptable pack in the folder (then in ``extra_roots``, such as Workshop items), and the
+    reason each refused folder was refused; a later pack with an id already loaded is refused."""
     packs, errors, seen = [], {}, set()
-    if not folder.is_dir():
-        return packs, errors
-    for root in sorted(path for path in folder.iterdir() if path.is_dir() or path.is_symlink())[:MAX_PACKS]:
+    local = sorted(path for path in folder.iterdir() if path.is_dir() or path.is_symlink()) if folder.is_dir() else []
+    for root in (local + list(extra_roots))[:MAX_PACKS]:
         try:
             pack = load_pack(root)
             if pack.identifier in seen:
@@ -199,4 +244,5 @@ def catalog_with_packs(packs: list[ContentPack]) -> Catalog:
     """The built-in catalog plus the packs' furniture, through the catalog's own checks."""
     base = builtin_catalog()
     furniture = list(base.furniture.values()) + [piece for pack in packs for piece in pack.furniture]
-    return Catalog(furniture, list(base.recipes.values()), list(base.items.values()))
+    themes = [theme for pack in packs for theme in pack.themes]
+    return Catalog(furniture, list(base.recipes.values()), list(base.items.values()), themes)

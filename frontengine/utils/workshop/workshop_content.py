@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from frontengine.utils.logging.loggin_instance import front_engine_logger
-from frontengine.utils.workshop.workshop_manifest import is_legacy_preset, read_manifest
+from frontengine.utils.workshop.workshop_manifest import is_legacy_preset, read_manifest, safe_path
 
 # FrontEngine 的 Steam App ID（商店頁 /app/2793470/）
 # FrontEngine's Steam App ID, from its store page.
@@ -30,6 +30,8 @@ KIND_PET_PACK = "pet_pack"
 KIND_PRESET = "preset"
 KIND_MEDIA = "media"
 KIND_SCENE = "scene"
+HOME_PACK_KINDS = ("home_furniture", "home_theme")     # a content pack folder as the entry
+KIND_HOME_BLUEPRINT = "home_blueprint"
 
 _PET_STATE_FILES = ("walk", "idle", "sleep", "climb", "fall", "drag")
 _IMAGE_SUFFIXES = (".gif", ".webp", ".png", ".jpg", ".jpeg")
@@ -139,6 +141,27 @@ def scan_workshop_items(content_dir) -> List[Dict[str, str]]:
     except OSError as error:
         front_engine_logger.warning(f"[workshop] scan failed: {error!r}")
     return items
+
+
+def home_pack_roots(content_dir) -> List[Path]:
+    """The pack folders of subscribed furniture and theme items; the pet home checks each one itself."""
+    roots = []
+    for item in scan_workshop_items(content_dir):
+        if item["kind"] in HOME_PACK_KINDS:
+            try:
+                roots.append(safe_path(Path(item["path"]), read_manifest(Path(item["path"]))["entry"]))
+            except (OSError, ValueError) as error:               # UnicodeError is a ValueError
+                front_engine_logger.warning(f"[workshop] home pack {item['id']}: {error}")
+    return roots
+
+
+def missing_requirements(item_path, installed: set) -> List[str]:
+    """The content packs a subscribed item needs that are not installed (from its manifest)."""
+    try:
+        manifest = read_manifest(Path(item_path))
+    except (OSError, ValueError):
+        return []
+    return [pack for pack in manifest.get("requires", []) if pack not in installed]
 
 
 def preset_files(item_path) -> List[str]:

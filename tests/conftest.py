@@ -36,6 +36,13 @@ def _never_read_the_real_session_lock(monkeypatch):
     monkeypatch.setattr(session_lock, "is_session_locked", lambda: False)
 
 
+@pytest.fixture(autouse=True)
+def _never_read_the_real_workshop_folder(monkeypatch):
+    """The pet home would load packs subscribed on this machine's Steam; tests use their own."""
+    from frontengine.ui.page.pet_game import home_page
+    monkeypatch.setattr(home_page, "workshop_pack_roots", lambda: [])
+
+
 @pytest.fixture(scope="session", autouse=True)
 def _run_from_temporary_directory():
     """整個測試 session 在暫存目錄下執行 / Run the session from a temp directory."""

@@ -61,7 +61,7 @@ def test_a_pack_adds_namespaced_furniture_with_its_pictures(tmp_path):
     (dict(version=2), "format"),
     (dict(id="other"), "folder"),
     (dict(extra=1), "format"),
-    (dict(furniture=[]), "1 to 64"),
+    (dict(furniture=[]), "at least one piece"),
     (dict(furniture=[dict(LAMP, id="Bad-Id")]), "id"),
     (dict(furniture=[dict(LAMP, colour="red")]), "fields"),
     (dict(furniture=[LAMP, LAMP]), "Duplicate"),

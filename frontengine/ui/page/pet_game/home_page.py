@@ -45,6 +45,8 @@ from frontengine.utils.multi_language.retranslate import retranslator, translate
 from frontengine.utils.pet_game.catalog import CELL_PIXELS
 from frontengine.utils.pet_game.content_pack import PACK_FOLDER, catalog_with_packs, load_packs
 from frontengine.show.pet_game.furniture_art import register_pack_pictures
+from frontengine.show.pet_game.themes import register_themes
+from frontengine.utils.workshop.workshop_content import find_workshop_dir, home_pack_roots
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.pet_game.schedule import clock_text, game_day
 
@@ -64,12 +66,19 @@ STAGE_HEIGHT = 220
 LAYER_KEY = "pet_home_layer"
 
 
+def workshop_pack_roots() -> list[Path]:
+    """Furniture and theme packs subscribed on the Steam Workshop, when Steam's folder is there."""
+    content = find_workshop_dir()
+    return home_pack_roots(content) if content is not None else []
+
+
 def default_service(parent) -> HomeService:
     mode = user_setting_dict.get(SAVE_MODE_KEY)
-    packs, errors = load_packs(Path(getcwd()) / PACK_FOLDER)
+    packs, errors = load_packs(Path(getcwd()) / PACK_FOLDER, workshop_pack_roots())
     for name, reason in errors.items():
         front_engine_logger.warning(f"[PetHome] content pack {name} refused: {reason}")
     register_pack_pictures({key: value for pack in packs for key, value in pack.pictures.items()})
+    register_themes([theme for pack in packs for theme in pack.themes])
     store = HomeSaveStore(Path(getcwd()), catalog_with_packs(packs), mode if mode in MODES else "manage")
     store.packs, store.pack_errors = packs, errors
     return HomeService(parent, store, PetProfiles(user_setting_dict, write_user_setting),
@@ -80,7 +89,9 @@ def packs_text(store) -> str:
     """Which packs are in use (with source and licence) and why any folder was refused."""
     packs, errors = getattr(store, "packs", []), getattr(store, "pack_errors", {})
     lines = [translate("pet_home_pack_line", "{name} - {count} pieces · {source} · {license}").format(
-        name=pack.name, count=len(pack.furniture), source=pack.source, license=pack.license) for pack in packs]
+        name=pack.name, count=len(pack.furniture), source=pack.source, license=pack.license)
+        + (" · " + translate("pet_home_pack_themes", "{count} themes").format(count=len(pack.themes))
+           if pack.themes else "") for pack in packs]
     lines += [translate("pet_home_pack_refused", "{name} was not loaded: {reason}").format(name=name, reason=reason)
               for name, reason in sorted(errors.items())]
     return "\n".join(lines) or translate("pet_home_no_packs",

@@ -252,6 +252,8 @@ class LayoutPanel:
             self.theme.clear()
             for name in THEMES:
                 self.theme.addItem(translate("pet_game_theme_" + name, name), name)
+            for name, definition in sorted(world.catalog.themes.items()):     # from content packs
+                self.theme.addItem(definition.name, name)
             self.theme.setCurrentIndex(self.theme.findData(theme))
         self.place_button.setEnabled(bool(things))
         self._refresh_presets(world)
@@ -455,9 +457,9 @@ class LayoutPanel:
         self.page.report_text(translate("pet_home_blueprint_saved", "Blueprint saved to {path}").format(path=target))
         return target
 
-    def visit_blueprint(self):
-        """Open a blueprint read-only; a file that is not one is refused, never half-trusted."""
-        path = self.choose_open_path()
+    def visit_blueprint(self, path: str | None = None):
+        """Open a blueprint read-only (a Workshop item passes its file); a file that is not one is refused."""
+        path = path or self.choose_open_path()
         if not path:
             return None
         source = Path(path)
