@@ -166,8 +166,8 @@ def _theme(raw: object, pack: str) -> ThemeDefinition:
                            _color(raw["floor"]), _color(raw["day"]), _color(raw["night"]))
 
 
-def load_pack(root: Path) -> ContentPack:
-    """Read and check one pack folder; raises ValueError with the reason when it is refused."""
+def _manifest(root: Path) -> dict:
+    """The pack's manifest: format, version, fields and an id equal to the folder name."""
     if root.is_symlink() or not root.is_dir():
         raise ValueError("Not a pack folder")
     _check_files(root)
@@ -181,6 +181,33 @@ def load_pack(root: Path) -> ContentPack:
     identifier = data["id"]
     if not isinstance(identifier, str) or not _PACK_ID.fullmatch(identifier) or identifier != root.name:
         raise ValueError("The pack id must match its folder name")
+    return data
+
+
+def _add_themes(pack: ContentPack, raw_themes: list) -> None:
+    for raw in raw_themes:
+        theme = _theme(raw, pack.identifier)
+        if any(other.identifier == theme.identifier for other in pack.themes):
+            raise ValueError(f"Duplicate theme id in pack: {theme.identifier}")
+        pack.themes.append(theme)
+
+
+def _add_furniture(pack: ContentPack, raw_furniture: list) -> None:
+    for raw in raw_furniture:
+        definition, art = _piece(raw, pack.identifier)
+        if any(other.identifier == definition.identifier for other in pack.furniture):
+            raise ValueError(f"Duplicate furniture id in pack: {definition.identifier}")
+        pictures = {theme: path for theme in THEMES if (path := _picture(pack.root, theme, art)) is not None}
+        if "warm_home" not in pictures:
+            raise ValueError(f"Pack furniture needs a warm_home picture: {art}.png")
+        pack.furniture.append(definition)
+        pack.pictures[definition.identifier] = pictures
+
+
+def load_pack(root: Path) -> ContentPack:
+    """Read and check one pack folder; raises ValueError with the reason when it is refused."""
+    data = _manifest(root)
+    identifier = data["id"]
     raw_furniture, raw_themes = data["furniture"], data.get("themes", [])
     if not isinstance(raw_furniture, list) or len(raw_furniture) > MAX_PACK_FURNITURE:
         raise ValueError("A pack holds up to 64 pieces of furniture")
@@ -190,20 +217,8 @@ def load_pack(root: Path) -> ContentPack:
         raise ValueError("A pack brings at least one piece of furniture or one theme")
     pack = ContentPack(identifier, _text(data["name"], 64, "name"), _text(data["source"], 200, "source"),
                        _text(data["license"], 64, "license"), root)
-    for raw in raw_themes:
-        theme = _theme(raw, identifier)
-        if any(other.identifier == theme.identifier for other in pack.themes):
-            raise ValueError(f"Duplicate theme id in pack: {theme.identifier}")
-        pack.themes.append(theme)
-    for raw in raw_furniture:
-        definition, art = _piece(raw, identifier)
-        if any(other.identifier == definition.identifier for other in pack.furniture):
-            raise ValueError(f"Duplicate furniture id in pack: {definition.identifier}")
-        pictures = {theme: path for theme in THEMES if (path := _picture(root, theme, art)) is not None}
-        if "warm_home" not in pictures:
-            raise ValueError(f"Pack furniture needs a warm_home picture: {art}.png")
-        pack.furniture.append(definition)
-        pack.pictures[definition.identifier] = pictures
+    _add_themes(pack, raw_themes)
+    _add_furniture(pack, raw_furniture)
     return pack
 
 

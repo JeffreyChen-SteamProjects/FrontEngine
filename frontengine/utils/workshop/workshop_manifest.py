@@ -67,6 +67,18 @@ def checked_tree(root: Path) -> list[Path]:
     return files
 
 
+def _checked_lists(value: dict) -> tuple[list, list]:
+    """Required capabilities (strings) and required content packs (pack ids), both optional."""
+    capabilities = value.get("required_capabilities", [])
+    if not isinstance(capabilities, list) or any(not isinstance(v, str) for v in capabilities):
+        raise ValueError("Invalid required capabilities")
+    requires = value.get("requires", [])          # content packs a home item needs, by pack id
+    if (not isinstance(requires, list) or len(requires) > MAX_REQUIRES
+            or any(not isinstance(v, str) or not _PACK_ID.fullmatch(v) for v in requires)):
+        raise ValueError("Invalid required content packs")
+    return capabilities, sorted(set(requires))
+
+
 def validate_manifest(value: object, root: Path) -> dict:
     """Validate an envelope and its confined, existing content entry."""
     if not isinstance(value, dict) or value.get("format") != FORMAT:
@@ -87,16 +99,10 @@ def validate_manifest(value: object, root: Path) -> dict:
     minimum = value.get("min_frontengine_version", "1.0.81")
     if not isinstance(minimum, str) or not re.fullmatch(r"\d+\.\d+\.\d+", minimum):
         raise ValueError("Invalid minimum FrontEngine version")
-    capabilities = value.get("required_capabilities", [])
-    if not isinstance(capabilities, list) or any(not isinstance(v, str) for v in capabilities):
-        raise ValueError("Invalid required capabilities")
-    requires = value.get("requires", [])          # content packs a home item needs, by pack id
-    if (not isinstance(requires, list) or len(requires) > MAX_REQUIRES
-            or any(not isinstance(v, str) or not _PACK_ID.fullmatch(v) for v in requires)):
-        raise ValueError("Invalid required content packs")
+    capabilities, requires = _checked_lists(value)
     return {**value, "title": title.strip(), "content_revision": revision,
             "min_frontengine_version": minimum, "required_capabilities": capabilities,
-            "requires": sorted(set(requires))}
+            "requires": requires}
 
 
 def read_manifest(root: Path) -> dict:

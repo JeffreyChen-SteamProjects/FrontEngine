@@ -51,7 +51,8 @@ def _blueprint_text(theme="warm_home", pieces=(("bed_basic", 1),)):
 
 def test_a_pack_can_bring_themes_alone_and_they_join_the_catalog(tmp_path):
     pack = load_pack(_theme_pack(tmp_path))
-    assert pack.furniture == [] and [theme.identifier for theme in pack.themes] == ["moods__dusk"]
+    assert pack.furniture == []
+    assert [theme.identifier for theme in pack.themes] == ["moods__dusk"]
     catalog = catalog_with_packs([pack])
     assert catalog.themes["moods__dusk"].base == "night_studio"
     world = World(catalog, "a" * 32, seed=1)
@@ -65,13 +66,15 @@ def test_a_pack_can_bring_themes_alone_and_they_join_the_catalog(tmp_path):
     {"extra": 1},
 ])
 def test_a_bad_theme_refuses_the_whole_pack(tmp_path, change):
+    root = _theme_pack(tmp_path, themes_=({**DUSK, **change},))
     with pytest.raises(ValueError):
-        load_pack(_theme_pack(tmp_path, themes_=({**DUSK, **change},)))
+        load_pack(root)
 
 
 def test_a_pack_with_neither_furniture_nor_themes_is_refused(tmp_path):
+    root = _pack(tmp_path, furniture=(), themes=[])
     with pytest.raises(ValueError, match="at least one"):
-        load_pack(_pack(tmp_path, furniture=(), themes=[]))
+        load_pack(root)
 
 
 def test_a_pack_theme_is_drawn_in_its_colours_over_its_base_pictures(tmp_path):
@@ -82,7 +85,8 @@ def test_a_pack_theme_is_drawn_in_its_colours_over_its_base_pictures(tmp_path):
     assert themes.palette("gone__theme") == themes.PALETTES["warm_home"]
     assert themes.base_theme("gone__theme") == "warm_home"
     drawn, base = picture("moods__dusk", "bed_basic"), picture("night_studio", "bed_basic")
-    assert drawn is not None and drawn.size() == base.size()
+    assert drawn is not None
+    assert drawn.size() == base.size()
 
 
 def test_a_save_keeps_a_pack_theme_while_its_pack_is_missing(tmp_path):
@@ -101,12 +105,14 @@ def test_a_shared_blueprint_is_rewritten_from_its_checked_parts():
     assert parse_blueprint(canonical_blueprint(text)) == parse_blueprint(text)
     personal = json.loads(text)
     personal["coins"], personal["pets"] = 999, [{"name": "Mochi"}]
+    personal_text = json.dumps(personal)
     with pytest.raises(ValueError):
-        canonical_blueprint(json.dumps(personal))
+        canonical_blueprint(personal_text)
     zone_with_owner = json.loads(text)
     zone_with_owner["zones"][0]["owner"] = "someone"
+    owner_text = json.dumps(zone_with_owner)
     with pytest.raises(ValueError):
-        canonical_blueprint(json.dumps(zone_with_owner))
+        canonical_blueprint(owner_text)
 
 
 def test_a_blueprint_names_the_content_packs_it_needs():
@@ -154,11 +160,13 @@ def test_publishing_a_furniture_pack_copies_only_its_manifest_and_pictures(tmp_p
     _png(source / "thumbnail.png")
     manifest = create_snapshot("home_furniture", source, "Cozy", _preview(tmp_path), tmp_path / "out")
     root = tmp_path / "out" / "content" / "cozy"
-    assert manifest["entry"] == "content/cozy" and manifest["requires"] == []
+    assert manifest["entry"] == "content/cozy"
+    assert manifest["requires"] == []
     assert sorted(path.relative_to(root).as_posix() for path in root.rglob("*") if path.is_file()) == [
         "furniture/warm_home/egg.png", "furniture/warm_home/moon_lamp.png", "pack.json", "thumbnail.png"]
+    preview = _preview(tmp_path)
     with pytest.raises(ValueError, match="theme"):
-        create_snapshot("home_theme", source, "Cozy", _preview(tmp_path), tmp_path / "out2")
+        create_snapshot("home_theme", source, "Cozy", preview, tmp_path / "out2")
 
 
 def test_publishing_a_blueprint_ships_only_the_layout_and_lists_its_packs(tmp_path):

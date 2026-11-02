@@ -150,7 +150,7 @@ def home_pack_roots(content_dir) -> List[Path]:
         if item["kind"] in HOME_PACK_KINDS:
             try:
                 roots.append(safe_path(Path(item["path"]), read_manifest(Path(item["path"]))["entry"]))
-            except (OSError, ValueError, UnicodeError) as error:
+            except (OSError, ValueError) as error:               # UnicodeError is a ValueError
                 front_engine_logger.warning(f"[workshop] home pack {item['id']}: {error}")
     return roots
 
@@ -159,7 +159,7 @@ def missing_requirements(item_path, installed: set) -> List[str]:
     """The content packs a subscribed item needs that are not installed (from its manifest)."""
     try:
         manifest = read_manifest(Path(item_path))
-    except (OSError, ValueError, UnicodeError):
+    except (OSError, ValueError):
         return []
     return [pack for pack in manifest.get("requires", []) if pack not in installed]
 
