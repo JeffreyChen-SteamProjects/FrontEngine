@@ -275,9 +275,11 @@ def test_hide_and_show_all_reach_the_home_strip_and_desktop_pets_in_the_real_win
     window.pet_home_ui.strip_list.append(strip)
     try:
         window.control_center_ui.hide_all()
-        assert not strip.isVisible() and not pet.isVisible()
+        assert not strip.isVisible()
+        assert not pet.isVisible()
         window.control_center_ui.show_all()
-        assert strip.isVisible() and pet.isVisible()
+        assert strip.isVisible()
+        assert pet.isVisible()
     finally:
         window.pet_home_ui.strip_list.remove(strip)
         strip.close()
