@@ -146,3 +146,36 @@ def test_page_clone_rename_export_and_import_use_distinct_identities(tmp_path, m
         for pet in page.pet_list:
             pet.close()
         page.close()
+
+
+def test_a_pet_moves_from_the_desktop_into_the_home_and_back_without_losing_care(tmp_path):
+    """The home is the new front door: a live desktop pet stays away until it closes, then moves in;
+    the home's care values are mirrored into the profile, and closing the home frees the identity."""
+    from frontengine.show.pet.pet_profile_session import PetProfileSession
+    from frontengine.show.pet_game.home_service import HomeService
+    from frontengine.user_setting.pet_game_save import HomeSaveStore
+    from frontengine.utils.pet_game.catalog import builtin_catalog
+
+    profiles = PetProfiles({}, lambda: None)
+    pet = DesktopPetWidget(_sprite(tmp_path), profiles=profiles, talk=False, sit_on_windows=False)
+    identifier = pet.profile_session.identifier
+    service = HomeService(None, HomeSaveStore(tmp_path, builtin_catalog()), profiles)
+    try:
+        service.create_home("screen", 0, 900, 30, seed=2)
+        assert service.adopt(identifier) == "active_elsewhere"       # never two of the same pet
+        pet.close()
+        assert PetProfileSession.active(profiles, identifier) is None
+        assert service.adopt(identifier) == "accepted"
+        resident = service.world.residents[identifier]
+        resident.needs["mood"] = 33
+        assert service.save_now() is True
+    finally:
+        assert service.shutdown() is True
+    assert PetProfileSession.active(profiles, identifier) is None
+    assert profiles.get(identifier)["mood"] == 33
+    again = DesktopPetWidget(_sprite(tmp_path), profile_id=identifier, profiles=profiles, talk=False,
+                             sit_on_windows=False)
+    try:
+        assert again.profile_session.state()["mood"] == 33
+    finally:
+        again.close()
