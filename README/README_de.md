@@ -133,6 +133,8 @@ Standardmäßig öffnet sich ein Overlay ohne Nachfrage auf dem Bildschirm, auf 
 
 **Desktop-Haustier** — ein animiertes Sprite, das auf Ihrem Desktop lebt.
 
+Die Seite beginnt mit *Ihr Haustier*: Ein Klick auf eine der eingebauten Figuren bringt sofort ein so gekleidetes Haustier auf den Desktop, oder wählen Sie *Eigenes Bild…*. Darunter stehen die Haustiere auf dem Desktop mit *Garderobe*, *Tier zurückholen* und *Wegräumen* (Doppelklick holt eines zurück); alle anderen Einstellungen bleiben eingeklappt, bis Sie ihren Abschnitt öffnen.
+
 - Die Pflege speichert Energie und Spiel-/Arbeits-/Ruhemodus je Identität und erhält UUIDs und Werte aus Version 1. Das Sprite-Menü ergänzt Begrüßen, Streicheln und Fellpflege. Zeitaktionen belohnen nur den Abschluss; satte Tiere lehnen Futter ab und Wiederholungen benötigen eine Pause. Pflege folgt aktiver Zeit, ohne Nachberechnung bei versteckten Tieren oder Offline-Zeit. Puppet teilt Sitzung und Fütterungsregeln; native Reaktionen hängen von Laufzeit und Modell ab. 
 
 - **Sprites** — ein einzelnes GIF/WebP/PNG oder ein *Pet-Pack*-Ordner, dessen

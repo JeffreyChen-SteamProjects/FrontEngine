@@ -128,6 +128,8 @@ By default an overlay opens on the screen FrontEngine is on, without asking. Cho
 
 **Desktop pet** — an animated sprite that lives on your desktop.
 
+The page opens with *Your pet*: click one of the built-in characters and a pet dressed as it appears on the desktop at once, or pick *Your own picture…*. Below, the pets on the desktop are listed with *Wardrobe*, *Bring pet back* and *Put away* (a double-click brings one back); every other setting is folded away until you open its section.
+
 - Companion care saves energy and play/work/rest modes for each identity, preserving version 1 UUIDs and stats. The sprite menu adds greeting, petting and grooming. Timed actions reward completion only; full pets refuse food and repeats need a cooldown. Care follows active time, with no hidden/offline catch-up. Puppet pets share session and feeding rules; native responses depend on runtime/model capabilities. 
 
 - **Sprites** — a single GIF/WebP/PNG, or a *pet pack* folder whose file names

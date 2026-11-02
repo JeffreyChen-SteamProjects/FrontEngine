@@ -202,7 +202,8 @@ FrontEngine 是一個 PySide6 桌面**覆蓋層（overlay）框架**：把影片
 | `page/sound_player/sound_player_setting_ui.py` | 147 | 音效與音樂播放。 |
 | `page/particle/particle_setting_ui.py` | 253 | 粒子效果。 |
 | `page/scene_setting/` | 46 + 185 + 7 頁 | 場景編輯：`scene_setting_ui.py` 是外框，`scene_manager.py` 負責 JSON 讀寫與啟動，`scene_page/` 是七個子頁（gif/image/sound/text/video/web + `base_scene_page.py` 的 Template Method 基底 + `registry.py` 註冊表）。 |
-| `page/pet/pet_setting_ui.py` | 562 | 桌寵：動作包、行為模式、多隻與鬼抓人、麥克風對嘴、AI 對話、打字時安分、專注計時（番茄鐘）。 |
+| `page/pet/pet_setting_ui.py` | 830 | 桌寵：動作包、行為模式、多隻與鬼抓人、麥克風對嘴、AI 對話、打字時安分、專注計時（番茄鐘）。頁面最上方是 `pet_quick.PetQuickStart`，其餘區塊（更多來源、身分、外觀、行為、聲音、專注、互動）預設收合。 |
+| `page/pet/pet_quick.py` | 150 | 「你的寵物」：每個內建角色一張卡片（圖示取 `inkside/sprites/<id>-sit.png` 第一格），點了就 `quick_builtin` 安裝並直接放一隻穿成該角色的寵物到桌面；「自己的圖片…」走 `choose_and_play`。下方清單列出桌面上的寵物（每秒對照 `pet_list` 更新），附衣櫃、找回（雙擊亦可）與收起來（關閉並從 `pet_list` 移除）。 |
 | `page/wallpaper/wallpaper_setting_ui.py` | 328 | 桌布：資料夾播放清單、每螢幕不同資料夾、隨機、時段切換清單、音量反應。 |
 | `page/widgets/widgets_setting_ui.py` | 360 | 桌面小工具：頻譜、正在播放、系統監控、便利貼。 |
 | `page/focus/focus_setting_ui.py` | 215 | 專注：背景壓暗、干擾區域遮罩。 |
