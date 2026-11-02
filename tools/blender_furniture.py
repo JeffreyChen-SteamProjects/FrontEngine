@@ -598,6 +598,101 @@ def bath_tub(p: Palette) -> None:
     sphere(0.08, (0.18, 0.2, 1.66), p["accent"])
 
 
+# ----- the second collection -------------------------------------------------------------------
+
+def floor_lamp(p: Palette) -> None:
+    cylinder(0.32, 0.08, (0.5, 0, 0.04), p["dark_wood"])
+    cylinder(0.04, 2.0, (0.5, 0, 1.08), p["metal"], bevel=0.0)
+    cone(0.42, 0.26, 0.55, (0.5, 0, 2.2), p["fabric"])
+    sphere(0.12, (0.5, 0, 1.98), p["accent_2"])
+
+
+def hanging_plants(p: Palette) -> None:
+    box((2.0, 0.12, 0.12), (1.0, 0, 2.4), p["dark_wood"], bevel=0.02)
+    for x, drop in ((0.45, 0.7), (1.0, 1.0), (1.55, 0.6)):
+        cylinder(0.015, drop, (x, 0, 2.4 - drop / 2), p["metal"], bevel=0.0)
+        cylinder(0.2, 0.26, (x, 0, 2.4 - drop - 0.1), p["accent"])
+        bush((x, 0, 2.4 - drop - 0.18), 0.35, p["leaf"], p["leaf_dark"], seed=int(x * 10))
+
+
+def wardrobe_closet(p: Palette) -> None:
+    box((1.9, 0.9, 2.3), (1.0, 0, 1.17), p["wood"], bevel=0.05)
+    box((1.96, 0.96, 0.12), (1.0, 0, 2.36), p["dark_wood"], bevel=0.03)
+    box((0.03, 0.02, 2.0), (1.0, -0.46, 1.2), p["dark_wood"], bevel=0.0)
+    for x in (0.86, 1.14):
+        sphere(0.06, (x, -0.48, 1.25), p["accent"])
+    for x in (0.18, 1.82):
+        box((0.12, 0.12, 0.1), (x, 0, 0.05), p["dark_wood"], bevel=0.0)
+
+
+def futon(p: Palette) -> None:
+    cushion((3.0, 1.4, 0.22), (1.5, 0, 0.12), p["fabric"])
+    cushion((2.0, 1.3, 0.12), (1.9, 0, 0.3), p["accent"], softness=1)
+    cushion((0.7, 1.0, 0.2), (0.45, 0, 0.34), p["fabric"])
+
+
+def kotatsu(p: Palette) -> None:
+    cushion((2.9, 1.4, 0.55), (1.5, 0, 0.3), p["accent"], softness=1)
+    box((3.0, 1.5, 0.1), (1.5, 0, 0.62), p["wood"], bevel=0.03)
+    for x in (0.9, 2.1):
+        cylinder(0.16, 0.14, (x, 0, 0.74), p["fabric"])
+    sphere(0.12, (1.5, 0, 0.78), p["accent_2"])
+
+
+def tv_set(p: Palette) -> None:
+    box((2.0, 0.8, 0.6), (1.0, 0, 0.3), p["dark_wood"], bevel=0.04)
+    box((1.6, 0.25, 1.05), (1.0, 0.1, 1.15), p["metal"], bevel=0.04)
+    screen = box((1.4, 0.04, 0.85), (1.0, -0.04, 1.15), p["water"], bevel=0.0)
+    screen.name = "screen"
+    for x in (0.7, 1.3):
+        cylinder(0.02, 0.4, (x, 0.1, 1.85), p["metal"], rotation=(0, math.radians(25 if x < 1 else -25), 0), bevel=0.0)
+
+
+def fireplace(p: Palette) -> None:
+    box((3.0, 0.9, 1.7), (1.5, 0.05, 0.85), p["fabric"], bevel=0.05)
+    box((3.2, 1.0, 0.14), (1.5, 0.05, 1.77), p["dark_wood"], bevel=0.03)
+    box((1.6, 0.4, 1.0), (1.5, -0.3, 0.5), p["metal"], bevel=0.04)
+    for x, height in ((1.2, 0.5), (1.5, 0.7), (1.8, 0.45)):
+        cone(0.18, 0.0, height, (x, -0.5, 0.15 + height / 2), p["accent"])
+        cone(0.1, 0.0, height * 0.6, (x, -0.55, 0.12 + height * 0.3), p["accent_2"])
+    box((1.2, 0.2, 0.1), (1.5, -0.5, 0.07), p["dark_wood"], bevel=0.0)
+
+
+def rocking_horse(p: Palette) -> None:
+    """Two curved rockers (short planks along an arc), legs, a padded body and a head with a mane."""
+    radius, centre = 1.6, 1.68
+    for y in (-0.25, 0.25):
+        for step in range(-4, 5):
+            angle = math.radians(step * 8)
+            box((0.3, 0.08, 0.08), (1.0 + radius * math.sin(angle), y, centre - radius * math.cos(angle)),
+                p["dark_wood"], bevel=0.0, rotation=(0, -angle, 0))
+    for x in (0.55, 1.45):
+        for y in (-0.25, 0.25):
+            box((0.08, 0.08, 0.6), (x, y, 0.55), p["wood"], bevel=0.0)
+    cushion((1.4, 0.45, 0.4), (1.0, 0, 0.95), p["accent"])
+    cushion((0.45, 0.35, 0.7), (1.6, 0, 1.35), p["accent"], softness=1)
+    sphere(0.06, (1.75, -0.18, 1.55), p["metal"])
+    box((0.1, 0.38, 0.5), (1.45, 0, 1.45), p["accent_2"], bevel=0.02)
+
+
+def telescope(p: Palette) -> None:
+    for angle in (0, 120, 240):
+        leg = math.radians(angle)
+        cylinder(0.035, 1.3, (0.5 + 0.22 * math.cos(leg), 0.22 * math.sin(leg), 0.62), p["dark_wood"],
+                 rotation=(0.3 * math.sin(leg), -0.3 * math.cos(leg), 0), bevel=0.0)
+    cylinder(0.12, 1.1, (0.5, 0, 1.45), p["accent"], rotation=(0, math.radians(60), 0))
+    cylinder(0.15, 0.12, (0.98, 0, 1.73), p["metal"], rotation=(0, math.radians(60), 0))
+
+
+def shower(p: Palette) -> None:
+    box((0.95, 0.9, 0.12), (0.5, 0, 0.06), p["fabric"], bevel=0.03)
+    cylinder(0.035, 2.2, (0.12, 0.3, 1.15), p["metal"], bevel=0.0)
+    cylinder(0.03, 0.5, (0.36, 0.3, 2.22), p["metal"], rotation=(0, math.radians(90), 0), bevel=0.0)
+    cone(0.16, 0.06, 0.14, (0.62, 0.3, 2.15), p["metal"])
+    curtain = cushion((0.08, 0.85, 1.6), (0.92, 0, 1.15), p["water"], softness=1)
+    curtain.name = "curtain"
+
+
 PIECES = {"bed_basic": (4, bed_basic), "bed_cozy": (4, bed_cozy), "table_basic": (4, table_basic),
           "desk_basic": (3, desk_basic), "plant_pot": (1, plant_pot), "wall_lamp": (1, wall_lamp),
           "toy_box": (2, toy_box), "armchair": (2, armchair), "stool": (1, stool), "planter": (2, planter),
@@ -612,6 +707,10 @@ PIECES.update({"bunk_bed": (4, bunk_bed), "hammock": (3, hammock), "pet_cushion"
                "grandfather_clock": (1, grandfather_clock),
                "pet_stairs": (2, pet_stairs), "cat_tree": (2, cat_tree), "climbing_wall": (2, climbing_wall),
                "bath_tub": (3, bath_tub)})
+PIECES.update({"floor_lamp": (1, floor_lamp), "hanging_plants": (2, hanging_plants),
+               "wardrobe_closet": (2, wardrobe_closet), "futon": (3, futon), "kotatsu": (3, kotatsu),
+               "tv_set": (2, tv_set), "fireplace": (3, fireplace), "rocking_horse": (2, rocking_horse),
+               "telescope": (1, telescope), "shower": (1, shower)})
 
 
 # ----- items: materials, harvests and goods -------------------------------------------------------
