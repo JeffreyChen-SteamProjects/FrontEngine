@@ -8,7 +8,10 @@ from pathlib import Path, PurePosixPath
 
 FORMAT = "frontengine.workshop"
 VERSION = 1
-KINDS = ("scene", "preset", "pet_pack")
+KINDS = ("scene", "preset", "pet_pack", "home_furniture", "home_theme", "home_blueprint")
+FOLDER_KINDS = ("pet_pack", "home_furniture", "home_theme")      # the entry is a folder, not a file
+MAX_REQUIRES = 16
+_PACK_ID = re.compile(r"[a-z][a-z0-9_]{0,23}")
 MAX_BYTES = 256 * 1024 * 1024
 MAX_FILES = 4096
 MAX_MANIFEST_BYTES = 64 * 1024
@@ -76,7 +79,7 @@ def validate_manifest(value: object, root: Path) -> dict:
     if not isinstance(title, str) or not title.strip() or "\0" in title or len(title.encode("utf-8")) > 128:
         raise ValueError("Workshop title must contain 1–128 UTF-8 bytes")
     entry = safe_path(root, value.get("entry"))
-    if not (entry.is_dir() if value["kind"] == "pet_pack" else entry.is_file()):
+    if not (entry.is_dir() if value["kind"] in FOLDER_KINDS else entry.is_file()):
         raise ValueError("Workshop entry is missing or has the wrong type")
     revision = value.get("content_revision", 1)
     if type(revision) is not int or revision < 1:
@@ -87,8 +90,13 @@ def validate_manifest(value: object, root: Path) -> dict:
     capabilities = value.get("required_capabilities", [])
     if not isinstance(capabilities, list) or any(not isinstance(v, str) for v in capabilities):
         raise ValueError("Invalid required capabilities")
+    requires = value.get("requires", [])          # content packs a home item needs, by pack id
+    if (not isinstance(requires, list) or len(requires) > MAX_REQUIRES
+            or any(not isinstance(v, str) or not _PACK_ID.fullmatch(v) for v in requires)):
+        raise ValueError("Invalid required content packs")
     return {**value, "title": title.strip(), "content_revision": revision,
-            "min_frontengine_version": minimum, "required_capabilities": capabilities}
+            "min_frontengine_version": minimum, "required_capabilities": capabilities,
+            "requires": sorted(set(requires))}
 
 
 def read_manifest(root: Path) -> dict:

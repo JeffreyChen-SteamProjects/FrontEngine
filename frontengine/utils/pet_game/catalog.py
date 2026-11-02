@@ -49,6 +49,18 @@ class FurnitureDefinition:
 
 
 @dataclass(frozen=True)
+class ThemeDefinition:
+    """A home theme from a content pack: its own colours over one built-in theme's furniture pictures."""
+
+    identifier: str                  # <pack>__<id>
+    name: str
+    base: str                        # warm_home / green_studio / night_studio
+    floor: tuple[int, int, int]
+    day: tuple[int, int, int]
+    night: tuple[int, int, int]
+
+
+@dataclass(frozen=True)
 class Recipe:
     """One unit of work at a station; rewards exist only after completion."""
 
@@ -183,7 +195,8 @@ class Catalog:
     """Immutable lookup of validated furniture and recipes with unique identities."""
 
     def __init__(self, furniture: list[FurnitureDefinition], recipes: list[Recipe],
-                 items: list[ItemDefinition] | None = None) -> None:
+                 items: list[ItemDefinition] | None = None, themes: list[ThemeDefinition] | None = None) -> None:
+        self.themes: dict[str, ThemeDefinition] = {theme.identifier: theme for theme in themes or []}
         self.furniture: dict[str, FurnitureDefinition] = {}
         self.recipes: dict[str, Recipe] = {}
         self.items: dict[str, ItemDefinition] = {}

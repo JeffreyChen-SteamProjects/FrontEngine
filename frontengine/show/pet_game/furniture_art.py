@@ -11,6 +11,8 @@ from pathlib import Path
 
 from PySide6.QtGui import QImage
 
+from frontengine.show.pet_game.themes import base_theme
+
 FOLDER = Path(__file__).resolve().parent / "furniture"
 ITEM_FOLDER = Path(__file__).resolve().parent / "items"
 # Where a pet using the piece rests, as a fraction of the picture's height above the floor:
@@ -27,6 +29,7 @@ def register_pack_pictures(pictures: dict[str, dict[str, Path]]) -> None:
 
 
 def _candidates(theme: str, definition: str) -> list[Path]:
+    theme = base_theme(theme)                  # a pack theme uses its base theme's pictures
     pack = PACK_PICTURES.get(definition)
     if pack is not None:
         return [path for path in (pack.get(theme), pack.get("warm_home")) if path is not None]

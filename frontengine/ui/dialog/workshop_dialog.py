@@ -15,11 +15,33 @@ from frontengine.user_setting.preset_repository import PresetRepository
 from frontengine.user_setting.scene_setting import adopt_scene_entries
 from frontengine.utils.multi_language.retranslate import retranslator, tr, translate
 from frontengine.utils.scene_format.scene_package import load_package
+from frontengine.utils.pet_game.content_pack import PACK_FOLDER
 from frontengine.utils.workshop.workshop_cache import WorkshopCache
+from frontengine.utils.workshop.workshop_content import (
+    HOME_PACK_KINDS, KIND_HOME_BLUEPRINT, find_workshop_dir, home_pack_roots, missing_requirements,
+)
+from frontengine.utils.workshop.workshop_manifest import FOLDER_KINDS, KINDS
 from frontengine.utils.workshop.workshop_jobs import WorkshopJobs
 from frontengine.utils.workshop.workshop_publications import PublicationStore
 from frontengine.utils.workshop.workshop_publisher import WorkshopPublisher
 from frontengine.utils.workshop.workshop_subscriptions import WorkshopSubscriptions
+
+
+def installed_home_packs() -> set[str]:
+    """Content pack ids present here: the local packs folder and subscribed Workshop packs."""
+    local = Path.cwd() / PACK_FOLDER
+    names = {path.name for path in local.iterdir() if path.is_dir()} if local.is_dir() else set()
+    content = find_workshop_dir()
+    return names | ({root.name for root in home_pack_roots(content)} if content is not None else set())
+
+
+def _needs(item: dict, installed: set[str]) -> str:
+    """' · needs: a, b' for a home item whose content packs are not installed, else ''."""
+    if item.get("kind") not in (*HOME_PACK_KINDS, KIND_HOME_BLUEPRINT) or not item.get("path"):
+        return ""
+    missing = missing_requirements(item["path"], installed)
+    return " · " + translate("workshop_needs_packs", "needs: {packs}").format(packs=", ".join(missing)) \
+        if missing else ""
 
 
 class WorkshopDialog(QDialog):
@@ -58,7 +80,7 @@ class WorkshopDialog(QDialog):
     def _build_publish(self) -> None:
         section = self.page.add_section("workshop_publish")
         self.kind, self.visibility = QComboBox(), QComboBox()
-        for kind in ("scene", "preset", "pet_pack"):
+        for kind in KINDS:
             self.kind.addItem(translate("workshop_kind_" + kind), kind)
         for visibility in (2, 1, 0, 3):
             self.visibility.addItem(translate("workshop_visibility_" + str(visibility)), visibility)
@@ -130,10 +152,11 @@ class WorkshopDialog(QDialog):
             self.status.setText(self.status.text() + "\n" + reason)
 
     def _choose_source(self) -> None:
-        if self.kind.currentData() == "pet_pack":
+        if self.kind.currentData() in FOLDER_KINDS:
             path = QFileDialog.getExistingDirectory(self, translate("workshop_choose_source"))
         else:
-            file_filter = "Scene (*.fescene *.json)" if self.kind.currentData() == "scene" else "Preset (*.zip)"
+            file_filter = {"scene": "Scene (*.fescene *.json)", "home_blueprint": "Blueprint (*.json)"}.get(
+                self.kind.currentData(), "Preset (*.zip)")
             path, _ = QFileDialog.getOpenFileName(self, translate("workshop_choose_source"), "", file_filter)
         if path:
             self.source.setText(path)
@@ -221,9 +244,11 @@ class WorkshopDialog(QDialog):
         selected = self.items.currentItem()
         selected_id = selected.data(Qt.ItemDataRole.UserRole)["id"] if selected else ""
         self.items.clear()
+        installed = installed_home_packs() if any(item.get("kind") in (*HOME_PACK_KINDS, KIND_HOME_BLUEPRINT)
+                                                  for item in items) else set()
         for item in items:
             row = QListWidgetItem(f'{item["title"]} · {item["id"]} · '
-                                  + translate("workshop_state_" + item["status"]))
+                                  + translate("workshop_state_" + item["status"]) + _needs(item, installed))
             row.setToolTip(item.get("error", ""))
             row.setData(Qt.ItemDataRole.UserRole, item)
             self.items.addItem(row)
@@ -253,6 +278,10 @@ class WorkshopDialog(QDialog):
             if ok and name.strip():
                 repository = PresetRepository(Path.cwd() / "presets")
                 self.jobs.submit("preset", lambda: self.cache.import_preset(item, name.strip(), repository))
+        elif item["kind"] in HOME_PACK_KINDS:          # the home reads packs as it starts
+            retranslator.set_text(self.upload_status, "workshop_home_pack_ready")
+        elif item["kind"] == KIND_HOME_BLUEPRINT:
+            self.owner.pet_home_ui.layout_panel.visit_blueprint(str(entry))
         elif item["kind"] in ("pet_pack", "media"):
             if item["kind"] == "media":
                 entry = next(path for path in entry.iterdir() if path.suffix.lower() in {".png", ".jpg", ".jpeg", ".gif", ".webp"})

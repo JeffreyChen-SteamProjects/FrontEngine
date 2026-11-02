@@ -14,7 +14,7 @@ from collections import Counter
 
 from frontengine.utils.pet_game.arrangement import _stairs_first
 from frontengine.utils.pet_game.catalog import _check_identifier as check_identifier
-from frontengine.utils.pet_game.layout import MAX_FURNITURE, MAX_ZONE_CELLS, MIN_ZONE_CELLS, THEMES, Zone
+from frontengine.utils.pet_game.layout import MAX_FURNITURE, MAX_ZONE_CELLS, MIN_ZONE_CELLS, Zone, known_theme
 
 BLUEPRINT_FORMAT = "frontengine.home-blueprint"
 BLUEPRINT_VERSION = 1
@@ -46,7 +46,7 @@ def _int(value: object, low: int, high: int) -> int:
 def _zone(raw: object, index: int) -> Zone:
     if not isinstance(raw, dict) or set(raw) != _ZONE_FIELDS:
         raise ValueError("Invalid blueprint zone")
-    if raw["theme"] not in THEMES:
+    if not known_theme(raw["theme"]):
         raise ValueError("Unknown blueprint theme")
     width = _int(raw["width_cells"], MIN_ZONE_CELLS, MAX_ZONE_CELLS)
     # Rebuilt through Zone.from_dict, so restricted cells and areas get the save file's own checks.
@@ -77,6 +77,23 @@ def parse_blueprint(text: object) -> tuple[list[Zone], list[tuple[int, str, int,
         zone = _int(entry[0], 0, len(zones) - 1)
         pieces.append((zone, entry[1], _int(entry[2], 0, MAX_ZONE_CELLS - 1), entry[3]))
     return zones, pieces
+
+
+def canonical_blueprint(text: str) -> str:
+    """The blueprint rewritten from its checked parts only - what is shared on the Workshop."""
+    zones, pieces = parse_blueprint(text)
+    return json.dumps({"format": BLUEPRINT_FORMAT, "version": BLUEPRINT_VERSION,
+                       "zones": [{"width_cells": zone.width_cells, "theme": zone.theme, "entrance": zone.entrance,
+                                  "restricted": list(zone.restricted), "areas": [list(a) for a in zone.areas]}
+                                 for zone in zones],
+                       "pieces": sorted([list(piece) for piece in pieces])}, separators=(",", ":"))
+
+
+def required_packs(text: str) -> list[str]:
+    """The content packs a blueprint's pieces and themes come from (``<pack>__<id>``), sorted."""
+    zones, pieces = parse_blueprint(text)
+    names = [name for _zone, name, _cell, _flipped in pieces] + [zone.theme for zone in zones]
+    return sorted({name.split("__", 1)[0] for name in names if "__" in name})
 
 
 def visit_blueprint(text: str, catalog):

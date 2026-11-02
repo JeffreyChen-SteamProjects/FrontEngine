@@ -32,7 +32,7 @@ class BlueprintVisit(QDialog):
         layout.addWidget(self.view)
         self.missing = QLabel(missing_text(world, missing))
         self.missing.setWordWrap(True)
-        self.missing.setVisible(bool(missing))
+        self.missing.setVisible(bool(self.missing.text()))
         layout.addWidget(self.missing)
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)
         buttons.rejected.connect(self.reject)
@@ -44,14 +44,26 @@ class BlueprintVisit(QDialog):
         self.view.set_world(self.world, self.zones.currentData() or next(iter(self.world.zones)))
 
 
+def missing_packs(world, missing: dict[str, int]) -> list[str]:
+    """Content packs the blueprint uses that are not installed here, from its pieces and themes."""
+    names = [key for key in missing if key not in world.catalog.furniture]
+    names += [zone.theme for zone in world.zones.values() if zone.theme not in world.catalog.themes]
+    return sorted({name.split("__", 1)[0] for name in names if "__" in name})
+
+
 def missing_text(world, missing: dict[str, int]) -> str:
-    """What could not be shown, by name when this FrontEngine knows the piece, else by its id."""
+    """What could not be shown, by name when this FrontEngine knows the piece, else by its id,
+    and which content packs to install to see the rest."""
+    packs = missing_packs(world, missing)
+    needs = translate("pet_home_visit_needs_packs", "Needs content packs: {packs}").format(
+        packs=", ".join(packs)) if packs else ""
     if not missing:
-        return ""
+        return needs
     names = []
     for key, count in sorted(missing.items()):
         found = world.catalog.furniture.get(key)
         label = translate(found.label_key, found.fallback) if found is not None else key
         names.append(f"{label} × {count}")
-    return translate("pet_home_visit_missing", "Not shown here (missing content or no room): {items}").format(
+    text = translate("pet_home_visit_missing", "Not shown here (missing content or no room): {items}").format(
         items=", ".join(names))
+    return text + ("\n" + needs if needs else "")

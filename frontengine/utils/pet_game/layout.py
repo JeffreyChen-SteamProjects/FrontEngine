@@ -14,6 +14,14 @@ from dataclasses import dataclass, field
 from frontengine.utils.pet_game.catalog import CELL_PIXELS, Catalog, FurnitureDefinition
 
 THEMES = ("warm_home", "green_studio", "night_studio")
+# A content pack's theme: <pack>__<id>. Saves and blueprints keep one even while its pack is
+# missing (it is drawn as the warm home until the pack returns), like dormant furniture.
+_PACK_THEME = re.compile(r"[a-z][a-z0-9_]{0,23}__[a-z][a-z0-9_]{0,21}")
+
+
+def known_theme(value: object) -> bool:
+    """A built-in theme, or a well-formed content pack theme id."""
+    return value in THEMES or (isinstance(value, str) and _PACK_THEME.fullmatch(value) is not None)
 # Area labels on a zone's floor: they steer which piece a resident picks, never forbid one.
 AREA_TAGS = ("living", "work", "leisure", "dining")
 AREA_FOR_ACTIVITY = {"sleep": "living", "eat": "dining", "work": "work", "play": "leisure", "relax": "leisure",
@@ -94,7 +102,7 @@ class Zone:
             raise ValueError("Invalid zone fields")
         if not isinstance(data["screen"], str) or len(data["screen"]) > 128:
             raise ValueError("Invalid zone screen")
-        if data["theme"] not in THEMES:
+        if not known_theme(data["theme"]):
             raise ValueError("Unknown zone theme")
         width = _int(data["width_cells"], MIN_ZONE_CELLS, MAX_ZONE_CELLS, "zone width")
         restricted = data["restricted"]

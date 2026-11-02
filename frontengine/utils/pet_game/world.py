@@ -423,7 +423,7 @@ class World:
 
     def set_theme(self, zone: str, theme: str) -> str:
         """Change how a zone looks; furniture, paths and storage stay exactly as they are."""
-        if zone not in self.zones or theme not in THEMES:
+        if zone not in self.zones or (theme not in THEMES and theme not in self.catalog.themes):
             return "unknown"
         self.zones[zone].theme = theme
         self.emit("theme_set", zone=zone, theme=theme)
