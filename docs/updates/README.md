@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261102-28 | 2026-11-02 | Five more outfits, and a wardrobe that fetches new clothes by itself | #done #pets #art #ui | [2026-11](2026-11.md) |
 | U-20261102-27 | 2026-11-02 | The desktop pet page starts with one click | #done #pets #ui | [2026-11](2026-11.md) |
 | U-20261102-26 | 2026-11-02 | Fewer steps across the pages: no monitor prompt, no not-ready dialogs, choose or drop to show | #done #ui | [2026-11](2026-11.md) |
 | U-20261102-25 | 2026-11-02 | Size the desktop home, keep the pet in view, and pat with a double-click | #done #pets #game #ui | [2026-11](2026-11.md) |
@@ -255,6 +256,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 51 |
+| [2026-11.md](2026-11.md) | 2026-11 | 52 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
