@@ -59,7 +59,9 @@ def test_reactions_move_the_rig_and_return_to_defaults(tmp_path):
         def rested():
             return {key: round(value, 3) for key, value in values().items()} == {
                 key: round(value, 3) for key, value in defaults.items()}
-        assert _wait_until(lambda: not pet.canvas.active_expressions() and rested())
+        # The fade back runs on timers: in a full run on a busy machine it took over five seconds
+        # (U-20261102-23), so the return to defaults gets more time; it still has to happen.
+        assert _wait_until(lambda: not pet.canvas.active_expressions() and rested(), timeout_ms=20000)
     finally:
         pet.close()
         QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)

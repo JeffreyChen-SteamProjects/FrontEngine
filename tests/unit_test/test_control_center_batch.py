@@ -239,3 +239,45 @@ def test_a_dead_overlay_does_not_stop_the_batch(centre) -> None:
     centre.clear_all()
 
     assert registered == []
+
+
+def _desktop_pet(window, tmp_path):
+    from PySide6.QtGui import QColor, QPixmap
+    from frontengine.show.pet.desktop_pet import DesktopPetWidget
+    sprite = tmp_path / "sprite.png"
+    picture = QPixmap(48, 48)
+    picture.fill(QColor("#d3a231"))
+    assert picture.save(str(sprite))
+    pet = DesktopPetWidget(str(sprite), profiles=window.pet_setting_ui.profile_controls.profiles, talk=False,
+                           sit_on_windows=False)
+    window.pet_setting_ui.pet_list.append(pet)
+    pet.show()
+    return pet
+
+
+def test_close_all_in_the_real_window_closes_desktop_pets_and_frees_their_identity(make_main_window, tmp_path):
+    """Close all still reaches the pet page after it moved, and closing runs the pet's cleanup."""
+    from frontengine.show.pet.pet_profile_session import PetProfileSession
+    window = make_main_window()
+    pet = _desktop_pet(window, tmp_path)
+    profiles, identifier = window.pet_setting_ui.profile_controls.profiles, pet.profile_session.identifier
+    assert PetProfileSession.active(profiles, identifier) is not None
+    window.control_center_ui.clear_all()
+    assert window.pet_setting_ui.pet_list == []
+    assert PetProfileSession.active(profiles, identifier) is None
+
+
+def test_hide_and_show_all_reach_the_home_strip_and_desktop_pets_in_the_real_window(make_main_window, tmp_path):
+    window = make_main_window()
+    pet = _desktop_pet(window, tmp_path)
+    strip = QWidget()
+    strip.show()
+    window.pet_home_ui.strip_list.append(strip)
+    try:
+        window.control_center_ui.hide_all()
+        assert not strip.isVisible() and not pet.isVisible()
+        window.control_center_ui.show_all()
+        assert strip.isVisible() and pet.isVisible()
+    finally:
+        window.pet_home_ui.strip_list.remove(strip)
+        strip.close()

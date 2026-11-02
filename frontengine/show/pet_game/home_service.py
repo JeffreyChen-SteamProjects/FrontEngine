@@ -129,11 +129,14 @@ class HomeService(QObject):
         return result
 
     def create_home(self, screen: str, x: int, y: int, width_cells: int, seed: int | None = None,
-                    furnish: bool = False) -> World:
-        """Start a new home with the starter kit (set out at once with ``furnish``); never replaces one."""
+                    furnish: bool = False, home: str | None = None) -> World:
+        """Start a new home with the starter kit (set out at once with ``furnish``); never replaces one.
+
+        ``home`` fixes the home's identity (weather and commissions are seeded from it) for replays.
+        """
         if self.world is not None:
             raise ValueError("A home is already open")
-        world = World(self.store.catalog, uuid.uuid4().hex, self.store.mode,
+        world = World(self.store.catalog, home or uuid.uuid4().hex, self.store.mode,
                       secrets.randbits(63) if seed is None else seed)
         zone = world.add_zone(screen, x, y, width_cells)
         if world.mode == "manage":

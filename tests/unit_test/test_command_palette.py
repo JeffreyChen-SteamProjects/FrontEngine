@@ -185,3 +185,19 @@ def test_main_palette_shortcut_opens_and_page_command_routes(monkeypatch):
     window.tools_setting_ui.start_capture.assert_called_once_with()
     window.command_palette.close()
     window.close()
+
+
+def test_every_page_command_still_opens_its_page_once_after_the_redesign(make_main_window):
+    """Pages moved into the sidebar and the Features menu: each page command still lands on its
+    own page, and running it again neither adds a page nor builds a second one."""
+    window = make_main_window()
+    commands = sorted(name for name in window.action_registry.actions if name.startswith("page."))
+    assert len(commands) == window.page_stack.count()              # one command per page
+    pages = [window.page_stack.widget(index) for index in range(window.page_stack.count())]
+    for command in commands:
+        assert window.action_registry.execute(command)
+        first = window.page_stack.currentWidget()
+        assert window.action_registry.execute(command)
+        assert window.page_stack.currentWidget() is first
+    assert [window.page_stack.widget(index) for index in range(window.page_stack.count())] == pages
+    assert len({id(page) for page in pages}) == len(pages)
