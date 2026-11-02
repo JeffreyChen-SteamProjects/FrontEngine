@@ -51,6 +51,7 @@ class HomeView(QWidget):
     reduced_motion = False        # no in-between movement and no moving rain
     zoom = 1.0                    # cell size multiplier (ZOOMS); the desktop strip stays at 1
     zoomable = False              # Ctrl+wheel zooms only where the page allows it
+    scroll_x = 0.0                # how far the content is shifted left; only a strip larger than its screen scrolls
     zoom_changed = Signal(float)
     drag_enabled = False          # while arranging, pieces can be dragged to a new cell
     area_tool: str | None = None  # an area tag (or "clear") while painting floor areas
@@ -123,6 +124,14 @@ class HomeView(QWidget):
     def _floor_y(self) -> float:
         return self.height() - FLOOR_HEIGHT - 4
 
+    def cell_x(self, cell: float) -> float:
+        """Widget x of a (fractional) cell's left edge."""
+        return cell * self.cell_width() - self.scroll_x
+
+    def x_cell(self, x: float) -> float:
+        """The (fractional) cell under a widget x."""
+        return (x + self.scroll_x) / self.cell_width()
+
     # ----- painting ---------------------------------------------------------------
 
     def paintEvent(self, _event: QPaintEvent) -> None:
@@ -152,13 +161,13 @@ class HomeView(QWidget):
     def _paint_floor(self, painter: QPainter) -> None:
         zone = self.world.zones[self.zone]
         width = self.cell_width()
-        floor = QRectF(0, self._floor_y(), width * zone.width_cells, FLOOR_HEIGHT)
+        floor = QRectF(self.cell_x(0), self._floor_y(), width * zone.width_cells, FLOOR_HEIGHT)
         painter.fillRect(floor, floor_color(zone.theme))
         self._paint_areas(painter, floor)
         for cell in zone.restricted:
-            painter.fillRect(QRectF(cell * width, floor.top(), width, FLOOR_HEIGHT),
+            painter.fillRect(QRectF(self.cell_x(cell), floor.top(), width, FLOOR_HEIGHT),
                              QColor(200, 70, 70, 120))
-        door = QRectF(zone.entrance * width, self._floor_y() - width * 2, width, width * 2)
+        door = QRectF(self.cell_x(zone.entrance), self._floor_y() - width * 2, width, width * 2)
         linked = self.world.crossing(self.zone) is not None
         painter.setPen(QPen(self.ink(), 2 if linked else 1, Qt.PenStyle.SolidLine if linked else Qt.PenStyle.DashLine))
         painter.drawRect(door)
@@ -167,7 +176,7 @@ class HomeView(QWidget):
         if self.preview is not None:
             painter.setPen(QPen(self.palette().mid().color(), 1))
             for cell in range(zone.width_cells + 1):
-                painter.drawLine(QPointF(cell * width, floor.top()), QPointF(cell * width, floor.bottom()))
+                painter.drawLine(QPointF(self.cell_x(cell), floor.top()), QPointF(self.cell_x(cell), floor.bottom()))
 
     def _paint_areas(self, painter: QPainter, floor: QRectF) -> None:
         """Labelled stretches of floor: a coloured band with the label, and the one being painted."""
@@ -182,7 +191,7 @@ class HomeView(QWidget):
         for first, last, tag in bands:
             color = QColor(AREA_COLORS.get(tag, "#9A9284"))
             color.setAlpha(150)
-            band = QRectF(first * width, floor.top(), (last - first + 1) * width, FLOOR_HEIGHT)
+            band = QRectF(self.cell_x(first), floor.top(), (last - first + 1) * width, FLOOR_HEIGHT)
             painter.fillRect(band, color)
             painter.setPen(QColor("#171715"))
             painter.drawText(band, Qt.AlignmentFlag.AlignCenter, translate("pet_home_area_" + tag, tag))
@@ -199,7 +208,7 @@ class HomeView(QWidget):
         ratio = aspect(self._theme(), art_name(definition))
         height = definition.width * width * ratio if ratio is not None else HEIGHTS[definition.category] * width
         height = min(self._floor_y() - 24, height)
-        return QRectF(cell * width, self._floor_y() - height, definition.width * width, height)
+        return QRectF(self.cell_x(cell), self._floor_y() - height, definition.width * width, height)
 
     def _paint_piece(self, painter: QPainter, piece, definition) -> None:
         rect = self.piece_rect(piece, definition)
@@ -323,7 +332,7 @@ class HomeView(QWidget):
     def resident_box(self, resident) -> QRectF:
         """Where the resident is drawn and clicked: its character standing on the floor, or the marker."""
         width = self.cell_width()
-        x = self.resident_x_milli(resident) / 1000 / CELL_PIXELS * width
+        x = self.cell_x(self.resident_x_milli(resident) / 1000 / CELL_PIXELS)
         size = self._sprite_size(resident)
         if size is not None:
             floor = self._floor_y() - self._rest_height(resident)
@@ -399,11 +408,11 @@ class HomeView(QWidget):
 
     def _drag_cell(self, event: QMouseEvent) -> int:
         _identifier, grab = self._dragging
-        return max(0, int(round((event.position().x() - grab) / self.cell_width())))
+        return max(0, int(round(self.x_cell(event.position().x() - grab))))
 
     def _floor_cell(self, x: float) -> int:
         cells = self.world.zones[self.zone].width_cells
-        return max(0, min(cells - 1, int(x // self.cell_width())))
+        return max(0, min(cells - 1, int(self.x_cell(x))))
 
     def mouseMoveEvent(self, event: QMouseEvent) -> None:
         if self._painting is not None:
@@ -455,6 +464,6 @@ class HomeView(QWidget):
                 if self.piece_rect(piece, definition).contains(point):
                     self.furniture_selected.emit(piece.identifier)
                     return
-        cell = int(point.x() // self.cell_width())
+        cell = int(self.x_cell(point.x()))
         if 0 <= cell < self.world.zones[self.zone].width_cells:
             self.cell_clicked.emit(cell)
