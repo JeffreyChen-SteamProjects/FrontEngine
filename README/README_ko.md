@@ -35,7 +35,7 @@ FrontEngine은 데스크톱 오버레이 앱입니다. 동영상, 이미지, GIF
 
 ## 설치
 
-Python **3.10+**. Windows 10/11이 주요 대상이며, macOS와 Linux에서도 앱이
+Python **3.11+**. Windows 10/11이 주요 대상이며, macOS와 Linux에서도 앱이
 실행됩니다. 플랫폼 차이는 [플랫폼 지원](#platform-support)에 나열되어 있습니다.
 
 ```bash
@@ -463,7 +463,7 @@ feat/xyz  ──PR──►  dev  ──PR──►  main
 
 | Workflow | Trigger | Purpose |
 | --- | --- | --- |
-| `CI` (`ci.yml`) | `main` 또는 `dev`로의 Push / PR, 수동 디스패치, 또는 `Nightly`가 호출 | 컴파일하고, 유닛 테스트를 실행한 뒤, *그 체크아웃*에서 wheel을 빌드해 설치하고 앱을 시작 — Python 3.10 / 3.11 / 3.12, Windows에서 |
+| `CI` (`ci.yml`) | `main` 또는 `dev`로의 Push / PR, 수동 디스패치, 또는 `Nightly`가 호출 | 컴파일하고, 유닛 테스트를 실행한 뒤, *그 체크아웃*에서 wheel을 빌드해 설치하고 앱을 시작 — Python 3.11 / 3.12, Windows에서 |
 | `Nightly` (`nightly.yml`) | 매일 cron, 수동 디스패치 | `CI`를 호출합니다. 스케줄이 일부러 여기 있습니다: GitHub은 cron을 담은 워크플로를 약 60일간 비활성 상태면 비활성화하는데, 그렇지 않으면 그것이 PR 검사까지 함께 무너뜨리기 때문입니다 |
 | `Release` (`release.yml`) | **`dev`에서 온** 풀 리퀘스트가 `main`에 병합되거나, 수동 디스패치 | 버전을 올리고, `[skip ci]`와 함께 되커밋하며, `stable.toml` → `pyproject.toml`을 바꾸고, sdist + wheel을 빌드해 PyPI에 `frontengine`으로 업로드하고, `v<version>` 태그가 붙은 GitHub 릴리스를 만들며, `dev`를 fast-forward 합니다 |
 

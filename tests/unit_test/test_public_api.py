@@ -71,13 +71,10 @@ def test_every_package_directory_has_an_init_file() -> None:
 
 def _declared_dependencies(pyproject: Path) -> list:
     """
-    讀出 pyproject 的 dependencies 陣列。刻意不用 tomllib：那是 3.11 才進標準
-    函式庫的，而本專案支援 3.10（CI 也真的在 3.10 上跑）。這個陣列只是一串
-    引號字串，用不著完整的 TOML 解析器。
-    The dependencies array from pyproject. Deliberately not via tomllib, which
-    only joined the standard library in 3.11 while this project supports 3.10
-    and CI really does run there. The array is a list of quoted strings; a full
-    TOML parser is not needed to read it.
+    讀出 pyproject 的 dependencies 陣列。這個陣列只是一串引號字串，
+    用不著完整的 TOML 解析器。
+    The dependencies array from pyproject. The array is a list of quoted
+    strings; a full TOML parser is not needed to read it.
     """
     text = pyproject.read_text(encoding="utf-8")
     start = text.index("dependencies = [")
