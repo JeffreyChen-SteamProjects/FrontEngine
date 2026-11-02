@@ -14,7 +14,8 @@ planning so you resume where the last session stopped.
 - It is tracked, so keep it free of anything that should not be public. Only
   `.claude/settings.local.json` stays ignored.
 - Rules and standing knowledge live in this file ("Deliberately removed" and
-  "Environment notes" below), never in `progress.md`.
+  "Environment notes" below), never in `progress.md` - the one exception is
+  the placement rule in its header, which `test_progress_layout.py` enforces.
 - **Real-device acceptance goes first.** Every item that needs a real machine,
   a person or hardware to verify (native windows, DPI, monitors, recorded play
   sessions, long real-time runs, packaging on a clean machine) lives in the
