@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261102-24 | 2026-11-02 | Rain and snow on the desktop strip, in a layer that never takes input | #done #pets #game #native | [2026-11](2026-11.md) |
 | U-20261102-23 | 2026-11-02 | Old entry points tested after the move, and a background smoke run of the pet home | #done #tests #pets | [2026-11](2026-11.md) |
 | U-20261102-22 | 2026-11-02 | Furniture packs, themes and blueprints on the Workshop, with missing packs named | #done #pets #game #workshop #security | [2026-11](2026-11.md) |
 | U-20261102-21 | 2026-11-02 | Picture and Puppet pets appear in the home as themselves | #done #pets #game #animation #security | [2026-11](2026-11.md) |
@@ -251,6 +252,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 47 |
+| [2026-11.md](2026-11.md) | 2026-11 | 48 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
