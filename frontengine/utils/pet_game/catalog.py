@@ -9,10 +9,11 @@ import re
 from dataclasses import dataclass, field
 
 CELL_PIXELS = 32          # one layout grid cell in logical pixels
-NEEDS = ("energy", "fullness", "mood", "comfort", "social")
+NEEDS = ("energy", "fullness", "mood", "comfort", "social", "hygiene")
+V2_NEEDS = ("energy", "fullness", "mood", "comfort", "social")   # homes saved before version 7
 LEGACY_NEEDS = ("energy", "fullness", "mood")     # homes saved before version 2
-ACTIVITIES = ("sleep", "eat", "work", "play", "relax")
-CATEGORIES = ("bed", "table", "workstation", "leisure", "decoration")
+ACTIVITIES = ("sleep", "eat", "work", "play", "relax", "wash")
+CATEGORIES = ("bed", "table", "workstation", "leisure", "decoration", "bath")
 PROFESSIONS = ("writing", "crafting", "gardening")
 ITEM_KINDS = ("material", "food", "goods")
 FURNITURE_PREFIX = "furniture:"
@@ -122,7 +123,7 @@ def _check_footprint(definition: FurnitureDefinition) -> None:
 # falls back to the next one and finally to standing (idle), so every piece stays usable.
 POSES = ("sleep", "feed", "sit", "play", "greet", "write", "garden", "craft", "idle")
 ACTIVITY_POSES = {"sleep": ("sleep", "sit"), "eat": ("feed", "sit"), "relax": ("sit",), "play": ("play", "greet"),
-                  "work": ("sit",)}
+                  "work": ("sit",), "wash": ("sit",)}
 
 
 def art_name(definition: FurnitureDefinition) -> str:
@@ -318,6 +319,9 @@ def _furniture() -> list[FurnitureDefinition]:
         FurnitureDefinition("climbing_wall", "pet_game_climbing_wall", "Climbing wall", "leisure", 2, True, (1,),
                             "play", {"mood": 22, "energy": -6}, price=110, sell_back=55, use_ms=(30000, 45000),
                             unlock_level=3, raised=True),
+        # Washing: the floor always works (a pet tidies itself up); a tub is quicker and nicer.
+        FurnitureDefinition("bath_tub", "pet_game_bath_tub", "Bath tub", "bath", 3, True, (1,), "wash",
+                            {"hygiene": 60, "mood": 3, "comfort": 10}, price=70, sell_back=35, comfort=1),
     ]
 
 

@@ -21,9 +21,9 @@ from frontengine.utils.pet_game.catalog import CELL_PIXELS, art_name
 from frontengine.utils.pet_game.world import World
 
 # Footprint heights in cells, so a bed reads lower than a desk at a glance.
-HEIGHTS = {"bed": 1.3, "table": 1.6, "workstation": 1.9, "leisure": 1.4, "decoration": 1.5}
+HEIGHTS = {"bed": 1.3, "table": 1.6, "workstation": 1.9, "leisure": 1.4, "decoration": 1.5, "bath": 1.4}
 COLORS = {"bed": "#7c9fd6", "table": "#c99a63", "workstation": "#8fb67a", "leisure": "#d58fb8",
-          "decoration": "#6fbfb3"}
+          "decoration": "#6fbfb3", "bath": "#8cc8e8"}
 FLOOR_HEIGHT = 16
 MIN_CELL = 20.0          # below this, furniture labels stop being readable
 MAX_CELL = 40.0
@@ -34,7 +34,8 @@ DONE_SECONDS = 4.0
 AREA_COLORS = {"living": "#B8C7E6", "work": "#C9D9A5", "leisure": "#F2C6A8", "dining": "#F1DD9A",
                "clear": "#D8D2C6"}
 GLYPHS = {"sleep": "Zz", "nap": "Zz", "eat": "~", "snack": "~", "work": "✎", "play": "♪",
-          "relax": "☕", "wait": "…", "wander": "", "visit": "", "help": "🤝", "come": "", "tag": "🏃", "idle": "", "drag": "✋"}
+          "relax": "☕", "wait": "…", "wander": "", "visit": "", "help": "🤝", "come": "", "tag": "🏃", "idle": "", "drag": "✋",
+          "wash": "≈", "tidy": "≈"}
 
 
 def resident_color(identifier: str) -> QColor:

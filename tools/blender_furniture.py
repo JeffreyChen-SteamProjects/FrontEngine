@@ -38,7 +38,8 @@ FIXED = {"ink": "#171715", "leaf": "#6FA34F", "leaf_dark": "#467A35", "soil": "#
 def reset_scene() -> None:
     bpy.ops.wm.read_factory_settings(use_empty=True)
     scene = bpy.context.scene
-    scene.render.engine = "BLENDER_EEVEE_NEXT"
+    engines = scene.render.bl_rna.properties["engine"].enum_items.keys()
+    scene.render.engine = "BLENDER_EEVEE_NEXT" if "BLENDER_EEVEE_NEXT" in engines else "BLENDER_EEVEE"  # 4.2 / 5.x
     scene.render.film_transparent = True
     scene.render.image_settings.file_format = "PNG"
     scene.render.image_settings.color_mode = "RGBA"
@@ -582,6 +583,21 @@ def climbing_wall(p: Palette) -> None:
     box((0.12, 0.12, 0.5), (1.85, -0.3, 2.0), p["dark_wood"], bevel=0.02, rotation=(0.6, 0, 0))
 
 
+def bath_tub(p: Palette) -> None:
+    """A round-ended tub on little feet, full of bubbles, with a tap at the head end."""
+    for x in (0.45, 2.55):
+        sphere(0.13, (x, 0, 0.13), p["metal"], scale=(1.0, 1.0, 0.9))
+    cushion((2.8, 1.2, 0.85), (1.5, 0, 0.62), p["fabric"])
+    cushion((2.9, 1.3, 0.12), (1.5, 0, 1.06), p["accent_2"], softness=1)
+    box((2.5, 1.0, 0.06), (1.5, 0, 1.02), p["water"], bevel=0.0)
+    for index, (x, z) in enumerate(((0.8, 1.18), (1.15, 1.26), (1.5, 1.2), (1.85, 1.3), (2.2, 1.16),
+                                    (1.0, 1.38), (1.65, 1.42))):
+        sphere(0.15 + 0.03 * (index % 3), (x, -0.15, z), p["paper"])
+    cylinder(0.06, 0.55, (0.18, 0.2, 1.35), p["metal"], bevel=0.0)
+    cylinder(0.05, 0.3, (0.32, 0.2, 1.6), p["metal"], rotation=(0, math.radians(90), 0), bevel=0.0)
+    sphere(0.08, (0.18, 0.2, 1.66), p["accent"])
+
+
 PIECES = {"bed_basic": (4, bed_basic), "bed_cozy": (4, bed_cozy), "table_basic": (4, table_basic),
           "desk_basic": (3, desk_basic), "plant_pot": (1, plant_pot), "wall_lamp": (1, wall_lamp),
           "toy_box": (2, toy_box), "armchair": (2, armchair), "stool": (1, stool), "planter": (2, planter),
@@ -594,7 +610,8 @@ PIECES.update({"bunk_bed": (4, bunk_bed), "hammock": (3, hammock), "pet_cushion"
                "scratching_post": (1, scratching_post), "rug": (4, rug), "easel": (1, easel),
                "aquarium": (2, aquarium), "string_lights": (3, string_lights),
                "grandfather_clock": (1, grandfather_clock),
-               "pet_stairs": (2, pet_stairs), "cat_tree": (2, cat_tree), "climbing_wall": (2, climbing_wall)})
+               "pet_stairs": (2, pet_stairs), "cat_tree": (2, cat_tree), "climbing_wall": (2, climbing_wall),
+               "bath_tub": (3, bath_tub)})
 
 
 # ----- items: materials, harvests and goods -------------------------------------------------------

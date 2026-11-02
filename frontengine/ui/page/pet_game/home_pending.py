@@ -2,12 +2,14 @@
 
 The home runs itself, so this list stays short: only things the home cannot settle
 on its own - no pet yet, unread inbox notes, furniture left in storage, jobs
-waiting for materials, a pet's wish and a celebration that is ready.
+waiting for materials, a grubby pet in a home without a bath tub, a pet's wish
+and a celebration that is ready.
 """
 from __future__ import annotations
 
 from frontengine.utils.multi_language.retranslate import translate
 from frontengine.utils.pet_game import goals
+from frontengine.utils.pet_game.behaviour import LOW_HYGIENE
 
 MAX_PENDING = 5
 
@@ -31,6 +33,10 @@ def pending(world, unread: int = 0) -> list[tuple[str, str]]:
     if waiting:
         items.append((translate("pet_home_pending_materials", "{count} jobs wait for materials")
                       .format(count=waiting), "pet_home_shop_section"))
+    grubby = _grubby_without_tub(world)
+    if grubby is not None:
+        items.append((translate("pet_home_pending_wash", "{name} needs a wash: a bath tub from the shop helps")
+                      .format(name=grubby), "pet_home_shop_section"))
     if goals.celebration_ready(world):
         items.append((translate("pet_home_pending_celebration", "A home celebration is ready"),
                       "pet_home_goals_section"))
@@ -41,3 +47,14 @@ def pending(world, unread: int = 0) -> list[tuple[str, str]]:
                 name=world.residents[identifier].name), "pet_home_residents_section"))
             break
     return items[:MAX_PENDING]
+
+
+def _grubby_without_tub(world) -> str | None:
+    """The first pet low on cleanliness in a home with nowhere to bathe; tidying up alone is slow."""
+    if world.sandbox or any(world.definition(piece).activity == "wash" for piece in world.furniture.values()):
+        return None
+    for identifier in sorted(world.residents):
+        resident = world.residents[identifier]
+        if resident.needs["hygiene"] <= LOW_HYGIENE:
+            return resident.name
+    return None

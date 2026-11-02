@@ -11,7 +11,7 @@ import hashlib
 from dataclasses import dataclass, field
 
 from frontengine.utils.pet_companion.stats import MAX_AFFECTION
-from frontengine.utils.pet_game.catalog import LEGACY_NEEDS, NEEDS, PROFESSIONS
+from frontengine.utils.pet_game.catalog import LEGACY_NEEDS, NEEDS, PROFESSIONS, V2_NEEDS
 from frontengine.utils.pet_game.layout import RESIDENT_ID, MAX_ZONE_CELLS, check_local_id, checked_int
 from frontengine.utils.pet_game.schedule import TEMPLATES
 
@@ -20,6 +20,7 @@ MAX_TRAITS = 2
 # A liking for a profession: a little faster and happier at it, never required for it.
 PROFESSION_TRAITS = {"gardening": "green_thumb", "writing": "bookish", "crafting": "handy"}
 NEW_NEED_DEFAULT = 60
+FRESH_HYGIENE = 80                 # a pet arrives, or an older home loads, freshly washed
 MAX_EXPERIENCE = 10_000_000
 LEVEL_STEPS = (0, 40, 120, 300, 700, 1500)
 
@@ -106,9 +107,11 @@ def _checked_name(value: object) -> str:
 
 
 def _checked_needs(value: object) -> dict[str, int]:
-    """Version 1 homes had three needs; comfort and social start at a neutral value."""
+    """Older homes had fewer needs: comfort and social start neutral (version 1), hygiene fresh (before 7)."""
     if isinstance(value, dict) and set(value) == set(LEGACY_NEEDS):
-        value = {**value, **{need: NEW_NEED_DEFAULT for need in NEEDS if need not in LEGACY_NEEDS}}
+        value = {**value, **{need: NEW_NEED_DEFAULT for need in V2_NEEDS if need not in LEGACY_NEEDS}}
+    if isinstance(value, dict) and set(value) == set(V2_NEEDS):
+        value = {**value, "hygiene": FRESH_HYGIENE}
     if not isinstance(value, dict) or set(value) != set(NEEDS):
         raise ValueError("Invalid resident needs")
     return {need: _bounded(value[need], 0, 100, need) for need in NEEDS}
@@ -145,5 +148,6 @@ def resident_from_profile(profile: dict, zone: str, x_milli: int) -> Resident:
     """Adopt a validated pet profile; care values carry over, nothing is reset."""
     return Resident(profile["id"], profile["name"], zone, x_milli,
                     {"energy": profile.get("energy", 70), "fullness": profile["fullness"],
-                     "mood": profile["mood"], "comfort": NEW_NEED_DEFAULT, "social": NEW_NEED_DEFAULT},
+                     "mood": profile["mood"], "comfort": NEW_NEED_DEFAULT, "social": NEW_NEED_DEFAULT,
+                     "hygiene": FRESH_HYGIENE},
                     affection=profile["affection"], traits=traits_for(profile["id"]))

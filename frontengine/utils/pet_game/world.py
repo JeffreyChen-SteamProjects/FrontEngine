@@ -28,15 +28,16 @@ from frontengine.utils.pet_game.rng import GameRandom
 from frontengine.utils.pet_game.schedule import TEMPLATES, initial_time
 
 FORMAT = "frontengine.pet-home"
-VERSION = 6              # 2: needs, relationships; 3: goals, progress; 4: zone areas; 5: crossings; 6: upgrades
+VERSION = 7              # 2: needs, relationships; 3: goals, progress; 4: zone areas; 5: crossings; 6: upgrades;
+                         # 7: hygiene
 RELATION_LIMIT = 100
 MODES = ("manage", "sandbox")
 MAX_RESIDENTS = 12
 MAX_ZONES = 8
-COMMANDS = ("sleep", "eat", "play", "relax", "work", "stop")
+COMMANDS = ("sleep", "eat", "wash", "play", "relax", "work", "stop")
 # The player's own care: a small, immediate lift with a cooldown per pet and kind, so it never farms.
 INTERACTIONS = {"feed": {"fullness": 15, "mood": 3}, "pat": {"mood": 8, "social": 5},
-                "talk": {"social": 12, "mood": 3}, "groom": {"comfort": 12, "mood": 4},
+                "talk": {"social": 12, "mood": 3}, "groom": {"hygiene": 15, "comfort": 12, "mood": 4},
                 "toy": {"mood": 10, "energy": -4}}
 # Moving a pet about is not for a pet that is busy at something that holds it in place.
 BUSY_KINDS = ("work", "eat", "snack", "sleep")

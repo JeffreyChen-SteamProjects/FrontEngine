@@ -9,7 +9,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from frontengine.utils.pet_game.behaviour import (
-    URGENT_ENERGY, URGENT_FULLNESS, cancel_activity, decide, greet_arrived, greet_completed, help_completed,
+    LOW_HYGIENE, URGENT_ENERGY, URGENT_FULLNESS, cancel_activity, decide, greet_arrived, greet_completed, help_completed,
     tag_completed,
     helpers, release,
     shared_completed, together,
@@ -26,11 +26,14 @@ STEP_MS = 200
 COME_WAIT_MS = 8000                 # how long a called pet waits where it was called to
 WALK_MILLI_PER_MS = 64           # 64 logical pixels per second
 MAX_ADVANCE_MS = 6 * 60 * 60 * 1000
-BASE_RATES = {"energy": -1, "fullness": -2, "mood": -1, "comfort": -1, "social": -1}
+BASE_RATES = {"energy": -1, "fullness": -2, "mood": -1, "comfort": -1, "social": -1, "hygiene": -1}
 LOW_COMFORT = 30                    # below this, discomfort wears on mood
 TOGETHER_SOCIAL = 20                # per minute while sharing a table or a toy box with others
 LIKED_WORK_MOOD = 2                 # per minute while doing work the pet likes
-FLOOR_RATES = {"nap": {"energy": 12, "mood": 0}, "snack": {"fullness": 30, "mood": 1}}
+FLOOR_RATES = {"nap": {"energy": 12, "mood": 0}, "snack": {"fullness": 30, "mood": 1},
+               "tidy": {"hygiene": 20, "mood": 0}}       # tidying itself up: slower than a bath tub
+PLAY_HYGIENE = -2                   # per minute while playing: games are messy
+WASH_MIN_MS = 10000
 # Mood while doing something that is not furniture-driven (absolute points/minute).
 ACTIVITY_MOOD = {"wander": 2, "eat": 5, "sleep": 1}
 HERB_MEAL_MOOD = 6                  # extra mood per minute when a meal uses herbs from storage
@@ -68,6 +71,8 @@ def _rates(world: World, resident: Resident) -> dict[str, int]:
     rates["comfort"] += world.comfort(resident.zone) // 5
     if resident.needs["comfort"] < LOW_COMFORT:
         rates["mood"] -= 1
+    if resident.needs["hygiene"] < LOW_HYGIENE:
+        rates["mood"] -= 1
     if "social" in resident.traits:
         rates["social"] -= 1
     activity = resident.activity
@@ -81,6 +86,8 @@ def _activity_rates(world: World, resident: Resident, rates: dict[str, int]) -> 
     activity = resident.activity
     if activity.kind in ACTIVITY_MOOD:
         rates["mood"] = ACTIVITY_MOOD[activity.kind]
+    if activity.kind in ("play", "tag"):
+        rates["hygiene"] = PLAY_HYGIENE
     if activity.kind in FLOOR_RATES:
         rates.update(FLOOR_RATES[activity.kind])
     elif activity.kind == "work":
@@ -187,6 +194,8 @@ def _finished(world: World, resident: Resident) -> bool:
         return needs["energy"] >= 100 or (needs["energy"] >= 95 and not sleepy)
     if activity.kind in ("eat", "snack"):
         return needs["fullness"] >= 95 and world.time_ms - activity.started_ms >= 15000
+    if activity.kind in ("wash", "tidy"):
+        return needs["hygiene"] >= 95 and world.time_ms - activity.started_ms >= WASH_MIN_MS
     return activity.until_ms is None or world.time_ms >= activity.until_ms
 
 

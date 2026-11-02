@@ -23,6 +23,7 @@ URGENT_FULLNESS = 25
 WORK_MIN_ENERGY = 25
 LOW_MOOD = 30
 LOW_SOCIAL = 35
+LOW_HYGIENE = 30                 # below this a pet goes to wash, and feeling grubby wears on mood
 GREET_MS = 2500
 GREET_REACH_CELLS = 8
 GREET_COOLDOWN_MS = 5 * 60 * 1000
@@ -150,6 +151,15 @@ def start_meal(world: World, resident: Resident, reason: str) -> None:
         start(world, resident, "wait", "table_full", duration=WAIT_MS)
     else:
         start(world, resident, "snack", reason)    # basic food is always available
+
+
+def start_wash(world: World, resident: Resident, reason: str) -> None:
+    """A free bath tub when there is one; otherwise the pet tidies itself up where it stands."""
+    found = _free_piece(world, resident, "wash")
+    if found is not None:
+        start(world, resident, "wash", reason, *found)
+    else:
+        start(world, resident, "tidy", reason)
 
 
 def _station_for(world: World, resident: Resident, task) -> tuple[str, int] | str:
@@ -289,6 +299,8 @@ def _follow_command(world: World, resident: Resident, command: str) -> None:
         start_rest(world, resident, "command")
     elif command == "eat":
         start_meal(world, resident, "command")
+    elif command == "wash":
+        start_wash(world, resident, "command")
     elif command == "work":
         start_work(world, resident, "command")
     else:
@@ -312,6 +324,8 @@ def _cared_for(world: World, resident: Resident, block: str) -> bool:
         start_rest(world, resident, "bedtime")
     elif block == "meal" and needs["fullness"] < 80:
         start_meal(world, resident, "mealtime")
+    elif needs["hygiene"] <= LOW_HYGIENE:
+        start_wash(world, resident, "grubby")
     elif needs["social"] <= LOW_SOCIAL and start_greet(world, resident):
         return True                        # walking over to say hello
     elif needs["mood"] <= LOW_MOOD:
