@@ -1683,6 +1683,8 @@ germany_word_dict = {
     "pet_game_wish_cozy_bed": "ein gemütliches Bett (eines aufstellen)",
     "pet_home_theme": "Thema",
     "pet_home_reduced_motion": "Bewegung reduzieren",
+    "pet_home_ambient": "Umgebungsgeräusche (Vögel, Grillen, Regen)",
+    "pet_home_ambient_volume": "Lautstärke der Umgebung",
     "pet_game_theme_warm_home": "Gemütliches Zuhause",
     "pet_game_theme_green_studio": "Grünes Atelier",
     "pet_game_theme_night_studio": "Nachtatelier",

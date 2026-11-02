@@ -1680,6 +1680,8 @@ french_word_dict = {
     "pet_game_wish_cozy_bed": "un lit douillet (en placer un)",
     "pet_home_theme": "Thème",
     "pet_home_reduced_motion": "Réduire les animations",
+    "pet_home_ambient": "Ambiance sonore (oiseaux, grillons, pluie)",
+    "pet_home_ambient_volume": "Volume de l’ambiance",
     "pet_game_theme_warm_home": "Maison chaleureuse",
     "pet_game_theme_green_studio": "Atelier verdoyant",
     "pet_game_theme_night_studio": "Atelier de nuit",
