@@ -2,6 +2,7 @@
 is not running, keeps its own volume, and releases its players; the strip darkens at night."""
 import wave
 
+import pytest
 from PySide6.QtCore import QObject
 from PySide6.QtGui import QColor, QImage, QPainter
 
@@ -15,15 +16,15 @@ HOUR = DAY_MS // 24
 
 
 class FakePlayer(QObject):
-    made = []
+    """Records what the ambience asks of a player; never opens an audio device."""
 
-    def __init__(self, parent=None):
+    def __init__(self, made: list, parent=None):
         super().__init__(parent)
         self.source = None
         self.loops = None
         self.volume = None
         self.playing = False
-        FakePlayer.made.append(self)
+        made.append(self)
 
     def setSource(self, url):
         self.source = url.toLocalFile()
@@ -50,11 +51,16 @@ def _moment(kind):
     raise AssertionError(kind)
 
 
-def _ambience():
-    FakePlayer.made = []
-    sound = Ambience(FakePlayer)
-    sound.set_enabled(True)
-    return sound
+@pytest.fixture
+def made():
+    return []
+
+
+@pytest.fixture
+def sound(made):
+    playing = Ambience(lambda parent: FakePlayer(made, parent))
+    playing.set_enabled(True)
+    return playing
 
 
 def test_the_loop_follows_weather_first_then_the_hour():
@@ -73,57 +79,58 @@ def test_every_loop_ships_as_a_short_quiet_wave():
             assert handle.getnframes() == 22050 * 12
 
 
-def test_it_is_silent_until_chosen_and_while_the_home_is_not_running():
-    FakePlayer.made = []
-    sound = Ambience(FakePlayer)
+def test_it_is_silent_until_chosen_and_while_the_home_is_not_running(made):
+    sound = Ambience(lambda parent: FakePlayer(made, parent))
     sound.update(HOME, _moment("day"), running=True)
-    assert FakePlayer.made == [] and sound.current is None          # off by default: nothing is even loaded
+    assert made == []                                   # off by default: nothing is even loaded
+    assert sound.current is None
     sound.set_enabled(True)
     sound.update(HOME, _moment("day"), running=False)
     assert sound.current is None
-    sound.update(None, _moment("day"), running=True)                  # no home yet
+    sound.update(None, _moment("day"), running=True)    # no home yet
     assert sound.current is None
 
 
-def test_it_plays_one_looping_track_and_switches_when_the_weather_turns():
-    sound = _ambience()
+def test_it_plays_one_looping_track_and_switches_when_the_weather_turns(sound, made):
     sound.update(HOME, _moment("day"), running=True)
-    day = FakePlayer.made[0]
+    day = made[0]
     assert (sound.current, day.playing, day.loops) == ("day", True, -2)
     assert day.source.endswith("day.wav")
     sound.update(HOME, _moment("rain"), running=True)
-    rain = FakePlayer.made[1]
+    rain = made[1]
     assert (sound.current, day.playing, rain.playing) == ("rain", False, True)
     sound.update(HOME, _moment("day"), running=True)
-    assert len(FakePlayer.made) == 2 and day.playing                # players are reused
-    sound.update(HOME, _moment("day"), running=False)                # paused, locked or in a meeting
-    assert not day.playing and sound.current is None
+    assert len(made) == 2                               # players are reused
+    assert day.playing
+    sound.update(HOME, _moment("day"), running=False)   # paused, locked or in a meeting
+    assert not day.playing
+    assert sound.current is None
 
 
-def test_volume_is_its_own_and_zero_means_silence():
-    sound = _ambience()
+def test_volume_is_its_own_and_zero_means_silence(sound, made):
     sound.set_volume(25)
     sound.update(HOME, _moment("night"), running=True)
-    player = FakePlayer.made[0]
+    player = made[0]
     assert player.volume == 0.25
     sound.set_volume(80)
     assert player.volume == 0.8
     sound.set_volume(0)
-    assert not player.playing and sound.current is None
+    assert not player.playing
+    assert sound.current is None
     sound.set_volume(150)
     assert sound.volume == 100
 
 
-def test_shutdown_stops_and_releases_every_player():
-    sound = _ambience()
+def test_shutdown_stops_and_releases_every_player(sound, made):
     sound.update(HOME, _moment("day"), running=True)
     sound.update(HOME, _moment("night"), running=True)
     sound.shutdown()
-    assert not any(player.playing for player in FakePlayer.made)
-    assert sound._players == {} and sound.current is None
+    assert not any(player.playing for player in made)
+    assert sound._players == {}
+    assert sound.current is None
 
 
-def test_the_page_setting_turns_it_on_and_remembers_volume(tmp_path, monkeypatch):
+def test_the_page_setting_turns_it_on_and_remembers_volume(tmp_path, monkeypatch, made):
     from frontengine.show.pet_game.home_service import HomeService
     from frontengine.ui.page.pet_game import home_page
     from frontengine.user_setting.pet_game_save import HomeSaveStore
@@ -131,19 +138,21 @@ def test_the_page_setting_turns_it_on_and_remembers_volume(tmp_path, monkeypatch
     from frontengine.user_setting.user_setting_file import user_setting_dict
     from frontengine.utils.pet_game.catalog import builtin_catalog
 
-    monkeypatch.setattr(ambience, "_sound_effect", FakePlayer)
+    monkeypatch.setattr(ambience, "_sound_effect", lambda parent: FakePlayer(made, parent))
     monkeypatch.setitem(user_setting_dict, home_page.AMBIENT_KEY, False)
     monkeypatch.setitem(user_setting_dict, home_page.AMBIENT_VOLUME_KEY, 30)
     service = HomeService(None, HomeSaveStore(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None))
     page = home_page.PetHomePage(service)
     try:
-        assert not page.ambience.enabled and not page.ambient_slider.isEnabled()
+        assert not page.ambience.enabled
+        assert not page.ambient_slider.isEnabled()
         assert page.ambient_slider.value() == 30
         page.ambient_check.setChecked(True)
         page.ambient_slider.setValue(55)
         assert user_setting_dict[home_page.AMBIENT_KEY] is True
         assert user_setting_dict[home_page.AMBIENT_VOLUME_KEY] == 55
-        assert page.ambience.enabled and page.ambience.volume == 55
+        assert page.ambience.enabled
+        assert page.ambience.volume == 55
     finally:
         page.shutdown()
         page.close()

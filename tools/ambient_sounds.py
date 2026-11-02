@@ -1,8 +1,8 @@
 """Synthesise the pet home's ambient loops: day, night, rain and snow.
 
-Run from the repository root (numpy only, deterministic)::
+Run with numpy installed (deterministic; it always writes the package's own folder)::
 
-    py tools/ambient_sounds.py frontengine/show/pet_game/ambience
+    py tools/ambient_sounds.py
 
 Each loop is 12 s of 22,050 Hz mono 16-bit PCM and joins its own start without a
 click: the last second is cross-faded into the first. Everything is made from
@@ -11,7 +11,6 @@ Levels stay low (peaks around -12 dBFS) because these sit under whatever else is
 """
 from __future__ import annotations
 
-import sys
 import wave
 from pathlib import Path
 
@@ -101,6 +100,8 @@ def snow(rng: np.random.Generator, count: int) -> np.ndarray:
 
 
 LOOPS = {"day": (day, 11), "night": (night, 23), "rain": (rain, 37), "snow": (snow, 41)}
+# Fixed, never taken from the command line: the loops only ever belong in the package.
+OUTPUT = Path(__file__).resolve().parents[1] / "frontengine" / "show" / "pet_game" / "ambience"
 
 
 def seamless(make, seed: int) -> np.ndarray:
@@ -123,11 +124,10 @@ def write(target: Path, samples: np.ndarray) -> None:
 
 
 def main() -> None:
-    output = Path(sys.argv[1] if len(sys.argv) > 1 else "ambience")
-    output.mkdir(parents=True, exist_ok=True)
+    OUTPUT.mkdir(parents=True, exist_ok=True)
     for name, (make, seed) in LOOPS.items():
-        write(output / f"{name}.wav", seamless(make, seed))
-        print("wrote", output / f"{name}.wav")
+        write(OUTPUT / f"{name}.wav", seamless(make, seed))
+        print("wrote", OUTPUT / f"{name}.wav")
 
 
 if __name__ == "__main__":
