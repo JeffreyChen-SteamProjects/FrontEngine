@@ -177,9 +177,9 @@ def virtual_desktop_geometry(screens=None) -> QRect:
 
 def build_target_monitor_combobox(screens=None) -> QComboBox:
     """
-    Build a combobox listing the current monitors plus an initial "Ask"
-    entry. Selection "Ask" (data=None) preserves today's prompt flow;
-    selecting a monitor index pre-selects that screen.
+    Build a combobox listing the current monitors after a first "This screen"
+    entry (data=None): the screen FrontEngine's window is on, so starting never
+    stops to ask which monitor; choosing a number pins that monitor instead.
 
     多螢幕時多一個「橫跨所有螢幕」。只有一個螢幕時不提供——那和一般顯示完全一樣，
     列出來只會讓人以為自己漏掉了什麼。
@@ -189,7 +189,8 @@ def build_target_monitor_combobox(screens=None) -> QComboBox:
     """
     monitors = QGuiApplication.screens() if screens is None else screens
     combobox = QComboBox()
-    combobox.addItem(language_wrapper.language_word_dict.get("target_monitor_ask", "Ask"), None)
+    combobox.addItem(language_wrapper.language_word_dict.get(
+        "target_monitor_here", "This screen (where FrontEngine is)"), None)
     for index, _ in enumerate(monitors):
         combobox.addItem(str(index), index)
     if len(monitors) > 1:
@@ -205,11 +206,21 @@ def resolve_span(combobox: Optional[QComboBox]) -> bool:
 
 
 def resolve_preferred_monitor(combobox: Optional[QComboBox]) -> Optional[int]:
-    """Return the selected monitor index, or None for the Ask entry."""
+    """The chosen monitor's index; "This screen" is the monitor FrontEngine's window is on.
+
+    Only a page without a combobox gets None, which keeps the older choose-a-monitor prompt.
+    """
     if combobox is None:
         return None
     data = combobox.currentData()
-    return int(data) if isinstance(data, int) else None
+    if isinstance(data, int):
+        return data
+    if data == SPAN_ALL_DATA:                 # spanning is not one monitor
+        return None
+    screens = QGuiApplication.screens()
+    window = combobox.window()
+    screen = window.screen() if window is not None else None
+    return screens.index(screen) if screen in screens else 0
 
 
 class _DropFileFilter(QObject):
@@ -249,6 +260,13 @@ class _DropFileFilter(QObject):
                     front_engine_logger.warning(f"[DropFileFilter] handler error: {error!r}")
                 return True
         return False
+
+
+def ask_for_input(field: QWidget) -> None:
+    """Point at the empty field instead of a dialog: focus it and say what it needs, in place."""
+    field.setFocus()
+    if hasattr(field, "setPlaceholderText"):
+        field.setPlaceholderText(language_wrapper.language_word_dict.get("fill_this_in", "Fill this in first"))
 
 
 def enable_file_drop(widget: QWidget, extensions, on_file: Callable[[str], None]) -> _DropFileFilter:

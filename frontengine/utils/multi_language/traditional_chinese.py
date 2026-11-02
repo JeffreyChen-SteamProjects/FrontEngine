@@ -278,6 +278,8 @@ traditional_chinese_word_dict = {
     # Target monitor / control center
     "target_monitor_label": "目標螢幕",
     "target_monitor_ask": "詢問",
+    "target_monitor_here": "這個螢幕（FrontEngine 所在的螢幕）",
+    "fill_this_in": "請先填這裡",
     "settings_menu_preset_schedule": "排程預設集⋯",
     "preset_schedule_title": "排程預設集",
     "preset_schedule_enable": "依排程自動套用預設集",

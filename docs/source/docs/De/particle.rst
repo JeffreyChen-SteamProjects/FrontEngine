@@ -9,4 +9,4 @@ Partikel-Seite
   senkt zusätzlich alle Overlays auf einmal.
 * Deckkraft - wie durchsichtig die Partikel sind.
 * Auf allen Bildschirmen zeigen - eine Kopie je Monitor.
-* Zielbildschirm - welcher Bildschirm, oder jedes Mal nachfragen.
+* Zielbildschirm - welcher Bildschirm; ohne Nachfrage standardmäßig der, auf dem FrontEngine ist.

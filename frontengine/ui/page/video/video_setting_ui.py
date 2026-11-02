@@ -1,7 +1,7 @@
 from typing import Optional
 
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QSlider, QLabel, QPushButton, QMessageBox, QCheckBox
+from PySide6.QtWidgets import QSlider, QLabel, QPushButton, QCheckBox
 
 from frontengine.show.video.video_player import VideoWidget
 from frontengine.ui.dialog.choose_file_dialog import choose_video
@@ -134,9 +134,7 @@ class VideoSettingUI(SettingPage):
 
     def start_play_video(self) -> None:
         if not self.video_path or not self.ready_to_play:
-            message_box = QMessageBox(self)
-            message_box.setText(language_wrapper.language_word_dict.get("not_prepare"))
-            message_box.exec()
+            self.choose_and_copy_file_to_cwd_video_dir_then_play()  # nothing chosen yet: choosing one shows it
             return
 
         front_engine_logger.info("[VideoSettingUI] start_play_video")
@@ -168,6 +166,7 @@ class VideoSettingUI(SettingPage):
             self.ready_to_play = True
             add_recent_file("video", self.video_path)
             reload_recent_combobox(self.recent_files_combobox, "video")
+            self.start_play_video()  # chosen means shown: no second click
 
     def _apply_recent_file(self, _index: int = 0) -> None:
         path = self.recent_files_combobox.currentData()
@@ -186,6 +185,7 @@ class VideoSettingUI(SettingPage):
         self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
         add_recent_file("video", path)
         reload_recent_combobox(self.recent_files_combobox, "video")
+        self.start_play_video()  # a dropped file is shown at once
 
     def opacity_trick(self) -> None:
         front_engine_logger.info("[VideoSettingUI] opacity_trick")

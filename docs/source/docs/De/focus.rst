@@ -6,7 +6,7 @@ Fokus-Seite
 * Störendes abdecken - einen Teil des Bildschirms verbergen: den unteren
   Streifen mit der Taskleiste, die Ecke unten rechts, den oberen Streifen, eine
   der beiden Seitenkanten oder den ganzen Bildschirm.
-* Zielbildschirm - welcher Bildschirm, oder jedes Mal nachfragen.
+* Zielbildschirm - welcher Bildschirm; ohne Nachfrage standardmäßig der, auf dem FrontEngine ist.
 
 Beide lassen Klicks durch: Was sie abdecken, funktioniert weiter, es lenkt nur
 nicht mehr ab. Eine Abdeckung bleibt außerdem in einer Bildschirmfreigabe

@@ -9,4 +9,4 @@ Pagina Particelle
   abbassa ulteriormente tutti gli overlay in una volta.
 * Opacità - quanto le particelle sono trasparenti.
 * Mostra su tutti gli schermi - una copia per monitor.
-* Schermo di destinazione - quale schermo usare, o chiedere ogni volta.
+* Schermo di destinazione - quale schermo usare; per impostazione predefinita quello di FrontEngine, senza chiedere.

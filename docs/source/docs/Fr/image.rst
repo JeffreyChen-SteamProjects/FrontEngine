@@ -16,7 +16,7 @@ Page Image
     * Aléatoire - ordre mélangé.
     * Inclure les sous-dossiers.
 
-* Écran cible - quel écran utiliser, ou demander à chaque fois.
+* Écran cible - quel écran utiliser ; par défaut celui de FrontEngine, sans question.
 * Récents - les images déjà affichées.
 * Ouvrir une planche… - choisir plusieurs images à la fois et les étaler sur une
   même surface au-dessus du bureau. Faites glisser chaque image pour l'arranger, le

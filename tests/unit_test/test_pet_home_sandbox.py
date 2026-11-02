@@ -28,7 +28,7 @@ def page(tmp_path):
 
 def test_switching_keeps_two_separate_saves(page):
     page.create_home()
-    page.residents.new_pet()
+    # creating a home with no pets brings a first one
     managed = page.service.world
     coins = managed.ledger.coins
     assert page.set_free_arranging(True)
@@ -52,7 +52,7 @@ def test_switching_keeps_two_separate_saves(page):
 def test_a_pet_can_visit_free_arranging_without_its_profile_changing(page):
     page.set_free_arranging(True)
     page.create_home()
-    page.residents.new_pet()
+    # creating a home with no pets brings a first one
     identifier = page.selected_resident
     before = dict(page.profiles.get(identifier))
     page.service.world.residents[identifier].needs["mood"] = 1
@@ -67,7 +67,7 @@ def test_a_pet_can_visit_free_arranging_without_its_profile_changing(page):
 def test_leaving_cancels_activities_and_remembers_the_mode(page):
     from frontengine.user_setting.user_setting_file import user_setting_dict
     page.create_home()
-    page.residents.new_pet()
+    # creating a home with no pets brings a first one
     resident = next(iter(page.service.world.residents.values()))
     page.service.run(lambda world: world.residents[resident.identifier].commands.append("play"))
     page.set_free_arranging(True)

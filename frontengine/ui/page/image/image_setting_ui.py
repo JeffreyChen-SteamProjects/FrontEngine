@@ -2,7 +2,7 @@ from typing import Optional
 
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import (
-    QSlider, QLabel, QPushButton, QMessageBox, QCheckBox, QComboBox, QFileDialog,
+    QSlider, QLabel, QPushButton, QCheckBox, QComboBox, QFileDialog,
 )
 
 from frontengine.show.image.paint_image import ImageWidget
@@ -231,9 +231,7 @@ class ImageSettingUI(SettingPage):
         # In slideshow mode, prime the first image from the chosen folder.
         slideshow = self.slideshow_checkbox.isChecked() and self._prime_slideshow()
         if not self.image_path or not self.ready_to_play:
-            message_box = QMessageBox(self)
-            message_box.setText(language_wrapper.language_word_dict.get("not_prepare"))
-            message_box.exec()
+            self.choose_and_copy_file_to_cwd_image_dir_then_play()  # nothing chosen yet: choosing one shows it
             return
 
         dispatch_to_monitors(
@@ -317,6 +315,7 @@ class ImageSettingUI(SettingPage):
             self.ready_to_play = True
             add_recent_file("image", self.image_path)
             reload_recent_combobox(self.recent_files_combobox, "image")
+            self.start_play_image()  # chosen means shown: no second click
 
     def _apply_recent_file(self, _index: int = 0) -> None:
         path = self.recent_files_combobox.currentData()
@@ -335,6 +334,7 @@ class ImageSettingUI(SettingPage):
         self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
         add_recent_file("image", path)
         reload_recent_combobox(self.recent_files_combobox, "image")
+        self.start_play_image()  # a dropped file is shown at once
 
     def opacity_trick(self) -> None:
         front_engine_logger.info("[ImageSettingUI] opacity_trick")

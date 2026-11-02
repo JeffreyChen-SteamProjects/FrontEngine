@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261102-26 | 2026-11-02 | Fewer steps across the pages: no monitor prompt, no not-ready dialogs, choose or drop to show | #done #ui | [2026-11](2026-11.md) |
 | U-20261102-25 | 2026-11-02 | Size the desktop home, keep the pet in view, and pat with a double-click | #done #pets #game #ui | [2026-11](2026-11.md) |
 | U-20261102-24 | 2026-11-02 | Rain and snow on the desktop strip, in a layer that never takes input | #done #pets #game #native | [2026-11](2026-11.md) |
 | U-20261102-23 | 2026-11-02 | Old entry points tested after the move, and a background smoke run of the pet home | #done #tests #pets | [2026-11](2026-11.md) |
@@ -253,6 +254,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 49 |
+| [2026-11.md](2026-11.md) | 2026-11 | 50 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

@@ -102,9 +102,7 @@ class SoundPlayerSettingUI(SettingPage):
     def start_play_sound(self) -> None:
         front_engine_logger.info("[SoundPlayerSettingUI] start_play_sound")
         if not self.player_sound_path:
-            message_box = QMessageBox(self)
-            message_box.setText(language_wrapper.language_word_dict.get("not_prepare"))
-            message_box.exec()
+            self.choose_and_copy_sound_file_to_cwd_sound_dir_then_play()  # choosing one plays it
             return
 
         sound_player = SoundPlayer(sound_path=self.player_sound_path)
@@ -127,6 +125,7 @@ class SoundPlayerSettingUI(SettingPage):
         self.player_sound_path = choose_player_sound(self)
         if self.player_sound_path:
             retranslator.set_text(self.player_ready_label, "Ready")
+            self.start_play_sound()                   # chosen means playing: no second click
 
     def volume_trick(self) -> None:
         front_engine_logger.info("[SoundPlayerSettingUI] volume_trick")

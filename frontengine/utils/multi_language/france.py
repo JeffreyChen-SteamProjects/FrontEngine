@@ -277,6 +277,8 @@ french_word_dict = {
     "preset_no_presets": "Aucun préréglage enregistré pour l'instant.",
     "target_monitor_label": "Écran cible",
     "target_monitor_ask": "Demander",
+    "target_monitor_here": "Cet écran (celui de FrontEngine)",
+    "fill_this_in": "Remplissez d’abord ce champ",
     "settings_menu_preset_schedule": "Préréglage programmé...",
     "preset_schedule_title": "Préréglage programmé",
     "preset_schedule_enable": "Appliquer un préréglage selon un horaire",

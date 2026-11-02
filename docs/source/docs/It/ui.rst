@@ -27,8 +27,8 @@ stessa cosa:
 
 * **Opacità** - quanto traspare la scrivania. Gli overlay nascono piuttosto
   trasparenti, per stare sopra al tuo lavoro invece di nasconderlo.
-* **Schermo di destinazione** - quale schermo. Impostato su *Chiedi*, la domanda
-  arriva ogni volta.
+* **Schermo di destinazione** - quale schermo. *Questo schermo* (predefinito) è quello della finestra
+  di FrontEngine: l'avvio non si ferma mai a chiedere.
 
   Con più di uno schermo c'è anche **Su tutti gli schermi**: un solo overlay su
   tutta la scrivania invece di uno per schermo.
@@ -36,6 +36,8 @@ stessa cosa:
 * **Mostra sotto tutte le finestre** - infila l'overlay sotto le tue finestre,
   così si comporta da sfondo anziché da qualcosa davanti.
 * **Recenti** - i file già usati, per non doverli ricercare.
+
+Un file scelto viene mostrato subito, così come uno trascinato sulla pagina, e *Avvia* senza file apre la scelta; un campo di testo o indirizzo vuoto viene indicato sul posto invece che con un avviso, e Invio al suo interno avvia.
 
 Gli overlay non danno fastidio
 ==============================

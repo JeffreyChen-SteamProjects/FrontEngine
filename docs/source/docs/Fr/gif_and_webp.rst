@@ -10,5 +10,5 @@ Page GIF et WebP
 * Plein écran - étirer sur tout l'écran.
 * Afficher sur tous les écrans - une copie par moniteur.
 * Afficher sous toutes les fenêtres - la placer sous les autres fenêtres.
-* Écran cible - quel écran utiliser, ou demander à chaque fois.
+* Écran cible - quel écran utiliser ; par défaut celui de FrontEngine, sans question.
 * Récents - les animations déjà affichées.

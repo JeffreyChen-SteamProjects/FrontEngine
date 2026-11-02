@@ -30,8 +30,8 @@ Die meisten Seiten tragen dieselben wenigen Bedienelemente, und sie bedeuten
 * **Deckkraft** - wie viel vom Schreibtisch durchscheint. Overlays sind
   standardmäßig recht durchsichtig, damit sie über Ihrer Arbeit liegen statt
   sie zu verdecken.
-* **Zielbildschirm** - welcher Bildschirm. Auf *Nachfragen* gestellt, werden
-  Sie stattdessen jedes Mal gefragt.
+* **Zielbildschirm** - welcher Bildschirm. *Dieser Bildschirm* (die Vorgabe) ist der,
+  auf dem das FrontEngine-Fenster liegt; beim Start wird nicht nachgefragt.
 
   Bei mehr als einem Bildschirm gibt es zusätzlich **Über alle Bildschirme**: ein
   einzelnes Overlay über den gesamten Desktop statt eines je Bildschirm.
@@ -40,6 +40,8 @@ Die meisten Seiten tragen dieselben wenigen Bedienelemente, und sie bedeuten
   wirkt es wie ein Hintergrund statt wie etwas davor.
 * **Zuletzt verwendet** - vorher benutzte Dateien, damit Sie sie nicht wieder
   suchen müssen.
+
+Eine gewählte Datei wird sofort gezeigt, ebenso eine auf die Seite gezogene, und *Start* ohne Datei öffnet die Auswahl; ein leeres Text- oder Adressfeld wird markiert statt mit einem Warndialog gemeldet, und Enter darin startet.
 
 Overlays stehen nicht im Weg
 ============================

@@ -278,6 +278,8 @@ english_word_dict = {
     # Target monitor / control center
     "target_monitor_label": "Target monitor",
     "target_monitor_ask": "Ask",
+    "target_monitor_here": "This screen (where FrontEngine is)",
+    "fill_this_in": "Fill this in first",
     "settings_menu_preset_schedule": "Scheduled preset...",
     "preset_schedule_title": "Scheduled preset",
     "preset_schedule_enable": "Apply a preset on a schedule",

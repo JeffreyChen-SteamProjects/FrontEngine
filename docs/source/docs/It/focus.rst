@@ -6,7 +6,7 @@ Pagina Concentrazione
 * Copri una distrazione - nascondere una parte dello schermo: la striscia
   inferiore con la barra delle applicazioni, l'angolo in basso a destra, la
   striscia superiore, uno dei bordi laterali, o tutto lo schermo.
-* Schermo di destinazione - quale schermo usare, o chiedere ogni volta.
+* Schermo di destinazione - quale schermo usare; per impostazione predefinita quello di FrontEngine, senza chiedere.
 
 Entrambi lasciano passare i clic: ciò che coprono continua a funzionare,
 semplicemente smette di reclamare la tua attenzione. Una copertura inoltre resta

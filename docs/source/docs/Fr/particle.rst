@@ -9,4 +9,4 @@ Page Particules
   abaisse encore tous les calques d'un coup.
 * Opacité - à quel point les particules sont translucides.
 * Afficher sur tous les écrans - une copie par moniteur.
-* Écran cible - quel écran utiliser, ou demander à chaque fois.
+* Écran cible - quel écran utiliser ; par défaut celui de FrontEngine, sans question.

@@ -103,7 +103,7 @@ def test_arranging_shows_reasons_and_escape_leaves(page):
 
 def test_clicking_the_view_selects_residents_and_furniture(page):
     page.create_home()
-    page.residents.new_pet()
+    # creating a home with no pets brings a first one
     page.view.resize(900, 180)
     resident = page.service.world.residents[page.selected_resident]
     page.select_resident(None)

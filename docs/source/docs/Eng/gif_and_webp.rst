@@ -10,5 +10,5 @@ GIF & WebP Page
 * Fullscreen - stretch to the whole screen.
 * Show on all screen - one copy per monitor.
 * Show on all window bottom - place it beneath other windows.
-* Target monitor - which screen to use, or ask each time.
+* Target monitor - which screen to use; by default the one FrontEngine is on, without asking.
 * Recent - animations you showed before.

@@ -277,6 +277,8 @@ germany_word_dict = {
     "preset_no_presets": "Noch keine Voreinstellungen gespeichert.",
     "target_monitor_label": "Zielbildschirm",
     "target_monitor_ask": "Nachfragen",
+    "target_monitor_here": "Dieser Bildschirm (wo FrontEngine ist)",
+    "fill_this_in": "Bitte zuerst ausfüllen",
     "settings_menu_preset_schedule": "Geplante Voreinstellung...",
     "preset_schedule_title": "Geplante Voreinstellung",
     "preset_schedule_enable": "Voreinstellung nach Zeitplan anwenden",

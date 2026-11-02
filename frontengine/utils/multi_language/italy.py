@@ -277,6 +277,8 @@ italian_word_dict = {
     "preset_no_presets": "Nessuna preimpostazione salvata finora.",
     "target_monitor_label": "Schermo di destinazione",
     "target_monitor_ask": "Chiedi",
+    "target_monitor_here": "Questo schermo (dove si trova FrontEngine)",
+    "fill_this_in": "Compila prima questo campo",
     "settings_menu_preset_schedule": "Preimpostazione pianificata...",
     "preset_schedule_title": "Preimpostazione pianificata",
     "preset_schedule_enable": "Applica una preimpostazione a orario",

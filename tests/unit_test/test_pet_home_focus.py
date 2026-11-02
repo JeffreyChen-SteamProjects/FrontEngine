@@ -56,7 +56,7 @@ def _page(tmp_path, monkeypatch, focus):
     service = HomeService(None, HomeSaveStore(tmp_path, CATALOG), PetProfiles({}, lambda: None))
     page = PetHomePage(service)
     page.create_home()
-    page.residents.new_pet()
+    # creating a home with no pets brings a first one
     return page
 
 

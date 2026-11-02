@@ -3,11 +3,12 @@ import threading
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QSlider, QLabel, QLineEdit, QPushButton, QCheckBox, QComboBox, \
-    QFontComboBox, QMessageBox, QFileDialog, QSpinBox
+    QFontComboBox, QFileDialog, QSpinBox
 
 from frontengine.show.text.draw_text import TextWidget
 from frontengine.ui.page.utils import (
     apply_checkbox_state,
+    ask_for_input,
     apply_combobox_data_state,
     apply_combobox_text_state,
     apply_slider_state,
@@ -83,6 +84,7 @@ class TextSettingUI(SettingPage):
 
         # Text input
         self.line_edit = QLineEdit()
+        self.line_edit.returnPressed.connect(lambda: self.start_draw_text_on_screen())   # type, Enter, shown
 
         # Start Button
         self.start_button = tr(QPushButton(), "text_setting_start_draw")
@@ -426,7 +428,7 @@ class TextSettingUI(SettingPage):
         # text has to be filled in.
         is_static = (self.text_source_combobox.currentData() or SOURCE_STATIC) == SOURCE_STATIC
         if is_static and not self.line_edit.text().strip():
-            QMessageBox.warning(self, "Warning", language_wrapper.language_word_dict.get("not_prepare"))
+            ask_for_input(self.line_edit)            # no dialog to dismiss: the field asks for the text
             return
 
         def present_on_monitor(widget: TextWidget, monitor, _idx: int) -> None:

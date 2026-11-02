@@ -28,8 +28,8 @@ la même chose partout :
 
 * **Opacité** - ce que laisse voir le bureau. Les calques sont assez
   translucides par défaut, pour se poser sur votre travail plutôt que le cacher.
-* **Écran cible** - quel écran. Réglé sur *Demander*, la question vous est posée
-  à chaque fois.
+* **Écran cible** - quel écran. *Cet écran* (par défaut) est celui de la fenêtre
+  FrontEngine : le démarrage ne s’arrête jamais pour demander.
 
   Avec plusieurs écrans s'ajoute **Sur tous les écrans** : un seul calque couvrant
   tout le bureau plutôt qu'un par écran.
@@ -37,6 +37,8 @@ la même chose partout :
 * **Afficher sous toutes les fenêtres** - glisser le calque sous vos fenêtres :
   il se comporte alors comme un fond plutôt que comme quelque chose devant.
 * **Récents** - les fichiers déjà utilisés, pour ne pas les rechercher.
+
+Un fichier choisi s’affiche aussitôt, tout comme un fichier déposé sur la page, et *Démarrer* sans fichier ouvre le sélecteur ; un champ de texte ou d’adresse vide est signalé sur place plutôt que par une boîte d’avertissement, et Entrée dedans démarre.
 
 Les calques ne gênent pas
 =========================

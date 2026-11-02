@@ -9,4 +9,4 @@ Particle Page
   further for every overlay at once.
 * Opacity - how see-through the particles are.
 * Show on all screen - one copy per monitor.
-* Target monitor - which screen to use, or ask each time.
+* Target monitor - which screen to use; by default the one FrontEngine is on, without asking.

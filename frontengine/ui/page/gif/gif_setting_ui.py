@@ -1,7 +1,7 @@
 from typing import Optional
 
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QLabel, QSlider, QPushButton, QMessageBox, QCheckBox
+from PySide6.QtWidgets import QLabel, QSlider, QPushButton, QCheckBox
 
 from frontengine.show.gif.paint_gif import GifWidget
 from frontengine.ui.dialog.choose_file_dialog import choose_gif
@@ -120,9 +120,7 @@ class GIFSettingUI(SettingPage):
     def start_play_gif(self) -> None:
         front_engine_logger.info("[GIFSettingUI] start_play_gif")
         if not self.gif_image_path or not self.ready_to_play:
-            message_box = QMessageBox(self)
-            message_box.setText(language_wrapper.language_word_dict.get("not_prepare"))
-            message_box.exec()
+            self.choose_and_copy_file_to_cwd_gif_dir_then_play()  # nothing chosen yet: choosing one shows it
             return
 
         dispatch_to_monitors(
@@ -147,6 +145,7 @@ class GIFSettingUI(SettingPage):
             self.ready_to_play = True
             add_recent_file("gif", self.gif_image_path)
             reload_recent_combobox(self.recent_files_combobox, "gif")
+            self.start_play_gif()  # chosen means shown: no second click
 
     def _apply_recent_file(self, _index: int = 0) -> None:
         path = self.recent_files_combobox.currentData()
@@ -165,6 +164,7 @@ class GIFSettingUI(SettingPage):
         self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
         add_recent_file("gif", path)
         reload_recent_combobox(self.recent_files_combobox, "gif")
+        self.start_play_gif()  # a dropped file is shown at once
 
     def opacity_trick(self) -> None:
         front_engine_logger.info("[GIFSettingUI] opacity_trick")
