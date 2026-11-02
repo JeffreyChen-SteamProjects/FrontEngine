@@ -132,6 +132,26 @@ def _flush_deleted_widgets() -> None:
     QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
 
 
+@pytest.fixture(autouse=True)
+def _delete_closed_test_windows(_qt_application):
+    """Delete the top-level windows a test built and closed, once its fixtures are torn down.
+
+    Closing only hides a window without WA_DeleteOnClose: every desktop pet test left about
+    232 widgets per pet (menus, speech bubbles, the settings page around it) and the
+    screensaver tests about 4,800, all alive until the session ended. Windows that already
+    existed (module fixtures) and windows still shown are left alone.
+    """
+    from PySide6.QtWidgets import QApplication
+    from shiboken6 import getCppPointer
+    before = {getCppPointer(widget)[0] for widget in QApplication.topLevelWidgets()}
+    yield
+    from PySide6.QtCore import QCoreApplication, QEvent
+    for widget in QApplication.topLevelWidgets():
+        if getCppPointer(widget)[0] not in before and not widget.isVisible():
+            widget.deleteLater()
+    QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+
+
 @pytest.fixture(autouse=True, scope="module")
 def _release_test_widget_cycles(_qt_application):
     """Release cyclic and deleted test widgets on their GUI thread before another module starts."""
