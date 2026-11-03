@@ -37,7 +37,7 @@ e widgets de área de trabalho.
 
 ## Instalação
 
-Python **3.10+**. O Windows 10/11 é o alvo principal; o macOS e o Linux executam
+Python **3.11+**. O Windows 10/11 é o alvo principal; o macOS e o Linux executam
 o aplicativo, com as diferenças de plataforma listadas em [Suporte de plataforma](#suporte-de-plataforma).
 
 ```bash
@@ -505,7 +505,7 @@ feat/xyz  ──PR──►  dev  ──PR──►  main
 
 | Workflow | Gatilho | Finalidade |
 | --- | --- | --- |
-| `CI` (`ci.yml`) | Push / PR para `main` ou `dev`, disparo manual, ou chamado pelo `Nightly` | Compila, roda os testes unitários, depois compila uma wheel a partir *daquele checkout*, instala-a e inicia o aplicativo — em Python 3.10 / 3.11 / 3.12, Windows |
+| `CI` (`ci.yml`) | Push / PR para `main` ou `dev`, disparo manual, ou chamado pelo `Nightly` | Compila, roda os testes unitários, depois compila uma wheel a partir *daquele checkout*, instala-a e inicia o aplicativo — em Python 3.11 / 3.12, Windows |
 | `Nightly` (`nightly.yml`) | Cron diário, disparo manual | Chama o `CI`. A agenda vive aqui de propósito: o GitHub desabilita workflows que contêm um cron após ~60 dias de inatividade, e isso, de outra forma, derrubaria as verificações de PR junto |
 | `Release` (`release.yml`) | Um pull request **a partir de `dev`** é mesclado em `main`, ou disparo manual | Incrementa a versão, faz commit dela de volta com `[skip ci]`, troca `stable.toml` → `pyproject.toml`, compila sdist + wheel, envia ao PyPI como `frontengine`, cria um release no GitHub com a tag `v<version>`, e faz o fast-forward de `dev` |
 

@@ -35,7 +35,7 @@ annotation de présentation, mesure et capture, masques de concentration et widg
 
 ## Installation
 
-Python **3.10+**. Windows 10/11 est la cible principale ; macOS et Linux exécutent
+Python **3.11+**. Windows 10/11 est la cible principale ; macOS et Linux exécutent
 l'application, avec les différences de plateforme listées sous [Prise en charge des plateformes](#prise-en-charge-des-plateformes).
 
 ```bash
@@ -484,7 +484,7 @@ feat/xyz  ──PR──►  dev  ──PR──►  main
 
 | Workflow | Trigger | Purpose |
 | --- | --- | --- |
-| `CI` (`ci.yml`) | Push / PR vers `main` ou `dev`, déclenchement manuel, ou appelé par `Nightly` | Compile, exécute les tests unitaires, puis construit un wheel à partir de *cette checkout*, l'installe et démarre l'application — sur Python 3.10 / 3.11 / 3.12, Windows |
+| `CI` (`ci.yml`) | Push / PR vers `main` ou `dev`, déclenchement manuel, ou appelé par `Nightly` | Compile, exécute les tests unitaires, puis construit un wheel à partir de *cette checkout*, l'installe et démarre l'application — sur Python 3.11 / 3.12, Windows |
 | `Nightly` (`nightly.yml`) | Cron quotidien, déclenchement manuel | Appelle `CI`. La planification vit ici à dessein : GitHub désactive les workflows contenant un cron après ~60 jours d'inactivité, et cela emporterait sinon les contrôles de PR avec elle |
 | `Release` (`release.yml`) | Une pull request **depuis `dev`** est fusionnée dans `main`, ou déclenchement manuel | Incrémente la version, la recommite avec `[skip ci]`, échange `stable.toml` → `pyproject.toml`, construit sdist + wheel, téléverse sur PyPI sous le nom `frontengine`, crée une version GitHub taguée `v<version>`, et avance `dev` en fast-forward |
 

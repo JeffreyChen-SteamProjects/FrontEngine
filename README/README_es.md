@@ -36,7 +36,7 @@ captura, máscaras de concentración y widgets de escritorio.
 
 ## Instalación
 
-Python **3.10+**. Windows 10/11 es el objetivo principal; macOS y Linux ejecutan la
+Python **3.11+**. Windows 10/11 es el objetivo principal; macOS y Linux ejecutan la
 aplicación, con las diferencias de plataforma indicadas en [Compatibilidad de plataformas](#compatibilidad-de-plataformas).
 
 ```bash
@@ -483,7 +483,7 @@ feat/xyz  ──PR──►  dev  ──PR──►  main
 
 | Flujo de trabajo | Desencadenante | Propósito |
 | --- | --- | --- |
-| `CI` (`ci.yml`) | Push / PR a `main` o `dev`, activación manual, o llamado por `Nightly` | Compila, ejecuta las pruebas unitarias, y luego construye un wheel a partir de *ese checkout*, lo instala e inicia la aplicación — en Python 3.10 / 3.11 / 3.12, Windows |
+| `CI` (`ci.yml`) | Push / PR a `main` o `dev`, activación manual, o llamado por `Nightly` | Compila, ejecuta las pruebas unitarias, y luego construye un wheel a partir de *ese checkout*, lo instala e inicia la aplicación — en Python 3.11 / 3.12, Windows |
 | `Nightly` (`nightly.yml`) | Cron diario, activación manual | Llama a `CI`. La programación vive aquí a propósito: GitHub desactiva los flujos de trabajo que contienen un cron tras ~60 días de inactividad, y eso, de lo contrario, se llevaría por delante las comprobaciones de PR |
 | `Release` (`release.yml`) | Un pull request **desde `dev`** se fusiona en `main`, o activación manual | Incrementa la versión, la vuelve a confirmar con `[skip ci]`, intercambia `stable.toml` → `pyproject.toml`, construye sdist + wheel, sube a PyPI como `frontengine`, crea una release de GitHub etiquetada como `v<version>`, y hace fast-forward de `dev` |
 

@@ -36,7 +36,7 @@ Präsentationsannotationen, Messen und Erfassen, Fokusmasken und Desktop-Widgets
 
 ## Installation
 
-Python **3.10+**. Windows 10/11 ist die primäre Zielplattform; macOS und Linux
+Python **3.11+**. Windows 10/11 ist die primäre Zielplattform; macOS und Linux
 führen die App aus, mit den unter [Plattformunterstützung](#plattformunterstützung)
 aufgeführten Plattformunterschieden.
 
@@ -524,7 +524,7 @@ feat/xyz  ──PR──►  dev  ──PR──►  main
 
 | Workflow | Auslöser | Zweck |
 | --- | --- | --- |
-| `CI` (`ci.yml`) | Push / PR nach `main` oder `dev`, manueller Dispatch oder aufgerufen von `Nightly` | Kompilieren, die Unit-Tests ausführen, dann ein Wheel aus *diesem Checkout* bauen, es installieren und die App starten — auf Python 3.10 / 3.11 / 3.12, Windows |
+| `CI` (`ci.yml`) | Push / PR nach `main` oder `dev`, manueller Dispatch oder aufgerufen von `Nightly` | Kompilieren, die Unit-Tests ausführen, dann ein Wheel aus *diesem Checkout* bauen, es installieren und die App starten — auf Python 3.11 / 3.12, Windows |
 | `Nightly` (`nightly.yml`) | Täglicher Cron, manueller Dispatch | Ruft `CI` auf. Der Zeitplan liegt absichtlich hier: GitHub deaktiviert Workflows, die einen Cron enthalten, nach etwa 60 Tagen Inaktivität, und das würde sonst die PR-Prüfungen mit hinunterreißen |
 | `Release` (`release.yml`) | Ein Pull Request **von `dev`** wird in `main` gemerged, oder manueller Dispatch | Erhöht die Version, committet sie zurück mit `[skip ci]`, tauscht `stable.toml` → `pyproject.toml`, baut sdist + wheel, lädt zu PyPI als `frontengine` hoch, erstellt ein GitHub-Release getaggt `v<version>` und führt `dev` per Fast-Forward nach |
 

@@ -34,7 +34,7 @@ FrontEngine 是一款桌面叠加应用。视频、图片、GIF、网页、文�
 
 ## 安装
 
-Python **3.10+**。主要目标平台是 Windows 10/11；macOS 和 Linux 也能运行本应用，
+Python **3.11+**。主要目标平台是 Windows 10/11；macOS 和 Linux 也能运行本应用，
 平台差异列在[平台支持](#平台支持)一节。
 
 ```bash
@@ -433,7 +433,7 @@ feat/xyz  ──PR──►  dev  ──PR──►  main
 
 | Workflow | Trigger | Purpose |
 | --- | --- | --- |
-| `CI` (`ci.yml`) | 推送 / PR 到 `main` 或 `dev`、手动触发，或由 `Nightly` 调用 | 编译、运行单元测试，然后从*那次 checkout* 构建一个 wheel、安装它并启动应用——在 Python 3.10 / 3.11 / 3.12、Windows 上 |
+| `CI` (`ci.yml`) | 推送 / PR 到 `main` 或 `dev`、手动触发，或由 `Nightly` 调用 | 编译、运行单元测试，然后从*那次 checkout* 构建一个 wheel、安装它并启动应用——在 Python 3.11 / 3.12、Windows 上 |
 | `Nightly` (`nightly.yml`) | 每日定时任务、手动触发 | 调用 `CI`。日程特意放在这里：GitHub 会在约 60 天无活动后禁用含 cron 的工作流，否则那会连带把 PR 检查也一起弄下线 |
 | `Release` (`release.yml`) | 一个**来自 `dev`** 的拉取请求被合并进 `main`，或手动触发 | 提升版本号，带着 `[skip ci]` 把它提交回去，把 `stable.toml` → `pyproject.toml` 对调，构建 sdist + wheel，作为 `frontengine` 上传到 PyPI，创建一个打了 `v<version>` 标签的 GitHub release，并把 `dev` 快进 |
 

@@ -23,7 +23,7 @@
     **Actions → CI → Run workflow** 手動觸發，以及由 ``nightly.yml`` 每日呼叫。
     手動觸發是必要的：帶 ``[skip ci]`` 的 commit（版本號那一筆就是）會讓分支
     停在一個沒有 CI 紀錄的 HEAD 上，沒有手動觸發就補不回來。
-  * 於 ``windows-latest`` 上對 Python 3.10、3.11、3.12 進行 matrix 測試。
+  * 於 ``windows-latest`` 上對 Python 3.11、3.12 進行 matrix 測試。
   * 編譯 ``frontengine/`` 底下所有模組，並執行 ``tests/unit_test/start/``
     底下的兩支 GUI 冒煙測試腳本。
 
