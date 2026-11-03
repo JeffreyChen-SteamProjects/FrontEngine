@@ -25,7 +25,7 @@ Workflows
     The manual trigger matters because ``[skip ci]`` commits - the version
     bump among them - otherwise leave a branch with no CI record and no way
     to ask for one.
-  * Matrix-tests Python 3.10, 3.11 and 3.12 on ``windows-latest``.
+  * Matrix-tests Python 3.11 and 3.12 on ``windows-latest``.
   * Compiles every module under ``frontengine/`` and launches the two GUI
     smoke scripts in ``tests/unit_test/start/``.
 
