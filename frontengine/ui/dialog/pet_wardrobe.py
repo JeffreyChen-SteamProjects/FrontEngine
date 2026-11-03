@@ -145,6 +145,30 @@ class PetWardrobeDialog(QDialog):
         retranslator.bind_call(self._retranslate_choices)
         if errors:
             self.status.setText('\n'.join((*errors, self.status.text())))
+        self._adding_new_clothes = False
+        self.add_new_builtin_clothes()
+
+    def missing_builtin_clothes(self) -> str | None:
+        """The pet's built-in character when clothes added in a later FrontEngine are not installed yet."""
+        from frontengine.show.pet.inkside.assemble import garment_identifier
+        from frontengine.show.pet.inkside.garments import GARMENTS
+        from frontengine.show.pet.inkside.library import VERSION, _template, builtin_identifiers
+        character = (self.draft.appearance.get('character') or {}).get('id')
+        if character not in builtin_identifiers():
+            return None
+        template = _template(character)
+        missing = any(not self.library.is_installed(garment_identifier(garment, template), VERSION)
+                      for garment in GARMENTS)
+        return character if missing else None
+
+    def add_new_builtin_clothes(self) -> None:
+        """Opening the wardrobe brings in new built-in clothes by itself: no install button to find."""
+        character = self.missing_builtin_clothes()
+        if character is None or self._install_job is not None:
+            return
+        self.builtin.setCurrentIndex(self.builtin.findData(character))
+        self._adding_new_clothes = True
+        self._install_builtin()
 
     def _buttons(self, layout, entries, right: bool = False) -> list:
         """A row of buttons at their own width: left-aligned, or on the right for the closing pair."""
@@ -198,6 +222,10 @@ class PetWardrobeDialog(QDialog):
     def _builtin_installed(self, error: str) -> None:
         self._installed(error)
         if not error and not self._closed:
+            if self._adding_new_clothes:
+                self._adding_new_clothes = False
+                self.status.setText(translate('pet_wardrobe_new_clothes', 'New built-in clothes are ready to try on.'))
+                return
             self.status.setText(translate('pet_wardrobe_builtin_done',
                                           'Built-in character ready. Choose it under Character.'))
 
