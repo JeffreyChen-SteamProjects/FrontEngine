@@ -3,6 +3,8 @@ Pagina Mascotte
 
 Un compagno che vive sulla scrivania.
 
+La pagina si apre con *La tua mascotta*: fai clic su uno dei personaggi integrati e una mascotta vestita così compare subito sul desktop, oppure scegli *La tua immagine…*. Sotto sono elencate le mascotte sul desktop con *Guardaroba*, *Riporta l’animale* e *Metti via* (un doppio clic ne riporta una); tutte le altre impostazioni restano chiuse finché non apri la loro sezione.
+
 * Scegli l'immagine della mascotte - una sola immagine.
 * Scegli un pacchetto mascotte… - una cartella con le immagini walk / idle /
   sleep / climb / fall / drag, così si anima.

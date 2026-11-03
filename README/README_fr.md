@@ -127,6 +127,8 @@ Par défaut, une superposition s’ouvre sur l’écran de FrontEngine, sans que
 
 **Animal de compagnie de bureau** — un sprite animé qui vit sur votre bureau.
 
+La page s’ouvre sur *Votre mascotte* : cliquez sur un des personnages intégrés et une mascotte habillée comme lui apparaît aussitôt sur le bureau, ou choisissez *Votre propre image…*. En dessous, les mascottes du bureau sont listées avec *Garde-robe*, *Ramener l’animal* et *Ranger* (un double-clic en ramène une) ; tous les autres réglages restent repliés jusqu’à ce que vous ouvriez leur section.
+
 - Les soins enregistrent l’énergie et les modes jeu/travail/repos par identité, en conservant UUID et statistiques de version 1. Le menu du sprite ajoute salutations, caresses et brossage. Les actions minutées récompensent uniquement leur achèvement ; les animaux rassasiés refusent la nourriture et les répétitions nécessitent une pause. Les soins suivent le temps actif, sans rattrapage masqué ou hors ligne. Puppet partage la session et les règles d’alimentation ; les réactions natives dépendent du moteur et du modèle. 
 
 - **Sprites** — un seul GIF/WebP/PNG, ou un dossier de *pack d'animal* dont les noms

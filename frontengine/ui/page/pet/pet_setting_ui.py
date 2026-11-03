@@ -37,6 +37,7 @@ from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import retranslator, tr
 from frontengine.ui.page.pet.pet_profile_controls import PetProfileControls
+from frontengine.ui.page.pet.pet_quick import PetQuickStart
 
 _PET_EXTENSIONS = (".gif", ".webp", ".png", ".jpg", ".puppet")
 
@@ -205,8 +206,10 @@ class PetSettingUI(SettingPage):
         # Drag and drop
         self._drop_filter = enable_file_drop(self, _PET_EXTENSIONS, self._on_file_dropped)
 
-        # Layout
-        source = self.add_section("section_source", "Source")
+        # Layout: one click to a pet on top, everything else folded away below.
+        self._spawn_when_installed = False
+        self.quick = PetQuickStart(self)
+        source = self.add_section("pet_more_sources", "More ways to add a pet", collapsed=True)
         self.pack_editor_button = tr(QPushButton(), 'pack_editor_title')
         self.pack_editor_button.clicked.connect(self.open_pack_editor)
         source.add_actions(self.choose_file_button, self.choose_pack_button,
@@ -222,16 +225,16 @@ class PetSettingUI(SettingPage):
         source.add_row('pet_builtin_character_pick', puppet_row, 'Built-in character')
         self.profile_controls = PetProfileControls(self)
 
-        appearance = self.add_section("section_appearance", "Appearance")
+        appearance = self.add_section("section_appearance", "Appearance", collapsed=True)
         appearance.add_row(self.size_label, self.size_combobox)
         appearance.add_row(self.speed_label, self.speed_combobox)
 
-        behaviour = self.add_section("section_behaviour", "Behaviour")
+        behaviour = self.add_section("section_behaviour", "Behaviour", collapsed=True)
         behaviour.add_row(self.behaviour_label, self.behaviour_combobox)
         behaviour.add_inline(self.climb_checkbox, self.sit_checkbox)
         behaviour.add_inline(self.settle_typing_checkbox)
 
-        sound = self.add_section("section_options", "Sound and speech")
+        sound = self.add_section("section_options", "Sound and speech", collapsed=True)
         sound.add_row(self.volume_label, self.volume_combobox)
         sound.add_inline(self.talk_checkbox, self.speech_checkbox)
         sound.add_inline(self.audio_react_checkbox, self.audio_source_combobox)
@@ -239,11 +242,11 @@ class PetSettingUI(SettingPage):
         # 專注計時器是寵物幫你顧的，不是外觀設定，所以自成一區
         # The focus timer is something the pet keeps for you rather than a look,
         # so it gets its own group.
-        focus = self.add_section(self.focus_label)
+        focus = self.add_section(self.focus_label, collapsed=True)
         focus.add_inline(self.focus_minutes_combobox, self.break_minutes_combobox)
         focus.add_inline(self.focus_button)
 
-        together = self.add_section("section_actions", "Together")
+        together = self.add_section("section_actions", "Together", collapsed=True)
         together.add_inline(self.tag_checkbox, self.chat_checkbox)
 
         self.add_body_widget(self.drop_hint_label)
@@ -442,6 +445,15 @@ class PetSettingUI(SettingPage):
         self.ready_to_play = True
         self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
 
+    def quick_builtin(self, identifier: str) -> None:
+        """A character card: install it if needed and put a pet dressed as it on the desktop."""
+        index = self.builtin_character.findData(identifier)
+        if index < 0 or self._sprite_install is not None:
+            return
+        self.builtin_character.setCurrentIndex(index)
+        self._spawn_when_installed = True
+        self.use_builtin_character()
+
     def use_builtin_character(self) -> None:
         """Install the chosen INKSIDE character for sprite pets; Start then spawns a pet dressed as it."""
         from frontengine.show.pet.asset_library import PetAssetLibrary
@@ -465,6 +477,10 @@ class PetSettingUI(SettingPage):
         self._builtin_sprite = (identifier, preview)
         self.ready_to_play = True
         self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+        if self._spawn_when_installed:          # a character card was clicked: no Start needed
+            self._spawn_when_installed = False
+            self._spawn_pet()
+            self.quick.refresh()
 
     def _dress_as_builtin(self, pet, identifier: str) -> None:
         """Give the pet's identity the built-in character, unless it already wears it."""

@@ -128,6 +128,8 @@ Por defecto, una superposición se abre en la pantalla donde está FrontEngine, 
 
 **Mascota de escritorio** — un sprite animado que vive en tu escritorio.
 
+La página empieza con *Tu mascota*: haz clic en uno de los personajes integrados y aparece al instante en el escritorio una mascota vestida como él, o elige *Tu propia imagen…*. Debajo se listan las mascotas del escritorio con *Vestuario*, *Traer de vuelta* y *Guardar* (doble clic trae una de vuelta); el resto de ajustes queda plegado hasta que abras su sección.
+
 - El cuidado guarda energía y modos de juego/trabajo/descanso por identidad y conserva UUID y estadísticas de la versión 1. El menú del sprite añade saludos, caricias y cepillado. Las acciones temporizadas solo recompensan al completarse; las mascotas saciadas rechazan comida y las repeticiones requieren una pausa. El cuidado sigue el tiempo activo, sin acumular tiempo oculto o sin conexión. Puppet comparte sesión y reglas de alimentación; las respuestas nativas dependen del entorno y del modelo. 
 
 - **Sprites** — un solo GIF/WebP/PNG, o una carpeta de *pack de mascota* cuyos nombres de

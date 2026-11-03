@@ -131,6 +131,8 @@ Por padrão, uma sobreposição abre na tela em que o FrontEngine está, sem per
 
 **Mascote de desktop** — um sprite animado que vive na sua área de trabalho.
 
+A página começa com *Seu pet*: clique em um dos personagens embutidos e um pet vestido como ele aparece na hora na área de trabalho, ou escolha *Sua própria imagem…*. Abaixo, os pets na área de trabalho são listados com *Guarda-roupa*, *Trazer o pet de volta* e *Guardar* (duplo clique traz um de volta); todas as outras configurações ficam recolhidas até você abrir a seção.
+
 - O cuidado salva energia e modos de brincar/trabalhar/descansar por identidade, preservando UUID e estatísticas da versão 1. O menu do sprite adiciona cumprimentos, carinho e escovação. Ações com tempo só recompensam a conclusão; animais saciados recusam comida e repetições exigem uma pausa. O cuidado acompanha o tempo ativo, sem acumular tempo oculto ou offline. Puppet compartilha sessão e regras de alimentação; respostas nativas dependem do runtime e do modelo. 
 
 - **Sprites** — um único GIF/WebP/PNG, ou uma pasta *pet pack* cujos nomes de

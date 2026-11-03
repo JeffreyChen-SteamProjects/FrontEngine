@@ -45,7 +45,7 @@ class PetProfileControls:
         self.call_x.setValue(120)
         self._dialogs = {}
         self._wardrobes = {}
-        section = page.add_section('pet_profile_title', 'Pet identities')
+        section = page.add_section('pet_profile_title', 'Pet identities', collapsed=True)
         section.add_row(tr(QLabel(), 'pet_profile_select'), self.selector)
         section.add_row(tr(QLabel(), 'pet_profile_name'), self.name)
         section.add_actions(self.rename, self.export, self.import_button, self.refresh_button, self.customize_button)
