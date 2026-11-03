@@ -1,6 +1,6 @@
 # CLAUDE.md - FrontEngine
 
-PySide6 desktop overlay app (Python 3.10+, PyOpenGL, numpy; own design system, no qt-material).
+PySide6 desktop overlay app (Python 3.11+, PyOpenGL, numpy; own design system, no qt-material).
 Published on PyPI as `frontengine` (stable, `stable.toml`) and `frontengine_dev`
 (dev, `pyproject.toml`). What it does and how to run it: `README.md`.
 

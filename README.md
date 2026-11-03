@@ -36,7 +36,7 @@ desktop widgets.
 
 ## Install
 
-Python **3.10+**. Windows 10/11 is the primary target; macOS and Linux run the
+Python **3.11+**. Windows 10/11 is the primary target; macOS and Linux run the
 app, with the platform differences listed under [Platform support](#platform-support).
 
 ```bash
@@ -480,7 +480,7 @@ feat/xyz  ──PR──►  dev  ──PR──►  main
 
 | Workflow | Trigger | Purpose |
 | --- | --- | --- |
-| `CI` (`ci.yml`) | Push / PR to `main` or `dev`, manual dispatch, or called by `Nightly` | Compile, run the unit tests, then build a wheel from *that checkout*, install it and start the app — on Python 3.10 / 3.11 / 3.12, Windows |
+| `CI` (`ci.yml`) | Push / PR to `main` or `dev`, manual dispatch, or called by `Nightly` | Compile, run the unit tests, then build a wheel from *that checkout*, install it and start the app — on Python 3.11 / 3.12, Windows |
 | `Nightly` (`nightly.yml`) | Daily cron, manual dispatch | Calls `CI`. The schedule lives here on purpose: GitHub disables workflows containing a cron after ~60 days of inactivity, and that would otherwise take the PR checks down with it |
 | `Release` (`release.yml`) | A pull request **from `dev`** is merged into `main`, or manual dispatch | Bumps the version, commits it back with `[skip ci]`, swaps `stable.toml` → `pyproject.toml`, builds sdist + wheel, uploads to PyPI as `frontengine`, creates a GitHub release tagged `v<version>`, and fast-forwards `dev` |
 
