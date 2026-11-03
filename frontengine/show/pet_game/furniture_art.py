@@ -17,7 +17,8 @@ FOLDER = Path(__file__).resolve().parent / "furniture"
 ITEM_FOLDER = Path(__file__).resolve().parent / "items"
 # Where a pet using the piece rests, as a fraction of the picture's height above the floor:
 # a sleeping pet lies on the mattress, a relaxing one sits on the cushion.
-SURFACES = {"bed_basic": 0.42, "bed_cozy": 0.44, "armchair": 0.3, "cat_tree": 0.8, "climbing_wall": 0.86}
+SURFACES = {"bed_basic": 0.42, "bed_cozy": 0.44, "armchair": 0.3, "cat_tree": 0.8, "climbing_wall": 0.86,
+            "futon": 0.3}
 _CACHE: dict[tuple[str, str], QImage | None] = {}
 # Content packs' pictures, already checked by content_pack: furniture id -> theme -> file.
 PACK_PICTURES: dict[str, dict[str, Path]] = {}
