@@ -8,7 +8,8 @@ Builds a home in a temporary working directory, puts an ordinary window behind
 the strip, and asks Win32 which window owns given screen points: empty strip
 pixels must belong to the window behind (click-through), residents, furniture
 and the home button to the strip. Also checks that showing the strip does not
-change the foreground window and that the layer choice toggles WS_EX_TOPMOST.
+change the foreground window and that the layer choice toggles WS_EX_TOPMOST, and that
+while it rains the weather layer is shown over the strip without changing any of that.
 Writes OUTPUT_DIR/result.json and a screenshot. Never touches the user's desktop.
 """
 import ctypes
@@ -66,6 +67,27 @@ def topmost(widget: QWidget) -> bool:
     return bool(user32.GetWindowLongW(int(widget.winId()), GWL_EXSTYLE) & WS_EX_TOPMOST)
 
 
+def rain(strip, world, points, behind_hwnd) -> dict:
+    """Make it rain: the weather layer shows over the strip and every click still lands as before."""
+    from frontengine.show.pet_game.strip_weather import precipitation
+    foreground = int(user32.GetForegroundWindow() or 0)
+    hour = world.time_ms
+    while precipitation(world.home, hour) != 'rain':
+        hour += 60_000 * 15
+    world.time_ms = hour
+    strip._stepped()
+    wait(600)
+    layer = strip.weather_layer
+    layer.grab().save(str(OUTPUT / 'rain-layer.png'))
+    owners = {name: owner(strip, point) for name, point in points.items()}
+    strip_hwnd = int(strip.winId())
+    return {'rain_shown': layer.isVisible() and layer.geometry() == strip.geometry(),
+            'rain_layer_hwnd': int(layer.winId()), 'rain_owners': owners,
+            'rain_empty_passes_through': owners['empty'] == behind_hwnd,
+            'rain_items_take_input': all(owners[name] == strip_hwnd for name in ('furniture', 'resident', 'button')),
+            'rain_foreground_unchanged': int(user32.GetForegroundWindow() or 0) == foreground}
+
+
 def run() -> dict:
     from frontengine.show.pet_game.home_service import HomeService
     from frontengine.ui.page.pet_game.home_page import PetHomePage
@@ -86,12 +108,7 @@ def run() -> dict:
     service = HomeService(None, HomeSaveStore(Path.cwd(), builtin_catalog()), PetProfiles({}, lambda: None))
     page = PetHomePage(service)
     page.create_home()
-    page.residents.new_pet()
-    panel = page.layout_panel
-    for definition, cell in (('bed_basic', 4), ('desk_basic', 12)):
-        panel.storage.setCurrentIndex(panel.storage.findData(definition))
-        panel.cell.setValue(cell)
-        panel.place()
+    page.residents.new_pet()          # creating a home already sets out the bed, table and desk
     wait(1200)
     strip = page.strip_list[0]
     strip.grab().save(str(OUTPUT / 'strip.png'))
@@ -113,6 +130,7 @@ def run() -> dict:
         'foreground_unchanged': int(user32.GetForegroundWindow() or 0) == foreground_before,
         'topmost_when_top': topmost(strip),
     }
+    result.update(rain(strip, world, points, behind_hwnd))
     page.choose_layer('bottom')
     wait(400)
     result['topmost_when_bottom'] = topmost(strip)
@@ -130,7 +148,9 @@ def run() -> dict:
     result['passed'] = (result['empty_passes_through'] and result['items_take_input']
                         and result['foreground_unchanged'] and result['topmost_when_top']
                         and not result['topmost_when_bottom'] and result['arranging_takes_empty']
-                        and result['after_arranging_passes_through'])
+                        and result['after_arranging_passes_through'] and result['rain_shown']
+                        and result['rain_empty_passes_through'] and result['rain_items_take_input']
+                        and result['rain_foreground_unchanged'])
     return result
 
 

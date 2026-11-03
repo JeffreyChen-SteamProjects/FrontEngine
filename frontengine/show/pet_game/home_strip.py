@@ -23,6 +23,7 @@ from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QMenu, QToolButton, Q
 from frontengine.show.pet_game.captions import card_text, result_text
 from frontengine.show.pet_game.home_service import HomeService
 from frontengine.show.pet_game.home_view import HomeView
+from frontengine.show.pet_game.strip_weather import StripWeather
 from frontengine.show.pet_game.themes import NIGHT_TINT, floor_color, glyph, night_shade
 from frontengine.utils.multi_language.retranslate import translate
 from frontengine.utils.pet_game.catalog import CELL_PIXELS
@@ -96,8 +97,10 @@ class HomeStrip(HomeView):
         self.toolbar = self._toolbar()
         self.done_button = self._done_button()
         self.place_toolbar()
+        self.weather_layer = StripWeather(self)     # rain and snow: its own window, never takes input
         self.frame_timer = QTimer(self)
         self.frame_timer.timeout.connect(self.update)
+        self.frame_timer.timeout.connect(self._weather_frame)
         self.set_quality_tier(tier)
         self.bubbles: dict[str, tuple[str, float]] = {}     # resident -> (text, shown until)
         service.ticked.connect(self._stepped)
@@ -132,6 +135,7 @@ class HomeStrip(HomeView):
         visible = self.isVisible()
         self.layer = layer
         self.setWindowFlags(strip_flags(layer))
+        self.weather_layer.apply_layer()
         if visible:
             self.show()
 
@@ -154,6 +158,11 @@ class HomeStrip(HomeView):
             self.place_toolbar()              # the glyph widens the button; never elide it
         self.refresh_info()
         self.update_mask()
+        self.weather_layer.sync()
+
+    def _weather_frame(self) -> None:
+        if self.weather_layer.isVisible():
+            self.weather_layer.update()
 
     def resident_x_milli(self, resident) -> float:
         if self._dragging is not None and self._dragging[0] == resident.identifier:
@@ -374,6 +383,11 @@ class HomeStrip(HomeView):
     def resizeEvent(self, event) -> None:
         super().resizeEvent(event)
         self.place_toolbar()
+        self.weather_layer.sync()
+
+    def moveEvent(self, event) -> None:
+        super().moveEvent(event)
+        self.weather_layer.sync()
 
     def _done_button(self) -> QToolButton:
         """Shown only while arranging: the strip never takes focus, so Esc cannot reach it."""
@@ -559,10 +573,12 @@ class HomeStrip(HomeView):
     def showEvent(self, event: QShowEvent) -> None:
         super().showEvent(event)
         self.service.resume(HIDDEN_REASON)
+        self.weather_layer.sync()
 
     def hideEvent(self, event: QHideEvent) -> None:
         """Hidden (for example by Hide all) means paused, and the status says so."""
         super().hideEvent(event)
+        self.weather_layer.sync()
         if not self.isVisible() and not getattr(self, "_closing", False):
             self.service.pause(HIDDEN_REASON)
 
@@ -570,6 +586,7 @@ class HomeStrip(HomeView):
         """Closing removes the desktop drawing only; the home keeps its state and clock."""
         self._closing = True
         self.frame_timer.stop()
+        self.weather_layer.close()
         for signal, slot in ((self.service.ticked, self._stepped), (self.service.events_ready, self._events)):
             try:
                 signal.disconnect(slot)
