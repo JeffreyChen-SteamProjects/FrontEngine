@@ -14,7 +14,7 @@ FrontEngine 是一個 PySide6 桌面**覆蓋層（overlay）框架**：把影片
 文字、粒子、音效、桌寵等東西放到螢幕最上層（或最底層）播放，並附帶一整套
 「螢幕周邊工具」——護眼濾鏡、簡報塗鴉、量測取色、錄影、虛擬攝影機、專注遮罩等。
 
-- 執行環境：Python 3.10+、PySide6 6.11.1、PyOpenGL、numpy、pynput（介面樣式為自有設計系統，不再使用 qt-material）
+- 執行環境：Python 3.11+、PySide6 6.11.1、PyOpenGL、numpy、pynput（介面樣式為自有設計系統，不再使用 qt-material）
 - 發佈：PyPI `frontengine`（穩定，`stable.toml`）／ `frontengine_dev`（開發，`pyproject.toml`）；
   另有 Steam 版本（`steam_assets/`、`utils/steam/`、`utils/workshop/`）
 - 進入點：
