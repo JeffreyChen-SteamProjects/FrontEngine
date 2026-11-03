@@ -58,7 +58,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
-| U-20261102-30 | 2026-11-02 | Rain and snow on the desktop strip, in a layer that never takes input | #done #pets #game #native | [2026-11](2026-11.md) |
 | U-20261102-24 | 2026-11-02 | Require Python 3.11; stop supporting 3.10 | #migration #deps #ci | [2026-11](2026-11.md) |
 | U-20261102-23 | 2026-11-02 | Old entry points tested after the move, and a background smoke run of the pet home | #done #tests #pets | [2026-11](2026-11.md) |
 | U-20261102-22 | 2026-11-02 | Furniture packs, themes and blueprints on the Workshop, with missing packs named | #done #pets #game #workshop #security | [2026-11](2026-11.md) |
@@ -107,21 +106,21 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 | U-20261101-03 | 2026-11-01 | Pet home page: play the first loop from the main window | #done #pets #game #ui | [2026-11](2026-11.md) |
 | U-20261101-02 | 2026-11-01 | Pet home service: one clock, identity leases, background saves | #done #pets #game | [2026-11](2026-11.md) |
 | U-20261101-01 | 2026-11-01 | Pet home domain layer: world, simulation, economy and saves | #done #pets #game | [2026-11](2026-11.md) |
-| U-20261030-08 | 2026-10-30 | Accept the whole GUI on an isolated desktop | #done #ui #tests #native | [2026-10](2026-10.md) |
-| U-20261030-07 | 2026-10-30 | Name the random-actions mode in the menu and start summoned pets moving at once | #done #pets #ui #motion | [2026-10](2026-10.md) |
-| U-20261030-06 | 2026-10-30 | Pick each autonomous pet action at random from the whole action set | #done #pets #puppet #motion | [2026-10](2026-10.md) |
-| U-20261030-05 | 2026-10-30 | Start built-in characters from the Pet page as sprite pets | #done #pets #ui | [2026-10](2026-10.md) |
-| U-20261030-04 | 2026-10-30 | Puppet pets stroll on their own | #done #pets #puppet #motion | [2026-10](2026-10.md) |
-| U-20261030-03 | 2026-10-30 | Build the executable on every CPU core by default | #done #packaging #build | [2026-10](2026-10.md) |
-| U-20261030-02 | 2026-10-30 | Clear the release PR's SonarCloud gate | #done #ci #quality #macos | [2026-10](2026-10.md) |
-| U-20261030-01 | 2026-10-30 | Clean up listeners and widgets before the test process exits | #done #ci #tests | [2026-10](2026-10.md) |
-| U-20261029-53 | 2026-10-29 | Fix the PR #227 macOS install failure and SonarCloud findings | #done #pets #ci #quality | [2026-10](2026-10.md) |
-| U-20261029-52 | 2026-10-29 | Clean stray specks and off-palette pink from the generated pet frames | #done #pets #animation | [2026-10](2026-10.md) |
-| U-20261029-51 | 2026-10-29 | Generated walk and climb frames for the other five built-in characters | #done #pets #animation | [2026-10](2026-10.md) |
-| U-20261029-50 | 2026-10-29 | Stop pets jittering left and right on narrow window ledges | #done #pets #motion | [2026-10](2026-10.md) |
-| U-20261029-49 | 2026-10-29 | Paint desktop pets through Qt so their frames change while they move | #done #pets #animation #compositor | [2026-10](2026-10.md) |
-| U-20261029-48 | 2026-10-29 | Show animated pets moving on the GPU path and walk MOCHI with generated step frames | #done #pets #animation #compositor | [2026-10](2026-10.md) |
 | U-20261029-47 | 2026-10-29 | Make the built-in walk and climb read as real steps at pet size | #done #pets #animation | [2026-10](2026-10.md) |
+| U-20261029-48 | 2026-10-29 | Show animated pets moving on the GPU path and walk MOCHI with generated step frames | #done #pets #animation #compositor | [2026-10](2026-10.md) |
+| U-20261029-49 | 2026-10-29 | Paint desktop pets through Qt so their frames change while they move | #done #pets #animation #compositor | [2026-10](2026-10.md) |
+| U-20261029-50 | 2026-10-29 | Stop pets jittering left and right on narrow window ledges | #done #pets #motion | [2026-10](2026-10.md) |
+| U-20261029-51 | 2026-10-29 | Generated walk and climb frames for the other five built-in characters | #done #pets #animation | [2026-10](2026-10.md) |
+| U-20261029-52 | 2026-10-29 | Clean stray specks and off-palette pink from the generated pet frames | #done #pets #animation | [2026-10](2026-10.md) |
+| U-20261029-53 | 2026-10-29 | Fix the PR #227 macOS install failure and SonarCloud findings | #done #pets #ci #quality | [2026-10](2026-10.md) |
+| U-20261030-01 | 2026-10-30 | Clean up listeners and widgets before the test process exits | #done #ci #tests | [2026-10](2026-10.md) |
+| U-20261030-02 | 2026-10-30 | Clear the release PR's SonarCloud gate | #done #ci #quality #macos | [2026-10](2026-10.md) |
+| U-20261030-03 | 2026-10-30 | Build the executable on every CPU core by default | #done #packaging #build | [2026-10](2026-10.md) |
+| U-20261030-04 | 2026-10-30 | Puppet pets stroll on their own | #done #pets #puppet #motion | [2026-10](2026-10.md) |
+| U-20261030-05 | 2026-10-30 | Start built-in characters from the Pet page as sprite pets | #done #pets #ui | [2026-10](2026-10.md) |
+| U-20261030-06 | 2026-10-30 | Pick each autonomous pet action at random from the whole action set | #done #pets #puppet #motion | [2026-10](2026-10.md) |
+| U-20261030-07 | 2026-10-30 | Name the random-actions mode in the menu and start summoned pets moving at once | #done #pets #ui #motion | [2026-10](2026-10.md) |
+| U-20261030-08 | 2026-10-30 | Accept the whole GUI on an isolated desktop | #done #ui #tests #native | [2026-10](2026-10.md) |
 | U-20261029-46 | 2026-10-29 | Keep pets aligned and sized across monitors with different scaling | #done #pets #monitors #native | [2026-10](2026-10.md) |
 | U-20261029-45 | 2026-10-29 | Accept pet toys, calls, strokes and Puppet reactions on the real screen, isolated | #done #pets #puppet #native | [2026-10](2026-10.md) |
 | U-20261029-44 | 2026-10-29 | End grooming with a stretch and limit repeated peer greetings | #done #pets #animation | [2026-10](2026-10.md) |
@@ -177,11 +176,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 | U-20261028-02 | 2026-10-28 | Add per-pet customization | #done #pets #ui | [2026-10](2026-10.md) |
 | U-20261028-01 | 2026-10-28 | Design pet interactions, wardrobe and high-contrast chibi style | #decision #pets #design | [2026-10](2026-10.md) |
 | U-20261022-02 | 2026-10-22 | Keep packaging checks and Qt test cleanup aligned | #bugfix #deps #ci | [2026-10](2026-10.md) |
-| U-20261022-01 | 2026-10-22 | Keep dependency metadata aligned | #bugfix #deps #ci | [2026-10](2026-10.md) |
 | U-20261018-01 | 2026-10-18 | Reorganize the workspace around common actions and compact inspectors | #done #ui #ux | [2026-10](2026-10.md) |
-| U-20261012-03 | 2026-10-12 | Verify native macOS capture with an owned window identifier | #done #ci #tests | [2026-10](2026-10.md) |
-| U-20261012-02 | 2026-10-12 | Isolate native unit-test frameworks and canonicalize Windows ACLs | #done #ci #tests | [2026-10](2026-10.md) |
-| U-20261012-01 | 2026-10-12 | Fix macOS CI platform assumptions and scene extraction roots | #done #ci #tests | [2026-10](2026-10.md) |
 | U-20261008-24 | 2026-10-08 | Complete delivery checks and verify the final compiled source | #done #ci #packaging | [2026-10](2026-10.md) |
 | U-20261008-23 | 2026-10-08 | Check the native Mac fixture before exiting its Qt event loop | #done #macos #ci | [2026-10](2026-10.md) |
 | U-20261008-22 | 2026-10-08 | Resolve owned Mac windows without depending on Quartz titles | #done #macos #ci | [2026-10](2026-10.md) |
@@ -230,6 +225,10 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 | U-20261007-03 | 2026-10-07 | Persist Workshop publication IDs and recover interrupted uploads | #done #workshop | [2026-10](2026-10.md) |
 | U-20261007-02 | 2026-10-07 | Add native Steam runtime and validate SDK callback ABI | #done #steam #workshop | [2026-10](2026-10.md) |
 | U-20261007-01 | 2026-10-07 | Validate Workshop publication snapshots and preset archives | #done #workshop #security | [2026-10](2026-10.md) |
+| U-20261022-01 | 2026-10-22 | Keep dependency metadata aligned | #bugfix #deps #ci | [2026-10](2026-10.md) |
+| U-20261012-03 | 2026-10-12 | Verify native macOS capture with an owned window identifier | #done #ci #tests | [2026-10](2026-10.md) |
+| U-20261012-02 | 2026-10-12 | Isolate native unit-test frameworks and canonicalize Windows ACLs | #done #ci #tests | [2026-10](2026-10.md) |
+| U-20261012-01 | 2026-10-12 | Fix macOS CI platform assumptions and scene extraction roots | #done #ci #tests | [2026-10](2026-10.md) |
 | U-20261003-02 | 2026-10-03 | Track selected Steam SDK examples and application configuration | #steam #configuration | [2026-10](2026-10.md) |
 | U-20261003-01 | 2026-10-03 | Add streaming capture and platform interoperability | #done #interop | [2026-10](2026-10.md) |
 | U-20261001-04 | 2026-10-01 | Release job builds with the locked setuptools | #done #ci #security #X-13 | [2026-10](2026-10.md) |
