@@ -1,12 +1,13 @@
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
-    QLabel, QMessageBox, QSlider, QLineEdit, QPushButton, QCheckBox,
+    QLabel, QSlider, QLineEdit, QPushButton, QCheckBox,
     QComboBox, QPlainTextEdit,
 )
 
 from frontengine.show.web.webview import WebWidget
 from frontengine.ui.page.utils import (
     apply_checkbox_state,
+    ask_for_input,
     apply_combobox_text_state,
     apply_slider_state,
     build_target_monitor_combobox,
@@ -47,6 +48,7 @@ class WEBSettingUI(SettingPage):
 
         # WEB URL input
         self.web_url_input = QLineEdit()
+        self.web_url_input.returnPressed.connect(lambda: self.start_open_web_with_url())   # paste, Enter, open
 
         # Start url button
         self.start_button = tr(QPushButton(), "web_setting_open_url")
@@ -287,9 +289,7 @@ class WEBSettingUI(SettingPage):
             # An empty URL opens a blank fullscreen click-through page: invisible,
             # unclickable, and only closable from the control center. Every other
             # page stops first; this one should too.
-            message_box = QMessageBox(self)
-            message_box.setText(language_wrapper.language_word_dict.get("not_prepare"))
-            message_box.exec()
+            ask_for_input(self.web_url_input)        # no dialog to dismiss: the field asks for the address
             return
 
         def present_on_monitor(widget: WebWidget, monitor, _idx: int) -> None:

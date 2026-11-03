@@ -34,7 +34,7 @@ def page(tmp_path):
     widget = PetHomePage(service)
     widget.clock = clock
     widget.create_home()                      # the starter kit is set out by itself
-    widget.residents.new_pet()
+    # creating a home with no pets brings a first one
     yield widget
     widget.shutdown()
     widget.deleteLater()

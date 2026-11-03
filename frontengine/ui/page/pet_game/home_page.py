@@ -517,11 +517,18 @@ class PetHomePage(SettingPage):
             self.report_text(str(error))
             return
         moved = self.move_in_newcomers()
+        first = None
+        if not self.service.world.residents and not self.newcomers.count():
+            # Nobody to move in yet: a first pet comes along, so the home is never empty to start with.
+            first = self.profiles.create()["id"]
+            moved = int(self.service.adopt(first) == "accepted")
         if moved:
             self.report_text(translate("pet_home_moved_in", "{count} pets moved in.").format(count=moved))
         self._set_running(True)
         self.sync_strip()
         self.refresh()
+        if first is not None and first in self.service.world.residents:
+            self.select_resident(first)
 
     def chosen_newcomers(self) -> list[str]:
         return [self.newcomers.item(i).data(Qt.ItemDataRole.UserRole) for i in range(self.newcomers.count())

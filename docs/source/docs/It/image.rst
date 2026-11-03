@@ -16,7 +16,7 @@ Pagina Immagine
     * Casuale - ordine mescolato.
     * Includi le sottocartelle.
 
-* Schermo di destinazione - quale schermo usare, o chiedere ogni volta.
+* Schermo di destinazione - quale schermo usare; per impostazione predefinita quello di FrontEngine, senza chiedere.
 * Recenti - le immagini già mostrate.
 * Apri tavola di riferimento… - scegliere più immagini insieme e disporle su
   un'unica superficie sopra la scrivania. Trascina ciascuna per disporla, lo sfondo

@@ -2,7 +2,7 @@ from typing import Optional
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QGuiApplication, QPixmap
-from PySide6.QtWidgets import QSlider, QLabel, QPushButton, QMessageBox, QCheckBox, QComboBox
+from PySide6.QtWidgets import QSlider, QLabel, QPushButton, QCheckBox, QComboBox
 
 from frontengine.show.particle.particle_ui import ParticleOpenGLWidget
 from frontengine.ui.dialog.choose_file_dialog import choose_image
@@ -146,10 +146,9 @@ class ParticleSettingUI(SettingPage):
     def start_play_particle(self) -> None:
         front_engine_logger.info("[ParticleSettingUI] start_play_particle")
         if not self.image_path or not self.ready_to_play:
-            message_box = QMessageBox(self)
-            message_box.setText(language_wrapper.language_word_dict.get("not_prepare"))
-            message_box.exec()
-            return
+            self.choose_and_copy_file_to_cwd_image_dir_then_play()  # nothing chosen yet: choose now, then go on
+            if not self.image_path or not self.ready_to_play:
+                return
 
         span = resolve_span(self.target_monitor_combobox)
 

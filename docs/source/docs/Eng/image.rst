@@ -16,7 +16,7 @@ Image Page
     * Shuffle - random order.
     * Include subfolders - look inside nested folders too.
 
-* Target monitor - which screen to use, or ask each time.
+* Target monitor - which screen to use; by default the one FrontEngine is on, without asking.
 * Recent - images you showed before.
 * Open reference board... - pick several pictures at once and spread them on one
   canvas over the desktop. Drag each picture to arrange it, drag the background to

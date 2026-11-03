@@ -277,6 +277,8 @@ russian_word_dict = {
     "preset_no_presets": "Пресеты пока не сохранены.",
     "target_monitor_label": "Целевой экран",
     "target_monitor_ask": "Спрашивать",
+    "target_monitor_here": "Этот экран (где открыт FrontEngine)",
+    "fill_this_in": "Сначала заполните это поле",
     "settings_menu_preset_schedule": "Пресет по расписанию...",
     "preset_schedule_title": "Пресет по расписанию",
     "preset_schedule_enable": "Применять пресет по расписанию",

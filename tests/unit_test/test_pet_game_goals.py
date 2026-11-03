@@ -186,7 +186,7 @@ def test_the_goals_panel_claims_and_saves_a_game_only_photo(tmp_path, monkeypatc
     page = PetHomePage(service)
     try:
         page.create_home()
-        page.residents.new_pet()
+        # creating a home with no pets brings a first one
         page.refresh()
         panel = page.goals
         assert panel.level.text() == "Home level 1"

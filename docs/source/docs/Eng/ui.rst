@@ -28,8 +28,8 @@ everywhere:
 
 * **Opacity** - how much of the desktop shows through. Overlays default to
   fairly translucent so they sit over your work rather than hide it.
-* **Target monitor** - which screen to use. Set it to *Ask* and you are asked
-  each time instead.
+* **Target monitor** - which screen to use. *This screen* (the default) is the one
+  FrontEngine's window is on, so starting never stops to ask.
 
   With more than one screen there is also **Span all screens**, which puts a
   single overlay across the whole desktop rather than one on each.
@@ -37,6 +37,8 @@ everywhere:
 * **Show on all window bottom** - drop the overlay beneath your windows, so it
   behaves like a backdrop instead of something in front.
 * **Recent** - files you used before, to save finding them again.
+
+Choosing a file shows it at once, so does dropping one onto the page, and *Start* without a file opens the chooser; an empty text or address field is pointed at instead of a warning dialog, and Enter in it starts.
 
 Overlays do not get in the way
 ==============================

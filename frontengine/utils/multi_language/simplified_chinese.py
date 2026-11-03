@@ -277,6 +277,8 @@ simplified_chinese_word_dict = {
     "preset_no_presets": "还没有储存任何预设。",
     "target_monitor_label": "目标萤幕",
     "target_monitor_ask": "每次询问",
+    "target_monitor_here": "这个屏幕（FrontEngine 所在的屏幕）",
+    "fill_this_in": "请先填这里",
     "settings_menu_preset_schedule": "排程预设⋯",
     "preset_schedule_title": "排程预设",
     "preset_schedule_enable": "按计划自动套用预设",

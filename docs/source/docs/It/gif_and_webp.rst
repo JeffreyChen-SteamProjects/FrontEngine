@@ -10,5 +10,5 @@ Pagina GIF e WebP
 * Schermo intero - allargare a tutto lo schermo.
 * Mostra su tutti gli schermi - una copia per monitor.
 * Mostra sotto tutte le finestre - collocarla sotto le altre finestre.
-* Schermo di destinazione - quale schermo usare, o chiedere ogni volta.
+* Schermo di destinazione - quale schermo usare; per impostazione predefinita quello di FrontEngine, senza chiedere.
 * Recenti - le animazioni già mostrate.

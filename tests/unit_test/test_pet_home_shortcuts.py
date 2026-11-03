@@ -11,6 +11,7 @@ from frontengine.ui.page.pet_game.home_pending import MAX_PENDING, pending
 from frontengine.user_setting.pet_game_save import HomeSaveStore
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.utils.pet_game.catalog import builtin_catalog
+from frontengine.utils.pet_game.world import World
 
 
 @pytest.fixture(autouse=True)
@@ -34,9 +35,11 @@ def page(tmp_path):
 def test_waiting_list_names_what_the_home_cannot_settle(page):
     page.create_home()
     world = page.service.world
-    texts = [text for text, _key in pending(world)]
-    assert any("pet" in text.lower() for text in texts)                       # move a pet in
-    page.residents.new_pet()
+    assert len(world.residents) == 1                                          # a first pet came along
+    assert not any("move a pet" in text.lower() for text, _key in pending(world))
+    empty = World(builtin_catalog(), "c" * 32, seed=1)
+    empty.add_zone("s", 0, 0, 20)
+    assert any("pet" in text.lower() for text, _key in pending(empty))        # an empty home asks for one
     world.ledger.apply("gift", "test", 500)
     world.buy("armchair", "t1")                                               # left in storage
     keys = [key for _text, key in pending(world, unread=3)]

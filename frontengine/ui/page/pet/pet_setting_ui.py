@@ -626,9 +626,7 @@ class PetSettingUI(SettingPage):
     def start_play_pet(self) -> None:
         front_engine_logger.info("[PetSettingUI] start_play_pet")
         if not self.pet_image_path or not self.ready_to_play:
-            message_box = QMessageBox(self)
-            message_box.setText(language_wrapper.language_word_dict.get("not_prepare"))
-            message_box.exec()
+            self.choose_and_play()  # nothing chosen yet: choosing one shows it
             return
         self._spawn_pet()
 
@@ -642,6 +640,7 @@ class PetSettingUI(SettingPage):
             self.ready_to_play = True
             add_recent_file("pet", self.pet_image_path)
             reload_recent_combobox(self.recent_files_combobox, "pet")
+            self.start_play_pet()  # chosen means shown: no second click
 
     def choose_sound(self) -> None:
         """選擇點擊時播放的音效（選填）/ Choose an optional click sound."""
@@ -712,6 +711,7 @@ class PetSettingUI(SettingPage):
         self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
         add_recent_file("pet", path)
         reload_recent_combobox(self.recent_files_combobox, "pet")
+        self.start_play_pet()  # a dropped file is shown at once
 
     def _audio_provider(self, geometry):
         """

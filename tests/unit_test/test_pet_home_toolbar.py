@@ -28,7 +28,7 @@ def page(tmp_path):
     service = HomeService(None, HomeSaveStore(tmp_path, CATALOG), PetProfiles({}, lambda: None))
     widget = PetHomePage(service)
     widget.create_home()
-    widget.residents.new_pet()
+    # creating a home with no pets brings a first one
     yield widget
     widget.shutdown()
     widget.deleteLater()

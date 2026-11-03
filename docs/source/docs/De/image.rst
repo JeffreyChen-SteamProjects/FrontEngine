@@ -16,7 +16,7 @@ Bild-Seite
     * Zufällig - gemischte Reihenfolge.
     * Unterordner einbeziehen.
 
-* Zielbildschirm - welcher Bildschirm, oder jedes Mal nachfragen.
+* Zielbildschirm - welcher Bildschirm; ohne Nachfrage standardmäßig der, auf dem FrontEngine ist.
 * Zuletzt verwendet - vorher gezeigte Bilder.
 * Referenztafel öffnen… - mehrere Bilder auf einmal wählen und auf einer Fläche
   über dem Schreibtisch ausbreiten. Einzelne ziehen zum Anordnen, den Hintergrund
