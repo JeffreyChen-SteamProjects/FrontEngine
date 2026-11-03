@@ -36,7 +36,7 @@ FrontEngine はデスクトップ用のオーバーレイアプリです。動�
 
 ## インストール
 
-Python **3.10+**。主な対象は Windows 10/11 です。macOS と Linux でもアプリは
+Python **3.11+**。主な対象は Windows 10/11 です。macOS と Linux でもアプリは
 動きますが、プラットフォームごとの違いは [プラットフォーム対応](#プラットフォーム対応)
 に一覧があります。
 
@@ -493,7 +493,7 @@ feat/xyz  ──PR──►  dev  ──PR──►  main
 
 | Workflow | Trigger | Purpose |
 | --- | --- | --- |
-| `CI` (`ci.yml`) | `main` または `dev` へのプッシュ / PR、手動ディスパッチ、または `Nightly` からの呼び出し | コンパイルし、ユニットテストを実行し、その後*そのチェックアウト*から wheel をビルドし、インストールしてアプリを起動 — Python 3.10 / 3.11 / 3.12、Windows で |
+| `CI` (`ci.yml`) | `main` または `dev` へのプッシュ / PR、手動ディスパッチ、または `Nightly` からの呼び出し | コンパイルし、ユニットテストを実行し、その後*そのチェックアウト*から wheel をビルドし、インストールしてアプリを起動 — Python 3.11 / 3.12、Windows で |
 | `Nightly` (`nightly.yml`) | 毎日の cron、手動ディスパッチ | `CI` を呼び出します。スケジュールがここにあるのは意図的です。GitHub は cron を含むワークフローを約 60 日間の非アクティブののちに無効化するため、そうでなければ PR チェックも道連れになってしまうからです |
 | `Release` (`release.yml`) | **`dev` からの**プルリクエストが `main` にマージされる、または手動ディスパッチ | バージョンを上げ、`[skip ci]` を付けてコミットバックし、`stable.toml` → `pyproject.toml` を入れ替え、sdist + wheel をビルドし、`frontengine` として PyPI にアップロードし、`v<version>` のタグを付けた GitHub リリースを作成し、`dev` を早送りします |
 

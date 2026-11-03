@@ -35,7 +35,7 @@ FrontEngine 是一款桌面覆蓋層應用程式。影片、圖片、GIF、網�
 
 ## 安裝
 
-需要 Python **3.10+**。主要支援平台是 Windows 10/11；macOS 與 Linux 也能
+需要 Python **3.11+**。主要支援平台是 Windows 10/11；macOS 與 Linux 也能
 執行這款應用程式，各平台的差異列在 [平台支援](#平台支援) 一節。
 
 ```bash
@@ -457,7 +457,7 @@ feat/xyz  ──PR──►  dev  ──PR──►  main
 
 | 工作流程 | 觸發 | 用途 |
 | --- | --- | --- |
-| `CI`(`ci.yml`) | 推送／PR 到 `main` 或 `dev`、手動派發,或由 `Nightly` 呼叫 | 編譯、跑單元測試,接著從*那次 checkout* 建置一個 wheel、安裝它並啟動應用程式——在 Python 3.10 / 3.11 / 3.12、Windows 上 |
+| `CI`(`ci.yml`) | 推送／PR 到 `main` 或 `dev`、手動派發,或由 `Nightly` 呼叫 | 編譯、跑單元測試,接著從*那次 checkout* 建置一個 wheel、安裝它並啟動應用程式——在 Python 3.11 / 3.12、Windows 上 |
 | `Nightly`(`nightly.yml`) | 每日 cron、手動派發 | 呼叫 `CI`。排程刻意放在這裡:GitHub 會在含有 cron 的工作流程閒置約 60 天後停用它,否則那會連帶把 PR 檢查一起弄掉 |
 | `Release`(`release.yml`) | 一個**來自 `dev`**的 pull request 被併入 `main`,或手動派發 | 提升版本號、帶著 `[skip ci]` 把它 commit 回去、把 `stable.toml` → `pyproject.toml` 對調、建置 sdist + wheel、以 `frontengine` 之名上傳到 PyPI、建立一個標記為 `v<version>` 的 GitHub release,並快轉 `dev` |
 

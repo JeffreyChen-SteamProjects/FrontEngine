@@ -152,8 +152,7 @@ _BUILD = re.compile(r"(?:python3? -m build|pyproject-build)\b.*")
 _METADATA = ["pyproject.toml", "stable.toml"]
 _BUILD_REQUIRES = re.compile(r"^\[build-system\]\n(?:[^\[\n].*\n|\n)*?requires\s*=\s*\[((?:.|\n)*?)\]\s*$",
                              re.MULTILINE)
-# The job runs Python 3.12. tomllib is in its standard library but not in that
-# of Python 3.10, which also runs this suite.
+# The job runs Python 3.12, whose standard library has tomllib.
 _JOB_STDLIB = set(sys.stdlib_module_names) | {"tomllib"}
 
 
