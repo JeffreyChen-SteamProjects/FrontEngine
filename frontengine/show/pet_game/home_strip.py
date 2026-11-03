@@ -32,7 +32,11 @@ from frontengine.user_setting.user_setting_file import user_setting_dict
 from frontengine.utils.pet_game.world import COMMANDS, INTERACTIONS
 from frontengine.utils.power_mode.power_mode import normalize_tier
 
-STRIP_HEIGHT = 150
+STRIP_HEIGHT = 150                    # at 100 %
+SCALES = (75, 100, 125, 150, 200)     # strip sizes in percent; furniture, pets and height all follow
+DEFAULT_SCALE = 100
+FOLLOW_MARGIN = 0.25                  # scroll once the followed spot leaves the middle half of the screen
+SCROLL_EASE = 0.25                    # share of the remaining distance scrolled per frame
 BUBBLE_SECONDS = 3.0
 FRAME_MS = {"high": 16, "balanced": 33, "saver": 66}
 DRAG_START_PX = 6
@@ -66,6 +70,7 @@ class HomeStrip(HomeView):
     action_requested = Signal(str, str)    # (action, pet or piece): wardrobe, work, follow, move, tab, arrange
     layer_requested = Signal(str)
     mode_requested = Signal(str)
+    scale_requested = Signal(int)          # a size in percent chosen on the strip (Ctrl+wheel or the ⌂ menu)
     quiet = False                          # focus mode: no bubbles and no cards
     closed = Signal()                      # at close time, before the deferred delete
     arrange_finished = Signal()            # the strip's own way out of arranging (it takes no keys)
@@ -90,6 +95,8 @@ class HomeStrip(HomeView):
         self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.setAcceptDrops(True)
         self.setWindowTitle(translate("tab_pet_home_text", "Pet home"))
+        self.scale = DEFAULT_SCALE / 100
+        self._scroll_goal = 0.0
         self.setFixedHeight(STRIP_HEIGHT)
         self.chosen: str | None = None        # the pet last clicked here, shown in the toolbar
         self._menu_x_milli = 0                # where the last right-click was, for "Come here"
@@ -101,6 +108,7 @@ class HomeStrip(HomeView):
         self.frame_timer = QTimer(self)
         self.frame_timer.timeout.connect(self.update)
         self.frame_timer.timeout.connect(self._weather_frame)
+        self.frame_timer.timeout.connect(self._ease_scroll)
         self.set_quality_tier(tier)
         self.bubbles: dict[str, tuple[str, float]] = {}     # resident -> (text, shown until)
         service.ticked.connect(self._stepped)
@@ -119,14 +127,76 @@ class HomeStrip(HomeView):
         return QGuiApplication.primaryScreen()
 
     def place_on_screen(self) -> None:
-        """Sit on the bottom edge of the zone's screen work area, above the taskbar."""
+        """Sit on the bottom edge of the zone's screen work area, above the taskbar, at the chosen size.
+
+        A home larger than the screen at this size keeps its window on the screen and scrolls
+        its content instead (see ``_scroll_target``), so it never spills onto another monitor.
+        """
         area = self.screen_for_zone().availableGeometry()
-        width = min(area.width(), self.world.zones[self.zone].width_pixels + 2)
-        self.setFixedWidth(width)
-        self.move(area.left(), area.bottom() - STRIP_HEIGHT + 1)
+        height = round(STRIP_HEIGHT * self.scale)
+        self.setFixedSize(min(area.width(), self.content_width() + 2), height)
+        self.move(area.left(), area.bottom() - height + 1)
+        self.scroll_x = self._scroll_goal = min(self.scroll_x, self.max_scroll())
 
     def cell_width(self) -> float:
-        return float(CELL_PIXELS)        # on the desktop one cell is exactly one grid cell
+        return CELL_PIXELS * self.scale        # at 100 % one cell is exactly one grid cell
+
+    def content_width(self) -> int:
+        return round(self.world.zones[self.zone].width_pixels * self.scale) if self.world else 0
+
+    def max_scroll(self) -> float:
+        return float(max(0, self.content_width() + 2 - self.width()))
+
+    def set_scale(self, percent: int) -> None:
+        """Bigger or smaller furniture, pets and strip; the world and its layout do not change."""
+        if percent not in SCALES or round(self.scale * 100) == percent:
+            return
+        self.scale = percent / 100
+        self.place_on_screen()
+        self._scroll_goal = self._scroll_target()
+        self.scroll_x = self._scroll_goal
+        self.place_toolbar()
+        self.update_mask()
+        self.update()
+
+    def _scroll_target(self) -> float:
+        """Keep the pet last clicked (else the pets' middle) in the middle half of the screen."""
+        limit = self.max_scroll()
+        world = self.service.world
+        if limit <= 0 or world is None:
+            return 0.0
+        pets = [r for r in world.residents.values() if r.zone == self.zone]
+        followed = [r for r in pets if r.identifier == self.chosen] or pets
+        if not followed:
+            return self._scroll_goal
+        middle = sum(self.resident_x_milli(r) for r in followed) / len(followed) / 1000 / CELL_PIXELS
+        x = middle * self.cell_width() - self._scroll_goal          # where it would be drawn now
+        if self.width() * FOLLOW_MARGIN <= x <= self.width() * (1 - FOLLOW_MARGIN):
+            return self._scroll_goal
+        return max(0.0, min(limit, middle * self.cell_width() - self.width() / 2))
+
+    def _ease_scroll(self) -> None:
+        """Glide toward the scroll goal a little each frame; the input mask moves with the content."""
+        distance = self._scroll_goal - self.scroll_x
+        if abs(distance) < 0.5:
+            if distance:
+                self.scroll_x = self._scroll_goal
+                self.update_mask()
+            return
+        self.scroll_x += distance if self.reduced_motion else distance * SCROLL_EASE
+        self.update_mask()
+
+    def wheelEvent(self, event) -> None:
+        """Ctrl+wheel over a pet, a piece or ⌂ makes the strip bigger or smaller."""
+        if not event.modifiers() & Qt.KeyboardModifier.ControlModifier:
+            event.ignore()
+            return
+        current = SCALES.index(min(SCALES, key=lambda value: abs(value - self.scale * 100)))
+        step = 1 if event.angleDelta().y() > 0 else -1
+        target = SCALES[max(0, min(len(SCALES) - 1, current + step))]
+        if target != round(self.scale * 100):
+            self.scale_requested.emit(target)
+        event.accept()
 
     def set_layer(self, layer: str) -> None:
         """Above every window (default) or below them, like a wallpaper."""
@@ -157,6 +227,7 @@ class HomeStrip(HomeView):
             self.button.setText(text)
             self.place_toolbar()              # the glyph widens the button; never elide it
         self.refresh_info()
+        self._scroll_goal = self._scroll_target()
         self.update_mask()
         self.weather_layer.sync()
 
@@ -277,10 +348,10 @@ class HomeStrip(HomeView):
         zone, width = self.world.zones[self.zone], self.cell_width()
         floor = self._floor_y()
         for cell in range(zone.width_cells + 1):
-            painter.drawLine(QPointF(cell * width, floor - 6), QPointF(cell * width, floor))
+            painter.drawLine(QPointF(self.cell_x(cell), floor - 6), QPointF(self.cell_x(cell), floor))
         for cell in zone.restricted:
-            painter.fillRect(QRectF(cell * width, floor - 6, width, 6), QColor(200, 70, 70, 160))
-        painter.drawRect(QRectF(zone.entrance * width, floor - width * 2, width, width * 2))
+            painter.fillRect(QRectF(self.cell_x(cell), floor - 6, width, 6), QColor(200, 70, 70, 160))
+        painter.drawRect(QRectF(self.cell_x(zone.entrance), floor - width * 2, width, width * 2))
 
     def _floor_y(self) -> float:
         """Furniture stands on the bottom edge of the work area, right on the taskbar."""
@@ -414,6 +485,11 @@ class HomeStrip(HomeView):
         other_dock = "right" if self.dock == "left" else "left"
         menu.addAction(translate("pet_home_dock_" + other_dock, "Move the toolbar to the " + other_dock),
                        lambda: self.set_dock(other_dock))
+        sizes = menu.addMenu(translate("pet_home_strip_size", "Size"))
+        for percent in SCALES:
+            action = sizes.addAction(f"{percent}%", lambda p=percent: self.scale_requested.emit(p))
+            action.setCheckable(True)
+            action.setChecked(round(self.scale * 100) == percent)
         modes = menu.addMenu(translate("pet_home_mode", "Mode"))
         for mode in HOME_MODES:
             modes.addAction(translate("pet_home_mode_" + mode, mode), lambda m=mode: self.mode_requested.emit(m))
@@ -440,12 +516,12 @@ class HomeStrip(HomeView):
         point = event.position()
         resident = self._resident_at(point)
         if event.button() == Qt.MouseButton.RightButton:
-            self._menu_x_milli = int(point.x() / self.cell_width() * CELL_PIXELS * 1000)
+            self._menu_x_milli = int(self.x_cell(point.x()) * CELL_PIXELS * 1000)
             self._context_menu(resident, self._piece_at(point), event.globalPosition().toPoint())
         elif event.button() == Qt.MouseButton.LeftButton and resident is not None:
             self._press = (resident, point)
         elif event.button() == Qt.MouseButton.LeftButton and self.arranging:
-            self.cell_clicked.emit(int(point.x() // self.cell_width()))
+            self.cell_clicked.emit(int(self.x_cell(point.x())))
 
     def mouseMoveEvent(self, event: QMouseEvent) -> None:
         if self._press is None:
@@ -456,7 +532,7 @@ class HomeStrip(HomeView):
                 return
             self.service.run(lambda world: world.drag(identifier, None))
             self.setMask(QRegion(self.rect()))      # keep receiving the drag everywhere
-        self._dragging = (identifier, event.position().x() / self.cell_width() * CELL_PIXELS * 1000)
+        self._dragging = (identifier, self.x_cell(event.position().x()) * CELL_PIXELS * 1000)
         self.update()
 
     def mouseReleaseEvent(self, event: QMouseEvent) -> None:
@@ -475,6 +551,14 @@ class HomeStrip(HomeView):
         self.refresh_info()
         self.resident_selected.emit(identifier)
         self.show_card(identifier, event.globalPosition().toPoint())
+
+    def mouseDoubleClickEvent(self, event: QMouseEvent) -> None:
+        """Double-clicking a pet pats it: the most common care without opening a menu."""
+        resident = self._resident_at(event.position()) if self.service.world is not None else None
+        if event.button() == Qt.MouseButton.LeftButton and resident is not None:
+            self._press = None
+            self._interact(resident, "pat")
+            event.accept()
 
     @staticmethod
     def _dropped_files(mime) -> bool:
@@ -505,7 +589,8 @@ class HomeStrip(HomeView):
         resident = self.service.world.residents.get(identifier)
         if resident is None or self.quiet:
             return
-        QToolTip.showText(where, card_text(resident, self.service.world), self, QRect(), 6000)
+        hint = translate("pet_home_card_hint", "Double-click to pat · right-click for more")
+        QToolTip.showText(where, card_text(resident, self.service.world) + "\n" + hint, self, QRect(), 6000)
 
     def _context_menu(self, resident: str | None, piece: str | None, where: QPoint) -> None:
         menu = QMenu(self)

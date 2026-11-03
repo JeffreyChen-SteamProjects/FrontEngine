@@ -18,7 +18,9 @@ from PySide6.QtWidgets import (QCheckBox, QComboBox, QFrame, QHBoxLayout, QLabel
 
 from frontengine.show.pet_game.ambience import DEFAULT_VOLUME, Ambience
 from frontengine.show.pet_game.home_service import HomeService
-from frontengine.show.pet_game.home_strip import HIDDEN_REASON, HOME_MODES, LAYERS, LOCKED_REASON, HomeStrip
+from frontengine.show.pet_game.home_strip import (
+    DEFAULT_SCALE, HIDDEN_REASON, HOME_MODES, LAYERS, LOCKED_REASON, SCALES, HomeStrip,
+)
 from frontengine.show.pet_game.home_view import HomeView
 from frontengine.show.pet_game.resident_art import ResidentArt
 from frontengine.show.pet_game.themes import glyph
@@ -54,6 +56,7 @@ RUNNING_KEY = "pet_home_running"
 DESKTOP_KEY = "pet_home_on_desktop"
 INTRO_KEY = "pet_home_intro_seen"
 MOTION_KEY = "pet_home_reduced_motion"
+SCALE_KEY = "pet_home_strip_scale"           # desktop strip size in percent (SCALES)
 AMBIENT_KEY = "pet_home_ambient"             # ambient sound on (off by default)
 AMBIENT_VOLUME_KEY = "pet_home_ambient_volume"   # 0-100, its own volume
 MODE_KEY = "pet_home_mode"
@@ -379,6 +382,16 @@ class PetHomePage(SettingPage):
         self.motion_check.setChecked(user_setting_dict.get(MOTION_KEY) is True)
         self.motion_check.toggled.connect(self._motion_toggled)
         section.add_widget(self.motion_check)
+        self.scale_combo = QComboBox()
+        for percent in SCALES:
+            self.scale_combo.addItem(f"{percent}%", percent)
+        self.scale_combo.setCurrentIndex(SCALES.index(self.strip_scale))
+        self.scale_combo.activated.connect(lambda _index: self.set_strip_scale(self.scale_combo.currentData()))
+        section.add_row("pet_home_strip_size_setting", self.scale_combo, "Size on the desktop")
+        hint = tr(QLabel(), "pet_home_strip_size_hint",
+                  "Ctrl + mouse wheel over a pet or piece on the desktop also changes it.")
+        hint.setWordWrap(True)
+        section.add_widget(hint)
         self._build_ambience_settings(section)
         where = tr(QLabel(), "pet_home_settings_strip_hint",
                    "Mode and layer are on the desktop strip's ⌂ menu; meeting mode turns on by itself while "
@@ -607,6 +620,8 @@ class PetHomePage(SettingPage):
             strip.reduced_motion = self.motion_check.isChecked()
             strip.art = self.art
             strip.mode_requested.connect(self.set_mode)
+            strip.scale_requested.connect(self.set_strip_scale)
+            strip.set_scale(self.strip_scale)
             strip.show()
         if zones:
             self.apply_mode()
@@ -659,6 +674,20 @@ class PetHomePage(SettingPage):
         """Screen sharing puts the home into meeting mode for as long as it lasts."""
         self._effective_mode = "meeting" if sharing else None
         self.apply_mode()
+
+    @property
+    def strip_scale(self) -> int:
+        value = user_setting_dict.get(SCALE_KEY, DEFAULT_SCALE)
+        return value if value in SCALES else DEFAULT_SCALE
+
+    def set_strip_scale(self, percent: int) -> None:
+        """Bigger or smaller desktop home, remembered; every strip follows at once."""
+        if percent not in SCALES:
+            return
+        user_setting_dict[SCALE_KEY] = percent
+        self.scale_combo.setCurrentIndex(SCALES.index(percent))
+        for strip in self.strip_list:
+            strip.set_scale(percent)
 
     def _motion_toggled(self, checked: bool) -> None:
         user_setting_dict[MOTION_KEY] = checked

@@ -88,6 +88,30 @@ def rain(strip, world, points, behind_hwnd) -> dict:
             'rain_foreground_unchanged': int(user32.GetForegroundWindow() or 0) == foreground}
 
 
+def larger(page, strip, behind_hwnd) -> dict:
+    """At 200 % the home is wider than the screen: it stays on its screen, scrolls to the pet,
+    and the pet still takes clicks while the empty strip still passes them through."""
+    world = strip.service.world
+    pet = next(iter(world.residents.values()))
+    page.set_strip_scale(200)
+    strip.chosen = pet.identifier
+    strip._stepped()
+    wait(1500)
+    area = strip.screen_for_zone().availableGeometry()
+    box = strip.resident_box(pet)
+    empty = QPoint(strip.width() - 12, strip.height() - 30)
+    on_item = strip._resident_at(empty) is not None or strip._piece_at(empty) is not None
+    result = {'large_size': [strip.width(), strip.height()], 'large_scroll': strip.scroll_x,
+              'large_on_screen': area.contains(strip.geometry()),
+              'large_pet_takes_input': owner(strip, box.center().toPoint()) == int(strip.winId()),
+              # the corner may hold a piece at this size; only an empty spot must pass through
+              'large_empty_passes_through': on_item or owner(strip, empty) == behind_hwnd}
+    strip.grab().save(str(OUTPUT / 'strip-200.png'))
+    page.set_strip_scale(100)
+    wait(400)
+    return result
+
+
 def run() -> dict:
     from frontengine.show.pet_game.home_service import HomeService
     from frontengine.ui.page.pet_game.home_page import PetHomePage
@@ -131,6 +155,7 @@ def run() -> dict:
         'topmost_when_top': topmost(strip),
     }
     result.update(rain(strip, world, points, behind_hwnd))
+    result.update(larger(page, strip, behind_hwnd))
     page.choose_layer('bottom')
     wait(400)
     result['topmost_when_bottom'] = topmost(strip)
@@ -150,7 +175,8 @@ def run() -> dict:
                         and not result['topmost_when_bottom'] and result['arranging_takes_empty']
                         and result['after_arranging_passes_through'] and result['rain_shown']
                         and result['rain_empty_passes_through'] and result['rain_items_take_input']
-                        and result['rain_foreground_unchanged'])
+                        and result['rain_foreground_unchanged'] and result['large_on_screen']
+                        and result['large_pet_takes_input'] and result['large_empty_passes_through'])
     return result
 
 
