@@ -36,8 +36,10 @@ desktop widgets.
 
 ## Install
 
-Python **3.11+**. Windows 10/11 is the primary target; macOS and Linux run the
+Python 3.11+ is supported, except 3.14.0 through 3.14.4. For Python 3.14, use 3.14.5 or later. Windows 10/11 is the primary target; macOS and Linux run the
 app, with the platform differences listed under [Platform support](#platform-support).
+
+A native Qt crash was reproduced on Windows with Python 3.14.4; earlier 3.14 patches are excluded as a precaution. Recreate existing virtual environments with a compatible interpreter, and use that interpreter for source runs. EXEs that embed an excluded version need a rebuild with a compatible interpreter. Updating the FrontEngine package does not upgrade Python.
 
 ```bash
 pip install frontengine

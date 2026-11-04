@@ -3,6 +3,12 @@ How to use
 
 .. image:: ../image/main/FrontEngine.png
 
+.. note::
+
+    Python 3.11+ is supported, except 3.14.0 through 3.14.4. For Python 3.14, use 3.14.5 or later.
+
+    A native Qt crash was reproduced on Windows with Python 3.14.4; earlier 3.14 patches are excluded as a precaution. Recreate existing virtual environments with a compatible interpreter, and use that interpreter for source runs. EXEs that embed an excluded version need a rebuild with a compatible interpreter. Updating the FrontEngine package does not upgrade Python.
+
 FrontEngine puts things on top of your screen - a video, an image, a web page,
 some text, a desktop pet - and keeps them there while you carry on working.
 Each of those is called an overlay. You can run as many as you like at once,

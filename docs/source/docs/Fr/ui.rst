@@ -3,6 +3,12 @@ Comment l'utiliser
 
 .. image:: ../image/main/FrontEngine.png
 
+.. note::
+
+    Python 3.11 et les versions ultérieures sont pris en charge, sauf 3.14.0 à 3.14.4. Pour Python 3.14, utilisez 3.14.5 ou une version ultérieure.
+
+    Un plantage natif de Qt a été reproduit sous Windows avec Python 3.14.4 ; les correctifs antérieurs de 3.14 sont exclus par précaution. Recréez les environnements virtuels existants avec un interpréteur compatible et utilisez-le aussi pour exécuter le code source. Les EXE qui intègrent une version exclue doivent être reconstruits avec un interpréteur compatible. Mettre à jour le paquet FrontEngine ne met pas Python à jour.
+
 FrontEngine place des choses par-dessus votre écran - une vidéo, une image, une
 page web, du texte, une mascotte - et les y garde pendant que vous continuez à
 travailler. Chacune s'appelle un calque. Vous pouvez en faire tourner autant que

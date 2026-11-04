@@ -35,8 +35,10 @@ annotation de présentation, mesure et capture, masques de concentration et widg
 
 ## Installation
 
-Python **3.11+**. Windows 10/11 est la cible principale ; macOS et Linux exécutent
+Python 3.11 et les versions ultérieures sont pris en charge, sauf 3.14.0 à 3.14.4. Pour Python 3.14, utilisez 3.14.5 ou une version ultérieure. Windows 10/11 est la cible principale ; macOS et Linux exécutent
 l'application, avec les différences de plateforme listées sous [Prise en charge des plateformes](#prise-en-charge-des-plateformes).
+
+Un plantage natif de Qt a été reproduit sous Windows avec Python 3.14.4 ; les correctifs antérieurs de 3.14 sont exclus par précaution. Recréez les environnements virtuels existants avec un interpréteur compatible et utilisez-le aussi pour exécuter le code source. Les EXE qui intègrent une version exclue doivent être reconstruits avec un interpréteur compatible. Mettre à jour le paquet FrontEngine ne met pas Python à jour.
 
 ```bash
 pip install frontengine

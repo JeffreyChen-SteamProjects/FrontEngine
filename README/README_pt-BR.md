@@ -37,8 +37,10 @@ e widgets de área de trabalho.
 
 ## Instalação
 
-Python **3.11+**. O Windows 10/11 é o alvo principal; o macOS e o Linux executam
+Python 3.11 ou posterior é compatível, exceto de 3.14.0 a 3.14.4. Para Python 3.14, use 3.14.5 ou posterior. O Windows 10/11 é o alvo principal; o macOS e o Linux executam
 o aplicativo, com as diferenças de plataforma listadas em [Suporte de plataforma](#suporte-de-plataforma).
+
+Uma falha nativa do Qt foi reproduzida no Windows com Python 3.14.4; os patches anteriores de 3.14 são excluídos por precaução. Recrie os ambientes virtuais existentes com um interpretador compatível e use-o também para executar o código-fonte. Os EXEs que incluem uma versão excluída precisam ser recompilados com um interpretador compatível. Atualizar o pacote FrontEngine não atualiza o Python.
 
 ```bash
 pip install frontengine

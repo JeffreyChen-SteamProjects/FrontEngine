@@ -35,8 +35,10 @@ FrontEngine 是一款桌面覆蓋層應用程式。影片、圖片、GIF、網�
 
 ## 安裝
 
-需要 Python **3.11+**。主要支援平台是 Windows 10/11；macOS 與 Linux 也能
+支援 Python 3.11 以上，但排除 3.14.0 至 3.14.4。使用 Python 3.14 時，請安裝 3.14.5 或更新的修補版本。主要支援平台是 Windows 10/11；macOS 與 Linux 也能
 執行這款應用程式，各平台的差異列在 [平台支援](#平台支援) 一節。
+
+已在 Windows 的 Python 3.14.4 重現 Qt 原生崩潰；較早的 3.14 修補版本則預防性排除。請使用相容的直譯器重建既有虛擬環境，並以該直譯器執行原始碼。內嵌被排除版本的 EXE 也須使用相容的直譯器重新建置。更新 FrontEngine 套件不會升級 Python。
 
 ```bash
 pip install frontengine

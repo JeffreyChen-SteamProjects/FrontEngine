@@ -36,9 +36,11 @@ Präsentationsannotationen, Messen und Erfassen, Fokusmasken und Desktop-Widgets
 
 ## Installation
 
-Python **3.11+**. Windows 10/11 ist die primäre Zielplattform; macOS und Linux
+Python 3.11+ wird unterstützt, außer 3.14.0 bis 3.14.4. Verwenden Sie für Python 3.14 die Version 3.14.5 oder neuer. Windows 10/11 ist die primäre Zielplattform; macOS und Linux
 führen die App aus, mit den unter [Plattformunterstützung](#plattformunterstützung)
 aufgeführten Plattformunterschieden.
+
+Ein nativer Qt-Absturz wurde unter Windows mit Python 3.14.4 reproduziert; frühere 3.14-Patchversionen sind vorsorglich ausgeschlossen. Erstellen Sie bestehende virtuelle Umgebungen mit einem kompatiblen Interpreter neu und verwenden Sie ihn auch für den Start aus dem Quellcode. EXE-Dateien mit einer ausgeschlossenen Python-Version müssen mit einem kompatiblen Interpreter neu gebaut werden. Ein Update des FrontEngine-Pakets aktualisiert Python nicht.
 
 ```bash
 pip install frontengine

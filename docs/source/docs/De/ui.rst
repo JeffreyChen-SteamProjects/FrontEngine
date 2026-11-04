@@ -3,6 +3,12 @@ Bedienung
 
 .. image:: ../image/main/FrontEngine.png
 
+.. note::
+
+    Python 3.11+ wird unterstützt, außer 3.14.0 bis 3.14.4. Verwenden Sie für Python 3.14 die Version 3.14.5 oder neuer.
+
+    Ein nativer Qt-Absturz wurde unter Windows mit Python 3.14.4 reproduziert; frühere 3.14-Patchversionen sind vorsorglich ausgeschlossen. Erstellen Sie bestehende virtuelle Umgebungen mit einem kompatiblen Interpreter neu und verwenden Sie ihn auch für den Start aus dem Quellcode. EXE-Dateien mit einer ausgeschlossenen Python-Version müssen mit einem kompatiblen Interpreter neu gebaut werden. Ein Update des FrontEngine-Pakets aktualisiert Python nicht.
+
 FrontEngine legt Dinge über Ihren Bildschirm - ein Video, ein Bild, eine
 Webseite, etwas Text, ein Haustier - und lässt sie dort, während Sie
 weiterarbeiten. Jedes davon heißt Overlay. Sie können beliebig viele
