@@ -40,6 +40,7 @@ class _PreparedPetClose:
         session.timer.stop()
         if _ACTIVE.get(session._key) is session:
             _ACTIVE.pop(session._key, None)
+        session._storage_use.release()
 
 
 class PetProfileSession(QObject):
@@ -51,26 +52,34 @@ class PetProfileSession(QObject):
                  profiles: PetProfiles | None = None, name: str = "") -> None:
         super().__init__(parent)
         self.profiles = profiles or PetProfiles(user_setting_dict, write_user_setting)
-        record = self.profiles.get(identifier) if identifier else self.profiles.create(name)
-        self.identifier = record["id"]
-        self._key = (id(self.profiles.settings), self.identifier)
-        if self._key in _ACTIVE:
-            raise ValueError(translate('pet_profile_active', 'This pet identity is already active; clone it to create another'))
-        _ACTIVE[self._key] = self
-        self._closed = False
-        self._prepared_close: _PreparedPetClose | None = None
-        self.initial = record
-        self.companion = CompanionState(record)
-        self.mode_revision = 0
-        self.appearance_renderer = None
-        self._clock = monotonic
-        self._last_tick = None
-        self.care_timer = QTimer(self)
-        self.care_timer.setInterval(100)
-        self.care_timer.timeout.connect(self._tick)
-        self.timer = QTimer(self)
-        self.timer.setSingleShot(True)
-        self.timer.timeout.connect(self.flush)
+        self._storage_use = self.profiles._acquire_use()
+        self._key = None
+        try:
+            record = self.profiles.get(identifier) if identifier else self.profiles.create(name)
+            self.identifier = record["id"]
+            self._key = (self.profiles.identity_key, self.identifier)
+            if self._key in _ACTIVE:
+                raise ValueError(translate('pet_profile_active', 'This pet identity is already active; clone it to create another'))
+            _ACTIVE[self._key] = self
+            self._closed = False
+            self._prepared_close: _PreparedPetClose | None = None
+            self.initial = record
+            self.companion = CompanionState(record)
+            self.mode_revision = 0
+            self.appearance_renderer = None
+            self._clock = monotonic
+            self._last_tick = None
+            self.care_timer = QTimer(self)
+            self.care_timer.setInterval(100)
+            self.care_timer.timeout.connect(self._tick)
+            self.timer = QTimer(self)
+            self.timer.setSingleShot(True)
+            self.timer.timeout.connect(self.flush)
+        except BaseException:
+            if self._key is not None and _ACTIVE.get(self._key) is self:
+                _ACTIVE.pop(self._key, None)
+            self._storage_use.release()
+            raise
 
     def schedule(self) -> None:
         """Coalesce changes in the same interaction without constant disk writes."""
@@ -219,4 +228,4 @@ class PetProfileSession(QObject):
     @staticmethod
     def active(profiles: PetProfiles, identifier: str) -> PetProfileSession | None:
         """Return an active session for export/rename without creating a widget."""
-        return _ACTIVE.get((id(profiles.settings), identifier))
+        return _ACTIVE.get((profiles.identity_key, identifier))

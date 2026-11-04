@@ -2,10 +2,12 @@
 from __future__ import annotations
 
 import copy
+from contextlib import nullcontext
+from functools import wraps
 import json
 import uuid
 from pathlib import Path
-from typing import Callable
+from typing import TYPE_CHECKING, Callable
 
 from frontengine.utils.json.json_repository import JsonRepository
 from frontengine.user_setting.pet_profile_schema import (
@@ -15,12 +17,54 @@ from frontengine.user_setting.pet_profile_schema import (
 MAX_PROFILES = 256
 MAX_BYTES = 256 * 1024
 
+if TYPE_CHECKING:
+    from frontengine.user_setting.storage_session import StorageSession
+
+
+def _profile_operation(method):
+    @wraps(method)
+    def call(self, *args, **kwargs):
+        with self._owner._settings_transaction() if self._owner is not None else nullcontext():
+            return method(self, *args, **kwargs)
+    return call
+
+
+class _MemoryUse:
+    def release(self) -> None:
+        pass
+
 
 class PetProfiles:
     """Commit shared settings atomically without overwriting other pet records."""
 
     def __init__(self, settings: dict, save: Callable[[], object]) -> None:
-        self.settings, self.save = settings, save
+        self._owner = None
+        self._settings, self.save = settings, save
+
+    @classmethod
+    def _for_storage(cls, owner: StorageSession) -> PetProfiles:
+        profiles = cls(owner.settings, owner.save_settings)
+        profiles._owner = owner
+        return profiles
+
+    @property
+    def settings(self) -> dict:
+        """Borrow the captured mapping; direct mutation requires a live caller lifetime."""
+        return self._owner.settings if self._owner is not None else self._settings
+
+    @settings.setter
+    def settings(self, settings: dict) -> None:
+        if self._owner is not None:
+            raise AttributeError("Owned profile settings cannot be replaced")
+        self._settings = settings
+
+    @property
+    @_profile_operation
+    def identity_key(self) -> object:
+        return self._owner if self._owner is not None else id(self._settings)
+
+    def _acquire_use(self):
+        return self._owner._hold('pet') if self._owner is not None else _MemoryUse()
 
     def _read(self) -> dict:
         data = self.settings.get("pet_profiles")
@@ -39,10 +83,12 @@ class PetProfiles:
             records[identifier] = checked
         return {**data, "version": 2, "records": records}
 
+    @_profile_operation
     def profiles(self) -> list[dict]:
         """Return detached records sorted by name and stable identity."""
         return sorted(self._read()["records"].values(), key=lambda record: (record["name"], record["id"]))
 
+    @_profile_operation
     def get(self, identifier: str) -> dict:
         """Load a stable identity or fail explicitly; never silently reuse another."""
         record = self._read()["records"].get(identifier)
@@ -65,6 +111,7 @@ class PetProfiles:
                 self.settings["pet_profiles"] = old
             raise
 
+    @_profile_operation
     def create(self, name: str = "", source: dict | None = None) -> dict:
         """Migrate legacy shared stats once; every later pet gets fresh defaults."""
         data = self._read()
@@ -86,6 +133,7 @@ class PetProfiles:
         self._commit(data)
         return copy.deepcopy(record)
 
+    @_profile_operation
     def update(self, identifier: str, changes: dict) -> dict:
         """Replace specified fields only; failed persistence restores settings."""
         if not isinstance(changes, dict) or set(changes) - (PROFILE_FIELDS - {"id"}):
@@ -98,11 +146,15 @@ class PetProfiles:
         self._commit(data)
         return copy.deepcopy(record)
 
+    @_profile_operation
     def export_profile(self, identifier: str, destination: Path) -> None:
         """Atomically export this pet only, without sprites or other settings."""
+        from frontengine.user_setting.storage_session import checked_export_destination
+        destination = checked_export_destination(destination)
         JsonRepository(destination).save({"format": "frontengine.pet-save", "version": 2,
                                           "profile": self.get(identifier)})
 
+    @_profile_operation
     def import_profile(self, source: Path) -> dict:
         """Import as a new identity so an existing/live pet can never be overwritten."""
         with source.open("rb") as file:

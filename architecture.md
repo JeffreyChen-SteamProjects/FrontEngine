@@ -53,7 +53,12 @@ is `user_setting/scene_setting.py`, which imports `ui/dialog/choose_file_dialog`
 
 `user_setting/storage_session.py` supplies explicit directory ownership before settings reads,
 using persistent native file locks and client/I/O lifetime checks. Its captured paths and writers
-remain tied to one session. The global settings facade and home/main-window integration are
+remain tied to one session. Its cached `profiles()` adapter serializes complete profile
+read/modify/save/rollback transactions with settings serialization. Explicitly injected pet
+sessions retain the owner through failed or canceled closure and release it only after finalization.
+Profile exports validate both their destination and temporary path against managed names and linked
+files. Borrowed settings mappings still require a live caller lifetime and direct mutations are not
+serialized. The global settings facade and home/main-window integration are
 still tracked in `progress.md` #52; the new boundary alone does not protect existing UI entrypoints.
 
 ## 3. Entry points and public interfaces

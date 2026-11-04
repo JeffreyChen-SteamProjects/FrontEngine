@@ -7,11 +7,14 @@ import os
 from pathlib import Path
 import stat
 from threading import RLock
-from typing import Iterator
+from typing import TYPE_CHECKING, Iterator
 
 from frontengine.utils.exception.exceptions import FrontEngineJsonFileException
 from frontengine.utils.json.json_repository import JsonRepository
 from frontengine.utils.logging.loggin_instance import front_engine_logger
+
+if TYPE_CHECKING:
+    from frontengine.user_setting.pet_profiles import PetProfiles
 
 LOCK_NAME = ".frontengine-owner.lock"
 SETTINGS_NAME = "user_setting.json"
@@ -45,6 +48,27 @@ def _regular_file(path: Path) -> None:
     reparse = getattr(info, "st_file_attributes", 0) & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)
     if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1 or reparse:
         raise StorageUnavailable(f"Managed storage must be a regular file without aliases: {path}")
+
+
+def checked_export_destination(destination: Path) -> Path:
+    """Keep portable exports and their temporary writes away from managed files."""
+    from frontengine.user_setting.pet_game_save import FILE_NAMES
+    reserved = {LOCK_NAME, SETTINGS_NAME, *FILE_NAMES.values()}
+    reserved |= {name + suffix for name in tuple(reserved) for suffix in ('.tmp', '.bak', '.bak.tmp')}
+    destination = Path(destination)
+    if os.name == 'nt' and any(part.endswith((' ', '.')) or ':' in part
+                               for part in destination.parts if part not in (destination.anchor, '.', '..')):
+        raise StorageUnavailable(f"Export path uses a Windows filename alias: {destination}")
+    resolved_destination = destination.resolve()
+    paths = (destination, destination.with_name(destination.name + '.tmp'),
+             resolved_destination, resolved_destination.with_name(resolved_destination.name + '.tmp'))
+    for path in paths:
+        _regular_file(path)
+        resolved = path.resolve()
+        if path.name.casefold() in reserved or resolved.name.casefold() in reserved:
+            raise StorageUnavailable(f"Cannot export over managed storage: {path}")
+        _regular_file(resolved)
+    return resolved_destination
 
 
 class _DirectoryLock:
@@ -138,10 +162,12 @@ class StorageSession:
         self._identity = directory.stat()
         self._pid = os.getpid()
         self._mutex = RLock()
+        self._settings_mutex = RLock()
         self._closed = False
         self._operations = 0
         self._uses: set[_Use] = set()
         self._settings: dict = {}
+        self._profiles: PetProfiles | None = None
 
     @classmethod
     def open(cls, directory: Path) -> StorageSession:
@@ -186,6 +212,13 @@ class StorageSession:
         with self._operation():
             return self._settings
 
+    def profiles(self) -> PetProfiles:
+        from frontengine.user_setting.pet_profiles import PetProfiles
+        with self._settings_transaction():
+            if self._profiles is None:
+                self._profiles = PetProfiles._for_storage(self)
+            return self._profiles
+
     def _check_pid(self) -> None:
         if self._pid != os.getpid():
             raise StorageClosed("Storage ownership cannot be inherited by a child process")
@@ -220,6 +253,12 @@ class StorageSession:
         _regular_file(path)
         return path
 
+    @contextmanager
+    def _settings_transaction(self) -> Iterator[None]:
+        with self._operation():
+            with self._settings_mutex:
+                yield
+
     def _hold(self, kind: str) -> _Use:
         self._check_pid()
         with self._mutex:
@@ -230,7 +269,7 @@ class StorageSession:
 
     def save_settings(self) -> Path:
         """Persist to the captured root; a stale callback never opens a new owner."""
-        with self._operation():
+        with self._settings_transaction():
             path = self._checked_path(SETTINGS_NAME)
             self._checked_path(SETTINGS_NAME + ".tmp")
             return JsonRepository(path).save(self._settings)
