@@ -74,3 +74,40 @@ def test_old_completion_cannot_allow_two_unfinished_writes(service):
     QCoreApplication.processEvents()
     home._save_soon()
     assert sum(not job[0].done() for job in writer.jobs) == 1
+
+
+def test_background_save_retries_profiles_before_announcing_success(service, monkeypatch):
+    home, writer = service
+    identifiers = sorted(home.profiles.create(name)["id"] for name in ("First", "Second"))
+    for identifier in identifiers:
+        assert home.adopt(identifier) == "accepted"
+        home.world.residents[identifier].needs["energy"] -= 10
+    failures, saved, attempts = [], [], []
+    home.save_failed.connect(failures.append)
+    home.saved.connect(lambda: saved.append(True))
+
+    def fail_first_profile():
+        attempts.append(True)
+        if len(attempts) == 1:
+            raise PermissionError("profile disk unavailable")
+
+    try:
+        with monkeypatch.context() as patch:
+            patch.setattr(home.profiles, "save", fail_first_profile)
+            home._save_soon()
+            writer.finish(0)
+            QCoreApplication.processEvents()
+            assert failures and not saved
+            assert len(attempts) == 2
+            first, second = identifiers
+            assert home.profiles.get(first)["energy"] != home.world.residents[first].needs["energy"]
+            assert home.profiles.get(second)["energy"] == home.world.residents[second].needs["energy"]
+            assert home.save_timer.isActive()
+            home.save_timer.timeout.emit()
+            writer.finish(1)
+            QCoreApplication.processEvents()
+            assert saved == [True]
+            assert home.profiles.get(first)["energy"] == home.world.residents[first].needs["energy"]
+            assert not home.running
+    finally:
+        home.shutdown()

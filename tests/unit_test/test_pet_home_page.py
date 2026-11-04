@@ -57,6 +57,97 @@ def test_no_home_offers_creation_and_disables_the_panels(page):
     assert page.status.text() == translate("pet_home_create_hint")
 
 
+def test_successful_save_clears_failure_banner_but_keeps_inbox(page):
+    page.service.save_failed.emit("disk unavailable")
+    assert "disk unavailable" in page.message.text()
+    assert not page.message.isHidden()
+    history = [page.inbox.list.item(i).text() for i in range(page.inbox.list.count())]
+    assert history
+    unread = page.inbox.unread
+
+    page.service.saved.emit()
+
+    assert page.message.text() == ""
+    assert page.message.isHidden()
+    assert [page.inbox.list.item(i).text() for i in range(page.inbox.list.count())] == history
+    assert page.inbox.unread == unread
+
+
+@pytest.mark.parametrize("same_text", [False, True])
+def test_successful_save_preserves_a_newer_report(page, same_text):
+    page.service.save_failed.emit("disk unavailable")
+    text = page.message.text() if same_text else "Furniture placed."
+    page.report_text(text)
+
+    page.service.saved.emit()
+
+    assert page.message.text() == text
+    assert not page.message.isHidden()
+
+
+def test_repeated_save_failures_clear_after_each_recovery(page):
+    for _ in range(2):
+        page.service.save_failed.emit("disk unavailable")
+        page.service.save_failed.emit("disk unavailable")
+        assert not page.message.isHidden()
+        page.service.saved.emit()
+        assert page.message.text() == ""
+        assert page.message.isHidden()
+        page.report_text("Furniture placed.")
+        page.service.saved.emit()
+        assert page.message.text() == "Furniture placed."
+    assert page.inbox.unread == 4
+    assert page.inbox.entries[0]["count"] == 4
+
+
+def test_failed_mode_switch_clears_save_error_after_recovery(page, monkeypatch):
+    page.create_home()
+
+    def deny_save(_world):
+        raise PermissionError("disk unavailable")
+
+    with monkeypatch.context() as patch:
+        patch.setattr(page.service.store, "save", deny_save)
+        assert not page.set_free_arranging(True)
+        assert page.service.mode == "manage"
+        assert not page.sandbox_button.isChecked()
+        assert page.message.text()
+
+    assert page.service.save_now()
+    assert page.message.text() == ""
+    assert page.message.isHidden()
+    assert page.service.mode == "manage"
+    assert not page.sandbox_button.isChecked()
+
+
+def test_profile_save_failure_keeps_banner_until_complete_retry(page, monkeypatch):
+    page.create_home()
+    resident = next(iter(page.service.world.residents.values()))
+    resident.needs["energy"] -= 10
+    saved = []
+    page.service.saved.connect(lambda: saved.append(True))
+
+    def deny_profile_save():
+        raise PermissionError("profile disk unavailable")
+
+    with monkeypatch.context() as patch:
+        patch.setattr(page.service.profiles, "save", deny_profile_save)
+        assert not page.set_free_arranging(True)
+        assert page.message.text()
+        assert not page.service.save_now()
+        assert page.message.text()
+        assert not saved
+        assert page.service.save_timer.isActive()
+
+    page.service.save_timer.timeout.emit()
+    assert saved == [True]
+    assert page.message.text() == ""
+    assert page.message.isHidden()
+    assert page.service.mode == "manage"
+    profile = page.service.profiles.get(resident.identifier)
+    assert profile["energy"] == resident.needs["energy"]
+
+
 def test_first_loop_from_the_page(page):
     page.create_home()
     assert page.service.world is not None

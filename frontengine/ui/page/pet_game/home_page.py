@@ -112,6 +112,7 @@ class PetHomePage(SettingPage):
         self.profiles = self.service.profiles
         self.selected_resident: str | None = None
         self.selected_furniture: str | None = None
+        self._save_failure_message = False
         self.strip_list: list[HomeStrip] = []      # registered with the Control Center
         self.art = ResidentArt(self.service)
         self.art.changed.connect(self._art_changed)
@@ -499,6 +500,7 @@ class PetHomePage(SettingPage):
         self.lock_watcher.locked_changed.connect(self._session_locked)
         self.lock_watcher.start()
         self.service.save_failed.connect(self._on_save_failed)
+        self.service.saved.connect(self._on_saved)
         self.service.running_changed.connect(lambda _running: self._refresh_status())
         self.service.running_changed.connect(lambda _running: self.update_ambience())
         self.view.resident_selected.connect(self.select_resident)
@@ -756,8 +758,10 @@ class PetHomePage(SettingPage):
 
     def report(self, code: object) -> None:
         self.report_text(result_text(code) if isinstance(code, str) else "")
+        self._save_failure_message = code == "save_failed"
 
     def report_text(self, text: str) -> None:
+        self._save_failure_message = False
         self.message.setText(text)
         self.message.setVisible(bool(text))
 
@@ -794,6 +798,11 @@ class PetHomePage(SettingPage):
         self.report_text(translate("pet_home_save_failed",
                                    "The home could not be saved ({error}). It will retry; nothing is lost yet.")
                          .format(error=error))
+        self._save_failure_message = True
+
+    def _on_saved(self) -> None:
+        if self._save_failure_message:
+            self.report_text("")
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
         if event.key() == Qt.Key.Key_Escape and (self.layout_panel.arranging

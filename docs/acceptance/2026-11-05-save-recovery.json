@@ -1,0 +1,25 @@
+{
+  "passed": true,
+  "base_revision": "a56013f",
+  "source_sha256": {
+    "frontengine/show/pet_game/home_service.py": "82cc0524b99c57f34e7b3d45da38367d621aa1d8274db4037ec371b8f1514d19",
+    "frontengine/ui/page/pet_game/home_page.py": "7ca84b677d10a5194164dd812167e01da2ede78397dfb48dca1454e28372efc1"
+  },
+  "requirement": "progress.md #51",
+  "python": "3.14.5 (tags/v3.14.5:5607950, May 10 2026, 10:43:50) [MSC v.1944 64 bit (AMD64)]",
+  "purchase_retry_seconds": 4.891884199998458,
+  "mode_retry_seconds": 5.002137499992386,
+  "profile_retry_seconds": 5.010061199995107,
+  "old_file_preserved": true,
+  "message_after_retry": "",
+  "error_history_preserved": true,
+  "mode_unchanged": true,
+  "profile_failed_save_did_not_emit_saved": true,
+  "profile_retry_while_paused": true,
+  "cold_world_equal": true,
+  "cold_profiles_present": true,
+  "cold_leases_reacquired": true,
+  "native_evidence": ".audit/save-retry-native-aggregate-normal-time",
+  "cold_evidence": ".audit/save-retry-aggregate-cold",
+  "scope": "Real Windows sharing denials of home and profile files, UI purchase/mode/start-pause controls, normal aggregate retry; no crash, settlement or power-loss claim"
+}

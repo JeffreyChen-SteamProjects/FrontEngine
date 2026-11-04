@@ -25,6 +25,7 @@ from frontengine.show.pet.pet_profile_session import PetProfileSession
 from frontengine.user_setting.pet_game_save import HomeSaveStore, LoadResult
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.utils.logging.loggin_instance import front_engine_logger
+from frontengine.utils.multi_language.retranslate import translate
 from frontengine.utils.pet_game import simulation
 from frontengine.utils.pet_game.behaviour import cancel_activity
 from frontengine.utils.pet_game.world import MODES, World
@@ -332,13 +333,17 @@ class HomeService(QObject):
             self.save_timer.start(RETRY_MS)
 
     def _succeeded(self, revision: int) -> bool:
-        if revision == self._revision:
-            self._dirty = False
         mirrored = True
         for identifier in sorted(self.sessions):      # every profile, even after a failure
             mirrored = self._mirror(identifier) and mirrored
+        if not mirrored:
+            self._dirty = True
+            self._failed(translate("pet_profile_save_failed", "Could not save the latest pet state."))
+            return False
+        if revision == self._revision:
+            self._dirty = False
         self.saved.emit()
-        return mirrored
+        return True
 
     def save_now(self) -> bool:
         """Blocking save (shutdown, tests): home first, then profiles; failure keeps memory."""
