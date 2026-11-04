@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261105-09 | 2026-11-05 | Native soak preparation exposed an intermittent access violation | #incident #pets #native | [2026-11](2026-11.md) |
 | U-20261105-08 | 2026-11-05 | Full regression and installed-wheel home checks pass; mixed DPI unavailable | #snapshot #tests #native #packaging | [2026-11](2026-11.md) |
 | U-20261105-07 | 2026-11-05 | Persist life-event frequency and keep blocked layout restoration retryable | #done #pets #events #saving | [2026-11](2026-11.md) |
 | U-20261105-06 | 2026-11-05 | Refresh item visuals and preserve photos, notifications and paid upgrades | #done #ui #pets | [2026-11](2026-11.md) |
@@ -266,6 +267,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 62 |
+| [2026-11.md](2026-11.md) | 2026-11 | 63 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
