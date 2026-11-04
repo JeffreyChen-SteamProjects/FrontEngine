@@ -604,13 +604,19 @@ class PetHomePage(SettingPage):
     def shutdown(self) -> bool:
         if not self.service.shutdown():
             return False
+        self._finish_shutdown()
+        return True
+
+    def _prepare_shutdown(self):
+        return self.service._prepare_close()
+
+    def _finish_shutdown(self) -> None:
         for dialog in [*self.residents.wardrobes.values(), *self.layout_panel.visits]:
             dialog.close()
         self.close_strip()
         self.lock_watcher.stop()
         self.art.shutdown()
         self.ambience.shutdown()
-        return True
 
     # ----- desktop strip ---------------------------------------------------------------
 

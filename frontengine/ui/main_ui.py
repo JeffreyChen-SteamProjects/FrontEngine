@@ -719,12 +719,9 @@ class FrontEngineMainUI(QMainWindow):
 
     def _save_window_geometry(self) -> None:
         """將目前視窗大小/位置寫入設定 / Persist the current window geometry."""
-        try:
-            encoded = bytes(self.saveGeometry().toBase64().data()).decode("ascii")
-            user_setting_dict["window_geometry"] = encoded
-            user_setting_dict["window_maximized"] = self.isMaximized()
-        except Exception as error:
-            front_engine_logger.warning(f"[FrontEngineMainUI] save geometry failed: {error!r}")
+        encoded = bytes(self.saveGeometry().toBase64().data()).decode("ascii")
+        user_setting_dict["window_geometry"] = encoded
+        user_setting_dict["window_maximized"] = self.isMaximized()
 
     def retranslate(self) -> int:
         """
@@ -1251,19 +1248,60 @@ class FrontEngineMainUI(QMainWindow):
             QMessageBox.StandardButton.No)
         return response == QMessageBox.StandardButton.Yes
 
-    def _flush_pet_profiles(self) -> bool:
-        """Keep the app alive if any pet's current state cannot be saved."""
+    def _prepare_pet_profiles(self) -> list | None:
         sessions = {}
         for widget in self.control_center_ui.all_overlays():
             session = getattr(widget, 'profile_session', None)
             if session is not None and not getattr(session, '_closed', False):
                 sessions[id(session)] = session
-        success = True
+        prepared, success = [], True
         for session in sessions.values():
-            success = session.flush() and success
+            pet = session._prepare_close()
+            if pet is None:
+                success = False
+            else:
+                prepared.append(pet)
         if not success:
+            for pet in prepared:
+                pet.cancel()
             self.statusBar().showMessage(translate('pet_profile_save_failed'))
-        return success
+            return None
+        return prepared
+
+    def _prepare_shutdown(self) -> list | None:
+        versions = getattr(self, 'preset_versions_dialog', None)
+        if versions is not None and not versions.cancel_preview():
+            self.statusBar().showMessage(translate('pet_home_result_save_failed'))
+            return None
+        pet_page = getattr(self, 'pet_setting_ui', None)
+        if pet_page is not None:
+            pet_page.stop_focus_session()
+        prepared = self._prepare_pet_profiles()
+        if prepared is None:
+            return None
+        try:
+            home = getattr(self, 'pet_home_ui', None)
+            if home is not None and not home.service._closed:
+                token = home._prepare_shutdown()
+                if token is None:
+                    raise ValueError(translate('pet_home_save_failed_exit'))
+                prepared.append(token)
+            if user_setting_dict.get("restore_last_session") and not save_last_session(self):
+                raise ValueError(translate('pet_home_result_save_failed'))
+            self._save_page_state()
+            self._persist_clipboard()
+            self._save_window_geometry()
+            usage = getattr(self, 'usage_service', None)
+            if usage is not None:
+                usage.save()
+            write_user_setting()
+        except (OSError, ValueError, KeyError, RuntimeError) as error:
+            for token in reversed(prepared):
+                token.cancel()
+            front_engine_logger.warning(f"[FrontEngineMainUI] shutdown save failed: {error!r}")
+            self.statusBar().showMessage(translate('pet_home_result_save_failed') + " " + str(error))
+            return None
+        return prepared
 
     def _shutdown(self) -> bool:
         """
@@ -1280,17 +1318,15 @@ class FrontEngineMainUI(QMainWindow):
         """
         if self._shutdown_done:
             return True
-        pet_page = getattr(self, 'pet_setting_ui', None)
-        if pet_page is not None:
-            pet_page.stop_focus_session()
-        if not self._flush_pet_profiles():
-            return False
-        home = getattr(self, 'pet_home_ui', None)
-        if home is not None and not home.shutdown():
-            self.statusBar().showMessage(translate('pet_home_save_failed_exit',
-                                                   'The pet home could not be saved; FrontEngine stays open.'))
+        prepared = self._prepare_shutdown()
+        if prepared is None:
             return False
         self._shutdown_done = True
+        for token in prepared:
+            token.finalize()
+        home = getattr(self, 'pet_home_ui', None)
+        if home is not None:
+            home._finish_shutdown()
         front_engine_logger.info("[FrontEngineMainUI] shutdown")
         if getattr(self, "command_palette", None) is not None:
             self.command_palette.close()
@@ -1298,8 +1334,6 @@ class FrontEngineMainUI(QMainWindow):
             self.preset_versions_dialog.close()
         self._close_history_dialogs()
         self._close_asset_library()
-        if user_setting_dict.get("restore_last_session"):
-            save_last_session(self)
         self._stop_services()
         self.text_setting_ui.stop_file_preview()
         self.image_setting_ui.close_image_compare()
@@ -1311,7 +1345,7 @@ class FrontEngineMainUI(QMainWindow):
         from frontengine.user_setting.scene_setting import release_scene_packages
         if hasattr(self, 'tools_setting_ui'):
             self.tools_setting_ui.recorder.close()
-        self._save_page_state()
+        self._stop_page_services()
         # Assets must outlive all scene/pet widgets that may still read them.
         self.scene_setting_ui.shutdown_scene()
         self._clear_overlays()
@@ -1326,8 +1360,6 @@ class FrontEngineMainUI(QMainWindow):
         # display keeps refusing to sleep after the application is gone.
         if getattr(self, "keep_awake", None) is not None:
             self.keep_awake.disable()
-        self._save_window_geometry()
-        write_user_setting()
         self.scene_setting_ui.close_scene()
         return True
 
@@ -1368,17 +1400,21 @@ class FrontEngineMainUI(QMainWindow):
         for name in self._CLOSING_SERVICES:
             service = getattr(self, name, None)
             if service is not None:
-                service.stop()
+                if name == "usage_service":
+                    service.stop(save=False)
+                else:
+                    service.stop()
         if getattr(self, "clipboard_watcher", None) is not None:
             self.clipboard_watcher.stop()
-            self._persist_clipboard()
         if getattr(self, "critical_ext", None) is not None:
             self.critical_ext.stop()
 
     def _save_page_state(self) -> None:
-        """讓幾個分頁在關閉前把自己的東西收好。"""
         if getattr(self, "widgets_setting_ui", None) is not None:
             self.widgets_setting_ui.save_notes()
+
+    def _stop_page_services(self) -> None:
+        if getattr(self, "widgets_setting_ui", None) is not None:
             self.widgets_setting_ui.stop_spectrum()
         if getattr(self, "tools_setting_ui", None) is not None:
             self.tools_setting_ui.release_pinned_windows()

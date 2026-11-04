@@ -117,13 +117,14 @@ class UsageTracker:
             front_engine_logger.warning(f"[UsageTracker] load failed: {error!r}")
             self.history = {}
 
-    def save(self) -> bool:
+    def save(self, *, raise_errors: bool = False) -> bool:
         """
         把統計寫回本機檔案（只有這一個檔，不會送到任何地方）。沒有任何紀錄時
         **不會建立檔案**——關著統計的使用者，磁碟上就不該多出一個檔。
         Write the history back to the local file. With nothing recorded it
         **creates no file**: a user who leaves tracking off should not find one
-        on disk. Returns whether anything was written.
+        on disk. Returns whether anything was written. Composed shutdown uses
+        ``raise_errors=True`` to distinguish a failed write from an empty history.
         """
         if self._repository is None:
             return False
@@ -135,6 +136,8 @@ class UsageTracker:
             return True
         except Exception as error:  # pragma: no cover - defensive file boundary
             front_engine_logger.warning(f"[UsageTracker] save failed: {error!r}")
+            if raise_errors:
+                raise
             return False
 
     def clear(self) -> None:

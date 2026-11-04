@@ -85,17 +85,18 @@ def test_main_shutdown_checks_each_pet_before_teardown():
     from frontengine.ui.main_ui import FrontEngineMainUI
 
     calls, messages = [], []
-    first = SimpleNamespace(flush=lambda: calls.append('first') or False)
-    second = SimpleNamespace(flush=lambda: calls.append('second') or True)
+    first = SimpleNamespace(_prepare_close=lambda: calls.append('first'))
+    second = SimpleNamespace(_prepare_close=lambda: calls.append('second') or
+                             SimpleNamespace(cancel=lambda: calls.append('cancel')))
     widgets = [SimpleNamespace(profile_session=first), SimpleNamespace(profile_session=second),
                SimpleNamespace(profile_session=first)]
     owner = SimpleNamespace(control_center_ui=SimpleNamespace(all_overlays=lambda: widgets),
                             statusBar=lambda: SimpleNamespace(showMessage=messages.append))
-    assert not FrontEngineMainUI._flush_pet_profiles(owner)
-    assert calls == ['first', 'second']
+    assert FrontEngineMainUI._prepare_pet_profiles(owner) is None
+    assert calls == ['first', 'second', 'cancel']
     assert messages
     owner._shutdown_done = False
-    owner._flush_pet_profiles = lambda: False
+    owner._prepare_shutdown = lambda: None
     assert FrontEngineMainUI._shutdown(owner) is False
     assert not owner._shutdown_done
 

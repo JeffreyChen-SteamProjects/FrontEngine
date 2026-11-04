@@ -96,11 +96,16 @@ feature page (ui/page/<kind>/) → dispatch_to_monitors() (ui/page/utils.py)
 **Shutdown**
 
 ```
-closeEvent() | close() → _shutdown() (runs once) → flush pet profiles → pet home shutdown (save, release leases;
-  failure keeps the app open) → save session if enabled → stop _CLOSING_SERVICES
-  → cancel recording/native sessions → close scenes → release scene extraction leases
-  → save page state and geometry → write_user_setting() → close overlays
+closeEvent() | close() → _shutdown() → cancel preset preview → prepare pet/home closes
+  → save session, notes, clipboard, geometry and usage history → write_user_setting()
+  → finalize prepared closes without another profile/home write → stop services and close overlays
+  → release scene assets and owned resources
 ```
+
+A failure in these composed saves cancels preparation and retains the same home, pet identities,
+renderers, service timers and retry path. Home activity cancellation and focus-mode restoration
+are retained; earlier successful files are not rolled back. Independent Workshop, plugin and
+background repository persistence retain their existing shutdown contracts.
 
 ## 5. Extension points
 
