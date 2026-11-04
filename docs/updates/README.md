@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261105-21 | 2026-11-05 | 完成相容執行環境兩小時原生家園驗收 | #done #testing #pet-home | [2026-11](2026-11.md) |
 | U-20261105-20 | 2026-11-05 | Retain usable pets and home until final shutdown saves succeed | #done #pets #saving #ui | [2026-11](2026-11.md) |
 | U-20261105-19 | 2026-11-05 | Add owned storage sessions before integrating application lifetimes | #snapshot #saving #architecture #tests | [2026-11](2026-11.md) |
 | U-20261105-18 | 2026-11-05 | Retain the desktop home when closing cannot save | #done #pets #saving #ui | [2026-11](2026-11.md) |
@@ -278,6 +279,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 74 |
+| [2026-11.md](2026-11.md) | 2026-11 | 75 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
