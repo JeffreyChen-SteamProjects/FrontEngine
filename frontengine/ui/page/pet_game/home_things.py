@@ -8,9 +8,9 @@ from __future__ import annotations
 
 from functools import lru_cache
 
-from PySide6.QtCore import QRectF, QSize, Qt
+from PySide6.QtCore import QEvent, QRectF, QSize, Qt
 from PySide6.QtGui import QIcon, QImage, QPainter, QPixmap
-from PySide6.QtWidgets import QListView, QListWidget, QListWidgetItem
+from PySide6.QtWidgets import QListView, QListWidget, QListWidgetItem, QStyle, QStyleOptionViewItem
 
 from frontengine.show.pet_game.furniture_art import item_picture, picture
 from frontengine.utils.pet_game.catalog import FURNITURE_PREFIX
@@ -71,13 +71,39 @@ class ThingGrid(QListWidget):
         self.setResizeMode(QListView.ResizeMode.Adjust)
         self.setMovement(QListView.Movement.Static)
         self.setWrapping(True)
-        self.setWordWrap(True)
+        self.setWordWrap(False)
         self.setUniformItemSizes(True)
         self.setIconSize(QSize(TILE_ICON, TILE_ICON))
-        self.setGridSize(QSize(132, 128))
         self.setSpacing(4)
-        self.setMinimumHeight(128 * rows + 12)
-        self.setMaximumHeight(128 * rows + 12)
+        self._rows = rows
+        self._update_tile_size()
+        self.iconSizeChanged.connect(self._update_tile_size)
+
+    def _update_tile_size(self) -> None:
+        option = QStyleOptionViewItem()
+        self.initViewItemOption(option)
+        option.features |= (QStyleOptionViewItem.ViewItemFeature.HasDisplay
+                            | QStyleOptionViewItem.ViewItemFeature.HasDecoration)
+        option.text = "M\u2028M"
+        height = self.style().sizeFromContents(QStyle.ContentsType.CT_ItemViewItem,
+                                              option, QSize(), self).height()
+        width = 132
+        for row in range(self.count()):
+            _name, separator, caption = self.item(row).text().partition('\n')
+            if separator:
+                option.text = caption
+                width = max(width, self.style().sizeFromContents(
+                    QStyle.ContentsType.CT_ItemViewItem, option, QSize(), self).width())
+        size = QSize(width, max(128, height))
+        self.setGridSize(size)
+        for row in range(self.count()):
+            self.item(row).setSizeHint(size)
+        self.setFixedHeight(size.height() * self._rows + 12)
+
+    def changeEvent(self, event: QEvent) -> None:
+        super().changeEvent(event)
+        if event.type() in (QEvent.Type.FontChange, QEvent.Type.StyleChange) and hasattr(self, '_rows'):
+            self._update_tile_size()
 
     def set_things(self, things: list[tuple[str, QIcon, str]]) -> None:
         """``(key, icon, text)`` tiles; the selected key stays selected if it is still there."""
@@ -90,6 +116,7 @@ class ThingGrid(QListWidget):
                     item.setText(text)
                 item.setIcon(icon)
                 item.setToolTip(text.replace("\n", " "))
+            self._update_tile_size()
             return
         self.clear()
         for key, icon, text in things:
@@ -100,6 +127,7 @@ class ThingGrid(QListWidget):
             self.addItem(item)
             if key == current:
                 self.setCurrentItem(item)
+        self._update_tile_size()
 
     def current_key(self) -> str | None:
         item = self.currentItem()
