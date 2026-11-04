@@ -57,6 +57,37 @@ def test_no_home_offers_creation_and_disables_the_panels(page):
     assert page.status.text() == translate("pet_home_create_hint")
 
 
+@pytest.mark.parametrize("failed_store", ["home", "profiles"])
+def test_refused_shutdown_keeps_desktop_home_until_save_retry(page, monkeypatch, failed_store):
+    page.create_home()
+    page.desktop_check.setChecked(True)
+    page.sync_strip()
+    strips = list(page.strip_list)
+    assert strips and all(strip.isVisible() for strip in strips)
+    identities = set(page.service.sessions)
+    next(iter(page.service.world.residents.values())).needs["energy"] -= 10
+
+    def deny_save(*_args):
+        raise PermissionError("disk unavailable")
+
+    target = page.service.store if failed_store == "home" else page.service.profiles
+    with monkeypatch.context() as patch:
+        patch.setattr(target, "save", deny_save)
+        assert page.shutdown() is False
+        assert page.strip_list == strips
+        assert all(strip.isVisible() for strip in strips)
+        assert not page.art.closed
+        assert set(page.service.sessions) == identities
+        assert page.service.save_timer.isActive()
+
+    assert page.service.save_now()
+    assert page.message.isHidden()
+    assert page.shutdown()
+    assert not page.strip_list
+    assert page.art.closed
+    assert not page.service.sessions
+
+
 def test_successful_save_clears_failure_banner_but_keeps_inbox(page):
     page.service.save_failed.emit("disk unavailable")
     assert "disk unavailable" in page.message.text()
