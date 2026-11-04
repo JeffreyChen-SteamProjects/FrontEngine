@@ -51,6 +51,11 @@ on Steam (app 2793470) with Workshop import. JEditor embeds its main window as a
 Dependencies point downwards: `ui/` → `show/` → `user_setting/` + `utils/`. The one known inversion
 is `user_setting/scene_setting.py`, which imports `ui/dialog/choose_file_dialog`.
 
+`user_setting/storage_session.py` supplies explicit directory ownership before settings reads,
+using persistent native file locks and client/I/O lifetime checks. Its captured paths and writers
+remain tied to one session. The global settings facade and home/main-window integration are
+still tracked in `progress.md` #52; the new boundary alone does not protect existing UI entrypoints.
+
 ## 3. Entry points and public interfaces
 
 - **CLI**: the `frontengine` console script (`[project.scripts]` → `frontengine.ui.main_ui:main`) and

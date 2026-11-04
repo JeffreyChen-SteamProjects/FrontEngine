@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261105-19 | 2026-11-05 | Add owned storage sessions before integrating application lifetimes | #snapshot #saving #architecture #tests | [2026-11](2026-11.md) |
 | U-20261105-18 | 2026-11-05 | Retain the desktop home when closing cannot save | #done #pets #saving #ui | [2026-11](2026-11.md) |
 | U-20261105-17 | 2026-11-05 | Verify the installed save fix and reproduce shared-directory writer conflicts | #snapshot #tests #saving | [2026-11](2026-11.md) |
 | U-20261105-16 | 2026-11-05 | Report complete saves and clear recovered save errors | #done #pets #saving #ui | [2026-11](2026-11.md) |
@@ -276,6 +277,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 72 |
+| [2026-11.md](2026-11.md) | 2026-11 | 73 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

@@ -1,3 +1,4 @@
+from copy import deepcopy
 from os import getcwd
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -34,7 +35,7 @@ default_hotkeys: Dict[str, str] = {
     "move_window_next_monitor": "<ctrl>+<shift>+<f3>",
 }
 
-user_setting_dict: Dict[str, Any] = {
+_DEFAULT_SETTINGS: Dict[str, Any] = {
     "language": "English",
     "theme": "system",
     "hotkeys": dict(default_hotkeys),
@@ -127,6 +128,14 @@ user_setting_dict: Dict[str, Any] = {
     # Whether the pet home was running when FrontEngine last closed
     "pet_home_running": False,
 }
+
+
+def default_settings() -> Dict[str, Any]:
+    """Return independent defaults without copying another live session's edits."""
+    return deepcopy(_DEFAULT_SETTINGS)
+
+
+user_setting_dict: Dict[str, Any] = default_settings()
 
 
 def _repository() -> JsonRepository:

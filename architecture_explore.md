@@ -252,7 +252,8 @@ FrontEngine 是一個 PySide6 桌面**覆蓋層（overlay）框架**：把影片
 
 | 檔案 | 行數 | 功用 |
 | --- | ---: | --- |
-| `user_setting_file.py` | 256 | 全域 `user_setting_dict` 與其預設值（語言、主題、快速鍵、各功能開關與規則）。提供讀寫、匯出匯入、覆蓋層位置記憶、最近使用檔案、快速鍵對照表。設定檔是工作目錄下的 `user_setting.json`。 |
+| `user_setting_file.py` | 291 | 全域 `user_setting_dict` 與其預設值（語言、主題、快速鍵、各功能開關與規則）。`default_settings()` 從原始預設值深複製，避免新儲存工作階段沿用其他工作階段的修改。提供讀寫、匯出匯入、覆蓋層位置記憶、最近使用檔案、快速鍵對照表。既有全域讀寫仍使用工作目錄下的 `user_setting.json`，所有權整合追蹤於 #52。 |
+| `storage_session.py` | 247 | Explicit `StorageSession.open(directory)` acquires a persistent native file lock before reading settings, pins the physical root, and keeps ownership through registered clients and admitted I/O. Windows uses a nonblocking CRT byte lock; POSIX uses `flock`, with child descriptors closed after fork and inherited sessions rejected. Managed-file aliases and access failures are refused; invalid JSON retains the existing defaults fallback. Old bound writers cannot reopen a retired session. This independent-session foundation does not yet replace the global settings facade or HomeSaveStore; integration is tracked in #52. |
 | `preset_repository.py` | 233 | 預設集儲存庫：`presets/` 下一個預設集一個 JSON。含檔名淨化、匯出／匯入、**封包（zip，內含 `media/`）**；解壓時只取檔名最後一段以防 zip-slip。 |
 | `scene_setting.py` | 46 | 場景 JSON 的選檔與寫檔（⚠ 目前反向依賴 `ui/dialog`）。 |
 
