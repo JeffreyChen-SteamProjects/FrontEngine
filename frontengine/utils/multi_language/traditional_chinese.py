@@ -1835,6 +1835,7 @@ traditional_chinese_word_dict = {
     "pet_home_result_layout_copied": "已複製配置，可在其他家園用「貼上配置」",
     "pet_home_result_layout_invalid": "剪貼簿裡不是家園配置",
     "pet_home_result_layout_partly": "已套用配置；部分家具放不下，留在收納中",
+    "pet_home_result_layout_restore_blocked": "無法還原配置，部分家具無法取得或放不下。目前配置未變更，可稍後重試。",
     "pet_home_area_living": "居住",
     "pet_home_area_work": "工作",
     "pet_home_area_leisure": "休閒",

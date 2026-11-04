@@ -58,11 +58,19 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261105-08 | 2026-11-05 | Full regression and installed-wheel home checks pass; mixed DPI unavailable | #snapshot #tests #native #packaging | [2026-11](2026-11.md) |
+| U-20261105-07 | 2026-11-05 | Persist life-event frequency and keep blocked layout restoration retryable | #done #pets #events #saving | [2026-11](2026-11.md) |
+| U-20261105-06 | 2026-11-05 | Refresh item visuals and preserve photos, notifications and paid upgrades | #done #ui #pets | [2026-11](2026-11.md) |
 | U-20261102-29 | 2026-11-02 | Ten more pieces of furniture | #done #pets #game #art | [2026-11](2026-11.md) |
 | U-20261102-28 | 2026-11-02 | Five more outfits, and a wardrobe that fetches new clothes by itself | #done #pets #art #ui | [2026-11](2026-11.md) |
 | U-20261102-27 | 2026-11-02 | The desktop pet page starts with one click | #done #pets #ui | [2026-11](2026-11.md) |
 | U-20261102-26 | 2026-11-02 | Fewer steps across the pages: no monitor prompt, no not-ready dialogs, choose or drop to show | #done #ui | [2026-11](2026-11.md) |
 | U-20261102-25 | 2026-11-02 | Size the desktop home, keep the pet in view, and pat with a double-click | #done #pets #game #ui | [2026-11](2026-11.md) |
+| U-20261105-01 | 2026-11-05 | Native strip checks repaired and image overlay mixed DPI verified | #snapshot #tests #native | [2026-11](2026-11.md) |
+| U-20261105-02 | 2026-11-05 | Interrupted home-strip drags release the resident | #done #pets #events | [2026-11](2026-11.md) |
+| U-20261105-03 | 2026-11-05 | Cancelling layout edits prevents late moves and area painting | #done #ui #pets #events | [2026-11](2026-11.md) |
+| U-20261105-04 | 2026-11-05 | Blocking saves retain background write completion ownership | #done #pets #saving | [2026-11](2026-11.md) |
+| U-20261105-05 | 2026-11-05 | Room-scoped arranging and persistent meeting-mode exit | #done #ui #pets | [2026-11](2026-11.md) |
 | U-20261102-30 | 2026-11-02 | Rain and snow on the desktop strip, in a layer that never takes input | #done #pets #game #native | [2026-11](2026-11.md) |
 | U-20261102-24 | 2026-11-02 | Require Python 3.11; stop supporting 3.10 | #migration #deps #ci | [2026-11](2026-11.md) |
 | U-20261102-23 | 2026-11-02 | Old entry points tested after the move, and a background smoke run of the pet home | #done #tests #pets | [2026-11](2026-11.md) |
@@ -258,6 +266,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 54 |
+| [2026-11.md](2026-11.md) | 2026-11 | 62 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

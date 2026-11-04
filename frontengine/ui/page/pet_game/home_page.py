@@ -175,6 +175,8 @@ class PetHomePage(SettingPage):
         return list(QGuiApplication.screens())
 
     def choose_zone(self, zone: str | None) -> None:
+        self.layout_panel.preview_cell = None
+        self.set_preview(None)
         self._zone_id = zone
         self.selected_furniture = None
         self.refresh()
@@ -378,6 +380,13 @@ class PetHomePage(SettingPage):
         self.desktop_check.setChecked(user_setting_dict.get(DESKTOP_KEY, True) is not False)
         self.desktop_check.toggled.connect(self._desktop_toggled)
         section.add_widget(self.desktop_check)
+        self.mode_combo = QComboBox()
+        for index, mode in enumerate(HOME_MODES):
+            self.mode_combo.addItem('', mode)
+            retranslator.bind(self.mode_combo, 'pet_home_mode_' + mode, mode, 'setItemText', index)
+        self.mode_combo.setCurrentIndex(self.mode_combo.findData(self.mode))
+        self.mode_combo.activated.connect(lambda _index: self.set_mode(self.mode_combo.currentData()))
+        section.add_row('pet_home_mode', self.mode_combo, 'Mode')
         self.motion_check = tr(QCheckBox(), "pet_home_reduced_motion", "Reduce motion")
         self.motion_check.setChecked(user_setting_dict.get(MOTION_KEY) is True)
         self.motion_check.toggled.connect(self._motion_toggled)
@@ -497,6 +506,7 @@ class PetHomePage(SettingPage):
         self.view.cell_clicked.connect(self.layout_panel.cell_clicked)
         self.view.piece_hovered.connect(self.layout_panel.drag_hover)
         self.view.piece_dropped.connect(self.layout_panel.drop)
+        self.view.edit_cancelled.connect(lambda: self.set_preview(None))
         self.view.area_painted.connect(self.layout_panel.paint_area)
         application = QGuiApplication.instance()
         application.screenAdded.connect(self.screens_changed)
@@ -616,11 +626,11 @@ class PetHomePage(SettingPage):
         for zone in [key for key in zones if key not in {strip.zone for strip in self.strip_list}]:
             strip = HomeStrip(self.service, zone, self.layer, str(user_setting_dict.get("quality_tier", "")))
             strip.open_requested.connect(self.open_requested.emit)
-            strip.action_requested.connect(self.strip_action)
+            strip.action_requested.connect(lambda action, target, z=zone: self.strip_action(action, target, z))
             strip.arrange_finished.connect(self._strip_done_arranging)
             strip.layer_requested.connect(self.choose_layer)
             strip.resident_selected.connect(self.select_resident)
-            strip.cell_clicked.connect(self.layout_panel.cell_clicked)
+            strip.cell_clicked.connect(lambda cell, z=zone: self._strip_cell_clicked(z, cell))
             strip.closed.connect(lambda s=strip: self._forget_strip(s))
             strip.set_arranging(self.layout_panel.arranging)
             self.strip_list.append(strip)
@@ -666,6 +676,8 @@ class PetHomePage(SettingPage):
 
     def apply_mode(self) -> None:
         mode = getattr(self, "_effective_mode", None) or self.mode
+        self.mode_combo.setCurrentIndex(self.mode_combo.findData(mode))
+        self.mode_combo.setEnabled(not bool(getattr(self, "_effective_mode", None)))
         if mode == "meeting":
             self.service.pause(MEETING_REASON)
         else:
@@ -721,7 +733,7 @@ class PetHomePage(SettingPage):
     def set_preview(self, preview) -> None:
         self.view.set_preview(preview)
         for strip in self.strip_list:
-            strip.set_preview(preview)
+            strip.set_preview(preview if strip.zone == self.zone else None)
 
     def set_arranging(self, arranging: bool) -> None:
         for strip in self.strip_list:
@@ -736,6 +748,8 @@ class PetHomePage(SettingPage):
         self.residents.refresh_live()
 
     def select_furniture(self, identifier: str | None) -> None:
+        if identifier is not None:
+            self.layout_panel.storage.clearSelection()
         self.selected_furniture = identifier
         self.view.set_selected(identifier)
         self.layout_panel.refresh_lists()
@@ -782,8 +796,12 @@ class PetHomePage(SettingPage):
                          .format(error=error))
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
-        if event.key() == Qt.Key.Key_Escape and self.layout_panel.arranging:
-            self.layout_panel.toggle_arrange()
+        if event.key() == Qt.Key.Key_Escape and (self.layout_panel.arranging
+                                               or self.layout_panel.area_paint.isChecked()):
+            if self.layout_panel.area_paint.isChecked():
+                self.layout_panel.area_paint.click()
+            if self.layout_panel.arranging:
+                self.layout_panel.toggle_arrange()
             event.accept()
             return
         steps = {Qt.Key.Key_Left: -1, Qt.Key.Key_Right: 1}.get(event.key())
@@ -822,8 +840,26 @@ class PetHomePage(SettingPage):
         self._follow()
         self.update_ambience()
 
-    def strip_action(self, action: str, target: str) -> None:
+    def _strip_cell_clicked(self, zone: str, cell: int) -> None:
+        world = self.service.world
+        if world is None or zone not in world.zones:
+            return
+        if zone != self.zone:
+            self.choose_zone(zone)
+        self.layout_panel.cell_clicked(cell)
+
+    def strip_action(self, action: str, target: str, zone: str | None = None) -> None:
         """The desktop strip's toolbar and right-click menus: arranging stays on the desktop, the rest opens here."""
+        world = self.service.world
+        if world is None:
+            return
+        item = world.furniture.get(target) if action == "move" else world.residents.get(target)
+        zone = item.zone if item is not None else zone
+        if zone is not None:
+            if zone not in world.zones:
+                return
+            if zone != self.zone:
+                self.choose_zone(zone)
         if action in ("arrange", "move"):
             if action == "move":
                 self.select_furniture(target)

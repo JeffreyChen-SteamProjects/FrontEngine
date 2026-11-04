@@ -150,3 +150,56 @@ def test_painting_an_area_on_the_overview(page):
         {QEvent.Type.MouseButtonPress: view.mousePressEvent, QEvent.Type.MouseMove: view.mouseMoveEvent,
          QEvent.Type.MouseButtonRelease: view.mouseReleaseEvent}[kind](event)
     assert page.service.world.zones[page.zone].areas == ((2, 6, "work"),)
+
+
+def test_strip_placement_uses_clicked_room(page):
+    world = page.service.world
+    first = page.zone
+    second = page.add_zone(FakeScreen('second', 1280))
+    bed = next(piece for piece in world.furniture.values() if piece.definition == 'bed_basic')
+    world.store(bed.identifier)
+    page.choose_zone(first)
+    page.layout_panel.toggle_arrange()
+    assert page.layout_panel.storage.select_key('bed_basic')
+    strip = next(strip for strip in page.strip_list if strip.zone == second)
+    strip.cell_clicked.emit(20)
+    placed = next(piece for piece in world.furniture.values() if piece.definition == 'bed_basic')
+    assert (placed.zone, placed.cell) == (second, 20)
+    assert page.zone == second
+
+
+def test_preview_only_appears_in_selected_room(page):
+    first = page.zone
+    page.add_zone(FakeScreen('second', 1280))
+    page.choose_zone(first)
+    preview = ('bed_basic', 5, False, None)
+    page.set_preview(preview)
+    for strip in page.strip_list:
+        assert strip.preview == (preview if strip.zone == first else None)
+
+
+def test_follow_from_other_strip_selects_residents_room(page):
+    world = page.service.world
+    first = page.zone
+    second = page.add_zone(FakeScreen('second', 1280))
+    resident = next(iter(world.residents))
+    assert world.transfer_resident(resident, second) == 'accepted'
+    page.choose_zone(first)
+    strip = next(strip for strip in page.strip_list if strip.zone == second)
+    strip.action_requested.emit('follow', resident)
+    assert page.zone == second
+    assert page.followed == resident
+
+
+def test_strip_move_does_not_place_previously_selected_storage_item(page):
+    world = page.service.world
+    bed = next(piece for piece in world.furniture.values() if piece.definition == 'bed_basic')
+    desk = next(piece for piece in world.furniture.values() if piece.definition == 'desk_basic')
+    world.store(bed.identifier)
+    page.refresh()
+    assert page.layout_panel.storage.select_key('bed_basic')
+    strip = page.strip_list[0]
+    strip.action_requested.emit('move', desk.identifier)
+    strip.cell_clicked.emit(20)
+    assert desk.cell == 20
+    assert world.stored('bed_basic') == 1

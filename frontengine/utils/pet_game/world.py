@@ -28,8 +28,8 @@ from frontengine.utils.pet_game.rng import GameRandom
 from frontengine.utils.pet_game.schedule import TEMPLATES, initial_time
 
 FORMAT = "frontengine.pet-home"
-VERSION = 7              # 2: needs, relationships; 3: goals, progress; 4: zone areas; 5: crossings; 6: upgrades;
-                         # 7: hygiene
+VERSION = 8              # 2: needs, relationships; 3: goals, progress; 4: zone areas; 5: crossings; 6: upgrades;
+                         # 7: hygiene; 8: persistent life-event days
 RELATION_LIMIT = 100
 MODES = ("manage", "sandbox")
 MAX_RESIDENTS = 12

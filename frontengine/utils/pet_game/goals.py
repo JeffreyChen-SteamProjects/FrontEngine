@@ -130,6 +130,7 @@ class Progress:
     wishes: dict[str, dict] = field(default_factory=dict)        # resident -> {wish, base, ready}
     arrivals: dict[str, int] = field(default_factory=dict)       # resident -> world time it moved in
     events: list[dict] = field(default_factory=list)
+    event_days: dict[str, dict[str, int]] = field(default_factory=dict)
     upgrades: dict[str, int] = field(default_factory=dict)       # workstation kind -> level 2..3
     next_check_ms: int = 0                                       # runtime only
 
@@ -142,12 +143,14 @@ class Progress:
                 "commissions": {"day": self.commissions["day"], "offers": [dict(o) for o in self.commissions["offers"]]},
                 "wishes": {key: dict(value) for key, value in sorted(self.wishes.items())},
                 "arrivals": dict(sorted(self.arrivals.items())), "events": [dict(e) for e in self.events],
-                "upgrades": dict(sorted(self.upgrades.items()))}
+                "upgrades": dict(sorted(self.upgrades.items())),
+                "event_days": {kind: dict(sorted(scopes.items())) for kind, scopes in sorted(self.event_days.items())}}
 
     @classmethod
-    def from_dict(cls, data: object) -> Progress:
+    def from_dict(cls, data: object, version: int = 8) -> Progress:
         keys = {"stats", "goals", "commissions", "wishes", "arrivals", "events"}
-        if not isinstance(data, dict) or set(data) not in (keys, keys | {"upgrades"}):   # upgrades: version 6
+        required = keys | ({"event_days"} if version >= 8 else set())
+        if not isinstance(data, dict) or not required <= set(data) <= keys | {"upgrades", "event_days"}:
             raise ValueError("Invalid home progress")
         progress = cls()
         progress.stats = _checked_counts(data["stats"], MAX_STATS)
@@ -158,7 +161,15 @@ class Progress:
                              for key, value in _checked_residents(data["arrivals"]).items()}
         progress.events = _checked_events(data["events"])
         progress.upgrades = _checked_upgrades(data.get("upgrades", {}))
+        progress.event_days = _checked_event_days(data.get("event_days", {}))
+        for event in progress.events:
+            progress.record_event_day(event["kind"], event["resident"], event["day"])
         return progress
+
+    def record_event_day(self, kind: str, resident: str | None, day: int) -> None:
+        scope = resident if LIFE_EVENT_RULES[kind].per_resident else ""
+        days = self.event_days.setdefault(kind, {})
+        days[scope] = max(days.get(scope, 0), day)
 
 
 # ----- validation of saved progress ------------------------------------------------------
@@ -231,7 +242,27 @@ def _checked_events(value: object) -> list[dict]:
                 or event["kind"] not in LIFE_EVENTS or not isinstance(event["resident"], (str, type(None)))):
             raise ValueError("Invalid life event")
         checked_int(event["day"], 1, 10 ** 7, "event day")
+        if LIFE_EVENT_RULES[event["kind"]].per_resident and (
+                not isinstance(event["resident"], str) or not RESIDENT_ID.fullmatch(event["resident"])):
+            raise ValueError("Invalid event resident")
     return [dict(event) for event in value]
+
+
+def _checked_event_days(value: object) -> dict[str, dict[str, int]]:
+    if not isinstance(value, dict) or set(value) - LIFE_EVENT_RULES.keys():
+        raise ValueError("Invalid event days")
+    result = {}
+    for kind, scopes in value.items():
+        if not isinstance(scopes, dict):
+            raise ValueError("Invalid event scopes")
+        for scope, day in scopes.items():
+            if (not isinstance(scope, str)
+                    or (LIFE_EVENT_RULES[kind].per_resident and not RESIDENT_ID.fullmatch(scope))
+                    or (not LIFE_EVENT_RULES[kind].per_resident and scope != "")):
+                raise ValueError("Invalid event scope")
+            checked_int(day, 1, 10 ** 7, "event day")
+        result[kind] = dict(scopes)
+    return result
 
 
 # ----- tutorial and level ---------------------------------------------------------------
@@ -373,6 +404,7 @@ FRIEND_LEVEL, SKILLED_LEVEL, GREEN_HOME_DECORATIONS, FULL_HOUSE, HARVEST_UNITS =
 
 
 def _life_event(world: World, kind: str, resident: str | None) -> None:
+    world.progress.record_event_day(kind, resident, game_day(world.time_ms))
     world.progress.events = (world.progress.events + [
         {"kind": kind, "day": game_day(world.time_ms), "resident": resident}])[-MAX_EVENTS:]
     world.emit("life_event", event=kind, resident=resident)
@@ -382,12 +414,9 @@ def due(world: World, kind: str, resident: str | None = None) -> bool:
     """Whether the event's rule lets it happen today (for this pet, when it is about one pet)."""
     rule = LIFE_EVENT_RULES[kind]
     today = game_day(world.time_ms)
-    for event in world.progress.events:
-        if event["kind"] != kind or (rule.per_resident and event["resident"] != resident):
-            continue
-        if rule.cooldown_days == 0 or today - event["day"] < rule.cooldown_days:
-            return False
-    return True
+    scope = resident if rule.per_resident else ""
+    last_day = world.progress.event_days.get(kind, {}).get(scope)
+    return last_day is None or (rule.cooldown_days > 0 and today - last_day >= rule.cooldown_days)
 
 
 def _once_events(world: World) -> None:

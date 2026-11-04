@@ -61,6 +61,31 @@ def test_screen_sharing_borrows_meeting_mode_and_gives_it_back(page):
     assert page.mode == "focus"
 
 
+def test_settings_can_leave_meeting_without_the_hidden_strip(page):
+    from PySide6.QtCore import Qt
+    from PySide6.QtTest import QTest
+
+    page.set_mode('meeting')
+    assert all(not strip.isVisible() for strip in page.strip_list)
+    assert page.mode_combo.currentData() == 'meeting'
+    assert page.mode_combo.isEnabled()
+    QTest.keyClick(page.mode_combo, Qt.Key.Key_Home)
+    assert page.mode == 'normal'
+    assert page.service.running
+    assert all(strip.isVisible() for strip in page.strip_list)
+
+
+def test_settings_show_temporary_sharing_mode_without_overwriting_preference(page):
+    page.set_mode('focus')
+    page.sharing_changed(True)
+    assert page.mode_combo.currentData() == 'meeting'
+    assert not page.mode_combo.isEnabled()
+    assert page.mode == 'focus'
+    page.sharing_changed(False)
+    assert page.mode_combo.currentData() == 'focus'
+    assert page.mode_combo.isEnabled()
+
+
 def test_inbox_sorts_and_folds_everything_that_happened(page):
     world = page.service.world
     resident = next(iter(world.residents))
@@ -85,3 +110,25 @@ def test_inbox_sorts_and_folds_everything_that_happened(page):
 ])
 def test_only_meaningful_events_reach_the_inbox(event, expected):
     assert category(event) == expected
+
+
+def test_inbox_keeps_different_life_events_and_errors_distinct(page):
+    world = page.service.world
+    resident = next(iter(world.residents))
+    page.inbox.on_events([
+        {'kind': 'life_event', 'event': 'friend', 'resident': resident, 'time': 1000},
+        {'kind': 'life_event', 'event': 'skilled', 'resident': resident, 'time': 1000},
+        {'kind': 'life_event', 'event': 'skilled', 'resident': resident, 'time': 2000},
+    ], world)
+    assert page.inbox.list.count() == 2
+    assert page.inbox.entries[-1]['count'] == 2
+    page.inbox.add_error('disk full', 3000)
+    page.inbox.add_error('permission denied', 4000)
+    assert page.inbox.list.count() == 4
+    assert page.inbox.list.item(0).text() == 'permission denied'
+
+
+def test_inbox_does_not_fold_across_a_clock_reset(page):
+    page.inbox.add_error('disk full', 60000)
+    page.inbox.add_error('disk full', 0)
+    assert page.inbox.list.count() == 2

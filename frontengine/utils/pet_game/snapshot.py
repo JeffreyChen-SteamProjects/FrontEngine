@@ -25,7 +25,7 @@ FIELDS_V1 = {"format", "version", "home", "mode", "time_ms", "rng", "next_id", "
 FIELDS_V2 = FIELDS_V1 | {"relations"}
 FIELDS = FIELDS_V2 | {"progress"}
 FIELDS_BY_VERSION = {1: FIELDS_V1, 2: FIELDS_V2, 3: FIELDS, 4: FIELDS, 5: FIELDS, 6: FIELDS,
-                     7: FIELDS}  # 4-7: inner fields
+                     7: FIELDS, 8: FIELDS}  # 4-8: inner fields
 ZONE_DEFAULTS = {4: ("areas", []), 5: ("link", None)}     # fields zones gained in that version
 _PAIR = re.compile(r"[0-9a-f]{32}\|[0-9a-f]{32}")
 MAX_TIME_MS = 10 ** 13
@@ -150,9 +150,9 @@ def from_dict(data: object, catalog: Catalog) -> World:
     if len(world.dormant) > MAX_DORMANT:
         raise ValueError("Too many unavailable records")
     world.relations = _checked_relations(data.get("relations", {}), world)
-    world.progress = Progress.from_dict(data["progress"]) if "progress" in data else Progress()
+    world.progress = Progress.from_dict(data["progress"], data["version"]) if "progress" in data else Progress()
     world.progress.upgrades = {key: level for key, level in world.progress.upgrades.items()
-                               if key in catalog.furniture and catalog.furniture[key].profession}
+                               if key not in catalog.furniture or catalog.furniture[key].profession}
     for identifier in world.residents:              # homes saved before version 3 start counting now
         world.progress.arrivals.setdefault(identifier, world.time_ms)
     world.progress.arrivals = {key: value for key, value in world.progress.arrivals.items()

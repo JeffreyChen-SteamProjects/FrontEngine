@@ -84,9 +84,12 @@ class ThingGrid(QListWidget):
         current = self.current_key()
         things = [(key, icon, tile_text(text)) for key, icon, text in things]
         if [self.item(row).data(ROLE_KEY) for row in range(self.count())] == [key for key, _i, _t in things]:
-            for row, (_key, _icon, text) in enumerate(things):
-                if self.item(row).text() != text:
-                    self.item(row).setText(text)
+            for row, (_key, icon, text) in enumerate(things):
+                item = self.item(row)
+                if item.text() != text:
+                    item.setText(text)
+                item.setIcon(icon)
+                item.setToolTip(text.replace("\n", " "))
             return
         self.clear()
         for key, icon, text in things:

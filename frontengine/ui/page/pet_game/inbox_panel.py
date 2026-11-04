@@ -98,9 +98,10 @@ class InboxPanel:
             self.refresh_lists()
 
     def _add(self, event: dict, name: str, text: str) -> None:
-        key = (event["kind"], event.get("resident"), event.get("recipe"), event.get("reason"))
+        key = (event["kind"], event.get("resident"), event.get("recipe"), event.get("reason"),
+               event.get("event"), text)
         last = self.entries[-1] if self.entries else None
-        if last is not None and last["key"] == key and event.get("time", 0) - last["time"] <= FOLD_MS:
+        if last is not None and last["key"] == key and 0 <= event.get("time", 0) - last["time"] <= FOLD_MS:
             last.update(count=last["count"] + 1, time=event.get("time", 0))
         else:
             self.entries.append({"key": key, "text": text, "count": 1, "time": event.get("time", 0),

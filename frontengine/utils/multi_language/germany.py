@@ -1829,6 +1829,7 @@ germany_word_dict = {
     "pet_home_result_layout_copied": "Einrichtung kopiert - mit „Einrichtung einfügen“ in ein anderes Zuhause übernehmen",
     "pet_home_result_layout_invalid": "In der Zwischenablage ist keine Einrichtung",
     "pet_home_result_layout_partly": "Einrichtung angewendet; einige Stücke passten nicht und bleiben im Lager",
+    "pet_home_result_layout_restore_blocked": "Die Anordnung kann nicht wiederhergestellt werden. Einige Möbel fehlen oder passen nicht mehr. Nichts wurde geändert. Du kannst es erneut versuchen.",
     "pet_home_area_living": "Wohnen",
     "pet_home_area_work": "Arbeit",
     "pet_home_area_leisure": "Freizeit",

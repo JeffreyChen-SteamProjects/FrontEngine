@@ -1826,6 +1826,7 @@ italian_word_dict = {
     "pet_home_result_layout_copied": "Disposizione copiata - incollala in un'altra casa con Incolla disposizione",
     "pet_home_result_layout_invalid": "Gli appunti non contengono una disposizione",
     "pet_home_result_layout_partly": "Disposizione applicata; alcuni mobili non c'entravano e restano in deposito",
+    "pet_home_result_layout_restore_blocked": "Impossibile ripristinare la disposizione. Alcuni mobili non sono disponibili o non entrano più. Nulla è cambiato; puoi riprovare.",
     "pet_home_area_living": "Zona notte",
     "pet_home_area_work": "Lavoro",
     "pet_home_area_leisure": "Svago",

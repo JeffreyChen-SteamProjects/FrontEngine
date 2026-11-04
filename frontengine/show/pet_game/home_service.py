@@ -310,10 +310,13 @@ class HomeService(QObject):
             return
         revision = self._revision
         self._future = self._executor.submit(self.store.write_encoded, data)
-        self._future.add_done_callback(lambda future: self._written.emit(future.exception(), revision))
+        self._future.add_done_callback(lambda future: self._written.emit(future, revision))
 
-    def _on_written(self, error: object, revision: int) -> None:
+    def _on_written(self, future: Future, revision: int) -> None:
+        if future is not self._future:
+            return
         self._future = None
+        error = future.exception()
         if error is not None:
             self._failed(error)
         else:
@@ -340,9 +343,14 @@ class HomeService(QObject):
     def save_now(self) -> bool:
         """Blocking save (shutdown, tests): home first, then profiles; failure keeps memory."""
         self.save_timer.stop()
-        if self._future is not None:
-            self._future.result()   # let the in-flight write finish first; its signal is ignored
-            self._future = None
+        future, self._future = self._future, None
+        self._pending = False
+        if future is not None:
+            try:
+                future.result()
+            except (OSError, ValueError) as error:
+                self._failed(error)
+                return False
         if self.world is None:
             return True
         revision = self._revision

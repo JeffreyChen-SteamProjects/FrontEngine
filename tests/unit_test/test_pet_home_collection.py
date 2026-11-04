@@ -116,3 +116,46 @@ def test_the_collection_tab_and_locked_shop_captions(page):
     assert page.shop.items.select_key("furniture:piano")
     page.shop.buy()
     assert page.message.text() == translate("pet_home_result_locked")
+
+
+def test_same_second_photos_preserve_each_image(page, tmp_path, monkeypatch):
+    from datetime import datetime
+    from PySide6.QtGui import QPixmap
+    from frontengine.ui.page.pet_game import goals_panel
+
+    class FrozenTime:
+        @staticmethod
+        def now():
+            return datetime(2026, 11, 5, 12, 0, 0)
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(goals_panel, 'datetime', FrozenTime)
+    page.create_home()
+    picture = QPixmap(8, 8)
+    picture.fill(QColor('red'))
+    first = page.goals.save_photo(picture, 'Mochi')
+    picture.fill(QColor('blue'))
+    second = page.goals.save_photo(picture, 'Mochi')
+    assert first != second
+    assert QImage(str(first)).pixelColor(4, 4) == QColor('red')
+    assert QImage(str(second)).pixelColor(4, 4) == QColor('blue')
+
+
+@pytest.mark.parametrize('failure', ['folder', 'image'])
+def test_failed_photo_leaves_no_album_file(page, tmp_path, monkeypatch, failure):
+    from PySide6.QtGui import QPixmap
+
+    monkeypatch.chdir(tmp_path)
+    page.create_home()
+    folder = tmp_path / 'pet-album'
+    picture = QPixmap()
+    if failure == 'folder':
+        folder.write_text('occupied', encoding='utf-8')
+        picture = QPixmap(8, 8)
+        picture.fill(QColor('red'))
+    assert page.goals.save_photo(picture) is None
+    assert page.message.text() == translate('pet_home_photo_failed')
+    if failure == 'folder':
+        assert folder.read_text(encoding='utf-8') == 'occupied'
+    else:
+        assert list(folder.iterdir()) == []

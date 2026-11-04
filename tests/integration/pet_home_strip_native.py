@@ -56,6 +56,8 @@ def wait(ms: int) -> None:
 def owner(widget: QWidget, local: QPoint) -> int:
     """Root window under a strip-local logical point, asked in physical pixels."""
     screen = widget.screen()
+    if screen.geometry().topLeft() != QPoint(0, 0):
+        raise RuntimeError('This hit-test probe requires the primary monitor at native origin')
     logical = widget.mapToGlobal(local) - screen.geometry().topLeft()
     ratio = screen.devicePixelRatio()
     physical = wintypes.POINT(int(logical.x() * ratio), int(logical.y() * ratio))
@@ -79,6 +81,8 @@ def rain(strip, world, points, behind_hwnd) -> dict:
     wait(600)
     layer = strip.weather_layer
     layer.grab().save(str(OUTPUT / 'rain-layer.png'))
+    resident = next(iter(world.residents.values()))
+    points = dict(points, resident=strip.resident_center(resident).toPoint())
     owners = {name: owner(strip, point) for name, point in points.items()}
     strip_hwnd = int(strip.winId())
     return {'rain_shown': layer.isVisible() and layer.geometry() == strip.geometry(),
@@ -93,20 +97,29 @@ def larger(page, strip, behind_hwnd) -> dict:
     and the pet still takes clicks while the empty strip still passes them through."""
     world = strip.service.world
     pet = next(iter(world.residents.values()))
+    strip.service.pause('native-geometry-probe')
+    previous_x = pet.x_milli
+    pet.x_milli = (world.zones[strip.zone].width_pixels - 40) * 1000
+    strip._before = strip._after = {}
     page.set_strip_scale(200)
     strip.chosen = pet.identifier
     strip._stepped()
     wait(1500)
     area = strip.screen_for_zone().availableGeometry()
     box = strip.resident_box(pet)
-    empty = QPoint(strip.width() - 12, strip.height() - 30)
-    on_item = strip._resident_at(empty) is not None or strip._piece_at(empty) is not None
+    empty = next((QPoint(x, strip.height() - 30) for x in range(strip.width() - 12, 0, -20)
+                  if not strip.interactive_region().contains(QPoint(x, strip.height() - 30))), None)
+    if empty is None:
+        raise RuntimeError('No empty point available for the enlarged strip hit test')
     result = {'large_size': [strip.width(), strip.height()], 'large_scroll': strip.scroll_x,
               'large_on_screen': area.contains(strip.geometry()),
               'large_pet_takes_input': owner(strip, box.center().toPoint()) == int(strip.winId()),
-              # the corner may hold a piece at this size; only an empty spot must pass through
-              'large_empty_passes_through': on_item or owner(strip, empty) == behind_hwnd}
+              'large_scrolled': strip.scroll_x > 0,
+              'large_empty_passes_through': owner(strip, empty) == behind_hwnd}
     strip.grab().save(str(OUTPUT / 'strip-200.png'))
+    pet.x_milli = previous_x
+    strip._before = strip._after = {}
+    strip.service.resume('native-geometry-probe')
     page.set_strip_scale(100)
     wait(400)
     return result
@@ -128,6 +141,8 @@ def run() -> dict:
     behind.show()
     behind.activateWindow()
     wait(400)
+    behind.setGeometry(area.left(), area.bottom() - 400, area.width(), 400)
+    wait(200)
     foreground_before = int(user32.GetForegroundWindow() or 0)
     service = HomeService(None, HomeSaveStore(Path.cwd(), builtin_catalog()), PetProfiles({}, lambda: None))
     page = PetHomePage(service)
@@ -145,9 +160,16 @@ def run() -> dict:
         'resident': strip.resident_center(resident).toPoint(),
         'button': strip.button.geometry().center(),
     }
+    if not behind.geometry().contains(strip.mapToGlobal(points['empty'])):
+        raise RuntimeError('The backing window does not cover the empty test point')
     owners = {name: owner(strip, point) for name, point in points.items()}
     strip_hwnd, behind_hwnd = int(strip.winId()), int(behind.winId())
     result = {
+        'strip_geometry': strip.geometry().getRect(),
+        'behind_geometry': behind.geometry().getRect(),
+        'screen_geometry': strip.screen().geometry().getRect(),
+        'screen_ratio': strip.screen().devicePixelRatio(),
+        'empty_global': strip.mapToGlobal(points['empty']).toTuple(),
         'strip_hwnd': strip_hwnd, 'behind_hwnd': behind_hwnd, 'owners': owners,
         'empty_passes_through': owners['empty'] == behind_hwnd,
         'items_take_input': all(owners[name] == strip_hwnd for name in ('furniture', 'resident', 'button')),
@@ -176,7 +198,9 @@ def run() -> dict:
                         and result['after_arranging_passes_through'] and result['rain_shown']
                         and result['rain_empty_passes_through'] and result['rain_items_take_input']
                         and result['rain_foreground_unchanged'] and result['large_on_screen']
-                        and result['large_pet_takes_input'] and result['large_empty_passes_through'])
+                        and result['large_pet_takes_input'] and result['large_empty_passes_through']
+                        and result['large_scrolled'] and result['bottom_empty_passes_through']
+                        and result['shutdown'])
     return result
 
 

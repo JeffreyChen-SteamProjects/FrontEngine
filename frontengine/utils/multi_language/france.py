@@ -1826,6 +1826,7 @@ french_word_dict = {
     "pet_home_result_layout_copied": "Aménagement copié - collez-le dans une autre maison avec Coller l'aménagement",
     "pet_home_result_layout_invalid": "Le presse-papiers ne contient pas d'aménagement",
     "pet_home_result_layout_partly": "Aménagement appliqué ; certains meubles ne tenaient pas et restent en réserve",
+    "pet_home_result_layout_restore_blocked": "Impossible de restaurer cette disposition. Certains meubles sont indisponibles ou ne tiennent plus. Rien n’a changé ; vous pouvez réessayer.",
     "pet_home_area_living": "Vie",
     "pet_home_area_work": "Travail",
     "pet_home_area_leisure": "Loisirs",

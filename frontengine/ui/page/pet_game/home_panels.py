@@ -202,7 +202,8 @@ class LayoutPanel:
         section.add_inline(*self.actions)
         self.hint.setVisible(False)
         self.preview_cell: int | None = None
-        self.history = LayoutHistory()
+        self._history_world = None
+        self._histories: dict[str | None, LayoutHistory] = {}
         self.undo_button = _button("pet_home_undo", "Undo", self.undo)
         self.redo_button = _button("pet_home_redo", "Redo", self.redo)
         self.copy_button = _button("pet_home_copy_layout", "Copy layout", self.copy_layout)
@@ -356,6 +357,17 @@ class LayoutPanel:
 
     # ----- whole-zone changes -----------------------------------------------------------------
 
+    @property
+    def history(self) -> LayoutHistory:
+        world = self.page.service.world
+        if world is not self._history_world:
+            self._histories.clear()
+            self._history_world = world
+        zone = self.page.zone
+        if zone not in self._histories:
+            self._histories[zone] = LayoutHistory()
+        return self._histories[zone]
+
     def _change(self, command):
         """Every layout change goes through here so it can be undone."""
         world, zone = self.page.service.world, self.page.zone
@@ -369,13 +381,15 @@ class LayoutPanel:
     def undo(self) -> None:
         zone = self.page.zone
         if zone and self.history.can_undo():
-            self.page.service.run(lambda world: self.history.undo(world, zone))
+            restored = self.page.service.run(lambda world: self.history.undo(world, zone))
+            self.page.report("accepted" if restored else "layout_restore_blocked")
             self.page.refresh()
 
     def redo(self) -> None:
         zone = self.page.zone
         if zone and self.history.can_redo():
-            self.page.service.run(lambda world: self.history.redo(world, zone))
+            restored = self.page.service.run(lambda world: self.history.redo(world, zone))
+            self.page.report("accepted" if restored else "layout_restore_blocked")
             self.page.refresh()
 
     def copy_layout(self) -> None:

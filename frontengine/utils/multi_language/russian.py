@@ -1826,6 +1826,7 @@ russian_word_dict = {
     "pet_home_result_layout_copied": "Расстановка скопирована — вставьте её в другой дом кнопкой «Вставить расстановку»",
     "pet_home_result_layout_invalid": "В буфере обмена нет расстановки дома",
     "pet_home_result_layout_partly": "Расстановка применена; часть мебели не поместилась и осталась на складе",
+    "pet_home_result_layout_restore_blocked": "Не удалось восстановить расстановку. Некоторые предметы недоступны или больше не помещаются. Ничего не изменено; можно повторить попытку.",
     "pet_home_area_living": "Жилая",
     "pet_home_area_work": "Рабочая",
     "pet_home_area_leisure": "Отдых",

@@ -1836,6 +1836,7 @@ english_word_dict = {
     "pet_home_result_layout_copied": "Layout copied - paste it into another home with Paste layout",
     "pet_home_result_layout_invalid": "The clipboard does not hold a home layout",
     "pet_home_result_layout_partly": "Layout applied; some pieces did not fit and stay in storage",
+    "pet_home_result_layout_restore_blocked": "Cannot restore this layout. Some furniture is unavailable or no longer fits. Nothing changed; you can retry.",
     "pet_home_area_living": "Living",
     "pet_home_area_work": "Work",
     "pet_home_area_leisure": "Leisure",

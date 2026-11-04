@@ -48,6 +48,21 @@ def test_grid_keeps_the_selection_when_refilled():
     assert not grid.select_key("missing")
 
 
+def test_grid_refreshes_icon_and_tooltip_without_losing_selection():
+    from PySide6.QtGui import QColor, QIcon, QPixmap
+
+    grid = ThingGrid()
+    first, second = QPixmap(8, 8), QPixmap(8, 8)
+    first.fill(QColor('red'))
+    second.fill(QColor('blue'))
+    grid.set_things([('bed', QIcon(first), 'Bed × 1')])
+    grid.select_key('bed')
+    grid.set_things([('bed', QIcon(second), 'Bed × 2')])
+    assert grid.current_key() == 'bed'
+    assert grid.item(0).icon().pixmap(8, 8).toImage().pixelColor(4, 4) == QColor('blue')
+    assert grid.item(0).toolTip() == 'Bed × 2'
+
+
 @pytest.fixture
 def page(tmp_path, monkeypatch):
     from frontengine.user_setting.user_setting_file import user_setting_dict

@@ -14,7 +14,7 @@ import uuid
 from time import monotonic
 from typing import Callable
 
-from PySide6.QtCore import QPoint, QPointF, QRect, QRectF, Qt, QTimer, Signal
+from PySide6.QtCore import QEvent, QPoint, QPointF, QRect, QRectF, Qt, QTimer, Signal
 from PySide6.QtGui import (
     QCloseEvent, QColor, QGuiApplication, QHideEvent, QMouseEvent, QPainter, QPen, QRegion, QShowEvent,
 )
@@ -536,21 +536,37 @@ class HomeStrip(HomeView):
         self.update()
 
     def mouseReleaseEvent(self, event: QMouseEvent) -> None:
-        if self._press is None:
+        if event.button() != Qt.MouseButton.LeftButton or self._press is None:
             return
         identifier, _origin = self._press
         self._press = None
         if self._dragging is not None:
-            x_milli = int(self._dragging[1])
-            self._dragging = None
-            self.service.run(lambda world: world.drag(identifier, x_milli))
-            self._after[identifier] = self._before[identifier] = self.service.world.residents[identifier].x_milli
-            self.update_mask()
+            self._finish_pointer(commit=True)
             return
         self.chosen = identifier
         self.refresh_info()
         self.resident_selected.emit(identifier)
         self.show_card(identifier, event.globalPosition().toPoint())
+
+    def _finish_pointer(self, *, commit: bool) -> None:
+        dragging = self._dragging
+        self._press = self._dragging = None
+        world = self.service.world
+        if dragging is not None and world is not None and world is self.world:
+            identifier, preview = dragging
+            resident = world.residents.get(identifier)
+            if resident is not None:
+                if resident.activity is not None and resident.activity.kind == "drag":
+                    position = int(preview) if commit else resident.x_milli
+                    self.service.run(lambda current: current.drag(identifier, position))
+                self._after[identifier] = self._before[identifier] = resident.x_milli
+        self.update_mask()
+        self.update()
+
+    def event(self, event: QEvent) -> bool:
+        if event.type() == QEvent.Type.UngrabMouse and getattr(self, "_press", None) is not None:
+            self._finish_pointer(commit=False)
+        return super().event(event)
 
     def mouseDoubleClickEvent(self, event: QMouseEvent) -> None:
         """Double-clicking a pet pats it: the most common care without opening a menu."""
@@ -662,6 +678,7 @@ class HomeStrip(HomeView):
 
     def hideEvent(self, event: QHideEvent) -> None:
         """Hidden (for example by Hide all) means paused, and the status says so."""
+        self._finish_pointer(commit=False)
         super().hideEvent(event)
         self.weather_layer.sync()
         if not self.isVisible() and not getattr(self, "_closing", False):
@@ -669,6 +686,7 @@ class HomeStrip(HomeView):
 
     def closeEvent(self, event: QCloseEvent) -> None:
         """Closing removes the desktop drawing only; the home keeps its state and clock."""
+        self._finish_pointer(commit=False)
         self._closing = True
         self.frame_timer.stop()
         self.weather_layer.close()

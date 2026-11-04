@@ -90,7 +90,7 @@ def test_older_homes_load_with_washed_pets_and_new_homes_keep_cleanliness():
     world, _zone = _world()
     world.residents[PET].needs["hygiene"] = 42
     data = snapshot.to_dict(world)
-    assert data["version"] == 7
+    assert data["version"] == 8
     assert snapshot.from_dict(data, CATALOG).residents[PET].needs["hygiene"] == 42
     old = snapshot.to_dict(world)
     old["version"] = 6

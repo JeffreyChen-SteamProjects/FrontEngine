@@ -6,7 +6,7 @@ from os import getcwd
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTemporaryFile
 from PySide6.QtWidgets import QLabel, QListWidget, QListWidgetItem, QPushButton
 
 from frontengine.show.pet_game.captions import item_label
@@ -135,11 +135,19 @@ class GoalsPanel:
         if world is None:
             return None
         folder = Path(getcwd()) / ALBUM_FOLDER
-        folder.mkdir(exist_ok=True)
-        name = "".join(ch for ch in subject if ch.isalnum())[:24]
-        target = folder / f"day{game_day(world.time_ms)}-{datetime.now():%Y%m%d-%H%M%S}{'-' + name if name else ''}.png"
-        if not pixmap.save(str(target), "PNG"):
+        try:
+            folder.mkdir(exist_ok=True)
+        except OSError:
             self.page.report_text(translate("pet_home_photo_failed", "The photo could not be saved."))
             return None
+        name = "".join(ch for ch in subject if ch.isalnum())[:24]
+        prefix = f"day{game_day(world.time_ms)}-{datetime.now():%Y%m%d-%H%M%S}"
+        photo = QTemporaryFile(str(folder / f"{prefix}-XXXXXX{'-' + name if name else ''}.png"))
+        if not photo.open() or not pixmap.save(photo, "PNG") or not photo.flush():
+            self.page.report_text(translate("pet_home_photo_failed", "The photo could not be saved."))
+            return None
+        target = Path(photo.fileName())
+        photo.setAutoRemove(False)
+        photo.close()
         self.page.report_text(translate("pet_home_photo_saved", "Photo saved to {path}").format(path=target))
         return target
