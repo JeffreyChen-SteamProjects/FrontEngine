@@ -1,0 +1,40 @@
+{
+  "status": "confirmed_gap",
+  "requirement": "progress.md #52",
+  "revision": "1347993",
+  "first_process": {
+    "pid": 21140,
+    "status": "loaded",
+    "leased": [
+      "9f8a34f0380c490b8c093cb69fb4c43e"
+    ],
+    "away": false,
+    "running": true
+  },
+  "second_process": {
+    "pid": 33896,
+    "status": "loaded",
+    "leased": [
+      "9f8a34f0380c490b8c093cb69fb4c43e"
+    ],
+    "away": false,
+    "running": true
+  },
+  "first_save": {
+    "saved": true,
+    "time_ms": 1320000,
+    "name": "A latest"
+  },
+  "second_save": {
+    "saved": true,
+    "time_ms": 1260000,
+    "name": "Original"
+  },
+  "world_time_after_first": 1320000,
+  "world_time_after_second": 1260000,
+  "profile_name_after_first": "A latest",
+  "profile_name_after_second": "Original",
+  "evidence_sha256": "3d7734adad0e6c98cbb11dfad70cc117a04760b6841f8e3fa85357f31025f1f9",
+  "source": ".audit/identity-cross-process-20261105/baseline-result.json",
+  "scope": "Two real offscreen Qt processes, production home/profile stores and sessions, same isolated directory; controlled simulation clock. Main UI not launched; production entrypoint separately inspected for ownership gate."
+}

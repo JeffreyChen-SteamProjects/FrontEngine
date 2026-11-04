@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261105-17 | 2026-11-05 | Verify the installed save fix and reproduce shared-directory writer conflicts | #snapshot #tests #saving | [2026-11](2026-11.md) |
 | U-20261105-16 | 2026-11-05 | Report complete saves and clear recovered save errors | #done #pets #saving #ui | [2026-11](2026-11.md) |
 | U-20261105-15 | 2026-11-05 | Keep shop prices visible when tile names are long or fonts grow | #done #ui #pets | [2026-11](2026-11.md) |
 | U-20261105-14 | 2026-11-05 | Organize native screenshots and a sampled workflow clip for inspection | #done #ui #acceptance | [2026-11](2026-11.md) |
@@ -274,6 +275,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 70 |
+| [2026-11.md](2026-11.md) | 2026-11 | 71 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
