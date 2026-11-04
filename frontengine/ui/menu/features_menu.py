@@ -132,7 +132,7 @@ class FeaturesMenu(QMenu):
         if entry.kind == "menu":
             existing = getattr(self.ui, entry.target, None)
             if existing is not None:
-                menu.addMenu(existing)
+                menu.addAction(existing.menuAction())
             return
         if entry.kind == "page" and self.ui.sidebar.page_index(entry.target) is None:
             return
