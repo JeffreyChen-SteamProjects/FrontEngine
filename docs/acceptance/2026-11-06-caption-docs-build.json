@@ -1,0 +1,47 @@
+{
+  "product_test_commit": "f0336e45",
+  "sphinx_build": "HTML -W --keep-going succeeded; no warning/error markers",
+  "languages": [
+    {
+      "language": "Eng",
+      "latest_caption_paragraph_present": true,
+      "html_sha256": "ef9b8061d55d4fc8dd5f4fc497de6ff76896a783add5c97247902a404ad8adcb"
+    },
+    {
+      "language": "Zh",
+      "latest_caption_paragraph_present": true,
+      "html_sha256": "360b6c948ff6a4c8a5a5c992ec17d9a6fc0f36ff54df88245c9c0c21dbe6dbc6"
+    },
+    {
+      "language": "ZhCn",
+      "latest_caption_paragraph_present": true,
+      "html_sha256": "079b5a0eefd62ab994cc19b30b83ff7abf1b8d9345fd61b8cc69d6d9042bb5eb"
+    },
+    {
+      "language": "De",
+      "latest_caption_paragraph_present": true,
+      "html_sha256": "892c41a9a965125ef3dd9f51db9935e5315bf3e7263972eb22e15a2697294855"
+    },
+    {
+      "language": "Fr",
+      "latest_caption_paragraph_present": true,
+      "html_sha256": "57e2b7495bed0cbf1bcbbcec3c6531ce796dc8c06434abcb38ff821b294fae52"
+    },
+    {
+      "language": "Ru",
+      "latest_caption_paragraph_present": true,
+      "html_sha256": "7bc7015a629d33aa10a52edce9a39c233b389f7e8f21e05f05d4b1a2f031fa1e"
+    },
+    {
+      "language": "It",
+      "latest_caption_paragraph_present": true,
+      "html_sha256": "bb32889175d19830792edf8a9442ffa623be4b8db76b57015c9a1d2420a91b8e"
+    }
+  ],
+  "source_count_unchanged": 751,
+  "log_sha256": "78b1fe805a98b47bb4faef38f732e33bbe072afc8e3b7ac8abb37ff31270d6f2",
+  "limits": [
+    "HTML construction/content validation only, not visual or independent review.",
+    "Full regression queued separately; no pass claim yet."
+  ]
+}
