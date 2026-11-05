@@ -118,3 +118,5 @@ against another process maliciously swapping paths after validation.
 ## GIF overlay resources
 
 A GIF overlay owns its QMovie as a Qt child. Completing QObject deletion releases the decoder and source file even when Python references to the closed overlay or movie remain. Stopping playback alone does not release the source file.
+
+Pet settings pages derive generated assets, Puppet exports and previews from `lifetime.storage.directory`. New pets and inactive pets’ wardrobes use that directory for their default asset library. Explicit libraries on existing pets remain authoritative. The home page supplies its renderer with a factory that captures the directory before asynchronous work starts; a later host `chdir` does not redirect that work.

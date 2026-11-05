@@ -234,6 +234,7 @@ class PetProfileControls:
 
     @owned_action
     def wardrobe(self, identifier: str | None = None) -> None:
+        from frontengine.show.pet.asset_library import PetAssetLibrary
         from frontengine.ui.dialog.pet_wardrobe import PetWardrobeDialog
         from frontengine.show.pet.puppet_pet import PuppetPetWidget
 
@@ -249,8 +250,9 @@ class PetProfileControls:
             self._wardrobes[identifier].show()
             return
         try:
-            dialog = PetWardrobeDialog(self.profiles, identifier, self.page,
-                                       library=getattr(owner, 'asset_library', None))
+            library = (getattr(owner, 'asset_library', None)
+                       or PetAssetLibrary(self.lifetime.storage.directory / 'pet-assets'))
+            dialog = PetWardrobeDialog(self.profiles, identifier, self.page, library=library)
         except (OSError, ValueError) as error:
             self.status.setText(str(error))
             return

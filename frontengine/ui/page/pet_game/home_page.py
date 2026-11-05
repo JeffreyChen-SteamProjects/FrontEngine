@@ -10,6 +10,7 @@ from frontengine.ui.runtime_lifetime import owned_action
 from frontengine.ui.runtime_lifetime import OwnedWidgetList
 
 from concurrent.futures import ThreadPoolExecutor
+from functools import partial
 from os import getcwd
 from pathlib import Path
 
@@ -19,6 +20,7 @@ from PySide6.QtWidgets import (QCheckBox, QComboBox, QFrame, QLabel, QListWidget
                                QPushButton, QScrollArea, QSlider, QVBoxLayout, QWidget)
 
 from frontengine.show.pet_game.ambience import DEFAULT_VOLUME, Ambience
+from frontengine.show.pet.asset_library import PetAssetLibrary
 from frontengine.show.pet_game.home_service import HomeService
 from frontengine.show.pet_game.home_strip import (
     DEFAULT_SCALE, HIDDEN_REASON, HOME_MODES, LAYERS, LOCKED_REASON, SCALES, HomeStrip,
@@ -121,7 +123,9 @@ class PetHomePage(SettingPage):
         self.selected_furniture: str | None = None
         self._save_failure_message = False
         self.strip_list: list[HomeStrip] = OwnedWidgetList(self.lifetime)      # registered with the Control Center
-        self.art = ResidentArt(self.service, lifetime=self.lifetime)
+        self.art = ResidentArt(self.service,
+                               library_factory=partial(PetAssetLibrary, self.lifetime.storage.directory / 'pet-assets'),
+                               lifetime=self.lifetime)
         self.art.changed.connect(self._art_changed)
         self.ambience = Ambience(parent=self)
         self._tab_sections: dict | None = None

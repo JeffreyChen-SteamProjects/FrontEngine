@@ -13,6 +13,7 @@ from PySide6.QtWidgets import (
 from frontengine.show.pet.desktop_pet import (
     DesktopPetWidget, BEHAVIOUR_ACTIONS, BEHAVIOUR_FLOOR, BEHAVIOUR_WANDER, BEHAVIOUR_CHASE, PetTagGame, scan_pet_pack,
 )
+from frontengine.show.pet.asset_library import PetAssetLibrary
 from frontengine.ui.dialog.choose_file_dialog import choose_pet, choose_wav_sound
 from frontengine.ui.page.utils import (
     apply_checkbox_state,
@@ -357,7 +358,8 @@ class PetSettingUI(SettingPage):
             talk=presentation['speech_bubbles'], sound_path=sound,
             sit_on_windows=presentation['sit_on_windows'], volume=presentation['volume'] / 100.0,
             audio_react=audio_react,
-            asset_library=getattr(source_pet, 'asset_library', None),
+            asset_library=(getattr(source_pet, 'asset_library', None)
+                           or PetAssetLibrary(self.lifetime.storage.directory / 'pet-assets')),
             profile_id=identifier, profiles=self.profile_controls.profiles,
             profile_name=self.profile_controls.name.text(),
         )
@@ -438,7 +440,8 @@ class PetSettingUI(SettingPage):
         if self._puppet_export is not None:
             return
         self.builtin_puppet_button.setEnabled(False)
-        job = PuppetExport(self.builtin_character.currentData(), Path.cwd() / 'pet-assets' / 'puppets')
+        job = PuppetExport(self.builtin_character.currentData(),
+                           self.lifetime.storage.directory / 'pet-assets' / 'puppets')
         self._puppet_export = job
         job.signals.finished.connect(self._builtin_puppet_ready, Qt.ConnectionType.QueuedConnection)
         self.lifetime.submit(job)
@@ -468,12 +471,13 @@ class PetSettingUI(SettingPage):
     @owned_action
     def use_builtin_character(self) -> None:
         """Install the chosen INKSIDE character for sprite pets; Start then spawns a pet dressed as it."""
-        from frontengine.show.pet.asset_library import PetAssetLibrary
         from frontengine.ui.dialog.pet_asset_install import PetBuiltinSprite
         if self._sprite_install is not None:
             return
         self.builtin_sprite_button.setEnabled(False)
-        job = PetBuiltinSprite(PetAssetLibrary(), self.builtin_character.currentData(), Path.cwd() / 'pet-previews')
+        directory = self.lifetime.storage.directory
+        job = PetBuiltinSprite(PetAssetLibrary(directory / 'pet-assets'),
+                               self.builtin_character.currentData(), directory / 'pet-previews')
         self._sprite_install = job
         job.signals.finished.connect(self._builtin_character_ready, Qt.ConnectionType.QueuedConnection)
         self.lifetime.submit(job)
