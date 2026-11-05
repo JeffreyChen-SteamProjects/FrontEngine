@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261106-04 | 2026-11-06 | Verify Features menu routes across seven languages | #ui #acceptance | [2026-11](2026-11.md) |
 | U-20261106-03 | 2026-11-06 | Select the named command before unrelated history matches | #ui #search #testing | [2026-11](2026-11.md) |
 | U-20261106-02 | 2026-11-06 | Give the Work list a translated accessible name | #ui #accessibility #testing | [2026-11](2026-11.md) |
 | U-20261106-01 | 2026-11-06 | Restore visible keyboard focus to content lists | #ui #accessibility #testing | [2026-11](2026-11.md) |
@@ -330,6 +331,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 126 |
+| [2026-11.md](2026-11.md) | 2026-11 | 127 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
