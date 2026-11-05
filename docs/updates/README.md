@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261105-58 | 2026-11-05 | Inspect native home wrapping and preserve narrower layout failures | #ui #acceptance | [2026-11](2026-11.md) |
 | U-20261105-57 | 2026-11-05 | Wrap selected furniture text without widening hidden home tabs | #ui #testing | [2026-11](2026-11.md) |
 | U-20261105-56 | 2026-11-05 | Reproduce narrow Russian home overflow with explicit Arial | #testing #ui | [2026-11](2026-11.md) |
 | U-20261105-55 | 2026-11-05 | 驗證放大鏡的混合 DPI 顯示與定時更新 | #testing #dpi | [2026-11](2026-11.md) |
@@ -315,6 +316,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 111 |
+| [2026-11.md](2026-11.md) | 2026-11 | 112 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
