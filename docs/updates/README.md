@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261106-62 | 2026-11-06 | 舊家園格式與模式保存相容性矩陣 | Pet / Persistence / Test | [2026-11](2026-11.md) |
 | U-20261106-61 | 2026-11-06 | 整合版本靜態檢查與七語言文件建置 | Quality / Docs / Test | [2026-11](2026-11.md) |
 | U-20261106-60 | 2026-11-06 | 三種居民數的自主生活重播驗證 | Pet / Simulation / Test | [2026-11](2026-11.md) |
 | U-20261106-59 | 2026-11-06 | 使用中玩具收納與復原原生驗證 | Pet / Layout / Test | [2026-11](2026-11.md) |
@@ -388,6 +389,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 184 |
+| [2026-11.md](2026-11.md) | 2026-11 | 185 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
