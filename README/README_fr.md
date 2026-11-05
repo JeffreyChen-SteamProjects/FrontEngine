@@ -81,7 +81,7 @@ Chaque processus possède une seule fenêtre de contrôle FrontEngine. Son dossi
 
 Dans une fenêtre étroite, le texte d’état du foyer apparaît au-dessus des boutons d’action, qui passent à la ligne si nécessaire. Une fois la fermeture d’une superposition GIF terminée, son fichier source peut être déplacé ou supprimé.
 
-La génération des mascottes, les aperçus, les garde-robes par défaut et les images du foyer utilisent le répertoire de données détenu par la page de paramètres, même si l’hôte change de répertoire de travail. Toute bibliothèque de mascottes fournie explicitement est conservée. Les photos du foyer, l’album et le dossier des packs de contenu locaux utilisent ce même répertoire de données. Les nouvelles photos apparaissent dans l’album dès leur enregistrement réussi, même lorsque le foyer est en pause.
+La génération des mascottes, les aperçus, les garde-robes par défaut des mascottes du bureau et des résidents du foyer et les images du foyer utilisent le répertoire de données détenu par la page de paramètres, même si l’hôte change de répertoire de travail. Toute bibliothèque de mascottes fournie explicitement est conservée. Les photos du foyer, l’album et le dossier des packs de contenu locaux utilisent ce même répertoire de données. Les nouvelles photos apparaissent dans l’album dès leur enregistrement réussi, même lorsque le foyer est en pause.
 
 Les actions des panneaux du foyer sont refusées pendant la préparation et l’exécution de la fermeture ; les résultats du sélecteur de plans sont revérifiés avant utilisation. Annuler la fermeture autorise de nouvelles actions sans rejouer celles refusées.
 

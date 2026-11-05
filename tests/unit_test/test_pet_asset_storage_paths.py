@@ -120,3 +120,21 @@ def test_home_files_keep_their_owners_directory(action, lifetime_factory, tmp_pa
     finally:
         assert page.shutdown()
         page.close()
+
+
+def test_home_wardrobe_keeps_its_owners_directory(lifetime_factory, tmp_path, monkeypatch):
+    from frontengine.ui.page.pet_game.home_page import PetHomePage
+    lifetime = lifetime_factory()
+    directory = lifetime.storage.directory
+    page = PetHomePage(lifetime=lifetime)
+    page.create_home()
+    other = tmp_path / 'other-host-directory'
+    other.mkdir()
+    monkeypatch.chdir(other)
+    try:
+        page.residents.wardrobe()
+        dialog = page.residents.wardrobes[page.selected_resident]
+        assert dialog.library.root == directory / 'pet-assets'
+    finally:
+        assert page.shutdown()
+        page.close()

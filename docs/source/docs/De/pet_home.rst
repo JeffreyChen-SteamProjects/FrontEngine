@@ -16,7 +16,7 @@ Pro Prozess gibt es ein FrontEngine-Steuerfenster. Sein Einstellungsordner bleib
 
 In schmalen Fenstern steht der Heimstatus über den Aktionsschaltflächen, die bei Bedarf umbrechen. Nachdem ein GIF-Overlay vollständig geschlossen wurde, kann seine Quelldatei verschoben oder gelöscht werden.
 
-Tiererzeugung, Vorschauen, Standardgarderoben und Heimgrafiken verwenden das Datenverzeichnis der Einstellungsseite, auch wenn der Host sein Arbeitsverzeichnis ändert. Eine ausdrücklich angegebene Tierbibliothek bleibt erhalten. Fotos des Heims, das Album und der lokale Inhaltspaketordner verwenden dasselbe Datenverzeichnis. Neue Fotos erscheinen sofort nach erfolgreichem Speichern im Album, auch wenn das Heim pausiert ist.
+Tiererzeugung, Vorschauen, Standardgarderoben der Desktop-Tiere und Heimbewohner und Heimgrafiken verwenden das Datenverzeichnis der Einstellungsseite, auch wenn der Host sein Arbeitsverzeichnis ändert. Eine ausdrücklich angegebene Tierbibliothek bleibt erhalten. Fotos des Heims, das Album und der lokale Inhaltspaketordner verwenden dasselbe Datenverzeichnis. Neue Fotos erscheinen sofort nach erfolgreichem Speichern im Album, auch wenn das Heim pausiert ist.
 
 Während der Vorbereitung und Durchführung des Schließens werden Aktionen der Heimpanele abgewiesen; Dateidialog-Ergebnisse für Baupläne werden vor der Nutzung erneut geprüft. Nach Abbruch des Schließens sind neue Aktionen möglich, abgewiesene werden nicht wiederholt.
 

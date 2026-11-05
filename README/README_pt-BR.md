@@ -85,7 +85,7 @@ Cada processo tem uma janela de controle do FrontEngine. A pasta de configuraç�
 
 Em janelas estreitas, o estado da casa aparece acima dos botões de ação, que passam para outra linha quando necessário. Após o fechamento completo de uma sobreposição GIF, seu arquivo de origem pode ser movido ou excluído.
 
-A geração de mascotes, as prévias, os guarda-roupas padrão e as imagens da casa usam o diretório de dados da página de configurações, mesmo quando o aplicativo hospedeiro muda seu diretório de trabalho. Uma biblioteca de mascotes fornecida explicitamente é preservada. As fotos da casa, o álbum e a pasta de pacotes de conteúdo locais usam o mesmo diretório de dados. As novas fotos aparecem no álbum assim que são salvas com sucesso, mesmo quando a casa está pausada.
+A geração de mascotes, as prévias, os guarda-roupas padrão dos mascotes da área de trabalho e dos moradores da casa e as imagens da casa usam o diretório de dados da página de configurações, mesmo quando o aplicativo hospedeiro muda seu diretório de trabalho. Uma biblioteca de mascotes fornecida explicitamente é preservada. As fotos da casa, o álbum e a pasta de pacotes de conteúdo locais usam o mesmo diretório de dados. As novas fotos aparecem no álbum assim que são salvas com sucesso, mesmo quando a casa está pausada.
 
 As ações dos painéis da casa são recusadas durante a preparação e execução do fechamento; os resultados do seletor de plantas são verificados novamente antes do uso. Cancelar o fechamento permite novas ações sem repetir as recusadas.
 

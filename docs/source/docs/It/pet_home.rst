@@ -16,7 +16,7 @@ Ogni processo ha una sola finestra di controllo FrontEngine. La cartella delle i
 
 Nelle finestre strette, lo stato della casa appare sopra i pulsanti delle azioni, che vanno a capo quando necessario. Dopo la chiusura completa di una sovrapposizione GIF, il file di origine può essere spostato o eliminato.
 
-La generazione delle mascotte, le anteprime, i guardaroba predefiniti e le immagini della casa usano la directory dati della pagina delle impostazioni, anche se l’applicazione ospitante cambia directory di lavoro. Una libreria di mascotte fornita esplicitamente viene mantenuta. Le foto della casa, l’album e la cartella dei pacchetti di contenuti locali usano la stessa directory dati. Le nuove foto appaiono nell’album appena il salvataggio riesce, anche quando la casa è in pausa.
+La generazione delle mascotte, le anteprime, i guardaroba predefiniti delle mascotte del desktop e dei residenti della casa e le immagini della casa usano la directory dati della pagina delle impostazioni, anche se l’applicazione ospitante cambia directory di lavoro. Una libreria di mascotte fornita esplicitamente viene mantenuta. Le foto della casa, l’album e la cartella dei pacchetti di contenuti locali usano la stessa directory dati. Le nuove foto appaiono nell’album appena il salvataggio riesce, anche quando la casa è in pausa.
 
 Le azioni dei pannelli della casa vengono rifiutate durante la preparazione e l’esecuzione della chiusura; i risultati della selezione dei progetti vengono ricontrollati prima dell’uso. Annullare la chiusura consente nuove azioni senza ripetere quelle rifiutate.
 

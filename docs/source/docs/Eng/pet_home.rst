@@ -16,7 +16,7 @@ Each process has one FrontEngine control window. Its settings folder stays reser
 
 On narrow windows, home status text sits above action buttons that wrap onto another line. After a GIF overlay finishes closing, its source file can be moved or deleted.
 
-Pet generation, previews, default wardrobes and home artwork use the settings page’s owned data directory, even if the host changes its working directory. An explicitly supplied pet asset library is preserved. Home photos, the album and the local content-pack folder use the same owned data directory. New photos appear in the album as soon as saving succeeds, including while the home is paused.
+Pet generation, previews, default desktop-pet and home-resident wardrobes and home artwork use the settings page’s owned data directory, even if the host changes its working directory. An explicitly supplied pet asset library is preserved. Home photos, the album and the local content-pack folder use the same owned data directory. New photos appear in the album as soon as saving succeeds, including while the home is paused.
 
 Home panel actions are rejected while closing is prepared or in progress; blueprint file-dialog results are checked again before use. Cancelling close permits new actions without replaying rejected ones.
 

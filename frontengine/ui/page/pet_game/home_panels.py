@@ -165,8 +165,10 @@ class ResidentPanel:
             return
         dialog = self.wardrobes.get(identifier)
         if dialog is None:
+            from frontengine.show.pet.asset_library import PetAssetLibrary
             from frontengine.ui.dialog.pet_wardrobe import PetWardrobeDialog
-            dialog = PetWardrobeDialog(self.page.profiles, identifier, self.page)
+            library = PetAssetLibrary(self.lifetime.storage.directory / 'pet-assets')
+            dialog = PetWardrobeDialog(self.page.profiles, identifier, self.page, library=library)
             dialog.destroyed.connect(lambda _obj=None, key=identifier: self.wardrobes.pop(key, None))
             self.wardrobes[identifier] = dialog
         dialog.show()

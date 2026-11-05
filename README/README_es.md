@@ -82,7 +82,7 @@ Cada proceso tiene una ventana de control de FrontEngine. Su carpeta de ajustes 
 
 En ventanas estrechas, el estado del hogar aparece encima de los botones de acción, que pasan a otra línea cuando es necesario. Al terminar de cerrar una superposición GIF, su archivo de origen se puede mover o eliminar.
 
-La generación de mascotas, las vistas previas, los guardarropas predeterminados y las imágenes del hogar usan el directorio de datos de la página de ajustes, aunque el anfitrión cambie su directorio de trabajo. Se conserva cualquier biblioteca de mascotas indicada explícitamente. Las fotos del hogar, el álbum y la carpeta de paquetes de contenido locales usan el mismo directorio de datos. Las fotos nuevas aparecen en el álbum en cuanto se guardan correctamente, incluso con el hogar en pausa.
+La generación de mascotas, las vistas previas, los guardarropas predeterminados de las mascotas del escritorio y los residentes del hogar y las imágenes del hogar usan el directorio de datos de la página de ajustes, aunque el anfitrión cambie su directorio de trabajo. Se conserva cualquier biblioteca de mascotas indicada explícitamente. Las fotos del hogar, el álbum y la carpeta de paquetes de contenido locales usan el mismo directorio de datos. Las fotos nuevas aparecen en el álbum en cuanto se guardan correctamente, incluso con el hogar en pausa.
 
 Las acciones de los paneles del hogar se rechazan durante la preparación y ejecución del cierre; los resultados del selector de planos se comprueban de nuevo antes de usarlos. Cancelar el cierre permite nuevas acciones sin repetir las rechazadas.
 
