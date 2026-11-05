@@ -708,3 +708,5 @@ Una orden manual de trabajo en cola también informa al iniciarse de materiales 
 La escena del hogar y su barra de herramientas permanecen en filas separadas cuando cambia la altura de la lista de asuntos pendientes.
 
 Al terminar un trabajo, la estación muestra brevemente una marca, también tras la última unidad del encargo. Si se guarda la estación antes de mostrar el evento, no se añade ninguna marca.
+
+Mochila, Objetivos, los enlaces de tareas pendientes y la navegación de la barra del escritorio desplazan la pestaña elegida del hogar hasta hacerla visible, aunque ya estuviera seleccionada.

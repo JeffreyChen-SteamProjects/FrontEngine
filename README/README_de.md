@@ -751,3 +751,5 @@ Ein eingereihter manueller Arbeitsauftrag meldet beim Start auch fehlende Materi
 Wenn sich die Höhe der Liste ausstehender Aufgaben ändert, bleiben die Hausszene und ihre Werkzeugleiste in getrennten Zeilen.
 
 Abgeschlossene Arbeit zeigt kurz ein Häkchen an der Arbeitsstation, auch nach der letzten Einheit eines Auftrags. Eine vor der Ereignisanzeige eingelagerte Station erhält keine Markierung.
+
+Rucksack, Ziele, Links zu wartenden Aufgaben und die Navigation der Desktop-Leiste scrollen den gewählten Zuhause-Tab ins Blickfeld, auch wenn er bereits ausgewählt war.

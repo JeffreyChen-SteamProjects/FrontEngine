@@ -16,7 +16,7 @@ from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
 
-from PySide6.QtCore import Qt, QUrl, Signal
+from PySide6.QtCore import QPoint, Qt, QTimer, QUrl, Signal
 from PySide6.QtGui import QDesktopServices, QGuiApplication, QKeyEvent, QKeySequence
 from PySide6.QtWidgets import (QComboBox, QFrame, QLabel, QListWidget, QListWidgetItem,
                                QScrollArea, QSlider, QVBoxLayout, QWidget)
@@ -334,9 +334,9 @@ class PetHomePage(SettingPage):
         self.desktop_button = tr(QPushButton(), "pet_home_back_to_desktop", "Back to the desktop")
         self.desktop_button.clicked.connect(self.desktop_requested.emit)
         self.backpack_button = tr(QPushButton(), "pet_home_storage_section", "Backpack")
-        self.backpack_button.clicked.connect(lambda: self.tabs.select("pet_home_storage_section"))
+        self.backpack_button.clicked.connect(lambda: self._select_home_tab("pet_home_storage_section"))
         self.goals_button = tr(QPushButton(), "pet_home_goals_section", "Goals")
-        self.goals_button.clicked.connect(lambda: self.tabs.select("pet_home_goals_section"))
+        self.goals_button.clicked.connect(lambda: self._select_home_tab("pet_home_goals_section"))
         self.zoom_out = QPushButton("−")
         self.zoom_in = QPushButton("+")
         for button, steps, key, fallback in ((self.zoom_out, -1, "pet_home_zoom_out", "Zoom out"),
@@ -382,8 +382,18 @@ class PetHomePage(SettingPage):
         self.zone_combo.setVisible(len(zones) > 1)
 
     @owned_action
+    def _select_home_tab(self, key: str) -> None:
+        if self.tabs.select(key):
+            QTimer.singleShot(0, self, self._reveal_home_tab)
+
+    @owned_action
+    def _reveal_home_tab(self) -> None:
+        top = self.tabs.mapTo(self._scroll.widget(), QPoint(0, 0)).y()
+        self._scroll.verticalScrollBar().setValue(top)
+
+    @owned_action
     def _open_pending(self, item) -> None:
-        self.tabs.select(item.data(Qt.ItemDataRole.UserRole))
+        self._select_home_tab(item.data(Qt.ItemDataRole.UserRole))
 
     def _refresh_pending(self) -> None:
         items = pending(self.service.world, self.inbox.unread)
@@ -951,13 +961,13 @@ class PetHomePage(SettingPage):
             return
         self.open_requested.emit()
         if action == "tab":
-            self.tabs.select(target)
+            self._select_home_tab(target)
             return
         self.select_resident(target)
         if action == "wardrobe":
             self.residents.wardrobe()
         elif action == "work":
-            self.tabs.select("pet_home_work_section")
+            self._select_home_tab("pet_home_work_section")
         elif action == "follow":
             self.followed = target
             self._follow()

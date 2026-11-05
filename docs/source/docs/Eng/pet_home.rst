@@ -61,3 +61,5 @@ A queued manual work command also reports missing materials, a missing workstati
 The home scene and its toolbar remain in separate rows when the waiting-items list changes height.
 
 Completed work briefly marks the workstation with a check, including the final unit of a job. A workstation put away before the event is displayed receives no mark.
+
+Backpack, Goals, waiting-item links and desktop-strip navigation bring the selected home tab into view, even when that tab was already selected.

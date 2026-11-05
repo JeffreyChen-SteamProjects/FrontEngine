@@ -111,3 +111,78 @@ def test_a_newer_save_offers_the_update(tmp_path, *, home_store_factory, lifetim
     finally:
         page.shutdown()
         page.deleteLater()
+
+
+@pytest.mark.parametrize("height", [500, 900])
+@pytest.mark.parametrize("target", ["backpack", "goals"])
+@pytest.mark.parametrize("keyboard", [False, True])
+def test_stage_shortcut_reveals_content_even_when_tab_is_already_selected(page, height, target, keyboard):
+    from PySide6.QtTest import QTest
+    from PySide6.QtWidgets import QApplication
+
+    page.create_home()
+    page.resize(1000, height)
+    page.refresh()
+    button = page.backpack_button if target == "backpack" else page.goals_button
+    content = page.storage.list if target == "backpack" else page.goals.level
+    for _ in range(3):
+        QApplication.processEvents()
+    for _ in range(2):
+        page._scroll.verticalScrollBar().setValue(0)
+        if keyboard:
+            button.setFocus()
+            QTest.keyClick(button, Qt.Key.Key_Space)
+        else:
+            button.click()
+        for _ in range(3):
+            QApplication.processEvents()
+        assert not content.visibleRegion().isEmpty(), (target, height, keyboard)
+        assert not page.tabs.tabBar().visibleRegion().isEmpty()
+
+
+@pytest.mark.parametrize("route", ["pending", "strip"])
+def test_home_navigation_links_reveal_their_target(page, route):
+    from PySide6.QtWidgets import QApplication
+
+    page.create_home()
+    page.resize(1000, 500)
+    page.inbox.add_error("Navigation fixture", page.service.world.time_ms)
+    page.refresh()
+    for _ in range(3):
+        QApplication.processEvents()
+    page._scroll.verticalScrollBar().setValue(0)
+    if route == "pending":
+        item = next(page.pending_list.item(i) for i in range(page.pending_list.count())
+                    if page.pending_list.item(i).data(Qt.ItemDataRole.UserRole) == "pet_home_inbox_section")
+        page.pending_list.itemClicked.emit(item)
+    else:
+        page.strip_list[0].action_requested.emit("tab", "pet_home_inbox_section")
+    for _ in range(3):
+        QApplication.processEvents()
+    assert not page.inbox.list.visibleRegion().isEmpty()
+    assert page.tabs.keys()[page.tabs.currentIndex()] == "pet_home_inbox_section"
+
+
+def test_deferred_home_navigation_is_discarded_during_close_preparation(page):
+    from PySide6.QtWidgets import QApplication
+
+    page.create_home()
+    page.resize(1000, 500)
+    for _ in range(3):
+        QApplication.processEvents()
+    page._scroll.verticalScrollBar().setValue(0)
+    page.backpack_button.click()
+    page.lifetime.begin_prepare()
+    try:
+        for _ in range(3):
+            QApplication.processEvents()
+        assert page._scroll.verticalScrollBar().value() == 0
+    finally:
+        page.lifetime.cancel_prepare()
+    for _ in range(3):
+        QApplication.processEvents()
+    assert page._scroll.verticalScrollBar().value() == 0
+    page.backpack_button.click()
+    for _ in range(3):
+        QApplication.processEvents()
+    assert not page.storage.list.visibleRegion().isEmpty()

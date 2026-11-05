@@ -61,3 +61,5 @@ Un comando manuale di lavoro in coda segnala all’avvio anche materiali mancant
 La scena della casa e la barra degli strumenti restano su righe separate quando cambia l’altezza dell’elenco degli elementi in attesa.
 
 Il lavoro completato mostra brevemente un segno di spunta sulla postazione, anche dopo l’ultima unità dell’incarico. Una postazione riposta prima della visualizzazione dell’evento non riceve alcun segno.
+
+Zaino, Obiettivi, i collegamenti agli elementi in attesa e la navigazione dalla barra sul desktop fanno scorrere la scheda scelta della casa fino a renderla visibile, anche se era già selezionata.
