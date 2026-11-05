@@ -725,3 +725,5 @@ O seletor de modo nas configurações da casa continua disponível quando o modo
 Se o trabalho autônomo não puder começar por falta de materiais, ausência de uma estação de trabalho ou porque ela está ocupada, o cartão do morador mantém o motivo visível durante a atividade de lazer escolhida no lugar. Ao retomar o trabalho, o motivo anterior é apagado.
 
 Se um comando na fila for recusado na execução porque as condições mudaram, o cartão do morador mantém o motivo visível durante a atividade substituta. A próxima atividade aceita apaga esse motivo.
+
+Um comando manual de trabalho na fila também informa, ao iniciar, a falta de materiais e a ausência ou ocupação da estação de trabalho. O motivo aparece no cartão do morador; depois de resolver o problema, é possível repetir o comando.

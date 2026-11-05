@@ -55,3 +55,5 @@ The work list has an accessibility label that follows the interface language.
 When automatic work cannot start because materials are missing, there is no workstation, or the workstation is occupied, the resident card keeps the reason visible during the fallback leisure activity. Starting work again clears the old reason.
 
 If a queued command is refused when it executes because conditions have changed, the resident card keeps that reason visible during the replacement activity. The next accepted activity clears it.
+
+A queued manual work command also reports missing materials, a missing workstation, or an occupied workstation when it tries to start. The reason appears in the resident card; after resolving it, the work command can be retried.

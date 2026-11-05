@@ -55,3 +55,5 @@ Die barrierefreie Beschriftung der Aufgabenliste folgt der Sprache der Benutzero
 Wenn selbstständige Arbeit wegen fehlender Materialien, eines fehlenden oder eines belegten Arbeitsplatzes nicht beginnen kann, zeigt die Bewohnerkarte den Grund auch während der stattdessen gewählten Freizeitaktivität. Sobald die Arbeit wieder beginnt, verschwindet der alte Grund.
 
 Wird ein eingereihter Befehl bei der Ausführung wegen veränderter Bedingungen abgelehnt, zeigt die Bewohnerkarte den Grund während der Ersatzaktivität weiterhin an. Die nächste akzeptierte Aktivität entfernt ihn.
+
+Ein eingereihter manueller Arbeitsauftrag meldet beim Start auch fehlende Materialien sowie fehlende oder belegte Arbeitsplätze. Der Grund erscheint auf der Bewohnerkarte. Nach Beheben des Problems kann der Auftrag erneut erteilt werden.

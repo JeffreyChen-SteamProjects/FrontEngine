@@ -703,3 +703,5 @@ Le sélecteur de mode des réglages du foyer reste disponible lorsque le mode R�
 Si le travail autonome ne peut pas commencer faute de matériaux, faute de poste de travail ou parce que celui-ci est occupé, la fiche du résident conserve le motif pendant l’activité de loisir choisie à la place. La reprise du travail efface le motif précédent.
 
 Si une commande en attente est refusée à son exécution parce que les conditions ont changé, la fiche du résident conserve le motif pendant l’activité de remplacement. La prochaine activité acceptée l’efface.
+
+Une commande manuelle de travail en attente signale aussi, au démarrage, les matériaux manquants et les postes absents ou occupés. Le motif apparaît sur la fiche du résident. Après résolution du problème, la commande peut être réessayée.

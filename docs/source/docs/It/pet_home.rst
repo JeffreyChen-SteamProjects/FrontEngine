@@ -55,3 +55,5 @@ L’etichetta di accessibilità dell’elenco dei lavori segue la lingua dell’
 Se il lavoro autonomo non può iniziare perché mancano materiali, manca una postazione o la postazione è occupata, la scheda del residente mantiene visibile il motivo durante l’attività ricreativa scelta al suo posto. Quando il lavoro riprende, il motivo precedente scompare.
 
 Se un comando in coda viene rifiutato al momento dell’esecuzione perché le condizioni sono cambiate, la scheda del residente conserva il motivo durante l’attività sostitutiva. La successiva attività accettata lo cancella.
+
+Un comando manuale di lavoro in coda segnala all’avvio anche materiali mancanti e postazioni assenti o occupate. Il motivo appare nella scheda del residente; risolto il problema, il comando può essere ripetuto.

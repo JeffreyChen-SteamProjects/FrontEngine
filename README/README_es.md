@@ -702,3 +702,5 @@ El selector de modo de los ajustes del hogar sigue disponible cuando el modo Reu
 Si el trabajo autónomo no puede comenzar porque faltan materiales, no hay puesto de trabajo o está ocupado, la tarjeta del residente mantiene visible el motivo durante la actividad de ocio elegida en su lugar. Al reanudar el trabajo, se borra el motivo anterior.
 
 Si una orden en cola se rechaza al ejecutarse porque las condiciones han cambiado, la tarjeta del residente conserva el motivo durante la actividad sustituta. La siguiente actividad aceptada lo borra.
+
+Una orden manual de trabajo en cola también informa al iniciarse de materiales ausentes o de un puesto de trabajo inexistente u ocupado. El motivo aparece en la tarjeta del residente; tras resolverlo, se puede repetir la orden.

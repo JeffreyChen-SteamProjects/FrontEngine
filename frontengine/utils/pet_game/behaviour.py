@@ -291,6 +291,10 @@ def _start_free(world: World, resident: Resident, reason: str = "free_time") -> 
 
 def _follow_command(world: World, resident: Resident, command: str) -> None:
     reason = refusal(world, resident, command)
+    if reason is None and command == "work":
+        reason = start_work(world, resident, "command")
+        if reason is None:
+            return
     if reason is not None:
         world.emit("refused", resident=resident.identifier, command=command, reason=reason)
         decide(world, resident)
@@ -301,8 +305,6 @@ def _follow_command(world: World, resident: Resident, command: str) -> None:
         start_meal(world, resident, "command")
     elif command == "wash":
         start_wash(world, resident, "command")
-    elif command == "work":
-        start_work(world, resident, "command")
     else:
         found = _free_piece(world, resident, command)
         if found is None:
