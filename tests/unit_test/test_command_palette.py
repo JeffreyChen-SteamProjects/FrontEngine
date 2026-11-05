@@ -202,3 +202,26 @@ def test_every_page_command_still_opens_its_page_once_after_the_redesign(make_ma
         assert window.page_stack.currentWidget() is first
     assert [window.page_stack.widget(index) for index in range(window.page_stack.count())] == pages
     assert len({id(page) for page in pages}) == len(pages)
+
+
+@pytest.mark.parametrize("previous_query", ["", "Control"])
+def test_exact_page_name_enter_opens_matching_page(previous_query):
+    calls = []
+    registry = ActionRegistry()
+    registry.register(Action("page.tab_control_center_text", "test_control_name", "Control Center",
+                             lambda value: calls.append("control")))
+    registry.register(Action("page.tab_text_text", "test_text_name", "Text",
+                             lambda value: calls.append("text")))
+    history = CommandHistory({}, lambda: None)
+    history.toggle_favorite("page.tab_control_center_text", set(registry.actions))
+    history.record("page.tab_control_center_text", set(registry.actions))
+    dialog = CommandPaletteDialog(registry, history)
+    try:
+        dialog.show()
+        if previous_query:
+            dialog.search_input.setText(previous_query)
+        dialog.search_input.setText("Text")
+        QTest.keyClick(dialog.search_input, Qt.Key.Key_Return)
+        assert calls == ["text"]
+    finally:
+        dialog.close()

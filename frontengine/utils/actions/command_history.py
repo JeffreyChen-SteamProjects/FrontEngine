@@ -85,7 +85,7 @@ class CommandHistory:
     @owned_settings_operation
     def search(self, registry: ActionRegistry, query: str, label: Callable[[Action], str],
                favorites_only: bool = False) -> list[Action]:
-        """Search the current language, fallback and IDs; rank favorites/recent first."""
+        """Search labels and IDs; prefer exact labels before favorites and recent use."""
         known = set(registry.actions)
         favorites, recent = self.values("favorites", known), self.values("recent", known)
         terms = search_text(query).split()
@@ -93,7 +93,9 @@ class CommandHistory:
                    if (not favorites_only or action.identifier in favorites)
                    and all(term in search_text(f"{label(action)} {action.fallback} {action.identifier}")
                            for term in terms)]
+        exact_query = " ".join(terms)
         return sorted(actions, key=lambda action: (
+            bool(terms) and " ".join(search_text(label(action)).split()) != exact_query,
             action.identifier not in favorites,
             recent.index(action.identifier) if action.identifier in recent else 20,
             label(action).casefold()))

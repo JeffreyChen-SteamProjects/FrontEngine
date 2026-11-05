@@ -580,6 +580,8 @@ Cena → Editor visual oferece lista e prévia de camadas de imagem/GIF/texto, a
 
 Abra Comandos no menu ou pressione Ctrl+K / Ctrl+Shift+P no FrontEngine. Pesquise no idioma atual, rótulos ingleses ou nomes estáveis; as setas selecionam e Enter executa. Inclui navegação, captura, notas, filtro, Workshop e ações globais. Predefinição/qualidade aceitam um valor. Favoritos e últimos 20 comandos persistem; argumentos e buscas não são salvos.
 
+Um nome exato no idioma atual aparece antes dos favoritos e comandos recentes. Alterar a busca seleciona o melhor resultado; atualizar favoritos ou o idioma sem alterar a consulta mantém o comando selecionado e seu argumento.
+
 As configurações ficam em cartões: ações frequentes permanecem visíveis e comandos secundários ficam em More actions. Show details expande ferramentas avançadas e mensagens. O editor de cenas coloca a tela ao lado das abas Properties, Preview e Animation. Em janelas estreitas, campos e controles quebram a linha; a ação inferior continua visível. A busca mostra favoritos e dicas de teclado. Uma falha preserva a entrada para tentar novamente; escolher outro comando limpa o argumento anterior.
 
 Texto → TXT / JSON / CSV local exibe UTF-8 com campo e intervalo de 1–3600 segundos. JSON: /chave/índice (ex. /build/tasks); CSV: cabeçalhos únicos, coluna por linhas. Campo vazio: arquivo inteiro. Leitura em segundo plano, uma tarefa por fonte, limite 1 MiB e 65.536 caracteres. Erros de arquivo/campo, formato, acesso e tamanho são explícitos; correções recuperam o resultado. Predefinições salvam arquivo/campo/intervalo. Cenas portáteis copiam o arquivo: compartilhar o pacote compartilha esse retrato dos dados.
