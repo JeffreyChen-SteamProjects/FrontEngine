@@ -765,6 +765,7 @@ class WorkPanel:
         self.empty.setWordWrap(True)
         section.add_widget(self.empty)
         self.tasks = QListWidget()
+        tr(self.tasks, "pet_home_work_section", "Work", "setAccessibleName")
         self.tasks.setIconSize(QSize(32, 32))
         self.tasks.setMinimumHeight(150)
         section.add_widget(self.tasks)

@@ -49,3 +49,5 @@ Si la liste des travaux est vide, vérifiez les routines des habitants, les post
 Une fois toutes les récompenses du tutoriel récupérées ou les objectifs ignorés, le bouton permettant de passer le tutoriel disparaît ; la liste reste consultable.
 
 La liste des tâches affiche une bordure accentuée lorsqu’elle reçoit le focus clavier, même avant la sélection d’une tâche.
+
+Le libellé d’accessibilité de la liste des tâches suit la langue de l’interface.

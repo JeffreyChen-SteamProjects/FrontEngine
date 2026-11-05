@@ -49,3 +49,5 @@ Wenn die Arbeitsliste leer ist, prüfe die Tagesabläufe der Bewohner, die Arbei
 Sobald alle Tutorial-Ziele belohnt oder übersprungen wurden, verschwindet die Schaltfläche zum Überspringen; die Liste bleibt zum Nachlesen verfügbar.
 
 Die Aufgabenliste zeigt einen hervorgehobenen Rahmen, sobald sie den Tastaturfokus erhält, auch wenn noch keine Aufgabe ausgewählt ist.
+
+Die barrierefreie Beschriftung der Aufgabenliste folgt der Sprache der Benutzeroberfläche.

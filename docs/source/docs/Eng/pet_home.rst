@@ -49,3 +49,5 @@ If Work is empty, check residents' routines, workstations and backpack materials
 Once all tutorial goals are claimed or skipped, the skip button disappears; the list remains available to review.
 
 The work list shows a highlighted border when keyboard focus enters, even before a job is selected.
+
+The work list has an accessibility label that follows the interface language.

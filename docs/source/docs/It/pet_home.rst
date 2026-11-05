@@ -49,3 +49,5 @@ Se la lista dei lavori è vuota, controlla le routine dei residenti, le postazio
 Quando tutti gli obiettivi del tutorial sono stati premiati o saltati, il pulsante per saltare il tutorial scompare; la lista resta consultabile.
 
 L’elenco dei lavori evidenzia il bordo quando riceve il focus della tastiera, anche prima che venga selezionato un lavoro.
+
+L’etichetta di accessibilità dell’elenco dei lavori segue la lingua dell’interfaccia.

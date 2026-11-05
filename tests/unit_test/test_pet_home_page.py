@@ -49,6 +49,26 @@ def _place(page, definition: str, cell: int) -> None:
     panel.toggle_arrange()
 
 
+def test_work_list_accessible_name_follows_language(page):
+    from PySide6.QtGui import QAccessible
+    from frontengine.ui.menu.language_menu import LANGUAGES
+    from frontengine.utils.multi_language.language_wrapper import language_wrapper
+    from frontengine.utils.multi_language.retranslate import retranslator
+
+    interface = QAccessible.queryAccessibleInterface(page.work.tasks)
+    assert interface is not None
+    try:
+        for _label, language in LANGUAGES:
+            assert language_wrapper.reset_language(language)
+            retranslator.apply()
+            expected = translate('pet_home_work_section', 'Work')
+            assert expected
+            assert interface.text(QAccessible.Text.Name) == expected
+    finally:
+        language_wrapper.reset_language('English')
+        retranslator.apply()
+
+
 def test_styled_home_keeps_requested_width_in_every_language(page, request):
     import os
     from pathlib import Path
