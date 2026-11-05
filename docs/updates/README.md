@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261105-68 | 2026-11-05 | 完整回歸通過並結束窄視窗整合驗收 | #testing #ui #done | [2026-11](2026-11.md) |
 | U-20261105-67 | 2026-11-05 | 六居民自動生活三日與確定性重播 | #testing #pet #economy | [2026-11](2026-11.md) |
 | U-20261105-66 | 2026-11-05 | 中斷重啟後的寵物身分與搬入搬出驗收 | #testing #storage #pet | [2026-11](2026-11.md) |
 | U-20261105-65 | 2026-11-05 | 家園與角色分段存檔中斷恢復 | #testing #storage | [2026-11](2026-11.md) |
@@ -325,6 +326,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 121 |
+| [2026-11.md](2026-11.md) | 2026-11 | 122 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
