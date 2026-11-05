@@ -207,6 +207,7 @@ class LayoutPanel:
         self.hint.setWordWrap(True)
         section.add_widget(self.hint)
         self.selected = QLabel()
+        self.selected.setWordWrap(True)
         section.add_row("pet_home_selected_furniture", self.selected, "Selected")
         self.actions = [_button("pet_home_flip", "Mirror", self.mirror),
                         _button("pet_home_store", "Put away", self.store),

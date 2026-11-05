@@ -85,7 +85,7 @@ La génération des mascottes, les aperçus, les garde-robes par défaut des mas
 
 Les actions des panneaux du foyer sont refusées pendant la préparation et l’exécution de la fermeture ; les résultats du sélecteur de plans sont revérifiés avant utilisation. Annuler la fermeture autorise de nouvelles actions sans rejouer celles refusées.
 
-Après la création du foyer, les raccourcis et les longs textes des boutons et cases à cocher passent à la ligne dans les fenêtres étroites. Les commandes s’adaptent au panneau ; le dessin du foyer garde son propre défilement horizontal.
+Après la création du foyer, les raccourcis et les longs textes des boutons et cases à cocher passent à la ligne dans les fenêtres étroites. Les commandes s’adaptent au panneau ; le dessin du foyer garde son propre défilement horizontal. Les noms et les indications du meuble sélectionné passent à la ligne dans les panneaux étroits pour que l’onglet Meubles n’élargisse pas les autres onglets du foyer.
 
 Les commandes quotidiennes se mettent à jour à l’écran au changement de journée du jeu, même sans autre événement de vie ou de récompense.
 

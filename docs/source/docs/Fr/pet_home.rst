@@ -1,6 +1,8 @@
 Page Maison des mascottes
 -------------------------
 
+Les noms et les indications du meuble sélectionné passent à la ligne dans les panneaux étroits pour que l’onglet Meubles n’élargisse pas les autres onglets du foyer.
+
 **Maison des mascottes** — la première page. Vos mascottes enregistrées emménagent dans une petite maison, y vivent seules et travaillent pour gagner des pièces.
 
 * *Créer une maison* donne un lit, une table à manger, un bureau et 10 pièces. Rien n’est créé ni démarré avant ce clic, et tous les autres outils fonctionnent sans maison. Avant la création de la maison, chaque mascotte enregistrée figure sous *Mascottes qui emménagent avec vous*, toutes cochées ; décochez celles qui restent où elles sont. Les mascottes cochées emménagent telles quelles - même identité, nom, proximité, humeur, satiété, énergie, apparence et garde-robe -, rien n'est copié ni remis à zéro, et une mascotte laissée de côté peut emménager plus tard depuis l'onglet Habitants sans que le kit de départ soit redonné. L'année de la maison compte quatre saisons de sept jours de jeu - printemps, été, automne, hiver -, affichées dans la ligne d'état et en pétales, feuilles qui tombent ou neige dans le ciel de la vue d'ensemble (immobiles avec *Réduire les animations*) ; en hiver la pluie tombe en neige. Chaque saison propose un objectif à elle (faire pousser des fleurs, jouer, récolter des herbes, se détendre) récompensé une fois ; une saison manquée revient l'année suivante. Sans mascotte enregistrée, *Créer une maison* en amène aussi une première et la sélectionne.

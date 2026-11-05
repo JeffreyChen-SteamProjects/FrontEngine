@@ -1,6 +1,8 @@
 Pagina Casa delle mascotte
 --------------------------
 
+I nomi dei mobili selezionati e i suggerimenti vanno a capo nei pannelli stretti, così la scheda Mobili non allarga le altre schede della casa.
+
 **Casa delle mascotte** — la prima pagina. Le mascotte salvate si trasferiscono in una piccola casa, ci vivono da sole e lavorano per guadagnare monete.
 
 * *Crea una casa* fornisce un letto, un tavolo da pranzo, una scrivania e 10 monete. Finché non lo premi non viene creato né avviato nulla, e tutti gli altri strumenti funzionano anche senza casa. Prima di creare la casa, ogni mascotta salvata è elencata sotto *Mascotte che si trasferiscono con te*, tutte spuntate; togli la spunta a quelle che restano dove sono. Le mascotte spuntate si trasferiscono così come sono - stessa identità, nome, affetto, umore, sazietà, energia, aspetto e guardaroba -, nulla viene copiato o azzerato, e una mascotta lasciata fuori può trasferirsi in seguito dalla scheda Abitanti senza che il kit iniziale venga dato di nuovo. L'anno della casa ha quattro stagioni di sette giorni di gioco - primavera, estate, autunno, inverno -, mostrate nella riga di stato e come petali, foglie che cadono o neve nel cielo della panoramica (ferme con *Riduci il movimento*); d'inverno la pioggia cade come neve. Ogni stagione offre un obiettivo suo (coltivare fiori, giocare, raccogliere erbe, rilassarsi) premiato una volta; una stagione persa torna l'anno dopo. Senza mascotte salvate, *Crea una casa* porta anche una prima mascotta e la seleziona.

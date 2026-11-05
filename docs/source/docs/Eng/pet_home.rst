@@ -1,6 +1,8 @@
 Pet home Page
 -------------
 
+Selected furniture names and prompts wrap in narrow panels, so the Furniture tab does not widen the other home tabs.
+
 **Pet home** — the first page. Your saved pets move into a small home, live there on their own and work for home coins.
 
 * *Create a home* gives a bed, a dining table, a writing desk and 10 coins. Nothing is created or started until you press it, and every other tool works without a home. Before the home is created, every saved pet is listed under *Pets moving in with you*, all ticked; untick the ones that should stay where they are. The ticked pets move in as themselves - same identity, name, closeness, mood, fullness, energy, look and wardrobe - nothing is copied or reset, and a pet left out can move in later from the Residents tab without the starter kit being handed out again. The home's year has four seasons of seven game days - spring, summer, autumn, winter - shown in the status line and as petals, falling leaves or snow in the overview's sky (still with *Reduce motion*); in winter rain falls as snow. Each season offers one goal of its own (grow flowers, play, harvest herbs, relax) that pays once; a season missed simply comes round again next year. With no saved pets, *Create a home* also brings a first pet and selects it.

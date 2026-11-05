@@ -1,6 +1,8 @@
 Seite Haustier-Zuhause
 ----------------------
 
+Namen und Hinweise zur ausgewählten Einrichtung werden in schmalen Panels umgebrochen, damit der Möbel-Tab die anderen Heim-Tabs nicht verbreitert.
+
 **Haustier-Zuhause** — die erste Seite. Deine gespeicherten Haustiere ziehen in ein kleines Zuhause, leben dort selbstständig und arbeiten für Münzen.
 
 * *Zuhause anlegen* gibt ein Bett, einen Esstisch, einen Schreibtisch und 10 Münzen. Bevor du das drückst, wird nichts angelegt oder gestartet, und alle anderen Werkzeuge funktionieren auch ohne Zuhause. Bevor das Zuhause entsteht, stehen alle gespeicherten Haustiere unter *Haustiere, die mit einziehen*, alle angekreuzt; wer bleiben soll, wird abgewählt. Die angekreuzten ziehen als sie selbst ein - gleiche Identität, Name, Nähe, Laune, Sättigung, Energie, Aussehen und Garderobe -, nichts wird kopiert oder zurückgesetzt, und ein ausgelassenes Haustier kann später über den Reiter Bewohner einziehen, ohne dass die Startausstattung noch einmal ausgegeben wird. Das Jahr des Zuhauses hat vier Jahreszeiten zu je sieben Spieltagen - Frühling, Sommer, Herbst, Winter -, angezeigt in der Statuszeile und als Blüten, fallendes Laub oder Schnee am Himmel der Übersicht (bei *Bewegung reduzieren* stillstehend); im Winter fällt Regen als Schnee. Jede Jahreszeit bietet ein eigenes Ziel (Blumen ziehen, spielen, Kräuter ernten, entspannen), das einmal bezahlt wird; eine verpasste Jahreszeit kommt im nächsten Jahr wieder. Ohne gespeicherte Haustiere bringt *Zuhause anlegen* auch ein erstes Haustier mit und wählt es aus.

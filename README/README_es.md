@@ -86,7 +86,7 @@ La generación de mascotas, las vistas previas, los guardarropas predeterminados
 
 Las acciones de los paneles del hogar se rechazan durante la preparación y ejecución del cierre; los resultados del selector de planos se comprueban de nuevo antes de usarlos. Cancelar el cierre permite nuevas acciones sin repetir las rechazadas.
 
-Tras crear un hogar, los accesos y los textos largos de botones y casillas se ajustan en varias líneas en ventanas estrechas. Los controles se adaptan al panel; el dibujo del hogar conserva su desplazamiento horizontal independiente.
+Tras crear un hogar, los accesos y los textos largos de botones y casillas se ajustan en varias líneas en ventanas estrechas. Los controles se adaptan al panel; el dibujo del hogar conserva su desplazamiento horizontal independiente. Los nombres y las indicaciones del mueble seleccionado se ajustan en varias líneas en paneles estrechos para que la pestaña Muebles no ensanche las demás pestañas del hogar.
 
 Los encargos diarios se actualizan en pantalla al cambiar el día del juego, aunque no ocurra otro evento de vida o recompensa.
 
