@@ -356,6 +356,7 @@ def refresh_commissions(world: World) -> None:
         item, count, coins = pool.pop((seed >> (index * 8)) % len(pool))
         offers.append({"item": item, "count": count, "coins": coins, "done": False})
     world.progress.commissions = {"day": day, "offers": offers}
+    world.emit("commissions_refreshed", day=day)
 
 
 def deliver(world: World, index: int) -> str:

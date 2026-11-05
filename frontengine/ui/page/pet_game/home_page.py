@@ -835,7 +835,7 @@ class PetHomePage(SettingPage):
         self.inbox.on_events(events, self.service.world)
         kinds = {event["kind"] for event in events}
         if kinds & {"settled", "placed", "arrived", "settle_failed", "life_event", "wish_granted",
-                    "goal_claimed", "commission_done", "bought", "routine_set"}:
+                    "goal_claimed", "commission_done", "commissions_refreshed", "bought", "routine_set"}:
             self.refresh()
 
     def _on_save_failed(self, error: str) -> None:

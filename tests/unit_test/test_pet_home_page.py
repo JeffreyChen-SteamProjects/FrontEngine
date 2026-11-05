@@ -49,6 +49,34 @@ def _place(page, definition: str, cell: int) -> None:
     panel.toggle_arrange()
 
 
+def test_new_day_replaces_visible_commissions_without_another_event(page):
+    from frontengine.show.pet_game.captions import item_label
+    from frontengine.utils.pet_game import simulation
+    from frontengine.utils.pet_game.schedule import DAY_MS
+
+    page.create_home()
+    world = page.service.world
+    world.home = "00000000000000000000000000000001"
+    world.automatic = False
+    for resident in world.residents.values():
+        resident.parked = True
+    world.progress.commissions["day"] = 0
+    world.time_ms = DAY_MS - simulation.STEP_MS
+    world.progress.next_check_ms = DAY_MS
+    page.refresh()
+    yesterday = [page.goals.commissions.item(i).text() for i in range(page.goals.commissions.count())]
+    world.drain_events()
+
+    page.service.run(lambda current: simulation.advance(current, simulation.STEP_MS))
+
+    assert world.progress.commissions["day"] == 2
+    expected = [translate("pet_home_offer_line", "{count} × {item} → {coins} coins").format(
+        count=offer["count"], item=item_label(world, offer["item"]), coins=offer["coins"])
+        for offer in world.progress.commissions["offers"]]
+    assert expected != yesterday
+    assert [page.goals.commissions.item(i).text() for i in range(page.goals.commissions.count())] == expected
+
+
 def test_no_home_offers_creation_and_disables_the_panels(page):
     assert page.service.world is None
     assert not page.create_button.isHidden()

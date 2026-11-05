@@ -85,6 +85,18 @@ def test_commissions_are_seeded_by_day_and_leave_the_simulation_alone():
     assert world.progress.commissions["day"] == 2
 
 
+def test_commissions_notify_once_when_the_day_changes():
+    world, _zone = _world()
+    world.drain_events()
+    goals.refresh_commissions(world)
+    assert world.drain_events() == [{"kind": "commissions_refreshed", "time": world.time_ms, "day": 1}]
+    goals.refresh_commissions(world)
+    assert world.drain_events() == []
+    world.time_ms += DAY_MS
+    goals.refresh_commissions(world)
+    assert world.drain_events() == [{"kind": "commissions_refreshed", "time": world.time_ms, "day": 2}]
+
+
 def test_delivering_a_commission_pays_once_and_needs_the_goods():
     world, _zone = _world()
     goals.refresh_commissions(world)

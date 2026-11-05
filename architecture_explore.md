@@ -743,3 +743,5 @@ Residents as characters: `show/pet_game/resident_art.py` maps a resident's activ
 寵物設定頁的生成、Puppet 匯出、預覽與預設衣櫃，以及家園 ResidentPanel 的居民衣櫃均使用已綁定的儲存目錄；家園頁將固定目錄的素材庫工廠傳入 ResidentArt，避免延後工作隨主機 chdir 漂移。既有個體明確指定的素材庫仍優先使用。 家園照片保存、CollectionPanel 相簿讀取與本機內容包資料夾按鈕同樣使用 lifetime.storage.directory，與內容包載入器一致。
 
 家園面板保留頁面已持有的生命週期，以 owned_action 限制使用者指令入口；藍圖選檔結果經 after_dialog 再檢查才寫檔或建立視窗。刷新與關閉清理仍與新動作接納分開。
+
+Daily commission changes emit `commissions_refreshed` once per generated game day from `utils/pet_game/goals.py`. The home page consumes the event to refresh visible offers without waiting for unrelated life or reward events.

@@ -279,3 +279,5 @@ PetSettingUI, PetProfileControls and home ResidentPanel wardrobes resolve defaul
 Home panels retain their page lifetime and guard user-command entry points with owned_action. Blueprint selection results pass through after_dialog before writes or dialog creation; refresh and shutdown cleanup remain separate from new-action admission.
 
 HomeTabs permits home combo boxes and sliders to shrink within their panels; the shared form layout still stacks labels when needed. Home shortcuts use FlowLayout. The home canvas retains its own horizontal scroll area.
+
+Daily commission changes emit `commissions_refreshed` once per generated game day from `utils/pet_game/goals.py`. The home page consumes the event to refresh visible offers without waiting for unrelated life or reward events.
