@@ -84,6 +84,8 @@ Impostazioni → Permessi e capacità macOS elenca ogni funzione come disponibil
 
 Apri Comandi dal menu o premi Ctrl+K / Ctrl+Maiusc+P in FrontEngine. Cerca nella lingua attuale, nelle etichette inglesi o nei nomi stabili; frecce per selezionare, Invio per eseguire. Include navigazione, cattura, note, filtro, Workshop e azioni globali. Preset/qualità accettano un valore. Preferiti e ultimi 20 comandi restano dopo il riavvio; parametri e ricerche non vengono salvati.
 
+Anche le pagine dei plugin caricati compaiono nella ricerca dei comandi. Aprire un risultato torna alla pagina esistente e conserva i dati inseriti.
+
 Un nome esatto nella lingua attuale precede i preferiti e i comandi recenti. Modificare la ricerca seleziona il risultato migliore; aggiornare i preferiti o la lingua senza cambiare la ricerca mantiene il comando selezionato e il suo argomento.
 
 Le impostazioni sono raggruppate in schede: le azioni frequenti restano visibili e i comandi secondari si trovano in Altre azioni. Mostra impostazioni apre strumenti avanzati e messaggi. Nell’editor scene il canvas affianca le schede Proprietà, Anteprima e Animazione. Nelle finestre strette campi e controlli vanno a capo; l’azione inferiore resta visibile. La ricerca mostra preferiti e suggerimenti da tastiera. Un comando fallito conserva l’input per riprovare; selezionandone un altro si cancella il parametro precedente.

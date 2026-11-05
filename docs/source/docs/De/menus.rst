@@ -84,6 +84,8 @@ Einstellungen → macOS-Berechtigungen und Fähigkeiten zeigt jede Funktion als 
 
 Öffnen Sie Befehle in der Menüleiste oder drücken Sie in FrontEngine Strg+K / Strg+Umschalt+P. Suchen Sie in der aktuellen Sprache, mit englischen Namen oder festen Befehlsnamen; Pfeiltasten wählen, Enter führt aus. Enthalten sind Seitennavigation, Aufnahme, Notizen, Bildschirmfilter, Workshop und bestehende globale Aktionen. Preset/Qualität akzeptieren einen Wert. Favoriten und die letzten 20 Befehle bleiben erhalten; Parameter und Suchtext werden nicht gespeichert.
 
+Geladene Plugin-Seiten erscheinen auch in der Befehlssuche. Ein Suchergebnis öffnet die vorhandene Seite und erhält ihre aktuellen Eingaben.
+
 Ein exakt passender Name in der aktuellen Oberflächensprache steht vor Favoriten und zuletzt verwendeten Befehlen. Eine neue Suchanfrage wählt den besten Treffer. Werden bei unveränderter Anfrage Favoriten oder die Oberflächensprache geändert, bleiben der ausgewählte Befehl und sein Argument erhalten.
 
 Einstellungen sind in Karten gegliedert: häufige Aktionen bleiben sichtbar, weitere Befehle stehen unter Weitere Aktionen. Zusätzliche Werkzeuge und Meldungen öffnen sich mit Details anzeigen. Im Szeneneditor steht die Zeichenfläche neben den Reitern Eigenschaften, Vorschau und Animation. Schmale Fenster umbrechen Felder und Steuerelemente; die untere Aktion bleibt sichtbar. Die Befehlssuche zeigt Favoritenstatus und Tastaturhinweise. Nach einem Fehler bleibt die Eingabe für einen neuen Versuch erhalten; ein Befehlswechsel löscht den vorherigen Parameter.

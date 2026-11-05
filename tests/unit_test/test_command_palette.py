@@ -225,3 +225,26 @@ def test_exact_page_name_enter_opens_matching_page(previous_query):
         assert calls == ["text"]
     finally:
         dialog.close()
+
+
+def test_registered_plugin_page_is_searchable_without_recreating_it(monkeypatch, make_main_window):
+    from frontengine.ui import main_ui
+    from examples.plugins.clock.plugin import ClockPage
+
+    name = "Example clock"
+    monkeypatch.setattr(main_ui, "FrontEngine_EXTEND_TAB", {name: ClockPage})
+    monkeypatch.setattr(main_ui, "load_plugins", lambda *_args, **_kwargs: [])
+    window = make_main_window()
+    page = window.plugin_pages[name]
+    page.caption.setText("Keep my caption")
+    for _ in range(2):
+        window.sidebar.select_page(0)
+        window.command_palette_action.trigger()
+        palette = window.command_palette
+        palette.search_input.setText(name)
+        assert palette.results.count() == 1
+        QTest.keyClick(palette.search_input, Qt.Key.Key_Return)
+        assert window.page_stack.currentWidget() is page
+        assert page.caption.text() == "Keep my caption"
+    recent = window.command_history.values("recent", set(window.action_registry.actions))
+    assert recent[0] == "page." + name

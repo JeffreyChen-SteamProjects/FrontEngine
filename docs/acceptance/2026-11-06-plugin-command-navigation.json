@@ -1,0 +1,89 @@
+{
+  "baseline": {
+    "revision": "c9da39c",
+    "plugin": "Example clock",
+    "registration": "Repository example ClockPage injected at load_plugins boundary",
+    "sidebar_page": true,
+    "features_menu_page": true,
+    "search_count": 0,
+    "search_ids": [],
+    "registry_has_page": false
+  },
+  "exit_code": 0,
+  "harness": {
+    "source": "\"\"\"Widget-local keyboard events in an offscreen full MainUI.\"\"\"\nimport json\nimport logging\nimport os\nfrom pathlib import Path\nimport sys\nimport tempfile\nfrom time import monotonic\n\nROOT = Path(__file__).resolve().parents[1]\nsys.path.insert(0, str(ROOT))\nos.environ['QT_QPA_PLATFORM'] = 'offscreen'\ntrace = []\n\n\ndef tab_to(app, window, target):\n    for count in range(400):\n        current = app.focusWidget()\n        if current is target:\n            trace.append({'target': target.objectName() or type(target).__name__, 'tabs': count})\n            return\n        QTest.keyClick(current or window, Qt.Key.Key_Tab)\n        app.processEvents()\n    raise AssertionError(('Unreachable by Tab', type(target).__name__, target.objectName()))\n\n\nprevious = Path.cwd()\nwith tempfile.TemporaryDirectory(prefix='front-keyboard-flow-') as name:\n    os.chdir(name)\n    try:\n        Path('user_setting.json').write_text(json.dumps({'language': 'English', 'smart_pause': False,\n            'pet_home_on_desktop': False, 'pet_home_running': False}))\n        from PySide6.QtCore import QCoreApplication, QEvent, Qt\n        from PySide6.QtTest import QTest\n        from PySide6.QtWidgets import QApplication\n        from frontengine.ui import main_ui\n        from frontengine.ui.page.pet_game import home_page\n        from frontengine.utils.pet_game import simulation\n        from frontengine.utils.session_lock import session_lock\n        main_ui.CriticalExit.init_critical_exit = lambda self: None\n        main_ui.HotkeyService.start = lambda self: False\n        main_ui.AppProfileService.start = lambda self: None\n        main_ui.ShareWatchService.start = lambda self: None\n        home_page.workshop_pack_roots = lambda: []\n        session_lock.is_session_locked = lambda: False\n        from examples.plugins.clock.plugin import ClockPage\n        plugin_name = 'Example clock'\n        def register_example(tabs, **_kwargs):\n            tabs[plugin_name] = ClockPage\n            return [plugin_name]\n        main_ui.load_plugins = register_example\n        app = QApplication([])\n        app.setQuitOnLastWindowClosed(False)\n        window = main_ui.FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)\n        try:\n            window.resize(1280, 900)\n            window.show()\n            app.processEvents()\n            page = window.plugin_pages[plugin_name]\n            index = window.sidebar.page_index(plugin_name)\n            assert index is not None\n            assert window.sidebar.select_page(index)\n            assert window.page_stack.currentWidget() is page\n            window.features_menu.aboutToShow.emit()\n            action = next(action for action, entry in window.features_menu.entries.items()\n                          if entry.kind == 'page' and entry.target == plugin_name)\n            window.sidebar.select_page(0)\n            action.trigger()\n            app.processEvents()\n            assert window.page_stack.currentWidget() is page\n            window.command_palette_action.trigger()\n            app.processEvents()\n            palette = window.command_palette\n            palette.search_input.setText(plugin_name)\n            app.processEvents()\n            result = {'revision': 'c9da39c', 'plugin': plugin_name,\n                      'registration': 'Repository example ClockPage injected at load_plugins boundary',\n                      'sidebar_page': True, 'features_menu_page': True,\n                      'search_count': palette.results.count(),\n                      'search_ids': [palette.results.item(i).data(Qt.ItemDataRole.UserRole)\n                                     for i in range(palette.results.count())],\n                      'registry_has_page': 'page.' + plugin_name in window.action_registry.actions}\n            palette.hide()\n        finally:\n            window.request_shutdown()\n            deadline = monotonic() + 90\n            while not window.lifetime.closed and monotonic() < deadline:\n                QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)\n                app.processEvents()\n            assert window.lifetime.closed\n            window.deleteLater()\n            QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)\n        logging.shutdown()\n    finally:\n        os.chdir(previous)\n(ROOT / '.audit/plugin-entry-points-result.json').write_text(json.dumps(result, indent=2), encoding='utf-8')\nprint(json.dumps(result), flush=True)\n",
+    "sha256": "1bac100fb8a60c9cbb80002595afb8bcc35ed3fa849869fb801ba7d0c3016053"
+  },
+  "limits": [
+    "Repository example registered at the loader boundary in temporary settings, not external plugin install or permission acceptance.",
+    "Actual MainUI on Qt offscreen with OS/Workshop substitutions.",
+    "Fix isolated while c9da39c full regression runs; integration, full regression and independent review pending."
+  ],
+  "after": {
+    "base_revision": "c9da39c",
+    "plugin": "Example clock",
+    "registration": "Repository example ClockPage injected at load_plugins boundary",
+    "languages": [
+      {
+        "language": "English",
+        "same_page": true,
+        "caption_preserved": true,
+        "recent_recorded": true
+      },
+      {
+        "language": "Traditional_Chinese",
+        "same_page": true,
+        "caption_preserved": true,
+        "recent_recorded": true
+      },
+      {
+        "language": "Simplified_Chinese",
+        "same_page": true,
+        "caption_preserved": true,
+        "recent_recorded": true
+      },
+      {
+        "language": "Deutsch",
+        "same_page": true,
+        "caption_preserved": true,
+        "recent_recorded": true
+      },
+      {
+        "language": "Russian",
+        "same_page": true,
+        "caption_preserved": true,
+        "recent_recorded": true
+      },
+      {
+        "language": "France",
+        "same_page": true,
+        "caption_preserved": true,
+        "recent_recorded": true
+      },
+      {
+        "language": "Italy",
+        "same_page": true,
+        "caption_preserved": true,
+        "recent_recorded": true
+      }
+    ]
+  },
+  "after_exit_code": 0,
+  "fixed_harness": {
+    "source": "\"\"\"Widget-local keyboard events in an offscreen full MainUI.\"\"\"\nimport json\nimport logging\nimport os\nfrom pathlib import Path\nimport sys\nimport tempfile\nfrom time import monotonic\n\nROOT = Path(__file__).resolve().parents[1]\nsys.path.insert(0, str(ROOT))\nos.environ['QT_QPA_PLATFORM'] = 'offscreen'\ntrace = []\n\n\ndef tab_to(app, window, target):\n    for count in range(400):\n        current = app.focusWidget()\n        if current is target:\n            trace.append({'target': target.objectName() or type(target).__name__, 'tabs': count})\n            return\n        QTest.keyClick(current or window, Qt.Key.Key_Tab)\n        app.processEvents()\n    raise AssertionError(('Unreachable by Tab', type(target).__name__, target.objectName()))\n\n\nprevious = Path.cwd()\nwith tempfile.TemporaryDirectory(prefix='front-keyboard-flow-') as name:\n    os.chdir(name)\n    try:\n        Path('user_setting.json').write_text(json.dumps({'language': 'English', 'smart_pause': False,\n            'pet_home_on_desktop': False, 'pet_home_running': False}))\n        from PySide6.QtCore import QCoreApplication, QEvent, Qt\n        from PySide6.QtTest import QTest\n        from PySide6.QtWidgets import QApplication\n        from frontengine.ui import main_ui\n        from frontengine.ui.page.pet_game import home_page\n        from frontengine.utils.pet_game import simulation\n        from frontengine.utils.session_lock import session_lock\n        main_ui.CriticalExit.init_critical_exit = lambda self: None\n        main_ui.HotkeyService.start = lambda self: False\n        main_ui.AppProfileService.start = lambda self: None\n        main_ui.ShareWatchService.start = lambda self: None\n        home_page.workshop_pack_roots = lambda: []\n        session_lock.is_session_locked = lambda: False\n        from examples.plugins.clock.plugin import ClockPage\n        plugin_name = 'Example clock'\n        def register_example(tabs, **_kwargs):\n            tabs[plugin_name] = ClockPage\n            return [plugin_name]\n        main_ui.load_plugins = register_example\n        app = QApplication([])\n        app.setQuitOnLastWindowClosed(False)\n        window = main_ui.FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)\n        try:\n            window.resize(1280, 900)\n            window.show()\n            app.processEvents()\n            from frontengine.ui.menu.language_menu import LANGUAGES, set_language\n            page = window.plugin_pages[plugin_name]\n            page.caption.setText('Keep my caption')\n            result = {'base_revision': 'c9da39c', 'plugin': plugin_name,\n                      'registration': 'Repository example ClockPage injected at load_plugins boundary',\n                      'languages': []}\n            for _, language in LANGUAGES:\n                assert set_language(language, window)\n                window.sidebar.select_page(0)\n                window.command_palette_action.trigger()\n                app.processEvents()\n                palette = window.command_palette\n                palette.search_input.setText(plugin_name)\n                app.processEvents()\n                assert palette.results.count() == 1\n                assert palette.selected_id() == 'page.' + plugin_name\n                QTest.keyClick(palette.search_input, Qt.Key.Key_Return)\n                app.processEvents()\n                assert window.page_stack.currentWidget() is page\n                assert page.caption.text() == 'Keep my caption'\n                recent = window.command_history.values('recent', set(window.action_registry.actions))\n                assert recent[0] == 'page.' + plugin_name\n                result['languages'].append({'language': language, 'same_page': True,\n                                             'caption_preserved': True, 'recent_recorded': True})\n                print('verified ' + language, flush=True)\n        finally:\n            window.request_shutdown()\n            deadline = monotonic() + 90\n            while not window.lifetime.closed and monotonic() < deadline:\n                QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)\n                app.processEvents()\n            assert window.lifetime.closed\n            window.deleteLater()\n            QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)\n        logging.shutdown()\n    finally:\n        os.chdir(previous)\n(ROOT / '.audit/plugin-entry-points-result.json').write_text(json.dumps(result, indent=2), encoding='utf-8')\nprint(json.dumps(result), flush=True)\n",
+    "sha256": "853e829216d76b11bd650a6a6085f98e952123891b1d65bd36379d409e2bce84"
+  },
+  "red": {
+    "failure": "assert 0 == 1",
+    "summary": "1 failed, 11 deselected in 32.38s"
+  },
+  "green": {
+    "command_palette_plugin_lifecycle_features_tests": 25,
+    "summary": "25 passed in 37.13s",
+    "documentation_progress_tests": 27,
+    "documentation_seconds": 11.37,
+    "pyflakes_exit": 0,
+    "sphinx_warnings_as_errors_exit": 0
+  },
+  "fix": "Append successfully attached plugin pages to the same command_pages inventory used by startup command registration. The existing page, fallback label and stable sidebar ID are reused."
+}

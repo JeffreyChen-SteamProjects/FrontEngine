@@ -86,6 +86,8 @@ Paramètres → Autorisations et capacités macOS indique pour chaque fonction d
 
 Ouvrez Commandes dans le menu ou utilisez Ctrl+K / Ctrl+Maj+P dans FrontEngine. Recherchez dans la langue actuelle, les libellés anglais ou les noms stables ; les flèches sélectionnent et Entrée exécute. Navigation, capture, notes, filtre, Workshop et actions globales sont disponibles. Les actions préréglage/qualité acceptent une valeur. Favoris et 20 dernières commandes persistent ; paramètres et recherche ne sont pas enregistrés.
 
+Les pages des extensions chargées apparaissent aussi dans la recherche de commandes. Ouvrir un résultat revient à la page existante et conserve les données saisies.
+
 Un nom exact dans la langue actuelle apparaît avant les favoris et les commandes récentes. Modifier la recherche sélectionne le meilleur résultat. Changer les favoris ou la langue sans modifier la recherche conserve la commande sélectionnée et son argument.
 
 Les réglages sont regroupés en cartes : les actions courantes restent visibles et les commandes secondaires sont dans Autres actions. Afficher les réglages ouvre les outils avancés et les messages. Dans l’éditeur de scène, le canevas côtoie les onglets Propriétés, Aperçu et Animation. Les champs passent à la ligne dans une fenêtre étroite ; l’action du bas reste visible. La recherche affiche les favoris et les raccourcis. Après un échec, la saisie reste disponible pour réessayer ; changer de commande efface le paramètre précédent.

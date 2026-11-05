@@ -678,6 +678,7 @@ class FrontEngineMainUI(QMainWindow):
             self.plugin_pages[name] = page
             index = self.page_stack.addWidget(page)
             self.sidebar.add_page(name, index, name)
+            self.command_pages.append((page, name, index))
         except Exception as error:
             front_engine_logger.warning(f'[plugins] invalid page: {name}: {error}')
 
@@ -867,7 +868,7 @@ class FrontEngineMainUI(QMainWindow):
         self.action_registry.execute(action)
 
     def _setup_command_palette(self) -> None:
-        """Expose existing actions and built-in pages with stable searchable IDs."""
+        """Expose existing actions and attached pages with stable searchable IDs."""
         self.command_palette = None
         for _widget, key, index in self.command_pages:
             self.action_registry.register(Action(

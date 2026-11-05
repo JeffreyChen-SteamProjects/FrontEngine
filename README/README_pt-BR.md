@@ -580,6 +580,8 @@ Cena → Editor visual oferece lista e prévia de camadas de imagem/GIF/texto, a
 
 Abra Comandos no menu ou pressione Ctrl+K / Ctrl+Shift+P no FrontEngine. Pesquise no idioma atual, rótulos ingleses ou nomes estáveis; as setas selecionam e Enter executa. Inclui navegação, captura, notas, filtro, Workshop e ações globais. Predefinição/qualidade aceitam um valor. Favoritos e últimos 20 comandos persistem; argumentos e buscas não são salvos.
 
+As páginas dos plugins carregados também aparecem na busca de comandos. Abrir um resultado retorna à página existente e mantém o conteúdo digitado.
+
 Um nome exato no idioma atual aparece antes dos favoritos e comandos recentes. Alterar a busca seleciona o melhor resultado; atualizar favoritos ou o idioma sem alterar a consulta mantém o comando selecionado e seu argumento.
 
 As configurações ficam em cartões: ações frequentes permanecem visíveis e comandos secundários ficam em More actions. Show details expande ferramentas avançadas e mensagens. O editor de cenas coloca a tela ao lado das abas Properties, Preview e Animation. Em janelas estreitas, campos e controles quebram a linha; a ação inferior continua visível. A busca mostra favoritos e dicas de teclado. Uma falha preserva a entrada para tentar novamente; escolher outro comando limpa o argumento anterior.
