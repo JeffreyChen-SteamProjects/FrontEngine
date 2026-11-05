@@ -5,13 +5,15 @@ Panels never change the world themselves; every action goes through
 """
 from __future__ import annotations
 
+from frontengine.ui.page.wrapping_buttons import WrappingCheckBox as QCheckBox, WrappingPushButton as QPushButton
+
 import uuid
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 from frontengine.ui.runtime_lifetime import owned_action
 
-from PySide6.QtWidgets import QCheckBox, QComboBox, QFileDialog, QLabel, QListWidget, QListWidgetItem, QProgressBar, QPushButton
+from PySide6.QtWidgets import QComboBox, QFileDialog, QLabel, QListWidget, QListWidgetItem, QProgressBar
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QGuiApplication
 

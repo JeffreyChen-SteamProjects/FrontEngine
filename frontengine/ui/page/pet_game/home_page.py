@@ -6,6 +6,8 @@ effect: it reads the save (or reports why it cannot) and waits. A home that
 was running when FrontEngine closed starts again when the page is built.
 """
 from __future__ import annotations
+
+from frontengine.ui.page.wrapping_buttons import WrappingCheckBox as QCheckBox, WrappingPushButton as QPushButton
 from frontengine.ui.runtime_lifetime import owned_action
 from frontengine.ui.runtime_lifetime import OwnedWidgetList
 
@@ -15,8 +17,8 @@ from pathlib import Path
 
 from PySide6.QtCore import Qt, QUrl, Signal
 from PySide6.QtGui import QDesktopServices, QGuiApplication, QKeyEvent, QKeySequence
-from PySide6.QtWidgets import (QCheckBox, QComboBox, QFrame, QLabel, QListWidget, QListWidgetItem,
-                               QPushButton, QScrollArea, QSlider, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QComboBox, QFrame, QLabel, QListWidget, QListWidgetItem,
+                               QScrollArea, QSlider, QVBoxLayout, QWidget)
 
 from frontengine.show.pet_game.ambience import DEFAULT_VOLUME, Ambience
 from frontengine.show.pet.asset_library import PetAssetLibrary
@@ -30,7 +32,6 @@ from frontengine.show.pet_game.themes import glyph
 from frontengine.utils.pet_game.environment import season, weather
 from frontengine.show.pet_game.home_view import ZOOMS
 from frontengine.utils.pet_game.world import MODES
-from frontengine.ui.dialog.dialog_kit import button_row
 from frontengine.ui.page.flow_layout import FlowLayout
 from frontengine.ui.page.layout_kit import Section, SettingPage
 from frontengine.ui.page.pet_game.collection_panel import CollectionPanel
@@ -331,7 +332,10 @@ class PetHomePage(SettingPage):
             tr(button, key, fallback, "setAccessibleName")
             button.setFixedWidth(40)
             button.clicked.connect(lambda _checked=False, s=steps: self.view.step_zoom(s))
-        self.shortcuts = button_row(self.desktop_button, self.backpack_button, self.goals_button)
+        self.shortcuts = QWidget()
+        shortcut_layout = FlowLayout(self.shortcuts, spacing=10)
+        for button in (self.desktop_button, self.backpack_button, self.goals_button):
+            shortcut_layout.addWidget(button)
         self.zone_combo = QComboBox()
         tr(self.zone_combo, "pet_home_zone", "Zone", "setAccessibleName")
         self.zone_combo.activated.connect(lambda _index: self.choose_zone(self.zone_combo.currentData()))

@@ -4,6 +4,7 @@ from PySide6.QtTest import QTest
 from PySide6.QtWidgets import QApplication, QLabel
 
 from frontengine.ui.menu.language_menu import LANGUAGES, set_language
+from frontengine.ui.page.wrapping_buttons import WrappingCheckBox
 
 
 def test_empty_home_fits_narrow_window_in_every_language(make_main_window):
@@ -29,5 +30,27 @@ def test_empty_home_fits_narrow_window_in_every_language(make_main_window):
         page.create_button.setFocus()
         QTest.keyClick(page.create_button, Qt.Key.Key_Space)
         assert page.service.world is not None
+    finally:
+        set_language('English', window)
+
+
+def test_created_home_does_not_widen_the_whole_page(make_main_window):
+    window = make_main_window()
+    window.resize(536, 500)
+    window.show()
+    page = window.pet_home_ui
+    page.create_home()
+    try:
+        for _label, language in LANGUAGES:
+            assert set_language(language, window)
+            window.resize(536, 500)
+            for key in page.tabs.keys():
+                assert page.tabs.select(key)
+                for _ in range(3):
+                    QApplication.processEvents()
+                assert page._scroll.horizontalScrollBar().maximum() == 0, (language, key, window.width())
+                for check in page.tabs.findChildren(WrappingCheckBox):
+                    if check.isVisible():
+                        assert check.height() >= check.heightForWidth(check.width()), (language, key)
     finally:
         set_language('English', window)

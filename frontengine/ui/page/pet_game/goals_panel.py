@@ -1,6 +1,8 @@
 """The Goals section: home level, tutorial, today's commissions, the celebration and life events."""
 from __future__ import annotations
 
+from frontengine.ui.page.wrapping_buttons import WrappingPushButton as QPushButton
+
 from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -8,7 +10,7 @@ from typing import TYPE_CHECKING
 from frontengine.ui.runtime_lifetime import owned_action
 
 from PySide6.QtCore import Qt, QTemporaryFile
-from PySide6.QtWidgets import QLabel, QListWidget, QListWidgetItem, QPushButton
+from PySide6.QtWidgets import QLabel, QListWidget, QListWidgetItem
 
 from frontengine.show.pet_game.captions import item_label
 from frontengine.utils.multi_language.retranslate import translate, tr

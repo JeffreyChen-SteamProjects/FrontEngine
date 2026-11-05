@@ -7,9 +7,11 @@ not twenty. Meals and naps a pet takes on its own are never listed.
 """
 from __future__ import annotations
 
+from frontengine.ui.page.wrapping_buttons import WrappingPushButton as QPushButton
+
 from typing import TYPE_CHECKING
 
-from PySide6.QtWidgets import QLabel, QListWidget, QPushButton
+from PySide6.QtWidgets import QLabel, QListWidget
 
 from frontengine.show.pet_game.captions import result_text
 from frontengine.utils.multi_language.retranslate import translate, tr

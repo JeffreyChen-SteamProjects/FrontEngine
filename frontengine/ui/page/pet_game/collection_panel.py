@@ -1,6 +1,8 @@
 """The Collection tab: every piece of furniture and how to get it, what the pets made, and the photo album."""
 from __future__ import annotations
 
+from frontengine.ui.page.wrapping_buttons import WrappingPushButton as QPushButton
+
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -8,7 +10,7 @@ from frontengine.ui.runtime_lifetime import owned_action
 
 from PySide6.QtCore import QSize, Qt, QUrl
 from PySide6.QtGui import QDesktopServices, QIcon, QImage, QPixmap
-from PySide6.QtWidgets import QLabel, QPushButton
+from PySide6.QtWidgets import QLabel
 
 from frontengine.ui.page.pet_game.goals_panel import ALBUM_FOLDER
 from frontengine.ui.page.pet_game.home_things import ThingGrid, thing_icon

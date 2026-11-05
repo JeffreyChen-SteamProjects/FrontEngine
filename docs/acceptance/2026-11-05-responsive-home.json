@@ -1,0 +1,128 @@
+{
+  "source_base": "cf4a12217c5a0a0153406a5ea86a05466303ee0a",
+  "source_scope": "Uncommitted responsive-home implementation on source_base, identified by wheel and exact source hashes.",
+  "wheel_sha256": "68cd7a56b4752d9a21dfe9c377f28018ec12dc26f9cb94c27bc16b6c6169da17",
+  "wheel_python_sources_byte_equal": 502,
+  "source_hashes": {
+    "frontengine/ui/page/flow_layout.py": "ee7b847b776e5e8e19aebebb9080c402b4f11a8995f97119d20e320c1731adc3",
+    "frontengine/ui/page/wrapping_buttons.py": "480160c24b94225bfa05a43811cbc9ae667142e1204f67c44c7b4ef3d01473a8",
+    "frontengine/ui/page/pet_game/collection_panel.py": "5efe807de463afa49a834557f556898f0590f7afada418b5d78ed22a9035cb4a",
+    "frontengine/ui/page/pet_game/goals_panel.py": "26a2af51bfcdd6f764593e3d3e88232544fe1e7cec9580a940741a09d75dfd6d",
+    "frontengine/ui/page/pet_game/home_page.py": "26adc767fa08e40d4bb4f821039b0b33d59345f48c0587c3f26fa2248cd36430",
+    "frontengine/ui/page/pet_game/home_panels.py": "06a1d61161cd2d8329947087d8623328be7b162ca71619d47bd3d485e8361f0b",
+    "frontengine/ui/page/pet_game/home_stage.py": "5ee4fc9483df3132f5b25fd527c3ed2112f29e2a14950816481db08724b31194",
+    "frontengine/ui/page/pet_game/inbox_panel.py": "8f0074f839a3e0abea1e477d494656e3ebbc8fe64928a184eab6d801fa390e40"
+  },
+  "native_before": [
+    {
+      "window_width": 536,
+      "viewport_width": 284,
+      "horizontal_scroll_max": 167
+    },
+    {
+      "window_width": 640,
+      "viewport_width": 388,
+      "horizontal_scroll_max": 63
+    },
+    {
+      "window_width": 1000,
+      "viewport_width": 748,
+      "horizontal_scroll_max": 0
+    }
+  ],
+  "native_after": [
+    {
+      "window_width": 536,
+      "viewport_width": 284,
+      "horizontal_scroll_max": 0
+    },
+    {
+      "window_width": 640,
+      "viewport_width": 388,
+      "horizontal_scroll_max": 0
+    },
+    {
+      "window_width": 1000,
+      "viewport_width": 748,
+      "horizontal_scroll_max": 0
+    }
+  ],
+  "native_german_button": {
+    "window_width": 536,
+    "horizontal_scroll_max": 0,
+    "button_width": 188,
+    "button_height": 40,
+    "needed_height": 40,
+    "text": "Bereich auf diesem Bildschirm anlegen"
+  },
+  "regression": {
+    "name": "pytest",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "tests": "75",
+    "time": "284.398",
+    "timestamp": "2026-11-05T17:20:31.207309+08:00",
+    "hostname": "LAPTOP-EKQMFLNE"
+  },
+  "clean_install_steps": [
+    {
+      "step": "install",
+      "exit": 0
+    },
+    {
+      "step": "pip-check",
+      "exit": 0
+    },
+    {
+      "step": "smoke",
+      "exit": 0
+    }
+  ],
+  "installed_smoke": {
+    "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "prefix": "D:\\Codes\\FrontEngine\\.audit\\clean-front-integration-311",
+    "package": "D:\\Codes\\FrontEngine\\.audit\\clean-front-integration-311\\Lib\\site-packages\\frontengine\\__init__.py",
+    "qt": "6.12.0",
+    "snapshot_version": 8,
+    "residents": 1,
+    "furniture": 3,
+    "photo_saved": true,
+    "home_saved": true,
+    "same_app_reopened": true,
+    "closed": true,
+    "scope": "Clean installed wheel, Qt offscreen; OS key listeners, foreground watcher, share watcher, session lock and Workshop discovery replaced at boundary; no native device acceptance"
+  },
+  "evidence": [
+    {
+      "local_path": "worktrees\\ownership-integration\\.audit\\home-responsive-regression.xml",
+      "sha256": "48480e2ba735f750ad0253ce42d07fd38f20b7c009ca15efa80790e52f15bcc8"
+    },
+    {
+      "local_path": "worktrees\\ownership-integration\\.audit\\populated-home-fixed-baseline\\result.json",
+      "sha256": "9d01741d430d19fa165167badb44d292ef03f25c2ac5ae0e2c2587c7c2565a20"
+    },
+    {
+      "local_path": "worktrees\\ownership-integration\\.audit\\populated-home-fixed-review-baseline\\german-button.json",
+      "sha256": "7ba035cfe5d21eb5f5fac7bd944836d14b8cbf279ed5de4c18e076f1b98cac03"
+    },
+    {
+      "local_path": "worktrees\\ownership-integration\\.audit\\populated-home-fixed-review-baseline\\german-layout-buttons.png",
+      "sha256": "770711491017b581396ea8a1731dbae84f4f7ba285d9f8b988030e9d8444a600"
+    },
+    {
+      "local_path": "clean-front-responsive-home-exits.json",
+      "sha256": "6d262627993821ff2bca54f61414a5e61c84e018375046a27c68d3bc3dc451cd"
+    },
+    {
+      "local_path": "clean-front-responsive-home-smoke.json",
+      "sha256": "b7910355e1a328a33b523b3aca036c6b80d551c368bf8da7aca17357835b58a1"
+    }
+  ],
+  "scope": "Native layout probes on a private Win32 desktop. Seven-language, nine-tab regression uses Qt offscreen. Button click and Space tests target owned Qt widgets. No global input injection.",
+  "limitations": [
+    "Not mixed-DPI or hardware acceptance.",
+    "Independent review remains pending.",
+    "Broader event, host integration and native acceptance remain in progress.md."
+  ]
+}
