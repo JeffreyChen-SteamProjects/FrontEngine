@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261105-27 | 2026-11-05 | Keep home photos and content folders with their owner | fix, home, storage | [2026-11](2026-11.md) |
 | U-20261105-26 | 2026-11-05 | Keep pet assets in the owned data directory | fix, pet, storage | [2026-11](2026-11.md) |
 | U-20261105-25 | 2026-11-05 | 保存設定與作業所有權的受測整合階段 | #storage #runtime #validation | [2026-11](2026-11.md) |
 | U-20261105-24 | 2026-11-05 | 修正驗收關閉判定、GIF 檔案釋放與窄視窗家園 | #done #ui #lifecycle #testing | [2026-11](2026-11.md) |
@@ -284,6 +285,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 80 |
+| [2026-11.md](2026-11.md) | 2026-11 | 81 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

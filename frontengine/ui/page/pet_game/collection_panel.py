@@ -1,7 +1,6 @@
 """The Collection tab: every piece of furniture and how to get it, what the pets made, and the photo album."""
 from __future__ import annotations
 
-from os import getcwd
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -72,7 +71,7 @@ class CollectionPanel:
         section.add_inline(self.open_album)
 
     def folder(self) -> Path:
-        return Path(getcwd()) / ALBUM_FOLDER
+        return self.page.lifetime.storage.directory / ALBUM_FOLDER
 
     def refresh_lists(self) -> None:
         world, zone = self.page.service.world, self.page.zone

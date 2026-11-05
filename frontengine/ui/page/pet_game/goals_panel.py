@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 from datetime import datetime
-from os import getcwd
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -134,7 +133,7 @@ class GoalsPanel:
         world = self.page.service.world
         if world is None:
             return None
-        folder = Path(getcwd()) / ALBUM_FOLDER
+        folder = self.page.lifetime.storage.directory / ALBUM_FOLDER
         try:
             folder.mkdir(exist_ok=True)
         except OSError:

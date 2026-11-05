@@ -88,3 +88,35 @@ def test_home_art_factory_keeps_its_owners_directory(lifetime_factory, tmp_path,
     finally:
         assert page.shutdown()
         page.close()
+
+
+@pytest.mark.parametrize('action', ['photo', 'album', 'packs'])
+def test_home_files_keep_their_owners_directory(action, lifetime_factory, tmp_path, monkeypatch):
+    from pathlib import Path
+    from PySide6.QtGui import QColor, QDesktopServices, QPixmap
+    from frontengine.ui.page.pet_game.home_page import PetHomePage
+    lifetime = lifetime_factory()
+    directory = lifetime.storage.directory
+    page = PetHomePage(lifetime=lifetime)
+    other = tmp_path / 'other-host-directory'
+    other.mkdir()
+    monkeypatch.chdir(other)
+    opened = []
+    monkeypatch.setattr(QDesktopServices, 'openUrl', lambda url: opened.append(url.toLocalFile()))
+    try:
+        if action == 'photo':
+            page.create_home()
+            picture = QPixmap(16, 16)
+            picture.fill(QColor('orange'))
+            photo = page.goals.save_photo(picture)
+            assert photo is not None and photo.is_file()
+            assert photo.parent == directory / 'pet-album'
+        elif action == 'album':
+            assert page.collection.folder() == directory / 'pet-album'
+        else:
+            page.open_packs_folder()
+            assert [Path(path) for path in opened] == [directory / 'pet-home-packs']
+            assert (directory / 'pet-home-packs').is_dir()
+    finally:
+        assert page.shutdown()
+        page.close()

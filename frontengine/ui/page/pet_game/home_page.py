@@ -11,7 +11,6 @@ from frontengine.ui.runtime_lifetime import OwnedWidgetList
 
 from concurrent.futures import ThreadPoolExecutor
 from functools import partial
-from os import getcwd
 from pathlib import Path
 
 from PySide6.QtCore import Qt, QUrl, Signal
@@ -471,7 +470,7 @@ class PetHomePage(SettingPage):
 
     @owned_action
     def open_packs_folder(self) -> None:
-        folder = Path(getcwd()) / PACK_FOLDER
+        folder = self.lifetime.storage.directory / PACK_FOLDER
         folder.mkdir(exist_ok=True)
         QDesktopServices.openUrl(QUrl.fromLocalFile(str(folder)))
 

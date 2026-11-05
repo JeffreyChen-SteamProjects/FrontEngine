@@ -739,4 +739,4 @@ Residents as characters: `show/pet_game/resident_art.py` maps a resident's activ
 
 家園狀態文字獨立於可換行的操作按鈕列；歡迎標題也可換行，避免長翻譯撐寬窄視窗。
 
-寵物設定頁的生成、Puppet 匯出、預覽與預設衣櫃均使用已綁定的儲存目錄；家園頁將固定目錄的素材庫工廠傳入 ResidentArt，避免延後工作隨主機 chdir 漂移。既有個體明確指定的素材庫仍優先使用。
+寵物設定頁的生成、Puppet 匯出、預覽與預設衣櫃均使用已綁定的儲存目錄；家園頁將固定目錄的素材庫工廠傳入 ResidentArt，避免延後工作隨主機 chdir 漂移。既有個體明確指定的素材庫仍優先使用。 家園照片保存、CollectionPanel 相簿讀取與本機內容包資料夾按鈕同樣使用 lifetime.storage.directory，與內容包載入器一致。
