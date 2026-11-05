@@ -84,6 +84,8 @@ Impostazioni → Permessi e capacità macOS elenca ogni funzione come disponibil
 
 Apri Comandi dal menu o premi Ctrl+K / Ctrl+Maiusc+P in FrontEngine. Cerca nella lingua attuale, nelle etichette inglesi o nei nomi stabili; frecce per selezionare, Invio per eseguire. Include navigazione, cattura, note, filtro, Workshop e azioni globali. Preset/qualità accettano un valore. Preferiti e ultimi 20 comandi restano dopo il riavvio; parametri e ricerche non vengono salvati.
 
+I nomi dei plugin non sostituiscono le voci delle pagine integrate.
+
 Anche le pagine dei plugin caricati compaiono nella ricerca dei comandi. Aprire un risultato torna alla pagina esistente e conserva i dati inseriti.
 
 Un nome esatto nella lingua attuale precede i preferiti e i comandi recenti. Modificare la ricerca seleziona il risultato migliore; aggiornare i preferiti o la lingua senza cambiare la ricerca mantiene il comando selezionato e il suo argomento.

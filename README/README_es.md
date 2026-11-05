@@ -557,6 +557,8 @@ Escena → Editor visual ofrece lista y vista previa de capas de imagen/GIF/text
 
 Abre Comandos en el menú o pulsa Ctrl+K / Ctrl+Mayús+P en FrontEngine. Busca en el idioma actual, etiquetas inglesas o nombres estables; las flechas seleccionan y Intro ejecuta. Incluye navegación, captura, notas, filtro, Workshop y acciones globales. Preajuste/calidad aceptan un valor. Favoritos y últimos 20 comandos persisten; argumentos y búsquedas no se guardan.
 
+Los nombres de los complementos no sustituyen las entradas de las páginas integradas.
+
 Las páginas de los complementos cargados también aparecen en la búsqueda de comandos. Abrir un resultado vuelve a la página existente y conserva lo que has introducido.
 
 Un nombre exacto en el idioma actual aparece antes que los favoritos y los comandos recientes. Cambiar la búsqueda selecciona la mejor coincidencia; actualizar favoritos o el idioma sin cambiar la consulta conserva el comando seleccionado y su argumento.

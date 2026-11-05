@@ -558,6 +558,8 @@ Scène → Éditeur visuel propose liste et aperçu des calques image/GIF/texte,
 
 Ouvrez Commandes dans le menu ou utilisez Ctrl+K / Ctrl+Maj+P dans FrontEngine. Recherchez dans la langue actuelle, les libellés anglais ou les noms stables ; les flèches sélectionnent et Entrée exécute. Navigation, capture, notes, filtre, Workshop et actions globales sont disponibles. Les actions préréglage/qualité acceptent une valeur. Favoris et 20 dernières commandes persistent ; paramètres et recherche ne sont pas enregistrés.
 
+Les noms des extensions ne remplacent pas les entrées des pages intégrées.
+
 Les pages des extensions chargées apparaissent aussi dans la recherche de commandes. Ouvrir un résultat revient à la page existante et conserve les données saisies.
 
 Un nom exact dans la langue actuelle apparaît avant les favoris et les commandes récentes. Modifier la recherche sélectionne le meilleur résultat. Changer les favoris ou la langue sans modifier la recherche conserve la commande sélectionnée et son argument.

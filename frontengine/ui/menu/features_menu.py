@@ -126,7 +126,7 @@ class FeaturesMenu(QMenu):
         if plugins:                                   # whatever plugins registered this session
             submenu = self._new_submenu(translate("nav_group_extensions", "Extensions"))
             for name in plugins:
-                self._add_entry(submenu, Entry("page", name))
+                self._add_entry(submenu, Entry("page", f"plugin:{name}"))
 
     def _add_entry(self, menu: QMenu, entry: Entry) -> None:
         if entry.kind == "menu":

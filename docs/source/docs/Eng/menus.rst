@@ -83,6 +83,8 @@ Settings → macOS permissions and capabilities lists each feature as available,
 
 Open Commands from the menu bar or press Ctrl+K / Ctrl+Shift+P inside FrontEngine. Search the current interface language, English labels or stable command names; Up/Down selects and Enter runs. Commands include page navigation, capture, notes, the screen filter, Workshop and existing global actions. Preset/quality actions accept a value. Favorites and the last 20 commands survive restart; arguments and search text are not saved.
 
+Plugin names do not replace built-in page entries.
+
 Loaded plugin pages also appear in command search. Opening a result returns to the existing page and preserves its current input.
 
 An exact name in the current interface language appears before favorites and recent commands. Changing the search selects its best match; updating favorites or the interface language without changing the query keeps the selected command and its argument.

@@ -677,8 +677,9 @@ class FrontEngineMainUI(QMainWindow):
             page = attach_page(name, factory, self.control_center_ui)
             self.plugin_pages[name] = page
             index = self.page_stack.addWidget(page)
-            self.sidebar.add_page(name, index, name)
-            self.command_pages.append((page, name, index))
+            page_id = f"plugin:{name}"
+            self.sidebar.add_page(page_id, index, name)
+            self.command_pages.append((page, page_id, index))
         except Exception as error:
             front_engine_logger.warning(f'[plugins] invalid page: {name}: {error}')
 

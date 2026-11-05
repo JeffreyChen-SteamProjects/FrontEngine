@@ -227,11 +227,11 @@ def test_exact_page_name_enter_opens_matching_page(previous_query):
         dialog.close()
 
 
-def test_registered_plugin_page_is_searchable_without_recreating_it(monkeypatch, make_main_window):
+@pytest.mark.parametrize("name", ["Example clock", "tab_text_text"])
+def test_registered_plugin_page_is_searchable_without_recreating_it(monkeypatch, make_main_window, name):
     from frontengine.ui import main_ui
     from examples.plugins.clock.plugin import ClockPage
 
-    name = "Example clock"
     monkeypatch.setattr(main_ui, "FrontEngine_EXTEND_TAB", {name: ClockPage})
     monkeypatch.setattr(main_ui, "load_plugins", lambda *_args, **_kwargs: [])
     window = make_main_window()
@@ -242,9 +242,19 @@ def test_registered_plugin_page_is_searchable_without_recreating_it(monkeypatch,
         window.command_palette_action.trigger()
         palette = window.command_palette
         palette.search_input.setText(name)
-        assert palette.results.count() == 1
+        assert palette.selected_id() == "page.plugin:" + name
         QTest.keyClick(palette.search_input, Qt.Key.Key_Return)
         assert window.page_stack.currentWidget() is page
         assert page.caption.text() == "Keep my caption"
     recent = window.command_history.values("recent", set(window.action_registry.actions))
-    assert recent[0] == "page." + name
+    assert recent[0] == "page.plugin:" + name
+    assert window.sidebar.select_page_id("plugin:" + name)
+    assert window.page_stack.currentWidget() is page
+    window.features_menu.aboutToShow.emit()
+    action = next(action for action, entry in window.features_menu.entries.items()
+                  if entry.kind == "page" and entry.target == "plugin:" + name)
+    window.sidebar.select_page(0)
+    action.trigger()
+    assert window.page_stack.currentWidget() is page
+    assert window.action_registry.execute("page.tab_text_text")
+    assert window.page_stack.currentWidget() is window.text_setting_ui
