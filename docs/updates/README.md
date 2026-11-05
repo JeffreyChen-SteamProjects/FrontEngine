@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261105-43 | 2026-11-05 | 驗證 Web 覆蓋層跨混合 DPI 螢幕 | #verification #ui | [2026-11](2026-11.md) |
 | U-20261105-42 | 2026-11-05 | 驗證最新 wheel 內容與隔離安裝流程 | #test #packaging #ui | [2026-11](2026-11.md) |
 | U-20261105-41 | 2026-11-05 | 完成教學後移除無效的跳過操作 | #fix #ui #pet | [2026-11](2026-11.md) |
 | U-20261105-40 | 2026-11-05 | 說明空白工作清單並依選取啟用取消 | #fix #ui #pet | [2026-11](2026-11.md) |
@@ -300,6 +301,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 96 |
+| [2026-11.md](2026-11.md) | 2026-11 | 97 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
