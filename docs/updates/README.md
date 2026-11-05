@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261106-12 | 2026-11-06 | Verify service reuse during built-in page and command navigation | #testing #ui | [2026-11](2026-11.md) |
 | U-20261106-11 | 2026-11-06 | Record native MainUI onboarding and cold reload with failed video gate | #testing #acceptance | [2026-11](2026-11.md) |
 | U-20261106-10 | 2026-11-06 | Verify integrated accessibility and search regression; integrate plugin fixes | #testing #integration | [2026-11](2026-11.md) |
 | U-20261106-09 | 2026-11-06 | Verify work reservations across storage and restart | #pets #economy #acceptance | [2026-11](2026-11.md) |
@@ -338,6 +339,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 134 |
+| [2026-11.md](2026-11.md) | 2026-11 | 135 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

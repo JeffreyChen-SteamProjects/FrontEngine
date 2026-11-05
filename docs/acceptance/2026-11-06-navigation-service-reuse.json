@@ -1,0 +1,814 @@
+{
+  "result": {
+    "source_revision": "38033a7c5240ec0684852ee7de4f0dc60a0c7418",
+    "platform": "offscreen",
+    "os_services_stubbed": true,
+    "languages": [
+      {
+        "language": "English",
+        "keyboard_pages": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16
+        ],
+        "localized_searches": [
+          {
+            "page": "pet_home_ui",
+            "label": "Pet home",
+            "matching_commands": 1
+          },
+          {
+            "page": "video_setting_ui",
+            "label": "Video",
+            "matching_commands": 1
+          },
+          {
+            "page": "image_setting_ui",
+            "label": "Image",
+            "matching_commands": 1
+          },
+          {
+            "page": "web_setting_ui",
+            "label": "Web",
+            "matching_commands": 2
+          },
+          {
+            "page": "gif_setting_ui",
+            "label": "GIF & WebP",
+            "matching_commands": 1
+          },
+          {
+            "page": "text_setting_ui",
+            "label": "Text",
+            "matching_commands": 17
+          },
+          {
+            "page": "sound_player_setting_ui",
+            "label": "Sound",
+            "matching_commands": 1
+          },
+          {
+            "page": "scene_setting_ui",
+            "label": "Scene",
+            "matching_commands": 10
+          },
+          {
+            "page": "particle_setting_ui",
+            "label": "Particle",
+            "matching_commands": 1
+          },
+          {
+            "page": "pet_setting_ui",
+            "label": "Pet",
+            "matching_commands": 2
+          },
+          {
+            "page": "wallpaper_setting_ui",
+            "label": "Wallpaper",
+            "matching_commands": 1
+          },
+          {
+            "page": "widgets_setting_ui",
+            "label": "Widgets",
+            "matching_commands": 1
+          },
+          {
+            "page": "focus_setting_ui",
+            "label": "Focus",
+            "matching_commands": 1
+          },
+          {
+            "page": "screen_care_setting_ui",
+            "label": "Eye care",
+            "matching_commands": 1
+          },
+          {
+            "page": "presentation_setting_ui",
+            "label": "Presenting",
+            "matching_commands": 1
+          },
+          {
+            "page": "tools_setting_ui",
+            "label": "Tools",
+            "matching_commands": 1
+          },
+          {
+            "page": "control_center_ui",
+            "label": "Control Center",
+            "matching_commands": 1
+          }
+        ]
+      },
+      {
+        "language": "Traditional_Chinese",
+        "keyboard_pages": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16
+        ],
+        "localized_searches": [
+          {
+            "page": "pet_home_ui",
+            "label": "寵物家園",
+            "matching_commands": 1
+          },
+          {
+            "page": "video_setting_ui",
+            "label": "影片",
+            "matching_commands": 1
+          },
+          {
+            "page": "image_setting_ui",
+            "label": "圖片",
+            "matching_commands": 1
+          },
+          {
+            "page": "web_setting_ui",
+            "label": "網頁",
+            "matching_commands": 1
+          },
+          {
+            "page": "gif_setting_ui",
+            "label": "GIF 和 WebP",
+            "matching_commands": 1
+          },
+          {
+            "page": "text_setting_ui",
+            "label": "文字",
+            "matching_commands": 1
+          },
+          {
+            "page": "sound_player_setting_ui",
+            "label": "音樂",
+            "matching_commands": 1
+          },
+          {
+            "page": "scene_setting_ui",
+            "label": "場景",
+            "matching_commands": 4
+          },
+          {
+            "page": "particle_setting_ui",
+            "label": "粒子",
+            "matching_commands": 1
+          },
+          {
+            "page": "pet_setting_ui",
+            "label": "桌面寵物",
+            "matching_commands": 1
+          },
+          {
+            "page": "wallpaper_setting_ui",
+            "label": "桌布",
+            "matching_commands": 1
+          },
+          {
+            "page": "widgets_setting_ui",
+            "label": "小工具",
+            "matching_commands": 1
+          },
+          {
+            "page": "focus_setting_ui",
+            "label": "專注",
+            "matching_commands": 1
+          },
+          {
+            "page": "screen_care_setting_ui",
+            "label": "護眼",
+            "matching_commands": 1
+          },
+          {
+            "page": "presentation_setting_ui",
+            "label": "簡報",
+            "matching_commands": 1
+          },
+          {
+            "page": "tools_setting_ui",
+            "label": "工具",
+            "matching_commands": 2
+          },
+          {
+            "page": "control_center_ui",
+            "label": "控制中心",
+            "matching_commands": 1
+          }
+        ]
+      },
+      {
+        "language": "Simplified_Chinese",
+        "keyboard_pages": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16
+        ],
+        "localized_searches": [
+          {
+            "page": "pet_home_ui",
+            "label": "宠物家园",
+            "matching_commands": 1
+          },
+          {
+            "page": "video_setting_ui",
+            "label": "视频",
+            "matching_commands": 1
+          },
+          {
+            "page": "image_setting_ui",
+            "label": "图片",
+            "matching_commands": 1
+          },
+          {
+            "page": "web_setting_ui",
+            "label": "网页",
+            "matching_commands": 1
+          },
+          {
+            "page": "gif_setting_ui",
+            "label": "GIF 和 WebP",
+            "matching_commands": 1
+          },
+          {
+            "page": "text_setting_ui",
+            "label": "文字",
+            "matching_commands": 1
+          },
+          {
+            "page": "sound_player_setting_ui",
+            "label": "音乐",
+            "matching_commands": 1
+          },
+          {
+            "page": "scene_setting_ui",
+            "label": "场景",
+            "matching_commands": 4
+          },
+          {
+            "page": "particle_setting_ui",
+            "label": "粒子",
+            "matching_commands": 1
+          },
+          {
+            "page": "pet_setting_ui",
+            "label": "宠物",
+            "matching_commands": 2
+          },
+          {
+            "page": "wallpaper_setting_ui",
+            "label": "桌布",
+            "matching_commands": 1
+          },
+          {
+            "page": "widgets_setting_ui",
+            "label": "小工具",
+            "matching_commands": 1
+          },
+          {
+            "page": "focus_setting_ui",
+            "label": "专注",
+            "matching_commands": 1
+          },
+          {
+            "page": "screen_care_setting_ui",
+            "label": "护眼",
+            "matching_commands": 1
+          },
+          {
+            "page": "presentation_setting_ui",
+            "label": "简报",
+            "matching_commands": 1
+          },
+          {
+            "page": "tools_setting_ui",
+            "label": "工具",
+            "matching_commands": 2
+          },
+          {
+            "page": "control_center_ui",
+            "label": "控制中心",
+            "matching_commands": 1
+          }
+        ]
+      },
+      {
+        "language": "Deutsch",
+        "keyboard_pages": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16
+        ],
+        "localized_searches": [
+          {
+            "page": "pet_home_ui",
+            "label": "Haustier-Zuhause",
+            "matching_commands": 1
+          },
+          {
+            "page": "video_setting_ui",
+            "label": "Video",
+            "matching_commands": 1
+          },
+          {
+            "page": "image_setting_ui",
+            "label": "Bild",
+            "matching_commands": 3
+          },
+          {
+            "page": "web_setting_ui",
+            "label": "Webseite",
+            "matching_commands": 1
+          },
+          {
+            "page": "gif_setting_ui",
+            "label": "GIF und WebP",
+            "matching_commands": 1
+          },
+          {
+            "page": "text_setting_ui",
+            "label": "Text",
+            "matching_commands": 17
+          },
+          {
+            "page": "sound_player_setting_ui",
+            "label": "Musik",
+            "matching_commands": 1
+          },
+          {
+            "page": "scene_setting_ui",
+            "label": "Szene",
+            "matching_commands": 5
+          },
+          {
+            "page": "particle_setting_ui",
+            "label": "Partikel",
+            "matching_commands": 1
+          },
+          {
+            "page": "pet_setting_ui",
+            "label": "Haustier",
+            "matching_commands": 2
+          },
+          {
+            "page": "wallpaper_setting_ui",
+            "label": "Hintergrund",
+            "matching_commands": 1
+          },
+          {
+            "page": "widgets_setting_ui",
+            "label": "Widgets",
+            "matching_commands": 1
+          },
+          {
+            "page": "focus_setting_ui",
+            "label": "Fokus",
+            "matching_commands": 1
+          },
+          {
+            "page": "screen_care_setting_ui",
+            "label": "Augenschutz",
+            "matching_commands": 1
+          },
+          {
+            "page": "presentation_setting_ui",
+            "label": "Präsentieren",
+            "matching_commands": 1
+          },
+          {
+            "page": "tools_setting_ui",
+            "label": "Werkzeuge",
+            "matching_commands": 1
+          },
+          {
+            "page": "control_center_ui",
+            "label": "Kontrollzentrum",
+            "matching_commands": 1
+          }
+        ]
+      },
+      {
+        "language": "Russian",
+        "keyboard_pages": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16
+        ],
+        "localized_searches": [
+          {
+            "page": "pet_home_ui",
+            "label": "Дом питомцев",
+            "matching_commands": 1
+          },
+          {
+            "page": "video_setting_ui",
+            "label": "Видео",
+            "matching_commands": 1
+          },
+          {
+            "page": "image_setting_ui",
+            "label": "Изображение",
+            "matching_commands": 1
+          },
+          {
+            "page": "web_setting_ui",
+            "label": "Веб",
+            "matching_commands": 1
+          },
+          {
+            "page": "gif_setting_ui",
+            "label": "GIF и WebP",
+            "matching_commands": 1
+          },
+          {
+            "page": "text_setting_ui",
+            "label": "Текст",
+            "matching_commands": 1
+          },
+          {
+            "page": "sound_player_setting_ui",
+            "label": "Музыка",
+            "matching_commands": 1
+          },
+          {
+            "page": "scene_setting_ui",
+            "label": "Сцена",
+            "matching_commands": 1
+          },
+          {
+            "page": "particle_setting_ui",
+            "label": "Частица",
+            "matching_commands": 1
+          },
+          {
+            "page": "pet_setting_ui",
+            "label": "Питомец",
+            "matching_commands": 1
+          },
+          {
+            "page": "wallpaper_setting_ui",
+            "label": "Обои",
+            "matching_commands": 1
+          },
+          {
+            "page": "widgets_setting_ui",
+            "label": "Виджеты",
+            "matching_commands": 1
+          },
+          {
+            "page": "focus_setting_ui",
+            "label": "Фокус",
+            "matching_commands": 1
+          },
+          {
+            "page": "screen_care_setting_ui",
+            "label": "Забота о глазах",
+            "matching_commands": 1
+          },
+          {
+            "page": "presentation_setting_ui",
+            "label": "Презентация",
+            "matching_commands": 1
+          },
+          {
+            "page": "tools_setting_ui",
+            "label": "Инструменты",
+            "matching_commands": 1
+          },
+          {
+            "page": "control_center_ui",
+            "label": "Центр управления",
+            "matching_commands": 1
+          }
+        ]
+      },
+      {
+        "language": "France",
+        "keyboard_pages": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16
+        ],
+        "localized_searches": [
+          {
+            "page": "pet_home_ui",
+            "label": "Maison des mascottes",
+            "matching_commands": 1
+          },
+          {
+            "page": "video_setting_ui",
+            "label": "Vidéo",
+            "matching_commands": 1
+          },
+          {
+            "page": "image_setting_ui",
+            "label": "Image",
+            "matching_commands": 1
+          },
+          {
+            "page": "web_setting_ui",
+            "label": "Web",
+            "matching_commands": 2
+          },
+          {
+            "page": "gif_setting_ui",
+            "label": "GIF et WebP",
+            "matching_commands": 1
+          },
+          {
+            "page": "text_setting_ui",
+            "label": "Texte",
+            "matching_commands": 1
+          },
+          {
+            "page": "sound_player_setting_ui",
+            "label": "Musique",
+            "matching_commands": 1
+          },
+          {
+            "page": "scene_setting_ui",
+            "label": "Scène",
+            "matching_commands": 10
+          },
+          {
+            "page": "particle_setting_ui",
+            "label": "Particule",
+            "matching_commands": 1
+          },
+          {
+            "page": "pet_setting_ui",
+            "label": "Mascotte",
+            "matching_commands": 2
+          },
+          {
+            "page": "wallpaper_setting_ui",
+            "label": "Fond d'écran",
+            "matching_commands": 1
+          },
+          {
+            "page": "widgets_setting_ui",
+            "label": "Widgets",
+            "matching_commands": 1
+          },
+          {
+            "page": "focus_setting_ui",
+            "label": "Concentration",
+            "matching_commands": 1
+          },
+          {
+            "page": "screen_care_setting_ui",
+            "label": "Confort visuel",
+            "matching_commands": 1
+          },
+          {
+            "page": "presentation_setting_ui",
+            "label": "Présentation",
+            "matching_commands": 1
+          },
+          {
+            "page": "tools_setting_ui",
+            "label": "Outils",
+            "matching_commands": 1
+          },
+          {
+            "page": "control_center_ui",
+            "label": "Centre de contrôle",
+            "matching_commands": 1
+          }
+        ]
+      },
+      {
+        "language": "Italy",
+        "keyboard_pages": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16
+        ],
+        "localized_searches": [
+          {
+            "page": "pet_home_ui",
+            "label": "Casa delle mascotte",
+            "matching_commands": 1
+          },
+          {
+            "page": "video_setting_ui",
+            "label": "Video",
+            "matching_commands": 1
+          },
+          {
+            "page": "image_setting_ui",
+            "label": "Immagine",
+            "matching_commands": 1
+          },
+          {
+            "page": "web_setting_ui",
+            "label": "Web",
+            "matching_commands": 2
+          },
+          {
+            "page": "gif_setting_ui",
+            "label": "GIF e WebP",
+            "matching_commands": 1
+          },
+          {
+            "page": "text_setting_ui",
+            "label": "Testo",
+            "matching_commands": 1
+          },
+          {
+            "page": "sound_player_setting_ui",
+            "label": "Musica",
+            "matching_commands": 1
+          },
+          {
+            "page": "scene_setting_ui",
+            "label": "Scena",
+            "matching_commands": 5
+          },
+          {
+            "page": "particle_setting_ui",
+            "label": "Particella",
+            "matching_commands": 1
+          },
+          {
+            "page": "pet_setting_ui",
+            "label": "Mascotte",
+            "matching_commands": 2
+          },
+          {
+            "page": "wallpaper_setting_ui",
+            "label": "Sfondo",
+            "matching_commands": 1
+          },
+          {
+            "page": "widgets_setting_ui",
+            "label": "Widget",
+            "matching_commands": 1
+          },
+          {
+            "page": "focus_setting_ui",
+            "label": "Concentrazione",
+            "matching_commands": 1
+          },
+          {
+            "page": "screen_care_setting_ui",
+            "label": "Comfort visivo",
+            "matching_commands": 1
+          },
+          {
+            "page": "presentation_setting_ui",
+            "label": "Presentazione",
+            "matching_commands": 1
+          },
+          {
+            "page": "tools_setting_ui",
+            "label": "Strumenti",
+            "matching_commands": 1
+          },
+          {
+            "page": "control_center_ui",
+            "label": "Centro di controllo",
+            "matching_commands": 1
+          }
+        ]
+      }
+    ],
+    "page_count": 17,
+    "same_page_instances": true,
+    "same_palette_instance": true,
+    "service_attributes": {
+      "image_history_service": "frontengine.utils.image_history.service.ImageHistoryService",
+      "capture_history_service": "frontengine.utils.image_history.capture_service.CaptureHistoryService",
+      "todo_service": "frontengine.utils.todo.service.TodoService",
+      "asset_library_service": "frontengine.utils.asset_library.service.AssetLibraryService",
+      "window_follow_service": "frontengine.utils.window_pin.follow_window.WindowFollowService",
+      "monitor_profiles_service": "frontengine.utils.window_pin.topology_profiles.MonitorProfileService",
+      "workshop_service": "frontengine.utils.workshop.workshop_service.WorkshopService",
+      "preset_schedule_service": "frontengine.utils.preset_schedule.preset_schedule_service.PresetScheduleService",
+      "theme_schedule_service": "frontengine.utils.theme_schedule.theme_schedule_service.ThemeScheduleService",
+      "usage_service": "frontengine.utils.usage_tracking.usage_service.UsageTrackingService",
+      "signage_service": "frontengine.utils.signage.signage_service.SignageService",
+      "screensaver_service": "frontengine.utils.screensaver.screensaver_service.ScreensaverService",
+      "remote_server": "frontengine.utils.remote.remote_server.RemoteServer",
+      "midi_input": "frontengine.utils.midi.midi_input.MidiInput",
+      "share_watch_service": "frontengine.utils.screen_privacy.share_watch.ShareWatchService",
+      "reminder_service": "frontengine.utils.reminder.reminder_service.ReminderService",
+      "app_profile_service": "frontengine.utils.app_profile.app_profile_service.AppProfileService",
+      "smart_pause_service": null,
+      "virtual_desktop_service": "frontengine.utils.virtual_desktop.virtual_desktop.VirtualDesktopService",
+      "rule_engine_service": "frontengine.utils.rules.rule_engine.RuleEngineService",
+      "hotkey_service": "frontengine.utils.hotkey.hotkey_service.HotkeyService",
+      "home_service": "frontengine.show.pet_game.home_service.HomeService"
+    },
+    "new_service_constructions_during_navigation": {},
+    "same_service_instances": true,
+    "limits": [
+      "Constructors and references of existing main-window closing services plus HomeService only.",
+      "Offscreen Qt; OS service starts substituted as recorded in the harness.",
+      "Does not count worker threads, timer instances or repeated start calls on existing services.",
+      "Built-in pages and command palette only; no plugin installation or other dialogs."
+    ]
+  },
+  "exit_code": 0,
+  "monitored_existing_services": 21,
+  "source_manifest_sha256": "0c5c44a67eb561cc28b2ddbbdd49559f78b88341cf010b3636fe449707aa634e",
+  "harness": {
+    "source": "\"\"\"Widget-local keyboard events in an offscreen full MainUI.\"\"\"\nimport json\nimport logging\nimport os\nfrom pathlib import Path\nimport sys\nimport tempfile\nimport subprocess\nfrom collections import Counter\nfrom time import monotonic\n\nROOT = Path(__file__).resolve().parents[1]\nsys.path.insert(0, str(ROOT))\nos.environ['QT_QPA_PLATFORM'] = 'offscreen'\ntrace = []\n\n\ndef tab_to(app, window, target):\n    for count in range(400):\n        current = app.focusWidget()\n        if current is target:\n            trace.append({'target': target.objectName() or type(target).__name__, 'tabs': count})\n            return\n        QTest.keyClick(current or window, Qt.Key.Key_Tab)\n        app.processEvents()\n    raise AssertionError(('Unreachable by Tab', type(target).__name__, target.objectName()))\n\n\nprevious = Path.cwd()\nwith tempfile.TemporaryDirectory(prefix='front-keyboard-flow-') as name:\n    os.chdir(name)\n    try:\n        Path('user_setting.json').write_text(json.dumps({'language': 'English', 'smart_pause': False,\n            'pet_home_on_desktop': False, 'pet_home_running': False}))\n        from PySide6.QtCore import QCoreApplication, QEvent, Qt\n        from PySide6.QtTest import QTest\n        from PySide6.QtWidgets import QApplication\n        from frontengine.ui import main_ui\n        from frontengine.ui.page.pet_game import home_page\n        from frontengine.utils.pet_game import simulation\n        from frontengine.utils.session_lock import session_lock\n        main_ui.CriticalExit.init_critical_exit = lambda self: None\n        main_ui.HotkeyService.start = lambda self: False\n        main_ui.AppProfileService.start = lambda self: None\n        main_ui.ShareWatchService.start = lambda self: None\n        home_page.workshop_pack_roots = lambda: []\n        session_lock.is_session_locked = lambda: False\n        app = QApplication([])\n        app.setQuitOnLastWindowClosed(False)\n        window = main_ui.FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)\n        try:\n            window.resize(1280, 900)\n            window.show()\n            app.processEvents()\n            from frontengine.ui.menu.language_menu import LANGUAGES, set_language\n            from frontengine.ui.nav.sidebar import ROLE_KIND, KIND_PAGE, ROLE_PAGE_INDEX\n            expected = (\n                'pet_home_ui', 'video_setting_ui', 'image_setting_ui', 'web_setting_ui',\n                'gif_setting_ui', 'text_setting_ui', 'sound_player_setting_ui',\n                'scene_setting_ui', 'particle_setting_ui', 'pet_setting_ui',\n                'wallpaper_setting_ui', 'widgets_setting_ui', 'focus_setting_ui',\n                'screen_care_setting_ui', 'presentation_setting_ui', 'tools_setting_ui',\n                'control_center_ui',\n            )\n            pages = tuple(getattr(window, name) for name in expected)\n            assert tuple(row[0] for row in window.command_pages) == pages\n            assert window.page_stack.count() == len(pages)\n            result = {'source_revision': '6ba8f8c', 'platform': 'offscreen',\n                      'os_services_stubbed': True, 'languages': [], 'page_count': len(pages)}\n            palette_identity = None\n            services = {name: getattr(window, name, None) for name in window._CLOSING_SERVICES}\n            services['home_service'] = window.pet_home_ui.service\n            service_types = {type(service) for service in services.values() if service is not None}\n            created = Counter()\n            def observe_constructor(service_type):\n                original = service_type.__init__\n                name = service_type.__module__ + '.' + service_type.__qualname__\n                def counted(instance, *args, **kwargs):\n                    created[name] += 1\n                    original(instance, *args, **kwargs)\n                service_type.__init__ = counted\n            for service_type in service_types:\n                observe_constructor(service_type)\n            for _, language in LANGUAGES:\n                assert set_language(language, window)\n                app.processEvents()\n                window.sidebar.setFocus()\n                QTest.keyClick(window.sidebar, Qt.Key.Key_Home)\n                app.processEvents()\n                visited = set()\n                for step in range(window.sidebar.count() + 1):\n                    item = window.sidebar.currentItem()\n                    if item is not None and item.data(ROLE_KIND) == KIND_PAGE:\n                        index = item.data(ROLE_PAGE_INDEX)\n                        assert window.page_stack.currentWidget() is pages[index]\n                        visited.add(index)\n                    QTest.keyClick(window.sidebar, Qt.Key.Key_Down)\n                    app.processEvents()\n                assert visited == set(range(len(pages))), (language, visited)\n                searches = []\n                for widget, key, index in window.command_pages:\n                    window.command_palette_action.trigger()\n                    app.processEvents()\n                    palette = window.command_palette\n                    if palette_identity is None:\n                        palette_identity = palette\n                    assert palette is palette_identity\n                    assert palette.isVisible()\n                    label = window.sidebar.page_label(index)\n                    assert label\n                    palette.search_input.setText(label)\n                    app.processEvents()\n                    candidates = [palette.results.item(i).data(Qt.ItemDataRole.UserRole)\n                                  for i in range(palette.results.count())]\n                    target = 'page.' + key\n                    assert target in candidates, (language, label, target, candidates)\n                    for step in range(len(candidates)):\n                        if palette.selected_id() == target:\n                            break\n                        QTest.keyClick(palette.search_input, Qt.Key.Key_Down)\n                    assert palette.selected_id() == target\n                    QTest.keyClick(palette.search_input, Qt.Key.Key_Return)\n                    app.processEvents()\n                    assert not palette.isVisible(), (language, key)\n                    assert window.page_stack.currentWidget() is widget, (language, key)\n                    assert window.page_stack.count() == len(pages)\n                    searches.append({'page': expected[index], 'label': label,\n                                     'matching_commands': len(candidates)})\n                result['languages'].append({'language': language,\n                    'keyboard_pages': sorted(visited), 'localized_searches': searches})\n                assert all(getattr(window, name, None) is service for name, service in services.items()\n                           if name != 'home_service'), language\n                assert window.pet_home_ui.service is services['home_service'], language\n                assert not created, (language, dict(created))\n                print('verified ' + language, flush=True)\n            result['same_page_instances'] = all(window.page_stack.widget(i) is page\n                                               for i, page in enumerate(pages))\n            assert result['same_page_instances']\n            result['same_palette_instance'] = True\n            result['source_revision'] = subprocess.check_output(['git', '-C', str(ROOT), 'rev-parse', 'HEAD'], text=True).strip()\n            result['service_attributes'] = {name: type(service).__module__ + '.' + type(service).__qualname__\n                                            if service is not None else None for name, service in services.items()}\n            result['new_service_constructions_during_navigation'] = dict(created)\n            result['same_service_instances'] = True\n            result['limits'] = ['Constructors and references of existing main-window closing services plus HomeService only.',\n                                'Offscreen Qt; OS service starts substituted as recorded in the harness.',\n                                'Does not count worker threads, timer instances or repeated start calls on existing services.',\n                                'Built-in pages and command palette only; no plugin installation or other dialogs.']\n        finally:\n            window.request_shutdown()\n            deadline = monotonic() + 90\n            while not window.lifetime.closed and monotonic() < deadline:\n                QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)\n                app.processEvents()\n            assert window.lifetime.closed\n            window.deleteLater()\n            QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)\n        logging.shutdown()\n    finally:\n        os.chdir(previous)\n(ROOT / '.audit/navigation-service-reuse-result.json').write_text(json.dumps(result, indent=2), encoding='utf-8')\nprint(json.dumps(result), flush=True)\n",
+    "sha256": "d58596cfbc06d120b8b4076415ee3efd018488382cfc57b271b7b8d27fac4886"
+  }
+}
