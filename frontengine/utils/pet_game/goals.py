@@ -485,6 +485,10 @@ def _check_events(world: World) -> None:
         days = (world.time_ms - since) // DAY_MS
         if days and days % BIRTHDAY_EVERY_DAYS == 0 and identifier in world.residents \
                 and due(world, "birthday", identifier):
+            anniversary_day = game_day(since + days * DAY_MS)
+            last_day = world.progress.event_days.get("birthday", {}).get(identifier)
+            if last_day is not None and last_day >= anniversary_day:
+                continue
             world.residents[identifier].needs["mood"] = min(100, world.residents[identifier].needs["mood"] + 10)
             _life_event(world, "birthday", identifier)
 

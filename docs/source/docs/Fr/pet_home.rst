@@ -69,3 +69,5 @@ Le souhait de jouer se réalise seulement quand cet animal termine son jeu. Le s
 Le foyer géré et le foyer en aménagement libre conservent des historiques et des compteurs de messages non lus distincts pendant la session. Revenir à un foyer restaure ses messages et leur état de lecture ; un changement échoué conserve la boîte actuelle. Un nouveau foyer commence avec un historique vide.
 
 L’aménagement libre conserve les activités, les objets et la progression locale sans gagner ni dépenser de pièces. Les prix, récompenses et notifications en tiennent compte. Charger une ancienne sauvegarde de ce mode remet le solde à zéro en conservant les objets et l’historique des transactions ; le solde des foyers gérés reste inchangé.
+
+L’anniversaire de chaque résident est célébré une seule fois tous les sept jours de jeu depuis son arrivée. Le passage à minuit ou la réouverture de la sauvegarde ne répète ni le bonus d’humeur ni le message pour le même anniversaire.

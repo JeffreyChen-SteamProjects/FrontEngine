@@ -739,3 +739,5 @@ O desejo de brincar só se realiza quando aquele mascote termina de brincar. O d
 A casa gerenciada e a de decoração livre mantêm históricos e contadores de mensagens não lidas separados durante a sessão. Ao voltar, as mensagens e seu estado de leitura são restaurados; se a troca falhar, a caixa atual é mantida. Uma casa nova começa com um histórico vazio.
 
 A decoração livre mantém atividades, itens e progresso local sem ganhar ou gastar moedas. Preços, recompensas e avisos refletem essa regra. Ao carregar um salvamento antigo desse modo, o saldo passa a zero e os itens e o histórico de transações são preservados; o saldo da casa gerenciada não muda.
+
+O aniversário de cada morador é celebrado uma vez a cada sete dias de jogo desde sua chegada. A mudança de dia ou a reabertura do jogo salvo não repete a recompensa de humor nem a mensagem do mesmo aniversário.

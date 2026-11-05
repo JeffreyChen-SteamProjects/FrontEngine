@@ -1,0 +1,74 @@
+{
+  "baseline": "243f868f",
+  "change": "Use existing per-resident event day marker against current arrival-anniversary start day, preserving save format and next seven-day anniversary.",
+  "red": "4 failed, 2 passed, 15 deselected in 4.12s; cross-day cases produced 2 events instead of 1.",
+  "validation": [
+    "49 goals/event-history checks passed in 12.99s before adding four legacy-marker cases.",
+    "72 goals/event-history/save checks passed in 14.08s.",
+    "31 translation/progress checks passed in 2.27s."
+  ],
+  "native": {
+    "passed": true,
+    "birthday_counts": [
+      1,
+      2,
+      2
+    ],
+    "residents": [
+      "cd53a59142a7496d92090f3a38904067",
+      "12576ae63cff45f8a66d3e346eb5df27"
+    ],
+    "mood": 30,
+    "inbox_entries": 2,
+    "each_repeat_count": 1,
+    "actual_service_signal": true,
+    "runtime_closed": true,
+    "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-stage-layout\\.audit\\profession-owned-fixed",
+    "saved_snapshot_sha256": "c471f2056e3bf47d41a8073e4a214f8eccec310f6c85a5f6088181f0c4b05172",
+    "scope": "Native private MainUI with two explicit arrival timestamps and goals.update through actual service event signal to Inbox. Injected world times, not normal-speed anniversary play.",
+    "temporary_directory_removed": true
+  },
+  "cold": {
+    "passed": true,
+    "initial_snapshot_exact": true,
+    "profiles_exact": true,
+    "no_repeated_birthday": true,
+    "leases_reacquired": true,
+    "saved_exact": true,
+    "temporary_directory_removed": true
+  },
+  "observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "child_exit": 0,
+    "observation_only": true
+  },
+  "screenshot_viewed": true,
+  "fixture_correction": "First native probe removed birthday markers but retained future birthday history while rolling time back. Cold reload reconstructed the newer marker and exact snapshot comparison failed. Corrected fixture clears birthday history and markers together; original failed output retained.",
+  "limits": [
+    "Injected world times and explicit arrival/need fixtures; not fourteen days of real-time play.",
+    "Native two residents and legacy versions7/8 cases only; broader full regression and independent review pending."
+  ],
+  "hashes": {
+    "frontengine\\utils\\pet_game\\goals.py": "26db57700cdc13ca679d0b7e848744ef069e232a19467e5b8ca9ced4505ceba7",
+    "tests\\unit_test\\test_pet_game_goals.py": "284fde9594c9a09d90c11391e644525b920d962a9b79c870eb7eb6f5018c00fc",
+    ".audit\\native_birthday_anniversary.py": "690929ce2617e6ba7f4270431d6ece735f049a19f0e7f111ef0c30b61c88e952",
+    ".audit\\cold_birthday_anniversary.py": "ebc3dc3af0457117ce758fa2cba92577edc9535d05c47a26d60dc2aab20da85b",
+    ".audit\\native-birthday-anniversary-consistent\\result.json": "3dd63ef1f089d50c5ec47aef70b37b65a02eabdf2421814fb9ca0507a67ec22a",
+    ".audit\\native-birthday-anniversary-consistent\\cold-result.json": "440d592ed03f9eeee8c390ae979851d23946c09f40702167cbae9c735b9be01f",
+    ".audit\\native-birthday-anniversary-consistent\\birthday-inbox.png": "1fb4155c9077fae1d699e947213d0710f98b634dbb051f19c27f6a16c233c3f9"
+  }
+}

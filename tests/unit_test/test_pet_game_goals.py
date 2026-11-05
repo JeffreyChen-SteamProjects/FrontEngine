@@ -211,3 +211,53 @@ def test_the_goals_panel_claims_and_saves_a_game_only_photo(tmp_path, monkeypatc
         assert not QImage(str(photo)).isNull()
     finally:
         page.shutdown()
+
+
+@pytest.mark.parametrize("arrival_offset", [0, DAY_MS // 2, DAY_MS - goals.CHECK_MS])
+@pytest.mark.parametrize("reload", [False, True])
+def test_birthday_is_once_per_arrival_anniversary_across_calendar_days(arrival_offset, reload):
+    world, zone = _world()
+    world.automatic = False
+    world.time_ms = arrival_offset
+    _adopt(world, zone, A)
+    world.residents[A].needs["mood"] = 20
+    world.progress.wishes[A] = {"wish": "play_time", "base": 0, "ready": 0}
+    events = []
+    for cycle in (1, 2):
+        start = arrival_offset + cycle * goals.BIRTHDAY_EVERY_DAYS * DAY_MS
+        for time in (start, start + DAY_MS - goals.CHECK_MS):
+            world.time_ms = time
+            goals.update(world)
+            events.extend(event for event in world.drain_events()
+                          if event["kind"] == "life_event" and event["event"] == "birthday")
+            if reload:
+                world = snapshot.from_dict(snapshot.to_dict(world), world.catalog)
+                world.automatic = False
+        assert len(events) == cycle
+        assert world.residents[A].needs["mood"] == 20 + cycle * 10
+
+
+@pytest.mark.parametrize("version", [7, 8])
+@pytest.mark.parametrize("recorded_day", [8, 9])
+def test_saved_birthday_marker_blocks_same_anniversary_but_not_next(version, recorded_day):
+    world, zone = _world()
+    world.time_ms = DAY_MS // 2
+    _adopt(world, zone, A)
+    world.residents[A].needs["mood"] = 20
+    world.progress.wishes[A] = {"wish": "play_time", "base": 0, "ready": 0}
+    world.progress.events = [{"kind": "birthday", "day": recorded_day, "resident": A}]
+    world.progress.event_days = {"birthday": {A: recorded_day}}
+    data = snapshot.to_dict(world)
+    data["version"] = version
+    if version == 7:
+        del data["progress"]["event_days"]
+    world = snapshot.from_dict(data, world.catalog)
+    world.automatic = False
+    world.time_ms = 8 * DAY_MS
+    goals.update(world)
+    assert not [e for e in world.drain_events() if e.get("event") == "birthday"]
+    assert world.residents[A].needs["mood"] == 20
+    world.time_ms = 14 * DAY_MS + DAY_MS // 2
+    goals.update(world)
+    assert len([e for e in world.drain_events() if e.get("event") == "birthday"]) == 1
+    assert world.residents[A].needs["mood"] == 30

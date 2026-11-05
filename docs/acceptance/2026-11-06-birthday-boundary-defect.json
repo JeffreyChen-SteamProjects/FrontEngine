@@ -1,0 +1,28 @@
+{
+  "rows": [
+    {
+      "time_ms": 27000000,
+      "calendar_day": 8,
+      "days_since_arrival": 7,
+      "birthday_events": 1,
+      "mood": 30
+    },
+    {
+      "time_ms": 28800000,
+      "calendar_day": 9,
+      "days_since_arrival": 7,
+      "birthday_events": 1,
+      "mood": 40
+    },
+    {
+      "time_ms": 30600000,
+      "calendar_day": 9,
+      "days_since_arrival": 8,
+      "birthday_events": 0,
+      "mood": 40
+    }
+  ],
+  "total_birthdays": 2,
+  "expected_birthdays": 1,
+  "scope": "Actual goals.update with one resident arriving halfway through day, snapshot reload between checks; no fabricated event emission."
+}
