@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261106-43 | 2026-11-06 | 修正初次版面更新期間的家園導航 | #fix #ui #navigation #verified | [2026-11](2026-11.md) |
 | U-20261106-42 | 2026-11-06 | 重現初次版面更新期間的導航缺口 | #test #ui #review | [2026-11](2026-11.md) |
 | U-20261106-41 | 2026-11-06 | 驗證自動獎勵的原生通知與保存 | #test #events #economy #verified | [2026-11](2026-11.md) |
 | U-20261106-40 | 2026-11-06 | 完成工作標記版本完整回歸 | #test #events #verified | [2026-11](2026-11.md) |
@@ -369,6 +370,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 165 |
+| [2026-11.md](2026-11.md) | 2026-11 | 166 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

@@ -732,4 +732,4 @@ A cena da casa e sua barra de ferramentas permanecem em linhas separadas quando 
 
 Ao concluir um trabalho, a estação exibe brevemente uma marca de conclusão, inclusive após a última unidade da tarefa. Uma estação guardada antes da exibição do evento não recebe a marca.
 
-Mochila, Objetivos, links de itens pendentes e a navegação da barra da área de trabalho rolam a aba escolhida do lar para deixá-la visível, mesmo quando já estava selecionada.
+Mochila, Objetivos, links de itens pendentes e a navegação da barra da área de trabalho rolam a aba escolhida do lar para deixá-la visível, mesmo quando já estava selecionada. A navegação também mostra o conteúdo selecionado quando usada logo após a página da casa aparecer.

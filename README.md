@@ -709,4 +709,4 @@ The home scene and its toolbar remain in separate rows when the waiting-items li
 
 Completed work briefly marks the workstation with a check, including the final unit of a job. A workstation put away before the event is displayed receives no mark.
 
-Backpack, Goals, waiting-item links and desktop-strip navigation bring the selected home tab into view, even when that tab was already selected.
+Backpack, Goals, waiting-item links and desktop-strip navigation bring the selected home tab into view, even when that tab was already selected. Navigation also reveals the selected content when used immediately after the home page first appears.

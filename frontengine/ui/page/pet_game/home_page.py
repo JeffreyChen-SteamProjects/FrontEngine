@@ -16,7 +16,7 @@ from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
 
-from PySide6.QtCore import QPoint, Qt, QTimer, QUrl, Signal
+from PySide6.QtCore import QCoreApplication, QEvent, QPoint, Qt, QTimer, QUrl, Signal
 from PySide6.QtGui import QDesktopServices, QGuiApplication, QKeyEvent, QKeySequence
 from PySide6.QtWidgets import (QComboBox, QFrame, QLabel, QListWidget, QListWidgetItem,
                                QScrollArea, QSlider, QVBoxLayout, QWidget)
@@ -388,6 +388,12 @@ class PetHomePage(SettingPage):
 
     @owned_action
     def _reveal_home_tab(self) -> None:
+        widget = self.tabs
+        while widget is not None:
+            QCoreApplication.sendPostedEvents(widget, QEvent.Type.LayoutRequest)
+            if widget is self._scroll:
+                break
+            widget = widget.parentWidget()
         top = self.tabs.mapTo(self._scroll.widget(), QPoint(0, 0)).y()
         self._scroll.verticalScrollBar().setValue(top)
 
