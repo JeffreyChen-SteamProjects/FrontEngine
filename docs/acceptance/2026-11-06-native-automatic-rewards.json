@@ -1,0 +1,269 @@
+{
+  "product_commit": "68a4e939",
+  "result": {
+    "passed": true,
+    "claimed": [
+      {
+        "coins": 5,
+        "goal": "move_in",
+        "kind": "goal_claimed",
+        "time": 56478000
+      },
+      {
+        "coins": 5,
+        "goal": "place_bed",
+        "kind": "goal_claimed",
+        "time": 56478000
+      },
+      {
+        "coins": 5,
+        "goal": "place_table",
+        "kind": "goal_claimed",
+        "time": 56478000
+      },
+      {
+        "coins": 5,
+        "goal": "first_care",
+        "kind": "goal_claimed",
+        "time": 56478000
+      },
+      {
+        "coins": 5,
+        "goal": "place_station",
+        "kind": "goal_claimed",
+        "time": 56478000
+      },
+      {
+        "coins": 10,
+        "goal": "first_work",
+        "kind": "goal_claimed",
+        "time": 56478000
+      },
+      {
+        "coins": 10,
+        "goal": "buy_furniture",
+        "kind": "goal_claimed",
+        "time": 56478000
+      },
+      {
+        "coins": 30,
+        "goal": "autumn_harvest",
+        "kind": "goal_claimed",
+        "time": 56478000
+      }
+    ],
+    "delivered": [
+      {
+        "coins": 24,
+        "item": "flower",
+        "kind": "commission_done",
+        "time": 56478000
+      },
+      {
+        "coins": 40,
+        "item": "toy",
+        "kind": "commission_done",
+        "time": 56478000
+      }
+    ],
+    "expected_gain": 139,
+    "initial_coins": 191,
+    "final_coins": 330,
+    "inbox_rows": [
+      {
+        "key": [
+          "goal_claimed",
+          null,
+          null,
+          null,
+          null,
+          5,
+          null,
+          "",
+          [
+            "",
+            ""
+          ]
+        ],
+        "event": {
+          "coins": 5,
+          "goal": "move_in",
+          "kind": "goal_claimed",
+          "time": 56478000,
+          "resident_name": "",
+          "recipe_label": [
+            "",
+            ""
+          ]
+        },
+        "count": 5,
+        "time": 56478000,
+        "category": "work"
+      },
+      {
+        "key": [
+          "goal_claimed",
+          null,
+          null,
+          null,
+          null,
+          10,
+          null,
+          "",
+          [
+            "",
+            ""
+          ]
+        ],
+        "event": {
+          "coins": 10,
+          "goal": "first_work",
+          "kind": "goal_claimed",
+          "time": 56478000,
+          "resident_name": "",
+          "recipe_label": [
+            "",
+            ""
+          ]
+        },
+        "count": 2,
+        "time": 56478000,
+        "category": "work"
+      },
+      {
+        "key": [
+          "goal_claimed",
+          null,
+          null,
+          null,
+          null,
+          30,
+          null,
+          "",
+          [
+            "",
+            ""
+          ]
+        ],
+        "event": {
+          "coins": 30,
+          "goal": "autumn_harvest",
+          "kind": "goal_claimed",
+          "time": 56478000,
+          "resident_name": "",
+          "recipe_label": [
+            "",
+            ""
+          ]
+        },
+        "count": 1,
+        "time": 56478000,
+        "category": "work"
+      },
+      {
+        "key": [
+          "commission_done",
+          null,
+          null,
+          null,
+          null,
+          24,
+          null,
+          "",
+          [
+            "",
+            ""
+          ]
+        ],
+        "event": {
+          "coins": 24,
+          "item": "flower",
+          "kind": "commission_done",
+          "time": 56478000,
+          "resident_name": "",
+          "recipe_label": [
+            "",
+            ""
+          ]
+        },
+        "count": 1,
+        "time": 56478000,
+        "category": "work"
+      },
+      {
+        "key": [
+          "commission_done",
+          null,
+          null,
+          null,
+          null,
+          40,
+          null,
+          "",
+          [
+            "",
+            ""
+          ]
+        ],
+        "event": {
+          "coins": 40,
+          "item": "toy",
+          "kind": "commission_done",
+          "time": 56478000,
+          "resident_name": "",
+          "recipe_label": [
+            "",
+            ""
+          ]
+        },
+        "count": 1,
+        "time": 56478000,
+        "category": "work"
+      }
+    ],
+    "repeated_ticks_no_duplicate": true,
+    "persisted_snapshot_equal": true,
+    "explicit_ticks": 310,
+    "automation_enabled_by_service_command": true,
+    "runtime_closed": true,
+    "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-stage-layout\\.audit\\profession-owned-fixed",
+    "saved_snapshot_sha256": "c471f2056e3bf47d41a8073e4a214f8eccec310f6c85a5f6088181f0c4b05172",
+    "scope": "Native MainUI private desktop; earned-inventory fixture; automatic mode enabled by service command; 310 injected 200ms ticks; actual signals, Inbox and disk save; host starts/Workshop/lock query substituted. Not normal-speed or physical-input acceptance.",
+    "temporary_directory_removed": true
+  },
+  "observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "child_exit": 0,
+    "observation_only": true
+  },
+  "first_probe": {
+    "passed": false,
+    "error": "Traceback (most recent call last):\n  File \"D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-shortcut-scroll\\.audit\\native_automatic_rewards.py\", line 121, in <module>\n    assert not page.inbox.list.visibleRegion().isEmpty()\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n"
+  },
+  "harness": "import hashlib\nimport json\nimport logging\nimport os\nfrom pathlib import Path\nimport shutil\nimport sys\nimport tempfile\nimport traceback\nimport uuid\nfrom time import monotonic\n\nsys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'ownership-integration/.audit'))\nfrom complete_main_onboarding_native import observation\n\nROOT = Path(__file__).resolve().parents[1]\nsys.path.insert(0, str(ROOT))\nsys.path.insert(0, str(ROOT / 'tests/integration'))\nimport hidden_desktop\n\nsource = Path(sys.argv[1]).resolve()\noutput = Path(sys.argv[2]).resolve()\noutput.mkdir(parents=True, exist_ok=True)\nif not hidden_desktop.is_child(output):\n    assert not (output / 'result.json').exists(), 'Use a fresh output directory'\n    hidden_desktop.DESKTOP = f'FrontEngineColdReload{os.getpid()}_{uuid.uuid4().hex[:8]}'\n    before = observation()\n    code = hidden_desktop.run_on_hidden_desktop(__file__, str(source), str(output), timeout_ms=180000)\n    (output / 'observer.json').write_text(json.dumps({'before': before, 'after': observation(),\n        'child_exit': code, 'observation_only': True}, indent=2), encoding='utf-8')\n    raise SystemExit(code)\n\nos.environ['QT_QPA_PLATFORM'] = 'windows'\nexpected = json.loads((source / 'shutdown-world.json').read_text(encoding='utf-8'))\nresult = {'passed': False}\ntry:\n    with tempfile.TemporaryDirectory(prefix='fe-current-cold-reload-') as folder:\n        shutil.copytree(source / 'settings', folder, dirs_exist_ok=True)\n        previous = Path.cwd()\n        os.chdir(folder)\n        try:\n            from PySide6.QtCore import QCoreApplication, QEvent\n            from PySide6.QtTest import QTest\n            from PySide6.QtWidgets import QApplication\n            from frontengine.ui.page.pet_game import home_page\n            from frontengine.utils.session_lock import session_lock\n            from frontengine.user_setting.user_setting_file import user_setting_dict\n            from frontengine.utils.pet_game import snapshot\n\n            home_page.workshop_pack_roots = lambda: []\n            session_lock.is_session_locked = lambda: False\n            app = QApplication([])\n            app.setQuitOnLastWindowClosed(False)\n            screen = app.primaryScreen()\n            for zone in expected['zones']:\n                zone['screen'] = (screen.name() or 'primary')[:128]\n            Path('pet-home.json').write_text(json.dumps(expected, ensure_ascii=False), encoding='utf-8')\n            from frontengine.ui import main_ui\n            main_ui.CriticalExit.init_critical_exit = lambda self: None\n            main_ui.HotkeyService.start = lambda self: False\n            main_ui.AppProfileService.start = lambda self: None\n            main_ui.ShareWatchService.start = lambda self: None\n            window = main_ui.FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)\n            lifetime = window.lifetime\n            page = window.pet_home_ui\n            try:\n                actual = snapshot.to_dict(page.service.world)\n                assert actual == expected, 'Cold process world differs from final shutdown snapshot'\n                residents = set(page.service.world.residents)\n                records = user_setting_dict['pet_profiles']['records']\n                assert residents <= set(records), 'Resident profiles missing from settings'\n                assert residents == set(page.service.sessions), 'Resident identity leases were not reacquired'\n                page.service.pause('acceptance')\n                window.resize(1280, 960)\n                window.show()\n                window.sidebar.select_page_id(\"tab_pet_home_text\")\n                page.refresh()\n                from frontengine.utils.pet_game import goals\n                service = page.service\n                world = service.world\n                service.timer.stop()\n                service.periodic.stop()\n                events = []\n                service.events_ready.connect(events.extend)\n                baseline = snapshot.to_dict(world)\n                expected_goals = {g.identifier: g.coins for g in goals.ALL_GOALS if goals.goal_state(world, g) == 'done'}\n                expected_offers = [(i, dict(o)) for i,o in enumerate(world.progress.commissions['offers'])\n                                   if not o['done'] and world.ledger.available(o['item']) >= o['count']]\n                assert expected_goals and len(expected_offers) == 2\n                service.run(lambda w: setattr(w, 'automatic', True))\n                clock = [100.0]\n                service._clock = lambda: clock[0]\n                service._last = clock[0]\n                for _ in range(155):\n                    clock[0] += .2\n                    service._tick()\n                claimed = [e for e in events if e['kind'] == 'goal_claimed']\n                delivered = [e for e in events if e['kind'] == 'commission_done']\n                assert {e['goal']: e['coins'] for e in claimed} == expected_goals\n                assert len(claimed) == len(expected_goals)\n                assert len(delivered) == len(expected_offers)\n                for i, offer in expected_offers:\n                    assert world.progress.commissions['offers'][i]['done']\n                    assert world.ledger.items.get(offer['item'], 0) == baseline['ledger']['items'].get(offer['item'], 0) - offer['count']\n                rows = [e for e in page.inbox.entries if e['event']['kind'] in ('goal_claimed','commission_done')]\n                assert sum(e['count'] for e in rows) == len(claimed)+len(delivered)\n                expected_gain = sum(expected_goals.values()) + sum(o['coins'] for _,o in expected_offers)\n                assert world.ledger.coins == baseline['ledger']['coins'] + expected_gain\n                first = snapshot.to_dict(world)['ledger']\n                for _ in range(155):\n                    clock[0] += .2\n                    service._tick()\n                assert len([e for e in events if e['kind']=='goal_claimed']) == len(claimed)\n                assert len([e for e in events if e['kind']=='commission_done']) == len(delivered)\n                assert snapshot.to_dict(world)['ledger'] == first\n                assert service.save_now()\n                stored = json.loads(service.store.path.read_text(encoding='utf-8'))\n                assert stored == snapshot.to_dict(world)\n                QTest.qWait(200)\n                page._select_home_tab('pet_home_inbox_section')\n                QTest.qWait(200)\n                window.grab().save(str(output/'navigation-debug.png'))\n                assert not page.inbox.list.visibleRegion().isEmpty()\n                assert window.grab().save(str(output/'automatic-rewards-inbox.png'))\n                result.update(claimed=claimed, delivered=delivered, expected_gain=expected_gain,\n                    initial_coins=baseline['ledger']['coins'], final_coins=world.ledger.coins,\n                    inbox_rows=rows, repeated_ticks_no_duplicate=True, persisted_snapshot_equal=True,\n                    explicit_ticks=310, automation_enabled_by_service_command=True)\n            finally:\n                window.request_shutdown()\n                deadline = monotonic() + 120\n                while not lifetime.closed and monotonic() < deadline:\n                    QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)\n                    app.processEvents()\n                    QTest.qWait(10)\n                assert lifetime.closed, (lifetime.state, lifetime.error)\n            result.update(passed=True, runtime_closed=True, python=sys.version,\n                source=str(source), saved_snapshot_sha256=hashlib.sha256((source / 'shutdown-world.json').read_bytes()).hexdigest(),\n                scope='Native MainUI private desktop; earned-inventory fixture; automatic mode enabled by service command; 310 injected 200ms ticks; actual signals, Inbox and disk save; host starts/Workshop/lock query substituted. Not normal-speed or physical-input acceptance.')\n        finally:\n            logging.shutdown()\n            os.chdir(previous)\n    result['temporary_directory_removed'] = True\nexcept Exception:\n    result.update(passed=False, error=traceback.format_exc())\n(output / 'result.json').write_text(json.dumps(result, indent=2), encoding='utf-8')\nraise SystemExit(0 if result['passed'] else 1)\n",
+  "image_reviewed": {
+    "name": "automatic-rewards-inbox.png",
+    "sha256": "a4dee09b376dd02a4c3c5305913f6ebbe8bd83f72d006afb1d8295e0cd338e07"
+  },
+  "limits": [
+    "Automation was enabled through HomeService.run; no claim button exists in this UI.",
+    "310 injected 200ms clock ticks; not normal-speed or physical input acceptance.",
+    "Existing earned inventory and completed goal conditions loaded from profession fixture.",
+    "First probe failed visibility when navigating before pending layout work; settled layout passed. Timing remains under review in #68.",
+    "Wishes and cold restart after these specific rewards not covered."
+  ]
+}
