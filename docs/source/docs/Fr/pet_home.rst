@@ -47,3 +47,5 @@ Le sélecteur de mode des réglages du foyer reste disponible lorsque le mode R�
 Si la liste des travaux est vide, vérifiez les routines des habitants, les postes de travail et les matériaux du sac. Sélectionnez un travail inachevé pour activer son annulation.
 
 Une fois toutes les récompenses du tutoriel récupérées ou les objectifs ignorés, le bouton permettant de passer le tutoriel disparaît ; la liste reste consultable.
+
+La liste des tâches affiche une bordure accentuée lorsqu’elle reçoit le focus clavier, même avant la sélection d’une tâche.

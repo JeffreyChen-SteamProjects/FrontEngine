@@ -47,3 +47,5 @@ Il selettore della modalità nelle impostazioni della casa rimane disponibile qu
 Se la lista dei lavori è vuota, controlla le routine dei residenti, le postazioni e i materiali nello zaino. Seleziona un lavoro non ancora completato per abilitarne l’annullamento.
 
 Quando tutti gli obiettivi del tutorial sono stati premiati o saltati, il pulsante per saltare il tutorial scompare; la lista resta consultabile.
+
+L’elenco dei lavori evidenzia il bordo quando riceve il focus della tastiera, anche prima che venga selezionato un lavoro.

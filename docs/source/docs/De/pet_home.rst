@@ -47,3 +47,5 @@ Die Modusauswahl in den Hauseinstellungen bleibt verfügbar, wenn der manuell ge
 Wenn die Arbeitsliste leer ist, prüfe die Tagesabläufe der Bewohner, die Arbeitsplätze und die Materialien im Rucksack. Wähle einen noch nicht abgeschlossenen Auftrag, um „Aufgabe abbrechen“ zu aktivieren.
 
 Sobald alle Tutorial-Ziele belohnt oder übersprungen wurden, verschwindet die Schaltfläche zum Überspringen; die Liste bleibt zum Nachlesen verfügbar.
+
+Die Aufgabenliste zeigt einen hervorgehobenen Rahmen, sobald sie den Tastaturfokus erhält, auch wenn noch keine Aufgabe ausgewählt ist.

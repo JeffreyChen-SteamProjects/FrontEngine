@@ -4,11 +4,43 @@ import re
 
 import pytest
 from PySide6.QtGui import QPalette
-from PySide6.QtWidgets import QWidget
+from PySide6.QtCore import Qt
+from PySide6.QtTest import QTest
+from PySide6.QtWidgets import (
+    QApplication, QLineEdit, QListView, QListWidget, QTableView, QTableWidget,
+    QTreeView, QTreeWidget, QVBoxLayout, QWidget,
+)
 
 from frontengine.ui.style import app_style
 from frontengine.ui.style.tokens import DARK, LIGHT, THEMES, normalise_theme, resolve_theme
 from frontengine.utils.theme_schedule.theme_schedule_service import ThemeScheduleService
+
+
+@pytest.mark.parametrize('theme', ['light', 'dark'])
+@pytest.mark.parametrize('view_type', [QListView, QListWidget, QTreeView, QTreeWidget, QTableView, QTableWidget])
+def test_item_view_focus_is_visible_without_selection_or_resizing(theme, view_type):
+    host = QWidget()
+    layout = QVBoxLayout(host)
+    entry, view = QLineEdit(), view_type()
+    layout.addWidget(entry)
+    layout.addWidget(view)
+    app_style.apply_app_style(host, theme)
+    host.resize(360, 240)
+    host.show()
+    try:
+        entry.setFocus()
+        QApplication.processEvents()
+        before = view.grab().toImage()
+        geometry = view.geometry()
+        QTest.keyClick(entry, Qt.Key.Key_Tab)
+        QApplication.processEvents()
+        assert view.hasFocus()
+        after = view.grab().toImage()
+        assert view.geometry() == geometry
+        assert before.copy(0, 0, before.width(), 1) != after.copy(0, 0, after.width(), 1), (
+            f'{view_type.__name__} {theme}: border does not change when keyboard focus enters')
+    finally:
+        host.close()
 
 
 @pytest.mark.parametrize("stored, light, dark", [

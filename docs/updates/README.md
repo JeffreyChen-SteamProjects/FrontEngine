@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261106-01 | 2026-11-06 | Restore visible keyboard focus to content lists | #ui #accessibility #testing | [2026-11](2026-11.md) |
 | U-20261105-69 | 2026-11-05 | 家園主視窗鍵盤操作流程驗收 | #testing #ui #accessibility | [2026-11](2026-11.md) |
 | U-20261105-68 | 2026-11-05 | 完整回歸通過並結束窄視窗整合驗收 | #testing #ui #done | [2026-11](2026-11.md) |
 | U-20261105-67 | 2026-11-05 | 六居民自動生活三日與確定性重播 | #testing #pet #economy | [2026-11](2026-11.md) |
@@ -327,6 +328,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 123 |
+| [2026-11.md](2026-11.md) | 2026-11 | 124 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

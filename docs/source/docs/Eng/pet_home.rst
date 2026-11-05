@@ -47,3 +47,5 @@ Home settings keeps the mode selector available while manually selected Meeting 
 If Work is empty, check residents' routines, workstations and backpack materials. Select an unfinished job to enable Cancel job.
 
 Once all tutorial goals are claimed or skipped, the skip button disappears; the list remains available to review.
+
+The work list shows a highlighted border when keyboard focus enters, even before a job is selected.
