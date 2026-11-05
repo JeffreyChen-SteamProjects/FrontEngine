@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261106-39 | 2026-11-06 | 驗證七種語言的原生家園捷徑 | #test #ui #navigation #verified | [2026-11](2026-11.md) |
 | U-20261106-38 | 2026-11-06 | 修正家園捷徑切換後內容仍在視窗外 | #fix #ui #navigation #verified | [2026-11](2026-11.md) |
 | U-20261106-37 | 2026-11-06 | 核對原生職業進度呈現並記錄捷徑可見性問題 | #test #ui #review | [2026-11](2026-11.md) |
 | U-20261106-36 | 2026-11-06 | 驗證完整職業進度跨程序保存與重複結算 | #test #save #economy #verified | [2026-11](2026-11.md) |
@@ -365,6 +366,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 161 |
+| [2026-11.md](2026-11.md) | 2026-11 | 162 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
