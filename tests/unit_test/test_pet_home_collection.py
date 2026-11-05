@@ -141,6 +141,24 @@ def test_same_second_photos_preserve_each_image(page, tmp_path, monkeypatch):
     assert QImage(str(second)).pixelColor(4, 4) == QColor('blue')
 
 
+@pytest.mark.parametrize('entry', ['button', 'resident'])
+def test_a_new_photo_appears_in_the_album_immediately(page, entry):
+    from PySide6.QtWidgets import QPushButton
+    page.create_home()
+    page.service.pause('test')
+    assert page.collection.photos.count() == 0
+    if entry == 'button':
+        button = next(button for button in page.goals.section.findChildren(QPushButton)
+                      if button.text() == translate('pet_home_photo'))
+        button.click()
+    else:
+        page.strip_action('photo', page.selected_resident)
+    photos = album_photos(page.collection.folder())
+    assert len(photos) == 1
+    assert page.collection.photos.count() == 1
+    assert page.collection.photos.item(0).text() == photos[0].stem
+
+
 @pytest.mark.parametrize('failure', ['folder', 'image'])
 def test_failed_photo_leaves_no_album_file(page, tmp_path, monkeypatch, failure):
     from PySide6.QtGui import QPixmap

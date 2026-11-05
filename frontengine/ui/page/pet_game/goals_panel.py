@@ -148,5 +148,6 @@ class GoalsPanel:
         target = Path(photo.fileName())
         photo.setAutoRemove(False)
         photo.close()
+        self.page.collection.refresh_lists()
         self.page.report_text(translate("pet_home_photo_saved", "Photo saved to {path}").format(path=target))
         return target
