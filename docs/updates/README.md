@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261106-10 | 2026-11-06 | Verify integrated accessibility and search regression; integrate plugin fixes | #testing #integration | [2026-11](2026-11.md) |
 | U-20261106-09 | 2026-11-06 | Verify work reservations across storage and restart | #pets #economy #acceptance | [2026-11](2026-11.md) |
 | U-20261106-08 | 2026-11-06 | Verify preset menu round trips and plugin batch cleanup | #ui #presets #acceptance | [2026-11](2026-11.md) |
 | U-20261106-07 | 2026-11-06 | Separate plugin navigation IDs from built-in pages | #ui #plugins #testing | [2026-11](2026-11.md) |
@@ -336,6 +337,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 132 |
+| [2026-11.md](2026-11.md) | 2026-11 | 133 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
