@@ -706,3 +706,5 @@ Si una orden en cola se rechaza al ejecutarse porque las condiciones han cambiad
 Una orden manual de trabajo en cola también informa al iniciarse de materiales ausentes o de un puesto de trabajo inexistente u ocupado. El motivo aparece en la tarjeta del residente; tras resolverlo, se puede repetir la orden.
 
 La escena del hogar y su barra de herramientas permanecen en filas separadas cuando cambia la altura de la lista de asuntos pendientes.
+
+Al terminar un trabajo, la estación muestra brevemente una marca, también tras la última unidad del encargo. Si se guarda la estación antes de mostrar el evento, no se añade ninguna marca.

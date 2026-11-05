@@ -59,3 +59,5 @@ Wird ein eingereihter Befehl bei der Ausführung wegen veränderter Bedingungen 
 Ein eingereihter manueller Arbeitsauftrag meldet beim Start auch fehlende Materialien sowie fehlende oder belegte Arbeitsplätze. Der Grund erscheint auf der Bewohnerkarte. Nach Beheben des Problems kann der Auftrag erneut erteilt werden.
 
 Wenn sich die Höhe der Liste ausstehender Aufgaben ändert, bleiben die Hausszene und ihre Werkzeugleiste in getrennten Zeilen.
+
+Abgeschlossene Arbeit zeigt kurz ein Häkchen an der Arbeitsstation, auch nach der letzten Einheit eines Auftrags. Eine vor der Ereignisanzeige eingelagerte Station erhält keine Markierung.

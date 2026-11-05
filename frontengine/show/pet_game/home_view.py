@@ -305,9 +305,8 @@ class HomeView(QWidget):
         for event in events:
             if event.get("kind") != "settled":
                 continue
-            resident = world.residents.get(event.get("resident"))
-            station = resident.activity.furniture if resident is not None and resident.activity else None
-            if station is not None:
+            station = event.get("station")
+            if station in world.furniture:
                 self.badges[station] = self.badge_clock() + DONE_SECONDS
         self.update()
 

@@ -1,4 +1,6 @@
 """The home pauses while the computer is locked, and furniture shows what is happening at it."""
+import pytest
+
 from frontengine.show.pet_game.home_service import HomeService
 from frontengine.show.pet_game.home_strip import LOCKED_REASON
 from frontengine.show.pet_game.home_view import HomeView
@@ -75,3 +77,45 @@ def test_badges_show_use_the_trade_and_a_finished_job():
     now[0] += 5
     assert view.piece_badge(desk, world.definition(desk)) == "✎"
     view.deleteLater()
+
+
+@pytest.mark.parametrize("units", [1, 2])
+@pytest.mark.parametrize("remove_station", [False, True])
+def test_real_work_completion_marks_its_station_after_activity_ends(units, remove_station):
+    from frontengine.utils.pet_game import simulation
+
+    world, zone = _world()
+    world.automatic = False
+    pet = "b" * 32
+    world.add_resident({"id": pet, "name": "Worker", "mood": 95,
+                        "fullness": 95, "energy": 95, "affection": 0}, zone)
+    status, identifier = world.create_task("letter", pet, units=units)
+    assert status == "accepted"
+    desk = next(p for p in world.furniture.values() if p.definition == "desk_basic")
+    view = HomeView()
+    view.set_world(world, zone)
+    view.badge_clock = lambda: world.time_ms / 1000
+    try:
+        world.drain_events()
+        completed = 0
+        for _ in range(5000):
+            simulation.step(world)
+            events = world.drain_events()
+            settled = [e for e in events if e["kind"] == "settled"]
+            if not settled:
+                continue
+            completed += len(settled)
+            if remove_station:
+                assert world.store(desk.identifier) == "accepted"
+            view.note_events(events)
+            if remove_station:
+                assert desk.identifier not in view.badges
+                break
+            assert view.piece_badge(desk, world.definition(desk)) == "✓"
+            if identifier not in world.tasks:
+                break
+        assert completed == (1 if remove_station else units)
+        if not remove_station:
+            assert identifier not in world.tasks
+    finally:
+        view.deleteLater()

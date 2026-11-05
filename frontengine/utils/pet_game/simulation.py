@@ -257,7 +257,8 @@ def settle(world: World, resident: Resident, task) -> None:
         skills = resident.skills
         skills[recipe.profession] = skills.get(recipe.profession, 0) + recipe.experience
         world.emit("settled", resident=resident.identifier, task=task.identifier,
-                   recipe=recipe.identifier, coins=recipe.coins, transaction=transaction)
+                   recipe=recipe.identifier, coins=recipe.coins, transaction=transaction,
+                   station=resident.activity.furniture if resident.activity is not None else None)
     task.done += 1
     task.progress_ms = 0
     _after_unit(world, resident, task)

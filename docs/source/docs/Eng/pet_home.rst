@@ -59,3 +59,5 @@ If a queued command is refused when it executes because conditions have changed,
 A queued manual work command also reports missing materials, a missing workstation, or an occupied workstation when it tries to start. The reason appears in the resident card; after resolving it, the work command can be retried.
 
 The home scene and its toolbar remain in separate rows when the waiting-items list changes height.
+
+Completed work briefly marks the workstation with a check, including the final unit of a job. A workstation put away before the event is displayed receives no mark.

@@ -729,3 +729,5 @@ Se um comando na fila for recusado na execução porque as condições mudaram, 
 Um comando manual de trabalho na fila também informa, ao iniciar, a falta de materiais e a ausência ou ocupação da estação de trabalho. O motivo aparece no cartão do morador; depois de resolver o problema, é possível repetir o comando.
 
 A cena da casa e sua barra de ferramentas permanecem em linhas separadas quando a altura da lista de itens pendentes muda.
+
+Ao concluir um trabalho, a estação exibe brevemente uma marca de conclusão, inclusive após a última unidade da tarefa. Uma estação guardada antes da exibição do evento não recebe a marca.

@@ -707,3 +707,5 @@ Si une commande en attente est refusée à son exécution parce que les conditio
 Une commande manuelle de travail en attente signale aussi, au démarrage, les matériaux manquants et les postes absents ou occupés. Le motif apparaît sur la fiche du résident. Après résolution du problème, la commande peut être réessayée.
 
 La scène du foyer et sa barre d’outils restent sur des lignes distinctes lorsque la hauteur de la liste des éléments en attente change.
+
+Un travail terminé affiche brièvement une coche sur le poste, y compris après la dernière unité de la tâche. Un poste rangé avant l’affichage de l’événement ne reçoit aucune marque.

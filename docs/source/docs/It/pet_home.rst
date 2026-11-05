@@ -59,3 +59,5 @@ Se un comando in coda viene rifiutato al momento dell’esecuzione perché le co
 Un comando manuale di lavoro in coda segnala all’avvio anche materiali mancanti e postazioni assenti o occupate. Il motivo appare nella scheda del residente; risolto il problema, il comando può essere ripetuto.
 
 La scena della casa e la barra degli strumenti restano su righe separate quando cambia l’altezza dell’elenco degli elementi in attesa.
+
+Il lavoro completato mostra brevemente un segno di spunta sulla postazione, anche dopo l’ultima unità dell’incarico. Una postazione riposta prima della visualizzazione dell’evento non riceve alcun segno.
