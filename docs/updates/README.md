@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261105-39 | 2026-11-05 | 驗證家園新玩家完整教學與存檔重開 | #test #pet #events | [2026-11](2026-11.md) |
 | U-20261105-38 | 2026-11-05 | 驗證 GIF 與文字覆蓋層跨螢幕 | #test #ui | [2026-11](2026-11.md) |
 | U-20261105-37 | 2026-11-05 | 記錄最新版主視窗回歸與 SMTC 診斷 | #test #ui | [2026-11](2026-11.md) |
 | U-20261105-36 | 2026-11-05 | 圖片覆蓋層混合 DPI 複驗 | #test #ui | [2026-11](2026-11.md) |
@@ -296,6 +297,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 92 |
+| [2026-11.md](2026-11.md) | 2026-11 | 93 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

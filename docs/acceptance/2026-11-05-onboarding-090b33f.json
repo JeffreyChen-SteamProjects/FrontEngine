@@ -1,0 +1,180 @@
+{
+  "source_head": "090b33f89c2412bee161363d0e75b13e483d27fa",
+  "python_source_files": 502,
+  "elapsed_s": 930.6570000000065,
+  "milestones": {
+    "home_established": 2.7820000000065193,
+    "first_life_interaction": 31.28200000000652,
+    "first_work_paid": 296.875,
+    "furniture_purchase": 297.625,
+    "second_resident": 298.60999999998603,
+    "tutorial_complete": 363.625
+  },
+  "tutorial_goals": {
+    "move_in": "claimed",
+    "place_bed": "claimed",
+    "place_table": "claimed",
+    "first_care": "claimed",
+    "place_station": "claimed",
+    "first_work": "claimed",
+    "buy_furniture": "claimed",
+    "decorate": "claimed",
+    "second_resident": "claimed",
+    "shared_moment": "claimed"
+  },
+  "event_counts": {
+    "placed": 5,
+    "arrived": 2,
+    "commissions_refreshed": 1,
+    "activity": 54,
+    "goal_claimed": 10,
+    "interrupted": 4,
+    "completed": 48,
+    "auto_job": 6,
+    "settled": 4,
+    "bought": 2,
+    "shared": 1,
+    "helped": 1
+  },
+  "work_payments": 4,
+  "final_coins": 78,
+  "save_and_reloaded_snapshots_equal": true,
+  "cold_process_verified": true,
+  "video": {
+    "source_frames": 4572,
+    "first_capture_s": 0.7349999999860302,
+    "last_capture_s": 930.5940000000119,
+    "session_end_s": 930.6570000000065,
+    "gap_min_s": 0.1870000000053551,
+    "gap_max_s": 0.8280000000086147,
+    "video_duration_s": 930.0,
+    "source_coverage_s": 929.9220000000205,
+    "decoded": true,
+    "video": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\ownership-integration\\.audit\\complete-onboarding-090b33f-930\\onboarding-session.mp4",
+    "capture_gaps_over_one_second": [],
+    "average_capture_fps": 4.916541387342056,
+    "scope": "Owned QWidget recording at target five frames per second. Actual timestamps and capture gaps are retained; frames are held until the next capture. Video starts at first capture. No audio or desktop capture."
+  },
+  "foreground_observation": {
+    "source_unchanged": true,
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        2106,
+        546
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        2362,
+        117
+      ]
+    },
+    "desktop": "FrontEngineFirstFifteen55040_962c4bb5",
+    "child_exit": 0,
+    "note": "Read-only before/after observations; differences can reflect user activity."
+  },
+  "limitations": [
+    "Standalone PetHomePage, not the whole MainUI.",
+    "Workshop discovery and session-lock query substituted; network was not disabled at OS level.",
+    "Widget-only recording at target five frames per second; no audio.",
+    "No mixed-DPI, device, host-package or independent-review acceptance."
+  ],
+  "artifacts": {
+    "harness.py": {
+      "sha256": "a008766d4cda028006ea35d5bd60b698b64965a3eee409c507b136526a12096f",
+      "bytes": 22591
+    },
+    "verify_complete_onboarding.py": {
+      "sha256": "1a028e7411e07d7106cd43e133fc14276751b7a27d0728ae3d685562272d18cb",
+      "bytes": 5032
+    },
+    "encode_onboarding_run.py": {
+      "sha256": "052eb45e8cb8403efa1e965d9f2035874beec5437c0a1e340b3af1f42f6b535e",
+      "bytes": 2962
+    },
+    "current_cold_home_reload.py": {
+      "sha256": "2aaddf6fbdd28e363342a6d22315f84f7c34501ebcc4da212cfc33bff3280df4",
+      "bytes": 4203
+    },
+    "runtime.json": {
+      "sha256": "a00121c09a5bccdb716bd1e6714685032ff72f61e4f00fa2c337722aa842a7d5",
+      "bytes": 1123
+    },
+    "result.json": {
+      "sha256": "2bf33ee8baf75571b6070801b59ed2d262c919ca2f08cb1375a2efd8db8d8d16",
+      "bytes": 1039
+    },
+    "source-manifest.json": {
+      "sha256": "9cd465b927fda099369d1b4941cf793a7c315d281fcf31ea8f4970a114a8ab03",
+      "bytes": 60083
+    },
+    "actions.jsonl": {
+      "sha256": "daf2a4823a4e5ed3aa16a8a248cd34f2d9fa5c98399eef697d844b69a0a7d3cb",
+      "bytes": 36570
+    },
+    "frames.jsonl": {
+      "sha256": "b5ac94122b7c2b1c768a93533eb47147c8d50ac4a98cc4150b1fa196e19dd794",
+      "bytes": 278134
+    },
+    "shutdown-world.json": {
+      "sha256": "1addb3813899e25a1cc96bd99190d9c785ae662095515eada83cec7498729bf5",
+      "bytes": 8645
+    },
+    "reloaded-world.json": {
+      "sha256": "1addb3813899e25a1cc96bd99190d9c785ae662095515eada83cec7498729bf5",
+      "bytes": 8645
+    },
+    "final-save.json": {
+      "sha256": "4dba79fe3b0289d64a9b3f8b4fbe02f08ed0a5f4a1ddbc6fb68102ccf88b8f8c",
+      "bytes": 4976
+    },
+    "video-validation.json": {
+      "sha256": "0ad570606e332eae3d86b463013a67bca721d901abf99786b32228bfba708ed0",
+      "bytes": 766
+    },
+    "onboarding-session.mp4": {
+      "sha256": "c14879299afe364b49548d94b54ef94c3404a080e5be2c6ef4f8854bc330828a",
+      "bytes": 2083996
+    }
+  },
+  "artifact_directory": ".audit/complete-onboarding-090b33f-930",
+  "cold_result": {
+    "passed": true,
+    "world_snapshot_equal": true,
+    "resident_profiles_persisted": true,
+    "leases_reacquired": true,
+    "residents": [
+      "0bf0532ff71943319555d3e270258e87",
+      "c6645937646e43fc90bb1b27a16e32e6"
+    ],
+    "ledger_coins": 78,
+    "runtime_closed": true,
+    "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\ownership-integration\\.audit\\complete-onboarding-090b33f-930",
+    "saved_snapshot_sha256": "1addb3813899e25a1cc96bd99190d9c785ae662095515eada83cec7498729bf5",
+    "scope": "Fresh native Qt process on private desktop; copied captured settings; explicit lifetime; Workshop and session-lock boundary substitutions",
+    "temporary_directory_removed": true
+  },
+  "cold_observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        2362,
+        117
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        2362,
+        117
+      ]
+    },
+    "child_exit": 0,
+    "observation_only": true
+  },
+  "verifier_exit_code": 0,
+  "previous_run": "The 905-second run completed gameplay and cold reload but covered only 896.375 seconds of video; its video gate failed and it is not used for full recording acceptance."
+}
