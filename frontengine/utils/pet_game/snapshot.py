@@ -142,6 +142,7 @@ def from_dict(data: object, catalog: Catalog) -> World:
                               "resident")
     world.tasks = _unique([Task.from_dict(raw, catalog) for raw in tasks], "task")
     world.ledger = Ledger.from_dict(data["ledger"])
+    world.ledger.coins = world.coin_amount(world.ledger.coins)
     flags = _list(data, "flags", _FLAGS)
     if any(not isinstance(flag, str) or not 0 < len(flag) <= 48 for flag in flags):
         raise ValueError("Invalid home flags")

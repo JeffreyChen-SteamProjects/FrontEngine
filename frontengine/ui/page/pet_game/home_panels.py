@@ -647,7 +647,8 @@ class ShopPanel:
             if not definition.essential:
                 name = translate(definition.label_key, definition.fallback)
                 if goals.unlocked(world, definition.unlock_level):
-                    text = translate("pet_home_price", "{name} — {price} coins").format(name=name, price=definition.price)
+                    text = translate("pet_home_price", "{name} — {price} coins").format(
+                        name=name, price=world.coin_amount(definition.price))
                 else:
                     text = name + " — " + translate("pet_home_unlock_level", "home level {level}").format(
                         level=definition.unlock_level)
@@ -657,7 +658,7 @@ class ShopPanel:
             if item.buy_price:
                 things.append((item.identifier, thing_icon(item.identifier),
                                translate("pet_home_price", "{name} — {price} coins").format(
-                                   name=translate(item.label_key, item.fallback), price=item.buy_price)))
+                                   name=translate(item.label_key, item.fallback), price=world.coin_amount(item.buy_price))))
         self.items.set_things(things)
 
     @owned_action
@@ -715,7 +716,7 @@ class StoragePanel:
         text = translate("pet_home_stack", "{name} × {count}").format(name=label, count=count)
         if reserved:
             text += " " + translate("pet_home_reserved", "({count} set aside for work)").format(count=reserved)
-        price = world.catalog.sell_price(name)
+        price = world.coin_amount(world.catalog.sell_price(name))
         if price:
             text += " — " + translate("pet_home_sells_for", "sells for {price}").format(price=price)
         return text
@@ -745,7 +746,7 @@ def recipe_details(world, recipe) -> str:
                      "Takes {minutes} min · uses {inputs} · makes {outputs} · {coins} coins · "
                      "energy −{energy}/min · needs level {level}").format(
         minutes=f"{recipe.duration_ms / 60000:g}", inputs=stacks(recipe.inputs), outputs=stacks(recipe.outputs),
-        coins=recipe.coins, energy=recipe.energy_per_minute, level=recipe.min_level)
+        coins=world.coin_amount(recipe.coins), energy=recipe.energy_per_minute, level=recipe.min_level)
 
 
 class WorkPanel:

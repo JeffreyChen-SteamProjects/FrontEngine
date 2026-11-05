@@ -248,7 +248,8 @@ def settle(world: World, resident: Resident, task) -> None:
         task.inputs_reserved = False
     items = {**{name: -amount for name, amount in recipe.inputs.items()}, **recipe.outputs}
     transaction = task.settlement_id()
-    result = world.ledger.apply(transaction, "work:" + recipe.identifier, recipe.coins, items)
+    coins = world.coin_amount(recipe.coins)
+    result = world.ledger.apply(transaction, "work:" + recipe.identifier, coins, items)
     if result not in ("accepted", "duplicate"):
         task.progress_ms = recipe.duration_ms - 1
         task.state = "paused"
@@ -259,7 +260,7 @@ def settle(world: World, resident: Resident, task) -> None:
         skills = resident.skills
         skills[recipe.profession] = skills.get(recipe.profession, 0) + recipe.experience
         world.emit("settled", resident=resident.identifier, task=task.identifier,
-                   recipe=recipe.identifier, coins=recipe.coins, transaction=transaction,
+                   recipe=recipe.identifier, coins=coins, transaction=transaction,
                    station=resident.activity.furniture if resident.activity is not None else None)
     task.done += 1
     task.progress_ms = 0

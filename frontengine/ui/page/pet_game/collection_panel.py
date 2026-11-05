@@ -39,7 +39,7 @@ def how_to_get(world, definition) -> str:
         return translate("pet_home_made_at_station", "made at a workstation")
     if not goals.unlocked(world, definition.unlock_level):
         return translate("pet_home_unlock_level", "home level {level}").format(level=definition.unlock_level)
-    return translate("pet_home_price_short", "{price} coins").format(price=definition.price)
+    return translate("pet_home_price_short", "{price} coins").format(price=world.coin_amount(definition.price))
 
 
 def creations(world) -> list[tuple[str, int]]:

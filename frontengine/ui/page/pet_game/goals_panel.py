@@ -92,13 +92,13 @@ class GoalsPanel:
         mark = {"claimed": "✔", "done": "★", "skipped": "–", "open": "○"}[state]
         name = translate("pet_game_goal_" + goal.identifier, goal.identifier)
         return translate("pet_home_goal_line", "{mark} {name} ({current}/{target}) · {coins} coins").format(
-            mark=mark, name=name, current=min(current, target), target=target, coins=goal.coins)
+            mark=mark, name=name, current=min(current, target), target=target, coins=world.coin_amount(goal.coins))
 
     @staticmethod
     def _offer_line(world, offer: dict) -> str:
         status = "✔ " if offer["done"] else ""
         return status + translate("pet_home_offer_line", "{count} × {item} → {coins} coins").format(
-            count=offer["count"], item=item_label(world, offer["item"]), coins=offer["coins"])
+            count=offer["count"], item=item_label(world, offer["item"]), coins=world.coin_amount(offer["coins"]))
 
     @staticmethod
     def _event_line(world, event: dict) -> str:

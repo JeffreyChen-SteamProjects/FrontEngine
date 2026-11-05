@@ -737,3 +737,5 @@ Mochila, Objetivos, links de itens pendentes e a navegação da barra da área d
 O desejo de brincar só se realiza quando aquele mascote termina de brincar. O desejo de compartilhar uma refeição vale apenas para os mascotes que comem à mesma mesa, não para espectadores ou brincadeiras em grupo. Brincadeiras interrompidas não dão recompensa; desejos e intervalos salvos são preservados.
 
 A casa gerenciada e a de decoração livre mantêm históricos e contadores de mensagens não lidas separados durante a sessão. Ao voltar, as mensagens e seu estado de leitura são restaurados; se a troca falhar, a caixa atual é mantida. Uma casa nova começa com um histórico vazio.
+
+A decoração livre mantém atividades, itens e progresso local sem ganhar ou gastar moedas. Preços, recompensas e avisos refletem essa regra. Ao carregar um salvamento antigo desse modo, o saldo passa a zero e os itens e o histórico de transações são preservados; o saldo da casa gerenciada não muda.

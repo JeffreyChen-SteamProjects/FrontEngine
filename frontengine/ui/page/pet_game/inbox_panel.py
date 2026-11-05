@@ -44,14 +44,21 @@ def line(event: dict) -> str:
     name = event.get("resident_name", "")
     if kind == "settled":
         label = translate(*event["recipe_label"])
+        if not event.get("coins", 0):
+            return translate("pet_home_note_settled_no_coins", "{name} finished {recipe}").format(
+                name=name, recipe=label)
         return translate("pet_home_note_settled", "{name} finished {recipe} (+{coins})").format(
             name=name, recipe=label, coins=event.get("coins", 0))
     if kind == "commission_done":
+        if not event["coins"]:
+            return translate("pet_home_note_commission_no_coins", "Commission delivered")
         return translate("pet_home_note_commission", "Commission delivered (+{coins})").format(coins=event["coins"])
     if kind == "auto_job":
         label = translate(*event["recipe_label"])
         return translate("pet_home_note_auto_job", "{name} took up {recipe}").format(name=name, recipe=label)
     if kind == "goal_claimed":
+        if not event["coins"]:
+            return translate("pet_home_note_goal_completed", "Goal completed")
         return translate("pet_home_note_goal_claimed", "Reward collected (+{coins})").format(coins=event["coins"])
     if kind == "interrupted":
         return translate("pet_home_note_" + event["reason"], event["reason"]).format(name=name)

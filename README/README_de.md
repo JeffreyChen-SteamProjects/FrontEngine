@@ -757,3 +757,5 @@ Rucksack, Ziele, Links zu wartenden Aufgaben und die Navigation der Desktop-Leis
 Spielwünsche erfüllen sich nur, wenn das betreffende Haustier sein Spiel beendet. Ein Essenswunsch gilt nur für Tiere, die am selben Tisch essen, nicht für Zuschauer oder gemeinsame Spiele. Unterbrochenes Spielen gibt keine Wunschbelohnung; gespeicherte Wünsche und Wartezeiten bleiben erhalten.
 
 Das verwaltete Zuhause und das Zuhause zum freien Einrichten behalten während der Sitzung getrennte Posteingänge und Ungelesen-Zähler. Beim Zurückwechseln werden die Nachrichten und ihr Lesestatus wiederhergestellt; ein fehlgeschlagener Wechsel behält den aktuellen Posteingang. Ein neues Zuhause beginnt mit einem leeren Verlauf.
+
+Freies Einrichten behält Aktivitäten, Gegenstände und lokalen Fortschritt, ohne Münzen zu verdienen oder auszugeben. Preise, Belohnungen und Abschlussmeldungen berücksichtigen dies. Beim Laden älterer Spielstände für freies Einrichten wird der Münzstand auf null gesetzt; Gegenstände und Transaktionsverlauf bleiben erhalten. Verwaltete Zuhause behalten ihren Münzstand.

@@ -293,10 +293,11 @@ def claim(world: World, identifier: str) -> str:
         return "unknown"
     if goal_state(world, goal) != "done":
         return "not_ready"
-    result = world.ledger.apply("goal:" + identifier, "goal", goal.coins)
+    coins = world.coin_amount(goal.coins)
+    result = world.ledger.apply("goal:" + identifier, "goal", coins)
     if result in ("accepted", "duplicate"):
         world.progress.goals[identifier] = "claimed"
-        world.emit("goal_claimed", goal=identifier, coins=goal.coins)
+        world.emit("goal_claimed", goal=identifier, coins=coins)
     return result
 
 
@@ -328,7 +329,7 @@ def celebrate(world: World) -> str:
     """A one-time home party; free life simply continues afterwards."""
     if not celebration_ready(world):
         return "not_ready"
-    result = world.ledger.apply("goal:celebration", "celebration", CELEBRATION_COINS)
+    result = world.ledger.apply("goal:celebration", "celebration", world.coin_amount(CELEBRATION_COINS))
     if result not in ("accepted", "duplicate"):
         return result
     world.progress.goals["celebration"] = "claimed"
@@ -366,12 +367,13 @@ def deliver(world: World, index: int) -> str:
         return "unknown"
     offer = offers[index]
     transaction = f"commission:{world.progress.commissions['day']}:{index}"
-    result = world.ledger.apply(transaction, "commission", offer["coins"], {offer["item"]: -offer["count"]})
+    coins = world.coin_amount(offer["coins"])
+    result = world.ledger.apply(transaction, "commission", coins, {offer["item"]: -offer["count"]})
     if result == "insufficient":
         return "none_stored"
     if result in ("accepted", "duplicate"):
         offer["done"] = True
-        world.emit("commission_done", item=offer["item"], coins=offer["coins"])
+        world.emit("commission_done", item=offer["item"], coins=coins)
     return result
 
 

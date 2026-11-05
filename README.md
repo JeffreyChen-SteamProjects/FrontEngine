@@ -714,3 +714,5 @@ Backpack, Goals, waiting-item links and desktop-strip navigation bring the selec
 Play wishes complete only when that pet finishes playing. A meal wish completes for the pets eating together at the same table, not for spectators or shared games. Interrupted play gives no wish reward; existing wishes and cooldowns remain compatible with saved homes.
 
 The managed home and free-arranging home keep separate Inbox histories and unread counts during the session. Switching back restores that home’s notes and read state; a failed switch keeps the current Inbox. Creating a new home starts a fresh history.
+
+Free arranging keeps activities, items and local progress without earning or spending coins. Prices, rewards and completion notices reflect this. Loading an older free-arranging save resets its coin balance to zero while retaining items and transaction history; managed homes keep their balance.

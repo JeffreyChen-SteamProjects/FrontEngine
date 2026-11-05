@@ -67,3 +67,5 @@ Zaino, Obiettivi, i collegamenti agli elementi in attesa e la navigazione dalla 
 Il desiderio di giocare si realizza solo quando quel cucciolo termina il gioco. Il desiderio di un pasto insieme riguarda chi mangia allo stesso tavolo, non gli spettatori o i giochi condivisi. Un gioco interrotto non dà ricompense; desideri e attese salvati restano compatibili.
 
 La casa gestita e quella con disposizione libera mantengono cronologie e conteggi dei messaggi non letti separati durante la sessione. Tornando a una casa si ripristinano i suoi messaggi e lo stato di lettura; se il cambio non riesce, resta la casella attuale. Una casa nuova inizia con una cronologia vuota.
+
+La disposizione libera conserva attività, oggetti e progressi locali senza guadagnare né spendere monete. Prezzi, ricompense e notifiche rispecchiano questa regola. Caricando un vecchio salvataggio di questa modalità, il saldo viene azzerato mantenendo oggetti e cronologia delle transazioni; il saldo della casa gestita non cambia.
