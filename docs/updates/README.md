@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261105-46 | 2026-11-05 | 修正便條文字被繪圖合成器遮住 | #fix #ui #verification | [2026-11](2026-11.md) |
 | U-20261105-45 | 2026-11-05 | 驗證粒子四方向跨混合 DPI 螢幕 | #verification #ui | [2026-11](2026-11.md) |
 | U-20261105-44 | 2026-11-05 | 驗證影片原生畫面跨混合 DPI 螢幕 | #verification #ui | [2026-11](2026-11.md) |
 | U-20261105-43 | 2026-11-05 | 驗證 Web 覆蓋層跨混合 DPI 螢幕 | #verification #ui | [2026-11](2026-11.md) |
@@ -303,6 +304,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 99 |
+| [2026-11.md](2026-11.md) | 2026-11 | 100 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

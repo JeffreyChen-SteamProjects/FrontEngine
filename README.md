@@ -201,6 +201,7 @@ during quiet hours.
   happened meanwhile.
 - **Sticky notes** — editable cards above every window, keeping their text,
   colour and position between sessions.
+  Sticky note text stays visible and editable when the global rendering backend changes.
 
 ### Work
 

@@ -200,6 +200,7 @@ pendant les heures calmes.
   s'est passé entre-temps.
 - **Notes autocollantes** — des cartes modifiables au-dessus de toutes les fenêtres, conservant leur texte,
   leur couleur et leur position entre les sessions.
+  Le texte des notes autocollantes reste visible et modifiable lors du changement du moteur de rendu global.
 
 ### Travail
 

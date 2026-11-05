@@ -201,6 +201,7 @@ el relevo durante las horas de silencio.
   tanto.
 - **Notas adhesivas** — tarjetas editables por encima de cada ventana, que conservan su texto,
   color y posición entre sesiones.
+  El texto de las notas adhesivas permanece visible y editable al cambiar el motor de renderizado global.
 
 ### Trabajo
 

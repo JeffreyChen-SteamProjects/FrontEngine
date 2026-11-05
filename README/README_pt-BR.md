@@ -208,6 +208,7 @@ alto-falantes. Uma segunda pasta pode assumir durante as horas de silêncio.
   então reativá-la mostra o que aconteceu nesse meio-tempo.
 - **Notas adesivas** — cartões editáveis acima de cada janela, mantendo seu
   texto, cor e posição entre sessões.
+  O texto das notas adesivas permanece visível e editável ao mudar o mecanismo global de renderização.
 
 ### Trabalho
 

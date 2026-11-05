@@ -216,6 +216,7 @@ Lautsprecherpegel pulsieren. Ein zweiter Ordner kann während der Ruhezeiten
   passiert ist.
 - **Haftnotizen** — bearbeitbare Karten über jedem Fenster, die ihren Text, ihre
   Farbe und Position zwischen den Sitzungen behalten.
+  Der Text von Haftnotizen bleibt beim Wechsel des globalen Renderers sichtbar und bearbeitbar.
 
 ### Arbeit
 

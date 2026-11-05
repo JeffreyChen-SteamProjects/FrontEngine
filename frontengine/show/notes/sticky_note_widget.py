@@ -88,6 +88,7 @@ class StickyNoteWidget(BaseWidget):
         candidate = QColor(color)
         self.color = candidate if candidate.isValid() else QColor(DEFAULT_COLOR)
         self.opacity = 1.0
+        self._requested_render_backend = 'software'
         # 要打字就不能點擊穿透，也就不提供鎖定
         # Typing needs the mouse and keyboard, so this one is never lockable.
         self.overlay_lockable = False
@@ -112,6 +113,10 @@ class StickyNoteWidget(BaseWidget):
 
         apply_overlay_window_flags(self, show_on_bottom=False, allow_input=True)
         self.resize(clamp_size(width, DEFAULT_WIDTH), clamp_size(height, DEFAULT_HEIGHT))
+
+    def set_render_backend(self, backend: str = 'auto') -> None:
+        """Keep the text editor above the paper without a covering compositor."""
+        self._requested_render_backend = 'software'
 
     def text(self) -> str:
         return self.text_edit.toPlainText()
