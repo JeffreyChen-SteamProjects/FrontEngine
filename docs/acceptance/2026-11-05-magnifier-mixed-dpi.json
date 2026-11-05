@@ -1,0 +1,1706 @@
+{
+  "source_revision": "9ed1b2d",
+  "runs": {
+    "magnifier-dpi-9ed1b2d": {
+      "result": {
+        "observations": [
+          {
+            "requested_backend": "auto",
+            "actual_backend": "gpu",
+            "target": "BenQ GW2486TC",
+            "actual_screen": "BenQ GW2486TC",
+            "zoom": 2,
+            "dpr": 1.0,
+            "logical_size": [
+              240,
+              240
+            ],
+            "pixels": [
+              240,
+              240
+            ],
+            "initial_colors": [
+              "#e03060",
+              "#20b070",
+              "#2474c4",
+              "#ffd740"
+            ],
+            "updated_colors": [
+              "#ffd740",
+              "#2474c4",
+              "#20b070",
+              "#e03060"
+            ],
+            "capture_rect": [
+              899,
+              479,
+              120,
+              120
+            ],
+            "expected_rect": [
+              899,
+              479,
+              120,
+              120
+            ],
+            "timer_capture_calls": 6,
+            "file": "magnifier-auto-0.png",
+            "passed": true
+          },
+          {
+            "requested_backend": "auto",
+            "actual_backend": "gpu",
+            "target": "BenQ GW2486TC",
+            "actual_screen": "BenQ GW2486TC",
+            "zoom": 3,
+            "dpr": 1.0,
+            "logical_size": [
+              240,
+              240
+            ],
+            "pixels": [
+              240,
+              240
+            ],
+            "initial_colors": [
+              "#e03060",
+              "#20b070",
+              "#2474c4",
+              "#ffd740"
+            ],
+            "updated_colors": [
+              "#ffd740",
+              "#2474c4",
+              "#20b070",
+              "#e03060"
+            ],
+            "capture_rect": [
+              919,
+              499,
+              80,
+              80
+            ],
+            "expected_rect": [
+              919,
+              499,
+              80,
+              80
+            ],
+            "timer_capture_calls": 7,
+            "file": "magnifier-auto-1.png",
+            "passed": true
+          },
+          {
+            "requested_backend": "auto",
+            "actual_backend": "gpu",
+            "target": "BenQ GW2490",
+            "actual_screen": "BenQ GW2490",
+            "zoom": 2,
+            "dpr": 1.25,
+            "logical_size": [
+              192,
+              192
+            ],
+            "pixels": [
+              240,
+              240
+            ],
+            "initial_colors": [
+              "#e03060",
+              "#20b070",
+              "#2474c4",
+              "#ffd740"
+            ],
+            "updated_colors": [
+              "#ffd740",
+              "#2474c4",
+              "#20b070",
+              "#e03060"
+            ],
+            "capture_rect": [
+              2627,
+              207,
+              120,
+              120
+            ],
+            "expected_rect": [
+              2627,
+              207,
+              120,
+              120
+            ],
+            "timer_capture_calls": 6,
+            "file": "magnifier-auto-2.png",
+            "passed": false
+          },
+          {
+            "requested_backend": "auto",
+            "actual_backend": "gpu",
+            "target": "BenQ GW2490",
+            "actual_screen": "BenQ GW2490",
+            "zoom": 3,
+            "dpr": 1.25,
+            "logical_size": [
+              240,
+              240
+            ],
+            "pixels": [
+              300,
+              300
+            ],
+            "initial_colors": [
+              "#e03060",
+              "#20b070",
+              "#2474c4",
+              "#ffd740"
+            ],
+            "updated_colors": [
+              "#ffd740",
+              "#2474c4",
+              "#20b070",
+              "#e03060"
+            ],
+            "capture_rect": [
+              2647,
+              227,
+              80,
+              80
+            ],
+            "expected_rect": [
+              2647,
+              227,
+              80,
+              80
+            ],
+            "timer_capture_calls": 6,
+            "file": "magnifier-auto-3.png",
+            "passed": true
+          },
+          {
+            "requested_backend": "auto",
+            "actual_backend": "gpu",
+            "target": "BenQ GW2486TC",
+            "actual_screen": "BenQ GW2486TC",
+            "zoom": 2,
+            "dpr": 1.0,
+            "logical_size": [
+              300,
+              300
+            ],
+            "pixels": [
+              300,
+              300
+            ],
+            "initial_colors": [
+              "#e03060",
+              "#20b070",
+              "#2474c4",
+              "#ffd740"
+            ],
+            "updated_colors": [
+              "#ffd740",
+              "#2474c4",
+              "#20b070",
+              "#e03060"
+            ],
+            "capture_rect": [
+              899,
+              479,
+              120,
+              120
+            ],
+            "expected_rect": [
+              899,
+              479,
+              120,
+              120
+            ],
+            "timer_capture_calls": 6,
+            "file": "magnifier-auto-4.png",
+            "passed": false
+          },
+          {
+            "requested_backend": "auto",
+            "actual_backend": "gpu",
+            "target": "BenQ GW2486TC",
+            "actual_screen": "BenQ GW2486TC",
+            "zoom": 3,
+            "dpr": 1.0,
+            "logical_size": [
+              240,
+              240
+            ],
+            "pixels": [
+              240,
+              240
+            ],
+            "initial_colors": [
+              "#e03060",
+              "#20b070",
+              "#2474c4",
+              "#ffd740"
+            ],
+            "updated_colors": [
+              "#ffd740",
+              "#2474c4",
+              "#20b070",
+              "#e03060"
+            ],
+            "capture_rect": [
+              919,
+              499,
+              80,
+              80
+            ],
+            "expected_rect": [
+              919,
+              499,
+              80,
+              80
+            ],
+            "timer_capture_calls": 7,
+            "file": "magnifier-auto-5.png",
+            "passed": true
+          },
+          {
+            "requested_backend": "gpu",
+            "actual_backend": "gpu",
+            "target": "BenQ GW2486TC",
+            "actual_screen": "BenQ GW2486TC",
+            "zoom": 2,
+            "dpr": 1.0,
+            "logical_size": [
+              240,
+              240
+            ],
+            "pixels": [
+              240,
+              240
+            ],
+            "initial_colors": [
+              "#e03060",
+              "#20b070",
+              "#2474c4",
+              "#ffd740"
+            ],
+            "updated_colors": [
+              "#ffd740",
+              "#2474c4",
+              "#20b070",
+              "#e03060"
+            ],
+            "capture_rect": [
+              899,
+              479,
+              120,
+              120
+            ],
+            "expected_rect": [
+              899,
+              479,
+              120,
+              120
+            ],
+            "timer_capture_calls": 5,
+            "file": "magnifier-gpu-6.png",
+            "passed": true
+          },
+          {
+            "requested_backend": "gpu",
+            "actual_backend": "gpu",
+            "target": "BenQ GW2486TC",
+            "actual_screen": "BenQ GW2486TC",
+            "zoom": 3,
+            "dpr": 1.0,
+            "logical_size": [
+              240,
+              240
+            ],
+            "pixels": [
+              240,
+              240
+            ],
+            "initial_colors": [
+              "#e03060",
+              "#20b070",
+              "#2474c4",
+              "#ffd740"
+            ],
+            "updated_colors": [
+              "#ffd740",
+              "#2474c4",
+              "#20b070",
+              "#e03060"
+            ],
+            "capture_rect": [
+              919,
+              499,
+              80,
+              80
+            ],
+            "expected_rect": [
+              919,
+              499,
+              80,
+              80
+            ],
+            "timer_capture_calls": 7,
+            "file": "magnifier-gpu-7.png",
+            "passed": true
+          },
+          {
+            "requested_backend": "gpu",
+            "actual_backend": "gpu",
+            "target": "BenQ GW2490",
+            "actual_screen": "BenQ GW2490",
+            "zoom": 2,
+            "dpr": 1.25,
+            "logical_size": [
+              192,
+              192
+            ],
+            "pixels": [
+              240,
+              240
+            ],
+            "initial_colors": [
+              "#e03060",
+              "#20b070",
+              "#2474c4",
+              "#ffd740"
+            ],
+            "updated_colors": [
+              "#ffd740",
+              "#2474c4",
+              "#20b070",
+              "#e03060"
+            ],
+            "capture_rect": [
+              2627,
+              207,
+              120,
+              120
+            ],
+            "expected_rect": [
+              2627,
+              207,
+              120,
+              120
+            ],
+            "timer_capture_calls": 8,
+            "file": "magnifier-gpu-8.png",
+            "passed": false
+          },
+          {
+            "requested_backend": "gpu",
+            "actual_backend": "gpu",
+            "target": "BenQ GW2490",
+            "actual_screen": "BenQ GW2490",
+            "zoom": 3,
+            "dpr": 1.25,
+            "logical_size": [
+              240,
+              240
+            ],
+            "pixels": [
+              300,
+              300
+            ],
+            "initial_colors": [
+              "#e03060",
+              "#20b070",
+              "#2474c4",
+              "#ffd740"
+            ],
+            "updated_colors": [
+              "#ffd740",
+              "#2474c4",
+              "#20b070",
+              "#e03060"
+            ],
+            "capture_rect": [
+              2647,
+              227,
+              80,
+              80
+            ],
+            "expected_rect": [
+              2647,
+              227,
+              80,
+              80
+            ],
+            "timer_capture_calls": 7,
+            "file": "magnifier-gpu-9.png",
+            "passed": true
+          },
+          {
+            "requested_backend": "gpu",
+            "actual_backend": "gpu",
+            "target": "BenQ GW2486TC",
+            "actual_screen": "BenQ GW2486TC",
+            "zoom": 2,
+            "dpr": 1.0,
+            "logical_size": [
+              300,
+              300
+            ],
+            "pixels": [
+              300,
+              300
+            ],
+            "initial_colors": [
+              "#e03060",
+              "#20b070",
+              "#2474c4",
+              "#ffd740"
+            ],
+            "updated_colors": [
+              "#ffd740",
+              "#2474c4",
+              "#20b070",
+              "#e03060"
+            ],
+            "capture_rect": [
+              899,
+              479,
+              120,
+              120
+            ],
+            "expected_rect": [
+              899,
+              479,
+              120,
+              120
+            ],
+            "timer_capture_calls": 6,
+            "file": "magnifier-gpu-10.png",
+            "passed": false
+          },
+          {
+            "requested_backend": "gpu",
+            "actual_backend": "gpu",
+            "target": "BenQ GW2486TC",
+            "actual_screen": "BenQ GW2486TC",
+            "zoom": 3,
+            "dpr": 1.0,
+            "logical_size": [
+              240,
+              240
+            ],
+            "pixels": [
+              240,
+              240
+            ],
+            "initial_colors": [
+              "#e03060",
+              "#20b070",
+              "#2474c4",
+              "#ffd740"
+            ],
+            "updated_colors": [
+              "#ffd740",
+              "#2474c4",
+              "#20b070",
+              "#e03060"
+            ],
+            "capture_rect": [
+              919,
+              499,
+              80,
+              80
+            ],
+            "expected_rect": [
+              919,
+              499,
+              80,
+              80
+            ],
+            "timer_capture_calls": 7,
+            "file": "magnifier-gpu-11.png",
+            "passed": true
+          },
+          {
+            "requested_backend": "software",
+            "actual_backend": "software",
+            "target": "BenQ GW2486TC",
+            "actual_screen": "BenQ GW2486TC",
+            "zoom": 2,
+            "dpr": 1.0,
+            "logical_size": [
+              240,
+              240
+            ],
+            "pixels": [
+              240,
+              240
+            ],
+            "initial_colors": [
+              "#e03060",
+              "#20b070",
+              "#2474c4",
+              "#ffd740"
+            ],
+            "updated_colors": [
+              "#ffd740",
+              "#2474c4",
+              "#20b070",
+              "#e03060"
+            ],
+            "capture_rect": [
+              899,
+              479,
+              120,
+              120
+            ],
+            "expected_rect": [
+              899,
+              479,
+              120,
+              120
+            ],
+            "timer_capture_calls": 5,
+            "file": "magnifier-software-12.png",
+            "passed": true
+          },
+          {
+            "requested_backend": "software",
+            "actual_backend": "software",
+            "target": "BenQ GW2486TC",
+            "actual_screen": "BenQ GW2486TC",
+            "zoom": 3,
+            "dpr": 1.0,
+            "logical_size": [
+              240,
+              240
+            ],
+            "pixels": [
+              240,
+              240
+            ],
+            "initial_colors": [
+              "#e03060",
+              "#20b070",
+              "#2474c4",
+              "#ffd740"
+            ],
+            "updated_colors": [
+              "#ffd740",
+              "#2474c4",
+              "#20b070",
+              "#e03060"
+            ],
+            "capture_rect": [
+              919,
+              499,
+              80,
+              80
+            ],
+            "expected_rect": [
+              919,
+              499,
+              80,
+              80
+            ],
+            "timer_capture_calls": 8,
+            "file": "magnifier-software-13.png",
+            "passed": true
+          },
+          {
+            "requested_backend": "software",
+            "actual_backend": "software",
+            "target": "BenQ GW2490",
+            "actual_screen": "BenQ GW2490",
+            "zoom": 2,
+            "dpr": 1.25,
+            "logical_size": [
+              192,
+              192
+            ],
+            "pixels": [
+              240,
+              240
+            ],
+            "initial_colors": [
+              "#e03060",
+              "#20b070",
+              "#2474c4",
+              "#ffd740"
+            ],
+            "updated_colors": [
+              "#ffd740",
+              "#2474c4",
+              "#20b070",
+              "#e03060"
+            ],
+            "capture_rect": [
+              2627,
+              207,
+              120,
+              120
+            ],
+            "expected_rect": [
+              2627,
+              207,
+              120,
+              120
+            ],
+            "timer_capture_calls": 6,
+            "file": "magnifier-software-14.png",
+            "passed": false
+          },
+          {
+            "requested_backend": "software",
+            "actual_backend": "software",
+            "target": "BenQ GW2490",
+            "actual_screen": "BenQ GW2490",
+            "zoom": 3,
+            "dpr": 1.25,
+            "logical_size": [
+              240,
+              240
+            ],
+            "pixels": [
+              300,
+              300
+            ],
+            "initial_colors": [
+              "#e03060",
+              "#20b070",
+              "#2474c4",
+              "#ffd740"
+            ],
+            "updated_colors": [
+              "#ffd740",
+              "#2474c4",
+              "#20b070",
+              "#e03060"
+            ],
+            "capture_rect": [
+              2647,
+              227,
+              80,
+              80
+            ],
+            "expected_rect": [
+              2647,
+              227,
+              80,
+              80
+            ],
+            "timer_capture_calls": 7,
+            "file": "magnifier-software-15.png",
+            "passed": true
+          },
+          {
+            "requested_backend": "software",
+            "actual_backend": "software",
+            "target": "BenQ GW2486TC",
+            "actual_screen": "BenQ GW2486TC",
+            "zoom": 2,
+            "dpr": 1.0,
+            "logical_size": [
+              300,
+              300
+            ],
+            "pixels": [
+              300,
+              300
+            ],
+            "initial_colors": [
+              "#e03060",
+              "#20b070",
+              "#2474c4",
+              "#ffd740"
+            ],
+            "updated_colors": [
+              "#ffd740",
+              "#2474c4",
+              "#20b070",
+              "#e03060"
+            ],
+            "capture_rect": [
+              899,
+              479,
+              120,
+              120
+            ],
+            "expected_rect": [
+              899,
+              479,
+              120,
+              120
+            ],
+            "timer_capture_calls": 7,
+            "file": "magnifier-software-16.png",
+            "passed": false
+          },
+          {
+            "requested_backend": "software",
+            "actual_backend": "software",
+            "target": "BenQ GW2486TC",
+            "actual_screen": "BenQ GW2486TC",
+            "zoom": 3,
+            "dpr": 1.0,
+            "logical_size": [
+              240,
+              240
+            ],
+            "pixels": [
+              240,
+              240
+            ],
+            "initial_colors": [
+              "#e03060",
+              "#20b070",
+              "#2474c4",
+              "#ffd740"
+            ],
+            "updated_colors": [
+              "#ffd740",
+              "#2474c4",
+              "#20b070",
+              "#e03060"
+            ],
+            "capture_rect": [
+              919,
+              499,
+              80,
+              80
+            ],
+            "expected_rect": [
+              919,
+              499,
+              80,
+              80
+            ],
+            "timer_capture_calls": 7,
+            "file": "magnifier-software-17.png",
+            "passed": true
+          }
+        ],
+        "closed": [
+          {
+            "backend": "auto",
+            "timer_stopped": true,
+            "deleted": true
+          },
+          {
+            "backend": "gpu",
+            "timer_stopped": true,
+            "deleted": true
+          },
+          {
+            "backend": "software",
+            "timer_stopped": true,
+            "deleted": true
+          }
+        ],
+        "passed": false,
+        "scope": "Native magnifier display, zoom geometry, timer-driven synthetic frame replacement, mixed DPI and cleanup on an owned hidden desktop. Injected cursor positions and synthetic grabber; no desktop input or real screen capture. This does not validate native capture coordinate conversion, physical mouse following, or pass-through."
+      },
+      "observer": {
+        "exit_code": 1,
+        "profile_removed": true,
+        "source_unchanged": true,
+        "before": {
+          "foreground": 3413904,
+          "cursor": [
+            2670,
+            122
+          ]
+        },
+        "after": {
+          "foreground": 3413904,
+          "cursor": [
+            2670,
+            122
+          ]
+        },
+        "observation_only": true,
+        "desktop": "FrontEngineVideoWebDpi_ed13f25a8624"
+      },
+      "stderr": "",
+      "artifact_sha256": {
+        "harness.py": "e6db0cf903cc8e528e7ff8ad017e3d5f4c85400bfe615b2751bb314ef8289600",
+        "magnifier-auto-0.png": "a4049e451f0576eeee5d4f7566c47fcf0f787ba4a60e528d281fcd4e996838aa",
+        "magnifier-auto-1.png": "9d54801509aca78906ce56be66bb2a92020844d2ed3bcdd937f592319f7eccbf",
+        "magnifier-auto-2.png": "efd080f4e5a54ca9d9c8a9c95a75adec5feee733d46fdd0ebc0e8f1cba9a1ff2",
+        "magnifier-auto-3.png": "b1b0c9072bc86c24877d491c46ed383f638b608202fbe6d5a91fc2d8c18a61ac",
+        "magnifier-auto-4.png": "c60ad079d0c1550bf70c3048a5c2d70ed6c6be394497b1c25d900e59cb26c3d5",
+        "magnifier-auto-5.png": "9d54801509aca78906ce56be66bb2a92020844d2ed3bcdd937f592319f7eccbf",
+        "magnifier-gpu-10.png": "c60ad079d0c1550bf70c3048a5c2d70ed6c6be394497b1c25d900e59cb26c3d5",
+        "magnifier-gpu-11.png": "9d54801509aca78906ce56be66bb2a92020844d2ed3bcdd937f592319f7eccbf",
+        "magnifier-gpu-6.png": "a4049e451f0576eeee5d4f7566c47fcf0f787ba4a60e528d281fcd4e996838aa",
+        "magnifier-gpu-7.png": "9d54801509aca78906ce56be66bb2a92020844d2ed3bcdd937f592319f7eccbf",
+        "magnifier-gpu-8.png": "efd080f4e5a54ca9d9c8a9c95a75adec5feee733d46fdd0ebc0e8f1cba9a1ff2",
+        "magnifier-gpu-9.png": "b1b0c9072bc86c24877d491c46ed383f638b608202fbe6d5a91fc2d8c18a61ac",
+        "magnifier-software-12.png": "a4049e451f0576eeee5d4f7566c47fcf0f787ba4a60e528d281fcd4e996838aa",
+        "magnifier-software-13.png": "9d54801509aca78906ce56be66bb2a92020844d2ed3bcdd937f592319f7eccbf",
+        "magnifier-software-14.png": "efd080f4e5a54ca9d9c8a9c95a75adec5feee733d46fdd0ebc0e8f1cba9a1ff2",
+        "magnifier-software-15.png": "b1b0c9072bc86c24877d491c46ed383f638b608202fbe6d5a91fc2d8c18a61ac",
+        "magnifier-software-16.png": "c60ad079d0c1550bf70c3048a5c2d70ed6c6be394497b1c25d900e59cb26c3d5",
+        "magnifier-software-17.png": "9d54801509aca78906ce56be66bb2a92020844d2ed3bcdd937f592319f7eccbf",
+        "observer.json": "8e07f2a81296900c7ed4b6c4e1aa2c45ca617f2e6a3c2f44480ee750fcbfd9c1",
+        "partial.json": "7d70e945b998d7b4c39080ea85aba180523df602fccbb9611b0a9ecd0f8c1936",
+        "result.json": "43c38992221a829dea8d540005f1ca2c48263cdfffbf89fe033a11adb3e5d560",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "magnifier-dpi-move-only-9ed1b2d": {
+      "result": {
+        "observations": [
+          {
+            "requested_backend": "auto",
+            "actual_backend": "gpu",
+            "target": "BenQ GW2486TC",
+            "actual_screen": "BenQ GW2486TC",
+            "zoom": 2,
+            "dpr": 1.0,
+            "logical_size": [
+              240,
+              240
+            ],
+            "pixels": [
+              240,
+              240
+            ],
+            "initial_colors": [
+              "#e03060",
+              "#20b070",
+              "#2474c4",
+              "#ffd740"
+            ],
+            "updated_colors": [
+              "#ffd740",
+              "#2474c4",
+              "#20b070",
+              "#e03060"
+            ],
+            "capture_rect": [
+              899,
+              479,
+              120,
+              120
+            ],
+            "expected_rect": [
+              899,
+              479,
+              120,
+              120
+            ],
+            "timer_capture_calls": 6,
+            "file": "magnifier-auto-0.png",
+            "passed": true
+          },
+          {
+            "requested_backend": "auto",
+            "actual_backend": "gpu",
+            "target": "BenQ GW2486TC",
+            "actual_screen": "BenQ GW2486TC",
+            "zoom": 3,
+            "dpr": 1.0,
+            "logical_size": [
+              240,
+              240
+            ],
+            "pixels": [
+              240,
+              240
+            ],
+            "initial_colors": [
+              "#e03060",
+              "#20b070",
+              "#2474c4",
+              "#ffd740"
+            ],
+            "updated_colors": [
+              "#ffd740",
+              "#2474c4",
+              "#20b070",
+              "#e03060"
+            ],
+            "capture_rect": [
+              919,
+              499,
+              80,
+              80
+            ],
+            "expected_rect": [
+              919,
+              499,
+              80,
+              80
+            ],
+            "timer_capture_calls": 7,
+            "file": "magnifier-auto-1.png",
+            "passed": true
+          },
+          {
+            "requested_backend": "auto",
+            "actual_backend": "gpu",
+            "target": "BenQ GW2490",
+            "actual_screen": "BenQ GW2490",
+            "zoom": 2,
+            "dpr": 1.25,
+            "logical_size": [
+              240,
+              240
+            ],
+            "pixels": [
+              300,
+              300
+            ],
+            "initial_colors": [
+              "#e03060",
+              "#20b070",
+              "#2474c4",
+              "#ffd740"
+            ],
+            "updated_colors": [
+              "#ffd740",
+              "#2474c4",
+              "#20b070",
+              "#e03060"
+            ],
+            "capture_rect": [
+              2627,
+              207,
+              120,
+              120
+            ],
+            "expected_rect": [
+              2627,
+              207,
+              120,
+              120
+            ],
+            "timer_capture_calls": 8,
+            "file": "magnifier-auto-2.png",
+            "passed": true
+          },
+          {
+            "requested_backend": "auto",
+            "actual_backend": "gpu",
+            "target": "BenQ GW2490",
+            "actual_screen": "BenQ GW2490",
+            "zoom": 3,
+            "dpr": 1.25,
+            "logical_size": [
+              240,
+              240
+            ],
+            "pixels": [
+              300,
+              300
+            ],
+            "initial_colors": [
+              "#e03060",
+              "#20b070",
+              "#2474c4",
+              "#ffd740"
+            ],
+            "updated_colors": [
+              "#ffd740",
+              "#2474c4",
+              "#20b070",
+              "#e03060"
+            ],
+            "capture_rect": [
+              2647,
+              227,
+              80,
+              80
+            ],
+            "expected_rect": [
+              2647,
+              227,
+              80,
+              80
+            ],
+            "timer_capture_calls": 8,
+            "file": "magnifier-auto-3.png",
+            "passed": true
+          },
+          {
+            "requested_backend": "auto",
+            "actual_backend": "gpu",
+            "target": "BenQ GW2486TC",
+            "actual_screen": "BenQ GW2486TC",
+            "zoom": 2,
+            "dpr": 1.0,
+            "logical_size": [
+              240,
+              240
+            ],
+            "pixels": [
+              240,
+              240
+            ],
+            "initial_colors": [
+              "#e03060",
+              "#20b070",
+              "#2474c4",
+              "#ffd740"
+            ],
+            "updated_colors": [
+              "#ffd740",
+              "#2474c4",
+              "#20b070",
+              "#e03060"
+            ],
+            "capture_rect": [
+              899,
+              479,
+              120,
+              120
+            ],
+            "expected_rect": [
+              899,
+              479,
+              120,
+              120
+            ],
+            "timer_capture_calls": 7,
+            "file": "magnifier-auto-4.png",
+            "passed": true
+          },
+          {
+            "requested_backend": "auto",
+            "actual_backend": "gpu",
+            "target": "BenQ GW2486TC",
+            "actual_screen": "BenQ GW2486TC",
+            "zoom": 3,
+            "dpr": 1.0,
+            "logical_size": [
+              240,
+              240
+            ],
+            "pixels": [
+              240,
+              240
+            ],
+            "initial_colors": [
+              "#e03060",
+              "#20b070",
+              "#2474c4",
+              "#ffd740"
+            ],
+            "updated_colors": [
+              "#ffd740",
+              "#2474c4",
+              "#20b070",
+              "#e03060"
+            ],
+            "capture_rect": [
+              919,
+              499,
+              80,
+              80
+            ],
+            "expected_rect": [
+              919,
+              499,
+              80,
+              80
+            ],
+            "timer_capture_calls": 8,
+            "file": "magnifier-auto-5.png",
+            "passed": true
+          },
+          {
+            "requested_backend": "gpu",
+            "actual_backend": "gpu",
+            "target": "BenQ GW2486TC",
+            "actual_screen": "BenQ GW2486TC",
+            "zoom": 2,
+            "dpr": 1.0,
+            "logical_size": [
+              240,
+              240
+            ],
+            "pixels": [
+              240,
+              240
+            ],
+            "initial_colors": [
+              "#e03060",
+              "#20b070",
+              "#2474c4",
+              "#ffd740"
+            ],
+            "updated_colors": [
+              "#ffd740",
+              "#2474c4",
+              "#20b070",
+              "#e03060"
+            ],
+            "capture_rect": [
+              899,
+              479,
+              120,
+              120
+            ],
+            "expected_rect": [
+              899,
+              479,
+              120,
+              120
+            ],
+            "timer_capture_calls": 6,
+            "file": "magnifier-gpu-6.png",
+            "passed": true
+          },
+          {
+            "requested_backend": "gpu",
+            "actual_backend": "gpu",
+            "target": "BenQ GW2486TC",
+            "actual_screen": "BenQ GW2486TC",
+            "zoom": 3,
+            "dpr": 1.0,
+            "logical_size": [
+              240,
+              240
+            ],
+            "pixels": [
+              240,
+              240
+            ],
+            "initial_colors": [
+              "#e03060",
+              "#20b070",
+              "#2474c4",
+              "#ffd740"
+            ],
+            "updated_colors": [
+              "#ffd740",
+              "#2474c4",
+              "#20b070",
+              "#e03060"
+            ],
+            "capture_rect": [
+              919,
+              499,
+              80,
+              80
+            ],
+            "expected_rect": [
+              919,
+              499,
+              80,
+              80
+            ],
+            "timer_capture_calls": 7,
+            "file": "magnifier-gpu-7.png",
+            "passed": true
+          },
+          {
+            "requested_backend": "gpu",
+            "actual_backend": "gpu",
+            "target": "BenQ GW2490",
+            "actual_screen": "BenQ GW2490",
+            "zoom": 2,
+            "dpr": 1.25,
+            "logical_size": [
+              240,
+              240
+            ],
+            "pixels": [
+              300,
+              300
+            ],
+            "initial_colors": [
+              "#e03060",
+              "#20b070",
+              "#2474c4",
+              "#ffd740"
+            ],
+            "updated_colors": [
+              "#ffd740",
+              "#2474c4",
+              "#20b070",
+              "#e03060"
+            ],
+            "capture_rect": [
+              2627,
+              207,
+              120,
+              120
+            ],
+            "expected_rect": [
+              2627,
+              207,
+              120,
+              120
+            ],
+            "timer_capture_calls": 6,
+            "file": "magnifier-gpu-8.png",
+            "passed": true
+          },
+          {
+            "requested_backend": "gpu",
+            "actual_backend": "gpu",
+            "target": "BenQ GW2490",
+            "actual_screen": "BenQ GW2490",
+            "zoom": 3,
+            "dpr": 1.25,
+            "logical_size": [
+              240,
+              240
+            ],
+            "pixels": [
+              300,
+              300
+            ],
+            "initial_colors": [
+              "#e03060",
+              "#20b070",
+              "#2474c4",
+              "#ffd740"
+            ],
+            "updated_colors": [
+              "#ffd740",
+              "#2474c4",
+              "#20b070",
+              "#e03060"
+            ],
+            "capture_rect": [
+              2647,
+              227,
+              80,
+              80
+            ],
+            "expected_rect": [
+              2647,
+              227,
+              80,
+              80
+            ],
+            "timer_capture_calls": 7,
+            "file": "magnifier-gpu-9.png",
+            "passed": true
+          },
+          {
+            "requested_backend": "gpu",
+            "actual_backend": "gpu",
+            "target": "BenQ GW2486TC",
+            "actual_screen": "BenQ GW2486TC",
+            "zoom": 2,
+            "dpr": 1.0,
+            "logical_size": [
+              240,
+              240
+            ],
+            "pixels": [
+              240,
+              240
+            ],
+            "initial_colors": [
+              "#e03060",
+              "#20b070",
+              "#2474c4",
+              "#ffd740"
+            ],
+            "updated_colors": [
+              "#ffd740",
+              "#2474c4",
+              "#20b070",
+              "#e03060"
+            ],
+            "capture_rect": [
+              899,
+              479,
+              120,
+              120
+            ],
+            "expected_rect": [
+              899,
+              479,
+              120,
+              120
+            ],
+            "timer_capture_calls": 7,
+            "file": "magnifier-gpu-10.png",
+            "passed": true
+          },
+          {
+            "requested_backend": "gpu",
+            "actual_backend": "gpu",
+            "target": "BenQ GW2486TC",
+            "actual_screen": "BenQ GW2486TC",
+            "zoom": 3,
+            "dpr": 1.0,
+            "logical_size": [
+              240,
+              240
+            ],
+            "pixels": [
+              240,
+              240
+            ],
+            "initial_colors": [
+              "#e03060",
+              "#20b070",
+              "#2474c4",
+              "#ffd740"
+            ],
+            "updated_colors": [
+              "#ffd740",
+              "#2474c4",
+              "#20b070",
+              "#e03060"
+            ],
+            "capture_rect": [
+              919,
+              499,
+              80,
+              80
+            ],
+            "expected_rect": [
+              919,
+              499,
+              80,
+              80
+            ],
+            "timer_capture_calls": 6,
+            "file": "magnifier-gpu-11.png",
+            "passed": true
+          },
+          {
+            "requested_backend": "software",
+            "actual_backend": "software",
+            "target": "BenQ GW2486TC",
+            "actual_screen": "BenQ GW2486TC",
+            "zoom": 2,
+            "dpr": 1.0,
+            "logical_size": [
+              240,
+              240
+            ],
+            "pixels": [
+              240,
+              240
+            ],
+            "initial_colors": [
+              "#e03060",
+              "#20b070",
+              "#2474c4",
+              "#ffd740"
+            ],
+            "updated_colors": [
+              "#ffd740",
+              "#2474c4",
+              "#20b070",
+              "#e03060"
+            ],
+            "capture_rect": [
+              899,
+              479,
+              120,
+              120
+            ],
+            "expected_rect": [
+              899,
+              479,
+              120,
+              120
+            ],
+            "timer_capture_calls": 5,
+            "file": "magnifier-software-12.png",
+            "passed": true
+          },
+          {
+            "requested_backend": "software",
+            "actual_backend": "software",
+            "target": "BenQ GW2486TC",
+            "actual_screen": "BenQ GW2486TC",
+            "zoom": 3,
+            "dpr": 1.0,
+            "logical_size": [
+              240,
+              240
+            ],
+            "pixels": [
+              240,
+              240
+            ],
+            "initial_colors": [
+              "#e03060",
+              "#20b070",
+              "#2474c4",
+              "#ffd740"
+            ],
+            "updated_colors": [
+              "#ffd740",
+              "#2474c4",
+              "#20b070",
+              "#e03060"
+            ],
+            "capture_rect": [
+              919,
+              499,
+              80,
+              80
+            ],
+            "expected_rect": [
+              919,
+              499,
+              80,
+              80
+            ],
+            "timer_capture_calls": 7,
+            "file": "magnifier-software-13.png",
+            "passed": true
+          },
+          {
+            "requested_backend": "software",
+            "actual_backend": "software",
+            "target": "BenQ GW2490",
+            "actual_screen": "BenQ GW2490",
+            "zoom": 2,
+            "dpr": 1.25,
+            "logical_size": [
+              240,
+              240
+            ],
+            "pixels": [
+              300,
+              300
+            ],
+            "initial_colors": [
+              "#e03060",
+              "#20b070",
+              "#2474c4",
+              "#ffd740"
+            ],
+            "updated_colors": [
+              "#ffd740",
+              "#2474c4",
+              "#20b070",
+              "#e03060"
+            ],
+            "capture_rect": [
+              2627,
+              207,
+              120,
+              120
+            ],
+            "expected_rect": [
+              2627,
+              207,
+              120,
+              120
+            ],
+            "timer_capture_calls": 8,
+            "file": "magnifier-software-14.png",
+            "passed": true
+          },
+          {
+            "requested_backend": "software",
+            "actual_backend": "software",
+            "target": "BenQ GW2490",
+            "actual_screen": "BenQ GW2490",
+            "zoom": 3,
+            "dpr": 1.25,
+            "logical_size": [
+              240,
+              240
+            ],
+            "pixels": [
+              300,
+              300
+            ],
+            "initial_colors": [
+              "#e03060",
+              "#20b070",
+              "#2474c4",
+              "#ffd740"
+            ],
+            "updated_colors": [
+              "#ffd740",
+              "#2474c4",
+              "#20b070",
+              "#e03060"
+            ],
+            "capture_rect": [
+              2647,
+              227,
+              80,
+              80
+            ],
+            "expected_rect": [
+              2647,
+              227,
+              80,
+              80
+            ],
+            "timer_capture_calls": 7,
+            "file": "magnifier-software-15.png",
+            "passed": true
+          },
+          {
+            "requested_backend": "software",
+            "actual_backend": "software",
+            "target": "BenQ GW2486TC",
+            "actual_screen": "BenQ GW2486TC",
+            "zoom": 2,
+            "dpr": 1.0,
+            "logical_size": [
+              240,
+              240
+            ],
+            "pixels": [
+              240,
+              240
+            ],
+            "initial_colors": [
+              "#e03060",
+              "#20b070",
+              "#2474c4",
+              "#ffd740"
+            ],
+            "updated_colors": [
+              "#ffd740",
+              "#2474c4",
+              "#20b070",
+              "#e03060"
+            ],
+            "capture_rect": [
+              899,
+              479,
+              120,
+              120
+            ],
+            "expected_rect": [
+              899,
+              479,
+              120,
+              120
+            ],
+            "timer_capture_calls": 7,
+            "file": "magnifier-software-16.png",
+            "passed": true
+          },
+          {
+            "requested_backend": "software",
+            "actual_backend": "software",
+            "target": "BenQ GW2486TC",
+            "actual_screen": "BenQ GW2486TC",
+            "zoom": 3,
+            "dpr": 1.0,
+            "logical_size": [
+              240,
+              240
+            ],
+            "pixels": [
+              240,
+              240
+            ],
+            "initial_colors": [
+              "#e03060",
+              "#20b070",
+              "#2474c4",
+              "#ffd740"
+            ],
+            "updated_colors": [
+              "#ffd740",
+              "#2474c4",
+              "#20b070",
+              "#e03060"
+            ],
+            "capture_rect": [
+              919,
+              499,
+              80,
+              80
+            ],
+            "expected_rect": [
+              919,
+              499,
+              80,
+              80
+            ],
+            "timer_capture_calls": 8,
+            "file": "magnifier-software-17.png",
+            "passed": true
+          }
+        ],
+        "closed": [
+          {
+            "backend": "auto",
+            "timer_stopped": true,
+            "deleted": true
+          },
+          {
+            "backend": "gpu",
+            "timer_stopped": true,
+            "deleted": true
+          },
+          {
+            "backend": "software",
+            "timer_stopped": true,
+            "deleted": true
+          }
+        ],
+        "passed": true,
+        "scope": "Native magnifier display, zoom geometry, timer-driven synthetic frame replacement, mixed DPI and cleanup on an owned hidden desktop. Injected cursor positions and synthetic grabber; no desktop input or real screen capture. This does not validate native capture coordinate conversion, physical mouse following, or pass-through."
+      },
+      "observer": {
+        "exit_code": 0,
+        "profile_removed": true,
+        "source_unchanged": true,
+        "before": {
+          "foreground": 133262,
+          "cursor": [
+            2756,
+            220
+          ]
+        },
+        "after": {
+          "foreground": 133262,
+          "cursor": [
+            2756,
+            220
+          ]
+        },
+        "observation_only": true,
+        "desktop": "FrontEngineVideoWebDpi_b916620d0874"
+      },
+      "stderr": "",
+      "artifact_sha256": {
+        "harness.py": "20b4c0a87081597a4124016aa9cf470dd1561f25d3d2c4bf599becc59ce0dd7e",
+        "magnifier-auto-0.png": "a4049e451f0576eeee5d4f7566c47fcf0f787ba4a60e528d281fcd4e996838aa",
+        "magnifier-auto-1.png": "9d54801509aca78906ce56be66bb2a92020844d2ed3bcdd937f592319f7eccbf",
+        "magnifier-auto-2.png": "26318e4b6f0bf2a1bf4549292e0a181c10093f63f90eb05306bcac3e985ab0c1",
+        "magnifier-auto-3.png": "b1b0c9072bc86c24877d491c46ed383f638b608202fbe6d5a91fc2d8c18a61ac",
+        "magnifier-auto-4.png": "a4049e451f0576eeee5d4f7566c47fcf0f787ba4a60e528d281fcd4e996838aa",
+        "magnifier-auto-5.png": "9d54801509aca78906ce56be66bb2a92020844d2ed3bcdd937f592319f7eccbf",
+        "magnifier-gpu-10.png": "a4049e451f0576eeee5d4f7566c47fcf0f787ba4a60e528d281fcd4e996838aa",
+        "magnifier-gpu-11.png": "9d54801509aca78906ce56be66bb2a92020844d2ed3bcdd937f592319f7eccbf",
+        "magnifier-gpu-6.png": "a4049e451f0576eeee5d4f7566c47fcf0f787ba4a60e528d281fcd4e996838aa",
+        "magnifier-gpu-7.png": "9d54801509aca78906ce56be66bb2a92020844d2ed3bcdd937f592319f7eccbf",
+        "magnifier-gpu-8.png": "26318e4b6f0bf2a1bf4549292e0a181c10093f63f90eb05306bcac3e985ab0c1",
+        "magnifier-gpu-9.png": "b1b0c9072bc86c24877d491c46ed383f638b608202fbe6d5a91fc2d8c18a61ac",
+        "magnifier-software-12.png": "a4049e451f0576eeee5d4f7566c47fcf0f787ba4a60e528d281fcd4e996838aa",
+        "magnifier-software-13.png": "9d54801509aca78906ce56be66bb2a92020844d2ed3bcdd937f592319f7eccbf",
+        "magnifier-software-14.png": "26318e4b6f0bf2a1bf4549292e0a181c10093f63f90eb05306bcac3e985ab0c1",
+        "magnifier-software-15.png": "b1b0c9072bc86c24877d491c46ed383f638b608202fbe6d5a91fc2d8c18a61ac",
+        "magnifier-software-16.png": "a4049e451f0576eeee5d4f7566c47fcf0f787ba4a60e528d281fcd4e996838aa",
+        "magnifier-software-17.png": "9d54801509aca78906ce56be66bb2a92020844d2ed3bcdd937f592319f7eccbf",
+        "observer.json": "e2b39d1c3c082d2a3cb20f5e6d72f809972b3af0345ae14f338435054c22dbea",
+        "partial.json": "3f7b63e9963d4db815b47475c9c713e94f6e8bd4a1b52d99a3820561ddd12736",
+        "result.json": "be76e3d107557ebbd33889651304891bbb0ef711d593693d0402a3faf977ffe1",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "interpretation": [
+    "The initial probe called setScreen and move on each already-visible magnifier. Six first-zoom cases measured 192 or 300 logical pixels instead of 240; content and capture rectangles still matched.",
+    "The product drag path in BaseWidget.mouseMoveEvent calls move without setScreen. Removing only the extra setScreen call made all 18 cases pass; no product patch was made.",
+    "The accepted probe verifies two zoom factors, three requested backends, 100/125/100 percent monitor movement, live synthetic frame replacement, timer stop and QWidget deletion.",
+    "Auto/GPU use native GPU and software uses software. The 125 percent GPU screenshot was inspected.",
+    "Injected cursor and grabber avoid desktop input and real-screen capture. Native capture coordinate conversion, physical mouse following and input pass-through remain unverified.",
+    "Both probes used owned hidden Win32 desktops. Foreground/cursor observations matched and temporary profiles were removed.",
+    "The full 9ed1b2d regression remains a separate running process; this report does not claim that it passed."
+  ]
+}
