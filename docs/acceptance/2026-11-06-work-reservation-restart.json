@@ -1,0 +1,40 @@
+{
+  "result": {
+    "revision": "c1507d3",
+    "time": "accelerated fixed simulation steps",
+    "cases": [
+      {
+        "operation": "cancel",
+        "saved_progress_ms": 20020,
+        "wood": 4,
+        "toys": 0,
+        "reserved": {},
+        "coins": 778,
+        "child_exit": 0,
+        "reopen_exact_ledger": true
+      },
+      {
+        "operation": "resume",
+        "saved_progress_ms": 20020,
+        "wood": 2,
+        "toys": 1,
+        "reserved": {},
+        "coins": 808,
+        "child_exit": 0,
+        "reopen_exact_ledger": true
+      }
+    ]
+  },
+  "exit_code": 0,
+  "harness": {
+    "source": "import json\nimport os\nfrom pathlib import Path\nimport subprocess\nimport sys\nimport tempfile\n\nROOT = Path(__file__).resolve().parents[1]\nsys.path.insert(0, str(ROOT))\nfrom PySide6.QtCore import QCoreApplication, QEvent\nfrom frontengine.show.pet_game.home_service import HomeService\nfrom frontengine.user_setting.pet_game_save import HomeSaveStore\nfrom frontengine.user_setting.storage_session import StorageSession\nfrom frontengine.utils.pet_game.catalog import builtin_catalog\nfrom frontengine.utils.pet_game import simulation\n\n\ndef open_home(directory):\n    owner = StorageSession.open(directory)\n    home = HomeService(None, HomeSaveStore(owner, builtin_catalog()), owner.profiles())\n    return owner, home\n\n\ndef close_home(owner, home):\n    assert home.shutdown()\n    home.deleteLater()\n    QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)\n    owner.close()\n\n\ndef advance_until(world, predicate, limit=1800000):\n    for _ in range(limit // simulation.STEP_MS):\n        if predicate():\n            return\n        simulation.step(world)\n    raise AssertionError('Required work state was not reached')\n\n\ndef prepare(directory):\n    owner, home = open_home(directory)\n    record = owner.profiles().create('Crafter')\n    world = home.create_home('screen', 0, 900, 48, seed=4, furnish=True)\n    world.automatic = False\n    assert home.adopt(record['id']) == 'accepted'\n    world.residents[record['id']].needs.update(energy=95, fullness=95, mood=90)\n    assert world.ledger.apply('setup', 'audit', 1000) == 'accepted'\n    assert home.run(lambda w: w.buy('workbench', 'buy-bench')) == 'accepted'\n    zone = next(iter(world.zones))\n    status, bench = home.run(lambda w: w.place_anywhere('workbench', zone))\n    assert status == 'accepted'\n    assert home.run(lambda w: w.buy_item('wood', 4, 'buy-wood')) == 'accepted'\n    status, task_id = home.run(lambda w: w.create_task('toy', record['id']))\n    assert status == 'accepted'\n    advance_until(world, lambda: world.tasks[task_id].progress_ms >= 20000)\n    assert world.ledger.reserved == {'wood': 2}\n    progress = world.tasks[task_id].progress_ms\n    assert home.run(lambda w: w.store(bench)) == 'accepted'\n    assert world.tasks[task_id].state == 'paused'\n    assert world.tasks[task_id].progress_ms == progress\n    assert world.ledger.count('wood') == 4 and world.ledger.count('toy') == 0\n    metadata = {'task': task_id, 'progress': progress, 'coins': world.ledger.coins,\n                'zone': zone, 'pet': record['id']}\n    assert home.save_now()\n    close_home(owner, home)\n    (directory / 'case.json').write_text(json.dumps(metadata), encoding='utf-8')\n    return metadata\n\n\ndef continue_case(directory, operation):\n    metadata = json.loads((directory / 'case.json').read_text())\n    owner, home = open_home(directory)\n    assert home.open().status == 'loaded'\n    world, task_id = home.world, metadata['task']\n    assert world.tasks[task_id].progress_ms == metadata['progress']\n    assert world.tasks[task_id].state == 'paused'\n    assert world.ledger.reserved == {'wood': 2}\n    if operation == 'cancel':\n        assert home.run(lambda w: w.cancel_task(task_id)) == 'accepted'\n        assert home.run(lambda w: w.cancel_task(task_id)) == 'unknown'\n        assert world.ledger.count('wood') == 4 and world.ledger.count('toy') == 0\n        assert world.ledger.coins == metadata['coins']\n    else:\n        status, _ = home.run(lambda w: w.place_anywhere('workbench', metadata['zone']))\n        assert status == 'accepted'\n        advance_until(world, lambda: task_id not in world.tasks)\n        assert world.ledger.count('wood') == 2 and world.ledger.count('toy') == 1\n        recipe = world.catalog.recipes['toy']\n        before = world.ledger.to_dict()\n        for _ in range(10):\n            assert world.ledger.apply(task_id + ':u0', 'work:toy', recipe.coins,\n                                     {'wood': -2, 'toy': 1}) == 'duplicate'\n        assert world.ledger.to_dict() == before\n    assert task_id not in world.tasks and world.ledger.reserved == {}\n    final = world.ledger.to_dict()\n    assert home.save_now()\n    close_home(owner, home)\n    (directory / 'final.json').write_text(json.dumps(final), encoding='utf-8')\n    return final\n\n\ndef verify_reopen(directory, operation):\n    owner, home = open_home(directory)\n    assert home.open().status == 'loaded'\n    expected = json.loads((directory / 'final.json').read_text())\n    assert home.world.ledger.to_dict() == expected\n    assert not home.world.tasks and not home.world.ledger.reserved\n    if operation == 'resume':\n        task_id = json.loads((directory / 'case.json').read_text())['task']\n        assert home.world.ledger.apply(task_id + ':u0', 'work:toy', 0,\n                                      {'wood': -2, 'toy': 1}) == 'duplicate'\n        assert home.world.ledger.to_dict() == expected\n    close_home(owner, home)\n\n\napp = QCoreApplication([])\nif len(sys.argv) > 1:\n    continue_case(Path(sys.argv[1]), sys.argv[2])\nelse:\n    result = {'revision': 'c1507d3', 'time': 'accelerated fixed simulation steps', 'cases': []}\n    for operation in ('cancel', 'resume'):\n        with tempfile.TemporaryDirectory(prefix='front-work-reservation-') as name:\n            directory = Path(name)\n            metadata = prepare(directory)\n            process = subprocess.run([sys.executable, str(Path(__file__).resolve()), name, operation],\n                                     capture_output=True, creationflags=subprocess.CREATE_NO_WINDOW)\n            assert process.returncode == 0, (operation, process.stdout.decode(errors='replace'),\n                                             process.stderr.decode(errors='replace'))\n            verify_reopen(directory, operation)\n            final = json.loads((directory / 'final.json').read_text())\n            result['cases'].append({'operation': operation, 'saved_progress_ms': metadata['progress'],\n                                    'wood': final['items'].get('wood', 0),\n                                    'toys': final['items'].get('toy', 0),\n                                    'reserved': final['reserved'], 'coins': final['coins'],\n                                    'child_exit': process.returncode, 'reopen_exact_ledger': True})\n            print('verified ' + operation, flush=True)\n    (ROOT / '.audit/work-reservation-restart-result.json').write_text(json.dumps(result, indent=2), encoding='utf-8')\n    print(json.dumps(result), flush=True)\n",
+    "sha256": "3f79d858f7613a182bef0848b0788a5af5d2a93fb6e15a0542198d25fbda0481"
+  },
+  "limits": [
+    "Real StorageSession/HomeService and separate continuation processes with temporary profile/home files; accelerated simulation steps, not normal-speed UI acceptance.",
+    "One resident, seed4, toy recipe, one workbench and two reserved wood units; not all professions, recipes or population schedules.",
+    "Setup grants1000coins and buys furniture/materials. This does not demonstrate zero-money recovery. Final coin totals are not isolated recipe rewards.",
+    "Normal save/shutdown/reopen boundaries, not abrupt crash or disk failure. Earlier interruption reports cover different scenarios.",
+    "Ten duplicate ledger settlement retries before save and one after reopen check unchanged ledger; no replay beyond applied-ID retention window."
+  ]
+}
