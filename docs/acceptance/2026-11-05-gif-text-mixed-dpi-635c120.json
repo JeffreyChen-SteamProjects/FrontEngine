@@ -1,0 +1,323 @@
+{
+  "observations": [
+    {
+      "kind": "gif",
+      "backend": "software",
+      "actual_backend": "software",
+      "target": "BenQ GW2486TC",
+      "actual_screen": "BenQ GW2486TC",
+      "dpr": 1.0,
+      "logical_size": [
+        320,
+        180
+      ],
+      "pixels": [
+        320,
+        180
+      ],
+      "on_screen": true,
+      "file": "gif-software-0.png",
+      "animation_frames": 7,
+      "text_colored_pixels": null,
+      "center": "#20b070",
+      "passed": true
+    },
+    {
+      "kind": "gif",
+      "backend": "software",
+      "actual_backend": "software",
+      "target": "BenQ GW2490",
+      "actual_screen": "BenQ GW2490",
+      "dpr": 1.25,
+      "logical_size": [
+        320,
+        180
+      ],
+      "pixels": [
+        400,
+        225
+      ],
+      "on_screen": true,
+      "file": "gif-software-1.png",
+      "animation_frames": 6,
+      "text_colored_pixels": null,
+      "center": "#20b070",
+      "passed": true
+    },
+    {
+      "kind": "gif",
+      "backend": "software",
+      "actual_backend": "software",
+      "target": "BenQ GW2486TC",
+      "actual_screen": "BenQ GW2486TC",
+      "dpr": 1.0,
+      "logical_size": [
+        320,
+        180
+      ],
+      "pixels": [
+        320,
+        180
+      ],
+      "on_screen": true,
+      "file": "gif-software-2.png",
+      "animation_frames": 7,
+      "text_colored_pixels": null,
+      "center": "#ef602a",
+      "passed": true
+    },
+    {
+      "kind": "text",
+      "backend": "software",
+      "actual_backend": "software",
+      "target": "BenQ GW2486TC",
+      "actual_screen": "BenQ GW2486TC",
+      "dpr": 1.0,
+      "logical_size": [
+        320,
+        180
+      ],
+      "pixels": [
+        320,
+        180
+      ],
+      "on_screen": true,
+      "file": "text-software-0.png",
+      "animation_frames": null,
+      "text_colored_pixels": 1333,
+      "center": "#ff0000",
+      "passed": true
+    },
+    {
+      "kind": "text",
+      "backend": "software",
+      "actual_backend": "software",
+      "target": "BenQ GW2490",
+      "actual_screen": "BenQ GW2490",
+      "dpr": 1.25,
+      "logical_size": [
+        320,
+        180
+      ],
+      "pixels": [
+        400,
+        225
+      ],
+      "on_screen": true,
+      "file": "text-software-1.png",
+      "animation_frames": null,
+      "text_colored_pixels": 2055,
+      "center": "#ff8040",
+      "passed": true
+    },
+    {
+      "kind": "text",
+      "backend": "software",
+      "actual_backend": "software",
+      "target": "BenQ GW2486TC",
+      "actual_screen": "BenQ GW2486TC",
+      "dpr": 1.0,
+      "logical_size": [
+        320,
+        180
+      ],
+      "pixels": [
+        320,
+        180
+      ],
+      "on_screen": true,
+      "file": "text-software-2.png",
+      "animation_frames": null,
+      "text_colored_pixels": 1333,
+      "center": "#ff0000",
+      "passed": true
+    },
+    {
+      "kind": "gif",
+      "backend": "gpu",
+      "actual_backend": "gpu",
+      "target": "BenQ GW2486TC",
+      "actual_screen": "BenQ GW2486TC",
+      "dpr": 1.0,
+      "logical_size": [
+        320,
+        180
+      ],
+      "pixels": [
+        320,
+        180
+      ],
+      "on_screen": true,
+      "file": "gif-gpu-0.png",
+      "animation_frames": 7,
+      "text_colored_pixels": null,
+      "center": "#ef602a",
+      "passed": true
+    },
+    {
+      "kind": "gif",
+      "backend": "gpu",
+      "actual_backend": "gpu",
+      "target": "BenQ GW2490",
+      "actual_screen": "BenQ GW2490",
+      "dpr": 1.25,
+      "logical_size": [
+        320,
+        180
+      ],
+      "pixels": [
+        400,
+        225
+      ],
+      "on_screen": true,
+      "file": "gif-gpu-1.png",
+      "animation_frames": 7,
+      "text_colored_pixels": null,
+      "center": "#ef602a",
+      "passed": true
+    },
+    {
+      "kind": "gif",
+      "backend": "gpu",
+      "actual_backend": "gpu",
+      "target": "BenQ GW2486TC",
+      "actual_screen": "BenQ GW2486TC",
+      "dpr": 1.0,
+      "logical_size": [
+        320,
+        180
+      ],
+      "pixels": [
+        320,
+        180
+      ],
+      "on_screen": true,
+      "file": "gif-gpu-2.png",
+      "animation_frames": 7,
+      "text_colored_pixels": null,
+      "center": "#ef602a",
+      "passed": true
+    },
+    {
+      "kind": "text",
+      "backend": "gpu",
+      "actual_backend": "gpu",
+      "target": "BenQ GW2486TC",
+      "actual_screen": "BenQ GW2486TC",
+      "dpr": 1.0,
+      "logical_size": [
+        320,
+        180
+      ],
+      "pixels": [
+        320,
+        180
+      ],
+      "on_screen": true,
+      "file": "text-gpu-0.png",
+      "animation_frames": null,
+      "text_colored_pixels": 1638,
+      "center": "#ff0000",
+      "passed": true
+    },
+    {
+      "kind": "text",
+      "backend": "gpu",
+      "actual_backend": "gpu",
+      "target": "BenQ GW2490",
+      "actual_screen": "BenQ GW2490",
+      "dpr": 1.25,
+      "logical_size": [
+        320,
+        180
+      ],
+      "pixels": [
+        400,
+        225
+      ],
+      "on_screen": true,
+      "file": "text-gpu-1.png",
+      "animation_frames": null,
+      "text_colored_pixels": 2427,
+      "center": "#ff552b",
+      "passed": true
+    },
+    {
+      "kind": "text",
+      "backend": "gpu",
+      "actual_backend": "gpu",
+      "target": "BenQ GW2486TC",
+      "actual_screen": "BenQ GW2486TC",
+      "dpr": 1.0,
+      "logical_size": [
+        320,
+        180
+      ],
+      "pixels": [
+        320,
+        180
+      ],
+      "on_screen": true,
+      "file": "text-gpu-2.png",
+      "animation_frames": null,
+      "text_colored_pixels": 1638,
+      "center": "#ff0000",
+      "passed": true
+    }
+  ],
+  "closed": [
+    {
+      "kind": "gif",
+      "backend": "software",
+      "hidden": true,
+      "decoder_stopped": true
+    },
+    {
+      "kind": "text",
+      "backend": "software",
+      "hidden": true,
+      "decoder_stopped": null
+    },
+    {
+      "kind": "gif",
+      "backend": "gpu",
+      "hidden": true,
+      "decoder_stopped": true
+    },
+    {
+      "kind": "text",
+      "backend": "gpu",
+      "hidden": true,
+      "decoder_stopped": null
+    }
+  ],
+  "temporary_directory_removed": true,
+  "scope": "Owned GIF and static text widgets on unique hidden native desktop; no input injection, desktop switch or other windows moved. Does not test fullscreen, input transparency, disconnect or dynamic text.",
+  "passed": true,
+  "source_revision": "635c120",
+  "observer": {
+    "exit_code": 0,
+    "source_unchanged": true,
+    "desktop": "FrontEngineGifTextDpi_266ff7ac7ab6"
+  },
+  "harness_sha256": "aa8b1fcd2ec1bfefba30a8ba690459ff5b99c26f1ff3a8fd6a248f901d99d8e8",
+  "screenshots": {
+    "gif-gpu-0.png": "ee8b7c8fac31adb2af6392f5f9295cb4ac877f9027679e986bdf9f673e4ae7d0",
+    "gif-gpu-1.png": "23d0d5186cf0e4c6320af0b66de23718e803e0ad7d5860900cc7accd421ab4ad",
+    "gif-gpu-2.png": "ee8b7c8fac31adb2af6392f5f9295cb4ac877f9027679e986bdf9f673e4ae7d0",
+    "gif-software-0.png": "c3b8ab259e8f1d05a3cae59552ea9f4d0b2885b5ec4d22e99ce643efa03a6dd2",
+    "gif-software-1.png": "06afc24aa6dac0b1a9113340f22f1e26d5d0c3aca181f4f0418b66565f80665e",
+    "gif-software-2.png": "ee8b7c8fac31adb2af6392f5f9295cb4ac877f9027679e986bdf9f673e4ae7d0",
+    "text-gpu-0.png": "14339eb7bb9c4c9a45f748752e98e8777792e8ef1f56924d2ca86d4e50793ce2",
+    "text-gpu-1.png": "ec85eeb969bd8260806b6a55fe5a21d8ce3603cc1461cbed854a555f5bca4706",
+    "text-gpu-2.png": "14339eb7bb9c4c9a45f748752e98e8777792e8ef1f56924d2ca86d4e50793ce2",
+    "text-software-0.png": "69e0007d7658121a43fb0b7b0374460563258d0587acf8708f6297103b2dd238",
+    "text-software-1.png": "0af24576e89700d5754b2f91c78da0a4742df86e8f84eddf2aa75b63d0e82ec9",
+    "text-software-2.png": "69e0007d7658121a43fb0b7b0374460563258d0587acf8708f6297103b2dd238"
+  },
+  "limitations": [
+    "Direct widget construction, not each settings-page entry.",
+    "No foreground/cursor before-after measurements.",
+    "No video, web, particle, dynamic text, fullscreen, input-transparency or physical display reconfiguration acceptance."
+  ]
+}
