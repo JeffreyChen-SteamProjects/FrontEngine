@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261105-64 | 2026-11-05 | 家園存檔程序中斷驗收 | #testing #storage | [2026-11](2026-11.md) |
 | U-20261105-63 | 2026-11-05 | Integrate message and font fixes and verify the installed wheel | #integration #packaging #testing | [2026-11](2026-11.md) |
 | U-20261105-62 | 2026-11-05 | Select and verify Arial in narrow layout regression tests | #testing #ui | [2026-11](2026-11.md) |
 | U-20261105-61 | 2026-11-05 | Keep home operation feedback translatable across language changes | #ui #testing | [2026-11](2026-11.md) |
@@ -321,6 +322,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 117 |
+| [2026-11.md](2026-11.md) | 2026-11 | 118 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
