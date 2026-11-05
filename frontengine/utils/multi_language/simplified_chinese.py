@@ -1761,6 +1761,7 @@ simplified_chinese_word_dict = {
     "pet_home_note_goal_claimed": "已领取奖励（+{coins}）",
     "pet_home_result_bought_no_room": "已购买，但没有空位，先放在仓库",
     "pet_home_work_auto": "居民会在工作时段，按家里有的工作台自己接工作，只用背包里已有的材料。",
+    "pet_home_work_empty": "目前没有工作。请检查居民作息、工作站与背包中的材料。",
     "pet_home_goals_auto": "奖励完成后会自动领取，委托在物品足够时会自动交付。",
     "pet_home_settings_strip_hint": "模式与图层在桌面长条的 ⌂ 菜单里；共享屏幕时会自动切到会议模式。",
     "pet_home_result_pick_item": "请先选一样东西",

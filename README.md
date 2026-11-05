@@ -105,6 +105,8 @@ Hosts embedding individual settings pages must pass an explicit DefaultSettingsL
 - The strip can be made smaller or larger (75–200 %, furniture, pets and height together) with Ctrl + mouse wheel over a pet or piece, from ⌂ → *Size*, or in the Settings tab; the choice is remembered. A home wider than its screen at that size stays on the screen and glides along to keep the pet you last clicked (or the pets) in view. Double-click a pet on the strip to pat it.
 - **Features**, the first menu, holds every tool grouped by purpose (media, scenes and wallpaper, widgets, focus and eye care, presenting, capture, pets, automation, content and Workshop, overlay control, settings and help), plus *Search features* (Ctrl+K), *Pinned* and *Recent*. Entries open the same pages and run the same commands as before, so hotkeys, presets, rules, the phone remote and MIDI keep working; the Presets, Settings, Language and Help menus appear inside it as they are. Sidebar groups fold with a click on their heading and stay folded. The tray menu gains *Open Pet home*.
 
+If Work is empty, check residents' routines, workstations and backpack materials. Select an unfinished job to enable Cancel job.
+
 ### On screen
 
 Media overlays. Each one picks its monitor (or spans all of them), remembers

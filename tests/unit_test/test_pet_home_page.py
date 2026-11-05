@@ -327,3 +327,60 @@ def test_work_is_taken_up_by_itself_and_the_backpack_sells(page):
     coins = page.service.world.ledger.coins
     page.storage.sell()
     assert page.service.world.ledger.coins == coins + 24
+
+
+def test_empty_work_page_explains_what_to_check(page):
+    from PySide6.QtWidgets import QLabel, QPushButton
+    page.create_home()
+    panel = page.work
+    labels = [label.text() for label in panel.section.findChildren(QLabel) if not label.isHidden()]
+    assert translate("pet_home_work_empty", "No jobs yet. Check residents' routines, workstations and materials in the backpack.") in labels
+    assert panel.tasks.isHidden()
+    cancel = next(button for button in panel.section.findChildren(QPushButton)
+                  if button.text() == translate("pet_home_cancel_task"))
+    assert not cancel.isEnabled()
+
+
+def test_cancel_job_requires_selection_and_returns_to_empty_state(page):
+    from PySide6.QtWidgets import QPushButton
+    page.create_home()
+    world = page.service.world
+    resident = next(iter(world.residents))
+    status, identifier = world.create_task("letter", resident)
+    assert status == "accepted"
+    page.refresh()
+    panel = page.work
+    cancel = next(button for button in panel.section.findChildren(QPushButton)
+                  if button.text() == translate("pet_home_cancel_task"))
+    assert not cancel.isEnabled()
+    assert not panel.tasks.isHidden()
+    panel.tasks.setCurrentRow(0)
+    assert cancel.isEnabled()
+    panel.tasks.clearSelection()
+    assert not cancel.isEnabled()
+    panel.tasks.setCurrentRow(0)
+    assert cancel.isEnabled()
+    before = world.ledger.coins
+    cancel.click()
+    assert identifier not in world.tasks
+    assert world.ledger.coins == before
+    assert panel.tasks.isHidden()
+    assert not cancel.isEnabled()
+
+
+def test_selected_job_stops_being_cancellable_when_it_settles(page):
+    from PySide6.QtWidgets import QPushButton
+    page.create_home()
+    world = page.service.world
+    status, identifier = world.create_task("letter", next(iter(world.residents)))
+    assert status == "accepted"
+    page.refresh()
+    panel = page.work
+    panel.tasks.setCurrentRow(0)
+    cancel = next(button for button in panel.section.findChildren(QPushButton)
+                  if button.text() == translate("pet_home_cancel_task"))
+    assert cancel.isEnabled()
+    world.tasks[identifier].state = "settled"
+    panel.refresh_live()
+    assert not cancel.isEnabled()
+    assert panel.tasks.count() == 1

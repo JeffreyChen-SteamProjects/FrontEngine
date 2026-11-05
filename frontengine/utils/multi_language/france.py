@@ -1759,6 +1759,7 @@ french_word_dict = {
     "pet_home_note_goal_claimed": "Récompense reçue (+{coins})",
     "pet_home_result_bought_no_room": "Acheté - pas de place libre, il attend dans la réserve",
     "pet_home_work_auto": "Pendant leurs heures de travail, les habitants se mettent d'eux-mêmes au travail que permettent leurs postes, avec seulement le matériel déjà dans le sac.",
+    "pet_home_work_empty": "Aucun travail pour le moment. Vérifiez les routines des habitants, les postes de travail et les matériaux du sac.",
     "pet_home_goals_auto": "Les récompenses sont récupérées et les commandes livrées d'elles-mêmes dès qu'elles sont prêtes.",
     "pet_home_settings_strip_hint": "Le mode et le calque sont dans le menu ⌂ de la bande du bureau ; le mode réunion s'active tout seul pendant le partage d'écran.",
     "pet_home_result_pick_item": "Choisissez d'abord quelque chose",

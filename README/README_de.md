@@ -108,6 +108,8 @@ Hosts, die einzelne Einstellungsseiten einbetten, müssen über lifetime= eine e
 - Der Streifen lässt sich verkleinern oder vergrößern (75–200 %, Möbel, Haustiere und Höhe zusammen): mit Strg + Mausrad über einem Haustier oder Möbelstück, über ⌂ → *Größe* oder im Tab Einstellungen; die Wahl wird gespeichert. Ist das Zuhause bei dieser Größe breiter als sein Bildschirm, bleibt es auf dem Bildschirm und gleitet mit, damit das zuletzt angeklickte Haustier (oder die Haustiere) sichtbar bleibt. Ein Doppelklick auf ein Haustier im Streifen streichelt es.
 - **Funktionen**, das erste Menü, enthält alle Werkzeuge nach Zweck gruppiert (Medien, Szenen und Hintergrund, Widgets, Fokus und Augenschutz, Präsentieren, Aufnahme, Haustiere, Automatisierung, Inhalte und Workshop, Overlay-Steuerung, Einstellungen und Hilfe) sowie *Funktionen suchen* (Strg+K), *Angeheftet* und *Zuletzt verwendet*. Die Einträge öffnen dieselben Seiten und führen dieselben Befehle aus wie bisher, daher funktionieren Tastenkürzel, Voreinstellungen, Regeln, die Handy-Fernbedienung und MIDI weiter; die Menüs Voreinstellungen, Einstellungen, Sprache und Hilfe erscheinen unverändert darin. Gruppen in der Seitenleiste klappen mit einem Klick auf ihre Überschrift zu und bleiben zu. Das Tray-Menü bietet *Haustier-Zuhause öffnen*.
 
+Wenn die Arbeitsliste leer ist, prüfe die Tagesabläufe der Bewohner, die Arbeitsplätze und die Materialien im Rucksack. Wähle einen noch nicht abgeschlossenen Auftrag, um „Aufgabe abbrechen“ zu aktivieren.
+
 ### Auf dem Bildschirm
 
 Medien-Overlays. Jedes wählt seinen Monitor (oder erstreckt sich über alle),

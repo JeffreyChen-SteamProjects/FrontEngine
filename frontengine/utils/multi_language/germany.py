@@ -1762,6 +1762,7 @@ germany_word_dict = {
     "pet_home_note_goal_claimed": "Belohnung erhalten (+{coins})",
     "pet_home_result_bought_no_room": "Gekauft - kein freier Platz, es wartet im Lager",
     "pet_home_work_auto": "Bewohner nehmen sich während ihrer Arbeitszeit die Arbeit vor, die ihre Arbeitsplätze erlauben, und nutzen nur Material aus dem Rucksack.",
+    "pet_home_work_empty": "Noch keine Aufträge. Prüfe die Tagesabläufe der Bewohner, die Arbeitsplätze und die Materialien im Rucksack.",
     "pet_home_goals_auto": "Belohnungen werden von selbst abgeholt und Aufträge abgegeben, sobald sie bereit sind.",
     "pet_home_settings_strip_hint": "Modus und Ebene stehen im ⌂-Menü der Desktop-Leiste; beim Teilen des Bildschirms schaltet sich der Besprechungsmodus von selbst ein.",
     "pet_home_result_pick_item": "Wähle zuerst etwas aus",

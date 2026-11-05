@@ -108,6 +108,8 @@ Os hosts que incorporam páginas de configurações individuais devem passar uma
 - A faixa pode ficar menor ou maior (75–200 %, móveis, pets e altura juntos) com Ctrl + roda do mouse sobre um pet ou móvel, em ⌂ → *Tamanho* ou na aba Configurações; a escolha é lembrada. Um lar mais largo que a tela nesse tamanho fica na tela e desliza para manter à vista o pet em que você clicou por último (ou os pets). Dê um duplo clique num pet da faixa para fazer carinho.
 - **Funções**, o primeiro menu, reúne todas as ferramentas por finalidade (mídia, cenas e papel de parede, widgets, foco e cuidado com os olhos, apresentação, captura, pets, automação, conteúdo e Workshop, controle de sobreposições, configurações e ajuda), além de *Buscar funções* (Ctrl+K), *Fixadas* e *Recentes*. As entradas abrem as mesmas páginas e executam os mesmos comandos de antes, então atalhos, predefinições, regras, o controle remoto pelo celular e MIDI continuam funcionando; os menus de predefinições, configurações, idioma e ajuda aparecem dentro dele como são. Os grupos da barra lateral se recolhem com um clique no título e ficam assim. O menu da bandeja ganha *Abrir o lar dos pets*.
 
+Se a lista de trabalhos estiver vazia, confira as rotinas dos moradores, as estações de trabalho e os materiais da mochila. Selecione um trabalho ainda não concluído para habilitar seu cancelamento.
+
 ### Na tela
 
 Sobreposições de mídia. Cada uma escolhe seu monitor (ou abrange todos eles),

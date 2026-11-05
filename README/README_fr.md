@@ -104,6 +104,8 @@ Les hôtes qui intègrent des pages de réglages individuelles doivent transmett
 - La bande peut être réduite ou agrandie (75–200 %, meubles, mascottes et hauteur ensemble) avec Ctrl + molette sur une mascotte ou un meuble, depuis ⌂ → *Taille* ou dans l’onglet Paramètres ; le choix est mémorisé. Une maison plus large que son écran à cette taille reste sur l’écran et glisse pour garder en vue la dernière mascotte cliquée (ou les mascottes). Double-cliquez sur une mascotte de la bande pour la caresser.
 - **Fonctions**, le premier menu, regroupe tous les outils par usage (médias, scènes et fond d’écran, widgets, concentration et confort visuel, présentation, capture, mascottes, automatisation, contenu et Workshop, contrôle des superpositions, réglages et aide), avec *Rechercher une fonction* (Ctrl+K), *Épinglées* et *Récentes*. Les entrées ouvrent les mêmes pages et lancent les mêmes commandes qu’avant : raccourcis, préréglages, règles, télécommande sur téléphone et MIDI continuent de fonctionner ; les menus Préréglages, Réglages, Langue et Aide y figurent tels quels. Les groupes de la barre latérale se replient d’un clic sur leur titre et le restent. Le menu de la zone de notification propose *Ouvrir la maison des mascottes*.
 
+Si la liste des travaux est vide, vérifiez les routines des habitants, les postes de travail et les matériaux du sac. Sélectionnez un travail inachevé pour activer son annulation.
+
 ### À l'écran
 
 Superpositions média. Chacune choisit son moniteur (ou s'étend sur tous), retient

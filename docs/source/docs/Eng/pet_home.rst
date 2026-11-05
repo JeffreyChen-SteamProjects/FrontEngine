@@ -39,3 +39,5 @@ Hosts embedding individual settings pages must pass an explicit DefaultSettingsL
 * The strip can be made smaller or larger (75–200 %, furniture, pets and height together) with Ctrl + mouse wheel over a pet or piece, from ⌂ → *Size*, or in the Settings tab; the choice is remembered. A home wider than its screen at that size stays on the screen and glides along to keep the pet you last clicked (or the pets) in view. Double-click a pet on the strip to pat it.
 
 Home settings keeps the mode selector available while manually selected Meeting mode hides the desktop strip. Undo and redo belong to each room; if furniture is unavailable or no longer fits, the current layout and history stay intact for retry. Esc cancels arranging and area painting. Consecutive photos receive separate files. Lifetime events remain recorded after they leave the recent-history list, and paid workstation upgrades survive temporarily missing furniture packs. Older saves can recover only event records they still contain.
+
+If Work is empty, check residents' routines, workstations and backpack materials. Select an unfinished job to enable Cancel job.

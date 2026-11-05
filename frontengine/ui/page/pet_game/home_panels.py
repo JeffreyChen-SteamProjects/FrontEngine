@@ -758,11 +758,18 @@ class WorkPanel:
                           "using only materials already in the backpack.")
         self.details.setWordWrap(True)
         section.add_widget(self.details)
+        self.empty = tr(QLabel(), "pet_home_work_empty",
+                        "No jobs yet. Check residents' routines, workstations and materials in the backpack.")
+        self.empty.setWordWrap(True)
+        section.add_widget(self.empty)
         self.tasks = QListWidget()
         self.tasks.setIconSize(QSize(32, 32))
         self.tasks.setMinimumHeight(150)
         section.add_widget(self.tasks)
-        section.add_inline(_button("pet_home_cancel_task", "Cancel job", self.cancel))
+        self.cancel_button = _button("pet_home_cancel_task", "Cancel job", self.cancel)
+        self.cancel_button.setEnabled(False)
+        section.add_inline(self.cancel_button)
+        self.tasks.itemSelectionChanged.connect(self._refresh_cancel)
         self.focus_check = tr(QCheckBox(), "pet_home_focus_companion",
                               "Pets work alongside my focus sessions (the pet page's focus timer)")
         self.focus_check.setChecked(user_setting_dict.get(FOCUS_KEY) is True)
@@ -780,8 +787,11 @@ class WorkPanel:
 
     def refresh_live(self) -> None:
         world = self.page.service.world
-        selected = self.tasks.currentItem().data(ROLE_ID) if self.tasks.currentItem() else None
+        selected_items = self.tasks.selectedItems()
+        selected = selected_items[0].data(ROLE_ID) if selected_items else None
         tasks = sorted(world.tasks.values(), key=lambda t: int(t.identifier[1:])) if world else []
+        self.empty.setVisible(world is not None and not tasks)
+        self.tasks.setVisible(bool(tasks))
         lines = [(task.identifier, task.recipe, self._task_text(world, task)) for task in tasks]
         if [self.tasks.item(row).data(ROLE_ID) for row in range(self.tasks.count())] != [i for i, _r, _t in lines]:
             self.tasks.clear()
@@ -794,6 +804,13 @@ class WorkPanel:
         else:
             for row, (_identifier, _recipe, text) in enumerate(lines):
                 self.tasks.item(row).setText(text)
+        self._refresh_cancel()
+
+    def _refresh_cancel(self) -> None:
+        world = self.page.service.world
+        items = self.tasks.selectedItems()
+        task = world.tasks.get(items[0].data(ROLE_ID)) if world is not None and items else None
+        self.cancel_button.setEnabled(bool(task and task.open))
 
     @staticmethod
     def _task_text(world, task) -> str:
@@ -810,8 +827,8 @@ class WorkPanel:
 
     @owned_action
     def cancel(self) -> None:
-        item = self.tasks.currentItem()
-        if item is not None:
-            task = item.data(ROLE_ID)
+        items = self.tasks.selectedItems()
+        if items:
+            task = items[0].data(ROLE_ID)
             self.page.report(self.page.service.run(lambda world: world.cancel_task(task)))
             self.refresh_live()

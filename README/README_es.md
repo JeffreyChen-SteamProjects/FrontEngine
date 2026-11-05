@@ -105,6 +105,8 @@ Los hosts que integran páginas de ajustes individuales deben pasar una DefaultS
 - La franja puede hacerse más pequeña o más grande (75–200 %, muebles, mascotas y altura a la vez) con Ctrl + rueda del ratón sobre una mascota o un mueble, desde ⌂ → *Tamaño* o en la pestaña Ajustes; la elección se recuerda. Un hogar más ancho que su pantalla a ese tamaño se queda en la pantalla y se desliza para mantener a la vista la mascota que pulsaste por última vez (o las mascotas). Haz doble clic en una mascota de la franja para acariciarla.
 - **Funciones**, el primer menú, reúne todas las herramientas por propósito (medios, escenas y fondo, widgets, concentración y cuidado visual, presentaciones, captura, mascotas, automatización, contenido y Workshop, control de superposiciones, ajustes y ayuda), además de *Buscar funciones* (Ctrl+K), *Fijadas* y *Recientes*. Las entradas abren las mismas páginas y ejecutan los mismos comandos que antes, así que los atajos, preajustes, reglas, el control remoto del móvil y MIDI siguen funcionando; los menús de preajustes, ajustes, idioma y ayuda aparecen dentro tal cual. Los grupos de la barra lateral se pliegan con un clic en su título y se quedan así. El menú de la bandeja añade *Abrir el hogar de mascotas*.
 
+Si la lista de trabajos está vacía, revisa las rutinas de los residentes, los puestos de trabajo y los materiales de la mochila. Selecciona un trabajo sin terminar para activar su cancelación.
+
 ### En pantalla
 
 Superposiciones de medios. Cada una elige su monitor (o abarca todos), recuerda dónde la

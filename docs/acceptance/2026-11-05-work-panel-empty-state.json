@@ -1,0 +1,110 @@
+{
+  "passed": true,
+  "languages": [
+    {
+      "language": "English",
+      "width": 536,
+      "empty_text": "No jobs yet. Check residents' routines, workstations and materials in the backpack.",
+      "label_size": [
+        432,
+        34
+      ],
+      "horizontal_overflow": false
+    },
+    {
+      "language": "Traditional_Chinese",
+      "width": 536,
+      "empty_text": "目前沒有工作。請檢查居民作息、工作站與背包中的材料。",
+      "label_size": [
+        432,
+        17
+      ],
+      "horizontal_overflow": false
+    },
+    {
+      "language": "Simplified_Chinese",
+      "width": 536,
+      "empty_text": "目前没有工作。请检查居民作息、工作站与背包中的材料。",
+      "label_size": [
+        432,
+        17
+      ],
+      "horizontal_overflow": false
+    },
+    {
+      "language": "Deutsch",
+      "width": 536,
+      "empty_text": "Noch keine Aufträge. Prüfe die Tagesabläufe der Bewohner, die Arbeitsplätze und die Materialien im Rucksack.",
+      "label_size": [
+        432,
+        34
+      ],
+      "horizontal_overflow": false
+    },
+    {
+      "language": "Russian",
+      "width": 536,
+      "empty_text": "Заданий пока нет. Проверьте распорядок жителей, рабочие места и материалы в рюкзаке.",
+      "label_size": [
+        432,
+        34
+      ],
+      "horizontal_overflow": false
+    },
+    {
+      "language": "France",
+      "width": 536,
+      "empty_text": "Aucun travail pour le moment. Vérifiez les routines des habitants, les postes de travail et les matériaux du sac.",
+      "label_size": [
+        432,
+        34
+      ],
+      "horizontal_overflow": false
+    },
+    {
+      "language": "Italy",
+      "width": 536,
+      "empty_text": "Nessun lavoro al momento. Controlla le routine dei residenti, le postazioni e i materiali nello zaino.",
+      "label_size": [
+        432,
+        34
+      ],
+      "horizontal_overflow": false
+    }
+  ],
+  "cancel_selection_and_empty_return": true,
+  "lifetime_closed": true,
+  "temporary_directory_removed": true,
+  "scope": "Native isolated desktop, narrow standalone home page, registered language/retranslation APIs; one fixture job for selection/cancellation. Workshop and lock boundaries substituted.",
+  "source_parent_revision": "c18e2da",
+  "changed_source_sha256": {
+    "frontengine\\ui\\page\\pet_game\\home_panels.py": "01ca24f8fdf35b97e26ffd00be342b60fb756eb53dfebf16641ae138cf4a09bc",
+    "frontengine\\utils\\multi_language\\__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "frontengine\\utils\\multi_language\\english.py": "57c5a4b52901431f7e0ec0bc57321ee9c6a20721847a25891f382131a4a931a9",
+    "frontengine\\utils\\multi_language\\france.py": "33df9d974391c3ab804103dcc31dc2f422e669d1d73313c056692570af617734",
+    "frontengine\\utils\\multi_language\\germany.py": "4f6b714d666855ea1d513f02cf58ab9ab2faa644449b08382882c8278960f84a",
+    "frontengine\\utils\\multi_language\\italy.py": "86e6e3d7b5a7d0479af1874c68f66ee0568a4715a5289e5f48c08e9f882148e2",
+    "frontengine\\utils\\multi_language\\language_wrapper.py": "9973dcf575865bc0708c5b468076578bb440448fcf8f6aa15bacebd87b874bf3",
+    "frontengine\\utils\\multi_language\\retranslate.py": "005f406e92aa32d5157c0ab569bba0ff49a0421e627185db24bb0547bc2246ee",
+    "frontengine\\utils\\multi_language\\russian.py": "ab97fa427ec05190b86caa45c474f89937ef105ad5972f5f523eb18996d17a7e",
+    "frontengine\\utils\\multi_language\\scene_3d_words.py": "8782798f98e4e83578c5148f47f7c909a9fac068f33243f92f1da3de3be04bb8",
+    "frontengine\\utils\\multi_language\\simplified_chinese.py": "6ca28a39e97832a625cb8475a2a43ed59a39d63642e0ec06025c04733168c96e",
+    "frontengine\\utils\\multi_language\\traditional_chinese.py": "9aec8542bd509279171486898e83844e4dfeb08e72e8d185907a25f5ed896db1"
+  },
+  "harness_sha256": "5ea41967a0eb9f22afc2ebaabda720c948dba762522388378f4600be67d36c9a",
+  "screenshots": {
+    "Deutsch-layout.png": "15b08b7f086581aabfd544347f67fba6df0992da74cbab9e1e0b4104294240c6",
+    "English-layout.png": "83eb3dc54c93bb8a3f32c816b5e58321d97e43f775358d902f3763d8ff48cf69",
+    "France-layout.png": "c699bd5aff97d18fbb29ed7a1fed627cb6d1139370fec29cd9c0dde4f32c6b6d",
+    "Italy-layout.png": "c875603e9a633317702844e0e8f45f737862c59d1751bb196cdfe47114911fda",
+    "Russian-layout.png": "51d4e0e7af8dd086990d842de1bc14142c51d610a87ad7a14d4d2f2dbce85475",
+    "Simplified_Chinese-layout.png": "b416d153a339917a6f8bcd4f1a098bb77924d7d66c9e25b7c2bfef9d57651401",
+    "Traditional_Chinese-layout.png": "34e1f6f53b3b13c68e2f8a0206c1cacd1fdcac8ff486e83e545cedc41ba375fd"
+  },
+  "limitations": [
+    "Standalone page; fixture job checks UI selection/cancellation, not autonomous scheduling.",
+    "No mixed-DPI transition, full MainUI, OS-offline or independent code review acceptance.",
+    "Qt layouts were allowed to settle for 150 ms after each language change."
+  ],
+  "clearing_selection_disables_cancel": true
+}
