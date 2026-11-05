@@ -273,7 +273,7 @@ class PetHomePage(SettingPage):
 
     def _build_status(self) -> None:
         """The stage: what is happening in the home, its controls, and the home itself."""
-        section = self.stage = self.add_section("pet_home_status_section", "Home")
+        section = self.stage = self.add_content_section("pet_home_status_section", "Home")
         section.title_label.hide()             # the page title already says it
         self.status = QLabel()
         self.status.setObjectName("homeStatus")

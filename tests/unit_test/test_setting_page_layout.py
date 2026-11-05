@@ -95,3 +95,51 @@ def test_inline_controls_wrap_and_hidden_controls_leave_no_gap(*, lifetime_facto
         assert controls[1].y() == controls[2].y()
     finally:
         page.close()
+
+
+def test_content_section_reflows_and_settles_after_height_changes():
+    from PySide6.QtCore import QEvent, QObject
+    from PySide6.QtWidgets import QVBoxLayout, QWidget
+    from frontengine.ui.page.flow_layout import FlowLayout
+    from frontengine.ui.page.layout_kit import ContentSection
+
+    class LayoutRequests(QObject):
+        count = 0
+
+        def eventFilter(self, watched, event):
+            if event.type() == QEvent.Type.LayoutRequest:
+                self.count += 1
+            return False
+
+    host = QWidget()
+    column = QVBoxLayout(host)
+    section = ContentSection("Home")
+    column.addWidget(section)
+    view, toolbar, pending = QWidget(), QWidget(), QLabel("Waiting")
+    view.setFixedHeight(234)
+    flow = FlowLayout(toolbar, spacing=10)
+    for caption in ("Back to the desktop", "Backpack", "Goals", "-", "+"):
+        flow.addWidget(QPushButton(caption))
+    for widget in (view, toolbar, pending):
+        section.add_widget(widget)
+    observer = LayoutRequests(host)
+    for widget in (host, section, section.content):
+        widget.installEventFilter(observer)
+    try:
+        host.show()
+        for width in (400, 980, 400):
+            for height in (120, 60, 30, 120):
+                pending.setFixedHeight(height)
+                settle_layout()
+                host.resize(width, host.heightForWidth(width))
+                settle_layout()
+                assert toolbar.y() > view.geometry().bottom()
+                assert pending.y() > toolbar.geometry().bottom()
+        settle_layout()
+        before = observer.count
+        for _ in range(100):
+            QApplication.processEvents()
+        assert observer.count == before
+    finally:
+        host.close()
+        host.deleteLater()

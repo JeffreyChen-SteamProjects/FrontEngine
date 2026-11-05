@@ -704,3 +704,5 @@ Si el trabajo autónomo no puede comenzar porque faltan materiales, no hay puest
 Si una orden en cola se rechaza al ejecutarse porque las condiciones han cambiado, la tarjeta del residente conserva el motivo durante la actividad sustituta. La siguiente actividad aceptada lo borra.
 
 Una orden manual de trabajo en cola también informa al iniciarse de materiales ausentes o de un puesto de trabajo inexistente u ocupado. El motivo aparece en la tarjeta del residente; tras resolverlo, se puede repetir la orden.
+
+La escena del hogar y su barra de herramientas permanecen en filas separadas cuando cambia la altura de la lista de asuntos pendientes.

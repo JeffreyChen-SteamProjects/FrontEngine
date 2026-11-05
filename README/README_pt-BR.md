@@ -727,3 +727,5 @@ Se o trabalho autônomo não puder começar por falta de materiais, ausência de
 Se um comando na fila for recusado na execução porque as condições mudaram, o cartão do morador mantém o motivo visível durante a atividade substituta. A próxima atividade aceita apaga esse motivo.
 
 Um comando manual de trabalho na fila também informa, ao iniciar, a falta de materiais e a ausência ou ocupação da estação de trabalho. O motivo aparece no cartão do morador; depois de resolver o problema, é possível repetir o comando.
+
+A cena da casa e sua barra de ferramentas permanecem em linhas separadas quando a altura da lista de itens pendentes muda.

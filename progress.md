@@ -7,6 +7,8 @@
 
 ## 實機驗收待辦
 
+- **#66 家園場景工具列重疊修正的整合驗收**。工作恢復使等待事項縮短時，原表單會讓工具列與場景重疊。隔離分支改用共用外觀的垂直內容分區；先失敗的回歸案例、七項家園與表單測試及原生 125% 主視窗驗證已通過。仍須完成相關測試、完整回歸、整合與獨立審查。
+
 - **#9** **macOS 權限與裝置驗收**〔阻塞：沒有可互動的 Mac 測試主機〕。驗證 TCC 權限拒絕／變更／重新啟動流程、原生音訊、MIDI 與多螢幕；入口為 `tests/integration/macos_native_smoke.py`。既有 Windows／Linux 支援與隔離測試不能替代 macOS 實機結果。
 - **#11** **Steam Workshop 離線／無客戶端驗收**〔阻塞：沒有獨立 Steam 測試工作階段〕。在獨立環境驗證離線與未啟動客戶端時的失敗回饋、重試及資源釋放。參考 `tests/integration/steam_workshop_smoke.py` 與 `steam_failure_smoke.py`；無效 App ID 的既有測試不能替代這兩個情境。
 - **#21** **覆蓋層跨螢幕跟隨驗收**。圖片覆蓋層以軟體與 GPU 後端通過 100%／125% 跨螢幕及返回驗證，見 `docs/acceptance/2026-11-05-overlay-mixed-dpi-fc30918.json`；寵物部分已有 U-20261029-46。GIF 與靜態文字的軟體／GPU 後端跨螢幕驗證見 `docs/acceptance/2026-11-05-gif-text-mixed-dpi-635c120.json`。Web 本機 HTML 的跨螢幕畫面、邏輯尺寸與 DOM 縮放驗證見 `docs/acceptance/2026-11-05-web-mixed-dpi-79bd15c.json`；影片原生子視窗擷取與持續解碼的混合 DPI 驗證見 `docs/acceptance/2026-11-05-video-mixed-dpi-27d6186.json`；先前 QWidget 擷取單色已確認為嵌入原生視窗的擷取限制。粒子四方向的 OpenGL 畫面、動畫與關閉清理驗證見 `docs/acceptance/2026-11-05-particle-mixed-dpi-1da244d.json`。便條、待辦與參考圖板的內容與尺寸驗證見 `docs/acceptance/2026-11-05-tools-mixed-dpi-note-fix.json`，並修正便條文字遭合成器遮住的問題。白板三種繪圖設定的工具列、筆畫與跨螢幕驗證見 `docs/acceptance/2026-11-05-whiteboard-toolbar-dpi.json`。放大鏡三種後端設定、兩種倍率與跨螢幕內容更新驗證見 `docs/acceptance/2026-11-05-magnifier-mixed-dpi.json`；該次注入合成擷取來源與游標座標，真實擷取座標、滑鼠跟隨及穿透仍待驗。仍須完成其餘一般工具覆蓋層類型的混合 DPI 驗收。

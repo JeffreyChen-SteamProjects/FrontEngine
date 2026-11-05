@@ -57,3 +57,5 @@ Wenn selbstständige Arbeit wegen fehlender Materialien, eines fehlenden oder ei
 Wird ein eingereihter Befehl bei der Ausführung wegen veränderter Bedingungen abgelehnt, zeigt die Bewohnerkarte den Grund während der Ersatzaktivität weiterhin an. Die nächste akzeptierte Aktivität entfernt ihn.
 
 Ein eingereihter manueller Arbeitsauftrag meldet beim Start auch fehlende Materialien sowie fehlende oder belegte Arbeitsplätze. Der Grund erscheint auf der Bewohnerkarte. Nach Beheben des Problems kann der Auftrag erneut erteilt werden.
+
+Wenn sich die Höhe der Liste ausstehender Aufgaben ändert, bleiben die Hausszene und ihre Werkzeugleiste in getrennten Zeilen.

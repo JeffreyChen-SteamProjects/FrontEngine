@@ -704,3 +704,5 @@ When automatic work cannot start because materials are missing, there is no work
 If a queued command is refused when it executes because conditions have changed, the resident card keeps that reason visible during the replacement activity. The next accepted activity clears it.
 
 A queued manual work command also reports missing materials, a missing workstation, or an occupied workstation when it tries to start. The reason appears in the resident card; after resolving it, the work command can be retried.
+
+The home scene and its toolbar remain in separate rows when the waiting-items list changes height.
