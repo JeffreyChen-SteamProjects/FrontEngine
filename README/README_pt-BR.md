@@ -89,7 +89,7 @@ A geração de mascotes, as prévias, os guarda-roupas padrão dos mascotes da �
 
 As ações dos painéis da casa são recusadas durante a preparação e execução do fechamento; os resultados do seletor de plantas são verificados novamente antes do uso. Cancelar o fechamento permite novas ações sem repetir as recusadas.
 
-Após criar uma casa, os atalhos e os textos longos de botões e caixas de seleção quebram em várias linhas em janelas estreitas. Os controles se ajustam ao painel; o desenho da casa mantém sua própria rolagem horizontal. Os nomes e as instruções do móvel selecionado quebram em várias linhas nos painéis estreitos, evitando que a aba Móveis alargue as outras abas da casa.
+Após criar uma casa, os atalhos e os textos longos de botões e caixas de seleção quebram em várias linhas em janelas estreitas. Os controles se ajustam ao painel; o desenho da casa mantém sua própria rolagem horizontal. Os nomes e as instruções do móvel selecionado quebram em várias linhas nos painéis estreitos, evitando que a aba Móveis alargue as outras abas da casa. O título da casa e as contagens de móveis em Mochila e Coleção também quebram em várias linhas nos painéis estreitos.
 
 As encomendas diárias são atualizadas na tela quando o dia do jogo muda, mesmo sem outro evento de vida ou recompensa.
 

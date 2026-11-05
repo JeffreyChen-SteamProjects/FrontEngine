@@ -86,7 +86,7 @@ Pet generation, previews, default desktop-pet and home-resident wardrobes and ho
 
 Home panel actions are rejected while closing is prepared or in progress; blueprint file-dialog results are checked again before use. Cancelling close permits new actions without replaying rejected ones.
 
-After creating a home, shortcuts and long button or checkbox captions wrap in narrow windows. Home controls can shrink to fit their panel; the home drawing keeps its own horizontal scrolling. Selected furniture names and prompts wrap in narrow panels, so the Furniture tab does not widen the other home tabs.
+After creating a home, shortcuts and long button or checkbox captions wrap in narrow windows. Home controls can shrink to fit their panel; the home drawing keeps its own horizontal scrolling. Selected furniture names and prompts wrap in narrow panels, so the Furniture tab does not widen the other home tabs. The home title and furniture counts in Backpack and Collection also wrap to fit narrow panels.
 
 Daily commissions refresh on screen when the game day changes, even when no other life or reward event occurs.
 

@@ -691,6 +691,7 @@ class StoragePanel:
         self.lifetime = page.lifetime
         section = self.section = page.add_section("pet_home_storage_section", "Backpack")
         self.collection = QLabel()
+        self.collection.setWordWrap(True)
         section.add_widget(self.collection)
         self.list = ThingGrid(rows=2)
         section.add_widget(self.list)

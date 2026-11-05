@@ -1,7 +1,7 @@
 Page Maison des mascottes
 -------------------------
 
-Les noms et les indications du meuble sélectionné passent à la ligne dans les panneaux étroits pour que l’onglet Meubles n’élargisse pas les autres onglets du foyer.
+Les noms et les indications du meuble sélectionné passent à la ligne dans les panneaux étroits pour que l’onglet Meubles n’élargisse pas les autres onglets du foyer. Le titre du foyer et les nombres de meubles dans Sac à dos et Collection passent aussi à la ligne dans les panneaux étroits.
 
 **Maison des mascottes** — la première page. Vos mascottes enregistrées emménagent dans une petite maison, y vivent seules et travaillent pour gagner des pièces.
 

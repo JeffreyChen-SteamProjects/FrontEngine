@@ -63,6 +63,7 @@ class CollectionPanel:
         self._thumbnails: dict[tuple[str, float], QIcon] = {}
         section = self.section = page.add_section("pet_home_collection_section", "Collection")
         self.count = QLabel()
+        self.count.setWordWrap(True)
         section.add_widget(self.count)
         self.encyclopedia = ThingGrid(rows=3)
         section.add_widget(self.encyclopedia, "pet_home_encyclopedia", "Furniture guide")

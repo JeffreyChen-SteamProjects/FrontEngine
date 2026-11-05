@@ -49,6 +49,42 @@ def _place(page, definition: str, cell: int) -> None:
     panel.toggle_arrange()
 
 
+def test_styled_home_keeps_requested_width_in_every_language(page, request):
+    import os
+    from pathlib import Path
+    from PySide6.QtGui import QFontDatabase
+    from PySide6.QtWidgets import QApplication
+    from frontengine.ui.style.app_style import apply_app_style
+    from frontengine.utils.multi_language.language_wrapper import language_wrapper
+    from frontengine.utils.multi_language.retranslate import retranslator
+
+    font_file = Path(os.environ.get('WINDIR', 'C:/Windows')) / 'Fonts/arial.ttf'
+    if not font_file.is_file():
+        pytest.skip('Windows Arial regression fixture is unavailable')
+    identifier = QFontDatabase.addApplicationFont(str(font_file))
+    assert identifier >= 0
+    request.addfinalizer(lambda: QFontDatabase.removeApplicationFont(identifier))
+    apply_app_style(page, None)
+    page.show()
+    page.create_home()
+    try:
+        for width in (296, 536):
+            for language in language_wrapper.choose_language_dict:
+                assert language_wrapper.reset_language(language)
+                retranslator.apply()
+                page.refresh()
+                page.resize(width, 760)
+                for key in page.tabs.keys():
+                    assert page.tabs.select(key)
+                    for _ in range(3):
+                        QApplication.processEvents()
+                    assert page.width() == width, (language, key, page.width())
+                    assert page._scroll.horizontalScrollBar().maximum() == 0, (language, key)
+    finally:
+        language_wrapper.reset_language('English')
+        retranslator.apply()
+
+
 def test_new_day_replaces_visible_commissions_without_another_event(page):
     from frontengine.show.pet_game.captions import item_label
     from frontengine.utils.pet_game import simulation
