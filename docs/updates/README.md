@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261105-50 | 2026-11-05 | 縮減 GPU 後端替換崩潰並保留回歸失敗 | #investigation #ui #test | [2026-11](2026-11.md) |
 | U-20261105-49 | 2026-11-05 | 記錄多覆蓋層連續跨螢幕的原生崩潰 | #investigation #ui | [2026-11](2026-11.md) |
 | U-20261105-48 | 2026-11-05 | 驗證便條與白板修正進入安裝套件 | #test #packaging #ui | [2026-11](2026-11.md) |
 | U-20261105-47 | 2026-11-05 | 修正白板工具列被半透明畫布蓋暗 | #fix #ui #verification | [2026-11](2026-11.md) |
@@ -307,6 +308,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 103 |
+| [2026-11.md](2026-11.md) | 2026-11 | 104 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
