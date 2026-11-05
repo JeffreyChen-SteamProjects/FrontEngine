@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261106-15 | 2026-11-06 | Verify integrated native onboarding recording and cold reload | #testing #acceptance | [2026-11](2026-11.md) |
 | U-20261106-14 | 2026-11-06 | Verify full regression after plugin navigation integration | #testing #integration | [2026-11](2026-11.md) |
 | U-20261106-13 | 2026-11-06 | Verify service start calls and timer reuse during navigation | #testing #ui | [2026-11](2026-11.md) |
 | U-20261106-12 | 2026-11-06 | Verify service reuse during built-in page and command navigation | #testing #ui | [2026-11](2026-11.md) |
@@ -341,6 +342,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 137 |
+| [2026-11.md](2026-11.md) | 2026-11 | 138 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
