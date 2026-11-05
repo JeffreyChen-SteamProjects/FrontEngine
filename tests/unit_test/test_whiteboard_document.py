@@ -179,3 +179,26 @@ def test_file_worker_error_keeps_page_and_close_cancels(tmp_path):
         release.set()
         board.lifetime.pool().waitForDone(5000)
         board.close()
+
+
+@pytest.mark.parametrize('backend', ['auto', 'gpu', 'software'])
+def test_render_backend_does_not_dim_whiteboard_controls(backend):
+    board = WhiteboardWidget()
+    try:
+        board.resize(900, 500)
+        board.show()
+        board.set_render_backend(backend)
+        QTest.qWait(60)
+        expected = board.controls.grab().toImage()
+        actual = board.grab().toImage().copy(board.controls.geometry())
+        expected_light = sum(expected.pixelColor(x, y).lightness()
+                             for x in range(0, expected.width(), 3)
+                             for y in range(0, expected.height(), 3))
+        actual_light = sum(actual.pixelColor(x, y).lightness()
+                           for x in range(0, actual.width(), 3)
+                           for y in range(0, actual.height(), 3))
+        assert expected_light > 0
+        assert actual_light >= expected_light * .95, (actual_light, expected_light)
+    finally:
+        board.close()
+        QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)

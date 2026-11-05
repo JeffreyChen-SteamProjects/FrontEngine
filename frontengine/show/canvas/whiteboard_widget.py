@@ -313,6 +313,11 @@ class WhiteboardWidget(BaseWidget):
             self.end_stroke()
         super().mouseReleaseEvent(event)
 
+    def set_render_backend(self, backend: str = 'auto') -> None:
+        """Keep the interactive toolbar above the composited canvas."""
+        super().set_render_backend(backend)
+        self.controls.raise_()
+
     def resizeEvent(self, event) -> None:
         super().resizeEvent(event)
         self.controls.setGeometry(0, 0, self.width(), self.controls.sizeHint().height())
