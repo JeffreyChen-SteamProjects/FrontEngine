@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261106-65 | 2026-11-06 | 目前版本的原生存檔保護與恢復驗收 | UI / Persistence / Test | [2026-11](2026-11.md) |
 | U-20261106-64 | 2026-11-06 | 工作結算的存檔中斷恢復矩陣 | Pet / Persistence / Test | [2026-11](2026-11.md) |
 | U-20261106-63 | 2026-11-06 | 心願事件版本完整回歸驗證 | Pet / Regression / Test | [2026-11](2026-11.md) |
 | U-20261106-62 | 2026-11-06 | 舊家園格式與模式保存相容性矩陣 | Pet / Persistence / Test | [2026-11](2026-11.md) |
@@ -391,6 +392,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 187 |
+| [2026-11.md](2026-11.md) | 2026-11 | 188 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
