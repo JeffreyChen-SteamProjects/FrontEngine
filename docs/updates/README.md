@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261106-36 | 2026-11-06 | 驗證完整職業進度跨程序保存與重複結算 | #test #save #economy #verified | [2026-11](2026-11.md) |
 | U-20261106-35 | 2026-11-06 | 驗證三職業九種配方的正常解鎖路線 | #test #economy #verified | [2026-11](2026-11.md) |
 | U-20261106-34 | 2026-11-06 | 驗證零貨幣恢復生產與三種入門配方 | #test #economy #verified | [2026-11](2026-11.md) |
 | U-20261106-33 | 2026-11-06 | 修正工作完成後工作站勾號漏接 | #fix #ui #events #verified | [2026-11](2026-11.md) |
@@ -362,6 +363,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 158 |
+| [2026-11.md](2026-11.md) | 2026-11 | 159 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
