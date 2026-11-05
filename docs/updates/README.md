@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261106-68 | 2026-11-06 | 外部家具包移除與重裝的跨程序驗證 | Pet / Content / Test | [2026-11](2026-11.md) |
 | U-20261106-67 | 2026-11-06 | 修正跨家園日重複慶祝生日 | Pet / Events / Fix | [2026-11](2026-11.md) |
 | U-20261106-66 | 2026-11-06 | 家園事件產生與介面轉送盤點 | Pet / Review / Events | [2026-11](2026-11.md) |
 | U-20261106-65 | 2026-11-06 | 目前版本的原生存檔保護與恢復驗收 | UI / Persistence / Test | [2026-11](2026-11.md) |
@@ -394,6 +395,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 190 |
+| [2026-11.md](2026-11.md) | 2026-11 | 191 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
