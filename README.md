@@ -718,3 +718,5 @@ The managed home and free-arranging home keep separate Inbox histories and unrea
 Free arranging keeps activities, items and local progress without earning or spending coins. Prices, rewards and completion notices reflect this. Loading an older free-arranging save resets its coin balance to zero while retaining items and transaction history; managed homes keep their balance.
 
 Each resident's birthday is celebrated once per seven-day anniversary of moving in. Crossing midnight or reopening the save does not repeat that anniversary's mood reward or Inbox note.
+
+Names of visible residents stay within the home view and desktop strip at either edge. Long names use an ellipsis, and the desktop name backdrop follows the displayed text.

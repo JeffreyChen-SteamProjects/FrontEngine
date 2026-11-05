@@ -130,3 +130,18 @@ def test_double_clicking_a_pet_pats_it(page):
     strip.mouseDoubleClickEvent(event)
     assert pet.needs["mood"] == min(100, mood + 8)
     assert pet.affection == affection + 1
+
+
+@pytest.mark.parametrize("edge", ["left", "right"])
+def test_edge_caption_remains_inside_strip_and_its_input_mask(page, edge):
+    strip = _strip(page)
+    pet = _pet(strip)
+    pet.x_milli = 0 if edge == "left" else strip.service.world.zones[strip.zone].width_pixels * 1000
+    strip._before = strip._after = {}
+    strip.chosen = pet.identifier
+    strip._stepped()
+    for _ in range(60):
+        strip._ease_scroll()
+    caption = strip.caption_rect(pet)
+    assert caption.left() >= 0 and caption.right() <= strip.width()
+    assert strip.interactive_region().contains(caption.toAlignedRect())

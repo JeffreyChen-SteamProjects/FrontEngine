@@ -71,3 +71,5 @@ La casa gestita e quella con disposizione libera mantengono cronologie e contegg
 La disposizione libera conserva attività, oggetti e progressi locali senza guadagnare né spendere monete. Prezzi, ricompense e notifiche rispecchiano questa regola. Caricando un vecchio salvataggio di questa modalità, il saldo viene azzerato mantenendo oggetti e cronologia delle transazioni; il saldo della casa gestita non cambia.
 
 Il compleanno di ogni residente viene festeggiato una sola volta ogni sette giorni di gioco dal suo arrivo. Il cambio di giorno o la riapertura del salvataggio non ripete il premio di umore né il messaggio per lo stesso anniversario.
+
+I nomi dei residenti visibili restano nella vista della casa e nella barra del desktop su entrambi i bordi. I nomi lunghi sono abbreviati con puntini di sospensione e lo sfondo del nome segue il testo mostrato.

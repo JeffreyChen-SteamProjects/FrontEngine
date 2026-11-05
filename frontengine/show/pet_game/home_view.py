@@ -411,16 +411,17 @@ class HomeView(QWidget):
         painter.drawEllipse(box)
 
     def _paint_resident(self, painter: QPainter, resident) -> None:
-        center = self.resident_center(resident)
         self._paint_body(painter, resident)
         kind = resident.activity.kind if resident.activity is not None else "idle"
         caption = resident.name + (" " + GLYPHS.get(kind, "") if GLYPHS.get(kind) else "")
         box = self.caption_rect(resident)
+        caption = painter.fontMetrics().elidedText(caption, Qt.TextElideMode.ElideRight,
+                                                   max(0, int(box.width()) - 10))
         if self.caption_backdrop:
             painter.setPen(Qt.PenStyle.NoPen)
             painter.setBrush(QColor(0, 0, 0, 150))
             plate = painter.fontMetrics().horizontalAdvance(caption) + 10
-            painter.drawRoundedRect(QRectF(center.x() - plate / 2, box.top(), plate, box.height()), 5, 5)
+            painter.drawRoundedRect(QRectF(box.center().x() - plate / 2, box.top(), plate, box.height()), 5, 5)
             painter.setPen(QColor("white"))
         else:
             painter.setPen(self.ink())
@@ -437,7 +438,12 @@ class HomeView(QWidget):
 
     def caption_rect(self, resident) -> QRectF:
         box = self.resident_box(resident)
-        return QRectF(box.center().x() - 70, box.top() - 20, 140, 18)
+        caption = QRectF(box.center().x() - 70, box.top() - 20, 140, 18)
+        if box.right() < 0 or box.left() > self.width():
+            return caption
+        caption.setWidth(min(caption.width(), self.width()))
+        caption.moveLeft(max(0.0, min(caption.left(), self.width() - caption.width())))
+        return caption
 
     # ----- input -----------------------------------------------------------------------
 

@@ -1,0 +1,327 @@
+{
+  "baseline": "2a539161",
+  "change": "Keep captions of visible residents inside each view, elide long labels and align the desktop backdrop with the caption; offscreen residents retain offscreen caption position.",
+  "red": "Two edge containment tests failed in3.89s; right name box extended68px past view.",
+  "validation": [
+    "Initial two regression cases passed1.67s.",
+    "14 caption/desktop-strip-size cases passed84.55s.",
+    "After correcting long-name fixture to legal length,37 caption/translation/progress checks passed2.44s."
+  ],
+  "native_comparison": {
+    "before": {
+      "native": {
+        "passed": true,
+        "variant": "baseline",
+        "cases": [
+          {
+            "surface": "overview",
+            "edge": "left",
+            "long_name": false,
+            "caption_inside": false,
+            "caption": [
+              -70.0,
+              159.0,
+              140.0,
+              18.0
+            ],
+            "view_width": 962
+          },
+          {
+            "surface": "strip",
+            "edge": "left",
+            "long_name": false,
+            "caption_inside": false,
+            "caption": [
+              -70.0,
+              95.4,
+              140.0,
+              18.0
+            ],
+            "view_width": 1536
+          },
+          {
+            "surface": "overview",
+            "edge": "left",
+            "long_name": true,
+            "caption_inside": false,
+            "caption": [
+              -70.0,
+              136.0,
+              140.0,
+              18.0
+            ],
+            "view_width": 962
+          },
+          {
+            "surface": "strip",
+            "edge": "left",
+            "long_name": true,
+            "caption_inside": false,
+            "caption": [
+              -70.0,
+              58.599999999999994,
+              140.0,
+              18.0
+            ],
+            "view_width": 1536
+          },
+          {
+            "surface": "overview",
+            "edge": "right",
+            "long_name": false,
+            "caption_inside": false,
+            "caption": [
+              889.999375,
+              136.0,
+              140.0,
+              18.0
+            ],
+            "view_width": 962
+          },
+          {
+            "surface": "strip",
+            "edge": "right",
+            "long_name": false,
+            "caption_inside": false,
+            "caption": [
+              1463.999,
+              58.599999999999994,
+              140.0,
+              18.0
+            ],
+            "view_width": 1536
+          },
+          {
+            "surface": "overview",
+            "edge": "right",
+            "long_name": true,
+            "caption_inside": false,
+            "caption": [
+              889.999375,
+              136.0,
+              140.0,
+              18.0
+            ],
+            "view_width": 962
+          },
+          {
+            "surface": "strip",
+            "edge": "right",
+            "long_name": true,
+            "caption_inside": false,
+            "caption": [
+              1463.999,
+              58.599999999999994,
+              140.0,
+              18.0
+            ],
+            "view_width": 1536
+          }
+        ],
+        "mask_covers_caption": true,
+        "runtime_closed": true,
+        "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+        "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-stage-layout\\.audit\\profession-owned-fixed",
+        "saved_snapshot_sha256": "c471f2056e3bf47d41a8073e4a214f8eccec310f6c85a5f6088181f0c4b05172",
+        "scope": "Native private MainUI and desktop strip with explicit left/right resident positions and short/long names; renders actual view and checks mask geometry. Not OS click-through or physical-monitor acceptance.",
+        "temporary_directory_removed": true
+      },
+      "observer": {
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "child_exit": 0,
+        "observation_only": true
+      },
+      "sha256": {
+        "main.png": "0c00e400acdc5cecc508c7f85241c84ce92bab25e5fd4f2b2da05212138bc9d6",
+        "overview-left-long.png": "82f7bbfe610f229b2543c4cccdf5aadb6a1a847f2468be29328b5b435d572478",
+        "overview-left-short.png": "4db039fd6bba48ee133a7c6bddcaaf8def72ad6b9ad05854a5bf7ef3b3888202",
+        "overview-right-long.png": "29c5ab01d2224c08478343581abdbd067247a2bf1442058610f0d531d739f017",
+        "overview-right-short.png": "40ff47f03b856a8b2abf7eda67d93db58c114715abf890c7c6df86350be6be79",
+        "strip-left-long.png": "d3bbad5096797bd92fc0ae3cfe553bd098f1d8f65bcdc5453c94de44e1766901",
+        "strip-left-short.png": "3ea772b80e395754de6f6bd9348b4b4c6ea182212a0661e11c5b9376e9fc02ba",
+        "strip-right-long.png": "e52aae9ecbde6d41515b143acc1a1eb54833871e60bca5e99710ea740bdcf315",
+        "strip-right-short.png": "3514b49c86e6a2c0954fbbdf6665f704928bab8b36a83271d15a051af8d0fcd6"
+      }
+    },
+    "after": {
+      "native": {
+        "passed": true,
+        "variant": "fixed",
+        "cases": [
+          {
+            "surface": "overview",
+            "edge": "left",
+            "long_name": false,
+            "caption_inside": true,
+            "caption": [
+              0.0,
+              159.0,
+              140.0,
+              18.0
+            ],
+            "view_width": 962
+          },
+          {
+            "surface": "strip",
+            "edge": "left",
+            "long_name": false,
+            "caption_inside": true,
+            "caption": [
+              0.0,
+              95.4,
+              140.0,
+              18.0
+            ],
+            "view_width": 1536
+          },
+          {
+            "surface": "overview",
+            "edge": "left",
+            "long_name": true,
+            "caption_inside": true,
+            "caption": [
+              0.0,
+              136.0,
+              140.0,
+              18.0
+            ],
+            "view_width": 962
+          },
+          {
+            "surface": "strip",
+            "edge": "left",
+            "long_name": true,
+            "caption_inside": true,
+            "caption": [
+              0.0,
+              58.599999999999994,
+              140.0,
+              18.0
+            ],
+            "view_width": 1536
+          },
+          {
+            "surface": "overview",
+            "edge": "right",
+            "long_name": false,
+            "caption_inside": true,
+            "caption": [
+              822.0,
+              136.0,
+              140.0,
+              18.0
+            ],
+            "view_width": 962
+          },
+          {
+            "surface": "strip",
+            "edge": "right",
+            "long_name": false,
+            "caption_inside": true,
+            "caption": [
+              1396.0,
+              58.599999999999994,
+              140.0,
+              18.0
+            ],
+            "view_width": 1536
+          },
+          {
+            "surface": "overview",
+            "edge": "right",
+            "long_name": true,
+            "caption_inside": true,
+            "caption": [
+              822.0,
+              136.0,
+              140.0,
+              18.0
+            ],
+            "view_width": 962
+          },
+          {
+            "surface": "strip",
+            "edge": "right",
+            "long_name": true,
+            "caption_inside": true,
+            "caption": [
+              1396.0,
+              58.599999999999994,
+              140.0,
+              18.0
+            ],
+            "view_width": 1536
+          }
+        ],
+        "mask_covers_caption": true,
+        "runtime_closed": true,
+        "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+        "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-stage-layout\\.audit\\profession-owned-fixed",
+        "saved_snapshot_sha256": "c471f2056e3bf47d41a8073e4a214f8eccec310f6c85a5f6088181f0c4b05172",
+        "scope": "Native private MainUI and desktop strip with explicit left/right resident positions and short/long names; renders actual view and checks mask geometry. Not OS click-through or physical-monitor acceptance.",
+        "temporary_directory_removed": true
+      },
+      "observer": {
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "child_exit": 0,
+        "observation_only": true
+      },
+      "sha256": {
+        "main.png": "259e84bc660f4954267939d29ca6763e0434d668376cedf5c16728f3d1f2fd7f",
+        "overview-left-long.png": "ab6b733cfc347cfbd07a1284002435f8e731f990c486aaadcd58626c8777b1e7",
+        "overview-left-short.png": "7442246ddda830d9c99f1882c05eb14e4e4709ba7e43adfc24689e0a176e1baf",
+        "overview-right-long.png": "3917c63d2eadf42960f5a3673d2d6e31421f6947e2dd0a62f0fa6c220e270010",
+        "overview-right-short.png": "887e03773fd48f65a53333332b301c75bc051eeb6c7aacfc9fb380a5cb99f89e",
+        "strip-left-long.png": "427e1f7307660b0fad429dd8a76fbf77fc1832853f3f3986725081689b612348",
+        "strip-left-short.png": "fcade5488bc05b25ebf444c1c1c961275e488761137896ceb85873212bff2acb",
+        "strip-right-long.png": "0afdbea0e6a0e640f7056e5c592638b0cde108152c177ca6cea7ea193d4d52a2",
+        "strip-right-short.png": "c3665cc4cd23dd896be02d4c061855dbe53fab60d826a36970a137a3044f8911"
+      }
+    }
+  },
+  "screenshots_viewed": [
+    "native-caption-before/overview-left-short.png",
+    "native-caption-before/strip-right-long.png",
+    "native-caption-after-valid/overview-left-short.png",
+    "native-caption-after-valid/strip-right-long.png"
+  ],
+  "invalid_probe": "Initial baseline probe used65-character name, exceeding64-character save limit. Images produced but shutdown did not complete; exact private test child70412 identity verified and terminated for invalid fixture. Handle94405 terminal1. Excluded from acceptance; output retained. Corrected independent baseline/fixed runs use legal name and restore original resident fields before closing.",
+  "limits": [
+    "Mask geometry checked; not OS click-through, physical DPI or monitor-hotplug acceptance.",
+    "Full regression and independent review pending."
+  ],
+  "evidence_sha256": {
+    "frontengine/show/pet_game/home_view.py": "3c5e0aa3edc46d811bb7d7a9d1e77d98ddc9572bb517c8d053fa991230a8b563",
+    "tests/unit_test/test_pet_home_caption_bounds.py": "ebc19c479d74851f9eeee4a6739fd55bd6ef56f529ba5a7ea5459dc79cc9560b",
+    "tests/unit_test/test_pet_home_strip_size.py": "dac336aa90cb333dd3b2b9c6ead6fb73eab52078fde28999127b15b929fa3c9a",
+    ".audit/native_caption_bounds_valid.py": "119abdf007e05a199d9a3b4fe597c81886977cee38fbb7ad604701cd51c92ccb",
+    ".audit/caption-red.log": "bdcb34b0af64559325c27cd35e01fd7f7822764ab44628c5b9b6e4672045fb49",
+    ".audit/caption-expanded.log": "8f8ce161b453a91ecb2643af868e643bb5bf9d4d9d375e312b241210be6628cb"
+  }
+}

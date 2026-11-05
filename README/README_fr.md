@@ -719,3 +719,5 @@ Le foyer géré et le foyer en aménagement libre conservent des historiques et 
 L’aménagement libre conserve les activités, les objets et la progression locale sans gagner ni dépenser de pièces. Les prix, récompenses et notifications en tiennent compte. Charger une ancienne sauvegarde de ce mode remet le solde à zéro en conservant les objets et l’historique des transactions ; le solde des foyers gérés reste inchangé.
 
 L’anniversaire de chaque résident est célébré une seule fois tous les sept jours de jeu depuis son arrivée. Le passage à minuit ou la réouverture de la sauvegarde ne répète ni le bonus d’humeur ni le message pour le même anniversaire.
+
+Les noms des résidents visibles restent dans la vue du foyer et la bande du bureau, même sur les bords. Les noms longs sont abrégés avec des points de suspension et leur fond suit le texte affiché.

@@ -718,3 +718,5 @@ El hogar gestionado y el de distribución libre mantienen historiales y contador
 La distribución libre conserva actividades, objetos y progreso local sin ganar ni gastar monedas. Los precios, recompensas y avisos reflejan esta regla. Al cargar una partida antigua de este modo, el saldo pasa a cero y se conservan los objetos y el historial de transacciones; el saldo del hogar gestionado no cambia.
 
 El cumpleaños de cada residente se celebra una vez cada siete días de juego desde su llegada. El cambio de día o la reapertura de la partida no repite la recompensa de ánimo ni el aviso para el mismo aniversario.
+
+Los nombres de los residentes visibles permanecen dentro de la vista del hogar y de la franja del escritorio en ambos bordes. Los nombres largos se acortan con puntos suspensivos y su fondo sigue el texto mostrado.
