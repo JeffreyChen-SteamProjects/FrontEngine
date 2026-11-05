@@ -881,7 +881,7 @@ class PetHomePage(SettingPage):
         self.packs_label.setText(packs_text(self.service.store))
         self.view.set_world(self.service.world, self.zone)
         for panel in (self.residents, self.goals, self.layout_panel, self.shop, self.storage, self.work,
-                      self.collection):
+                      self.collection, self.inbox):
             panel.refresh_lists()
         self.refresh_live()
         for strip in self.strip_list:         # a new pet or piece must take clicks even while paused

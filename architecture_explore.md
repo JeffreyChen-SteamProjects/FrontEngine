@@ -745,3 +745,5 @@ Residents as characters: `show/pet_game/resident_art.py` maps a resident's activ
 家園面板保留頁面已持有的生命週期，以 owned_action 限制使用者指令入口；藍圖選檔結果經 after_dialog 再檢查才寫檔或建立視窗。刷新與關閉清理仍與新動作接納分開。
 
 Daily commission changes emit `commissions_refreshed` once per generated game day from `utils/pet_game/goals.py`. The home page consumes the event to refresh visible offers without waiting for unrelated life or reward events.
+
+Inbox history keeps copied event payloads with the resident name and recipe translation key/fallback captured at arrival. Rendering uses the current language; repeat identity uses event values rather than translated text. Records retain no world or widget reference. The home refresh path includes the inbox.

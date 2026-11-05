@@ -37,22 +37,17 @@ def category(event: dict) -> str | None:
     return None
 
 
-def line(world, event: dict) -> str:
+def line(event: dict) -> str:
     kind = event["kind"]
-    if world is None:                       # no home loaded: only problems can still arrive
-        return translate("pet_home_note_failed", "{text}").format(text=event.get("text", kind))
-    resident = world.residents.get(event.get("resident"))
-    name = resident.name if resident else ""
+    name = event.get("resident_name", "")
     if kind == "settled":
-        recipe = world.catalog.recipes.get(event.get("recipe"))
-        label = translate(recipe.label_key, recipe.fallback) if recipe else event.get("recipe", "")
+        label = translate(*event["recipe_label"])
         return translate("pet_home_note_settled", "{name} finished {recipe} (+{coins})").format(
             name=name, recipe=label, coins=event.get("coins", 0))
     if kind == "commission_done":
         return translate("pet_home_note_commission", "Commission delivered (+{coins})").format(coins=event["coins"])
     if kind == "auto_job":
-        recipe = world.catalog.recipes.get(event.get("recipe"))
-        label = translate(recipe.label_key, recipe.fallback) if recipe else event.get("recipe", "")
+        label = translate(*event["recipe_label"])
         return translate("pet_home_note_auto_job", "{name} took up {recipe}").format(name=name, recipe=label)
     if kind == "goal_claimed":
         return translate("pet_home_note_goal_claimed", "Reward collected (+{coins})").format(coins=event["coins"])
@@ -91,22 +86,28 @@ class InboxPanel:
         for event in events:
             name = category(event)
             if name is not None and self.wanted(name):
-                self._add(event, name, line(world, event))
+                message = dict(event)
+                resident = world.residents.get(event.get("resident")) if world is not None else None
+                recipe = world.catalog.recipes.get(event.get("recipe")) if world is not None else None
+                message["resident_name"] = resident.name if resident else ""
+                message["recipe_label"] = (recipe.label_key, recipe.fallback) if recipe else ("", event.get("recipe", ""))
+                self._add(message, name)
         self.refresh_lists()
 
     def add_error(self, text: str, time_ms: int) -> None:
         if self.wanted("errors"):
-            self._add({"kind": "save_failed", "time": time_ms, "text": text}, "errors", text)
+            self._add({"kind": "save_failed", "time": time_ms, "text": text}, "errors")
             self.refresh_lists()
 
-    def _add(self, event: dict, name: str, text: str) -> None:
+    def _add(self, event: dict, name: str) -> None:
         key = (event["kind"], event.get("resident"), event.get("recipe"), event.get("reason"),
-               event.get("event"), text)
+               event.get("event"), event.get("coins"), event.get("text"), event.get("resident_name"),
+               event.get("recipe_label"))
         last = self.entries[-1] if self.entries else None
         if last is not None and last["key"] == key and 0 <= event.get("time", 0) - last["time"] <= FOLD_MS:
             last.update(count=last["count"] + 1, time=event.get("time", 0))
         else:
-            self.entries.append({"key": key, "text": text, "count": 1, "time": event.get("time", 0),
+            self.entries.append({"key": key, "event": event, "count": 1, "time": event.get("time", 0),
                                  "category": name})
             self.entries = self.entries[-MAX_LINES:]
         self.unread += 1
@@ -120,5 +121,5 @@ class InboxPanel:
         for entry in reversed(self.entries):
             suffix = " " + translate("pet_home_note_times", "×{count}").format(count=entry["count"]) \
                 if entry["count"] > 1 else ""
-            self.list.addItem(entry["text"] + suffix)
+            self.list.addItem(line(entry["event"]) + suffix)
         self.count.setText(translate("pet_home_inbox_unread", "{count} new").format(count=self.unread))

@@ -103,6 +103,54 @@ def test_inbox_sorts_and_folds_everything_that_happened(page):
     assert page.inbox.count.text() == "0 new"
 
 
+def test_inbox_history_follows_language_changes_and_keeps_repeat_counts(make_main_window):
+    from frontengine.ui.menu.language_menu import set_language
+    from frontengine.utils.multi_language.retranslate import translate
+
+    window = make_main_window()
+    assert set_language('English', window)
+    page = window.pet_home_ui
+    page.create_home()
+    page.service.pause('test')
+    world = page.service.world
+    resident = next(iter(world.residents.values()))
+    event = {'kind': 'settled', 'resident': resident.identifier, 'recipe': 'letter', 'coins': 12, 'time': 1000}
+    page.inbox.on_events([event, {**event, 'time': 2000}], world)
+    english = page.inbox.list.item(0).text()
+    try:
+        assert set_language('France', window)
+        recipe = world.catalog.recipes['letter']
+        expected = translate('pet_home_note_settled').format(
+            name=resident.name, recipe=translate(recipe.label_key, recipe.fallback), coins=12)
+        assert expected not in english
+        assert page.inbox.list.item(0).text() == expected + ' ' + translate('pet_home_note_times').format(count=2)
+        assert page.inbox.count.text() == translate('pet_home_inbox_unread').format(count=2)
+        page.inbox.on_events([{**event, 'time': 3000}], world)
+        assert page.inbox.list.count() == 1
+        assert page.inbox.entries[0]['count'] == 3
+    finally:
+        set_language('English', window)
+
+
+def test_inbox_history_keeps_names_and_rewards_from_when_the_event_arrived(page):
+    world = page.service.world
+    resident = next(iter(world.residents.values()))
+    resident.name = 'Original name'
+    event = {'kind': 'settled', 'resident': resident.identifier, 'recipe': 'letter', 'coins': 12, 'time': 1000}
+    page.inbox.on_events([event], world)
+    original = page.inbox.list.item(0).text()
+    resident.name = 'New name'
+    event['coins'] = 99
+    page.inbox.refresh_lists()
+    assert page.inbox.list.item(0).text() == original
+    assert 'Original name' in original
+    assert '(+12)' in original
+    page.inbox.on_events([{**event, 'coins': 24, 'time': 2000}], world)
+    assert page.inbox.list.count() == 2
+    assert 'New name' in page.inbox.list.item(0).text()
+    assert '(+24)' in page.inbox.list.item(0).text()
+
+
 @pytest.mark.parametrize("event, expected", [
     ({"kind": "settled"}, "work"), ({"kind": "interrupted", "reason": "tired"}, "needs"),
     ({"kind": "interrupted", "reason": "furniture_moved"}, None), ({"kind": "completed"}, None),

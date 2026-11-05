@@ -281,3 +281,5 @@ Home panels retain their page lifetime and guard user-command entry points with 
 HomeTabs permits home combo boxes and sliders to shrink within their panels; the shared form layout still stacks labels when needed. Home shortcuts use FlowLayout. The home canvas retains its own horizontal scroll area.
 
 Daily commission changes emit `commissions_refreshed` once per generated game day from `utils/pet_game/goals.py`. The home page consumes the event to refresh visible offers without waiting for unrelated life or reward events.
+
+Inbox history keeps copied event payloads with the resident name and recipe translation key/fallback captured at arrival. Rendering uses the current language; repeat identity uses event values rather than translated text. Records retain no world or widget reference. The home refresh path includes the inbox.
