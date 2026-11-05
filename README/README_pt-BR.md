@@ -91,6 +91,8 @@ As ações dos painéis da casa são recusadas durante a preparação e execuç�
 
 Após criar uma casa, os atalhos e os textos longos de botões e caixas de seleção quebram em várias linhas em janelas estreitas. Os controles se ajustam ao painel; o desenho da casa mantém sua própria rolagem horizontal. Os nomes e as instruções do móvel selecionado quebram em várias linhas nos painéis estreitos, evitando que a aba Móveis alargue as outras abas da casa. O título da casa e as contagens de móveis em Mochila e Coleção também quebram em várias linhas nos painéis estreitos.
 
+As mensagens de ações da casa acompanham as mudanças de idioma e preservam quantidades, caminhos de arquivos e detalhes originais dos erros. Salvar com sucesso limpa o aviso de falha correspondente sem apagar mensagens mais recentes.
+
 As encomendas diárias são atualizadas na tela quando o dia do jogo muda, mesmo sem outro evento de vida ou recompensa.
 
 Os eventos já recebidos acompanham as mudanças de idioma e mantêm suas contagens de repetição, nomes originais dos animais e valores das recompensas. Novas notas e a ação de marcar tudo como lido também atualizam imediatamente a lista de pendências enquanto o lar está pausado.

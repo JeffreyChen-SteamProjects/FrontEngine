@@ -121,6 +121,72 @@ def test_no_home_offers_creation_and_disables_the_panels(page):
     assert page.status.text() == translate("pet_home_create_hint")
 
 
+@pytest.mark.parametrize('operation', ['move', 'result', 'photo', 'blueprint', 'save_error'])
+def test_operation_message_follows_language_without_losing_values(page, tmp_path, monkeypatch, operation):
+    from PySide6.QtGui import QPixmap
+    from frontengine.utils.multi_language.language_wrapper import language_wrapper
+    from frontengine.utils.multi_language.retranslate import retranslator
+
+    language_wrapper.reset_language('English')
+    retranslator.apply()
+    page.create_home()
+    values = {}
+    if operation == 'move':
+        key, values = 'pet_home_moved_in', {'count': 1}
+    elif operation == 'result':
+        page.report('pick_item')
+        key = 'pet_home_result_pick_item'
+    elif operation == 'photo':
+        picture = QPixmap(8, 8)
+        picture.fill(Qt.GlobalColor.white)
+        target = page.goals.save_photo(picture, 'test')
+        assert target.is_file()
+        key, values = 'pet_home_photo_saved', {'path': target}
+    elif operation == 'blueprint':
+        target = tmp_path / 'maison-{original}.json'
+        monkeypatch.setattr(page.layout_panel, 'choose_save_path', lambda: str(target))
+        assert page.layout_panel.share_blueprint() == target
+        key, values = 'pet_home_blueprint_saved', {'path': target}
+    else:
+        page.service.save_failed.emit('disk {original} unavailable')
+        key, values = 'pet_home_save_failed', {'error': 'disk {original} unavailable'}
+    before = page.message.text()
+    try:
+        assert language_wrapper.reset_language('France')
+        retranslator.apply()
+        assert page.message.text() == translate(key).format(**values)
+        assert page.message.text() != before
+        if operation == 'save_error':
+            page.service.saved.emit()
+            assert page.message.text() == ''
+            assert page.message.isHidden()
+    finally:
+        language_wrapper.reset_language('English')
+        retranslator.apply()
+
+
+def test_raw_message_replaces_save_failure_and_survives_language_change(page):
+    from frontengine.utils.multi_language.language_wrapper import language_wrapper
+    from frontengine.utils.multi_language.retranslate import retranslator
+
+    page.create_home()
+    page.service.save_failed.emit('disk unavailable')
+    raw = 'original diagnostic: {path} /tmp/échec.json'
+    page.report_text(raw)
+    try:
+        assert language_wrapper.reset_language('France')
+        retranslator.apply()
+        page.service.saved.emit()
+        assert page.message.text() == raw
+        page.report_text('')
+        language_wrapper.reset_language('English')
+        retranslator.apply()
+        assert page.message.text() == '' and page.message.isHidden()
+    finally:
+        language_wrapper.reset_language('English')
+        retranslator.apply()
+
+
 @pytest.mark.parametrize("failed_store", ["home", "profiles"])
 def test_refused_shutdown_keeps_desktop_home_until_save_retry(page, monkeypatch, failed_store):
     page.create_home()

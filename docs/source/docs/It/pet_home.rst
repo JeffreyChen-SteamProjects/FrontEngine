@@ -1,6 +1,8 @@
 Pagina Casa delle mascotte
 --------------------------
 
+I messaggi delle azioni della casa seguono i cambi di lingua, conservando quantità, percorsi dei file e dettagli originali degli errori. Un salvataggio riuscito cancella il relativo avviso di errore senza eliminare i messaggi più recenti.
+
 I nomi dei mobili selezionati e i suggerimenti vanno a capo nei pannelli stretti, così la scheda Mobili non allarga le altre schede della casa. Anche il titolo della casa e il numero di mobili in Zaino e Collezione vanno a capo nei pannelli stretti.
 
 **Casa delle mascotte** — la prima pagina. Le mascotte salvate si trasferiscono in una piccola casa, ci vivono da sole e lavorano per guadagnare monete.

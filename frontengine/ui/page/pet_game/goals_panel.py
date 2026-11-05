@@ -151,17 +151,17 @@ class GoalsPanel:
         try:
             folder.mkdir(exist_ok=True)
         except OSError:
-            self.page.report_text(translate("pet_home_photo_failed", "The photo could not be saved."))
+            self.page.report_message("pet_home_photo_failed", "The photo could not be saved.")
             return None
         name = "".join(ch for ch in subject if ch.isalnum())[:24]
         prefix = f"day{game_day(world.time_ms)}-{datetime.now():%Y%m%d-%H%M%S}"
         photo = QTemporaryFile(str(folder / f"{prefix}-XXXXXX{'-' + name if name else ''}.png"))
         if not photo.open() or not pixmap.save(photo, "PNG") or not photo.flush():
-            self.page.report_text(translate("pet_home_photo_failed", "The photo could not be saved."))
+            self.page.report_message("pet_home_photo_failed", "The photo could not be saved.")
             return None
         target = Path(photo.fileName())
         photo.setAutoRemove(False)
         photo.close()
         self.page.collection.refresh_lists()
-        self.page.report_text(translate("pet_home_photo_saved", "Photo saved to {path}").format(path=target))
+        self.page.report_message("pet_home_photo_saved", "Photo saved to {path}", path=target)
         return target

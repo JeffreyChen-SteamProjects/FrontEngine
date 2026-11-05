@@ -1,6 +1,8 @@
 Page Maison des mascottes
 -------------------------
 
+Les messages d’action du foyer suivent les changements de langue en conservant quantités, chemins de fichiers et détails des erreurs d’origine. Une sauvegarde réussie efface son avis d’échec sans effacer les messages plus récents.
+
 Les noms et les indications du meuble sélectionné passent à la ligne dans les panneaux étroits pour que l’onglet Meubles n’élargisse pas les autres onglets du foyer. Le titre du foyer et les nombres de meubles dans Sac à dos et Collection passent aussi à la ligne dans les panneaux étroits.
 
 **Maison des mascottes** — la première page. Vos mascottes enregistrées emménagent dans une petite maison, y vivent seules et travaillent pour gagner des pièces.

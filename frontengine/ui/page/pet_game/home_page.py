@@ -12,6 +12,7 @@ from frontengine.ui.runtime_lifetime import owned_action
 from frontengine.ui.runtime_lifetime import OwnedWidgetList
 
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
 
@@ -42,7 +43,6 @@ from frontengine.ui.page.pet_game.home_stage import EmptyHome, HomeTabs, TAB_ORD
 from frontengine.ui.page.pet_game.home_panels import (
     LayoutPanel, ResidentPanel, ShopPanel, StoragePanel, WorkPanel,
 )
-from frontengine.show.pet_game.captions import result_text
 from frontengine.ui.page.pet_game.goals_panel import GoalsPanel
 from frontengine.ui.page.pet_game.inbox_panel import InboxPanel
 from frontengine.user_setting.pet_game_save import HomeSaveStore
@@ -71,6 +71,18 @@ UPDATE_URL = "https://pypi.org/project/frontengine/"
 # The overview on this page is a stage, taller than the desktop strip.
 STAGE_HEIGHT = 220
 LAYER_KEY = "pet_home_layer"
+
+
+@dataclass(frozen=True)
+class _TranslatedMessage:
+    key: str
+    fallback: str
+    values: tuple[tuple[str, object], ...]
+    save_failure: bool = False
+
+    def render(self) -> str:
+        text = translate(self.key, self.fallback)
+        return text.format(**dict(self.values)) if self.values else text
 
 
 def workshop_pack_roots() -> list[Path]:
@@ -122,7 +134,7 @@ class PetHomePage(SettingPage):
         self.profiles = self.service.profiles
         self.selected_resident: str | None = None
         self.selected_furniture: str | None = None
-        self._save_failure_message = False
+        self._message: _TranslatedMessage | str = ""
         self.strip_list: list[HomeStrip] = OwnedWidgetList(self.lifetime)      # registered with the Control Center
         self.art = ResidentArt(self.service,
                                library_factory=partial(PetAssetLibrary, self.lifetime.storage.directory / 'pet-assets'),
@@ -561,7 +573,7 @@ class PetHomePage(SettingPage):
             first = self.profiles.create()["id"]
             moved = int(self.service.adopt(first) == "accepted")
         if moved:
-            self.report_text(translate("pet_home_moved_in", "{count} pets moved in.").format(count=moved))
+            self.report_message("pet_home_moved_in", "{count} pets moved in.", count=moved)
         self._set_running(True)
         self.sync_strip()
         self.refresh()
@@ -627,8 +639,8 @@ class PetHomePage(SettingPage):
             self.report_text(str(error))
             return
         self.load_result = self.service.store.load()
-        self.report_text(translate("pet_home_kept_as", "The old file was kept as {name}.").format(
-            name=kept.name if kept else "-"))
+        self.report_message("pet_home_kept_as", "The old file was kept as {name}.",
+                            name=kept.name if kept else "-")
         self.refresh()
 
     def shutdown(self) -> bool:
@@ -806,11 +818,22 @@ class PetHomePage(SettingPage):
         self.layout_panel.refresh_lists()
 
     def report(self, code: object) -> None:
-        self.report_text(result_text(code) if isinstance(code, str) else "")
-        self._save_failure_message = code == "save_failed"
+        if isinstance(code, str):
+            self.report_message("pet_home_result_" + code, code, save_failure=code == "save_failed")
+        else:
+            self.report_text("")
+
+    def report_message(self, key: str, fallback: str = "", *, save_failure: bool = False,
+                       **values: object) -> None:
+        self._message = _TranslatedMessage(key, fallback, tuple(values.items()), save_failure)
+        self._refresh_message()
 
     def report_text(self, text: str) -> None:
-        self._save_failure_message = False
+        self._message = text
+        self._refresh_message()
+
+    def _refresh_message(self) -> None:
+        text = self._message.render() if isinstance(self._message, _TranslatedMessage) else self._message
         self.message.setText(text)
         self.message.setVisible(bool(text))
 
@@ -844,13 +867,12 @@ class PetHomePage(SettingPage):
         world = self.service.world
         self.inbox.add_error(translate("pet_home_save_failed", "The home could not be saved ({error}).")
                              .format(error=error), world.time_ms if world else 0)
-        self.report_text(translate("pet_home_save_failed",
-                                   "The home could not be saved ({error}). It will retry; nothing is lost yet.")
-                         .format(error=error))
-        self._save_failure_message = True
+        self.report_message("pet_home_save_failed",
+                            "The home could not be saved ({error}). It will retry; nothing is lost yet.",
+                            save_failure=True, error=error)
 
     def _on_saved(self) -> None:
-        if self._save_failure_message:
+        if isinstance(self._message, _TranslatedMessage) and self._message.save_failure:
             self.report_text("")
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
@@ -880,6 +902,7 @@ class PetHomePage(SettingPage):
 
     def refresh(self) -> None:
         """Rebuild lists (after commands, events and language changes)."""
+        self._refresh_message()
         self.packs_label.setText(packs_text(self.service.store))
         self.view.set_world(self.service.world, self.zone)
         for panel in (self.residents, self.goals, self.layout_panel, self.shop, self.storage, self.work,

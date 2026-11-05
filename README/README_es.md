@@ -88,6 +88,8 @@ Las acciones de los paneles del hogar se rechazan durante la preparación y ejec
 
 Tras crear un hogar, los accesos y los textos largos de botones y casillas se ajustan en varias líneas en ventanas estrechas. Los controles se adaptan al panel; el dibujo del hogar conserva su desplazamiento horizontal independiente. Los nombres y las indicaciones del mueble seleccionado se ajustan en varias líneas en paneles estrechos para que la pestaña Muebles no ensanche las demás pestañas del hogar. El título del hogar y los recuentos de muebles de Mochila y Colección también se ajustan en varias líneas en paneles estrechos.
 
+Los mensajes de acciones del hogar cambian con el idioma y conservan cantidades, rutas y detalles originales de los errores. Guardar correctamente elimina el aviso de fallo correspondiente sin borrar mensajes posteriores.
+
 Los encargos diarios se actualizan en pantalla al cambiar el día del juego, aunque no ocurra otro evento de vida o recompensa.
 
 Los eventos existentes de la bandeja de entrada cambian de idioma y conservan sus repeticiones, nombres originales de mascotas y recompensas. Las notas nuevas y marcar todo como leído actualizan la lista de pendientes de inmediato, incluso con el hogar en pausa.

@@ -87,6 +87,8 @@ Les actions des panneaux du foyer sont refusées pendant la préparation et l’
 
 Après la création du foyer, les raccourcis et les longs textes des boutons et cases à cocher passent à la ligne dans les fenêtres étroites. Les commandes s’adaptent au panneau ; le dessin du foyer garde son propre défilement horizontal. Les noms et les indications du meuble sélectionné passent à la ligne dans les panneaux étroits pour que l’onglet Meubles n’élargisse pas les autres onglets du foyer. Le titre du foyer et les nombres de meubles dans Sac à dos et Collection passent aussi à la ligne dans les panneaux étroits.
 
+Les messages d’action du foyer suivent les changements de langue en conservant quantités, chemins de fichiers et détails des erreurs d’origine. Une sauvegarde réussie efface son avis d’échec sans effacer les messages plus récents.
+
 Les commandes quotidiennes se mettent à jour à l’écran au changement de journée du jeu, même sans autre événement de vie ou de récompense.
 
 Les événements déjà reçus suivent les changements de langue et conservent leur nombre de répétitions, les noms d’origine des animaux et les montants des récompenses. Les nouvelles notes et le marquage de tous les messages comme lus mettent aussi à jour immédiatement la liste des éléments à traiter, même lorsque le foyer est en pause.

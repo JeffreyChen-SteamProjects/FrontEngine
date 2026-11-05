@@ -88,6 +88,8 @@ Home panel actions are rejected while closing is prepared or in progress; bluepr
 
 After creating a home, shortcuts and long button or checkbox captions wrap in narrow windows. Home controls can shrink to fit their panel; the home drawing keeps its own horizontal scrolling. Selected furniture names and prompts wrap in narrow panels, so the Furniture tab does not widen the other home tabs. The home title and furniture counts in Backpack and Collection also wrap to fit narrow panels.
 
+Home operation messages follow language changes while preserving counts, file paths and original error details. A successful save clears its failure notice without clearing newer feedback.
+
 Daily commissions refresh on screen when the game day changes, even when no other life or reward event occurs.
 
 Existing inbox events follow language changes and retain their repeat counts, original pet names and reward amounts. New notes and marking all as read also update the pending list immediately while the home is paused.

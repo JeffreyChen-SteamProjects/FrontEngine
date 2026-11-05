@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261105-61 | 2026-11-05 | Keep home operation feedback translatable across language changes | #ui #testing | [2026-11](2026-11.md) |
 | U-20261105-60 | 2026-11-05 | Verify native home layouts inside the complete main window | #ui #acceptance | [2026-11](2026-11.md) |
 | U-20261105-59 | 2026-11-05 | Wrap home headings and collection totals at native narrow widths | #ui #testing #acceptance | [2026-11](2026-11.md) |
 | U-20261105-58 | 2026-11-05 | Inspect native home wrapping and preserve narrower layout failures | #ui #acceptance | [2026-11](2026-11.md) |
@@ -318,6 +319,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 114 |
+| [2026-11.md](2026-11.md) | 2026-11 | 115 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

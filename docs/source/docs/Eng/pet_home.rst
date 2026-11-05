@@ -1,6 +1,8 @@
 Pet home Page
 -------------
 
+Home operation messages follow language changes while preserving counts, file paths and original error details. A successful save clears its failure notice without clearing newer feedback.
+
 Selected furniture names and prompts wrap in narrow panels, so the Furniture tab does not widen the other home tabs. The home title and furniture counts in Backpack and Collection also wrap to fit narrow panels.
 
 **Pet home** — the first page. Your saved pets move into a small home, live there on their own and work for home coins.

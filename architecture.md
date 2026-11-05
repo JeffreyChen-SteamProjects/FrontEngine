@@ -1,5 +1,7 @@
 # FrontEngine Architecture
 
+PetHomePage keeps operation feedback as either raw diagnostic text or a translated message value (key, fallback, captured parameters, save-failure classification). Panel actions use report_message for localized feedback and report_text for raw errors; refresh re-renders without repeating operations. Save completion clears only an outstanding save-failure message.
+
 Windows requirements include the PyWinRT Media.Control projection for song metadata. Nuitka explicitly includes `winrt` because the Now playing loader imports its namespace dynamically; legacy `winsdk` remains a runtime fallback.
 
 The executable builder checks platform-filtered dependency metadata and version constraints before invoking Nuitka, preventing incomplete build environments from silently producing broken distributions.

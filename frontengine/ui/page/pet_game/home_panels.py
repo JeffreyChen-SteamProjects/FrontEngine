@@ -496,7 +496,7 @@ class LayoutPanel:
         except OSError as error:
             self.page.report_text(str(error))
             return None
-        self.page.report_text(translate("pet_home_blueprint_saved", "Blueprint saved to {path}").format(path=target))
+        self.page.report_message("pet_home_blueprint_saved", "Blueprint saved to {path}", path=target)
         return target
 
     @owned_action
@@ -511,8 +511,8 @@ class LayoutPanel:
                 raw = stream.read(MAX_BLUEPRINT_BYTES + 1)
             world, missing = visit_blueprint(raw.decode("utf-8"), self.page.service.store.catalog)
         except (OSError, ValueError, UnicodeDecodeError) as error:
-            self.page.report_text(translate("pet_home_blueprint_invalid", "That file is not a home blueprint ({error}).")
-                                  .format(error=error))
+            self.page.report_message("pet_home_blueprint_invalid", "That file is not a home blueprint ({error}).",
+                                     error=str(error))
             return None
         dialog = BlueprintVisit(world, missing, source.stem, self.page)
         dialog.finished.connect(lambda _code, d=dialog: self.visits.remove(d) if d in self.visits else None)

@@ -91,6 +91,8 @@ Während der Vorbereitung und Durchführung des Schließens werden Aktionen der 
 
 Nach dem Erstellen eines Heims werden Schnellaktionen sowie lange Schaltflächen- und Kontrollkästchentexte in schmalen Fenstern umgebrochen. Die Bedienelemente passen sich dem Panel an; die Heimansicht behält ihre eigene horizontale Bildlaufleiste. Namen und Hinweise zur ausgewählten Einrichtung werden in schmalen Panels umgebrochen, damit der Möbel-Tab die anderen Heim-Tabs nicht verbreitert. Auch der Heimtitel und die Möbelzahlen in Rucksack und Sammlung werden in schmalen Panels umgebrochen.
 
+Heim-Aktionsmeldungen wechseln mit der Sprache und behalten Anzahlen, Dateipfade und ursprüngliche Fehlerdetails. Erfolgreiches Speichern löscht die zugehörige Fehlermeldung, aber keine neueren Rückmeldungen.
+
 Die täglichen Aufträge werden beim Wechsel des Spieltags auf dem Bildschirm aktualisiert, auch wenn kein anderes Lebens- oder Belohnungsereignis eintritt.
 
 Vorhandene Eingangsmeldungen folgen Sprachwechseln und behalten ihre Wiederholungszahlen, ursprünglichen Tiernamen und Belohnungsbeträge. Neue Meldungen und das Markieren aller Meldungen als gelesen aktualisieren die Aufgabenliste sofort, auch bei pausiertem Heim.

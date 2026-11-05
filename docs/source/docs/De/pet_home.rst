@@ -1,6 +1,8 @@
 Seite Haustier-Zuhause
 ----------------------
 
+Heim-Aktionsmeldungen wechseln mit der Sprache und behalten Anzahlen, Dateipfade und ursprüngliche Fehlerdetails. Erfolgreiches Speichern löscht die zugehörige Fehlermeldung, aber keine neueren Rückmeldungen.
+
 Namen und Hinweise zur ausgewählten Einrichtung werden in schmalen Panels umgebrochen, damit der Möbel-Tab die anderen Heim-Tabs nicht verbreitert. Auch der Heimtitel und die Möbelzahlen in Rucksack und Sammlung werden in schmalen Panels umgebrochen.
 
 **Haustier-Zuhause** — die erste Seite. Deine gespeicherten Haustiere ziehen in ein kleines Zuhause, leben dort selbstständig und arbeiten für Münzen.
