@@ -5,7 +5,6 @@ from PySide6.QtGui import QMouseEvent
 
 from frontengine.show.pet_game.home_service import HomeService
 from frontengine.ui.page.pet_game.home_page import PetHomePage
-from frontengine.user_setting.pet_game_save import HomeSaveStore
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.utils.pet_game import behaviour, snapshot
 from frontengine.utils.pet_game.catalog import builtin_catalog
@@ -104,12 +103,13 @@ class FakeScreen:
 
 
 @pytest.fixture
-def page(tmp_path, monkeypatch):
+def page(tmp_path, monkeypatch, *, home_store_factory, lifetime_factory):
     from frontengine.user_setting.user_setting_file import user_setting_dict
+    lifetime_factory()
     monkeypatch.setitem(user_setting_dict, "pet_home_running", False)
     monkeypatch.setitem(user_setting_dict, "pet_home_on_desktop", True)
-    service = HomeService(None, HomeSaveStore(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None))
-    widget = PetHomePage(service)
+    service = HomeService(None, home_store_factory(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None))
+    widget = PetHomePage(service, lifetime=lifetime_factory())
     widget.resize(1200, 900)
     widget.show()
     widget.create_home()

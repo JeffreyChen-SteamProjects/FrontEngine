@@ -90,9 +90,10 @@ class Library:
         return self.catalog, ()
 
 
-def test_dialog_offers_only_fitting_pieces_and_explains_the_rest(closet):
+def test_dialog_offers_only_fitting_pieces_and_explains_the_rest(closet, *, lifetime_factory):
+    lifetime_factory()
     profiles, record, catalog, assets = closet
-    dialog = PetWardrobeDialog(profiles, record['id'], library=Library(catalog))
+    dialog = PetWardrobeDialog(profiles, record['id'], library=Library(catalog), lifetime=lifetime_factory())
     try:
         assert not dialog.slots['head'].isEnabled()
         assert dialog.status.text() == translate('pet_wardrobe_legacy')
@@ -109,9 +110,10 @@ def test_dialog_offers_only_fitting_pieces_and_explains_the_rest(closet):
         dialog.close()
 
 
-def test_try_on_replacement_note_and_comparison_preview(closet):
+def test_try_on_replacement_note_and_comparison_preview(closet, *, lifetime_factory):
+    lifetime_factory()
     profiles, record, catalog, assets = closet
-    dialog = PetWardrobeDialog(profiles, record['id'], library=Library(catalog))
+    dialog = PetWardrobeDialog(profiles, record['id'], library=Library(catalog), lifetime=lifetime_factory())
     try:
         dialog.character.setCurrentIndex(dialog.character.findData(_ref(assets['cat'])))
         dialog._choose_character()
@@ -157,12 +159,13 @@ def test_live_pet_switches_outfit_only_after_a_drag_ends(tmp_path, closet):
         pet.close()
 
 
-def test_library_backed_dialog_still_scans_real_assets(tmp_path):
+def test_library_backed_dialog_still_scans_real_assets(tmp_path, *, lifetime_factory):
+    lifetime_factory()
     make_asset(tmp_path / 'source')
     library = PetAssetLibrary(tmp_path / 'library')
     library.install(tmp_path / 'source')
     profiles = PetProfiles({}, lambda: None)
-    dialog = PetWardrobeDialog(profiles, profiles.create()['id'], library=library)
+    dialog = PetWardrobeDialog(profiles, profiles.create()['id'], library=library, lifetime=lifetime_factory())
     try:
         assert dialog.character.count() == 2
     finally:

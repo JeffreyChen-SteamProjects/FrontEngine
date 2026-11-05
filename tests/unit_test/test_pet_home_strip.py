@@ -6,7 +6,6 @@ from PySide6.QtGui import QMouseEvent
 from frontengine.show.pet_game.home_service import HomeService
 from frontengine.show.pet_game.home_strip import FRAME_MS, HIDDEN_REASON, HomeStrip
 from frontengine.ui.page.pet_game.home_page import PetHomePage
-from frontengine.user_setting.pet_game_save import HomeSaveStore
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.utils.pet_game.catalog import builtin_catalog
 
@@ -28,11 +27,12 @@ def _settings(monkeypatch):
 
 
 @pytest.fixture
-def page(tmp_path):
+def page(tmp_path, *, home_store_factory, lifetime_factory):
+    lifetime_factory()
     clock = Clock()
-    service = HomeService(None, HomeSaveStore(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None),
+    service = HomeService(None, home_store_factory(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None),
                           clock=clock)
-    widget = PetHomePage(service)
+    widget = PetHomePage(service, lifetime=lifetime_factory())
     widget.clock = clock
     widget.create_home()                      # the starter kit is set out by itself
     # creating a home with no pets brings a first one

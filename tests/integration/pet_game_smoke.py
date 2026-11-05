@@ -95,16 +95,22 @@ def run(output: Path, seed: int, minutes: int, residents: int, shots: int) -> di
     from frontengine.show.pet_game.home_service import HomeService
     from frontengine.show.pet_game.home_view import HomeView
     from frontengine.user_setting.pet_game_save import HomeSaveStore
+    from frontengine.user_setting.storage_session import StorageSession
     from frontengine.utils.pet_game import simulation
     from frontengine.utils.pet_game.catalog import builtin_catalog
 
     _refuse_media_keys()
     output.mkdir(parents=True, exist_ok=True)
     profiles, pets = _test_profiles(seed, residents)
-    service = HomeService(None, HomeSaveStore(Path.cwd(), builtin_catalog()), profiles)
-    view = HomeView()
+    storage = StorageSession.open(Path.cwd())
+    storage.settings.update(profiles.settings)
+    storage.save_settings()
+    store = HomeSaveStore(storage, builtin_catalog())
+    service = view = None
     settlements, counts, pictures = [], Counter(), []
     try:
+        service = HomeService(None, store, storage.profiles())
+        view = HomeView()
         service.create_home("smoke", 0, 900, 40, furnish=True, seed=seed, home=_identity(seed, "home"))
         for identifier in pets:
             assert service.adopt(identifier) == "accepted"
@@ -133,8 +139,13 @@ def run(output: Path, seed: int, minutes: int, residents: int, shots: int) -> di
             "screenshots": pictures, "saved": service.save_now(),
         }
     finally:
-        view.close()
-        service.shutdown()
+        if view is not None:
+            view.close()
+        if service is not None:
+            assert service.shutdown()
+        else:
+            store.close()
+        storage.close()
     (output / "result.json").write_text(json.dumps(result, indent=2, ensure_ascii=False), encoding="utf-8")
     return result
 

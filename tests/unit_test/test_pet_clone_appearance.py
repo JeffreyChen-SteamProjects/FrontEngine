@@ -8,8 +8,9 @@ from test_pet_profile_sessions import _sprite
 from test_pet_variants import variant_asset
 
 
-def test_clone_uses_source_sprite_and_custom_parts_after_page_selection_changes(tmp_path, monkeypatch):
-    page = PetSettingUI()
+def test_clone_uses_source_sprite_and_custom_parts_after_page_selection_changes(tmp_path, monkeypatch, *, lifetime_factory):
+    lifetime_factory()
+    page = PetSettingUI(lifetime=lifetime_factory())
     profiles = PetProfiles({}, lambda: None)
     page.profile_controls.profiles = profiles
     page.profile_controls.refresh()
@@ -52,12 +53,13 @@ def test_clone_uses_source_sprite_and_custom_parts_after_page_selection_changes(
         page.close()
 
 
-def test_puppet_clone_keeps_model_and_size_when_page_selects_sprite(tmp_path, monkeypatch):
+def test_puppet_clone_keeps_model_and_size_when_page_selects_sprite(tmp_path, monkeypatch, *, lifetime_factory):
     import pytest
+    lifetime_factory()
     pytest.importorskip('Imervue.puppet.document_io')
     from test_puppet_startup_lifecycle import asset
     from frontengine.show.pet.puppet_pet import PuppetPetWidget
-    page = PetSettingUI()
+    page = PetSettingUI(lifetime=lifetime_factory())
     page.profile_controls.profiles = PetProfiles({}, lambda: None)
     page.profile_controls.refresh()
     page.pet_image_path = str(asset(tmp_path))

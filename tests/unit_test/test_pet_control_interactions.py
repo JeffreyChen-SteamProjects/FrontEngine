@@ -81,9 +81,10 @@ def test_manager_clears_pointer_interaction_and_keeps_cooldown(social_pets):
     assert controls.interaction.currentData() == selected
 
 
-def test_manager_puppet_care_uses_same_completion(puppet):
+def test_manager_puppet_care_uses_same_completion(puppet, *, lifetime_factory):
     from frontengine.ui.page.pet.pet_setting_ui import PetSettingUI
-    page = PetSettingUI()
+    lifetime_factory()
+    page = PetSettingUI(lifetime=lifetime_factory())
     try:
         controls = page.profile_controls
         controls.profiles = puppet.profile_session.profiles

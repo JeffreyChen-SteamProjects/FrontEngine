@@ -13,6 +13,7 @@ they belong - which is what makes it infinite.
 """
 from __future__ import annotations
 
+from frontengine.utils.work_lifetime import WorkLifetime
 from pathlib import Path
 import math
 from typing import Any, Dict, List, Optional, Tuple
@@ -75,9 +76,12 @@ class WhiteboardWidget(BaseWidget):
     無限畫布。筆畫以畫布座標保存，畫的時候才換算成螢幕座標。
     """
 
-    def __init__(self, color: str = DEFAULT_COLOR, width: int = DEFAULT_WIDTH) -> None:
+    def __init__(self, color: str = DEFAULT_COLOR, width: int = DEFAULT_WIDTH, *, lifetime=None) -> None:
         front_engine_logger.info("[WhiteboardWidget] Init")
         super().__init__()
+        self._owns_lifetime = lifetime is None
+        self.lifetime = lifetime or WorkLifetime()
+        self.lifetime.adopt(self)
         candidate = QColor(color)
         self.color = candidate if candidate.isValid() else QColor(DEFAULT_COLOR)
         self.pen_width = max(1, min(64, int(width)))
@@ -315,6 +319,8 @@ class WhiteboardWidget(BaseWidget):
 
     def closeEvent(self, event) -> None:
         self.controls.shutdown()
+        if self._owns_lifetime:
+            self.lifetime.close()
         super().closeEvent(event)
 
     def wheelEvent(self, event) -> None:

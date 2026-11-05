@@ -3,7 +3,7 @@ import json
 import zipfile
 
 import pytest
-from PySide6.QtCore import QCoreApplication, QEvent, QThreadPool
+from PySide6.QtCore import QCoreApplication, QEvent
 from PySide6.QtTest import QTest
 
 from frontengine.show.pet.inkside.cast import TEMPLATES
@@ -67,17 +67,18 @@ def test_reactions_move_the_rig_and_return_to_defaults(tmp_path):
         QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
 
 
-def test_pet_page_generates_and_spawns_a_builtin_puppet(tmp_path, monkeypatch):
+def test_pet_page_generates_and_spawns_a_builtin_puppet(tmp_path, monkeypatch, *, lifetime_factory):
     from frontengine.show.pet.puppet_pet import PuppetPetWidget
     from frontengine.ui.page.pet.pet_setting_ui import PetSettingUI
     monkeypatch.chdir(tmp_path)
-    page = PetSettingUI()
+    lifetime_factory()
+    page = PetSettingUI(lifetime=lifetime_factory())
     try:
         page.profile_controls.profiles = PetProfiles({}, lambda: None)
         page.builtin_character.setCurrentIndex(page.builtin_character.findData('inkside-gill'))
         page.use_builtin_puppet()
         assert not page.builtin_puppet_button.isEnabled()
-        assert QThreadPool.globalInstance().waitForDone(60000)
+        assert page.lifetime.pool().waitForDone(60000)
         QCoreApplication.processEvents()
         assert page.builtin_puppet_button.isEnabled()
         assert page.pet_image_path == str(tmp_path / 'pet-assets' / 'puppets' / 'inkside-gill.puppet')

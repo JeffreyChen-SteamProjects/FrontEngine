@@ -11,9 +11,13 @@ from __future__ import annotations
 import json
 import os
 from dataclasses import dataclass
+from contextlib import contextmanager
+from functools import wraps
+from threading import RLock
 from pathlib import Path
 from typing import Callable
 
+from frontengine.user_setting.storage_session import StorageSession, StorageBusy, StorageClosed, HomeRuntimeInUse
 from frontengine.utils.pet_game import snapshot
 from frontengine.utils.pet_game.catalog import Catalog
 from frontengine.utils.pet_game.world import World
@@ -46,19 +50,90 @@ def _write_file(path: Path, data: bytes) -> None:
         raise
 
 
+def _owned_store_operation(method):
+    @wraps(method)
+    def call(self, *args, **kwargs):
+        with self._operation():
+            return method(self, *args, **kwargs)
+    return call
+
+
 class HomeSaveStore:
     """One mode's save file. ``write`` is injectable so tests can fail the disk."""
 
-    def __init__(self, directory: Path, catalog: Catalog, mode: str = "manage",
+    def __init__(self, storage: StorageSession, catalog: Catalog, mode: str = "manage",
                  write: Callable[[Path, bytes], None] = _write_file) -> None:
         if mode not in FILE_NAMES:
             raise ValueError("Unknown home save mode")
-        self.path = Path(directory) / FILE_NAMES[mode]
+        self.storage = storage
+        self._claim = storage._claim_home(mode)
+        self._mutex = RLock()
+        self._io_mutex = RLock()
+        self._operations = 0
+        self._closed = False
+        self._service = None
+        self.path = storage.directory / FILE_NAMES[mode]
         self.backup = self.path.with_name(self.path.name + ".bak")
         self.catalog = catalog
         self.mode = mode
         self._write = write
         self.read_only = False
+
+    @contextmanager
+    def _operation(self):
+        with self.storage._operation():
+            with self._mutex:
+                if self._closed:
+                    raise StorageClosed('Home store is closed')
+                self._operations += 1
+            try:
+                with self._io_mutex:
+                    for path in (self.path, self.backup):
+                        self.storage._checked_path(path.name)
+                        self.storage._checked_path(path.name + '.tmp')
+                    yield
+            finally:
+                with self._mutex:
+                    self._operations -= 1
+
+    def _attach_service(self, service) -> None:
+        with self._operation():
+            with self._mutex:
+                if self._service is not None:
+                    raise HomeRuntimeInUse('Home store already has a service')
+                self._service = service
+
+    def _detach_service(self, service) -> None:
+        self.storage._check_pid()
+        with self._mutex:
+            if self._service is service:
+                self._service = None
+
+    def _close_service(self, service) -> None:
+        self.storage._check_pid()
+        with self._mutex:
+            if self._closed:
+                return
+            if self._service not in (None, service) or self._operations:
+                raise StorageBusy('Home service still has admitted operations')
+            self._claim.release()
+            self._service = None
+            self._closed = True
+
+    def for_mode(self, mode: str) -> HomeSaveStore:
+        with self._operation():
+            return HomeSaveStore(self.storage, self.catalog, mode, self._write)
+
+    def close(self) -> None:
+        """Release the mode only after its service and admitted writes finish."""
+        self.storage._check_pid()
+        with self._mutex:
+            if self._closed:
+                return
+            if self._service is not None or self._operations:
+                raise StorageBusy('Home store still has a service or operation')
+            self._closed = True
+            self._claim.release()
 
     def _read(self, path: Path) -> World:
         with open(path, "rb") as file:
@@ -74,6 +149,7 @@ class HomeSaveStore:
             raise ValueError("Home save belongs to another mode")
         return world
 
+    @_owned_store_operation
     def load(self) -> LoadResult:
         """Read the save without ever modifying it."""
         backup = self.backup.is_file()
@@ -88,6 +164,7 @@ class HomeSaveStore:
             self.read_only = True
             return LoadResult("corrupt", error=str(error), backup_available=backup)
 
+    @_owned_store_operation
     def restore_backup(self) -> LoadResult:
         """Load the last good save; it becomes current only on the next successful save."""
         try:
@@ -99,13 +176,14 @@ class HomeSaveStore:
         self.read_only = False
         return LoadResult("loaded", world, backup_available=True)
 
+    @_owned_store_operation
     def set_aside(self, suffix: str) -> Path | None:
         """Keep an unreadable or newer save under another name so a new home can start."""
         if not suffix.isalnum() or len(suffix) > 32:
             raise ValueError("Invalid set-aside suffix")
         target = None
         if self.path.is_file():
-            target = self.path.with_name(f"{self.path.name}.{suffix}")
+            target = self.storage._checked_path(f"{self.path.name}.{suffix}")
             if target.exists():
                 raise FileExistsError("A set-aside save with this name already exists")
             os.replace(self.path, target)
@@ -125,12 +203,12 @@ class HomeSaveStore:
         """Prove the bytes load back into a valid home; pure CPU work on detached data."""
         snapshot.from_dict(json.loads(data.decode("utf-8")), self.catalog)
 
+    @_owned_store_operation
     def write_encoded(self, data: bytes) -> None:
         """Worker-safe: verify, back up the last good file, then replace. Nothing unverified reaches disk."""
         if self.read_only:
             raise PermissionError("Home save is protected; restore a backup or update FrontEngine")
         self.verify(data)
-        self.path.parent.mkdir(parents=True, exist_ok=True)
         if self.path.is_file():
             try:
                 self._read(self.path)
@@ -139,6 +217,7 @@ class HomeSaveStore:
                 pass          # never let a damaged file replace the last good backup
         self._write(self.path, data)
 
+    @_owned_store_operation
     def save(self, world: World) -> None:
         """Raise on failure; the caller keeps the in-memory world and may retry."""
         if self.read_only:

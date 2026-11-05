@@ -5,7 +5,7 @@ import threading
 import time
 
 import pytest
-from PySide6.QtCore import QPoint, Qt, QEvent, QCoreApplication, QThreadPool
+from PySide6.QtCore import QPoint, Qt, QEvent, QCoreApplication
 from PySide6.QtGui import QImage
 from PySide6.QtTest import QTest
 from PySide6.QtWidgets import QApplication
@@ -177,5 +177,5 @@ def test_file_worker_error_keeps_page_and_close_cancels(tmp_path):
         assert board.strokes == [line()]
     finally:
         release.set()
-        QThreadPool.globalInstance().waitForDone(5000)
+        board.lifetime.pool().waitForDone(5000)
         board.close()

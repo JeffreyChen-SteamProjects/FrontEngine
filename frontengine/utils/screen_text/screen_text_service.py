@@ -128,8 +128,12 @@ class ScreenTextService:
                  consent_provider: Optional[Callable[[], bool]] = None,
                  key_provider: Optional[Callable[[], Optional[str]]] = None,
                  local_backend: Optional[OcrBackend] = None,
-                 text_consent_provider: Optional[Callable[[], bool]] = None) -> None:
+                 text_consent_provider: Optional[Callable[[], bool]] = None, *, lifetime=None) -> None:
         self.model = model
+        self.lifetime = lifetime
+        self._threads = []
+        if lifetime is not None:
+            lifetime.register_pending(self.pending)
         self._consent_provider = consent_provider or (lambda: False)
         self._key_provider = key_provider or api_key
         self._client = None
@@ -247,7 +251,7 @@ class ScreenTextService:
         def worker() -> None:
             on_reply(self.read_result(png_bytes, action, language, question))
 
-        threading.Thread(target=worker, name="frontengine-screen-text", daemon=True).start()
+        self._start_worker(worker, "frontengine-screen-text")
 
     def read_async(self, png_bytes: bytes, on_reply: Callable[[Optional[str]], None],
                    action: Any = ACTION_EXTRACT, language: str = DEFAULT_LANGUAGE,
@@ -258,4 +262,15 @@ class ScreenTextService:
             answer = self.read(png_bytes, action, language, question)
             on_reply(answer)
 
-        threading.Thread(target=worker, name="frontengine-screen-text", daemon=True).start()
+        self._start_worker(worker, "frontengine-screen-text")
+
+    def _start_worker(self, worker, name):
+        if self.lifetime is not None:
+            self.lifetime.require_live()
+        thread = threading.Thread(target=worker, name=name, daemon=True)
+        self._threads.append(thread)
+        thread.start()
+
+    def pending(self) -> bool:
+        self._threads[:] = [thread for thread in self._threads if thread.is_alive()]
+        return bool(self._threads)

@@ -31,7 +31,8 @@ class _StubPage:
         """場景頁的介面 / The scene page's interface."""
 
 
-def _control_center() -> ControlCenterUI:
+def _control_center(*, lifetime_factory) -> ControlCenterUI:
+    lifetime_factory()
     return ControlCenterUI(
         video_setting_ui=_StubPage("video_widget_list"),
         image_setting_ui=_StubPage("image_widget_list"),
@@ -42,12 +43,13 @@ def _control_center() -> ControlCenterUI:
         scene_setting_ui=_StubPage("scene_widget_list"),
         particle_setting_ui=_StubPage("particle_list"),
         redirect_output=False,
-    )
+     lifetime=lifetime_factory())
 
 
 @pytest.fixture(name="centre")
-def _centre() -> ControlCenterUI:
-    centre = _control_center()
+def _centre(*, lifetime_factory) -> ControlCenterUI:
+    lifetime_factory()
+    centre = _control_center(lifetime_factory=lifetime_factory)
     yield centre
     centre.close()
 
@@ -80,7 +82,7 @@ def test_rejected_close_remains_registered_and_keeps_cleanup_services(centre):
         ordinary.close()
 
 
-def test_main_shutdown_checks_each_pet_before_teardown():
+def test_main_shutdown_checks_each_pet_before_teardown(lifetime_factory):
     from types import SimpleNamespace
     from frontengine.ui.main_ui import FrontEngineMainUI
 
@@ -95,6 +97,9 @@ def test_main_shutdown_checks_each_pet_before_teardown():
     assert FrontEngineMainUI._prepare_pet_profiles(owner) is None
     assert calls == ['first', 'second', 'cancel']
     assert messages
+    owner.lifetime = lifetime_factory()
+    owner.children = lambda: []
+    owner.request_shutdown = lambda: FrontEngineMainUI.request_shutdown(owner)
     owner._shutdown_done = False
     owner._prepare_shutdown = lambda: None
     assert FrontEngineMainUI._shutdown(owner) is False

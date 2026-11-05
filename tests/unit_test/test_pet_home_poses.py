@@ -9,7 +9,6 @@ from frontengine.show.pet.inkside.library import VERSION, install_builtin, upgra
 from frontengine.show.pet.wardrobe import WardrobeDraft
 from frontengine.show.pet_game.home_service import HomeService
 from frontengine.show.pet_game.resident_art import PROFESSION_ACTIONS, ResidentArt, semantic_action
-from frontengine.user_setting.pet_game_save import HomeSaveStore
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.utils.pet_game.catalog import builtin_catalog
 from frontengine.utils.pet_game.resident import Activity
@@ -91,16 +90,17 @@ def test_builtin_renderers_have_the_home_poses_only_when_undressed(library):
     assert not dressed.has_action("write")
 
 
-def test_a_resident_wearing_an_older_builtin_is_upgraded_through_a_checked_change(tmp_path, library):
+def test_a_resident_wearing_an_older_builtin_is_upgraded_through_a_checked_change(tmp_path, library, *, home_store_factory, lifetime_factory):
+    lifetime = lifetime_factory()
     profiles = PetProfiles({}, lambda: None)
-    service = HomeService(None, HomeSaveStore(tmp_path, builtin_catalog()), profiles)
+    service = HomeService(None, home_store_factory(tmp_path, builtin_catalog()), profiles)
     service.create_home("screen", 0, 900, 40, seed=3)
     record = profiles.create("Mochi")
     assert service.adopt(record["id"]) == "accepted"
     old = copy.deepcopy(profiles.get(record["id"])["appearance"])
     old["character"] = {"id": "inkside-mochi", "version": "1"}
     profiles.update(record["id"], {"appearance": old})
-    art = ResidentArt(service, library_factory=lambda: library)
+    art = ResidentArt(service, library_factory=lambda: library, lifetime=lifetime)
     try:
         changed = []
         art.changed.connect(lambda: changed.append(True))

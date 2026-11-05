@@ -4,7 +4,6 @@ import threading
 import time
 
 import pytest
-from PySide6.QtCore import QThreadPool
 from PySide6.QtGui import QColor, QImage
 from PySide6.QtWidgets import QApplication
 
@@ -103,8 +102,9 @@ def test_existing_destination_is_untouched_and_alias_import_is_bounded(tmp_path,
         packs.validate_sprite(draft.actions['walk'])
 
 
-def test_preview_speed_size_and_shutdown(tmp_path):
-    dialog = PetPackEditor()
+def test_preview_speed_size_and_shutdown(tmp_path, *, lifetime_factory):
+    lifetime_factory()
+    dialog = PetPackEditor(lifetime=lifetime_factory())
     try:
         dialog.actions['walk'] = sprite(tmp_path)
         dialog.show()
@@ -122,8 +122,9 @@ def test_preview_speed_size_and_shutdown(tmp_path):
         dialog.close()
 
 
-def test_worker_error_preserves_choices_and_close_cancels(tmp_path):
-    dialog = PetPackEditor()
+def test_worker_error_preserves_choices_and_close_cancels(tmp_path, *, lifetime_factory):
+    lifetime_factory()
+    dialog = PetPackEditor(lifetime=lifetime_factory())
     source = sprite(tmp_path)
     dialog.actions['walk'] = source
     entered, release = threading.Event(), threading.Event()
@@ -145,12 +146,13 @@ def test_worker_error_preserves_choices_and_close_cancels(tmp_path):
         assert dialog.closed and not dialog.preview.timer.isActive()
     finally:
         release.set()
-        QThreadPool.globalInstance().waitForDone(5000)
+        dialog.lifetime.pool().waitForDone(5000)
         dialog.close()
 
 
-def test_export_selection_does_not_spawn_a_pet(tmp_path):
-    dialog = PetPackEditor()
+def test_export_selection_does_not_spawn_a_pet(tmp_path, *, lifetime_factory):
+    lifetime_factory()
+    dialog = PetPackEditor(lifetime=lifetime_factory())
     selected = []
     dialog.pack_selected.connect(selected.append)
     try:

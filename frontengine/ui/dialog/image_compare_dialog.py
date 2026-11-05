@@ -1,8 +1,9 @@
 """One zoomable view with aligned side-by-side, overlay, wipe and difference modes."""
+from frontengine.ui.runtime_lifetime import captured_lifetime, owned_callback
 from pathlib import Path
 from threading import Event
 
-from PySide6.QtCore import QObject, QRunnable, QRectF, Qt, QThreadPool, Signal
+from PySide6.QtCore import QObject, QRunnable, QRectF, Qt, Signal
 from PySide6.QtGui import QColor, QPixmap
 from PySide6.QtWidgets import (
     QComboBox, QDialog, QFileDialog, QGraphicsPixmapItem, QGraphicsScene,
@@ -11,18 +12,6 @@ from PySide6.QtWidgets import (
 
 from frontengine.show.reference.image_compare import align_images, checked_image, difference_image
 from frontengine.utils.multi_language.retranslate import retranslator, tr, translate
-
-_POOL = None
-
-
-def comparison_pool() -> QThreadPool:
-    """Bound concurrent decoding across closing/reopened comparison windows."""
-    global _POOL
-    if _POOL is None:
-        _POOL = QThreadPool()
-        _POOL.setMaxThreadCount(2)
-    return _POOL
-
 
 class _CompareSignals(QObject):
     finished = Signal(object, object, str)
@@ -87,8 +76,10 @@ class _ClippedImage(QGraphicsPixmapItem):
 class ImageCompareDialog(QDialog):
     """Bounded worker decoding; obsolete results never overwrite a newer selection."""
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent=None, *, lifetime=None) -> None:
         super().__init__(parent)
+        self.lifetime = lifetime or captured_lifetime(parent)
+        self.lifetime.adopt(self)
         self.resize(1000, 700)
         self._closed, self._busy = False, False
         self._cancelled = Event()
@@ -169,8 +160,9 @@ class ImageCompareDialog(QDialog):
         self.status.setText(translate('image_compare_loading'))
         job = _CompareJob(self._request, self._cancelled)
         job.signals.finished.connect(self._completed, Qt.ConnectionType.QueuedConnection)
-        comparison_pool().start(job)
+        self.lifetime.submit(job, group='comparison')
 
+    @owned_callback
     def _completed(self, request, images, error: str) -> None:
         self._busy = False
         if self._closed:

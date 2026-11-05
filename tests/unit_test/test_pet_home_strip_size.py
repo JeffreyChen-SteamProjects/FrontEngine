@@ -8,7 +8,6 @@ from PySide6.QtGui import QMouseEvent, QWheelEvent
 from frontengine.show.pet_game.home_service import HomeService
 from frontengine.show.pet_game.home_strip import SCALES, STRIP_HEIGHT
 from frontengine.ui.page.pet_game import home_page
-from frontengine.user_setting.pet_game_save import HomeSaveStore
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.user_setting.user_setting_file import user_setting_dict
 from frontengine.utils.pet_game.catalog import CELL_PIXELS, builtin_catalog
@@ -22,9 +21,10 @@ def _settings(monkeypatch):
 
 
 @pytest.fixture
-def page(tmp_path):
-    service = HomeService(None, HomeSaveStore(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None))
-    widget = home_page.PetHomePage(service)
+def page(tmp_path, *, home_store_factory, lifetime_factory):
+    lifetime_factory()
+    service = HomeService(None, home_store_factory(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None))
+    widget = home_page.PetHomePage(service, lifetime=lifetime_factory())
     widget.create_home()
     # creating a home with no pets brings a first one
     yield widget

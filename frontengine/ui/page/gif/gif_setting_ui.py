@@ -1,3 +1,5 @@
+from frontengine.ui.runtime_lifetime import owned_action
+from frontengine.ui.runtime_lifetime import OwnedWidgetList
 from typing import Optional
 
 from PySide6.QtCore import Qt
@@ -25,14 +27,14 @@ from frontengine.utils.multi_language.retranslate import tr
 
 
 class GIFSettingUI(SettingPage):
-    def __init__(self):
+    def __init__(self, *, lifetime):
         front_engine_logger.info("[GIFSettingUI] Init")
         super().__init__("tab_gif_text", "page_subtitle_gif",
-                         "GIF and WEBP", "Put an animation on top of everything else.")
+                         "GIF and WEBP", "Put an animation on top of everything else.", lifetime=lifetime)
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
 
         # Init variable
-        self.gif_widget_list = []
+        self.gif_widget_list = OwnedWidgetList(self.lifetime)
         self.show_all_screen = False
         self.ready_to_play = False
         self.gif_image_path: Optional[str] = None
@@ -104,10 +106,12 @@ class GIFSettingUI(SettingPage):
         self.finish_body()
         self.set_footer(primary=self.start_button, status=self.ready_label)
 
+    @owned_action
     def set_show_all_screen(self) -> None:
         front_engine_logger.info("[GIFSettingUI] set_show_all_screen")
         self.show_all_screen = self.show_on_all_screen_checkbox.isChecked()
 
+    @owned_action
     def _create_gif_widget(self) -> GifWidget:
         front_engine_logger.info("[GIFSettingUI] _create_gif_widget")
         gif_widget = GifWidget(gif_image_path=self.gif_image_path)
@@ -117,6 +121,7 @@ class GIFSettingUI(SettingPage):
         self.gif_widget_list.append(gif_widget)
         return gif_widget
 
+    @owned_action
     def start_play_gif(self) -> None:
         front_engine_logger.info("[GIFSettingUI] start_play_gif")
         if not self.gif_image_path or not self.ready_to_play:
@@ -135,11 +140,12 @@ class GIFSettingUI(SettingPage):
             span_all_screens=resolve_span(self.target_monitor_combobox),
         )
 
+    @owned_action
     def choose_and_copy_file_to_cwd_gif_dir_then_play(self) -> None:
         front_engine_logger.info("[GIFSettingUI] choose_and_copy_file_to_cwd_gif_dir_then_play")
         self.ready_label.setText(language_wrapper.language_word_dict.get("Not Ready"))
         self.ready_to_play = False
-        self.gif_image_path = choose_gif(self)
+        self.gif_image_path = self.lifetime.after_dialog(choose_gif(self))
         if self.gif_image_path:
             self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
             self.ready_to_play = True
@@ -147,6 +153,7 @@ class GIFSettingUI(SettingPage):
             reload_recent_combobox(self.recent_files_combobox, "gif")
             self.start_play_gif()  # chosen means shown: no second click
 
+    @owned_action
     def _apply_recent_file(self, _index: int = 0) -> None:
         path = self.recent_files_combobox.currentData()
         self.recent_files_combobox.setCurrentIndex(0)
@@ -157,6 +164,7 @@ class GIFSettingUI(SettingPage):
         self.ready_to_play = True
         self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
 
+    @owned_action
     def _on_file_dropped(self, path: str) -> None:
         front_engine_logger.info(f"[GIFSettingUI] _on_file_dropped | path={path}")
         self.gif_image_path = path
@@ -166,10 +174,12 @@ class GIFSettingUI(SettingPage):
         reload_recent_combobox(self.recent_files_combobox, "gif")
         self.start_play_gif()  # a dropped file is shown at once
 
+    @owned_action
     def opacity_trick(self) -> None:
         front_engine_logger.info("[GIFSettingUI] opacity_trick")
         self.opacity_slider_value_label.setText(str(self.opacity_slider.value()))
 
+    @owned_action
     def speed_trick(self) -> None:
         front_engine_logger.info("[GIFSettingUI] speed_trick")
         self.speed_slider_value_label.setText(str(self.speed_slider.value()))

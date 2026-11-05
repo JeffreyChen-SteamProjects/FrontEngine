@@ -100,14 +100,15 @@ def test_invalid_draft_keeps_last_preview_and_saved_state(tmp_path):
     assert profiles.get(record['id']) == record
 
 
-def test_installed_parts_dialog_preview_apply_and_cancel(tmp_path):
+def test_installed_parts_dialog_preview_apply_and_cancel(tmp_path, *, lifetime_factory):
+    lifetime_factory()
     source = tmp_path / 'cat'
     variant_asset(source)
     library = PetAssetLibrary(tmp_path / 'library')
     asset = library.install(source)
     profiles = PetProfiles({}, lambda: None)
     record = profiles.create()
-    dialog = PetWardrobeDialog(profiles, record['id'], library=library)
+    dialog = PetWardrobeDialog(profiles, record['id'], library=library, lifetime=lifetime_factory())
     try:
         assert not dialog.variant_choice.isEnabled()
         dialog.character.setCurrentIndex(dialog.character.findData(asset_reference(asset)))

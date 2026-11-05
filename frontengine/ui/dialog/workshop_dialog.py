@@ -1,5 +1,6 @@
 """Workshop management with lazy Steam initialization and background file work."""
 from __future__ import annotations
+from frontengine.ui.runtime_lifetime import captured_lifetime
 
 from pathlib import Path
 
@@ -47,6 +48,8 @@ def _needs(item: dict, installed: set[str]) -> str:
 class WorkshopDialog(QDialog):
     def __init__(self, owner, service, storage_root: Path | None = None) -> None:
         super().__init__(owner)
+        self.lifetime = captured_lifetime(owner)
+        self.lifetime.adopt(self)
         self.owner, self.service, self.storage_root = owner, service, storage_root
         self.store = self.cache = self.publisher = self.subscriptions = None
         self.jobs = WorkshopJobs(self)
@@ -57,7 +60,7 @@ class WorkshopDialog(QDialog):
         self.resize(850, 750)
         retranslator.bind(self, "workshop_manage", setter="setWindowTitle")
         layout = QVBoxLayout(self)
-        self.page = SettingPage("workshop_manage", "workshop_manage_hint")
+        self.page = SettingPage("workshop_manage", "workshop_manage_hint", lifetime=self.lifetime)
         layout.addWidget(self.page)
         self._build_session()
         self._build_publish()

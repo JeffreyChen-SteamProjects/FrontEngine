@@ -275,8 +275,14 @@ class SettingPage(QWidget):
 
     def __init__(self, title_key: str, subtitle_key: str = "",
                  title_fallback: str = "", subtitle_fallback: str = "", *, compact: bool = False,
-                 wide: bool = False):
+                 wide: bool = False, lifetime):
         super().__init__()
+        from frontengine.ui.runtime_lifetime import DefaultSettingsLifetime
+        if not isinstance(lifetime, DefaultSettingsLifetime):
+            raise TypeError("Settings pages require a DefaultSettingsLifetime")
+        lifetime.require_live()
+        self.lifetime = lifetime
+        lifetime.adopt(self)
         self.setProperty("settingPage", True)
         self._wide = wide or compact
         self._page_layout = QVBoxLayout(self)

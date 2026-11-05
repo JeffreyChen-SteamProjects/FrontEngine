@@ -170,3 +170,40 @@ class PetProfiles:
                 or type(data.get("version")) is not int or data["version"] not in (1, 2)):
             raise ValueError("Unsupported pet save format")
         return self.create(source=checked_profile(data.get("profile"), data["version"]))
+
+    def _looks_folder(self, identifier: str) -> Path | None:
+        if self._owner is None:
+            return None
+        from frontengine.user_setting.pet_looks import LOOK_FOLDER
+        from frontengine.user_setting.storage_session import _regular_file, StorageUnavailable
+        import stat
+        folder = self._owner.directory / LOOK_FOLDER
+        try:
+            info = folder.lstat()
+        except FileNotFoundError:
+            pass
+        else:
+            reparse = getattr(info, 'st_file_attributes', 0) & getattr(stat, 'FILE_ATTRIBUTE_REPARSE_POINT', 0)
+            if not stat.S_ISDIR(info.st_mode) or reparse:
+                raise StorageUnavailable(f'Portrait directory must not be linked: {folder}')
+        if isinstance(identifier, str) and len(identifier) == 32 and all(c in '0123456789abcdef' for c in identifier):
+            _regular_file(folder / f'{identifier}.png')
+        return folder
+
+    @_profile_operation
+    def look_for(self, identifier: str):
+        """Read a pet look from the captured settings and portrait directory."""
+        from frontengine.user_setting.pet_looks import look_for
+        return look_for(self.settings, identifier, self._looks_folder(identifier))
+
+    @_profile_operation
+    def remember_sprite(self, identifier: str, path: str | Path) -> bool:
+        """Record a sprite reference while its settings owner is admitted."""
+        from frontengine.user_setting.pet_looks import remember_sprite
+        return remember_sprite(self.settings, identifier, path)
+
+    @_profile_operation
+    def remember_portrait(self, identifier: str, image) -> bool:
+        """Write the portrait under the captured root before recording its reference."""
+        from frontengine.user_setting.pet_looks import remember_portrait
+        return remember_portrait(self.settings, identifier, image, self._looks_folder(identifier))

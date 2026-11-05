@@ -6,7 +6,6 @@ import pytest
 from frontengine.show.pet_game.home_service import HomeService
 from frontengine.show.pet_game.resident_art import semantic_action
 from frontengine.ui.page.pet_game.home_page import PetHomePage
-from frontengine.user_setting.pet_game_save import HomeSaveStore
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.user_setting.user_setting_file import user_setting_dict
 from frontengine.utils.pet_game import goals
@@ -88,14 +87,15 @@ def test_a_character_without_a_pose_uses_the_next_one_the_piece_allows():
 
 
 @pytest.fixture
-def setup(tmp_path, monkeypatch):
+def setup(tmp_path, monkeypatch, *, home_store_factory, lifetime_factory):
+    lifetime_factory()
     monkeypatch.setitem(user_setting_dict, "pet_home_running", False)
     monkeypatch.setitem(user_setting_dict, "pet_home_on_desktop", False)
     profiles = PetProfiles({}, lambda: None)
     first, second = profiles.create("Mochi"), profiles.create("Pip")
     profiles.update(first["id"], {"mood": 33, "fullness": 44, "affection": 7})
-    service = HomeService(None, HomeSaveStore(tmp_path, CATALOG), profiles)
-    page = PetHomePage(service)
+    service = HomeService(None, home_store_factory(tmp_path, CATALOG), profiles)
+    page = PetHomePage(service, lifetime=lifetime_factory())
     yield page, profiles, first["id"], second["id"]
     page.shutdown()
     page.deleteLater()

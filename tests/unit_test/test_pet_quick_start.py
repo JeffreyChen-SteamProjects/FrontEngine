@@ -1,6 +1,6 @@
 """The desktop pet page starts with one click: a character card puts a dressed pet on the desktop,
 the pets there are listed with wardrobe / bring back / put away, and the rest is folded away."""
-from PySide6.QtCore import QCoreApplication, QEvent, QThreadPool
+from PySide6.QtCore import QCoreApplication, QEvent
 from PySide6.QtWidgets import QToolButton
 
 from frontengine.show.pet.desktop_pet import DesktopPetWidget
@@ -10,10 +10,11 @@ from frontengine.ui.page.layout_kit import Section
 from frontengine.user_setting.pet_profiles import PetProfiles
 
 
-def _page(tmp_path, monkeypatch):
+def _page(tmp_path, monkeypatch, *, lifetime_factory):
     from frontengine.ui.page.pet.pet_setting_ui import PetSettingUI
     monkeypatch.chdir(tmp_path)
-    page = PetSettingUI()
+    lifetime_factory()
+    page = PetSettingUI(lifetime=lifetime_factory())
     page.profile_controls.profiles = PetProfiles({}, lambda: None)
     page.profile_controls.refresh()
     monkeypatch.setattr(page, "_target_geometry", lambda: None)
@@ -27,8 +28,9 @@ def _close(page):
     QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
 
 
-def test_the_page_opens_with_the_cards_and_everything_else_folded(tmp_path, monkeypatch):
-    page = _page(tmp_path, monkeypatch)
+def test_the_page_opens_with_the_cards_and_everything_else_folded(tmp_path, monkeypatch, *, lifetime_factory):
+    lifetime_factory()
+    page = _page(tmp_path, monkeypatch, lifetime_factory=lifetime_factory)
     try:
         sections = page.findChildren(Section)
         titles = [section.toggle_button.isHidden() for section in sections]
@@ -44,11 +46,12 @@ def test_the_page_opens_with_the_cards_and_everything_else_folded(tmp_path, monk
         _close(page)
 
 
-def test_a_card_puts_a_dressed_pet_on_the_desktop_in_one_click(tmp_path, monkeypatch):
-    page = _page(tmp_path, monkeypatch)
+def test_a_card_puts_a_dressed_pet_on_the_desktop_in_one_click(tmp_path, monkeypatch, *, lifetime_factory):
+    lifetime_factory()
+    page = _page(tmp_path, monkeypatch, lifetime_factory=lifetime_factory)
     try:
         page.quick.cards["inkside-pip"].click()
-        assert QThreadPool.globalInstance().waitForDone(120000)
+        assert page.lifetime.pool().waitForDone(120000)
         QCoreApplication.processEvents()
         assert len(page.pet_list) == 1
         pet = page.pet_list[0]
@@ -62,9 +65,10 @@ def test_a_card_puts_a_dressed_pet_on_the_desktop_in_one_click(tmp_path, monkeyp
         _close(page)
 
 
-def test_the_list_brings_a_pet_back_and_puts_it_away(tmp_path, monkeypatch):
+def test_the_list_brings_a_pet_back_and_puts_it_away(tmp_path, monkeypatch, *, lifetime_factory):
     from test_pet_profile_sessions import _sprite
-    page = _page(tmp_path, monkeypatch)
+    lifetime_factory()
+    page = _page(tmp_path, monkeypatch, lifetime_factory=lifetime_factory)
     try:
         pet = DesktopPetWidget(_sprite(tmp_path), profiles=page.profile_controls.profiles, talk=False,
                                sit_on_windows=False)

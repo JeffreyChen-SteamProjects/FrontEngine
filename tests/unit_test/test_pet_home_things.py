@@ -5,7 +5,6 @@ from frontengine.show.pet_game.furniture_art import ITEM_FOLDER, item_picture
 from frontengine.show.pet_game.home_service import HomeService
 from frontengine.ui.page.pet_game.home_page import PetHomePage
 from frontengine.ui.page.pet_game.home_things import RECIPE_ICONS, ROLE_KEY, ThingGrid, thing_icon, thing_pixmap
-from frontengine.user_setting.pet_game_save import HomeSaveStore
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.utils.pet_game.catalog import FURNITURE_PREFIX, builtin_catalog
 
@@ -108,11 +107,12 @@ def test_grid_reserves_name_and_caption_space_after_styling(font_size, _qt_appli
 
 
 @pytest.fixture
-def page(tmp_path, monkeypatch):
+def page(tmp_path, monkeypatch, *, home_store_factory, lifetime_factory):
     from frontengine.user_setting.user_setting_file import user_setting_dict
+    lifetime_factory()
     monkeypatch.setitem(user_setting_dict, "pet_home_running", False)
-    service = HomeService(None, HomeSaveStore(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None))
-    widget = PetHomePage(service)
+    service = HomeService(None, home_store_factory(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None))
+    widget = PetHomePage(service, lifetime=lifetime_factory())
     widget.create_home()
     yield widget
     widget.shutdown()

@@ -107,10 +107,11 @@ def test_scaled_view_gestures_map_to_crop_and_copy_pin_share_result():
         QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
 
 
-def test_editor_replacement_old_destroyed_signal_does_not_clear_new(tmp_path, monkeypatch):
+def test_editor_replacement_old_destroyed_signal_does_not_clear_new(tmp_path, monkeypatch, *, lifetime_factory):
     from frontengine.ui.page.tools.tools_setting_ui import ToolsSettingUI
     monkeypatch.chdir(tmp_path)
-    page = ToolsSettingUI()
+    lifetime_factory()
+    page = ToolsSettingUI(lifetime=lifetime_factory())
     try:
         page.last_capture = QPixmap.fromImage(image())
         page.edit_last_capture()

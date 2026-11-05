@@ -7,7 +7,7 @@ from weakref import WeakValueDictionary
 from PySide6.QtCore import QObject, QTimer, Signal
 
 from frontengine.user_setting.pet_profiles import PetProfiles
-from frontengine.user_setting.user_setting_file import user_setting_dict, write_user_setting
+from frontengine.user_setting.default_storage import default_storage
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.retranslate import translate
 from frontengine.utils.pet_companion import CompanionState
@@ -51,7 +51,7 @@ class PetProfileSession(QObject):
     def __init__(self, parent: QObject, identifier: str | None = None,
                  profiles: PetProfiles | None = None, name: str = "") -> None:
         super().__init__(parent)
-        self.profiles = profiles or PetProfiles(user_setting_dict, write_user_setting)
+        self.profiles = profiles if profiles is not None else default_storage().profiles()
         self._storage_use = self.profiles._acquire_use()
         self._key = None
         try:

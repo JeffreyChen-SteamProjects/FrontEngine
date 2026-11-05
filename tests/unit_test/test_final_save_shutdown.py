@@ -120,7 +120,9 @@ def _assert_retry_completes(window, pet, tmp_path, monkeypatch):
     restored = PetProfiles(json.loads((tmp_path / "user_setting.json").read_text(encoding="utf-8")),
                            lambda: None)
     assert restored.get(session.identifier)["mode"] == "work"
-    assert home.service.store.load().world.home == home.service.world.home
+    from frontengine.utils.pet_game.snapshot import from_dict
+    stored = json.loads(home.service.store.path.read_text(encoding="utf-8"))
+    assert from_dict(stored, home.service.store.catalog).home == home.service.world.home
 
 
 def test_prepared_pet_retains_renderer_and_freezes_care_until_cancel_or_finalize(monkeypatch):

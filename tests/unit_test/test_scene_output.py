@@ -128,9 +128,10 @@ def test_failed_device_reports_reason_and_closes():
     assert errors == ['Driver unavailable'] and camera.closed
 
 
-def test_output_dialog_scene_edits_reject_and_page_shutdown_stop_all_output(tmp_path):
+def test_output_dialog_scene_edits_reject_and_page_shutdown_stop_all_output(tmp_path, *, lifetime_factory):
     from frontengine.ui.dialog.scene_output_dialog import SceneOutputDialog
     from frontengine.utils.scene_format.scene_editor_document import SceneEditorDocument
+    lifetime_factory()
     document = SceneEditorDocument()
     document.reset(scene(tmp_path))
     cameras = []
@@ -138,7 +139,7 @@ def test_output_dialog_scene_edits_reject_and_page_shutdown_stop_all_output(tmp_
         camera = Camera()
         cameras.append(camera)
         return FrameSender(width, height, fps, parent, factory=lambda *_args: camera)
-    dialog = SceneOutputDialog(document, sender_factory=sender_factory)
+    dialog = SceneOutputDialog(document, sender_factory=sender_factory, lifetime=lifetime_factory())
     dialog.show()
     dialog.start_preview()
     assert dialog.session is not None and not cameras

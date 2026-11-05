@@ -1,10 +1,11 @@
 """GUI sprite-pack mapping, movement preview and cancellable folder export."""
 from __future__ import annotations
+from frontengine.ui.runtime_lifetime import captured_lifetime, owned_callback
 
 from pathlib import Path
 from threading import Event
 
-from PySide6.QtCore import QObject, QRunnable, QThreadPool, Qt, Signal
+from PySide6.QtCore import QObject, QRunnable, Qt, Signal
 from PySide6.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QGridLayout, QLabel, QLineEdit, QPushButton, QSpinBox, QComboBox, QFileDialog, QInputDialog
 
 from frontengine.ui.dialog.pet_pack_preview import PetPackPreview
@@ -38,8 +39,10 @@ class PetPackEditor(QDialog):
 
     pack_selected = Signal(str)
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent=None, *, lifetime=None) -> None:
         super().__init__(parent)
+        self.lifetime = lifetime or captured_lifetime(parent)
+        self.lifetime.adopt(self)
         tr(self, 'pack_editor_title', setter='setWindowTitle')
         self.resize(820, 700)
         self.actions, self.paths = {}, {}
@@ -195,8 +198,9 @@ class PetPackEditor(QDialog):
             button.setEnabled(False)
         self.status_kind = 'working'
         retranslator.set_text(self.status, 'pack_editor_working')
-        QThreadPool.globalInstance().start(_PackJob(kind, function, self.pending, self.signals))
+        self.lifetime.submit(_PackJob(kind, function, self.pending, self.signals))
 
+    @owned_callback
     def _job_done(self, kind: str, value, error: str) -> None:
         self.pending = None
         for button in self.job_buttons + self.edit_controls:

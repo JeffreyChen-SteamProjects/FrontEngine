@@ -11,7 +11,6 @@ from PySide6.QtGui import QColor, QImage
 from frontengine.show.pet_game.home_service import HomeService
 from frontengine.show.pet_game.picture_renderer import MAX_HEIGHT, PictureRenderer, load_picture
 from frontengine.show.pet_game.resident_art import ResidentArt, fallback_character
-from frontengine.user_setting.pet_game_save import HomeSaveStore
 from frontengine.user_setting.pet_looks import LOOKS_KEY, look_for, remember_portrait, remember_sprite
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.utils.pet_game.catalog import builtin_catalog
@@ -142,13 +141,14 @@ def test_mirroring_and_size_limits(tmp_path):
 # ----- in the home ----------------------------------------------------------------------------------
 
 @pytest.fixture
-def home(tmp_path):
+def home(tmp_path, *, home_store_factory, lifetime_factory):
+    lifetime = lifetime_factory()
     profiles = PetProfiles({}, lambda: None)
-    service = HomeService(None, HomeSaveStore(tmp_path, builtin_catalog()), profiles)
+    service = HomeService(None, home_store_factory(tmp_path, builtin_catalog()), profiles)
     service.create_home("screen", 0, 900, 40, seed=3)
     record = profiles.create("Mochi")
     assert service.adopt(record["id"]) == "accepted"
-    art = ResidentArt(service)
+    art = ResidentArt(service, lifetime=lifetime)
     yield service, art, record["id"]
     art.shutdown()
     service.shutdown()
@@ -177,12 +177,13 @@ def test_an_unusable_look_falls_back_to_the_stand_in(home, tmp_path):
     assert art.renderer(identifier).character.identifier == fallback_character(identifier)
 
 
-def test_the_pet_page_keeps_a_puppet_portrait_only_when_its_canvas_can_render(tmp_path, monkeypatch):
+def test_the_pet_page_keeps_a_puppet_portrait_only_when_its_canvas_can_render(tmp_path, monkeypatch, *, lifetime_factory):
     from frontengine.ui.page.pet import pet_setting_ui
     from frontengine.ui.page.pet.pet_setting_ui import PetSettingUI
 
     monkeypatch.chdir(tmp_path)
-    page = PetSettingUI()
+    lifetime_factory()
+    page = PetSettingUI(lifetime=lifetime_factory())
     settings = page.profile_controls.profiles.settings
 
     class Pet:

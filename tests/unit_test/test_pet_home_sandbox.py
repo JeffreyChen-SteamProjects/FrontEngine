@@ -3,7 +3,6 @@ import pytest
 
 from frontengine.show.pet_game.home_service import HomeService
 from frontengine.ui.page.pet_game.home_page import SAVE_MODE_KEY, PetHomePage
-from frontengine.user_setting.pet_game_save import HomeSaveStore
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.utils.pet_game.catalog import builtin_catalog
 
@@ -16,13 +15,15 @@ def _settings(monkeypatch):
 
 
 @pytest.fixture
-def page(tmp_path):
+def page(tmp_path, monkeypatch, *, home_store_factory, lifetime_factory):
+    lifetime_factory()
     profiles = PetProfiles({}, lambda: None)
-    service = HomeService(None, HomeSaveStore(tmp_path, builtin_catalog()), profiles)
-    widget = PetHomePage(service)
+    service = HomeService(None, home_store_factory(tmp_path, builtin_catalog()), profiles)
+    widget = PetHomePage(service, lifetime=lifetime_factory())
     widget.tmp_path = tmp_path
     yield widget
-    widget.shutdown()
+    monkeypatch.undo()
+    assert widget.shutdown()
     widget.deleteLater()
 
 

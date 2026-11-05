@@ -149,7 +149,7 @@ def test_argument_is_kept_for_same_command_and_cleared_for_another():
         dialog.close()
 
 
-def test_main_palette_shortcut_opens_and_page_command_routes(monkeypatch):
+def test_main_palette_shortcut_opens_and_page_command_routes(monkeypatch, lifetime_factory):
     from types import MethodType, SimpleNamespace
     from unittest.mock import Mock
     from PySide6.QtWidgets import QMainWindow, QWidget, QApplication
@@ -159,6 +159,7 @@ def test_main_palette_shortcut_opens_and_page_command_routes(monkeypatch):
 
     monkeypatch.setattr(module, "write_user_setting", lambda: None)
     window = QMainWindow()
+    window.lifetime = lifetime_factory()
     window.menu_bar = window.menuBar()
     window.action_registry = ActionRegistry()
     window.sidebar = NavigationSidebar(window)

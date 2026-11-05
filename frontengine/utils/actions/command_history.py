@@ -4,6 +4,7 @@ from __future__ import annotations
 import unicodedata
 from typing import Callable
 
+from frontengine.user_setting.storage_session import owned_settings_operation
 from frontengine.utils.actions.action_registry import Action, ActionRegistry
 
 SETTING_KEY = "command_palette"
@@ -19,8 +20,18 @@ class CommandHistory:
     """Persist stable IDs only; arguments and search text stay out of history."""
 
     def __init__(self, settings: dict, save: Callable[[], object]) -> None:
+        self._owner = None
         self.settings, self.save = settings, save
 
+    @classmethod
+    def for_storage(cls, storage) -> CommandHistory:
+        """Capture the directory owner before reading or changing preferences."""
+        with storage._settings_transaction():
+            history = cls(storage.settings, storage.save_settings)
+            history._owner = storage
+            return history
+
+    @owned_settings_operation
     def values(self, key: str, known: set[str]) -> list[str]:
         """Ignore malformed, duplicate and unavailable persisted identifiers."""
         state = self.settings.get(SETTING_KEY, {})
@@ -40,15 +51,26 @@ class CommandHistory:
         """Normalize both lists before saving; never retain command arguments."""
         state = {name: self.values(name, known) for name in ("recent", "favorites")}
         state[key] = values
+        existed = SETTING_KEY in self.settings
+        previous = self.settings.get(SETTING_KEY)
         self.settings[SETTING_KEY] = state
-        self.save()
+        try:
+            self.save()
+        except Exception:
+            if existed:
+                self.settings[SETTING_KEY] = previous
+            else:
+                self.settings.pop(SETTING_KEY, None)
+            raise
 
+    @owned_settings_operation
     def record(self, identifier: str, known: set[str]) -> None:
         """Keep at most twenty most recently executed registered commands."""
         if identifier in known:
             recent = self.values("recent", known)
             self._store("recent", [identifier] + [item for item in recent if item != identifier][:19], known)
 
+    @owned_settings_operation
     def toggle_favorite(self, identifier: str, known: set[str]) -> None:
         """Toggle a favorite while bounding persisted preference size."""
         if identifier not in known:
@@ -60,6 +82,7 @@ class CommandHistory:
             favorites.append(identifier)
         self._store("favorites", favorites, known)
 
+    @owned_settings_operation
     def search(self, registry: ActionRegistry, query: str, label: Callable[[Action], str],
                favorites_only: bool = False) -> list[Action]:
         """Search the current language, fallback and IDs; rank favorites/recent first."""

@@ -66,32 +66,33 @@ class _Library:
         return version == VERSION and identifier in self.installed
 
 
-def _wardrobe(character, installed):
+def _wardrobe(character, installed, lifetime):
     builtin = QComboBox()
     for identifier, name in builtin_names():
         builtin.addItem(name, identifier)
-    wardrobe = SimpleNamespace(draft=SimpleNamespace(appearance={"character": character}),
+    wardrobe = SimpleNamespace(lifetime=lifetime, draft=SimpleNamespace(appearance={"character": character}),
                                library=_Library(installed), _install_job=None, builtin=builtin,
                                _install_builtin=Mock(), _adding_new_clothes=False)
     wardrobe.missing_builtin_clothes = lambda: PetWardrobeDialog.missing_builtin_clothes(wardrobe)
     return wardrobe
 
 
-def test_an_opened_wardrobe_fetches_new_built_in_clothes_by_itself():
+def test_an_opened_wardrobe_fetches_new_built_in_clothes_by_itself(lifetime_factory):
+    lifetime = lifetime_factory()
     template = next(t for t in TEMPLATES if t.ident == "inkside-pip")
     everything = {garment_identifier(garment, template) for garment in GARMENTS}
     reference = {"id": "inkside-pip", "version": VERSION}
-    older = _wardrobe(reference, everything - {garment_identifier(GARMENTS[-1], template)})
+    older = _wardrobe(reference, everything - {garment_identifier(GARMENTS[-1], template)}, lifetime)
     assert PetWardrobeDialog.missing_builtin_clothes(older) == "inkside-pip"
     PetWardrobeDialog.add_new_builtin_clothes(older)
     older._install_builtin.assert_called_once_with()
     assert older._adding_new_clothes is True
     assert older.builtin.currentData() == "inkside-pip"
-    current = _wardrobe(reference, everything)
+    current = _wardrobe(reference, everything, lifetime)
     assert PetWardrobeDialog.missing_builtin_clothes(current) is None
-    own = _wardrobe({"id": "my-cat", "version": "1"}, set())
+    own = _wardrobe({"id": "my-cat", "version": "1"}, set(), lifetime)
     assert PetWardrobeDialog.missing_builtin_clothes(own) is None              # not a built-in character
-    busy = _wardrobe(reference, set())
+    busy = _wardrobe(reference, set(), lifetime)
     busy._install_job = object()
     PetWardrobeDialog.add_new_builtin_clothes(busy)
     busy._install_builtin.assert_not_called()

@@ -1951,4 +1951,5 @@ simplified_chinese_word_dict = {
     "pet_home_pack_themes": "{count} 个主题",
     "pet_home_visit_needs_packs": "需要的内容包：{packs}",
     "pet_home_no_packs": "没有家具包。把家具包文件夹放进家具包文件夹后重新启动。",
+    "runtime_shutdown_failed": "无法完成关闭：{error}",
 }

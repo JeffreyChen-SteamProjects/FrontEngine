@@ -80,7 +80,7 @@ def test_a_missing_vdf_is_not_an_error(tmp_path):
     assert _vdf_language_code([tmp_path / "nope.vdf"]) is None
 
 
-def test_first_launch_follows_steam_and_records_it(in_tmp_dir, monkeypatch):
+def test_first_launch_follows_steam_and_records_it(in_tmp_dir, monkeypatch, lifetime_factory):
     """
     設定檔裡還沒有 language：跟著 Steam，並把結果寫進設定，
     這樣同一件事只會發生一次。
@@ -90,6 +90,7 @@ def test_first_launch_follows_steam_and_records_it(in_tmp_dir, monkeypatch):
     monkeypatch.setattr("frontengine.ui.main_ui.steam_language", lambda: "Deutsch")
     (in_tmp_dir / "user_setting.json").write_text(json.dumps({"theme": "dark_amber.xml"}),
                                                   encoding="utf-8")
+    lifetime_factory()
     user_setting_dict["language"] = "English"
 
     assert is_stored("language") is False
@@ -97,7 +98,7 @@ def test_first_launch_follows_steam_and_records_it(in_tmp_dir, monkeypatch):
     assert user_setting_dict["language"] == "Deutsch"
 
 
-def test_a_language_the_user_chose_is_never_overridden(in_tmp_dir, monkeypatch):
+def test_a_language_the_user_chose_is_never_overridden(in_tmp_dir, monkeypatch, lifetime_factory):
     """
     使用者挑過（設定檔裡有 language）：Steam 說什麼都不算。
     少了這條，選單裡改語言下次開啟就會被改回去。
@@ -107,6 +108,7 @@ def test_a_language_the_user_chose_is_never_overridden(in_tmp_dir, monkeypatch):
     monkeypatch.setattr("frontengine.ui.main_ui.steam_language", lambda: "Deutsch")
     (in_tmp_dir / "user_setting.json").write_text(json.dumps({"language": "Italy"}),
                                                   encoding="utf-8")
+    lifetime_factory()
     user_setting_dict["language"] = "Italy"
 
     assert is_stored("language") is True
@@ -114,7 +116,7 @@ def test_a_language_the_user_chose_is_never_overridden(in_tmp_dir, monkeypatch):
     assert user_setting_dict["language"] == "Italy"
 
 
-def test_choosing_english_counts_as_choosing(in_tmp_dir, monkeypatch):
+def test_choosing_english_counts_as_choosing(in_tmp_dir, monkeypatch, lifetime_factory):
     """
     「使用者選了英文」和「使用者沒選過」不一樣。合併預設值之後兩者長得一模一樣，
     所以這件事得問檔案本身——這條測試就是釘住那個區別。
@@ -124,25 +126,28 @@ def test_choosing_english_counts_as_choosing(in_tmp_dir, monkeypatch):
     monkeypatch.setattr("frontengine.ui.main_ui.steam_language", lambda: "Traditional_Chinese")
     (in_tmp_dir / "user_setting.json").write_text(json.dumps({"language": "English"}),
                                                   encoding="utf-8")
+    lifetime_factory()
     user_setting_dict["language"] = "English"
 
     assert FrontEngineMainUI._startup_language() == "English"
 
 
-def test_no_settings_file_at_all_still_follows_steam(in_tmp_dir, monkeypatch):
+def test_no_settings_file_at_all_still_follows_steam(in_tmp_dir, monkeypatch, lifetime_factory):
     from frontengine.ui.main_ui import FrontEngineMainUI
 
     monkeypatch.setattr("frontengine.ui.main_ui.steam_language", lambda: "Russian")
+    lifetime_factory()
     user_setting_dict["language"] = "English"
 
     assert is_stored("language") is False
     assert FrontEngineMainUI._startup_language() == "Russian"
 
 
-def test_without_steam_the_stored_default_is_kept(in_tmp_dir, monkeypatch):
+def test_without_steam_the_stored_default_is_kept(in_tmp_dir, monkeypatch, lifetime_factory):
     from frontengine.ui.main_ui import FrontEngineMainUI
 
     monkeypatch.setattr("frontengine.ui.main_ui.steam_language", lambda: None)
+    lifetime_factory()
     user_setting_dict["language"] = "English"
 
     assert FrontEngineMainUI._startup_language() == "English"

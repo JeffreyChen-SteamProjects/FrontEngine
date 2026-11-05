@@ -111,13 +111,12 @@ def test_sleeping_pets_do_not_watch_the_sky():
     assert "starry_night" not in _check(world)
 
 
-def test_reduced_motion_draws_residents_where_the_world_has_them(tmp_path):
+def test_reduced_motion_draws_residents_where_the_world_has_them(tmp_path, *, home_store_factory):
     from frontengine.show.pet_game.home_service import HomeService
     from frontengine.show.pet_game.home_strip import HomeStrip
-    from frontengine.user_setting.pet_game_save import HomeSaveStore
     from frontengine.user_setting.pet_profiles import PetProfiles
 
-    service = HomeService(None, HomeSaveStore(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None))
+    service = HomeService(None, home_store_factory(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None))
     service.create_home("screen", 0, 900, 40, seed=3)
     record = service.profiles.create("Mochi")
     service.adopt(record["id"])

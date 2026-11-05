@@ -1949,4 +1949,5 @@ italian_word_dict = {
     "pet_home_pack_themes": "{count} temi",
     "pet_home_visit_needs_packs": "Pacchetti di contenuti necessari: {packs}",
     "pet_home_no_packs": "Nessun pacchetto di mobili. Metti la cartella di un pacchetto nella cartella dei pacchetti e riavvia.",
+    "runtime_shutdown_failed": "Impossibile completare la chiusura: {error}",
 }

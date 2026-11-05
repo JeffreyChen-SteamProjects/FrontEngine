@@ -136,6 +136,16 @@ for(const name of actions){
 class _TLSHTTPServer(ThreadingHTTPServer):
     daemon_threads = True
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.request_threads = []
+
+    def process_request(self, request, address):
+        self.request_threads[:] = [thread for thread in self.request_threads if thread.is_alive()]
+        thread = threading.Thread(target=self.process_request_thread, args=(request, address), daemon=True)
+        self.request_threads.append(thread)
+        thread.start()
+
     def get_request(self):
         request, address = super().get_request()
         request.settimeout(5.0)
@@ -167,6 +177,8 @@ class RemoteServer(QObject):
         self._on_action = on_action
         self._server: Optional[ThreadingHTTPServer] = None
         self._thread: Optional[threading.Thread] = None
+        self._stopping_threads = []
+        self._stopping_servers = []
         self._certificate_store = CertificateStore(certificate_dir)
         self.certificate: Optional[Certificate] = None
 
@@ -234,12 +246,20 @@ class RemoteServer(QObject):
         server, self._server = self._server, None
         if server is None:
             return
+        self._stopping_servers.append(server)
         server.shutdown()
         server.server_close()
         if self._thread is not None:
+            self._stopping_threads.append(self._thread)
             self._thread.join(timeout=2.0)
         self._thread = None
         front_engine_logger.info("[RemoteServer] stopped")
+
+    def pending(self) -> bool:
+        self._stopping_threads[:] = [thread for thread in self._stopping_threads if thread.is_alive()]
+        self._stopping_servers[:] = [server for server in self._stopping_servers
+                                    if any(thread.is_alive() for thread in server.request_threads)]
+        return bool(self._stopping_threads or self._stopping_servers)
 
     def perform(self, token: str, action: str) -> int:
         """

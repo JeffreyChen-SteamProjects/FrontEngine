@@ -1,7 +1,8 @@
 """Identity-specific wardrobe preview and explicit appearance commits."""
 from __future__ import annotations
+from frontengine.ui.runtime_lifetime import captured_lifetime, owned_callback, owned_action
 
-from PySide6.QtCore import Qt, QTimer, QThreadPool, Slot
+from PySide6.QtCore import Qt, QTimer, Slot
 from PySide6.QtGui import QColor, QPixmap
 from PySide6.QtWidgets import (
     QCheckBox, QComboBox, QDialog, QFormLayout, QHBoxLayout, QLabel,
@@ -22,8 +23,10 @@ from frontengine.ui.dialog.dialog_kit import button_row, roomy
 class PetWardrobeDialog(QDialog):
     """Stage clothes on a separate clock; the desktop changes only on Apply."""
 
-    def __init__(self, profiles, identifier, parent=None, library=None) -> None:
+    def __init__(self, profiles, identifier, parent=None, library=None, *, lifetime=None) -> None:
         super().__init__(parent)
+        self.lifetime = lifetime or captured_lifetime(parent)
+        self.lifetime.adopt(self)
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         tr(self, 'pet_wardrobe_title', 'Wardrobe', 'setWindowTitle')
         self.library = library or PetAssetLibrary()
@@ -161,6 +164,7 @@ class PetWardrobeDialog(QDialog):
                       for garment in GARMENTS)
         return character if missing else None
 
+    @owned_action
     def add_new_builtin_clothes(self) -> None:
         """Opening the wardrobe brings in new built-in clothes by itself: no install button to find."""
         character = self.missing_builtin_clothes()
@@ -186,6 +190,7 @@ class PetWardrobeDialog(QDialog):
         layout.addLayout(row)
         return buttons
 
+    @owned_action
     def refresh_library(self) -> None:
         try:
             catalog, errors = self.library.scan()
@@ -197,16 +202,18 @@ class PetWardrobeDialog(QDialog):
         if errors:
             self.status.setText('\n'.join((*errors, self.status.text())))
 
+    @owned_action
     def _install(self) -> None:
-        source = QFileDialog.getExistingDirectory(self, translate('pet_wardrobe_install', 'Install asset folder'))
+        source = self.lifetime.after_dialog(QFileDialog.getExistingDirectory(self, translate('pet_wardrobe_install', 'Install asset folder')))
         if not source or self._install_job is not None:
             return
         self.install_button.setEnabled(False)
         job = PetAssetInstall(self.library, source)
         self._install_job = job
         job.signals.finished.connect(self._installed, Qt.ConnectionType.QueuedConnection)
-        QThreadPool.globalInstance().start(job)
+        self.lifetime.submit(job)
 
+    @owned_action
     def _install_builtin(self) -> None:
         if self._install_job is not None:
             return
@@ -216,9 +223,10 @@ class PetWardrobeDialog(QDialog):
         job = PetBuiltinInstall(self.library, self.builtin.currentData())
         self._install_job = job
         job.signals.finished.connect(self._builtin_installed, Qt.ConnectionType.QueuedConnection)
-        QThreadPool.globalInstance().start(job)
+        self.lifetime.submit(job)
 
     @Slot(str)
+    @owned_callback
     def _builtin_installed(self, error: str) -> None:
         self._installed(error)
         if not error and not self._closed:
@@ -230,6 +238,7 @@ class PetWardrobeDialog(QDialog):
                                           'Built-in character ready. Choose it under Character.'))
 
     @Slot(str)
+    @owned_callback
     def _installed(self, error: str) -> None:
         self._install_job = None
         if self._closed:
@@ -240,6 +249,7 @@ class PetWardrobeDialog(QDialog):
         if error:
             self.status.setText(error)
 
+    @owned_action
     def _attempt(self, operation) -> bool:
         try:
             operation()
@@ -341,11 +351,13 @@ class PetWardrobeDialog(QDialog):
             self.variant_choice.setCurrentIndex(max(0, self.variant_choice.findData(selected)))
         self.variant_choice.setEnabled(self.variant_choice.count() > 0)
 
+    @owned_action
     def _choose_variant(self, _index=0) -> None:
         group, choice = self.variant_group.currentData(), self.variant_choice.currentData()
         if group is not None:
             self._attempt(lambda: self.draft.set_variant(group, choice))
 
+    @owned_action
     def _choose_color(self) -> None:
         selected = self.color_region.currentData()
         if selected is None:
@@ -355,15 +367,17 @@ class PetWardrobeDialog(QDialog):
         asset = next(asset for asset in (self.draft.preview.character, *self.draft.preview.garments)
                      if asset_reference(asset) == reference)
         value = self.draft.appearance.get('colors', {}).get(key, {}).get(region, asset.palette[region])
-        color = QColorDialog.getColor(QColor(value), self, translate('pet_wardrobe_color', 'Choose color'))
+        color = self.lifetime.after_dialog(QColorDialog.getColor(QColor(value), self, translate('pet_wardrobe_color', 'Choose color')))
         if color.isValid():
             self._attempt(lambda: self.draft.set_color(reference, region, color.name()))
 
+    @owned_action
     def _reset_color(self) -> None:
         selected = self.color_region.currentData()
         if selected is not None:
             self._attempt(lambda: self.draft.set_color(*selected, None))
 
+    @owned_action
     def _choose_swatch(self, color: str) -> None:
         selected = self.color_region.currentData()
         if selected is not None:
@@ -381,10 +395,12 @@ class PetWardrobeDialog(QDialog):
             index = control.count() - 1
         control.setCurrentIndex(max(0, index))
 
+    @owned_action
     def _choose_character(self, _index=0) -> None:
         reference = self.character.currentData()
         self._attempt(lambda: self.draft.choose_character(reference))
 
+    @owned_action
     def _choose_slot(self, slot: str) -> None:
         reference = self.slots[slot].currentData()
         if reference is None:
@@ -396,12 +412,14 @@ class PetWardrobeDialog(QDialog):
                 self.status.setText(translate('pet_wardrobe_replaced', 'Replaced: {items}').format(
                     items=', '.join(self.draft.replaced)))
 
+    @owned_action
     def _try_on(self) -> None:
         """Trying a garment on plays the outfit-show pose once in the preview."""
         if self.draft.preview is not None and 'outfit_show' in self.draft.preview.character.actions:
             self.playback.set_action('outfit_show')
             QTimer.singleShot(900, self, lambda: self.playback.set_action(self.action.currentText() or 'idle'))
 
+    @owned_action
     def _pin_comparison(self, pinned: bool) -> None:
         self._compare = self.draft.preview if pinned else None
         self.compare_preview.setVisible(self._compare is not None)
@@ -409,20 +427,25 @@ class PetWardrobeDialog(QDialog):
             self.compare_preview.clear()
         self._render()
 
+    @owned_action
     def _save_outfit(self) -> None:
         self._attempt(lambda: self.draft.save_outfit(self.outfit_name.text()))
 
+    @owned_action
     def _wear_outfit(self) -> None:
         self._attempt(lambda: self.draft.wear_outfit(self.outfits.currentData()))
 
+    @owned_action
     def _update_outfit(self) -> None:
         identifier = self.outfits.currentData()
         if identifier is not None:
             self._attempt(lambda: self.draft.save_outfit(self.outfit_name.text(), identifier))
 
+    @owned_action
     def _delete_outfit(self) -> None:
         self._attempt(lambda: self.draft.delete_outfit(self.outfits.currentData()))
 
+    @owned_action
     def apply_changes(self) -> bool:
         if not self._attempt(self.draft.apply):
             return False

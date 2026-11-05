@@ -1,8 +1,10 @@
+from frontengine.ui.runtime_lifetime import owned_action
+from frontengine.ui.runtime_lifetime import OwnedWidgetList, owned_callback
 from typing import Optional
 from pathlib import Path
 import sys
 
-from PySide6.QtCore import Qt, QThreadPool, QTimer, Signal
+from PySide6.QtCore import Qt, QTimer, Signal
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import (
     QLabel, QPushButton, QMessageBox, QComboBox, QCheckBox, QFileDialog, QHBoxLayout, QWidget,
@@ -22,7 +24,6 @@ from frontengine.ui.page.utils import (
     reload_recent_combobox,
     resolve_preferred_monitor,
 )
-from frontengine.user_setting.pet_looks import remember_portrait, remember_sprite
 from frontengine.user_setting.user_setting_file import add_recent_file
 from frontengine.utils.audio_meter.microphone_meter import microphone_level
 from frontengine.utils.audio_meter.screen_audio import audio_level_provider_for_screen
@@ -52,13 +53,13 @@ PORTRAIT_DELAY_MS = 1500     # let a Puppet settle into its idle pose before the
 class PetSettingUI(SettingPage):
     workshop_requested = Signal()
     focus_phase = Signal(str)           # "focus", "break", "long_break" or "stopped"
-    def __init__(self):
+    def __init__(self, *, lifetime):
         front_engine_logger.info("[PetSettingUI] Init")
         super().__init__("tab_pet_text", "page_subtitle_pet",
-                         "Pet", "A companion that lives on your desktop.")
+                         "Pet", "A companion that lives on your desktop.", lifetime=lifetime)
 
         # Init variable
-        self.pet_list: list = []
+        self.pet_list: list = OwnedWidgetList(self.lifetime)
         self.pack_editor = None
         # 打字時安分：按鍵由既有的全域監聽服務推過來，這裡只記時間並在停手後放行
         # Settling while typing: keys come from the existing global watch
@@ -274,6 +275,7 @@ class PetSettingUI(SettingPage):
             self._input_watch.stop()
         self._apply_settled(False)
 
+    @owned_action
     def _on_settle_typing_toggled(self) -> None:
         if any(self._pet_typing_enabled(pet) for pet in self._alive_pets()):
             self._start_typing_watch()
@@ -285,6 +287,7 @@ class PetSettingUI(SettingPage):
             # without it, the pet stays frozen for good and simply looks broken.
             self._stop_typing_watch()
 
+    @owned_action
     def _on_key_pressed(self, _keys) -> None:
         """有人按了鍵：寵物先停下來，停手一段時間後再放行。"""
         if not any(self._pet_typing_enabled(pet) for pet in self._alive_pets()):
@@ -293,6 +296,7 @@ class PetSettingUI(SettingPage):
         self._apply_settled(True)
         self._settle_timer.start(int(self._typing_watch.settle_seconds * 1000))
 
+    @owned_action
     def _apply_settled(self, settled: bool) -> None:
         """把安分狀態套到目前所有寵物身上。"""
         for pet in self.pet_list[:]:
@@ -322,6 +326,7 @@ class PetSettingUI(SettingPage):
                 'volume': int(self.volume_combobox.currentData()),
                 'settle_typing': self.settle_typing_checkbox.isChecked()}
 
+    @owned_action
     def _spawn_pet(self, clone_source: dict | None = None, *, source_pet=None) -> None:
         """建立、顯示並開始移動一隻寵物（供 Start 與右鍵複製共用）。"""
         if not self.pet_image_path and source_pet is None:
@@ -335,6 +340,7 @@ class PetSettingUI(SettingPage):
         except (OSError, ValueError, RuntimeError) as error:
             self.profile_controls.status.setText(str(error))
 
+    @owned_action
     def _spawn_profile_pet(self, identifier: str | None, *, source_pet=None) -> None:
         path = (getattr(source_pet, 'image_path', getattr(source_pet, 'path', None))
                 if source_pet is not None else self.pet_image_path)
@@ -357,7 +363,7 @@ class PetSettingUI(SettingPage):
         )
         if source_pet is None and self._builtin_sprite is not None and path == self._builtin_sprite[1]:
             self._dress_as_builtin(pet, self._builtin_sprite[0])
-        remember_sprite(self.profile_controls.profiles.settings, pet.profile_session.identifier, path)
+        self.profile_controls.profiles.remember_sprite(pet.profile_session.identifier, path)
         pet.clone_requested.connect(lambda: self._spawn_pet(pet.profile_session.state(), source_pet=pet))
         pet.customize_requested.connect(lambda: self.profile_controls.customize(pet.profile_session.identifier))
         pet.profile_session.changed.connect(self._on_settle_typing_toggled)
@@ -384,6 +390,7 @@ class PetSettingUI(SettingPage):
             bounds = geometry[0]
             pet.start_moving((bounds.left(), bounds.top(), bounds.right(), bounds.bottom()))
 
+    @owned_action
     def _spawn_puppet(self, identifier: str | None = None, *, source_pet=None) -> None:
         from frontengine.show.pet.puppet_pet import PuppetPetWidget
         try:
@@ -396,7 +403,7 @@ class PetSettingUI(SettingPage):
                                   profiles=self.profile_controls.profiles,
                                   profile_name=self.profile_controls.name.text())
         except (ValueError, OSError, RuntimeError) as error:
-            QMessageBox.warning(self, 'Imervue puppet', str(error))
+            self.lifetime.after_dialog(QMessageBox.warning(self, 'Imervue puppet', str(error)))
             return
         if source_pet is not None:
             for expression in source_pet.canvas.active_expressions():
@@ -414,6 +421,7 @@ class PetSettingUI(SettingPage):
         self._on_settle_typing_toggled()
         QTimer.singleShot(PORTRAIT_DELAY_MS, pet, lambda: self._remember_portrait(pet))
 
+    @owned_callback
     def _remember_portrait(self, pet) -> None:
         """A still of the Puppet, from its own canvas, so the pet home can show it as itself."""
         try:
@@ -421,8 +429,9 @@ class PetSettingUI(SettingPage):
         except (ValueError, RuntimeError) as error:       # no GL canvas: the home uses a stand-in
             front_engine_logger.info(f"[PetSettingUI] no portrait for the pet home: {error}")
             return
-        remember_portrait(self.profile_controls.profiles.settings, pet.profile_session.identifier, image)
+        self.profile_controls.profiles.remember_portrait(pet.profile_session.identifier, image)
 
+    @owned_action
     def use_builtin_puppet(self) -> None:
         """Generate the chosen INKSIDE character as a Puppet model with its reaction script."""
         from frontengine.ui.dialog.pet_asset_install import PuppetExport
@@ -432,8 +441,9 @@ class PetSettingUI(SettingPage):
         job = PuppetExport(self.builtin_character.currentData(), Path.cwd() / 'pet-assets' / 'puppets')
         self._puppet_export = job
         job.signals.finished.connect(self._builtin_puppet_ready, Qt.ConnectionType.QueuedConnection)
-        QThreadPool.globalInstance().start(job)
+        self.lifetime.submit(job)
 
+    @owned_callback
     def _builtin_puppet_ready(self, model: str, script: str, error: str) -> None:
         self._puppet_export = None
         self.builtin_puppet_button.setEnabled(True)
@@ -445,6 +455,7 @@ class PetSettingUI(SettingPage):
         self.ready_to_play = True
         self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
 
+    @owned_action
     def quick_builtin(self, identifier: str) -> None:
         """A character card: install it if needed and put a pet dressed as it on the desktop."""
         index = self.builtin_character.findData(identifier)
@@ -454,6 +465,7 @@ class PetSettingUI(SettingPage):
         self._spawn_when_installed = True
         self.use_builtin_character()
 
+    @owned_action
     def use_builtin_character(self) -> None:
         """Install the chosen INKSIDE character for sprite pets; Start then spawns a pet dressed as it."""
         from frontengine.show.pet.asset_library import PetAssetLibrary
@@ -464,8 +476,9 @@ class PetSettingUI(SettingPage):
         job = PetBuiltinSprite(PetAssetLibrary(), self.builtin_character.currentData(), Path.cwd() / 'pet-previews')
         self._sprite_install = job
         job.signals.finished.connect(self._builtin_character_ready, Qt.ConnectionType.QueuedConnection)
-        QThreadPool.globalInstance().start(job)
+        self.lifetime.submit(job)
 
+    @owned_callback
     def _builtin_character_ready(self, preview: str, error: str) -> None:
         identifier, self._sprite_install = self._sprite_install.identifier, None
         self.builtin_sprite_button.setEnabled(True)
@@ -494,20 +507,22 @@ class PetSettingUI(SettingPage):
         draft.choose_character(reference)
         draft.apply(present=False)   # no outfit show: a summoned pet sets off at once
 
+    @owned_action
     def choose_puppet_script(self) -> None:
-        path, _ = QFileDialog.getOpenFileName(self, 'Imervue pet script', '', 'Pet script (*.petscript.json)')
+        path, _ = self.lifetime.after_dialog(QFileDialog.getOpenFileName(self, 'Imervue pet script', '', 'Pet script (*.petscript.json)'))
         if path:
             self.puppet_script_path = path
 
     def chat_service(self) -> PetChatService:
         """共用的 AI 對話服務（懶建立；沒有金鑰時它自己會回報不可用）。"""
         if self._chat_service is None:
-            self._chat_service = PetChatService()
+            self._chat_service = PetChatService(lifetime=self.lifetime)
         return self._chat_service
 
     # --- focus timer -----------------------------------------------------
     FOCUS_TICK_MS = 1000
 
+    @owned_action
     def toggle_focus_session(self) -> None:
         """開始或停止一次專注（沒有寵物時仍可計時，只是沒人陪你）。"""
         if self.focus_timer.running:
@@ -515,6 +530,7 @@ class PetSettingUI(SettingPage):
         else:
             self.start_focus_session()
 
+    @owned_action
     def start_focus_session(self) -> None:
         """依目前設定開始專注，並讓寵物宣布 / Start focusing; the pet announces it."""
         self.focus_timer.focus_minutes = int(self.focus_minutes_combobox.currentText())
@@ -541,6 +557,7 @@ class PetSettingUI(SettingPage):
         retranslator.set_text(
             self.focus_button, "pet_focus_start", "Start focus")
 
+    @owned_action
     def _tick_focus_timer(self) -> None:
         """每秒推進一次；換階段時讓寵物說話。"""
         phase = self.focus_timer.tick()
@@ -555,6 +572,7 @@ class PetSettingUI(SettingPage):
         elif phase == PHASE_LONG_BREAK:
             self._announce_focus("focus_done")
 
+    @owned_action
     def _announce_focus(self, pool_name: str) -> None:
         """讓所有寵物說出該階段的台詞（沒有寵物就安靜略過）。"""
         for pet in self._alive_pets():
@@ -595,6 +613,7 @@ class PetSettingUI(SettingPage):
 
     TAG_INTERVAL_MS = 100
 
+    @owned_action
     def _on_tag_toggled(self, checked: bool) -> None:
         """切換鬼抓人：關掉時停錶並把所有寵物放回平常的行為。"""
         front_engine_logger.info(f"[PetSettingUI] tag game | enabled={checked}")
@@ -607,6 +626,7 @@ class PetSettingUI(SettingPage):
             if hasattr(pet, 'apply_tag_role'):
                 pet.apply_tag_role(None)
 
+    @owned_action
     def _start_tag_game(self) -> None:
         """有兩隻以上寵物且已勾選時才需要開錶 / Only run the game with 2+ pets."""
         eligible = [pet for pet in self._alive_pets() if getattr(pet, 'can_socialize', False)]
@@ -616,6 +636,7 @@ class PetSettingUI(SettingPage):
         else:
             self._on_tag_toggled(False)
 
+    @owned_action
     def _tick_tag_game(self) -> None:
         """每一拍把座標餵給遊戲，再把角色發回各隻寵物。"""
         alive = self._alive_pets()
@@ -639,6 +660,7 @@ class PetSettingUI(SettingPage):
             if key == tagged:
                 pet.on_tagged()
 
+    @owned_action
     def start_play_pet(self) -> None:
         front_engine_logger.info("[PetSettingUI] start_play_pet")
         if not self.pet_image_path or not self.ready_to_play:
@@ -646,11 +668,12 @@ class PetSettingUI(SettingPage):
             return
         self._spawn_pet()
 
+    @owned_action
     def choose_and_play(self) -> None:
         front_engine_logger.info("[PetSettingUI] choose_and_play")
         self.ready_label.setText(language_wrapper.language_word_dict.get("Not Ready"))
         self.ready_to_play = False
-        self.pet_image_path = choose_pet(self)
+        self.pet_image_path = self.lifetime.after_dialog(choose_pet(self))
         if self.pet_image_path:
             self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
             self.ready_to_play = True
@@ -658,28 +681,30 @@ class PetSettingUI(SettingPage):
             reload_recent_combobox(self.recent_files_combobox, "pet")
             self.start_play_pet()  # chosen means shown: no second click
 
+    @owned_action
     def choose_sound(self) -> None:
         """選擇點擊時播放的音效（選填）/ Choose an optional click sound."""
         front_engine_logger.info("[PetSettingUI] choose_sound")
-        path = choose_wav_sound(self)
+        path = self.lifetime.after_dialog(choose_wav_sound(self))
         if path:
             self.pet_sound_path = path
 
+    @owned_action
     def choose_pack(self) -> None:
         """選擇動作包資料夾（依 walk/idle/climb/fall/drag 檔名對應狀態）。"""
         front_engine_logger.info("[PetSettingUI] choose_pack")
-        folder = QFileDialog.getExistingDirectory(
+        folder = self.lifetime.after_dialog(QFileDialog.getExistingDirectory(
             self, language_wrapper.language_word_dict.get("pet_choose_pack", _CHOOSE_PACK)
-        )
+        ))
         if not folder:
             return
         if not scan_pet_pack(folder):
-            QMessageBox.warning(
+            self.lifetime.after_dialog(QMessageBox.warning(
                 self,
                 language_wrapper.language_word_dict.get("pet_choose_pack", _CHOOSE_PACK),
                 language_wrapper.language_word_dict.get(
                     "pet_pack_empty", "No sprites (walk/idle/climb/fall/drag) found in that folder."),
-            )
+            ))
             return
         self.pet_image_path = folder
         self.ready_to_play = True
@@ -687,6 +712,7 @@ class PetSettingUI(SettingPage):
         add_recent_file("pet", folder)
         reload_recent_combobox(self.recent_files_combobox, "pet")
 
+    @owned_action
     def open_pack_editor(self) -> None:
         """Open the sprite-only mapping editor without spawning a desktop pet."""
         if self.pack_editor is None:
@@ -697,6 +723,7 @@ class PetSettingUI(SettingPage):
         self.pack_editor.raise_()
         self.pack_editor.activateWindow()
 
+    @owned_action
     def _use_edited_pack(self, folder: str) -> None:
         if not scan_pet_pack(folder):
             return
@@ -706,11 +733,17 @@ class PetSettingUI(SettingPage):
         add_recent_file('pet', folder)
         reload_recent_combobox(self.recent_files_combobox, 'pet')
 
+    def stop_asset_preparation(self) -> None:
+        self._spawn_when_installed = False
+        if self._sprite_install is not None:
+            self._sprite_install.cancel.set()
+
     def close_pack_editor(self) -> None:
         """Cancel file work and release animation resources before application shutdown."""
         if self.pack_editor is not None:
             self.pack_editor.close()
 
+    @owned_action
     def _apply_recent_file(self, _index: int = 0) -> None:
         path = self.recent_files_combobox.currentData()
         self.recent_files_combobox.setCurrentIndex(0)
@@ -720,6 +753,7 @@ class PetSettingUI(SettingPage):
         self.ready_to_play = True
         self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
 
+    @owned_action
     def _on_file_dropped(self, path: str) -> None:
         front_engine_logger.info(f"[PetSettingUI] _on_file_dropped | path={path}")
         self.pet_image_path = path
@@ -737,6 +771,9 @@ class PetSettingUI(SettingPage):
         microphone so it only moves while you talk. Both read a meter value and
         capture no audio content.
         """
+        if sys.platform.startswith('linux'):
+            from frontengine.utils.linux.audio import owned_level_provider
+            return owned_level_provider(self.lifetime, microphone=self.audio_source_combobox.currentData() == 'microphone')
         if sys.platform == 'darwin':
             from frontengine.utils.macos.audio import MacAudioLevelProvider
             return MacAudioLevelProvider(microphone=self.audio_source_combobox.currentData() == 'microphone')

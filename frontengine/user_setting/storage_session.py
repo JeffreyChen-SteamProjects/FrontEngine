@@ -1,7 +1,8 @@
 """Directory ownership for disk-backed settings and home clients."""
 from __future__ import annotations
 
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
+from functools import wraps
 import errno
 import os
 from pathlib import Path
@@ -38,6 +39,10 @@ class StorageBusy(RuntimeError):
     """Clients or admitted operations still require this owner."""
 
 
+class HomeRuntimeInUse(StorageBusy):
+    """Another store or service owns this home snapshot."""
+
+
 def _regular_file(path: Path) -> None:
     try:
         info = path.lstat()
@@ -69,6 +74,14 @@ def checked_export_destination(destination: Path) -> Path:
             raise StorageUnavailable(f"Cannot export over managed storage: {path}")
         _regular_file(resolved)
     return resolved_destination
+
+
+def owned_settings_operation(method):
+    @wraps(method)
+    def call(self, *args, **kwargs):
+        with self._owner._settings_transaction() if self._owner is not None else nullcontext():
+            return method(self, *args, **kwargs)
+    return call
 
 
 class _DirectoryLock:
@@ -154,6 +167,15 @@ class _Use:
                 self.released = True
 
 
+class _HomeUse(_Use):
+    def release(self) -> None:
+        self.owner._check_pid()
+        with self.owner._mutex:
+            if not self.released:
+                self.owner._home_claims.pop(self.kind)
+                super().release()
+
+
 class StorageSession:
     """Keep a directory owned from its first read through its last client/write."""
 
@@ -168,6 +190,7 @@ class StorageSession:
         self._uses: set[_Use] = set()
         self._settings: dict = {}
         self._profiles: PetProfiles | None = None
+        self._home_claims: dict[str, _HomeUse] = {}
 
     @classmethod
     def open(cls, directory: Path) -> StorageSession:
@@ -264,6 +287,17 @@ class StorageSession:
         with self._mutex:
             self._require_open()
             use = _Use(self, kind)
+            self._uses.add(use)
+            return use
+
+    def _claim_home(self, mode: str) -> _Use:
+        self._check_pid()
+        with self._mutex:
+            self._require_open()
+            if mode in self._home_claims:
+                raise HomeRuntimeInUse(f"Home mode is already owned: {mode}")
+            use = _HomeUse(self, mode)
+            self._home_claims[mode] = use
             self._uses.add(use)
             return use
 

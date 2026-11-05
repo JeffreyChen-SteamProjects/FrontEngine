@@ -3,7 +3,6 @@ from frontengine.show.pet_game.home_service import HomeService
 from frontengine.show.pet_game.home_strip import LOCKED_REASON
 from frontengine.show.pet_game.home_view import HomeView
 from frontengine.ui.page.pet_game.home_page import PetHomePage
-from frontengine.user_setting.pet_game_save import HomeSaveStore
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.user_setting.user_setting_file import user_setting_dict
 from frontengine.utils.pet_game.catalog import builtin_catalog
@@ -28,11 +27,12 @@ def test_the_watcher_reports_changes_only_and_treats_errors_as_unlocked():
     assert watcher.check() is False
 
 
-def test_locking_pauses_the_home_and_unlocking_resumes_it(tmp_path, monkeypatch):
+def test_locking_pauses_the_home_and_unlocking_resumes_it(tmp_path, monkeypatch, *, home_store_factory, lifetime_factory):
+    lifetime_factory()
     monkeypatch.setitem(user_setting_dict, "pet_home_running", True)
     monkeypatch.setitem(user_setting_dict, "pet_home_on_desktop", False)
-    service = HomeService(None, HomeSaveStore(tmp_path, CATALOG), PetProfiles({}, lambda: None))
-    page = PetHomePage(service)
+    service = HomeService(None, home_store_factory(tmp_path, CATALOG), PetProfiles({}, lambda: None))
+    page = PetHomePage(service, lifetime=lifetime_factory())
     try:
         page.create_home()
         service.start()

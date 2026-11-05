@@ -5,7 +5,6 @@ import pytest
 from PySide6.QtCore import QCoreApplication
 
 from frontengine.show.pet_game.home_service import HomeService
-from frontengine.user_setting.pet_game_save import HomeSaveStore
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.utils.pet_game.catalog import builtin_catalog
 
@@ -31,12 +30,18 @@ class ControlledWriter(Executor):
 
 
 @pytest.fixture
-def service(tmp_path):
+def service(tmp_path, *, home_store_factory):
     writer = ControlledWriter()
-    home = HomeService(None, HomeSaveStore(tmp_path, builtin_catalog()),
+    home = HomeService(None, home_store_factory(tmp_path, builtin_catalog()),
                        PetProfiles({}, lambda: None), executor=writer)
+    original_write = home.store._write
     home.create_home('screen', 0, 900, 40, seed=3)
     yield home, writer
+    home.store._write = original_write
+    for index, job in enumerate(writer.jobs):
+        if not job[0].done():
+            writer.finish(index)
+    assert home.shutdown()
     home.deleteLater()
 
 

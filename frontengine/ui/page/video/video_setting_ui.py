@@ -1,3 +1,5 @@
+from frontengine.ui.runtime_lifetime import owned_action
+from frontengine.ui.runtime_lifetime import OwnedWidgetList
 from typing import Optional
 
 from PySide6.QtCore import Qt
@@ -25,13 +27,13 @@ from frontengine.utils.multi_language.retranslate import tr
 
 
 class VideoSettingUI(SettingPage):
-    def __init__(self):
+    def __init__(self, *, lifetime):
         front_engine_logger.info("[VideoSettingUI] Init")
         super().__init__("tab_video_text", "page_subtitle_video",
-                         "Video", "Play a video on top of everything else.")
+                         "Video", "Play a video on top of everything else.", lifetime=lifetime)
 
         # Init variable
-        self.video_widget_list = []
+        self.video_widget_list = OwnedWidgetList(self.lifetime)
         self.show_all_screen = False
         self.ready_to_play = False
         self.video_path: Optional[str] = None
@@ -116,10 +118,12 @@ class VideoSettingUI(SettingPage):
         self.finish_body()
         self.set_footer(primary=self.start_button, status=self.ready_label)
 
+    @owned_action
     def set_show_all_screen(self) -> None:
         front_engine_logger.info("[VideoSettingUI] set_show_all_screen")
         self.show_all_screen = self.show_on_all_screen_checkbox.isChecked()
 
+    @owned_action
     def _create_video_widget(self) -> VideoWidget:
         front_engine_logger.info("[VideoSettingUI] _create_video_widget")
         video_widget = VideoWidget(video_path=self.video_path)
@@ -132,6 +136,7 @@ class VideoSettingUI(SettingPage):
         self.video_widget_list.append(video_widget)
         return video_widget
 
+    @owned_action
     def start_play_video(self) -> None:
         if not self.video_path or not self.ready_to_play:
             self.choose_and_copy_file_to_cwd_video_dir_then_play()  # nothing chosen yet: choosing one shows it
@@ -156,11 +161,12 @@ class VideoSettingUI(SettingPage):
             span_all_screens=resolve_span(self.target_monitor_combobox),
         )
 
+    @owned_action
     def choose_and_copy_file_to_cwd_video_dir_then_play(self) -> None:
         front_engine_logger.info("[VideoSettingUI] choose_and_copy_file_to_cwd_video_dir_then_play")
         self.ready_label.setText(language_wrapper.language_word_dict.get("Not Ready"))
         self.ready_to_play = False
-        self.video_path = choose_video(self)
+        self.video_path = self.lifetime.after_dialog(choose_video(self))
         if self.video_path:
             self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
             self.ready_to_play = True
@@ -168,6 +174,7 @@ class VideoSettingUI(SettingPage):
             reload_recent_combobox(self.recent_files_combobox, "video")
             self.start_play_video()  # chosen means shown: no second click
 
+    @owned_action
     def _apply_recent_file(self, _index: int = 0) -> None:
         path = self.recent_files_combobox.currentData()
         self.recent_files_combobox.setCurrentIndex(0)
@@ -178,6 +185,7 @@ class VideoSettingUI(SettingPage):
         self.ready_to_play = True
         self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
 
+    @owned_action
     def _on_file_dropped(self, path: str) -> None:
         front_engine_logger.info(f"[VideoSettingUI] _on_file_dropped | path={path}")
         self.video_path = path
@@ -187,14 +195,17 @@ class VideoSettingUI(SettingPage):
         reload_recent_combobox(self.recent_files_combobox, "video")
         self.start_play_video()  # a dropped file is shown at once
 
+    @owned_action
     def opacity_trick(self) -> None:
         front_engine_logger.info("[VideoSettingUI] opacity_trick")
         self.opacity_slider_value_label.setText(str(self.opacity_slider.value()))
 
+    @owned_action
     def play_rate_trick(self) -> None:
         front_engine_logger.info("[VideoSettingUI] play_rate_trick")
         self.play_rate_slider_value_label.setText(str(self.play_rate_slider.value()))
 
+    @owned_action
     def volume_trick(self) -> None:
         front_engine_logger.info("[VideoSettingUI] volume_trick")
         self.volume_slider_value_label.setText(str(self.volume_slider.value()))

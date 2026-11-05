@@ -4,7 +4,7 @@ from PySide6.QtCore import QCoreApplication
 from PySide6.QtGui import QColor, QImage
 
 from frontengine.show.reference.image_compare import align_images, checked_image, difference_image
-from frontengine.ui.dialog.image_compare_dialog import ImageCompareDialog, comparison_pool
+from frontengine.ui.dialog.image_compare_dialog import ImageCompareDialog
 
 
 def _image(width, height, color):
@@ -59,17 +59,18 @@ def test_reader_rejects_bad_data_and_limits_before_decode(tmp_path):
 
 
 def _finish(dialog):
-    assert comparison_pool().waitForDone(5000)
+    assert dialog.lifetime.pool('comparison').waitForDone(5000)
     QCoreApplication.processEvents()
     # An obsolete result may schedule the latest coalesced request.
     if dialog._busy:
-        assert comparison_pool().waitForDone(5000)
+        assert dialog.lifetime.pool('comparison').waitForDone(5000)
         QCoreApplication.processEvents()
     assert not dialog._busy
 
 
-def test_async_modes_share_transform_slider_avoids_decode_and_failure_keeps_pair(tmp_path, monkeypatch):
+def test_async_modes_share_transform_slider_avoids_decode_and_failure_keeps_pair(tmp_path, monkeypatch, *, lifetime_factory):
     import frontengine.ui.dialog.image_compare_dialog as module
+    lifetime_factory()
     paths = [tmp_path / 'a.png', tmp_path / 'b.png']
     _image(10, 6, 'red').save(str(paths[0]))
     _image(6, 10, 'blue').save(str(paths[1]))
@@ -82,7 +83,7 @@ def test_async_modes_share_transform_slider_avoids_decode_and_failure_keeps_pair
         return original(path)
 
     monkeypatch.setattr(module, 'checked_image', record)
-    dialog = ImageCompareDialog()
+    dialog = ImageCompareDialog(lifetime=lifetime_factory())
     dialog.load_paths([str(path) for path in paths])
     _finish(dialog)
     assert len(calls) == 2 and all(identifier != gui_thread for identifier in calls)
@@ -107,11 +108,12 @@ def test_async_modes_share_transform_slider_avoids_decode_and_failure_keeps_pair
     assert not dialog.scene.items() and not dialog._items
 
 
-def test_only_latest_pending_selection_is_applied_and_close_ignores_late_result(tmp_path):
+def test_only_latest_pending_selection_is_applied_and_close_ignores_late_result(tmp_path, *, lifetime_factory):
+    lifetime_factory()
     paths = [tmp_path / 'a.png', tmp_path / 'b.png']
     for path in paths:
         _image(12, 8, 'red').save(str(path))
-    dialog = ImageCompareDialog()
+    dialog = ImageCompareDialog(lifetime=lifetime_factory())
     dialog.load_paths([str(path) for path in paths])
     dialog.alignment.setCurrentIndex(dialog.alignment.findData('center'))
     dialog.alignment.setCurrentIndex(dialog.alignment.findData('fit'))
@@ -123,9 +125,10 @@ def test_only_latest_pending_selection_is_applied_and_close_ignores_late_result(
     assert dialog._closed and not dialog.scene.items()
 
 
-def test_scene_output_matches_wipe_overlay_and_difference_controls():
+def test_scene_output_matches_wipe_overlay_and_difference_controls(*, lifetime_factory):
     from PySide6.QtGui import QPainter
-    dialog = ImageCompareDialog()
+    lifetime_factory()
+    dialog = ImageCompareDialog(lifetime=lifetime_factory())
     request = ('a.png', 'b.png', 'origin', 1)
     dialog._request = request
     a, b = _image(4, 2, 'red'), _image(4, 2, 'blue')
@@ -152,7 +155,7 @@ def test_scene_output_matches_wipe_overlay_and_difference_controls():
     dialog.close()
 
 
-def test_closed_queued_job_skips_decode_and_pool_has_a_global_bound(monkeypatch):
+def test_closed_queued_job_skips_decode_and_owned_pool_has_a_bound(monkeypatch, *, lifetime_factory):
     from threading import Event
     from unittest.mock import Mock
     import frontengine.ui.dialog.image_compare_dialog as module
@@ -162,4 +165,4 @@ def test_closed_queued_job_skips_decode_and_pool_has_a_global_bound(monkeypatch)
     monkeypatch.setattr(module, 'checked_image', decode)
     module._CompareJob(('a', 'b', 'origin', 1), cancelled).run()
     decode.assert_not_called()
-    assert comparison_pool().maxThreadCount() == 2
+    assert lifetime_factory().pool('comparison').maxThreadCount() == 2

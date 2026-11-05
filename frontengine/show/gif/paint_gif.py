@@ -2,7 +2,7 @@ from pathlib import Path
 
 from PySide6.QtCore import QRect
 from PySide6.QtGui import QPainter, QMovie
-from PySide6.QtWidgets import QMessageBox, QLabel
+from PySide6.QtWidgets import QMessageBox
 
 from frontengine.show.base_widget import BaseWidget
 from frontengine.utils.logging.loggin_instance import front_engine_logger
@@ -19,14 +19,12 @@ class GifWidget(BaseWidget):
         super().__init__(draw_location_x, draw_location_y)
         self.speed: int = 100
         self.gif_path: Path = Path(gif_image_path)
-        self.movie: QMovie = QMovie()
-        self.gif_label: QLabel = QLabel()
+        self.movie: QMovie = QMovie(self)
 
         if self.gif_path.exists() and self.gif_path.is_file():
             front_engine_logger.info(f"Loading GIF file: {self.gif_path}")
             self.movie.setFileName(str(self.gif_path))
             self.movie.frameChanged.connect(lambda _frame: self.update())
-            self.gif_label.setMovie(self.movie)
             self.movie.start()
             self.resize(self.movie.frameRect().size())
         else:

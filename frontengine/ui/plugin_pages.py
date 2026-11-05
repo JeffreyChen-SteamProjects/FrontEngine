@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 from PySide6.QtWidgets import QWidget
-from frontengine.utils.logging.loggin_instance import front_engine_logger
 
 
 def attach_page(name: str, factory: type, control_center) -> QWidget:
@@ -10,6 +9,11 @@ def attach_page(name: str, factory: type, control_center) -> QWidget:
     if not isinstance(factory, type) or not issubclass(factory, QWidget):
         raise ValueError('Plugin tabs must be QWidget subclasses')
     page = factory()
+    page.lifetime = control_center.lifetime
+    control_center.lifetime.adopt(page)
+    bind = getattr(page, "bind_lifetime", None)
+    if callable(bind):
+        bind(control_center.lifetime)
     if hasattr(page, 'overlay_widgets'):
         control_center.register_overlay_source(lambda: page.overlay_widgets)
     cleanup = getattr(page, 'release_overlay_resources', None)
@@ -25,11 +29,8 @@ def preset_pages(ui) -> list[tuple[str, QWidget]]:
 
 
 def shutdown_pages(ui) -> None:
-    """Dispose page-local jobs after registered overlays have closed; isolate plugin faults."""
+    """Cooperative shutdown must stop producers; failures retain runtime ownership."""
     for name, page in getattr(ui, 'plugin_pages', {}).items():
         shutdown = getattr(page, 'shutdown', None)
         if callable(shutdown):
-            try:
-                shutdown()
-            except Exception as error:
-                front_engine_logger.warning(f'[plugins] page shutdown failed: {name}: {error}')
+            shutdown()

@@ -1,5 +1,4 @@
 from copy import deepcopy
-from os import getcwd
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -138,62 +137,61 @@ def default_settings() -> Dict[str, Any]:
 user_setting_dict: Dict[str, Any] = default_settings()
 
 
-def _repository() -> JsonRepository:
-    return JsonRepository(Path(getcwd()) / "user_setting.json")
-
-
 def write_user_setting() -> Path:
-    return _repository().save(user_setting_dict)
+    from frontengine.user_setting.default_storage import default_storage
+    return default_storage().save_settings()
 
 
 def read_user_setting() -> Path:
-    repo = _repository()
-    repo.load_into(user_setting_dict)
-    return repo.path
+    """Return the owned initial load without rebinding a live settings dictionary."""
+    from frontengine.user_setting.default_storage import default_storage
+    from frontengine.user_setting.storage_session import SETTINGS_NAME
+    storage = default_storage()
+    with storage._operation():
+        return storage._checked_path(SETTINGS_NAME)
 
 
 def is_stored(key: str) -> bool:
-    """
-    這個鍵是不是真的寫在設定檔裡（而不是這裡的預設值）。
-
-    載入是把檔案 merge 到預設值上，所以載入之後 `user_setting_dict` 分不出兩者。
-    「使用者從沒挑過語言」和「使用者挑了英文」要做的事不一樣，得問檔案本身。
-
-    Whether `key` is actually in the settings file rather than a default here.
-
-    Loading merges the file over the defaults, so afterwards `user_setting_dict`
-    cannot tell the two apart. "The user never chose a language" and "the user
-    chose English" call for different behaviour, so this asks the file itself.
-    """
-    repo = _repository()
-    if not repo.exists():
-        return False
-    data = repo.load()
-    return isinstance(data, dict) and key in data
+    """Check whether the key exists on disk under the current directory owner."""
+    from frontengine.user_setting.default_storage import default_storage
+    from frontengine.user_setting.storage_session import SETTINGS_NAME
+    storage = default_storage()
+    with storage._settings_transaction():
+        data = JsonRepository(storage._checked_path(SETTINGS_NAME)).load()
+        return isinstance(data, dict) and key in data
 
 
 def export_user_setting(destination: Path) -> Path:
-    """將目前所有設定寫出到指定路徑 / Write all current settings to `destination`."""
-    destination = Path(destination)
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    data = {key: value for key, value in user_setting_dict.items() if key != 'plugin_grants'}
-    return JsonRepository(destination).save(data)
+    """Export current settings without credentials or managed-file collisions."""
+    from frontengine.user_setting.default_storage import default_storage
+    from frontengine.user_setting.storage_session import checked_export_destination
+    storage = default_storage()
+    with storage._settings_transaction():
+        destination = checked_export_destination(destination)
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        data = {key: value for key, value in storage.settings.items() if key != 'plugin_grants'}
+        return JsonRepository(destination).save(data)
 
 
 def import_user_setting(source: Path) -> None:
-    """
-    從檔案匯入設定並合併、持久化。非 JSON 物件會丟出 ValueError。
-    Import settings from a file, merge them in, and persist. A non-object
-    document raises ValueError.
-    """
-    repo = JsonRepository(Path(source))
-    if not repo.exists():
-        raise FileNotFoundError(f"File not found: {source}")
-    data = repo.load()
-    if not isinstance(data, dict):
-        raise ValueError("Settings file must contain a JSON object")
-    user_setting_dict.update({key: value for key, value in data.items() if key != 'plugin_grants'})
-    write_user_setting()
+    """Merge an imported object atomically, retaining memory on save failure."""
+    from frontengine.user_setting.default_storage import default_storage
+    storage = default_storage()
+    with storage._settings_transaction():
+        repo = JsonRepository(Path(source))
+        if not repo.exists():
+            raise FileNotFoundError(f"File not found: {source}")
+        data = repo.load()
+        if not isinstance(data, dict):
+            raise ValueError("Settings file must contain a JSON object")
+        previous = dict(storage.settings)
+        storage.settings.update({key: value for key, value in data.items() if key != 'plugin_grants'})
+        try:
+            storage.save_settings()
+        except Exception:
+            storage.settings.clear()
+            storage.settings.update(previous)
+            raise
 
 
 def save_overlay_geometry(kind: str, x: int, y: int, width: int, height: int) -> None:

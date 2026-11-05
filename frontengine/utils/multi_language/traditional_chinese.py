@@ -1958,4 +1958,5 @@ traditional_chinese_word_dict = {
     "pet_home_pack_themes": "{count} 個主題",
     "pet_home_visit_needs_packs": "需要的內容包：{packs}",
     "pet_home_no_packs": "沒有家具包。把家具包資料夾放進家具包資料夾後重新啟動。",
+    "runtime_shutdown_failed": "無法完成關閉：{error}",
 }

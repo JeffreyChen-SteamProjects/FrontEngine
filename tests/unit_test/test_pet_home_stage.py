@@ -4,7 +4,6 @@ import pytest
 from frontengine.show.pet_game.home_service import HomeService
 from frontengine.ui.page.pet_game.home_page import STAGE_HEIGHT, PetHomePage
 from frontengine.ui.page.pet_game.home_stage import TAB_ORDER, EmptyHome
-from frontengine.user_setting.pet_game_save import HomeSaveStore
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.utils.multi_language.retranslate import translate
 from frontengine.utils.pet_game.catalog import builtin_catalog
@@ -17,9 +16,10 @@ def _running_setting(monkeypatch):
 
 
 @pytest.fixture
-def page(tmp_path):
-    service = HomeService(None, HomeSaveStore(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None))
-    widget = PetHomePage(service)
+def page(tmp_path, *, home_store_factory, lifetime_factory):
+    lifetime_factory()
+    service = HomeService(None, home_store_factory(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None))
+    widget = PetHomePage(service, lifetime=lifetime_factory())
     widget.resize(1200, 900)
     widget.show()
     yield widget

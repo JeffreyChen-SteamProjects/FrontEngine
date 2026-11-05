@@ -148,7 +148,7 @@ class Scene3DClock(QObject):
 
 
 class MediaSource:
-    def __init__(self, entry, preview=False, prepared=None):
+    def __init__(self, entry, preview=False, prepared=None, *, lifetime=None):
         self.entry, self.widget, self.image, self.movie = deepcopy(entry), None, QImage(), None
         self.audition = False
         self._video_stamp = None
@@ -180,7 +180,7 @@ class MediaSource:
             settings = {**entry, 'opacity': 100}
             if kind == 'TEXT':
                 from frontengine.show.overlay_factory import build_overlay
-                self.widget = build_overlay('text', settings)
+                self.widget = build_overlay('text', settings, lifetime=lifetime)
                 self.widget.set_render_backend('software')
             else:
                 from .media_frame import SceneMediaFrame
@@ -248,7 +248,7 @@ class MediaSource:
 class Scene3DRuntime(QObject):
     failed = Signal(str)
     performance_changed = Signal(int, float)
-    def __init__(self, document, models=None, parent=None, *, preview=False, enable_media=True):
+    def __init__(self, document, models=None, parent=None, *, preview=False, enable_media=True, lifetime=None):
         super().__init__(parent)
         self.document = read_scene_document(document)
         self.models = prepare_models(self.document) if models is None else dict(models)
@@ -278,7 +278,7 @@ class Scene3DRuntime(QObject):
                     continue
                 if kind in MEDIA_TYPES:
                     prepared = self.models.get(str(Path(entry['file_path']).resolve())) if kind in ('IMAGE', 'GIF') else None
-                    self.sources[key] = MediaSource(entry, preview, prepared)
+                    self.sources[key] = MediaSource(entry, preview, prepared, lifetime=lifetime)
                     widget = self.sources[key].widget
                     if widget is not None and hasattr(widget, 'failed'):
                         widget.failed.connect(lambda message, layer=key: self.failed.emit(layer+': '+message))

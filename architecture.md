@@ -58,8 +58,21 @@ read/modify/save/rollback transactions with settings serialization. Explicitly i
 sessions retain the owner through failed or canceled closure and release it only after finalization.
 Profile exports validate both their destination and temporary path against managed names and linked
 files. Borrowed settings mappings still require a live caller lifetime and direct mutations are not
-serialized. The global settings facade and home/main-window integration are
-still tracked in `progress.md` #52; the new boundary alone does not protect existing UI entrypoints.
+serialized. `default_storage.py` binds the existing exported dictionary to one captured owner
+without reloading while scopes remain live. Home stores require that owner, claim their mode
+before reading and retain it through their attached service. History, palettes and pet assets
+use owner-bound transactions and paths.
+
+`utils/work_lifetime.py` owns callback admission and Python-slot signal argument adaptation,
+private worker pools, producer completion and
+QObject retirement without importing the UI layer. `ui/runtime_lifetime.py` adds the default
+settings binding and the single-main-window claim. Settings pages require `lifetime=`; MainUI
+retains its public constructor and exposes `request_shutdown()` and `shutdown_finished`.
+Preparation defers callbacks, refusal replays them, and retirement discards them. Storage is
+released only after owned workers and objects finish. JEditor and PyBreeze gate container and
+application closure on this completion and reuse the existing embedded window.
+The embedding and cooperative plugin contracts are in
+[`docs/formats/runtime-lifetime.md`](docs/formats/runtime-lifetime.md).
 
 ## 3. Entry points and public interfaces
 
@@ -258,3 +271,5 @@ Cancellation tombstones count toward the 500-record limit and prevent stale impo
 `utils/linux` provides explicit X11/Wayland session policy, EWMH/python-xlib window list/physical-frame geometry/pin/move, compositing-manager-gated opacity and physical XRandR work areas. Native Wayland arbitrary-window control/global pynput input/profile positioning are rejected with concrete reasons, not described as global Xwayland support. Linux-only python-xlib dependency aligns requirements and both manifests. PulseCapture launches fixed distro parec paths on one worker, default output monitor or microphone, one sanitized 2048-float memory frame; lazy PulseMeter construction does not start disabled reactive audio. Stop handles spawning races, kills only own child, worker reaps; shared captures stop on MainUI shutdown and join only through GUI-polled barrier. WASAPI peak-only behavior unchanged; Linux meter requires real audio samples, explicit docs distinction. LoopbackSpectrum/SystemAudioMeter/MicrophoneMeter route Linux to this adapter. platform_info/capabilities.py and Help platform_capabilities_dialog display read-only prerequisites/original failure reasons without enabling capture/listeners. Protocol acceptance uses isolated Linux display/audio servers; physical Mac/Linux audio/multi-monitor acceptance remains separate.
 
 - Windows entry `exe/start_front_engine.py` delegates normal startup to the published main_ui.main CLI (--preset/--debug). Explicit --verify-scene-build FIXTURES REPORT calls the fixed exe/scene_build_acceptance.py probe with isolated temporary settings and local seven-type inputs (tests/integration/scene_build_fixtures.py). It verifies compiled native media/editor/export/cleanup and writes bounded owned screenshots/report, never supplied Python scripts. Fixture generation optionally needs PyAV; native Puppet acceptance needs the optional runtime in the build environment. Installed Pillow decoder plugins and Imervue package data are included by build_exe.py.
+
+`show/gif/paint_gif.py` owns its QMovie as a Qt child, so overlay deletion releases the source file independently of retained Python references. The home page places status text above wrapping action buttons; its welcome heading also wraps for longer translations.

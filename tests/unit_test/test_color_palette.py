@@ -90,11 +90,12 @@ def test_picker_samples_clicks_only_and_preserves_exact_color():
     widget.close()
 
 
-def test_tools_collection_and_edit_dialog_share_persistent_model(monkeypatch):
+def test_tools_collection_and_edit_dialog_share_persistent_model(monkeypatch, *, lifetime_factory):
     import frontengine.ui.page.tools.tools_setting_ui as module
+    lifetime_factory()
     monkeypatch.setattr(module, "user_setting_dict", {})
     monkeypatch.setattr(module, "write_user_setting", lambda: None)
-    page = module.ToolsSettingUI()
+    page = module.ToolsSettingUI(lifetime=lifetime_factory())
     page._record_palette_color("#123456")
     assert not page.palette.entries
     page.palette_collect.setChecked(True)

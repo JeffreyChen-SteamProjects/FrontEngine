@@ -4,7 +4,7 @@ import json
 import time
 
 import pytest
-from PySide6.QtCore import QObject, Signal, QCoreApplication, QThreadPool
+from PySide6.QtCore import QObject, Signal, QCoreApplication
 from PySide6.QtGui import QImage
 
 from frontengine.utils.steam.steam_runtime import APP_ID, SteamEvent
@@ -166,14 +166,15 @@ def test_unsubscribed_content_is_not_reintroduced_by_late_worker(installed):
     subscriptions.stop()
 
 
-def test_worker_delivers_on_gui_thread_and_suppresses_shutdown_callbacks():
+def test_worker_delivers_on_gui_thread_and_suppresses_shutdown_callbacks(*, lifetime_factory):
     import threading
-    jobs = WorkshopJobs()
+    lifetime_factory()
+    jobs = WorkshopJobs(lifetime=lifetime_factory())
     main_thread = threading.get_ident()
     delivered = []
     jobs.completed.connect(lambda key, result: delivered.append((threading.get_ident(), result)))
     assert jobs.submit("first", lambda: threading.get_ident())
-    QThreadPool.globalInstance().waitForDone(3000)
+    jobs.pool.waitForDone(3000)
     deadline = time.monotonic() + 3
     while not delivered and time.monotonic() < deadline:
         QCoreApplication.processEvents()

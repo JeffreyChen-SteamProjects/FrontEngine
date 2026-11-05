@@ -8,7 +8,6 @@ from frontengine.show.pet_game.home_service import HomeService
 from frontengine.show.pet_game.home_view import ZOOMS
 from frontengine.ui.page.pet_game.home_page import STAGE_HEIGHT, UPDATE_URL, PetHomePage
 from frontengine.ui.page.pet_game.home_pending import MAX_PENDING, pending
-from frontengine.user_setting.pet_game_save import HomeSaveStore
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.utils.pet_game.catalog import builtin_catalog
 from frontengine.utils.pet_game.world import World
@@ -22,9 +21,10 @@ def _settings(monkeypatch):
 
 
 @pytest.fixture
-def page(tmp_path):
-    service = HomeService(None, HomeSaveStore(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None))
-    widget = PetHomePage(service)
+def page(tmp_path, *, home_store_factory, lifetime_factory):
+    lifetime_factory()
+    service = HomeService(None, home_store_factory(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None))
+    widget = PetHomePage(service, lifetime=lifetime_factory())
     widget.resize(1200, 900)
     widget.show()
     yield widget
@@ -97,10 +97,11 @@ def test_the_strip_offers_a_way_out_of_arranging(page):
     assert strip.done_button.isHidden()
 
 
-def test_a_newer_save_offers_the_update(tmp_path):
+def test_a_newer_save_offers_the_update(tmp_path, *, home_store_factory, lifetime_factory):
+    lifetime_factory()
     (tmp_path / "pet-home.json").write_text('{"format": "frontengine.pet-home", "version": 999}', encoding="utf-8")
-    service = HomeService(None, HomeSaveStore(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None))
-    page = PetHomePage(service)
+    service = HomeService(None, home_store_factory(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None))
+    page = PetHomePage(service, lifetime=lifetime_factory())
     page.show()
     try:
         assert page.load_result.status == "newer"

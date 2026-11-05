@@ -5,17 +5,19 @@ from frontengine.ui.page.tools import tools_setting_ui as tools
 from frontengine.utils.screen_text.screen_text_service import ScreenTextResult
 
 
-def test_local_capture_starts_without_cloud_consent(monkeypatch):
+def test_local_capture_starts_without_cloud_consent(monkeypatch, *, lifetime_factory):
+    lifetime_factory()
     monkeypatch.setattr(tools, 'ask_for_consent', lambda *_args: (_ for _ in ()).throw(AssertionError('cloud prompt')))
-    page = tools.ToolsSettingUI()
+    page = tools.ToolsSettingUI(lifetime=lifetime_factory())
     picker = page.start_screen_text()
     assert picker is not None
     picker.close()
     page.close()
 
 
-def test_empty_local_success_stays_empty_in_tools_ui(monkeypatch):
-    page = tools.ToolsSettingUI()
+def test_empty_local_success_stays_empty_in_tools_ui(monkeypatch, *, lifetime_factory):
+    lifetime_factory()
+    page = tools.ToolsSettingUI(lifetime=lifetime_factory())
     result = ScreenTextResult('success', '', 'Windows.Media.Ocr')
     shown = []
     class LocalService:

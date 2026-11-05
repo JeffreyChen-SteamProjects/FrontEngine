@@ -1,11 +1,11 @@
 """Local identity selection and portable single-pet state management."""
 from pathlib import Path
 
+from frontengine.ui.runtime_lifetime import owned_action, owned_callback
+
 from PySide6.QtWidgets import QComboBox, QFileDialog, QLabel, QLineEdit, QPushButton, QSpinBox
 
 from frontengine.show.pet.pet_profile_session import PetProfileSession
-from frontengine.user_setting.pet_profiles import PetProfiles
-from frontengine.user_setting.user_setting_file import user_setting_dict, write_user_setting
 from frontengine.utils.multi_language.retranslate import retranslator, tr, translate
 from frontengine.show.pet.companion_menu import companion_status
 from frontengine.utils.pet_companion.stats import TREAT_KINDS
@@ -16,7 +16,8 @@ class PetProfileControls:
 
     def __init__(self, page) -> None:
         self.page = page
-        self.profiles = PetProfiles(user_setting_dict, write_user_setting)
+        self.lifetime = page.lifetime
+        self.profiles = page.lifetime.storage.profiles()
         self.selector = QComboBox()
         self.name = QLineEdit()
         retranslator.bind(self.name, 'pet_profile_name', setter='setPlaceholderText')
@@ -75,6 +76,7 @@ class PetProfileControls:
         retranslator.bind_call(self.refresh)
         self.refresh()
 
+    @owned_callback
     def refresh(self, *_args, selected: str | None = None) -> None:
         """Refresh saved names and retain the explicitly selected local identity."""
         identifier = selected if selected is not None else self.selector.currentData()
@@ -102,6 +104,7 @@ class PetProfileControls:
         self.selector.blockSignals(False)
         self._selected()
 
+    @owned_callback
     def _selected(self, *_args) -> None:
         identifier = self.selector.currentData()
         self.rename.setEnabled(identifier is not None)
@@ -138,12 +141,14 @@ class PetProfileControls:
             self.interaction.insertItem(position + offset, label, 'cmd:' + command)
         self.interaction.setCurrentIndex(max(0, self.interaction.findData(selected)))
 
+    @owned_action
     def _update_call_controls(self, *_args) -> None:
         enabled = self.selector.currentData() is not None and self.interaction.currentData() in ('call', 'light')
         self.call_x.setEnabled(enabled)
         self.call_y.setEnabled(enabled)
         self.call_hint.setVisible(enabled)
 
+    @owned_action
     def rename_selected(self) -> None:
         """Change the saved name without modifying this or any other pet's stats."""
         try:
@@ -153,6 +158,7 @@ class PetProfileControls:
         except (OSError, ValueError, KeyError) as error:
             self.status.setText(str(error))
 
+    @owned_action
     def recover_selected(self) -> None:
         from frontengine.show.pet.recovery import recover_pet
 
@@ -169,6 +175,7 @@ class PetProfileControls:
             return
         self.status.setText(translate('pet_recover_done', 'Pet returned to the selected screen.'))
 
+    @owned_action
     def interact_selected(self) -> None:
         identifier = self.selector.currentData()
         session = PetProfileSession.active(self.profiles, identifier) if identifier else None
@@ -209,6 +216,7 @@ class PetProfileControls:
         self.status.setText(companion_status(session) if result == 'accepted' else translate(
             'pet_companion_' + result, result))
 
+    @owned_action
     def customize(self, identifier: str | None = None) -> None:
         from frontengine.ui.dialog.pet_customization import PetCustomizationDialog
 
@@ -219,11 +227,12 @@ class PetProfileControls:
             self._dialogs[identifier].show()
             return
         dialog = PetCustomizationDialog(self.profiles, identifier, self.page,
-                                        self.page.customization_defaults())
+                                        self.page.customization_defaults(), lifetime=self.lifetime)
         self._dialogs[identifier] = dialog
         dialog.destroyed.connect(lambda: self._dialogs.pop(identifier, None))
         dialog.show()
 
+    @owned_action
     def wardrobe(self, identifier: str | None = None) -> None:
         from frontengine.ui.dialog.pet_wardrobe import PetWardrobeDialog
         from frontengine.show.pet.puppet_pet import PuppetPetWidget
@@ -249,10 +258,11 @@ class PetProfileControls:
         dialog.destroyed.connect(lambda: self._wardrobes.pop(identifier, None))
         dialog.show()
 
+    @owned_action
     def export_selected(self) -> None:
         """Flush live state before exporting the selected individual save."""
-        destination, _filter = QFileDialog.getSaveFileName(self.page, translate('pet_profile_export'),
-                                                          'pet-save.json', 'JSON (*.json)')
+        destination, _filter = self.lifetime.after_dialog(QFileDialog.getSaveFileName(self.page, translate('pet_profile_export'),
+                                                          'pet-save.json', 'JSON (*.json)'))
         if not destination:
             return
         try:
@@ -265,9 +275,10 @@ class PetProfileControls:
         except (OSError, ValueError) as error:
             self.status.setText(str(error))
 
+    @owned_action
     def import_save(self) -> None:
         """Import into a fresh identity; choose a sprite/puppet before spawning."""
-        source, _filter = QFileDialog.getOpenFileName(self.page, translate('pet_profile_import'), '', 'JSON (*.json)')
+        source, _filter = self.lifetime.after_dialog(QFileDialog.getOpenFileName(self.page, translate('pet_profile_import'), '', 'JSON (*.json)'))
         if not source:
             return
         try:

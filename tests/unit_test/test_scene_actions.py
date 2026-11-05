@@ -87,8 +87,9 @@ def test_background_source_read_does_not_modify_shared_scene(tmp_path):
         read_scene_source(path)
 
 
-def test_layer_actions_update_pixels_document_and_undo_without_doubled_opacity(tmp_path):
-    page = SceneSettingUI()
+def test_layer_actions_update_pixels_document_and_undo_without_doubled_opacity(tmp_path, *, lifetime_factory):
+    lifetime_factory()
+    page = SceneSettingUI(lifetime=lifetime_factory())
     entries = _image_scene(tmp_path)
     page.visual_editor.document.reset(entries)
     page.scene.add_entry('reference', entries['reference'])
@@ -139,8 +140,9 @@ def test_native_instances_follow_each_monitor_origin_without_hiding_peers():
         manager.clear()
 
 
-def test_async_playback_failure_keeps_old_scene_and_receipts_wait_for_completion(tmp_path):
-    page = SceneSettingUI()
+def test_async_playback_failure_keeps_old_scene_and_receipts_wait_for_completion(tmp_path, *, lifetime_factory):
+    lifetime_factory()
+    page = SceneSettingUI(lifetime=lifetime_factory())
     page.actions.deleteLater()
     gate = Event()
     threads = []
@@ -160,7 +162,7 @@ def test_async_playback_failure_keeps_old_scene_and_receipts_wait_for_completion
     registry.register(Action('scene_start', 'label', 'Play', actions.request, True, True))
     rules = [{'label': 'Play', 'action': 'scene_start', 'value': 'source.json', 'when': {'apps': 'code'}}]
     service = RuleEngineService(lambda: rules, lambda: {'app': 'code'})
-    window = SimpleNamespace(action_registry=registry, rule_engine_service=service)
+    window = SimpleNamespace(action_registry=registry, rule_engine_service=service, lifetime=lifetime_factory())
     service.rule_fired.connect(lambda rule: FrontEngineMainUI._on_rule_fired(window, rule))
     try:
         service.poll_once()
@@ -177,8 +179,9 @@ def test_async_playback_failure_keeps_old_scene_and_receipts_wait_for_completion
         page.close()
 
 
-def test_latest_request_wins_and_stop_cleans_cancelled_package_results(tmp_path):
-    page = SceneSettingUI()
+def test_latest_request_wins_and_stop_cleans_cancelled_package_results(tmp_path, *, lifetime_factory):
+    lifetime_factory()
+    page = SceneSettingUI(lifetime=lifetime_factory())
     page.actions.deleteLater()
     gate, started = Event(), Event()
     results = []
@@ -220,8 +223,9 @@ def test_latest_request_wins_and_stop_cleans_cancelled_package_results(tmp_path)
     assert not resource.exists()
 
 
-def test_successful_scene_replacement_retains_control_center_lists(tmp_path):
-    page = SceneSettingUI()
+def test_successful_scene_replacement_retains_control_center_lists(tmp_path, *, lifetime_factory):
+    lifetime_factory()
+    page = SceneSettingUI(lifetime=lifetime_factory())
     page.visual_editor.document.reset(_image_scene(tmp_path))
     lists = [page.scene.widget_list, page.scene.view_list, page.scene.native_widgets]
     try:
@@ -262,8 +266,9 @@ def test_target_picker_preserves_optional_scene_targets_and_generates_layer_valu
         rules.close()
 
 
-def test_layer_rules_wait_for_preceding_scene_and_failed_load_cannot_mutate_old_content(tmp_path):
-    page = SceneSettingUI()
+def test_layer_rules_wait_for_preceding_scene_and_failed_load_cannot_mutate_old_content(tmp_path, *, lifetime_factory):
+    lifetime_factory()
+    page = SceneSettingUI(lifetime=lifetime_factory())
     page.actions.deleteLater()
     gate = Event()
     entries = _image_scene(tmp_path)
@@ -294,8 +299,9 @@ def test_layer_rules_wait_for_preceding_scene_and_failed_load_cannot_mutate_old_
         page.close()
 
 
-def test_layers_after_superseding_scene_belong_to_latest_request(tmp_path):
-    page = SceneSettingUI()
+def test_layers_after_superseding_scene_belong_to_latest_request(tmp_path, *, lifetime_factory):
+    lifetime_factory()
+    page = SceneSettingUI(lifetime=lifetime_factory())
     page.actions.deleteLater()
     gate, started = Event(), Event()
     def reader(_path):

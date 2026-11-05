@@ -10,8 +10,9 @@ def settle_layout():
         QApplication.processEvents()
 
 
-def test_form_wraps_and_returns_to_columns_without_losing_values():
-    page = SettingPage("tab_video_text")
+def test_form_wraps_and_returns_to_columns_without_losing_values(*, lifetime_factory):
+    lifetime_factory()
+    page = SettingPage("tab_video_text", lifetime=lifetime_factory())
     section = page.add_section("section_appearance")
     label, field = QLabel("Target monitor"), QLineEdit("Display 1")
     section.add_row(label, field)
@@ -43,8 +44,9 @@ def test_form_wraps_and_returns_to_columns_without_losing_values():
         page.close()
 
 
-def test_wide_custom_content_can_be_reached_by_scrolling():
-    page = SettingPage("tab_video_text")
+def test_wide_custom_content_can_be_reached_by_scrolling(*, lifetime_factory):
+    lifetime_factory()
+    page = SettingPage("tab_video_text", lifetime=lifetime_factory())
     content = QLineEdit("Wide custom content")
     content.setMinimumWidth(800)
     page.add_body_widget(content)
@@ -66,8 +68,9 @@ def test_wide_custom_content_can_be_reached_by_scrolling():
         page.close()
 
 
-def test_inline_controls_wrap_and_hidden_controls_leave_no_gap():
-    page = SettingPage("tab_video_text")
+def test_inline_controls_wrap_and_hidden_controls_leave_no_gap(*, lifetime_factory):
+    lifetime_factory()
+    page = SettingPage("tab_video_text", lifetime=lifetime_factory())
     section = page.add_section("section_where")
     controls = [QCheckBox(text) for text in (
         "All monitors", "Behind windows", "Fullscreen")]

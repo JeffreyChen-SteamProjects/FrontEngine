@@ -1,3 +1,5 @@
+from frontengine.ui.runtime_lifetime import owned_action
+from frontengine.ui.runtime_lifetime import OwnedWidgetList
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QLabel, QSlider, QLineEdit, QPushButton, QCheckBox,
@@ -23,19 +25,19 @@ from frontengine.utils.web_url import next_page_index, normalize_web_url, parse_
 
 
 class WEBSettingUI(SettingPage):
-    def __init__(self):
+    def __init__(self, *, lifetime):
         front_engine_logger.info("[WEBSettingUI] Init")
         super().__init__("tab_web_text", "page_subtitle_web",
-                         "Web", "Keep a web page on top of everything else.")
+                         "Web", "Keep a web page on top of everything else.", lifetime=lifetime)
 
         # Init variable
-        self.web_widget_list = []
+        self.web_widget_list = OwnedWidgetList(self.lifetime)
         self.show_all_screen = False
         self.open_file = False
         self.enable_input = False
         # 網頁儀表板：一次開多個網址，一次只顯示一頁，可循環切換
         # Web dashboard: open several URLs at once, show one page at a time.
-        self.dashboard_widgets: list = []
+        self.dashboard_widgets: list = OwnedWidgetList(self.lifetime)
         self.dashboard_index = 0
 
         # Opacity setting
@@ -125,18 +127,22 @@ class WEBSettingUI(SettingPage):
         self.finish_body()
         self.set_footer(primary=self.start_button)
 
+    @owned_action
     def set_show_all_screen(self) -> None:
         front_engine_logger.info("[WEBSettingUI] set_show_all_screen")
         self.show_all_screen = self.show_on_all_screen_checkbox.isChecked()
 
+    @owned_action
     def set_open_file(self) -> None:
         front_engine_logger.info("[WEBSettingUI] set_open_file")
         self.open_file = self.open_local_html_checkbox.isChecked()
 
+    @owned_action
     def set_enable_input(self) -> None:
         front_engine_logger.info("[WEBSettingUI] set_enable_input")
         self.enable_input = self.enable_input_checkbox.isChecked()
 
+    @owned_action
     def _create_web_widget(self) -> WebWidget:
         front_engine_logger.info("[WEBSettingUI] _create_web_widget")
         url_text = self.web_url_input.text()
@@ -154,6 +160,7 @@ class WEBSettingUI(SettingPage):
         self.web_widget_list.append(web_widget)
         return web_widget
 
+    @owned_action
     def opacity_trick(self) -> None:
         front_engine_logger.info("[WEBSettingUI] opacity_trick")
         self.opacity_slider_value_label.setText(str(self.opacity_slider.value()))
@@ -163,6 +170,7 @@ class WEBSettingUI(SettingPage):
         """目前設定的儀表板網址清單 / The dashboard URLs as currently configured."""
         return parse_dashboard_urls(self.dashboard_edit.toPlainText())
 
+    @owned_action
     def start_dashboard(self) -> None:
         """
         一次開啟所有儀表板網址，但只顯示第一頁；其餘先隱藏，之後可循環切換。
@@ -187,6 +195,7 @@ class WEBSettingUI(SettingPage):
         self.dashboard_index = 0
         self._apply_dashboard_visibility()
 
+    @owned_action
     def _present_dashboard_widget(self, widget: WebWidget, monitor_index) -> None:
         """把儀表板頁面放到目標螢幕上（先建立後再依索引決定顯示哪一頁）。"""
         from PySide6.QtGui import QGuiApplication
@@ -197,6 +206,7 @@ class WEBSettingUI(SettingPage):
             widget.move(screens[monitor_index].availableGeometry().topLeft())
         widget.showFullScreen()
 
+    @owned_action
     def show_next_dashboard_page(self) -> None:
         """切換到下一頁（循環）；沒有儀表板時什麼都不做。"""
         if not self._alive_dashboard_widgets():
@@ -228,6 +238,7 @@ class WEBSettingUI(SettingPage):
             alive.append(widget)
         return alive
 
+    @owned_action
     def _apply_dashboard_visibility(self) -> None:
         """只顯示目前索引的那一頁。"""
         widgets = self._alive_dashboard_widgets()
@@ -281,6 +292,7 @@ class WEBSettingUI(SettingPage):
         if state.get("dashboard") is not None:
             self.dashboard_edit.setPlainText(str(state["dashboard"]))
 
+    @owned_action
     def start_open_web_with_url(self) -> None:
         front_engine_logger.info("[WEBSettingUI] start_open_web_with_url")
         if not self.web_url_input.text().strip():

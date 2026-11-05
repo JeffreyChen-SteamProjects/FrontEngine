@@ -5,6 +5,8 @@
 The eye-comfort page: colour filter, reading ruler and break reminders. All
 three are click-through overlays, so they never get in the way of your work.
 """
+from frontengine.ui.runtime_lifetime import owned_action
+from frontengine.ui.runtime_lifetime import OwnedWidgetList
 from typing import List
 
 from PySide6.QtCore import Qt, QTimer
@@ -35,16 +37,16 @@ class ScreenCareSettingUI(SettingPage):
 
     BREAK_TICK_MS = 1000
 
-    def __init__(self):
+    def __init__(self, *, lifetime):
         front_engine_logger.info("[ScreenCareSettingUI] Init")
         super().__init__("tab_screen_care_text", "page_subtitle_screen_care",
-                         "Eye care", "Filters, a reading ruler and breaks to rest your eyes.")
+                         "Eye care", "Filters, a reading ruler and breaks to rest your eyes.", lifetime=lifetime)
 
         # 目前開著的覆蓋層 / Overlays currently on screen
-        self.filter_widget_list: List[ScreenFilterWidget] = []
-        self.ruler_widget_list: List[ReadingRulerWidget] = []
-        self.break_overlay_list: List[ScreenFilterWidget] = []
-        self.color_vision_widget_list: List[ColorVisionWidget] = []
+        self.filter_widget_list: List[ScreenFilterWidget] = OwnedWidgetList(self.lifetime)
+        self.ruler_widget_list: List[ReadingRulerWidget] = OwnedWidgetList(self.lifetime)
+        self.break_overlay_list: List[ScreenFilterWidget] = OwnedWidgetList(self.lifetime)
+        self.color_vision_widget_list: List[ColorVisionWidget] = OwnedWidgetList(self.lifetime)
 
         # Colour filter
         self.filter_label = tr(QLabel(), "screen_filter_label", "Screen filter")
@@ -178,6 +180,7 @@ class ScreenCareSettingUI(SettingPage):
         widgets.clear()
 
     # --- colour filter ---------------------------------------------------
+    @owned_action
     def toggle_filter(self) -> None:
         """開關色彩濾鏡。"""
         if self.filter_widget_list:
@@ -185,6 +188,7 @@ class ScreenCareSettingUI(SettingPage):
         else:
             self.start_filter()
 
+    @owned_action
     def start_filter(self) -> None:
         front_engine_logger.info("[ScreenCareSettingUI] start_filter")
         self.stop_filter()
@@ -202,6 +206,7 @@ class ScreenCareSettingUI(SettingPage):
         retranslator.set_text(
             self.filter_button, "screen_filter_start", "Turn filter on")
 
+    @owned_action
     def _apply_filter_settings(self) -> None:
         """滑桿或顏色改變時即時套用到已開啟的濾鏡。"""
         for widget in self.filter_widget_list[:]:
@@ -212,6 +217,7 @@ class ScreenCareSettingUI(SettingPage):
                 self.filter_widget_list.remove(widget)
 
     # --- reading ruler ---------------------------------------------------
+    @owned_action
     def toggle_ruler(self) -> None:
         """開關閱讀尺。"""
         if self.ruler_widget_list:
@@ -219,6 +225,7 @@ class ScreenCareSettingUI(SettingPage):
         else:
             self.start_ruler()
 
+    @owned_action
     def start_ruler(self) -> None:
         front_engine_logger.info("[ScreenCareSettingUI] start_ruler")
         self.stop_ruler()
@@ -237,6 +244,7 @@ class ScreenCareSettingUI(SettingPage):
         retranslator.set_text(
             self.ruler_button, "reading_ruler_start", "Turn ruler on")
 
+    @owned_action
     def _apply_ruler_settings(self) -> None:
         for widget in self.ruler_widget_list[:]:
             try:
@@ -246,6 +254,7 @@ class ScreenCareSettingUI(SettingPage):
                 self.ruler_widget_list.remove(widget)
 
     # --- break reminder --------------------------------------------------
+    @owned_action
     def toggle_break_reminder(self) -> None:
         """開關護眼休息提醒。"""
         if self.break_reminder.running:
@@ -253,6 +262,7 @@ class ScreenCareSettingUI(SettingPage):
         else:
             self.start_break_reminder()
 
+    @owned_action
     def start_break_reminder(self) -> None:
         self.break_reminder.work_minutes = int(self.break_minutes_combobox.currentText())
         self.break_reminder.rest_seconds = int(self.break_seconds_combobox.currentText())
@@ -270,6 +280,7 @@ class ScreenCareSettingUI(SettingPage):
         retranslator.set_text(
             self.break_button, "break_reminder_start", "Start eye breaks")
 
+    @owned_action
     def _tick_break_reminder(self) -> None:
         """時間到就顯示或收起休息畫面。"""
         phase = self.break_reminder.tick()
@@ -278,6 +289,7 @@ class ScreenCareSettingUI(SettingPage):
         elif phase == PHASE_WORK:
             self._close_all(self.break_overlay_list)
 
+    @owned_action
     def show_break_overlay(self) -> None:
         """休息時把畫面壓暗一層當提示（仍可點擊穿透，不會擋住緊急操作）。"""
         front_engine_logger.info("[ScreenCareSettingUI] break time")
@@ -289,12 +301,14 @@ class ScreenCareSettingUI(SettingPage):
             self._present(overlay, screen)
 
     # --- colour vision ---------------------------------------------------
+    @owned_action
     def toggle_color_vision(self) -> None:
         if self.color_vision_widget_list:
             self.stop_color_vision()
         else:
             self.start_color_vision()
 
+    @owned_action
     def start_color_vision(self) -> None:
         """在每個目標螢幕開一層色覺模擬。"""
         front_engine_logger.info("[ScreenCareSettingUI] start_color_vision")
@@ -314,6 +328,7 @@ class ScreenCareSettingUI(SettingPage):
         retranslator.set_text(
             self.color_vision_button, "color_vision_start", "Simulate")
 
+    @owned_action
     def _apply_color_vision_settings(self) -> None:
         for widget in self.color_vision_widget_list[:]:
             try:

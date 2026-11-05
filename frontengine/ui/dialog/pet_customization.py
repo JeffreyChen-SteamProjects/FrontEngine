@@ -17,6 +17,7 @@ from frontengine.user_setting.pet_profile_schema import (
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.utils.multi_language.retranslate import retranslator, tr
 from frontengine.utils.pet_companion.stats import TREAT_KINDS
+from frontengine.utils.work_lifetime import WorkLifetime
 
 
 class PetCustomizationDialog(QDialog):
@@ -24,8 +25,14 @@ class PetCustomizationDialog(QDialog):
 
     def __init__(self, profiles: PetProfiles, identifier: str,
                  parent: QWidget | None = None,
-                 presentation_defaults: dict | None = None) -> None:
+                 presentation_defaults: dict | None = None, *,
+                 lifetime: WorkLifetime | None = None) -> None:
+        if lifetime is not None:
+            lifetime.require_live()
         super().__init__(parent)
+        self.lifetime = lifetime
+        if lifetime is not None:
+            lifetime.adopt(self)
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         tr(self, 'pet_custom_title', 'Customize pet', 'setWindowTitle')
         self.profiles, self.identifier = profiles, identifier
@@ -130,6 +137,8 @@ class PetCustomizationDialog(QDialog):
         self._toggle_presentation(preferences['presentation'] is None)
 
     def reset_defaults(self) -> None:
+        if self.lifetime is not None and not self.lifetime.accepting:
+            return
         """Stage defaults; nothing is persisted until Apply."""
         self._load(profile_defaults()['preferences'])
 
@@ -153,6 +162,8 @@ class PetCustomizationDialog(QDialog):
 
     def apply_changes(self) -> bool:
         """Commit a detached draft, retaining it on conflicts or save errors."""
+        if self.lifetime is not None and not self.lifetime.accepting:
+            return False
         candidate = self._candidate()
         taste = candidate.get('taste', {})
         if taste.get('favorite') is not None and taste.get('favorite') == taste.get('disliked'):

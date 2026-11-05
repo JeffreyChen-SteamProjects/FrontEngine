@@ -1,3 +1,6 @@
+from PySide6.QtCore import Signal
+from frontengine.ui.runtime_lifetime import (CloseDisposition, DefaultSettingsLifetime, MainRuntimeInUse, RuntimeState, owned_callback)
+from frontengine.user_setting.storage_session import StorageInUse, StorageUnavailable
 import os
 import sys
 from os import getcwd
@@ -8,7 +11,7 @@ from PySide6.QtCore import QByteArray, QTimer
 from PySide6.QtGui import QGuiApplication, QIcon, Qt, QAction, QKeySequence
 from PySide6.QtWidgets import (
     QMainWindow, QApplication, QGridLayout, QHBoxLayout, QStackedWidget, QStyle,
-    QMenuBar, QWidget, QMessageBox, QVBoxLayout,
+    QMenuBar, QWidget, QMessageBox, QVBoxLayout, QLayout,
 )
 
 from frontengine.ui.nav.sidebar import NavigationSidebar
@@ -119,6 +122,10 @@ class FrontEngineMainUI(QMainWindow):
     FrontEngine Main Window
     """
 
+    shutdown_finished = Signal()
+    shutdown_failed = Signal(object)
+    _critical_requested = Signal()
+
     def __init__(self,
                  main_app: QApplication = None,
                  debug: bool = False,
@@ -126,6 +133,21 @@ class FrontEngineMainUI(QMainWindow):
                  redirect_output: bool = True):
         super().__init__()
 
+        self.main_app = main_app
+        self._shutdown_done = False
+        self.system_tray = None
+        self.lifetime = DefaultSettingsLifetime.open(main=True)
+        self._frontengine_lifetime = self.lifetime
+        self.lifetime.finished.connect(self._runtime_finished)
+        self.lifetime.failed.connect(self._retirement_failed)
+        self.lifetime.register_pending(self._workers_pending)
+        try:
+            self._initialize(main_app, debug, show_system_tray_ray, redirect_output)
+        except BaseException:
+            self._abort_construction()
+            raise
+
+    def _initialize(self, main_app, debug, show_system_tray_ray, redirect_output):
         # 基本設定
         # Basic settings
         self.id = "FrontEngine"
@@ -161,7 +183,7 @@ class FrontEngineMainUI(QMainWindow):
         self.sidebar = NavigationSidebar(self)
         self.page_stack = QStackedWidget(self)
         self.page_stack.setObjectName("pageBody")
-        self.sidebar.page_requested.connect(self.page_stack.setCurrentIndex)
+        self.lifetime.connect_owned(self.sidebar.page_requested, self.page_stack.setCurrentIndex)
 
         central = QWidget(self)
         central_layout = QHBoxLayout(central)
@@ -177,7 +199,7 @@ class FrontEngineMainUI(QMainWindow):
         self.command_search_button = CommandSearchButton()
         retranslator.bind(self.command_search_button.caption, "command_palette_title")
         retranslator.bind(self.command_search_button, "command_palette_search", setter="setToolTip")
-        self.command_search_button.clicked.connect(self.open_command_palette)
+        self.lifetime.connect_owned(self.command_search_button.clicked, self.open_command_palette)
         navigation_layout.addWidget(self.command_search_button)
         navigation_layout.addWidget(self.sidebar, 1)
         central_layout.addWidget(navigation)
@@ -186,22 +208,22 @@ class FrontEngineMainUI(QMainWindow):
 
         # 各功能頁面初始化
         # Initialize each functional page
-        self.video_setting_ui = VideoSettingUI()
-        self.image_setting_ui = ImageSettingUI()
-        self.web_setting_ui = WEBSettingUI()
-        self.gif_setting_ui = GIFSettingUI()
-        self.sound_player_setting_ui = SoundPlayerSettingUI()
-        self.text_setting_ui = TextSettingUI()
-        self.scene_setting_ui = SceneSettingUI()
-        self.particle_setting_ui = ParticleSettingUI()
-        self.pet_setting_ui = PetSettingUI()
-        self.pet_home_ui = PetHomePage()
-        self.screen_care_setting_ui = ScreenCareSettingUI()
-        self.presentation_setting_ui = PresentationSettingUI()
-        self.wallpaper_setting_ui = WallpaperSettingUI()
-        self.focus_setting_ui = FocusSettingUI()
-        self.widgets_setting_ui = WidgetsSettingUI()
-        self.tools_setting_ui = ToolsSettingUI()
+        self.video_setting_ui = VideoSettingUI(lifetime=self.lifetime)
+        self.image_setting_ui = ImageSettingUI(lifetime=self.lifetime)
+        self.web_setting_ui = WEBSettingUI(lifetime=self.lifetime)
+        self.gif_setting_ui = GIFSettingUI(lifetime=self.lifetime)
+        self.sound_player_setting_ui = SoundPlayerSettingUI(lifetime=self.lifetime)
+        self.text_setting_ui = TextSettingUI(lifetime=self.lifetime)
+        self.scene_setting_ui = SceneSettingUI(lifetime=self.lifetime)
+        self.particle_setting_ui = ParticleSettingUI(lifetime=self.lifetime)
+        self.pet_setting_ui = PetSettingUI(lifetime=self.lifetime)
+        self.pet_home_ui = PetHomePage(lifetime=self.lifetime)
+        self.screen_care_setting_ui = ScreenCareSettingUI(lifetime=self.lifetime)
+        self.presentation_setting_ui = PresentationSettingUI(lifetime=self.lifetime)
+        self.wallpaper_setting_ui = WallpaperSettingUI(lifetime=self.lifetime)
+        self.focus_setting_ui = FocusSettingUI(lifetime=self.lifetime)
+        self.widgets_setting_ui = WidgetsSettingUI(lifetime=self.lifetime)
+        self.tools_setting_ui = ToolsSettingUI(lifetime=self.lifetime)
 
         # 控制中心
         # Control Center
@@ -216,13 +238,14 @@ class FrontEngineMainUI(QMainWindow):
             self.particle_setting_ui,
             redirect_output,
             pet_setting_ui=self.pet_setting_ui,
+            lifetime=self.lifetime,
         )
         self._register_extra_overlays()
         self.control_center_ui.register_overlay_source(lambda: self.pet_home_ui.strip_list)
-        self.pet_home_ui.open_requested.connect(self._open_pet_home)
-        self.pet_home_ui.desktop_requested.connect(self.step_aside)
-        self.control_center_ui.performance_changed.connect(self.scene_setting_ui.apply_performance_policy)
-        self.control_center_ui.overlay_visibility_changed.connect(self.scene_setting_ui.actions.set_group_hidden)
+        self.lifetime.connect_owned(self.pet_home_ui.open_requested, self._open_pet_home)
+        self.lifetime.connect_owned(self.pet_home_ui.desktop_requested, self.step_aside)
+        self.lifetime.connect_owned(self.control_center_ui.performance_changed, self.scene_setting_ui.apply_performance_policy)
+        self.lifetime.connect_owned(self.control_center_ui.overlay_visibility_changed, self.scene_setting_ui.actions.set_group_hidden)
         self.action_registry = self._build_action_registry()
 
         # Menu Bar
@@ -247,9 +270,9 @@ class FrontEngineMainUI(QMainWindow):
         # Build menus
         self.workshop_service = WorkshopService(self)
         self.workshop_dialog = None
-        self.scene_setting_ui.scene_manager_ui.workshop_requested.connect(lambda: self.open_workshop("scene"))
-        self.pet_setting_ui.focus_phase.connect(self.pet_home_ui.focus_phase_changed)
-        self.pet_setting_ui.workshop_requested.connect(
+        self.lifetime.connect_owned(self.scene_setting_ui.scene_manager_ui.workshop_requested, lambda: self.open_workshop("scene"))
+        self.lifetime.connect_owned(self.pet_setting_ui.focus_phase, self.pet_home_ui.focus_phase_changed)
+        self.lifetime.connect_owned(self.pet_setting_ui.workshop_requested,
             lambda: self.open_workshop("pet_pack", self.pet_setting_ui.pet_image_path or ""))
         build_language_menu(self)
         build_help_menu(self)
@@ -261,7 +284,8 @@ class FrontEngineMainUI(QMainWindow):
 
         # 致命退出設定
         # Critical exit setting
-        self.critical_ext = CriticalExit()
+        self.lifetime.connect_owned(self._critical_requested, self.request_shutdown, Qt.ConnectionType.QueuedConnection)
+        self.critical_ext = CriticalExit(on_exit=self._critical_requested.emit)
         self.critical_ext.set_critical_key(keyboard_keys_table.get("f12"))
         self.critical_ext.init_critical_exit()
 
@@ -272,7 +296,7 @@ class FrontEngineMainUI(QMainWindow):
         # QueuedConnection so the action runs on the GUI thread rather than
         # mutating Qt widgets off-thread.
         self.hotkey_service = HotkeyService(get_hotkey_bindings())
-        self.hotkey_service.hotkey_triggered.connect(
+        self.lifetime.connect_owned(self.hotkey_service.hotkey_triggered,
             self._handle_hotkey, Qt.ConnectionType.QueuedConnection
         )
         self.hotkey_service.start()
@@ -288,14 +312,14 @@ class FrontEngineMainUI(QMainWindow):
         self.smart_pause_service = None
         if user_setting_dict.get("smart_pause", True):
             self.smart_pause_service = SmartPauseService(rules_provider=current_rules)
-            self.smart_pause_service.pause_changed.connect(self._on_smart_pause_changed)
+            self.lifetime.connect_owned(self.smart_pause_service.pause_changed, self._on_smart_pause_changed)
             self.smart_pause_service.start()
 
         # 依前景程式自動套用預設集 / Apply a preset when a configured app takes focus
         self.app_profile_service = AppProfileService(
             config_provider=lambda: user_setting_dict.get("app_profiles", {})
         )
-        self.app_profile_service.profile_due.connect(
+        self.lifetime.connect_owned(self.app_profile_service.profile_due,
             lambda name: apply_named_preset(self, name)
         )
         self.app_profile_service.start()
@@ -309,12 +333,12 @@ class FrontEngineMainUI(QMainWindow):
         # explicit QueuedConnection brings them back to the UI thread - the same
         # reason the global hotkeys use one.
         self.remote_server = RemoteServer()
-        self.remote_server.action_requested.connect(
+        self.lifetime.connect_owned(self.remote_server.action_requested,
             self._handle_hotkey, Qt.ConnectionType.QueuedConnection)
         if remote_enabled():
             self.remote_server.start()
         self.midi_input = MidiInput()
-        self.midi_input.message_received.connect(
+        self.lifetime.connect_owned(self.midi_input.message_received,
             self._on_midi_message, Qt.ConnectionType.QueuedConnection)
         if user_setting_dict.get(MIDI_KEY):
             self.midi_input.start(user_setting_dict.get("midi_device") or 0)
@@ -322,14 +346,14 @@ class FrontEngineMainUI(QMainWindow):
         # 看板模式：依序輪播預設集，主視窗可以收起來
         # Signage mode: rotate presets, with the main window out of the way.
         self.signage_service = SignageService(config_provider=current_signage_settings)
-        self.signage_service.preset_due.connect(lambda name: apply_named_preset(self, name))
+        self.lifetime.connect_owned(self.signage_service.preset_due, lambda name: apply_named_preset(self, name))
         if current_signage_settings().get("enabled"):
             self.start_signage()
 
         # 分享畫面時把覆蓋層藏出擷取結果（自己仍看得到）
         # Hide the overlays from the capture while sharing; they stay on screen here.
         self.share_watch_service = ShareWatchService(config_provider=current_privacy_settings)
-        self.share_watch_service.sharing_changed.connect(self._on_sharing_changed)
+        self.lifetime.connect_owned(self.share_watch_service.sharing_changed, self._on_sharing_changed)
         self.share_watch_service.start()
 
         # 使用時間統計：預設關閉，只寫本機檔案，使用者可隨時清除
@@ -360,7 +384,7 @@ class FrontEngineMainUI(QMainWindow):
         self.reminder_service = ReminderService(
             config_provider=lambda: user_setting_dict.get("reminders", [])
         )
-        self.reminder_service.reminder_due.connect(self._show_reminder)
+        self.lifetime.connect_owned(self.reminder_service.reminder_due, self._show_reminder)
         self.reminder_service.start()
         # 最近一張提示卡；它會自己關掉，這裡留著只是為了測試與除錯
         # The most recent toast. It closes itself; this reference is for tests and debugging.
@@ -372,11 +396,11 @@ class FrontEngineMainUI(QMainWindow):
             config_provider=lambda: user_setting_dict.get("theme_schedule", {})
         )
         self._scheduled_theme: Optional[str] = None
-        self.theme_schedule_service.theme_changed.connect(self._apply_scheduled_theme)
+        self.lifetime.connect_owned(self.theme_schedule_service.theme_changed, self._apply_scheduled_theme)
         self.theme_schedule_service.start()
         # "Follow system" re-styles when the operating system switches light / dark.
         try:
-            QGuiApplication.styleHints().colorSchemeChanged.connect(self._on_system_scheme_changed)
+            self.lifetime.connect_owned(QGuiApplication.styleHints().colorSchemeChanged, self._on_system_scheme_changed)
         except AttributeError:   # Qt before 6.5
             pass
 
@@ -384,7 +408,7 @@ class FrontEngineMainUI(QMainWindow):
         self.preset_schedule_service = PresetScheduleService(
             config_provider=lambda: user_setting_dict.get("preset_schedule", {})
         )
-        self.preset_schedule_service.preset_due.connect(
+        self.lifetime.connect_owned(self.preset_schedule_service.preset_due,
             lambda name: apply_named_preset(self, name)
         )
         self.preset_schedule_service.start()
@@ -401,7 +425,7 @@ class FrontEngineMainUI(QMainWindow):
         # condition; this fills in the combinations between them.
         self.rule_engine_service = RuleEngineService(
             rules_provider=lambda: user_setting_dict.get(RULES_SETTING_KEY, []))
-        self.rule_engine_service.rule_fired.connect(self._on_rule_fired)
+        self.lifetime.connect_owned(self.rule_engine_service.rule_fired, self._on_rule_fired)
         self.rule_engine_service.start()
 
         # 把覆蓋層綁在目前的虛擬桌面（預設關閉，使用者在控制中心切換）
@@ -409,15 +433,15 @@ class FrontEngineMainUI(QMainWindow):
         # toggled from the control center.
         self.virtual_desktop_service = VirtualDesktopService(
             widgets_provider=self.control_center_ui.all_overlays)
-        self.control_center_ui.desktop_pin_changed.connect(self._on_desktop_pin_changed)
+        self.lifetime.connect_owned(self.control_center_ui.desktop_pin_changed, self._on_desktop_pin_changed)
 
         # 閒置夠久就把選定的覆蓋層放上來 / Show the chosen overlay once idle
         self._screensaver_overlays: list = []
         self.screensaver_service = ScreensaverService(
             config_provider=lambda: user_setting_dict.get("screensaver", {})
         )
-        self.screensaver_service.screensaver_started.connect(self._start_screensaver)
-        self.screensaver_service.screensaver_stopped.connect(self._stop_screensaver)
+        self.lifetime.connect_owned(self.screensaver_service.screensaver_started, self._start_screensaver)
+        self.lifetime.connect_owned(self.screensaver_service.screensaver_stopped, self._stop_screensaver)
         self.screensaver_service.start()
 
         # 還原上次工作階段（若有開啟），再套用啟動預設集
@@ -433,7 +457,7 @@ class FrontEngineMainUI(QMainWindow):
         if debug:
             self.debug_timer = QTimer()
             self.debug_timer.setInterval(10000)
-            self.debug_timer.timeout.connect(self.debug_close)
+            self.lifetime.connect_owned(self.debug_timer.timeout, self.debug_close)
             self.debug_timer.start()
 
     def _open_pet_home(self) -> None:
@@ -641,8 +665,9 @@ class FrontEngineMainUI(QMainWindow):
         for group in user_setting_dict.get("sidebar_collapsed_groups") or []:
             if isinstance(group, str):
                 self.sidebar.set_group_collapsed(group, True)
-        self.sidebar.collapsed_changed.connect(self._remember_collapsed_groups)
+        self.lifetime.connect_owned(self.sidebar.collapsed_changed, self._remember_collapsed_groups)
 
+    @owned_callback
     def _remember_collapsed_groups(self, groups: list) -> None:
         user_setting_dict["sidebar_collapsed_groups"] = groups
 
@@ -742,6 +767,7 @@ class FrontEngineMainUI(QMainWindow):
         else:
             self.showMinimized()
 
+    @owned_callback
     def _apply_theme(self, theme: str) -> None:
         """Apply the theme the user chose (system / light / dark) and remember it."""
         theme = normalise_theme(theme)
@@ -750,6 +776,7 @@ class FrontEngineMainUI(QMainWindow):
         self._scheduled_theme = None
         apply_app_style(self, theme, application=True)
 
+    @owned_callback
     def _apply_scheduled_theme(self, theme: str) -> None:
         """The day/night schedule's choice: shown, but the user's own theme setting stays as it was."""
         self._scheduled_theme = normalise_theme(theme)
@@ -759,6 +786,7 @@ class FrontEngineMainUI(QMainWindow):
         """The theme name on screen now: the schedule's while it runs, else the user's choice."""
         return self._scheduled_theme or normalise_theme(user_setting_dict.get("theme"))
 
+    @owned_callback
     def _on_system_scheme_changed(self, _scheme=None) -> None:
         if self.active_theme() == "system":
             apply_app_style(self, "system", application=True)
@@ -775,12 +803,12 @@ class FrontEngineMainUI(QMainWindow):
         # 這條路是真的要關了（X 按鈕、登出、closeAllWindows），所以收尾要在這裡做
         # This branch really is closing - X button, logout, closeAllWindows - so
         # the teardown belongs here.
-        if self._shutdown() is False:
+        if self.request_shutdown() is not CloseDisposition.CLOSED:
             event.ignore()
             return
-        self._request_exit()
         super().closeEvent(event)
 
+    @owned_callback
     def reload_hotkeys(self) -> None:
         """
         以最新設定重建全域快速鍵服務（設定對話框存檔後呼叫）。
@@ -790,15 +818,16 @@ class FrontEngineMainUI(QMainWindow):
         front_engine_logger.info("[FrontEngineMainUI] reload_hotkeys")
         if getattr(self, "hotkey_service", None) is not None:
             self.hotkey_service.stop()
+        self.lifetime.register_pending(self.hotkey_service.pending)
         self.hotkey_service = HotkeyService(get_hotkey_bindings())
-        self.hotkey_service.hotkey_triggered.connect(
+        self.lifetime.connect_owned(self.hotkey_service.hotkey_triggered,
             self._handle_hotkey, Qt.ConnectionType.QueuedConnection
         )
         self.hotkey_service.start()
 
     def _build_action_registry(self) -> ActionRegistry:
         """Bind shared action IDs once; every input route uses these callbacks."""
-        registry = ActionRegistry()
+        registry = ActionRegistry(lifetime=self.lifetime)
         callbacks = {
             "close_all": self.control_center_ui.clear_all,
             "hide_all": self.control_center_ui.hide_all,
@@ -832,6 +861,7 @@ class FrontEngineMainUI(QMainWindow):
         for identifier in ('layer_show', 'layer_hide', 'layer_opacity', 'layer_position', 'layer_transform'):
             registry.bind(identifier, lambda value, action=identifier: actions.layer(action, value), takes_value=True)
 
+    @owned_callback
     def _handle_hotkey(self, action: str) -> None:
         """Dispatch hotkey, remote and MIDI actions on the GUI thread."""
         self.action_registry.execute(action)
@@ -852,12 +882,12 @@ class FrontEngineMainUI(QMainWindow):
             ('scene_templates', 'scene_templates', 'Scene templates', self.scene_setting_ui.open_templates),
         ):
             self.action_registry.register(Action(identifier, key, fallback, lambda _value, run=callback: run()))
-        self.command_history = CommandHistory(user_setting_dict, write_user_setting)
+        self.command_history = CommandHistory.for_storage(self.lifetime.storage)
         action = QAction(self)
         retranslator.bind(action, "command_palette_title")
         action.setShortcuts([QKeySequence("Ctrl+K"), QKeySequence("Ctrl+Shift+P")])
         action.setShortcutContext(Qt.ShortcutContext.ApplicationShortcut)
-        action.triggered.connect(self.open_command_palette)
+        self.lifetime.connect_owned(action.triggered, self.open_command_palette)
         self.menu_bar.addAction(action)
         self.command_palette_action = action
 
@@ -900,6 +930,7 @@ class FrontEngineMainUI(QMainWindow):
         sheet.showFullScreen()
         self.shortcut_sheet = sheet
 
+    @owned_callback
     def _on_rule_fired(self, rule: dict) -> None:
         """
         一條規則剛剛成立。動作全部對應到既有的能力，所以規則引擎不會做出
@@ -917,7 +948,7 @@ class FrontEngineMainUI(QMainWindow):
             if isinstance(result, DeferredAction):
                 if service is not None:
                     if result.result is None:
-                        result.finished.connect(lambda success, error: service.record_execution(rule, success, error))
+                        self.lifetime.connect_owned(result.finished, lambda success, error: service.record_execution(rule, success, error))
                     else:
                         service.record_execution(rule, result.result, result.error)
                 return
@@ -944,6 +975,7 @@ class FrontEngineMainUI(QMainWindow):
         else:
             self.virtual_desktop_service.stop()
 
+    @owned_callback
     def _on_smart_pause_changed(self, paused: bool, reason: str) -> None:
         """
         智慧暫停回呼：規則成立時隱藏覆蓋層，規則解除時還原（僅還原本服務
@@ -959,6 +991,7 @@ class FrontEngineMainUI(QMainWindow):
             self.control_center_ui.show_all()
             self._smart_pause_hid = False
 
+    @owned_callback
     def _on_midi_message(self, message: dict) -> None:
         """
         處理一則 MIDI 訊息（已經由 QueuedConnection 帶回 UI 執行緒）。
@@ -1017,6 +1050,7 @@ class FrontEngineMainUI(QMainWindow):
         self.signage_service.stop()
         self.show()
 
+    @owned_callback
     def _on_sharing_changed(self, sharing: bool, match: str) -> None:
         """
         偵測到會議程式開著／關掉時，自動把覆蓋層藏出擷取結果或放回去。
@@ -1034,6 +1068,7 @@ class FrontEngineMainUI(QMainWindow):
                 language_wrapper.language_word_dict.get(
                     "screen_privacy_toast", "Overlays hidden from screen capture"))
 
+    @owned_callback
     def _show_reminder(self, label: str) -> None:
         """提醒到期：在畫面上方顯示一張會自己消失的提示卡。"""
         front_engine_logger.info(f"[MainUI] reminder | {label}")
@@ -1097,9 +1132,10 @@ class FrontEngineMainUI(QMainWindow):
         config = user_setting_dict.get('image_clipboard_history')
         config = config if isinstance(config, dict) else {}
         self.image_history_service = ImageHistoryService(Path(getcwd()) / 'clipboard-images.sqlite3', config, self)
-        self.image_history_service.result.connect(self._image_history_result)
+        self.lifetime.connect_owned(self.image_history_service.result, self._image_history_result)
         self.image_history_dialog = None
 
+    @owned_callback
     def _image_history_result(self, kind: str, value) -> None:
         if kind == 'configure':
             user_setting_dict['image_clipboard_history'] = dict(value)
@@ -1120,8 +1156,8 @@ class FrontEngineMainUI(QMainWindow):
         config = user_setting_dict.get('capture_history')
         config = config if isinstance(config, dict) else {}
         self.capture_history_service = CaptureHistoryService(Path(getcwd()) / 'capture-history.sqlite3', config, self)
-        self.tools_setting_ui.captured.connect(self.capture_history_service.capture)
-        self.capture_history_service.result.connect(self._capture_history_result)
+        self.lifetime.connect_owned(self.tools_setting_ui.captured, self.capture_history_service.capture)
+        self.lifetime.connect_owned(self.capture_history_service.result, self._capture_history_result)
         self.capture_history_dialog = None
 
     def _initialize_tasks(self) -> None:
@@ -1141,8 +1177,8 @@ class FrontEngineMainUI(QMainWindow):
         from frontengine.utils.window_pin.follow_window import WindowFollowService
         self.window_follow_service = WindowFollowService(self)
         self.window_follow_dialog = None
-        self.control_center_ui.overlay_visibility_changed.connect(self.window_follow_service.set_group_hidden)
-        self.control_center_ui.window_follow_requested.connect(self.open_window_follow)
+        self.lifetime.connect_owned(self.control_center_ui.overlay_visibility_changed, self.window_follow_service.set_group_hidden)
+        self.lifetime.connect_owned(self.control_center_ui.window_follow_requested, self.open_window_follow)
         self.control_center_ui.register_cleanup(self.window_follow_service.detach_all)
 
     def open_window_follow(self) -> None:
@@ -1162,7 +1198,7 @@ class FrontEngineMainUI(QMainWindow):
             self, excluded=lambda widget: id(widget) in self.window_follow_service.bindings)
         self.monitor_profiles_dialog = None
         self.monitor_profiles_service.set_enabled(bool(user_setting_dict.get('monitor_profiles_auto')))
-        self.control_center_ui.monitor_profiles_requested.connect(self.open_monitor_profiles)
+        self.lifetime.connect_owned(self.control_center_ui.monitor_profiles_requested, self.open_monitor_profiles)
 
     def _monitor_profiles_enabled(self, enabled: bool) -> None:
         user_setting_dict['monitor_profiles_auto'] = bool(enabled)
@@ -1192,6 +1228,7 @@ class FrontEngineMainUI(QMainWindow):
             dialog.abort_repair()
             dialog.close()
 
+    @owned_callback
     def _capture_history_result(self, kind: str, value) -> None:
         if kind == 'configure':
             user_setting_dict['capture_history'] = dict(value)
@@ -1303,25 +1340,35 @@ class FrontEngineMainUI(QMainWindow):
             return None
         return prepared
 
-    def _shutdown(self) -> bool:
-        """
-        存檔並停掉所有服務。放在這裡而不是 close() 裡面，是因為 Qt 的
-        QWidget::close() 不是虛擬函式：從標題列的 X、工作階段登出、或
-        closeAllWindows() 關閉時，Qt 只會走到 closeEvent，永遠不會呼叫這個
-        Python 的 close() 覆寫。收尾工作只寫在 close() 裡，等於只有系統匣的
-        「關閉」那一條路會存檔。
-        Save everything and stop every service. This lives here rather than in
-        close() because QWidget::close() is not virtual in Qt: closing from the
-        title-bar X, a session logout, or closeAllWindows() only ever reaches
-        closeEvent, never this Python close() override. With the teardown living
-        in close() alone, the tray's Quit item was the only exit that saved.
-        """
-        if self._shutdown_done:
-            return True
+    def request_shutdown(self) -> CloseDisposition:
+        if self.lifetime.closed:
+            return CloseDisposition.CLOSED
+        if self.lifetime.state is RuntimeState.RETIRING:
+            return CloseDisposition.DRAINING
+        for child in self.children():
+            if not isinstance(child, QLayout):
+                self.lifetime.adopt(child)
+        self.lifetime.begin_prepare()
         prepared = self._prepare_shutdown()
         if prepared is None:
-            return False
+            self.lifetime.cancel_prepare()
+            return CloseDisposition.REFUSED
         self._shutdown_done = True
+        self.lifetime.block(RuntimeError('Retirement cleanup is in progress'))
+        self.lifetime.close()
+        try:
+            self._teardown(prepared)
+        except Exception as error:
+            self.lifetime.block(error, report=True)
+            front_engine_logger.exception('[FrontEngineMainUI] retirement cleanup failed')
+        else:
+            self.lifetime.error = None
+        return CloseDisposition.DRAINING
+
+    def _shutdown(self) -> bool:
+        return self.request_shutdown() is not CloseDisposition.REFUSED
+
+    def _teardown(self, prepared) -> None:
         for token in prepared:
             token.finalize()
         home = getattr(self, 'pet_home_ui', None)
@@ -1338,6 +1385,7 @@ class FrontEngineMainUI(QMainWindow):
         self.text_setting_ui.stop_file_preview()
         self.image_setting_ui.close_image_compare()
         self.pet_setting_ui.close_pack_editor()
+        self.pet_setting_ui.stop_asset_preparation()
         self.tools_setting_ui.close_palette()
         self.tools_setting_ui.close_capture_editor()
         self.tools_setting_ui.close_live_ocr()
@@ -1349,9 +1397,6 @@ class FrontEngineMainUI(QMainWindow):
         # Assets must outlive all scene/pet widgets that may still read them.
         self.scene_setting_ui.shutdown_scene()
         self._clear_overlays()
-        if sys.platform.startswith('linux'):
-            from frontengine.utils.linux.audio import stop_all
-            stop_all()
         from frontengine.ui.plugin_pages import shutdown_pages
         shutdown_pages(self)
         release_scene_packages()
@@ -1361,31 +1406,52 @@ class FrontEngineMainUI(QMainWindow):
         if getattr(self, "keep_awake", None) is not None:
             self.keep_awake.disable()
         self.scene_setting_ui.close_scene()
-        return True
+
 
     def close(self) -> None:
-        """關閉程式並清理資源 / Close application and clear resources"""
-        if self._shutdown() is False:
-            return
-        super().close()
-        self._request_exit()
+        self.request_shutdown()
+
+    def _retirement_failed(self, error) -> None:
+        self.statusBar().showMessage(translate('runtime_shutdown_failed').format(error=error))
+        self.shutdown_failed.emit(error)
+
+    def _runtime_finished(self) -> None:
+        application = self.main_app
+        QMainWindow.close(self)
+        self.shutdown_finished.emit()
+        if application is not None:
+            application.exit(0)
 
     def _request_exit(self) -> None:
-        """Keep Qt alive until canceled local raster/file workers release their resources."""
-        if self.main_app is None or getattr(self, '_exit_barrier', None) is not None:
-            return
-        from frontengine.utils.shutdown_barrier import ShutdownBarrier
-        self.main_app.setQuitOnLastWindowClosed(False)
-        self._exit_barrier = ShutdownBarrier(self._workers_pending, lambda: self.main_app.exit(0), self.main_app)
-        self._exit_barrier.start()
+        self.request_shutdown()
+
+    def _abort_construction(self) -> None:
+        for child in self.children():
+            if not isinstance(child, QLayout):
+                self.lifetime.adopt(child)
+        self._shutdown_done = True
+        self.lifetime.block(RuntimeError('Constructor cleanup is in progress'))
+        self.lifetime.close()
+        try:
+            self._stop_services()
+            home = getattr(self, 'pet_home_ui', None)
+            if home is not None and not home.shutdown():
+                raise RuntimeError('Partially constructed home could not close')
+            pet = getattr(self, 'pet_setting_ui', None)
+            if pet is not None:
+                pet.stop_asset_preparation()
+        except Exception as error:
+            self.lifetime.block(error, report=True)
+        else:
+            self.lifetime.error = None
 
     def _workers_pending(self) -> bool:
-        from PySide6.QtCore import QThreadPool
-        if QThreadPool.globalInstance().activeThreadCount():
+        critical = getattr(self, "critical_ext", None)
+        if critical is not None and critical.is_alive():
             return True
-        if sys.platform.startswith('linux'):
-            from frontengine.utils.linux.audio import pending
-            if pending():
+        for name in ('hotkey_service', 'remote_server'):
+            service = getattr(self, name, None)
+            if service is not None and service.pending():
                 return True
         for name in ('asset_library_service', 'todo_service', 'image_history_service', 'capture_history_service'):
             service = getattr(self, name, None)
@@ -1436,10 +1502,9 @@ class FrontEngineMainUI(QMainWindow):
         self.control_center_ui.clear_all()
         self.wallpaper_setting_ui.wallpaper_widgets.clear()
 
-    @classmethod
-    def debug_close(cls) -> None:
+    def debug_close(self) -> None:
         """Debug 模式下強制退出 / Force exit in debug mode"""
-        sys.exit(0)
+        self.request_shutdown()
 
 
 def start_front_engine(debug: bool = False, preset: Optional[str] = None) -> None:
@@ -1457,7 +1522,11 @@ def start_front_engine(debug: bool = False, preset: Optional[str] = None) -> Non
         from frontengine.show.scene.view3d import surface_format
         QSurfaceFormat.setDefaultFormat(surface_format())
     main_app = QApplication(sys.argv)
-    window = FrontEngineMainUI(main_app=main_app, debug=debug)
+    try:
+        window = FrontEngineMainUI(main_app=main_app, debug=debug)
+    except (StorageInUse, StorageUnavailable, MainRuntimeInUse) as error:
+        print(str(error), file=sys.stderr)
+        raise SystemExit(1) from error
     if preset:
         apply_named_preset(window, preset)
     try:

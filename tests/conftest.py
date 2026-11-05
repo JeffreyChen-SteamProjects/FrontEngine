@@ -74,20 +74,19 @@ def _qt_application():
 @pytest.fixture
 def make_main_window(tmp_path, monkeypatch):
     """
-    Build FrontEngineMainUI from a settings dict, in its own folder, never writing settings.
+    Build FrontEngineMainUI with real owned persistence in its own folder.
     Every window built is closed and the working directory restored at teardown.
     """
     import json
     from frontengine.ui.main_ui import FrontEngineMainUI
-    import frontengine.ui.main_ui as main_module
-    import frontengine.ui.menu.settings_menu as menu_module
-
-    monkeypatch.setattr(main_module, "write_user_setting", lambda: None)
-    monkeypatch.setattr(menu_module, "write_user_setting", lambda: None)
     original = os.getcwd()
     windows = []
 
     def build(settings=None):
+        for previous in windows:
+            if not previous.lifetime.closed:
+                previous.close()
+                _drain_lifetimes([previous.lifetime])
         (tmp_path / "user_setting.json").write_text(json.dumps(settings or {"language": "English"}),
                                                     encoding="utf-8")
         os.chdir(tmp_path)
@@ -99,8 +98,10 @@ def make_main_window(tmp_path, monkeypatch):
         yield build
     finally:
         from PySide6.QtCore import QCoreApplication, QEvent
+        monkeypatch.undo()
         for window in windows:
             window.close()
+            _drain_lifetimes([window.lifetime])
             window.deleteLater()            # closing only hides it: thousands of widgets stayed alive
         QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
         os.chdir(original)
@@ -165,3 +166,70 @@ def _release_test_widget_cycles(_qt_application):
     _flush_deleted_widgets()
     yield
     _flush_deleted_widgets()
+
+
+def _drain_lifetimes(lifetimes):
+    from time import monotonic
+    from PySide6.QtCore import QCoreApplication, QEvent
+    from PySide6.QtTest import QTest
+    deadline = monotonic() + 120
+    while any(not lifetime.closed for lifetime in lifetimes) and monotonic() < deadline:
+        QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+        QCoreApplication.processEvents()
+        QTest.qWait(10)
+    unfinished = [(lifetime.state, lifetime.error) for lifetime in lifetimes if not lifetime.closed]
+    assert not unfinished, f'Owned runtimes did not retire: {unfinished}'
+
+
+@pytest.fixture
+def lifetime_factory(tmp_path, monkeypatch, _run_from_temporary_directory):
+    from pathlib import Path
+    from frontengine.ui.runtime_lifetime import DefaultSettingsLifetime
+    lifetimes = {}
+    def create():
+        if Path.cwd().resolve() == Path(_run_from_temporary_directory).resolve():
+            monkeypatch.chdir(tmp_path)
+        root = Path.cwd().resolve()
+        if root not in lifetimes or lifetimes[root].closed:
+            lifetimes[root] = DefaultSettingsLifetime.open()
+        return lifetimes[root]
+    yield create
+    monkeypatch.undo()
+    for lifetime in lifetimes.values():
+        lifetime.close()
+    _drain_lifetimes(list(lifetimes.values()))
+
+
+@pytest.fixture
+def storage_factory(tmp_path):
+    from pathlib import Path
+    from frontengine.user_setting.storage_session import StorageClosed, StorageSession
+    from frontengine.user_setting.default_storage import default_storage
+    owners = {}
+    def create(path=None):
+        root = Path(path or tmp_path).resolve()
+        try:
+            default = default_storage()
+        except StorageClosed:
+            default = None
+        if default is not None and default.directory == root:
+            return default
+        if root not in owners:
+            owners[root] = StorageSession.open(root)
+        return owners[root]
+    yield create
+    for owner in reversed(tuple(owners.values())):
+        owner.close()
+
+
+@pytest.fixture
+def home_store_factory(storage_factory, lifetime_factory):
+    from frontengine.user_setting.pet_game_save import HomeSaveStore
+    stores = []
+    def create(path, catalog, mode='manage', **kwargs):
+        store = HomeSaveStore(storage_factory(path), catalog, mode, **kwargs)
+        stores.append(store)
+        return store
+    yield create
+    for store in reversed(stores):
+        store.close()

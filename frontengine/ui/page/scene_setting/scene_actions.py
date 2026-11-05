@@ -1,12 +1,13 @@
 """Background scene preparation and GUI-thread scene/layer action dispatch."""
 from __future__ import annotations
+from frontengine.ui.runtime_lifetime import captured_lifetime, owned_callback
 
 from copy import deepcopy
 import json
 from pathlib import Path
 from threading import Event
 
-from PySide6.QtCore import QObject, QRunnable, QThreadPool, Qt, Signal
+from PySide6.QtCore import QObject, QRunnable, Qt, Signal
 from PySide6.QtGui import QGuiApplication, QImage
 
 from frontengine.show.scene.scene import SceneManager
@@ -46,16 +47,16 @@ def transition_frames(manager: SceneManager) -> dict[str, QImage]:
     return frames
 
 
-def prepare_playback(entries: dict, monitors: list, *, models=None) -> SceneManager:
+def prepare_playback(entries: dict, monitors: list, *, models=None, lifetime=None) -> SceneManager:
     """Build hidden playback; failures close every candidate and preserve the old scene."""
-    candidate = SceneManager()
+    candidate = SceneManager(lifetime=lifetime)
     try:
         if isinstance(entries, SceneDocument) and entries.mode == '3d':
             if user_setting_dict.get('render_backend', 'auto') == 'software':
                 raise ValueError('3D scenes require OpenGL; select Auto or GPU in render settings')
             from frontengine.show.scene.runtime3d import Scene3DRuntime
             from frontengine.show.scene.view3d import Scene3DView, OffscreenScene3D
-            candidate.runtime3d = Scene3DRuntime(entries, models)
+            candidate.runtime3d = Scene3DRuntime(entries, models, lifetime=lifetime)
             candidate.layer_settings = deepcopy(entries.entries)
             for monitor in monitors:
                 factor = min(1, 1920/entries.canvas[0], 1080/entries.canvas[1])
@@ -128,6 +129,8 @@ class SceneActions(QObject):
 
     def __init__(self, page, *, reader=read_scene_source, builder=prepare_playback) -> None:
         super().__init__(page)
+        self.lifetime = captured_lifetime(page)
+        self.lifetime.adopt(self)
         self.page, self.reader, self.builder = page, reader, builder
         self.pending = None
         self.wanted = None
@@ -189,7 +192,7 @@ class SceneActions(QObject):
         signals.finished.connect(self._finished, Qt.ConnectionType.QueuedConnection)
         self.pending = {'request': request, 'cancel': cancel, 'signals': signals}
         function = (lambda: self.reader(path)) if path else lambda: PreparedScene(entries).prepare()
-        QThreadPool.globalInstance().start(_SceneRead(function, cancel, signals))
+        self.lifetime.submit(_SceneRead(function, cancel, signals))
         self.status_changed.emit('')
 
     def _monitors(self, selection: str | int) -> list:
@@ -202,6 +205,7 @@ class SceneActions(QObject):
             raise ValueError('The selected scene screen is unavailable')
         return [screens[selection]]
 
+    @owned_callback
     def _finished(self, prepared: PreparedScene | None, error: str) -> None:
         pending, self.pending = self.pending, None
         operation, _path, screen, load_only, _entries, current = pending['request']
@@ -230,7 +234,7 @@ class SceneActions(QObject):
         if current and prepared.document != self.page.visual_editor.document.scene:
             raise ValueError('The editor changed while scene playback was being prepared')
         data = prepared.document if prepared.document.mode == '3d' else prepared.entries
-        candidate = None if load_only else (self.builder(data, self._monitors(screen), models=prepared.models)
+        candidate = None if load_only else (self.builder(data, self._monitors(screen), models=prepared.models, lifetime=self.lifetime)
                     if self.builder is prepare_playback else self.builder(data, self._monitors(screen)))
         manager = self.page.scene
         old_runtime = manager.runtime3d

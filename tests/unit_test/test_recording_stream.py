@@ -157,10 +157,11 @@ def test_recorder_reports_writer_failure_without_replacing_target(tmp_path):
     assert not list(tmp_path.glob("*.part"))
 
 
-def test_tools_cancel_target_does_not_start_capture(tmp_path, monkeypatch):
+def test_tools_cancel_target_does_not_start_capture(tmp_path, monkeypatch, *, lifetime_factory):
     from frontengine.ui.page.tools.tools_setting_ui import ToolsSettingUI
     from PySide6.QtWidgets import QFileDialog
-    page = ToolsSettingUI()
+    lifetime_factory()
+    page = ToolsSettingUI(lifetime=lifetime_factory())
     page.recorder.set_grabber(lambda _rect: pytest.fail("cancelled capture must not run"))
     monkeypatch.setattr(QFileDialog, "getSaveFileName", lambda *_args: ("", ""))
     try:
@@ -171,10 +172,11 @@ def test_tools_cancel_target_does_not_start_capture(tmp_path, monkeypatch):
         page.close()
 
 
-def test_tools_auto_stop_restores_button_and_allows_next_recording(tmp_path, monkeypatch):
+def test_tools_auto_stop_restores_button_and_allows_next_recording(tmp_path, monkeypatch, *, lifetime_factory):
     from frontengine.ui.page.tools.tools_setting_ui import ToolsSettingUI
     from PySide6.QtWidgets import QFileDialog
-    page = ToolsSettingUI()
+    lifetime_factory()
+    page = ToolsSettingUI(lifetime=lifetime_factory())
     target = tmp_path / "ui.gif"
     monkeypatch.setattr(QFileDialog, "getSaveFileName", lambda *_args: (str(target), ""))
     page.recorder.set_grabber(lambda _rect: pixmap())
@@ -333,13 +335,14 @@ def test_completed_recordings_release_old_writer_connections(tmp_path):
     assert previous() is None
 
 
-def test_tools_shows_writer_error_and_can_record_again(tmp_path, monkeypatch):
+def test_tools_shows_writer_error_and_can_record_again(tmp_path, monkeypatch, *, lifetime_factory):
     from frontengine.ui.page.tools.tools_setting_ui import ToolsSettingUI
     from PySide6.QtWidgets import QFileDialog
+    lifetime_factory()
     class BrokenWriter(gif_writer.IncrementalGifWriter):
         def append(self, *args, **kwargs):
             raise OSError("disk full")
-    page = ToolsSettingUI()
+    page = ToolsSettingUI(lifetime=lifetime_factory())
     page.recorder._writer_factory = BrokenWriter
     page.recorder.set_grabber(lambda _rect: pixmap())
     target = tmp_path / "failure.gif"

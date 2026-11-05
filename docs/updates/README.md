@@ -58,6 +58,8 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261105-25 | 2026-11-05 | 保存設定與作業所有權的受測整合階段 | #storage #runtime #validation | [2026-11](2026-11.md) |
+| U-20261105-24 | 2026-11-05 | 修正驗收關閉判定、GIF 檔案釋放與窄視窗家園 | #done #ui #lifecycle #testing | [2026-11](2026-11.md) |
 | U-20261105-23 | 2026-11-05 | 將獨立角色資料與寵物生命週期綁定儲存所有權 | #storage #pet #testing | [2026-11](2026-11.md) |
 | U-20261105-22 | 2026-11-05 | 重現關閉後仍處理寵物素材完成訊號 | #review #pet #lifecycle | [2026-11](2026-11.md) |
 | U-20261105-21 | 2026-11-05 | 完成相容執行環境兩小時原生家園驗收 | #done #testing #pet-home | [2026-11](2026-11.md) |
@@ -281,6 +283,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 77 |
+| [2026-11.md](2026-11.md) | 2026-11 | 79 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

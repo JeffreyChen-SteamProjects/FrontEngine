@@ -1,4 +1,5 @@
 """Author a scene entry pointing at the shared Imervue puppet format."""
+from frontengine.ui.runtime_lifetime import owned_action
 import json
 
 from PySide6.QtWidgets import QFileDialog, QLineEdit, QMessageBox, QPlainTextEdit, QPushButton, QSpinBox
@@ -10,8 +11,8 @@ from frontengine.utils.multi_language.retranslate import tr
 
 
 class PuppetSceneSettingUI(SettingPage):
-    def __init__(self, script_ui) -> None:
-        super().__init__('scene_puppet', 'scene_puppet_hint', 'Puppet', 'Use an Imervue character in this scene.')
+    def __init__(self, script_ui, *, lifetime) -> None:
+        super().__init__('scene_puppet', 'scene_puppet_hint', 'Puppet', 'Use an Imervue character in this scene.', lifetime=lifetime)
         self.script_ui = script_ui
         self.path = QLineEdit()
         self.script_path = QLineEdit()
@@ -44,17 +45,19 @@ class PuppetSceneSettingUI(SettingPage):
         append.clicked.connect(self.append_entry)
         details.add_inline(append)
 
+    @owned_action
     def choose_puppet(self) -> None:
-        path, _ = QFileDialog.getOpenFileName(self, 'Imervue puppet', '', 'Imervue puppet (*.puppet)')
+        path, _ = self.lifetime.after_dialog(QFileDialog.getOpenFileName(self, 'Imervue puppet', '', 'Imervue puppet (*.puppet)'))
         if path:
             self.path.setText(path)
 
+    @owned_action
     def append_entry(self) -> None:
         try:
             validate_puppet(self.path.text())
             values = finite_parameters(json.loads(self.parameters.toPlainText()))
         except (ValueError, OSError) as error:
-            QMessageBox.warning(self, 'Puppet Error', str(error))
+            self.lifetime.after_dialog(QMessageBox.warning(self, 'Puppet Error', str(error)))
             return
         entry = {'type': 'PUPPET', 'file_path': self.path.text(),
                  'x': self.x.value(), 'y': self.y.value(),

@@ -171,19 +171,19 @@ def test_malformed_progress_is_rejected(change):
         snapshot.from_dict(data, catalog)
 
 
-def test_the_goals_panel_claims_and_saves_a_game_only_photo(tmp_path, monkeypatch):
+def test_the_goals_panel_claims_and_saves_a_game_only_photo(tmp_path, monkeypatch, *, home_store_factory, lifetime_factory):
     from PySide6.QtGui import QImage
     from frontengine.show.pet_game.home_service import HomeService
     from frontengine.ui.page.pet_game.home_page import PetHomePage
-    from frontengine.user_setting.pet_game_save import HomeSaveStore
     from frontengine.user_setting.pet_profiles import PetProfiles
     from frontengine.user_setting.user_setting_file import user_setting_dict
 
+    monkeypatch.chdir(tmp_path)
+    lifetime_factory()
     monkeypatch.setitem(user_setting_dict, "pet_home_on_desktop", False)
     monkeypatch.setitem(user_setting_dict, "pet_home_running", False)
-    monkeypatch.chdir(tmp_path)
-    service = HomeService(None, HomeSaveStore(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None))
-    page = PetHomePage(service)
+    service = HomeService(None, home_store_factory(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None))
+    page = PetHomePage(service, lifetime=lifetime_factory())
     try:
         page.create_home()
         # creating a home with no pets brings a first one

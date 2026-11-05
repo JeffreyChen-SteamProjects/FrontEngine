@@ -6,7 +6,7 @@ so a pet without a work animation still sits at its desk instead of failing.
 Picture and Puppet pets use the look the pet page recorded for them
 (``user_setting.pet_looks``) through ``picture_renderer``; a pet with no usable
 look of its own is drawn as a built-in stand-in.
-Renderers are prepared on the global thread pool (scanning the asset library
+Renderers are prepared on a private, lifetime-owned pool (scanning the asset library
 and decoding images is file work) and handed back through a queued signal; until
 then, and for pets without a layered character, views draw the usual marker.
 """
@@ -25,9 +25,9 @@ from PySide6.QtGui import QImage
 
 from frontengine.show.pet.inkside.library import install_builtin, upgrade_builtin
 from frontengine.show.pet_game.picture_renderer import load_picture
-from frontengine.user_setting.pet_looks import look_for
 from frontengine.utils.pet_game.catalog import wanted_poses
 from frontengine.utils.logging.loggin_instance import front_engine_logger
+from frontengine.utils.work_lifetime import WorkLifetime, owned_callback
 
 # Semantic activity -> layered action. The renderer itself falls back to idle
 # for any action a character does not have.
@@ -157,21 +157,24 @@ class ResidentArt(QObject):
     prepared = Signal(str, str, object)
     changed = Signal()
 
-    def __init__(self, service, library_factory: Callable | None = None,
-                 pool: QThreadPool | None = None) -> None:
+    def __init__(self, service, library_factory: Callable | None = None, *,
+                 lifetime: WorkLifetime) -> None:
+        lifetime.require_live()
         super().__init__()
+        self.lifetime = lifetime
         self.service = service
         self.library_factory = library_factory or _default_library
-        if pool is None:                  # its own pool, so closing waits only for this home's work
-            pool = QThreadPool(self)
-            pool.setMaxThreadCount(2)
-        self.pool = pool
+        self.pool = QThreadPool(self)
+        self.pool.setMaxThreadCount(2)
         self.closed = False
         self._renderers: dict[str, tuple[str, object]] = {}
         self._pending: set[str] = set()
         self._unusable: set[str] = set()          # own looks that failed to load: the stand-in it is
         self._started = monotonic()
         self.prepared.connect(self._adopt, Qt.ConnectionType.QueuedConnection)
+        lifetime.adopt(self)
+        lifetime.register_pending(self.pool.activeThreadCount)
+        lifetime.register_stop(self.shutdown)
 
     def _appearance(self, identifier: str) -> dict | None:
         session = self.service.sessions.get(identifier)
@@ -184,6 +187,10 @@ class ResidentArt(QObject):
 
     def renderer(self, identifier: str):
         """The ready renderer for this resident's outfit, or a built-in stand-in; None while loading."""
+        if self.closed:
+            return None
+        if not self.lifetime.accepting:
+            return self._renderers.get(identifier, (None, None))[1]
         appearance = self._appearance(identifier)
         if appearance is None or appearance.get("character") is None:
             return self._picture(identifier)
@@ -204,7 +211,7 @@ class ResidentArt(QObject):
 
     def _picture(self, identifier: str):
         """The pet's own picture or Puppet portrait when one is recorded and loads; else the stand-in."""
-        look = look_for(self.service.profiles.settings, identifier)
+        look = self.service.profiles.look_for(identifier)
         if look is None:
             return self._fallback(identifier)
         try:
@@ -234,12 +241,14 @@ class ResidentArt(QObject):
         return None
 
     def shutdown(self) -> None:
-        """Drop queued work and wait for running work, so nothing outlives the home page."""
+        """Discard new results; the lifetime retains running work until it finishes."""
         self.closed = True
         self.pool.clear()
-        self.pool.waitForDone()
 
+    @owned_callback
     def _adopt(self, identifier: str, key: str, result) -> None:
+        if self.closed:
+            return
         renderer, expected, upgraded = result
         self._pending.discard(key)
         if key.startswith(PICTURE_PREFIX) and renderer is None:

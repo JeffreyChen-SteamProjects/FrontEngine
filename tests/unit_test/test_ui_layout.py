@@ -17,8 +17,9 @@ from frontengine.utils.multi_language.italy import italian_word_dict
 from frontengine.utils.multi_language.russian import russian_word_dict
 
 
-def _page(wide=False):
-    page = SettingPage("tab_video_text", "page_subtitle_video", "Video", "", wide=wide)
+def _page(wide=False, *, lifetime_factory):
+    lifetime_factory()
+    page = SettingPage("tab_video_text", "page_subtitle_video", "Video", "", wide=wide, lifetime=lifetime_factory())
     section = page.add_section("section_source", "Source")
     section.add_row("section_where", QComboBox(), "Where")
     page.finish_body()
@@ -29,8 +30,9 @@ def _page(wide=False):
     return page, section
 
 
-def test_sections_stay_in_one_centred_column_on_a_wide_window():
-    page, section = _page()
+def test_sections_stay_in_one_centred_column_on_a_wide_window(*, lifetime_factory):
+    lifetime_factory()
+    page, section = _page(lifetime_factory=lifetime_factory)
     assert section.width() <= CONTENT_MAX_WIDTH
     left = section.mapTo(page, section.rect().topLeft()).x()
     right = page.width() - (left + section.width())
@@ -40,14 +42,16 @@ def test_sections_stay_in_one_centred_column_on_a_wide_window():
     page.close()
 
 
-def test_wide_pages_use_the_whole_width():
-    page, section = _page(wide=True)
+def test_wide_pages_use_the_whole_width(*, lifetime_factory):
+    lifetime_factory()
+    page, section = _page(wide=True, lifetime_factory=lifetime_factory)
     assert section.width() > CONTENT_MAX_WIDTH
     page.close()
 
 
-def test_header_actions_sit_beside_the_title():
-    page = SettingPage("tab_video_text", "page_subtitle_video", "Video")
+def test_header_actions_sit_beside_the_title(*, lifetime_factory):
+    lifetime_factory()
+    page = SettingPage("tab_video_text", "page_subtitle_video", "Video", lifetime=lifetime_factory())
     button = page.add_header_action(QPushButton("Help"))
     page.resize(1200, 500)
     page.show()
@@ -57,8 +61,9 @@ def test_header_actions_sit_beside_the_title():
     page.close()
 
 
-def test_menu_buttons_are_as_tall_as_ordinary_buttons():
-    page, section = _page()
+def test_menu_buttons_are_as_tall_as_ordinary_buttons(*, lifetime_factory):
+    lifetime_factory()
+    page, section = _page(lifetime_factory=lifetime_factory)
     plain, extra = QPushButton("Choose"), QPushButton("Other")
     holder = section.add_actions(plain, extra)
     QCoreApplication.processEvents()

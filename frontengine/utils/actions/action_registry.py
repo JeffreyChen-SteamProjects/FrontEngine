@@ -53,7 +53,8 @@ class Action:
 class ActionRegistry:
     """Dispatch registered actions without evaluating names or resolving attributes."""
 
-    def __init__(self) -> None:
+    def __init__(self, *, lifetime=None) -> None:
+        self.lifetime = lifetime
         self.actions: dict[str, Action] = {}
 
     def register(self, action: Action) -> None:
@@ -74,6 +75,8 @@ class ActionRegistry:
 
     def invoke(self, identifier: str, value: str = "") -> object:
         """Return the callback receipt so async callers can observe completion."""
+        if self.lifetime is not None and not self.lifetime.accepting:
+            return False
         action = self.actions.get(identifier)
         if action is None or (action.takes_value and not action.optional_value and not value.strip()):
             return False

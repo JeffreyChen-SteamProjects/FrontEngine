@@ -92,18 +92,19 @@ def test_undeclared_region_and_unequipped_asset_rejected(tmp_path):
         load_layered_asset(tmp_path / 'invalid')
 
 
-def test_dialog_color_preview_apply_and_restore(tmp_path, monkeypatch):
+def test_dialog_color_preview_apply_and_restore(tmp_path, monkeypatch, *, lifetime_factory):
     from frontengine.show.pet.asset_library import PetAssetLibrary
     from frontengine.ui.dialog.pet_wardrobe import PetWardrobeDialog
     from PySide6.QtWidgets import QColorDialog
 
+    lifetime_factory()
     source = tmp_path / 'cat'
     palette_asset(source)
     library = PetAssetLibrary(tmp_path / 'library')
     asset = library.install(source)
     profiles = PetProfiles({}, lambda: None)
     record = profiles.create()
-    dialog = PetWardrobeDialog(profiles, record['id'], library=library)
+    dialog = PetWardrobeDialog(profiles, record['id'], library=library, lifetime=lifetime_factory())
     try:
         assert not dialog.color_button.isEnabled()
         dialog.character.setCurrentIndex(dialog.character.findData(asset_reference(asset)))
@@ -124,16 +125,17 @@ def test_dialog_color_preview_apply_and_restore(tmp_path, monkeypatch):
         dialog.close()
 
 
-def test_style_swatches_preview_without_committing_and_reopen_after_apply(tmp_path):
+def test_style_swatches_preview_without_committing_and_reopen_after_apply(tmp_path, *, lifetime_factory):
     from frontengine.show.pet.asset_library import PetAssetLibrary
     from frontengine.ui.dialog.pet_wardrobe import PetWardrobeDialog
 
+    lifetime_factory()
     palette_asset(tmp_path / 'cat')
     library = PetAssetLibrary(tmp_path / 'library')
     asset = library.install(tmp_path / 'cat')
     profiles = PetProfiles({}, lambda: None)
     record, other = profiles.create(), profiles.create()
-    dialog = PetWardrobeDialog(profiles, record['id'], library=library)
+    dialog = PetWardrobeDialog(profiles, record['id'], library=library, lifetime=lifetime_factory())
     try:
         assert all(not button.isEnabled() for button in dialog.swatches.values())
         dialog.character.setCurrentIndex(dialog.character.findData(asset_reference(asset)))
@@ -159,7 +161,7 @@ def test_style_swatches_preview_without_committing_and_reopen_after_apply(tmp_pa
         assert profiles.get(other['id']) == other
     finally:
         dialog.close()
-    reopened = PetWardrobeDialog(profiles, record['id'], library=library)
+    reopened = PetWardrobeDialog(profiles, record['id'], library=library, lifetime=lifetime_factory())
     try:
         assert reopened.draft.appearance['colors']['cat@1']['fur'] == '#f45588'
         reopened.color_reset.click()

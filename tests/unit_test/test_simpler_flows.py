@@ -31,8 +31,9 @@ def picture(tmp_path):
 
 
 @pytest.fixture
-def image_page():
-    page = image_setting_ui.ImageSettingUI()
+def image_page(*, lifetime_factory):
+    lifetime_factory()
+    page = image_setting_ui.ImageSettingUI(lifetime=lifetime_factory())
     yield page
     for widget in list(page.image_widget_list):
         widget.close()
@@ -53,11 +54,11 @@ def test_cancelling_the_chooser_shows_nothing_and_asks_nothing(image_page, monke
     assert image_page.image_widget_list == []
 
 
-def test_choosing_a_file_shows_it_at_once(picture, tmp_path, monkeypatch):
+def test_choosing_a_file_shows_it_at_once(picture, tmp_path, monkeypatch, lifetime_factory):
     animation = tmp_path / "a.gif"
     Image.new("RGB", (20, 20), "blue").save(animation)
     monkeypatch.setattr(gif_setting_ui, "choose_gif", lambda _parent: str(animation))
-    page = gif_setting_ui.GIFSettingUI()
+    page = gif_setting_ui.GIFSettingUI(lifetime=lifetime_factory())
     try:
         page.choose_and_copy_file_to_cwd_gif_dir_then_play()
         assert len(page.gif_widget_list) == 1
@@ -98,9 +99,10 @@ def test_a_numbered_monitor_and_spanning_still_mean_what_they_say():
     assert resolve_preferred_monitor(combobox) is None
 
 
-def test_an_empty_text_points_at_its_field_and_enter_starts_it():
+def test_an_empty_text_points_at_its_field_and_enter_starts_it(*, lifetime_factory):
     from frontengine.ui.page.text.text_setting_ui import TextSettingUI
-    page = TextSettingUI()
+    lifetime_factory()
+    page = TextSettingUI(lifetime=lifetime_factory())
     page.show()
     try:
         page.start_draw_text_on_screen()
@@ -115,9 +117,10 @@ def test_an_empty_text_points_at_its_field_and_enter_starts_it():
         page.close()
 
 
-def test_an_empty_address_points_at_its_field_and_enter_is_wired():
+def test_an_empty_address_points_at_its_field_and_enter_is_wired(*, lifetime_factory):
     from frontengine.ui.page.web.web_setting_ui import WEBSettingUI
-    page = WEBSettingUI()
+    lifetime_factory()
+    page = WEBSettingUI(lifetime=lifetime_factory())
     try:
         page.start_open_web_with_url()
         assert page.web_url_input.placeholderText()
@@ -126,16 +129,16 @@ def test_an_empty_address_points_at_its_field_and_enter_is_wired():
         page.close()
 
 
-def test_a_new_home_without_pets_brings_a_first_one_and_selects_it(tmp_path, monkeypatch):
+def test_a_new_home_without_pets_brings_a_first_one_and_selects_it(tmp_path, monkeypatch, *, home_store_factory, lifetime_factory):
     from frontengine.show.pet_game.home_service import HomeService
     from frontengine.ui.page.pet_game.home_page import PetHomePage
-    from frontengine.user_setting.pet_game_save import HomeSaveStore
     from frontengine.user_setting.pet_profiles import PetProfiles
     from frontengine.user_setting.user_setting_file import user_setting_dict
     from frontengine.utils.pet_game.catalog import builtin_catalog
+    lifetime_factory()
     monkeypatch.setitem(user_setting_dict, "pet_home_on_desktop", False)
     profiles = PetProfiles({}, lambda: None)
-    page = PetHomePage(HomeService(None, HomeSaveStore(tmp_path, builtin_catalog()), profiles))
+    page = PetHomePage(HomeService(None, home_store_factory(tmp_path, builtin_catalog()), profiles), lifetime=lifetime_factory())
     try:
         page.create_home()
         residents = page.service.world.residents

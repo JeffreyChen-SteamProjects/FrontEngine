@@ -21,7 +21,7 @@ class SceneRenderSession(QObject):
     failed = Signal(str)
 
     def __init__(self, entries: dict, size: tuple[int, int], parent=None,
-                 *, manager_factory: Callable = SceneManager, models=None) -> None:
+                 *, manager_factory: Callable = SceneManager, models=None, lifetime=None) -> None:
         super().__init__(parent)
         if size not in OUTPUT_SIZES:
             raise ValueError('Choose a supported fixed scene output resolution')
@@ -35,9 +35,9 @@ class SceneRenderSession(QObject):
             from frontengine.show.scene.runtime3d import Scene3DRuntime
             from frontengine.show.scene.view3d import OffscreenScene3D
             self.size, self.closed, self.view = QSize(*size), False, None
-            self.manager = manager_factory()
+            self.manager = manager_factory(lifetime=lifetime) if manager_factory is SceneManager else manager_factory()
             try:
-                self.runtime3d = Scene3DRuntime(document, models, preview=True)
+                self.runtime3d = Scene3DRuntime(document, models, preview=True, lifetime=lifetime)
                 self.runtime3d.failed.connect(self.failed)
                 self.offscreen3d = OffscreenScene3D(self.runtime3d, size)
                 self.offscreen3d.frame()
@@ -53,7 +53,7 @@ class SceneRenderSession(QObject):
         if sum(entry.get('type') in ('VIDEO', 'WEB', 'PUPPET', 'SOUND') for entry in validated.values()) > 8:
             raise ValueError('Scene output supports at most eight native media sources')
         self.size = QSize(*size)
-        self.manager = manager_factory()
+        self.manager = manager_factory(lifetime=lifetime) if manager_factory is SceneManager else manager_factory()
         self.view = None
         self.closed = False
         try:

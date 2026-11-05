@@ -94,10 +94,11 @@ def test_animation_round_trip_in_json_and_portable_scene(tmp_path):
         lease.cleanup()
 
 
-def test_editor_scrub_does_not_save_transient_positions_and_dialog_is_undoable(monkeypatch):
+def test_editor_scrub_does_not_save_transient_positions_and_dialog_is_undoable(monkeypatch, *, lifetime_factory):
     from frontengine.ui.page.scene_setting.scene_setting_ui import SceneSettingUI
     from frontengine.ui.dialog.scene_animation_dialog import SceneAnimationDialog
-    page = SceneSettingUI()
+    lifetime_factory()
+    page = SceneSettingUI(lifetime=lifetime_factory())
     editor = page.visual_editor
     editor.document.reset({'title': animated()})
     editor._select_layer('title')

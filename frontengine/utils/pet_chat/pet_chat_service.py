@@ -77,9 +77,13 @@ class PetChatService:
 
     def __init__(self, persona: str = DEFAULT_PERSONA, model: str = MODEL,
                  client_factory: Optional[Callable[[], object]] = None,
-                 key_provider: Callable[[], Optional[str]] = api_key) -> None:
+                 key_provider: Callable[[], Optional[str]] = api_key, *, lifetime=None) -> None:
         self.persona = persona
         self.model = model
+        self.lifetime = lifetime
+        self._threads = []
+        if lifetime is not None:
+            lifetime.register_pending(self.pending)
         self._client_factory = client_factory
         self._key_provider = key_provider
         self._client = None
@@ -169,8 +173,19 @@ class PetChatService:
             except Exception as error:  # pragma: no cover - callback boundary
                 front_engine_logger.warning(f"[PetChatService] reply callback failed: {error!r}")
 
-        threading.Thread(target=worker, name="frontengine-pet-chat", daemon=True).start()
+        self._start_worker(worker, "frontengine-pet-chat")
 
     def reset(self) -> None:
         """清掉對話記錄 / Forget the conversation so far."""
         self.history = []
+
+    def _start_worker(self, worker, name):
+        if self.lifetime is not None:
+            self.lifetime.require_live()
+        thread = threading.Thread(target=worker, name=name, daemon=True)
+        self._threads.append(thread)
+        thread.start()
+
+    def pending(self) -> bool:
+        self._threads[:] = [thread for thread in self._threads if thread.is_alive()]
+        return bool(self._threads)

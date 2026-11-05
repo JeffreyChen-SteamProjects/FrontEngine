@@ -3,7 +3,7 @@ import time
 from pathlib import Path
 from types import SimpleNamespace
 
-from PySide6.QtCore import QCoreApplication, QThreadPool
+from PySide6.QtCore import QCoreApplication
 from PySide6.QtGui import QImage
 from PySide6.QtWidgets import QWidget
 
@@ -35,13 +35,14 @@ class Backend:
 def flush_jobs(dialog):
     deadline = time.monotonic() + 5
     while dialog.jobs.pending and time.monotonic() < deadline:
-        QThreadPool.globalInstance().waitForDone(100)
+        dialog.jobs.pool.waitForDone(100)
         QCoreApplication.processEvents()
     assert not dialog.jobs.pending
 
 
-def test_dialog_is_lazy_and_close_does_not_cancel_upload(tmp_path):
+def test_dialog_is_lazy_and_close_does_not_cancel_upload(tmp_path, lifetime_factory):
     owner = QWidget()
+    owner.lifetime = lifetime_factory()
     backend = Backend()
     service = WorkshopService(owner, backend)
     dialog = WorkshopDialog(owner, service, tmp_path / "storage")
@@ -74,8 +75,9 @@ def test_dialog_is_lazy_and_close_does_not_cancel_upload(tmp_path):
     owner.close()
 
 
-def test_shutdown_marks_upload_uncertain_before_runtime_release(tmp_path):
+def test_shutdown_marks_upload_uncertain_before_runtime_release(tmp_path, lifetime_factory):
     owner = QWidget()
+    owner.lifetime = lifetime_factory()
     backend = Backend()
     service = WorkshopService(owner, backend)
     dialog = WorkshopDialog(owner, service, tmp_path)
@@ -91,11 +93,12 @@ def test_shutdown_marks_upload_uncertain_before_runtime_release(tmp_path):
     owner.close()
 
 
-def test_scene_load_adopts_package_lease_on_gui_thread(tmp_path):
+def test_scene_load_adopts_package_lease_on_gui_thread(tmp_path, lifetime_factory):
     from frontengine.user_setting.scene_setting import scene_json, release_scene_packages
     from frontengine.utils.scene_format.scene_package import save_package
     from frontengine.utils.workshop.workshop_package import create_snapshot
     owner = QWidget()
+    owner.lifetime = lifetime_factory()
     refreshed = []
     owner.scene_setting_ui = SimpleNamespace(scene_manager_ui=SimpleNamespace(renew_json_plain_text=lambda: refreshed.append(True)))
     service = WorkshopService(owner, Backend())

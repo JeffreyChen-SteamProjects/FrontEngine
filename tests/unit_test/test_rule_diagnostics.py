@@ -42,12 +42,12 @@ def test_identity_normalization_bounds_and_duplicate_labels():
     assert len(normalize_rules([_rule(str(index)) for index in range(205)])) == 200
 
 
-def test_preview_does_not_consume_edges_and_failed_actions_get_receipts():
+def test_preview_does_not_consume_edges_and_failed_actions_get_receipts(lifetime_factory):
     rules = [_rule('Fails'), _rule('Next', priority=1)]
     service = RuleEngineService(lambda: rules, lambda: {'app': 'code', 'now': datetime(2026, 10, 7, 19, 30)})
     registry = ActionRegistry()
     registry.register(Action('hide_all', 'label', 'Hide', lambda _value: False))
-    window = SimpleNamespace(action_registry=registry, rule_engine_service=service)
+    window = SimpleNamespace(action_registry=registry, rule_engine_service=service, lifetime=lifetime_factory())
     service.rule_fired.connect(lambda rule: FrontEngineMainUI._on_rule_fired(window, rule))
     assert all(row['matches'] and not row['active'] for row in service.preview())
     assert not service.history and not service.tracker.active('Fails')

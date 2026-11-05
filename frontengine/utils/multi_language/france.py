@@ -1949,4 +1949,5 @@ french_word_dict = {
     "pet_home_pack_themes": "{count} thèmes",
     "pet_home_visit_needs_packs": "Packs de contenu nécessaires : {packs}",
     "pet_home_no_packs": "Aucun pack de meubles. Placez un dossier de pack dans le dossier des packs et redémarrez.",
+    "runtime_shutdown_failed": "La fermeture a échoué : {error}",
 }

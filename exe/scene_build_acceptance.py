@@ -134,12 +134,14 @@ def verify_scene(fixtures: Path, report: Path) -> dict:
     from PySide6.QtWidgets import QApplication
     from shiboken6 import isValid
     from frontengine.ui.page.scene_setting.scene_setting_ui import SceneSettingUI
+    from frontengine.ui.runtime_lifetime import DefaultSettingsLifetime
     from frontengine.user_setting.scene_setting import load_scene_file, release_scene_packages
     from frontengine.utils.scene_format.scene_package import save_package
     from frontengine.utils.scene_format.scene_document import scene_envelope
     entries = checked_fixtures(fixtures)
     _require(QApplication.platformName() not in ('offscreen', 'minimal'), 'Use a real native Qt platform')
-    page, sources = SceneSettingUI(), []
+    lifetime = DefaultSettingsLifetime.open()
+    page, sources = SceneSettingUI(lifetime=lifetime), []
     try:
         page.resize(1080, 780)
         page.setWindowTitle('FrontEngine packaged scene acceptance')
@@ -171,6 +173,8 @@ def verify_scene(fixtures: Path, report: Path) -> dict:
             page.shutdown_scene()
             page.close()
         release_scene_packages()
+        lifetime.close()
+        wait_for(lambda: lifetime.closed)
         QApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
         QApplication.processEvents()
 

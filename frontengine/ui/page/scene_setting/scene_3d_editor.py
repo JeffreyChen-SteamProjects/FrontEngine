@@ -1,12 +1,13 @@
 """3D viewport, transforms and scene controls integrated with the existing editor."""
 from __future__ import annotations
+from frontengine.ui.runtime_lifetime import captured_lifetime, owned_callback
 
 from copy import deepcopy
 from pathlib import Path
 from threading import Event
 
 import numpy as np
-from PySide6.QtCore import QObject, QRunnable, QThreadPool, QTimer, Qt, Signal
+from PySide6.QtCore import QObject, QRunnable, QTimer, Qt, Signal
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QComboBox, QDoubleSpinBox,
                               QCheckBox, QPushButton, QLabel, QFileDialog, QTreeWidget, QTreeWidgetItem,
@@ -47,6 +48,8 @@ class Scene3DEditor(QWidget):
 
     def __init__(self, editor):
         super().__init__(editor)
+        self.lifetime = captured_lifetime(editor)
+        self.lifetime.adopt(self)
         self.editor, self.document = editor, editor.document
         self.runtime, self.generation, self.closed = None, 0, False
         self.cancel = Event()
@@ -262,8 +265,9 @@ class Scene3DEditor(QWidget):
             self.runtime = None
         retranslator.set_text(self.status, 'scene_action_loading', 'Loading scene…')
         self.cancel = Event()
-        QThreadPool.globalInstance().start(_Prepare(self.generation, document.copy(), self.signals, self.cancel))
+        self.lifetime.submit(_Prepare(self.generation, document.copy(), self.signals, self.cancel))
 
+    @owned_callback
     def _prepared(self, generation, document, models, error):
         if self.closed or generation != self.generation:
             return
@@ -280,7 +284,7 @@ class Scene3DEditor(QWidget):
         candidate = None
         try:
             candidate = Scene3DRuntime(document, models, preview=True,
-                                       enable_media=self.editor.media_enabled.isChecked())
+                                       enable_media=self.editor.media_enabled.isChecked(), lifetime=self.lifetime)
             from frontengine.show.scene.view3d import OffscreenScene3D
             probe = OffscreenScene3D(candidate, (320, 180))
             try:

@@ -20,10 +20,11 @@ def wait_for(condition):
 
 
 @pytest.fixture
-def page():
+def page(*, lifetime_factory):
+    lifetime_factory()
     previous = current_scene_document()
     adopt_scene_document({})
-    widget = SceneSettingUI()
+    widget = SceneSettingUI(lifetime=lifetime_factory())
     try:
         yield widget
     finally:

@@ -13,9 +13,10 @@ class CatalogLibrary:
         return self.catalog, ()
 
 
-def test_dialog_stages_outfit_and_cancel_does_not_change_profile(wardrobe):
+def test_dialog_stages_outfit_and_cancel_does_not_change_profile(wardrobe, *, lifetime_factory):
+    lifetime_factory()
     profiles, first, _, draft, character, garment = wardrobe
-    dialog = PetWardrobeDialog(profiles, first['id'], library=CatalogLibrary(draft.catalog))
+    dialog = PetWardrobeDialog(profiles, first['id'], library=CatalogLibrary(draft.catalog), lifetime=lifetime_factory())
     dialog.show()
     dialog.character.setCurrentIndex(dialog.character.findData(character))
     dialog._choose_character()
@@ -33,9 +34,10 @@ def test_dialog_stages_outfit_and_cancel_does_not_change_profile(wardrobe):
     assert dialog.playback.renderer is None
 
 
-def test_dialog_apply_then_cancel_keeps_last_applied_outfit(wardrobe):
+def test_dialog_apply_then_cancel_keeps_last_applied_outfit(wardrobe, *, lifetime_factory):
+    lifetime_factory()
     profiles, first, _, draft, character, garment = wardrobe
-    dialog = PetWardrobeDialog(profiles, first['id'], library=CatalogLibrary(draft.catalog))
+    dialog = PetWardrobeDialog(profiles, first['id'], library=CatalogLibrary(draft.catalog), lifetime=lifetime_factory())
     try:
         dialog.character.setCurrentIndex(dialog.character.findData(character))
         dialog._choose_character()
@@ -51,9 +53,10 @@ def test_dialog_apply_then_cancel_keeps_last_applied_outfit(wardrobe):
         dialog.close()
 
 
-def test_dialog_failed_save_keeps_preview_and_draft(wardrobe, monkeypatch):
+def test_dialog_failed_save_keeps_preview_and_draft(wardrobe, monkeypatch, *, lifetime_factory):
+    lifetime_factory()
     profiles, first, _, draft, character, _ = wardrobe
-    dialog = PetWardrobeDialog(profiles, first['id'], library=CatalogLibrary(draft.catalog))
+    dialog = PetWardrobeDialog(profiles, first['id'], library=CatalogLibrary(draft.catalog), lifetime=lifetime_factory())
     try:
         dialog.character.setCurrentIndex(dialog.character.findData(character))
         dialog._choose_character()
@@ -72,11 +75,12 @@ def test_dialog_failed_save_keeps_preview_and_draft(wardrobe, monkeypatch):
         dialog.close()
 
 
-def test_profile_controls_open_one_wardrobe_per_identity(wardrobe):
+def test_profile_controls_open_one_wardrobe_per_identity(wardrobe, *, lifetime_factory):
     from frontengine.ui.page.pet.pet_setting_ui import PetSettingUI
 
+    lifetime_factory()
     profiles, first, _, _, _, _ = wardrobe
-    page = PetSettingUI()
+    page = PetSettingUI(lifetime=lifetime_factory())
     try:
         page.profile_controls.profiles = profiles
         page.profile_controls.refresh(selected=first['id'])
@@ -92,23 +96,24 @@ def test_profile_controls_open_one_wardrobe_per_identity(wardrobe):
         page.close()
 
 
-def test_background_install_refreshes_dialog_catalog(tmp_path, monkeypatch):
+def test_background_install_refreshes_dialog_catalog(tmp_path, monkeypatch, *, lifetime_factory):
     from PySide6.QtWidgets import QFileDialog
-    from PySide6.QtCore import QCoreApplication, QThreadPool
+    from PySide6.QtCore import QCoreApplication
     from frontengine.show.pet.asset_library import PetAssetLibrary
     from frontengine.user_setting.pet_profiles import PetProfiles
     from test_pet_layered import make_asset
 
+    lifetime_factory()
     source = tmp_path / 'cat'
     make_asset(source)
     profiles = PetProfiles({}, lambda: None)
     record = profiles.create()
-    dialog = PetWardrobeDialog(profiles, record['id'], library=PetAssetLibrary(tmp_path / 'installed'))
+    dialog = PetWardrobeDialog(profiles, record['id'], library=PetAssetLibrary(tmp_path / 'installed'), lifetime=lifetime_factory())
     try:
         monkeypatch.setattr(QFileDialog, 'getExistingDirectory', lambda *_args: str(source))
         dialog._install()
         assert not dialog.install_button.isEnabled()
-        assert QThreadPool.globalInstance().waitForDone(5000)
+        assert dialog.lifetime.pool().waitForDone(5000)
         QCoreApplication.processEvents()
         assert dialog._install_job is None
         assert dialog.install_button.isEnabled()
@@ -119,15 +124,16 @@ def test_background_install_refreshes_dialog_catalog(tmp_path, monkeypatch):
 
 
 @pytest.mark.parametrize('destroy', [False, True])
-def test_close_during_install_cancels_staging_without_publishing(tmp_path, monkeypatch, destroy):
+def test_close_during_install_cancels_staging_without_publishing(tmp_path, monkeypatch, destroy, *, lifetime_factory):
     from threading import Event
     from PySide6.QtWidgets import QFileDialog
-    from PySide6.QtCore import QCoreApplication, QEvent, QThreadPool, Qt
+    from PySide6.QtCore import QCoreApplication, QEvent, Qt
     from shiboken6 import isValid
     from frontengine.show.pet.asset_library import PetAssetLibrary
     from frontengine.user_setting.pet_profiles import PetProfiles
     from test_pet_layered import make_asset
 
+    lifetime_factory()
     ready, release = Event(), Event()
 
     class PausedLibrary(PetAssetLibrary):
@@ -142,7 +148,7 @@ def test_close_during_install_cancels_staging_without_publishing(tmp_path, monke
     library = PausedLibrary(tmp_path / 'installed')
     profiles = PetProfiles({}, lambda: None)
     record = profiles.create()
-    dialog = PetWardrobeDialog(profiles, record['id'], library=library)
+    dialog = PetWardrobeDialog(profiles, record['id'], library=library, lifetime=lifetime_factory())
     if not destroy:
         dialog.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, False)
     dialog.show()
@@ -159,7 +165,7 @@ def test_close_during_install_cancels_staging_without_publishing(tmp_path, monke
             dialog.deleteLater()
             QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
         release.set()
-        assert QThreadPool.globalInstance().waitForDone(5000)
+        assert dialog.lifetime.pool().waitForDone(5000)
         QCoreApplication.processEvents()
         assert list(library.root.iterdir()) == []
         assert profiles.get(record['id']) == record
@@ -169,18 +175,19 @@ def test_close_during_install_cancels_staging_without_publishing(tmp_path, monke
             assert dialog.playback.renderer is None
     finally:
         release.set()
-        QThreadPool.globalInstance().waitForDone(5000)
+        dialog.lifetime.pool().waitForDone(5000)
         if isValid(dialog):
             dialog.close()
 
 
-def test_failed_background_install_can_retry_same_version(tmp_path, monkeypatch):
+def test_failed_background_install_can_retry_same_version(tmp_path, monkeypatch, *, lifetime_factory):
     from PySide6.QtWidgets import QFileDialog
-    from PySide6.QtCore import QCoreApplication, QThreadPool
+    from PySide6.QtCore import QCoreApplication
     from frontengine.show.pet.asset_library import PetAssetLibrary
     from frontengine.user_setting.pet_profiles import PetProfiles
     from test_pet_layered import make_asset
 
+    lifetime_factory()
     source = tmp_path / 'cat'
     make_asset(source)
     image = source / 'layer.png'
@@ -189,18 +196,18 @@ def test_failed_background_install_can_retry_same_version(tmp_path, monkeypatch)
     library = PetAssetLibrary(tmp_path / 'installed')
     profiles = PetProfiles({}, lambda: None)
     record = profiles.create()
-    dialog = PetWardrobeDialog(profiles, record['id'], library=library)
+    dialog = PetWardrobeDialog(profiles, record['id'], library=library, lifetime=lifetime_factory())
     monkeypatch.setattr(QFileDialog, 'getExistingDirectory', lambda *_args: str(source))
     try:
         dialog._install()
-        assert QThreadPool.globalInstance().waitForDone(5000)
+        assert dialog.lifetime.pool().waitForDone(5000)
         QCoreApplication.processEvents()
         assert dialog.status.text()
         assert dialog.install_button.isEnabled()
         assert list(library.root.iterdir()) == []
         image.write_bytes(original)
         dialog._install()
-        assert QThreadPool.globalInstance().waitForDone(5000)
+        assert dialog.lifetime.pool().waitForDone(5000)
         QCoreApplication.processEvents()
         assert dialog._install_job is None
         assert dialog.install_button.isEnabled()
