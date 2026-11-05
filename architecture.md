@@ -275,3 +275,5 @@ Cancellation tombstones count toward the 500-record limit and prevent stale impo
 `show/gif/paint_gif.py` owns its QMovie as a Qt child, so overlay deletion releases the source file independently of retained Python references. The home page places status text above wrapping action buttons; its welcome heading also wraps for longer translations.
 
 PetSettingUI and PetProfileControls resolve default asset libraries, generated models and previews against their captured settings storage. PetHomePage injects a directory-bound library factory into ResidentArt. Explicit asset libraries on existing pets are preserved across cloning and wardrobe access. Home photo writes, CollectionPanel album reads and the local content-pack folder button resolve against lifetime.storage.directory, matching the pack loader.
+
+Home panels retain their page lifetime and guard user-command entry points with owned_action. Blueprint selection results pass through after_dialog before writes or dialog creation; refresh and shutdown cleanup remain separate from new-action admission.

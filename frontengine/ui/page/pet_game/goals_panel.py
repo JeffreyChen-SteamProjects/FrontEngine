@@ -5,6 +5,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from frontengine.ui.runtime_lifetime import owned_action
+
 from PySide6.QtCore import Qt, QTemporaryFile
 from PySide6.QtWidgets import QLabel, QListWidget, QListWidgetItem, QPushButton
 
@@ -30,6 +32,7 @@ def _button(key: str, fallback: str, callback) -> QPushButton:
 class GoalsPanel:
     def __init__(self, page: PetHomePage) -> None:
         self.page = page
+        self.lifetime = page.lifetime
         section = self.section = page.add_section("pet_home_goals_section", "Goals")
         self.level = QLabel()
         section.add_widget(self.level)
@@ -100,16 +103,19 @@ class GoalsPanel:
         return translate("pet_home_event_line", "Day {day}: {text} {name}").format(
             day=event["day"], text=text, name=name).strip()
 
+    @owned_action
     def claim(self) -> None:
         item = self.tutorial.currentItem()
         if item is not None:
             self.page.report(self.page.service.run(lambda world: goals.claim(world, item.data(ROLE_ID))))
             self.page.refresh()
 
+    @owned_action
     def skip(self) -> None:
         self.page.report(self.page.service.run(goals.skip_tutorial))
         self.page.refresh()
 
+    @owned_action
     def deliver(self) -> None:
         item = self.commissions.currentItem()
         if item is not None:
@@ -117,10 +123,12 @@ class GoalsPanel:
             self.page.report(self.page.service.run(lambda world: goals.deliver(world, index)))
             self.page.refresh()
 
+    @owned_action
     def celebrate(self) -> None:
         self.page.report(self.page.service.run(goals.celebrate))
         self.page.refresh()
 
+    @owned_action
     def take_photo(self) -> Path | None:
         """Only the home drawing is saved; nothing on the desktop is captured."""
         world = self.page.service.world
@@ -128,6 +136,7 @@ class GoalsPanel:
             return None
         return self.save_photo(self.page.view.grab())
 
+    @owned_action
     def save_photo(self, pixmap, subject: str = "") -> Path | None:
         """Save a picture of the home into the album folder, named by game day and time."""
         world = self.page.service.world

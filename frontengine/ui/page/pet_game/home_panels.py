@@ -9,6 +9,8 @@ import uuid
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from frontengine.ui.runtime_lifetime import owned_action
+
 from PySide6.QtWidgets import QCheckBox, QComboBox, QFileDialog, QLabel, QListWidget, QListWidgetItem, QProgressBar, QPushButton
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QGuiApplication
@@ -53,6 +55,7 @@ class ResidentPanel:
 
     def __init__(self, page: PetHomePage) -> None:
         self.page = page
+        self.lifetime = page.lifetime
         section = self.section = page.add_section("pet_home_residents_section", "Residents")
         self.profiles = QComboBox()
         section.add_row("pet_home_adopt_label", self.profiles, "Saved pet")
@@ -106,6 +109,7 @@ class ResidentPanel:
             self.zone_target.addItem(zone.screen, zone.identifier)
         self.zone_row.setVisible(self.zone_target.count() > 1)
 
+    @owned_action
     def move_to_zone(self) -> None:
         resident, zone = self.page.selected_resident, self.zone_target.currentData()
         if resident and zone:
@@ -131,11 +135,13 @@ class ResidentPanel:
         if current is not None:
             self.page.select_resident(current.data(ROLE_ID))
 
+    @owned_action
     def command(self, command: str) -> None:
         resident = self.page.selected_resident
         if resident:
             self.page.report(self.page.service.run(lambda world: world.command(resident, command)))
 
+    @owned_action
     def adopt(self) -> None:
         identifier = self.profiles.currentData()
         if identifier:
@@ -143,12 +149,14 @@ class ResidentPanel:
             self.page.refresh()
             self.page.select_resident(identifier)
 
+    @owned_action
     def new_pet(self) -> None:
         record = self.page.profiles.create()
         self.page.report(self.page.service.adopt(record["id"]))
         self.page.refresh()
         self.page.select_resident(record["id"])
 
+    @owned_action
     def wardrobe(self) -> None:
         """The existing wardrobe; applying goes through the home's own lease on this pet."""
         identifier = self.page.selected_resident
@@ -164,6 +172,7 @@ class ResidentPanel:
         dialog.show()
         dialog.raise_()
 
+    @owned_action
     def release(self) -> None:
         resident = self.page.selected_resident
         if resident:
@@ -176,6 +185,7 @@ class LayoutPanel:
 
     def __init__(self, page: PetHomePage) -> None:
         self.page = page
+        self.lifetime = page.lifetime
         self.arranging = False
         section = self.section = page.add_section("pet_home_layout_section", "Furniture")
         self.theme = QComboBox()
@@ -288,16 +298,19 @@ class LayoutPanel:
         self.crossing.setCurrentIndex(max(0, self.crossing.findData(link)))
         self.crossing.setEnabled(self.crossing.count() > 1)
 
+    @owned_action
     def link_zone(self, *_args) -> None:
         zone, other = self.page.zone, self.crossing.currentData()
         if zone is not None:
             self.page.report(self.page.service.run(lambda world: world.link_zones(zone, other)))
             self.page.refresh()
 
+    @owned_action
     def _area_tool_changed(self, *_args) -> None:
         tag = self.area_tag.currentData()
         self.page.view.area_tool = tag if self.area_paint.isChecked() else None
 
+    @owned_action
     def paint_area(self, first: int, last: int) -> None:
         tag, zone = self.area_tag.currentData(), self.page.zone
         if zone is not None:
@@ -305,11 +318,13 @@ class LayoutPanel:
                 lambda world: world.set_area(zone, first, last, None if tag == "clear" else tag)))
             self.page.refresh()
 
+    @owned_action
     def add_zone(self) -> None:
         screen = self.zone_screens.currentData()
         if screen is not None:
             self.page.add_zone(screen)
 
+    @owned_action
     def move_zone(self) -> None:
         screen = self.zone_screens.currentData()
         if screen is not None:
@@ -340,6 +355,7 @@ class LayoutPanel:
         self.upgrade_button.setText(translate("pet_home_upgrade", "Upgrade ({cost} coins)").format(cost=cost)
                                     if cost is not None else translate("pet_home_upgrade_station", "Upgrade"))
 
+    @owned_action
     def upgrade(self) -> None:
         world = self.page.service.world
         piece = world.furniture.get(self.page.selected_furniture) if world else None
@@ -348,6 +364,7 @@ class LayoutPanel:
             self.page.report(self.page.service.run(lambda w: w.upgrade(piece.definition, transaction)))
             self.page.refresh()
 
+    @owned_action
     def _theme_chosen(self, _index: int) -> None:
         theme, zone = self.theme.currentData(), self.page.zone
         if theme and zone:
@@ -378,6 +395,7 @@ class LayoutPanel:
         self.page.refresh()
         return result
 
+    @owned_action
     def undo(self) -> None:
         zone = self.page.zone
         if zone and self.history.can_undo():
@@ -385,6 +403,7 @@ class LayoutPanel:
             self.page.report("accepted" if restored else "layout_restore_blocked")
             self.page.refresh()
 
+    @owned_action
     def redo(self) -> None:
         zone = self.page.zone
         if zone and self.history.can_redo():
@@ -392,12 +411,14 @@ class LayoutPanel:
             self.page.report("accepted" if restored else "layout_restore_blocked")
             self.page.refresh()
 
+    @owned_action
     def copy_layout(self) -> None:
         world, zone = self.page.service.world, self.page.zone
         if world is not None and zone:
             QGuiApplication.clipboard().setText(encode_layout(world, zone))
             self.page.report("layout_copied")
 
+    @owned_action
     def paste_layout(self) -> None:
         world = self.page.service.world
         if world is None:
@@ -433,6 +454,7 @@ class LayoutPanel:
                 text += " · " + translate("pet_home_layout_unavailable", "some cannot be bought yet and are left out")
         self.layout_note.setText(text)
 
+    @owned_action
     def apply_layout(self) -> None:
         pieces, zone = self._chosen_layout(), self.page.zone
         if pieces is None or zone is None:
@@ -456,10 +478,11 @@ class LayoutPanel:
                                                     "", "JSON (*.json)")
         return path
 
+    @owned_action
     def share_blueprint(self) -> Path | None:
         """Only rooms and furniture go into the file: no pets, names, coins or anything personal."""
         world = self.page.service.world
-        path = self.choose_save_path() if world is not None else ""
+        path = self.lifetime.after_dialog(self.choose_save_path()) if world is not None else ""
         if not path:
             return None
         target = Path(path)
@@ -471,9 +494,10 @@ class LayoutPanel:
         self.page.report_text(translate("pet_home_blueprint_saved", "Blueprint saved to {path}").format(path=target))
         return target
 
+    @owned_action
     def visit_blueprint(self, path: str | None = None):
         """Open a blueprint read-only (a Workshop item passes its file); a file that is not one is refused."""
-        path = path or self.choose_open_path()
+        path = self.lifetime.after_dialog(path or self.choose_open_path())
         if not path:
             return None
         source = Path(path)
@@ -491,6 +515,7 @@ class LayoutPanel:
         dialog.show()
         return dialog
 
+    @owned_action
     def drag_hover(self, identifier: str, cell: int) -> None:
         world, zone = self.page.service.world, self.page.zone
         piece = world.furniture.get(identifier) if world else None
@@ -498,6 +523,7 @@ class LayoutPanel:
             problem = world.preview(piece.definition, zone, cell, moving=identifier)
             self.page.set_preview((piece.definition, cell, piece.flipped, problem))
 
+    @owned_action
     def drop(self, identifier: str, cell: int) -> None:
         self.page.set_preview(None)
         world = self.page.service.world
@@ -506,6 +532,7 @@ class LayoutPanel:
             return
         self.page.report(self._change(lambda w: w.move(identifier, cell, None)))
 
+    @owned_action
     def nudge(self, steps: int) -> bool:
         """Arrow keys while arranging: the selected piece moves one cell at a time."""
         world, identifier = self.page.service.world, self.page.selected_furniture
@@ -515,6 +542,7 @@ class LayoutPanel:
         self.page.report(self._change(lambda w: w.move(identifier, piece.cell + steps, None)))
         return True
 
+    @owned_action
     def toggle_arrange(self) -> None:
         self.arranging = not self.arranging
         retranslator.set_text(self.arrange, "pet_home_arrange_done" if self.arranging else "pet_home_arrange",
@@ -525,6 +553,7 @@ class LayoutPanel:
         self.page.view.drag_enabled = self.arranging
         self.update_preview()
 
+    @owned_action
     def update_preview(self, *_args) -> None:
         """While arranging, the chosen piece shows at the last clicked spot with the reason it would not fit."""
         world, zone = self.page.service.world, self.page.zone
@@ -535,6 +564,7 @@ class LayoutPanel:
         problem = world.preview(definition, zone, self.preview_cell)
         self.page.set_preview((definition, self.preview_cell, False, problem))
 
+    @owned_action
     def cell_clicked(self, cell: int) -> None:
         """Arranging: a stored piece goes where you click, or the selected piece moves there."""
         if not self.arranging:
@@ -562,24 +592,28 @@ class LayoutPanel:
             self.preview_cell = None
         self.page.refresh()
 
+    @owned_action
     def place(self) -> None:
         """Put the chosen stored piece in the first free spot."""
         definition = self.storage.current_key() or (self.storage.item(0).data(ROLE_KEY) if self.storage.count() else None)
         if definition and self.page.zone:
             self._place_at(definition, None)
 
+    @owned_action
     def mirror(self) -> None:
         world, piece = self.page.service.world, self.page.selected_furniture
         found = world.furniture.get(piece) if world and piece else None
         if found is not None:
             self.page.report(self._change(lambda w: w.move(piece, found.cell, not found.flipped)))
 
+    @owned_action
     def store(self) -> None:
         piece = self.page.selected_furniture
         if piece:
             self.page.selected_furniture = None
             self.page.report(self._change(lambda world: world.store(piece)))
 
+    @owned_action
     def assign_bed(self) -> None:
         piece, resident = self.page.selected_furniture, self.page.selected_resident
         if piece and resident:
@@ -592,6 +626,7 @@ class ShopPanel:
 
     def __init__(self, page: PetHomePage) -> None:
         self.page = page
+        self.lifetime = page.lifetime
         section = self.section = page.add_section("pet_home_shop_section", "Shop")
         self.items = ThingGrid(rows=2)
         self.items.itemDoubleClicked.connect(lambda _item: self.buy())
@@ -620,6 +655,7 @@ class ShopPanel:
                                    name=translate(item.label_key, item.fallback), price=item.buy_price)))
         self.items.set_things(things)
 
+    @owned_action
     def buy(self) -> None:
         key, zone = self.items.current_key(), self.page.zone
         if not key:
@@ -633,6 +669,7 @@ class ShopPanel:
         self.page.report(code)
         self.page.refresh()
 
+    @owned_action
     def sell(self) -> None:
         key = self.items.current_key()
         if key and key.startswith(FURNITURE_PREFIX):
@@ -646,6 +683,7 @@ class StoragePanel:
 
     def __init__(self, page: PetHomePage) -> None:
         self.page = page
+        self.lifetime = page.lifetime
         section = self.section = page.add_section("pet_home_storage_section", "Backpack")
         self.collection = QLabel()
         section.add_widget(self.collection)
@@ -676,6 +714,7 @@ class StoragePanel:
             text += " — " + translate("pet_home_sells_for", "sells for {price}").format(price=price)
         return text
 
+    @owned_action
     def sell(self) -> None:
         name = self.list.current_key()
         if name is None:
@@ -708,6 +747,7 @@ class WorkPanel:
 
     def __init__(self, page: PetHomePage) -> None:
         self.page = page
+        self.lifetime = page.lifetime
         section = self.section = page.add_section("pet_home_work_section", "Work")
         self.details = tr(QLabel(), "pet_home_work_auto",
                           "Residents take up the work their workstations allow during their working hours, "
@@ -725,6 +765,7 @@ class WorkPanel:
         self.focus_check.toggled.connect(self._focus_toggled)
         section.add_widget(self.focus_check)
 
+    @owned_action
     def _focus_toggled(self, checked: bool) -> None:
         user_setting_dict[FOCUS_KEY] = bool(checked)
         if not checked:
@@ -763,6 +804,7 @@ class WorkPanel:
             done=task.done, units=task.units, state=state,
             percent=task.progress_ms * 100 // recipe.duration_ms)
 
+    @owned_action
     def cancel(self) -> None:
         item = self.tasks.currentItem()
         if item is not None:

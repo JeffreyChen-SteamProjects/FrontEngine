@@ -935,6 +935,7 @@ class PetHomePage(SettingPage):
         elif action == "photo":
             self.photo_of(target)
 
+    @owned_action
     def photo_of(self, identifier: str):
         """A photo of one pet from the overview, saved to the album; nothing on the desktop is captured."""
         world = self.service.world
