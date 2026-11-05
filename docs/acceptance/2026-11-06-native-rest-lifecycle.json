@@ -1,0 +1,330 @@
+{
+  "source_commit": "4c29988",
+  "rest": {
+    "passed": true,
+    "world_snapshot_equal": true,
+    "resident_profiles_persisted": true,
+    "leases_reacquired": true,
+    "residents": [
+      "35eca29b417c40a4bf32165a8f42ae84",
+      "96b68c7e5f234eeeb8858e4eb4461194"
+    ],
+    "ledger_coins": 90,
+    "rest_lifecycle": {
+      "moving": {
+        "elapsed_s": 0.39100000000325963,
+        "energy": 28,
+        "x": 400000,
+        "target_x": 80000,
+        "caption": "Sleeping (you asked)",
+        "bed": "f2"
+      },
+      "using": {
+        "elapsed_s": 5.48399999999674,
+        "energy": 28,
+        "x": 80000,
+        "target_x": 80000,
+        "caption": "Sleeping (you asked)",
+        "bed": "f2"
+      },
+      "completed": {
+        "elapsed_s": 140.17199999999139,
+        "energy": 95,
+        "caption": "Taking it easy"
+      },
+      "left_bed": {
+        "elapsed_s": 147.0,
+        "x": 496000,
+        "caption": "Playing (you asked) · about 1 min left"
+      }
+    },
+    "initial_energy": 28,
+    "initial_x": 496000,
+    "elapsed_s": 147.09399999998277,
+    "events": [
+      {
+        "activity": "work",
+        "kind": "activity",
+        "reason": "scheduled_work",
+        "resident": "35eca29b417c40a4bf32165a8f42ae84",
+        "time": 2118200
+      },
+      {
+        "activity": "play",
+        "kind": "activity",
+        "reason": "free_time",
+        "resident": "96b68c7e5f234eeeb8858e4eb4461194",
+        "time": 2118200
+      },
+      {
+        "activity": "work",
+        "kind": "interrupted",
+        "reason": "command",
+        "resident": "35eca29b417c40a4bf32165a8f42ae84",
+        "time": 2122600
+      },
+      {
+        "activity": "sleep",
+        "kind": "activity",
+        "reason": "command",
+        "resident": "35eca29b417c40a4bf32165a8f42ae84",
+        "time": 2122800
+      },
+      {
+        "activity": "play",
+        "kind": "completed",
+        "resident": "96b68c7e5f234eeeb8858e4eb4461194",
+        "time": 2156200
+      },
+      {
+        "activity": "wander",
+        "kind": "activity",
+        "reason": "free_time",
+        "resident": "96b68c7e5f234eeeb8858e4eb4461194",
+        "time": 2157200
+      },
+      {
+        "activity": "wander",
+        "kind": "completed",
+        "resident": "96b68c7e5f234eeeb8858e4eb4461194",
+        "time": 2175600
+      },
+      {
+        "activity": "wander",
+        "kind": "activity",
+        "reason": "free_time",
+        "resident": "96b68c7e5f234eeeb8858e4eb4461194",
+        "time": 2176600
+      },
+      {
+        "activity": "wander",
+        "kind": "completed",
+        "resident": "96b68c7e5f234eeeb8858e4eb4461194",
+        "time": 2183000
+      },
+      {
+        "activity": "play",
+        "kind": "activity",
+        "reason": "free_time",
+        "resident": "96b68c7e5f234eeeb8858e4eb4461194",
+        "time": 2184000
+      },
+      {
+        "activity": "play",
+        "kind": "completed",
+        "resident": "96b68c7e5f234eeeb8858e4eb4461194",
+        "time": 2220400
+      },
+      {
+        "activity": "wander",
+        "kind": "activity",
+        "reason": "free_time",
+        "resident": "96b68c7e5f234eeeb8858e4eb4461194",
+        "time": 2221400
+      },
+      {
+        "activity": "wander",
+        "kind": "completed",
+        "resident": "96b68c7e5f234eeeb8858e4eb4461194",
+        "time": 2236600
+      },
+      {
+        "activity": "wander",
+        "kind": "activity",
+        "reason": "free_time",
+        "resident": "96b68c7e5f234eeeb8858e4eb4461194",
+        "time": 2237600
+      },
+      {
+        "activity": "wander",
+        "kind": "completed",
+        "resident": "96b68c7e5f234eeeb8858e4eb4461194",
+        "time": 2246400
+      },
+      {
+        "activity": "wander",
+        "kind": "activity",
+        "reason": "free_time",
+        "resident": "96b68c7e5f234eeeb8858e4eb4461194",
+        "time": 2247400
+      },
+      {
+        "activity": "wander",
+        "kind": "completed",
+        "resident": "96b68c7e5f234eeeb8858e4eb4461194",
+        "time": 2261600
+      },
+      {
+        "activity": "sleep",
+        "kind": "completed",
+        "resident": "35eca29b417c40a4bf32165a8f42ae84",
+        "time": 2262600
+      },
+      {
+        "activity": "greet",
+        "kind": "activity",
+        "reason": "lonely",
+        "resident": "96b68c7e5f234eeeb8858e4eb4461194",
+        "time": 2262600
+      },
+      {
+        "activity": "play",
+        "kind": "activity",
+        "reason": "command",
+        "resident": "35eca29b417c40a4bf32165a8f42ae84",
+        "time": 2262800
+      },
+      {
+        "kind": "greeted",
+        "partner": "35eca29b417c40a4bf32165a8f42ae84",
+        "resident": "96b68c7e5f234eeeb8858e4eb4461194",
+        "time": 2265600
+      },
+      {
+        "activity": "greet",
+        "kind": "completed",
+        "resident": "96b68c7e5f234eeeb8858e4eb4461194",
+        "time": 2265600
+      },
+      {
+        "activity": "wander",
+        "kind": "activity",
+        "reason": "free_time",
+        "resident": "96b68c7e5f234eeeb8858e4eb4461194",
+        "time": 2266600
+      }
+    ],
+    "realtime_verified": true,
+    "command_scope": "Sleep then play via resident-card buttons; no simulation or need injection",
+    "runtime_closed": true,
+    "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "saved_snapshot_sha256": "ef252074bb0aba520bb00efed3948ee0a168e9920368aba877ab8e45db606388",
+    "scope": "Normal-speed sleep/use/release/play path in full MainUI on private desktop using prior real gameplay save; global hotkey/emergency/app-profile/share-watch starts, Workshop discovery and session-lock query substituted",
+    "temporary_directory_removed": true
+  },
+  "scroll_samples": [
+    {
+      "label": "settled_initial",
+      "scroll": 0,
+      "maximum": 784,
+      "button_visible": false,
+      "card_visible": false,
+      "button_y": 1261,
+      "card_y": 947,
+      "caption": "Working (on shift) · about 2 min left",
+      "focus": "NavigationSidebar"
+    },
+    {
+      "label": "button_click_before",
+      "scroll": 484,
+      "maximum": 784,
+      "button_visible": true,
+      "card_visible": true,
+      "button_y": 777,
+      "card_y": 463,
+      "caption": "Working (on shift) · about 2 min left",
+      "focus": "NavigationSidebar"
+    },
+    {
+      "label": "button_click_immediate",
+      "scroll": 484,
+      "maximum": 784,
+      "button_visible": true,
+      "card_visible": true,
+      "button_y": 807,
+      "card_y": 493,
+      "caption": "Taking it easy",
+      "focus": "NavigationSidebar"
+    },
+    {
+      "label": "button_click_after_1s",
+      "scroll": 484,
+      "maximum": 814,
+      "button_visible": true,
+      "card_visible": true,
+      "button_y": 807,
+      "card_y": 493,
+      "caption": "Sleeping (you asked)",
+      "focus": "NavigationSidebar"
+    },
+    {
+      "label": "qt_mouse_click_before",
+      "scroll": 484,
+      "maximum": 814,
+      "button_visible": true,
+      "card_visible": true,
+      "button_y": 807,
+      "card_y": 493,
+      "caption": "Sleeping (you asked)",
+      "focus": "NavigationSidebar"
+    },
+    {
+      "label": "qt_mouse_click_immediate",
+      "scroll": 484,
+      "maximum": 814,
+      "button_visible": true,
+      "card_visible": true,
+      "button_y": 807,
+      "card_y": 493,
+      "caption": "Taking it easy",
+      "focus": "WrappingPushButton"
+    },
+    {
+      "label": "qt_mouse_click_after_1s",
+      "scroll": 484,
+      "maximum": 814,
+      "button_visible": true,
+      "card_visible": true,
+      "button_y": 807,
+      "card_y": 493,
+      "caption": "Sleeping (you asked)",
+      "focus": "WrappingPushButton"
+    },
+    {
+      "label": "card_explicitly_scrolled",
+      "scroll": 484,
+      "maximum": 814,
+      "button_visible": true,
+      "card_visible": true,
+      "button_y": 807,
+      "card_y": 493,
+      "caption": "Sleeping (you asked)",
+      "focus": "WrappingPushButton"
+    }
+  ],
+  "source_files_verified": 502,
+  "visual_checks": [
+    "using.png: resident at bed; card below viewport",
+    "left-bed.png: resident using toy box away from bed",
+    "resident-card.png: visible Sleeping caption and need values"
+  ],
+  "limits": [
+    "Actual prior gameplay save; Sleep then Play commands, not autonomous sleep selection.",
+    "One resident and one bed; not six-resident autonomy or all furniture/path/DPI scenarios.",
+    "world_snapshot_equal and ledger_coins describe the initial loaded snapshot, not a post-rest cold reopen.",
+    "The post-rest save call succeeded; post-rest cold reopen was not tested here.",
+    "Private native desktop with host hotkey/emergency/app-profile/share-watch starts and Workshop/session-lock queries substituted.",
+    "No OS input, network isolation, hardware or independent-review acceptance.",
+    "Stable scrolling reproduced after layout settled; the earlier offscreen card alone does not establish a product defect."
+  ],
+  "harnesses": {
+    "rest": {
+      "source": "import hashlib\nimport json\nimport logging\nimport os\nfrom pathlib import Path\nimport shutil\nimport sys\nimport tempfile\nimport traceback\nimport uuid\nfrom time import monotonic\n\nfrom complete_main_onboarding_native import observation\n\nROOT = Path(__file__).resolve().parents[1]\nsys.path.insert(0, str(ROOT))\nsys.path.insert(0, str(ROOT / 'tests/integration'))\nimport hidden_desktop\n\nsource = Path(sys.argv[1]).resolve()\noutput = Path(sys.argv[2]).resolve()\noutput.mkdir(parents=True, exist_ok=True)\nif not hidden_desktop.is_child(output):\n    assert not (output / 'result.json').exists(), 'Use a fresh output directory'\n    hidden_desktop.DESKTOP = f'FrontEngineColdReload{os.getpid()}_{uuid.uuid4().hex[:8]}'\n    before = observation()\n    manifest = {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()\n                for p in (ROOT / 'frontengine').rglob('*.py')}\n    (output / 'source-manifest.json').write_text(json.dumps(manifest, indent=2))\n    shutil.copy2(__file__, output / 'harness.py')\n    code = hidden_desktop.run_on_hidden_desktop(__file__, str(source), str(output), timeout_ms=480000)\n    unchanged = all(hashlib.sha256((ROOT / name).read_bytes()).hexdigest() == digest\n                    for name, digest in manifest.items())\n    (output / 'observer.json').write_text(json.dumps({'before': before, 'after': observation(),\n        'child_exit': code, 'source_unchanged': unchanged, 'observation_only': True}, indent=2), encoding='utf-8')\n    raise SystemExit(code)\n\nos.environ['QT_QPA_PLATFORM'] = 'windows'\nexpected = json.loads((source / 'shutdown-world.json').read_text(encoding='utf-8'))\nresult = {'passed': False}\ntry:\n    with tempfile.TemporaryDirectory(prefix='fe-current-cold-reload-') as folder:\n        shutil.copytree(source / 'settings', folder, dirs_exist_ok=True)\n        previous = Path.cwd()\n        os.chdir(folder)\n        try:\n            from PySide6.QtCore import QCoreApplication, QEvent, Qt\n            from PySide6.QtTest import QTest\n            from PySide6.QtWidgets import QApplication\n            from frontengine.ui.page.pet_game import home_page\n            from frontengine.utils.session_lock import session_lock\n            from frontengine.user_setting.user_setting_file import user_setting_dict\n            from frontengine.utils.pet_game import snapshot\n\n            home_page.workshop_pack_roots = lambda: []\n            session_lock.is_session_locked = lambda: False\n            app = QApplication([])\n            app.setQuitOnLastWindowClosed(False)\n            from frontengine.ui import main_ui\n            main_ui.CriticalExit.init_critical_exit = lambda self: None\n            main_ui.HotkeyService.start = lambda self: False\n            main_ui.AppProfileService.start = lambda self: None\n            main_ui.ShareWatchService.start = lambda self: None\n            window = main_ui.FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)\n            lifetime = window.lifetime\n            page = window.pet_home_ui\n            try:\n                actual = snapshot.to_dict(page.service.world)\n                assert actual == expected, 'Cold process world differs from final shutdown snapshot'\n                residents = set(page.service.world.residents)\n                records = user_setting_dict['pet_profiles']['records']\n                assert residents <= set(records), 'Resident profiles missing from settings'\n                assert residents == set(page.service.sessions), 'Resident identity leases were not reacquired'\n                result.update(world_snapshot_equal=True, resident_profiles_persisted=True,\n                    leases_reacquired=True, residents=sorted(residents), ledger_coins=page.service.world.ledger.coins)\n                from frontengine.utils.pet_game.world import COMMANDS\n                world = page.service.world\n                window.resize(1280, 960)\n                window.show()\n                page.tabs.setCurrentIndex(page.tabs.keys().index('pet_home_residents_section'))\n                page.residents.list.setCurrentRow(0)\n                resident_id = page.residents.list.currentItem().data(Qt.ItemDataRole.UserRole)\n                resident = world.residents[resident_id]\n                initial_energy = resident.needs['energy']\n                initial_x = resident.x_milli\n                events = []\n                started = monotonic()\n                page.service.events_ready.connect(lambda batch: events.extend(dict(event) for event in batch))\n                if not page.service.running:\n                    page.run_button.click()\n                button = page.residents.commands[COMMANDS.index('sleep')]\n                page._scroll.ensureWidgetVisible(button)\n                app.processEvents()\n                assert button.isEnabled() and not button.visibleRegion().isEmpty()\n                button.click()\n                states = {}\n                play_sent = False\n                bed_id = None\n                start_world = world.time_ms\n                while monotonic() - started < 300:\n                    QTest.qWait(100)\n                    activity = resident.activity\n                    elapsed = monotonic() - started\n                    if activity and activity.kind == 'sleep':\n                        bed_id = activity.furniture\n                        assert bed_id is not None\n                        assert world.furniture[bed_id].users.get(activity.point) == resident_id\n                        caption = page.residents.activity.text()\n                        assert 'sleep' in caption.casefold(), caption\n                        state = activity.phase\n                        if state == 'using':\n                            assert resident.x_milli == activity.target_x\n                        if state not in states:\n                            states[state] = {'elapsed_s': elapsed, 'energy': resident.needs['energy'],\n                                             'x': resident.x_milli, 'target_x': activity.target_x,\n                                             'caption': caption, 'bed': bed_id}\n                            assert window.grab().save(str(output / (state + '.png')))\n                    completed = any(event.get('kind') == 'completed' and event.get('activity') == 'sleep'\n                                    and event.get('resident') == resident_id for event in events)\n                    if completed and not play_sent:\n                        assert 'moving' in states and 'using' in states\n                        assert resident.needs['energy'] >= 95 > initial_energy\n                        assert resident_id not in world.furniture[bed_id].users.values()\n                        states['completed'] = {'elapsed_s': elapsed, 'energy': resident.needs['energy'],\n                                               'caption': page.residents.activity.text()}\n                        assert window.grab().save(str(output / 'completed.png'))\n                        page.residents.commands[COMMANDS.index('play')].click()\n                        play_sent = True\n                    if play_sent and activity and activity.kind == 'play' and activity.phase == 'using':\n                        assert resident.x_milli != states['using']['x']\n                        assert resident_id not in world.furniture[bed_id].users.values()\n                        states['left_bed'] = {'elapsed_s': elapsed, 'x': resident.x_milli,\n                                             'caption': page.residents.activity.text()}\n                        assert window.grab().save(str(output / 'left-bed.png'))\n                        break\n                    (output / 'heartbeat.json').write_text(json.dumps({'elapsed_s': elapsed,\n                        'energy': resident.needs['energy'], 'states': states}), encoding='utf-8')\n                assert 'left_bed' in states, states\n                active_elapsed = monotonic() - started\n                assert 0.95 * active_elapsed <= (world.time_ms - start_world) / 1000 <= active_elapsed + 2\n                result.update(rest_lifecycle=states, initial_energy=initial_energy, initial_x=initial_x,\n                              elapsed_s=active_elapsed, events=events, realtime_verified=True,\n                              command_scope='Sleep then play via resident-card buttons; no simulation or need injection')\n                assert page.service.save_now()\n                (output / 'final-world.json').write_text(json.dumps(snapshot.to_dict(world), indent=2))\n            finally:\n                window.request_shutdown()\n                deadline = monotonic() + 120\n                while not lifetime.closed and monotonic() < deadline:\n                    QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)\n                    app.processEvents()\n                    QTest.qWait(10)\n                assert lifetime.closed, (lifetime.state, lifetime.error)\n            result.update(passed=True, runtime_closed=True, python=sys.version,\n                source=str(source), saved_snapshot_sha256=hashlib.sha256((source / 'shutdown-world.json').read_bytes()).hexdigest(),\n                scope='Normal-speed sleep/use/release/play path in full MainUI on private desktop using prior real gameplay save; global hotkey/emergency/app-profile/share-watch starts, Workshop discovery and session-lock query substituted')\n        finally:\n            logging.shutdown()\n            os.chdir(previous)\n    result['temporary_directory_removed'] = True\nexcept Exception:\n    result.update(passed=False, error=traceback.format_exc())\n(output / 'result.json').write_text(json.dumps(result, indent=2), encoding='utf-8')\nraise SystemExit(0 if result['passed'] else 1)\n",
+      "sha256": "36dd94be1a2263f1ea3244796c3699f11ef69f08989f47cead6c4c96746ea9d9"
+    },
+    "scroll": {
+      "source": "import hashlib\nimport json\nimport logging\nimport os\nfrom pathlib import Path\nimport shutil\nimport sys\nimport tempfile\nimport traceback\nimport uuid\nfrom time import monotonic\n\nfrom complete_main_onboarding_native import observation\n\nROOT = Path(__file__).resolve().parents[1]\nsys.path.insert(0, str(ROOT))\nsys.path.insert(0, str(ROOT / 'tests/integration'))\nimport hidden_desktop\n\nsource = Path(sys.argv[1]).resolve()\noutput = Path(sys.argv[2]).resolve()\noutput.mkdir(parents=True, exist_ok=True)\nif not hidden_desktop.is_child(output):\n    assert not (output / 'result.json').exists(), 'Use a fresh output directory'\n    hidden_desktop.DESKTOP = f'FrontEngineColdReload{os.getpid()}_{uuid.uuid4().hex[:8]}'\n    before = observation()\n    code = hidden_desktop.run_on_hidden_desktop(__file__, str(source), str(output), timeout_ms=180000)\n    (output / 'observer.json').write_text(json.dumps({'before': before, 'after': observation(),\n        'child_exit': code, 'observation_only': True}, indent=2), encoding='utf-8')\n    raise SystemExit(code)\n\nos.environ['QT_QPA_PLATFORM'] = 'windows'\nexpected = json.loads((source / 'shutdown-world.json').read_text(encoding='utf-8'))\nresult = {'passed': False}\ntry:\n    with tempfile.TemporaryDirectory(prefix='fe-current-cold-reload-') as folder:\n        shutil.copytree(source / 'settings', folder, dirs_exist_ok=True)\n        previous = Path.cwd()\n        os.chdir(folder)\n        try:\n            from PySide6.QtCore import QCoreApplication, QEvent, QPoint, Qt\n            from PySide6.QtTest import QTest\n            from PySide6.QtWidgets import QApplication\n            from frontengine.ui.page.pet_game import home_page\n            from frontengine.utils.session_lock import session_lock\n            from frontengine.user_setting.user_setting_file import user_setting_dict\n            from frontengine.utils.pet_game import snapshot\n\n            home_page.workshop_pack_roots = lambda: []\n            session_lock.is_session_locked = lambda: False\n            app = QApplication([])\n            app.setQuitOnLastWindowClosed(False)\n            from frontengine.ui import main_ui\n            main_ui.CriticalExit.init_critical_exit = lambda self: None\n            main_ui.HotkeyService.start = lambda self: False\n            main_ui.AppProfileService.start = lambda self: None\n            main_ui.ShareWatchService.start = lambda self: None\n            window = main_ui.FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)\n            lifetime = window.lifetime\n            page = window.pet_home_ui\n            try:\n                actual = snapshot.to_dict(page.service.world)\n                assert actual == expected, 'Cold process world differs from final shutdown snapshot'\n                residents = set(page.service.world.residents)\n                records = user_setting_dict['pet_profiles']['records']\n                assert residents <= set(records), 'Resident profiles missing from settings'\n                assert residents == set(page.service.sessions), 'Resident identity leases were not reacquired'\n                from frontengine.utils.pet_game.world import COMMANDS\n                window.resize(1280, 960)\n                window.show()\n                page.tabs.setCurrentIndex(page.tabs.keys().index('pet_home_residents_section'))\n                page.residents.list.setCurrentRow(0)\n                QTest.qWait(1000)\n                button = page.residents.commands[COMMANDS.index('sleep')]\n                bar = page._scroll.verticalScrollBar()\n                samples = []\n                def sample(label):\n                    focus = app.focusWidget()\n                    samples.append({'label': label, 'scroll': bar.value(), 'maximum': bar.maximum(),\n                                    'button_visible': not button.visibleRegion().isEmpty(),\n                                    'card_visible': not page.residents.activity.visibleRegion().isEmpty(),\n                                    'button_y': button.mapTo(page._scroll.viewport(), QPoint()).y(),\n                                    'card_y': page.residents.activity.mapTo(page._scroll.viewport(), QPoint()).y(),\n                                    'caption': page.residents.activity.text(),\n                                    'focus': type(focus).__name__ if focus else None})\n                sample('settled_initial')\n                for mode in ('button_click', 'qt_mouse_click'):\n                    page._scroll.ensureWidgetVisible(button)\n                    QTest.qWait(200)\n                    sample(mode + '_before')\n                    assert button.isEnabled() and not button.visibleRegion().isEmpty()\n                    if mode == 'button_click':\n                        button.click()\n                    else:\n                        QTest.mouseClick(button, Qt.MouseButton.LeftButton)\n                    sample(mode + '_immediate')\n                    QTest.qWait(1000)\n                    sample(mode + '_after_1s')\n                    assert window.grab().save(str(output / (mode + '.png')))\n                page._scroll.ensureWidgetVisible(page.residents.activity)\n                QTest.qWait(300)\n                sample('card_explicitly_scrolled')\n                assert window.grab().save(str(output / 'resident-card.png'))\n                result['scroll_samples'] = samples\n                result.update(world_snapshot_equal=True, resident_profiles_persisted=True,\n                    leases_reacquired=True, residents=sorted(residents), ledger_coins=page.service.world.ledger.coins)\n            finally:\n                window.request_shutdown()\n                deadline = monotonic() + 120\n                while not lifetime.closed and monotonic() < deadline:\n                    QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)\n                    app.processEvents()\n                    QTest.qWait(10)\n                assert lifetime.closed, (lifetime.state, lifetime.error)\n            result.update(passed=True, runtime_closed=True, python=sys.version,\n                source=str(source), saved_snapshot_sha256=hashlib.sha256((source / 'shutdown-world.json').read_bytes()).hexdigest(),\n                scope='Fresh full MainUI native process on private desktop; copied captured settings; global hotkey/emergency/app-profile/share-watch starts, Workshop discovery and session-lock query substituted')\n        finally:\n            logging.shutdown()\n            os.chdir(previous)\n    result['temporary_directory_removed'] = True\nexcept Exception:\n    result.update(passed=False, error=traceback.format_exc())\n(output / 'result.json').write_text(json.dumps(result, indent=2), encoding='utf-8')\nraise SystemExit(0 if result['passed'] else 1)\n",
+      "sha256": "4280278486933dbabbc44611f45dbaec3489d8cb17154ec2d61ebd6bcce62181"
+    }
+  },
+  "artifacts_sha256": {
+    "rest/result.json": "7d5774267cbc87c6edd44ffb0443c1785de930f30e89697b130700ada00281fc",
+    "rest/observer.json": "2b54ec5bd7cbf3b80d29b25b2db078672126f1d4d8bc3e5422e1d26e59f78036",
+    "rest/final-world.json": "64c438def0b170ac421abdca03f64692391f8e11209a78e146c963bf20ed7c6b",
+    "rest/using.png": "e3d56fd541f6e29dbb34e6ffd01b27dd87063d08ae37326951384702276ed32a",
+    "rest/left-bed.png": "51ee6f1013af9da3b871432a9a459bb5839e866eab02ca65d077c4a0ddbfe287",
+    "scroll/result.json": "45af51722e7c1c905490df338fcae053c00c5f6ddff578015f00db7a44ad171b",
+    "scroll/observer.json": "2f55f1e89c52e7d476b03e5cb1a5953f9a928d76dc38f9a5430eba19fa77fff1",
+    "scroll/resident-card.png": "b1c4d94aa4e9318d6ef73bec69266dfabb45ed326b6d7d204ed21c8946040631"
+  }
+}
