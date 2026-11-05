@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261106-57 | 2026-11-06 | 願望結算存檔邊界異常退出驗證 | Pet / Persistence / Test | [2026-11](2026-11.md) |
 | U-20261106-56 | 2026-11-06 | 自由布置金幣與完成通知修正 | Pet / Economy / UI | [2026-11](2026-11.md) |
 | U-20261106-55 | 2026-11-06 | 導航版面時序修正完整回歸通過 | UI / Test | [2026-11](2026-11.md) |
 | U-20261106-54 | 2026-11-06 | 確認自由布置目標金幣缺陷 | Pet / Audit | [2026-11](2026-11.md) |
@@ -383,6 +384,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 179 |
+| [2026-11.md](2026-11.md) | 2026-11 | 180 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

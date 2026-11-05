@@ -1,0 +1,57 @@
+{
+  "passed": true,
+  "cases": [
+    {
+      "mode": "manage",
+      "replacement_phase": "before",
+      "child_exit": 73,
+      "replayed_wish_grants": 1,
+      "final_affection": 3,
+      "profile_affection": 3,
+      "second_reopen_verified": true,
+      "temporary_directory_removed": true
+    },
+    {
+      "mode": "manage",
+      "replacement_phase": "after",
+      "child_exit": 73,
+      "replayed_wish_grants": 0,
+      "final_affection": 3,
+      "profile_affection": 3,
+      "second_reopen_verified": true,
+      "temporary_directory_removed": true
+    },
+    {
+      "mode": "sandbox",
+      "replacement_phase": "before",
+      "child_exit": 73,
+      "replayed_wish_grants": 1,
+      "final_affection": 3,
+      "profile_affection": 0,
+      "second_reopen_verified": true,
+      "temporary_directory_removed": true
+    },
+    {
+      "mode": "sandbox",
+      "replacement_phase": "after",
+      "child_exit": 73,
+      "replayed_wish_grants": 0,
+      "final_affection": 3,
+      "profile_affection": 0,
+      "second_reopen_verified": true,
+      "temporary_directory_removed": true
+    }
+  ],
+  "date": "2026-11-06",
+  "product_test_commit": "d825c06c",
+  "scope": "Real StorageSession, HomeSaveStore and HomeService; owned subprocess exits with os._exit(73) immediately before or after replacing the main home save after a real simulated play wish completes. Parent reopens, completes play again, saves and reopens a second time.",
+  "evidence_sha256": {
+    "check_wish_save_crash.py": "0f9c08454ceba8a9524114af646594540320ff47f28c1aa8f7171ed9e5759748",
+    "wish-save-crash.log": "c6494a8d0907780b3ef463536190559852cb40d711721cb139e6eff49bdf4504",
+    "wish-save-crash.json": "a70d5394a4fdb69482d4697b4ea7fd7030b5ed0069bba01322d6d58d380f4413"
+  },
+  "limits": [
+    "Offscreen QApplication with direct domain simulation; not native input or normal-speed acceptance.",
+    "Covers main-save replacement boundaries only, not physical power loss, all filesystem phases or all reward kinds."
+  ]
+}
