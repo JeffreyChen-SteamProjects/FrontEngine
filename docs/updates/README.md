@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261105-53 | 2026-11-05 | 延後合成器提交以修復跨螢幕切換崩潰 | #fix #rendering #done | [2026-11](2026-11.md) |
 | U-20261105-52 | 2026-11-05 | 縮小 OpenGL 清理崩潰的調查範圍 | #testing #diagnosis | [2026-11](2026-11.md) |
 | U-20261105-51 | 2026-11-05 | 保存完整回歸失敗與合成器清理對照 | #testing #diagnosis | [2026-11](2026-11.md) |
 | U-20261105-50 | 2026-11-05 | 縮減 GPU 後端替換崩潰並保留回歸失敗 | #investigation #ui #test | [2026-11](2026-11.md) |
@@ -310,6 +311,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 106 |
+| [2026-11.md](2026-11.md) | 2026-11 | 107 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

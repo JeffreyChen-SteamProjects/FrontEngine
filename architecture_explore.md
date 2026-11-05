@@ -95,7 +95,7 @@ FrontEngine 是一個 PySide6 桌面**覆蓋層（overlay）框架**：把影片
 
 | 檔案 | 行數 | 功用 |
 | --- | ---: | --- |
-| `base_widget.py` | 181 | `BaseWidget(QWidget)`。定義覆蓋層的共同契約：不透明度（預設 0.2）、`WA_TranslucentBackground` + `WA_DeleteOnClose`、鎖定/點擊穿透、拖曳擺位、位置記憶、綠幕背景色、畫質檔位、`keep_in_capture`。`paintEvent()` 統一開 painter → 子類別只實作 `draw_content(painter)`。 |
+| `base_widget.py` | 278 | `BaseWidget(QWidget)`。定義覆蓋層的共同契約：不透明度（預設 0.2）、`WA_TranslucentBackground` + `WA_DeleteOnClose`、鎖定/點擊穿透、拖曳擺位、位置記憶、綠幕背景色、畫質檔位、`keep_in_capture`。子類別實作 `draw_content(painter)`。直接繪製時由 `paintEvent()` 開 painter；使用合成器時，`paintEvent()` 與 `update()` 共用單一待辦旗標，把圖層更新排到事件迴圈，避免在父視窗繪製期間重新進入合成器。 |
 | `window_helpers.py` | 68 | 覆蓋層視窗旗標的單一出處：`apply_overlay_window_flags()`（置頂/置底、無邊框、Tool、點擊穿透）、`set_overlay_locked()`、`load_overlay_icon()`。 |
 | `draggable_window.py` | 65 | `DraggableTopWindow`：無邊框置頂小視窗，可拖曳、雙擊或 Esc 關閉。釘選截圖與視窗複本的底座。 |
 | `overlay_factory.py` | 125 | Abstract Factory：把場景 JSON 的 `{kind, ...}` 轉成對應 widget（image/gif/sound/text/video/web）。`build_overlay(kind, setting)` 是唯一入口，欄位缺失會明確報錯（場景 JSON 是外部資料）。 |
