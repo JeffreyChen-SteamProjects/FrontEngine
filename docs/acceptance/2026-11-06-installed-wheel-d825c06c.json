@@ -1,0 +1,29 @@
+{
+  "passed": true,
+  "product_commit": "d825c06c",
+  "wheel": "frontengine_dev-1.0.86-py3-none-any.whl",
+  "sha256": "2d929a686d733e9a4a513c0c87834540d302ac3de79dca3f75fe3bad022a1ea7",
+  "python_files_equal": 502,
+  "pet_assets_equal": 149,
+  "installed_package_files_equal": 711,
+  "loaded_installed_modules": 430,
+  "localized_goal_completion": {
+    "English": "Goal completed",
+    "Traditional_Chinese": "目標已完成",
+    "Simplified_Chinese": "目标已完成",
+    "Deutsch": "Ziel erreicht",
+    "Russian": "Цель достигнута",
+    "France": "Objectif atteint",
+    "Italy": "Obiettivo completato"
+  },
+  "sandbox_zero_currency_saved": true,
+  "runtime_closed": true,
+  "temporary_directory_removed": true,
+  "scope": "Fresh --target package directory, existing Python3.11/Qt6.12 dependency environment; offscreen MainUI, host services substituted. Not clean-machine dependency or native acceptance.",
+  "evidence_sha256": {
+    "wheel-d825c06c-build.log": "05c10c0518c88bc5e3bd45686802800deee05f7b2fc4335f5055e861b62819dc",
+    "wheel-d825c06c-install.log": "b93f43bf874954cb973cf6bd31464c724592989b0fa3b30ce1d06059539d9969",
+    "verify_installed_current.py": "d63538c2423ec9d98b87cca2b072c1ab9d4c15ad009dd014642333e2d5fe799f",
+    "installed-current.log": "c3d215a299f9c21357d7ced50d8ea032d27ec67e64f2ace0a8770e125d0b4051"
+  }
+}
