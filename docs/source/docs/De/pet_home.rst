@@ -53,3 +53,5 @@ Die Aufgabenliste zeigt einen hervorgehobenen Rahmen, sobald sie den Tastaturfok
 Die barrierefreie Beschriftung der Aufgabenliste folgt der Sprache der Benutzeroberfläche.
 
 Wenn selbstständige Arbeit wegen fehlender Materialien, eines fehlenden oder eines belegten Arbeitsplatzes nicht beginnen kann, zeigt die Bewohnerkarte den Grund auch während der stattdessen gewählten Freizeitaktivität. Sobald die Arbeit wieder beginnt, verschwindet der alte Grund.
+
+Wird ein eingereihter Befehl bei der Ausführung wegen veränderter Bedingungen abgelehnt, zeigt die Bewohnerkarte den Grund während der Ersatzaktivität weiterhin an. Die nächste akzeptierte Aktivität entfernt ihn.

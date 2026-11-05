@@ -53,3 +53,5 @@ L’elenco dei lavori evidenzia il bordo quando riceve il focus della tastiera, 
 L’etichetta di accessibilità dell’elenco dei lavori segue la lingua dell’interfaccia.
 
 Se il lavoro autonomo non può iniziare perché mancano materiali, manca una postazione o la postazione è occupata, la scheda del residente mantiene visibile il motivo durante l’attività ricreativa scelta al suo posto. Quando il lavoro riprende, il motivo precedente scompare.
+
+Se un comando in coda viene rifiutato al momento dell’esecuzione perché le condizioni sono cambiate, la scheda del residente conserva il motivo durante l’attività sostitutiva. La successiva attività accettata lo cancella.

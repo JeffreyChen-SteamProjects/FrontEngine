@@ -292,9 +292,9 @@ def _start_free(world: World, resident: Resident, reason: str = "free_time") -> 
 def _follow_command(world: World, resident: Resident, command: str) -> None:
     reason = refusal(world, resident, command)
     if reason is not None:
-        resident.last_refusal = reason
         world.emit("refused", resident=resident.identifier, command=command, reason=reason)
         decide(world, resident)
+        resident.last_refusal = reason
     elif command == "sleep":
         start_rest(world, resident, "command")
     elif command == "eat":

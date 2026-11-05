@@ -53,3 +53,5 @@ La liste des tâches affiche une bordure accentuée lorsqu’elle reçoit le foc
 Le libellé d’accessibilité de la liste des tâches suit la langue de l’interface.
 
 Si le travail autonome ne peut pas commencer faute de matériaux, faute de poste de travail ou parce que celui-ci est occupé, la fiche du résident conserve le motif pendant l’activité de loisir choisie à la place. La reprise du travail efface le motif précédent.
+
+Si une commande en attente est refusée à son exécution parce que les conditions ont changé, la fiche du résident conserve le motif pendant l’activité de remplacement. La prochaine activité acceptée l’efface.

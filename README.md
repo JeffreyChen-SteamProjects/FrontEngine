@@ -700,3 +700,5 @@ Puppet pets also offer Throw a ball from their menu, and both Sprite and Puppet 
 Home settings keeps the mode selector available while manually selected Meeting mode hides the desktop strip. Undo and redo belong to each room; if furniture is unavailable or no longer fits, the current layout and history stay intact for retry. Esc cancels arranging and area painting. Consecutive photos receive separate files. Lifetime events remain recorded after they leave the recent-history list, and paid workstation upgrades survive temporarily missing furniture packs. Older saves can recover only event records they still contain.
 
 When automatic work cannot start because materials are missing, there is no workstation, or the workstation is occupied, the resident card keeps the reason visible during the fallback leisure activity. Starting work again clears the old reason.
+
+If a queued command is refused when it executes because conditions have changed, the resident card keeps that reason visible during the replacement activity. The next accepted activity clears it.
