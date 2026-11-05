@@ -11,7 +11,7 @@ def test_created_home_fits_actual_narrow_window_with_arial(make_main_window, req
     import os
     from pathlib import Path
     import pytest
-    from PySide6.QtGui import QFontDatabase
+    from PySide6.QtGui import QFontDatabase, QFontInfo
 
     font_file = Path(os.environ.get('WINDIR', 'C:/Windows')) / 'Fonts/arial.ttf'
     if not font_file.is_file():
@@ -20,6 +20,10 @@ def test_created_home_fits_actual_narrow_window_with_arial(make_main_window, req
     assert identifier >= 0
     request.addfinalizer(lambda: QFontDatabase.removeApplicationFont(identifier))
     window = make_main_window()
+    font = window.font()
+    font.setFamily('Arial')
+    window.setFont(font)
+    assert QFontInfo(window.font()).family() == 'Arial'
     window.resize(536, 500)
     window.show()
     page = window.pet_home_ui

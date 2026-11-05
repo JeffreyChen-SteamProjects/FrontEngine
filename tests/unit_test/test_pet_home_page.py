@@ -52,7 +52,7 @@ def _place(page, definition: str, cell: int) -> None:
 def test_styled_home_keeps_requested_width_in_every_language(page, request):
     import os
     from pathlib import Path
-    from PySide6.QtGui import QFontDatabase
+    from PySide6.QtGui import QFontDatabase, QFontInfo
     from PySide6.QtWidgets import QApplication
     from frontengine.ui.style.app_style import apply_app_style
     from frontengine.utils.multi_language.language_wrapper import language_wrapper
@@ -64,6 +64,10 @@ def test_styled_home_keeps_requested_width_in_every_language(page, request):
     identifier = QFontDatabase.addApplicationFont(str(font_file))
     assert identifier >= 0
     request.addfinalizer(lambda: QFontDatabase.removeApplicationFont(identifier))
+    font = page.font()
+    font.setFamily('Arial')
+    page.setFont(font)
+    assert QFontInfo(page.font()).family() == 'Arial'
     apply_app_style(page, None)
     page.show()
     page.create_home()

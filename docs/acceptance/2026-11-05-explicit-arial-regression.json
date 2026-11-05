@@ -1,0 +1,68 @@
+{
+  "base": "075594f",
+  "change": "Explicitly select Arial on each target window/page and assert QFontInfo resolves Arial. Preserve point size, existing width/scroll assertions and font-registration cleanup.",
+  "reproduction_sequence": [
+    "empty home MainUI test",
+    "Windows native OCR test",
+    "styled standalone home test",
+    "actual-narrow Arial MainUI test"
+  ],
+  "red": {
+    "summary": "1 failed, 3 passed in 34.23s",
+    "font_snapshot": {
+      "actual_width": 754,
+      "requested_font": "Sans Serif,9,-1,5,400,0,0,0,0,0,0,0,0,0,0,1,,0,0",
+      "resolved_font": "",
+      "application_font": "Sans Serif,9,-1,5,400,0,0,0,0,0,0,0,0,0,0,1,,0,0",
+      "pages": {
+        "PetHomePage": 176,
+        "VideoSettingUI": 442,
+        "ImageSettingUI": 442,
+        "WEBSettingUI": 274,
+        "GIFSettingUI": 514,
+        "TextSettingUI": 370,
+        "SoundPlayerSettingUI": 408,
+        "SceneSettingUI": 454,
+        "ParticleSettingUI": 478,
+        "PetSettingUI": 358,
+        "WallpaperSettingUI": 444,
+        "WidgetsSettingUI": 164,
+        "FocusSettingUI": 176,
+        "ScreenCareSettingUI": 152,
+        "PresentationSettingUI": 176,
+        "ToolsSettingUI": 152,
+        "ControlCenterUI": 378
+      }
+    }
+  },
+  "green": [
+    {
+      "python": "3.14.5",
+      "qt": "6.11.2",
+      "summary": "4 passed in 27.94s"
+    },
+    {
+      "python": "3.11.9",
+      "qt": "6.12.0",
+      "summary": "4 passed in 54.93s"
+    }
+  ],
+  "negative_controls": [
+    "Empty window then Arial test passed without changes on Qt 6.12.",
+    "Styled page then Arial test passed without changes on Qt 6.11.",
+    "OCR then Arial test passed without changes on Qt 6.11.",
+    "Qt version difference alone does not explain the failure."
+  ],
+  "finding": "The combined font-registration/removal sequence leaves the implicit Sans Serif request resolving to an empty family. Registering Arial did not guarantee that the test widgets selected it.",
+  "limits": [
+    "Test precondition fix only; no product font or UI changes.",
+    "The original integration full run remains active with its recorded failure and unchanged sources.",
+    "No passing latest full-suite claim until changes are integrated and the complete suite runs."
+  ],
+  "evidence_sha256": {
+    "arial-font-cycle.log": "5635182282831f41a6ca9b557d7be7f34f3e583c45c2783c93d9815becd2d3fe",
+    "arial-font-cycle-green-611.log": "afe6b50ccdde736007bbb65c2290c49f6b0c760b78470f41d1f2078b6d26eb49",
+    "arial-font-cycle-green-612.log": "f96970d076b9c9d03ea310dc44d828d8f73f66df8e7d833fb702ce9aedc4f962",
+    "arial-font-cycle.json": "818e945578f14fc4e0e02165b95910e9b83c369416d2cd03e6f589f31ea65b51"
+  }
+}
