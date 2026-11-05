@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261106-30 | 2026-11-06 | 驗證三次原生主視窗連續重啟 | #test #save #verified | [2026-11](2026-11.md) |
 | U-20261106-29 | 2026-11-06 | 驗證家園時間倒退與工作結算 | #test #save #verified | [2026-11](2026-11.md) |
 | U-20261106-28 | 2026-11-06 | 驗證原生存檔失敗提示與自動重試 | #test #ui #save #verified | [2026-11](2026-11.md) |
 | U-20261106-27 | 2026-11-06 | 驗證主視窗備份還原與保留舊檔重開 | #test #ui #save #verified | [2026-11](2026-11.md) |
@@ -356,6 +357,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 152 |
+| [2026-11.md](2026-11.md) | 2026-11 | 153 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
