@@ -73,3 +73,5 @@ Free arranging keeps activities, items and local progress without earning or spe
 Each resident's birthday is celebrated once per seven-day anniversary of moving in. Crossing midnight or reopening the save does not repeat that anniversary's mood reward or Inbox note.
 
 Names of visible residents stay within the home view and desktop strip at either edge. Long names use an ellipsis, and the desktop name backdrop follows the displayed text.
+
+Activity bubbles stay within the desktop strip at both edges; text wider than the strip is shortened with an ellipsis. Bubbles for residents outside the visible area are hidden, and entering Focus or Meeting mode immediately hides existing bubbles.

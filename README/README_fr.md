@@ -721,3 +721,5 @@ L’aménagement libre conserve les activités, les objets et la progression loc
 L’anniversaire de chaque résident est célébré une seule fois tous les sept jours de jeu depuis son arrivée. Le passage à minuit ou la réouverture de la sauvegarde ne répète ni le bonus d’humeur ni le message pour le même anniversaire.
 
 Les noms des résidents visibles restent dans la vue du foyer et la bande du bureau, même sur les bords. Les noms longs sont abrégés avec des points de suspension et leur fond suit le texte affiché.
+
+Les bulles d’activité restent dans la bande du bureau sur les deux bords ; les textes trop larges sont abrégés. Les bulles des résidents hors de la zone visible sont masquées. Les modes Concentration et Réunion masquent immédiatement les bulles déjà affichées.

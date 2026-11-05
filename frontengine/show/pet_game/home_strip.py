@@ -259,11 +259,14 @@ class HomeStrip(HomeView):
 
     def bubble_rect(self, resident) -> QRectF | None:
         bubble = self.bubbles.get(resident.identifier)
-        if bubble is None or bubble[1] < self._clock():
+        if self.quiet or bubble is None or bubble[1] < self._clock():
             return None
-        width = self.fontMetrics().horizontalAdvance(bubble[0]) + 14
+        if not QRectF(self.rect()).intersects(self.resident_box(resident)):
+            return None
+        width = min(self.width(), self.fontMetrics().horizontalAdvance(bubble[0]) + 14)
         caption = self.caption_rect(resident)
-        return QRectF(caption.center().x() - width / 2, caption.top() - 24, width, 20)
+        left = max(0.0, min(caption.center().x() - width / 2, self.width() - width))
+        return QRectF(left, caption.top() - 24, width, 20)
 
     def paintEvent(self, event) -> None:
         super().paintEvent(event)
@@ -279,7 +282,9 @@ class HomeStrip(HomeView):
                 painter.setBrush(QColor(255, 255, 255, 235))
                 painter.drawRoundedRect(rect, 8, 8)
                 painter.setPen(QColor(30, 30, 30))
-                painter.drawText(rect, Qt.AlignmentFlag.AlignCenter, self.bubbles[resident.identifier][0])
+                text = painter.fontMetrics().elidedText(self.bubbles[resident.identifier][0],
+                                                       Qt.TextElideMode.ElideRight, max(0, int(rect.width()) - 14))
+                painter.drawText(rect, Qt.AlignmentFlag.AlignCenter, text)
         painter.end()
 
     def _paint_dusk(self, painter: QPainter) -> None:

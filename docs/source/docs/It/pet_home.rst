@@ -73,3 +73,5 @@ La disposizione libera conserva attività, oggetti e progressi locali senza guad
 Il compleanno di ogni residente viene festeggiato una sola volta ogni sette giorni di gioco dal suo arrivo. Il cambio di giorno o la riapertura del salvataggio non ripete il premio di umore né il messaggio per lo stesso anniversario.
 
 I nomi dei residenti visibili restano nella vista della casa e nella barra del desktop su entrambi i bordi. I nomi lunghi sono abbreviati con puntini di sospensione e lo sfondo del nome segue il testo mostrato.
+
+I fumetti delle attività restano entro entrambi i bordi della barra del desktop; il testo troppo largo viene abbreviato con puntini di sospensione. I fumetti dei residenti fuori dall’area visibile sono nascosti. Le modalità Concentrazione e Riunione nascondono subito anche i fumetti già presenti.

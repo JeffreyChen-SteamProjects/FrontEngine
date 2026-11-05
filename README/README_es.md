@@ -720,3 +720,5 @@ La distribución libre conserva actividades, objetos y progreso local sin ganar 
 El cumpleaños de cada residente se celebra una vez cada siete días de juego desde su llegada. El cambio de día o la reapertura de la partida no repite la recompensa de ánimo ni el aviso para el mismo aniversario.
 
 Los nombres de los residentes visibles permanecen dentro de la vista del hogar y de la franja del escritorio en ambos bordes. Los nombres largos se acortan con puntos suspensivos y su fondo sigue el texto mostrado.
+
+Los globos de actividad permanecen dentro de la franja del escritorio en ambos bordes; el texto demasiado ancho se acorta con puntos suspensivos. Se ocultan los globos de residentes fuera del área visible. Los modos Concentración y Reunión ocultan de inmediato los globos existentes.

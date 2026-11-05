@@ -73,3 +73,5 @@ Freies Einrichten behält Aktivitäten, Gegenstände und lokalen Fortschritt, oh
 Der Geburtstag jedes Bewohners wird alle sieben Spieltage seit dem Einzug einmal gefeiert. Ein Tageswechsel oder das erneute Öffnen des Spielstands wiederholt weder die Stimmungsbelohnung noch die Postfachnachricht für denselben Jahrestag.
 
 Die Namen sichtbarer Bewohner bleiben an beiden Rändern der Hausansicht und des Desktopstreifens innerhalb der Anzeige. Lange Namen werden mit Auslassungspunkten gekürzt; der Namenshintergrund folgt dem angezeigten Text.
+
+Aktivitätsblasen bleiben an beiden Rändern innerhalb des Desktopstreifens; zu breiter Text wird mit Auslassungspunkten gekürzt. Blasen außerhalb des sichtbaren Bereichs werden verborgen. Fokus- und Besprechungsmodus blenden auch bereits sichtbare Blasen sofort aus.

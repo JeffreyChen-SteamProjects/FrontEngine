@@ -145,3 +145,56 @@ def test_edge_caption_remains_inside_strip_and_its_input_mask(page, edge):
     caption = strip.caption_rect(pet)
     assert caption.left() >= 0 and caption.right() <= strip.width()
     assert strip.interactive_region().contains(caption.toAlignedRect())
+
+
+@pytest.mark.parametrize("edge", ["left", "right"])
+def test_activity_bubble_stays_within_strip_at_edge(page, edge):
+    strip = _strip(page)
+    pet = _pet(strip)
+    pet.x_milli = 0 if edge == "left" else strip.service.world.zones[strip.zone].width_pixels * 1000 - 1
+    strip._before = strip._after = {}
+    strip.chosen = pet.identifier
+    strip._stepped()
+    for _ in range(60):
+        strip._ease_scroll()
+    strip._events([{"kind": "activity", "activity": "visit", "resident": pet.identifier}])
+    bubble = strip.bubble_rect(pet)
+    assert bubble is not None
+    assert bubble.left() >= 0 and bubble.right() <= strip.width(), (bubble, strip.width())
+    assert strip.interactive_region().contains(bubble.toAlignedRect())
+
+
+def test_focus_mode_hides_an_existing_activity_bubble(page):
+    strip = _strip(page)
+    pet = _pet(strip)
+    strip._clock = lambda: 100.0
+    strip._events([{"kind": "activity", "activity": "visit", "resident": pet.identifier}])
+    assert strip.bubble_rect(pet) is not None
+    page.set_mode("focus")
+    assert strip.bubble_rect(pet) is None
+
+
+def test_bubble_bounds_in_all_languages_and_narrow_strip(page):
+    from frontengine.utils.multi_language.language_wrapper import language_wrapper
+    strip = _strip(page)
+    pet = _pet(strip)
+    strip.setFixedWidth(120)
+    pet.x_milli = 0
+    strip._before = strip._after = {}
+    strip.scroll_x = 0
+    strip._clock = lambda: 100.0
+    previous = language_wrapper.language
+    try:
+        for language in language_wrapper.choose_language_dict:
+            assert language_wrapper.reset_language(language)
+            strip._events([{"kind": "activity", "activity": "visit", "resident": pet.identifier}])
+            rect = strip.bubble_rect(pet)
+            assert rect is not None and rect.left() >= 0 and rect.right() <= 120
+            assert strip.interactive_region().contains(rect.toAlignedRect())
+    finally:
+        language_wrapper.reset_language(previous)
+    strip.scroll_x = 2000
+    assert strip.bubble_rect(pet) is None
+    strip.scroll_x = 0
+    strip._clock = lambda: 104.0
+    assert strip.bubble_rect(pet) is None
