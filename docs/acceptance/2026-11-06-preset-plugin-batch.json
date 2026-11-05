@@ -1,0 +1,78 @@
+{
+  "result": {
+    "revision": "c1507d3",
+    "platform": "offscreen",
+    "dialog_responses_substituted": true,
+    "cycles": [
+      {
+        "cycle": 0,
+        "saved_sections": [
+          "gif",
+          "image",
+          "particle",
+          "pet",
+          "plugin:Example clock",
+          "sound",
+          "text",
+          "video",
+          "web"
+        ],
+        "all_saved_sections_restored": true,
+        "hidden_timer_stopped": true,
+        "shown_timer_resumed": true,
+        "closed_overlay_deleted": true
+      },
+      {
+        "cycle": 1,
+        "saved_sections": [
+          "gif",
+          "image",
+          "particle",
+          "pet",
+          "plugin:Example clock",
+          "sound",
+          "text",
+          "video",
+          "web"
+        ],
+        "all_saved_sections_restored": true,
+        "hidden_timer_stopped": true,
+        "shown_timer_resumed": true,
+        "closed_overlay_deleted": true
+      },
+      {
+        "cycle": 2,
+        "saved_sections": [
+          "gif",
+          "image",
+          "particle",
+          "pet",
+          "plugin:Example clock",
+          "sound",
+          "text",
+          "video",
+          "web"
+        ],
+        "all_saved_sections_restored": true,
+        "hidden_timer_stopped": true,
+        "shown_timer_resumed": true,
+        "closed_overlay_deleted": true
+      }
+    ],
+    "save_load_notifications": 6,
+    "warnings": []
+  },
+  "exit_code": 0,
+  "harness": {
+    "source": "\"\"\"Widget-local keyboard events in an offscreen full MainUI.\"\"\"\nimport json\nimport logging\nimport os\nfrom pathlib import Path\nimport sys\nimport tempfile\nfrom time import monotonic\n\nROOT = Path(__file__).resolve().parents[1]\nsys.path.insert(0, str(ROOT))\nos.environ['QT_QPA_PLATFORM'] = 'offscreen'\ntrace = []\n\n\ndef tab_to(app, window, target):\n    for count in range(400):\n        current = app.focusWidget()\n        if current is target:\n            trace.append({'target': target.objectName() or type(target).__name__, 'tabs': count})\n            return\n        QTest.keyClick(current or window, Qt.Key.Key_Tab)\n        app.processEvents()\n    raise AssertionError(('Unreachable by Tab', type(target).__name__, target.objectName()))\n\n\nprevious = Path.cwd()\nwith tempfile.TemporaryDirectory(prefix='front-keyboard-flow-') as name:\n    os.chdir(name)\n    try:\n        Path('user_setting.json').write_text(json.dumps({'language': 'English', 'smart_pause': False,\n            'pet_home_on_desktop': False, 'pet_home_running': False}))\n        from PySide6.QtCore import QCoreApplication, QEvent, Qt\n        from PySide6.QtTest import QTest\n        from PySide6.QtWidgets import QApplication\n        from frontengine.ui import main_ui\n        from frontengine.ui.page.pet_game import home_page\n        from frontengine.utils.pet_game import simulation\n        from frontengine.utils.session_lock import session_lock\n        main_ui.CriticalExit.init_critical_exit = lambda self: None\n        main_ui.HotkeyService.start = lambda self: False\n        main_ui.AppProfileService.start = lambda self: None\n        main_ui.ShareWatchService.start = lambda self: None\n        home_page.workshop_pack_roots = lambda: []\n        session_lock.is_session_locked = lambda: False\n        from examples.plugins.clock.plugin import ClockPage\n        plugin_name = 'Example clock'\n        def register_example(tabs, **_kwargs):\n            tabs[plugin_name] = ClockPage\n            return [plugin_name]\n        main_ui.load_plugins = register_example\n        app = QApplication([])\n        app.setQuitOnLastWindowClosed(False)\n        window = main_ui.FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)\n        try:\n            window.resize(1280, 900)\n            window.show()\n            app.processEvents()\n            from frontengine.ui.menu import preset_menu\n            from frontengine.user_setting.preset_repository import PresetRepository\n            from PySide6.QtWidgets import QPushButton\n            from shiboken6 import isValid\n            messages, warnings = [], []\n            preset_menu.QInputDialog.getText = lambda *_a, **_kw: ('Entry audit', True)\n            preset_menu.QInputDialog.getItem = lambda *_a, **_kw: ('Entry audit', True)\n            preset_menu.QMessageBox.information = lambda *_a: messages.append(str(_a[-1]))\n            preset_menu.QMessageBox.warning = lambda *_a: warnings.append(str(_a[-1]))\n            preset_menu.QMessageBox.question = lambda *_a: preset_menu.QMessageBox.StandardButton.Yes\n            page = window.plugin_pages[plugin_name]\n            result = {'revision': 'c1507d3', 'platform': 'offscreen',\n                      'dialog_responses_substituted': True, 'cycles': []}\n            for cycle in range(3):\n                page.caption.setText('Saved caption ' + str(cycle))\n                window.text_setting_ui.line_edit.setText('Saved text ' + str(cycle))\n                snapshot = preset_menu._collect_state(window)\n                window.preset_menu.actions()[0].trigger()\n                app.processEvents()\n                saved = PresetRepository().load('Entry audit')\n                assert saved == snapshot\n                page.caption.setText('Changed after save')\n                window.text_setting_ui.line_edit.setText('Changed after save')\n                window.preset_menu.actions()[1].trigger()\n                app.processEvents()\n                restored = preset_menu._collect_state(window)\n                assert restored == snapshot, {key: (snapshot[key], restored.get(key))\n                                               for key in snapshot if snapshot[key] != restored.get(key)}\n                assert not warnings\n                button = page.findChild(QPushButton)\n                assert button.text() == 'Show clock'\n                button.click()\n                app.processEvents()\n                assert len(page.overlay_widgets) == 1\n                overlay = page.overlay_widgets[0]\n                assert overlay in window.control_center_ui.all_overlays()\n                assert overlay.isVisible() and overlay.timer.isActive()\n                window.features_menu.aboutToShow.emit()\n                for command in ('hide_all', 'show_all', 'close_all'):\n                    action = next(action for action, entry in window.features_menu.entries.items()\n                                  if entry.kind == 'action' and entry.target == command)\n                    action.trigger()\n                    app.processEvents()\n                    if command == 'hide_all':\n                        assert not overlay.isVisible() and not overlay.timer.isActive()\n                    elif command == 'show_all':\n                        assert overlay.isVisible() and overlay.timer.isActive()\n                    else:\n                        QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)\n                        app.processEvents()\n                        assert not page.overlay_widgets\n                        assert not isValid(overlay)\n                result['cycles'].append({'cycle': cycle, 'saved_sections': sorted(snapshot),\n                    'all_saved_sections_restored': True, 'hidden_timer_stopped': True,\n                    'shown_timer_resumed': True, 'closed_overlay_deleted': True})\n                print('verified cycle ' + str(cycle), flush=True)\n            assert len(messages) == 6 and not warnings\n            result['save_load_notifications'] = len(messages)\n            result['warnings'] = warnings\n        finally:\n            window.request_shutdown()\n            deadline = monotonic() + 90\n            while not window.lifetime.closed and monotonic() < deadline:\n                QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)\n                app.processEvents()\n            assert window.lifetime.closed\n            window.deleteLater()\n            QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)\n        logging.shutdown()\n    finally:\n        os.chdir(previous)\n(ROOT / '.audit/preset-plugin-batch-result.json').write_text(json.dumps(result, indent=2), encoding='utf-8')\nprint(json.dumps(result), flush=True)\n",
+    "sha256": "d060a13ab36d401436b488dbd453fc67bda3f2009ff3eaf4caba2956191f774e"
+  },
+  "limits": [
+    "Actual offscreen MainUI and QAction save/load plus Features batch actions, with temporary real preset files.",
+    "Preset name/selection and message-box responses are substituted; native dialog keyboard/pointer interaction is not covered.",
+    "Text and plugin captions are deliberately changed; the other seven builtin sections round-trip their current default values. This is not a historical-user migration fixture.",
+    "Batch hide/show/close uses the repository Clock plugin overlay only, not every overlay type or native compositor.",
+    "OS/Workshop services and loader registration are substituted as in the earlier plugin probe.",
+    "No process restart, external plugin installation, permission prompts or physical-monitor acceptance in this run."
+  ]
+}
