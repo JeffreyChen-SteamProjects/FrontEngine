@@ -1,0 +1,60 @@
+{
+  "product_commit": "0daa18f4",
+  "native": {
+    "passed": true,
+    "granted": [
+      {
+        "kind": "wish_granted",
+        "resident": "cd53a59142a7496d92090f3a38904067",
+        "time": 1236200,
+        "wish": "play_time"
+      }
+    ],
+    "managed_world_unchanged": true,
+    "profiles_unchanged": true,
+    "sandbox_reward_retained": true,
+    "mode_button_clicks": 3,
+    "create_button_clicked": true,
+    "sandbox_notes": [
+      "Recovery worker's wish came true",
+      "Reward collected (+5)"
+    ],
+    "managed_notes": [
+      "Recovery worker's wish came true",
+      "Reward collected (+5)"
+    ],
+    "explicit_ticks": 181,
+    "runtime_closed": true,
+    "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-stage-layout\\.audit\\profession-owned-fixed",
+    "saved_snapshot_sha256": "c471f2056e3bf47d41a8073e4a214f8eccec310f6c85a5f6088181f0c4b05172",
+    "scope": "Native private MainUI; actual mode/create/Play buttons with service furniture placement and explicit play wish; injected ticks; host services substituted. Not crash or normal-speed acceptance.",
+    "temporary_directory_removed": true
+  },
+  "observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "child_exit": 0,
+    "observation_only": true
+  },
+  "harness": "import hashlib\nimport json\nimport logging\nimport os\nfrom pathlib import Path\nimport shutil\nimport sys\nimport tempfile\nimport traceback\nimport uuid\nfrom time import monotonic\n\nsys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'ownership-integration/.audit'))\nfrom complete_main_onboarding_native import observation\n\nROOT = Path(__file__).resolve().parents[1]\nsys.path.insert(0, str(ROOT))\nsys.path.insert(0, str(ROOT / 'tests/integration'))\nimport hidden_desktop\n\nsource = Path(sys.argv[1]).resolve()\noutput = Path(sys.argv[2]).resolve()\noutput.mkdir(parents=True, exist_ok=True)\nif not hidden_desktop.is_child(output):\n    assert not (output / 'result.json').exists(), 'Use a fresh output directory'\n    hidden_desktop.DESKTOP = f'FrontEngineColdReload{os.getpid()}_{uuid.uuid4().hex[:8]}'\n    before = observation()\n    code = hidden_desktop.run_on_hidden_desktop(__file__, str(source), str(output), timeout_ms=180000)\n    (output / 'observer.json').write_text(json.dumps({'before': before, 'after': observation(),\n        'child_exit': code, 'observation_only': True}, indent=2), encoding='utf-8')\n    raise SystemExit(code)\n\nos.environ['QT_QPA_PLATFORM'] = 'windows'\nexpected = json.loads((source / 'shutdown-world.json').read_text(encoding='utf-8'))\nresult = {'passed': False}\ntry:\n    with tempfile.TemporaryDirectory(prefix='fe-current-cold-reload-') as folder:\n        shutil.copytree(source / 'settings', folder, dirs_exist_ok=True)\n        previous = Path.cwd()\n        os.chdir(folder)\n        try:\n            from PySide6.QtCore import QCoreApplication, QEvent\n            from PySide6.QtTest import QTest\n            from PySide6.QtWidgets import QApplication\n            from frontengine.ui.page.pet_game import home_page\n            from frontengine.utils.session_lock import session_lock\n            from frontengine.user_setting.user_setting_file import user_setting_dict\n            from frontengine.utils.pet_game import snapshot\n\n            home_page.workshop_pack_roots = lambda: []\n            session_lock.is_session_locked = lambda: False\n            app = QApplication([])\n            app.setQuitOnLastWindowClosed(False)\n            screen = app.primaryScreen()\n            for zone in expected['zones']:\n                zone['screen'] = (screen.name() or 'primary')[:128]\n            Path('pet-home.json').write_text(json.dumps(expected, ensure_ascii=False), encoding='utf-8')\n            from frontengine.ui import main_ui\n            main_ui.CriticalExit.init_critical_exit = lambda self: None\n            main_ui.HotkeyService.start = lambda self: False\n            main_ui.AppProfileService.start = lambda self: None\n            main_ui.ShareWatchService.start = lambda self: None\n            window = main_ui.FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)\n            lifetime = window.lifetime\n            page = window.pet_home_ui\n            try:\n                actual = snapshot.to_dict(page.service.world)\n                assert actual == expected, 'Cold process world differs from final shutdown snapshot'\n                residents = set(page.service.world.residents)\n                records = user_setting_dict['pet_profiles']['records']\n                assert residents <= set(records), 'Resident profiles missing from settings'\n                assert residents == set(page.service.sessions), 'Resident identity leases were not reacquired'\n                page.service.pause('acceptance')\n                window.resize(1280, 960)\n                window.show()\n                window.sidebar.select_page_id(\"tab_pet_home_text\")\n                page.refresh()\n                from frontengine.utils.multi_language.retranslate import translate\n                service = page.service\n                managed = snapshot.to_dict(service.world)\n                profiles_before = service.profiles.profiles()\n                pet = next(iter(service.world.residents))\n                QTest.qWait(200)\n                page.sandbox_button.click()\n                QTest.qWait(200)\n                assert service.mode == 'sandbox' and page.sandbox_button.isChecked()\n                assert service.world is None and page.create_button.isVisible()\n                page.create_button.click()\n                service.pause('acceptance')\n                QTest.qWait(200)\n                world = service.world\n                assert world.sandbox and pet in world.residents\n                zone = world.residents[pet].zone\n                assert service.run(lambda w:w.place_anywhere('toy_box',zone))[0]=='accepted'\n                world.progress.wishes[pet] = {'wish':'play_time','base':999,'ready':0}\n                before = world.residents[pet].affection\n                events = [];service.events_ready.connect(events.extend)\n                page.select_resident(pet)\n                page.refresh()\n                page._select_home_tab('pet_home_residents_section')\n                QTest.qWait(200)\n                button = next(b for b in page.residents.commands if b.text()==translate('pet_home_cmd_play','Play'))\n                button.click()\n                assert world.residents[pet].commands==['play']\n                service.timer.stop();service.periodic.stop()\n                clock=[100.];service._clock=lambda:clock[0];service._last=clock[0]\n                for steps in range(1500):\n                    clock[0]+=.2;service._tick()\n                    if any(e['kind']=='wish_granted' and e.get('resident')==pet for e in events):break\n                grants=[e for e in events if e['kind']=='wish_granted' and e.get('resident')==pet]\n                assert len(grants)==1\n                assert world.residents[pet].affection==before+3\n                assert service.profiles.profiles()==profiles_before\n                sandbox_notes=[page.inbox.list.item(i).text() for i in range(page.inbox.list.count())]\n                page.sandbox_button.click()\n                QTest.qWait(200)\n                assert service.mode=='manage' and not page.sandbox_button.isChecked()\n                assert snapshot.to_dict(service.world)==managed\n                assert service.profiles.profiles()==profiles_before\n                managed_notes=[page.inbox.list.item(i).text() for i in range(page.inbox.list.count())]\n                page._select_home_tab('pet_home_inbox_section')\n                QTest.qWait(200)\n                assert window.grab().save(str(output/'managed-inbox-after-sandbox.png'))\n                page.sandbox_button.click()\n                QTest.qWait(200)\n                assert service.mode=='sandbox'\n                assert service.world.residents[pet].affection==before+3\n                assert service.world.progress.wishes[pet]['wish'] is None\n                result.update(granted=grants,managed_world_unchanged=True,profiles_unchanged=True,\n                    sandbox_reward_retained=True,mode_button_clicks=3,create_button_clicked=True,\n                    sandbox_notes=sandbox_notes,managed_notes=managed_notes,explicit_ticks=steps+1)\n                world=service.world\n                final_world = snapshot.to_dict(world)\n                final_profiles = service.profiles.profiles()\n            finally:\n                window.request_shutdown()\n                deadline = monotonic() + 120\n                while not lifetime.closed and monotonic() < deadline:\n                    QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)\n                    app.processEvents()\n                    QTest.qWait(10)\n                assert lifetime.closed, (lifetime.state, lifetime.error)\n            final_world = snapshot.to_dict(world)\n            shutil.copytree(folder, output / 'settings', ignore=shutil.ignore_patterns('.frontengine-owner.lock'))\n            (output / 'shutdown-world.json').write_text(json.dumps(final_world, ensure_ascii=False), encoding='utf-8')\n            (output / 'profiles.json').write_text(json.dumps(final_profiles, ensure_ascii=False), encoding='utf-8')\n            result.update(passed=True, runtime_closed=True, python=sys.version,\n                source=str(source), saved_snapshot_sha256=hashlib.sha256((source / 'shutdown-world.json').read_bytes()).hexdigest(),\n                scope='Native private MainUI; actual mode/create/Play buttons with service furniture placement and explicit play wish; injected ticks; host services substituted. Not crash or normal-speed acceptance.')\n        finally:\n            logging.shutdown()\n            os.chdir(previous)\n    result['temporary_directory_removed'] = True\nexcept Exception:\n    result.update(passed=False, error=traceback.format_exc())\n(output / 'result.json').write_text(json.dumps(result, indent=2), encoding='utf-8')\nraise SystemExit(0 if result['passed'] else 1)\n",
+  "reviewed_image_sha256": "6d2079a10e08566c79baebb77c8f474f41fcb7f038da1087cc2b818c06fb56d4",
+  "finding": "Three actual mode button clicks preserve world/profile separation and sandbox reward. Inbox entries and unread count are not separated: sandbox wish and +5 reward remain visible after returning to manage without a mode label.",
+  "limits": [
+    "Explicit wish, service furniture placement, local mode/create/Play buttons and injected clock.",
+    "Native private desktop; host integrations substituted; normal shutdown only.",
+    "This confirms storage isolation and a notification-context defect, not complete mode acceptance."
+  ]
+}

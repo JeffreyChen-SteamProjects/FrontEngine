@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261106-52 | 2026-11-06 | 驗證原生願望跨模式流程並記錄通知混用 | #test #ui #events #review | [2026-11](2026-11.md) |
 | U-20261106-51 | 2026-11-06 | 驗證願望在自由布置與經營家園間隔離 | #test #save #events #verified | [2026-11](2026-11.md) |
 | U-20261106-50 | 2026-11-06 | 核對願望獎勵上限與選取保存 | #test #events #verified | [2026-11](2026-11.md) |
 | U-20261106-49 | 2026-11-06 | 完成捷徑初版完整回歸 | #test #ui #verified | [2026-11](2026-11.md) |
@@ -378,6 +379,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 174 |
+| [2026-11.md](2026-11.md) | 2026-11 | 175 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
