@@ -9,7 +9,7 @@
 
 - **#9** **macOS 權限與裝置驗收**〔阻塞：沒有可互動的 Mac 測試主機〕。驗證 TCC 權限拒絕／變更／重新啟動流程、原生音訊、MIDI 與多螢幕；入口為 `tests/integration/macos_native_smoke.py`。既有 Windows／Linux 支援與隔離測試不能替代 macOS 實機結果。
 - **#11** **Steam Workshop 離線／無客戶端驗收**〔阻塞：沒有獨立 Steam 測試工作階段〕。在獨立環境驗證離線與未啟動客戶端時的失敗回饋、重試及資源釋放。參考 `tests/integration/steam_workshop_smoke.py` 與 `steam_failure_smoke.py`；無效 App ID 的既有測試不能替代這兩個情境。
-- **#21** **覆蓋層跨螢幕跟隨驗收**。圖片覆蓋層以軟體與 GPU 後端通過 100%／125% 跨螢幕及返回驗證，見 `docs/acceptance/2026-11-05-overlay-mixed-dpi-fc30918.json`；寵物部分已有 U-20261029-46。GIF 與靜態文字的軟體／GPU 後端跨螢幕驗證見 `docs/acceptance/2026-11-05-gif-text-mixed-dpi-635c120.json`。Web 本機 HTML 的跨螢幕畫面、邏輯尺寸與 DOM 縮放驗證見 `docs/acceptance/2026-11-05-web-mixed-dpi-79bd15c.json`；影片原生子視窗擷取與持續解碼的混合 DPI 驗證見 `docs/acceptance/2026-11-05-video-mixed-dpi-27d6186.json`；先前 QWidget 擷取單色已確認為嵌入原生視窗的擷取限制。仍須完成粒子與其他一般覆蓋層類型的混合 DPI 驗收。
+- **#21** **覆蓋層跨螢幕跟隨驗收**。圖片覆蓋層以軟體與 GPU 後端通過 100%／125% 跨螢幕及返回驗證，見 `docs/acceptance/2026-11-05-overlay-mixed-dpi-fc30918.json`；寵物部分已有 U-20261029-46。GIF 與靜態文字的軟體／GPU 後端跨螢幕驗證見 `docs/acceptance/2026-11-05-gif-text-mixed-dpi-635c120.json`。Web 本機 HTML 的跨螢幕畫面、邏輯尺寸與 DOM 縮放驗證見 `docs/acceptance/2026-11-05-web-mixed-dpi-79bd15c.json`；影片原生子視窗擷取與持續解碼的混合 DPI 驗證見 `docs/acceptance/2026-11-05-video-mixed-dpi-27d6186.json`；先前 QWidget 擷取單色已確認為嵌入原生視窗的擷取限制。粒子四方向的 OpenGL 畫面、動畫與關閉清理驗證見 `docs/acceptance/2026-11-05-particle-mixed-dpi-1da244d.json`。仍須完成其他一般工具覆蓋層類型的混合 DPI 驗收。
 - **#22** **多螢幕配置恢復驗收**〔接拔與主螢幕切換需要人實際操作〕。目前已偵測到 100%／125% 雙螢幕；仍須驗證接拔、主螢幕切換、解析度／縮放變更，以及混合 DPI 下的配置恢復與可見區域限制。
 - **#24 舊入口回歸**。逐一從新選單與指令搜尋開啟所有既有頁面，確認舊設定、預設集、插件、快捷鍵及批次控制仍有效；重複開關面板不得重複建立服務；窄視窗、高 DPI、鍵盤與切換語言下檢查文字、焦點與返回遊戲的路徑。
 - **#25 存檔可靠性**。同 UUID 雙開、連續重啟、存檔中斷、磁碟寫入失敗、缺素材、未知版本、時鐘回撥與重跑遷移；以同一亂數種子重播結果一致，同一結算 ID 重試多次只入帳一次。
