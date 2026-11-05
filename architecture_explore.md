@@ -746,4 +746,4 @@ Residents as characters: `show/pet_game/resident_art.py` maps a resident's activ
 
 Daily commission changes emit `commissions_refreshed` once per generated game day from `utils/pet_game/goals.py`. The home page consumes the event to refresh visible offers without waiting for unrelated life or reward events.
 
-Inbox history keeps copied event payloads with the resident name and recipe translation key/fallback captured at arrival. Rendering uses the current language; repeat identity uses event values rather than translated text. Records retain no world or widget reference. The home refresh path includes the inbox.
+Inbox history keeps copied event payloads with the resident name and recipe translation key/fallback captured at arrival. Rendering uses the current language; repeat identity uses event values rather than translated text. Records retain no world or widget reference. The home refresh path includes the inbox. Inbox refresh also updates the pending list and its visibility, so arrival and mark-read actions work while paused. Initial inbox refresh runs after the page finishes constructing its panels.

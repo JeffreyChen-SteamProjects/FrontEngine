@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261105-35 | 2026-11-05 | Synchronize inbox reminders while the home is paused | fix, ui, pet, events | [2026-11](2026-11.md) |
 | U-20261105-34 | 2026-11-05 | Retranslate inbox history without changing past events | fix, ui, pet, events | [2026-11](2026-11.md) |
 | U-20261105-33 | 2026-11-05 | Refresh daily commissions when the game day changes | fix, pet, events | [2026-11](2026-11.md) |
 | U-20261105-32 | 2026-11-05 | Fit populated homes into narrow windows | fix, ui, pet | [2026-11](2026-11.md) |
@@ -292,6 +293,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 88 |
+| [2026-11.md](2026-11.md) | 2026-11 | 89 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

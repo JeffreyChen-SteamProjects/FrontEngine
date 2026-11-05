@@ -76,7 +76,6 @@ class InboxPanel:
         done = tr(QPushButton(), "pet_home_inbox_read", "Mark all as read")
         done.clicked.connect(self.mark_read)
         section.add_inline(done)
-        self.refresh_lists()
 
     @staticmethod
     def wanted(name: str) -> bool:
@@ -123,3 +122,4 @@ class InboxPanel:
                 if entry["count"] > 1 else ""
             self.list.addItem(line(entry["event"]) + suffix)
         self.count.setText(translate("pet_home_inbox_unread", "{count} new").format(count=self.unread))
+        self.page._refresh_pending()

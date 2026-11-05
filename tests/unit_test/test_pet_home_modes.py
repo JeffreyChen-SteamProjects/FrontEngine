@@ -151,6 +151,27 @@ def test_inbox_history_keeps_names_and_rewards_from_when_the_event_arrived(page)
     assert '(+24)' in page.inbox.list.item(0).text()
 
 
+@pytest.mark.parametrize('mark_read', [False, True])
+def test_paused_home_pending_list_follows_inbox_changes(page, mark_read):
+    from PySide6.QtCore import Qt
+    from PySide6.QtWidgets import QPushButton
+    from frontengine.utils.multi_language.retranslate import translate
+
+    page.service.pause('test')
+    assert not page.service.running
+    page.inbox.add_error('disk full', 1000)
+    if mark_read:
+        page.refresh()
+        button = next(button for button in page.inbox.section.findChildren(QPushButton)
+                      if button.text() == translate('pet_home_inbox_read'))
+        button.click()
+    keys = [page.pending_list.item(i).data(Qt.ItemDataRole.UserRole)
+            for i in range(page.pending_list.count())]
+    assert ('pet_home_inbox_section' in keys) is not mark_read
+    assert page.inbox.unread == (0 if mark_read else 1)
+    assert page.pending_box.isHidden() is mark_read
+
+
 @pytest.mark.parametrize("event, expected", [
     ({"kind": "settled"}, "work"), ({"kind": "interrupted", "reason": "tired"}, "needs"),
     ({"kind": "interrupted", "reason": "furniture_moved"}, None), ({"kind": "completed"}, None),

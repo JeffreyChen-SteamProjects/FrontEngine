@@ -374,6 +374,7 @@ class PetHomePage(SettingPage):
 
     def _refresh_pending(self) -> None:
         items = pending(self.service.world, self.inbox.unread)
+        self.pending_box.setVisible(bool(items))
         texts = [text for text, _key in items]
         if [self.pending_list.item(row).text() for row in range(self.pending_list.count())] == texts:
             return
@@ -981,7 +982,6 @@ class PetHomePage(SettingPage):
         self.update_button.setVisible(self.load_result.status == "newer" and not has_home)
         self.shortcuts.setVisible(has_home)
         self._refresh_pending()
-        self.pending_box.setVisible(has_home and self.pending_list.count() > 0)
         self._refresh_zone_combo(world)
         for panel in (self.residents, self.goals, self.layout_panel, self.shop, self.storage, self.work,
                       self.collection):
