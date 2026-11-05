@@ -352,7 +352,9 @@ def decide(world: World, resident: Resident) -> None:
         if why is None:
             return None
         if why not in ("no_task",):
+            _start_free(world, resident)
             resident.last_refusal = why
+            return None
     _start_free(world, resident)
 
 # ----- residents together -------------------------------------------------------------

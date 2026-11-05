@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261106-18 | 2026-11-06 | 保留自主工作受阻原因 | #fix #ui #pet #verified | [2026-11](2026-11.md) |
 | U-20261106-17 | 2026-11-06 | Verify autonomous bed sleep and floor rest with cold reload | #testing #pet-home | [2026-11](2026-11.md) |
 | U-20261106-16 | 2026-11-06 | Verify normal-speed sleep, bed release and resident card visibility | #testing #pet-home | [2026-11](2026-11.md) |
 | U-20261106-15 | 2026-11-06 | Verify integrated native onboarding recording and cold reload | #testing #acceptance | [2026-11](2026-11.md) |
@@ -344,6 +345,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 140 |
+| [2026-11.md](2026-11.md) | 2026-11 | 141 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

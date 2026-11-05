@@ -1,0 +1,125 @@
+{
+  "baseline": "d27f4a8",
+  "cases": [
+    {
+      "result": {
+        "passed": true,
+        "case": "waiting_materials",
+        "blocked_caption": "四處走走（自由時間） · 大約還剩 1 分鐘\n婉拒：等待材料。",
+        "recovered_caption": "工作中（排班中） · 大約還剩 3 分鐘",
+        "recovered_activity": "work",
+        "runtime_closed": true,
+        "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+        "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\work-blocked-reason\\waiting_materials",
+        "scope": "Native MainUI on private desktop; deterministic fixture and direct domain decisions with simulation stopped, validates visible captions and recovery only; global service starts, Workshop and lock query substituted",
+        "temporary_directory_removed": true
+      },
+      "observer": {
+        "before": {
+          "foreground": 72290928,
+          "cursor": [
+            960,
+            539
+          ]
+        },
+        "after": {
+          "foreground": 72290928,
+          "cursor": [
+            959,
+            539
+          ]
+        },
+        "child_exit": 0,
+        "observation_only": true
+      },
+      "screenshots": {
+        "blocked.png": "0074df562c780160ac9863cb294f10d1829002745760cd3768fb0621aa8bc139",
+        "recovered.png": "e3c30be2c2f507b15f432a2d76bf0622bbc0bc6237aa09155d595a4e09dedb1a"
+      }
+    },
+    {
+      "result": {
+        "passed": true,
+        "case": "no_station",
+        "blocked_caption": "四處走走（自由時間） · 大約還剩 1 分鐘\n婉拒：沒有這項工作的工作站。",
+        "recovered_caption": "工作中（排班中） · 大約還剩 2 分鐘",
+        "recovered_activity": "work",
+        "runtime_closed": true,
+        "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+        "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\work-blocked-reason\\no_station",
+        "scope": "Native MainUI on private desktop; deterministic fixture and direct domain decisions with simulation stopped, validates visible captions and recovery only; global service starts, Workshop and lock query substituted",
+        "temporary_directory_removed": true
+      },
+      "observer": {
+        "before": {
+          "foreground": 72290928,
+          "cursor": [
+            960,
+            539
+          ]
+        },
+        "after": {
+          "foreground": 72290928,
+          "cursor": [
+            959,
+            540
+          ]
+        },
+        "child_exit": 0,
+        "observation_only": true
+      },
+      "screenshots": {
+        "blocked.png": "48485ec82dcdaacd45ccf82b1a63d78a99e9dca6dd6e77a0290303741101b7ad",
+        "recovered.png": "23fb114ea1dc5ead066ee87a91587af7f81b7490d2b6736b470a0d2132266d3b"
+      }
+    },
+    {
+      "result": {
+        "passed": true,
+        "case": "station_busy",
+        "blocked_caption": "四處走走（自由時間） · 大約還剩 1 分鐘\n婉拒：工作站有人在用。",
+        "recovered_caption": "工作中（排班中） · 大約還剩 2 分鐘",
+        "recovered_activity": "work",
+        "runtime_closed": true,
+        "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+        "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\work-blocked-reason\\station_busy",
+        "scope": "Native MainUI on private desktop; deterministic fixture and direct domain decisions with simulation stopped, validates visible captions and recovery only; global service starts, Workshop and lock query substituted",
+        "temporary_directory_removed": true
+      },
+      "observer": {
+        "before": {
+          "foreground": 72290928,
+          "cursor": [
+            959,
+            539
+          ]
+        },
+        "after": {
+          "foreground": 72290928,
+          "cursor": [
+            959,
+            539
+          ]
+        },
+        "child_exit": 0,
+        "observation_only": true
+      },
+      "screenshots": {
+        "blocked.png": "d00da9ec76dea14a204a522d175dd53792afd2e92cc3100b02addccb2d04f36e",
+        "recovered.png": "5936319b55206e93e642efc7cc0f86448d17ac5ed8d1e9d4501d8bc30f2a8785"
+      }
+    }
+  ],
+  "harness_sha256": "9a5d00a5163d010d0c40a6224aac4b76d358a8642c9e412ba5d2212699f90dbb",
+  "harness_source": "import hashlib\nimport json\nimport logging\nimport os\nfrom pathlib import Path\nimport shutil\nimport sys\nimport tempfile\nimport traceback\nimport uuid\nfrom time import monotonic\n\nfrom complete_main_onboarding_native import observation\n\nROOT = Path(__file__).resolve().parents[1]\nsys.path.insert(0, str(ROOT))\nsys.path.insert(0, str(ROOT / 'tests/integration'))\nimport hidden_desktop\n\nsource = Path(sys.argv[1]).resolve()\noutput = Path(sys.argv[2]).resolve()\noutput.mkdir(parents=True, exist_ok=True)\nif not hidden_desktop.is_child(output):\n    assert not (output / 'result.json').exists(), 'Use a fresh output directory'\n    hidden_desktop.DESKTOP = f'FrontEngineColdReload{os.getpid()}_{uuid.uuid4().hex[:8]}'\n    before = observation()\n    code = hidden_desktop.run_on_hidden_desktop(__file__, str(source), str(output), timeout_ms=180000)\n    (output / 'observer.json').write_text(json.dumps({'before': before, 'after': observation(),\n        'child_exit': code, 'observation_only': True}, indent=2), encoding='utf-8')\n    raise SystemExit(code)\n\nos.environ['QT_QPA_PLATFORM'] = 'windows'\ncase = source.name\nresult = {'passed': False}\ntry:\n    with tempfile.TemporaryDirectory(prefix='fe-current-cold-reload-') as folder:\n        previous = Path.cwd()\n        os.chdir(folder)\n        try:\n            from PySide6.QtCore import QCoreApplication, QEvent\n            from PySide6.QtTest import QTest\n            from PySide6.QtWidgets import QApplication\n            from frontengine.ui.page.pet_game import home_page\n            from frontengine.utils.session_lock import session_lock\n            from frontengine.user_setting.user_setting_file import user_setting_dict\n            from frontengine.utils.pet_game import snapshot\n\n            home_page.workshop_pack_roots = lambda: []\n            session_lock.is_session_locked = lambda: False\n            app = QApplication([])\n            app.setQuitOnLastWindowClosed(False)\n            from frontengine.ui import main_ui\n            main_ui.CriticalExit.init_critical_exit = lambda self: None\n            main_ui.HotkeyService.start = lambda self: False\n            main_ui.AppProfileService.start = lambda self: None\n            main_ui.ShareWatchService.start = lambda self: None\n            window = main_ui.FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)\n            lifetime = window.lifetime\n            page = window.pet_home_ui\n            try:\n                from frontengine.utils.pet_game import behaviour\n                from frontengine.show.pet_game.captions import result_text\n                service = page.service\n                world = service.create_home('screen', 0, 900, 48, seed=5)\n                world.automatic = False\n                zone = next(iter(world.zones))\n                world.ledger.apply('fixture', 'native acceptance setup', 500)\n                pet = service.profiles.create('Mochi')['id']\n                service.profiles.update(pet, {'mood': 80, 'fullness': 90, 'energy': 95})\n                assert service.adopt(pet, zone) == 'accepted'\n                resident = world.residents[pet]\n                recipe = 'toy' if case == 'waiting_materials' else 'letter'\n                if case == 'waiting_materials':\n                    assert world.buy_and_place('workbench', zone, 'bench') == 'accepted'\n                elif case == 'station_busy':\n                    world.furnish(zone)\n                    other = service.profiles.create('Desk user')['id']\n                    service.profiles.update(other, {'mood': 80, 'fullness': 90, 'energy': 95})\n                    assert service.adopt(other, zone) == 'accepted'\n                    assert world.create_task('letter', other)[0] == 'accepted'\n                    behaviour.decide(world, world.residents[other])\n                    assert world.residents[other].activity.kind == 'work'\n                else:\n                    assert case == 'no_station'\n                assert world.create_task(recipe, pet)[0] == 'accepted'\n                behaviour.decide(world, resident)\n                assert resident.activity.kind != 'work'\n                window.resize(1280, 960)\n                window.show()\n                page.refresh()\n                page.tabs.setCurrentIndex(page.tabs.keys().index('pet_home_residents_section'))\n                page.select_resident(pet)\n                QTest.qWait(1000)\n                page._scroll.ensureWidgetVisible(page.residents.activity)\n                QTest.qWait(200)\n                caption = page.residents.activity.text()\n                assert result_text(case) in caption, caption\n                assert not page.residents.activity.visibleRegion().isEmpty()\n                assert window.grab().save(str(output / 'blocked.png'))\n                if case == 'waiting_materials':\n                    world.ledger.apply('wood', 'native acceptance setup', items={'wood': 2})\n                elif case == 'no_station':\n                    world.furnish(zone)\n                else:\n                    behaviour.cancel_activity(world, world.residents[other], 'fixture')\n                behaviour.cancel_activity(world, resident, 'fixture')\n                behaviour.decide(world, resident)\n                page.refresh()\n                assert resident.activity.kind == 'work'\n                recovered = page.residents.activity.text()\n                assert result_text(case) not in recovered\n                page._scroll.ensureWidgetVisible(page.residents.activity)\n                QTest.qWait(200)\n                assert window.grab().save(str(output / 'recovered.png'))\n                result.update(case=case, blocked_caption=caption, recovered_caption=recovered,\n                              recovered_activity=resident.activity.kind)\n            finally:\n                window.request_shutdown()\n                deadline = monotonic() + 120\n                while not lifetime.closed and monotonic() < deadline:\n                    QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)\n                    app.processEvents()\n                    QTest.qWait(10)\n                assert lifetime.closed, (lifetime.state, lifetime.error)\n            result.update(passed=True, runtime_closed=True, python=sys.version,\n                source=str(source),\n                scope='Native MainUI on private desktop; deterministic fixture and direct domain decisions with simulation stopped, validates visible captions and recovery only; global service starts, Workshop and lock query substituted')\n        finally:\n            logging.shutdown()\n            os.chdir(previous)\n    result['temporary_directory_removed'] = True\nexcept Exception:\n    result.update(passed=False, error=traceback.format_exc())\n(output / 'result.json').write_text(json.dumps(result, indent=2), encoding='utf-8')\nraise SystemExit(0 if result['passed'] else 1)\n",
+  "checks": {
+    "red": "Three new cases failed because expected reason absent from Walking around (free time).",
+    "green": "42 automation/professions/life tests passed in 13.84s; 54 home page/documentation tests passed in 147.11s."
+  },
+  "limits": [
+    "Native captions use deterministic setup and direct domain decisions with simulation stopped; not normal-speed autonomous acceptance.",
+    "Host starts, Workshop discovery and session-lock query substituted.",
+    "Integration, full regression and independent review remain pending.",
+    "Screenshots reviewed for resident captions; not acceptance of all page layout or sprite loading."
+  ]
+}

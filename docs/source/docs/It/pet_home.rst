@@ -51,3 +51,5 @@ Quando tutti gli obiettivi del tutorial sono stati premiati o saltati, il pulsan
 L’elenco dei lavori evidenzia il bordo quando riceve il focus della tastiera, anche prima che venga selezionato un lavoro.
 
 L’etichetta di accessibilità dell’elenco dei lavori segue la lingua dell’interfaccia.
+
+Se il lavoro autonomo non può iniziare perché mancano materiali, manca una postazione o la postazione è occupata, la scheda del residente mantiene visibile il motivo durante l’attività ricreativa scelta al suo posto. Quando il lavoro riprende, il motivo precedente scompare.

@@ -51,3 +51,5 @@ Une fois toutes les récompenses du tutoriel récupérées ou les objectifs igno
 La liste des tâches affiche une bordure accentuée lorsqu’elle reçoit le focus clavier, même avant la sélection d’une tâche.
 
 Le libellé d’accessibilité de la liste des tâches suit la langue de l’interface.
+
+Si le travail autonome ne peut pas commencer faute de matériaux, faute de poste de travail ou parce que celui-ci est occupé, la fiche du résident conserve le motif pendant l’activité de loisir choisie à la place. La reprise du travail efface le motif précédent.
