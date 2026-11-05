@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261105-31 | 2026-11-05 | Run current native GUI acceptance and expose populated-home overflow | validation, ui, native | [2026-11](2026-11.md) |
 | U-20261105-30 | 2026-11-05 | Keep resident wardrobes with the home asset directory | fix, pet, storage | [2026-11](2026-11.md) |
 | U-20261105-29 | 2026-11-05 | Guard home panel actions during shutdown | fix, lifecycle, pet | [2026-11](2026-11.md) |
 | U-20261105-28 | 2026-11-05 | Show saved photos in the album immediately | fix, ui, pet | [2026-11](2026-11.md) |
@@ -288,6 +289,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 84 |
+| [2026-11.md](2026-11.md) | 2026-11 | 85 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
