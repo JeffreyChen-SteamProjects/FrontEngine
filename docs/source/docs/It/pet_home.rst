@@ -63,3 +63,5 @@ La scena della casa e la barra degli strumenti restano su righe separate quando 
 Il lavoro completato mostra brevemente un segno di spunta sulla postazione, anche dopo l’ultima unità dell’incarico. Una postazione riposta prima della visualizzazione dell’evento non riceve alcun segno.
 
 Zaino, Obiettivi, i collegamenti agli elementi in attesa e la navigazione dalla barra sul desktop fanno scorrere la scheda scelta della casa fino a renderla visibile, anche se era già selezionata. La navigazione rende visibile il contenuto scelto anche subito dopo la prima apertura della pagina della casa.
+
+Il desiderio di giocare si realizza solo quando quel cucciolo termina il gioco. Il desiderio di un pasto insieme riguarda chi mangia allo stesso tavolo, non gli spettatori o i giochi condivisi. Un gioco interrotto non dà ricompense; desideri e attese salvati restano compatibili.

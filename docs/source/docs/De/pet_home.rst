@@ -63,3 +63,5 @@ Wenn sich die Höhe der Liste ausstehender Aufgaben ändert, bleiben die Haussze
 Abgeschlossene Arbeit zeigt kurz ein Häkchen an der Arbeitsstation, auch nach der letzten Einheit eines Auftrags. Eine vor der Ereignisanzeige eingelagerte Station erhält keine Markierung.
 
 Rucksack, Ziele, Links zu wartenden Aufgaben und die Navigation der Desktop-Leiste scrollen den gewählten Zuhause-Tab ins Blickfeld, auch wenn er bereits ausgewählt war. Auch unmittelbar nach dem ersten Öffnen der Heimseite wird der gewählte Inhalt durch die Navigation sichtbar.
+
+Spielwünsche erfüllen sich nur, wenn das betreffende Haustier sein Spiel beendet. Ein Essenswunsch gilt nur für Tiere, die am selben Tisch essen, nicht für Zuschauer oder gemeinsame Spiele. Unterbrochenes Spielen gibt keine Wunschbelohnung; gespeicherte Wünsche und Wartezeiten bleiben erhalten.

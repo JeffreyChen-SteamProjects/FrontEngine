@@ -214,6 +214,8 @@ def finish(world: World, resident: Resident, pause_ms: int = 1000) -> None:
     if activity.kind == "tag":
         tag_completed(world, resident, activity.partner)
     world.emit("completed", resident=resident.identifier, activity=activity.kind)
+    if activity.kind == "play":
+        goals.complete_wish(world, resident, "play_time")
 
 
 def _work(world: World, resident: Resident) -> None:

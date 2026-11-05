@@ -63,3 +63,5 @@ La scène du foyer et sa barre d’outils restent sur des lignes distinctes lors
 Un travail terminé affiche brièvement une coche sur le poste, y compris après la dernière unité de la tâche. Un poste rangé avant l’affichage de l’événement ne reçoit aucune marque.
 
 Sac à dos, Objectifs, les liens des éléments en attente et la navigation de la barre du bureau font défiler l’onglet choisi du foyer pour le rendre visible, même s’il était déjà sélectionné. La navigation rend aussi le contenu choisi visible lorsqu’elle est utilisée dès l’ouverture de la page du foyer.
+
+Le souhait de jouer se réalise seulement quand cet animal termine son jeu. Le souhait de partager un repas concerne les animaux qui mangent à la même table, pas les spectateurs ni les jeux communs. Un jeu interrompu ne donne pas de récompense ; les souhaits et délais enregistrés sont conservés.

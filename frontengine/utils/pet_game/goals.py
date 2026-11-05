@@ -1,8 +1,8 @@
 """Growth: tutorial goals, daily commissions, residents' wishes, life events and the celebration.
 
-Everything here is derived from world state and counters, checked every 30 s
-of world time, and seeded from the home identity rather than the simulation's
-random stream, so looking at goals never changes what happens in the home.
+Furniture wishes and goals are checked every 30 s of world time; personal
+activity wishes are completed by their participants. Selection is seeded from
+the home identity rather than the simulation's random stream, so looking at goals never changes what happens in the home.
 Rewards are paid once through the ledger with goal-specific transaction IDs.
 Nothing expires: there are no streaks, timers or missed-day penalties.
 """
@@ -19,6 +19,7 @@ from frontengine.utils.pet_game.schedule import DAY_MS, game_day
 
 if TYPE_CHECKING:
     from frontengine.utils.pet_game.world import World
+    from frontengine.utils.pet_game.resident import Resident
 
 CHECK_MS = 30000
 MAX_STATS = 256
@@ -102,9 +103,9 @@ COMMISSIONS = (("herb", 3, 18), ("herb", 5, 30), ("flower", 2, 24), ("toy", 1, 4
                ("furniture:stool", 1, 70))
 WISHES = {
     "plant": lambda w, r: placed(w, "decoration"),
-    "friend_meal": lambda w, r: _stat(w, "shared"),
+    "friend_meal": None,
     "new_leisure": lambda w, r: placed(w, "leisure"),
-    "play_time": lambda w, r: _stat(w, "completed:play"),
+    "play_time": None,
     "cozy_bed": lambda w, r: sum(1 for p in w.furniture.values() if p.definition == "bed_cozy"),
 }
 
@@ -383,13 +384,23 @@ def _update_wish(world: World, resident) -> None:
         if world.time_ms >= state["ready"]:
             names = sorted(WISHES)
             wish = names[_seeded(world, resident.identifier, _stat(world, "wish_granted")) % len(names)]
-            state.update(wish=wish, base=WISHES[wish](world, resident))
+            measure = WISHES[wish]
+            state.update(wish=wish, base=measure(world, resident) if measure is not None else 0)
         return
-    if WISHES[wish](world, resident) > state["base"]:
-        resident.needs["mood"] = min(100, resident.needs["mood"] + WISH_MOOD)
-        resident.affection = min(MAX_AFFECTION, resident.affection + WISH_AFFECTION)
-        state.update(wish=None, base=0, ready=world.time_ms + WISH_COOLDOWN_MS)
-        world.emit("wish_granted", resident=resident.identifier, wish=wish)
+    measure = WISHES[wish]
+    if measure is not None and measure(world, resident) > state["base"]:
+        complete_wish(world, resident, wish)
+
+
+def complete_wish(world: World, resident: Resident, wish: str) -> None:
+    """Complete only this resident's matching active wish, once."""
+    state = world.progress.wishes.get(resident.identifier)
+    if state is None or state["wish"] != wish:
+        return
+    resident.needs["mood"] = min(100, resident.needs["mood"] + WISH_MOOD)
+    resident.affection = min(MAX_AFFECTION, resident.affection + WISH_AFFECTION)
+    state.update(wish=None, base=0, ready=world.time_ms + WISH_COOLDOWN_MS)
+    world.emit("wish_granted", resident=resident.identifier, wish=wish)
 
 
 # ----- life events ---------------------------------------------------------------------------

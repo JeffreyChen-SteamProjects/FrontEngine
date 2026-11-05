@@ -710,3 +710,5 @@ La escena del hogar y su barra de herramientas permanecen en filas separadas cua
 Al terminar un trabajo, la estación muestra brevemente una marca, también tras la última unidad del encargo. Si se guarda la estación antes de mostrar el evento, no se añade ninguna marca.
 
 Mochila, Objetivos, los enlaces de tareas pendientes y la navegación de la barra del escritorio desplazan la pestaña elegida del hogar hasta hacerla visible, aunque ya estuviera seleccionada. La navegación también muestra el contenido seleccionado si se usa justo después de abrir la página del hogar.
+
+El deseo de jugar se cumple solo cuando esa mascota termina de jugar. El deseo de comer juntos cuenta solo para quienes comen en la misma mesa, no para espectadores ni juegos compartidos. Interrumpir el juego no concede la recompensa; se conservan los deseos y tiempos de espera guardados.
