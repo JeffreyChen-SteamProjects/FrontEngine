@@ -1,0 +1,54 @@
+{
+  "product_test_commit": "6a097aa0",
+  "source_files": 748,
+  "matches_running_regression_source": true,
+  "result": {
+    "passed": true,
+    "load_status": "newer",
+    "status_text": "家園存檔來自較新版本的 FrontEngine。請更新 FrontEngine 後再開啟，檔案沒有被更動。",
+    "update_caption": "取得最新版 FrontEngine",
+    "aside_caption": "保留舊檔並重新開始",
+    "blocked_create_verified": true,
+    "protected_sha256": "077a9c2a1c39fdb8561c993063865d59469454814152f997dd98778083f3092c",
+    "protected_after_shutdown": true,
+    "runtime_closed": true,
+    "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\ownership-integration\\.audit\\six-resident-day-d27f4a8-screen",
+    "saved_snapshot_sha256": "089e077dfbc7b7ad32a778e616d631d6c52434e4dd58d623fce45c1e9b83dd34",
+    "scope": "Native MainUI on private desktop, copy of actual six-resident settings with only save version incremented; no request to open update URL or discard save. Host global starts, Workshop and session-lock query substituted.",
+    "temporary_directory_removed": true
+  },
+  "observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "child_exit": 0,
+    "observation_only": true
+  },
+  "screenshot_viewed": true,
+  "limits": [
+    "Copied actual six-resident final settings into a temporary directory; changed only the home format version from 8 to 9.",
+    "Verified newer-version refusal, visible update/keep-file actions, hidden create button, direct create action refusal, and byte-identical home file after shutdown.",
+    "Did not click update URL, restore backup or keep-file-and-restart actions; does not validate those recovery flows.",
+    "Windows private desktop; global host starts, Workshop discovery and session-lock query substituted. No user files altered.",
+    "Does not cover all incompatible versions, clock rollback, disk failure or power loss."
+  ],
+  "sha256": {
+    ".audit/native-newer-save-protection/result.json": "d81f68be618e1bfe0579e9e47e1e70c6542baef975577884222c88ed8f75661c",
+    ".audit/native-newer-save-protection/observer.json": "108902181ee471ddb835401d5d799d056e70c9ac4aead7d271ce043e584e29a5",
+    ".audit/native-newer-save-protection/newer-save-protected.png": "c99be4a2ae4e9363942f27e71e91c450eee4371d8c260f3ece13d5ba163cbef6",
+    ".audit/native_newer_save_protection.py": "de2262fadff513f42a01aafcea56daa2ba9d15fb2e5ca134cee470329fd8b501"
+  },
+  "harness_source": "import hashlib\nimport json\nimport logging\nimport os\nfrom pathlib import Path\nimport shutil\nimport sys\nimport tempfile\nimport traceback\nimport uuid\nfrom time import monotonic\n\nsys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'ownership-integration/.audit'))\nfrom complete_main_onboarding_native import observation\n\nROOT = Path(__file__).resolve().parents[1]\nsys.path.insert(0, str(ROOT))\nsys.path.insert(0, str(ROOT / 'tests/integration'))\nimport hidden_desktop\n\nsource = Path(sys.argv[1]).resolve()\noutput = Path(sys.argv[2]).resolve()\noutput.mkdir(parents=True, exist_ok=True)\nif not hidden_desktop.is_child(output):\n    assert not (output / 'result.json').exists(), 'Use a fresh output directory'\n    hidden_desktop.DESKTOP = f'FrontEngineColdReload{os.getpid()}_{uuid.uuid4().hex[:8]}'\n    before = observation()\n    code = hidden_desktop.run_on_hidden_desktop(__file__, str(source), str(output), timeout_ms=180000)\n    (output / 'observer.json').write_text(json.dumps({'before': before, 'after': observation(),\n        'child_exit': code, 'observation_only': True}, indent=2), encoding='utf-8')\n    raise SystemExit(code)\n\nos.environ['QT_QPA_PLATFORM'] = 'windows'\nexpected = json.loads((source / 'shutdown-world.json').read_text(encoding='utf-8'))\nresult = {'passed': False}\ntry:\n    with tempfile.TemporaryDirectory(prefix='fe-current-cold-reload-') as folder:\n        shutil.copytree(source / 'settings', folder, dirs_exist_ok=True)\n        protected_path = Path(folder) / 'pet-home.json'\n        payload = json.loads(protected_path.read_text(encoding='utf-8'))\n        payload['version'] += 1\n        protected_path.write_text(json.dumps(payload), encoding='utf-8')\n        original = protected_path.read_bytes()\n        previous = Path.cwd()\n        os.chdir(folder)\n        try:\n            from PySide6.QtCore import QCoreApplication, QEvent\n            from PySide6.QtTest import QTest\n            from PySide6.QtWidgets import QApplication\n            from frontengine.ui.page.pet_game import home_page\n            from frontengine.utils.session_lock import session_lock\n            from frontengine.user_setting.user_setting_file import user_setting_dict\n            from frontengine.utils.pet_game import snapshot\n\n            home_page.workshop_pack_roots = lambda: []\n            session_lock.is_session_locked = lambda: False\n            app = QApplication([])\n            app.setQuitOnLastWindowClosed(False)\n            from frontengine.ui import main_ui\n            main_ui.CriticalExit.init_critical_exit = lambda self: None\n            main_ui.HotkeyService.start = lambda self: False\n            main_ui.AppProfileService.start = lambda self: None\n            main_ui.ShareWatchService.start = lambda self: None\n            window = main_ui.FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)\n            lifetime = window.lifetime\n            page = window.pet_home_ui\n            try:\n                window.resize(1280, 960)\n                window.show()\n                page.refresh()\n                QTest.qWait(500)\n                assert page.load_result.status == 'newer'\n                assert page.service.world is None and page.service.store.read_only\n                assert page.update_button.isVisible() and page.aside_button.isVisible()\n                assert not page.create_button.isVisible()\n                assert page.status.text().strip()\n                assert window.grab().save(str(output / 'newer-save-protected.png'))\n                page.create_home()\n                assert page.service.world is None\n                assert protected_path.read_bytes() == original\n                result.update(load_status=page.load_result.status, status_text=page.status.text(),\n                    update_caption=page.update_button.text(), aside_caption=page.aside_button.text(),\n                    blocked_create_verified=True, protected_sha256=hashlib.sha256(original).hexdigest())\n            finally:\n                window.request_shutdown()\n                deadline = monotonic() + 120\n                while not lifetime.closed and monotonic() < deadline:\n                    QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)\n                    app.processEvents()\n                    QTest.qWait(10)\n                assert lifetime.closed, (lifetime.state, lifetime.error)\n                assert protected_path.read_bytes() == original\n                result['protected_after_shutdown'] = True\n            result.update(passed=True, runtime_closed=True, python=sys.version,\n                source=str(source), saved_snapshot_sha256=hashlib.sha256((source / 'shutdown-world.json').read_bytes()).hexdigest(),\n                scope='Native MainUI on private desktop, copy of actual six-resident settings with only save version incremented; no request to open update URL or discard save. Host global starts, Workshop and session-lock query substituted.')\n        finally:\n            logging.shutdown()\n            os.chdir(previous)\n    result['temporary_directory_removed'] = True\nexcept Exception:\n    result.update(passed=False, error=traceback.format_exc())\n(output / 'result.json').write_text(json.dumps(result, indent=2), encoding='utf-8')\nraise SystemExit(0 if result['passed'] else 1)\n"
+}
