@@ -1,0 +1,93 @@
+{
+  "exit": 0,
+  "source_unchanged": true,
+  "source_count": 748,
+  "interpreter": "D:\\Codes\\FrontEngine\\.audit\\test-runtime-3145\\Scripts\\python.exe",
+  "product_test_commit": "3c086b2e",
+  "total": 3180,
+  "passed": 3177,
+  "failed": 0,
+  "skipped": [
+    {
+      "module": "tests.unit_test.test_default_storage_binding",
+      "name": "test_forked_empty_default_registry_rejects_inherited_locked_mutex",
+      "reason": "Requires POSIX fork"
+    },
+    {
+      "module": "tests.unit_test.test_remote_tls",
+      "name": "test_private_key_and_directory_are_owner_only",
+      "reason": "POSIX permission semantics"
+    },
+    {
+      "module": "tests.unit_test.test_storage_session",
+      "name": "test_forked_child_cannot_use_or_release_parent_owner",
+      "reason": "Requires POSIX fork"
+    }
+  ],
+  "junit_suite_seconds": "1623.586",
+  "pytest_reported_seconds": 1624.03,
+  "required_cases": {
+    "completion_badge_real_work": [
+      "test_real_work_completion_marks_its_station_after_activity_ends[False-1]",
+      "test_real_work_completion_marks_its_station_after_activity_ends[False-2]",
+      "test_real_work_completion_marks_its_station_after_activity_ends[True-1]",
+      "test_real_work_completion_marks_its_station_after_activity_ends[True-2]"
+    ],
+    "home_toolbar_recovery": [
+      "test_work_recovery_keeps_toolbar_below_home"
+    ],
+    "content_reflow_quiescence": [
+      "test_content_section_reflows_and_settles_after_height_changes"
+    ],
+    "manual_work_failure_and_retry": [
+      "test_manual_work_reports_start_failure_and_can_retry[waiting_materials]",
+      "test_manual_work_reports_start_failure_and_can_retry[no_station]",
+      "test_manual_work_reports_start_failure_and_can_retry[station_busy]"
+    ],
+    "queued_refusal_and_recovery": [
+      "test_queued_work_refusal_remains_visible_until_next_accepted_activity"
+    ],
+    "blocked_work_reason_and_recovery": [
+      "test_blocked_work_reason_is_visible_until_work_resumes[waiting_materials]",
+      "test_blocked_work_reason_is_visible_until_work_resumes[no_station]",
+      "test_blocked_work_reason_is_visible_until_work_resumes[station_busy]"
+    ],
+    "visible_focus": [
+      "test_item_view_focus_is_visible_without_selection_or_resizing[QListView-light]",
+      "test_item_view_focus_is_visible_without_selection_or_resizing[QListView-dark]",
+      "test_item_view_focus_is_visible_without_selection_or_resizing[QListWidget-light]",
+      "test_item_view_focus_is_visible_without_selection_or_resizing[QListWidget-dark]",
+      "test_item_view_focus_is_visible_without_selection_or_resizing[QTreeView-light]",
+      "test_item_view_focus_is_visible_without_selection_or_resizing[QTreeView-dark]",
+      "test_item_view_focus_is_visible_without_selection_or_resizing[QTreeWidget-light]",
+      "test_item_view_focus_is_visible_without_selection_or_resizing[QTreeWidget-dark]",
+      "test_item_view_focus_is_visible_without_selection_or_resizing[QTableView-light]",
+      "test_item_view_focus_is_visible_without_selection_or_resizing[QTableView-dark]",
+      "test_item_view_focus_is_visible_without_selection_or_resizing[QTableWidget-light]",
+      "test_item_view_focus_is_visible_without_selection_or_resizing[QTableWidget-dark]"
+    ],
+    "accessible_name": [
+      "test_work_list_accessible_name_follows_language"
+    ],
+    "exact_page_search": [
+      "test_exact_page_name_enter_opens_matching_page[]",
+      "test_exact_page_name_enter_opens_matching_page[Control]"
+    ],
+    "plugin_search_and_collision": [
+      "test_registered_plugin_page_is_searchable_without_recreating_it[Example clock]",
+      "test_registered_plugin_page_is_searchable_without_recreating_it[tab_text_text]"
+    ]
+  },
+  "diagnostic_markers": [],
+  "evidence_sha256": {
+    "pytest.log": "9d0f28bb103ccc28939599108fb29da9b904383d20e82cc67b5356bc74b3c652",
+    "junit.xml": "85a74316e14bd7e63b21f1d67ee1cfe1b02554f36cee7ac459d0a77485a9ec6c",
+    "source-manifest.json": "d6c6d3a965d4d3f7129ac07bc2b5675c45a19821e3f2865ccfd1ed3b84f79ca7",
+    "result.json": "dfe34e45a451f3e73a3aa5b015cb06fd7087645ac1d0a904fc5df48a509ef4a1"
+  },
+  "limits": [
+    "Windows offscreen Qt suite; no native input, hardware or independent-review acceptance.",
+    "Documentation-only commits after the source baseline are not product changes.",
+    "Three expected POSIX-only cases were skipped; names and reasons were verified."
+  ]
+}
