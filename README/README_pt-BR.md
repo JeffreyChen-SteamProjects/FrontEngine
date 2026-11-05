@@ -110,6 +110,8 @@ Os hosts que incorporam páginas de configurações individuais devem passar uma
 
 Se a lista de trabalhos estiver vazia, confira as rotinas dos moradores, as estações de trabalho e os materiais da mochila. Selecione um trabalho ainda não concluído para habilitar seu cancelamento.
 
+Quando todas as recompensas do tutorial forem recebidas ou os objetivos forem pulados, o botão de pular desaparece; a lista continua disponível para consulta.
+
 ### Na tela
 
 Sobreposições de mídia. Cada uma escolhe seu monitor (ou abrange todos eles),

@@ -41,3 +41,5 @@ Gli host che incorporano singole pagine delle impostazioni devono passare una De
 Il selettore della modalità nelle impostazioni della casa rimane disponibile quando la modalità Riunione selezionata manualmente nasconde la striscia sul desktop. Annulla e Ripeti hanno una cronologia per stanza; se alcuni mobili non sono disponibili o non entrano più, la disposizione e la cronologia restano intatte per riprovare. Esc annulla la disposizione e il disegno delle aree. Le foto consecutive vengono salvate in file separati. Gli eventi unici restano registrati dopo essere usciti dalla cronologia recente e i miglioramenti acquistati delle postazioni si conservano quando un pacchetto di mobili manca temporaneamente. I vecchi salvataggi possono recuperare solo gli eventi che contengono ancora.
 
 Se la lista dei lavori è vuota, controlla le routine dei residenti, le postazioni e i materiali nello zaino. Seleziona un lavoro non ancora completato per abilitarne l’annullamento.
+
+Quando tutti gli obiettivi del tutorial sono stati premiati o saltati, il pulsante per saltare il tutorial scompare; la lista resta consultabile.

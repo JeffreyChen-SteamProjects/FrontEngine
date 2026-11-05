@@ -384,3 +384,36 @@ def test_selected_job_stops_being_cancellable_when_it_settles(page):
     panel.refresh_live()
     assert not cancel.isEnabled()
     assert panel.tasks.count() == 1
+
+
+@pytest.mark.parametrize("states", [("claimed",), ("skipped",), ("claimed", "skipped")])
+def test_finished_tutorial_hides_skip_but_keeps_goals_reviewable(page, states):
+    from PySide6.QtWidgets import QPushButton
+    from frontengine.utils.pet_game import goals
+    page.create_home()
+    button = next(button for button in page.goals.section.findChildren(QPushButton)
+                  if button.text() == translate("pet_home_skip_tutorial"))
+    assert not button.isHidden()
+    world = page.service.world
+    for index, goal in enumerate(goals.TUTORIAL):
+        world.progress.goals[goal.identifier] = states[index % len(states)]
+    page.service.events_ready.emit([{"kind": "goal_claimed", "goal": "move_in", "coins": 5, "time": world.time_ms}])
+    assert button.isHidden()
+    assert page.goals.tutorial.count() >= len(goals.TUTORIAL)
+    world.progress.goals.pop(goals.TUTORIAL[-1].identifier)
+    page.refresh()
+    assert not button.isHidden()
+
+
+def test_skip_tutorial_hides_button_without_paying_rewards(page):
+    from PySide6.QtWidgets import QPushButton
+    from frontengine.utils.pet_game import goals
+    page.create_home()
+    button = next(button for button in page.goals.section.findChildren(QPushButton)
+                  if button.text() == translate("pet_home_skip_tutorial"))
+    coins = page.service.world.ledger.coins
+    button.click()
+    assert button.isHidden()
+    assert page.service.world.ledger.coins == coins
+    assert all(goals.goal_state(page.service.world, goal) == "skipped" for goal in goals.TUTORIAL)
+    assert page.goals.tutorial.count() >= len(goals.TUTORIAL)

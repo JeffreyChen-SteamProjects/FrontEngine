@@ -110,6 +110,8 @@ Hosts, die einzelne Einstellungsseiten einbetten, müssen über lifetime= eine e
 
 Wenn die Arbeitsliste leer ist, prüfe die Tagesabläufe der Bewohner, die Arbeitsplätze und die Materialien im Rucksack. Wähle einen noch nicht abgeschlossenen Auftrag, um „Aufgabe abbrechen“ zu aktivieren.
 
+Sobald alle Tutorial-Ziele belohnt oder übersprungen wurden, verschwindet die Schaltfläche zum Überspringen; die Liste bleibt zum Nachlesen verfügbar.
+
 ### Auf dem Bildschirm
 
 Medien-Overlays. Jedes wählt seinen Monitor (oder erstreckt sich über alle),

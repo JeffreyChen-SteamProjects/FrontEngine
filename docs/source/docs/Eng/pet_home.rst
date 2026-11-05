@@ -41,3 +41,5 @@ Hosts embedding individual settings pages must pass an explicit DefaultSettingsL
 Home settings keeps the mode selector available while manually selected Meeting mode hides the desktop strip. Undo and redo belong to each room; if furniture is unavailable or no longer fits, the current layout and history stay intact for retry. Esc cancels arranging and area painting. Consecutive photos receive separate files. Lifetime events remain recorded after they leave the recent-history list, and paid workstation upgrades survive temporarily missing furniture packs. Older saves can recover only event records they still contain.
 
 If Work is empty, check residents' routines, workstations and backpack materials. Select an unfinished job to enable Cancel job.
+
+Once all tutorial goals are claimed or skipped, the skip button disappears; the list remains available to review.

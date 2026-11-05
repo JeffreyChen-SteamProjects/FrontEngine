@@ -41,7 +41,8 @@ class GoalsPanel:
         self.tutorial = QListWidget()
         self.tutorial.setMaximumHeight(160)
         section.add_widget(self.tutorial, "pet_home_tutorial", "Getting started")
-        section.add_inline(_button("pet_home_skip_tutorial", "Skip the tutorial", self.skip))
+        self.skip_button = _button("pet_home_skip_tutorial", "Skip the tutorial", self.skip)
+        section.add_inline(self.skip_button)
         self.commissions = QListWidget()
         self.commissions.setMaximumHeight(90)
         section.add_widget(self.commissions, "pet_home_commissions", "Today's commissions")
@@ -57,6 +58,8 @@ class GoalsPanel:
 
     def refresh_lists(self) -> None:
         world = self.page.service.world
+        self.skip_button.setVisible(world is not None and any(
+            goals.goal_state(world, goal) not in ("claimed", "skipped") for goal in goals.TUTORIAL))
         if world is None:
             return
         goals.refresh_commissions(world)

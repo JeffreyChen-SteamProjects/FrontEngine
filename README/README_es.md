@@ -107,6 +107,8 @@ Los hosts que integran páginas de ajustes individuales deben pasar una DefaultS
 
 Si la lista de trabajos está vacía, revisa las rutinas de los residentes, los puestos de trabajo y los materiales de la mochila. Selecciona un trabajo sin terminar para activar su cancelación.
 
+Cuando todas las recompensas del tutorial se hayan cobrado o los objetivos se hayan omitido, el botón para omitirlo desaparece; la lista sigue disponible para consultarla.
+
 ### En pantalla
 
 Superposiciones de medios. Cada una elige su monitor (o abarca todos), recuerda dónde la

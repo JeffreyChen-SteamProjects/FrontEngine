@@ -107,6 +107,8 @@ Hosts embedding individual settings pages must pass an explicit DefaultSettingsL
 
 If Work is empty, check residents' routines, workstations and backpack materials. Select an unfinished job to enable Cancel job.
 
+Once all tutorial goals are claimed or skipped, the skip button disappears; the list remains available to review.
+
 ### On screen
 
 Media overlays. Each one picks its monitor (or spans all of them), remembers

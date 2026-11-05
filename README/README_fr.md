@@ -106,6 +106,8 @@ Les hôtes qui intègrent des pages de réglages individuelles doivent transmett
 
 Si la liste des travaux est vide, vérifiez les routines des habitants, les postes de travail et les matériaux du sac. Sélectionnez un travail inachevé pour activer son annulation.
 
+Une fois toutes les récompenses du tutoriel récupérées ou les objectifs ignorés, le bouton permettant de passer le tutoriel disparaît ; la liste reste consultable.
+
 ### À l'écran
 
 Superpositions média. Chacune choisit son moniteur (ou s'étend sur tous), retient

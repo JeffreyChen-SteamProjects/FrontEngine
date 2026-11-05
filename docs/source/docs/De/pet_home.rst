@@ -41,3 +41,5 @@ Hosts, die einzelne Einstellungsseiten einbetten, müssen über lifetime= eine e
 Die Modusauswahl in den Hauseinstellungen bleibt verfügbar, wenn der manuell gewählte Besprechungsmodus die Desktop-Leiste ausblendet. Rückgängig und Wiederholen haben für jeden Raum einen eigenen Verlauf. Fehlen Möbel oder passen sie nicht mehr, bleiben Anordnung und Verlauf für einen neuen Versuch erhalten. Esc beendet das Einrichten und das Zeichnen von Bereichen. Aufeinanderfolgende Fotos werden in getrennten Dateien gespeichert. Einmalige Lebensereignisse bleiben nach dem Verlassen des jüngsten Verlaufs vermerkt; bezahlte Arbeitsplatz-Upgrades bleiben bei vorübergehend fehlenden Möbelpaketen erhalten. Alte Spielstände können nur noch vorhandene Ereigniseinträge wiederherstellen.
 
 Wenn die Arbeitsliste leer ist, prüfe die Tagesabläufe der Bewohner, die Arbeitsplätze und die Materialien im Rucksack. Wähle einen noch nicht abgeschlossenen Auftrag, um „Aufgabe abbrechen“ zu aktivieren.
+
+Sobald alle Tutorial-Ziele belohnt oder übersprungen wurden, verschwindet die Schaltfläche zum Überspringen; die Liste bleibt zum Nachlesen verfügbar.
