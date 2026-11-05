@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261105-48 | 2026-11-05 | 驗證便條與白板修正進入安裝套件 | #test #packaging #ui | [2026-11](2026-11.md) |
 | U-20261105-47 | 2026-11-05 | 修正白板工具列被半透明畫布蓋暗 | #fix #ui #verification | [2026-11](2026-11.md) |
 | U-20261105-46 | 2026-11-05 | 修正便條文字被繪圖合成器遮住 | #fix #ui #verification | [2026-11](2026-11.md) |
 | U-20261105-45 | 2026-11-05 | 驗證粒子四方向跨混合 DPI 螢幕 | #verification #ui | [2026-11](2026-11.md) |
@@ -305,6 +306,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 101 |
+| [2026-11.md](2026-11.md) | 2026-11 | 102 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
