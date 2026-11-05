@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261106-23 | 2026-11-06 | 核實佇列拒絕提示的完整回歸 | #test #pet #verified | [2026-11](2026-11.md) |
 | U-20261106-22 | 2026-11-06 | 修正工作恢復後的家園場景工具列重疊 | #fix #ui #pet #verified | [2026-11](2026-11.md) |
 | U-20261106-21 | 2026-11-06 | 核實自主工作原因修正的完整回歸 | #test #pet #verified | [2026-11](2026-11.md) |
 | U-20261106-20 | 2026-11-06 | 回報手動工作啟動失敗並支援重試 | #fix #ui #pet #verified | [2026-11](2026-11.md) |
@@ -349,6 +350,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 145 |
+| [2026-11.md](2026-11.md) | 2026-11 | 146 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
