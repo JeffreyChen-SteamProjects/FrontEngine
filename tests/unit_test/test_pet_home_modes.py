@@ -118,7 +118,10 @@ def test_inbox_history_follows_language_changes_and_keeps_repeat_counts(make_mai
     page.inbox.on_events([event, {**event, 'time': 2000}], world)
     english = page.inbox.list.item(0).text()
     try:
+        assert page.set_free_arranging(True)
         assert set_language('France', window)
+        assert page.inbox.list.count() == 0
+        assert page.set_free_arranging(False)
         recipe = world.catalog.recipes['letter']
         expected = translate('pet_home_note_settled').format(
             name=resident.name, recipe=translate(recipe.label_key, recipe.fallback), coins=12)
@@ -201,3 +204,46 @@ def test_inbox_does_not_fold_across_a_clock_reset(page):
     page.inbox.add_error('disk full', 60000)
     page.inbox.add_error('disk full', 0)
     assert page.inbox.list.count() == 2
+
+
+def test_inbox_history_and_unread_belong_to_each_home_mode(page):
+    page.service.pause('test')
+    page.inbox.add_error('Managed notice', 1000)
+    managed_entries = list(page.inbox.entries)
+    managed_unread = page.inbox.unread
+    assert page.set_free_arranging(True)
+    assert page.inbox.entries == []
+    assert page.inbox.unread == 0
+    page.inbox.add_error('Before sandbox creation', 1000)
+    page.create_home()
+    assert page.inbox.entries == []
+    assert page.inbox.unread == 0
+    page.inbox.add_error('Sandbox notice', 1000)
+    sandbox_entries = list(page.inbox.entries)
+    sandbox_unread = page.inbox.unread
+    assert page.set_free_arranging(False)
+    assert page.inbox.entries == managed_entries
+    assert page.inbox.unread == managed_unread
+    page.inbox.mark_read()
+    assert page.set_free_arranging(True)
+    assert page.inbox.entries == sandbox_entries
+    assert page.inbox.unread == sandbox_unread
+    assert page.set_free_arranging(False)
+    assert page.inbox.unread == 0
+
+
+def test_failed_home_mode_switch_keeps_original_inbox(page, monkeypatch):
+    page.service.pause('test')
+    page.inbox.add_error('Managed notice', 1000)
+    assert page.set_free_arranging(True)
+    page.create_home()
+    page.inbox.add_error('Sandbox notice', 1000)
+    assert page.set_free_arranging(False)
+    with monkeypatch.context() as patch:
+        patch.setattr(page.service.store, '_write', lambda *_: (_ for _ in ()).throw(OSError('disk unavailable')))
+        assert not page.set_free_arranging(True)
+    assert page.service.mode == 'manage'
+    texts = [item['event'].get('text') for item in page.inbox.entries]
+    assert 'Managed notice' in texts
+    assert 'Sandbox notice' not in texts
+    assert any('disk unavailable' in str(text) for text in texts)

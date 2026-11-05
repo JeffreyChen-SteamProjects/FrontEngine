@@ -65,3 +65,5 @@ Un travail terminé affiche brièvement une coche sur le poste, y compris après
 Sac à dos, Objectifs, les liens des éléments en attente et la navigation de la barre du bureau font défiler l’onglet choisi du foyer pour le rendre visible, même s’il était déjà sélectionné. La navigation rend aussi le contenu choisi visible lorsqu’elle est utilisée dès l’ouverture de la page du foyer.
 
 Le souhait de jouer se réalise seulement quand cet animal termine son jeu. Le souhait de partager un repas concerne les animaux qui mangent à la même table, pas les spectateurs ni les jeux communs. Un jeu interrompu ne donne pas de récompense ; les souhaits et délais enregistrés sont conservés.
+
+Le foyer géré et le foyer en aménagement libre conservent des historiques et des compteurs de messages non lus distincts pendant la session. Revenir à un foyer restaure ses messages et leur état de lecture ; un changement échoué conserve la boîte actuelle. Un nouveau foyer commence avec un historique vide.

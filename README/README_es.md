@@ -712,3 +712,5 @@ Al terminar un trabajo, la estación muestra brevemente una marca, también tras
 Mochila, Objetivos, los enlaces de tareas pendientes y la navegación de la barra del escritorio desplazan la pestaña elegida del hogar hasta hacerla visible, aunque ya estuviera seleccionada. La navegación también muestra el contenido seleccionado si se usa justo después de abrir la página del hogar.
 
 El deseo de jugar se cumple solo cuando esa mascota termina de jugar. El deseo de comer juntos cuenta solo para quienes comen en la misma mesa, no para espectadores ni juegos compartidos. Interrumpir el juego no concede la recompensa; se conservan los deseos y tiempos de espera guardados.
+
+El hogar gestionado y el de distribución libre mantienen historiales y contadores de mensajes sin leer separados durante la sesión. Al volver se restauran los mensajes y su estado de lectura; si el cambio falla, se conserva la bandeja actual. Un hogar nuevo empieza con un historial vacío.

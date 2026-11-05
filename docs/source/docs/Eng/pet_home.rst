@@ -65,3 +65,5 @@ Completed work briefly marks the workstation with a check, including the final u
 Backpack, Goals, waiting-item links and desktop-strip navigation bring the selected home tab into view, even when that tab was already selected. Navigation also reveals the selected content when used immediately after the home page first appears.
 
 Play wishes complete only when that pet finishes playing. A meal wish completes for the pets eating together at the same table, not for spectators or shared games. Interrupted play gives no wish reward; existing wishes and cooldowns remain compatible with saved homes.
+
+The managed home and free-arranging home keep separate Inbox histories and unread counts during the session. Switching back restores that home’s notes and read state; a failed switch keeps the current Inbox. Creating a new home starts a fresh history.

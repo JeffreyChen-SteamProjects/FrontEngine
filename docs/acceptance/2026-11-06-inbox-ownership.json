@@ -1,0 +1,74 @@
+{
+  "date": "2026-11-06",
+  "issue": 70,
+  "status": "focused tests and native acceptance passed; full regression and independent review pending",
+  "change": "Inbox entries and unread state belong to actual service mode and current home identity. Each mode retains one session-only history.",
+  "native": {
+    "passed": true,
+    "granted": [
+      {
+        "kind": "wish_granted",
+        "resident": "cd53a59142a7496d92090f3a38904067",
+        "time": 1233400,
+        "wish": "play_time"
+      }
+    ],
+    "managed_world_unchanged": true,
+    "profiles_unchanged": true,
+    "sandbox_reward_retained": true,
+    "mode_button_clicks": 3,
+    "create_button_clicked": true,
+    "sandbox_notes": [
+      "Recovery worker's wish came true",
+      "Listening to the rain",
+      "Reward collected (+5)"
+    ],
+    "managed_notes": [],
+    "sandbox_unread": 3,
+    "managed_unread": 0,
+    "restored_inbox": true,
+    "explicit_ticks": 167,
+    "runtime_closed": true,
+    "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-stage-layout\\.audit\\profession-owned-fixed",
+    "saved_snapshot_sha256": "c471f2056e3bf47d41a8073e4a214f8eccec310f6c85a5f6088181f0c4b05172",
+    "scope": "Native private MainUI; actual mode/create/Play buttons with service furniture placement and explicit play wish; injected ticks; host services substituted. Not crash or normal-speed acceptance.",
+    "temporary_directory_removed": true
+  },
+  "observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "child_exit": 0,
+    "observation_only": true
+  },
+  "screenshot_review": "managed-inbox-after-sandbox.png inspected: empty list and 0 new, Inbox tab visible",
+  "red": "2 failed, 18 deselected in 13.56s; no teardown error",
+  "initial_green": "2 passed, 18 deselected in 18.69s",
+  "limits": [
+    "Injected simulation ticks and explicit play wish; not normal-speed or crash acceptance.",
+    "Full regression, integration and independent review remain pending."
+  ],
+  "focused": {
+    "command": "python -m pytest tests/unit_test/test_pet_home_modes.py tests/unit_test/test_home_action_admission.py tests/unit_test/test_pet_home_event_history.py -q",
+    "passed": 54,
+    "seconds": 239.24,
+    "exit": 0
+  },
+  "documentation": {
+    "passed": 27,
+    "seconds": 2.45
+  },
+  "static": "pyflakes clean for both changed Python files; git diff --check passed"
+}

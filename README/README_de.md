@@ -755,3 +755,5 @@ Abgeschlossene Arbeit zeigt kurz ein Häkchen an der Arbeitsstation, auch nach d
 Rucksack, Ziele, Links zu wartenden Aufgaben und die Navigation der Desktop-Leiste scrollen den gewählten Zuhause-Tab ins Blickfeld, auch wenn er bereits ausgewählt war. Auch unmittelbar nach dem ersten Öffnen der Heimseite wird der gewählte Inhalt durch die Navigation sichtbar.
 
 Spielwünsche erfüllen sich nur, wenn das betreffende Haustier sein Spiel beendet. Ein Essenswunsch gilt nur für Tiere, die am selben Tisch essen, nicht für Zuschauer oder gemeinsame Spiele. Unterbrochenes Spielen gibt keine Wunschbelohnung; gespeicherte Wünsche und Wartezeiten bleiben erhalten.
+
+Das verwaltete Zuhause und das Zuhause zum freien Einrichten behalten während der Sitzung getrennte Posteingänge und Ungelesen-Zähler. Beim Zurückwechseln werden die Nachrichten und ihr Lesestatus wiederhergestellt; ein fehlgeschlagener Wechsel behält den aktuellen Posteingang. Ein neues Zuhause beginnt mit einem leeren Verlauf.

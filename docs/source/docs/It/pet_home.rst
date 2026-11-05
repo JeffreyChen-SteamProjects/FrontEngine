@@ -65,3 +65,5 @@ Il lavoro completato mostra brevemente un segno di spunta sulla postazione, anch
 Zaino, Obiettivi, i collegamenti agli elementi in attesa e la navigazione dalla barra sul desktop fanno scorrere la scheda scelta della casa fino a renderla visibile, anche se era già selezionata. La navigazione rende visibile il contenuto scelto anche subito dopo la prima apertura della pagina della casa.
 
 Il desiderio di giocare si realizza solo quando quel cucciolo termina il gioco. Il desiderio di un pasto insieme riguarda chi mangia allo stesso tavolo, non gli spettatori o i giochi condivisi. Un gioco interrotto non dà ricompense; desideri e attese salvati restano compatibili.
+
+La casa gestita e quella con disposizione libera mantengono cronologie e conteggi dei messaggi non letti separati durante la sessione. Tornando a una casa si ripristinano i suoi messaggi e lo stato di lettura; se il cambio non riesce, resta la casella attuale. Una casa nuova inizia con una cronologia vuota.

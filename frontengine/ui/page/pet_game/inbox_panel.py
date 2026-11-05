@@ -7,6 +7,8 @@ not twenty. Meals and naps a pet takes on its own are never listed.
 """
 from __future__ import annotations
 
+from dataclasses import dataclass, field
+
 from frontengine.ui.page.wrapping_buttons import WrappingPushButton as QPushButton
 
 from typing import TYPE_CHECKING
@@ -62,11 +64,17 @@ def line(event: dict) -> str:
     return translate("pet_home_note_failed", "{text}").format(text=event.get("text", ""))
 
 
+@dataclass
+class _InboxHistory:
+    home: str | None
+    entries: list[dict] = field(default_factory=list)
+    unread: int = 0
+
+
 class InboxPanel:
     def __init__(self, page: PetHomePage) -> None:
         self.page = page
-        self.entries: list[dict] = []
-        self.unread = 0
+        self._histories: dict[str, _InboxHistory] = {}
         section = self.section = page.add_section("pet_home_inbox_section", "Inbox")
         self.count = QLabel()
         section.add_widget(self.count)
@@ -76,6 +84,23 @@ class InboxPanel:
         done = tr(QPushButton(), "pet_home_inbox_read", "Mark all as read")
         done.clicked.connect(self.mark_read)
         section.add_inline(done)
+
+    @property
+    def _history(self) -> _InboxHistory:
+        service = self.page.service
+        home = service.world.home if service.world is not None else None
+        history = self._histories.get(service.mode)
+        if history is None or history.home != home:
+            history = self._histories[service.mode] = _InboxHistory(home)
+        return history
+
+    @property
+    def entries(self) -> list[dict]:
+        return self._history.entries
+
+    @property
+    def unread(self) -> int:
+        return self._history.unread
 
     @staticmethod
     def wanted(name: str) -> bool:
@@ -99,20 +124,21 @@ class InboxPanel:
             self.refresh_lists()
 
     def _add(self, event: dict, name: str) -> None:
+        history = self._history
         key = (event["kind"], event.get("resident"), event.get("recipe"), event.get("reason"),
                event.get("event"), event.get("coins"), event.get("text"), event.get("resident_name"),
                event.get("recipe_label"))
-        last = self.entries[-1] if self.entries else None
+        last = history.entries[-1] if history.entries else None
         if last is not None and last["key"] == key and 0 <= event.get("time", 0) - last["time"] <= FOLD_MS:
             last.update(count=last["count"] + 1, time=event.get("time", 0))
         else:
-            self.entries.append({"key": key, "event": event, "count": 1, "time": event.get("time", 0),
+            history.entries.append({"key": key, "event": event, "count": 1, "time": event.get("time", 0),
                                  "category": name})
-            self.entries = self.entries[-MAX_LINES:]
-        self.unread += 1
+            history.entries = history.entries[-MAX_LINES:]
+        history.unread += 1
 
     def mark_read(self) -> None:
-        self.unread = 0
+        self._history.unread = 0
         self.refresh_lists()
 
     def refresh_lists(self) -> None:

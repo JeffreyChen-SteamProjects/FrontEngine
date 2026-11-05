@@ -735,3 +735,5 @@ Ao concluir um trabalho, a estação exibe brevemente uma marca de conclusão, i
 Mochila, Objetivos, links de itens pendentes e a navegação da barra da área de trabalho rolam a aba escolhida do lar para deixá-la visível, mesmo quando já estava selecionada. A navegação também mostra o conteúdo selecionado quando usada logo após a página da casa aparecer.
 
 O desejo de brincar só se realiza quando aquele mascote termina de brincar. O desejo de compartilhar uma refeição vale apenas para os mascotes que comem à mesma mesa, não para espectadores ou brincadeiras em grupo. Brincadeiras interrompidas não dão recompensa; desejos e intervalos salvos são preservados.
+
+A casa gerenciada e a de decoração livre mantêm históricos e contadores de mensagens não lidas separados durante a sessão. Ao voltar, as mensagens e seu estado de leitura são restaurados; se a troca falhar, a caixa atual é mantida. Uma casa nova começa com um histórico vazio.
