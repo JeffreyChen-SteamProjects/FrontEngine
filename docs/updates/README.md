@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261106-71 | 2026-11-06 | 收件匣歸屬版本完整回歸驗證 | Pet / Regression / Test | [2026-11](2026-11.md) |
 | U-20261106-70 | 2026-11-06 | 名字邊界修正文件建置與回歸收集 | Docs / Regression / Test | [2026-11](2026-11.md) |
 | U-20261106-69 | 2026-11-06 | 修正家園與桌面長條邊界名字截斷 | UI / Pet / Fix | [2026-11](2026-11.md) |
 | U-20261106-68 | 2026-11-06 | 外部家具包移除與重裝的跨程序驗證 | Pet / Content / Test | [2026-11](2026-11.md) |
@@ -397,6 +398,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 193 |
+| [2026-11.md](2026-11.md) | 2026-11 | 194 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
