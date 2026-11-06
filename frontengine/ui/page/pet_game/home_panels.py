@@ -180,8 +180,10 @@ class ResidentPanel:
     def release(self) -> None:
         resident = self.page.selected_resident
         if resident:
-            self.page.report(self.page.service.release(resident))
-            self.page.select_resident(None)
+            result = self.page.service.release(resident)
+            self.page.report(result)
+            if result == "accepted":
+                self.page.select_resident(None)
 
 
 class LayoutPanel:

@@ -79,3 +79,5 @@ Aktivitätsblasen bleiben an beiden Rändern innerhalb des Desktopstreifens; zu 
 Ein Schlafbefehl führt nach der Rückkehr in den Bereich mit dem eigenen Bett zum Ausruhen, auch bei noch hoher Energie. Stopp oder ein neuer Befehl bricht den Weg ab. Wird das Bett unterwegs eingelagert, ruht sich das Tier nach der Ankunft auf dem Boden aus.
 
 Die Auswahl eines Bewohners in einem anderen Bereich wechselt die Hausübersicht zu dessen Bereich. Bei der Auswahl im aktuellen Bereich oder beim Aufheben der Auswahl bleibt die aktuelle Einrichtungsansicht erhalten.
+
+Wenn das Speichern des Tierprofils beim Auszug fehlschlägt, bleibt der Bewohner ausgewählt. Sobald das Schreiben wieder möglich ist, können Sie den Auszug erneut versuchen.

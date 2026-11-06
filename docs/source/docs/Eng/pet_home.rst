@@ -79,3 +79,5 @@ Activity bubbles stay within the desktop strip at both edges; text wider than th
 A Sleep command continues into rest after the pet crosses back to its own bed, even when its energy is still high. Stop or a replacement command cancels the trip; if the bed is put away during travel, the pet rests on the floor after arriving.
 
 Selecting a resident in another zone switches the home overview to that resident’s zone. Selecting a resident in the current zone or clearing the selection keeps the current layout view.
+
+If saving a pet profile fails during Move out, the resident stays selected so you can retry after restoring write access.

@@ -1,0 +1,119 @@
+{
+  "product": "76618453",
+  "defect": "Move out clears resident selection after profile save failure",
+  "native_failure": {
+    "passed": false,
+    "error": "Traceback (most recent call last):\n  File \"D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-resident-selection\\.audit\\native_work_moveout_save_failure.py\", line 157, in <module>\n    assert page.selected_resident == pet\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n"
+  },
+  "observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "child_exit": 1,
+    "observation_only": true
+  },
+  "assertions_reached_before_failure": [
+    "one actual settings os.replace failure",
+    "world snapshot unchanged",
+    "profile dictionary unchanged",
+    "settings bytes unchanged",
+    "same live session retained",
+    "task progress and two reserved wood unchanged",
+    "duplicate identity acquisition rejected"
+  ],
+  "root_cause": "ResidentPanel.release calls select_resident(None) unconditionally after service.release result",
+  "native_harness_sha256": "5bd3e037349a972d2326ff55a73de7972ba87c17c9395d17c588963e3501330c",
+  "status": "fixed in isolated tree; full regression and independent review pending",
+  "native_fixed": {
+    "passed": true,
+    "failed_replace_count": 1,
+    "failed_release_world_unchanged": true,
+    "failed_release_profiles_unchanged": true,
+    "failed_release_disk_unchanged": true,
+    "failed_release_identity_retained": true,
+    "retry_succeeded": true,
+    "actual_work_and_moveout_buttons": true,
+    "progress_before_release": 20020,
+    "reserved_wood_before_release": 2,
+    "ledger_unchanged": true,
+    "task_cancelled": true,
+    "furniture_released": true,
+    "profile_care_preserved": true,
+    "identity_reacquired_after_release": true,
+    "no_settlement": true,
+    "events": [
+      {
+        "activity": "work",
+        "kind": "activity",
+        "reason": "command",
+        "resident": "cd53a59142a7496d92090f3a38904067",
+        "time": 56478000
+      },
+      {
+        "activity": "work",
+        "kind": "interrupted",
+        "reason": "task_cancelled",
+        "resident": "cd53a59142a7496d92090f3a38904067",
+        "time": 56496400
+      }
+    ],
+    "runtime_closed": true,
+    "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-stage-layout\\.audit\\profession-owned-fixed",
+    "saved_snapshot_sha256": "c471f2056e3bf47d41a8073e4a214f8eccec310f6c85a5f6088181f0c4b05172",
+    "scope": "Private native MainUI Work and Move out buttons during a toy order. Injected simulation clock, explicit fixture materials; one-shot settings os.replace failure, retained world/profile/identity and successful retry; not crash boundaries or all recipes.",
+    "temporary_directory_removed": true
+  },
+  "cold_reopen": {
+    "passed": true,
+    "initial_snapshot_exact": true,
+    "profiles_exact": true,
+    "leases_reacquired": true,
+    "saved_exact": true,
+    "temporary_directory_removed": true
+  },
+  "fixed_observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "child_exit": 0,
+    "observation_only": true
+  },
+  "clean_red": "1 failed, 31 deselected in 4.47s; selected_resident None instead of resident UUID",
+  "initial_red_limitation": "Initial fault injection remained active on assertion failure, causing an additional teardown error at 124.48s. Restored writer before assertions and repeated clean RED.",
+  "green": "2 passed, 30 deselected in 18.47s",
+  "documentation_checks": "54 passed in 3.56s",
+  "sphinx": "HTML -W --keep-going exit 0, build succeeded",
+  "scope": "Private native desktop, actual widget buttons, one-shot settings replace fault and injected simulation clock; not all disk errors, OS input, independent review, or full regression",
+  "artifacts": {
+    ".audit\\native-work-moveout-save-failure-fixed\\cold-result.json": "5bd41edb786e3fe553500e96167a938f64483ad3f1f564c603795a88e3110cbc",
+    ".audit\\native-work-moveout-save-failure-fixed\\moved-out.png": "e8da2f76fc7148267d8bfbef9c847ffb6f8caee738be95f135dd1ab9c50b5f37",
+    ".audit\\native-work-moveout-save-failure-fixed\\observer.json": "108902181ee471ddb835401d5d799d056e70c9ac4aead7d271ce043e584e29a5",
+    ".audit\\native-work-moveout-save-failure-fixed\\profiles.json": "0467d731d9e34a30122ac86c41e524f970575a5ca7d9681d5d8d2a5e7de1cdf7",
+    ".audit\\native-work-moveout-save-failure-fixed\\result.json": "57eb282f553d66c0b9040ef6d6060573ae8e5f4d801b5266f8c96f69a5480ee8",
+    ".audit\\native-work-moveout-save-failure-fixed\\shutdown-world.json": "5b248f4ed17bfd6a9578af1dce1b73b5050b000e5d587c4ad16c1890cba90ba2",
+    ".audit\\native-work-moveout-save-failure-fixed\\stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

@@ -543,3 +543,34 @@ def test_skip_tutorial_hides_button_without_paying_rewards(page):
     assert page.service.world.ledger.coins == coins
     assert all(goals.goal_state(page.service.world, goal) == "skipped" for goal in goals.TUTORIAL)
     assert page.goals.tutorial.count() >= len(goals.TUTORIAL)
+
+
+def test_failed_moveout_keeps_selection_for_retry(page, monkeypatch):
+    from PySide6.QtWidgets import QPushButton
+
+    page.create_home()
+    resident = next(iter(page.service.world.residents.values()))
+    pet = resident.identifier
+    page.select_resident(pet)
+    resident.needs['energy'] = 41
+    original_save = page.service.profiles.save
+
+    def fail_save():
+        raise OSError('Settings write refused')
+
+    monkeypatch.setattr(page.service.profiles, 'save', fail_save)
+    button = next(b for b in page.residents.section.findChildren(QPushButton)
+                  if b.text() == translate('pet_home_release', 'Move out'))
+    button.click()
+    monkeypatch.setattr(page.service.profiles, 'save', original_save)
+    assert pet in page.service.world.residents
+    assert pet in page.service.sessions
+    assert page.selected_resident == pet
+    button = next(b for b in page.residents.section.findChildren(QPushButton)
+                  if b.text() == translate('pet_home_release', 'Move out'))
+    assert button.isEnabled()
+    button.click()
+    assert pet not in page.service.world.residents
+    assert pet not in page.service.sessions
+    assert page.selected_resident is None
+    assert page.service.profiles.get(pet)['energy'] == 41

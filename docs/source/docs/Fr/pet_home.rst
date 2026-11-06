@@ -79,3 +79,5 @@ Les bulles d’activité restent dans la bande du bureau sur les deux bords ; le
 La consigne de dormir se poursuit par du repos après le retour dans la zone du lit attitré, même si l’énergie reste élevée. Arrêter ou donner une autre consigne annule le trajet. Si le lit est rangé pendant le trajet, l’animal fait une sieste au sol à son arrivée.
 
 Sélectionner un résident d’une autre zone affiche cette zone dans la vue d’ensemble du foyer. Sélectionner un résident de la zone actuelle ou annuler la sélection conserve la vue d’aménagement actuelle.
+
+Si l’enregistrement du profil échoue lors du départ, le résident reste sélectionné pour permettre une nouvelle tentative une fois l’accès en écriture rétabli.
