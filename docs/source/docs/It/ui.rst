@@ -120,3 +120,5 @@ Quando lo schermo lo guardano altri
 E :doc:`control_center` per comandare tutto quanto insieme.
 
 Il cambio della lingua aggiorna le opzioni dello schermo di destinazione e l’indicazione dei file recenti. Schermi selezionati, nomi e percorsi dei file e valori selezionati restano invariati, anche dopo aver ricaricato l’elenco dei file recenti.
+
+I messaggi delle interazioni appaiono sopra il pulsante di esecuzione, vicino al focus della tastiera. Nelle finestre strette, i titoli delle sezioni e i pulsanti dei dettagli vanno a capo. I campi di identità e interazione mantengono una larghezza minima leggibile e, se necessario, passano sotto le etichette. Selezione, valori e comandi restano invariati.

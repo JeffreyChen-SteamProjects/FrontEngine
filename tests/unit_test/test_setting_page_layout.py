@@ -143,3 +143,33 @@ def test_content_section_reflows_and_settles_after_height_changes():
     finally:
         host.close()
         host.deleteLater()
+
+
+def test_section_heading_wraps_without_losing_toggle_or_field_value(*, lifetime_factory):
+    from PySide6.QtTest import QTest
+    page = SettingPage('tab_pet_text', lifetime=lifetime_factory())
+    section = page.add_section(QLabel('More ways to add a pet'), collapsed=True)
+    field = QLineEdit('Keep this value')
+    section.add_row('Name', field)
+    page.finish_body()
+    try:
+        page.resize(850, 600)
+        page.show()
+        settle_layout()
+        assert section.toggle_button.y() == section.title_label.y()
+        page.resize(350, 600)
+        settle_layout()
+        assert section.toggle_button.y() > section.title_label.geometry().bottom()
+        viewport = page._scroll.viewport()
+        assert viewport.rect().contains(section.toggle_button.mapTo(viewport, section.toggle_button.rect().bottomRight()))
+        assert page._scroll.horizontalScrollBar().maximum() == 0
+        section.toggle_button.setFocus()
+        QTest.keyClick(section.toggle_button, Qt.Key.Key_Space)
+        settle_layout()
+        assert section.content.isVisible() and field.text() == 'Keep this value'
+        page.resize(850, 600)
+        settle_layout()
+        assert section.toggle_button.y() == section.title_label.y()
+        assert field.text() == 'Keep this value'
+    finally:
+        page.close()

@@ -3,7 +3,7 @@ from pathlib import Path
 
 from frontengine.ui.runtime_lifetime import owned_action, owned_callback
 
-from PySide6.QtWidgets import QComboBox, QFileDialog, QLabel, QLineEdit, QPushButton, QSpinBox
+from PySide6.QtWidgets import QComboBox, QFileDialog, QLabel, QLineEdit, QPushButton, QSpinBox, QSizePolicy
 
 from frontengine.show.pet.pet_profile_session import PetProfileSession
 from frontengine.utils.multi_language.retranslate import retranslator, tr, translate
@@ -58,11 +58,16 @@ class PetProfileControls:
                             'Negative values move left/up. The destination is limited to nearby work space; floor mode ignores vertical movement.')
         self.call_hint.setWordWrap(True)
         section.add_widget(self.call_hint)
+        section.add_widget(self.status)
         section.add_actions(self.interact_button)
         hint = tr(QLabel(), 'pet_profile_hint')
         hint.setWordWrap(True)
         section.add_widget(hint)
-        section.add_widget(self.status)
+        for control in (self.selector, self.name, self.interaction):
+            control.setMinimumWidth(160)
+            policy = control.sizePolicy()
+            policy.setHorizontalPolicy(QSizePolicy.Policy.Ignored)
+            control.setSizePolicy(policy)
         self.selector.currentIndexChanged.connect(self._selected)
         self.rename.clicked.connect(self.rename_selected)
         self.export.clicked.connect(self.export_selected)

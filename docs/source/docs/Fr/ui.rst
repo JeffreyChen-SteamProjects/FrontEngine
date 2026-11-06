@@ -124,3 +124,5 @@ Quand d'autres regardent votre écran
 Et :doc:`control_center` pour tout commander d'un coup.
 
 Changer la langue de l’interface actualise les choix d’écran cible et l’indication des fichiers récents. Les écrans cibles, noms et chemins des fichiers et valeurs sélectionnées restent inchangés, y compris après le rechargement de la liste des fichiers récents.
+
+Les messages d’interaction apparaissent au-dessus du bouton d’exécution, près du focus clavier. Dans les fenêtres étroites, les titres de section et les boutons de détails passent à la ligne. Les champs d’identité et d’interaction gardent une largeur minimale lisible et passent sous leur libellé si nécessaire. La sélection, les valeurs et les commandes sont conservées.

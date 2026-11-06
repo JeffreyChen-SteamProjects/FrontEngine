@@ -742,3 +742,5 @@ Target-monitor choices and the Recent placeholder update when you change the int
 The 3D editor’s Automatic duration and No parent labels follow interface-language changes. Duration values and parent relationships stay unchanged, including after selecting another object and returning.
 
 Adding a built-in character shows installation progress while its character and clothes are generated and validated. The percentage counts completed steps, not remaining time. The progress bar closes when the operation succeeds or fails; closing the wardrobe cancels unfinished work.
+
+Pet interaction feedback appears above Perform interaction so it remains near the keyboard focus. In narrow windows, section headings and their details buttons wrap; pet identity and interaction fields keep a readable minimum width and move below their labels when needed. Selected pets, field values and commands are preserved.

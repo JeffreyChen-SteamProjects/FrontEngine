@@ -785,3 +785,5 @@ Beim Wechsel der Oberflächensprache werden die Zielmonitor-Optionen und der Pla
 Die Beschriftungen für automatische Dauer und fehlendes übergeordnetes Objekt im 3D-Editor folgen der Oberflächensprache. Dauerwerte und Eltern-Kind-Beziehungen bleiben unverändert, auch nach dem Wechsel zu einem anderen Objekt und zurück.
 
 Beim Hinzufügen einer integrierten Figur zeigt ein Fortschrittsbalken die Erstellung und geprüfte Installation der Figur und ihrer Kleidung an. Der Prozentsatz zählt abgeschlossene Schritte und schätzt keine Restzeit. Nach Erfolg oder Fehler wird der Balken ausgeblendet. Das Schließen der Garderobe bricht ausstehende Arbeit ab.
+
+Rückmeldungen zu Tierinteraktionen stehen über „Interaktion ausführen“ und damit nahe am Tastaturfokus. In schmalen Fenstern werden Abschnittstitel und Detailschaltflächen umgebrochen. Identitäts- und Interaktionsfelder behalten eine lesbare Mindestbreite und stehen bei Bedarf unter ihren Beschriftungen. Auswahl, Werte und Befehle bleiben erhalten.

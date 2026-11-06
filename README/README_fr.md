@@ -743,3 +743,5 @@ Changer la langue de l’interface actualise les choix d’écran cible et l’i
 Les indications de durée automatique et d’absence de parent dans l’éditeur 3D suivent la langue de l’interface. La durée et les relations parent-enfant restent inchangées, même après avoir sélectionné un autre objet puis être revenu.
 
 L’ajout d’un personnage intégré affiche la progression de la création et de l’installation validée du personnage et de ses vêtements. Le pourcentage indique les étapes terminées, pas le temps restant. La barre disparaît après réussite ou échec. Fermer la garde-robe annule le travail restant.
+
+Les messages d’interaction apparaissent au-dessus du bouton d’exécution, près du focus clavier. Dans les fenêtres étroites, les titres de section et les boutons de détails passent à la ligne. Les champs d’identité et d’interaction gardent une largeur minimale lisible et passent sous leur libellé si nécessaire. La sélection, les valeurs et les commandes sont conservées.

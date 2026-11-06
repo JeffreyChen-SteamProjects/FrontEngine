@@ -765,3 +765,5 @@ Ao mudar o idioma da interface, as opções do monitor de destino e a indicaçã
 As indicações de duração automática e ausência de objeto pai no editor 3D acompanham o idioma da interface. A duração e as relações entre objetos permanecem iguais, inclusive após selecionar outro objeto e voltar.
 
 Ao adicionar um personagem integrado, uma barra mostra o progresso da geração e da instalação validada do personagem e das roupas. A porcentagem indica etapas concluídas, não o tempo restante. A barra desaparece após sucesso ou falha. Fechar o guarda-roupa cancela o trabalho pendente.
+
+As mensagens de interação aparecem acima do botão de execução, perto do foco do teclado. Em janelas estreitas, os títulos das seções e os botões de detalhes passam para outra linha. Os campos de identidade e interação mantêm uma largura mínima legível e ficam abaixo dos rótulos quando necessário. A seleção, os valores e os comandos são preservados.

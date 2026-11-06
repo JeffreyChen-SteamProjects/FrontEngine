@@ -120,3 +120,5 @@ Showing your screen to other people
 And :doc:`control_center` to command all of them at once.
 
 Target-monitor choices and the Recent placeholder update when you change the interface language. Monitor targets, recent file names and paths, and selected values stay unchanged. Recent lists retain this behavior after reloading.
+
+Pet interaction feedback appears above Perform interaction so it remains near the keyboard focus. In narrow windows, section headings and their details buttons wrap; pet identity and interaction fields keep a readable minimum width and move below their labels when needed. Selected pets, field values and commands are preserved.

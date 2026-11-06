@@ -123,3 +123,5 @@ Wenn andere zusehen
 Und :doc:`control_center`, um alles davon auf einmal zu befehligen.
 
 Beim Wechsel der Oberflächensprache werden die Zielmonitor-Optionen und der Platzhalter für zuletzt verwendete Dateien aktualisiert. Zielmonitore, Dateinamen, Pfade und Auswahlwerte bleiben unverändert. Dies gilt auch nach dem Neuladen der Dateiliste.
+
+Rückmeldungen zu Tierinteraktionen stehen über „Interaktion ausführen“ und damit nahe am Tastaturfokus. In schmalen Fenstern werden Abschnittstitel und Detailschaltflächen umgebrochen. Identitäts- und Interaktionsfelder behalten eine lesbare Mindestbreite und stehen bei Bedarf unter ihren Beschriftungen. Auswahl, Werte und Befehle bleiben erhalten.

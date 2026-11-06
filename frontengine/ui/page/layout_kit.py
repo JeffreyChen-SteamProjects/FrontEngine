@@ -120,9 +120,9 @@ class _SectionShell(QWidget):
         # translated, so reusing it needs no new language key.
         self.title_label = title if isinstance(title, QLabel) else tr(QLabel(), title, fallback)
         self.title_label.setObjectName("sectionHeader")
-        heading = QHBoxLayout()
+        self.title_label.setWordWrap(True)
+        heading = FlowLayout(spacing=8)
         heading.addWidget(self.title_label)
-        heading.addStretch()
         self.toggle_button = QToolButton()
         self.toggle_button.setObjectName("sectionToggle")
         self.toggle_button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
