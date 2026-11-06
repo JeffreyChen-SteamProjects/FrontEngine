@@ -1,0 +1,19 @@
+{
+  "source_commit": "6cfe606a",
+  "status": "reproduced, not fixed",
+  "surface": "Offscreen Qt, real TodoService and TodoRepository in an owned temporary directory",
+  "trigger": "QMessageBox.question returns Yes after TodoDialog.reject while TodoPanel._clear is suspended.",
+  "observed": {
+    "before_persisted_tasks": 1,
+    "after_persisted_tasks": 0,
+    "dialog_visible": false
+  },
+  "cause": "TodoPanel._clear submits clear after consuming a confirmation result without checking whether its panel was closed or destroyed.",
+  "next": [
+    "Reproduce reject/destruction and protect the confirmation boundary.",
+    "Inspect adjacent calendar-import picker for the same defect.",
+    "Verify live cancellation/retry, reusable dialog reopening and shared Today widget updates.",
+    "Verify native MainUI, synchronize docs, full regression and independent review."
+  ],
+  "limits": "Injected confirmation result; no user data, OS input or native confirmation interaction. No EXE conversion."
+}
