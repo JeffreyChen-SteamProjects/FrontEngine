@@ -8,7 +8,6 @@ from frontengine.show.scene.scene import SceneManager
 from frontengine.ui.page.scene_setting.scene_manager import SceneManagerUI
 from frontengine.ui.page.scene_setting.scene_page.registry import SCENE_PAGE_REGISTRY
 from frontengine.utils.logging.loggin_instance import front_engine_logger
-from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.ui.page.scene_setting.scene_visual_editor import SceneVisualEditor
 from frontengine.utils.multi_language.retranslate import retranslator, tr
 from frontengine.ui.page.scene_setting.scene_actions import SceneActions
@@ -30,12 +29,12 @@ class SceneSettingUI(SettingPage):
         self.visual_editor = SceneVisualEditor(self.scene_manager_ui, lifetime=self.lifetime)
         visual_index = self.tab_widget.addTab(self.visual_editor, "")
         retranslator.bind(self.tab_widget, "scene_visual_editor", "", "setTabText", visual_index)
-        self.tab_widget.addTab(
-            self.scene_manager_ui, language_wrapper.language_word_dict.get("scene_script")
-        )
+        script_index = self.tab_widget.addTab(self.scene_manager_ui, "")
+        retranslator.bind(self.tab_widget, "scene_script", "", "setTabText", script_index)
 
         for ui_class, label_key in SCENE_PAGE_REGISTRY:
-            self.tab_widget.addTab(ui_class(self.scene_manager_ui, lifetime=self.lifetime), language_wrapper.language_word_dict.get(label_key))
+            index = self.tab_widget.addTab(ui_class(self.scene_manager_ui, lifetime=self.lifetime), "")
+            retranslator.bind(self.tab_widget, label_key, "", "setTabText", index)
 
         # 場景的子分頁留著：那是「這個場景裡有哪些東西」，和主導覽是不同層次的
         # 選擇，攤平反而看不出它們屬於同一個場景。

@@ -69,3 +69,34 @@ def test_scene_option_labels_follow_language_without_editing_document(
             assert not changes
     finally:
         window.language_menu.actions()[0].trigger()
+
+
+@pytest.mark.parametrize('selected_tab', range(9))
+def test_scene_tab_labels_follow_language_without_replacing_pages(make_main_window, selected_tab):
+    from frontengine.ui.page.scene_setting.scene_page.registry import SCENE_PAGE_REGISTRY
+
+    window = make_main_window()
+    page = window.scene_setting_ui
+    tabs = page.tab_widget
+    keys = ['scene_visual_editor', 'scene_script', *[key for _, key in SCENE_PAGE_REGISTRY]]
+    assert tabs.count() == len(keys)
+    page.visual_editor.document.add({'type': 'TEXT', 'text': 'Keep this scene'}, 'Add text')
+    tabs.setCurrentIndex(selected_tab)
+    widgets = [tabs.widget(i) for i in range(tabs.count())]
+    scene = page.visual_editor.document.scene.copy().envelope()
+    script = page.scene_manager_ui.json_plaintext.toPlainText()
+    undo_index = page.visual_editor.document.undo.index()
+    changes = []
+    tabs.currentChanged.connect(changes.append)
+    try:
+        for index in [*range(len(LANGUAGES)), 0]:
+            window.language_menu.actions()[index].trigger()
+            assert [tabs.tabText(i) for i in range(tabs.count())] == [translate(key) for key in keys]
+            assert tabs.currentIndex() == selected_tab
+            assert [tabs.widget(i) for i in range(tabs.count())] == widgets
+            assert page.visual_editor.document.scene.envelope() == scene
+            assert page.scene_manager_ui.json_plaintext.toPlainText() == script
+            assert page.visual_editor.document.undo.index() == undo_index
+            assert not changes
+    finally:
+        window.language_menu.actions()[0].trigger()

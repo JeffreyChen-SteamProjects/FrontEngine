@@ -777,3 +777,5 @@ Kann ein neues Tierprofil nicht gespeichert werden, zeigt das Zuhause einen Fehl
 Beim Wechsel der Oberflächensprache werden auch die Auswahltexte für Qualität, Messmodus, Texterfassung, Kamerarahmen und Spektrumstil aktualisiert. Die ausgewählten Werte bleiben erhalten; der Sprachwechsel wendet keine andere Werkzeugeinstellung an.
 
 Beim Wechsel der Oberflächensprache werden auch die Optionen für Transformationswerkzeug, Achse, Koordinatenraum, Projektion und Lichttyp im 3D-Editor aktualisiert. Auswahlwerte, Szeneninhalt und Rückgängig-Verlauf bleiben unverändert.
+
+Auch die Beschriftungen der Unterregister für Szenenskript und Medien folgen der Oberflächensprache. Das ausgewählte Register und seine Seite bleiben erhalten, ebenso Szeneninhalt und Rückgängig-Verlauf.

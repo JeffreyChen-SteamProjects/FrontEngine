@@ -34,3 +34,5 @@
 Windows 封装共用 Python CLI 的 --preset 和 --debug。原生封装验收前，在构建环境安装可选 frontengine[puppet] 运行时（包含 Pillow 动态解码插件及已安装 Imervue 的包数据）。用 ``py tests/integration/scene_build_fixtures.py FIXTURES --puppet SAMPLE.puppet`` 生成本地合成素材（生成视频另需 PyAV）。在原生桌面运行 ``FrontEngine.exe --verify-scene-build FIXTURES REPORT``，REPORT 必须是新目录。固定验收以临时目录隔离设置、保持预览静音，只建立自己的场景／编辑器窗口，验证七种类型、旧／版本化 JSON、导出再加载、GIF 动画、网页交互、撤销重做、暂停恢复和清理，写入 result.json 和预览 PNG 后退出；不执行传入的 Python 测试脚本。请检查报告及退出码，缺少运行时或原生渲染会明确失败。
 
 切换界面语言时，3D 编辑器的变换工具、轴向、坐标空间、投影与光源类型选项也会更新。选取值、场景内容与撤销记录保持不变。
+
+场景脚本与媒体子分页标签也会随界面语言更新，不会切换当前分页或重建页面；场景内容与撤销记录保持不变。

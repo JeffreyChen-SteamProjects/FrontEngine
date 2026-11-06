@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261106-97 | 2026-11-06 | Refresh scene sub-tab labels without replacing pages | #fix #ui #localization | [2026-11](2026-11.md) |
 | U-20261106-96 | 2026-11-06 | Verify visible native 3D choices and reproduce stale scene tabs | #verification #ui #localization | [2026-11](2026-11.md) |
 | U-20261106-95 | 2026-11-06 | Verify 3D option documentation and queue full regression | #verification #ui #localization | [2026-11](2026-11.md) |
 | U-20261106-94 | 2026-11-06 | Refresh 3D editor choices when the language changes | #fix #ui #localization | [2026-11](2026-11.md) |
@@ -423,6 +424,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 219 |
+| [2026-11.md](2026-11.md) | 2026-11 | 220 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
