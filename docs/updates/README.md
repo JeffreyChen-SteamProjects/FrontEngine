@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261106-90 | 2026-11-06 | Verify native page routes and record stale translated choices | #verification #ui #localization | [2026-11](2026-11.md) |
 | U-20261106-89 | 2026-11-06 | Verify native close refusal and recovery at three save stages | #verification #pet #lifecycle | [2026-11](2026-11.md) |
 | U-20261106-88 | 2026-11-06 | Verify completed two-hour native home soak and both cold reopens | #verification #pet #stability | [2026-11](2026-11.md) |
 | U-20261106-87 | 2026-11-06 | Report pet profile creation failures and keep retry available | #fix #pet #ui #storage | [2026-11](2026-11.md) |
@@ -416,6 +417,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 212 |
+| [2026-11.md](2026-11.md) | 2026-11 | 213 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
