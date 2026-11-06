@@ -121,3 +121,5 @@ Wenn andere zusehen
 * :doc:`widgets` - Audio-Spektrum, Systemmonitor, aktuelle Wiedergabe, Notizen.
 
 Und :doc:`control_center`, um alles davon auf einmal zu befehligen.
+
+Beim Wechsel der Oberflächensprache werden die Zielmonitor-Optionen und der Platzhalter für zuletzt verwendete Dateien aktualisiert. Zielmonitore, Dateinamen, Pfade und Auswahlwerte bleiben unverändert. Dies gilt auch nach dem Neuladen der Dateiliste.

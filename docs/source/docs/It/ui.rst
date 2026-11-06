@@ -118,3 +118,5 @@ Quando lo schermo lo guardano altri
 * :doc:`widgets` - spettro audio, monitor di sistema, in riproduzione, foglietti.
 
 E :doc:`control_center` per comandare tutto quanto insieme.
+
+Il cambio della lingua aggiorna le opzioni dello schermo di destinazione e l’indicazione dei file recenti. Schermi selezionati, nomi e percorsi dei file e valori selezionati restano invariati, anche dopo aver ricaricato l’elenco dei file recenti.

@@ -736,3 +736,5 @@ Changing the interface language also updates the choices for quality, measuring 
 Changing the interface language updates the 3D editor’s transform tool, axis, coordinate space, projection and light-type choices. Selected values, scene content and undo history stay unchanged.
 
 Scene script and media sub-tab labels also follow the interface language without changing the selected tab or recreating its page. Scene content and undo history are preserved.
+
+Target-monitor choices and the Recent placeholder update when you change the interface language. Monitor targets, recent file names and paths, and selected values stay unchanged. Recent lists retain this behavior after reloading.

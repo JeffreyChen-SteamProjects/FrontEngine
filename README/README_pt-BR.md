@@ -759,3 +759,5 @@ Ao mudar o idioma da interface, as opções de qualidade, modo de medição, lei
 Ao mudar o idioma da interface, as opções de ferramenta de transformação, eixo, espaço de coordenadas, projeção e tipo de luz do editor 3D também são atualizadas. Os valores selecionados, o conteúdo da cena e o histórico de desfazer permanecem iguais.
 
 Os rótulos das subabas de script de cena e de mídia também acompanham o idioma da interface, sem mudar a aba selecionada nem recriar sua página. O conteúdo da cena e o histórico de desfazer são preservados.
+
+Ao mudar o idioma da interface, as opções do monitor de destino e a indicação de arquivos recentes são atualizadas. Os monitores de destino, nomes e caminhos dos arquivos e valores selecionados permanecem iguais. Isso também funciona após recarregar a lista de arquivos recentes.

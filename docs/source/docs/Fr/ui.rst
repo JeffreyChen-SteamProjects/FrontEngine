@@ -122,3 +122,5 @@ Quand d'autres regardent votre écran
   pense-bêtes.
 
 Et :doc:`control_center` pour tout commander d'un coup.
+
+Changer la langue de l’interface actualise les choix d’écran cible et l’indication des fichiers récents. Les écrans cibles, noms et chemins des fichiers et valeurs sélectionnées restent inchangés, y compris après le rechargement de la liste des fichiers récents.

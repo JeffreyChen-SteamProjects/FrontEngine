@@ -118,3 +118,5 @@ Showing your screen to other people
 * :doc:`widgets` - audio spectrum, system monitor, now playing, sticky notes.
 
 And :doc:`control_center` to command all of them at once.
+
+Target-monitor choices and the Recent placeholder update when you change the interface language. Monitor targets, recent file names and paths, and selected values stay unchanged. Recent lists retain this behavior after reloading.

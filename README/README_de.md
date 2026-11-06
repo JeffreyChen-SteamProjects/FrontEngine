@@ -779,3 +779,5 @@ Beim Wechsel der Oberflächensprache werden auch die Auswahltexte für Qualität
 Beim Wechsel der Oberflächensprache werden auch die Optionen für Transformationswerkzeug, Achse, Koordinatenraum, Projektion und Lichttyp im 3D-Editor aktualisiert. Auswahlwerte, Szeneninhalt und Rückgängig-Verlauf bleiben unverändert.
 
 Auch die Beschriftungen der Unterregister für Szenenskript und Medien folgen der Oberflächensprache. Das ausgewählte Register und seine Seite bleiben erhalten, ebenso Szeneninhalt und Rückgängig-Verlauf.
+
+Beim Wechsel der Oberflächensprache werden die Zielmonitor-Optionen und der Platzhalter für zuletzt verwendete Dateien aktualisiert. Zielmonitore, Dateinamen, Pfade und Auswahlwerte bleiben unverändert. Dies gilt auch nach dem Neuladen der Dateiliste.

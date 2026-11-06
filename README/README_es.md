@@ -736,3 +736,5 @@ Al cambiar el idioma de la interfaz también se actualizan las opciones de calid
 Al cambiar el idioma de la interfaz, se actualizan las opciones de herramienta de transformación, eje, espacio de coordenadas, proyección y tipo de luz del editor 3D. Los valores seleccionados, el contenido de la escena y el historial de deshacer no cambian.
 
 Las etiquetas de las subpestañas del script de escena y de medios también siguen el idioma de la interfaz, sin cambiar la pestaña seleccionada ni recrear su página. Se conservan el contenido de la escena y el historial de deshacer.
+
+Al cambiar el idioma de la interfaz, se actualizan las opciones del monitor de destino y el texto indicativo de archivos recientes. Los monitores de destino, nombres y rutas de archivos y valores seleccionados no cambian. Esto también funciona después de recargar la lista de archivos recientes.

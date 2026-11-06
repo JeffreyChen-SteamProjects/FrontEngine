@@ -100,3 +100,89 @@ def test_scene_tab_labels_follow_language_without_replacing_pages(make_main_wind
             assert not changes
     finally:
         window.language_menu.actions()[0].trigger()
+
+
+@pytest.mark.parametrize('page_key, attribute, key', [
+    ('tab_focus_text', 'target_monitor_combobox', 'target_monitor_here'),
+    ('tab_gif_text', 'recent_files_combobox', 'recent_files_label'),
+    ('tab_gif_text', 'target_monitor_combobox', 'target_monitor_here'),
+    ('tab_image_text', 'recent_files_combobox', 'recent_files_label'),
+    ('tab_image_text', 'target_monitor_combobox', 'target_monitor_here'),
+    ('tab_particle_text', 'recent_files_combobox', 'recent_files_label'),
+    ('tab_particle_text', 'target_monitor_combobox', 'target_monitor_here'),
+    ('tab_pet_text', 'recent_files_combobox', 'recent_files_label'),
+    ('tab_pet_text', 'target_monitor_combobox', 'target_monitor_here'),
+    ('tab_presentation_text', 'target_monitor_combobox', 'target_monitor_here'),
+    ('tab_screen_care_text', 'target_monitor_combobox', 'target_monitor_here'),
+    ('tab_text_text', 'target_monitor_combobox', 'target_monitor_here'),
+    ('tab_video_text', 'recent_files_combobox', 'recent_files_label'),
+    ('tab_video_text', 'target_monitor_combobox', 'target_monitor_here'),
+    ('tab_web_text', 'target_monitor_combobox', 'target_monitor_here'),
+])
+def test_shared_option_labels_follow_language_without_selection_changes(
+        make_main_window, page_key, attribute, key):
+    window = make_main_window()
+    page = next(widget for widget, name, _ in window.command_pages if name == page_key)
+    combo = getattr(page, attribute)
+    combo.setCurrentIndex(combo.count() - 1)
+    selected = combo.currentData()
+    values = [combo.itemData(i) for i in range(combo.count())]
+    changes = []
+    combo.currentIndexChanged.connect(changes.append)
+    try:
+        for index in [*range(len(LANGUAGES)), 0]:
+            window.language_menu.actions()[index].trigger()
+            assert combo.itemText(0) == translate(key)
+            assert combo.currentData() == selected
+            assert [combo.itemData(i) for i in range(combo.count())] == values
+            assert not changes
+    finally:
+        window.language_menu.actions()[0].trigger()
+
+
+def test_shared_monitor_span_label_keeps_target_on_language_change(make_main_window):
+    from frontengine.ui.page.utils import build_target_monitor_combobox, SPAN_ALL_DATA
+
+    window = make_main_window()
+    combo = build_target_monitor_combobox(screens=[object(), object()])
+    combo.setParent(window)
+    combo.setCurrentIndex(combo.findData(SPAN_ALL_DATA))
+    changes = []
+    combo.currentIndexChanged.connect(changes.append)
+    try:
+        for index in [*range(len(LANGUAGES)), 0]:
+            window.language_menu.actions()[index].trigger()
+            assert combo.itemText(0) == translate('target_monitor_here')
+            assert combo.itemText(3) == translate('target_monitor_span')
+            assert [combo.itemData(i) for i in range(combo.count())] == [None, 0, 1, SPAN_ALL_DATA]
+            assert combo.currentData() == SPAN_ALL_DATA
+            assert not changes
+    finally:
+        window.language_menu.actions()[0].trigger()
+
+
+def test_shared_recent_placeholder_follows_language_after_reload(make_main_window, monkeypatch):
+    from frontengine.ui.page import utils
+
+    window = make_main_window()
+    paths = ['C:/media/first.png', 'C:/media/second.png']
+    monkeypatch.setattr(utils, 'get_recent_files', lambda category: list(paths))
+    combo = utils.build_recent_combobox('image')
+    combo.setParent(window)
+    changes = []
+    combo.currentIndexChanged.connect(changes.append)
+    try:
+        for index in [*range(len(LANGUAGES)), 0]:
+            paths.reverse()
+            utils.reload_recent_combobox(combo, 'image')
+            combo.setCurrentIndex(2)
+            selected = combo.currentData()
+            changes.clear()
+            window.language_menu.actions()[index].trigger()
+            assert combo.itemText(0) == translate('recent_files_label')
+            assert [combo.itemData(i) for i in range(combo.count())] == [None, *paths]
+            assert [combo.itemText(i) for i in (1, 2)] == [path.rsplit('/', 1)[1] for path in paths]
+            assert combo.currentData() == selected
+            assert not changes
+    finally:
+        window.language_menu.actions()[0].trigger()
