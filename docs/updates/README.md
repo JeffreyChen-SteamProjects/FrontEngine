@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261106-105 | 2026-11-06 | Verify native wardrobe keyboard cancellation and focus return | #verification #pet #accessibility | [2026-11](2026-11.md) |
 | U-20261106-104 | 2026-11-06 | Verify seven-language home keyboard matrix at narrower width | #verification #pet #accessibility | [2026-11](2026-11.md) |
 | U-20261106-103 | 2026-11-06 | Verify native home keyboard flows in both themes | #verification #pet #accessibility | [2026-11](2026-11.md) |
 | U-20261106-102 | 2026-11-06 | Verify installed wheel with current localization and pet flows | #verification #packaging #pet | [2026-11](2026-11.md) |
@@ -431,6 +432,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 227 |
+| [2026-11.md](2026-11.md) | 2026-11 | 228 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
