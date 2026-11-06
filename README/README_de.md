@@ -781,3 +781,5 @@ Beim Wechsel der Oberflächensprache werden auch die Optionen für Transformatio
 Auch die Beschriftungen der Unterregister für Szenenskript und Medien folgen der Oberflächensprache. Das ausgewählte Register und seine Seite bleiben erhalten, ebenso Szeneninhalt und Rückgängig-Verlauf.
 
 Beim Wechsel der Oberflächensprache werden die Zielmonitor-Optionen und der Platzhalter für zuletzt verwendete Dateien aktualisiert. Zielmonitore, Dateinamen, Pfade und Auswahlwerte bleiben unverändert. Dies gilt auch nach dem Neuladen der Dateiliste.
+
+Die Beschriftungen für automatische Dauer und fehlendes übergeordnetes Objekt im 3D-Editor folgen der Oberflächensprache. Dauerwerte und Eltern-Kind-Beziehungen bleiben unverändert, auch nach dem Wechsel zu einem anderen Objekt und zurück.

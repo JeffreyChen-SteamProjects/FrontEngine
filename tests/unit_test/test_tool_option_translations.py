@@ -186,3 +186,59 @@ def test_shared_recent_placeholder_follows_language_after_reload(make_main_windo
             assert not changes
     finally:
         window.language_menu.actions()[0].trigger()
+
+
+@pytest.mark.parametrize('duration', [0, 12.5])
+def test_scene_duration_label_follows_language_without_changing_value(make_main_window, duration):
+    window = make_main_window()
+    editor = window.scene_setting_ui.visual_editor
+    spin = editor.editor3d.duration
+    spin.setValue(duration)
+    scene = editor.document.scene.copy().envelope()
+    undo_index = editor.document.undo.index()
+    changes = []
+    spin.valueChanged.connect(changes.append)
+    try:
+        for index in [*range(len(LANGUAGES)), 0]:
+            window.language_menu.actions()[index].trigger()
+            assert spin.specialValueText() == translate('scene3d_auto', 'Automatic')
+            assert spin.value() == duration
+            assert editor.document.scene.envelope() == scene
+            assert editor.document.undo.index() == undo_index
+            assert not changes
+    finally:
+        window.language_menu.actions()[0].trigger()
+
+
+@pytest.mark.parametrize('with_parent', [False, True])
+def test_scene_parent_placeholder_follows_language_after_selection_rebuild(make_main_window, with_parent):
+    window = make_main_window()
+    editor = window.scene_setting_ui.visual_editor
+    previous_scene = editor.document.scene.copy()
+    editor.scene_mode.setCurrentIndex(1)
+    group = editor.document.add({'type': 'GROUP'}, 'Add group')
+    child = editor.document.add({'type': 'CUBE', 'parent': group if with_parent else None}, 'Add cube')
+    editor._select_layer(child)
+    combo = editor.editor3d.parent_box
+    scene = editor.document.scene.copy().envelope()
+    undo_index = editor.document.undo.index()
+    changes = []
+    combo.currentIndexChanged.connect(changes.append)
+    try:
+        for index in [*range(len(LANGUAGES)), 0]:
+            editor._select_layer(group)
+            editor._select_layer(child)
+            values = [combo.itemData(i) for i in range(combo.count())]
+            assert values == [None, group]
+            changes.clear()
+            window.language_menu.actions()[index].trigger()
+            assert combo.itemText(0) == translate('scene3d_no_parent', 'No parent')
+            assert combo.itemText(1) == group
+            assert combo.currentData() == (group if with_parent else None)
+            assert [combo.itemData(i) for i in range(combo.count())] == values
+            assert editor.document.scene.envelope() == scene
+            assert editor.document.undo.index() == undo_index
+            assert not changes
+    finally:
+        window.language_menu.actions()[0].trigger()
+        editor.document.reset(previous_scene)

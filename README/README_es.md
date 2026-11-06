@@ -738,3 +738,5 @@ Al cambiar el idioma de la interfaz, se actualizan las opciones de herramienta d
 Las etiquetas de las subpestañas del script de escena y de medios también siguen el idioma de la interfaz, sin cambiar la pestaña seleccionada ni recrear su página. Se conservan el contenido de la escena y el historial de deshacer.
 
 Al cambiar el idioma de la interfaz, se actualizan las opciones del monitor de destino y el texto indicativo de archivos recientes. Los monitores de destino, nombres y rutas de archivos y valores seleccionados no cambian. Esto también funciona después de recargar la lista de archivos recientes.
+
+Las indicaciones de duración automática y ausencia de objeto padre del editor 3D siguen el idioma de la interfaz. La duración y las relaciones entre objetos se mantienen, incluso después de seleccionar otro objeto y volver.

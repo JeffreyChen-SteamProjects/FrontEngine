@@ -36,3 +36,5 @@ Le build Windows condividono --preset e --debug con la CLI Python. Per la verifi
 Il cambio della lingua dell’interfaccia aggiorna anche le opzioni di strumento di trasformazione, asse, spazio delle coordinate, proiezione e tipo di luce nell’editor 3D. I valori selezionati, il contenuto della scena e la cronologia degli annullamenti restano invariati.
 
 Anche le etichette delle sottoschede dello script della scena e dei contenuti multimediali seguono la lingua dell’interfaccia, senza cambiare la scheda selezionata o ricrearne la pagina. Il contenuto della scena e la cronologia degli annullamenti restano invariati.
+
+Le indicazioni di durata automatica e assenza di un oggetto padre nell’editor 3D seguono la lingua dell’interfaccia. Durata e relazioni tra oggetti restano invariate, anche dopo aver selezionato un altro oggetto ed essere tornati al precedente.

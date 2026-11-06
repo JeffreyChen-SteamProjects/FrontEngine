@@ -206,7 +206,7 @@ class Scene3DEditor(QWidget):
         section.add_row('scene3d_rate', self.rate)
         self.duration = QDoubleSpinBox()
         self.duration.setRange(0, 3600)
-        self.duration.setSpecialValueText(translate('scene3d_auto', 'Automatic'))
+        retranslator.bind(self.duration, 'scene3d_auto', 'Automatic', 'setSpecialValueText')
         self.duration.editingFinished.connect(self._playback_settings)
         section.add_row('scene3d_duration', self.duration)
         self.loop = tr(QCheckBox(), 'scene3d_loop', 'Loop')
@@ -351,7 +351,9 @@ class Scene3DEditor(QWidget):
             self.space.setEnabled(enabled and kind in MEDIA_TYPES)
             self.space.setCurrentIndex(self.space.findData((entry or {}).get('space', 'screen' if kind in MEDIA_TYPES else 'world')))
             self.parent_box.clear()
-            self.parent_box.addItem(translate('scene3d_no_parent', 'No parent'), None)
+            retranslator.forget(self.parent_box)
+            self.parent_box.addItem('', None)
+            retranslator.bind(self.parent_box, 'scene3d_no_parent', 'No parent', 'setItemText', 0)
             for key, value in self.document.entries.items():
                 if key not in self.selected and value['type'] == 'GROUP':
                     self.parent_box.addItem(key, key)

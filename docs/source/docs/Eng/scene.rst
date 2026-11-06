@@ -118,3 +118,5 @@ Puppet. Python 3.14 executable builds require Nuitka 4.3.1 or newer.
 Changing the interface language updates the 3D editor’s transform tool, axis, coordinate space, projection and light-type choices. Selected values, scene content and undo history stay unchanged.
 
 Scene script and media sub-tab labels also follow the interface language without changing the selected tab or recreating its page. Scene content and undo history are preserved.
+
+The 3D editor’s Automatic duration and No parent labels follow interface-language changes. Duration values and parent relationships stay unchanged, including after selecting another object and returning.

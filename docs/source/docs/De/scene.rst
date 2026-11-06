@@ -36,3 +36,5 @@ Windows-Builds teilen --preset und --debug mit der Python-CLI. Für native Paket
 Beim Wechsel der Oberflächensprache werden auch die Optionen für Transformationswerkzeug, Achse, Koordinatenraum, Projektion und Lichttyp im 3D-Editor aktualisiert. Auswahlwerte, Szeneninhalt und Rückgängig-Verlauf bleiben unverändert.
 
 Auch die Beschriftungen der Unterregister für Szenenskript und Medien folgen der Oberflächensprache. Das ausgewählte Register und seine Seite bleiben erhalten, ebenso Szeneninhalt und Rückgängig-Verlauf.
+
+Die Beschriftungen für automatische Dauer und fehlendes übergeordnetes Objekt im 3D-Editor folgen der Oberflächensprache. Dauerwerte und Eltern-Kind-Beziehungen bleiben unverändert, auch nach dem Wechsel zu einem anderen Objekt und zurück.

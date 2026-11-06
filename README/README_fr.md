@@ -739,3 +739,5 @@ Changer la langue de l’interface met aussi à jour les choix d’outil de tran
 Les libellés des sous-onglets de script de scène et de médias suivent aussi la langue de l’interface, sans changer l’onglet sélectionné ni recréer sa page. Le contenu de la scène et l’historique d’annulation sont conservés.
 
 Changer la langue de l’interface actualise les choix d’écran cible et l’indication des fichiers récents. Les écrans cibles, noms et chemins des fichiers et valeurs sélectionnées restent inchangés, y compris après le rechargement de la liste des fichiers récents.
+
+Les indications de durée automatique et d’absence de parent dans l’éditeur 3D suivent la langue de l’interface. La durée et les relations parent-enfant restent inchangées, même après avoir sélectionné un autre objet puis être revenu.

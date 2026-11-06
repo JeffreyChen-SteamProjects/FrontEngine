@@ -1,0 +1,111 @@
+{
+  "base_commit": "0c1e8055",
+  "change": "Bind automatic duration special text and rebuilt no-parent placeholder to existing retranslator; no data/schema/signature changes.",
+  "red": {
+    "failed": 4,
+    "seconds": 7.93,
+    "failure": "Automatic and No parent remained English after the Traditional Chinese language action.",
+    "log": ".audit/scene-dynamic-red.txt"
+  },
+  "green": {
+    "scene_options_editor_lifecycle": {
+      "passed": 68,
+      "seconds": 14.54,
+      "log": ".audit/scene-dynamic-green-isolated.txt"
+    },
+    "docs_translations_progress": {
+      "passed": 54,
+      "seconds": 2.83
+    },
+    "pyflakes": "both changed Python files clean"
+  },
+  "excluded_run": {
+    "log": ".audit/scene-dynamic-green.txt",
+    "reason": "New parent test left global 3D scene state. Later existing test cleared scene_json only, entering a modal scene-load error. External Python stack confirmed QMessageBox.warning in SceneVisualEditor.load_document. Terminated exact pytest PID60420, restored prior scene in new test finally, then reran identical suite successfully.",
+    "diagnostic_artifact": ".audit/scene-test-external-stack.txt",
+    "remote_dump_request": "A diagnostic remote_exec was requested but produced no dump before termination; not used as evidence."
+  },
+  "native": {
+    "languages": 7,
+    "dynamic_comparisons": 14,
+    "mismatches": [],
+    "scene_unchanged": true,
+    "undo_unchanged": true,
+    "runtime_closed": true,
+    "temporary_directory_removed": true,
+    "callback_errors": []
+  },
+  "observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "child_exit": 0,
+    "observation_only": true
+  },
+  "evidence_sha256": {
+    "result.json": "d5f4a229f2399be6dba237f4df2564f2183682ec7b0c3a81f7d0a406dc4f63e5",
+    "observer.json": "108902181ee471ddb835401d5d799d056e70c9ac4aead7d271ce043e584e29a5",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "documentation": {
+    "updated": 17,
+    "html": [
+      {
+        "language": "Eng",
+        "latest_paragraph_present": true,
+        "html_sha256": "4209f3a4b009117cd14bb71eb5a3e70ca9e543516f09c4c302528c28c7fa839f"
+      },
+      {
+        "language": "Zh",
+        "latest_paragraph_present": true,
+        "html_sha256": "186f570a77198d361c505e5bab3c1dca6986bf532fce05ca28ffd2a6284889bd"
+      },
+      {
+        "language": "ZhCn",
+        "latest_paragraph_present": true,
+        "html_sha256": "573d0a94b9e4670ffa8e0bc305c47e52e190f5adc1b54f33d73d4643c4ae967e"
+      },
+      {
+        "language": "De",
+        "latest_paragraph_present": true,
+        "html_sha256": "64a29dcf103b91ebd1cd023616c48b3d4f2eaa515e50f256540539a9ee4e81af"
+      },
+      {
+        "language": "Fr",
+        "latest_paragraph_present": true,
+        "html_sha256": "da38fea8fc1c9fa17b5cf76669719b0b87fa88c21b6e97d69c1e8ed3052f7dee"
+      },
+      {
+        "language": "It",
+        "latest_paragraph_present": true,
+        "html_sha256": "8a03e09103f1bd364cfc3c2be47090c45399e7e1af2cf7a8c0604dbf159a9475"
+      },
+      {
+        "language": "Ru",
+        "latest_paragraph_present": true,
+        "html_sha256": "0d821cb923da43365bb8d45f3f3542daed72f21c4a3f0dafa9c83119cefbc421"
+      }
+    ],
+    "sphinx": "-W --keep-going success without warnings/errors"
+  },
+  "collection": {
+    "total": 3303,
+    "seconds": 6.72
+  },
+  "pending": [
+    "Full regression",
+    "Independent review and integration",
+    "Complete native tool and narrow-layout acceptance"
+  ]
+}

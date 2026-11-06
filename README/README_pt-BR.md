@@ -761,3 +761,5 @@ Ao mudar o idioma da interface, as opções de ferramenta de transformação, ei
 Os rótulos das subabas de script de cena e de mídia também acompanham o idioma da interface, sem mudar a aba selecionada nem recriar sua página. O conteúdo da cena e o histórico de desfazer são preservados.
 
 Ao mudar o idioma da interface, as opções do monitor de destino e a indicação de arquivos recentes são atualizadas. Os monitores de destino, nomes e caminhos dos arquivos e valores selecionados permanecem iguais. Isso também funciona após recarregar a lista de arquivos recentes.
+
+As indicações de duração automática e ausência de objeto pai no editor 3D acompanham o idioma da interface. A duração e as relações entre objetos permanecem iguais, inclusive após selecionar outro objeto e voltar.

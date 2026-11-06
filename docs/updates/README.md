@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261106-101 | 2026-11-06 | Refresh automatic duration and no-parent labels | #fix #ui #localization | [2026-11](2026-11.md) |
 | U-20261106-100 | 2026-11-06 | Verify bubble regression and reproduce remaining 3D label gaps | #verification #ui #pet | [2026-11](2026-11.md) |
 | U-20261106-99 | 2026-11-06 | Refresh shared monitor and recent-file option labels | #fix #ui #localization | [2026-11](2026-11.md) |
 | U-20261106-98 | 2026-11-06 | Reproduce stale shared monitor and recent-file labels | #verification #ui #localization | [2026-11](2026-11.md) |
@@ -427,6 +428,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 223 |
+| [2026-11.md](2026-11.md) | 2026-11 | 224 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
