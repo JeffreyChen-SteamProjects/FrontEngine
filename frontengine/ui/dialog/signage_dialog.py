@@ -68,6 +68,8 @@ class SignageDialog(QDialog):
             "Presets are saved from the Presets menu. The rotation wraps at the end, so a "
             "machine left running keeps cycling.")
         self.hint_label.setWordWrap(True)
+        self.status = QLabel()
+        self.status.setWordWrap(True)
 
         self.button_box = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
@@ -82,7 +84,8 @@ class SignageDialog(QDialog):
         layout.addWidget(self.interval_spinbox, 3, 1)
         layout.addWidget(self.hide_checkbox, 4, 0, 1, 2)
         layout.addWidget(self.hint_label, 5, 0, 1, 2)
-        layout.addWidget(self.button_box, 6, 0, 1, 2)
+        layout.addWidget(self.status, 6, 0, 1, 2)
+        layout.addWidget(self.button_box, 7, 0, 1, 2)
 
     def settings(self) -> Dict[str, Any]:
         """對話框上目前的設定。"""
@@ -95,7 +98,17 @@ class SignageDialog(QDialog):
 
     def accept(self) -> None:
         settings = self.settings()
+        had_settings = SETTING_KEY in user_setting_dict
+        previous = user_setting_dict.get(SETTING_KEY)
         user_setting_dict[SETTING_KEY] = settings
-        write_user_setting()
+        try:
+            write_user_setting()
+        except (OSError, ValueError) as error:
+            if had_settings:
+                user_setting_dict[SETTING_KEY] = previous
+            else:
+                user_setting_dict.pop(SETTING_KEY, None)
+            self.status.setText(str(error))
+            return
         front_engine_logger.info(f"[SignageDialog] saved | {len(settings['presets'])} preset(s)")
         super().accept()
