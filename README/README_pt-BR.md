@@ -771,3 +771,5 @@ As mensagens de interação aparecem acima do botão de execução, perto do foc
 Os campos de personalização expõem os rótulos visíveis pela acessibilidade do Qt. Os nomes de petiscos favoritos e rejeitados, tamanho, velocidade, volume, comportamento, conversa e amplitude da animação acompanham o idioma da interface.
 
 Os campos de guarda-roupa e fotos expõem os rótulos visíveis pela acessibilidade do Qt, incluindo espaços de roupas, trajes salvos, pose e tempo da pose. Os nomes acompanham o idioma sem alterar o rascunho ou a foto.
+
+A opção de pose capturada acompanha o idioma da interface e preserva a pose selecionada, seu tempo e a foto.

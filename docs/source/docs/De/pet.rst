@@ -136,3 +136,5 @@ Rückmeldungen zu Tierinteraktionen stehen über „Interaktion ausführen“ un
 Die Felder zur Haustieranpassung stellen ihre sichtbaren Beschriftungen über die Qt-Barrierefreiheit bereit. Die Namen für bevorzugte und ungeliebte Leckerlis, Größe, Geschwindigkeit, Lautstärke, Verhalten, Gesprächigkeit und Animationsumfang folgen der Sprache der Oberfläche.
 
 Die Felder für Garderobe und Haustierfotos stellen ihre sichtbaren Beschriftungen über die Qt-Barrierefreiheit bereit, einschließlich Kleidungsplätzen, gespeicherten Outfits, Pose und Posenzeit. Die Namen folgen der Oberflächensprache, ohne Entwurf oder Foto zu ändern.
+
+Die Option „Aufgenommene Pose“ für Haustierfotos folgt der Oberflächensprache. Ausgewählte Pose, Posenzeit und Foto bleiben erhalten.

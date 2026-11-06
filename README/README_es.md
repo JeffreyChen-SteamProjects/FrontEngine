@@ -748,3 +748,5 @@ Los mensajes de interacción aparecen encima del botón de ejecución, cerca del
 Los campos de personalización exponen sus etiquetas visibles mediante la accesibilidad de Qt. Los nombres de golosinas favoritas y rechazadas, tamaño, velocidad, volumen, comportamiento, charla y amplitud de animación siguen el idioma de la interfaz.
 
 Los campos de vestuario y fotos exponen sus etiquetas visibles mediante la accesibilidad de Qt, incluidos los espacios de ropa, conjuntos guardados, pose y tiempo de pose. Los nombres siguen el idioma sin modificar el borrador ni la foto.
+
+La opción de pose capturada sigue el idioma de la interfaz y conserva la pose seleccionada, su tiempo y la foto.

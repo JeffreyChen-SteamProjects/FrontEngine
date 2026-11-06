@@ -42,7 +42,8 @@ class PetPhotoDialog(QDialog):
         form = QFormLayout()
         layout.addLayout(form)
         self.pose = QComboBox()
-        self.pose.addItem(translate('pet_photo_current', 'Captured pose'), None)
+        self.pose.addItem('', None)
+        tr(self.pose, 'pet_photo_current', 'Captured pose', 'setItemText', 0)
         if renderer:
             for action in renderer.character.actions:
                 self.pose.addItem(action, action)

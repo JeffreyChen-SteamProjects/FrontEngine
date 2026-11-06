@@ -749,3 +749,5 @@ Les messages d’interaction apparaissent au-dessus du bouton d’exécution, pr
 Les champs de personnalisation exposent leurs libellés visibles via l’accessibilité Qt. Les noms des friandises préférées ou détestées, de la taille, de la vitesse, du volume, du comportement, du bavardage et de l’amplitude des animations suivent la langue de l’interface.
 
 Les champs de garde-robe et de photo exposent leurs libellés visibles via l’accessibilité Qt, notamment les emplacements de vêtements, les tenues enregistrées, la pose et son instant. Ces noms suivent la langue de l’interface sans modifier le brouillon ni la photo.
+
+L’option « Pose capturée » suit la langue de l’interface sans changer la pose sélectionnée, son instant ni la photo.

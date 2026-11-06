@@ -134,3 +134,5 @@ Pet interaction feedback appears above Perform interaction so it remains near th
 Pet customization fields expose their visible labels through Qt accessibility. Favorite and disliked treats, size, speed, volume, behaviour, chatter and animation size keep their names in sync when the interface language changes.
 
 Wardrobe and pet-photo fields expose their visible labels through Qt accessibility, including clothing slots, saved outfits, pose and pose time. These names follow interface-language changes without changing the draft or photo.
+
+The pet-photo Captured pose option follows interface-language changes while preserving the selected pose, pose time and photo.

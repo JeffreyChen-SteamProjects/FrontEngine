@@ -136,3 +136,5 @@ I messaggi delle interazioni appaiono sopra il pulsante di esecuzione, vicino al
 I campi di personalizzazione espongono le etichette visibili tramite l’accessibilità Qt. I nomi di snack preferiti e sgraditi, dimensioni, velocità, volume, comportamento, loquacità e ampiezza delle animazioni seguono la lingua dell’interfaccia.
 
 I campi del guardaroba e delle foto espongono le etichette visibili tramite l’accessibilità Qt, inclusi gli slot degli abiti, i completi salvati, la posa e il relativo istante. I nomi seguono la lingua dell’interfaccia senza modificare la bozza o la foto.
+
+L’opzione «Posa acquisita» segue la lingua dell’interfaccia, mantenendo la posa selezionata, il relativo istante e la foto.
