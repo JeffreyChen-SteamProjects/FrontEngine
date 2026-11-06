@@ -793,3 +793,5 @@ Die Felder zur Haustieranpassung stellen ihre sichtbaren Beschriftungen über di
 Die Felder für Garderobe und Haustierfotos stellen ihre sichtbaren Beschriftungen über die Qt-Barrierefreiheit bereit, einschließlich Kleidungsplätzen, gespeicherten Outfits, Pose und Posenzeit. Die Namen folgen der Oberflächensprache, ohne Entwurf oder Foto zu ändern.
 
 Die Option „Aufgenommene Pose“ für Haustierfotos folgt der Oberflächensprache. Ausgewählte Pose, Posenzeit und Foto bleiben erhalten.
+
+Wird das Fotofenster während der Wahl des Speicherorts geschlossen, wird der zurückgegebene Pfad ignoriert. Es wird kein neues Foto geschrieben und keine vorhandene Datei überschrieben. Geschlossene Fotofenster lehnen auch spätere Speicheranfragen ab.

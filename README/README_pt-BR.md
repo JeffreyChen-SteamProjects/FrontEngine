@@ -773,3 +773,5 @@ Os campos de personalização expõem os rótulos visíveis pela acessibilidade 
 Os campos de guarda-roupa e fotos expõem os rótulos visíveis pela acessibilidade do Qt, incluindo espaços de roupas, trajes salvos, pose e tempo da pose. Os nomes acompanham o idioma sem alterar o rascunho ou a foto.
 
 A opção de pose capturada acompanha o idioma da interface e preserva a pose selecionada, seu tempo e a foto.
+
+Se a janela da foto fechar durante a escolha do local de salvamento, o caminho retornado será ignorado. Nenhuma foto será criada e os arquivos existentes serão preservados. A janela fechada também rejeita pedidos posteriores de salvamento.

@@ -8,6 +8,64 @@ from frontengine.user_setting.pet_profiles import PetProfiles
 from test_pet_variants import variant_asset
 
 
+def test_cancelled_photo_destination_allows_later_save(tmp_path, monkeypatch):
+    from PySide6.QtWidgets import QFileDialog
+
+    image = QImage(2, 2, QImage.Format.Format_ARGB32)
+    image.fill(QColor(255, 0, 0, 128))
+    dialog = PetPhotoDialog(image)
+    target = tmp_path / 'photo.png'
+    choices = iter([('', ''), (str(target), 'PNG (*.png)')])
+    monkeypatch.setattr(QFileDialog, 'getSaveFileName', lambda *_args: next(choices))
+    try:
+        dialog.choose_destination()
+        assert not target.exists()
+        dialog.choose_destination()
+        assert QImage(str(target)) == image
+    finally:
+        dialog.close()
+
+
+@pytest.mark.parametrize('closing', ['reject', 'close', 'destroy'])
+@pytest.mark.parametrize('existing', [False, True])
+def test_photo_closed_during_destination_choice_never_writes(tmp_path, monkeypatch, closing, existing):
+    from PySide6.QtCore import QCoreApplication, QEvent
+    from PySide6.QtWidgets import QFileDialog
+    from shiboken6 import isValid
+
+    image = QImage(2, 2, QImage.Format.Format_ARGB32)
+    image.fill(QColor('red'))
+    dialog = PetPhotoDialog(image)
+    dialog.show()
+    target = tmp_path / 'photo.png'
+    if existing:
+        target.write_bytes(b'original')
+
+    def choose(*_args):
+        if closing == 'reject':
+            dialog.reject()
+        else:
+            dialog.close()
+        if closing == 'destroy':
+            QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+        return str(target), 'PNG (*.png)'
+
+    monkeypatch.setattr(QFileDialog, 'getSaveFileName', choose)
+    try:
+        dialog.choose_destination()
+        monkeypatch.setattr(QFileDialog, 'getSaveFileName',
+                            lambda *_args: pytest.fail('Closed photo opened another file picker'))
+        dialog.choose_destination()
+        assert not dialog.save_to(target)
+        if existing:
+            assert target.read_bytes() == b'original'
+        else:
+            assert not target.exists()
+    finally:
+        if isValid(dialog):
+            dialog.close()
+
+
 @pytest.mark.parametrize('pose', [None, 'sleep'])
 def test_photo_language_change_preserves_pose_time_and_image(tmp_path, pose):
     from frontengine.utils.multi_language.language_wrapper import language_wrapper

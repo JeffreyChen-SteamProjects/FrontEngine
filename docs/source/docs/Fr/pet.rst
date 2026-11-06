@@ -140,3 +140,5 @@ Les champs de personnalisation exposent leurs libellés visibles via l’accessi
 Les champs de garde-robe et de photo exposent leurs libellés visibles via l’accessibilité Qt, notamment les emplacements de vêtements, les tenues enregistrées, la pose et son instant. Ces noms suivent la langue de l’interface sans modifier le brouillon ni la photo.
 
 L’option « Pose capturée » suit la langue de l’interface sans changer la pose sélectionnée, son instant ni la photo.
+
+Si la fenêtre photo se ferme pendant le choix de l’emplacement, le chemin retourné est ignoré. Aucune nouvelle photo n’est écrite et les fichiers existants restent inchangés. Une fenêtre photo fermée refuse aussi les demandes ultérieures d’enregistrement.

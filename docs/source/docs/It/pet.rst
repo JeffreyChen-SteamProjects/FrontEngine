@@ -138,3 +138,5 @@ I campi di personalizzazione espongono le etichette visibili tramite l’accessi
 I campi del guardaroba e delle foto espongono le etichette visibili tramite l’accessibilità Qt, inclusi gli slot degli abiti, i completi salvati, la posa e il relativo istante. I nomi seguono la lingua dell’interfaccia senza modificare la bozza o la foto.
 
 L’opzione «Posa acquisita» segue la lingua dell’interfaccia, mantenendo la posa selezionata, il relativo istante e la foto.
+
+Se la finestra della foto si chiude durante la scelta della destinazione, il percorso restituito viene ignorato. Non viene scritta una nuova foto e i file esistenti restano invariati. La finestra chiusa rifiuta anche le successive richieste di salvataggio.

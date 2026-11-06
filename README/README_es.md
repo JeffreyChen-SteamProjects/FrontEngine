@@ -750,3 +750,5 @@ Los campos de personalización exponen sus etiquetas visibles mediante la accesi
 Los campos de vestuario y fotos exponen sus etiquetas visibles mediante la accesibilidad de Qt, incluidos los espacios de ropa, conjuntos guardados, pose y tiempo de pose. Los nombres siguen el idioma sin modificar el borrador ni la foto.
 
 La opción de pose capturada sigue el idioma de la interfaz y conserva la pose seleccionada, su tiempo y la foto.
+
+Si la ventana de foto se cierra al elegir la ubicación de guardado, se ignora la ruta devuelta. No se crea ninguna foto ni se sobrescriben archivos existentes. La ventana cerrada también rechaza solicitudes posteriores de guardado.
