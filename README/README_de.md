@@ -799,3 +799,5 @@ Wird das Fotofenster während der Wahl des Speicherorts geschlossen, wird der zu
 Wird die Garderobe während der Ordner- oder Farbauswahl geschlossen, wird die zurückgegebene Auswahl verworfen. Es startet keine Installation und keine Farbe wird geändert. Weitere Auswahlaufrufe der geschlossenen Garderobe werden ebenfalls ignoriert.
 
 Wird der Sprite-Paketeditor während der Auswahl eines Bildes, Importordners, Exportordners oder Exportnamens geschlossen, verwirft er die zurückgegebene Auswahl. Er startet keinen neuen Auftrag und lässt den Entwurf unverändert. Wird nur der Auswahldialog abgebrochen, bleibt der Editor für einen weiteren Versuch verfügbar.
+
+Wird der Aufnahmeeditor während der Auswahl eines Speicherorts geschlossen, verwirft er den Pfad, ohne eine Datei zu erstellen oder zu überschreiben. Beim Schließen während der Texteingabe wird der zurückgegebene Text verworfen. Wird nur der Speicher- oder Textdialog abgebrochen, bleibt der Editor für einen weiteren Versuch verfügbar.

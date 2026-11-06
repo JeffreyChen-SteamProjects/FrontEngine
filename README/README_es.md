@@ -756,3 +756,5 @@ Si la ventana de foto se cierra al elegir la ubicación de guardado, se ignora l
 Cerrar el vestuario al elegir una carpeta o un color descarta el resultado. No se inicia ninguna instalación ni cambia el color. También se ignoran las solicitudes posteriores de selección del vestuario cerrado.
 
 Si el editor de paquetes de sprites se cierra mientras se elige una imagen, una carpeta de importación, una carpeta de exportación o un nombre de exportación, se descarta la selección devuelta. No se inicia ninguna tarea nueva ni se modifica el borrador. Cancelar solo el selector permite volver a intentarlo en el editor.
+
+Si el editor de capturas se cierra mientras se elige dónde guardar, se descarta el destino sin crear ni sobrescribir archivos. Cerrarlo durante la entrada de texto también descarta el texto devuelto. Cancelar solo el diálogo de guardado o de texto permite volver a intentarlo en el editor.

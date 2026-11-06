@@ -757,3 +757,5 @@ Si la fenêtre photo se ferme pendant le choix de l’emplacement, le chemin ret
 Fermer la garde-robe pendant le choix d’un dossier ou d’une couleur annule le résultat retourné. Aucune installation ne démarre et aucune couleur ne change. Les demandes ultérieures de sélection de cette garde-robe fermée sont aussi ignorées.
 
 Si l’éditeur de packs de sprites se ferme pendant le choix d’une image, d’un dossier d’importation, d’un dossier d’exportation ou d’un nom d’exportation, le choix renvoyé est ignoré. Aucune nouvelle tâche ne démarre et le brouillon reste inchangé. Annuler uniquement le sélecteur permet de réessayer dans l’éditeur.
+
+Si l’éditeur de capture se ferme pendant le choix de l’emplacement d’enregistrement, la destination est ignorée sans créer ni écraser de fichier. Le fermer pendant la saisie de texte ignore aussi le texte renvoyé. Annuler uniquement la boîte de dialogue d’enregistrement ou de texte permet de réessayer dans l’éditeur.
