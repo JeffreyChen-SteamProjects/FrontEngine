@@ -20,6 +20,8 @@ from frontengine.ui.page.utils import (
     apply_combobox_data_state,
     apply_combobox_text_state,
     build_recent_combobox,
+    apply_target_monitor_state,
+    target_monitor_state,
     build_target_monitor_combobox,
     enable_file_drop,
     reload_recent_combobox,
@@ -798,7 +800,7 @@ class PetSettingUI(SettingPage):
             "talk": self.talk_checkbox.isChecked(),
             "sound": self.pet_sound_path,
             "sit": self.sit_checkbox.isChecked(),
-            "target_monitor": self.target_monitor_combobox.currentText(),
+            "target_monitor": target_monitor_state(self.target_monitor_combobox),
             "volume": self.volume_combobox.currentText(),
             "audio_react": self.audio_react_checkbox.isChecked(),
             "audio_source": self.audio_source_combobox.currentData(),
@@ -811,13 +813,13 @@ class PetSettingUI(SettingPage):
 
     def set_state(self, state: dict) -> None:
         """把預設集的內容還原到這一頁的控制項上。"""
+        apply_target_monitor_state(self.target_monitor_combobox, state.get("target_monitor"))
         self._restore_media(state)
         apply_combobox_data_state(self.behaviour_combobox, self._behaviour_from(state))
         apply_combobox_data_state(self.audio_source_combobox, state.get("audio_source"))
         apply_combobox_text_state(state, (
             (self.size_combobox, "size"),
             (self.speed_combobox, "speed"),
-            (self.target_monitor_combobox, "target_monitor"),
             (self.volume_combobox, "volume"),
             (self.focus_minutes_combobox, "focus_minutes"),
             (self.break_minutes_combobox, "break_minutes"),

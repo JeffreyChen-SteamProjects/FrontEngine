@@ -200,6 +200,31 @@ def build_target_monitor_combobox(screens=None) -> QComboBox:
     return combobox
 
 
+def target_monitor_state(combobox: QComboBox) -> str:
+    """Serialize the selected destination independently of its translated label."""
+    data = combobox.currentData()
+    return "here" if data is None else str(data)
+
+
+def apply_target_monitor_state(combobox: QComboBox, value: object) -> None:
+    """Restore a stable destination or a legacy translated label, if available."""
+    if type(value) not in (str, int):
+        return
+    value = str(value)
+    for index in range(combobox.count()):
+        data = combobox.itemData(index)
+        token = "here" if data is None else str(data)
+        if value == token:
+            combobox.setCurrentIndex(index)
+            return
+    for key, data in (("target_monitor_here", None), ("target_monitor_span", SPAN_ALL_DATA)):
+        if any(value == words.get(key) for words in language_wrapper.choose_language_dict.values()):
+            index = combobox.findData(data)
+            if index >= 0:
+                combobox.setCurrentIndex(index)
+            return
+
+
 def resolve_span(combobox: Optional[QComboBox]) -> bool:
     """使用者是不是選了「橫跨所有螢幕」。"""
     return combobox is not None and combobox.currentData() == SPAN_ALL_DATA

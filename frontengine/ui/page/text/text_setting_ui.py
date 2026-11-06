@@ -14,6 +14,8 @@ from frontengine.ui.page.utils import (
     apply_combobox_data_state,
     apply_combobox_text_state,
     apply_slider_state,
+    apply_target_monitor_state,
+    target_monitor_state,
     build_target_monitor_combobox,
     dispatch_to_monitors,
     resolve_preferred_monitor,
@@ -372,7 +374,7 @@ class TextSettingUI(SettingPage):
             "alignment": self.text_position_combobox.currentText(),
             "show_on_all_screen": self.show_on_all_screen_checkbox.isChecked(),
             "show_on_bottom": self.show_on_bottom_checkbox.isChecked(),
-            "target_monitor": self.target_monitor_combobox.currentText(),
+            "target_monitor": target_monitor_state(self.target_monitor_combobox),
             "color": self.text_color_combobox.currentText(),
             "font_family": self.font_family_combobox.currentFont().family(),
             "marquee": self.marquee_checkbox.isChecked(),
@@ -388,11 +390,11 @@ class TextSettingUI(SettingPage):
 
     def set_state(self, state: dict) -> None:
         """把預設集的內容還原到這一頁的控制項上。"""
+        apply_target_monitor_state(self.target_monitor_combobox, state.get("target_monitor"))
         apply_slider_state(state, ((self.opacity_slider, "opacity"),
                                    (self.font_size_slider, "font_size")))
         apply_combobox_text_state(state, (
             (self.text_position_combobox, "alignment"),
-            (self.target_monitor_combobox, "target_monitor"),
             (self.text_color_combobox, "color"),
             (self.marquee_speed_combobox, "marquee_speed"),
             (self.outline_color_combobox, "outline_color"),

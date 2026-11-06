@@ -12,6 +12,8 @@ from frontengine.ui.page.utils import (
     ask_for_input,
     apply_combobox_text_state,
     apply_slider_state,
+    apply_target_monitor_state,
+    target_monitor_state,
     build_target_monitor_combobox,
     dispatch_to_monitors,
     resolve_preferred_monitor,
@@ -260,7 +262,7 @@ class WEBSettingUI(SettingPage):
             "enable_input": self.enable_input_checkbox.isChecked(),
             "show_on_all_screen": self.show_on_all_screen_checkbox.isChecked(),
             "show_on_bottom": self.show_on_bottom_checkbox.isChecked(),
-            "target_monitor": self.target_monitor_combobox.currentText(),
+            "target_monitor": target_monitor_state(self.target_monitor_combobox),
             "zoom": self.zoom_combobox.currentText(),
             "refresh": self.refresh_combobox.currentText(),
             "dashboard": self.dashboard_edit.toPlainText(),
@@ -268,9 +270,9 @@ class WEBSettingUI(SettingPage):
 
     def set_state(self, state: dict) -> None:
         """把預設集的內容還原到這一頁的控制項上。"""
+        apply_target_monitor_state(self.target_monitor_combobox, state.get("target_monitor"))
         apply_slider_state(state, ((self.opacity_slider, "opacity"),))
         apply_combobox_text_state(state, (
-            (self.target_monitor_combobox, "target_monitor"),
             (self.zoom_combobox, "zoom"),
             (self.refresh_combobox, "refresh"),
         ))

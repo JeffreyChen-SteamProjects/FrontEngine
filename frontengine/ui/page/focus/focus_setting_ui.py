@@ -19,7 +19,13 @@ from frontengine.ui.page.layout_kit import SettingPage
 from frontengine.show.focus_shield.focus_shield_widget import (
     DimBackgroundWidget, DistractionMaskWidget,
 )
-from frontengine.ui.page.utils import build_target_monitor_combobox, coerce_int, resolve_preferred_monitor
+from frontengine.ui.page.utils import (
+    apply_target_monitor_state,
+    target_monitor_state,
+    build_target_monitor_combobox,
+    coerce_int,
+    resolve_preferred_monitor,
+)
 from frontengine.utils.focus_shield.focus_shield import (
     REGION_BOTTOM, REGION_BOTTOM_RIGHT, REGION_FULL, REGION_LEFT, REGION_RIGHT, REGION_TOP,
 )
@@ -205,7 +211,7 @@ class FocusSettingUI(SettingPage):
             "dim": self.dim_slider.value(),
             "mask_region": self.mask_region_combobox.currentData(),
             "mask_percent": self.mask_percent_slider.value(),
-            "target_monitor": self.target_monitor_combobox.currentText(),
+            "target_monitor": target_monitor_state(self.target_monitor_combobox),
         }
 
     def set_state(self, state: dict) -> None:
@@ -217,7 +223,4 @@ class FocusSettingUI(SettingPage):
             index = self.mask_region_combobox.findData(str(state["mask_region"]))
             if index >= 0:
                 self.mask_region_combobox.setCurrentIndex(index)
-        if state.get("target_monitor") is not None:
-            index = self.target_monitor_combobox.findText(str(state["target_monitor"]))
-            if index >= 0:
-                self.target_monitor_combobox.setCurrentIndex(index)
+        apply_target_monitor_state(self.target_monitor_combobox, state.get("target_monitor"))

@@ -20,7 +20,13 @@ from frontengine.show.screen_care.screen_filter import (
     FILTER_COLORS, ReadingRulerWidget, ScreenFilterWidget,
 )
 from frontengine.ui.page.layout_kit import SettingPage
-from frontengine.ui.page.utils import build_target_monitor_combobox, coerce_int, resolve_preferred_monitor
+from frontengine.ui.page.utils import (
+    apply_target_monitor_state,
+    target_monitor_state,
+    build_target_monitor_combobox,
+    coerce_int,
+    resolve_preferred_monitor,
+)
 from frontengine.utils.break_reminder.break_reminder import (
     PHASE_REST, PHASE_WORK, BreakReminder,
 )
@@ -349,16 +355,16 @@ class ScreenCareSettingUI(SettingPage):
             "break_minutes": self.break_minutes_combobox.currentText(),
             "break_seconds": self.break_seconds_combobox.currentText(),
             "all_screens": self.all_screens_checkbox.isChecked(),
-            "target_monitor": self.target_monitor_combobox.currentText(),
+            "target_monitor": target_monitor_state(self.target_monitor_combobox),
         }
 
     def set_state(self, state: dict) -> None:
+        apply_target_monitor_state(self.target_monitor_combobox, state.get("target_monitor"))
         for combobox, key in (
             (self.filter_color_combobox, "filter_color"),
             (self.ruler_band_combobox, "ruler_band"),
             (self.break_minutes_combobox, "break_minutes"),
             (self.break_seconds_combobox, "break_seconds"),
-            (self.target_monitor_combobox, "target_monitor"),
         ):
             if state.get(key) is not None:
                 index = combobox.findText(str(state[key]))

@@ -11,6 +11,8 @@ from frontengine.ui.dialog.choose_file_dialog import choose_image
 from frontengine.ui.page.layout_kit import SettingPage
 from frontengine.ui.page.utils import (
     build_recent_combobox,
+    apply_target_monitor_state,
+    target_monitor_state,
     build_target_monitor_combobox,
     coerce_int,
     dispatch_to_monitors,
@@ -231,7 +233,7 @@ class ParticleSettingUI(SettingPage):
             "count": self.particle_count_combobox.currentText(),
             "speed": self.particle_speed_combobox.currentText(),
             "show_on_all_screen": self.show_on_all_screen_checkbox.isChecked(),
-            "target_monitor": self.target_monitor_combobox.currentText(),
+            "target_monitor": target_monitor_state(self.target_monitor_combobox),
         }
 
     def set_state(self, state: dict) -> None:
@@ -255,7 +257,4 @@ class ParticleSettingUI(SettingPage):
         if "show_on_all_screen" in state:
             self.show_on_all_screen_checkbox.setChecked(bool(state["show_on_all_screen"]))
             self.show_all_screen = bool(state["show_on_all_screen"])
-        if state.get("target_monitor") is not None:
-            index = self.target_monitor_combobox.findText(str(state["target_monitor"]))
-            if index >= 0:
-                self.target_monitor_combobox.setCurrentIndex(index)
+        apply_target_monitor_state(self.target_monitor_combobox, state.get("target_monitor"))

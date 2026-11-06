@@ -28,7 +28,13 @@ from frontengine.show.presentation.keystroke_display import (
 )
 from frontengine.show.presentation.magnifier import MagnifierWidget
 from frontengine.show.freeze.freeze_widget import FreezeWidget, capture_screen
-from frontengine.ui.page.utils import build_target_monitor_combobox, coerce_int, resolve_preferred_monitor
+from frontengine.ui.page.utils import (
+    apply_target_monitor_state,
+    target_monitor_state,
+    build_target_monitor_combobox,
+    coerce_int,
+    resolve_preferred_monitor,
+)
 from frontengine.utils.input_watch.input_watch_service import InputWatchService
 from frontengine.ui.page.layout_kit import SettingPage
 from frontengine.utils.logging.loggin_instance import front_engine_logger
@@ -525,7 +531,7 @@ class PresentationSettingUI(SettingPage):
             "keystroke_position": self.keystroke_position_combobox.currentData(),
             "keystroke_size": self.keystroke_size_combobox.currentText(),
             "keystroke_mouse": self.keystroke_mouse_checkbox.isChecked(),
-            "target_monitor": self.target_monitor_combobox.currentText(),
+            "target_monitor": target_monitor_state(self.target_monitor_combobox),
         }
 
     @staticmethod
@@ -542,13 +548,13 @@ class PresentationSettingUI(SettingPage):
             combobox.setCurrentIndex(index)
 
     def set_state(self, state: dict) -> None:
+        apply_target_monitor_state(self.target_monitor_combobox, state.get("target_monitor"))
         for combobox, key in ((self.annotate_tool_combobox, "annotate_tool"),
                               (self.keystroke_position_combobox, "keystroke_position")):
             self._select_by(combobox, state.get(key), "findData")
         for combobox, key in ((self.annotate_color_combobox, "annotate_color"),
                               (self.magnifier_zoom_combobox, "magnifier_zoom"),
-                              (self.keystroke_size_combobox, "keystroke_size"),
-                              (self.target_monitor_combobox, "target_monitor")):
+                              (self.keystroke_size_combobox, "keystroke_size")):
             self._select_by(combobox, state.get(key), "findText")
         width = coerce_int(state.get("annotate_width"))
         if width is not None:
