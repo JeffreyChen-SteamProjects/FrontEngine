@@ -760,3 +760,5 @@ Si el editor de paquetes de sprites se cierra mientras se elige una imagen, una 
 Si el editor de capturas se cierra mientras se elige dónde guardar, se descarta el destino sin crear ni sobrescribir archivos. Cerrarlo durante la entrada de texto también descarta el texto devuelto. Cancelar solo el diálogo de guardado o de texto permite volver a intentarlo en el editor.
 
 Si la biblioteca de recursos se cierra durante la selección de un archivo o carpeta, se descarta la selección devuelta. Cerrarla durante la confirmación de un nuevo vínculo también impide que esa confirmación envíe cambios. Cancelar solo el selector o la confirmación permite volver a intentarlo en la biblioteca.
+
+Si el editor de tareas se cierra durante la selección del calendario o la confirmación de vaciado, se descarta la selección devuelta y se conservan las tareas guardadas. Cancelar solo el selector o la confirmación permite volver a intentarlo. Al abrirlo de nuevo, el editor sigue sincronizado con la lista compartida.

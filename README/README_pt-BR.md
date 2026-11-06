@@ -783,3 +783,5 @@ Se o editor de pacotes de sprites for fechado durante a escolha de uma imagem, p
 Se o editor de capturas for fechado durante a escolha do local de salvamento, o destino será ignorado sem criar ou sobrescrever arquivos. Fechá-lo durante a entrada de texto também descarta o texto retornado. Cancelar apenas a janela de salvamento ou de texto permite tentar novamente no editor.
 
 Se a biblioteca de recursos for fechada durante a escolha de um arquivo ou pasta, a seleção retornada será ignorada. Fechá-la durante a confirmação de um novo vínculo também impede que essa confirmação envie alterações. Cancelar apenas o seletor ou a confirmação permite tentar novamente na biblioteca.
+
+Se o editor de tarefas for fechado durante a escolha do calendário ou a confirmação de limpeza, a seleção retornada será ignorada e as tarefas salvas serão preservadas. Cancelar apenas o seletor ou a confirmação permite tentar novamente. Ao reabrir, o editor continua sincronizado com a lista compartilhada.

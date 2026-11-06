@@ -21,3 +21,5 @@ Abbruchdatensätze zählen zur 500er-Grenze und verhindern Wiederherstellung dur
 Der Text von Haftnotizen bleibt beim Wechsel des globalen Renderers sichtbar und bearbeitbar.
 
 Beim Wechsel der Oberflächensprache werden auch die Auswahltexte für Qualität, Messmodus, Texterfassung, Kamerarahmen und Spektrumstil aktualisiert. Die ausgewählten Werte bleiben erhalten; der Sprachwechsel wendet keine andere Werkzeugeinstellung an.
+
+Wird der Aufgabeneditor während der Kalenderauswahl oder der Bestätigung zum Leeren geschlossen, verwirft er die zurückgegebene Auswahl und behält gespeicherte Aufgaben bei. Wird nur die Auswahl oder Bestätigung abgebrochen, ist ein weiterer Versuch möglich. Nach dem erneuten Öffnen bleibt der Editor mit der gemeinsamen Aufgabenliste verbunden.

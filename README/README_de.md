@@ -803,3 +803,5 @@ Wird der Sprite-Paketeditor während der Auswahl eines Bildes, Importordners, Ex
 Wird der Aufnahmeeditor während der Auswahl eines Speicherorts geschlossen, verwirft er den Pfad, ohne eine Datei zu erstellen oder zu überschreiben. Beim Schließen während der Texteingabe wird der zurückgegebene Text verworfen. Wird nur der Speicher- oder Textdialog abgebrochen, bleibt der Editor für einen weiteren Versuch verfügbar.
 
 Wird die Medienbibliothek während der Datei- oder Ordnerauswahl geschlossen, verwirft sie die zurückgegebene Auswahl. Wird sie während der Bestätigung einer Neuverknüpfung geschlossen, übernimmt diese Bestätigung keine Änderungen. Wird nur die Auswahl oder Bestätigung abgebrochen, bleibt die Bibliothek für einen weiteren Versuch verfügbar.
+
+Wird der Aufgabeneditor während der Kalenderauswahl oder der Bestätigung zum Leeren geschlossen, verwirft er die zurückgegebene Auswahl und behält gespeicherte Aufgaben bei. Wird nur die Auswahl oder Bestätigung abgebrochen, ist ein weiterer Versuch möglich. Nach dem erneuten Öffnen bleibt der Editor mit der gemeinsamen Aufgabenliste verbunden.

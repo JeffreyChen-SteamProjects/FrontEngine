@@ -20,3 +20,5 @@ Registrazioni di annullamento contano nei 500 e impediscono che vecchi import ri
 Il testo delle note adesive rimane visibile e modificabile quando cambia il motore di rendering globale.
 
 Il cambio della lingua aggiorna anche le opzioni di qualità, modalità di misurazione, lettura del testo, forma della cornice della fotocamera e stile dello spettro. I valori selezionati restano invariati e il cambio di lingua non applica impostazioni diverse agli strumenti.
+
+Se l’editor delle attività viene chiuso durante la scelta del calendario o la conferma di cancellazione di tutte le attività, la scelta restituita viene ignorata e le attività salvate restano invariate. Annullando solo la selezione o la conferma, è possibile riprovare. Alla riapertura, l’editor resta sincronizzato con l’elenco condiviso.

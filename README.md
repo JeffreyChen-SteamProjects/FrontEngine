@@ -760,3 +760,5 @@ Closing the sprite-pack editor while choosing a sprite, import folder, export fo
 Closing the capture editor while choosing a save location discards the destination without creating or overwriting a file. Closing it during text input discards the returned text. Cancelling only the save or text dialog keeps the editor available for another attempt.
 
 Closing the asset library during file or folder selection discards the returned choice. Closing it during relink confirmation also prevents that confirmation from submitting changes. Cancelling only the picker or confirmation keeps the library available for another attempt.
+
+Closing the task editor during calendar selection or clear confirmation discards the returned choice, preserving saved tasks. Cancelling only the picker or confirmation allows another attempt. Reopening the editor keeps it connected to the shared checklist.

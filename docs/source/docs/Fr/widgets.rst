@@ -20,3 +20,5 @@ Traces d’annulation comptent dans les 500 et empêchent les anciens imports de
 Le texte des notes autocollantes reste visible et modifiable lors du changement du moteur de rendu global.
 
 Le changement de langue actualise aussi les choix de qualité, de mode de mesure, de lecture de texte, de forme du cadre de caméra et de style du spectre. Les valeurs sélectionnées restent inchangées ; changer de langue n’applique aucun autre réglage aux outils.
+
+Si l’éditeur de tâches se ferme pendant le choix d’un calendrier ou la confirmation de suppression de toutes les tâches, le choix renvoyé est ignoré et les tâches enregistrées sont conservées. Annuler uniquement le sélecteur ou la confirmation permet de réessayer. Après sa réouverture, l’éditeur reste synchronisé avec la liste partagée.

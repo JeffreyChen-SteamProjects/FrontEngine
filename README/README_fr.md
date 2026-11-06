@@ -761,3 +761,5 @@ Si l’éditeur de packs de sprites se ferme pendant le choix d’une image, d�
 Si l’éditeur de capture se ferme pendant le choix de l’emplacement d’enregistrement, la destination est ignorée sans créer ni écraser de fichier. Le fermer pendant la saisie de texte ignore aussi le texte renvoyé. Annuler uniquement la boîte de dialogue d’enregistrement ou de texte permet de réessayer dans l’éditeur.
 
 Si la bibliothèque de ressources se ferme pendant le choix d’un fichier ou d’un dossier, le choix renvoyé est ignoré. La fermer pendant la confirmation d’une nouvelle liaison empêche aussi cette confirmation de soumettre des modifications. Annuler uniquement le sélecteur ou la confirmation permet de réessayer dans la bibliothèque.
+
+Si l’éditeur de tâches se ferme pendant le choix d’un calendrier ou la confirmation de suppression de toutes les tâches, le choix renvoyé est ignoré et les tâches enregistrées sont conservées. Annuler uniquement le sélecteur ou la confirmation permet de réessayer. Après sa réouverture, l’éditeur reste synchronisé avec la liste partagée.

@@ -19,3 +19,5 @@ Cancellation tombstones count toward the 500-record limit and prevent stale impo
 Sticky note text stays visible and editable when the global rendering backend changes.
 
 Changing the interface language also updates the choices for quality, measuring mode, reading text, camera frame shape and spectrum style. Your selected values stay unchanged, and the language change does not apply a different tool setting.
+
+Closing the task editor during calendar selection or clear confirmation discards the returned choice, preserving saved tasks. Cancelling only the picker or confirmation allows another attempt. Reopening the editor keeps it connected to the shared checklist.
