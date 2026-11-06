@@ -807,3 +807,5 @@ Se o salvamento das configurações de sinalização falhar, a janela mostra o e
 O jantar com amigos ocorre quando pelo menos três moradores comem na mesma área. Refeições em áreas separadas não contam como um encontro. O evento é registrado no máximo uma vez por dia da casa, inclusive após salvar e reabrir.
 
 A lista de predefinições de sinalização e o intervalo de rotação usam seus rótulos visíveis como nomes acessíveis. Os nomes acompanham a mudança de idioma sem alterar as configurações.
+
+As predefinições agendadas mostram rótulos separados para hora e minuto. Os campos de predefinição, hora, minuto, tempo ocioso e origem do protetor de tela usam os rótulos visíveis como nomes acessíveis. Os nomes acompanham o idioma sem mudar os valores selecionados.

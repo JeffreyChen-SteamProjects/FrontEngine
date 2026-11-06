@@ -784,3 +784,5 @@ If saving signage settings fails, the dialog shows the error and keeps your edit
 Dinner with friends occurs when at least three residents are eating in the same area. Residents eating in separate areas do not count as one gathering. The event is recorded at most once per home day, including after saving and reopening the home.
 
 The signage preset list and rotation interval expose their visible labels as accessibility names. These names follow language changes without altering your settings.
+
+Scheduled presets show separate Hour and Minute labels. The preset, hour, minute, screensaver idle duration and source fields expose their visible labels as accessibility names, which follow language changes without changing the selected values.

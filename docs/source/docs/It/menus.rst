@@ -117,3 +117,5 @@ Nell’editor del testo riconosciuto e nell’elenco delle preimpostazioni per l
 Se il salvataggio delle impostazioni di rotazione non riesce, la finestra mostra l’errore e conserva le modifiche. Le impostazioni precedenti restano attive. Risolvi il problema e conferma di nuovo, oppure annulla per scartare le modifiche.
 
 L’elenco delle preimpostazioni e l’intervallo di rotazione usano le etichette visibili come nomi accessibili. I nomi seguono i cambi di lingua senza modificare le impostazioni.
+
+Le preimpostazioni pianificate mostrano etichette separate per ora e minuto. I campi della preimpostazione, dell’ora, del minuto, dell’inattività e della sorgente del salvaschermo usano le etichette visibili come nomi accessibili. I nomi seguono la lingua senza cambiare i valori selezionati.

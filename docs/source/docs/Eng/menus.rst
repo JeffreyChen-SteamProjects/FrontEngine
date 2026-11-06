@@ -116,3 +116,5 @@ In the screen-text result editor and the signage preset list, Tab moves to the n
 If saving signage settings fails, the dialog shows the error and keeps your edits. The previous settings remain active. Correct the problem and confirm again to retry, or cancel to discard your edits.
 
 The signage preset list and rotation interval expose their visible labels as accessibility names. These names follow language changes without altering your settings.
+
+Scheduled presets show separate Hour and Minute labels. The preset, hour, minute, screensaver idle duration and source fields expose their visible labels as accessibility names, which follow language changes without changing the selected values.

@@ -785,3 +785,5 @@ Si l’enregistrement des réglages d’affichage échoue, la boîte de dialogue
 Le dîner entre amis se déclenche lorsque trois habitants au moins mangent dans la même zone. Des repas dans des zones séparées ne constituent pas une même réunion. Cet événement est enregistré au plus une fois par jour du foyer, même après sauvegarde et réouverture.
 
 La liste des préréglages d’affichage et l’intervalle de rotation utilisent leurs libellés visibles comme noms accessibles. Ces noms suivent les changements de langue sans modifier vos réglages.
+
+Les préréglages planifiés affichent des libellés distincts pour l’heure et les minutes. Le préréglage, l’heure, les minutes, la durée d’inactivité et la source de l’économiseur d’écran utilisent leurs libellés visibles comme noms accessibles. Ces noms suivent la langue sans changer les valeurs sélectionnées.

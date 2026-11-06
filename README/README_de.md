@@ -827,3 +827,5 @@ Wenn die Signage-Einstellungen nicht gespeichert werden können, zeigt der Dialo
 Das Ereignis „Abendessen mit Freunden“ tritt auf, wenn mindestens drei Bewohner im selben Bereich essen. Mahlzeiten in getrennten Bereichen zählen nicht als gemeinsames Treffen. Das Ereignis wird höchstens einmal pro Heimtag erfasst, auch nach dem Speichern und erneuten Öffnen.
 
 Die Signage-Preset-Liste und das Wechselintervall verwenden ihre sichtbaren Beschriftungen als barrierefreie Namen. Diese folgen dem Sprachwechsel, ohne Ihre Einstellungen zu ändern.
+
+Geplante Presets zeigen getrennte Beschriftungen für Stunde und Minute. Preset, Stunde, Minute sowie Leerlaufdauer und Quelle des Bildschirmschoners verwenden ihre sichtbaren Beschriftungen als barrierefreie Namen. Diese folgen dem Sprachwechsel, ohne die ausgewählten Werte zu ändern.

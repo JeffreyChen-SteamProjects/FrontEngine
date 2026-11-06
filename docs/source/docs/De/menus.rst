@@ -117,3 +117,5 @@ Im Bildschirmtext-Editor und in der Signage-Preset-Liste wechselt Tab zum nächs
 Wenn die Signage-Einstellungen nicht gespeichert werden können, zeigt der Dialog den Fehler und behält Ihre Eingaben. Die bisherigen Einstellungen bleiben aktiv. Beheben Sie das Problem und bestätigen Sie erneut, oder brechen Sie ab, um die Änderungen zu verwerfen.
 
 Die Signage-Preset-Liste und das Wechselintervall verwenden ihre sichtbaren Beschriftungen als barrierefreie Namen. Diese folgen dem Sprachwechsel, ohne Ihre Einstellungen zu ändern.
+
+Geplante Presets zeigen getrennte Beschriftungen für Stunde und Minute. Preset, Stunde, Minute sowie Leerlaufdauer und Quelle des Bildschirmschoners verwenden ihre sichtbaren Beschriftungen als barrierefreie Namen. Diese folgen dem Sprachwechsel, ohne die ausgewählten Werte zu ändern.

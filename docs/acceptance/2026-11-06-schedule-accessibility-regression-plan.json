@@ -1,0 +1,8 @@
+{
+  "product_test_commit": "8b13ba28",
+  "collected": 3502,
+  "expected_passed": 3499,
+  "expected_skipped": 3,
+  "source_files": 756,
+  "status": "Not launched. Prior parent queue PID 70172 absent and no parent result available; re-audit queue before scheduling."
+}

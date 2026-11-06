@@ -784,3 +784,5 @@ Si falla el guardado de la configuración de señalización, el diálogo muestra
 La cena con amigos ocurre cuando al menos tres residentes comen en la misma zona. Las comidas en zonas separadas no cuentan como una reunión. El evento se registra como máximo una vez por día del hogar, incluso después de guardar y volver a abrir.
 
 La lista de preajustes de señalización y el intervalo de rotación usan sus etiquetas visibles como nombres accesibles. Estos nombres cambian con el idioma sin modificar la configuración.
+
+Los preajustes programados muestran etiquetas separadas para hora y minuto. Los campos de preajuste, hora, minuto, tiempo de inactividad y fuente del salvapantallas usan sus etiquetas visibles como nombres accesibles. Los nombres siguen el idioma sin cambiar los valores seleccionados.
