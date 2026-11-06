@@ -752,3 +752,5 @@ Los campos de vestuario y fotos exponen sus etiquetas visibles mediante la acces
 La opción de pose capturada sigue el idioma de la interfaz y conserva la pose seleccionada, su tiempo y la foto.
 
 Si la ventana de foto se cierra al elegir la ubicación de guardado, se ignora la ruta devuelta. No se crea ninguna foto ni se sobrescriben archivos existentes. La ventana cerrada también rechaza solicitudes posteriores de guardado.
+
+Cerrar el vestuario al elegir una carpeta o un color descarta el resultado. No se inicia ninguna instalación ni cambia el color. También se ignoran las solicitudes posteriores de selección del vestuario cerrado.

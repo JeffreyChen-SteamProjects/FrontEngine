@@ -775,3 +775,5 @@ Os campos de guarda-roupa e fotos expõem os rótulos visíveis pela acessibilid
 A opção de pose capturada acompanha o idioma da interface e preserva a pose selecionada, seu tempo e a foto.
 
 Se a janela da foto fechar durante a escolha do local de salvamento, o caminho retornado será ignorado. Nenhuma foto será criada e os arquivos existentes serão preservados. A janela fechada também rejeita pedidos posteriores de salvamento.
+
+Fechar o guarda-roupa durante a escolha de uma pasta ou cor descarta o resultado. Nenhuma instalação é iniciada e a cor não muda. Pedidos posteriores de seleção do guarda-roupa fechado também são ignorados.

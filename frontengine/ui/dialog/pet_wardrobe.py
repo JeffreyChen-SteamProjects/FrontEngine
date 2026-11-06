@@ -1,5 +1,6 @@
 """Identity-specific wardrobe preview and explicit appearance commits."""
 from __future__ import annotations
+from shiboken6 import isValid
 from frontengine.ui.runtime_lifetime import captured_lifetime, owned_callback, owned_action
 
 from PySide6.QtCore import Qt, QTimer, Slot
@@ -211,8 +212,10 @@ class PetWardrobeDialog(QDialog):
 
     @owned_action
     def _install(self) -> None:
+        if self._closed or not isValid(self):
+            return
         source = self.lifetime.after_dialog(QFileDialog.getExistingDirectory(self, translate('pet_wardrobe_install', 'Install asset folder')))
-        if not source or self._install_job is not None:
+        if self._closed or not isValid(self) or not source or self._install_job is not None:
             return
         self.install_button.setEnabled(False)
         job = PetAssetInstall(self.library, source)
@@ -378,6 +381,8 @@ class PetWardrobeDialog(QDialog):
 
     @owned_action
     def _choose_color(self) -> None:
+        if self._closed or not isValid(self):
+            return
         selected = self.color_region.currentData()
         if selected is None:
             return
@@ -387,7 +392,7 @@ class PetWardrobeDialog(QDialog):
                      if asset_reference(asset) == reference)
         value = self.draft.appearance.get('colors', {}).get(key, {}).get(region, asset.palette[region])
         color = self.lifetime.after_dialog(QColorDialog.getColor(QColor(value), self, translate('pet_wardrobe_color', 'Choose color')))
-        if color.isValid():
+        if not self._closed and isValid(self) and color.isValid():
             self._attempt(lambda: self.draft.set_color(reference, region, color.name()))
 
     @owned_action

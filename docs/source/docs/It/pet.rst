@@ -140,3 +140,5 @@ I campi del guardaroba e delle foto espongono le etichette visibili tramite l’
 L’opzione «Posa acquisita» segue la lingua dell’interfaccia, mantenendo la posa selezionata, il relativo istante e la foto.
 
 Se la finestra della foto si chiude durante la scelta della destinazione, il percorso restituito viene ignorato. Non viene scritta una nuova foto e i file esistenti restano invariati. La finestra chiusa rifiuta anche le successive richieste di salvataggio.
+
+Chiudere il guardaroba durante la scelta di una cartella o di un colore scarta il risultato. Non viene avviata alcuna installazione e il colore non cambia. Anche le successive richieste di selezione del guardaroba chiuso vengono ignorate.

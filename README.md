@@ -752,3 +752,5 @@ Wardrobe and pet-photo fields expose their visible labels through Qt accessibili
 The pet-photo Captured pose option follows interface-language changes while preserving the selected pose, pose time and photo.
 
 If the pet-photo window closes while a save location is being chosen, the returned destination is ignored. No new photo is written and an existing file is left unchanged. Closed photo windows also reject later save requests.
+
+Closing the wardrobe while choosing an asset folder or color discards the returned choice. It starts no installation and makes no color change. Later picker requests from that closed wardrobe are also ignored.

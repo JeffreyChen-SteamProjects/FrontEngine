@@ -5,6 +5,63 @@ import test_pet_wardrobe as fixtures
 wardrobe = fixtures.wardrobe
 
 
+@pytest.mark.parametrize('picker', ['asset', 'color'])
+@pytest.mark.parametrize('closing', ['reject', 'reject_destroy', 'destroy'])
+def test_closed_wardrobe_discards_modal_picker_result(tmp_path, monkeypatch, lifetime_factory, picker, closing):
+    from PySide6.QtCore import QCoreApplication, QEvent
+    from PySide6.QtGui import QColor
+    from PySide6.QtWidgets import QFileDialog, QColorDialog
+    from shiboken6 import isValid
+    from frontengine.ui.dialog import pet_wardrobe as module
+    from frontengine.show.pet.asset_library import PetAssetLibrary
+    from frontengine.show.pet.wardrobe import asset_reference
+    from frontengine.user_setting.pet_profiles import PetProfiles
+    from test_pet_layered import make_asset, write
+
+    source = tmp_path / 'cat'
+    data = make_asset(source)
+    data['palette'] = {'fur': '#ffffff'}
+    write(source, data)
+    library = PetAssetLibrary(tmp_path / 'library')
+    asset = library.install(source)
+    profiles = PetProfiles({}, lambda: None)
+    record = profiles.create()
+    dialog = PetWardrobeDialog(profiles, record['id'], library=library, lifetime=lifetime_factory())
+    dialog.character.setCurrentIndex(dialog.character.findData(asset_reference(asset)))
+    dialog._choose_character()
+    dialog.show()
+    assert dialog.color_region.currentData() is not None
+
+    def choose(*_args):
+        if closing != 'destroy':
+            dialog.reject()
+        else:
+            dialog.deleteLater()
+        if closing != 'reject':
+            QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+        return str(source) if picker == 'asset' else QColor('red')
+
+    monkeypatch.setattr(QFileDialog, 'getExistingDirectory', choose)
+    monkeypatch.setattr(QColorDialog, 'getColor', choose)
+    monkeypatch.setattr(module, 'PetAssetInstall',
+                        lambda *_args: pytest.fail('Closed wardrobe created an installation job'))
+    monkeypatch.setattr(dialog.draft, 'set_color',
+                        lambda *_args: pytest.fail('Closed wardrobe applied a color'))
+    try:
+        (dialog._install if picker == 'asset' else dialog._choose_color)()
+        monkeypatch.setattr(QFileDialog, 'getExistingDirectory',
+                            lambda *_args: pytest.fail('Closed wardrobe opened a directory picker'))
+        monkeypatch.setattr(QColorDialog, 'getColor',
+                            lambda *_args: pytest.fail('Closed wardrobe opened a color picker'))
+        dialog._install()
+        dialog._choose_color()
+        assert dialog._install_job is None
+        assert profiles.get(record['id']) == record
+    finally:
+        if isValid(dialog):
+            dialog.close()
+
+
 class CatalogLibrary:
     def __init__(self, catalog):
         self.catalog = catalog
