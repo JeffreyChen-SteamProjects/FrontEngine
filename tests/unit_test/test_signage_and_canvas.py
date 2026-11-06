@@ -22,6 +22,60 @@ from frontengine.utils.signage.signage_service import (
 START = datetime(2026, 7, 26, 9, 0)
 
 
+@pytest.mark.parametrize('stored', ['missing', 'null', 'settings'])
+@pytest.mark.parametrize('failure', [OSError, ValueError])
+def test_signage_save_failure_preserves_settings_and_allows_retry(tmp_path, monkeypatch, stored, failure):
+    import json
+    from PySide6.QtWidgets import QDialog
+    from frontengine.ui.dialog import signage_dialog as module
+
+    original = {'enabled': False, 'presets': ['Original'], 'interval_minutes': 7, 'hide_window': True}
+    state = {'unrelated': 'keep'}
+    if stored != 'missing':
+        state[module.SETTING_KEY] = original if stored == 'settings' else None
+    monkeypatch.setattr(module, 'user_setting_dict', state)
+    before = dict(state)
+    destination = tmp_path / 'settings.json'
+    destination.write_text(json.dumps(state), encoding='utf-8')
+    before_bytes = destination.read_bytes()
+    attempts = []
+
+    def write():
+        attempts.append(True)
+        if len(attempts) == 1:
+            raise failure('Cannot save signage')
+        destination.write_text(json.dumps(state), encoding='utf-8')
+
+    monkeypatch.setattr(module, 'write_user_setting', write)
+    dialog = module.SignageDialog()
+    dialog.show()
+    dialog.enable_checkbox.setChecked(True)
+    dialog.presets_edit.setPlainText('New one\nNew two')
+    desired = dialog.settings()
+    errors = []
+    try:
+        try:
+            dialog.accept()
+        except (OSError, ValueError) as error:
+            errors.append(str(error))
+        assert state == before
+        if stored == 'settings':
+            assert state[module.SETTING_KEY] is original
+        assert destination.read_bytes() == before_bytes
+        assert not errors
+        assert dialog.isVisible() and dialog.result() != QDialog.DialogCode.Accepted
+        assert 'Cannot save signage' in dialog.status.text()
+        assert dialog.settings() == desired
+        dialog.accept()
+        assert dialog.result() == QDialog.DialogCode.Accepted
+        assert not dialog.isVisible()
+        assert state[module.SETTING_KEY] == desired
+        assert json.loads(destination.read_text(encoding='utf-8')) == state
+        assert state['unrelated'] == 'keep' and len(attempts) == 2
+    finally:
+        dialog.close()
+
+
 # --- signage --------------------------------------------------------------
 def test_the_interval_is_clamped() -> None:
     assert clamp_interval(0) == MIN_INTERVAL_MINUTES
