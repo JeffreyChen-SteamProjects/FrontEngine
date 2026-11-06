@@ -142,3 +142,5 @@ L’opzione «Posa acquisita» segue la lingua dell’interfaccia, mantenendo la
 Se la finestra della foto si chiude durante la scelta della destinazione, il percorso restituito viene ignorato. Non viene scritta una nuova foto e i file esistenti restano invariati. La finestra chiusa rifiuta anche le successive richieste di salvataggio.
 
 Chiudere il guardaroba durante la scelta di una cartella o di un colore scarta il risultato. Non viene avviata alcuna installazione e il colore non cambia. Anche le successive richieste di selezione del guardaroba chiuso vengono ignorate.
+
+Se l’editor dei pacchetti di sprite viene chiuso durante la scelta di un’immagine, della cartella di importazione, della cartella di esportazione o del nome di esportazione, la scelta restituita viene ignorata. Non viene avviata una nuova attività e la bozza resta invariata. Annullando solo la finestra di selezione, è possibile riprovare nell’editor.

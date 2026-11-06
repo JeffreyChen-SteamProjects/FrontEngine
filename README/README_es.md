@@ -754,3 +754,5 @@ La opción de pose capturada sigue el idioma de la interfaz y conserva la pose s
 Si la ventana de foto se cierra al elegir la ubicación de guardado, se ignora la ruta devuelta. No se crea ninguna foto ni se sobrescriben archivos existentes. La ventana cerrada también rechaza solicitudes posteriores de guardado.
 
 Cerrar el vestuario al elegir una carpeta o un color descarta el resultado. No se inicia ninguna instalación ni cambia el color. También se ignoran las solicitudes posteriores de selección del vestuario cerrado.
+
+Si el editor de paquetes de sprites se cierra mientras se elige una imagen, una carpeta de importación, una carpeta de exportación o un nombre de exportación, se descarta la selección devuelta. No se inicia ninguna tarea nueva ni se modifica el borrador. Cancelar solo el selector permite volver a intentarlo en el editor.

@@ -140,3 +140,5 @@ The pet-photo Captured pose option follows interface-language changes while pres
 If the pet-photo window closes while a save location is being chosen, the returned destination is ignored. No new photo is written and an existing file is left unchanged. Closed photo windows also reject later save requests.
 
 Closing the wardrobe while choosing an asset folder or color discards the returned choice. It starts no installation and makes no color change. Later picker requests from that closed wardrobe are also ignored.
+
+Closing the sprite-pack editor while choosing a sprite, import folder, export folder or export name discards the returned choice. It starts no new job and leaves the draft unchanged. Cancelling only the picker keeps the editor available for another attempt.

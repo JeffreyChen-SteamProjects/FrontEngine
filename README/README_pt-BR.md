@@ -777,3 +777,5 @@ A opção de pose capturada acompanha o idioma da interface e preserva a pose se
 Se a janela da foto fechar durante a escolha do local de salvamento, o caminho retornado será ignorado. Nenhuma foto será criada e os arquivos existentes serão preservados. A janela fechada também rejeita pedidos posteriores de salvamento.
 
 Fechar o guarda-roupa durante a escolha de uma pasta ou cor descarta o resultado. Nenhuma instalação é iniciada e a cor não muda. Pedidos posteriores de seleção do guarda-roupa fechado também são ignorados.
+
+Se o editor de pacotes de sprites for fechado durante a escolha de uma imagem, pasta de importação, pasta de exportação ou nome de exportação, a seleção retornada será ignorada. Nenhuma nova tarefa será iniciada e o rascunho permanecerá inalterado. Cancelar apenas o seletor permite tentar novamente no editor.

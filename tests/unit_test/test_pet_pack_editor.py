@@ -168,3 +168,104 @@ def test_export_selection_does_not_spawn_a_pet(tmp_path, *, lifetime_factory):
         assert str(tmp_path / 'output') in dialog.status.text()
     finally:
         dialog.close()
+
+
+@pytest.mark.parametrize('boundary', ['parent', 'name', 'import', 'action'])
+@pytest.mark.parametrize('closing', ['reject', 'reject_destroy', 'destroy'])
+def test_editor_discards_picker_result_after_closing(tmp_path, monkeypatch, lifetime_factory, boundary, closing):
+    from PySide6.QtCore import QCoreApplication, QEvent
+    from PySide6.QtWidgets import QFileDialog, QInputDialog
+    from shiboken6 import isValid
+
+    dialog = PetPackEditor(lifetime=lifetime_factory())
+    dialog.actions['walk'] = sprite(tmp_path)
+    original_actions = dict(dialog.actions)
+    replacement = sprite(tmp_path, 'replacement.png')
+    jobs = []
+    monkeypatch.setattr(dialog.lifetime, 'submit', jobs.append)
+
+    def retire():
+        if closing != 'destroy':
+            dialog.reject()
+        if closing != 'reject':
+            dialog.deleteLater()
+            QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+
+    def choose_parent(*_args, **_kwargs):
+        if boundary in ('parent', 'import'):
+            retire()
+        return str(tmp_path)
+
+    def choose_name(*_args, **_kwargs):
+        assert boundary == 'name', 'closed editor opened another prompt'
+        retire()
+        return 'output', True
+
+    monkeypatch.setattr(QFileDialog, 'getExistingDirectory', choose_parent)
+    monkeypatch.setattr(QInputDialog, 'getText', choose_name)
+    def choose_sprite(*_args, **_kwargs):
+        retire()
+        return replacement, ''
+    monkeypatch.setattr(QFileDialog, 'getOpenFileName', choose_sprite)
+    def invoke():
+        if boundary == 'import':
+            dialog.import_folder()
+        elif boundary == 'action':
+            dialog.choose_action('walk')
+        else:
+            dialog.export_folder()
+    try:
+        invoke()
+        assert jobs == []
+        assert dialog.pending is None
+        assert dialog.actions == original_actions
+        assert not (tmp_path / 'output').exists()
+        def unexpected_picker(*_args, **_kwargs):
+            pytest.fail('closed editor reopened the picker')
+        monkeypatch.setattr(QFileDialog, 'getExistingDirectory', unexpected_picker)
+        monkeypatch.setattr(QFileDialog, 'getOpenFileName', unexpected_picker)
+        invoke()
+    finally:
+        if isValid(dialog):
+            dialog.close()
+
+
+@pytest.mark.parametrize('boundary', ['parent', 'name', 'import', 'action'])
+def test_editor_picker_cancel_allows_retry(tmp_path, monkeypatch, lifetime_factory, boundary):
+    from PySide6.QtWidgets import QFileDialog, QInputDialog
+
+    dialog = PetPackEditor(lifetime=lifetime_factory())
+    source = sprite(tmp_path, 'walk.png')
+    attempts = iter(['', str(tmp_path)])
+    names = iter([('', False), ('exported', True)])
+    images = iter([('', ''), (source, '')])
+    monkeypatch.setattr(QFileDialog, 'getExistingDirectory', lambda *_args: next(attempts) if boundary != 'name' else str(tmp_path))
+    monkeypatch.setattr(QInputDialog, 'getText', lambda *_args, **_kwargs: next(names) if boundary == 'name' else ('exported', True))
+    monkeypatch.setattr(QFileDialog, 'getOpenFileName', lambda *_args: next(images))
+    if boundary in ('parent', 'name'):
+        dialog.actions['walk'] = source
+    before = dict(dialog.actions)
+    def invoke():
+        if boundary == 'import':
+            dialog.import_folder()
+        elif boundary == 'action':
+            dialog.choose_action('walk')
+        else:
+            dialog.export_folder()
+    try:
+        invoke()
+        assert not dialog.closed and dialog.pending is None
+        assert dialog.actions == before
+        assert not (tmp_path / 'exported').exists()
+        invoke()
+        wait(lambda: dialog.pending is None)
+        if boundary in ('parent', 'name'):
+            loaded = packs.load_pack(tmp_path / 'exported')
+            assert loaded.name == 'Sprite pet'
+            assert QImage(loaded.actions['walk']) == QImage(source)
+            assert dialog.use_button.isEnabled()
+        else:
+            assert dialog.actions == {'walk': source}
+            assert dialog.paths['walk'].text() == source
+    finally:
+        dialog.close()

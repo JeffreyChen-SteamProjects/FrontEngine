@@ -797,3 +797,5 @@ Die Option „Aufgenommene Pose“ für Haustierfotos folgt der Oberflächenspra
 Wird das Fotofenster während der Wahl des Speicherorts geschlossen, wird der zurückgegebene Pfad ignoriert. Es wird kein neues Foto geschrieben und keine vorhandene Datei überschrieben. Geschlossene Fotofenster lehnen auch spätere Speicheranfragen ab.
 
 Wird die Garderobe während der Ordner- oder Farbauswahl geschlossen, wird die zurückgegebene Auswahl verworfen. Es startet keine Installation und keine Farbe wird geändert. Weitere Auswahlaufrufe der geschlossenen Garderobe werden ebenfalls ignoriert.
+
+Wird der Sprite-Paketeditor während der Auswahl eines Bildes, Importordners, Exportordners oder Exportnamens geschlossen, verwirft er die zurückgegebene Auswahl. Er startet keinen neuen Auftrag und lässt den Entwurf unverändert. Wird nur der Auswahldialog abgebrochen, bleibt der Editor für einen weiteren Versuch verfügbar.

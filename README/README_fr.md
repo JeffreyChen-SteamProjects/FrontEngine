@@ -755,3 +755,5 @@ L’option « Pose capturée » suit la langue de l’interface sans changer la 
 Si la fenêtre photo se ferme pendant le choix de l’emplacement, le chemin retourné est ignoré. Aucune nouvelle photo n’est écrite et les fichiers existants restent inchangés. Une fenêtre photo fermée refuse aussi les demandes ultérieures d’enregistrement.
 
 Fermer la garde-robe pendant le choix d’un dossier ou d’une couleur annule le résultat retourné. Aucune installation ne démarre et aucune couleur ne change. Les demandes ultérieures de sélection de cette garde-robe fermée sont aussi ignorées.
+
+Si l’éditeur de packs de sprites se ferme pendant le choix d’une image, d’un dossier d’importation, d’un dossier d’exportation ou d’un nom d’exportation, le choix renvoyé est ignoré. Aucune nouvelle tâche ne démarre et le brouillon reste inchangé. Annuler uniquement le sélecteur permet de réessayer dans l’éditeur.
