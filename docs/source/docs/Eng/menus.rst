@@ -108,3 +108,5 @@ Help → Platform capabilities shows read-only adapter prerequisites and precise
 A meter stops its owned capture within 1.25 seconds after reactive sampling ends; a new enabled sample can restart it.
 
 Closing remote-control settings while choosing a public-certificate export path discards the destination. That export creates no certificate or output file and does not overwrite an existing file. Cancelling only the file picker allows another attempt in the open settings dialog.
+
+In Rules, Tab moves from the table to the other controls; arrow keys move between cells. Closing a scene action editor during file selection discards the returned path. Closing Rules while its target editor is open prevents the returned target from changing the rule. Cancelling either picker preserves the previous value, and you can reopen it to try again. Confirming a target changes the draft; confirm Rules to save it.

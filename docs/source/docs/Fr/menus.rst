@@ -111,3 +111,5 @@ Aide → Capacités plateforme lit prérequis/derniers échecs sans capture/éco
 Le compteur arrête sa capture dans les 1,25 seconde suivant la fin des lectures réactives ; une nouvelle lecture activée peut la relancer.
 
 Si les paramètres de télécommande se ferment pendant le choix du chemin d’exportation du certificat public, la destination est ignorée. Cet export ne crée ni certificat ni fichier de sortie et n’écrase aucun fichier existant. Annuler uniquement le sélecteur de fichiers permet de réessayer dans la fenêtre de paramètres restée ouverte.
+
+Dans Règles, Tab quitte le tableau pour les autres commandes ; les flèches passent entre les cellules. Fermer l’éditeur d’action de scène pendant le choix du fichier ignore le chemin. Fermer Règles lorsque l’éditeur de cible est ouvert empêche son résultat de modifier la règle. Annuler conserve la valeur précédente ; rouvrez l’éditeur pour réessayer. Confirmer la cible modifie le brouillon. Confirmez Règles pour l’enregistrer.

@@ -109,3 +109,5 @@ Aiuto → Capacità piattaforma legge prerequisiti/errori senza cattura/ascolto.
 Il misuratore arresta la propria cattura entro 1,25 secondi dalla fine dei campioni reattivi; un nuovo campione abilitato può riavviarla.
 
 Se le impostazioni del controllo remoto vengono chiuse durante la scelta del percorso di esportazione del certificato pubblico, la destinazione viene ignorata. Tale esportazione non crea certificati o file di output e non sovrascrive file esistenti. Annullando solo la selezione del file, è possibile riprovare nella finestra delle impostazioni ancora aperta.
+
+In Regole, Tab passa dalla tabella agli altri controlli; le frecce spostano la selezione tra le celle. Chiudere l’editor dell’azione di scena durante la scelta del file scarta il percorso. Chiudere Regole mentre l’editor della destinazione è aperto impedisce al risultato di modificare la regola. Annullare mantiene il valore precedente; riaprire l’editor per riprovare. Confermare la destinazione modifica la bozza. Confermare Regole per salvarla.

@@ -109,3 +109,5 @@ Hilfe → Plattformfähigkeiten zeigt Voraussetzungen/letzte Fehler ohne Capture
 Ein Pegelmesser beendet seine eigene Aufnahme innerhalb von 1,25 Sekunden nach Ende der reaktiven Abfragen; eine neue aktivierte Abfrage kann sie neu starten.
 
 Werden die Fernsteuerungseinstellungen während der Auswahl eines Exportpfads für das öffentliche Zertifikat geschlossen, wird der Pfad verworfen. Dieser Export erstellt weder ein Zertifikat noch eine Ausgabedatei und überschreibt keine vorhandene Datei. Wird nur die Dateiauswahl abgebrochen, ist im geöffneten Einstellungsdialog ein weiterer Versuch möglich.
+
+In Regeln wechselt Tab von der Tabelle zu den anderen Bedienelementen; Pfeiltasten wechseln zwischen Zellen. Wird der Szenenaktionseditor während der Dateiauswahl geschlossen, wird der Pfad verworfen. Wird das Regelfenster bei geöffnetem Zieleditor geschlossen, ändert dessen Ergebnis die Regel nicht. Abbrechen behält den bisherigen Wert; erneutes Öffnen erlaubt einen weiteren Versuch. Das Bestätigen des Ziels ändert den Entwurf. Erst das Bestätigen des Regelfensters speichert ihn.

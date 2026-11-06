@@ -772,3 +772,5 @@ En el gestor de Workshop, Tab y Mayús+Tab permiten pasar entre campos, incluida
 Cerrar la salida de escena mientras se elige el color de fondo de la cámara descarta ese color y detiene la vista previa. Cancelar solo el selector de color conserva el color actual y mantiene la vista previa. Vuelva a abrir la salida de escena para elegir otro color. La vista previa no abre una cámara.
 
 Cerrar la comparación de imágenes durante la selección de archivos descarta esa selección. Volver a abrirla desde la página Imagen crea una nueva ventana de comparación. Cancelar solo la selección conserva las imágenes actuales; un nuevo par las sustituye tras descodificarse correctamente.
+
+En Reglas, Tab pasa de la tabla a los demás controles y las flechas cambian de celda. Cerrar el editor de acciones de escena durante la selección de un archivo descarta la ruta. Cerrar Reglas con el editor de destino abierto impide que su resultado modifique la regla. Cancelar conserva el valor anterior; puede volver a abrir el editor para reintentar. Confirmar el destino modifica el borrador. Confirme Reglas para guardarlo.

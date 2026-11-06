@@ -795,3 +795,5 @@ No gerenciador do Workshop, Tab e Shift+Tab alternam entre os campos, incluindo 
 Fechar a saída da cena ao escolher a cor de fundo da câmera descarta a cor e interrompe a prévia. Cancelar apenas a seleção de cor mantém a cor atual e a prévia em execução. Reabra a saída da cena para escolher outra cor. A prévia não abre uma câmera.
 
 Fechar a comparação de imagens durante a seleção de arquivos descarta a seleção. Reabri-la pela página Imagem cria uma nova janela de comparação. Cancelar apenas a seleção mantém as imagens atuais; um novo par as substitui após a decodificação bem-sucedida.
+
+Em Regras, Tab sai da tabela para os outros controles; as setas alternam entre células. Fechar o editor de ação de cena durante a seleção de arquivo descarta o caminho. Fechar Regras com o editor de destino aberto impede que o resultado altere a regra. Cancelar mantém o valor anterior; reabra o editor para tentar novamente. Confirmar o destino altera o rascunho. Confirme Regras para salvá-lo.

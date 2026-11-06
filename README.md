@@ -772,3 +772,5 @@ In the Workshop manager, Tab and Shift+Tab move between fields, including the de
 Closing scene output while choosing a camera background discards the returned color and stops the preview. Cancelling only the color picker preserves the current color and keeps the preview running. Reopen scene output to choose a new color. Previewing does not open a camera.
 
 Closing image comparison while choosing files discards the returned selection. Reopening comparison from the Image page creates a fresh comparison window. Cancelling only the file picker keeps the current images; choosing another pair replaces them after decoding succeeds.
+
+In Rules, Tab moves from the table to the other controls; arrow keys move between cells. Closing a scene action editor during file selection discards the returned path. Closing Rules while its target editor is open prevents the returned target from changing the rule. Cancelling either picker preserves the previous value, and you can reopen it to try again. Confirming a target changes the draft; confirm Rules to save it.

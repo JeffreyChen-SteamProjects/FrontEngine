@@ -17,6 +17,7 @@ from typing import Any, Dict, List, Optional
 import json
 import uuid
 from copy import deepcopy
+from shiboken6 import isValid
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
@@ -116,6 +117,7 @@ class RulesDialog(QDialog):
 
     def _build_table(self) -> None:
         self.table = QTableWidget(0, 9)
+        self.table.setTabKeyNavigation(False)
         self.table.setHorizontalHeaderLabels([
             _t("rules_column_label", "Rule"),
             _t("rules_column_days", "Days"),
@@ -177,6 +179,8 @@ class RulesDialog(QDialog):
 
     def choose_target(self) -> None:
         """Edit the selected scene/layer action with file and layer selectors."""
+        if not isValid(self) or not self.isVisible():
+            return
         from frontengine.ui.dialog.scene_action_dialog import SceneActionDialog
         row = self.table.currentRow()
         if row < 0:
@@ -190,9 +194,11 @@ class RulesDialog(QDialog):
             return
         from frontengine.user_setting.scene_setting import scene_json
         dialog = SceneActionDialog(action, self._cell_text(row, _COLUMN_VALUE), scene_json, self)
-        if dialog.exec() == QDialog.DialogCode.Accepted:
+        result = dialog.exec()
+        if isValid(self) and self.isVisible() and isValid(dialog) and result == QDialog.DialogCode.Accepted:
             self.table.item(row, _COLUMN_VALUE).setText(dialog.action_value())
-        dialog.deleteLater()
+        if isValid(dialog):
+            dialog.deleteLater()
 
 
     def add_row(self, rule: Optional[Dict[str, Any]] = None) -> None:

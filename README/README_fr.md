@@ -773,3 +773,5 @@ Dans le gestionnaire Workshop, Tab et Maj+Tab passent entre les champs, y compri
 Fermer la sortie de scène pendant le choix de la couleur de fond de la caméra ignore cette couleur et arrête l’aperçu. Annuler uniquement le sélecteur de couleur conserve la couleur actuelle et laisse l’aperçu actif. Rouvrez la sortie de scène pour choisir une autre couleur. L’aperçu n’ouvre pas de caméra.
 
 Fermer la comparaison d’images pendant le choix des fichiers ignore la sélection. La rouvrir depuis la page Image crée une nouvelle fenêtre de comparaison. Annuler uniquement le choix des fichiers conserve les images actuelles ; une nouvelle paire les remplace une fois le décodage réussi.
+
+Dans Règles, Tab quitte le tableau pour les autres commandes ; les flèches passent entre les cellules. Fermer l’éditeur d’action de scène pendant le choix du fichier ignore le chemin. Fermer Règles lorsque l’éditeur de cible est ouvert empêche son résultat de modifier la règle. Annuler conserve la valeur précédente ; rouvrez l’éditeur pour réessayer. Confirmer la cible modifie le brouillon. Confirmez Règles pour l’enregistrer.
