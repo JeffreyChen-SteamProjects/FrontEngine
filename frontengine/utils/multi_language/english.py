@@ -285,6 +285,8 @@ english_word_dict = {
     "preset_schedule_enable": "Apply a preset on a schedule",
     "preset_schedule_preset": "Preset",
     "preset_schedule_time": "At",
+    "preset_schedule_hour": "Hour",
+    "preset_schedule_minute": "Minute",
     "preset_schedule_days": "On",
     "preset_schedule_hint": "With no day ticked it runs every day. It fires once as the time passes, so starting FrontEngine after that time will not apply it late.",
     "weekday_monday": "Mon",

@@ -284,6 +284,8 @@ italian_word_dict = {
     "preset_schedule_enable": "Applica una preimpostazione a orario",
     "preset_schedule_preset": "Preimpostazione",
     "preset_schedule_time": "Alle",
+    "preset_schedule_hour": "Ora",
+    "preset_schedule_minute": "Minuto",
     "preset_schedule_days": "Nei giorni",
     "preset_schedule_hint": "Senza giorni selezionati vale tutti i giorni. Scatta nel momento in cui l'ora viene superata: avviare FrontEngine dopo non la recupera.",
     "weekday_monday": "Lun",

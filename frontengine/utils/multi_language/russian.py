@@ -284,6 +284,8 @@ russian_word_dict = {
     "preset_schedule_enable": "Применять пресет по расписанию",
     "preset_schedule_preset": "Пресет",
     "preset_schedule_time": "В",
+    "preset_schedule_hour": "Час",
+    "preset_schedule_minute": "Минута",
     "preset_schedule_days": "По дням",
     "preset_schedule_hint": "Если ни один день не отмечен, срабатывает каждый день. Срабатывает в момент наступления времени: запуск FrontEngine позже не применит его задним числом.",
     "weekday_monday": "Пн",

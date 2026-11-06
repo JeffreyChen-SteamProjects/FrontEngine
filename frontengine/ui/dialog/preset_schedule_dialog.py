@@ -72,6 +72,7 @@ class PresetScheduleDialog(QDialog):
 
         self.preset_label = tr(QLabel(), "preset_schedule_preset", "Preset")
         self.preset_combobox = QComboBox()
+        self.preset_label.setBuddy(self.preset_combobox)
         # 只列真的存在的預設集：讓人自己打名字的話，打錯了要等到排程觸發的那一刻
         # 才會發現什麼都沒發生。
         # Only presets that exist are listed: with a free-text name, a typo is
@@ -83,10 +84,14 @@ class PresetScheduleDialog(QDialog):
             self.preset_combobox.setCurrentIndex(index)
 
         self.time_label = tr(QLabel(), "preset_schedule_time", "At")
+        self.hour_label = tr(QLabel(), "preset_schedule_hour", "Hour")
         self.hour_spinbox = QSpinBox()
+        self.hour_label.setBuddy(self.hour_spinbox)
         self.hour_spinbox.setRange(0, 23)
         self.hour_spinbox.setValue(int(settings.get("hour", 9)) % 24)
+        self.minute_label = tr(QLabel(), "preset_schedule_minute", "Minute")
         self.minute_spinbox = QSpinBox()
+        self.minute_label.setBuddy(self.minute_spinbox)
         self.minute_spinbox.setRange(0, 59)
         self.minute_spinbox.setValue(int(settings.get("minute", 0)) % 60)
 
@@ -116,13 +121,15 @@ class PresetScheduleDialog(QDialog):
         layout.addWidget(self.enable_checkbox, 0, 0, 1, 3)
         layout.addWidget(self.preset_label, 1, 0)
         layout.addWidget(self.preset_combobox, 1, 1, 1, 2)
-        layout.addWidget(self.time_label, 2, 0)
-        layout.addWidget(self.hour_spinbox, 2, 1)
-        layout.addWidget(self.minute_spinbox, 2, 2)
-        layout.addWidget(self.days_label, 3, 0)
-        layout.addWidget(days_holder, 3, 1, 1, 2)
-        layout.addWidget(self.hint_label, 4, 0, 1, 3)
-        layout.addWidget(buttons, 5, 0, 1, 3)
+        layout.addWidget(self.time_label, 2, 0, 2, 1)
+        layout.addWidget(self.hour_label, 2, 1)
+        layout.addWidget(self.minute_label, 2, 2)
+        layout.addWidget(self.hour_spinbox, 3, 1)
+        layout.addWidget(self.minute_spinbox, 3, 2)
+        layout.addWidget(self.days_label, 4, 0)
+        layout.addWidget(days_holder, 4, 1, 1, 2)
+        layout.addWidget(self.hint_label, 5, 0, 1, 3)
+        layout.addWidget(buttons, 6, 0, 1, 3)
 
     def _preset_names(self) -> List[str]:
         try:

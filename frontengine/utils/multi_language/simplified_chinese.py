@@ -284,6 +284,8 @@ simplified_chinese_word_dict = {
     "preset_schedule_enable": "按计划自动套用预设",
     "preset_schedule_preset": "预设",
     "preset_schedule_time": "时间",
+    "preset_schedule_hour": "时",
+    "preset_schedule_minute": "分",
     "preset_schedule_days": "星期",
     "preset_schedule_hint": "没有勾任何一天就是每天都跑。它是在时间点跨过去的那一刻触发一次，所以在那之后才打开 FrontEngine 不会补套用。",
     "weekday_monday": "一",

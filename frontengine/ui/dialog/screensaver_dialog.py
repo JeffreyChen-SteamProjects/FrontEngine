@@ -64,11 +64,13 @@ class ScreensaverDialog(QDialog):
 
         self.idle_label = tr(QLabel(), "screensaver_idle_minutes", "Idle for (minutes)")
         self.idle_spinbox = QSpinBox()
+        self.idle_label.setBuddy(self.idle_spinbox)
         self.idle_spinbox.setRange(MIN_IDLE_MINUTES, MAX_IDLE_MINUTES)
         self.idle_spinbox.setValue(settings["idle_minutes"])
 
         self.source_label = tr(QLabel(), "screensaver_source", "Show")
         self.source_combobox = QComboBox()
+        self.source_label.setBuddy(self.source_combobox)
         for name in SOURCES:
             key, fallback = SOURCE_LABEL_KEYS[name]
             self.source_combobox.addItem(_t(key, fallback), name)

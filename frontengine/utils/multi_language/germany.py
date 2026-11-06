@@ -284,6 +284,8 @@ germany_word_dict = {
     "preset_schedule_enable": "Voreinstellung nach Zeitplan anwenden",
     "preset_schedule_preset": "Voreinstellung",
     "preset_schedule_time": "Um",
+    "preset_schedule_hour": "Stunde",
+    "preset_schedule_minute": "Minute",
     "preset_schedule_days": "An",
     "preset_schedule_hint": "Ohne angehakten Tag läuft es täglich. Es löst beim Überschreiten der Uhrzeit einmal aus; ein späterer Start holt es nicht nach.",
     "weekday_monday": "Mo",

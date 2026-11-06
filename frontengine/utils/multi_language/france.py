@@ -284,6 +284,8 @@ french_word_dict = {
     "preset_schedule_enable": "Appliquer un préréglage selon un horaire",
     "preset_schedule_preset": "Préréglage",
     "preset_schedule_time": "À",
+    "preset_schedule_hour": "Heure",
+    "preset_schedule_minute": "Minute",
     "preset_schedule_days": "Le",
     "preset_schedule_hint": "Sans jour coché, cela s'applique tous les jours. Le déclenchement a lieu au passage de l'heure : démarrer FrontEngine après ne le rattrape pas.",
     "weekday_monday": "Lun",
