@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261106-82 | 2026-11-06 | 原生工作途中搬出與材料釋放驗證 | Pet / Lifecycle / Test | [2026-11](2026-11.md) |
 | U-20261106-81 | 2026-11-06 | 重新核對雙螢幕驗收前提 | Acceptance / Environment | [2026-11](2026-11.md) |
 | U-20261106-80 | 2026-11-06 | 目前版本全部受版控 Python 靜態檢查 | Review / Static / Test | [2026-11](2026-11.md) |
 | U-20261106-79 | 2026-11-06 | 居民選取修正版 wheel 安裝驗證 | Package / Pet / Test | [2026-11](2026-11.md) |
@@ -408,6 +409,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 204 |
+| [2026-11.md](2026-11.md) | 2026-11 | 205 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
