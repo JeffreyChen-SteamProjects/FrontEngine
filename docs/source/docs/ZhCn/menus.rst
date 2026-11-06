@@ -91,3 +91,5 @@ Settings → macOS 权限与能力会逐项列出可用、不可用或不支持�
 帮助 → 平台能力只读显示必要条件和最近原生失败，不启动捕获或监听。Linux 音频需 pulseaudio-utils（parec）和 PulseAudio／PipeWire Pulse 服务，频谱／反应用默认输出 monitor、对嘴用默认麦克风。不同于 Windows 峰值电表，Linux 读取实际音频采样；首次启用采样才建立自己的线程／子进程，仅内存保留 2048 个清理 float 采样，丢弃过期，不存储或发送。停止／关闭／退出只收回自身捕获进程，无 GUI join；设备／服务／权限失败明确显示。Linux 窗口几何／布局／置顶／屏幕移动使用 Linux 安装 python-xlib、EWMH 和物理 XRandR 工作区，透明度需合成管理器。X11 pynput 需 DISPLAY／服务权限；原生 Wayland 任意窗口定位和全桌面 pynput 不可用，即使 Xwayland，界面显示原因并拒绝屏幕恢复，不宣称监听其他 Wayland 程序。Linux 协议验收用隔离 X11／Wayland 和虚拟 Pulse 设备；Linux 物理音频／多屏及 macOS 实机仍待验收。
 
 音频反应停止采样后，电表会在 1.25 秒内停止自己的采集；重新启用采样可再次启动。
+
+选择公开证书导出路径期间若远程控制设置已关闭，返回的路径会被忽略。该次导出不创建证书或输出文件，也不覆盖已有文件。仅取消文件选择窗口时，仍可在打开的设置窗口中重试。

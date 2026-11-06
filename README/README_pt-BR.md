@@ -787,3 +787,5 @@ Se a biblioteca de recursos for fechada durante a escolha de um arquivo ou pasta
 Se o editor de tarefas for fechado durante a escolha do calendário ou a confirmação de limpeza, a seleção retornada será ignorada e as tarefas salvas serão preservadas. Cancelar apenas o seletor ou a confirmação permite tentar novamente. Ao reabrir, o editor continua sincronizado com a lista compartilhada.
 
 Na paleta de cores, Tab e Shift+Tab movem o foco entre a tabela e os outros controles; as setas mudam de célula. Fechar a paleta durante a escolha do caminho de exportação CSS ou JSON descarta o destino sem criar ou sobrescrever arquivos. Cancelar apenas o seletor permite tentar novamente, inclusive depois de reabrir a paleta.
+
+Se as configurações do controle remoto forem fechadas durante a escolha do caminho de exportação do certificado público, o destino será ignorado. Essa exportação não cria certificados nem arquivos de saída e não sobrescreve arquivos existentes. Cancelar apenas o seletor de arquivos permite tentar novamente na janela de configurações aberta.

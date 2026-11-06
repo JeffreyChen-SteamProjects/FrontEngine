@@ -1,8 +1,77 @@
 """Reviewable certificate controls and separate cloud consent in result UI."""
+import pytest
 from frontengine.ui.dialog.remote_control_dialog import RemoteControlDialog
 from frontengine.ui.dialog import screen_text_dialog
 from frontengine.utils.remote.remote_server import RemoteServer
 from frontengine.utils.screen_text.screen_text_service import ScreenTextResult
+
+
+@pytest.mark.parametrize('closing', ['reject', 'close', 'destroy'])
+@pytest.mark.parametrize('existing', [False, True])
+def test_remote_export_discards_path_after_dialog_closes(tmp_path, monkeypatch, closing, existing):
+    from PySide6.QtCore import QCoreApplication, QEvent
+    from PySide6.QtWidgets import QFileDialog
+    from shiboken6 import isValid
+    from frontengine.ui.dialog import remote_control_dialog
+    from frontengine.utils.remote import remote_server
+
+    monkeypatch.setattr(remote_control_dialog, 'remote_enabled', lambda: False)
+    monkeypatch.setattr(remote_server, 'local_address', lambda: '127.0.0.1')
+    server = RemoteServer(port=0, certificate_dir=tmp_path / 'private')
+    monkeypatch.setattr(server, 'start', lambda: pytest.fail('Export test must not start a listener'))
+    dialog = RemoteControlDialog(remote=server)
+    dialog.show()
+    destination = tmp_path / 'public.crt'
+    if existing:
+        destination.write_bytes(b'original certificate file')
+    def choose_then_close(*_args):
+        if closing == 'reject':
+            dialog.reject()
+        elif closing == 'close':
+            dialog.close()
+        else:
+            dialog.deleteLater()
+            QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+        return str(destination), ''
+    monkeypatch.setattr(QFileDialog, 'getSaveFileName', choose_then_close)
+    try:
+        assert not dialog.export_certificate()
+        assert destination.read_bytes() == b'original certificate file' if existing else not destination.exists()
+        assert server.certificate is None and not server.running
+        def unexpected(*_args):
+            pytest.fail('Closed remote dialog reopened the export picker')
+        monkeypatch.setattr(QFileDialog, 'getSaveFileName', unexpected)
+        assert not dialog.export_certificate()
+    finally:
+        if isValid(dialog):
+            dialog.reject()
+        server.stop()
+
+
+def test_remote_export_picker_cancel_then_retry_without_listener(tmp_path, monkeypatch):
+    from PySide6.QtWidgets import QFileDialog
+    from frontengine.ui.dialog import remote_control_dialog
+    from frontengine.utils.remote import remote_server
+
+    monkeypatch.setattr(remote_control_dialog, 'remote_enabled', lambda: False)
+    monkeypatch.setattr(remote_server, 'local_address', lambda: '127.0.0.1')
+    server = RemoteServer(port=0, certificate_dir=tmp_path / 'private')
+    monkeypatch.setattr(server, 'start', lambda: pytest.fail('Export test must not start a listener'))
+    dialog = RemoteControlDialog(remote=server)
+    target = tmp_path / 'public.crt'
+    choices = iter([('', ''), (str(target), '')])
+    monkeypatch.setattr(QFileDialog, 'getSaveFileName', lambda *_args: next(choices))
+    try:
+        assert not dialog.export_certificate()
+        assert not target.exists() and server.certificate is None
+        assert dialog.export_certificate()
+        assert target.read_bytes() == server.certificate.certificate_path.read_bytes()
+        assert target.read_bytes().startswith(b'-----BEGIN CERTIFICATE-----')
+        assert b'PRIVATE KEY' not in target.read_bytes()
+        assert not server.running
+    finally:
+        dialog.reject()
+        server.stop()
 
 
 def test_remote_dialog_reports_certificate_fingerprint_and_exports_public_certificate(tmp_path, monkeypatch):

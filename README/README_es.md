@@ -764,3 +764,5 @@ Si la biblioteca de recursos se cierra durante la selección de un archivo o car
 Si el editor de tareas se cierra durante la selección del calendario o la confirmación de vaciado, se descarta la selección devuelta y se conservan las tareas guardadas. Cancelar solo el selector o la confirmación permite volver a intentarlo. Al abrirlo de nuevo, el editor sigue sincronizado con la lista compartida.
 
 En la paleta de colores, Tab y Mayús+Tab mueven el foco entre la tabla y los demás controles; las flechas cambian de celda. Cerrar la paleta al elegir la ruta de exportación CSS o JSON descarta el destino sin crear ni sobrescribir archivos. Cancelar solo el selector permite volver a intentarlo, incluso tras abrir la paleta de nuevo.
+
+Si los ajustes del control remoto se cierran al elegir la ruta de exportación del certificado público, se descarta el destino. Esa exportación no crea certificados ni archivos de salida y no sobrescribe archivos existentes. Cancelar solo el selector de archivos permite volver a intentarlo en la ventana de ajustes abierta.

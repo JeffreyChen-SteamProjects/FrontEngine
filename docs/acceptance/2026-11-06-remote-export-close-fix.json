@@ -1,0 +1,39 @@
+{
+  "base_commit": "c1c62347",
+  "status": "focused fix and verification complete; full regression, independent review and integration pending",
+  "cause": "Certificate export consumes a destination after the settings dialog finishes or is destroyed, provisions/writes a certificate and can then access deleted labels.",
+  "red": "Corrected visible-dialog baseline: 6 failed, 5 deselected in 2.31s.",
+  "test_correction": "Initial hidden-dialog close cases did not emit finished; corrected the fixture to show the dialog and reran the unmodified baseline before accepting the fix.",
+  "fix": "Track finished state and check it plus Qt validity before opening and after returning from the export picker. Retain supported export before the first show.",
+  "related_tests": "40 passed in 9.67s",
+  "coverage": [
+    "Reject, close and destruction with new/existing destinations; repeated calls after closure are ignored.",
+    "Cancelled picker can retry and export exact public certificate bytes without private-key data or starting a listener."
+  ],
+  "native": {
+    "surface": "Private Windows desktop, Traditional Chinese dark MainUI 900x740.",
+    "activation": "Calls the actual settings-menu open function, runs its dialog event loop, then local Tab/Space activates the certificate export button.",
+    "trigger": "Injected picker rejects the dialog before returning an existing destination.",
+    "result": "Existing bytes unchanged, certificate not provisioned, no listener started, settings dialog reference cleared.",
+    "shutdown": "Normal runtime closure, temporary directory removed, blank stderr and unchanged foreground/cursor.",
+    "cold": "Independent process verifies exact home world/profiles, reacquired leases and saved state."
+  },
+  "pending": [
+    "Full regression, independent review and integration."
+  ],
+  "limits": "No OS file-picker interaction or physical menu click. New export tests and native closure probe forbid listener startup; the existing related TLS test retains its own loopback server coverage. No EXE conversion.",
+  "documentation": {
+    "files": 17,
+    "checks": "31 passed in 2.12s",
+    "sphinx": "HTML build with -W passed",
+    "rendered_paragraphs_exact": [
+      "Eng",
+      "Zh",
+      "ZhCn",
+      "De",
+      "Fr",
+      "Ru",
+      "It"
+    ]
+  }
+}

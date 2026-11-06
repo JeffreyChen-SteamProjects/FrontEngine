@@ -765,3 +765,5 @@ Si la bibliothèque de ressources se ferme pendant le choix d’un fichier ou d�
 Si l’éditeur de tâches se ferme pendant le choix d’un calendrier ou la confirmation de suppression de toutes les tâches, le choix renvoyé est ignoré et les tâches enregistrées sont conservées. Annuler uniquement le sélecteur ou la confirmation permet de réessayer. Après sa réouverture, l’éditeur reste synchronisé avec la liste partagée.
 
 Dans la palette de couleurs, Tab et Maj+Tab déplacent le focus entre le tableau et les autres commandes ; les flèches changent de cellule. Fermer la palette pendant le choix du chemin d’exportation CSS ou JSON ignore la destination sans créer ni écraser de fichier. Annuler uniquement le sélecteur permet de réessayer, y compris après la réouverture de la palette.
+
+Si les paramètres de télécommande se ferment pendant le choix du chemin d’exportation du certificat public, la destination est ignorée. Cet export ne crée ni certificat ni fichier de sortie et n’écrase aucun fichier existant. Annuler uniquement le sélecteur de fichiers permet de réessayer dans la fenêtre de paramètres restée ouverte.

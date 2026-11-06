@@ -764,3 +764,5 @@ Closing the asset library during file or folder selection discards the returned 
 Closing the task editor during calendar selection or clear confirmation discards the returned choice, preserving saved tasks. Cancelling only the picker or confirmation allows another attempt. Reopening the editor keeps it connected to the shared checklist.
 
 In the color palette, Tab and Shift+Tab move between the table and other controls; arrow keys move between cells. Closing the palette while choosing a CSS or JSON export path discards the destination without creating or overwriting a file. Cancelling only the picker allows another attempt, including after reopening the palette.
+
+Closing remote-control settings while choosing a public-certificate export path discards the destination. That export creates no certificate or output file and does not overwrite an existing file. Cancelling only the file picker allows another attempt in the open settings dialog.
