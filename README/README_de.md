@@ -775,3 +775,5 @@ Wenn das Speichern des Tierprofils beim Auszug fehlschlägt, bleibt der Bewohner
 Kann ein neues Tierprofil nicht gespeichert werden, zeigt das Zuhause einen Fehler an und fügt keinen Bewohner hinzu. Stellen Sie den Schreibzugriff wieder her und versuchen Sie es mit „Neues Tier“ erneut. Beim ersten Erstellen bleibt das leere Zuhause nutzbar; ein erneuter Versuch vergibt das Starterpaket nicht noch einmal.
 
 Beim Wechsel der Oberflächensprache werden auch die Auswahltexte für Qualität, Messmodus, Texterfassung, Kamerarahmen und Spektrumstil aktualisiert. Die ausgewählten Werte bleiben erhalten; der Sprachwechsel wendet keine andere Werkzeugeinstellung an.
+
+Beim Wechsel der Oberflächensprache werden auch die Optionen für Transformationswerkzeug, Achse, Koordinatenraum, Projektion und Lichttyp im 3D-Editor aktualisiert. Auswahlwerte, Szeneninhalt und Rückgängig-Verlauf bleiben unverändert.

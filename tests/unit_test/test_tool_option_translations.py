@@ -35,3 +35,37 @@ def test_tool_option_labels_follow_language_without_changing_selection(
             assert not changes
     finally:
         window.language_menu.actions()[0].trigger()
+
+
+@pytest.mark.parametrize('attribute, keys', [
+    ('tool', ('scene3d_move', 'scene3d_rotate', 'scene3d_scale')),
+    ('axis', ('scene3d_free', 'scene3d_x', 'scene3d_y', 'scene3d_z')),
+    ('space', ('scene3d_world', 'scene3d_screen')),
+    ('projection', ('scene3d_perspective', 'scene3d_orthographic')),
+    ('light_type', ('scene3d_directional', 'scene3d_point')),
+])
+def test_scene_option_labels_follow_language_without_editing_document(
+        make_main_window, attribute, keys):
+    window = make_main_window()
+    editor = window.scene_setting_ui.visual_editor
+    combo = getattr(editor.editor3d, attribute)
+    fallbacks = [combo.itemText(i) for i in range(combo.count())]
+    combo.setCurrentIndex(combo.count() - 1)
+    selected = combo.currentData()
+    values = [combo.itemData(i) for i in range(combo.count())]
+    scene = editor.document.scene.copy().envelope()
+    undo_index = editor.document.undo.index()
+    changes = []
+    combo.currentIndexChanged.connect(changes.append)
+    try:
+        for index in [*range(len(LANGUAGES)), 0]:
+            window.language_menu.actions()[index].trigger()
+            assert [combo.itemText(i) for i in range(combo.count())] == [
+                translate(key, fallback) for key, fallback in zip(keys, fallbacks)]
+            assert combo.currentData() == selected
+            assert [combo.itemData(i) for i in range(combo.count())] == values
+            assert editor.document.scene.envelope() == scene
+            assert editor.document.undo.index() == undo_index
+            assert not changes
+    finally:
+        window.language_menu.actions()[0].trigger()

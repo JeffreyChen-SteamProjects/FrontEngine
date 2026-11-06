@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261106-94 | 2026-11-06 | Refresh 3D editor choices when the language changes | #fix #ui #localization | [2026-11](2026-11.md) |
 | U-20261106-93 | 2026-11-06 | Reproduce stale 3D editor option labels | #verification #ui #localization | [2026-11](2026-11.md) |
 | U-20261106-92 | 2026-11-06 | Verify caption regression and withdraw unsupported sidebar defect | #verification #ui #done | [2026-11](2026-11.md) |
 | U-20261106-91 | 2026-11-06 | Update tool option labels when the language changes | #fix #ui #localization | [2026-11](2026-11.md) |
@@ -420,6 +421,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 216 |
+| [2026-11.md](2026-11.md) | 2026-11 | 217 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

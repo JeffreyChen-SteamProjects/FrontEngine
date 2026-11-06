@@ -61,9 +61,11 @@ class Scene3DEditor(QWidget):
         row = QHBoxLayout()
         self.tool, self.axis = QComboBox(), QComboBox()
         for value in ('move', 'rotate', 'scale'):
-            self.tool.addItem(translate('scene3d_'+value, value), value)
+            self.tool.addItem('', value)
+            retranslator.bind(self.tool, 'scene3d_'+value, value, 'setItemText', self.tool.count() - 1)
         for value in ('free', 'x', 'y', 'z'):
-            self.axis.addItem(translate('scene3d_'+value, value.upper()), value)
+            self.axis.addItem('', value)
+            retranslator.bind(self.axis, 'scene3d_'+value, value.upper(), 'setItemText', self.axis.count() - 1)
         self.local = tr(QCheckBox(), 'scene3d_local', 'Local axes')
         self.snap = tr(QCheckBox(), 'scene3d_snap', 'Snap')
         for widget in (self.tool, self.axis, self.local, self.snap):
@@ -109,8 +111,9 @@ class Scene3DEditor(QWidget):
         self.inspector = page
         section = page.add_section('scene3d_transform', '3D transform')
         self.space = QComboBox()
-        self.space.addItem(translate('scene3d_world', 'World'), 'world')
-        self.space.addItem(translate('scene3d_screen', 'Screen'), 'screen')
+        for value in ('world', 'screen'):
+            self.space.addItem('', value)
+            retranslator.bind(self.space, 'scene3d_'+value, value.title(), 'setItemText', self.space.count() - 1)
         self.space.currentIndexChanged.connect(self._apply)
         section.add_row('scene3d_space', self.space)
         self.parent_box = QComboBox()
@@ -144,13 +147,15 @@ class Scene3DEditor(QWidget):
             self.properties[name] = spin
             section.add_row('scene3d_'+name, spin)
         self.projection = QComboBox()
-        self.projection.addItem(translate('scene3d_perspective', 'Perspective'), 'perspective')
-        self.projection.addItem(translate('scene3d_orthographic', 'Orthographic'), 'orthographic')
+        for value in ('perspective', 'orthographic'):
+            self.projection.addItem('', value)
+            retranslator.bind(self.projection, 'scene3d_'+value, value.title(), 'setItemText', self.projection.count() - 1)
         self.projection.currentIndexChanged.connect(self._apply)
         section.add_row('scene3d_projection', self.projection)
         self.light_type = QComboBox()
-        self.light_type.addItem(translate('scene3d_directional', 'Directional'), 'directional')
-        self.light_type.addItem(translate('scene3d_point', 'Point'), 'point')
+        for value in ('directional', 'point'):
+            self.light_type.addItem('', value)
+            retranslator.bind(self.light_type, 'scene3d_'+value, value.title(), 'setItemText', self.light_type.count() - 1)
         self.light_type.currentIndexChanged.connect(self._apply)
         section.add_row('scene3d_light_type', self.light_type)
         self.clip = QComboBox()

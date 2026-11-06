@@ -114,3 +114,5 @@ and does not establish compatibility with every GPU or window compositor.
 The supported Qt range is 6.11.2 to below 6.13. The optional Imervue runtime pins
 Qt 6.11.2; install the Puppet extra before building a distribution that includes
 Puppet. Python 3.14 executable builds require Nuitka 4.3.1 or newer.
+
+Changing the interface language updates the 3D editor’s transform tool, axis, coordinate space, projection and light-type choices. Selected values, scene content and undo history stay unchanged.

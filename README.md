@@ -732,3 +732,5 @@ If saving a pet profile fails during Move out, the resident stays selected so yo
 If a new pet profile cannot be saved, the home shows an error without adding a resident. Restore write access and choose New pet to retry. If this happens while creating your first home, the empty home remains usable and retrying does not grant the starter kit again.
 
 Changing the interface language also updates the choices for quality, measuring mode, reading text, camera frame shape and spectrum style. Your selected values stay unchanged, and the language change does not apply a different tool setting.
+
+Changing the interface language updates the 3D editor’s transform tool, axis, coordinate space, projection and light-type choices. Selected values, scene content and undo history stay unchanged.

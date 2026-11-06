@@ -107,3 +107,5 @@ Debian/Python 容器中執行 ``tests/integration/linux_scene3d_acceptance.sh``�
 Qt 支援範圍為 6.11.2 至低於 6.13。選用 Imervue 執行期固定使用 Qt 6.11.2，
 包含 Puppet 的發行版應先安裝 Puppet extra。Python 3.14 的 EXE 建置需
 Nuitka 4.3.1 以上版本。
+
+切換介面語言時，3D 編輯器的變形工具、軸向、座標空間、投影與光源類型選項也會更新。選取值、場景內容與復原紀錄保持不變。

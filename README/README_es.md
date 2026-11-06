@@ -732,3 +732,5 @@ Si no se puede guardar el perfil de la mascota al mudarse, el residente permanec
 Si no se puede guardar el perfil de una mascota nueva, se muestra un error y no se añade ningún residente. Restablece el acceso de escritura y vuelve a intentarlo con Nueva mascota. Si ocurre al crear tu primera casa, la casa vacía sigue disponible y el reintento no vuelve a conceder el paquete inicial.
 
 Al cambiar el idioma de la interfaz también se actualizan las opciones de calidad, modo de medición, lectura de texto, forma del marco de cámara y estilo del espectro. Los valores seleccionados se conservan y el cambio de idioma no aplica una configuración distinta a las herramientas.
+
+Al cambiar el idioma de la interfaz, se actualizan las opciones de herramienta de transformación, eje, espacio de coordenadas, proyección y tipo de luz del editor 3D. Los valores seleccionados, el contenido de la escena y el historial de deshacer no cambian.

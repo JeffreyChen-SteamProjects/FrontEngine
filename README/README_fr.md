@@ -733,3 +733,5 @@ Si l’enregistrement du profil échoue lors du départ, le résident reste sél
 Si le profil d’un nouvel animal ne peut pas être enregistré, un message d’erreur apparaît et aucun résident n’est ajouté. Rétablissez l’accès en écriture puis réessayez avec Nouvel animal. Lors de la création du premier foyer, le foyer vide reste utilisable et une nouvelle tentative ne redonne pas le kit de départ.
 
 Le changement de langue actualise aussi les choix de qualité, de mode de mesure, de lecture de texte, de forme du cadre de caméra et de style du spectre. Les valeurs sélectionnées restent inchangées ; changer de langue n’applique aucun autre réglage aux outils.
+
+Changer la langue de l’interface met aussi à jour les choix d’outil de transformation, d’axe, d’espace de coordonnées, de projection et de type de lumière dans l’éditeur 3D. Les valeurs sélectionnées, le contenu de la scène et l’historique d’annulation restent inchangés.

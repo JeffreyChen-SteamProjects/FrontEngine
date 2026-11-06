@@ -1,0 +1,176 @@
+{
+  "base_commit": "127f5b7c",
+  "change": "Bind the five fixed 3D option groups to existing setItemText retranslation; preserve data and selection. No API or scene schema change.",
+  "red": {
+    "tests": 5,
+    "seconds": 8.1,
+    "failure": "Move/Rotate/Scale remained English after switching to Traditional Chinese; all five option groups failed their translated-label assertion.",
+    "log": ".audit/scene-options-red.txt"
+  },
+  "green": {
+    "scene_options_ui_lifecycle": {
+      "passed": 22,
+      "seconds": 5.44
+    },
+    "docs_translations_progress_scene_editor": {
+      "passed": 70,
+      "seconds": 3.9
+    },
+    "pyflakes": "clean for both changed Python files",
+    "diff_check": "clean"
+  },
+  "native": {
+    "passed": true,
+    "pages": 1,
+    "languages": 7,
+    "cases": 7,
+    "routes": [
+      {
+        "language": "English",
+        "page": "tab_scene_text",
+        "label": "Scene",
+        "requested_width": 900,
+        "actual_size": [
+          900,
+          740
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "English-900-tab_scene_text.png"
+      },
+      {
+        "language": "Traditional_Chinese",
+        "page": "tab_scene_text",
+        "label": "場景",
+        "requested_width": 900,
+        "actual_size": [
+          900,
+          740
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "Traditional_Chinese-900-tab_scene_text.png"
+      },
+      {
+        "language": "Simplified_Chinese",
+        "page": "tab_scene_text",
+        "label": "场景",
+        "requested_width": 900,
+        "actual_size": [
+          900,
+          740
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "Simplified_Chinese-900-tab_scene_text.png"
+      },
+      {
+        "language": "Deutsch",
+        "page": "tab_scene_text",
+        "label": "Szene",
+        "requested_width": 900,
+        "actual_size": [
+          900,
+          740
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "Deutsch-900-tab_scene_text.png"
+      },
+      {
+        "language": "Russian",
+        "page": "tab_scene_text",
+        "label": "Сцена",
+        "requested_width": 900,
+        "actual_size": [
+          900,
+          740
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "Russian-900-tab_scene_text.png"
+      },
+      {
+        "language": "France",
+        "page": "tab_scene_text",
+        "label": "Scène",
+        "requested_width": 900,
+        "actual_size": [
+          900,
+          740
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "France-900-tab_scene_text.png"
+      },
+      {
+        "language": "Italy",
+        "page": "tab_scene_text",
+        "label": "Scena",
+        "requested_width": 900,
+        "actual_size": [
+          900,
+          740
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "Italy-900-tab_scene_text.png"
+      }
+    ],
+    "combo_mismatches": [],
+    "selected_values": {
+      "tool": "move",
+      "axis": "free",
+      "space": "world",
+      "projection": "perspective",
+      "light_type": "directional"
+    },
+    "index_changes": {
+      "tool": [],
+      "axis": [],
+      "space": [],
+      "projection": [],
+      "light_type": []
+    },
+    "callback_errors": [],
+    "home_world_unchanged": true,
+    "home_service_and_leases_reused": true,
+    "command_palette_reused": true,
+    "runtime_closed": true,
+    "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-stage-layout\\.audit\\profession-owned-fixed",
+    "saved_snapshot_sha256": "c471f2056e3bf47d41a8073e4a214f8eccec310f6c85a5f6088181f0c4b05172",
+    "scope": "Private native MainUI, seven language menu actions, five existing 3D editor option groups. Reads widget labels and checks stable data/order/no index signals. Host services substituted. No 3D render, control visibility, OS input or full localization acceptance claim.",
+    "temporary_directory_removed": true
+  },
+  "observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "child_exit": 0,
+    "observation_only": true
+  },
+  "probe_sha256": "49d9edff633886e8f721bbdc04709e8bd13e66bebae82a7c00d435a62e8751e8",
+  "documentation_files_updated": 17,
+  "pending": [
+    "Full regression on this revision",
+    "Visible native 3D editor and rendering acceptance",
+    "Independent review and integration"
+  ],
+  "collection": {
+    "total": 3273,
+    "seconds": 6.9,
+    "execution": "full regression not started"
+  }
+}

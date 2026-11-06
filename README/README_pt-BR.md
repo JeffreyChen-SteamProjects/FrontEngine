@@ -755,3 +755,5 @@ Se o perfil do pet não puder ser salvo ao sair da casa, o morador permanece sel
 Se o perfil de um novo pet não puder ser salvo, a casa exibirá um erro e nenhum morador será adicionado. Restabeleça o acesso de gravação e tente novamente com Novo pet. Se isso ocorrer ao criar a primeira casa, a casa vazia continuará disponível e a nova tentativa não concederá o kit inicial outra vez.
 
 Ao mudar o idioma da interface, as opções de qualidade, modo de medição, leitura de texto, formato da moldura da câmera e estilo do espectro também são atualizadas. Os valores selecionados são mantidos, e a mudança de idioma não aplica outra configuração às ferramentas.
+
+Ao mudar o idioma da interface, as opções de ferramenta de transformação, eixo, espaço de coordenadas, projeção e tipo de luz do editor 3D também são atualizadas. Os valores selecionados, o conteúdo da cena e o histórico de desfazer permanecem iguais.
