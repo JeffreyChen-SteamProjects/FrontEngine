@@ -104,6 +104,7 @@ class ScreenTextDialog(QDialog):
 
         self.text_edit = QPlainTextEdit(result.text if result is not None else str(text))
         self.text_edit.setReadOnly(False)
+        self.text_edit.setTabChangesFocus(True)
         self.copy_button = tr(QPushButton(), "screen_text_copy", "Copy")
         self.copy_button.clicked.connect(self.copy_text)
         self.consent_checkbox = tr(QCheckBox(), "screen_text_consent_toggle",

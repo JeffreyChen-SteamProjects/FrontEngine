@@ -56,6 +56,7 @@ class SignageDialog(QDialog):
         self.enable_checkbox.setChecked(bool(settings.get("enabled")))
         self.presets_label = tr(QLabel(), "signage_presets_label", "Presets, one per line:")
         self.presets_edit = QPlainTextEdit("\n".join(settings.get("presets", [])))
+        self.presets_edit.setTabChangesFocus(True)
         self.interval_label = tr(QLabel(), "signage_interval_label", "Change every (minutes)")
         self.interval_spinbox = QSpinBox()
         self.interval_spinbox.setRange(MIN_INTERVAL_MINUTES, MAX_INTERVAL_MINUTES)
