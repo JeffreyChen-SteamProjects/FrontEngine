@@ -746,3 +746,5 @@ Adding a built-in character shows installation progress while its character and 
 Pet interaction feedback appears above Perform interaction so it remains near the keyboard focus. In narrow windows, section headings and their details buttons wrap; pet identity and interaction fields keep a readable minimum width and move below their labels when needed. Selected pets, field values and commands are preserved.
 
 Pet customization fields expose their visible labels through Qt accessibility. Favorite and disliked treats, size, speed, volume, behaviour, chatter and animation size keep their names in sync when the interface language changes.
+
+Wardrobe and pet-photo fields expose their visible labels through Qt accessibility, including clothing slots, saved outfits, pose and pose time. These names follow interface-language changes without changing the draft or photo.

@@ -108,6 +108,9 @@ class PetWardrobeDialog(QDialog):
         self.outfit_name = QLineEdit()
         form.addRow(tr(QLabel(), 'pet_wardrobe_outfits', 'Saved outfits'), self.outfits)
         form.addRow(tr(QLabel(), 'pet_wardrobe_name', 'Outfit name'), self.outfit_name)
+        for control in (self.character, *self.slots.values(), self.action, self.color_region,
+                        self.variant_group, self.variant_choice, self.outfits, self.outfit_name):
+            form.labelForField(control).setBuddy(control)
         self._buttons(layout, (
             ('pet_wardrobe_save', 'Save new outfit', self._save_outfit),
             ('pet_wardrobe_update', 'Update selected', self._update_outfit),

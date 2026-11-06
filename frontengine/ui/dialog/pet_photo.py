@@ -50,6 +50,8 @@ class PetPhotoDialog(QDialog):
         self.time = QSpinBox()
         self.time.setSuffix(' ms')
         form.addRow(tr(QLabel(), 'pet_photo_time', 'Pose time'), self.time)
+        for control in (self.pose, self.time):
+            form.labelForField(control).setBuddy(control)
         self.pose.currentIndexChanged.connect(self._pose_changed)
         self.time.valueChanged.connect(self._render)
         self.status = QLabel()

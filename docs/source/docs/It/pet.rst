@@ -134,3 +134,5 @@ Quando aggiungi un personaggio integrato, una barra mostra i progressi della gen
 I messaggi delle interazioni appaiono sopra il pulsante di esecuzione, vicino al focus della tastiera. Nelle finestre strette, i titoli delle sezioni e i pulsanti dei dettagli vanno a capo. I campi di identità e interazione mantengono una larghezza minima leggibile e, se necessario, passano sotto le etichette. Selezione, valori e comandi restano invariati.
 
 I campi di personalizzazione espongono le etichette visibili tramite l’accessibilità Qt. I nomi di snack preferiti e sgraditi, dimensioni, velocità, volume, comportamento, loquacità e ampiezza delle animazioni seguono la lingua dell’interfaccia.
+
+I campi del guardaroba e delle foto espongono le etichette visibili tramite l’accessibilità Qt, inclusi gli slot degli abiti, i completi salvati, la posa e il relativo istante. I nomi seguono la lingua dell’interfaccia senza modificare la bozza o la foto.

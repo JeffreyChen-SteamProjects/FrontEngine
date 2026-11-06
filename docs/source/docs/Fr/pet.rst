@@ -136,3 +136,5 @@ L’ajout d’un personnage intégré affiche la progression de la création et 
 Les messages d’interaction apparaissent au-dessus du bouton d’exécution, près du focus clavier. Dans les fenêtres étroites, les titres de section et les boutons de détails passent à la ligne. Les champs d’identité et d’interaction gardent une largeur minimale lisible et passent sous leur libellé si nécessaire. La sélection, les valeurs et les commandes sont conservées.
 
 Les champs de personnalisation exposent leurs libellés visibles via l’accessibilité Qt. Les noms des friandises préférées ou détestées, de la taille, de la vitesse, du volume, du comportement, du bavardage et de l’amplitude des animations suivent la langue de l’interface.
+
+Les champs de garde-robe et de photo exposent leurs libellés visibles via l’accessibilité Qt, notamment les emplacements de vêtements, les tenues enregistrées, la pose et son instant. Ces noms suivent la langue de l’interface sans modifier le brouillon ni la photo.

@@ -746,3 +746,5 @@ Al añadir un personaje integrado, una barra muestra el progreso de generación 
 Los mensajes de interacción aparecen encima del botón de ejecución, cerca del foco del teclado. En ventanas estrechas, los títulos de sección y los botones de detalles pasan a otra línea. Los campos de identidad e interacción mantienen una anchura mínima legible y se colocan debajo de sus etiquetas cuando es necesario. Se conservan la selección, los valores y los comandos.
 
 Los campos de personalización exponen sus etiquetas visibles mediante la accesibilidad de Qt. Los nombres de golosinas favoritas y rechazadas, tamaño, velocidad, volumen, comportamiento, charla y amplitud de animación siguen el idioma de la interfaz.
+
+Los campos de vestuario y fotos exponen sus etiquetas visibles mediante la accesibilidad de Qt, incluidos los espacios de ropa, conjuntos guardados, pose y tiempo de pose. Los nombres siguen el idioma sin modificar el borrador ni la foto.
