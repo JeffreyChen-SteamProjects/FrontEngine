@@ -3,7 +3,7 @@ pytest
 twine
 build
 auto-py-to-exe
-Nuitka>=4.3.1
+Nuitka>=4.3.3
 PyOpenGL
 PyOpenGL_accelerate
 numpy
