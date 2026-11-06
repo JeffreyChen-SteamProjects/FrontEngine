@@ -274,5 +274,5 @@
     },
     "runtime_closed": true
   },
-  "keyboard_menu_limit": "Tab targeting hidden button was an invalid probe because the command lives in ActionMenu. Subsequent Space/Down probes did not retain an open native menu. Actual QAction dispatch passed; physical keyboard menu opening remains unverified."
+  "keyboard_menu_limit": "Resolved by corrected widget-local keyboard probe: Space opens, Down selects, Return dispatches; two full MainUI native cases and cold reopen passed. See 2026-11-06-customization-keyboard-menu.json. OS keyboard and screen-reader acceptance remain unverified."
 }
