@@ -770,3 +770,5 @@ Si los ajustes del control remoto se cierran al elegir la ruta de exportación d
 En el gestor de Workshop, Tab y Mayús+Tab permiten pasar entre campos, incluida la descripción; Intro añade una línea en ese campo. Cerrar el gestor al elegir el origen o la vista previa descarta la selección. Cerrarlo al escribir el nombre de un preajuste impide esa importación. Tras cancelar o volver a abrir el gestor, puede intentarlo de nuevo. Las subidas ya iniciadas continúan al cerrar el gestor.
 
 Cerrar la salida de escena mientras se elige el color de fondo de la cámara descarta ese color y detiene la vista previa. Cancelar solo el selector de color conserva el color actual y mantiene la vista previa. Vuelva a abrir la salida de escena para elegir otro color. La vista previa no abre una cámara.
+
+Cerrar la comparación de imágenes durante la selección de archivos descarta esa selección. Volver a abrirla desde la página Imagen crea una nueva ventana de comparación. Cancelar solo la selección conserva las imágenes actuales; un nuevo par las sustituye tras descodificarse correctamente.

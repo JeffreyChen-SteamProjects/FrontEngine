@@ -771,3 +771,5 @@ Si les paramètres de télécommande se ferment pendant le choix du chemin d’e
 Dans le gestionnaire Workshop, Tab et Maj+Tab passent entre les champs, y compris la description ; Entrée y ajoute une nouvelle ligne. Fermer le gestionnaire pendant le choix de la source ou de l’aperçu ignore ce choix. Le fermer pendant la saisie du nom d’un préréglage empêche cet import. Après une annulation ou une réouverture, vous pouvez réessayer. Les envois déjà en cours continuent après la fermeture du gestionnaire.
 
 Fermer la sortie de scène pendant le choix de la couleur de fond de la caméra ignore cette couleur et arrête l’aperçu. Annuler uniquement le sélecteur de couleur conserve la couleur actuelle et laisse l’aperçu actif. Rouvrez la sortie de scène pour choisir une autre couleur. L’aperçu n’ouvre pas de caméra.
+
+Fermer la comparaison d’images pendant le choix des fichiers ignore la sélection. La rouvrir depuis la page Image crée une nouvelle fenêtre de comparaison. Annuler uniquement le choix des fichiers conserve les images actuelles ; une nouvelle paire les remplace une fois le décodage réussi.

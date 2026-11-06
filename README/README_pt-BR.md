@@ -793,3 +793,5 @@ Se as configurações do controle remoto forem fechadas durante a escolha do cam
 No gerenciador do Workshop, Tab e Shift+Tab alternam entre os campos, incluindo a descrição; Enter adiciona uma linha nesse campo. Fechar o gerenciador ao escolher a origem ou a prévia descarta a seleção. Fechá-lo ao inserir o nome de uma predefinição impede essa importação. Após cancelar ou reabrir o gerenciador, é possível tentar novamente. Os envios já iniciados continuam após o fechamento.
 
 Fechar a saída da cena ao escolher a cor de fundo da câmera descarta a cor e interrompe a prévia. Cancelar apenas a seleção de cor mantém a cor atual e a prévia em execução. Reabra a saída da cena para escolher outra cor. A prévia não abre uma câmera.
+
+Fechar a comparação de imagens durante a seleção de arquivos descarta a seleção. Reabri-la pela página Imagem cria uma nova janela de comparação. Cancelar apenas a seleção mantém as imagens atuais; um novo par as substitui após a decodificação bem-sucedida.

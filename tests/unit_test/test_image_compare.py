@@ -1,4 +1,5 @@
 import threading
+import pytest
 
 from PySide6.QtCore import QCoreApplication
 from PySide6.QtGui import QColor, QImage
@@ -11,6 +12,39 @@ def _image(width, height, color):
     image = QImage(width, height, QImage.Format.Format_RGBA8888)
     image.fill(QColor(color))
     return image
+
+
+@pytest.mark.parametrize('count', [1, 2])
+@pytest.mark.parametrize('destroy', [False, True])
+def test_closed_comparison_discards_picker_result(tmp_path, monkeypatch, lifetime_factory, count, destroy):
+    from PySide6.QtCore import QEvent
+    from PySide6.QtWidgets import QFileDialog
+    from shiboken6 import isValid
+
+    dialog = ImageCompareDialog(lifetime=lifetime_factory())
+    dialog.show()
+    before_status = dialog.status.text()
+    def choose(*_args):
+        dialog.reject()
+        if destroy:
+            dialog.deleteLater()
+            QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+        return [str(tmp_path / f'{index}.png') for index in range(count)], ''
+    monkeypatch.setattr(QFileDialog, 'getOpenFileNames', choose)
+    try:
+        dialog.choose_images()
+        assert dialog._paths == ()
+        assert dialog._request is None and not dialog._busy
+        if isValid(dialog):
+            assert dialog.status.text() == before_status
+            assert not dialog.scene.items()
+        def unexpected(*_args):
+            pytest.fail('Closed comparison reopened its picker')
+        monkeypatch.setattr(QFileDialog, 'getOpenFileNames', unexpected)
+        dialog.choose_images()
+    finally:
+        if isValid(dialog):
+            dialog.close()
 
 
 def test_different_sizes_have_explicit_origin_center_and_proportional_fit():
@@ -66,6 +100,34 @@ def _finish(dialog):
         assert dialog.lifetime.pool('comparison').waitForDone(5000)
         QCoreApplication.processEvents()
     assert not dialog._busy
+
+
+def test_comparison_picker_cancel_preserves_pair_then_retry_replaces_it(tmp_path, monkeypatch, lifetime_factory):
+    from PySide6.QtWidgets import QFileDialog
+
+    paths = [tmp_path / f'{name}.png' for name in ('red', 'blue', 'green', 'white')]
+    for path in paths:
+        assert _image(12, 8, path.stem).save(str(path))
+    dialog = ImageCompareDialog(lifetime=lifetime_factory())
+    dialog.show()
+    try:
+        dialog.load_paths([str(path) for path in paths[:2]])
+        _finish(dialog)
+        before = [item.pixmap().toImage() for item in dialog._items]
+        status = dialog.status.text()
+        answers = iter([[], [str(path) for path in paths[2:]]])
+        monkeypatch.setattr(QFileDialog, 'getOpenFileNames', lambda *_args: (next(answers), ''))
+        dialog.choose_images()
+        assert [item.pixmap().toImage() for item in dialog._items] == before
+        assert dialog.status.text() == status
+        assert not dialog._busy
+        dialog.choose_images()
+        _finish(dialog)
+        assert dialog._items[0].pixmap().toImage().pixelColor(0, 0) == QColor('green')
+        assert dialog._items[1].pixmap().toImage().pixelColor(0, 0) == QColor('white')
+        assert dialog.status.text() == 'A: green.png · B: white.png'
+    finally:
+        dialog.close()
 
 
 def test_async_modes_share_transform_slider_avoids_decode_and_failure_keeps_pair(tmp_path, monkeypatch, *, lifetime_factory):

@@ -2,6 +2,7 @@
 from frontengine.ui.runtime_lifetime import captured_lifetime, owned_callback
 from pathlib import Path
 from threading import Event
+from shiboken6 import isValid
 
 from PySide6.QtCore import QObject, QRunnable, QRectF, Qt, Signal
 from PySide6.QtGui import QColor, QPixmap
@@ -134,9 +135,11 @@ class ImageCompareDialog(QDialog):
                 combo.setItemText(index, translate(prefix + combo.itemData(index)))
 
     def choose_images(self) -> None:
+        if not isValid(self) or self._closed or not self.lifetime.accepting:
+            return
         paths, _filter = QFileDialog.getOpenFileNames(self, translate('image_compare_choose'), '',
                                                     'Images (*.png *.jpg *.jpeg *.webp *.bmp *.gif)')
-        if paths:
+        if isValid(self) and not self._closed and self.lifetime.accepting and paths:
             self.load_paths(paths)
 
     def load_paths(self, paths: list[str]) -> None:
