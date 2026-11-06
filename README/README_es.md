@@ -778,3 +778,5 @@ En Reglas, Tab pasa de la tabla a los demás controles y las flechas cambian de 
 El consentimiento para procesar texto reconocido y capturas en la nube se guarda por separado. Cerrar la ventana de origen durante la confirmación descarta la respuesta, sin autorizar ni reintentar la solicitud. Cerrar la página Herramientas también conserva el texto anterior y no abre un resultado. Si la página sigue abierta, No muestra el resultado original y Sí reintenta una vez la solicitud original.
 
 En el editor de texto reconocido y la lista de preajustes de señalización, Tab pasa al control siguiente y Mayús+Tab vuelve sin cambiar el texto. Intro sigue insertando una línea nueva. El teclado permite llegar a Copiar o al intervalo de rotación y después cerrar o cancelar. Cancelar la configuración de señalización conserva los valores guardados.
+
+Si falla el guardado de la configuración de señalización, el diálogo muestra el error y conserva los cambios. La configuración anterior sigue activa. Corrige el problema y confirma de nuevo, o cancela para descartar los cambios.

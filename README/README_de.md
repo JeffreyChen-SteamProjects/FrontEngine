@@ -821,3 +821,5 @@ In Regeln wechselt Tab von der Tabelle zu den anderen Bedienelementen; Pfeiltast
 Die Zustimmung zur Cloud-Verarbeitung von erkanntem Text und Screenshots bleibt getrennt. Wird das Quellfenster während der Rückfrage geschlossen, wird die Antwort verworfen: Es erfolgt weder eine Zustimmung noch ein erneuter Versuch. Wird dabei die Werkzeugseite geschlossen, bleibt der vorherige Text erhalten und kein Ergebnisfenster öffnet sich. Bei geöffneter Seite zeigt Nein das ursprüngliche Ergebnis; Ja wiederholt die ursprüngliche Anfrage einmal.
 
 Im Bildschirmtext-Editor und in der Signage-Preset-Liste wechselt Tab zum nächsten Bedienelement und Umschalt+Tab zurück, ohne den Text zu ändern. Enter fügt weiterhin einen Zeilenumbruch ein. Kopieren, Wechselintervall, Schließen und Abbrechen sind per Tastatur erreichbar. Das Abbrechen der Signage-Einstellungen lässt die gespeicherten Werte unverändert.
+
+Wenn die Signage-Einstellungen nicht gespeichert werden können, zeigt der Dialog den Fehler und behält Ihre Eingaben. Die bisherigen Einstellungen bleiben aktiv. Beheben Sie das Problem und bestätigen Sie erneut, oder brechen Sie ab, um die Änderungen zu verwerfen.

@@ -112,3 +112,5 @@ Closing remote-control settings while choosing a public-certificate export path 
 In Rules, Tab moves from the table to the other controls; arrow keys move between cells. Closing a scene action editor during file selection discards the returned path. Closing Rules while its target editor is open prevents the returned target from changing the rule. Cancelling either picker preserves the previous value, and you can reopen it to try again. Confirming a target changes the draft; confirm Rules to save it.
 
 In the screen-text result editor and the signage preset list, Tab moves to the next control and Shift+Tab moves back without changing the text. Enter still inserts a new line. You can reach Copy or the rotation interval, then close or cancel with the keyboard. Cancelling signage leaves its saved settings unchanged.
+
+If saving signage settings fails, the dialog shows the error and keeps your edits. The previous settings remain active. Correct the problem and confirm again to retry, or cancel to discard your edits.

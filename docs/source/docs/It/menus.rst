@@ -113,3 +113,5 @@ Se le impostazioni del controllo remoto vengono chiuse durante la scelta del per
 In Regole, Tab passa dalla tabella agli altri controlli; le frecce spostano la selezione tra le celle. Chiudere l’editor dell’azione di scena durante la scelta del file scarta il percorso. Chiudere Regole mentre l’editor della destinazione è aperto impedisce al risultato di modificare la regola. Annullare mantiene il valore precedente; riaprire l’editor per riprovare. Confermare la destinazione modifica la bozza. Confermare Regole per salvarla.
 
 Nell’editor del testo riconosciuto e nell’elenco delle preimpostazioni per la rotazione, Tab passa al controllo successivo e Maiusc+Tab torna indietro senza modificare il testo. Invio aggiunge ancora una nuova riga. La tastiera permette di raggiungere Copia o l’intervallo di rotazione, poi di chiudere o annullare. Annullare mantiene inalterate le impostazioni di rotazione salvate.
+
+Se il salvataggio delle impostazioni di rotazione non riesce, la finestra mostra l’errore e conserva le modifiche. Le impostazioni precedenti restano attive. Risolvi il problema e conferma di nuovo, oppure annulla per scartare le modifiche.

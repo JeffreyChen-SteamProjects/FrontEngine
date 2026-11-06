@@ -801,3 +801,5 @@ Em Regras, Tab sai da tabela para os outros controles; as setas alternam entre c
 O consentimento para processar texto reconhecido e capturas na nuvem continua separado. Fechar a janela de origem durante a confirmação descarta a resposta, sem autorizar nem repetir a solicitação. Fechar a página Ferramentas também mantém o texto anterior e não abre um resultado. Com a página aberta, Não mostra o resultado original e Sim repete a solicitação original uma vez.
 
 No editor de texto reconhecido e na lista de predefinições de sinalização, Tab avança para o próximo controle e Shift+Tab retorna sem alterar o texto. Enter continua inserindo uma nova linha. O teclado permite acessar Copiar ou o intervalo de rotação e depois fechar ou cancelar. Cancelar a configuração de sinalização mantém os valores salvos.
+
+Se o salvamento das configurações de sinalização falhar, a janela mostra o erro e mantém suas alterações. As configurações anteriores continuam ativas. Corrija o problema e confirme novamente, ou cancele para descartar as alterações.

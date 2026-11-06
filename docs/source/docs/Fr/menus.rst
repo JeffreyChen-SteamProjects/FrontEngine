@@ -115,3 +115,5 @@ Si les paramètres de télécommande se ferment pendant le choix du chemin d’e
 Dans Règles, Tab quitte le tableau pour les autres commandes ; les flèches passent entre les cellules. Fermer l’éditeur d’action de scène pendant le choix du fichier ignore le chemin. Fermer Règles lorsque l’éditeur de cible est ouvert empêche son résultat de modifier la règle. Annuler conserve la valeur précédente ; rouvrez l’éditeur pour réessayer. Confirmer la cible modifie le brouillon. Confirmez Règles pour l’enregistrer.
 
 Dans l’éditeur de texte reconnu et la liste des préréglages d’affichage, Tab passe à la commande suivante et Maj+Tab revient sans modifier le texte. Entrée ajoute toujours une nouvelle ligne. Le clavier permet d’atteindre Copier ou l’intervalle de rotation, puis de fermer ou d’annuler. Annuler les réglages d’affichage conserve les valeurs enregistrées.
+
+Si l’enregistrement des réglages d’affichage échoue, la boîte de dialogue affiche l’erreur et conserve vos modifications. Les réglages précédents restent actifs. Corrigez le problème puis confirmez à nouveau, ou annulez pour abandonner vos modifications.

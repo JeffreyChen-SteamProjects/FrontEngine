@@ -779,3 +779,5 @@ Dans Règles, Tab quitte le tableau pour les autres commandes ; les flèches pas
 Les autorisations cloud pour le texte reconnu et les captures restent distinctes. Fermer la fenêtre source pendant la demande ignore la réponse, sans accorder d’autorisation ni relancer la requête. Fermer la page Outils à ce moment conserve le texte précédent sans ouvrir de résultat. Si la page reste ouverte, Non affiche le résultat initial et Oui relance une fois la requête initiale.
 
 Dans l’éditeur de texte reconnu et la liste des préréglages d’affichage, Tab passe à la commande suivante et Maj+Tab revient sans modifier le texte. Entrée ajoute toujours une nouvelle ligne. Le clavier permet d’atteindre Copier ou l’intervalle de rotation, puis de fermer ou d’annuler. Annuler les réglages d’affichage conserve les valeurs enregistrées.
+
+Si l’enregistrement des réglages d’affichage échoue, la boîte de dialogue affiche l’erreur et conserve vos modifications. Les réglages précédents restent actifs. Corrigez le problème puis confirmez à nouveau, ou annulez pour abandonner vos modifications.
