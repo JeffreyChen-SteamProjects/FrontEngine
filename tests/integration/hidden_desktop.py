@@ -14,6 +14,8 @@ import sys
 
 DESKTOP = 'FrontEnginePetProbe'
 CHILD_FLAG = '--child'
+DESKTOP_READOBJECTS = 0x0001
+UOI_NAME = 2
 
 
 class _StartupInfo(ctypes.Structure):
@@ -31,7 +33,7 @@ class _ProcessInfo(ctypes.Structure):
 
 
 def is_child(output: Path | None = None) -> bool:
-    """True in the child; it then sends stderr and fatal tracebacks to output/stderr.txt."""
+    """Enter a child probe only on a desktop separate from the input desktop."""
     if CHILD_FLAG not in sys.argv:
         return False
     if output is not None:
@@ -40,6 +42,35 @@ def is_child(output: Path | None = None) -> bool:
         sys.stderr = open(Path(output) / 'stderr.txt', 'w', encoding='utf-8', buffering=1)
         os.dup2(sys.stderr.fileno(), 2)  # Qt's own fatal messages go to the C-level stderr
         faulthandler.enable(sys.stderr)
+    user32 = ctypes.WinDLL('user32', use_last_error=True)
+    kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
+    user32.GetThreadDesktop.argtypes = [wintypes.DWORD]
+    user32.GetThreadDesktop.restype = wintypes.HANDLE
+    user32.OpenInputDesktop.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+    user32.OpenInputDesktop.restype = wintypes.HANDLE
+    user32.CloseDesktop.argtypes = [wintypes.HANDLE]
+    user32.GetUserObjectInformationW.argtypes = [wintypes.HANDLE, ctypes.c_int, ctypes.c_void_p,
+                                               wintypes.DWORD, ctypes.POINTER(wintypes.DWORD)]
+    kernel32.GetCurrentThreadId.restype = wintypes.DWORD
+    input_desktop = user32.OpenInputDesktop(0, False, DESKTOP_READOBJECTS)
+    if not input_desktop:
+        raise ctypes.WinError(ctypes.get_last_error())
+    try:
+        names = []
+        for handle in (user32.GetThreadDesktop(kernel32.GetCurrentThreadId()), input_desktop):
+            name = ctypes.create_unicode_buffer(512)
+            needed = wintypes.DWORD()
+            if not user32.GetUserObjectInformationW(handle, UOI_NAME, name, ctypes.sizeof(name), ctypes.byref(needed)):
+                raise ctypes.WinError(ctypes.get_last_error())
+            names.append(name.value)
+    finally:
+        user32.CloseDesktop(input_desktop)
+    if output is not None:
+        import json
+        (Path(output) / 'desktop.json').write_text(json.dumps(
+            {'thread_desktop': names[0], 'input_desktop': names[1]}, indent=2), encoding='utf-8')
+    if names[0] == names[1]:
+        raise RuntimeError('Refusing to run a probe on the input desktop')
     return True
 
 
