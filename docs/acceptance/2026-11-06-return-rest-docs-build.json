@@ -1,0 +1,73 @@
+{
+  "passed": true,
+  "warnings": 0,
+  "pages": [
+    {
+      "language": "Eng",
+      "latest_paragraph_present": true,
+      "source_sha256": "27d27e38430c83459e3dfffc090c9537b1b631c883b0206eecead42386bcec5d",
+      "html_sha256": "2b5b29776393321593ba2da3d4cfed806c2ec055a2c91ce226e511bd57865a1b"
+    },
+    {
+      "language": "Zh",
+      "latest_paragraph_present": true,
+      "source_sha256": "8c27524fbfa3fa7ed6f063b09041e8fdf5897b27583f015254f5c0ddcb0a3d18",
+      "html_sha256": "083bc8a8909aef57181e68d52da12269ac0c4759298b31055a0aa19cdbac2805"
+    },
+    {
+      "language": "ZhCn",
+      "latest_paragraph_present": true,
+      "source_sha256": "94489728a32588468eda3112e189cc707ecb4d1685dcc2990703e6e07706641e",
+      "html_sha256": "b81e343efeb14d33479ad261a1b18d4339a457e773722ae74721280d8dfbee27"
+    },
+    {
+      "language": "De",
+      "latest_paragraph_present": true,
+      "source_sha256": "5170b3842b79a31a391fc84871d63c981a540cbfc7f982bc0baab11460ee6e93",
+      "html_sha256": "324fb50ef9e97c9866c49decedfa43a7b93d75e27333753fffe8a119ea10d3cd"
+    },
+    {
+      "language": "Ru",
+      "latest_paragraph_present": true,
+      "source_sha256": "d9f636023ee9091a96f9adb8b04cf34f1ad43b5f2042bd52608546ecfced275d",
+      "html_sha256": "3f66428401a5678107eb91e7f48fcf5e0c26d0135242a05c813e3a01f82dc33d"
+    },
+    {
+      "language": "Fr",
+      "latest_paragraph_present": true,
+      "source_sha256": "669e48f73dd05acecf46185b6790fd8c378654d7d61323e867fc7085a0ad3776",
+      "html_sha256": "c9adafe888c4d576752616195bfa8744e741a31e20208a220a0548d136c97741"
+    },
+    {
+      "language": "It",
+      "latest_paragraph_present": true,
+      "source_sha256": "43aab1f75a12757914b8e6c3689d094f19417461324819e59ee8d5e1a3d8b663",
+      "html_sha256": "1bb8d1686fbc5ddb4e59ea2e1c135ad8c74393e4ea70b842f227470cc3b845aa"
+    }
+  ],
+  "product_test_commit": "35c9fb52",
+  "source_files_unchanged": 751,
+  "full_collection": {
+    "count": 3253,
+    "seconds": 6.22,
+    "interpreter": "Python 3.14.5 / Qt 6.11.2"
+  },
+  "queue": {
+    "session": 54446,
+    "parent_queue_pid": 44960,
+    "expected_passed": 3250,
+    "expected_posix_skips": 3,
+    "status": "queued; not a passing full regression result"
+  },
+  "limits": [
+    "HTML content/build verification does not prove native visual or screen-reader behavior.",
+    "Full regression and independent review remain pending."
+  ],
+  "evidence_sha256": {
+    "sphinx-return-rest.log": "53aff2d2430337dca6d50afd2c6eecc1cec2e18ec4aef92c189a189d8610df6a",
+    "full-collection-35c9fb52-3145.log": "4b6522d0c7dfbd421de77a1fabe6492e082795aaa825ed5d0477f3d69681917a",
+    "run_full_regression_35c9fb52.py": "4f4cc758ec9db66a492e144a4b4daacf249809983504ce8e206b7f2274ee0535",
+    "verify_full_35c9fb52.py": "84611af062bda6ed23fba7fa4d3f222aa8d6d7e3f24c7190c3536a7345c08034",
+    "full-regression-35c9fb52-plan.json": "454b50553dfce7adab1ea7b6b6ae9cbc9760f592d05dd85474dd9049c110b7c2"
+  }
+}
