@@ -1,6 +1,7 @@
 """Explicit fixed-resolution preview and asynchronous virtual-camera output."""
 from __future__ import annotations
 from frontengine.ui.runtime_lifetime import captured_lifetime, owned_callback
+from shiboken6 import isValid
 
 from PySide6.QtCore import Qt, QTimer, QRunnable, QObject, Signal
 from PySide6.QtGui import QPixmap, QColor
@@ -198,8 +199,10 @@ class SceneOutputDialog(QDialog):
             self.sender.submit(image_to_rgb(frame))
 
     def _background(self):
+        if not isValid(self) or not self.isVisible() or not self.lifetime.accepting:
+            return
         color = QColorDialog.getColor(self.background, self, translate('scene3d_output_background', 'Camera background'))
-        if color.isValid():
+        if isValid(self) and self.isVisible() and self.lifetime.accepting and color.isValid():
             self.background = color
 
     def _scene_changed(self, _entries: dict) -> None:

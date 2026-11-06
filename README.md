@@ -768,3 +768,5 @@ In the color palette, Tab and Shift+Tab move between the table and other control
 Closing remote-control settings while choosing a public-certificate export path discards the destination. That export creates no certificate or output file and does not overwrite an existing file. Cancelling only the file picker allows another attempt in the open settings dialog.
 
 In the Workshop manager, Tab and Shift+Tab move between fields, including the description; Enter adds a new line there. Closing the manager during source or preview selection discards the returned choice. Closing it while naming a preset prevents that import. Cancel or reopen the manager to try again. Uploads already in progress continue when the manager closes.
+
+Closing scene output while choosing a camera background discards the returned color and stops the preview. Cancelling only the color picker preserves the current color and keeps the preview running. Reopen scene output to choose a new color. Previewing does not open a camera.

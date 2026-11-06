@@ -120,3 +120,5 @@ Changing the interface language updates the 3D editor’s transform tool, axis, 
 Scene script and media sub-tab labels also follow the interface language without changing the selected tab or recreating its page. Scene content and undo history are preserved.
 
 The 3D editor’s Automatic duration and No parent labels follow interface-language changes. Duration values and parent relationships stay unchanged, including after selecting another object and returning.
+
+Closing scene output while choosing a camera background discards the returned color and stops the preview. Cancelling only the color picker preserves the current color and keeps the preview running. Reopen scene output to choose a new color. Previewing does not open a camera.

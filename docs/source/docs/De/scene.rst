@@ -38,3 +38,5 @@ Beim Wechsel der Oberflächensprache werden auch die Optionen für Transformatio
 Auch die Beschriftungen der Unterregister für Szenenskript und Medien folgen der Oberflächensprache. Das ausgewählte Register und seine Seite bleiben erhalten, ebenso Szeneninhalt und Rückgängig-Verlauf.
 
 Die Beschriftungen für automatische Dauer und fehlendes übergeordnetes Objekt im 3D-Editor folgen der Oberflächensprache. Dauerwerte und Eltern-Kind-Beziehungen bleiben unverändert, auch nach dem Wechsel zu einem anderen Objekt und zurück.
+
+Wird die Szenenausgabe während der Auswahl einer Kamerahintergrundfarbe geschlossen, wird die Auswahl verworfen und die Vorschau gestoppt. Wird nur die Farbauswahl abgebrochen, bleiben die aktuelle Farbe und die laufende Vorschau erhalten. Öffnen Sie die Szenenausgabe erneut, um eine andere Farbe auszuwählen. Die Vorschau öffnet keine Kamera.

@@ -769,3 +769,5 @@ Dans la palette de couleurs, Tab et Maj+Tab déplacent le focus entre le tableau
 Si les paramètres de télécommande se ferment pendant le choix du chemin d’exportation du certificat public, la destination est ignorée. Cet export ne crée ni certificat ni fichier de sortie et n’écrase aucun fichier existant. Annuler uniquement le sélecteur de fichiers permet de réessayer dans la fenêtre de paramètres restée ouverte.
 
 Dans le gestionnaire Workshop, Tab et Maj+Tab passent entre les champs, y compris la description ; Entrée y ajoute une nouvelle ligne. Fermer le gestionnaire pendant le choix de la source ou de l’aperçu ignore ce choix. Le fermer pendant la saisie du nom d’un préréglage empêche cet import. Après une annulation ou une réouverture, vous pouvez réessayer. Les envois déjà en cours continuent après la fermeture du gestionnaire.
+
+Fermer la sortie de scène pendant le choix de la couleur de fond de la caméra ignore cette couleur et arrête l’aperçu. Annuler uniquement le sélecteur de couleur conserve la couleur actuelle et laisse l’aperçu actif. Rouvrez la sortie de scène pour choisir une autre couleur. L’aperçu n’ouvre pas de caméra.

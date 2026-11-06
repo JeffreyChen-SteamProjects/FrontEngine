@@ -1,0 +1,99 @@
+{
+  "status": "partial",
+  "base": "78f67f94",
+  "problem": "Closing or destroying scene output during color selection still applied the returned background color.",
+  "change": "Check Qt validity, visibility and owner lifetime before opening the color picker and before applying its result.",
+  "reproduction": {
+    "log": ".audit/scene-output-modal-red.log",
+    "result": "3 failed, 9 deselected in 4.25s",
+    "observed": "Background changed from black to magenta after reject, close and destruction."
+  },
+  "verification": {
+    "command": "D:/Codes/FrontEngine/.audit/host-runtime-612/Scripts/python.exe -m pytest tests/unit_test/test_scene_output.py tests/unit_test/test_runtime_ownership.py -q",
+    "log": ".audit/scene-output-modal-green.log",
+    "exit_code": 0,
+    "passed": 42,
+    "seconds": 9.73,
+    "coverage": [
+      "Closed or destroyed dialogs preserve the previous background and refuse to reopen the picker.",
+      "Cancelling preserves black; reopening and retrying applies magenta.",
+      "The real renderer and FrameSender produce RGB [255, 0, 255] at the transparent background pixel, observed by a local camera substitute.",
+      "Reject stops the output timer, closes the render session and drains the local camera sender."
+    ]
+  },
+  "limitations": [
+    "Offscreen Qt with substituted color dialog returns and camera device; no physical camera was opened.",
+    "Full regression, independent review and integration remain pending. Native checks do not cover OS keyboard input or a real color picker.",
+    "No EXE was built."
+  ],
+  "native": {
+    "directory": ".audit/native-scene-output",
+    "platform": "Windows private desktop, Traditional_Chinese, dark, 900x740 main window",
+    "entry": "Actual scene page open_output entry; widget-local Tab/Space operates preview and color buttons. Color returns are substituted.",
+    "cases": {
+      "cases": [
+        {
+          "choice": "close",
+          "background": "#000000",
+          "preview_closed": true,
+          "camera_not_opened": true
+        },
+        {
+          "choice": "cancel",
+          "background": "#000000",
+          "preview_closed": true,
+          "camera_not_opened": true
+        },
+        {
+          "choice": "retry",
+          "background": "#ff00ff",
+          "preview_closed": true,
+          "camera_not_opened": true
+        }
+      ],
+      "actual_scene_entry": true
+    },
+    "observer": {
+      "before": {
+        "foreground": 2558004,
+        "cursor": [
+          768,
+          432
+        ]
+      },
+      "after": {
+        "foreground": 2558004,
+        "cursor": [
+          768,
+          432
+        ]
+      },
+      "child_exit": 0
+    },
+    "runtime_closed": true,
+    "temporary_directory_removed": true,
+    "stderr_empty": true,
+    "cold_home": {
+      "passed": true,
+      "initial_snapshot_exact": true,
+      "profiles_exact": true,
+      "leases_reacquired": true,
+      "saved_exact": true,
+      "temporary_directory_removed": true
+    }
+  },
+  "documentation": {
+    "files": 17,
+    "checks": "54 passed in 3.13s",
+    "sphinx": "HTML build with -W passed",
+    "rendered_paragraphs_exact": [
+      "Eng",
+      "Zh",
+      "ZhCn",
+      "De",
+      "Fr",
+      "Ru",
+      "It"
+    ]
+  }
+}

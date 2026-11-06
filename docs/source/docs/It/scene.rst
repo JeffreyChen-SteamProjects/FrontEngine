@@ -38,3 +38,5 @@ Il cambio della lingua dell’interfaccia aggiorna anche le opzioni di strumento
 Anche le etichette delle sottoschede dello script della scena e dei contenuti multimediali seguono la lingua dell’interfaccia, senza cambiare la scheda selezionata o ricrearne la pagina. Il contenuto della scena e la cronologia degli annullamenti restano invariati.
 
 Le indicazioni di durata automatica e assenza di un oggetto padre nell’editor 3D seguono la lingua dell’interfaccia. Durata e relazioni tra oggetti restano invariate, anche dopo aver selezionato un altro oggetto ed essere tornati al precedente.
+
+Chiudere l’uscita della scena durante la scelta del colore di sfondo della videocamera scarta il colore e arresta l’anteprima. Annullare solo la scelta del colore mantiene il colore attuale e lascia attiva l’anteprima. Riaprire l’uscita della scena per scegliere un altro colore. L’anteprima non apre una videocamera.

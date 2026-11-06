@@ -768,3 +768,5 @@ En la paleta de colores, Tab y Mayús+Tab mueven el foco entre la tabla y los de
 Si los ajustes del control remoto se cierran al elegir la ruta de exportación del certificado público, se descarta el destino. Esa exportación no crea certificados ni archivos de salida y no sobrescribe archivos existentes. Cancelar solo el selector de archivos permite volver a intentarlo en la ventana de ajustes abierta.
 
 En el gestor de Workshop, Tab y Mayús+Tab permiten pasar entre campos, incluida la descripción; Intro añade una línea en ese campo. Cerrar el gestor al elegir el origen o la vista previa descarta la selección. Cerrarlo al escribir el nombre de un preajuste impide esa importación. Tras cancelar o volver a abrir el gestor, puede intentarlo de nuevo. Las subidas ya iniciadas continúan al cerrar el gestor.
+
+Cerrar la salida de escena mientras se elige el color de fondo de la cámara descarta ese color y detiene la vista previa. Cancelar solo el selector de color conserva el color actual y mantiene la vista previa. Vuelva a abrir la salida de escena para elegir otro color. La vista previa no abre una cámara.
