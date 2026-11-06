@@ -57,10 +57,12 @@ class SignageDialog(QDialog):
         self.presets_label = tr(QLabel(), "signage_presets_label", "Presets, one per line:")
         self.presets_edit = QPlainTextEdit("\n".join(settings.get("presets", [])))
         self.presets_edit.setTabChangesFocus(True)
+        self.presets_label.setBuddy(self.presets_edit)
         self.interval_label = tr(QLabel(), "signage_interval_label", "Change every (minutes)")
         self.interval_spinbox = QSpinBox()
         self.interval_spinbox.setRange(MIN_INTERVAL_MINUTES, MAX_INTERVAL_MINUTES)
         self.interval_spinbox.setValue(settings.get("interval_minutes"))
+        self.interval_label.setBuddy(self.interval_spinbox)
         self.hide_checkbox = tr(QCheckBox(), "signage_hide_window",
             "Hide the main window while rotating")
         self.hide_checkbox.setChecked(bool(settings.get("hide_window", True)))
