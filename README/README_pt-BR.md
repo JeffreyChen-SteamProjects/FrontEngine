@@ -803,3 +803,5 @@ O consentimento para processar texto reconhecido e capturas na nuvem continua se
 No editor de texto reconhecido e na lista de predefinições de sinalização, Tab avança para o próximo controle e Shift+Tab retorna sem alterar o texto. Enter continua inserindo uma nova linha. O teclado permite acessar Copiar ou o intervalo de rotação e depois fechar ou cancelar. Cancelar a configuração de sinalização mantém os valores salvos.
 
 Se o salvamento das configurações de sinalização falhar, a janela mostra o erro e mantém suas alterações. As configurações anteriores continuam ativas. Corrija o problema e confirme novamente, ou cancele para descartar as alterações.
+
+O jantar com amigos ocorre quando pelo menos três moradores comem na mesma área. Refeições em áreas separadas não contam como um encontro. O evento é registrado no máximo uma vez por dia da casa, inclusive após salvar e reabrir.

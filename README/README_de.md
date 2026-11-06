@@ -823,3 +823,5 @@ Die Zustimmung zur Cloud-Verarbeitung von erkanntem Text und Screenshots bleibt 
 Im Bildschirmtext-Editor und in der Signage-Preset-Liste wechselt Tab zum nächsten Bedienelement und Umschalt+Tab zurück, ohne den Text zu ändern. Enter fügt weiterhin einen Zeilenumbruch ein. Kopieren, Wechselintervall, Schließen und Abbrechen sind per Tastatur erreichbar. Das Abbrechen der Signage-Einstellungen lässt die gespeicherten Werte unverändert.
 
 Wenn die Signage-Einstellungen nicht gespeichert werden können, zeigt der Dialog den Fehler und behält Ihre Eingaben. Die bisherigen Einstellungen bleiben aktiv. Beheben Sie das Problem und bestätigen Sie erneut, oder brechen Sie ab, um die Änderungen zu verwerfen.
+
+Das Ereignis „Abendessen mit Freunden“ tritt auf, wenn mindestens drei Bewohner im selben Bereich essen. Mahlzeiten in getrennten Bereichen zählen nicht als gemeinsames Treffen. Das Ereignis wird höchstens einmal pro Heimtag erfasst, auch nach dem Speichern und erneuten Öffnen.

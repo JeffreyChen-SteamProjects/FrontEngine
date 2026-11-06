@@ -144,3 +144,5 @@ Wird das Fotofenster während der Wahl des Speicherorts geschlossen, wird der zu
 Wird die Garderobe während der Ordner- oder Farbauswahl geschlossen, wird die zurückgegebene Auswahl verworfen. Es startet keine Installation und keine Farbe wird geändert. Weitere Auswahlaufrufe der geschlossenen Garderobe werden ebenfalls ignoriert.
 
 Wird der Sprite-Paketeditor während der Auswahl eines Bildes, Importordners, Exportordners oder Exportnamens geschlossen, verwirft er die zurückgegebene Auswahl. Er startet keinen neuen Auftrag und lässt den Entwurf unverändert. Wird nur der Auswahldialog abgebrochen, bleibt der Editor für einen weiteren Versuch verfügbar.
+
+Das Ereignis „Abendessen mit Freunden“ tritt auf, wenn mindestens drei Bewohner im selben Bereich essen. Mahlzeiten in getrennten Bereichen zählen nicht als gemeinsames Treffen. Das Ereignis wird höchstens einmal pro Heimtag erfasst, auch nach dem Speichern und erneuten Öffnen.

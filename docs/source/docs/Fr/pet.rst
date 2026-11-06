@@ -146,3 +146,5 @@ Si la fenêtre photo se ferme pendant le choix de l’emplacement, le chemin ret
 Fermer la garde-robe pendant le choix d’un dossier ou d’une couleur annule le résultat retourné. Aucune installation ne démarre et aucune couleur ne change. Les demandes ultérieures de sélection de cette garde-robe fermée sont aussi ignorées.
 
 Si l’éditeur de packs de sprites se ferme pendant le choix d’une image, d’un dossier d’importation, d’un dossier d’exportation ou d’un nom d’exportation, le choix renvoyé est ignoré. Aucune nouvelle tâche ne démarre et le brouillon reste inchangé. Annuler uniquement le sélecteur permet de réessayer dans l’éditeur.
+
+Le dîner entre amis se déclenche lorsque trois habitants au moins mangent dans la même zone. Des repas dans des zones séparées ne constituent pas une même réunion. Cet événement est enregistré au plus une fois par jour du foyer, même après sauvegarde et réouverture.

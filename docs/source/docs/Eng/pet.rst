@@ -142,3 +142,5 @@ If the pet-photo window closes while a save location is being chosen, the return
 Closing the wardrobe while choosing an asset folder or color discards the returned choice. It starts no installation and makes no color change. Later picker requests from that closed wardrobe are also ignored.
 
 Closing the sprite-pack editor while choosing a sprite, import folder, export folder or export name discards the returned choice. It starts no new job and leaves the draft unchanged. Cancelling only the picker keeps the editor available for another attempt.
+
+Dinner with friends occurs when at least three residents are eating in the same area. Residents eating in separate areas do not count as one gathering. The event is recorded at most once per home day, including after saving and reopening the home.

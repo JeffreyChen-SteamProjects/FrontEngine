@@ -780,3 +780,5 @@ El consentimiento para procesar texto reconocido y capturas en la nube se guarda
 En el editor de texto reconocido y la lista de preajustes de señalización, Tab pasa al control siguiente y Mayús+Tab vuelve sin cambiar el texto. Intro sigue insertando una línea nueva. El teclado permite llegar a Copiar o al intervalo de rotación y después cerrar o cancelar. Cancelar la configuración de señalización conserva los valores guardados.
 
 Si falla el guardado de la configuración de señalización, el diálogo muestra el error y conserva los cambios. La configuración anterior sigue activa. Corrige el problema y confirma de nuevo, o cancela para descartar los cambios.
+
+La cena con amigos ocurre cuando al menos tres residentes comen en la misma zona. Las comidas en zonas separadas no cuentan como una reunión. El evento se registra como máximo una vez por día del hogar, incluso después de guardar y volver a abrir.
