@@ -785,7 +785,7 @@
   ],
   "scope": "Native MainUI widget-local keyboard operations on private Windows desktops; four neutral-taste built-in treats, cancel, completion, immediate cooldown refusal, selected-pet isolation, save and separate-process reopen.",
   "limitations": [
-    "Synthetic 64x64 sprite; care timers stopped and advanced by two seconds.",
+    "Synthetic 64x64 sprite and explicit two-second care advances. The inherited harness stops the debounce-save timer; it does not explicitly pause the care timer. The later treat-boundary report explicitly pauses care before its controlled advances.",
     "English dark theme at requested 900x740 only for the four complete accepted runs.",
     "Cooldown expiry and persistence of the cooldown clock are not tested.",
     "No production artwork, OS input injection, mixed-DPI, independent review, or full-goal completion claim."

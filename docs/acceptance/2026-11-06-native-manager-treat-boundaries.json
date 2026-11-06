@@ -1,0 +1,212 @@
+{
+  "product_test_commit": "69a3b6c1",
+  "unchanged_source_test_files": 752,
+  "cases": [
+    {
+      "artifact_directory": ".audit\\native-treat-boundary-snack",
+      "treat": "snack",
+      "refused_at_seconds": 29.9,
+      "accepted_at_seconds": 30,
+      "second_completion_once": true,
+      "profile": {
+        "id": "dfbedc168ed34c9a89fdf1e59dfb327e",
+        "name": "Pet 3",
+        "mood": 63,
+        "fullness": 99,
+        "affection": 10,
+        "energy": 70,
+        "mode": "work",
+        "appearance": {
+          "character": null,
+          "equipped": {
+            "head": null,
+            "neck": null,
+            "body": null,
+            "back": null
+          },
+          "saved_outfits": []
+        },
+        "preferences": {
+          "auto_rest": true,
+          "allow_throw": true,
+          "allow_social": true,
+          "presentation": null,
+          "taste": {
+            "favorite": null,
+            "disliked": null
+          }
+        }
+      },
+      "care_clock_explicitly_paused": true,
+      "cold_reopen": {
+        "passed": true,
+        "initial_snapshot_exact": true,
+        "profiles_exact": true,
+        "leases_reacquired": true,
+        "saved_exact": true,
+        "temporary_directory_removed": true
+      },
+      "foreground_and_cursor_unchanged": true,
+      "runtime_closed": true,
+      "stderr_empty": true
+    },
+    {
+      "artifact_directory": ".audit\\native-treat-boundary-feast",
+      "treat": "feast",
+      "refused_at_seconds": 29.9,
+      "accepted_at_seconds": 30,
+      "second_completion_once": true,
+      "profile": {
+        "id": "9695aafa7d7346f38a4dffaacbc47b69",
+        "name": "Pet 3",
+        "mood": 55,
+        "fullness": 100,
+        "affection": 12,
+        "energy": 70,
+        "mode": "work",
+        "appearance": {
+          "character": null,
+          "equipped": {
+            "head": null,
+            "neck": null,
+            "body": null,
+            "back": null
+          },
+          "saved_outfits": []
+        },
+        "preferences": {
+          "auto_rest": true,
+          "allow_throw": true,
+          "allow_social": true,
+          "presentation": null,
+          "taste": {
+            "favorite": null,
+            "disliked": null
+          }
+        }
+      },
+      "care_clock_explicitly_paused": true,
+      "cold_reopen": {
+        "passed": true,
+        "initial_snapshot_exact": true,
+        "profiles_exact": true,
+        "leases_reacquired": true,
+        "saved_exact": true,
+        "temporary_directory_removed": true
+      },
+      "foreground_and_cursor_unchanged": true,
+      "runtime_closed": true,
+      "stderr_empty": true
+    },
+    {
+      "artifact_directory": ".audit\\native-treat-boundary-music",
+      "treat": "music",
+      "refused_at_seconds": 29.9,
+      "accepted_at_seconds": 30,
+      "second_completion_once": true,
+      "profile": {
+        "id": "ad5afb4e4dad4e70aead1be98a3b7e33",
+        "name": "Pet 3",
+        "mood": 79,
+        "fullness": 69,
+        "affection": 10,
+        "energy": 70,
+        "mode": "work",
+        "appearance": {
+          "character": null,
+          "equipped": {
+            "head": null,
+            "neck": null,
+            "body": null,
+            "back": null
+          },
+          "saved_outfits": []
+        },
+        "preferences": {
+          "auto_rest": true,
+          "allow_throw": true,
+          "allow_social": true,
+          "presentation": null,
+          "taste": {
+            "favorite": null,
+            "disliked": null
+          }
+        }
+      },
+      "care_clock_explicitly_paused": true,
+      "cold_reopen": {
+        "passed": true,
+        "initial_snapshot_exact": true,
+        "profiles_exact": true,
+        "leases_reacquired": true,
+        "saved_exact": true,
+        "temporary_directory_removed": true
+      },
+      "foreground_and_cursor_unchanged": true,
+      "runtime_closed": true,
+      "stderr_empty": true
+    },
+    {
+      "artifact_directory": ".audit\\native-treat-boundary-book",
+      "treat": "book",
+      "refused_at_seconds": 29.9,
+      "accepted_at_seconds": 30,
+      "second_completion_once": true,
+      "profile": {
+        "id": "a97badaa487c481caef062bea1a4b633",
+        "name": "Pet 3",
+        "mood": 51,
+        "fullness": 79,
+        "affection": 8,
+        "energy": 70,
+        "mode": "work",
+        "appearance": {
+          "character": null,
+          "equipped": {
+            "head": null,
+            "neck": null,
+            "body": null,
+            "back": null
+          },
+          "saved_outfits": []
+        },
+        "preferences": {
+          "auto_rest": true,
+          "allow_throw": true,
+          "allow_social": true,
+          "presentation": null,
+          "taste": {
+            "favorite": null,
+            "disliked": null
+          }
+        }
+      },
+      "care_clock_explicitly_paused": true,
+      "cold_reopen": {
+        "passed": true,
+        "initial_snapshot_exact": true,
+        "profiles_exact": true,
+        "leases_reacquired": true,
+        "saved_exact": true,
+        "temporary_directory_removed": true
+      },
+      "foreground_and_cursor_unchanged": true,
+      "runtime_closed": true,
+      "stderr_empty": true
+    }
+  ],
+  "cold_cooldown": {
+    "saved_profile_exact": true,
+    "reopened_feed_accepted": true,
+    "no_reward_on_start_or_cancel": true,
+    "temporary_directory_removed": true,
+    "interpretation": "Desktop companion cooldown is session-local and resets on reopen; this is observation, not a claim of persistent cooldown."
+  },
+  "scope": "Four native manager keyboard feed cases, Traditional Chinese/light/900x740, refused at 29.9 seconds and accepted at 30 seconds after completion; second completion once and independent cold reopen exact.",
+  "limits": [
+    "Synthetic artwork and manually advanced active clock, not elapsed wall-time acceptance.",
+    "Cooldown is session-local; reopen resets it. Persistent cooldown is not implemented or claimed.",
+    "Full integration, independent code review, hardware matrix and broader goal remain incomplete."
+  ],
+  "audit_correction": "Earlier native_manager_interactions body stops the debounce save timer, not the care timer. This boundary probe explicitly calls PetProfileSession.pause() on both desktop pets before controlled advances."
+}
