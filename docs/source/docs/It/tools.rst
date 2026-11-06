@@ -56,3 +56,5 @@ Se l’editor della cattura viene chiuso durante la scelta della posizione di sa
 Se la libreria delle risorse viene chiusa durante la scelta di un file o di una cartella, la scelta restituita viene ignorata. La chiusura durante la conferma di un nuovo collegamento impedisce anche a tale conferma di inviare modifiche. Annullando solo la selezione o la conferma, è possibile riprovare nella libreria.
 
 Nella tavolozza, Tab e Maiusc+Tab spostano il focus tra la tabella e gli altri controlli; le frecce cambiano cella. Chiudendo la tavolozza durante la scelta del percorso di esportazione CSS o JSON, la destinazione viene ignorata senza creare o sovrascrivere file. Annullando solo la selezione, è possibile riprovare anche dopo aver riaperto la tavolozza.
+
+Il consenso cloud per il testo riconosciuto e per le schermate resta separato. Chiudere la finestra di origine durante la richiesta di consenso scarta la risposta, senza autorizzare né ripetere la richiesta. Chiudere la pagina Strumenti in quel momento conserva il testo precedente senza aprire un risultato. Se la pagina resta aperta, No mostra il risultato originale e Sì ripete una volta la richiesta originale.

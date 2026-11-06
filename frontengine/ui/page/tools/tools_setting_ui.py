@@ -11,6 +11,7 @@ from frontengine.ui.runtime_lifetime import OwnedWidgetList, owned_callback
 from typing import List, Optional
 from pathlib import Path
 import sys
+from shiboken6 import isValid
 
 from PySide6.QtCore import QBuffer, QIODevice, QTimer, QRect, Signal
 from PySide6.QtGui import QGuiApplication, QPixmap, QImage
@@ -781,6 +782,8 @@ class ToolsSettingUI(SettingPage):
     def _handle_screen_text_result(self, result, data, action, language, question) -> None:
         if result.consent_required and api_key() is not None:
             consent = ask_for_text_consent(self) if result.consent_required == 'text' else ask_for_consent(self)
+            if not isValid(self) or not self.isVisible() or not self.lifetime.accepting:
+                return
             if consent:
                 self._request_screen_text(data, action, language, question)
                 return

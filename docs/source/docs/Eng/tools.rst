@@ -55,3 +55,5 @@ Closing the capture editor while choosing a save location discards the destinati
 Closing the asset library during file or folder selection discards the returned choice. Closing it during relink confirmation also prevents that confirmation from submitting changes. Cancelling only the picker or confirmation keeps the library available for another attempt.
 
 In the color palette, Tab and Shift+Tab move between the table and other controls; arrow keys move between cells. Closing the palette while choosing a CSS or JSON export path discards the destination without creating or overwriting a file. Cancelling only the picker allows another attempt, including after reopening the palette.
+
+Cloud consent for recognized text and screenshots remains separate. Closing the source window while a consent prompt is open discards its answer; it does not grant consent or retry the request. Closing the Tools page during that prompt also preserves the previous text without opening a result window. With the page still open, No displays the original result and Yes retries the original request once.

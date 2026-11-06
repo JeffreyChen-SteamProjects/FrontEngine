@@ -56,3 +56,5 @@ Si l’éditeur de capture se ferme pendant le choix de l’emplacement d’enre
 Si la bibliothèque de ressources se ferme pendant le choix d’un fichier ou d’un dossier, le choix renvoyé est ignoré. La fermer pendant la confirmation d’une nouvelle liaison empêche aussi cette confirmation de soumettre des modifications. Annuler uniquement le sélecteur ou la confirmation permet de réessayer dans la bibliothèque.
 
 Dans la palette de couleurs, Tab et Maj+Tab déplacent le focus entre le tableau et les autres commandes ; les flèches changent de cellule. Fermer la palette pendant le choix du chemin d’exportation CSS ou JSON ignore la destination sans créer ni écraser de fichier. Annuler uniquement le sélecteur permet de réessayer, y compris après la réouverture de la palette.
+
+Les autorisations cloud pour le texte reconnu et les captures restent distinctes. Fermer la fenêtre source pendant la demande ignore la réponse, sans accorder d’autorisation ni relancer la requête. Fermer la page Outils à ce moment conserve le texte précédent sans ouvrir de résultat. Si la page reste ouverte, Non affiche le résultat initial et Oui relance une fois la requête initiale.

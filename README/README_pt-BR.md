@@ -797,3 +797,5 @@ Fechar a saída da cena ao escolher a cor de fundo da câmera descarta a cor e i
 Fechar a comparação de imagens durante a seleção de arquivos descarta a seleção. Reabri-la pela página Imagem cria uma nova janela de comparação. Cancelar apenas a seleção mantém as imagens atuais; um novo par as substitui após a decodificação bem-sucedida.
 
 Em Regras, Tab sai da tabela para os outros controles; as setas alternam entre células. Fechar o editor de ação de cena durante a seleção de arquivo descarta o caminho. Fechar Regras com o editor de destino aberto impede que o resultado altere a regra. Cancelar mantém o valor anterior; reabra o editor para tentar novamente. Confirmar o destino altera o rascunho. Confirme Regras para salvá-lo.
+
+O consentimento para processar texto reconhecido e capturas na nuvem continua separado. Fechar a janela de origem durante a confirmação descarta a resposta, sem autorizar nem repetir a solicitação. Fechar a página Ferramentas também mantém o texto anterior e não abre um resultado. Com a página aberta, Não mostra o resultado original e Sim repete a solicitação original uma vez.
