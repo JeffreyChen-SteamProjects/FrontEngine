@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261106-74 | 2026-11-06 | 修正回家跨區後遺失睡覺指令 | Pet / Events / Fix | [2026-11](2026-11.md) |
 | U-20261106-73 | 2026-11-06 | 家園回家事件與原生泡泡跨程序驗證 | Pet / Events / Test | [2026-11](2026-11.md) |
 | U-20261106-72 | 2026-11-06 | 修正活動泡泡邊界與專注模式顯示 | UI / Pet / Fix | [2026-11](2026-11.md) |
 | U-20261106-71 | 2026-11-06 | 收件匣歸屬版本完整回歸驗證 | Pet / Regression / Test | [2026-11](2026-11.md) |
@@ -400,6 +401,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 196 |
+| [2026-11.md](2026-11.md) | 2026-11 | 197 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

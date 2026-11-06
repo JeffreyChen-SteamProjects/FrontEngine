@@ -12,7 +12,7 @@ from frontengine.utils.pet_game.behaviour import (
     LOW_HYGIENE, URGENT_ENERGY, URGENT_FULLNESS, cancel_activity, decide, greet_arrived, greet_completed, help_completed,
     tag_completed,
     helpers, release,
-    shared_completed, together,
+    shared_completed, start_rest, together,
 )
 from frontengine.utils.pet_game import goals
 from frontengine.utils.pet_game.resident import PROFESSION_TRAITS
@@ -146,8 +146,10 @@ def _walk(world: World, resident: Resident) -> None:
     resident.x_milli = activity.target_x
     if activity.kind == "visit":
         resident.activity = None
-        world.cross(resident.identifier)
+        crossed = world.cross(resident.identifier)
         resident.decide_after_ms = world.time_ms
+        if crossed == "accepted" and activity.reason == "going_home":
+            start_rest(world, resident, "going_home")
         return
     activity.phase = "using"
     activity.started_ms = world.time_ms

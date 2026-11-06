@@ -1,4 +1,6 @@
 """Raised pieces reached by climbing or pet stairs, and crossing points between zones."""
+import pytest
+
 from frontengine.utils.pet_game import arrangement, behaviour, simulation, snapshot
 from frontengine.utils.pet_game.catalog import builtin_catalog
 from frontengine.utils.pet_game.world import World
@@ -127,3 +129,73 @@ def test_choosing_where_the_entrance_leads_on_the_page(tmp_path, monkeypatch, *,
     finally:
         page.shutdown()
         page.deleteLater()
+
+
+@pytest.mark.parametrize("energy", [60, 90])
+def test_sleep_command_reaches_owned_bed_after_crossing(energy):
+    world, home = _world()
+    away = world.add_zone("right", 1920, 0, 30)
+    assert world.link_zones(home, away) == "accepted"
+    bed = _place(world, "bed_basic", home, 3)[1]
+    assert world.assign_bed(bed, PET) == "accepted"
+    assert world.transfer_resident(PET, away, keep_claims=True) == "accepted"
+    pet = world.residents[PET]
+    pet.needs.update(energy=energy, fullness=90, hygiene=90, social=90)
+    pet.x_milli = 20 * 32 * 1000
+    world.drain_events()
+    assert world.command(PET, "sleep") == "accepted"
+    for _ in range(200):
+        simulation.step(world)
+        if pet.activity and pet.activity.kind == "sleep" and pet.activity.phase == "using":
+            break
+    assert pet.zone == home
+    assert pet.activity is not None
+    assert pet.activity.kind == "sleep"
+    assert pet.activity.phase == "using"
+    assert pet.activity.furniture == bed
+    assert world.furniture[bed].owner == PET
+    events = world.drain_events()
+    assert len([e for e in events if e["kind"] == "moved_zone"]) == 1
+    assert len([e for e in events if e["kind"] == "activity" and e["activity"] == "sleep"]) == 1
+
+
+@pytest.mark.parametrize("change", ["stop", "eat", "unlink", "store_bed", "ordinary_visit"])
+def test_return_home_rest_respects_changes_during_travel(change):
+    world, home = _world()
+    away = world.add_zone("right", 1920, 0, 30)
+    world.link_zones(home, away)
+    bed = _place(world, "bed_basic", home, 3)[1]
+    world.assign_bed(bed, PET)
+    world.transfer_resident(PET, away, keep_claims=True)
+    pet = world.residents[PET]
+    pet.x_milli = 20 * 32 * 1000
+    if change == "ordinary_visit":
+        behaviour.start_visit(world, pet, "visiting")
+    else:
+        world.command(PET, "sleep")
+        simulation.step(world)
+        assert pet.activity.kind == "visit"
+    if change in ("stop", "eat"):
+        assert world.command(PET, change) == "accepted"
+        simulation.step(world)
+        assert pet.zone == away
+        assert pet.activity is None if change == "stop" else pet.activity.kind == "snack"
+        return
+    if change == "unlink":
+        world.link_zones(away, None)
+    elif change == "store_bed":
+        assert world.store(bed) == "accepted"
+    for _ in range(100):
+        simulation.step(world)
+        if pet.activity is None or pet.activity.kind != "visit":
+            break
+    if change == "unlink":
+        assert pet.zone == away
+        assert pet.activity is None
+    elif change == "store_bed":
+        assert pet.zone == home
+        assert pet.activity.kind == "nap"
+        assert pet.activity.furniture is None
+    else:
+        assert pet.zone == home
+        assert pet.activity is None

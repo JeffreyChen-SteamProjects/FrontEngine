@@ -75,3 +75,5 @@ L’anniversaire de chaque résident est célébré une seule fois tous les sept
 Les noms des résidents visibles restent dans la vue du foyer et la bande du bureau, même sur les bords. Les noms longs sont abrégés avec des points de suspension et leur fond suit le texte affiché.
 
 Les bulles d’activité restent dans la bande du bureau sur les deux bords ; les textes trop larges sont abrégés. Les bulles des résidents hors de la zone visible sont masquées. Les modes Concentration et Réunion masquent immédiatement les bulles déjà affichées.
+
+La consigne de dormir se poursuit par du repos après le retour dans la zone du lit attitré, même si l’énergie reste élevée. Arrêter ou donner une autre consigne annule le trajet. Si le lit est rangé pendant le trajet, l’animal fait une sieste au sol à son arrivée.

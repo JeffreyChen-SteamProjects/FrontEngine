@@ -745,3 +745,5 @@ O aniversário de cada morador é celebrado uma vez a cada sete dias de jogo des
 Os nomes dos moradores visíveis ficam dentro da visão da casa e da faixa da área de trabalho nas duas bordas. Nomes longos usam reticências, e o fundo do nome acompanha o texto exibido.
 
 Os balões de atividade ficam dentro das duas bordas da faixa da área de trabalho; textos largos demais usam reticências. Os balões de moradores fora da área visível ficam ocultos. Os modos Foco e Reunião ocultam imediatamente os balões já exibidos.
+
+A ordem de dormir continua com o descanso após o retorno à área da própria cama, mesmo com bastante energia. Parar ou receber outra ordem cancela o trajeto. Se a cama for guardada durante o caminho, o pet cochila no chão ao chegar.

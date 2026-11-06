@@ -765,3 +765,5 @@ Der Geburtstag jedes Bewohners wird alle sieben Spieltage seit dem Einzug einmal
 Die Namen sichtbarer Bewohner bleiben an beiden Rändern der Hausansicht und des Desktopstreifens innerhalb der Anzeige. Lange Namen werden mit Auslassungspunkten gekürzt; der Namenshintergrund folgt dem angezeigten Text.
 
 Aktivitätsblasen bleiben an beiden Rändern innerhalb des Desktopstreifens; zu breiter Text wird mit Auslassungspunkten gekürzt. Blasen außerhalb des sichtbaren Bereichs werden verborgen. Fokus- und Besprechungsmodus blenden auch bereits sichtbare Blasen sofort aus.
+
+Ein Schlafbefehl führt nach der Rückkehr in den Bereich mit dem eigenen Bett zum Ausruhen, auch bei noch hoher Energie. Stopp oder ein neuer Befehl bricht den Weg ab. Wird das Bett unterwegs eingelagert, ruht sich das Tier nach der Ankunft auf dem Boden aus.
