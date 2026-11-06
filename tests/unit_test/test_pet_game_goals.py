@@ -37,6 +37,111 @@ def _states(world: World) -> dict[str, str]:
     return {goal.identifier: goals.goal_state(world, goal) for goal in goals.TUTORIAL}
 
 
+@pytest.mark.parametrize('groups', [(0, 1, 2), (0, 0, 1), (0, 0, 0)])
+@pytest.mark.parametrize('mode', ['manage', 'sandbox'])
+def test_friends_dinner_requires_three_diners_in_one_zone(groups, mode):
+    world = World(builtin_catalog(), HOME, mode=mode, seed=9)
+    if mode == 'manage':
+        world.ledger.apply('test-capital', 'test', 1000)
+    zones = {group: world.add_zone(f'screen-{group}', group * 1000, 900, 48)
+             for group in sorted(set(groups))}
+    for number, group in enumerate(groups):
+        assert world.buy('round_table', f'table-{number}') == 'accepted'
+        assert world.place('round_table', zones[group], 7 + number * 6)[0] == 'accepted'
+        identifier = f'{number + 1:032x}'
+        _adopt(world, zones[group], identifier)
+        world.residents[identifier].needs['fullness'] = 30
+        assert world.command(identifier, 'eat') == 'accepted'
+    events = _run(world, 1)
+    dinners = [event for event in events if event.get('event') == 'friends_dinner']
+    assert len(dinners) == (1 if len(zones) == 1 else 0)
+    loaded = snapshot.from_dict(snapshot.to_dict(world), world.catalog)
+    assert loaded.progress.event_days == world.progress.event_days
+
+
+@pytest.mark.parametrize('together', [False, True])
+@pytest.mark.parametrize('mode', ['manage', 'sandbox'])
+def test_dinner_service_inbox_and_saved_marker(tmp_path, monkeypatch, home_store_factory,
+                                               lifetime_factory, together, mode):
+    from pathlib import Path
+    import subprocess
+    import sys
+
+    from frontengine.show.pet_game.home_service import HomeService
+    from frontengine.ui.page.pet_game.home_page import PetHomePage
+    from frontengine.user_setting.user_setting_file import user_setting_dict
+
+    lifetime = lifetime_factory()
+    monkeypatch.setitem(user_setting_dict, 'pet_home_on_desktop', False)
+    monkeypatch.setitem(user_setting_dict, 'pet_home_running', False)
+    store = home_store_factory(tmp_path, builtin_catalog(), mode)
+    service = HomeService(None, store, store.storage.profiles())
+    page = PetHomePage(service, lifetime=lifetime)
+    try:
+        world = service.create_home('screen', 0, 900, 48, seed=9)
+        service.pause('audit')
+        world.automatic = False
+        first_zone = next(iter(world.zones))
+        if mode == 'manage':
+            world.ledger.apply('test-capital', 'test', 1000)
+        for number in range(3):
+            zone = first_zone if together or number == 0 else world.add_zone(
+                f'screen-{number}', number * 1000, 900, 48)
+            assert world.buy('round_table', f'table-{number}') == 'accepted'
+            assert world.place('round_table', zone, 7 + number * 6)[0] == 'accepted'
+            record = service.profiles.create(f'Pet {number}')
+            assert service.adopt(record['id'], zone) == 'accepted'
+            resident = world.residents[record['id']]
+            resident.traits = ()
+            resident.needs.update(fullness=30, energy=90)
+            assert world.command(record['id'], 'eat') == 'accepted'
+        for _ in range(300):
+            simulation.step(world)
+            service._publish()
+        dinners = [entry for entry in page.inbox.entries
+                   if entry['event'].get('event') == 'friends_dinner']
+        assert len(dinners) == int(together)
+        if together:
+            assert dinners[0]['count'] == 1
+            assert 'Dinner with friends' in [page.inbox.list.item(i).text()
+                                           for i in range(page.inbox.list.count())]
+        service._publish()
+        assert service.save_now()
+        loaded = store.load()
+        assert loaded.status == 'loaded'
+        assert loaded.world.progress.event_days == world.progress.event_days
+        assert bool(loaded.world.progress.event_days.get('friends_dinner')) == together
+        assert len([entry for entry in page.inbox.entries
+                    if entry['event'].get('event') == 'friends_dinner']) == int(together)
+        child = subprocess.run([sys.executable, '-c', '''
+import json, sys
+from pathlib import Path
+sys.path.insert(0, sys.argv[1])
+from frontengine.utils.pet_game import simulation, snapshot
+from frontengine.utils.pet_game.catalog import builtin_catalog
+data = json.loads(Path(sys.argv[2]).read_text(encoding='utf-8'))
+world = snapshot.from_dict(data, builtin_catalog())
+assert snapshot.to_dict(world) == data
+assert not world.drain_events()
+markers = dict(world.progress.event_days.get('friends_dinner', {}))
+assert bool(markers) == (sys.argv[3] == 'True')
+for resident in world.residents.values():
+    resident.needs.update(fullness=30, energy=90)
+    assert world.command(resident.identifier, 'eat') == 'accepted'
+events = []
+for _ in range(300):
+    simulation.step(world)
+    events.extend(world.drain_events())
+assert not any(event.get('event') == 'friends_dinner' for event in events)
+assert world.progress.event_days.get('friends_dinner', {}) == markers
+print('cold dinner markers preserved; no duplicate event')
+''', str(Path(__file__).resolve().parents[2]), str(store.path), str(together)],
+                               capture_output=True, text=True, timeout=60)
+        assert child.returncode == 0, child.stdout + child.stderr
+    finally:
+        page.shutdown()
+
+
 def test_tutorial_goals_follow_play_and_pay_once():
     world, zone = _world()
     assert set(_states(world).values()) == {"open"}
