@@ -825,3 +825,5 @@ Im Bildschirmtext-Editor und in der Signage-Preset-Liste wechselt Tab zum nächs
 Wenn die Signage-Einstellungen nicht gespeichert werden können, zeigt der Dialog den Fehler und behält Ihre Eingaben. Die bisherigen Einstellungen bleiben aktiv. Beheben Sie das Problem und bestätigen Sie erneut, oder brechen Sie ab, um die Änderungen zu verwerfen.
 
 Das Ereignis „Abendessen mit Freunden“ tritt auf, wenn mindestens drei Bewohner im selben Bereich essen. Mahlzeiten in getrennten Bereichen zählen nicht als gemeinsames Treffen. Das Ereignis wird höchstens einmal pro Heimtag erfasst, auch nach dem Speichern und erneuten Öffnen.
+
+Die Signage-Preset-Liste und das Wechselintervall verwenden ihre sichtbaren Beschriftungen als barrierefreie Namen. Diese folgen dem Sprachwechsel, ohne Ihre Einstellungen zu ändern.

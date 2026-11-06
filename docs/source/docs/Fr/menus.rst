@@ -117,3 +117,5 @@ Dans Règles, Tab quitte le tableau pour les autres commandes ; les flèches pas
 Dans l’éditeur de texte reconnu et la liste des préréglages d’affichage, Tab passe à la commande suivante et Maj+Tab revient sans modifier le texte. Entrée ajoute toujours une nouvelle ligne. Le clavier permet d’atteindre Copier ou l’intervalle de rotation, puis de fermer ou d’annuler. Annuler les réglages d’affichage conserve les valeurs enregistrées.
 
 Si l’enregistrement des réglages d’affichage échoue, la boîte de dialogue affiche l’erreur et conserve vos modifications. Les réglages précédents restent actifs. Corrigez le problème puis confirmez à nouveau, ou annulez pour abandonner vos modifications.
+
+La liste des préréglages d’affichage et l’intervalle de rotation utilisent leurs libellés visibles comme noms accessibles. Ces noms suivent les changements de langue sans modifier vos réglages.

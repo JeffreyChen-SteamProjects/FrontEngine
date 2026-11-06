@@ -782,3 +782,5 @@ En el editor de texto reconocido y la lista de preajustes de señalización, Tab
 Si falla el guardado de la configuración de señalización, el diálogo muestra el error y conserva los cambios. La configuración anterior sigue activa. Corrige el problema y confirma de nuevo, o cancela para descartar los cambios.
 
 La cena con amigos ocurre cuando al menos tres residentes comen en la misma zona. Las comidas en zonas separadas no cuentan como una reunión. El evento se registra como máximo una vez por día del hogar, incluso después de guardar y volver a abrir.
+
+La lista de preajustes de señalización y el intervalo de rotación usan sus etiquetas visibles como nombres accesibles. Estos nombres cambian con el idioma sin modificar la configuración.

@@ -115,3 +115,5 @@ In Regole, Tab passa dalla tabella agli altri controlli; le frecce spostano la s
 Nell’editor del testo riconosciuto e nell’elenco delle preimpostazioni per la rotazione, Tab passa al controllo successivo e Maiusc+Tab torna indietro senza modificare il testo. Invio aggiunge ancora una nuova riga. La tastiera permette di raggiungere Copia o l’intervallo di rotazione, poi di chiudere o annullare. Annullare mantiene inalterate le impostazioni di rotazione salvate.
 
 Se il salvataggio delle impostazioni di rotazione non riesce, la finestra mostra l’errore e conserva le modifiche. Le impostazioni precedenti restano attive. Risolvi il problema e conferma di nuovo, oppure annulla per scartare le modifiche.
+
+L’elenco delle preimpostazioni e l’intervallo di rotazione usano le etichette visibili come nomi accessibili. I nomi seguono i cambi di lingua senza modificare le impostazioni.

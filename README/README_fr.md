@@ -783,3 +783,5 @@ Dans l’éditeur de texte reconnu et la liste des préréglages d’affichage, 
 Si l’enregistrement des réglages d’affichage échoue, la boîte de dialogue affiche l’erreur et conserve vos modifications. Les réglages précédents restent actifs. Corrigez le problème puis confirmez à nouveau, ou annulez pour abandonner vos modifications.
 
 Le dîner entre amis se déclenche lorsque trois habitants au moins mangent dans la même zone. Des repas dans des zones séparées ne constituent pas une même réunion. Cet événement est enregistré au plus une fois par jour du foyer, même après sauvegarde et réouverture.
+
+La liste des préréglages d’affichage et l’intervalle de rotation utilisent leurs libellés visibles comme noms accessibles. Ces noms suivent les changements de langue sans modifier vos réglages.

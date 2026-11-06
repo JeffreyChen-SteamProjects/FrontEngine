@@ -114,3 +114,5 @@ In Rules, Tab moves from the table to the other controls; arrow keys move betwee
 In the screen-text result editor and the signage preset list, Tab moves to the next control and Shift+Tab moves back without changing the text. Enter still inserts a new line. You can reach Copy or the rotation interval, then close or cancel with the keyboard. Cancelling signage leaves its saved settings unchanged.
 
 If saving signage settings fails, the dialog shows the error and keeps your edits. The previous settings remain active. Correct the problem and confirm again to retry, or cancel to discard your edits.
+
+The signage preset list and rotation interval expose their visible labels as accessibility names. These names follow language changes without altering your settings.
