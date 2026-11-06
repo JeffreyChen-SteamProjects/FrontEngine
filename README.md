@@ -762,3 +762,5 @@ Closing the capture editor while choosing a save location discards the destinati
 Closing the asset library during file or folder selection discards the returned choice. Closing it during relink confirmation also prevents that confirmation from submitting changes. Cancelling only the picker or confirmation keeps the library available for another attempt.
 
 Closing the task editor during calendar selection or clear confirmation discards the returned choice, preserving saved tasks. Cancelling only the picker or confirmation allows another attempt. Reopening the editor keeps it connected to the shared checklist.
+
+In the color palette, Tab and Shift+Tab move between the table and other controls; arrow keys move between cells. Closing the palette while choosing a CSS or JSON export path discards the destination without creating or overwriting a file. Cancelling only the picker allows another attempt, including after reopening the palette.

@@ -55,3 +55,5 @@ Beim Wechsel der Oberflächensprache werden auch die Auswahltexte für Qualität
 Wird der Aufnahmeeditor während der Auswahl eines Speicherorts geschlossen, verwirft er den Pfad, ohne eine Datei zu erstellen oder zu überschreiben. Beim Schließen während der Texteingabe wird der zurückgegebene Text verworfen. Wird nur der Speicher- oder Textdialog abgebrochen, bleibt der Editor für einen weiteren Versuch verfügbar.
 
 Wird die Medienbibliothek während der Datei- oder Ordnerauswahl geschlossen, verwirft sie die zurückgegebene Auswahl. Wird sie während der Bestätigung einer Neuverknüpfung geschlossen, übernimmt diese Bestätigung keine Änderungen. Wird nur die Auswahl oder Bestätigung abgebrochen, bleibt die Bibliothek für einen weiteren Versuch verfügbar.
+
+In der Farbpalette wechseln Tab und Umschalt+Tab zwischen der Tabelle und anderen Steuerelementen; Pfeiltasten wechseln zwischen Zellen. Wird die Palette während der Auswahl eines CSS- oder JSON-Exportpfads geschlossen, wird der Pfad verworfen, ohne Dateien zu erstellen oder zu überschreiben. Wird nur der Auswahldialog abgebrochen, ist ein weiterer Versuch möglich, auch nach erneutem Öffnen der Palette.

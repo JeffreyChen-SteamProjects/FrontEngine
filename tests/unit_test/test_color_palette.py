@@ -11,6 +11,96 @@ from frontengine.utils.json.json_repository import JsonRepository
 from frontengine.utils.measure.color_palette import ColorPalette, MAX_RECENT, MAX_SWATCHES
 
 
+@pytest.mark.parametrize('format_name', ['css', 'json'])
+@pytest.mark.parametrize('existing', [False, True])
+@pytest.mark.parametrize('closing', ['reject', 'close', 'destroy'])
+def test_palette_export_discards_destination_after_closure(tmp_path, monkeypatch, format_name, existing, closing):
+    from PySide6.QtCore import QEvent
+    from PySide6.QtWidgets import QFileDialog
+    from shiboken6 import isValid
+    from frontengine.ui.dialog.color_palette_dialog import ColorPaletteDialog
+
+    palette = ColorPalette({}, lambda: None)
+    palette.add('Accent', 'Brand', '#123456')
+    expected = palette.export_text(format_name)
+    dialog = ColorPaletteDialog(None, palette)
+    dialog.show()
+    destination = tmp_path / ('palette.' + format_name)
+    if existing:
+        destination.write_bytes(b'keep original bytes')
+    def choose_then_close(*_args):
+        if closing == 'reject':
+            dialog.reject()
+        elif closing == 'close':
+            dialog.close()
+        else:
+            dialog.deleteLater()
+            QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+        return str(destination), ''
+    monkeypatch.setattr(QFileDialog, 'getSaveFileName', choose_then_close)
+    try:
+        dialog.export(format_name)
+        assert destination.read_bytes() == b'keep original bytes' if existing else not destination.exists()
+        assert palette.export_text(format_name) == expected
+        def unexpected_picker(*_args):
+            pytest.fail('closed palette reopened its export picker')
+        monkeypatch.setattr(QFileDialog, 'getSaveFileName', unexpected_picker)
+        dialog.export(format_name)
+    finally:
+        if isValid(dialog):
+            dialog.close()
+
+
+@pytest.mark.parametrize('format_name', ['css', 'json'])
+def test_palette_export_cancel_reopen_then_retry(tmp_path, monkeypatch, format_name):
+    from PySide6.QtWidgets import QFileDialog
+    from frontengine.ui.dialog.color_palette_dialog import ColorPaletteDialog
+
+    palette = ColorPalette({}, lambda: None)
+    palette.add('Accent', 'Brand', '#123456')
+    dialog = ColorPaletteDialog(None, palette)
+    destination = tmp_path / ('palette.' + format_name)
+    choices = iter([('', ''), (str(destination), '')])
+    monkeypatch.setattr(QFileDialog, 'getSaveFileName', lambda *_args: next(choices))
+    try:
+        dialog.show()
+        dialog.export(format_name)
+        assert not destination.exists()
+        dialog.reject()
+        dialog.show()
+        dialog.export(format_name)
+        assert destination.read_text(encoding='utf-8') == palette.export_text(format_name)
+    finally:
+        dialog.close()
+
+
+def test_palette_table_allows_tab_to_leave_without_changing_colors():
+    from PySide6.QtCore import Qt
+    from PySide6.QtTest import QTest
+    from PySide6.QtWidgets import QApplication
+    from frontengine.ui.dialog.color_palette_dialog import ColorPaletteDialog
+
+    palette = ColorPalette({}, lambda: None)
+    palette.add('Accent', 'Brand', '#123456')
+    expected = palette.export_text('json')
+    dialog = ColorPaletteDialog(None, palette)
+    try:
+        dialog.show()
+        dialog.activateWindow()
+        QTest.qWait(20)
+        dialog.table.setCurrentCell(0, 0)
+        dialog.table.setFocus()
+        QTest.keyClick(dialog.table, Qt.Key.Key_Right)
+        assert dialog.table.currentColumn() == 1
+        QTest.keyClick(dialog.table, Qt.Key.Key_Tab)
+        assert QApplication.focusWidget() is dialog.name_input
+        QTest.keyClick(dialog.name_input, Qt.Key.Key_Backtab)
+        assert QApplication.focusWidget() is dialog.table
+        assert palette.export_text('json') == expected
+    finally:
+        dialog.close()
+
+
 def test_palette_reopens_and_exports_exact_rgb(tmp_path):
     settings = {}
     repository = JsonRepository(tmp_path / "settings.json")

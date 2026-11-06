@@ -54,3 +54,5 @@ Il cambio della lingua aggiorna anche le opzioni di qualità, modalità di misur
 Se l’editor della cattura viene chiuso durante la scelta della posizione di salvataggio, la destinazione viene ignorata senza creare o sovrascrivere file. La chiusura durante l’inserimento del testo scarta anche il testo restituito. Annullando solo la finestra di salvataggio o di testo, è possibile riprovare nell’editor.
 
 Se la libreria delle risorse viene chiusa durante la scelta di un file o di una cartella, la scelta restituita viene ignorata. La chiusura durante la conferma di un nuovo collegamento impedisce anche a tale conferma di inviare modifiche. Annullando solo la selezione o la conferma, è possibile riprovare nella libreria.
+
+Nella tavolozza, Tab e Maiusc+Tab spostano il focus tra la tabella e gli altri controlli; le frecce cambiano cella. Chiudendo la tavolozza durante la scelta del percorso di esportazione CSS o JSON, la destinazione viene ignorata senza creare o sovrascrivere file. Annullando solo la selezione, è possibile riprovare anche dopo aver riaperto la tavolozza.

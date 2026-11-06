@@ -785,3 +785,5 @@ Se o editor de capturas for fechado durante a escolha do local de salvamento, o 
 Se a biblioteca de recursos for fechada durante a escolha de um arquivo ou pasta, a seleção retornada será ignorada. Fechá-la durante a confirmação de um novo vínculo também impede que essa confirmação envie alterações. Cancelar apenas o seletor ou a confirmação permite tentar novamente na biblioteca.
 
 Se o editor de tarefas for fechado durante a escolha do calendário ou a confirmação de limpeza, a seleção retornada será ignorada e as tarefas salvas serão preservadas. Cancelar apenas o seletor ou a confirmação permite tentar novamente. Ao reabrir, o editor continua sincronizado com a lista compartilhada.
+
+Na paleta de cores, Tab e Shift+Tab movem o foco entre a tabela e os outros controles; as setas mudam de célula. Fechar a paleta durante a escolha do caminho de exportação CSS ou JSON descarta o destino sem criar ou sobrescrever arquivos. Cancelar apenas o seletor permite tentar novamente, inclusive depois de reabrir a paleta.

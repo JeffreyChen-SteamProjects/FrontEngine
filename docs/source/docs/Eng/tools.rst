@@ -53,3 +53,5 @@ Changing the interface language also updates the choices for quality, measuring 
 Closing the capture editor while choosing a save location discards the destination without creating or overwriting a file. Closing it during text input discards the returned text. Cancelling only the save or text dialog keeps the editor available for another attempt.
 
 Closing the asset library during file or folder selection discards the returned choice. Closing it during relink confirmation also prevents that confirmation from submitting changes. Cancelling only the picker or confirmation keeps the library available for another attempt.
+
+In the color palette, Tab and Shift+Tab move between the table and other controls; arrow keys move between cells. Closing the palette while choosing a CSS or JSON export path discards the destination without creating or overwriting a file. Cancelling only the picker allows another attempt, including after reopening the palette.

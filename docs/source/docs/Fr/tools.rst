@@ -54,3 +54,5 @@ Le changement de langue actualise aussi les choix de qualité, de mode de mesure
 Si l’éditeur de capture se ferme pendant le choix de l’emplacement d’enregistrement, la destination est ignorée sans créer ni écraser de fichier. Le fermer pendant la saisie de texte ignore aussi le texte renvoyé. Annuler uniquement la boîte de dialogue d’enregistrement ou de texte permet de réessayer dans l’éditeur.
 
 Si la bibliothèque de ressources se ferme pendant le choix d’un fichier ou d’un dossier, le choix renvoyé est ignoré. La fermer pendant la confirmation d’une nouvelle liaison empêche aussi cette confirmation de soumettre des modifications. Annuler uniquement le sélecteur ou la confirmation permet de réessayer dans la bibliothèque.
+
+Dans la palette de couleurs, Tab et Maj+Tab déplacent le focus entre le tableau et les autres commandes ; les flèches changent de cellule. Fermer la palette pendant le choix du chemin d’exportation CSS ou JSON ignore la destination sans créer ni écraser de fichier. Annuler uniquement le sélecteur permet de réessayer, y compris après la réouverture de la palette.

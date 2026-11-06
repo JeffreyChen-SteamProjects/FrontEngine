@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from shiboken6 import isValid
 
 from PySide6.QtCore import Qt, QRect
 from PySide6.QtGui import QColor
@@ -40,6 +41,7 @@ class ColorPaletteDialog(QDialog):
         self.search = QLineEdit()
         retranslator.bind(self.search, "palette_search", setter="setPlaceholderText")
         self.table = QTableWidget(0, 3)
+        self.table.setTabKeyNavigation(False)
         self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
         self.table.horizontalHeader().setStretchLastSection(True)
@@ -151,9 +153,11 @@ class ColorPaletteDialog(QDialog):
 
     def export(self, format_name: str) -> None:
         """Export canonical values to the selected file with atomic replacement."""
+        if not isValid(self) or not self.isVisible():
+            return
         path, _ = QFileDialog.getSaveFileName(self, translate("palette_export_" + format_name), "",
                                              f"{format_name.upper()} (*.{format_name})")
-        if path:
+        if isValid(self) and self.isVisible() and path:
             self._apply(lambda: self.palette.export(Path(path), format_name))
 
     def showEvent(self, event) -> None:
