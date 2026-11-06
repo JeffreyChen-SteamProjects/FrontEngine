@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261106-88 | 2026-11-06 | Verify completed two-hour native home soak and both cold reopens | #verification #pet #stability | [2026-11](2026-11.md) |
 | U-20261106-87 | 2026-11-06 | Report pet profile creation failures and keep retry available | #fix #pet #ui #storage | [2026-11](2026-11.md) |
 | U-20261106-86 | 2026-11-06 | Verify native mode-switch persistence failure and retry | #verification #pet #storage | [2026-11](2026-11.md) |
 | U-20261106-85 | 2026-11-06 | Keep current resident selected after a refused move-in | #fix #pet #ui #verification | [2026-11](2026-11.md) |
@@ -414,6 +415,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 210 |
+| [2026-11.md](2026-11.md) | 2026-11 | 211 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
