@@ -767,3 +767,5 @@ Die Namen sichtbarer Bewohner bleiben an beiden Rändern der Hausansicht und des
 Aktivitätsblasen bleiben an beiden Rändern innerhalb des Desktopstreifens; zu breiter Text wird mit Auslassungspunkten gekürzt. Blasen außerhalb des sichtbaren Bereichs werden verborgen. Fokus- und Besprechungsmodus blenden auch bereits sichtbare Blasen sofort aus.
 
 Ein Schlafbefehl führt nach der Rückkehr in den Bereich mit dem eigenen Bett zum Ausruhen, auch bei noch hoher Energie. Stopp oder ein neuer Befehl bricht den Weg ab. Wird das Bett unterwegs eingelagert, ruht sich das Tier nach der Ankunft auf dem Boden aus.
+
+Die Auswahl eines Bewohners in einem anderen Bereich wechselt die Hausübersicht zu dessen Bereich. Bei der Auswahl im aktuellen Bereich oder beim Aufheben der Auswahl bleibt die aktuelle Einrichtungsansicht erhalten.

@@ -77,3 +77,5 @@ I nomi dei residenti visibili restano nella vista della casa e nella barra del d
 I fumetti delle attività restano entro entrambi i bordi della barra del desktop; il testo troppo largo viene abbreviato con puntini di sospensione. I fumetti dei residenti fuori dall’area visibile sono nascosti. Le modalità Concentrazione e Riunione nascondono subito anche i fumetti già presenti.
 
 Il comando di dormire prosegue con il riposo dopo il ritorno nella zona del proprio letto, anche con energia ancora alta. Fermarsi o ricevere un nuovo comando annulla il tragitto. Se il letto viene riposto durante il viaggio, all’arrivo il pet riposa sul pavimento.
+
+Selezionando un residente di un’altra zona, la panoramica della casa passa alla sua zona. Selezionare un residente della zona attuale o annullare la selezione mantiene la vista di arredamento attuale.

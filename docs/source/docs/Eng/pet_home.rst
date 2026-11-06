@@ -77,3 +77,5 @@ Names of visible residents stay within the home view and desktop strip at either
 Activity bubbles stay within the desktop strip at both edges; text wider than the strip is shortened with an ellipsis. Bubbles for residents outside the visible area are hidden, and entering Focus or Meeting mode immediately hides existing bubbles.
 
 A Sleep command continues into rest after the pet crosses back to its own bed, even when its energy is still high. Stop or a replacement command cancels the trip; if the bed is put away during travel, the pet rests on the floor after arriving.
+
+Selecting a resident in another zone switches the home overview to that resident’s zone. Selecting a resident in the current zone or clearing the selection keeps the current layout view.

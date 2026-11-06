@@ -724,3 +724,5 @@ Los nombres de los residentes visibles permanecen dentro de la vista del hogar y
 Los globos de actividad permanecen dentro de la franja del escritorio en ambos bordes; el texto demasiado ancho se acorta con puntos suspensivos. Se ocultan los globos de residentes fuera del área visible. Los modos Concentración y Reunión ocultan de inmediato los globos existentes.
 
 La orden de dormir continúa con el descanso al volver a la zona de su propia cama, aunque quede mucha energía. Detenerse o recibir otra orden cancela el trayecto. Si se guarda la cama durante el viaje, la mascota duerme una siesta en el suelo al llegar.
+
+Al seleccionar un residente de otra zona, la vista general del hogar cambia a esa zona. Seleccionar un residente de la zona actual o quitar la selección conserva la vista de distribución actual.

@@ -821,6 +821,10 @@ class PetHomePage(SettingPage):
     @owned_action
     def select_resident(self, identifier: str | None) -> None:
         self.selected_resident = identifier
+        world = self.service.world
+        resident = world.residents.get(identifier) if world is not None else None
+        if resident is not None and resident.zone != self.zone:
+            self.choose_zone(resident.zone)
         self.view.set_selected(identifier or self.selected_furniture)
         self.residents.refresh_lists()
         self.residents.refresh_live()

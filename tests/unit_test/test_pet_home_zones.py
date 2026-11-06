@@ -203,3 +203,34 @@ def test_strip_move_does_not_place_previously_selected_storage_item(page):
     strip.cell_clicked.emit(20)
     assert desk.cell == 20
     assert world.stored('bed_basic') == 1
+
+
+def test_selecting_resident_from_list_shows_its_zone(page):
+    world = page.service.world
+    first = page.zone
+    second = page.add_zone(FakeScreen("second", 1280))
+    identifier = next(iter(world.residents))
+    assert world.transfer_resident(identifier, second) == "accepted"
+    page.choose_zone(first)
+    page.select_resident(None)
+    page.residents.list.setCurrentRow(0)
+    assert page.selected_resident == identifier
+    assert page.zone == second
+    assert page.view.zone == second
+    assert page.zone_combo.currentData() == second
+    assert page.view.selected == identifier
+
+
+@pytest.mark.parametrize("clear_selection", [False, True])
+def test_resident_selection_within_zone_keeps_layout_context(page, clear_selection):
+    identifier = next(iter(page.service.world.residents))
+    zone = page.zone
+    piece = next(iter(page.service.world.furniture))
+    page.select_furniture(piece)
+    preview = ("bed_basic", 20, False, None)
+    page.set_preview(preview)
+    page.select_resident(None if clear_selection else identifier)
+    assert page.zone == zone
+    assert page.selected_furniture == piece
+    assert page.view.preview == preview
+    assert page.view.selected == (piece if clear_selection else identifier)
