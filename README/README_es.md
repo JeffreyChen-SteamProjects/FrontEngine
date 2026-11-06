@@ -740,3 +740,5 @@ Las etiquetas de las subpestañas del script de escena y de medios también sigu
 Al cambiar el idioma de la interfaz, se actualizan las opciones del monitor de destino y el texto indicativo de archivos recientes. Los monitores de destino, nombres y rutas de archivos y valores seleccionados no cambian. Esto también funciona después de recargar la lista de archivos recientes.
 
 Las indicaciones de duración automática y ausencia de objeto padre del editor 3D siguen el idioma de la interfaz. La duración y las relaciones entre objetos se mantienen, incluso después de seleccionar otro objeto y volver.
+
+Al añadir un personaje integrado, una barra muestra el progreso de generación e instalación validada del personaje y su ropa. El porcentaje indica pasos completados, no tiempo restante. La barra desaparece al terminar o si hay un error. Cerrar el armario cancela el trabajo pendiente.

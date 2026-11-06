@@ -740,3 +740,5 @@ Scene script and media sub-tab labels also follow the interface language without
 Target-monitor choices and the Recent placeholder update when you change the interface language. Monitor targets, recent file names and paths, and selected values stay unchanged. Recent lists retain this behavior after reloading.
 
 The 3D editor’s Automatic duration and No parent labels follow interface-language changes. Duration values and parent relationships stay unchanged, including after selecting another object and returning.
+
+Adding a built-in character shows installation progress while its character and clothes are generated and validated. The percentage counts completed steps, not remaining time. The progress bar closes when the operation succeeds or fails; closing the wardrobe cancels unfinished work.

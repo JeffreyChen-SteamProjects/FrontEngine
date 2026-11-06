@@ -46,6 +46,10 @@ class ExportSignals(QObject):
     finished = Signal(str, str, str)
 
 
+class BuiltinInstallSignals(InstallSignals):
+    progress = Signal(int, int)
+
+
 class PetBuiltinInstall(QRunnable):
     """Draw one built-in character and its wardrobe off the GUI thread, then install them."""
 
@@ -53,13 +57,13 @@ class PetBuiltinInstall(QRunnable):
         super().__init__()
         self.library, self.identifier = library, identifier
         self.cancel = Event()
-        self.signals = InstallSignals()
+        self.signals = BuiltinInstallSignals()
 
     def run(self) -> None:
         from frontengine.show.pet.inkside.library import install_builtin
         error = ''
         try:
-            install_builtin(self.library, self.identifier, self.cancel)
+            install_builtin(self.library, self.identifier, self.cancel, self.signals.progress.emit)
         except (OSError, ValueError) as failure:
             error = str(failure)
         self.signals.finished.emit(error)

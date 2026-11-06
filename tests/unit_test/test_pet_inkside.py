@@ -147,7 +147,7 @@ def test_builtin_install_is_validated_and_idempotent(tmp_path):
     library = PetAssetLibrary(tmp_path / 'library')
     progress = []
     assert install_builtin(library, 'inkside-ink', progress=lambda done, total: progress.append(done)) == 1 + len(GARMENTS)
-    assert progress[-1] == 1 + len(GARMENTS)
+    assert progress == list(range(2 * (1 + len(GARMENTS)) + 1))
     assert install_builtin(library, 'inkside-ink') == 0
     catalog, errors = library.scan()
     assert errors == ()

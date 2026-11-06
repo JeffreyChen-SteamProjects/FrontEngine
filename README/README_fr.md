@@ -741,3 +741,5 @@ Les libellés des sous-onglets de script de scène et de médias suivent aussi l
 Changer la langue de l’interface actualise les choix d’écran cible et l’indication des fichiers récents. Les écrans cibles, noms et chemins des fichiers et valeurs sélectionnées restent inchangés, y compris après le rechargement de la liste des fichiers récents.
 
 Les indications de durée automatique et d’absence de parent dans l’éditeur 3D suivent la langue de l’interface. La durée et les relations parent-enfant restent inchangées, même après avoir sélectionné un autre objet puis être revenu.
+
+L’ajout d’un personnage intégré affiche la progression de la création et de l’installation validée du personnage et de ses vêtements. Le pourcentage indique les étapes terminées, pas le temps restant. La barre disparaît après réussite ou échec. Fermer la garde-robe annule le travail restant.

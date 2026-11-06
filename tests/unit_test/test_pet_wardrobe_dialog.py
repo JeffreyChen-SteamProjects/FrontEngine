@@ -216,3 +216,56 @@ def test_failed_background_install_can_retry_same_version(tmp_path, monkeypatch,
         assert profiles.get(record['id']) == record
     finally:
         dialog.close()
+
+
+@pytest.mark.parametrize('fail', [False, True])
+@pytest.mark.parametrize('close_early', [False, True])
+def test_builtin_progress_reaches_dialog_and_resets_after_completion(wardrobe, monkeypatch, fail, close_early, *, lifetime_factory):
+    from threading import Event
+    from PySide6.QtCore import QCoreApplication, Qt
+    from PySide6.QtTest import QTest
+    from frontengine.show.pet.inkside import library as builtin_library
+    profiles, first, _, draft, _, _ = wardrobe
+    release = Event()
+    def install(_library, _identifier, cancel, progress=None):
+        if progress:
+            progress(1, 4)
+        assert release.wait(5)
+        if fail:
+            raise OSError('Installation failed')
+        if progress:
+            progress(4, 4)
+        return 2
+    monkeypatch.setattr(builtin_library, 'install_builtin', install)
+    dialog = PetWardrobeDialog(profiles, first['id'], library=CatalogLibrary(draft.catalog), lifetime=lifetime_factory())
+    dialog.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, False)
+    dialog.show()
+    try:
+        dialog._install_builtin()
+        for _ in range(100):
+            QTest.qWait(10)
+            if hasattr(dialog, 'install_progress') and dialog.install_progress.value() == 1:
+                break
+        assert dialog.install_progress.isVisible()
+        assert dialog.install_progress.maximum() == 4
+        assert dialog.install_progress.value() == 1
+        assert not dialog.builtin_button.isEnabled()
+        if close_early:
+            dialog.reject()
+            assert dialog._install_job.cancel.is_set()
+        release.set()
+        assert dialog.lifetime.pool().waitForDone(5000)
+        QCoreApplication.processEvents()
+        assert dialog._install_job is None
+        if close_early:
+            assert not dialog.isVisible()
+            assert dialog.install_progress.value() == 1
+            return
+        assert dialog.install_progress.isHidden()
+        assert dialog.builtin_button.isEnabled()
+        if fail:
+            assert 'Installation failed' in dialog.status.text()
+    finally:
+        release.set()
+        dialog.lifetime.pool().waitForDone(5000)
+        dialog.close()

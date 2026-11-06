@@ -53,6 +53,7 @@ def test_language_switch_preserves_pending_wardrobe_and_preview(tmp_path, *, lif
         for language in list(language_wrapper.choose_language_dict) * 3:
             language_wrapper.reset_language(language)
             retranslator.apply()
+            assert dialog.install_progress.accessibleName() == translate('pet_wardrobe_builtin_busy')
             assert dialog.character.itemText(0) == translate('pet_wardrobe_none')
             assert all(control.itemText(0) == translate('pet_wardrobe_none')
                        for control in dialog.slots.values())

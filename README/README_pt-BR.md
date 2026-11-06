@@ -763,3 +763,5 @@ Os rótulos das subabas de script de cena e de mídia também acompanham o idiom
 Ao mudar o idioma da interface, as opções do monitor de destino e a indicação de arquivos recentes são atualizadas. Os monitores de destino, nomes e caminhos dos arquivos e valores selecionados permanecem iguais. Isso também funciona após recarregar a lista de arquivos recentes.
 
 As indicações de duração automática e ausência de objeto pai no editor 3D acompanham o idioma da interface. A duração e as relações entre objetos permanecem iguais, inclusive após selecionar outro objeto e voltar.
+
+Ao adicionar um personagem integrado, uma barra mostra o progresso da geração e da instalação validada do personagem e das roupas. A porcentagem indica etapas concluídas, não o tempo restante. A barra desaparece após sucesso ou falha. Fechar o guarda-roupa cancela o trabalho pendente.

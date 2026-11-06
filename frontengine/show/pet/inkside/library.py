@@ -85,6 +85,8 @@ def install_builtin(library, identifier: str, cancel: Event | None = None,
     wanted += [(garment_identifier(garment, template),
                 lambda folder, garment=garment: build_garment(garment, template, folder)) for garment in GARMENTS]
     missing = [(ident, build) for ident, build in wanted if not library.is_installed(ident, VERSION)]
+    if progress is not None:
+        progress(0, 2 * len(missing))
     with tempfile.TemporaryDirectory(prefix='frontengine-inkside-') as staging:
         sources = []
         for index, (ident, build) in enumerate(missing):
@@ -94,5 +96,8 @@ def install_builtin(library, identifier: str, cancel: Event | None = None,
             sources.append(build(Path(staging).resolve() / ident))
             if progress is not None:
                 progress(index + 1, 2 * len(missing))
-        library.install_many(sources, cancel=cancel)
+        def installed(done: int, total: int) -> None:
+            if progress is not None:
+                progress(len(missing) + done, len(missing) + total)
+        library.install_many(sources, cancel=cancel, progress=installed)
     return len(missing)

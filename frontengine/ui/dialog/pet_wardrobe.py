@@ -6,7 +6,7 @@ from PySide6.QtCore import Qt, QTimer, Slot
 from PySide6.QtGui import QColor, QPixmap
 from PySide6.QtWidgets import (
     QCheckBox, QComboBox, QDialog, QFormLayout, QHBoxLayout, QLabel,
-    QLineEdit, QPushButton, QVBoxLayout, QFileDialog, QColorDialog,
+    QLineEdit, QPushButton, QProgressBar, QVBoxLayout, QFileDialog, QColorDialog,
 )
 
 from frontengine.show.pet.asset_library import PetAssetLibrary
@@ -117,6 +117,10 @@ class PetWardrobeDialog(QDialog):
         self.status = QLabel('\n'.join(errors))
         self.status.setWordWrap(True)
         layout.addWidget(self.status)
+        self.install_progress = tr(QProgressBar(), 'pet_wardrobe_builtin_busy',
+                                   'Drawing the character and its wardrobe…', 'setAccessibleName')
+        self.install_progress.hide()
+        layout.addWidget(self.install_progress)
         self.install_button = tr(QPushButton(), 'pet_wardrobe_install', 'Install asset folder')
         self.install_button.clicked.connect(self._install)
         builtin_row = QHBoxLayout()
@@ -220,10 +224,21 @@ class PetWardrobeDialog(QDialog):
         self.install_button.setEnabled(False)
         self.builtin_button.setEnabled(False)
         self.status.setText(translate('pet_wardrobe_builtin_busy', 'Drawing the character and its wardrobe…'))
+        self.install_progress.setRange(0, 0)
+        self.install_progress.show()
         job = PetBuiltinInstall(self.library, self.builtin.currentData())
         self._install_job = job
+        job.signals.progress.connect(self._builtin_progress, Qt.ConnectionType.QueuedConnection)
         job.signals.finished.connect(self._builtin_installed, Qt.ConnectionType.QueuedConnection)
         self.lifetime.submit(job)
+
+    @Slot(int, int)
+    @owned_callback
+    def _builtin_progress(self, done: int, total: int) -> None:
+        if self._closed or self._install_job is None:
+            return
+        self.install_progress.setRange(0, total)
+        self.install_progress.setValue(done)
 
     @Slot(str)
     @owned_callback
@@ -243,6 +258,7 @@ class PetWardrobeDialog(QDialog):
         self._install_job = None
         if self._closed:
             return
+        self.install_progress.hide()
         self.install_button.setEnabled(True)
         self.builtin_button.setEnabled(True)
         self.refresh_library()
