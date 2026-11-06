@@ -7,6 +7,26 @@ from frontengine.ui.dialog.screen_text_dialog import ScreenTextDialog
 from frontengine.ui.dialog.signage_dialog import SignageDialog
 
 
+@pytest.mark.parametrize('field,label_name', [('presets_edit', 'presets_label'),
+                                             ('interval_spinbox', 'interval_label')])
+def test_signage_accessible_name_tracks_visible_label_without_editing_settings(field, label_name):
+    from PySide6.QtGui import QAccessible
+
+    dialog = SignageDialog()
+    try:
+        dialog.presets_edit.setPlainText('Morning\nEvening')
+        before = dialog.settings()
+        control = getattr(dialog, field)
+        label = getattr(dialog, label_name)
+        accessible = QAccessible.queryAccessibleInterface(control)
+        assert accessible.text(QAccessible.Text.Name) == label.text()
+        label.setText('Updated ' + label.text())
+        assert accessible.text(QAccessible.Text.Name) == label.text()
+        assert dialog.settings() == before
+    finally:
+        dialog.reject()
+
+
 @pytest.mark.parametrize('kind', ['screen_text', 'signage'])
 def test_multiline_form_tab_preserves_text_and_enter_inserts_line(kind):
     dialog = ScreenTextDialog('First line') if kind == 'screen_text' else SignageDialog()
