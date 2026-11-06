@@ -9,6 +9,7 @@ Nothing expires: there are no streaks, timers or missed-day penalties.
 from __future__ import annotations
 
 import hashlib
+from collections import Counter
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Callable
 
@@ -452,8 +453,9 @@ def _daily_events(world: World, day: int) -> None:
     awake = [r for r in world.residents.values() if not r.parked and not r.away
              and (r.activity is None or r.activity.kind not in ("sleep", "nap"))]
     eating = [r for r in awake if r.activity is not None and r.activity.kind == "eat" and r.activity.phase == "using"]
+    diners_by_zone = Counter(resident.zone for resident in eating)
     today = {
-        "friends_dinner": len(eating) >= 3,
+        "friends_dinner": any(count >= 3 for count in diners_by_zone.values()),
         "rainy_day": bool(awake) and weather(world.home, world.time_ms) in ("rain", "snow"),
         "starry_night": bool(awake) and sky(world.time_ms) == "night"
         and weather(world.home, world.time_ms) == "clear",
