@@ -50,6 +50,10 @@ class PetCustomizationDialog(QDialog):
         layout.addLayout(form)
         self._care_controls(form)
         self._presentation_controls(form)
+        for control in self.controls.values():
+            label = form.labelForField(control)
+            if isinstance(label, QLabel):
+                label.setBuddy(control)
         self.status = QLabel()
         self.status.setWordWrap(True)
         layout.addWidget(self.status)

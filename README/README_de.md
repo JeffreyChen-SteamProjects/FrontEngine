@@ -787,3 +787,5 @@ Die Beschriftungen für automatische Dauer und fehlendes übergeordnetes Objekt 
 Beim Hinzufügen einer integrierten Figur zeigt ein Fortschrittsbalken die Erstellung und geprüfte Installation der Figur und ihrer Kleidung an. Der Prozentsatz zählt abgeschlossene Schritte und schätzt keine Restzeit. Nach Erfolg oder Fehler wird der Balken ausgeblendet. Das Schließen der Garderobe bricht ausstehende Arbeit ab.
 
 Rückmeldungen zu Tierinteraktionen stehen über „Interaktion ausführen“ und damit nahe am Tastaturfokus. In schmalen Fenstern werden Abschnittstitel und Detailschaltflächen umgebrochen. Identitäts- und Interaktionsfelder behalten eine lesbare Mindestbreite und stehen bei Bedarf unter ihren Beschriftungen. Auswahl, Werte und Befehle bleiben erhalten.
+
+Die Felder zur Haustieranpassung stellen ihre sichtbaren Beschriftungen über die Qt-Barrierefreiheit bereit. Die Namen für bevorzugte und ungeliebte Leckerlis, Größe, Geschwindigkeit, Lautstärke, Verhalten, Gesprächigkeit und Animationsumfang folgen der Sprache der Oberfläche.

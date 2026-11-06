@@ -9,6 +9,29 @@ from frontengine.user_setting.pet_profile_schema import checked_profile, present
 from frontengine.user_setting.pet_profiles import PetProfiles
 
 
+@pytest.mark.parametrize('field', ['favorite', 'disliked', 'size', 'speed', 'volume',
+                                  'behaviour', 'chatter', 'motion'])
+def test_customization_fields_expose_their_visible_label_to_accessibility(field):
+    from PySide6.QtGui import QAccessible
+    from PySide6.QtWidgets import QFormLayout
+
+    profiles = PetProfiles({}, lambda: None)
+    record = profiles.create()
+    dialog = PetCustomizationDialog(profiles, record['id'])
+    try:
+        dialog.controls['use_defaults'].setChecked(False)
+        control = dialog.controls[field]
+        form = dialog.findChild(QFormLayout)
+        label = form.labelForField(control)
+        assert label.text()
+        interface = QAccessible.queryAccessibleInterface(control)
+        assert interface.text(QAccessible.Text.Name) == label.text()
+        label.setText('Updated ' + label.text())
+        assert interface.text(QAccessible.Text.Name) == label.text()
+    finally:
+        dialog.close()
+
+
 def test_old_preferences_normalize_without_mutating_source():
     profiles = PetProfiles({}, lambda: None)
     record = profiles.create('Legacy')

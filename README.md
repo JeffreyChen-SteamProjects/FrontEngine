@@ -744,3 +744,5 @@ The 3D editor’s Automatic duration and No parent labels follow interface-langu
 Adding a built-in character shows installation progress while its character and clothes are generated and validated. The percentage counts completed steps, not remaining time. The progress bar closes when the operation succeeds or fails; closing the wardrobe cancels unfinished work.
 
 Pet interaction feedback appears above Perform interaction so it remains near the keyboard focus. In narrow windows, section headings and their details buttons wrap; pet identity and interaction fields keep a readable minimum width and move below their labels when needed. Selected pets, field values and commands are preserved.
+
+Pet customization fields expose their visible labels through Qt accessibility. Favorite and disliked treats, size, speed, volume, behaviour, chatter and animation size keep their names in sync when the interface language changes.

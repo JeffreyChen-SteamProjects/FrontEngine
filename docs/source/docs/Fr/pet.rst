@@ -134,3 +134,5 @@ Le menu Puppet propose aussi Lancer une balle, et les gestionnaires Sprite et Pu
 L’ajout d’un personnage intégré affiche la progression de la création et de l’installation validée du personnage et de ses vêtements. Le pourcentage indique les étapes terminées, pas le temps restant. La barre disparaît après réussite ou échec. Fermer la garde-robe annule le travail restant.
 
 Les messages d’interaction apparaissent au-dessus du bouton d’exécution, près du focus clavier. Dans les fenêtres étroites, les titres de section et les boutons de détails passent à la ligne. Les champs d’identité et d’interaction gardent une largeur minimale lisible et passent sous leur libellé si nécessaire. La sélection, les valeurs et les commandes sont conservées.
+
+Les champs de personnalisation exposent leurs libellés visibles via l’accessibilité Qt. Les noms des friandises préférées ou détestées, de la taille, de la vitesse, du volume, du comportement, du bavardage et de l’amplitude des animations suivent la langue de l’interface.

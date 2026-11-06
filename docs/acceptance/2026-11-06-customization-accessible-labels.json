@@ -1,0 +1,278 @@
+{
+  "base_commit": "27aa0084",
+  "status": "local fix, full MainUI command dispatch and docs verified; full regression and independent review pending",
+  "red_cases": 8,
+  "related_tests": {
+    "passed": 48,
+    "skipped": 9,
+    "seconds": 3.07,
+    "skip_reason": "Imervue.puppet.document_io unavailable in native runtime"
+  },
+  "native": {
+    "cases": [
+      {
+        "language": "English",
+        "names": {
+          "favorite": "Favorite treat",
+          "disliked": "Disliked treat",
+          "size": "Size",
+          "speed": "Speed",
+          "volume": "Volume",
+          "behaviour": "Behaviour",
+          "chatter": "Chatter",
+          "motion": "Animation size"
+        },
+        "draft_unchanged": true
+      },
+      {
+        "language": "Traditional_Chinese",
+        "names": {
+          "favorite": "\u559c\u6b61\u7684\u9ede\u5fc3",
+          "disliked": "\u4e0d\u559c\u6b61\u7684\u9ede\u5fc3",
+          "size": "\u5927\u5c0f",
+          "speed": "\u901f\u5ea6",
+          "volume": "\u97f3\u91cf",
+          "behaviour": "\u884c\u70ba",
+          "chatter": "\u4e3b\u52d5\u8aaa\u8a71",
+          "motion": "\u52d5\u756b\u5e45\u5ea6"
+        },
+        "draft_unchanged": true
+      },
+      {
+        "language": "Simplified_Chinese",
+        "names": {
+          "favorite": "\u559c\u6b22\u7684\u70b9\u5fc3",
+          "disliked": "\u4e0d\u559c\u6b22\u7684\u70b9\u5fc3",
+          "size": "\u5927\u5c0f",
+          "speed": "\u901f\u5ea6",
+          "volume": "\u97f3\u91cf",
+          "behaviour": "\u884c\u4e3a",
+          "chatter": "\u4e3b\u52a8\u8bf4\u8bdd",
+          "motion": "\u52a8\u753b\u5e45\u5ea6"
+        },
+        "draft_unchanged": true
+      },
+      {
+        "language": "Deutsch",
+        "names": {
+          "favorite": "Lieblingsleckerbissen",
+          "disliked": "Unbeliebter Leckerbissen",
+          "size": "Gr\u00f6\u00dfe",
+          "speed": "Geschwindigkeit",
+          "volume": "Lautst\u00e4rke",
+          "behaviour": "Verhalten",
+          "chatter": "Plaudern",
+          "motion": "Animationsst\u00e4rke"
+        },
+        "draft_unchanged": true
+      },
+      {
+        "language": "Russian",
+        "names": {
+          "favorite": "\u041b\u044e\u0431\u0438\u043c\u043e\u0435 \u0443\u0433\u043e\u0449\u0435\u043d\u0438\u0435",
+          "disliked": "\u041d\u0435\u043b\u044e\u0431\u0438\u043c\u043e\u0435 \u0443\u0433\u043e\u0449\u0435\u043d\u0438\u0435",
+          "size": "\u0420\u0430\u0437\u043c\u0435\u0440",
+          "speed": "\u0421\u043a\u043e\u0440\u043e\u0441\u0442\u044c",
+          "volume": "\u0413\u0440\u043e\u043c\u043a\u043e\u0441\u0442\u044c",
+          "behaviour": "\u041f\u043e\u0432\u0435\u0434\u0435\u043d\u0438\u0435",
+          "chatter": "\u0411\u043e\u043b\u0442\u043e\u0432\u043d\u044f",
+          "motion": "\u0420\u0430\u0437\u043c\u0430\u0445 \u0430\u043d\u0438\u043c\u0430\u0446\u0438\u0438"
+        },
+        "draft_unchanged": true
+      },
+      {
+        "language": "France",
+        "names": {
+          "favorite": "Friandise pr\u00e9f\u00e9r\u00e9e",
+          "disliked": "Friandise moins aim\u00e9e",
+          "size": "Taille",
+          "speed": "Vitesse",
+          "volume": "Volume",
+          "behaviour": "Comportement",
+          "chatter": "Bavardage",
+          "motion": "Amplitude des animations"
+        },
+        "draft_unchanged": true
+      },
+      {
+        "language": "Italy",
+        "names": {
+          "favorite": "Spuntino preferito",
+          "disliked": "Spuntino sgradito",
+          "size": "Dimensione",
+          "speed": "Velocit\u00e0",
+          "volume": "Volume",
+          "behaviour": "Comportamento",
+          "chatter": "Chiacchiere",
+          "motion": "Ampiezza animazioni"
+        },
+        "draft_unchanged": true
+      }
+    ],
+    "comparisons": 56,
+    "temporary_directory_removed": true,
+    "scope": "Native standalone customization dialog, Qt accessibility interface, seven languages; no screen-reader integration claim."
+  },
+  "observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "child_exit": 0
+  },
+  "excluded_probe": {
+    "directory": ".audit/native-labels",
+    "reason": "Imported observation helper prepended its older worktree. Corrected script prioritizes current ROOT and asserts actual class source path. Failed probe excluded."
+  },
+  "limits": [
+    "Qt accessibility names only; no screen reader or OS accessibility bridge validation.",
+    "Native standalone dialog; full MainUI customization flow still pending."
+  ],
+  "complete_dependency_tests": {
+    "passed": 57,
+    "skipped": 0,
+    "seconds": 3.58
+  },
+  "docs": {
+    "updated_files": 17,
+    "checks_passed": 31,
+    "sphinx_warning_as_error": true,
+    "rendered_paragraphs_checked": 7
+  },
+  "main_ui": {
+    "names": {
+      "cases": [
+        {
+          "language": "English",
+          "names": {
+            "favorite": "Favorite treat",
+            "disliked": "Disliked treat",
+            "size": "Size",
+            "speed": "Speed",
+            "volume": "Volume",
+            "behaviour": "Behaviour",
+            "chatter": "Chatter",
+            "motion": "Animation size"
+          }
+        },
+        {
+          "language": "Traditional_Chinese",
+          "names": {
+            "favorite": "\u559c\u6b61\u7684\u9ede\u5fc3",
+            "disliked": "\u4e0d\u559c\u6b61\u7684\u9ede\u5fc3",
+            "size": "\u5927\u5c0f",
+            "speed": "\u901f\u5ea6",
+            "volume": "\u97f3\u91cf",
+            "behaviour": "\u884c\u70ba",
+            "chatter": "\u4e3b\u52d5\u8aaa\u8a71",
+            "motion": "\u52d5\u756b\u5e45\u5ea6"
+          }
+        },
+        {
+          "language": "Simplified_Chinese",
+          "names": {
+            "favorite": "\u559c\u6b22\u7684\u70b9\u5fc3",
+            "disliked": "\u4e0d\u559c\u6b22\u7684\u70b9\u5fc3",
+            "size": "\u5927\u5c0f",
+            "speed": "\u901f\u5ea6",
+            "volume": "\u97f3\u91cf",
+            "behaviour": "\u884c\u4e3a",
+            "chatter": "\u4e3b\u52a8\u8bf4\u8bdd",
+            "motion": "\u52a8\u753b\u5e45\u5ea6"
+          }
+        },
+        {
+          "language": "Deutsch",
+          "names": {
+            "favorite": "Lieblingsleckerbissen",
+            "disliked": "Unbeliebter Leckerbissen",
+            "size": "Gr\u00f6\u00dfe",
+            "speed": "Geschwindigkeit",
+            "volume": "Lautst\u00e4rke",
+            "behaviour": "Verhalten",
+            "chatter": "Plaudern",
+            "motion": "Animationsst\u00e4rke"
+          }
+        },
+        {
+          "language": "Russian",
+          "names": {
+            "favorite": "\u041b\u044e\u0431\u0438\u043c\u043e\u0435 \u0443\u0433\u043e\u0449\u0435\u043d\u0438\u0435",
+            "disliked": "\u041d\u0435\u043b\u044e\u0431\u0438\u043c\u043e\u0435 \u0443\u0433\u043e\u0449\u0435\u043d\u0438\u0435",
+            "size": "\u0420\u0430\u0437\u043c\u0435\u0440",
+            "speed": "\u0421\u043a\u043e\u0440\u043e\u0441\u0442\u044c",
+            "volume": "\u0413\u0440\u043e\u043c\u043a\u043e\u0441\u0442\u044c",
+            "behaviour": "\u041f\u043e\u0432\u0435\u0434\u0435\u043d\u0438\u0435",
+            "chatter": "\u0411\u043e\u043b\u0442\u043e\u0432\u043d\u044f",
+            "motion": "\u0420\u0430\u0437\u043c\u0430\u0445 \u0430\u043d\u0438\u043c\u0430\u0446\u0438\u0438"
+          }
+        },
+        {
+          "language": "France",
+          "names": {
+            "favorite": "Friandise pr\u00e9f\u00e9r\u00e9e",
+            "disliked": "Friandise moins aim\u00e9e",
+            "size": "Taille",
+            "speed": "Vitesse",
+            "volume": "Volume",
+            "behaviour": "Comportement",
+            "chatter": "Bavardage",
+            "motion": "Amplitude des animations"
+          }
+        },
+        {
+          "language": "Italy",
+          "names": {
+            "favorite": "Spuntino preferito",
+            "disliked": "Spuntino sgradito",
+            "size": "Dimensione",
+            "speed": "Velocit\u00e0",
+            "volume": "Volume",
+            "behaviour": "Comportamento",
+            "chatter": "Chiacchiere",
+            "motion": "Ampiezza animazioni"
+          }
+        }
+      ],
+      "menu_action_dispatch_and_keyboard_escape": true,
+      "draft_and_profile_unchanged": true
+    },
+    "observer": {
+      "before": {
+        "foreground": 2558004,
+        "cursor": [
+          768,
+          432
+        ]
+      },
+      "after": {
+        "foreground": 2558004,
+        "cursor": [
+          768,
+          432
+        ]
+      },
+      "child_exit": 0
+    },
+    "cold_reopen": {
+      "passed": true,
+      "initial_snapshot_exact": true,
+      "profiles_exact": true,
+      "leases_reacquired": true,
+      "saved_exact": true,
+      "temporary_directory_removed": true
+    },
+    "runtime_closed": true
+  },
+  "keyboard_menu_limit": "Tab targeting hidden button was an invalid probe because the command lives in ActionMenu. Subsequent Space/Down probes did not retain an open native menu. Actual QAction dispatch passed; physical keyboard menu opening remains unverified."
+}

@@ -744,3 +744,5 @@ Las indicaciones de duración automática y ausencia de objeto padre del editor 
 Al añadir un personaje integrado, una barra muestra el progreso de generación e instalación validada del personaje y su ropa. El porcentaje indica pasos completados, no tiempo restante. La barra desaparece al terminar o si hay un error. Cerrar el armario cancela el trabajo pendiente.
 
 Los mensajes de interacción aparecen encima del botón de ejecución, cerca del foco del teclado. En ventanas estrechas, los títulos de sección y los botones de detalles pasan a otra línea. Los campos de identidad e interacción mantienen una anchura mínima legible y se colocan debajo de sus etiquetas cuando es necesario. Se conservan la selección, los valores y los comandos.
+
+Los campos de personalización exponen sus etiquetas visibles mediante la accesibilidad de Qt. Los nombres de golosinas favoritas y rechazadas, tamaño, velocidad, volumen, comportamiento, charla y amplitud de animación siguen el idioma de la interfaz.
