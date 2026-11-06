@@ -20,7 +20,6 @@ from frontengine.user_setting.user_setting_file import clear_overlay_geometry, u
 from frontengine.ui.page.layout_kit import SettingPage
 from frontengine.ui.page.action_menu import ActionMenu
 from frontengine.utils.logging.loggin_instance import front_engine_logger
-from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import retranslator, tr, translate
 from frontengine.utils.screen_privacy import capture_affinity
 from frontengine.utils.virtual_desktop import virtual_desktop
@@ -134,8 +133,9 @@ class ControlCenterUI(SettingPage):
                 (TIER_HIGH, "control_center_quality_high", "High"),
                 (TIER_BALANCED, "control_center_quality_balanced", "Balanced"),
                 (TIER_SAVER, "control_center_quality_saver", "Saver")):
-            self.quality_combobox.addItem(
-                language_wrapper.language_word_dict.get(key, fallback), tier)
+            self.quality_combobox.addItem("", tier)
+            retranslator.bind(self.quality_combobox, key, fallback, "setItemText",
+                              self.quality_combobox.count() - 1)
         self.quality_combobox.currentIndexChanged.connect(self._apply_quality_tier)
 
         # Log panel

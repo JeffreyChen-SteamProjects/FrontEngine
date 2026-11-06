@@ -753,3 +753,5 @@ Ao selecionar um morador de outra área, a visão geral da casa muda para essa �
 Se o perfil do pet não puder ser salvo ao sair da casa, o morador permanece selecionado para que você possa tentar novamente quando o acesso de gravação for restabelecido. Se a entrada de um pet salvo ou novo for recusada, a seleção atual também será mantida; o novo morador só será selecionado após entrar com sucesso.
 
 Se o perfil de um novo pet não puder ser salvo, a casa exibirá um erro e nenhum morador será adicionado. Restabeleça o acesso de gravação e tente novamente com Novo pet. Se isso ocorrer ao criar a primeira casa, a casa vazia continuará disponível e a nova tentativa não concederá o kit inicial outra vez.
+
+Ao mudar o idioma da interface, as opções de qualidade, modo de medição, leitura de texto, formato da moldura da câmera e estilo do espectro também são atualizadas. Os valores selecionados são mantidos, e a mudança de idioma não aplica outra configuração às ferramentas.

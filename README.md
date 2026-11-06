@@ -730,3 +730,5 @@ Selecting a resident in another zone switches the home overview to that resident
 If saving a pet profile fails during Move out, the resident stays selected so you can retry after restoring write access. A refused Move in or New pet action also keeps the current resident selected; selection changes to the arriving pet only after a successful move-in.
 
 If a new pet profile cannot be saved, the home shows an error without adding a resident. Restore write access and choose New pet to retry. If this happens while creating your first home, the empty home remains usable and retrying does not grant the starter kit again.
+
+Changing the interface language also updates the choices for quality, measuring mode, reading text, camera frame shape and spectrum style. Your selected values stay unchanged, and the language change does not apply a different tool setting.

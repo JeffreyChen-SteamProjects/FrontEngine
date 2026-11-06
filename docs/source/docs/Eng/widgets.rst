@@ -17,3 +17,5 @@ Widgets → Tasks and calendar manages checked tasks with optional local due tim
 Cancellation tombstones count toward the 500-record limit and prevent stale imports from resurrecting cancelled events. Clear all asks for confirmation and removes tasks, events and cancellation metadata. Interactive Today controls use ordinary Qt software painting so the compositor cannot cover them.
 
 Sticky note text stays visible and editable when the global rendering backend changes.
+
+Changing the interface language also updates the choices for quality, measuring mode, reading text, camera frame shape and spectrum style. Your selected values stay unchanged, and the language change does not apply a different tool setting.

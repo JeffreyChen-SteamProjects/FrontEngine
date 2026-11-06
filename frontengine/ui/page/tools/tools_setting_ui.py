@@ -200,7 +200,9 @@ class ToolsSettingUI(SettingPage):
         for mode, key, fallback in ((MODE_COLOR, "tools_measure_color", "Colour picker"),
                                     (MODE_RULER, "tools_measure_ruler", "Pixel ruler"),
                                     (MODE_ANGLE, "tools_measure_angle", "Protractor")):
-            self.measure_mode_combobox.addItem(_t(key, fallback), mode)
+            self.measure_mode_combobox.addItem("", mode)
+            retranslator.bind(self.measure_mode_combobox, key, fallback, "setItemText",
+                              self.measure_mode_combobox.count() - 1)
         self.measure_mode_combobox.currentIndexChanged.connect(self._apply_measure_settings)
         self.color_format_label = tr(QLabel(), "tools_color_format", "Copy colour as")
         self.color_format_combobox = QComboBox()
@@ -235,7 +237,9 @@ class ToolsSettingUI(SettingPage):
         for action, key, fallback in ((ACTION_EXTRACT, "tools_screen_text_extract", "Copy text"),
                                       (ACTION_TRANSLATE, "tools_screen_text_translate", "Translate"),
                                       (ACTION_ASK, "tools_screen_text_ask", "Ask about it")):
-            self.screen_text_combobox.addItem(_t(key, fallback), action)
+            self.screen_text_combobox.addItem("", action)
+            retranslator.bind(self.screen_text_combobox, key, fallback, "setItemText",
+                              self.screen_text_combobox.count() - 1)
         self.screen_text_input = QLineEdit()
         self.screen_text_input.setPlaceholderText(
             _t("tools_screen_text_input", "Language, or your question"))
@@ -341,7 +345,9 @@ class ToolsSettingUI(SettingPage):
         for shape, key, fallback in ((SHAPE_CIRCLE, "tools_camera_circle", "Circle"),
                                      (SHAPE_ROUNDED, "tools_camera_rounded", "Rounded"),
                                      (SHAPE_RECTANGLE, "tools_camera_rectangle", "Rectangle")):
-            self.camera_shape_combobox.addItem(_t(key, fallback), shape)
+            self.camera_shape_combobox.addItem("", shape)
+            retranslator.bind(self.camera_shape_combobox, key, fallback, "setItemText",
+                              self.camera_shape_combobox.count() - 1)
         self.camera_shape_combobox.currentIndexChanged.connect(self._apply_camera_settings)
         self.camera_device_combobox = QComboBox()
         self.reload_cameras()

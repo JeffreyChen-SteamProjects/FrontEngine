@@ -18,3 +18,5 @@ Widget → Attività e calendario offre spunte, scadenza locale facoltativa e im
 Registrazioni di annullamento contano nei 500 e impediscono che vecchi import ripristinino eventi. Cancella tutto chiede conferma ed elimina attività, eventi e annullamenti. Oggi usa disegno software Qt normale per non coprire i controlli.
 
 Il testo delle note adesive rimane visibile e modificabile quando cambia il motore di rendering globale.
+
+Il cambio della lingua aggiorna anche le opzioni di qualità, modalità di misurazione, lettura del testo, forma della cornice della fotocamera e stile dello spettro. I valori selezionati restano invariati e il cambio di lingua non applica impostazioni diverse agli strumenti.

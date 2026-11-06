@@ -18,3 +18,5 @@ Widgets → Tâches et calendrier propose coches, échéance locale facultative 
 Traces d’annulation comptent dans les 500 et empêchent les anciens imports de ressusciter les événements. Effacer tout confirme puis retire tâches, événements et annulations. Aujourd’hui utilise le dessin logiciel Qt ordinaire pour ne pas couvrir ses commandes.
 
 Le texte des notes autocollantes reste visible et modifiable lors du changement du moteur de rendu global.
+
+Le changement de langue actualise aussi les choix de qualité, de mode de mesure, de lecture de texte, de forme du cadre de caméra et de style du spectre. Les valeurs sélectionnées restent inchangées ; changer de langue n’applique aucun autre réglage aux outils.

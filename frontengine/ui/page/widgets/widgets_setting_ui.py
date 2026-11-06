@@ -33,7 +33,7 @@ from frontengine.utils.audio_meter.spectrum_analyzer import DEFAULT_BANDS
 from frontengine.ui.page.layout_kit import SettingPage
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
-from frontengine.utils.multi_language.retranslate import tr
+from frontengine.utils.multi_language.retranslate import retranslator, tr
 from frontengine.utils.now_playing.now_playing import now_playing
 from frontengine.user_setting.user_setting_file import user_setting_dict, write_user_setting
 
@@ -153,8 +153,11 @@ class WidgetsSettingUI(SettingPage):
     def _build_spectrum_row(self) -> None:
         self.spectrum_label = tr(QLabel(), "widgets_spectrum_label", "Audio spectrum")
         self.spectrum_style_combobox = QComboBox()
-        self.spectrum_style_combobox.addItem(_t("widgets_spectrum_bars", "Bars"), STYLE_BARS)
-        self.spectrum_style_combobox.addItem(_t("widgets_spectrum_ring", "Ring"), STYLE_RING)
+        for style, key, fallback in ((STYLE_BARS, "widgets_spectrum_bars", "Bars"),
+                                     (STYLE_RING, "widgets_spectrum_ring", "Ring")):
+            self.spectrum_style_combobox.addItem("", style)
+            retranslator.bind(self.spectrum_style_combobox, key, fallback, "setItemText",
+                              self.spectrum_style_combobox.count() - 1)
         self.spectrum_style_combobox.currentIndexChanged.connect(self._apply_spectrum_settings)
         self.spectrum_bands_label = tr(QLabel(), "widgets_spectrum_bands", "Bands")
         self.spectrum_bands_spinbox = QSpinBox()

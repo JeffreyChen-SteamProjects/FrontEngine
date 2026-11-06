@@ -19,3 +19,5 @@ Widgets → Aufgaben und Kalender bietet Häkchen, optionale lokale Fälligkeit 
 Abbruchdatensätze zählen zur 500er-Grenze und verhindern Wiederherstellung durch alte Importe. Alles leeren fragt nach und entfernt Aufgaben, Termine und Abbruchdaten. Heute nutzt normale Qt-Softwarezeichnung, damit der Compositor die Bedienung nicht verdeckt.
 
 Der Text von Haftnotizen bleibt beim Wechsel des globalen Renderers sichtbar und bearbeitbar.
+
+Beim Wechsel der Oberflächensprache werden auch die Auswahltexte für Qualität, Messmodus, Texterfassung, Kamerarahmen und Spektrumstil aktualisiert. Die ausgewählten Werte bleiben erhalten; der Sprachwechsel wendet keine andere Werkzeugeinstellung an.
