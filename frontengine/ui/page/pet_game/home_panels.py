@@ -155,7 +155,14 @@ class ResidentPanel:
 
     @owned_action
     def new_pet(self) -> None:
-        record = self.page.profiles.create()
+        try:
+            record = self.page.profiles.create()
+        except OSError:
+            self.page.report("save_failed")
+            return
+        except ValueError as error:
+            self.page.report_text(str(error))
+            return
         result = self.page.service.adopt(record["id"])
         self.page.report(result)
         self.page.refresh()

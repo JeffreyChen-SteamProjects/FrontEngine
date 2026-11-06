@@ -81,3 +81,5 @@ La consigne de dormir se poursuit par du repos après le retour dans la zone du 
 Sélectionner un résident d’une autre zone affiche cette zone dans la vue d’ensemble du foyer. Sélectionner un résident de la zone actuelle ou annuler la sélection conserve la vue d’aménagement actuelle.
 
 Si l’enregistrement du profil échoue lors du départ, le résident reste sélectionné pour permettre une nouvelle tentative une fois l’accès en écriture rétabli. Si l’arrivée d’un animal enregistré ou nouveau est refusée, la sélection actuelle est également conservée ; le nouvel arrivant n’est sélectionné qu’après une installation réussie.
+
+Si le profil d’un nouvel animal ne peut pas être enregistré, un message d’erreur apparaît et aucun résident n’est ajouté. Rétablissez l’accès en écriture puis réessayez avec Nouvel animal. Lors de la création du premier foyer, le foyer vide reste utilisable et une nouvelle tentative ne redonne pas le kit de départ.

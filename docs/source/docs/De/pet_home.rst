@@ -81,3 +81,5 @@ Ein Schlafbefehl führt nach der Rückkehr in den Bereich mit dem eigenen Bett z
 Die Auswahl eines Bewohners in einem anderen Bereich wechselt die Hausübersicht zu dessen Bereich. Bei der Auswahl im aktuellen Bereich oder beim Aufheben der Auswahl bleibt die aktuelle Einrichtungsansicht erhalten.
 
 Wenn das Speichern des Tierprofils beim Auszug fehlschlägt, bleibt der Bewohner ausgewählt. Sobald das Schreiben wieder möglich ist, können Sie den Auszug erneut versuchen. Wird der Einzug eines gespeicherten oder neuen Tiers abgelehnt, bleibt ebenfalls der bisherige Bewohner ausgewählt. Erst nach erfolgreichem Einzug wechselt die Auswahl zum neuen Bewohner.
+
+Kann ein neues Tierprofil nicht gespeichert werden, zeigt das Zuhause einen Fehler an und fügt keinen Bewohner hinzu. Stellen Sie den Schreibzugriff wieder her und versuchen Sie es mit „Neues Tier“ erneut. Beim ersten Erstellen bleibt das leere Zuhause nutzbar; ein erneuter Versuch vergibt das Starterpaket nicht noch einmal.

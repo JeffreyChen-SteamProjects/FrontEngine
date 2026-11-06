@@ -586,8 +586,14 @@ class PetHomePage(SettingPage):
         first = None
         if not self.service.world.residents and not self.newcomers.count():
             # Nobody to move in yet: a first pet comes along, so the home is never empty to start with.
-            first = self.profiles.create()["id"]
-            moved = int(self.service.adopt(first) == "accepted")
+            try:
+                first = self.profiles.create()["id"]
+            except OSError:
+                self.report("save_failed")
+            except ValueError as error:
+                self.report_text(str(error))
+            else:
+                moved = int(self.service.adopt(first) == "accepted")
         if moved:
             self.report_message("pet_home_moved_in", "{count} pets moved in.", count=moved)
         self._set_running(True)

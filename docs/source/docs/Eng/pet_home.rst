@@ -81,3 +81,5 @@ A Sleep command continues into rest after the pet crosses back to its own bed, e
 Selecting a resident in another zone switches the home overview to that resident’s zone. Selecting a resident in the current zone or clearing the selection keeps the current layout view.
 
 If saving a pet profile fails during Move out, the resident stays selected so you can retry after restoring write access. A refused Move in or New pet action also keeps the current resident selected; selection changes to the arriving pet only after a successful move-in.
+
+If a new pet profile cannot be saved, the home shows an error without adding a resident. Restore write access and choose New pet to retry. If this happens while creating your first home, the empty home remains usable and retrying does not grant the starter kit again.

@@ -607,3 +607,65 @@ def test_failed_movein_keeps_resident_selection(page, reason):
     finally:
         if lease is not None:
             assert lease.close()
+
+
+@pytest.mark.parametrize('entry', ['new_pet', 'first_home'])
+def test_profile_creation_failure_is_reported_and_retryable(page, monkeypatch, entry):
+    import sys
+    from PySide6.QtWidgets import QPushButton
+
+    if entry == 'new_pet':
+        page.create_home()
+    before_profiles = page.profiles.profiles()
+    before_count = len(page.service.world.residents) if page.service.world else 0
+    before_selection = page.selected_resident
+    callbacks = []
+
+    def deny_save():
+        raise PermissionError('Profile storage unavailable')
+
+    button = next(b for b in page.residents.section.findChildren(QPushButton)
+                  if b.text() == translate('pet_home_new_resident', 'New pet'))
+    with monkeypatch.context() as patch:
+        patch.setattr(page.profiles, 'save', deny_save)
+        patch.setattr(sys, 'excepthook', lambda kind, value, tb: callbacks.append(str(value)))
+        (page.create_button if entry == 'first_home' else button).click()
+    assert not callbacks
+    assert page.profiles.profiles() == before_profiles
+    assert len(page.service.world.residents) == before_count
+    assert page.selected_resident == before_selection
+    assert page.message.text() == translate('pet_home_result_save_failed', 'save_failed')
+    assert not page.message.isHidden()
+    assert page.residents.section.isEnabled()
+    button.click()
+    assert len(page.profiles.profiles()) == len(before_profiles) + 1
+    assert len(page.service.world.residents) == before_count + 1
+    assert page.selected_resident in page.service.world.residents
+
+
+def test_new_pet_profile_limit_is_reported_without_changing_home(page, monkeypatch):
+    import sys
+    from copy import deepcopy
+    from uuid import uuid4
+    from PySide6.QtWidgets import QPushButton
+    from frontengine.user_setting.pet_profiles import MAX_PROFILES
+
+    page.create_home()
+    record = page.profiles.profiles()[0]
+    records = page.profiles.settings['pet_profiles']['records']
+    while len(records) < MAX_PROFILES:
+        identifier = uuid4().hex
+        records[identifier] = {**deepcopy(record), 'id': identifier}
+    resident_ids = set(page.service.world.residents)
+    selected = page.selected_resident
+    callbacks = []
+    monkeypatch.setattr(sys, 'excepthook', lambda kind, value, tb: callbacks.append(str(value)))
+    button = next(b for b in page.residents.section.findChildren(QPushButton)
+                  if b.text() == translate('pet_home_new_resident', 'New pet'))
+    button.click()
+    assert not callbacks
+    assert len(page.profiles.profiles()) == MAX_PROFILES
+    assert set(page.service.world.residents) == resident_ids
+    assert page.selected_resident == selected
+    assert page.message.text() == 'At most 256 pet profiles can be saved'
+    assert not page.message.isHidden()
