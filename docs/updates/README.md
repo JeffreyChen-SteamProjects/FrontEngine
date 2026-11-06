@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261106-85 | 2026-11-06 | Keep current resident selected after a refused move-in | #fix #pet #ui #verification | [2026-11](2026-11.md) |
 | U-20261106-84 | 2026-11-06 | Verify birthday regression and queue release retry validation | #verification #pet #docs | [2026-11](2026-11.md) |
 | U-20261106-83 | 2026-11-06 | Preserve resident selection when Move out cannot save | #fix #ui #pet #verification | [2026-11](2026-11.md) |
 | U-20261106-82 | 2026-11-06 | 原生工作途中搬出與材料釋放驗證 | Pet / Lifecycle / Test | [2026-11](2026-11.md) |
@@ -411,6 +412,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 207 |
+| [2026-11.md](2026-11.md) | 2026-11 | 208 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

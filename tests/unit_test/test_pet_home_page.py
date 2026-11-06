@@ -574,3 +574,36 @@ def test_failed_moveout_keeps_selection_for_retry(page, monkeypatch):
     assert pet not in page.service.sessions
     assert page.selected_resident is None
     assert page.service.profiles.get(pet)['energy'] == 41
+
+
+@pytest.mark.parametrize('reason', ['active_elsewhere', 'full_saved', 'full_new'])
+def test_failed_movein_keeps_resident_selection(page, reason):
+    from PySide6.QtWidgets import QPushButton
+    from frontengine.utils.pet_game.world import MAX_RESIDENTS
+
+    page.create_home()
+    service = page.service
+    pet = next(iter(service.world.residents))
+    if reason.startswith('full'):
+        while len(service.world.residents) < MAX_RESIDENTS:
+            record = service.profiles.create()
+            assert service.adopt(record['id']) == 'accepted'
+    record = service.profiles.create('Waiting pet')
+    identifier = record['id']
+    page.select_resident(pet)
+    page.refresh()
+    page.residents.profiles.setCurrentIndex(page.residents.profiles.findData(identifier))
+    lease = service._session_factory(None, identifier, service.profiles) if reason == 'active_elsewhere' else None
+    key, label = ('pet_home_new_resident', 'New pet') if reason == 'full_new' else ('pet_home_adopt', 'Move in')
+    button = next(b for b in page.residents.section.findChildren(QPushButton)
+                  if b.text() == translate(key, label))
+    before = set(service.world.residents)
+    try:
+        button.click()
+        assert set(service.world.residents) == before
+        assert identifier not in service.sessions
+        assert page.selected_resident == pet
+        assert all(control.isEnabled() for control in page.residents.commands)
+    finally:
+        if lease is not None:
+            assert lease.close()

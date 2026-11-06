@@ -147,16 +147,20 @@ class ResidentPanel:
     def adopt(self) -> None:
         identifier = self.profiles.currentData()
         if identifier:
-            self.page.report(self.page.service.adopt(identifier))
+            result = self.page.service.adopt(identifier)
+            self.page.report(result)
             self.page.refresh()
-            self.page.select_resident(identifier)
+            if result == "accepted":
+                self.page.select_resident(identifier)
 
     @owned_action
     def new_pet(self) -> None:
         record = self.page.profiles.create()
-        self.page.report(self.page.service.adopt(record["id"]))
+        result = self.page.service.adopt(record["id"])
+        self.page.report(result)
         self.page.refresh()
-        self.page.select_resident(record["id"])
+        if result == "accepted":
+            self.page.select_resident(record["id"])
 
     @owned_action
     def wardrobe(self) -> None:

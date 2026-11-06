@@ -80,4 +80,4 @@ Il comando di dormire prosegue con il riposo dopo il ritorno nella zona del prop
 
 Selezionando un residente di un’altra zona, la panoramica della casa passa alla sua zona. Selezionare un residente della zona attuale o annullare la selezione mantiene la vista di arredamento attuale.
 
-Se il salvataggio del profilo dell’animale non riesce durante il trasferimento fuori casa, il residente resta selezionato per poter riprovare quando l’accesso in scrittura viene ripristinato.
+Se il salvataggio del profilo dell’animale non riesce durante il trasferimento fuori casa, il residente resta selezionato per poter riprovare quando l’accesso in scrittura viene ripristinato. Se l’ingresso di un animale salvato o nuovo viene rifiutato, viene mantenuta la selezione corrente; il nuovo residente viene selezionato solo dopo l’ingresso riuscito.

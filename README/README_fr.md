@@ -728,4 +728,4 @@ La consigne de dormir se poursuit par du repos après le retour dans la zone du 
 
 Sélectionner un résident d’une autre zone affiche cette zone dans la vue d’ensemble du foyer. Sélectionner un résident de la zone actuelle ou annuler la sélection conserve la vue d’aménagement actuelle.
 
-Si l’enregistrement du profil échoue lors du départ, le résident reste sélectionné pour permettre une nouvelle tentative une fois l’accès en écriture rétabli.
+Si l’enregistrement du profil échoue lors du départ, le résident reste sélectionné pour permettre une nouvelle tentative une fois l’accès en écriture rétabli. Si l’arrivée d’un animal enregistré ou nouveau est refusée, la sélection actuelle est également conservée ; le nouvel arrivant n’est sélectionné qu’après une installation réussie.

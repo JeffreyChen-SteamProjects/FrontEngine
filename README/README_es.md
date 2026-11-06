@@ -727,4 +727,4 @@ La orden de dormir continúa con el descanso al volver a la zona de su propia ca
 
 Al seleccionar un residente de otra zona, la vista general del hogar cambia a esa zona. Seleccionar un residente de la zona actual o quitar la selección conserva la vista de distribución actual.
 
-Si no se puede guardar el perfil de la mascota al mudarse, el residente permanece seleccionado para que puedas volver a intentarlo cuando se restablezca el acceso de escritura.
+Si no se puede guardar el perfil de la mascota al mudarse, el residente permanece seleccionado para que puedas volver a intentarlo cuando se restablezca el acceso de escritura. Si se rechaza la entrada de una mascota guardada o nueva, también se conserva la selección actual; solo se selecciona al nuevo residente cuando entra correctamente.

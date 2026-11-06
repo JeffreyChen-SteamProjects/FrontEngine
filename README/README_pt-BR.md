@@ -750,4 +750,4 @@ A ordem de dormir continua com o descanso após o retorno à área da própria c
 
 Ao selecionar um morador de outra área, a visão geral da casa muda para essa área. Selecionar um morador da área atual ou limpar a seleção mantém a visualização atual da disposição.
 
-Se o perfil do pet não puder ser salvo ao sair da casa, o morador permanece selecionado para que você possa tentar novamente quando o acesso de gravação for restabelecido.
+Se o perfil do pet não puder ser salvo ao sair da casa, o morador permanece selecionado para que você possa tentar novamente quando o acesso de gravação for restabelecido. Se a entrada de um pet salvo ou novo for recusada, a seleção atual também será mantida; o novo morador só será selecionado após entrar com sucesso.
