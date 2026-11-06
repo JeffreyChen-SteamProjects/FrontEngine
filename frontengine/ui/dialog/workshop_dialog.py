@@ -3,6 +3,7 @@ from __future__ import annotations
 from frontengine.ui.runtime_lifetime import captured_lifetime
 
 from pathlib import Path
+from shiboken6 import isValid
 
 from PySide6.QtCore import Qt, QUrl
 from PySide6.QtGui import QDesktopServices
@@ -89,6 +90,7 @@ class WorkshopDialog(QDialog):
             self.visibility.addItem(translate("workshop_visibility_" + str(visibility)), visibility)
         self.source, self.preview, self.title, self.tags, self.published_id = (QLineEdit() for _ in range(5))
         self.description = QPlainTextEdit()
+        self.description.setTabChangesFocus(True)
         self.description.setMaximumHeight(90)
         for key, widget in (("workshop_kind", self.kind), ("workshop_source", self.source),
                             ("workshop_preview", self.preview), ("workshop_title", self.title),
@@ -155,20 +157,24 @@ class WorkshopDialog(QDialog):
             self.status.setText(self.status.text() + "\n" + reason)
 
     def _choose_source(self) -> None:
+        if not isValid(self) or not self.isVisible() or not self.lifetime.accepting:
+            return
         if self.kind.currentData() in FOLDER_KINDS:
             path = QFileDialog.getExistingDirectory(self, translate("workshop_choose_source"))
         else:
             file_filter = {"scene": "Scene (*.fescene *.json)", "home_blueprint": "Blueprint (*.json)"}.get(
                 self.kind.currentData(), "Preset (*.zip)")
             path, _ = QFileDialog.getOpenFileName(self, translate("workshop_choose_source"), "", file_filter)
-        if path:
+        if isValid(self) and self.isVisible() and self.lifetime.accepting and path:
             self.source.setText(path)
             if not self.title.text():
                 self.title.setText(Path(path).stem)
 
     def _choose_preview(self) -> None:
+        if not isValid(self) or not self.isVisible() or not self.lifetime.accepting:
+            return
         path, _ = QFileDialog.getOpenFileName(self, translate("workshop_choose_preview"), "", "PNG / JPEG (*.png *.jpg *.jpeg)")
-        if path:
+        if isValid(self) and self.isVisible() and self.lifetime.accepting and path:
             self.preview.setText(path)
 
     def _prepare(self) -> None:
@@ -272,13 +278,15 @@ class WorkshopDialog(QDialog):
             self._error(str(error))
 
     def _load_item(self, item: dict) -> None:
+        if item["kind"] == "preset" and (not isValid(self) or not self.isVisible() or not self.lifetime.accepting):
+            return
         entry = self.cache.entry(item)
         if item["kind"] == "scene":
             self.jobs.submit("scene", lambda: load_package(entry))
         elif item["kind"] == "preset":
             name, ok = QInputDialog.getText(self, translate("workshop_use"), translate("preset_save_label"),
                                           text=f'Workshop_{item["id"]}_{item["title"]}')
-            if ok and name.strip():
+            if isValid(self) and self.isVisible() and self.lifetime.accepting and ok and name.strip():
                 repository = PresetRepository(Path.cwd() / "presets")
                 self.jobs.submit("preset", lambda: self.cache.import_preset(item, name.strip(), repository))
         elif item["kind"] in HOME_PACK_KINDS:          # the home reads packs as it starts

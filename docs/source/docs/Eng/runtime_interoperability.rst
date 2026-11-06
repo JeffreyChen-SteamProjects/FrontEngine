@@ -31,3 +31,5 @@ Presets → Manage Workshop opens the Steam manager; Scene and Pet also provide 
 Windows installations now include winrt-Windows.Media.Control for the Now playing widget (song title and artist through SMTC); older winsdk remains a fallback. No active media session yields an empty result, with the existing audio-application fallback retained.
 
 Executable builds check all required dependencies and versions before compilation; install requirements.txt in the build environment first.
+
+In the Workshop manager, Tab and Shift+Tab move between fields, including the description; Enter adds a new line there. Closing the manager during source or preview selection discards the returned choice. Closing it while naming a preset prevents that import. Cancel or reopen the manager to try again. Uploads already in progress continue when the manager closes.

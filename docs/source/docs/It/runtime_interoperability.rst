@@ -31,3 +31,5 @@ Preset → Gestisci Workshop apre il gestore Steam; anche Scena e Animale offron
 Windows include winrt-Windows.Media.Control per mostrare titolo e artista tramite SMTC nel widget di riproduzione; il vecchio winsdk rimane disponibile. Senza sessione multimediale il risultato è vuoto; resta il nome dell’app audio come alternativa.
 
 La compilazione dell’eseguibile verifica dipendenze e versioni; installa prima requirements.txt nell’ambiente di compilazione.
+
+Nel gestore Workshop, Tab e Maiusc+Tab spostano il focus tra i campi, inclusa la descrizione; Invio aggiunge una nuova riga nella descrizione. Chiudere il gestore durante la scelta della sorgente o dell’anteprima scarta la scelta. Chiuderlo durante l’inserimento del nome di una preimpostazione impedisce tale importazione. Dopo un annullamento o una riapertura è possibile riprovare. I caricamenti già in corso continuano dopo la chiusura del gestore.

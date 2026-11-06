@@ -1,0 +1,127 @@
+{
+  "status": "partial",
+  "worktree": "workshop-modal-close",
+  "base": "b2cf2cd4",
+  "problem": "Source, preview and preset name dialogs could return after Workshop closed or was destroyed, changing fields or starting a new import.",
+  "change": "Check Qt validity, visibility and owner lifetime before opening these modal dialogs and before consuming their results. Existing uploads continue after dialog closure.",
+  "reproduction": {
+    "log": ".audit/workshop-modal-red.log",
+    "failed": 8,
+    "deselected": 6,
+    "seconds": 4.27,
+    "cases": "source file, source folder, preview and preset name, each rejected or destroyed before modal return"
+  },
+  "verification": {
+    "command": "D:/Codes/FrontEngine/.audit/host-runtime-612/Scripts/python.exe -m pytest tests/unit_test/test_workshop_dialog.py tests/unit_test/test_runtime_ownership.py -q",
+    "log": ".audit/workshop-modal-green.log",
+    "exit_code": 0,
+    "passed": 48,
+    "seconds": 10.4,
+    "coverage": [
+      "Eight closed or destroyed dialog cases discard modal results and refuse subsequent modal entry.",
+      "Three picker cases preserve empty fields on cancel and populate the correct fields after reopening and retrying.",
+      "A real local preset package is not imported after closure or cancellation; reopening and retrying imports equivalent data and preserves cache readiness.",
+      "The existing simulated Steam event test retains upload completion after dialog closure."
+    ]
+  },
+  "limitations": [
+    "Unit tests use offscreen Qt. Native checks use real Windows widgets on a private desktop with widget-local keyboard events and substituted modal results.",
+    "No real Steam publication or OS keyboard input was verified.",
+    "Full regression, independent review and integration remain pending.",
+    "No EXE was built."
+  ],
+  "keyboard_fix": {
+    "problem": "Native Tab navigation stopped at QPlainTextEdit because Tab inserted text.",
+    "native_failure": ".audit/native-workshop-close/focus-failure.json",
+    "red_test": ".audit/workshop-tab-red.log",
+    "red_result": "1 failed, 18 deselected in 2.11s; tags.hasFocus() was False after Tab.",
+    "change": "Set description.setTabChangesFocus(True).",
+    "verification": "Tab moves to tags without changing description, Backtab returns, and Enter still inserts a newline."
+  },
+  "native": {
+    "directory": ".audit/native-workshop-fixed",
+    "platform": "Windows private desktop, Traditional_Chinese, dark theme, 900x740 main window",
+    "entry": "Actual MainUI.open_workshop entry, with widget-local Tab/Space on real buttons; modal results substituted.",
+    "cases": {
+      "cases": [
+        {
+          "operation": "source_file",
+          "fields_unchanged": true,
+          "no_pending_job": true
+        },
+        {
+          "operation": "source_folder",
+          "fields_unchanged": true,
+          "no_pending_job": true
+        },
+        {
+          "operation": "preview",
+          "fields_unchanged": true,
+          "no_pending_job": true
+        },
+        {
+          "operation": "ClosedImport",
+          "imported": false
+        },
+        {
+          "operation": "CancelledImport",
+          "imported": false
+        },
+        {
+          "operation": "Imported",
+          "imported": true
+        }
+      ],
+      "actual_main_entry": true,
+      "steam_start_forbidden": true,
+      "cache_ready": true
+    },
+    "observer": {
+      "before": {
+        "foreground": 2558004,
+        "cursor": [
+          768,
+          432
+        ]
+      },
+      "after": {
+        "foreground": 2558004,
+        "cursor": [
+          768,
+          432
+        ]
+      },
+      "child_exit": 0
+    },
+    "runtime_closed": true,
+    "temporary_directory_removed": true,
+    "stderr_empty": true,
+    "cold_home": {
+      "passed": true,
+      "initial_snapshot_exact": true,
+      "profiles_exact": true,
+      "leases_reacquired": true,
+      "saved_exact": true,
+      "temporary_directory_removed": true
+    },
+    "cold_preset": {
+      "imported_data_exact": true,
+      "closed_import_absent": true,
+      "cancelled_import_absent": true
+    }
+  },
+  "documentation": {
+    "files": 17,
+    "checks": "54 passed in 3.13s",
+    "sphinx": "HTML build with -W passed",
+    "rendered_paragraphs_exact": [
+      "Eng",
+      "Zh",
+      "ZhCn",
+      "De",
+      "Fr",
+      "Ru",
+      "It"
+    ]
+  }
+}

@@ -31,3 +31,5 @@ Préréglages → Gérer le Workshop ouvre le gestionnaire Steam ; Scène et Ani
 Windows inclut désormais winrt-Windows.Media.Control pour afficher titre et artiste via SMTC dans le widget de lecture ; l’ancien winsdk reste une alternative. Sans session multimédia, le résultat est vide ; le nom de l’application audio reste disponible en secours.
 
 La construction de l’exécutable vérifie dépendances et versions avant compilation ; installez d’abord requirements.txt dans cet environnement.
+
+Dans le gestionnaire Workshop, Tab et Maj+Tab passent entre les champs, y compris la description ; Entrée y ajoute une nouvelle ligne. Fermer le gestionnaire pendant le choix de la source ou de l’aperçu ignore ce choix. Le fermer pendant la saisie du nom d’un préréglage empêche cet import. Après une annulation ou une réouverture, vous pouvez réessayer. Les envois déjà en cours continuent après la fermeture du gestionnaire.

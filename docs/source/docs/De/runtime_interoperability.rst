@@ -31,3 +31,5 @@ Presets → Workshop verwalten öffnet den Steam-Manager; Szene und Tier bieten 
 Windows-Installationen enthalten jetzt winrt-Windows.Media.Control für Titel und Interpret im Wiedergabe-Widget über SMTC; älteres winsdk bleibt eine Alternative. Ohne Mediensitzung bleibt das Ergebnis leer; die bisherige Anzeige des Audio-App-Namens bleibt erhalten.
 
 EXE-Builds prüfen benötigte Abhängigkeiten und Versionen vor der Kompilierung; zuerst requirements.txt in der Build-Umgebung installieren.
+
+Im Workshop-Manager wechseln Tab und Umschalt+Tab zwischen den Feldern, auch im Beschreibungsfeld; Enter fügt dort einen Zeilenumbruch ein. Wird der Manager während der Auswahl einer Quelle oder eines Vorschaubilds geschlossen, wird die Auswahl verworfen. Wird er während der Eingabe eines Preset-Namens geschlossen, startet der Import nicht. Nach dem Abbrechen oder erneuten Öffnen können Sie es erneut versuchen. Bereits laufende Uploads werden nach dem Schließen fortgesetzt.
