@@ -801,3 +801,5 @@ Wird die Garderobe während der Ordner- oder Farbauswahl geschlossen, wird die z
 Wird der Sprite-Paketeditor während der Auswahl eines Bildes, Importordners, Exportordners oder Exportnamens geschlossen, verwirft er die zurückgegebene Auswahl. Er startet keinen neuen Auftrag und lässt den Entwurf unverändert. Wird nur der Auswahldialog abgebrochen, bleibt der Editor für einen weiteren Versuch verfügbar.
 
 Wird der Aufnahmeeditor während der Auswahl eines Speicherorts geschlossen, verwirft er den Pfad, ohne eine Datei zu erstellen oder zu überschreiben. Beim Schließen während der Texteingabe wird der zurückgegebene Text verworfen. Wird nur der Speicher- oder Textdialog abgebrochen, bleibt der Editor für einen weiteren Versuch verfügbar.
+
+Wird die Medienbibliothek während der Datei- oder Ordnerauswahl geschlossen, verwirft sie die zurückgegebene Auswahl. Wird sie während der Bestätigung einer Neuverknüpfung geschlossen, übernimmt diese Bestätigung keine Änderungen. Wird nur die Auswahl oder Bestätigung abgebrochen, bleibt die Bibliothek für einen weiteren Versuch verfügbar.

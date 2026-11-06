@@ -52,3 +52,5 @@ Outils → OCR en direct affiche le texte près d’une zone fixe. Initialement 
 Le changement de langue actualise aussi les choix de qualité, de mode de mesure, de lecture de texte, de forme du cadre de caméra et de style du spectre. Les valeurs sélectionnées restent inchangées ; changer de langue n’applique aucun autre réglage aux outils.
 
 Si l’éditeur de capture se ferme pendant le choix de l’emplacement d’enregistrement, la destination est ignorée sans créer ni écraser de fichier. Le fermer pendant la saisie de texte ignore aussi le texte renvoyé. Annuler uniquement la boîte de dialogue d’enregistrement ou de texte permet de réessayer dans l’éditeur.
+
+Si la bibliothèque de ressources se ferme pendant le choix d’un fichier ou d’un dossier, le choix renvoyé est ignoré. La fermer pendant la confirmation d’une nouvelle liaison empêche aussi cette confirmation de soumettre des modifications. Annuler uniquement le sélecteur ou la confirmation permet de réessayer dans la bibliothèque.

@@ -52,3 +52,5 @@ Strumenti → OCR in diretta mostra testo accanto a un’area fissa. Inizialment
 Il cambio della lingua aggiorna anche le opzioni di qualità, modalità di misurazione, lettura del testo, forma della cornice della fotocamera e stile dello spettro. I valori selezionati restano invariati e il cambio di lingua non applica impostazioni diverse agli strumenti.
 
 Se l’editor della cattura viene chiuso durante la scelta della posizione di salvataggio, la destinazione viene ignorata senza creare o sovrascrivere file. La chiusura durante l’inserimento del testo scarta anche il testo restituito. Annullando solo la finestra di salvataggio o di testo, è possibile riprovare nell’editor.
+
+Se la libreria delle risorse viene chiusa durante la scelta di un file o di una cartella, la scelta restituita viene ignorata. La chiusura durante la conferma di un nuovo collegamento impedisce anche a tale conferma di inviare modifiche. Annullando solo la selezione o la conferma, è possibile riprovare nella libreria.

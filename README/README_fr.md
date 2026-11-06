@@ -759,3 +759,5 @@ Fermer la garde-robe pendant le choix d’un dossier ou d’une couleur annule l
 Si l’éditeur de packs de sprites se ferme pendant le choix d’une image, d’un dossier d’importation, d’un dossier d’exportation ou d’un nom d’exportation, le choix renvoyé est ignoré. Aucune nouvelle tâche ne démarre et le brouillon reste inchangé. Annuler uniquement le sélecteur permet de réessayer dans l’éditeur.
 
 Si l’éditeur de capture se ferme pendant le choix de l’emplacement d’enregistrement, la destination est ignorée sans créer ni écraser de fichier. Le fermer pendant la saisie de texte ignore aussi le texte renvoyé. Annuler uniquement la boîte de dialogue d’enregistrement ou de texte permet de réessayer dans l’éditeur.
+
+Si la bibliothèque de ressources se ferme pendant le choix d’un fichier ou d’un dossier, le choix renvoyé est ignoré. La fermer pendant la confirmation d’une nouvelle liaison empêche aussi cette confirmation de soumettre des modifications. Annuler uniquement le sélecteur ou la confirmation permet de réessayer dans la bibliothèque.

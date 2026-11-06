@@ -781,3 +781,5 @@ Fechar o guarda-roupa durante a escolha de uma pasta ou cor descarta o resultado
 Se o editor de pacotes de sprites for fechado durante a escolha de uma imagem, pasta de importação, pasta de exportação ou nome de exportação, a seleção retornada será ignorada. Nenhuma nova tarefa será iniciada e o rascunho permanecerá inalterado. Cancelar apenas o seletor permite tentar novamente no editor.
 
 Se o editor de capturas for fechado durante a escolha do local de salvamento, o destino será ignorado sem criar ou sobrescrever arquivos. Fechá-lo durante a entrada de texto também descarta o texto retornado. Cancelar apenas a janela de salvamento ou de texto permite tentar novamente no editor.
+
+Se a biblioteca de recursos for fechada durante a escolha de um arquivo ou pasta, a seleção retornada será ignorada. Fechá-la durante a confirmação de um novo vínculo também impede que essa confirmação envie alterações. Cancelar apenas o seletor ou a confirmação permite tentar novamente na biblioteca.
