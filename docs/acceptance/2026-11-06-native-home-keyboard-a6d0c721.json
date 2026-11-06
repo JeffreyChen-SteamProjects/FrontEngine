@@ -1,0 +1,248 @@
+{
+  "product_test_commit": "a6d0c721",
+  "runs": [
+    {
+      "theme": "dark",
+      "result": {
+        "created_home": true,
+        "cancelled_automatic_work": true,
+        "entered_and_escaped_arranging": true,
+        "tab_routes": [
+          {
+            "target": "primaryAction",
+            "tabs": 5
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 13
+          },
+          {
+            "target": "QListWidget",
+            "tabs": 1
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 14
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 3
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 22
+          },
+          {
+            "target": "QListWidget",
+            "tabs": 4
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 6
+          }
+        ],
+        "selection": {
+          "after_home": {
+            "row": 0,
+            "selected": 0,
+            "count": 1,
+            "focus": "QListWidget"
+          },
+          "after_down": {
+            "row": 0,
+            "selected": 0
+          },
+          "after_space": {
+            "row": 0,
+            "selected": 1
+          }
+        },
+        "final_focus": "WrappingPushButton",
+        "keyboard_commands": [
+          {
+            "command": "sleep",
+            "queue": [
+              "sleep"
+            ]
+          },
+          {
+            "command": "stop",
+            "queue": []
+          }
+        ],
+        "theme": "dark",
+        "runtime_closed": true,
+        "temporary_directory_removed": true
+      },
+      "observer": {
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "child_exit": 0
+      },
+      "cold_reload": {
+        "passed": true,
+        "initial_snapshot_exact": true,
+        "profiles_exact": true,
+        "leases_reacquired": true,
+        "saved_exact": true,
+        "temporary_directory_removed": true
+      },
+      "evidence_sha256": {
+        "result.json": "e418891dd1ead4f482b3d78b8c55ce3487f94af018db47a8614752f7fe5a3e2b",
+        "observer.json": "2a689a216983485f51c03e4b2a63a0f1987f03f7adf42f973f92f921c1195c1f",
+        "cold-result.json": "5bd41edb786e3fe553500e96167a938f64483ad3f1f564c603795a88e3110cbc",
+        "final-window.png": "033c0f7d626fcd05aefb5de9608b9a1fc9918684cffb9546c2105976ff6f0c74",
+        "shutdown-world.json": "b96c142d2d10f9e9a14b97e3ca095f7e94eb8c5df071b48f4af0c95c1418d2a2",
+        "profiles.json": "614ddfb4d4d424967fc0e8ef296b123ae0492742e03a0caf2b4a6271e19ca5fd"
+      }
+    },
+    {
+      "theme": "light",
+      "result": {
+        "created_home": true,
+        "cancelled_automatic_work": true,
+        "entered_and_escaped_arranging": true,
+        "tab_routes": [
+          {
+            "target": "primaryAction",
+            "tabs": 5
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 13
+          },
+          {
+            "target": "QListWidget",
+            "tabs": 1
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 14
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 3
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 22
+          },
+          {
+            "target": "QListWidget",
+            "tabs": 4
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 6
+          }
+        ],
+        "selection": {
+          "after_home": {
+            "row": 0,
+            "selected": 0,
+            "count": 1,
+            "focus": "QListWidget"
+          },
+          "after_down": {
+            "row": 0,
+            "selected": 0
+          },
+          "after_space": {
+            "row": 0,
+            "selected": 1
+          }
+        },
+        "final_focus": "WrappingPushButton",
+        "keyboard_commands": [
+          {
+            "command": "sleep",
+            "queue": [
+              "sleep"
+            ]
+          },
+          {
+            "command": "stop",
+            "queue": []
+          }
+        ],
+        "theme": "light",
+        "runtime_closed": true,
+        "temporary_directory_removed": true
+      },
+      "observer": {
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "child_exit": 0
+      },
+      "cold_reload": {
+        "passed": true,
+        "initial_snapshot_exact": true,
+        "profiles_exact": true,
+        "leases_reacquired": true,
+        "saved_exact": true,
+        "temporary_directory_removed": true
+      },
+      "evidence_sha256": {
+        "result.json": "a1018ddff4bb9da9991e7e0c1828661102dbe308ccb5c6865cfd727737585078",
+        "observer.json": "2a689a216983485f51c03e4b2a63a0f1987f03f7adf42f973f92f921c1195c1f",
+        "cold-result.json": "5bd41edb786e3fe553500e96167a938f64483ad3f1f564c603795a88e3110cbc",
+        "final-window.png": "8d00e0c2aee9095f63d29e02226cee4fd0c0b2accfa8b691dc6684f5e807ec03",
+        "shutdown-world.json": "dab47410f17ddcb489b4a88560b75becb6d1c697c5b66ba8bbdb0c10ed907302",
+        "profiles.json": "577d1b2670741acff6770cd2f06592f305be537f486b1708abdd5e8a6f03a937"
+      }
+    }
+  ],
+  "frozen_source_files_unchanged": 752,
+  "visual_review": "Original-resolution light-theme final screenshot shows selected resident and focus outline on Stop.",
+  "excluded_run": {
+    "directory": ".audit/native-keyboard-dark",
+    "reason": "Keyboard behavior completed but evidence export tried to read profile service after shutdown. Moved profile capture after save and before close, then reran both themes. Original failure retained; no product change."
+  },
+  "limits": [
+    "Widget-local QTest keyboard events on unique private native Win32 desktop; no OS input injection.",
+    "English at requested1280x900, current monitor DPR1.25; not all-language/narrow/high-DPI matrix.",
+    "Work was advanced by injected 180000ms domain step; Sleep queued then Stop cancelled before simulation, not a completed sleep journey.",
+    "Host hotkey, application profile, share-watch, Workshop and lock-query services substituted.",
+    "No full screen-reader or complete accessibility acceptance."
+  ]
+}
