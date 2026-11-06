@@ -1,8 +1,9 @@
 """Run a probe in a child process on its own hidden Win32 desktop.
 
-Windows on that desktop use the real monitors' geometry, work areas and GPU, and
-can be activated, but none of it reaches the user's input desktop: their
-foreground window, cursor and screen contents are never touched.
+Windows on that desktop use the real monitors' geometry, work areas and GPU.
+The launcher assigns the child to that desktop without switching the input
+desktop. Probe code must still avoid global input injection and desktop switches.
+Before/after foreground and cursor samples do not identify the cause of changes.
 """
 from __future__ import annotations
 
