@@ -705,6 +705,7 @@ class PetHomePage(SettingPage):
             strip.action_requested.connect(lambda action, target, z=zone: self.strip_action(action, target, z))
             strip.arrange_finished.connect(self._strip_done_arranging)
             strip.layer_requested.connect(self.choose_layer)
+            strip.hide_requested.connect(self._hide_from_desktop)
             strip.resident_selected.connect(self.select_resident)
             strip.cell_clicked.connect(lambda cell, z=zone: self._strip_cell_clicked(z, cell))
             strip.closed.connect(lambda s=strip: self._forget_strip(s))
@@ -799,6 +800,11 @@ class PetHomePage(SettingPage):
         for view in (self.view, *self.strip_list):
             view.reduced_motion = reduced
             view.update()
+
+    @owned_action
+    def _hide_from_desktop(self) -> None:
+        """The strip's own Hide: the same as unticking Show the home on the desktop, so it stays hidden."""
+        self.desktop_check.setChecked(False)
 
     @owned_action
     def _desktop_toggled(self, checked: bool) -> None:

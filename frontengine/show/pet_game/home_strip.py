@@ -74,6 +74,7 @@ class HomeStrip(HomeView):
     quiet = False                          # focus mode: no bubbles and no cards
     closed = Signal()                      # at close time, before the deferred delete
     arrange_finished = Signal()            # the strip's own way out of arranging (it takes no keys)
+    hide_requested = Signal()              # "Hide the home": the page unticks Show the home on the desktop
     overlay_lockable = False              # lock-all must not make the home unclickable
     overlay_remembers_geometry = False
 
@@ -513,7 +514,13 @@ class HomeStrip(HomeView):
         modes = menu.addMenu(translate("pet_home_mode", "Mode"))
         for mode in HOME_MODES:
             modes.addAction(translate("pet_home_mode_" + mode, mode), lambda m=mode: self.mode_requested.emit(m))
-        menu.addAction(translate("pet_home_hide", "Hide the home"), self.hide)
+        menu.addAction(translate("pet_home_hide", "Hide the home"), self._hide_home)
+
+    def _hide_home(self) -> None:
+        # The page turns the setting off and closes every strip; hiding first also covers a strip
+        # that nothing is listening to.
+        self.hide_requested.emit()
+        self.hide()
 
     # ----- mouse -------------------------------------------------------------------------------
 
