@@ -215,6 +215,21 @@ class HomeStrip(HomeView):
 
     # ----- interpolation ---------------------------------------------------------------
 
+    def follow_world(self, world) -> None:
+        """Rebind a kept strip to the home now running.
+
+        Both homes number their first zone "z1", so a strip survives a manage/sandbox switch;
+        without this it kept drawing the other home and could not finish a drag on this one.
+        """
+        if world is self.world:
+            return
+        self._finish_pointer(commit=False)
+        self._before, self._after = {}, {}
+        self.bubbles.clear()
+        self.set_world(world, self.zone)
+        self.place_on_screen()
+        self._stepped()
+
     def _stepped(self) -> None:
         world = self.service.world
         if world is None:

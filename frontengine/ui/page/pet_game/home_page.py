@@ -697,6 +697,8 @@ class PetHomePage(SettingPage):
         for strip in [strip for strip in self.strip_list if strip.zone not in zones]:
             strip.close()
             self._forget_strip(strip)
+        for strip in self.strip_list:
+            strip.follow_world(world)
         for zone in [key for key in zones if key not in {strip.zone for strip in self.strip_list}]:
             strip = HomeStrip(self.service, zone, self.layer, str(user_setting_dict.get("quality_tier", "")))
             strip.open_requested.connect(self.open_requested.emit)
