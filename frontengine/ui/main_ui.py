@@ -1364,6 +1364,10 @@ class FrontEngineMainUI(QMainWindow):
             self.lifetime.cancel_prepare()
             return CloseDisposition.REFUSED
         self._shutdown_done = True
+        if self.main_app is not None:
+            # Teardown closes the overlays; with the main window hidden (tray quit) the last
+            # visible one would make Qt quit before retirement drains. _runtime_finished exits.
+            self.main_app.setQuitOnLastWindowClosed(False)
         self.lifetime.block(RuntimeError('Retirement cleanup is in progress'))
         self.lifetime.close()
         try:

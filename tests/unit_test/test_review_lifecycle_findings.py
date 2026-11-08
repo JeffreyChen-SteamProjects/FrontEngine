@@ -137,3 +137,32 @@ def test_overlay_outside_any_lifetime_still_remembers_where_it_was_left(monkeypa
     finally:
         free.close()
         owned.close()
+
+
+def test_closing_overlays_during_teardown_cannot_end_the_application_early(make_main_window, monkeypatch):
+    """Closing the last visible overlay made Qt quit before the lifetime drained (tray quit)."""
+    from frontengine.ui.runtime_lifetime import CloseDisposition
+    window = make_main_window()
+    calls = []
+
+    class Application:
+        def setQuitOnLastWindowClosed(self, enabled):
+            calls.append(('quit_on_last_window', enabled))
+
+        def exit(self, code=0):
+            calls.append(('exit', code))
+
+    clear = window._clear_overlays
+    monkeypatch.setattr(window, '_clear_overlays', lambda: (calls.append(('clear_overlays',)), clear())[1])
+    window.main_app = Application()
+    window.hide()
+    assert window.request_shutdown() in (CloseDisposition.DRAINING, CloseDisposition.CLOSED)
+    assert ('quit_on_last_window', False) in calls
+    assert calls.index(('quit_on_last_window', False)) < calls.index(('clear_overlays',))
+
+
+def test_embedded_window_leaves_the_host_application_settings_alone(make_main_window):
+    from frontengine.ui.runtime_lifetime import CloseDisposition
+    window = make_main_window()
+    assert window.main_app is None
+    assert window.request_shutdown() in (CloseDisposition.DRAINING, CloseDisposition.CLOSED)
