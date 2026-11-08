@@ -113,6 +113,20 @@ def test_a_newer_save_offers_the_update(tmp_path, *, home_store_factory, lifetim
         page.deleteLater()
 
 
+def _settle_reveal(page, rounds: int = 30) -> None:
+    """Let the page finish laying out and scrolling: stop once nothing moved for three rounds."""
+    from PySide6.QtCore import QPoint
+    from PySide6.QtWidgets import QApplication
+    content, still, last = page._scroll.widget(), 0, None
+    for _ in range(rounds):
+        QApplication.processEvents()
+        now = (page._scroll.verticalScrollBar().value(), page.tabs.mapTo(content, QPoint(0, 0)).y())
+        still = still + 1 if now == last else 0
+        last = now
+        if still >= 3:
+            return
+
+
 @pytest.mark.parametrize("height", [500, 900])
 @pytest.mark.parametrize("target", ["backpack", "goals"])
 @pytest.mark.parametrize("keyboard", [False, True])
@@ -134,8 +148,7 @@ def test_stage_shortcut_reveals_content_even_when_tab_is_already_selected(page, 
             QTest.keyClick(button, Qt.Key.Key_Space)
         else:
             button.click()
-        for _ in range(3):
-            QApplication.processEvents()
+        _settle_reveal(page)
         assert not content.visibleRegion().isEmpty(), (target, height, keyboard)
         assert not page.tabs.tabBar().visibleRegion().isEmpty()
 
@@ -186,3 +199,24 @@ def test_deferred_home_navigation_is_discarded_during_close_preparation(page):
     for _ in range(3):
         QApplication.processEvents()
     assert not page.storage.list.visibleRegion().isEmpty()
+
+
+@pytest.mark.parametrize("target", ["backpack", "goals"])
+def test_shortcut_reveal_measures_after_content_above_settles(page, target):
+    """A message above the tabs that shrinks just before the reveal must not push the tabs out of view."""
+    from PySide6.QtWidgets import QApplication
+
+    page.create_home()
+    page.resize(1000, 500)
+    page.refresh()
+    page.report_text("\n".join(["A long message that takes room above the tabs."] * 12))
+    for _ in range(3):
+        QApplication.processEvents()
+    page._scroll.verticalScrollBar().setValue(0)
+    button = page.backpack_button if target == "backpack" else page.goals_button
+    content = page.storage.list if target == "backpack" else page.goals.level
+    button.click()
+    page.report_text("")                      # the content above shrinks before the reveal runs
+    _settle_reveal(page)
+    assert not content.visibleRegion().isEmpty()
+    assert not page.tabs.tabBar().visibleRegion().isEmpty()

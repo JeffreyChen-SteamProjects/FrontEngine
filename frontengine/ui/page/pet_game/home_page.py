@@ -16,7 +16,7 @@ from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
 
-from PySide6.QtCore import QCoreApplication, QEvent, QPoint, Qt, QTimer, QUrl, Signal
+from PySide6.QtCore import QCoreApplication, QEvent, QObject, QPoint, Qt, QTimer, QUrl, Signal
 from PySide6.QtGui import QDesktopServices, QGuiApplication, QKeyEvent, QKeySequence
 from PySide6.QtWidgets import (QComboBox, QFrame, QLabel, QListWidget, QListWidgetItem,
                                QScrollArea, QSlider, QVBoxLayout, QWidget)
@@ -57,6 +57,8 @@ from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.pet_game.schedule import clock_text, game_day
 
 RUNNING_KEY = "pet_home_running"
+REVEAL_LAYOUT_ROUNDS = 4          # nested sections settle in a few rounds of layout requests
+REVEAL_FOLLOW_MS = 1500           # how long a shortcut keeps its tab in view while content settles
 DESKTOP_KEY = "pet_home_on_desktop"
 INTRO_KEY = "pet_home_intro_seen"
 MOTION_KEY = "pet_home_reduced_motion"
@@ -71,6 +73,19 @@ UPDATE_URL = "https://pypi.org/project/frontengine/"
 # The overview on this page is a stage, taller than the desktop strip.
 STAGE_HEIGHT = 220
 LAYER_KEY = "pet_home_layer"
+
+
+class _TabsMoved(QObject):
+    """Calls back when the watched tabs move inside the page: content above them changed size."""
+
+    def __init__(self, callback, parent: QObject) -> None:
+        super().__init__(parent)
+        self._callback = callback
+
+    def eventFilter(self, watched: QObject, event: QEvent) -> bool:  # NOSONAR - Qt override name
+        if event.type() == QEvent.Type.Move:
+            self._callback()
+        return False
 
 
 @dataclass(frozen=True)
@@ -384,18 +399,57 @@ class PetHomePage(SettingPage):
     @owned_action
     def _select_home_tab(self, key: str) -> None:
         if self.tabs.select(key):
+            self._follow_reveal()
+            QTimer.singleShot(0, self, self._reveal_home_tab)
+
+    def _follow_reveal(self) -> None:
+        """For a moment after a shortcut, keep the tabs in view while content above them settles.
+
+        Pictures, messages and lists above the tabs can change size just after the reveal; the
+        scroll position follows them until the user scrolls or the moment passes.
+        """
+        bar = self._scroll.verticalScrollBar()
+        if not getattr(self, '_reveal_hooked', False):
+            self.lifetime.connect_owned(bar.rangeChanged, lambda _low, _high: self._reveal_again())
+            watcher = _TabsMoved(self._reveal_again, self)
+            widget = self.tabs
+            while widget is not None and widget is not self._scroll.widget():
+                widget.installEventFilter(watcher)      # the tabs move when any section around them does
+                widget = widget.parentWidget()
+            self._reveal_hooked = True
+        self._reveal_generation = getattr(self, '_reveal_generation', 0) + 1
+        self._reveal_following, self._revealed_value = True, None
+        generation = self._reveal_generation
+        QTimer.singleShot(REVEAL_FOLLOW_MS, self, lambda: self._stop_following_reveal(generation))
+
+    def _stop_following_reveal(self, generation: int) -> None:
+        if getattr(self, '_reveal_generation', 0) == generation:
+            self._reveal_following, self._revealed_value = False, None
+
+    def _reveal_again(self) -> None:
+        """The tabs moved or the page's height changed while following: put the tabs back in view,
+        unless the user has scrolled since (a shrinking page lowering the value is not the user)."""
+        bar = self._scroll.verticalScrollBar()
+        revealed = getattr(self, '_revealed_value', None)
+        if (getattr(self, '_reveal_following', False) and revealed is not None
+                and bar.value() == min(revealed, bar.maximum())):
             QTimer.singleShot(0, self, self._reveal_home_tab)
 
     @owned_action
     def _reveal_home_tab(self) -> None:
-        widget = self.tabs
-        while widget is not None:
-            QCoreApplication.sendPostedEvents(widget, QEvent.Type.LayoutRequest)
-            if widget is self._scroll:
+        # Measure only once everything above the tabs has its final size: a status line or message
+        # that just changed lays out its own section, not one of the tabs' ancestors, and a section
+        # that resizes asks its parent again; measuring before that scrolled past the tab bar.
+        content = self._scroll.widget()
+        for _ in range(REVEAL_LAYOUT_ROUNDS):
+            before = self.tabs.mapTo(content, QPoint(0, 0)).y(), content.height()
+            QCoreApplication.sendPostedEvents(None, QEvent.Type.LayoutRequest)
+            if (self.tabs.mapTo(content, QPoint(0, 0)).y(), content.height()) == before:
                 break
-            widget = widget.parentWidget()
-        top = self.tabs.mapTo(self._scroll.widget(), QPoint(0, 0)).y()
-        self._scroll.verticalScrollBar().setValue(top)
+        bar = self._scroll.verticalScrollBar()
+        bar.setValue(self.tabs.mapTo(content, QPoint(0, 0)).y())
+        if getattr(self, '_reveal_following', False):
+            self._revealed_value = bar.value()
 
     @owned_action
     def _open_pending(self, item) -> None:
