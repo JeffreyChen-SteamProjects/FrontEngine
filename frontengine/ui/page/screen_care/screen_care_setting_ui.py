@@ -57,10 +57,10 @@ class ScreenCareSettingUI(SettingPage):
         # Colour filter
         self.filter_label = tr(QLabel(), "screen_filter_label", "Screen filter")
         self.filter_color_combobox = QComboBox()
-        for name, hex_value in FILTER_COLORS:
-            self.filter_color_combobox.addItem(
-                language_wrapper.language_word_dict.get(f"screen_filter_color_{name.lower()}", name),
-                hex_value)
+        for index, (name, hex_value) in enumerate(FILTER_COLORS):
+            self.filter_color_combobox.addItem(name, hex_value)
+            retranslator.bind(self.filter_color_combobox, f"screen_filter_color_{name.lower()}", name,
+                              "setItemText", index)
         self.filter_strength_label = tr(QLabel(), "screen_filter_strength", "Strength")
         self.filter_strength_slider = QSlider(Qt.Orientation.Horizontal)
         self.filter_strength_slider.setRange(1, 80)
@@ -348,7 +348,7 @@ class ScreenCareSettingUI(SettingPage):
         return {
             "color_vision_kind": self.color_vision_combobox.currentData(),
             "color_vision_severity": self.color_vision_slider.value(),
-            "filter_color": self.filter_color_combobox.currentText(),
+            "filter_color": self._filter_color_name(),
             "filter_strength": self.filter_strength_slider.value(),
             "ruler_band": self.ruler_band_combobox.currentText(),
             "ruler_strength": self.ruler_strength_slider.value(),
@@ -358,10 +358,26 @@ class ScreenCareSettingUI(SettingPage):
             "target_monitor": target_monitor_state(self.target_monitor_combobox),
         }
 
+    def _filter_color_name(self) -> str:
+        """The stable colour name: the shown label changes with the language."""
+        data = self.filter_color_combobox.currentData()
+        return next((name for name, hex_value in FILTER_COLORS if hex_value == data), FILTER_COLORS[0][0])
+
+    def _apply_filter_color(self, value: object) -> None:
+        """Accept the stable name, a colour value, or a label saved in any language."""
+        if not isinstance(value, str):
+            return
+        for name, hex_value in FILTER_COLORS:
+            key = f"screen_filter_color_{name.lower()}"
+            labels = {words.get(key) for words in language_wrapper.choose_language_dict.values()}
+            if value in (name, hex_value) or value in labels:
+                self.filter_color_combobox.setCurrentIndex(self.filter_color_combobox.findData(hex_value))
+                return
+
     def set_state(self, state: dict) -> None:
         apply_target_monitor_state(self.target_monitor_combobox, state.get("target_monitor"))
+        self._apply_filter_color(state.get("filter_color"))
         for combobox, key in (
-            (self.filter_color_combobox, "filter_color"),
             (self.ruler_band_combobox, "ruler_band"),
             (self.break_minutes_combobox, "break_minutes"),
             (self.break_seconds_combobox, "break_seconds"),

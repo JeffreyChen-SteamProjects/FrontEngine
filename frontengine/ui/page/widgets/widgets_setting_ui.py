@@ -242,7 +242,7 @@ class WidgetsSettingUI(SettingPage):
         widget.show()
         widget.start()
         self.spectrum_widget_list.append(widget)
-        self.spectrum_button.setText(_t("widgets_spectrum_stop", "Stop spectrum"))
+        retranslator.set_text(self.spectrum_button, "widgets_spectrum_stop", "Stop spectrum")
 
     def stop_spectrum(self) -> None:
         """收掉頻譜並停止擷取。"""
@@ -253,7 +253,7 @@ class WidgetsSettingUI(SettingPage):
             except RuntimeError:
                 pass
         self.spectrum_widget_list.clear()
-        self.spectrum_button.setText(_t("widgets_spectrum_start", "Start spectrum"))
+        retranslator.set_text(self.spectrum_button, "widgets_spectrum_start", "Start spectrum")
 
     @owned_action
     def _apply_spectrum_settings(self) -> None:
@@ -297,7 +297,7 @@ class WidgetsSettingUI(SettingPage):
         widget.show()
         widget.start()
         self.monitor_widget_list.append(widget)
-        self.monitor_button.setText(_t("widgets_monitor_stop", "Stop monitor"))
+        retranslator.set_text(self.monitor_button, "widgets_monitor_stop", "Stop monitor")
 
     def stop_monitor(self) -> None:
         for widget in self.monitor_widget_list[:]:
@@ -306,7 +306,7 @@ class WidgetsSettingUI(SettingPage):
             except RuntimeError:
                 pass
         self.monitor_widget_list.clear()
-        self.monitor_button.setText(_t("widgets_monitor_start", "Start monitor"))
+        retranslator.set_text(self.monitor_button, "widgets_monitor_start", "Start monitor")
 
     @owned_action
     def _apply_monitor_settings(self) -> None:
@@ -338,7 +338,7 @@ class WidgetsSettingUI(SettingPage):
         widget.show()
         widget.start()
         self.now_playing_widget_list.append(widget)
-        self.now_playing_button.setText(_t("widgets_now_playing_stop", "Hide now playing"))
+        retranslator.set_text(self.now_playing_button, "widgets_now_playing_stop", "Hide now playing")
 
     def stop_now_playing(self) -> None:
         for widget in self.now_playing_widget_list[:]:
@@ -347,7 +347,7 @@ class WidgetsSettingUI(SettingPage):
             except RuntimeError:
                 pass
         self.now_playing_widget_list.clear()
-        self.now_playing_button.setText(_t("widgets_now_playing_start", "Show now playing"))
+        retranslator.set_text(self.now_playing_button, "widgets_now_playing_start", "Show now playing")
 
     # --- sticky notes ----------------------------------------------------
     @owned_action

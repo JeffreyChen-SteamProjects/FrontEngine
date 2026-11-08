@@ -323,8 +323,11 @@ class TextSettingUI(SettingPage):
 
         def resolve() -> None:
             found = lookup_city(city)
+            # This runs off the UI thread: a retired page neither raises here nor touches the service.
+            if not self.lifetime.accepting:
+                return
             if found is None:
-                self.lifetime.after_dialog(front_engine_logger.warning(f"[TextSettingUI] weather city not found: {city}"))
+                front_engine_logger.warning(f"[TextSettingUI] weather city not found: {city}")
                 # 查失敗就忘掉，下次按開始才會再試一次
                 # Forget a failure so the next Start tries again.
                 self._weather_city_resolved = None

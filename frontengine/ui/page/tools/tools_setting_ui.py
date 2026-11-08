@@ -384,7 +384,7 @@ class ToolsSettingUI(SettingPage):
         widget.setMouseTracking(True)
         widget.show()
         self.measure_widget_list.append(widget)
-        self.measure_button.setText(_t("tools_measure_stop", "Stop measuring"))
+        retranslator.set_text(self.measure_button, "tools_measure_stop", "Stop measuring")
 
     def stop_measure(self) -> None:
         for widget in self.measure_widget_list[:]:
@@ -393,7 +393,7 @@ class ToolsSettingUI(SettingPage):
             except RuntimeError:
                 pass
         self.measure_widget_list.clear()
-        self.measure_button.setText(_t("tools_measure_start", "Start measuring"))
+        retranslator.set_text(self.measure_button, "tools_measure_start", "Start measuring")
 
     @owned_action
     def _apply_measure_settings(self) -> None:
@@ -570,7 +570,7 @@ class ToolsSettingUI(SettingPage):
             return False
         widget.show()
         self.camera_widget_list.append(widget)
-        self.camera_button.setText(_t("tools_camera_stop", "Hide camera"))
+        retranslator.set_text(self.camera_button, "tools_camera_stop", "Hide camera")
         return True
 
     def stop_camera(self) -> None:
@@ -580,7 +580,7 @@ class ToolsSettingUI(SettingPage):
             except RuntimeError:
                 pass
         self.camera_widget_list.clear()
-        self.camera_button.setText(_t("tools_camera_start", "Show camera"))
+        retranslator.set_text(self.camera_button, "tools_camera_start", "Show camera")
 
     @owned_action
     def _apply_camera_settings(self) -> None:
@@ -665,7 +665,7 @@ class ToolsSettingUI(SettingPage):
         """對指定範圍開始輸出。"""
         started = self.virtual_camera_feed.start(region, self.virtual_camera_fps_spinbox.value())
         if started:
-            self.virtual_camera_button.setText(_t("tools_vcam_stop", "Stop sending"))
+            retranslator.set_text(self.virtual_camera_button, "tools_vcam_stop", "Stop sending")
             self.virtual_camera_status.setText(
                 _t("tools_vcam_sending", "Sending to {device}").format(
                     device=self.virtual_camera_feed.device_name()))
@@ -673,7 +673,7 @@ class ToolsSettingUI(SettingPage):
 
     def stop_virtual_camera(self) -> None:
         self.virtual_camera_feed.stop()
-        self.virtual_camera_button.setText(_t("tools_vcam_start", "Send an area"))
+        retranslator.set_text(self.virtual_camera_button, "tools_vcam_start", "Send an area")
         self.virtual_camera_status.setText(_t("tools_vcam_ready", "Ready"))
 
     @owned_callback
@@ -782,7 +782,8 @@ class ToolsSettingUI(SettingPage):
     def _handle_screen_text_result(self, result, data, action, language, question) -> None:
         if result.consent_required and api_key() is not None:
             consent = ask_for_text_consent(self) if result.consent_required == 'text' else ask_for_consent(self)
-            if not isValid(self) or not self.isVisible() or not self.lifetime.accepting:
+            # The window, not this page: another sidebar page may be showing in front of it.
+            if not isValid(self) or not self.window().isVisible() or not self.lifetime.accepting:
                 return
             if consent:
                 self._request_screen_text(data, action, language, question)

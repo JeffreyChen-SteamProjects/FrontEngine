@@ -48,7 +48,7 @@ def set_text_consent(granted: bool) -> None:
 
 
 def ask_for_text_consent(parent: Optional[QWidget] = None) -> bool:
-    if parent is not None and (not isValid(parent) or not parent.isVisible()):
+    if parent is not None and (not isValid(parent) or not parent.window().isVisible()):
         return False
     if has_text_consent():
         return True
@@ -60,7 +60,7 @@ def ask_for_text_consent(parent: Optional[QWidget] = None) -> bool:
            "Allow recognized text to be sent?"),
         QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         QMessageBox.StandardButton.No)
-    if parent is not None and (not isValid(parent) or not parent.isVisible()):
+    if parent is not None and (not isValid(parent) or not parent.window().isVisible()):
         return False
     granted = answer == QMessageBox.StandardButton.Yes
     set_text_consent(granted)
@@ -73,7 +73,7 @@ def ask_for_consent(parent: Optional[QWidget] = None) -> bool:
     Ask whether screenshots may go to Anthropic. Already-granted consent returns
     True without asking again.
     """
-    if parent is not None and (not isValid(parent) or not parent.isVisible()):
+    if parent is not None and (not isValid(parent) or not parent.window().isVisible()):
         return False
     if has_consent():
         return True
@@ -86,7 +86,7 @@ def ask_for_consent(parent: Optional[QWidget] = None) -> bool:
            "selection. Your own ANTHROPIC_API_KEY is used. Allow captures to be sent?"),
         QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         QMessageBox.StandardButton.No)
-    if parent is not None and (not isValid(parent) or not parent.isVisible()):
+    if parent is not None and (not isValid(parent) or not parent.window().isVisible()):
         return False
     granted = answer == QMessageBox.StandardButton.Yes
     set_consent(granted)
