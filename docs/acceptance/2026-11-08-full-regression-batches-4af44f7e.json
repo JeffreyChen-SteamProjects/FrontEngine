@@ -1,7 +1,7 @@
 {
   "item": "#113",
   "date": "2026-11-08",
-  "head": "93da1947",
+  "head": "4af44f7e",
   "branch": "fix/cumulative-review-findings",
   "runtime": "D:/Codes/FrontEngine/.audit/test-runtime-3145 (Python 3.14.5, offscreen)",
   "method": "same tests, plugins and environment as the single-process runner, split into 8 sequential batches in fresh pytest processes (three single-process runs were stopped for low machine memory at 34-38%)",
@@ -32,12 +32,12 @@
     "test_storage_session (Requires POSIX fork)"
   ],
   "earlier_runs": {
-    "88412757": "3 failed (load-sensitive shortcut test, #117)",
-    "538fd5f8": "stopped at 37% (memory)",
-    "ae393935": "access violation at 97%, fixed in c9f6d1de",
-    "c9f6d1de": "1 failed (clone animation timing), fixed in be0295d5",
-    "be0295d5": "stopped at 34% (memory)",
-    "d020f9b6": "stopped at 38% (memory)"
+    "efaa362b": "3 failed (load-sensitive shortcut test, #117)",
+    "78fa77c8": "stopped at 37% (memory)",
+    "216c2627": "access violation at 97%, fixed in 16c188a6",
+    "16c188a6": "1 failed (clone animation timing), fixed in 3271f560",
+    "3271f560": "stopped at 34% (memory)",
+    "5385a830": "stopped at 38% (memory)"
   },
   "sha256": {
     "batch-0.exit": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",

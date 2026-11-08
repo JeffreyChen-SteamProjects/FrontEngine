@@ -1,10 +1,10 @@
 {
   "item": "#111",
   "date": "2026-11-08",
-  "head": "6d49440f",
+  "head": "890a48cd",
   "product_commit": "4e98b94d",
   "worktree": "D:/Codes/FrontEngine/.audit/worktrees/monitor-state-language",
-  "output": ".audit/full-regression-6d49440f",
+  "output": ".audit/full-regression-890a48cd",
   "runtime": "D:/Codes/FrontEngine/.audit/test-runtime-3145 (Python 3.14.5, offscreen)",
   "result": {
     "exit": 0,

@@ -1,9 +1,9 @@
 {
   "item": "#112",
   "date": "2026-11-08",
-  "base": "6d49440f",
-  "test_commit": "7111facc",
-  "product_commit": "b1ded098",
+  "base": "890a48cd",
+  "test_commit": "bf7dbfa0",
+  "product_commit": "a96c6bcc",
   "runtime": "D:/Codes/FrontEngine/.audit/test-runtime-3145 (Python 3.14.5, offscreen)",
   "reproduced_before_fix": {
     "save_failure": "12 of 12 cases failed: OSError/ValueError raised out of accept with the unsaved settings already in user_setting_dict",

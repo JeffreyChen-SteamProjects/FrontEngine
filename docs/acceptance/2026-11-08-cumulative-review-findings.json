@@ -6,7 +6,7 @@
   "date": "2026-11-08",
   "review": {
     "base": "d2a8e7c0 (merge-base with dev)",
-    "head_reviewed": "88412757",
+    "head_reviewed": "efaa362b",
     "commits_ahead": 238,
     "product_files": 121,
     "method": "three independent read-only reviewers split by area (storage/shutdown, pet home, general UI); every finding re-read against the code before fixing"
@@ -23,9 +23,9 @@
     "UI6": "weather lookup thread raised _ActionCancelled and updated the service after retirement"
   },
   "commits": {
-    "lifecycle": "80cf6f8d",
-    "home_strip": "20eabdf3",
-    "ui": "affad1bf"
+    "lifecycle": "d7fec9b9",
+    "home_strip": "61dc72cb",
+    "ui": "bdfae817"
   },
   "tests": {
     "new_red": "19 failed + 1 teardown error before the fixes (UI file re-run alone: 11 failed, positive control passed)",
