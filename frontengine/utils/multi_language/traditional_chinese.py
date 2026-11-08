@@ -56,6 +56,7 @@ traditional_chinese_word_dict = {
     "tools_name": "名稱",
     "tools_saved": "已儲存",
     "pet_settle_typing": "打字時安分",
+    "pet_return_on_start": "FrontEngine 啟動時讓寵物回來",
     "target_monitor_span": "橫跨所有螢幕",
     "tools_replicate_window": "視窗複本⋯",
     "window_replica_region": "顯示範圍",

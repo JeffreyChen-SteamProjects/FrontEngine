@@ -18,6 +18,9 @@ The page opens with *Your pet*: click one of the built-in characters and a pet d
 * Settle while typing - the pet stops moving while you are at the keyboard and
   carries on a couple of seconds after you stop, so it does not walk across the
   line you are reading.
+* Bring pets back when FrontEngine starts - on by default: the pets on the desktop
+  when FrontEngine closes come back, as themselves, the next time it starts; a pet
+  you put away stays away.
 * Speak out loud - read those remarks aloud.
 * Play tag with each other - two or more pets chase one another.
 * React to audio - the pet moves in time with sound. It can follow your

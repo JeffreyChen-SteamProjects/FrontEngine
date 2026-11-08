@@ -451,6 +451,8 @@ class FrontEngineMainUI(QMainWindow):
         if user_setting_dict.get("sticky_notes_restore"):
             self.widgets_setting_ui.restore_saved_notes()
         apply_startup_preset(self)
+        # Once the window and the home are up: the pets on the desktop at the last close come back.
+        QTimer.singleShot(0, self.pet_setting_ui, self.pet_setting_ui.bring_pets_back)
 
         # Debug 模式下自動關閉
         # Auto close in debug mode
@@ -1332,6 +1334,7 @@ class FrontEngineMainUI(QMainWindow):
             if user_setting_dict.get("restore_last_session") and not save_last_session(self):
                 raise ValueError(translate('pet_home_result_save_failed'))
             self._save_page_state()
+            self.pet_setting_ui.remember_desktop_pets()
             self._persist_clipboard()
             self._save_window_geometry()
             usage = getattr(self, 'usage_service', None)

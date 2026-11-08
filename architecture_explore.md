@@ -258,6 +258,7 @@ FrontEngine 是一個 PySide6 桌面**覆蓋層（overlay）框架**：把影片
 | `default_storage.py` | 93 | First binding acquires storage before loading the existing exported dictionary. Concurrent scopes share that binding without reloading; a different directory or retiring generation is rejected. Last close retains ownership until registered clients and I/O finish. PID checks precede the registry mutex after fork. |
 | `preset_repository.py` | 233 | 預設集儲存庫：`presets/` 下一個預設集一個 JSON。含檔名淨化、匯出／匯入、**封包（zip，內含 `media/`）**；解壓時只取檔名最後一段以防 zip-slip。 |
 | `scene_setting.py` | 46 | 場景 JSON 的選檔與寫檔（⚠ 目前反向依賴 `ui/dialog`）。 |
+| `desktop_pets.py` | 95 | Which desktop pets come back on the next start: `pet_desktop_pets` holds `{id, path[, script]}` per live pet (written by `PetSettingUI.remember_desktop_pets()` during shutdown preparation), `pet_desktop_return` (default on) gates it, and `checked_returning()` drops malformed, duplicate, missing-picture and excess (over 16) entries at the boundary. `PetSettingUI.bring_pets_back()` respawns them after startup through `_spawn_profile_pet(path=…)`, skipping identities that are gone or already live (in the home) without a dialog. |
 
 ---
 

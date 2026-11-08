@@ -56,6 +56,7 @@ french_word_dict = {
     "tools_name": "Nom",
     "tools_saved": "Enregistrés",
     "pet_settle_typing": "Rester tranquille pendant la frappe",
+    "pet_return_on_start": "Faire revenir les animaux au démarrage de FrontEngine",
     "target_monitor_span": "Sur tous les écrans",
     "tools_replicate_window": "Dupliquer une fenêtre...",
     "window_replica_region": "Afficher",

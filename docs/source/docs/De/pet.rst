@@ -19,6 +19,9 @@ Die Seite beginnt mit *Ihr Haustier*: Ein Klick auf eine der eingebauten Figuren
 * Beim Tippen still halten - das Tier bleibt stehen, solange Sie tippen, und geht
   ein paar Sekunden danach weiter, damit es nicht über die Zeile läuft, die Sie
   gerade lesen.
+* Haustiere beim Start von FrontEngine zurückholen - standardmäßig an: Die Haustiere,
+  die beim Schließen auf dem Desktop waren, kommen beim nächsten Start als sie selbst
+  zurück; ein weggeräumtes Haustier bleibt weg.
 * Laut vorlesen - diese Bemerkungen ausgesprochen.
 * Fangen spielen - zwei oder mehr Haustiere jagen einander.
 * Auf Audio reagieren - das Haustier bewegt sich zum Ton. Es folgt wahlweise

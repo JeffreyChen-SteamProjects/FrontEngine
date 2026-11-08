@@ -19,6 +19,9 @@ La pagina si apre con *La tua mascotta*: fai clic su uno dei personaggi integrat
 * Fumetti - brevi battute secondo l'ora, quando le si dà da mangiare e così via.
 * Fermo mentre scrivi - l'animaletto si ferma mentre digiti e riparte un paio di
   secondi dopo, così non attraversa la riga che stai leggendo.
+* Riporta gli animali all'avvio di FrontEngine - attivo per impostazione predefinita:
+  gli animali sul desktop alla chiusura tornano, così come sono, all'avvio successivo;
+  un animale messo via resta via.
 * Leggere ad alta voce - pronunciare quelle battute.
 * Giocare a rincorrersi - due o più mascotte si inseguono.
 * Reagire all'audio - la mascotte si muove a tempo. Può seguire gli

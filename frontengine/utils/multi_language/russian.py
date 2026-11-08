@@ -56,6 +56,7 @@ russian_word_dict = {
     "tools_name": "Имя",
     "tools_saved": "Сохранённые",
     "pet_settle_typing": "Не двигаться при наборе текста",
+    "pet_return_on_start": "Возвращать питомцев при запуске FrontEngine",
     "target_monitor_span": "На все экраны",
     "tools_replicate_window": "Копия окна...",
     "window_replica_region": "Показывать",

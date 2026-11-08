@@ -20,6 +20,9 @@ La page s’ouvre sur *Votre mascotte* : cliquez sur un des personnages intégr�
 * Rester tranquille pendant la frappe - le compagnon s'arrête tant que vous tapez
   et repart une ou deux secondes après, pour ne pas traverser la ligne que vous
   êtes en train de lire.
+* Faire revenir les animaux au démarrage de FrontEngine - activé par défaut : les
+  animaux présents sur le bureau à la fermeture reviennent tels quels au démarrage
+  suivant ; un animal rangé reste rangé.
 * Lire à voix haute - dire ces remarques.
 * Jouer à chat - deux mascottes ou plus se poursuivent.
 * Réagir au son - la mascotte bouge en rythme. Elle peut suivre vos

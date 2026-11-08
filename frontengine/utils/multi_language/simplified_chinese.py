@@ -56,6 +56,7 @@ simplified_chinese_word_dict = {
     "tools_name": "名称",
     "tools_saved": "已保存",
     "pet_settle_typing": "打字时安分",
+    "pet_return_on_start": "FrontEngine 启动时让宠物回来",
     "target_monitor_span": "横跨所有屏幕",
     "tools_replicate_window": "窗口副本⋯",
     "window_replica_region": "显示范围",

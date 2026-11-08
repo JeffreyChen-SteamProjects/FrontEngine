@@ -126,6 +126,9 @@ _DEFAULT_SETTINGS: Dict[str, Any] = {
     "pet_timeline": [],
     # Whether the pet home was running when FrontEngine last closed
     "pet_home_running": False,
+    # Desktop pets come back on the next start (see user_setting/desktop_pets.py)
+    "pet_desktop_return": True,
+    "pet_desktop_pets": [],
 }
 
 

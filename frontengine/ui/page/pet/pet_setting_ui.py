@@ -28,7 +28,8 @@ from frontengine.ui.page.utils import (
     reload_recent_combobox,
     resolve_preferred_monitor,
 )
-from frontengine.user_setting.user_setting_file import add_recent_file
+from frontengine.user_setting.desktop_pets import PETS_KEY, RETURN_KEY, checked_returning, desktop_record
+from frontengine.user_setting.user_setting_file import add_recent_file, user_setting_dict
 from frontengine.utils.audio_meter.microphone_meter import microphone_level
 from frontengine.utils.audio_meter.screen_audio import audio_level_provider_for_screen
 from frontengine.utils.pet_chat.pet_chat_service import PetChatService
@@ -160,6 +161,9 @@ class PetSettingUI(SettingPage):
         self.settle_typing_checkbox = tr(QCheckBox(), "pet_settle_typing",
                                          "Settle while typing")
         self.settle_typing_checkbox.clicked.connect(self._on_settle_typing_toggled)
+        self.return_checkbox = tr(QCheckBox(), "pet_return_on_start", "Bring pets back when FrontEngine starts")
+        self.return_checkbox.setChecked(bool(user_setting_dict.get(RETURN_KEY, True)))
+        self.return_checkbox.toggled.connect(self._set_return)
 
         self.speech_checkbox = tr(QCheckBox(), "pet_speech_label", "Speak out loud")
         self.chat_checkbox = tr(QCheckBox(), "pet_chat_label", "AI chat (needs API key)")
@@ -238,6 +242,7 @@ class PetSettingUI(SettingPage):
         behaviour.add_row(self.behaviour_label, self.behaviour_combobox)
         behaviour.add_inline(self.climb_checkbox, self.sit_checkbox)
         behaviour.add_inline(self.settle_typing_checkbox)
+        behaviour.add_inline(self.return_checkbox)
 
         sound = self.add_section("section_options", "Sound and speech", collapsed=True)
         sound.add_row(self.volume_label, self.volume_combobox)
@@ -363,12 +368,40 @@ class PetSettingUI(SettingPage):
             # The identity could not be released, so keep the pet where shutdown flushes and retries it.
             self.pet_list.append(pet)
 
+    def _set_return(self, enabled: bool) -> None:
+        user_setting_dict[RETURN_KEY] = bool(enabled)
+
+    def remember_desktop_pets(self) -> None:
+        """Record which pets are on the desktop now, so the next start brings them back."""
+        user_setting_dict[PETS_KEY] = desktop_record(self.pet_list)
+
     @owned_action
-    def _spawn_profile_pet(self, identifier: str | None, *, source_pet=None) -> None:
-        path = (getattr(source_pet, 'image_path', getattr(source_pet, 'path', None))
-                if source_pet is not None else self.pet_image_path)
+    def bring_pets_back(self) -> int:
+        """Put the pets that were on the desktop at the last close back, as themselves."""
+        if not user_setting_dict.get(RETURN_KEY, True):
+            return 0
+        returned = 0
+        for entry in checked_returning(user_setting_dict.get(PETS_KEY)):
+            try:
+                self._spawn_profile_pet(entry['id'], path=entry['path'], script=entry.get('script'), report=False)
+            except (OSError, ValueError, RuntimeError, KeyError) as error:
+                # Gone from the profiles, living in the home, or its picture no longer loads: it stays away.
+                front_engine_logger.info(f"[PetSettingUI] pet {entry['id']} stays away: {error!r}")
+                continue
+            returned += 1
+        if returned:
+            self.quick.refresh()
+        return returned
+
+    @owned_action
+    def _spawn_profile_pet(self, identifier: str | None, *, source_pet=None, path: str | None = None,
+                           script: str | None = None, report: bool = True) -> None:
+        returning = path is not None
+        path = path or (getattr(source_pet, 'image_path', getattr(source_pet, 'path', None))
+                        if source_pet is not None else self.pet_image_path)
         if Path(path).suffix.lower() == '.puppet':
-            self._spawn_puppet(identifier, source_pet=source_pet)
+            self._spawn_puppet(identifier, source_pet=source_pet, path=path if returning else None,
+                               script=script, report=report)
             return
         presentation = source_pet._presentation_defaults if source_pet is not None else self.customization_defaults()
         sound = (source_pet._sound.source().toLocalFile() if source_pet._sound is not None else None) if source_pet is not None else self.pet_sound_path
@@ -386,7 +419,8 @@ class PetSettingUI(SettingPage):
             profile_name=self.profile_controls.name.text(),
         )
         with self._until_tracked(pet):
-            if source_pet is None and self._builtin_sprite is not None and path == self._builtin_sprite[1]:
+            if (not returning and source_pet is None and self._builtin_sprite is not None
+                    and path == self._builtin_sprite[1]):
                 self._dress_as_builtin(pet, self._builtin_sprite[0])
             self.profile_controls.profiles.remember_sprite(pet.profile_session.identifier, path)
             pet.clone_requested.connect(lambda: self._spawn_pet(pet.profile_session.state(), source_pet=pet))
@@ -416,18 +450,24 @@ class PetSettingUI(SettingPage):
             pet.start_moving((bounds.left(), bounds.top(), bounds.right(), bounds.bottom()))
 
     @owned_action
-    def _spawn_puppet(self, identifier: str | None = None, *, source_pet=None) -> None:
+    def _spawn_puppet(self, identifier: str | None = None, *, source_pet=None, path: str | None = None,
+                      script: str | None = None, report: bool = True) -> None:
         from frontengine.show.pet.puppet_pet import PuppetPetWidget
+        if path is None:
+            path = source_pet.path if source_pet is not None else self.pet_image_path
+            script = source_pet.script_path if source_pet is not None else self.puppet_script_path
         try:
             width = max(64, int(self.size_combobox.currentText()))
-            pet = PuppetPetWidget(source_pet.path if source_pet is not None else self.pet_image_path,
+            pet = PuppetPetWidget(path,
                                   source_pet._initial_size if source_pet is not None else (width, int(width * 1.5)),
-                                  script_path=source_pet.script_path if source_pet is not None else self.puppet_script_path,
+                                  script_path=script,
                                   parameters=source_pet.canvas.parameter_values() if source_pet is not None else None,
                                   profile_id=identifier,
                                   profiles=self.profile_controls.profiles,
                                   profile_name=self.profile_controls.name.text())
         except (ValueError, OSError, RuntimeError) as error:
+            if not report:
+                raise
             self.lifetime.after_dialog(QMessageBox.warning(self, 'Imervue puppet', str(error)))
             return
         with self._until_tracked(pet):

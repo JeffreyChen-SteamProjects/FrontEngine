@@ -56,6 +56,7 @@ germany_word_dict = {
     "tools_name": "Name",
     "tools_saved": "Gespeichert",
     "pet_settle_typing": "Beim Tippen still halten",
+    "pet_return_on_start": "Haustiere beim Start von FrontEngine zurückholen",
     "target_monitor_span": "Über alle Bildschirme",
     "tools_replicate_window": "Fenster duplizieren...",
     "window_replica_region": "Anzeigen",

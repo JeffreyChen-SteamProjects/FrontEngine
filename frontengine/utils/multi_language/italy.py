@@ -56,6 +56,7 @@ italian_word_dict = {
     "tools_name": "Nome",
     "tools_saved": "Salvati",
     "pet_settle_typing": "Fermo mentre scrivi",
+    "pet_return_on_start": "Riporta gli animali all'avvio di FrontEngine",
     "target_monitor_span": "Su tutti gli schermi",
     "tools_replicate_window": "Duplica una finestra...",
     "window_replica_region": "Mostra",
