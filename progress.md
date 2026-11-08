@@ -148,7 +148,7 @@
 
 已完成的記錄在 `docs/updates/`（U-20261101-01 起）。實機驗收一律放在上方的「實機驗收待辦」。
 
-- [ ] #119 家具互動與寵物自己回來兩個分支的完整回歸。feat/furniture-interactions（fc7d23d0）與其上的 feat/pets-come-back（f4c5c878）尚未有完整回歸結果：家具分支的分批執行跑完第 0 批（通過）與第 1 批（僅 #117 的兩項負載敏感測試失敗），第 2 批執行中因整機記憶體不足被中止；寵物回來的定向 13 項、相關 12 個模組 135 項、翻譯與文件檢查已通過，觸及預設設定的家園相關模組因記憶體不足未跑完。記憶體充足時以分批執行器重跑（可續跑），以 pets-come-back 的 HEAD 為準即可涵蓋兩者。
+- [ ] #119 家具互動與桌面寵物簡化（A／B／C）整條分支的完整回歸。依序為 feat/furniture-interactions（fc7d23d0）→ feat/pets-come-back（c4df9515）→ feat/instant-builtin-pet（3a5bed99）→ feat/first-run-pet（3742de6e），以最後一個 HEAD 重跑即涵蓋全部。目前只有各自的定向與相關模組結果：家具 1205／1207（2 項為 #117 的負載敏感測試）、寵物回來 135 項、卡片先出寵物 106 項、第一次開在寵物頁 76＋51＋32 項；家具分支的分批全套跑完第 0、1 批後因整機記憶體不足被中止。記憶體充足時以分批執行器重跑。
 
 - [ ] #114 PyBreeze 的主視窗關閉／重開配合。JEditor 端已於 JEditor 分支 fix/frontengine-storage-lifetime 本機提交 0f2009b（共用主機、重用同一視窗、依關閉結果保留容器），9 項主機與實際執行期測試對本分支通過，完整套件失敗清單與未修改基底逐項相同（皆為環境缺 tree_sitter），PyBreeze 語言對照與契約測試 72/72；尚未推送或合併。`.audit/worktrees/pybreeze-ownership`（PyBreeze 倉庫）仍有未提交的對應修改，處理前須先確認。
 
