@@ -162,12 +162,12 @@ class WorkLifetime(QObject):
     def adopt(self, root):
         self.require_live()
         root._frontengine_lifetime = self
-        key = id(root)
-        if key not in self._roots and isinstance(root, QObject):
-            # Forget a root once Qt destroys it; holding the wrapper kept closed overlays and
-            # their pixmaps alive until shutdown.
-            root.destroyed.connect(lambda *_args, key=key: self._roots.pop(key, None))
-        self._roots[key] = root
+        # Forget roots Qt has already destroyed, so closed overlays and their pixmaps do not
+        # stay alive until shutdown. Done here rather than from `destroyed`: dropping the last
+        # wrapper reference while its C++ object is being destroyed crashes the process.
+        self._roots = {key: kept for key, kept in self._roots.items()
+                       if not isinstance(kept, QObject) or isValid(kept)}
+        self._roots[id(root)] = root
         return root
 
     def pool(self, group='default'):

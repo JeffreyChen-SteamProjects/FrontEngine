@@ -107,18 +107,41 @@ def test_unexpected_error_while_preparing_shutdown_refuses_and_recovers(make_mai
 
 def test_closed_widgets_are_not_kept_alive_by_their_lifetime(*, lifetime_factory):
     lifetime = lifetime_factory()
-    widget = QWidget()
-    widget.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
-    widget.payload = QPixmap(256, 256)
-    lifetime.adopt(widget)
-    reference = weakref.ref(widget)
-    widget.show()
-    widget.close()
-    QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
-    del widget
+    references = []
+    for _ in range(20):
+        widget = QWidget()
+        widget.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
+        widget.payload = QPixmap(256, 256)
+        lifetime.adopt(widget)
+        references.append(weakref.ref(widget))
+        widget.show()
+        widget.close()
+        QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+        del widget
+    survivor = lifetime.adopt(QWidget())
     gc.collect()
-    assert reference() is None
-    assert not lifetime._roots
+    assert all(reference() is None for reference in references)
+    assert list(lifetime._roots.values()) == [survivor]
+    survivor.close()
+    survivor.deleteLater()
+
+
+def test_destroying_an_adopted_dialog_does_not_crash_lifetime_drain(*, lifetime_factory):
+    """Regression: a `destroyed` callback that dropped the wrapper crashed the drain."""
+    from PySide6.QtWidgets import QDialog
+    lifetime = lifetime_factory()
+    for destroy in (False, True):
+        dialog = QDialog()
+        lifetime.adopt(dialog)
+        dialog.show()
+        dialog.reject()
+        if destroy:
+            dialog.deleteLater()
+            QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+        else:
+            dialog.close()
+    lifetime.adopt(QWidget()).deleteLater()
+    QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
 
 
 def test_overlay_outside_any_lifetime_still_remembers_where_it_was_left(monkeypatch):
