@@ -1,0 +1,68 @@
+{
+  "cases": [
+    {
+      "boundary": "before:pet-home.json.bak",
+      "abrupt_exit_pid": 50448,
+      "exit_code": 73,
+      "committed": false,
+      "recovered_sha256": "64bc24a4511f6f2a5e44c1b1d159774fdb2b888ece59313355fb8fcd83ec6089",
+      "continued_coins": 88,
+      "reopen_and_continue": "passed"
+    },
+    {
+      "boundary": "after:pet-home.json.bak",
+      "abrupt_exit_pid": 4280,
+      "exit_code": 73,
+      "committed": false,
+      "recovered_sha256": "64bc24a4511f6f2a5e44c1b1d159774fdb2b888ece59313355fb8fcd83ec6089",
+      "continued_coins": 88,
+      "reopen_and_continue": "passed"
+    },
+    {
+      "boundary": "before:pet-home.json",
+      "abrupt_exit_pid": 35316,
+      "exit_code": 73,
+      "committed": false,
+      "recovered_sha256": "64bc24a4511f6f2a5e44c1b1d159774fdb2b888ece59313355fb8fcd83ec6089",
+      "continued_coins": 88,
+      "reopen_and_continue": "passed"
+    },
+    {
+      "boundary": "after:pet-home.json",
+      "abrupt_exit_pid": 26440,
+      "exit_code": 73,
+      "committed": true,
+      "recovered_sha256": "ada45216c209662cc43ceaac04b90d399d569f650cf7f92317406d08fc07d30b",
+      "continued_coins": 93,
+      "reopen_and_continue": "passed"
+    }
+  ],
+  "limits": [
+    "Process termination, not power loss or disk failure",
+    "HomeSaveStore only, not aggregate profile and home persistence",
+    "No GUI or desktop input; production serialization and file writer",
+    "A deterministic os._exit boundary models abrupt process loss, not random-time external termination.",
+    "No assertion of arbitrary settlement-ID replay, aggregate persistence, or independent code review.",
+    "Different continuation coin totals reflect different committed simulation states and elapsed simulation time; they are not a cross-case equality check."
+  ],
+  "product_commit": "1c24853",
+  "parent_exit_code": 0,
+  "source_unchanged": true,
+  "source_count": 748,
+  "method": "Actual child process uses os._exit(73) immediately before or after production os.replace. No Python cleanup runs.",
+  "verified": [
+    "Before main replacement the original main bytes remain exact; after main replacement the new bytes remain exact.",
+    "StorageSession can reacquire the directory after the worker exits without closing it.",
+    "Production loader accepts each surviving save.",
+    "Continuing the recovered world matches a reference loaded from the same surviving bytes after 600000 simulated milliseconds.",
+    "Saving again preserves coins on reload and removes leftover main and backup temporary files."
+  ],
+  "harness_corrections": [
+    "Initial parent-kill design stopped after finding Windows venv launcher and worker have different PIDs; not a product failure.",
+    "Second run read an empty marker before the worker finished writing it; corrected parent reads marker only after process exit."
+  ],
+  "full_regression": "Session 81120 still running; no full-suite pass claim.",
+  "harness_path": ".audit/check_save_process_interruption.py",
+  "harness_sha256": "7a8bf3ace7fe94ed6fc6110b259b5ae07dfd3ee0c7458b464a9c6be19fa4b943",
+  "harness_source": "\"\"\"Kill only an owned save worker at each atomic replacement boundary.\"\"\"\nimport hashlib\nimport json\nimport os\nfrom pathlib import Path\nimport subprocess\nimport sys\nimport tempfile\nimport time\n\nROOT = Path(__file__).resolve().parents[1]\nsys.path.insert(0, str(ROOT))\nfrom frontengine.user_setting.pet_game_save import HomeSaveStore\nfrom frontengine.user_setting.storage_session import StorageSession\nfrom frontengine.utils.pet_game import simulation, snapshot\nfrom frontengine.utils.pet_game.catalog import builtin_catalog\nfrom frontengine.utils.pet_game.world import World\n\n\ndef world():\n    value = World(builtin_catalog(), \"a\" * 32, seed=5)\n    zone = value.add_zone(\"screen\", 0, 900, 40)\n    value.grant_starter_kit()\n    for definition, cell in ((\"bed_basic\", 2), (\"table_basic\", 7), (\"desk_basic\", 12)):\n        value.place(definition, zone, cell)\n    value.add_resident({\"id\": \"b\" * 32, \"name\": \"Mochi\", \"mood\": 60,\n                        \"fullness\": 70, \"affection\": 3, \"energy\": 70}, zone)\n    assert value.create_task(\"letter\", \"b\" * 32, units=3)[0] == \"accepted\"\n    return value\n\n\ndef worker(directory, boundary):\n    owner = StorageSession.open(directory)\n    store = HomeSaveStore(owner, builtin_catalog())\n    loaded = store.load()\n    assert loaded.status == \"loaded\"\n    value = loaded.world\n    simulation.advance(value, 300000)\n    (directory / \"expected.json\").write_bytes(store.encode(value))\n    original_replace = os.replace\n    phase, target = boundary.split(\":\")\n\n    def reached():\n        (directory / \"ready\").write_text(str(os.getpid()), encoding=\"ascii\")\n        os._exit(73)\n\n    def replace(source, destination):\n        matches = Path(destination).name == target\n        if matches and phase == \"before\":\n            reached()\n        original_replace(source, destination)\n        if matches and phase == \"after\":\n            reached()\n\n    os.replace = replace\n    store.save(value)\n    raise AssertionError(\"Worker missed the requested boundary\")\n\n\ndef check(boundary):\n    with tempfile.TemporaryDirectory(prefix=\"front-home-crash-\") as name:\n        directory = Path(name)\n        owner = StorageSession.open(directory)\n        store = HomeSaveStore(owner, builtin_catalog())\n        store.save(world())\n        baseline = store.path.read_bytes()\n        store.close()\n        owner.close()\n        process = subprocess.Popen([sys.executable, str(Path(__file__).resolve()),\n                                    \"worker\", name, boundary],\n                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE,\n                                   creationflags=subprocess.CREATE_NO_WINDOW)\n        try:\n            deadline = time.monotonic() + 180\n            while not (directory / \"ready\").exists():\n                if process.poll() is not None:\n                    if (directory / \"ready\").exists():\n                        break\n                    raise AssertionError(process.communicate())\n                if time.monotonic() > deadline:\n                    raise TimeoutError(boundary)\n                time.sleep(0.05)\n            stdout, stderr = process.communicate(timeout=10)\n            assert process.returncode == 73 and not stderr, (stdout, stderr)\n            worker_pid = int((directory / \"ready\").read_text())\n        finally:\n            if process.poll() is None:\n                process.kill()\n                process.communicate(timeout=10)\n        expected = (directory / \"expected.json\").read_bytes()\n        assert expected != baseline\n        committed = boundary == \"after:pet-home.json\"\n        actual = (directory / \"pet-home.json\").read_bytes()\n        assert actual == (expected if committed else baseline)\n        owner = StorageSession.open(directory)\n        store = HomeSaveStore(owner, builtin_catalog())\n        loaded = store.load()\n        assert loaded.status == \"loaded\"\n        reference = snapshot.from_dict(json.loads(actual), builtin_catalog())\n        simulation.advance(loaded.world, 600000)\n        simulation.advance(reference, 600000)\n        assert snapshot.to_dict(loaded.world) == snapshot.to_dict(reference)\n        store.save(loaded.world)\n        coins = loaded.world.ledger.coins\n        assert store.load().world.ledger.coins == coins\n        assert not (directory / \"pet-home.json.tmp\").exists()\n        assert not (directory / \"pet-home.json.bak.tmp\").exists()\n        store.close()\n        owner.close()\n        return {\"boundary\": boundary, \"abrupt_exit_pid\": worker_pid,\n                \"exit_code\": process.returncode, \"committed\": committed,\n                \"recovered_sha256\": hashlib.sha256(actual).hexdigest(),\n                \"continued_coins\": coins, \"reopen_and_continue\": \"passed\"}\n\n\nif __name__ == \"__main__\":\n    if len(sys.argv) > 1 and sys.argv[1] == \"worker\":\n        worker(Path(sys.argv[2]), sys.argv[3])\n    else:\n        results = []\n        for target in (\"pet-home.json.bak\", \"pet-home.json\"):\n            for phase in (\"before\", \"after\"):\n                result = check(f\"{phase}:{target}\")\n                results.append(result)\n                print(json.dumps(result), flush=True)\n        output = ROOT / \".audit/save-process-interruption-result.json\"\n        output.write_text(json.dumps({\"cases\": results, \"limits\": [\n            \"Process termination, not power loss or disk failure\",\n            \"HomeSaveStore only, not aggregate profile and home persistence\",\n            \"No GUI or desktop input; production serialization and file writer\"\n        ]}, indent=2), encoding=\"utf-8\")\n        print(output.read_text(encoding=\"utf-8\"))\n"
+}

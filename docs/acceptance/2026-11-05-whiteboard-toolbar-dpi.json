@@ -1,0 +1,261 @@
+{
+  "observations": [
+    {
+      "backend": "auto",
+      "actual_backend": "gpu",
+      "dpr": 1.0,
+      "target": "BenQ GW2486TC",
+      "actual_screen": "BenQ GW2486TC",
+      "logical_size": [
+        900,
+        500
+      ],
+      "pixels": [
+        900,
+        500
+      ],
+      "on_screen": true,
+      "toolbar_brightness_ratio": 1.0,
+      "stroke_red_pixels": 522,
+      "file": "auto-0.png",
+      "passed": true
+    },
+    {
+      "backend": "auto",
+      "actual_backend": "gpu",
+      "dpr": 1.25,
+      "target": "BenQ GW2490",
+      "actual_screen": "BenQ GW2490",
+      "logical_size": [
+        900,
+        500
+      ],
+      "pixels": [
+        1125,
+        625
+      ],
+      "on_screen": true,
+      "toolbar_brightness_ratio": 1.0,
+      "stroke_red_pixels": 825,
+      "file": "auto-1.png",
+      "passed": true
+    },
+    {
+      "backend": "auto",
+      "actual_backend": "gpu",
+      "dpr": 1.0,
+      "target": "BenQ GW2486TC",
+      "actual_screen": "BenQ GW2486TC",
+      "logical_size": [
+        900,
+        500
+      ],
+      "pixels": [
+        900,
+        500
+      ],
+      "on_screen": true,
+      "toolbar_brightness_ratio": 1.0,
+      "stroke_red_pixels": 522,
+      "file": "auto-2.png",
+      "passed": true
+    },
+    {
+      "backend": "gpu",
+      "actual_backend": "gpu",
+      "dpr": 1.0,
+      "target": "BenQ GW2486TC",
+      "actual_screen": "BenQ GW2486TC",
+      "logical_size": [
+        900,
+        500
+      ],
+      "pixels": [
+        900,
+        500
+      ],
+      "on_screen": true,
+      "toolbar_brightness_ratio": 1.0,
+      "stroke_red_pixels": 522,
+      "file": "gpu-0.png",
+      "passed": true
+    },
+    {
+      "backend": "gpu",
+      "actual_backend": "gpu",
+      "dpr": 1.25,
+      "target": "BenQ GW2490",
+      "actual_screen": "BenQ GW2490",
+      "logical_size": [
+        900,
+        500
+      ],
+      "pixels": [
+        1125,
+        625
+      ],
+      "on_screen": true,
+      "toolbar_brightness_ratio": 1.0,
+      "stroke_red_pixels": 825,
+      "file": "gpu-1.png",
+      "passed": true
+    },
+    {
+      "backend": "gpu",
+      "actual_backend": "gpu",
+      "dpr": 1.0,
+      "target": "BenQ GW2486TC",
+      "actual_screen": "BenQ GW2486TC",
+      "logical_size": [
+        900,
+        500
+      ],
+      "pixels": [
+        900,
+        500
+      ],
+      "on_screen": true,
+      "toolbar_brightness_ratio": 1.0,
+      "stroke_red_pixels": 522,
+      "file": "gpu-2.png",
+      "passed": true
+    },
+    {
+      "backend": "software",
+      "actual_backend": "software",
+      "dpr": 1.0,
+      "target": "BenQ GW2486TC",
+      "actual_screen": "BenQ GW2486TC",
+      "logical_size": [
+        900,
+        500
+      ],
+      "pixels": [
+        900,
+        500
+      ],
+      "on_screen": true,
+      "toolbar_brightness_ratio": 1.0,
+      "stroke_red_pixels": 522,
+      "file": "software-0.png",
+      "passed": true
+    },
+    {
+      "backend": "software",
+      "actual_backend": "software",
+      "dpr": 1.25,
+      "target": "BenQ GW2490",
+      "actual_screen": "BenQ GW2490",
+      "logical_size": [
+        900,
+        500
+      ],
+      "pixels": [
+        1125,
+        625
+      ],
+      "on_screen": true,
+      "toolbar_brightness_ratio": 1.0,
+      "stroke_red_pixels": 825,
+      "file": "software-1.png",
+      "passed": true
+    },
+    {
+      "backend": "software",
+      "actual_backend": "software",
+      "dpr": 1.0,
+      "target": "BenQ GW2486TC",
+      "actual_screen": "BenQ GW2486TC",
+      "logical_size": [
+        900,
+        500
+      ],
+      "pixels": [
+        900,
+        500
+      ],
+      "on_screen": true,
+      "toolbar_brightness_ratio": 1.0,
+      "stroke_red_pixels": 522,
+      "file": "software-2.png",
+      "passed": true
+    }
+  ],
+  "closed": [
+    {
+      "backend": "auto",
+      "controls_closed": true,
+      "deleted": true
+    },
+    {
+      "backend": "gpu",
+      "controls_closed": true,
+      "deleted": true
+    },
+    {
+      "backend": "software",
+      "controls_closed": true,
+      "deleted": true
+    }
+  ],
+  "errors": [],
+  "passed": true,
+  "scope": "Owned hidden Win32 desktop, actual whiteboard controls and stroke; three rendering preferences across100/125/100percent. Programmatic button activation/page switching, no desktop input injection. No physical monitor reconfiguration, external files, native drag or fullscreen acceptance.",
+  "base_head": "46e7604",
+  "source_sha256": {
+    "frontengine/show/canvas/whiteboard_widget.py": "009782136aa875b4427a643bb841e06de7740fd4ad769908f48b3fd982ac6f0c",
+    "frontengine/show/canvas/whiteboard_controls.py": "9a8836d0edbce07385d1e2434d1c6369534792ee28f2d579f402301329fd1367",
+    "frontengine/show/base_widget.py": "dcb220da4f1a431521fc7365e5a3f868e4fa30e5ec8507ce77f24067cdcdd539"
+  },
+  "observer": {
+    "exit_code": 0,
+    "profile_removed": true,
+    "source_unchanged": true,
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        2070,
+        399
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        2070,
+        399
+      ]
+    },
+    "observation_only": true,
+    "desktop": "FrontEngineVideoWebDpi_d91288558d4e"
+  },
+  "artifact_directory": ".audit\\whiteboard-dpi-fixed",
+  "artifact_sha256": {
+    "auto-0.png": "567956859e7e5838db4f96d358ea05f7c990d831d1ffb9f3b639cd878cc8ee4a",
+    "auto-1.png": "df282bc98624e9f05836a2a425fb59f0afa3f4fa57d62367f64d0f99fbe17c4f",
+    "auto-2.png": "567956859e7e5838db4f96d358ea05f7c990d831d1ffb9f3b639cd878cc8ee4a",
+    "gpu-0.png": "567956859e7e5838db4f96d358ea05f7c990d831d1ffb9f3b639cd878cc8ee4a",
+    "gpu-1.png": "df282bc98624e9f05836a2a425fb59f0afa3f4fa57d62367f64d0f99fbe17c4f",
+    "gpu-2.png": "567956859e7e5838db4f96d358ea05f7c990d831d1ffb9f3b639cd878cc8ee4a",
+    "harness.py": "c1f6ba19ca512888ac5ed53dda22a1a748a2fdfe8b05e47337ac5c6d90693b33",
+    "observer.json": "6682a4b9ed5e26fb568343570b3aae38f5e64d33a9d0029e294126322161d80e",
+    "result.json": "d9455d48dd2877da0a675b04ab89bd6ec4b4e4421e1139f64596616219e9c3c8",
+    "software-0.png": "567956859e7e5838db4f96d358ea05f7c990d831d1ffb9f3b639cd878cc8ee4a",
+    "software-1.png": "df282bc98624e9f05836a2a425fb59f0afa3f4fa57d62367f64d0f99fbe17c4f",
+    "software-2.png": "567956859e7e5838db4f96d358ea05f7c990d831d1ffb9f3b639cd878cc8ee4a",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "before_fix": {
+    "native_directory": ".audit/whiteboard-diagnostic-46e7604",
+    "regression": "Three backend cases failed. Actual toolbar sampled lightness sum 1298658 versus standalone controls 2447415.",
+    "cause": "The newly created compositor was stacked above child controls and drew the translucent canvas over them."
+  },
+  "validation": {
+    "whiteboard_notes_todo_tests": 33,
+    "documentation_progress_tests": 27
+  },
+  "limitations": [
+    "Programmatic button activation, not desktop input injection.",
+    "Synthetic single stroke; not full drawing, export, persistence or physical display-change acceptance.",
+    "Same-theme controls capture is the readability reference; this does not prove general accessibility contrast compliance."
+  ]
+}

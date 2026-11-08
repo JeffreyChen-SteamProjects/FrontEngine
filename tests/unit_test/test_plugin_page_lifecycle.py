@@ -37,15 +37,16 @@ def test_example_manifest_api_and_real_registered_close_all(centre):
 
 
 @pytest.fixture
-def centre():
+def centre(*, lifetime_factory):
     from frontengine.ui.page.control_center.control_center_ui import ControlCenterUI
+    lifetime_factory()
     pages = {name: SimpleNamespace(**{field: []}) for name, field in (
         ('video_setting_ui', 'video_widget_list'), ('image_setting_ui', 'image_widget_list'),
         ('web_setting_ui', 'web_widget_list'), ('gif_setting_ui', 'gif_widget_list'),
         ('sound_player_setting_ui', 'sound_widget_list'), ('text_setting_ui', 'text_widget_list'),
         ('particle_setting_ui', 'particle_list'))}
     pages['scene_setting_ui'] = SimpleNamespace(close_scene=lambda: None)
-    value = ControlCenterUI(**pages, redirect_output=False)
+    value = ControlCenterUI(**pages, redirect_output=False, lifetime=lifetime_factory())
     yield value
     value.close()
     value.deleteLater()

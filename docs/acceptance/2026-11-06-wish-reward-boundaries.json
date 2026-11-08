@@ -1,0 +1,171 @@
+{
+  "passed": true,
+  "paired_completion_samples": [
+    {
+      "initial_mood": 50,
+      "initial_affection": 0,
+      "control_mood": 50,
+      "reward_mood": 60,
+      "reward_affection": 3
+    },
+    {
+      "initial_mood": 50,
+      "initial_affection": 999999,
+      "control_mood": 50,
+      "reward_mood": 60,
+      "reward_affection": 1000000
+    },
+    {
+      "initial_mood": 50,
+      "initial_affection": 1000000,
+      "control_mood": 50,
+      "reward_mood": 60,
+      "reward_affection": 1000000
+    },
+    {
+      "initial_mood": 95,
+      "initial_affection": 0,
+      "control_mood": 95,
+      "reward_mood": 100,
+      "reward_affection": 3
+    },
+    {
+      "initial_mood": 95,
+      "initial_affection": 999999,
+      "control_mood": 95,
+      "reward_mood": 100,
+      "reward_affection": 1000000
+    },
+    {
+      "initial_mood": 95,
+      "initial_affection": 1000000,
+      "control_mood": 95,
+      "reward_mood": 100,
+      "reward_affection": 1000000
+    },
+    {
+      "initial_mood": 100,
+      "initial_affection": 0,
+      "control_mood": 100,
+      "reward_mood": 100,
+      "reward_affection": 3
+    },
+    {
+      "initial_mood": 100,
+      "initial_affection": 999999,
+      "control_mood": 100,
+      "reward_mood": 100,
+      "reward_affection": 1000000
+    },
+    {
+      "initial_mood": 100,
+      "initial_affection": 1000000,
+      "control_mood": 100,
+      "reward_mood": 100,
+      "reward_affection": 1000000
+    }
+  ],
+  "selection_samples": [
+    {
+      "home": "00000000000000000000000000000000",
+      "wish": "cozy_bed"
+    },
+    {
+      "home": "00000000000000000000000000000001",
+      "wish": "friend_meal"
+    },
+    {
+      "home": "00000000000000000000000000000002",
+      "wish": "cozy_bed"
+    },
+    {
+      "home": "00000000000000000000000000000003",
+      "wish": "new_leisure"
+    },
+    {
+      "home": "00000000000000000000000000000004",
+      "wish": "friend_meal"
+    },
+    {
+      "home": "00000000000000000000000000000005",
+      "wish": "new_leisure"
+    },
+    {
+      "home": "00000000000000000000000000000006",
+      "wish": "cozy_bed"
+    },
+    {
+      "home": "00000000000000000000000000000007",
+      "wish": "play_time"
+    },
+    {
+      "home": "00000000000000000000000000000008",
+      "wish": "plant"
+    },
+    {
+      "home": "00000000000000000000000000000009",
+      "wish": "play_time"
+    },
+    {
+      "home": "0000000000000000000000000000000a",
+      "wish": "new_leisure"
+    },
+    {
+      "home": "0000000000000000000000000000000b",
+      "wish": "play_time"
+    },
+    {
+      "home": "0000000000000000000000000000000c",
+      "wish": "plant"
+    },
+    {
+      "home": "0000000000000000000000000000000d",
+      "wish": "cozy_bed"
+    },
+    {
+      "home": "0000000000000000000000000000000e",
+      "wish": "new_leisure"
+    },
+    {
+      "home": "0000000000000000000000000000000f",
+      "wish": "friend_meal"
+    },
+    {
+      "home": "00000000000000000000000000000010",
+      "wish": "friend_meal"
+    },
+    {
+      "home": "00000000000000000000000000000011",
+      "wish": "friend_meal"
+    },
+    {
+      "home": "00000000000000000000000000000012",
+      "wish": "plant"
+    },
+    {
+      "home": "00000000000000000000000000000013",
+      "wish": "play_time"
+    }
+  ],
+  "selected_kinds": [
+    "cozy_bed",
+    "friend_meal",
+    "new_leisure",
+    "plant",
+    "play_time"
+  ],
+  "selection_preserves_rng": true,
+  "selection_survives_snapshot": true,
+  "scope": "Actual final simulation step in paired worlds isolates wish delta from activity mood effects. Twenty home identities check deterministic selection; no native UI or sandbox isolation claim.",
+  "product_commit": "0daa18f4",
+  "harness": "from pathlib import Path\nimport sys,json\nfrom copy import deepcopy\nroot=Path.cwd();sys.path.insert(0,str(root))\nfrom frontengine.utils.pet_game import goals,simulation,snapshot\nfrom frontengine.utils.pet_game.catalog import builtin_catalog\nfrom frontengine.utils.pet_game.world import World\nfrom frontengine.utils.pet_companion.stats import MAX_AFFECTION\npet='b'*32;w=World(builtin_catalog(),'a'*32,seed=5);w.automatic=False\nzone=w.add_zone('fixture',0,0,40)\nw.add_resident({'id':pet,'name':'Reward probe','mood':80,'fullness':90,'energy':90,'affection':0},zone)\nw.ledger.apply('fixture','fixture',40);assert w.buy_and_place('toy_box',zone,'toy')=='accepted'\nw.progress.wishes[pet]={'wish':None,'base':0,'ready':10**12}\nassert w.command(pet,'play')=='accepted'\nfor steps in range(1000):\n a=w.residents[pet].activity\n if a and a.kind=='play' and a.phase=='using' and a.until_ms is not None and a.until_ms<=w.time_ms+simulation.STEP_MS:break\n simulation.step(w);w.drain_events()\nelse:raise AssertionError('No final play step')\nbase=snapshot.to_dict(w);samples=[]\nfor mood in (50,95,100):\n for affection in (0,MAX_AFFECTION-1,MAX_AFFECTION):\n  control=deepcopy(w);reward=deepcopy(w)\n  for world in (control,reward):\n   world.automatic=False;world.residents[pet].needs['mood']=mood;world.residents[pet].affection=affection\n  reward.progress.wishes[pet]={'wish':'play_time','base':999,'ready':0}\n  simulation.step(control);simulation.step(reward)\n  ce=control.drain_events();re=reward.drain_events()\n  assert any(e['kind']=='completed' and e.get('activity')=='play' for e in ce), (ce, control.residents[pet].activity, base['time_ms'])\n  assert len([e for e in re if e['kind']=='wish_granted'])==1\n  c=control.residents[pet];r=reward.residents[pet]\n  assert r.needs['mood']==min(100,c.needs['mood']+goals.WISH_MOOD)\n  assert r.affection==min(MAX_AFFECTION,c.affection+goals.WISH_AFFECTION)\n  assert reward.progress.wishes[pet]['ready']==reward.time_ms+goals.WISH_COOLDOWN_MS\n  samples.append({'initial_mood':mood,'initial_affection':affection,'control_mood':c.needs['mood'],'reward_mood':r.needs['mood'],'reward_affection':r.affection})\nselection=[]\nfor seed in range(20):\n world=World(builtin_catalog(),f'{seed:032x}',seed=seed);z=world.add_zone('fixture',0,0,40)\n world.add_resident({'id':pet,'name':'Choice probe','mood':80,'fullness':90,'energy':90,'affection':0},z)\n before=world.rng.state;goals.update(world);state=dict(world.progress.wishes[pet])\n assert world.rng.state==before\n assert state['wish'] in goals.WISHES\n loaded=snapshot.from_dict(snapshot.to_dict(world),world.catalog)\n assert loaded.progress.wishes[pet]==state\n selection.append({'home':world.home,'wish':state['wish']})\nresult={'passed':True,'paired_completion_samples':samples,'selection_samples':selection,'selected_kinds':sorted({s['wish'] for s in selection}),'selection_preserves_rng':True,'selection_survives_snapshot':True,'scope':'Actual final simulation step in paired worlds isolates wish delta from activity mood effects. Twenty home identities check deterministic selection; no native UI or sandbox isolation claim.'}\nPath('.audit/wish-reward-boundaries.json').write_text(json.dumps(result,indent=2),encoding='utf-8');print(json.dumps({'passed':True,'reward_cases':len(samples),'selection_cases':len(selection),'selected_kinds':result['selected_kinds']}))\n",
+  "probe_corrections": [
+    "Snapshot loading intentionally drops active activities; paired completion worlds therefore use deepcopy of the live pre-completion state, not snapshot roundtrip.",
+    "GameRandom state is exposed as state, not random.Random.getstate."
+  ],
+  "limits": [
+    "Nine paired final-step comparisons isolate reward delta, not long-run balance.",
+    "Twenty home identities cover all five selections but are not a statistical distribution proof.",
+    "No sandbox mode isolation or abnormal shutdown acceptance."
+  ]
+}

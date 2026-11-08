@@ -1,0 +1,81 @@
+{
+  "product": "76618453",
+  "native": {
+    "passed": true,
+    "actual_work_and_moveout_buttons": true,
+    "progress_before_release": 20020,
+    "reserved_wood_before_release": 2,
+    "ledger_unchanged": true,
+    "task_cancelled": true,
+    "furniture_released": true,
+    "profile_care_preserved": true,
+    "identity_reacquired_after_release": true,
+    "no_settlement": true,
+    "events": [
+      {
+        "activity": "work",
+        "kind": "activity",
+        "reason": "command",
+        "resident": "cd53a59142a7496d92090f3a38904067",
+        "time": 56478000
+      },
+      {
+        "activity": "work",
+        "kind": "interrupted",
+        "reason": "task_cancelled",
+        "resident": "cd53a59142a7496d92090f3a38904067",
+        "time": 56496400
+      }
+    ],
+    "runtime_closed": true,
+    "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-stage-layout\\.audit\\profession-owned-fixed",
+    "saved_snapshot_sha256": "c471f2056e3bf47d41a8073e4a214f8eccec310f6c85a5f6088181f0c4b05172",
+    "scope": "Private native MainUI Work and Move out buttons during a toy order. Injected simulation clock, explicit fixture materials; normal release/save/cold reopen, not crash boundaries or all recipes.",
+    "temporary_directory_removed": true
+  },
+  "cold_reopen": {
+    "passed": true,
+    "initial_snapshot_exact": true,
+    "profiles_exact": true,
+    "leases_reacquired": true,
+    "saved_exact": true,
+    "temporary_directory_removed": true
+  },
+  "observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "child_exit": 0,
+    "observation_only": true
+  },
+  "stderr_empty": true,
+  "frozen_source_files_unchanged": 751,
+  "limits": [
+    "One progressed managed resident and a toy order with fixture materials, injected simulation clock.",
+    "Normal Move out, save and cold reopen; not a crash-during-release or all-recipes test.",
+    "Identity reacquisition uses the real PetSession factory without spawning a desktop pet.",
+    "No OS input, full regression or independent-review claim."
+  ],
+  "evidence_sha256": {
+    ".audit\\native_work_moveout.py": "5091d99f9f2b8f3c7cc8f41cc774ac218dfdf8deff8222f51cf9f74b969f0a89",
+    ".audit\\cold_mixed_dpi_travel.py": "8036f53574ba6c68e74c48f86aaf30f11a824b3a274ca70d33059421352a85ec",
+    ".audit\\native-work-moveout\\cold-result.json": "5bd41edb786e3fe553500e96167a938f64483ad3f1f564c603795a88e3110cbc",
+    ".audit\\native-work-moveout\\observer.json": "108902181ee471ddb835401d5d799d056e70c9ac4aead7d271ce043e584e29a5",
+    ".audit\\native-work-moveout\\profiles.json": "0467d731d9e34a30122ac86c41e524f970575a5ca7d9681d5d8d2a5e7de1cdf7",
+    ".audit\\native-work-moveout\\result.json": "91222deae5ed6be3cd63cc0ba4db54d09f1cf0a3fd7f0669c4c073698ee19179",
+    ".audit\\native-work-moveout\\shutdown-world.json": "5b248f4ed17bfd6a9578af1dce1b73b5050b000e5d587c4ad16c1890cba90ba2",
+    ".audit\\native-work-moveout\\moved-out.png": "e8da2f76fc7148267d8bfbef9c847ffb6f8caee738be95f135dd1ab9c50b5f37"
+  }
+}

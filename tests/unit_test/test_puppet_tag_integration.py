@@ -15,8 +15,9 @@ class Sprite(Puppet):
         self.roles.append(role)
 
 
-def test_turning_off_tag_with_mixed_pets_resets_only_supported_pets():
-    page = PetSettingUI()
+def test_turning_off_tag_with_mixed_pets_resets_only_supported_pets(*, lifetime_factory):
+    lifetime_factory()
+    page = PetSettingUI(lifetime=lifetime_factory())
     sprite = Sprite()
     page.pet_list = [Puppet(), sprite]
     page._on_tag_toggled(False)
@@ -24,8 +25,9 @@ def test_turning_off_tag_with_mixed_pets_resets_only_supported_pets():
     page.close()
 
 
-def test_tag_timer_requires_two_supported_pets():
-    page = PetSettingUI()
+def test_tag_timer_requires_two_supported_pets(*, lifetime_factory):
+    lifetime_factory()
+    page = PetSettingUI(lifetime=lifetime_factory())
     page.pet_list = [Puppet(), Sprite()]
     page.tag_checkbox.setChecked(True)
     page._start_tag_game()

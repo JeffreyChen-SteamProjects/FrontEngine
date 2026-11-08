@@ -8,6 +8,7 @@ from PySide6.QtWidgets import QCheckBox, QComboBox, QDialog, QGridLayout, QLabel
 from frontengine.user_setting.user_setting_file import get_recent_files
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
+from frontengine.utils.multi_language.retranslate import retranslator
 
 
 def create_monitor_selection_dialog(parent: QWidget, monitors: list) -> tuple[QDialog, QComboBox]:
@@ -189,15 +190,39 @@ def build_target_monitor_combobox(screens=None) -> QComboBox:
     """
     monitors = QGuiApplication.screens() if screens is None else screens
     combobox = QComboBox()
-    combobox.addItem(language_wrapper.language_word_dict.get(
-        "target_monitor_here", "This screen (where FrontEngine is)"), None)
+    combobox.addItem("", None)
+    retranslator.bind(combobox, "target_monitor_here", "This screen (where FrontEngine is)", "setItemText", 0)
     for index, _ in enumerate(monitors):
         combobox.addItem(str(index), index)
     if len(monitors) > 1:
-        combobox.addItem(
-            language_wrapper.language_word_dict.get("target_monitor_span", "Span all screens"),
-            SPAN_ALL_DATA)
+        combobox.addItem("", SPAN_ALL_DATA)
+        retranslator.bind(combobox, "target_monitor_span", "Span all screens", "setItemText", combobox.count() - 1)
     return combobox
+
+
+def target_monitor_state(combobox: QComboBox) -> str:
+    """Serialize the selected destination independently of its translated label."""
+    data = combobox.currentData()
+    return "here" if data is None else str(data)
+
+
+def apply_target_monitor_state(combobox: QComboBox, value: object) -> None:
+    """Restore a stable destination or a legacy translated label, if available."""
+    if type(value) not in (str, int):
+        return
+    value = str(value)
+    for index in range(combobox.count()):
+        data = combobox.itemData(index)
+        token = "here" if data is None else str(data)
+        if value == token:
+            combobox.setCurrentIndex(index)
+            return
+    for key, data in (("target_monitor_here", None), ("target_monitor_span", SPAN_ALL_DATA)):
+        if any(value == words.get(key) for words in language_wrapper.choose_language_dict.values()):
+            index = combobox.findData(data)
+            if index >= 0:
+                combobox.setCurrentIndex(index)
+            return
 
 
 def resolve_span(combobox: Optional[QComboBox]) -> bool:
@@ -313,7 +338,9 @@ def reload_recent_combobox(combobox: QComboBox, category: str) -> None:
     """
     combobox.blockSignals(True)
     combobox.clear()
-    combobox.addItem(language_wrapper.language_word_dict.get("recent_files_label", "Recent"), None)
+    retranslator.forget(combobox)
+    combobox.addItem("", None)
+    retranslator.bind(combobox, "recent_files_label", "Recent", "setItemText", 0)
     for path in get_recent_files(category):
         combobox.addItem(Path(path).name, path)
     combobox.setCurrentIndex(0)

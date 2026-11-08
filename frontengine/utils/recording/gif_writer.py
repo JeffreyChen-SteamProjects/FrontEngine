@@ -371,6 +371,10 @@ class AsyncGifWriter:
         self._thread.start()
 
     @property
+    def worker_thread(self):
+        return self._thread
+
+    @property
     def done(self) -> bool:
         return self._done.is_set()
 

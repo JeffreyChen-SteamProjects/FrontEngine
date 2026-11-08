@@ -15,7 +15,7 @@ macOS：選用 macos extra 以 macOS 13+ 與公開 PyObjC framework 為基準。
 
 外掛：啟用載入不代表授權外掛。plugin.json 或單檔 sidecar 宣告版本、身分、入口與能力；Python import 前檢查同意，授權綁定內容摘要。程式或宣告改變就需重新同意；舊外掛需明確完全信任。Settings → Revoke plugin grants 可撤銷保存的授權；已在執行的程式需重新啟動才能卸載。Python 外掛仍具有完整應用程式權限，宣告與同意不是作業系統沙箱。
 
-算圖：Settings → Overlay rendering 可選 Auto、GPU 或 Software，並查看實際後端。GPU 合成器以 OpenGL texture、shader 與 framebuffer 處理圖層順序、變換、不透明度與裁切；初始化失敗時回退軟體並顯示原因。既有 QPainter 內容仍可能先由 CPU 轉成點陣圖再上傳；web／video／原生 widget 可能使用獨立視窗。擷取與錄製可能將 GPU 畫面讀回 CPU，這不代表零拷貝擷取或已測得效能提升。 場景 GPU 合成目前涵蓋 IMAGE、GIF 與 TEXT；puppet 使用自己的 Imervue 視窗繪製。
+算圖：Settings → Overlay rendering 可選 Auto、GPU 或 Software，並查看實際後端。GPU 合成器以 OpenGL texture、shader 與 framebuffer 處理圖層順序、變換、不透明度與裁切；初始化失敗時回退軟體並顯示原因。既有 QPainter 內容仍可能先由 CPU 轉成點陣圖再上傳；web／video／原生 widget 可能使用獨立視窗。擷取與錄製可能將 GPU 畫面讀回 CPU，這不代表零拷貝擷取或已測得效能提升。 場景 GPU 合成目前涵蓋 IMAGE、GIF 與 TEXT；puppet 使用自己的 Imervue 視窗繪製。 覆蓋層重繪會將合成器更新排到父視窗繪製完成後執行，切換後端或螢幕時也遵循此順序。
 
 Windows OCR 的 WinRT 投影套件包含於 FrontEngine 的一般 Windows 安裝；請安裝需要的 Windows 辨識語言。Tesseract 的執行檔與訓練語言資料需另行安裝。選用 puppet extra 會安裝 Imervue>=1.0.90；macos extra 安裝 macOS 13+ 的公開 PyObjC framework。請使用下列指令。docs/formats/ 提供 puppet、pet.json、petscript 與場景範例。
 
@@ -31,3 +31,5 @@ Workshop 內容宣告採版本化格式，使用前會驗證；未知的中繼�
 Windows 安裝現在包含 winrt-Windows.Media.Control，讓「正在播放」小工具透過 SMTC 顯示歌名與演出者；舊 winsdk 仍可備援。沒有媒體工作階段時回傳空結果，並保留既有音訊程式名稱備援。
 
 執行檔建置會在編譯前檢查所有必要依賴與版本；請先在建置環境安裝 requirements.txt。
+
+Workshop 管理視窗中，Tab 與 Shift+Tab 可在欄位間移動，包含多行說明欄；Enter 在說明欄換行。選擇來源或預覽圖時關閉管理視窗，返回的選擇不會套用；輸入預設集名稱時關閉則不會啟動該次匯入。取消或重開管理視窗後可以重試。已開始的上傳會在管理視窗關閉後繼續。

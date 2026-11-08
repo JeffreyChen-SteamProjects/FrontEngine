@@ -108,7 +108,8 @@ def test_puppet_customization_preserves_aspect_and_disables_unsupported_controls
 
 
 @pytest.mark.parametrize("malformed", [False, True])
-def test_reference_runtime_script_failure_allocates_no_child_window(tmp_path, malformed):
+def test_reference_runtime_script_failure_allocates_no_child_window(tmp_path, malformed, lifetime_factory):
+    lifetime_factory()
     pytest.importorskip("Imervue.puppet.document_io")
     from frontengine.show.pet.puppet_pet import PuppetPetWidget
     owner = QWidget()
@@ -194,7 +195,8 @@ def test_puppet_only_success_opens_native_window_without_empty_graphics_view(mon
         page.close()
 
 
-def test_real_canvas_left_drag_moves_pet_window(tmp_path):
+def test_real_canvas_left_drag_moves_pet_window(tmp_path, lifetime_factory):
+    lifetime_factory()
     pytest.importorskip("Imervue.puppet.document_io")
     from PySide6.QtCore import QPoint, Qt
     from PySide6.QtTest import QTest
@@ -215,7 +217,8 @@ def test_real_canvas_left_drag_moves_pet_window(tmp_path):
 
 
 @pytest.mark.parametrize("hit_response", [False, True])
-def test_hit_signal_plays_linked_motion_toggles_expression_and_selects_script_line(tmp_path, hit_response):
+def test_hit_signal_plays_linked_motion_toggles_expression_and_selects_script_line(tmp_path, hit_response, lifetime_factory):
+    lifetime_factory()
     pytest.importorskip("Imervue.puppet.document_io")
     from Imervue.puppet.document import HitArea, Motion, Expression
     from frontengine.show.pet.puppet_pet import PuppetPetWidget
@@ -240,7 +243,8 @@ def test_hit_signal_plays_linked_motion_toggles_expression_and_selects_script_li
         pet.close()
 
 
-def test_hit_without_specific_line_uses_time_of_day_greeting(tmp_path):
+def test_hit_without_specific_line_uses_time_of_day_greeting(tmp_path, lifetime_factory):
+    lifetime_factory()
     pytest.importorskip("Imervue.puppet.document_io")
     from frontengine.show.pet.puppet_pet import PuppetPetWidget
     script = tmp_path / "lines.petscript.json"

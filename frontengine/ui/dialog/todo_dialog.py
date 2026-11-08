@@ -1,5 +1,6 @@
 """Local task editor and shared checkbox panel for the Today desktop widget."""
 from datetime import date
+from shiboken6 import isValid
 
 from PySide6.QtCore import Qt, QDateTime, QTimer
 from PySide6.QtWidgets import (QDialog, QWidget, QVBoxLayout, QHBoxLayout, QLineEdit,
@@ -87,8 +88,10 @@ class TodoPanel(QWidget):
         self._request('add', title=self.title.text().strip(), due=due)
 
     def _import(self) -> None:
+        if not isValid(self) or not self.isVisible():
+            return
         path, _ = QFileDialog.getOpenFileName(self, 'iCalendar', '', 'iCalendar (*.ics)')
-        if path:
+        if isValid(self) and self.isVisible() and path:
             self._request('import', path=path)
 
     def _remove(self) -> None:
@@ -97,12 +100,14 @@ class TodoPanel(QWidget):
             self._request('remove', id=selected.data(Qt.ItemDataRole.UserRole))
 
     def _clear(self) -> None:
+        if not isValid(self) or not self.isVisible():
+            return
         from frontengine.utils.multi_language.language_wrapper import language_wrapper
         text = language_wrapper.language_word_dict.get('todo_clear_confirm', 'Delete every task, event and cancellation record?')
         response = QMessageBox.question(self, self.windowTitle(), text,
                                         QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
                                         QMessageBox.StandardButton.No)
-        if response == QMessageBox.StandardButton.Yes:
+        if isValid(self) and self.isVisible() and response == QMessageBox.StandardButton.Yes:
             self._request('clear')
 
     def _checked(self, item) -> None:

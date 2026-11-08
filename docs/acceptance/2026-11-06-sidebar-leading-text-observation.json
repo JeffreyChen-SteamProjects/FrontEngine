@@ -1,0 +1,9 @@
+{
+  "product_base": "70275848 plus option-label fix",
+  "status": "withdrawn as a product defect: original full-resolution artifact shows intact leading labels; no code change",
+  "observation": "After the language/page sequence, Italian sidebar labels lose their leading characters (for example scene and presentation) even at requested window width 900; captured image shows cropped icons/text on the left.",
+  "screenshot": ".audit\\native-combo-language-verified\\Italy-900-tab_widgets_text.png",
+  "sha256": "b2ce6be6677e7185e4e2d3ab5419fc22e86a416ada8ed1a90b58ed32de82741c",
+  "candidate_to_inspect": "NavigationSidebar hidden horizontal scrollbar and item size hints; not yet a verified cause.",
+  "follow_up": "2026-11-06-sidebar-observation-verification.json"
+}

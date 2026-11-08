@@ -1,0 +1,240 @@
+{
+  "base": "933d8817",
+  "status": "754 source/test files frozen; full regression queued, incomplete. Independent review and integration pending.",
+  "defect": "Friends dinner event counted simultaneous diners across disconnected zones as one gathering.",
+  "reproduction": {
+    "events": [
+      {
+        "kind": "life_event",
+        "time": 1230200,
+        "event": "friends_dinner",
+        "resident": null
+      }
+    ],
+    "observations": [
+      {
+        "00000000000000000000000000000001": {
+          "zone": "z1",
+          "activity": {
+            "kind": "eat",
+            "reason": "command",
+            "furniture": "f2",
+            "point": 0,
+            "task": null,
+            "phase": "using",
+            "target_x": 240000,
+            "until_ms": null,
+            "started_ms": 1203800,
+            "bonus": false,
+            "partner": null
+          }
+        },
+        "00000000000000000000000000000002": {
+          "zone": "z3",
+          "activity": {
+            "kind": "eat",
+            "reason": "command",
+            "furniture": "f4",
+            "point": 0,
+            "task": null,
+            "phase": "using",
+            "target_x": 240000,
+            "until_ms": null,
+            "started_ms": 1203800,
+            "bonus": false,
+            "partner": null
+          }
+        },
+        "00000000000000000000000000000003": {
+          "zone": "z5",
+          "activity": {
+            "kind": "eat",
+            "reason": "command",
+            "furniture": "f6",
+            "point": 0,
+            "task": null,
+            "phase": "using",
+            "target_x": 240000,
+            "until_ms": null,
+            "started_ms": 1203800,
+            "bonus": false,
+            "partner": null
+          }
+        }
+      }
+    ],
+    "shared_events": [],
+    "relations": {},
+    "snapshot_roundtrip": true
+  },
+  "mechanism": "goals._daily_events tested total awake diners across the entire world.",
+  "fix": "Count diners per zone and retain the existing three-person threshold. No snapshot format or function signature changes.",
+  "red": {
+    "failed": 4,
+    "passed_controls": 2,
+    "deselected": 25
+  },
+  "green": {
+    "passed": 69,
+    "scope": [
+      "goals",
+      "social",
+      "event_history"
+    ]
+  },
+  "cases": "manage and sandbox, each with three separate zones, two plus one split, or all three in one zone; real eat commands and 300 simulation steps.",
+  "limits": [
+    "Synthetic initial capital and resident needs; no elapsed wall-clock gameplay claim.",
+    "First probe tried buying essential table_basic and stopped at not_for_sale. Corrected fixture buys purchasable round tables.",
+    "Same-zone meal grouping preserves three-person semantics; it does not require all three to use one two-seat table.",
+    "No EXE, push, merge or release.",
+    "First service harness acquired storage before default lifetime and hit ownership lock conflict; fixed to share the default lifetime owner.",
+    "First cold-read harness incorrectly granted sandbox currency; loader correctly normalized it to zero. Fixture corrected to fund manage mode only.",
+    "Native traditional-Chinese dark MainUI uses widget-local Tab/Space on actual eat buttons, synthetic initial capital/needs and 600 simulation steps. Not normal-speed or OS input acceptance.",
+    "Native first attempt collided with starter furniture at a fixed test cell; corrected fixture uses existing place_anywhere API. Product unchanged.",
+    "Both native attempts observed changes in foreground HWND and cursor coordinates. Cause unestablished; no foreground/cursor stability claim.",
+    "Cold HomeService reopens native saved state in a new process and verifies exact world/profiles, reacquired resident leases and successful save. Native case is manage mode; sandbox notification route is covered offscreen."
+  ],
+  "evidence": {
+    "dinner-probe.json": "16f6bf4127ee9dfbf712445b6c9dc4c262dd06bf983de4fcca33d248b5b74680",
+    "dinner-red.log": "2664f66bf6e76740be52042b191f8c535b9f0b556d26bda78f5d0219c3505141",
+    "dinner-green.log": "8c2cef9aadffedd02822b563aace6a01e23c1c415af541d8196de8a520e600fd",
+    "dinner-service-cold-final.log": "4b494b9a9ebb3783cf20d9256feb8b2c9b8b32a7e1fc8c92aeefdee7c31b7ce9",
+    "dinner-docs.log": "b58aa5a24c4e254ff375b040d21fe63010fa5b74da39a0fe546849bbf3dfba96",
+    "dinner-sphinx.log": "9babb467992e8cb91259936dcb3437b34ffa3a1775dc88d0017172b6cef6cff6",
+    "native-dinner-retry/dinner.json": "f527b75d4f37dc05711cae353142e5e843250c481d0cba256ad50ccecb7cb539",
+    "native-dinner-retry/result.json": "543ef7b3148165ce87d9f7c8429dbd25d4010b84ca4885be403aa046dfa2ca67",
+    "native-dinner-retry/observer.json": "ebcfb0d6c7c7fdf7537810f3f986797fc67b4d1042ebaa504bac57fb26a2f58a",
+    "native-dinner-retry/cold-result.json": "5bd41edb786e3fe553500e96167a938f64483ad3f1f564c603795a88e3110cbc",
+    "native-dinner-retry/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "native-dinner-retry/dinner-inbox.png": "bf34d62c6d7acbc4bde57d7c7b0f5ccb6d682fec66b97da930b693ba8619a21f"
+  },
+  "service_inbox_and_cold_read": {
+    "cases": 4,
+    "modes": [
+      "manage",
+      "sandbox"
+    ],
+    "conditions": [
+      "three separate zones",
+      "three in one zone"
+    ],
+    "route": "real HomeService events_ready signal to PetHomePage inbox; explicit simulation steps and _publish",
+    "saved": "real HomeSaveStore with disk-backed profiles; exact snapshot read in independent Python child",
+    "replay": "no load-time events; eat commands and 300 more steps emit no duplicate dinner on the same day",
+    "validation": "73 passed across goals/social/event_history including all four subprocess checks",
+    "surface": "Qt offscreen; not native keyboard or full MainUI acceptance"
+  },
+  "documentation": {
+    "files": 17,
+    "checks": "54 passed",
+    "sphinx": "-W build succeeded",
+    "rendered_exact": [
+      "Eng",
+      "Zh",
+      "ZhCn",
+      "De",
+      "Fr",
+      "Ru",
+      "It"
+    ]
+  },
+  "native": {
+    "dinner": {
+      "cases": [
+        {
+          "together": false,
+          "dinner_notifications": 0,
+          "actual_eat_buttons": 3
+        },
+        {
+          "together": true,
+          "dinner_notifications": 1,
+          "actual_eat_buttons": 3
+        }
+      ],
+      "event_markers": {
+        "friends_dinner": {
+          "": 1
+        }
+      },
+      "simulation_steps": 600
+    },
+    "result": {
+      "dinner_cases": [
+        {
+          "together": false,
+          "dinner_notifications": 0,
+          "actual_eat_buttons": 3
+        },
+        {
+          "together": true,
+          "dinner_notifications": 1,
+          "actual_eat_buttons": 3
+        }
+      ],
+      "theme": "dark",
+      "language": "Traditional_Chinese",
+      "tab_routes": [
+        {
+          "target": "primaryAction",
+          "tabs": 5
+        },
+        {
+          "target": "WrappingPushButton",
+          "tabs": 20
+        },
+        {
+          "target": "WrappingPushButton",
+          "tabs": 0
+        },
+        {
+          "target": "WrappingPushButton",
+          "tabs": 0
+        },
+        {
+          "target": "WrappingPushButton",
+          "tabs": 0
+        },
+        {
+          "target": "WrappingPushButton",
+          "tabs": 0
+        },
+        {
+          "target": "WrappingPushButton",
+          "tabs": 0
+        }
+      ],
+      "runtime_closed": true,
+      "temporary_directory_removed": true
+    },
+    "observer": {
+      "before": {
+        "foreground": 36114656,
+        "cursor": [
+          536,
+          887
+        ]
+      },
+      "after": {
+        "foreground": 133262,
+        "cursor": [
+          950,
+          293
+        ]
+      },
+      "child_exit": 0
+    },
+    "cold-result": {
+      "passed": true,
+      "initial_snapshot_exact": true,
+      "profiles_exact": true,
+      "leases_reacquired": true,
+      "saved_exact": true,
+      "temporary_directory_removed": true
+    }
+  },
+  "product_commit": "20069297",
+  "test_commit": "b287e53a",
+  "regression_plan": "docs/acceptance/2026-11-06-dinner-regression-plan.json"
+}

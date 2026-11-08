@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 from collections import Counter
+from copy import deepcopy
 from typing import TYPE_CHECKING
 
 from frontengine.utils.pet_game.goals import unlocked
@@ -53,9 +54,10 @@ def snapshot(world: World, zone: str) -> list[dict]:
 
 
 def restore(world: World, zone: str, saved: list[dict]) -> int:
-    """Put the zone back as it was; returns how many saved pieces could not be placed again."""
+    """Put the zone back; nonzero means a storage or placement operation failed."""
     for piece, _definition in list(world.in_zone(zone)):
-        world.store(piece.identifier)
+        if world.store(piece.identifier) != "accepted":
+            return 1
     missed = 0
     for entry in (saved[index] for index in _stairs_first(world, (entry["definition"] for entry in saved))):
         result, identifier = world.place(entry["definition"], zone, entry["cell"], entry["flipped"])
@@ -89,12 +91,18 @@ class LayoutHistory:
     def undo(self, world: World, zone: str) -> bool:
         if not self._undo:
             return False
+        trial = deepcopy(world, {id(world.catalog): world.catalog})
+        if restore(trial, zone, self._undo[-1]):
+            return False
         self._redo.append(snapshot(world, zone))
         restore(world, zone, self._undo.pop())
         return True
 
     def redo(self, world: World, zone: str) -> bool:
         if not self._redo:
+            return False
+        trial = deepcopy(world, {id(world.catalog): world.catalog})
+        if restore(trial, zone, self._redo[-1]):
             return False
         self._undo.append(snapshot(world, zone))
         restore(world, zone, self._redo.pop())

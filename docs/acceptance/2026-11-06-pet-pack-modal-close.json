@@ -1,0 +1,91 @@
+{
+  "base_commit": "aa1fc1f8",
+  "status": "focused implementation and verification complete; full regression, independent review and integration pending",
+  "cause": "Closing the editor during either export picker does not prevent export_folder from consuming the returned value and submitting a new export job. The import and sprite picker paths also consumed results after local closure.",
+  "before": {
+    "surface": "offscreen Qt, real export worker and temporary filesystem, injected picker results",
+    "parent_picker_close": "Opened the name prompt after reject and created pet.json.",
+    "name_picker_close": "Created pet.json after reject.",
+    "regression": "6 failed, 12 deselected in 4.13s",
+    "import_action_regression": "6 failed, 18 deselected in 2.17s; submitted import job, changed sprite draft or accessed destroyed child widget."
+  },
+  "after": {
+    "fix": "Check local closed state, Qt validity and owner admission before export/import/sprite pickers and after every picker return.",
+    "same_reproduction": "Both closed editors create no output; closing during the parent picker opens no name prompt.",
+    "related_tests": "57 passed in 9.83s",
+    "cases": "12 close cases across parent/name/import/sprite pickers and reject/reject-plus-destruction/direct destruction; 4 live cancellation/retry cases use real import/export and exact image comparison."
+  },
+  "pending": [
+    "Full regression, independent review and integration."
+  ],
+  "limits": "No OS picker automation, all-language/DPI or screen-reader acceptance. Prior frozen worktree unchanged. No EXE conversion.",
+  "native": {
+    "cases": [
+      {
+        "picker": "parent",
+        "new_jobs": 0,
+        "draft_unchanged": true,
+        "no_output": true
+      },
+      {
+        "picker": "name",
+        "new_jobs": 0,
+        "draft_unchanged": true,
+        "no_output": true
+      },
+      {
+        "picker": "import",
+        "new_jobs": 0,
+        "draft_unchanged": true,
+        "no_output": true
+      },
+      {
+        "picker": "action",
+        "new_jobs": 0,
+        "draft_unchanged": true,
+        "no_output": true
+      }
+    ],
+    "observer": {
+      "before": {
+        "foreground": 2558004,
+        "cursor": [
+          768,
+          432
+        ]
+      },
+      "after": {
+        "foreground": 2558004,
+        "cursor": [
+          768,
+          432
+        ]
+      },
+      "child_exit": 0
+    },
+    "cold": {
+      "passed": true,
+      "initial_snapshot_exact": true,
+      "profiles_exact": true,
+      "leases_reacquired": true,
+      "saved_exact": true,
+      "temporary_directory_removed": true
+    },
+    "scope": "Traditional Chinese dark 900x740, private Windows desktop, actual MainUI owner and cached editor reopened four times. Editor opened through page method; editor buttons activated with local Tab/Space. Picker returns injected; no OS input.",
+    "shutdown": "Normal runtime closure, temporary settings removed, blank stderr, independent process reopens exact world/profiles/save and reacquires leases."
+  },
+  "documentation": {
+    "files": 17,
+    "checks": "31 passed in 2.28s",
+    "sphinx": "HTML build with -W passed",
+    "rendered_paragraphs_exact": [
+      "Eng",
+      "Zh",
+      "ZhCn",
+      "De",
+      "Fr",
+      "Ru",
+      "It"
+    ]
+  }
+}

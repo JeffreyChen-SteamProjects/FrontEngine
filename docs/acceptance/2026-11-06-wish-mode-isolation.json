@@ -1,0 +1,53 @@
+{
+  "product_commit": "0daa18f4",
+  "service": {
+    "passed": true,
+    "sandbox_affection_gain": 3,
+    "manage_snapshot_unchanged": true,
+    "profiles_unchanged": true,
+    "sandbox_wish_saved": true,
+    "explicit_ticks": 165,
+    "pet": "ecf849a9e1784225b9d9b16c6820ed05",
+    "temporary_directory_removed": true
+  },
+  "cold": {
+    "passed": true,
+    "modes": [
+      {
+        "mode": "manage",
+        "affection": 0,
+        "wish": {
+          "wish": "play_time",
+          "base": 999,
+          "ready": 0
+        },
+        "world_exact": true,
+        "save_exact": true
+      },
+      {
+        "mode": "sandbox",
+        "affection": 3,
+        "wish": {
+          "wish": null,
+          "base": 0,
+          "ready": 1533000
+        },
+        "world_exact": true,
+        "save_exact": true
+      }
+    ],
+    "profiles_unchanged": true,
+    "leases_reacquired": true,
+    "temporary_directory_removed": true
+  },
+  "harness": "from pathlib import Path\nimport json,os,sys,tempfile,shutil\nroot=Path.cwd();sys.path.insert(0,str(root));os.environ['QT_QPA_PLATFORM']='offscreen'\nfrom PySide6.QtWidgets import QApplication\nfrom frontengine.show.pet_game.home_service import HomeService\nfrom frontengine.user_setting.storage_session import StorageSession\nfrom frontengine.user_setting.pet_game_save import HomeSaveStore\nfrom frontengine.utils.pet_game.catalog import builtin_catalog\nfrom frontengine.utils.pet_game import snapshot\napp=QApplication([]);out=root/'.audit/wish-mode-isolation-placed';out.mkdir(exist_ok=False)\nwith tempfile.TemporaryDirectory(prefix='fe-wish-modes-') as folder:\n owner=StorageSession.open(Path(folder)/'settings');profiles=owner.profiles();pet=profiles.create('Mode probe')['id']\n service=HomeService(None,HomeSaveStore(owner,builtin_catalog()),profiles);service.pause('audit')\n try:\n  manage=service.create_home('fixture',0,0,40,seed=5,furnish=True)\n  assert service.adopt(pet)=='accepted'\n  manage.progress.wishes[pet]={'wish':'play_time','base':999,'ready':0}\n  assert service.save_now()\n  manage_before=snapshot.to_dict(manage);profile_before=profiles.profiles()\n  assert service.switch_mode('sandbox').status=='missing'\n  sandbox=service.create_home('fixture',0,0,40,seed=6)\n  assert service.adopt(pet)=='accepted'\n  zone=next(iter(sandbox.zones));assert service.run(lambda w:w.buy_and_place('toy_box',zone,'toy'))=='accepted'\n  assert service.run(lambda w:w.place_anywhere('toy_box',zone))[0]=='accepted'\n  sandbox.progress.wishes[pet]={'wish':'play_time','base':0,'ready':0}\n  before=sandbox.residents[pet].affection\n  events=[];service.events_ready.connect(events.extend)\n  command=service.run(lambda w:w.command(pet,'play'));assert command=='accepted', (command, sandbox.residents[pet])\n  clock=[100.];service._clock=lambda:clock[0];service._last=clock[0]\n  for steps in range(1000):\n   clock[0]+=.2;service._tick()\n   if any(e['kind']=='wish_granted' for e in events):break\n  assert len([e for e in events if e['kind']=='wish_granted'])==1\n  assert sandbox.residents[pet].affection==before+3\n  assert profiles.profiles()==profile_before\n  assert service.save_now()\n  assert service.switch_mode('manage').status=='loaded'\n  assert snapshot.to_dict(service.world)==manage_before\n  assert profiles.profiles()==profile_before\n  assert service.world.progress.wishes[pet]['wish']=='play_time'\n  assert service.switch_mode('sandbox').status=='loaded'\n  assert service.world.residents[pet].affection==before+3\n  assert service.world.progress.wishes[pet]['wish'] is None\n  assert service.shutdown()\n  assert profiles.profiles()==profile_before\n  result={'passed':True,'sandbox_affection_gain':3,'manage_snapshot_unchanged':True,'profiles_unchanged':True,'sandbox_wish_saved':True,'explicit_ticks':steps+1,'pet':pet}\n finally:\n  service.shutdown();service.store.close();owner.close()\n shutil.copytree(Path(folder)/'settings',out/'settings',ignore=shutil.ignore_patterns('.frontengine-owner.lock'))\n (out/'profiles.json').write_text(json.dumps(profile_before),encoding='utf-8')\nresult['temporary_directory_removed']=not Path(folder).exists()\n(out/'result.json').write_text(json.dumps(result,indent=2),encoding='utf-8');print(json.dumps(result))\n",
+  "cold_harness": "from pathlib import Path\nimport sys,os,json,tempfile,shutil\nroot=Path.cwd();sys.path.insert(0,str(root));os.environ['QT_QPA_PLATFORM']='offscreen'\nfrom PySide6.QtWidgets import QApplication\nfrom frontengine.show.pet_game.home_service import HomeService\nfrom frontengine.user_setting.storage_session import StorageSession\nfrom frontengine.user_setting.pet_game_save import HomeSaveStore\nfrom frontengine.utils.pet_game.catalog import builtin_catalog\nfrom frontengine.utils.pet_game import snapshot\napp=QApplication([]);source=root/'.audit/wish-mode-isolation-placed';expected_profiles=json.loads((source/'profiles.json').read_text(encoding='utf-8'));pet=json.loads((source/'result.json').read_text(encoding='utf-8'))['pet'];samples=[]\nwith tempfile.TemporaryDirectory(prefix='fe-wish-mode-cold-') as folder:\n target=Path(folder)/'settings';shutil.copytree(source/'settings',target);owner=StorageSession.open(target)\n try:\n  for mode in ('manage','sandbox'):\n   store=HomeSaveStore(owner,builtin_catalog(),mode);expected=json.loads(store.path.read_text(encoding='utf-8'));service=HomeService(None,store,owner.profiles());service.pause('audit')\n   try:\n    assert service.open().status=='loaded'\n    assert snapshot.to_dict(service.world)==expected\n    assert owner.profiles().profiles()==expected_profiles\n    assert set(service.sessions)=={pet}\n    resident=service.world.residents[pet];wish=service.world.progress.wishes[pet]\n    assert resident.affection==(0 if mode=='manage' else 3)\n    assert wish['wish']==('play_time' if mode=='manage' else None)\n    assert service.save_now()\n    assert json.loads(store.path.read_text(encoding='utf-8'))==expected\n    samples.append({'mode':mode,'affection':resident.affection,'wish':dict(wish),'world_exact':True,'save_exact':True})\n   finally:service.shutdown();store.close()\n  assert owner.profiles().profiles()==expected_profiles\n finally:owner.close()\nr={'passed':True,'modes':samples,'profiles_unchanged':True,'leases_reacquired':True,'temporary_directory_removed':not Path(folder).exists()};(source/'cold-result.json').write_text(json.dumps(r,indent=2),encoding='utf-8');print(json.dumps(r))\n",
+  "probe_corrections": [
+    "Missing mode returns missing, not empty.",
+    "Sandbox buy_and_place intentionally does not place; explicit place_anywhere used."
+  ],
+  "limits": [
+    "Offscreen real HomeService/StorageSession with disk-owned profile; not native mode button acceptance.",
+    "One play-wish fixture, injected clock and normal shutdown; not crash/power loss or every activity."
+  ]
+}

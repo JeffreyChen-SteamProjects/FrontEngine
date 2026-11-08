@@ -13,6 +13,8 @@ has to capture the system output stream to compute frequencies. Samples are
 FFT'd in memory, never stored or sent, and capture stops with the overlay - and
 the page says so, so nobody runs it unaware.
 """
+from frontengine.ui.runtime_lifetime import owned_action
+from frontengine.ui.runtime_lifetime import OwnedWidgetList
 from typing import Dict, List
 
 from PySide6.QtGui import QGuiApplication
@@ -31,7 +33,7 @@ from frontengine.utils.audio_meter.spectrum_analyzer import DEFAULT_BANDS
 from frontengine.ui.page.layout_kit import SettingPage
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
-from frontengine.utils.multi_language.retranslate import tr
+from frontengine.utils.multi_language.retranslate import retranslator, tr
 from frontengine.utils.now_playing.now_playing import now_playing
 from frontengine.user_setting.user_setting_file import user_setting_dict, write_user_setting
 
@@ -57,17 +59,19 @@ MONITOR_LINE_LABELS: Dict[str, tuple] = {
 class WidgetsSettingUI(SettingPage):
     """桌面小工具設定頁 / The desktop widgets page."""
 
-    def __init__(self):
+    def __init__(self, *, lifetime):
         front_engine_logger.info("[WidgetsSettingUI] Init")
         super().__init__("tab_widgets_text", "page_subtitle_widgets",
-                         "Widgets", "Small panels that stay in view.")
+                         "Widgets", "Small panels that stay in view.", lifetime=lifetime)
 
-        self.spectrum_widget_list: List[SpectrumWidget] = []
-        self.monitor_widget_list: List[SystemMonitorWidget] = []
-        self.now_playing_widget_list: List[NowPlayingWidget] = []
-        self.note_widget_list: List[StickyNoteWidget] = []
-        self.todo_widget_list, self.todo_service, self.todo_dialog = [], None, None
+        self.spectrum_widget_list: List[SpectrumWidget] = OwnedWidgetList(self.lifetime)
+        self.monitor_widget_list: List[SystemMonitorWidget] = OwnedWidgetList(self.lifetime)
+        self.now_playing_widget_list: List[NowPlayingWidget] = OwnedWidgetList(self.lifetime)
+        self.note_widget_list: List[StickyNoteWidget] = OwnedWidgetList(self.lifetime)
+        self.todo_widget_list, self.todo_service, self.todo_dialog = OwnedWidgetList(self.lifetime), None, None
         self.capture = LoopbackSpectrum(DEFAULT_BANDS)
+        self.lifetime.register_pending(self.capture.pending)
+        self.lifetime.register_stop(self.capture.stop)
 
         self._build_spectrum_row()
         self._build_monitor_row()
@@ -110,10 +114,12 @@ class WidgetsSettingUI(SettingPage):
         today.clicked.connect(self.show_today)
         section.add_inline(button, today)
 
+    @owned_action
     def configure_tasks(self, service) -> None:
         """Let MainUI supply a shared lazy durable owner after page construction."""
         self.todo_service = service
 
+    @owned_action
     def open_tasks(self) -> None:
         """Open the local task editor without opening a desktop overlay automatically."""
         if self.todo_service is None:
@@ -124,6 +130,7 @@ class WidgetsSettingUI(SettingPage):
         self.todo_dialog.show()
         self.todo_dialog.raise_()
 
+    @owned_action
     def show_today(self) -> None:
         """Reuse one registered today checklist window."""
         if self.todo_service is None:
@@ -146,8 +153,11 @@ class WidgetsSettingUI(SettingPage):
     def _build_spectrum_row(self) -> None:
         self.spectrum_label = tr(QLabel(), "widgets_spectrum_label", "Audio spectrum")
         self.spectrum_style_combobox = QComboBox()
-        self.spectrum_style_combobox.addItem(_t("widgets_spectrum_bars", "Bars"), STYLE_BARS)
-        self.spectrum_style_combobox.addItem(_t("widgets_spectrum_ring", "Ring"), STYLE_RING)
+        for style, key, fallback in ((STYLE_BARS, "widgets_spectrum_bars", "Bars"),
+                                     (STYLE_RING, "widgets_spectrum_ring", "Ring")):
+            self.spectrum_style_combobox.addItem("", style)
+            retranslator.bind(self.spectrum_style_combobox, key, fallback, "setItemText",
+                              self.spectrum_style_combobox.count() - 1)
         self.spectrum_style_combobox.currentIndexChanged.connect(self._apply_spectrum_settings)
         self.spectrum_bands_label = tr(QLabel(), "widgets_spectrum_bands", "Bands")
         self.spectrum_bands_spinbox = QSpinBox()
@@ -205,17 +215,19 @@ class WidgetsSettingUI(SettingPage):
         self.note_restore_checkbox.toggled.connect(self._store_note_restore)
 
     # --- spectrum --------------------------------------------------------
+    @owned_action
     def toggle_spectrum(self) -> None:
         if self.spectrum_widget_list:
             self.stop_spectrum()
         else:
             self.start_spectrum()
 
+    @owned_action
     def start_spectrum(self) -> None:
         """開一個頻譜覆蓋層，並開始擷取（擷取只在這段期間進行）。"""
         front_engine_logger.info("[WidgetsSettingUI] start_spectrum")
         if not self.capture.start():
-            front_engine_logger.warning("[WidgetsSettingUI] loopback capture unavailable")
+            self.lifetime.after_dialog(front_engine_logger.warning("[WidgetsSettingUI] loopback capture unavailable"))
             return
         self.capture.set_bands(self.spectrum_bands_spinbox.value())
         widget = SpectrumWidget(self.spectrum_bands_spinbox.value(),
@@ -230,7 +242,7 @@ class WidgetsSettingUI(SettingPage):
         widget.show()
         widget.start()
         self.spectrum_widget_list.append(widget)
-        self.spectrum_button.setText(_t("widgets_spectrum_stop", "Stop spectrum"))
+        retranslator.set_text(self.spectrum_button, "widgets_spectrum_stop", "Stop spectrum")
 
     def stop_spectrum(self) -> None:
         """收掉頻譜並停止擷取。"""
@@ -241,8 +253,9 @@ class WidgetsSettingUI(SettingPage):
             except RuntimeError:
                 pass
         self.spectrum_widget_list.clear()
-        self.spectrum_button.setText(_t("widgets_spectrum_start", "Start spectrum"))
+        retranslator.set_text(self.spectrum_button, "widgets_spectrum_start", "Start spectrum")
 
+    @owned_action
     def _apply_spectrum_settings(self) -> None:
         bands = self.spectrum_bands_spinbox.value()
         self.capture.set_bands(bands)
@@ -254,6 +267,7 @@ class WidgetsSettingUI(SettingPage):
                 self.spectrum_widget_list.remove(widget)
 
     # --- system monitor --------------------------------------------------
+    @owned_action
     def toggle_monitor(self) -> None:
         if self.monitor_widget_list:
             self.stop_monitor()
@@ -270,6 +284,7 @@ class WidgetsSettingUI(SettingPage):
         return normalize_lines(
             [key for key, box in self.monitor_line_checkboxes.items() if box.isChecked()])
 
+    @owned_action
     def start_monitor(self) -> None:
         front_engine_logger.info("[WidgetsSettingUI] start_monitor")
         widget = SystemMonitorWidget(self.monitor_history_spinbox.value(),
@@ -282,7 +297,7 @@ class WidgetsSettingUI(SettingPage):
         widget.show()
         widget.start()
         self.monitor_widget_list.append(widget)
-        self.monitor_button.setText(_t("widgets_monitor_stop", "Stop monitor"))
+        retranslator.set_text(self.monitor_button, "widgets_monitor_stop", "Stop monitor")
 
     def stop_monitor(self) -> None:
         for widget in self.monitor_widget_list[:]:
@@ -291,8 +306,9 @@ class WidgetsSettingUI(SettingPage):
             except RuntimeError:
                 pass
         self.monitor_widget_list.clear()
-        self.monitor_button.setText(_t("widgets_monitor_start", "Start monitor"))
+        retranslator.set_text(self.monitor_button, "widgets_monitor_start", "Start monitor")
 
+    @owned_action
     def _apply_monitor_settings(self) -> None:
         lines = self.selected_monitor_lines()
         for widget in self.monitor_widget_list[:]:
@@ -303,12 +319,14 @@ class WidgetsSettingUI(SettingPage):
                 self.monitor_widget_list.remove(widget)
 
     # --- now playing -----------------------------------------------------
+    @owned_action
     def toggle_now_playing(self) -> None:
         if self.now_playing_widget_list:
             self.stop_now_playing()
         else:
             self.start_now_playing()
 
+    @owned_action
     def start_now_playing(self) -> None:
         front_engine_logger.info("[WidgetsSettingUI] start_now_playing")
         widget = NowPlayingWidget(now_playing)
@@ -320,7 +338,7 @@ class WidgetsSettingUI(SettingPage):
         widget.show()
         widget.start()
         self.now_playing_widget_list.append(widget)
-        self.now_playing_button.setText(_t("widgets_now_playing_stop", "Hide now playing"))
+        retranslator.set_text(self.now_playing_button, "widgets_now_playing_stop", "Hide now playing")
 
     def stop_now_playing(self) -> None:
         for widget in self.now_playing_widget_list[:]:
@@ -329,9 +347,10 @@ class WidgetsSettingUI(SettingPage):
             except RuntimeError:
                 pass
         self.now_playing_widget_list.clear()
-        self.now_playing_button.setText(_t("widgets_now_playing_start", "Show now playing"))
+        retranslator.set_text(self.now_playing_button, "widgets_now_playing_start", "Show now playing")
 
     # --- sticky notes ----------------------------------------------------
+    @owned_action
     def add_note(self, text: str = "") -> StickyNoteWidget:
         """開一張新的便利貼。"""
         front_engine_logger.info("[WidgetsSettingUI] add_note")
@@ -367,6 +386,7 @@ class WidgetsSettingUI(SettingPage):
         write_user_setting()
         return states
 
+    @owned_action
     def restore_saved_notes(self) -> List[StickyNoteWidget]:
         """把上次的便利貼開回來（只有在使用者選擇要還原時才會被呼叫）。"""
         notes = restore_notes(user_setting_dict.get("sticky_notes"), self.note_widget_list)
@@ -374,6 +394,7 @@ class WidgetsSettingUI(SettingPage):
             note.show()
         return notes
 
+    @owned_action
     def _store_note_restore(self, enabled: bool) -> None:
         user_setting_dict["sticky_notes_restore"] = bool(enabled)
         write_user_setting()

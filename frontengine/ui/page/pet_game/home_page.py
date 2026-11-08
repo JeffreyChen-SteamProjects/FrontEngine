@@ -7,16 +7,22 @@ was running when FrontEngine closed starts again when the page is built.
 """
 from __future__ import annotations
 
+from frontengine.ui.page.wrapping_buttons import WrappingCheckBox as QCheckBox, WrappingPushButton as QPushButton
+from frontengine.ui.runtime_lifetime import owned_action
+from frontengine.ui.runtime_lifetime import OwnedWidgetList
+
 from concurrent.futures import ThreadPoolExecutor
-from os import getcwd
+from dataclasses import dataclass
+from functools import partial
 from pathlib import Path
 
-from PySide6.QtCore import Qt, QUrl, Signal
+from PySide6.QtCore import QCoreApplication, QEvent, QObject, QPoint, Qt, QTimer, QUrl, Signal
 from PySide6.QtGui import QDesktopServices, QGuiApplication, QKeyEvent, QKeySequence
-from PySide6.QtWidgets import (QCheckBox, QComboBox, QFrame, QHBoxLayout, QLabel, QListWidget, QListWidgetItem,
-                               QPushButton, QScrollArea, QSlider, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QComboBox, QFrame, QLabel, QListWidget, QListWidgetItem,
+                               QScrollArea, QSlider, QVBoxLayout, QWidget)
 
 from frontengine.show.pet_game.ambience import DEFAULT_VOLUME, Ambience
+from frontengine.show.pet.asset_library import PetAssetLibrary
 from frontengine.show.pet_game.home_service import HomeService
 from frontengine.show.pet_game.home_strip import (
     DEFAULT_SCALE, HIDDEN_REASON, HOME_MODES, LAYERS, LOCKED_REASON, SCALES, HomeStrip,
@@ -27,7 +33,7 @@ from frontengine.show.pet_game.themes import glyph
 from frontengine.utils.pet_game.environment import season, weather
 from frontengine.show.pet_game.home_view import ZOOMS
 from frontengine.utils.pet_game.world import MODES
-from frontengine.ui.dialog.dialog_kit import button_row
+from frontengine.ui.page.flow_layout import FlowLayout
 from frontengine.ui.page.layout_kit import Section, SettingPage
 from frontengine.ui.page.pet_game.collection_panel import CollectionPanel
 from frontengine.ui.page.pet_game.home_pending import pending
@@ -37,12 +43,10 @@ from frontengine.ui.page.pet_game.home_stage import EmptyHome, HomeTabs, TAB_ORD
 from frontengine.ui.page.pet_game.home_panels import (
     LayoutPanel, ResidentPanel, ShopPanel, StoragePanel, WorkPanel,
 )
-from frontengine.show.pet_game.captions import result_text
 from frontengine.ui.page.pet_game.goals_panel import GoalsPanel
 from frontengine.ui.page.pet_game.inbox_panel import InboxPanel
 from frontengine.user_setting.pet_game_save import HomeSaveStore
-from frontengine.user_setting.pet_profiles import PetProfiles
-from frontengine.user_setting.user_setting_file import user_setting_dict, write_user_setting
+from frontengine.user_setting.user_setting_file import user_setting_dict
 from frontengine.utils.multi_language.retranslate import retranslator, translate, tr
 from frontengine.utils.pet_game.catalog import CELL_PIXELS
 from frontengine.utils.pet_game.content_pack import PACK_FOLDER, catalog_with_packs, load_packs
@@ -53,6 +57,8 @@ from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.pet_game.schedule import clock_text, game_day
 
 RUNNING_KEY = "pet_home_running"
+REVEAL_LAYOUT_ROUNDS = 4          # nested sections settle in a few rounds of layout requests
+REVEAL_FOLLOW_MS = 1500           # how long a shortcut keeps its tab in view while content settles
 DESKTOP_KEY = "pet_home_on_desktop"
 INTRO_KEY = "pet_home_intro_seen"
 MOTION_KEY = "pet_home_reduced_motion"
@@ -69,6 +75,31 @@ STAGE_HEIGHT = 220
 LAYER_KEY = "pet_home_layer"
 
 
+class _TabsMoved(QObject):
+    """Calls back when the watched tabs move inside the page: content above them changed size."""
+
+    def __init__(self, callback, parent: QObject) -> None:
+        super().__init__(parent)
+        self._callback = callback
+
+    def eventFilter(self, watched: QObject, event: QEvent) -> bool:  # NOSONAR - Qt override name
+        if event.type() == QEvent.Type.Move:
+            self._callback()
+        return False
+
+
+@dataclass(frozen=True)
+class _TranslatedMessage:
+    key: str
+    fallback: str
+    values: tuple[tuple[str, object], ...]
+    save_failure: bool = False
+
+    def render(self) -> str:
+        text = translate(self.key, self.fallback)
+        return text.format(**dict(self.values)) if self.values else text
+
+
 def workshop_pack_roots() -> list[Path]:
     """Furniture and theme packs subscribed on the Steam Workshop, when Steam's folder is there."""
     content = find_workshop_dir()
@@ -76,16 +107,21 @@ def workshop_pack_roots() -> list[Path]:
 
 
 def default_service(parent) -> HomeService:
-    mode = user_setting_dict.get(SAVE_MODE_KEY)
-    packs, errors = load_packs(Path(getcwd()) / PACK_FOLDER, workshop_pack_roots())
+    storage = parent.lifetime.storage
+    mode = storage.settings.get(SAVE_MODE_KEY)
+    packs, errors = load_packs(storage.directory / PACK_FOLDER, workshop_pack_roots())
     for name, reason in errors.items():
         front_engine_logger.warning(f"[PetHome] content pack {name} refused: {reason}")
     register_pack_pictures({key: value for pack in packs for key, value in pack.pictures.items()})
     register_themes([theme for pack in packs for theme in pack.themes])
-    store = HomeSaveStore(Path(getcwd()), catalog_with_packs(packs), mode if mode in MODES else "manage")
+    store = HomeSaveStore(storage, catalog_with_packs(packs), mode if mode in MODES else "manage")
     store.packs, store.pack_errors = packs, errors
-    return HomeService(parent, store, PetProfiles(user_setting_dict, write_user_setting),
-                       executor=ThreadPoolExecutor(1, thread_name_prefix="pet-home-save"))
+    try:
+        return HomeService(parent, store, storage.profiles(),
+                           executor=ThreadPoolExecutor(1, thread_name_prefix="pet-home-save"))
+    except BaseException:
+        store.close()
+        raise
 
 
 def packs_text(store) -> str:
@@ -105,15 +141,19 @@ class PetHomePage(SettingPage):
     open_requested = Signal()
     desktop_requested = Signal()          # "Back to the desktop": the window steps aside
 
-    def __init__(self, service: HomeService | None = None) -> None:
+    def __init__(self, service: HomeService | None = None, *, lifetime) -> None:
         super().__init__("pet_home_title", "pet_home_subtitle", "Pet home",
-                         "Your pets live, work and rest in a small home of their own.", wide=True)
+                         "Your pets live, work and rest in a small home of their own.", wide=True, lifetime=lifetime)
+        self.title_label.setWordWrap(True)
         self.service = service or default_service(self)
         self.profiles = self.service.profiles
         self.selected_resident: str | None = None
         self.selected_furniture: str | None = None
-        self.strip_list: list[HomeStrip] = []      # registered with the Control Center
-        self.art = ResidentArt(self.service)
+        self._message: _TranslatedMessage | str = ""
+        self.strip_list: list[HomeStrip] = OwnedWidgetList(self.lifetime)      # registered with the Control Center
+        self.art = ResidentArt(self.service,
+                               library_factory=partial(PetAssetLibrary, self.lifetime.storage.directory / 'pet-assets'),
+                               lifetime=self.lifetime)
         self.art.changed.connect(self._art_changed)
         self.ambience = Ambience(parent=self)
         self._tab_sections: dict | None = None
@@ -150,6 +190,7 @@ class PetHomePage(SettingPage):
         retranslator.bind_call(self.refresh)
         self.refresh()
 
+    @owned_action
     def add_section(self, title: "str | QLabel", fallback: str = "", *, collapsed: bool = False) -> Section:
         """While the panels are built, their sections are collected for the tabs instead of stacked."""
         if self._tab_sections is None or not isinstance(title, str):
@@ -174,7 +215,10 @@ class PetHomePage(SettingPage):
         """The connected screens (a method so tests can stand in other monitors)."""
         return list(QGuiApplication.screens())
 
+    @owned_action
     def choose_zone(self, zone: str | None) -> None:
+        self.layout_panel.preview_cell = None
+        self.set_preview(None)
         self._zone_id = zone
         self.selected_furniture = None
         self.refresh()
@@ -185,6 +229,7 @@ class PetHomePage(SettingPage):
         taken = {zone.screen for zone in world.zones.values()} if world is not None else set()
         return [screen for screen in self.screens() if (screen.name() or "primary")[:128] not in taken]
 
+    @owned_action
     def add_zone(self, screen) -> str | None:
         """A home zone on another screen, as wide as that screen allows."""
         area = screen.availableGeometry()
@@ -199,6 +244,7 @@ class PetHomePage(SettingPage):
         self.sync_strip()
         return zone
 
+    @owned_action
     def move_zone(self, screen) -> str:
         zone, area = self.zone, screen.availableGeometry()
         width = max(16, min(60, area.width() // CELL_PIXELS))
@@ -226,6 +272,7 @@ class PetHomePage(SettingPage):
     def _build_intro(self) -> None:
         """Shown once: where the old tools went, and that none of them needs a home."""
         section = self.intro_section = self.add_section("pet_home_intro_title", "Welcome to the pet home")
+        section.title_label.setWordWrap(True)
         text = tr(QLabel(), "pet_home_intro", "FrontEngine now opens on your pets' home.")
         text.setWordWrap(True)
         section.add_widget(text)
@@ -234,13 +281,14 @@ class PetHomePage(SettingPage):
         section.add_inline(done)
         section.setVisible(user_setting_dict.get(INTRO_KEY) is not True)
 
+    @owned_action
     def dismiss_intro(self) -> None:
         user_setting_dict[INTRO_KEY] = True
         self.intro_section.setVisible(False)
 
     def _build_status(self) -> None:
         """The stage: what is happening in the home, its controls, and the home itself."""
-        section = self.stage = self.add_section("pet_home_status_section", "Home")
+        section = self.stage = self.add_content_section("pet_home_status_section", "Home")
         section.title_label.hide()             # the page title already says it
         self.status = QLabel()
         self.status.setObjectName("homeStatus")
@@ -261,13 +309,10 @@ class PetHomePage(SettingPage):
         self.update_button.clicked.connect(lambda: open_browser(UPDATE_URL))
         for button in (self.create_button, self.run_button):
             button.setObjectName("primaryAction")
-        # One line on top of the stage: what is happening on the left, what you can do on the right.
+        section.add_widget(self.status)
         bar = QWidget()
         bar.setObjectName("inlineActions")
-        row = QHBoxLayout(bar)
-        row.setContentsMargins(0, 0, 0, 0)
-        row.setSpacing(10)
-        row.addWidget(self.status, 1)
+        row = FlowLayout(bar, spacing=10)
         self.sandbox_button = tr(QPushButton(), "pet_home_free_arranging", "Free arranging")
         self.sandbox_button.setCheckable(True)
         self.sandbox_button.setChecked(self.service.mode == "sandbox")
@@ -304,9 +349,9 @@ class PetHomePage(SettingPage):
         self.desktop_button = tr(QPushButton(), "pet_home_back_to_desktop", "Back to the desktop")
         self.desktop_button.clicked.connect(self.desktop_requested.emit)
         self.backpack_button = tr(QPushButton(), "pet_home_storage_section", "Backpack")
-        self.backpack_button.clicked.connect(lambda: self.tabs.select("pet_home_storage_section"))
+        self.backpack_button.clicked.connect(lambda: self._select_home_tab("pet_home_storage_section"))
         self.goals_button = tr(QPushButton(), "pet_home_goals_section", "Goals")
-        self.goals_button.clicked.connect(lambda: self.tabs.select("pet_home_goals_section"))
+        self.goals_button.clicked.connect(lambda: self._select_home_tab("pet_home_goals_section"))
         self.zoom_out = QPushButton("−")
         self.zoom_in = QPushButton("+")
         for button, steps, key, fallback in ((self.zoom_out, -1, "pet_home_zoom_out", "Zoom out"),
@@ -315,7 +360,10 @@ class PetHomePage(SettingPage):
             tr(button, key, fallback, "setAccessibleName")
             button.setFixedWidth(40)
             button.clicked.connect(lambda _checked=False, s=steps: self.view.step_zoom(s))
-        self.shortcuts = button_row(self.desktop_button, self.backpack_button, self.goals_button)
+        self.shortcuts = QWidget()
+        shortcut_layout = FlowLayout(self.shortcuts, spacing=10)
+        for button in (self.desktop_button, self.backpack_button, self.goals_button):
+            shortcut_layout.addWidget(button)
         self.zone_combo = QComboBox()
         tr(self.zone_combo, "pet_home_zone", "Zone", "setAccessibleName")
         self.zone_combo.activated.connect(lambda _index: self.choose_zone(self.zone_combo.currentData()))
@@ -348,11 +396,68 @@ class PetHomePage(SettingPage):
         self.zone_combo.setCurrentIndex(max(0, self.zone_combo.findData(self.zone)))
         self.zone_combo.setVisible(len(zones) > 1)
 
+    @owned_action
+    def _select_home_tab(self, key: str) -> None:
+        if self.tabs.select(key):
+            self._follow_reveal()
+            QTimer.singleShot(0, self, self._reveal_home_tab)
+
+    def _follow_reveal(self) -> None:
+        """For a moment after a shortcut, keep the tabs in view while content above them settles.
+
+        Pictures, messages and lists above the tabs can change size just after the reveal; the
+        scroll position follows them until the user scrolls or the moment passes.
+        """
+        bar = self._scroll.verticalScrollBar()
+        if not getattr(self, '_reveal_hooked', False):
+            self.lifetime.connect_owned(bar.rangeChanged, lambda _low, _high: self._reveal_again())
+            watcher = _TabsMoved(self._reveal_again, self)
+            widget = self.tabs
+            while widget is not None and widget is not self._scroll.widget():
+                widget.installEventFilter(watcher)      # the tabs move when any section around them does
+                widget = widget.parentWidget()
+            self._reveal_hooked = True
+        self._reveal_generation = getattr(self, '_reveal_generation', 0) + 1
+        self._reveal_following, self._revealed_value = True, None
+        generation = self._reveal_generation
+        QTimer.singleShot(REVEAL_FOLLOW_MS, self, lambda: self._stop_following_reveal(generation))
+
+    def _stop_following_reveal(self, generation: int) -> None:
+        if getattr(self, '_reveal_generation', 0) == generation:
+            self._reveal_following, self._revealed_value = False, None
+
+    def _reveal_again(self) -> None:
+        """The tabs moved or the page's height changed while following: put the tabs back in view,
+        unless the user has scrolled since (a shrinking page lowering the value is not the user)."""
+        bar = self._scroll.verticalScrollBar()
+        revealed = getattr(self, '_revealed_value', None)
+        if (getattr(self, '_reveal_following', False) and revealed is not None
+                and bar.value() == min(revealed, bar.maximum())):
+            QTimer.singleShot(0, self, self._reveal_home_tab)
+
+    @owned_action
+    def _reveal_home_tab(self) -> None:
+        # Measure only once everything above the tabs has its final size: a status line or message
+        # that just changed lays out its own section, not one of the tabs' ancestors, and a section
+        # that resizes asks its parent again; measuring before that scrolled past the tab bar.
+        content = self._scroll.widget()
+        for _ in range(REVEAL_LAYOUT_ROUNDS):
+            before = self.tabs.mapTo(content, QPoint(0, 0)).y(), content.height()
+            QCoreApplication.sendPostedEvents(None, QEvent.Type.LayoutRequest)
+            if (self.tabs.mapTo(content, QPoint(0, 0)).y(), content.height()) == before:
+                break
+        bar = self._scroll.verticalScrollBar()
+        bar.setValue(self.tabs.mapTo(content, QPoint(0, 0)).y())
+        if getattr(self, '_reveal_following', False):
+            self._revealed_value = bar.value()
+
+    @owned_action
     def _open_pending(self, item) -> None:
-        self.tabs.select(item.data(Qt.ItemDataRole.UserRole))
+        self._select_home_tab(item.data(Qt.ItemDataRole.UserRole))
 
     def _refresh_pending(self) -> None:
         items = pending(self.service.world, self.inbox.unread)
+        self.pending_box.setVisible(bool(items))
         texts = [text for text, _key in items]
         if [self.pending_list.item(row).text() for row in range(self.pending_list.count())] == texts:
             return
@@ -365,6 +470,7 @@ class PetHomePage(SettingPage):
         row = self.pending_list.sizeHintForRow(0) if items else self.pending_list.fontMetrics().height() + 12
         self.pending_list.setFixedHeight(rows * max(row, 1) + 2 * self.pending_list.frameWidth() + 12)
 
+    @owned_action
     def _zoom_changed(self, zoom: float) -> None:
         self.view.setFixedHeight(round(STAGE_HEIGHT * zoom))
         self.view_area.setFixedHeight(self.view.height() + self.view_area.horizontalScrollBar().sizeHint().height() + 2)
@@ -378,6 +484,13 @@ class PetHomePage(SettingPage):
         self.desktop_check.setChecked(user_setting_dict.get(DESKTOP_KEY, True) is not False)
         self.desktop_check.toggled.connect(self._desktop_toggled)
         section.add_widget(self.desktop_check)
+        self.mode_combo = QComboBox()
+        for index, mode in enumerate(HOME_MODES):
+            self.mode_combo.addItem('', mode)
+            retranslator.bind(self.mode_combo, 'pet_home_mode_' + mode, mode, 'setItemText', index)
+        self.mode_combo.setCurrentIndex(self.mode_combo.findData(self.mode))
+        self.mode_combo.activated.connect(lambda _index: self.set_mode(self.mode_combo.currentData()))
+        section.add_row('pet_home_mode', self.mode_combo, 'Mode')
         self.motion_check = tr(QCheckBox(), "pet_home_reduced_motion", "Reduce motion")
         self.motion_check.setChecked(user_setting_dict.get(MOTION_KEY) is True)
         self.motion_check.toggled.connect(self._motion_toggled)
@@ -424,12 +537,14 @@ class PetHomePage(SettingPage):
         self.ambience.set_volume(volume)
         self.ambient_slider.setEnabled(self.ambient_check.isChecked())
 
+    @owned_action
     def _ambient_toggled(self, checked: bool) -> None:
         user_setting_dict[AMBIENT_KEY] = checked
         self.ambient_slider.setEnabled(checked)
         self.ambience.set_enabled(checked)
         self.update_ambience()
 
+    @owned_action
     def _ambient_volume_changed(self, value: int) -> None:
         user_setting_dict[AMBIENT_VOLUME_KEY] = value
         self.ambient_value.setText(f"{value}%")
@@ -441,8 +556,9 @@ class PetHomePage(SettingPage):
         self.ambience.update(world.home if world is not None else None, world.time_ms if world is not None else 0,
                              self.service.running)
 
+    @owned_action
     def open_packs_folder(self) -> None:
-        folder = Path(getcwd()) / PACK_FOLDER
+        folder = self.lifetime.storage.directory / PACK_FOLDER
         folder.mkdir(exist_ok=True)
         QDesktopServices.openUrl(QUrl.fromLocalFile(str(folder)))
 
@@ -458,6 +574,7 @@ class PetHomePage(SettingPage):
         area.setFixedHeight(view.height() + area.horizontalScrollBar().sizeHint().height() + 2)
         return area
 
+    @owned_action
     def set_free_arranging(self, free: bool) -> bool:
         """Swap to the free-arranging home (or back); the button follows what really happened."""
         mode = "sandbox" if free else "manage"
@@ -490,6 +607,7 @@ class PetHomePage(SettingPage):
         self.lock_watcher.locked_changed.connect(self._session_locked)
         self.lock_watcher.start()
         self.service.save_failed.connect(self._on_save_failed)
+        self.service.saved.connect(self._on_saved)
         self.service.running_changed.connect(lambda _running: self._refresh_status())
         self.service.running_changed.connect(lambda _running: self.update_ambience())
         self.view.resident_selected.connect(self.select_resident)
@@ -497,6 +615,7 @@ class PetHomePage(SettingPage):
         self.view.cell_clicked.connect(self.layout_panel.cell_clicked)
         self.view.piece_hovered.connect(self.layout_panel.drag_hover)
         self.view.piece_dropped.connect(self.layout_panel.drop)
+        self.view.edit_cancelled.connect(lambda: self.set_preview(None))
         self.view.area_painted.connect(self.layout_panel.paint_area)
         application = QGuiApplication.instance()
         application.screenAdded.connect(self.screens_changed)
@@ -504,6 +623,7 @@ class PetHomePage(SettingPage):
 
     # ----- home lifecycle ------------------------------------------------------------
 
+    @owned_action
     def create_home(self) -> None:
         if self.service.world is not None or self.service.store.read_only:
             return
@@ -520,10 +640,16 @@ class PetHomePage(SettingPage):
         first = None
         if not self.service.world.residents and not self.newcomers.count():
             # Nobody to move in yet: a first pet comes along, so the home is never empty to start with.
-            first = self.profiles.create()["id"]
-            moved = int(self.service.adopt(first) == "accepted")
+            try:
+                first = self.profiles.create()["id"]
+            except OSError:
+                self.report("save_failed")
+            except ValueError as error:
+                self.report_text(str(error))
+            else:
+                moved = int(self.service.adopt(first) == "accepted")
         if moved:
-            self.report_text(translate("pet_home_moved_in", "{count} pets moved in.").format(count=moved))
+            self.report_message("pet_home_moved_in", "{count} pets moved in.", count=moved)
         self._set_running(True)
         self.sync_strip()
         self.refresh()
@@ -534,6 +660,7 @@ class PetHomePage(SettingPage):
         return [self.newcomers.item(i).data(Qt.ItemDataRole.UserRole) for i in range(self.newcomers.count())
                 if self.newcomers.item(i).checkState() == Qt.CheckState.Checked]
 
+    @owned_action
     def move_in_newcomers(self) -> int:
         """The ticked pets move in as themselves (same identity, name, closeness, needs, look and wardrobe).
 
@@ -560,6 +687,7 @@ class PetHomePage(SettingPage):
                 self.newcomers.addItem(item)
         self.newcomers_box.setVisible(bool(records))
 
+    @owned_action
     def toggle_running(self) -> None:
         self._set_running(not self.service.running)
 
@@ -571,12 +699,14 @@ class PetHomePage(SettingPage):
         user_setting_dict[RUNNING_KEY] = running
         self._refresh_status()
 
+    @owned_action
     def restore_backup(self) -> None:
         result = self.service.restore_backup()
         self.load_result = result
         self.report_text("" if result.world is not None else result.error)
         self.refresh()
 
+    @owned_action
     def set_aside(self) -> None:
         from datetime import datetime
         try:
@@ -585,18 +715,26 @@ class PetHomePage(SettingPage):
             self.report_text(str(error))
             return
         self.load_result = self.service.store.load()
-        self.report_text(translate("pet_home_kept_as", "The old file was kept as {name}.").format(
-            name=kept.name if kept else "-"))
+        self.report_message("pet_home_kept_as", "The old file was kept as {name}.",
+                            name=kept.name if kept else "-")
         self.refresh()
 
     def shutdown(self) -> bool:
+        if not self.service.shutdown():
+            return False
+        self._finish_shutdown()
+        return True
+
+    def _prepare_shutdown(self):
+        return self.service._prepare_close()
+
+    def _finish_shutdown(self) -> None:
         for dialog in [*self.residents.wardrobes.values(), *self.layout_panel.visits]:
             dialog.close()
         self.close_strip()
         self.lock_watcher.stop()
         self.art.shutdown()
         self.ambience.shutdown()
-        return self.service.shutdown()
 
     # ----- desktop strip ---------------------------------------------------------------
 
@@ -613,14 +751,20 @@ class PetHomePage(SettingPage):
         for strip in [strip for strip in self.strip_list if strip.zone not in zones]:
             strip.close()
             self._forget_strip(strip)
+        for strip in self.strip_list:
+            strip.follow_world(world)
         for zone in [key for key in zones if key not in {strip.zone for strip in self.strip_list}]:
             strip = HomeStrip(self.service, zone, self.layer, str(user_setting_dict.get("quality_tier", "")))
             strip.open_requested.connect(self.open_requested.emit)
-            strip.action_requested.connect(self.strip_action)
+            strip.action_requested.connect(lambda action, target, z=zone: self.strip_action(action, target, z))
             strip.arrange_finished.connect(self._strip_done_arranging)
             strip.layer_requested.connect(self.choose_layer)
+            strip.hide_requested.connect(self._hide_from_desktop)
+            strip.furniture_selected.connect(lambda identifier, z=zone: self._strip_piece_selected(z, identifier))
+            strip.piece_hovered.connect(self.layout_panel.drag_hover)
+            strip.piece_dropped.connect(self.layout_panel.drop)
             strip.resident_selected.connect(self.select_resident)
-            strip.cell_clicked.connect(self.layout_panel.cell_clicked)
+            strip.cell_clicked.connect(lambda cell, z=zone: self._strip_cell_clicked(z, cell))
             strip.closed.connect(lambda s=strip: self._forget_strip(s))
             strip.set_arranging(self.layout_panel.arranging)
             self.strip_list.append(strip)
@@ -656,6 +800,7 @@ class PetHomePage(SettingPage):
         mode = user_setting_dict.get(MODE_KEY, "normal")
         return mode if mode in HOME_MODES else "normal"
 
+    @owned_action
     def set_mode(self, mode: str) -> None:
         """Normal; focus (quiet strip); meeting (hidden and paused); saver (slow drawing, same time)."""
         if mode not in HOME_MODES:
@@ -664,8 +809,11 @@ class PetHomePage(SettingPage):
         self._sharing_meeting = False
         self.apply_mode()
 
+    @owned_action
     def apply_mode(self) -> None:
         mode = getattr(self, "_effective_mode", None) or self.mode
+        self.mode_combo.setCurrentIndex(self.mode_combo.findData(mode))
+        self.mode_combo.setEnabled(not bool(getattr(self, "_effective_mode", None)))
         if mode == "meeting":
             self.service.pause(MEETING_REASON)
         else:
@@ -687,6 +835,7 @@ class PetHomePage(SettingPage):
         value = user_setting_dict.get(SCALE_KEY, DEFAULT_SCALE)
         return value if value in SCALES else DEFAULT_SCALE
 
+    @owned_action
     def set_strip_scale(self, percent: int) -> None:
         """Bigger or smaller desktop home, remembered; every strip follows at once."""
         if percent not in SCALES:
@@ -696,10 +845,12 @@ class PetHomePage(SettingPage):
         for strip in self.strip_list:
             strip.set_scale(percent)
 
+    @owned_action
     def _motion_toggled(self, checked: bool) -> None:
         user_setting_dict[MOTION_KEY] = checked
         self.apply_motion()
 
+    @owned_action
     def apply_motion(self) -> None:
         """Reduced motion: residents jump between world steps and the rain stands still."""
         reduced = self.motion_check.isChecked()
@@ -707,10 +858,17 @@ class PetHomePage(SettingPage):
             view.reduced_motion = reduced
             view.update()
 
+    @owned_action
+    def _hide_from_desktop(self) -> None:
+        """The strip's own Hide: the same as unticking Show the home on the desktop, so it stays hidden."""
+        self.desktop_check.setChecked(False)
+
+    @owned_action
     def _desktop_toggled(self, checked: bool) -> None:
         user_setting_dict[DESKTOP_KEY] = checked
         self.sync_strip()
 
+    @owned_action
     def choose_layer(self, layer: str) -> None:
         if layer not in LAYERS:
             return
@@ -718,32 +876,55 @@ class PetHomePage(SettingPage):
         for strip in self.strip_list:
             strip.set_layer(layer)
 
+    @owned_action
     def set_preview(self, preview) -> None:
         self.view.set_preview(preview)
         for strip in self.strip_list:
-            strip.set_preview(preview)
+            strip.set_preview(preview if strip.zone == self.zone else None)
 
+    @owned_action
     def set_arranging(self, arranging: bool) -> None:
         for strip in self.strip_list:
             strip.set_arranging(arranging)
 
     # ----- selection and feedback --------------------------------------------------------
 
+    @owned_action
     def select_resident(self, identifier: str | None) -> None:
         self.selected_resident = identifier
+        world = self.service.world
+        resident = world.residents.get(identifier) if world is not None else None
+        if resident is not None and resident.zone != self.zone:
+            self.choose_zone(resident.zone)
         self.view.set_selected(identifier or self.selected_furniture)
         self.residents.refresh_lists()
         self.residents.refresh_live()
 
+    @owned_action
     def select_furniture(self, identifier: str | None) -> None:
+        if identifier is not None:
+            self.layout_panel.storage.clearSelection()
         self.selected_furniture = identifier
         self.view.set_selected(identifier)
         self.layout_panel.refresh_lists()
 
     def report(self, code: object) -> None:
-        self.report_text(result_text(code) if isinstance(code, str) else "")
+        if isinstance(code, str):
+            self.report_message("pet_home_result_" + code, code, save_failure=code == "save_failed")
+        else:
+            self.report_text("")
+
+    def report_message(self, key: str, fallback: str = "", *, save_failure: bool = False,
+                       **values: object) -> None:
+        self._message = _TranslatedMessage(key, fallback, tuple(values.items()), save_failure)
+        self._refresh_message()
 
     def report_text(self, text: str) -> None:
+        self._message = text
+        self._refresh_message()
+
+    def _refresh_message(self) -> None:
+        text = self._message.render() if isinstance(self._message, _TranslatedMessage) else self._message
         self.message.setText(text)
         self.message.setVisible(bool(text))
 
@@ -770,20 +951,28 @@ class PetHomePage(SettingPage):
         self.inbox.on_events(events, self.service.world)
         kinds = {event["kind"] for event in events}
         if kinds & {"settled", "placed", "arrived", "settle_failed", "life_event", "wish_granted",
-                    "goal_claimed", "commission_done", "bought", "routine_set"}:
+                    "goal_claimed", "commission_done", "commissions_refreshed", "bought", "routine_set"}:
             self.refresh()
 
     def _on_save_failed(self, error: str) -> None:
         world = self.service.world
         self.inbox.add_error(translate("pet_home_save_failed", "The home could not be saved ({error}).")
                              .format(error=error), world.time_ms if world else 0)
-        self.report_text(translate("pet_home_save_failed",
-                                   "The home could not be saved ({error}). It will retry; nothing is lost yet.")
-                         .format(error=error))
+        self.report_message("pet_home_save_failed",
+                            "The home could not be saved ({error}). It will retry; nothing is lost yet.",
+                            save_failure=True, error=error)
+
+    def _on_saved(self) -> None:
+        if isinstance(self._message, _TranslatedMessage) and self._message.save_failure:
+            self.report_text("")
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
-        if event.key() == Qt.Key.Key_Escape and self.layout_panel.arranging:
-            self.layout_panel.toggle_arrange()
+        if event.key() == Qt.Key.Key_Escape and (self.layout_panel.arranging
+                                               or self.layout_panel.area_paint.isChecked()):
+            if self.layout_panel.area_paint.isChecked():
+                self.layout_panel.area_paint.click()
+            if self.layout_panel.arranging:
+                self.layout_panel.toggle_arrange()
             event.accept()
             return
         steps = {Qt.Key.Key_Left: -1, Qt.Key.Key_Right: 1}.get(event.key())
@@ -804,10 +993,11 @@ class PetHomePage(SettingPage):
 
     def refresh(self) -> None:
         """Rebuild lists (after commands, events and language changes)."""
+        self._refresh_message()
         self.packs_label.setText(packs_text(self.service.store))
         self.view.set_world(self.service.world, self.zone)
         for panel in (self.residents, self.goals, self.layout_panel, self.shop, self.storage, self.work,
-                      self.collection):
+                      self.collection, self.inbox):
             panel.refresh_lists()
         self.refresh_live()
         for strip in self.strip_list:         # a new pet or piece must take clicks even while paused
@@ -822,8 +1012,28 @@ class PetHomePage(SettingPage):
         self._follow()
         self.update_ambience()
 
-    def strip_action(self, action: str, target: str) -> None:
+    @owned_action
+    def _strip_piece_selected(self, zone: str, identifier: str) -> None:
+        world = self.service.world
+        if world is None or zone not in world.zones or identifier not in world.furniture:
+            return
+        if zone != self.zone:
+            self.choose_zone(zone)
+        self.select_furniture(identifier)
+
+    def _strip_cell_clicked(self, zone: str, cell: int) -> None:
+        world = self.service.world
+        if world is None or zone not in world.zones:
+            return
+        if zone != self.zone:
+            self.choose_zone(zone)
+        self.layout_panel.cell_clicked(cell)
+
+    @owned_action
+    def strip_action(self, action: str, target: str, zone: str | None = None) -> None:
         """The desktop strip's toolbar and right-click menus: arranging stays on the desktop, the rest opens here."""
+        if not self._strip_zone(action, target, zone):
+            return
         if action in ("arrange", "move"):
             if action == "move":
                 self.select_furniture(target)
@@ -832,19 +1042,38 @@ class PetHomePage(SettingPage):
             return
         self.open_requested.emit()
         if action == "tab":
-            self.tabs.select(target)
+            self._select_home_tab(target)
             return
+        self._strip_resident_action(action, target)
+
+    def _strip_zone(self, action: str, target: str, zone: str | None) -> bool:
+        """Show the area the strip's item lives in; False when there is no home or no such area."""
+        world = self.service.world
+        if world is None:
+            return False
+        item = world.furniture.get(target) if action == "move" else world.residents.get(target)
+        zone = item.zone if item is not None else zone
+        if zone is None:
+            return True
+        if zone not in world.zones:
+            return False
+        if zone != self.zone:
+            self.choose_zone(zone)
+        return True
+
+    def _strip_resident_action(self, action: str, target: str) -> None:
         self.select_resident(target)
         if action == "wardrobe":
             self.residents.wardrobe()
         elif action == "work":
-            self.tabs.select("pet_home_work_section")
+            self._select_home_tab("pet_home_work_section")
         elif action == "follow":
             self.followed = target
             self._follow()
         elif action == "photo":
             self.photo_of(target)
 
+    @owned_action
     def photo_of(self, identifier: str):
         """A photo of one pet from the overview, saved to the album; nothing on the desktop is captured."""
         world = self.service.world
@@ -886,7 +1115,6 @@ class PetHomePage(SettingPage):
         self.update_button.setVisible(self.load_result.status == "newer" and not has_home)
         self.shortcuts.setVisible(has_home)
         self._refresh_pending()
-        self.pending_box.setVisible(has_home and self.pending_list.count() > 0)
         self._refresh_zone_combo(world)
         for panel in (self.residents, self.goals, self.layout_panel, self.shop, self.storage, self.work,
                       self.collection):

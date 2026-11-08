@@ -1,3 +1,4 @@
+from frontengine.ui.runtime_lifetime import owned_action
 from typing import Optional
 
 from PySide6.QtWidgets import QPushButton
@@ -9,8 +10,8 @@ from frontengine.utils.multi_language.retranslate import tr
 
 
 class SoundSceneSettingUI(BaseSceneSettingUI):
-    def __init__(self, script_ui: SceneManagerUI):
-        super().__init__(script_ui)
+    def __init__(self, script_ui: SceneManagerUI, *, lifetime):
+        super().__init__(script_ui, lifetime=lifetime)
         self.player_sound_path: Optional[str] = None
 
         volume_label, self.volume_value, self.volume_slider = self._build_slider("Volume", 1, 100, 100)
@@ -38,6 +39,7 @@ class SoundSceneSettingUI(BaseSceneSettingUI):
         self.grid_layout.addWidget(self.player_ready_label, 1, 1)
         self.grid_layout.addWidget(self.update_scene_button, 2, 0)
 
+    @owned_action
     def _update_scene(self) -> None:
         if not self.player_sound_path:
             self._warn_not_prepared()

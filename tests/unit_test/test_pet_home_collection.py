@@ -6,7 +6,6 @@ from frontengine.show.pet_game.home_service import HomeService
 from frontengine.ui.page.pet_game.collection_panel import album_photos, creations, how_to_get, owned_count
 from frontengine.ui.page.pet_game.home_page import PetHomePage
 from frontengine.ui.page.pet_game.home_stage import TAB_ORDER
-from frontengine.user_setting.pet_game_save import HomeSaveStore
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.utils.multi_language.retranslate import translate
 from frontengine.utils.pet_game import behaviour, goals
@@ -93,11 +92,12 @@ def test_only_pngs_inside_the_album_are_listed(tmp_path):
 
 
 @pytest.fixture
-def page(tmp_path, monkeypatch):
+def page(tmp_path, monkeypatch, *, home_store_factory, lifetime_factory):
     from frontengine.user_setting.user_setting_file import user_setting_dict
+    lifetime_factory()
     monkeypatch.setitem(user_setting_dict, "pet_home_running", False)
-    service = HomeService(None, HomeSaveStore(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None))
-    widget = PetHomePage(service)
+    service = HomeService(None, home_store_factory(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None))
+    widget = PetHomePage(service, lifetime=lifetime_factory())
     yield widget
     widget.shutdown()
     widget.deleteLater()
@@ -116,3 +116,64 @@ def test_the_collection_tab_and_locked_shop_captions(page):
     assert page.shop.items.select_key("furniture:piano")
     page.shop.buy()
     assert page.message.text() == translate("pet_home_result_locked")
+
+
+def test_same_second_photos_preserve_each_image(page, tmp_path, monkeypatch):
+    from datetime import datetime
+    from PySide6.QtGui import QPixmap
+    from frontengine.ui.page.pet_game import goals_panel
+
+    class FrozenTime:
+        @staticmethod
+        def now():
+            return datetime(2026, 11, 5, 12, 0, 0)
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(goals_panel, 'datetime', FrozenTime)
+    page.create_home()
+    picture = QPixmap(8, 8)
+    picture.fill(QColor('red'))
+    first = page.goals.save_photo(picture, 'Mochi')
+    picture.fill(QColor('blue'))
+    second = page.goals.save_photo(picture, 'Mochi')
+    assert first != second
+    assert QImage(str(first)).pixelColor(4, 4) == QColor('red')
+    assert QImage(str(second)).pixelColor(4, 4) == QColor('blue')
+
+
+@pytest.mark.parametrize('entry', ['button', 'resident'])
+def test_a_new_photo_appears_in_the_album_immediately(page, entry):
+    from PySide6.QtWidgets import QPushButton
+    page.create_home()
+    page.service.pause('test')
+    assert page.collection.photos.count() == 0
+    if entry == 'button':
+        button = next(button for button in page.goals.section.findChildren(QPushButton)
+                      if button.text() == translate('pet_home_photo'))
+        button.click()
+    else:
+        page.strip_action('photo', page.selected_resident)
+    photos = album_photos(page.collection.folder())
+    assert len(photos) == 1
+    assert page.collection.photos.count() == 1
+    assert page.collection.photos.item(0).text() == photos[0].stem
+
+
+@pytest.mark.parametrize('failure', ['folder', 'image'])
+def test_failed_photo_leaves_no_album_file(page, tmp_path, monkeypatch, failure):
+    from PySide6.QtGui import QPixmap
+
+    monkeypatch.chdir(tmp_path)
+    page.create_home()
+    folder = tmp_path / 'pet-album'
+    picture = QPixmap()
+    if failure == 'folder':
+        folder.write_text('occupied', encoding='utf-8')
+        picture = QPixmap(8, 8)
+        picture.fill(QColor('red'))
+    assert page.goals.save_photo(picture) is None
+    assert page.message.text() == translate('pet_home_photo_failed')
+    if failure == 'folder':
+        assert folder.read_text(encoding='utf-8') == 'occupied'
+    else:
+        assert list(folder.iterdir()) == []

@@ -1,0 +1,221 @@
+{
+  "product_commit": "acbe8d21",
+  "status": "native widget-label defect reproduced; fix pending",
+  "result": {
+    "passed": false,
+    "pages": 1,
+    "languages": 7,
+    "cases": 7,
+    "routes": [
+      {
+        "language": "English",
+        "page": "tab_scene_text",
+        "label": "Scene",
+        "requested_width": 900,
+        "actual_size": [
+          900,
+          740
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "English-900-tab_scene_text.png"
+      },
+      {
+        "language": "Traditional_Chinese",
+        "page": "tab_scene_text",
+        "label": "場景",
+        "requested_width": 900,
+        "actual_size": [
+          900,
+          740
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "Traditional_Chinese-900-tab_scene_text.png"
+      },
+      {
+        "language": "Simplified_Chinese",
+        "page": "tab_scene_text",
+        "label": "场景",
+        "requested_width": 900,
+        "actual_size": [
+          900,
+          740
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "Simplified_Chinese-900-tab_scene_text.png"
+      },
+      {
+        "language": "Deutsch",
+        "page": "tab_scene_text",
+        "label": "Szene",
+        "requested_width": 900,
+        "actual_size": [
+          900,
+          740
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "Deutsch-900-tab_scene_text.png"
+      },
+      {
+        "language": "Russian",
+        "page": "tab_scene_text",
+        "label": "Сцена",
+        "requested_width": 900,
+        "actual_size": [
+          900,
+          740
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "Russian-900-tab_scene_text.png"
+      },
+      {
+        "language": "France",
+        "page": "tab_scene_text",
+        "label": "Scène",
+        "requested_width": 900,
+        "actual_size": [
+          900,
+          740
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "France-900-tab_scene_text.png"
+      },
+      {
+        "language": "Italy",
+        "page": "tab_scene_text",
+        "label": "Scena",
+        "requested_width": 900,
+        "actual_size": [
+          900,
+          740
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "Italy-900-tab_scene_text.png"
+      }
+    ],
+    "combo_mismatches": [
+      {
+        "language": "Traditional_Chinese",
+        "page": "tab_scene_text",
+        "control": "tool",
+        "actual": [
+          "Move",
+          "Rotate",
+          "Scale"
+        ],
+        "expected": [
+          "移動",
+          "旋轉",
+          "縮放"
+        ]
+      },
+      {
+        "language": "Traditional_Chinese",
+        "page": "tab_scene_text",
+        "control": "axis",
+        "actual": [
+          "Free",
+          "X",
+          "Y",
+          "Z"
+        ],
+        "expected": [
+          "自由",
+          "X",
+          "Y",
+          "Z"
+        ]
+      },
+      {
+        "language": "Traditional_Chinese",
+        "page": "tab_scene_text",
+        "control": "space",
+        "actual": [
+          "World",
+          "Screen"
+        ],
+        "expected": [
+          "空間平面",
+          "螢幕圖層"
+        ]
+      },
+      {
+        "language": "Traditional_Chinese",
+        "page": "tab_scene_text",
+        "control": "projection",
+        "actual": [
+          "Perspective",
+          "Orthographic"
+        ],
+        "expected": [
+          "透視",
+          "正交"
+        ]
+      },
+      {
+        "language": "Traditional_Chinese",
+        "page": "tab_scene_text",
+        "control": "light_type",
+        "actual": [
+          "Directional",
+          "Point"
+        ],
+        "expected": [
+          "方向光",
+          "點光源"
+        ]
+      }
+    ],
+    "selected_values": {
+      "tool": "move",
+      "axis": "free",
+      "space": "world",
+      "projection": "perspective",
+      "light_type": "directional"
+    },
+    "index_changes": {
+      "tool": [],
+      "axis": [],
+      "space": [],
+      "projection": [],
+      "light_type": []
+    },
+    "callback_errors": [],
+    "home_world_unchanged": true,
+    "home_service_and_leases_reused": true,
+    "command_palette_reused": true,
+    "runtime_closed": true,
+    "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-stage-layout\\.audit\\profession-owned-fixed",
+    "saved_snapshot_sha256": "c471f2056e3bf47d41a8073e4a214f8eccec310f6c85a5f6088181f0c4b05172",
+    "scope": "Private native MainUI, seven language menu actions, five existing 3D editor option groups. Reads widget labels and checks stable data/order/no index signals. Host services substituted. No 3D render, control visibility, OS input or full localization acceptance claim.",
+    "temporary_directory_removed": true
+  },
+  "observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "child_exit": 1,
+    "observation_only": true
+  },
+  "excluded_probe": "native-scene-option-before incorrectly expected untranslated axis key names; replaced by explicit fallback-aware probe",
+  "cause": "Scene3DEditor populates tool/axis/space/projection/light_type using translate once; entries have no retranslator bindings.",
+  "scope_limit": "Existing 3D widgets inspected in actual MainUI; no GL rendering or visibility acceptance."
+}

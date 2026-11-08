@@ -26,3 +26,5 @@ Präsentieren-Seite
     * „Whiteboard speichern“ schreibt ein Bild genau des bemalten Bereichs.
 
 Präsentation → Tafel hat unabhängige editierbare Seiten, Zeichen/Auswahlmodus, Shift-Mehrfachauswahl, Strichbewegung/Löschen und insgesamt 20 Undo-Zustände. Mittlere Taste verschiebt, Rad zoomt; Auswahl/Bewegung in Canvas-Koordinaten, eigene Ansicht je Seite. Speichern/Öffnen nutzt versioniertes .fewhiteboard JSON mit Vektorstrichen/Ansichten zum Weiterbearbeiten. Ein Hintergrundworker validiert und liest/schreibt; Fehler erhalten Tafel/Datei. Seiten-PNG zeigt nur die gewählte Seite ohne Bedienelemente/Auswahl/Ansichtstransform, mit vollständigen Stifträndern. Grenzen: 50 Seiten, 2000 Striche/Seite, 100000 Punkte, acht MiB JSON; PNG 8192 Pixel/Seite, 16 Megapixel. Schließen/Escape bricht Schreiben ab und ignoriert späte Lesergebnisse.
+
+Beim Wechsel des Renderers bleiben die Whiteboard-Bedienelemente über der Zeichenfläche und gut lesbar.

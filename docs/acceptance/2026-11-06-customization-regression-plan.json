@@ -1,0 +1,11 @@
+{
+  "product_test_commit": "d63a94c5",
+  "collected": 3321,
+  "expected_passed": 3318,
+  "expected_skipped": 3,
+  "parent_queue_pid": 61676,
+  "source_files": 752,
+  "collection_seconds": 7.06,
+  "status": "queued; no full-suite pass claimed",
+  "required_new_regression_cases": 8
+}

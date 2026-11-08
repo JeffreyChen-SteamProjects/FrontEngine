@@ -4,7 +4,6 @@ from PySide6.QtGui import QDropEvent
 
 from frontengine.show.pet_game.home_service import HomeService
 from frontengine.ui.page.pet_game.home_page import PetHomePage
-from frontengine.user_setting.pet_game_save import HomeSaveStore
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.user_setting.user_setting_file import user_setting_dict
 from frontengine.utils.pet_game import behaviour
@@ -49,19 +48,21 @@ def test_ending_takes_back_only_its_own_untouched_requests():
     assert world.focus_end() == []
 
 
-def _page(tmp_path, monkeypatch, focus):
+def _page(tmp_path, monkeypatch, focus, *, home_store_factory, lifetime_factory):
+    lifetime_factory()
     monkeypatch.setitem(user_setting_dict, "pet_home_running", False)
     monkeypatch.setitem(user_setting_dict, "pet_home_on_desktop", True)
     monkeypatch.setitem(user_setting_dict, "pet_home_focus_companion", focus)
-    service = HomeService(None, HomeSaveStore(tmp_path, CATALOG), PetProfiles({}, lambda: None))
-    page = PetHomePage(service)
+    service = HomeService(None, home_store_factory(tmp_path, CATALOG), PetProfiles({}, lambda: None))
+    page = PetHomePage(service, lifetime=lifetime_factory())
     page.create_home()
     # creating a home with no pets brings a first one
     return page
 
 
-def test_the_page_follows_the_focus_timer_only_when_asked(tmp_path, monkeypatch):
-    page = _page(tmp_path, monkeypatch, False)
+def test_the_page_follows_the_focus_timer_only_when_asked(tmp_path, monkeypatch, *, home_store_factory, lifetime_factory):
+    lifetime_factory()
+    page = _page(tmp_path, monkeypatch, False, home_store_factory=home_store_factory, lifetime_factory=lifetime_factory)
     try:
         resident = next(iter(page.service.world.residents.values()))
         page.focus_phase_changed("focus")
@@ -76,8 +77,9 @@ def test_the_page_follows_the_focus_timer_only_when_asked(tmp_path, monkeypatch)
         page.deleteLater()
 
 
-def test_a_file_dropped_on_a_pet_feeds_it_and_is_never_opened(tmp_path, monkeypatch):
-    page = _page(tmp_path, monkeypatch, False)
+def test_a_file_dropped_on_a_pet_feeds_it_and_is_never_opened(tmp_path, monkeypatch, *, home_store_factory, lifetime_factory):
+    lifetime_factory()
+    page = _page(tmp_path, monkeypatch, False, home_store_factory=home_store_factory, lifetime_factory=lifetime_factory)
     try:
         strip = page.strip_list[0]
         resident = next(iter(page.service.world.residents.values()))

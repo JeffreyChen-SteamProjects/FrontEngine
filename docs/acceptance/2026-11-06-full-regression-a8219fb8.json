@@ -1,0 +1,84 @@
+{
+  "exit": 0,
+  "source_unchanged": true,
+  "source_count": 748,
+  "interpreter": "D:\\Codes\\FrontEngine\\.audit\\test-runtime-3145\\Scripts\\python.exe",
+  "product_test_commit": "a8219fb8",
+  "total": 3174,
+  "passed": 3171,
+  "failed": 0,
+  "skipped": [
+    {
+      "module": "tests.unit_test.test_default_storage_binding",
+      "name": "test_forked_empty_default_registry_rejects_inherited_locked_mutex",
+      "reason": "Requires POSIX fork"
+    },
+    {
+      "module": "tests.unit_test.test_remote_tls",
+      "name": "test_private_key_and_directory_are_owner_only",
+      "reason": "POSIX permission semantics"
+    },
+    {
+      "module": "tests.unit_test.test_storage_session",
+      "name": "test_forked_child_cannot_use_or_release_parent_owner",
+      "reason": "Requires POSIX fork"
+    }
+  ],
+  "junit_suite_seconds": "1361.573",
+  "pytest_reported_seconds": 1362.49,
+  "required_cases": {
+    "manual_work_failure_and_retry": [
+      "test_manual_work_reports_start_failure_and_can_retry[waiting_materials]",
+      "test_manual_work_reports_start_failure_and_can_retry[no_station]",
+      "test_manual_work_reports_start_failure_and_can_retry[station_busy]"
+    ],
+    "queued_refusal_and_recovery": [
+      "test_queued_work_refusal_remains_visible_until_next_accepted_activity"
+    ],
+    "blocked_work_reason_and_recovery": [
+      "test_blocked_work_reason_is_visible_until_work_resumes[waiting_materials]",
+      "test_blocked_work_reason_is_visible_until_work_resumes[no_station]",
+      "test_blocked_work_reason_is_visible_until_work_resumes[station_busy]"
+    ],
+    "visible_focus": [
+      "test_item_view_focus_is_visible_without_selection_or_resizing[QListView-light]",
+      "test_item_view_focus_is_visible_without_selection_or_resizing[QListView-dark]",
+      "test_item_view_focus_is_visible_without_selection_or_resizing[QListWidget-light]",
+      "test_item_view_focus_is_visible_without_selection_or_resizing[QListWidget-dark]",
+      "test_item_view_focus_is_visible_without_selection_or_resizing[QTreeView-light]",
+      "test_item_view_focus_is_visible_without_selection_or_resizing[QTreeView-dark]",
+      "test_item_view_focus_is_visible_without_selection_or_resizing[QTreeWidget-light]",
+      "test_item_view_focus_is_visible_without_selection_or_resizing[QTreeWidget-dark]",
+      "test_item_view_focus_is_visible_without_selection_or_resizing[QTableView-light]",
+      "test_item_view_focus_is_visible_without_selection_or_resizing[QTableView-dark]",
+      "test_item_view_focus_is_visible_without_selection_or_resizing[QTableWidget-light]",
+      "test_item_view_focus_is_visible_without_selection_or_resizing[QTableWidget-dark]"
+    ],
+    "accessible_name": [
+      "test_work_list_accessible_name_follows_language"
+    ],
+    "exact_page_search": [
+      "test_exact_page_name_enter_opens_matching_page[]",
+      "test_exact_page_name_enter_opens_matching_page[Control]"
+    ],
+    "plugin_search_and_collision": [
+      "test_registered_plugin_page_is_searchable_without_recreating_it[Example clock]",
+      "test_registered_plugin_page_is_searchable_without_recreating_it[tab_text_text]"
+    ]
+  },
+  "diagnostic_markers": [],
+  "evidence_sha256": {
+    "pytest.log": "c64530b72ddcb6594640b4b8f95f51e436d6b828a3216af597f2481f29d6c3e6",
+    "junit.xml": "f5411cc12cf9aae76ec5e72e8508420ab8f17ae24e57dd980c430ecb2cc94fce",
+    "source-manifest.json": "9f2e07798a165ad3ae6eb79560516b5dd47e1945e8ee6317a85c11d4c875878f",
+    "result.json": "dfe34e45a451f3e73a3aa5b015cb06fd7087645ac1d0a904fc5df48a509ef4a1"
+  },
+  "limits": [
+    "Windows offscreen Qt suite; no native input, hardware or independent-review acceptance.",
+    "Documentation-only commits after the source baseline are not product changes.",
+    "Three expected POSIX-only cases were skipped; names and reasons were verified.",
+    "Does not cover the later 6a097aa0 stage-layout implementation."
+  ],
+  "verifier": "from pathlib import Path\nimport hashlib\nimport json\nimport re\nimport xml.etree.ElementTree as ET\n\nroot = Path(__file__).resolve().parents[1]\noutput = root / '.audit/full-regression-a8219fb8'\nstate = json.loads((output / 'result.json').read_text())\nassert state['exit'] == 0 and state['source_unchanged'], state\nmanifest = json.loads((output / 'source-manifest.json').read_text())\ncurrent = {path.relative_to(root).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest()\n           for folder in ('frontengine', 'tests') for path in (root / folder).rglob('*.py')}\nassert current == manifest, 'Tested source set or content changed'\nassert len(current) == state['source_count'] == 748\nsuite = ET.parse(output / 'junit.xml').getroot().find('testsuite')\ncases = suite.findall('testcase')\nfailures = [case.attrib for case in cases if case.find('failure') is not None or case.find('error') is not None]\nskipped = [{'module': case.get('classname'), 'name': case.get('name'),\n            'reason': case.find('skipped').get('message')}\n           for case in cases if case.find('skipped') is not None]\nassert not failures, failures\nassert len(cases) == int(suite.get('tests')) == 3174\nassert len(skipped) == int(suite.get('skipped')) == 3\nassert {(case['module'], case['name'], case['reason']) for case in skipped} == {\n    ('tests.unit_test.test_default_storage_binding',\n     'test_forked_empty_default_registry_rejects_inherited_locked_mutex', 'Requires POSIX fork'),\n    ('tests.unit_test.test_remote_tls',\n     'test_private_key_and_directory_are_owner_only', 'POSIX permission semantics'),\n    ('tests.unit_test.test_storage_session',\n     'test_forked_child_cannot_use_or_release_parent_owner', 'Requires POSIX fork'),\n}\nassert int(suite.get('failures')) == int(suite.get('errors')) == 0\nrequirements = {\n    'manual_work_failure_and_retry': ('test_manual_work_reports_start_failure_and_can_retry', 3),\n    'queued_refusal_and_recovery': ('test_queued_work_refusal_remains_visible_until_next_accepted_activity', 1),\n    'blocked_work_reason_and_recovery': ('test_blocked_work_reason_is_visible_until_work_resumes', 3),\n    'visible_focus': ('test_item_view_focus_is_visible_without_selection_or_resizing', 12),\n    'accessible_name': ('test_work_list_accessible_name_follows_language', 1),\n    'exact_page_search': ('test_exact_page_name_enter_opens_matching_page', 2),\n    'plugin_search_and_collision': ('test_registered_plugin_page_is_searchable_without_recreating_it', 2),\n}\nverified = {}\nfor label, (prefix, count) in requirements.items():\n    selected = [case for case in cases if case.get('name', '').startswith(prefix)]\n    assert len(selected) == count, (label, len(selected), count)\n    assert all(case.find('skipped') is None for case in selected), label\n    verified[label] = [case.get('name') for case in selected]\nassert {name.rsplit('[', 1)[1].rstrip(']') for name in verified['blocked_work_reason_and_recovery']} == {'waiting_materials', 'no_station', 'station_busy'}\nassert any('[tab_text_text]' in name for name in verified['plugin_search_and_collision'])\nassert any('[Example clock]' in name for name in verified['plugin_search_and_collision'])\nlog = (output / 'pytest.log').read_text(encoding='utf-8')\nsummary = re.search(r'3171 passed, 3 skipped in ([\\d.]+)s', log)\nassert summary, 'Expected terminal pytest summary missing'\ndiagnostics = [line for line in log.splitlines() if any(marker in line for marker in ('Timeout (', 'FAILED ', 'ERROR '))]\nreport = {\n    **state,\n    'product_test_commit': 'a8219fb8',\n    'total': len(cases),\n    'passed': len(cases) - len(skipped),\n    'failed': 0,\n    'skipped': skipped,\n    'junit_suite_seconds': suite.get('time'),\n    'pytest_reported_seconds': float(summary.group(1)),\n    'required_cases': verified,\n    'diagnostic_markers': diagnostics,\n    'evidence_sha256': {name: hashlib.sha256((output / name).read_bytes()).hexdigest()\n                        for name in ('pytest.log', 'junit.xml', 'source-manifest.json', 'result.json')},\n    'limits': ['Windows offscreen Qt suite; no native input, hardware or independent-review acceptance.',\n               'Documentation-only commits after the source baseline are not product changes.',\n               'Three expected POSIX-only cases were skipped; names and reasons were verified.'],\n}\nassert not any(marker.startswith(('FAILED ', 'ERROR ')) for marker in diagnostics), diagnostics\n(root / '.audit/full-regression-a8219fb8-verified.json').write_text(json.dumps(report, indent=2), encoding='utf-8')\nprint(json.dumps({'passed': report['passed'], 'skipped': len(skipped), 'verified_cases': verified}))\n",
+  "verifier_sha256": "f08b0ed229d590bf48e2d06eaa503c8055db5fb078adddb5c15b03b5000933f6"
+}

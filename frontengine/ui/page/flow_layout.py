@@ -72,6 +72,9 @@ class FlowLayout(QLayout):
             if item.isEmpty():
                 continue
             size = item.sizeHint().expandedTo(item.minimumSize())
+            if item.hasHeightForWidth():
+                size.setWidth(max(item.minimumSize().width(), min(size.width(), area.width())))
+                size.setHeight(max(item.minimumSize().height(), item.heightForWidth(size.width())))
             if x > area.x() and x + size.width() > area.x() + area.width():
                 x = area.x()
                 y += line_height + self.spacing()

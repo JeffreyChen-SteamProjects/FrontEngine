@@ -1,0 +1,86 @@
+{
+  "base_commit": "d96e413a",
+  "status": "focused fix and verification complete; full regression, independent review and integration pending",
+  "cause": "save_result consumes a file-picker result after the editor is closed, writes the PNG and then accesses a destroyed status label. CaptureCanvas also consumes text-prompt results and refreshes its scene after the editor closes or is destroyed.",
+  "red": "6 failed, 9 deselected in 4.04s",
+  "fix": "Track dialog finished state and check that state plus Qt validity before opening the picker and before consuming its result. After text input returns, discard it when the canvas is invalid or no longer visible; use existing widget visibility rather than a second closed flag.",
+  "related_tests": "55 passed in 9.01s",
+  "coverage": [
+    "Reject, close, direct destruction and reject before deferred destruction, each with new and existing destination.",
+    "Repeated save calls after closure do not reopen the picker.",
+    "Cancelling only the picker allows retry; saved pixels retain redaction.",
+    "Eight text closure cases cover accepted/cancelled results and reject/close/destruction/pending deletion, without document/history/signal changes.",
+    "Cancelling text input while the editor stays open permits a later gesture to add exactly one annotation."
+  ],
+  "native": {
+    "surface": "Private Windows desktop, Traditional Chinese dark MainUI, 900x740, synthetic capture",
+    "activation": "Tools page method opens the editor; widget-local Tab/Space activates its actual Save button.",
+    "trigger": "Injected picker result rejects and destroys the editor before returning an existing destination.",
+    "result": "Original destination bytes and source capture pixels remain unchanged; page drops the destroyed editor reference.",
+    "shutdown": "Normal runtime shutdown, temporary directory removed, blank stderr, unchanged foreground and cursor.",
+    "cold": "Independent process reopens exact world/profiles, reacquires leases and saves exact state."
+  },
+  "pending": [
+    "Full regression, independent review and integration."
+  ],
+  "limits": "Picker returns are injected; no OS input or system file-picker automation. No EXE conversion.",
+  "text_red": "8 failed, 17 deselected in 2.19s",
+  "native_text": {
+    "cases": [
+      {
+        "accepted": false,
+        "marks": 0,
+        "history": 0,
+        "changed_signals": 0,
+        "original_capture_unchanged": true
+      },
+      {
+        "accepted": true,
+        "marks": 0,
+        "history": 0,
+        "changed_signals": 0,
+        "original_capture_unchanged": true
+      }
+    ],
+    "observer": {
+      "before": {
+        "foreground": 2558004,
+        "cursor": [
+          768,
+          432
+        ]
+      },
+      "after": {
+        "foreground": 2558004,
+        "cursor": [
+          768,
+          432
+        ]
+      },
+      "child_exit": 0
+    },
+    "cold": {
+      "passed": true,
+      "initial_snapshot_exact": true,
+      "profiles_exact": true,
+      "leases_reacquired": true,
+      "saved_exact": true,
+      "temporary_directory_removed": true
+    },
+    "scope": "Same private native MainUI. Widget-local mouse press establishes coordinates; an explicit QMouseEvent calls the release handler. Text prompt results injected after reject and deferred destruction. No OS mouse injection or system text-dialog interaction."
+  },
+  "documentation": {
+    "files": 17,
+    "checks": "31 passed in 2.15s",
+    "sphinx": "HTML build with -W passed",
+    "rendered_paragraphs_exact": [
+      "Eng",
+      "Zh",
+      "ZhCn",
+      "De",
+      "Fr",
+      "Ru",
+      "It"
+    ]
+  }
+}

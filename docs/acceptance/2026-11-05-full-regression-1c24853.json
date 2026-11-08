@@ -1,0 +1,81 @@
+{
+  "exit": 0,
+  "source_unchanged": true,
+  "source_count": 748,
+  "interpreter": "D:\\Codes\\FrontEngine\\.audit\\test-runtime-3145\\Scripts\\python.exe",
+  "product_test_commit": "1c24853",
+  "passed": 3147,
+  "skipped": [
+    {
+      "module": "tests.unit_test.test_default_storage_binding",
+      "name": "test_forked_empty_default_registry_rejects_inherited_locked_mutex",
+      "reason": "Requires POSIX fork"
+    },
+    {
+      "module": "tests.unit_test.test_remote_tls",
+      "name": "test_private_key_and_directory_are_owner_only",
+      "reason": "POSIX permission semantics"
+    },
+    {
+      "module": "tests.unit_test.test_storage_session",
+      "name": "test_forked_child_cannot_use_or_release_parent_owner",
+      "reason": "Requires POSIX fork"
+    }
+  ],
+  "failed": 0,
+  "total": 3150,
+  "pytest_reported_seconds": 3072.24,
+  "junit_suite_seconds": "3063.677",
+  "focused_cases_passed": [
+    "tests.unit_test.test_pet_home_page::test_styled_home_keeps_requested_width_in_every_language",
+    "tests.unit_test.test_pet_home_page::test_operation_message_follows_language_without_losing_values[move]",
+    "tests.unit_test.test_pet_home_page::test_operation_message_follows_language_without_losing_values[result]",
+    "tests.unit_test.test_pet_home_page::test_operation_message_follows_language_without_losing_values[photo]",
+    "tests.unit_test.test_pet_home_page::test_operation_message_follows_language_without_losing_values[blueprint]",
+    "tests.unit_test.test_pet_home_page::test_operation_message_follows_language_without_losing_values[save_error]",
+    "tests.unit_test.test_pet_home_responsive::test_created_home_fits_actual_narrow_window_with_arial"
+  ],
+  "command": [
+    "D:\\Codes\\FrontEngine\\.audit\\test-runtime-3145\\Scripts\\python.exe",
+    "-m",
+    "pytest",
+    "-p",
+    "live_failure_reporter",
+    "-p",
+    "responsive_failure_probe_1c24853",
+    "tests/",
+    "-q",
+    "--maxfail=5",
+    "-o",
+    "faulthandler_timeout=180",
+    "--junitxml=D:\\Codes\\FrontEngine\\.audit\\worktrees\\ownership-integration\\.audit\\full-regression-1c24853\\junit.xml"
+  ],
+  "evidence_sha256": {
+    "pytest.log": "4bbd8a9dea44602c5b238342b763bc47249d77bd01c335837a9afb5b03cbe828",
+    "junit.xml": "f8febe6961ac26813309c901f455210320e47da4762abd8f0eeef66b91db117f",
+    "source-manifest.json": "4555f3bcccfb84dc0e4ea89e98ff68b1df120f096ad796f839380844875f8e86",
+    "result.json": "dfe34e45a451f3e73a3aa5b015cb06fd7087645ac1d0a904fc5df48a509ef4a1"
+  },
+  "diagnostic": "A 180-second faulthandler stack dump occurred during pathlib.open in the Inkside layered-asset fixture. The same process continued and completed successfully; it was not restarted.",
+  "narrow_layout_evidence": [
+    "2026-11-05-responsive-selected-furniture-wrap.json",
+    "2026-11-05-styled-home-widths.json",
+    "2026-11-05-main-home-native.json",
+    "2026-11-05-explicit-arial-regression.json"
+  ],
+  "limits": [
+    "Windows Python 3.14.5 and Qt 6.11.2, Qt offscreen suite; not a substitute for native OS, device, focus, or normal-speed acceptance.",
+    "POSIX fork and file-permission checks were skipped and remain unverified on this machine.",
+    "Native styled standalone home was separately verified at actual widths 296 and 536. Native full MainUI was separately verified at 1000 and 1280; requested 536 widened to 588 or 785 and is not claimed as passing at 536.",
+    "Independent review and remaining acceptance requirements in progress.md remain outstanding.",
+    "No EXE built, push, merge, or release performed."
+  ],
+  "argument_adaptation_cases_passed": [
+    "tests.unit_test.test_runtime_ownership::test_owned_methods_keep_qt_signal_argument_adaptation[owned_action]",
+    "tests.unit_test.test_runtime_ownership::test_owned_methods_keep_qt_signal_argument_adaptation[owned_callback]",
+    "tests.unit_test.test_runtime_ownership::test_owned_connection_keeps_qt_signal_argument_adaptation",
+    "tests.unit_test.test_runtime_ownership::test_owned_methods_keep_variadic_fields_defaults_and_keywords[owned_action]",
+    "tests.unit_test.test_runtime_ownership::test_owned_methods_keep_variadic_fields_defaults_and_keywords[owned_callback]",
+    "tests.unit_test.test_scene_3d_ui::test_mode_switch_json_and_undo_keep_camera_and_settings"
+  ]
+}

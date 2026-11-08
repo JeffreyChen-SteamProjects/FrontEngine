@@ -8,7 +8,6 @@ from frontengine.show.pet_game.home_service import HomeService
 from frontengine.show.pet_game.home_view import ZOOMS
 from frontengine.ui.page.pet_game.home_page import STAGE_HEIGHT, UPDATE_URL, PetHomePage
 from frontengine.ui.page.pet_game.home_pending import MAX_PENDING, pending
-from frontengine.user_setting.pet_game_save import HomeSaveStore
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.utils.pet_game.catalog import builtin_catalog
 from frontengine.utils.pet_game.world import World
@@ -22,9 +21,10 @@ def _settings(monkeypatch):
 
 
 @pytest.fixture
-def page(tmp_path):
-    service = HomeService(None, HomeSaveStore(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None))
-    widget = PetHomePage(service)
+def page(tmp_path, *, home_store_factory, lifetime_factory):
+    lifetime_factory()
+    service = HomeService(None, home_store_factory(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None))
+    widget = PetHomePage(service, lifetime=lifetime_factory())
     widget.resize(1200, 900)
     widget.show()
     yield widget
@@ -97,10 +97,11 @@ def test_the_strip_offers_a_way_out_of_arranging(page):
     assert strip.done_button.isHidden()
 
 
-def test_a_newer_save_offers_the_update(tmp_path):
+def test_a_newer_save_offers_the_update(tmp_path, *, home_store_factory, lifetime_factory):
+    lifetime_factory()
     (tmp_path / "pet-home.json").write_text('{"format": "frontengine.pet-home", "version": 999}', encoding="utf-8")
-    service = HomeService(None, HomeSaveStore(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None))
-    page = PetHomePage(service)
+    service = HomeService(None, home_store_factory(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None))
+    page = PetHomePage(service, lifetime=lifetime_factory())
     page.show()
     try:
         assert page.load_result.status == "newer"
@@ -110,3 +111,112 @@ def test_a_newer_save_offers_the_update(tmp_path):
     finally:
         page.shutdown()
         page.deleteLater()
+
+
+def _settle_reveal(page, rounds: int = 30) -> None:
+    """Let the page finish laying out and scrolling: stop once nothing moved for three rounds."""
+    from PySide6.QtCore import QPoint
+    from PySide6.QtWidgets import QApplication
+    content, still, last = page._scroll.widget(), 0, None
+    for _ in range(rounds):
+        QApplication.processEvents()
+        now = (page._scroll.verticalScrollBar().value(), page.tabs.mapTo(content, QPoint(0, 0)).y())
+        still = still + 1 if now == last else 0
+        last = now
+        if still >= 3:
+            return
+
+
+@pytest.mark.parametrize("height", [500, 900])
+@pytest.mark.parametrize("target", ["backpack", "goals"])
+@pytest.mark.parametrize("keyboard", [False, True])
+def test_stage_shortcut_reveals_content_even_when_tab_is_already_selected(page, height, target, keyboard):
+    from PySide6.QtTest import QTest
+    from PySide6.QtWidgets import QApplication
+
+    page.create_home()
+    page.resize(1000, height)
+    page.refresh()
+    button = page.backpack_button if target == "backpack" else page.goals_button
+    content = page.storage.list if target == "backpack" else page.goals.level
+    for _ in range(3):
+        QApplication.processEvents()
+    for _ in range(2):
+        page._scroll.verticalScrollBar().setValue(0)
+        if keyboard:
+            button.setFocus()
+            QTest.keyClick(button, Qt.Key.Key_Space)
+        else:
+            button.click()
+        _settle_reveal(page)
+        assert not content.visibleRegion().isEmpty(), (target, height, keyboard)
+        assert not page.tabs.tabBar().visibleRegion().isEmpty()
+
+
+@pytest.mark.parametrize("route", ["pending", "strip"])
+def test_home_navigation_links_reveal_their_target(page, route):
+    from PySide6.QtWidgets import QApplication
+
+    page.create_home()
+    page.resize(1000, 500)
+    page.inbox.add_error("Navigation fixture", page.service.world.time_ms)
+    page.refresh()
+    for _ in range(3):
+        QApplication.processEvents()
+    page._scroll.verticalScrollBar().setValue(0)
+    if route == "pending":
+        item = next(page.pending_list.item(i) for i in range(page.pending_list.count())
+                    if page.pending_list.item(i).data(Qt.ItemDataRole.UserRole) == "pet_home_inbox_section")
+        page.pending_list.itemClicked.emit(item)
+    else:
+        page.strip_list[0].action_requested.emit("tab", "pet_home_inbox_section")
+    for _ in range(3):
+        QApplication.processEvents()
+    assert not page.inbox.list.visibleRegion().isEmpty()
+    assert page.tabs.keys()[page.tabs.currentIndex()] == "pet_home_inbox_section"
+
+
+def test_deferred_home_navigation_is_discarded_during_close_preparation(page):
+    from PySide6.QtWidgets import QApplication
+
+    page.create_home()
+    page.resize(1000, 500)
+    for _ in range(3):
+        QApplication.processEvents()
+    page._scroll.verticalScrollBar().setValue(0)
+    page.backpack_button.click()
+    page.lifetime.begin_prepare()
+    try:
+        for _ in range(3):
+            QApplication.processEvents()
+        assert page._scroll.verticalScrollBar().value() == 0
+    finally:
+        page.lifetime.cancel_prepare()
+    for _ in range(3):
+        QApplication.processEvents()
+    assert page._scroll.verticalScrollBar().value() == 0
+    page.backpack_button.click()
+    for _ in range(3):
+        QApplication.processEvents()
+    assert not page.storage.list.visibleRegion().isEmpty()
+
+
+@pytest.mark.parametrize("target", ["backpack", "goals"])
+def test_shortcut_reveal_measures_after_content_above_settles(page, target):
+    """A message above the tabs that shrinks just before the reveal must not push the tabs out of view."""
+    from PySide6.QtWidgets import QApplication
+
+    page.create_home()
+    page.resize(1000, 500)
+    page.refresh()
+    page.report_text("\n".join(["A long message that takes room above the tabs."] * 12))
+    for _ in range(3):
+        QApplication.processEvents()
+    page._scroll.verticalScrollBar().setValue(0)
+    button = page.backpack_button if target == "backpack" else page.goals_button
+    content = page.storage.list if target == "backpack" else page.goals.level
+    button.click()
+    page.report_text("")                      # the content above shrinks before the reveal runs
+    _settle_reveal(page)
+    assert not content.visibleRegion().isEmpty()
+    assert not page.tabs.tabBar().visibleRegion().isEmpty()

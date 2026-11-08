@@ -12,7 +12,7 @@ from frontengine.utils.pet_game.behaviour import (
     LOW_HYGIENE, URGENT_ENERGY, URGENT_FULLNESS, cancel_activity, decide, greet_arrived, greet_completed, help_completed,
     tag_completed,
     helpers, release,
-    shared_completed, together,
+    shared_completed, start_rest, together,
 )
 from frontengine.utils.pet_game import goals
 from frontengine.utils.pet_game.resident import PROFESSION_TRAITS
@@ -146,8 +146,10 @@ def _walk(world: World, resident: Resident) -> None:
     resident.x_milli = activity.target_x
     if activity.kind == "visit":
         resident.activity = None
-        world.cross(resident.identifier)
+        crossed = world.cross(resident.identifier)
         resident.decide_after_ms = world.time_ms
+        if crossed == "accepted" and activity.reason == "going_home":
+            start_rest(world, resident, "going_home")
         return
     activity.phase = "using"
     activity.started_ms = world.time_ms
@@ -214,6 +216,8 @@ def finish(world: World, resident: Resident, pause_ms: int = 1000) -> None:
     if activity.kind == "tag":
         tag_completed(world, resident, activity.partner)
     world.emit("completed", resident=resident.identifier, activity=activity.kind)
+    if activity.kind == "play":
+        goals.complete_wish(world, resident, "play_time")
 
 
 def _work(world: World, resident: Resident) -> None:
@@ -246,7 +250,8 @@ def settle(world: World, resident: Resident, task) -> None:
         task.inputs_reserved = False
     items = {**{name: -amount for name, amount in recipe.inputs.items()}, **recipe.outputs}
     transaction = task.settlement_id()
-    result = world.ledger.apply(transaction, "work:" + recipe.identifier, recipe.coins, items)
+    coins = world.coin_amount(recipe.coins)
+    result = world.ledger.apply(transaction, "work:" + recipe.identifier, coins, items)
     if result not in ("accepted", "duplicate"):
         task.progress_ms = recipe.duration_ms - 1
         task.state = "paused"
@@ -257,7 +262,8 @@ def settle(world: World, resident: Resident, task) -> None:
         skills = resident.skills
         skills[recipe.profession] = skills.get(recipe.profession, 0) + recipe.experience
         world.emit("settled", resident=resident.identifier, task=task.identifier,
-                   recipe=recipe.identifier, coins=recipe.coins, transaction=transaction)
+                   recipe=recipe.identifier, coins=coins, transaction=transaction,
+                   station=resident.activity.furniture if resident.activity is not None else None)
     task.done += 1
     task.progress_ms = 0
     _after_unit(world, resident, task)

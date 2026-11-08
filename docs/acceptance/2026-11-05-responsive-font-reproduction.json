@@ -1,0 +1,47 @@
+{
+  "product_commit": "9ed1b2d",
+  "status": "reproduced; product fix pending",
+  "ocr_then_responsive": {
+    "passed": 1,
+    "failed": 1,
+    "seconds": 45.82
+  },
+  "explicit_arial": {
+    "failed": 1,
+    "seconds": 23.8
+  },
+  "failure": {
+    "language": "Russian",
+    "tab": "shop",
+    "window_width": 536,
+    "horizontal_maximum": 10,
+    "stable_after_ms": 100
+  },
+  "isolated_width_observation": {
+    "observations": 63,
+    "requested_width": 536,
+    "actual_width": 754,
+    "pytest_passed": 1
+  },
+  "hidden_furniture_page": {
+    "minimum_hint_width": 232,
+    "combo_minimum_hint_width": 204
+  },
+  "findings": [
+    "Windows OCR integration test registers Arial without removing the application font.",
+    "An explicitly registered Arial font reproduces the same failure without OCR.",
+    "The responsive test does not assert the actual requested width.",
+    "Removing the font leak alone cannot establish correct narrow layout behavior."
+  ],
+  "limits": [
+    "Offscreen Qt observations, not native visual acceptance.",
+    "Full regression remains running; no passing full-suite claim.",
+    "Combo sizing policy experiment is separate process-local instrumentation."
+  ],
+  "combo_policy_experiment": {
+    "result": "AdjustToMinimumContentsLengthWithIcon plus minimumContentsLength 1 did not remove Russian shop overflow; root layout cause remains unproven",
+    "failed": 1,
+    "passed": 1,
+    "seconds": 72.48
+  }
+}

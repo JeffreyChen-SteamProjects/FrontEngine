@@ -8,13 +8,15 @@ from frontengine.ui.page.scene_setting.scene_setting_ui import SceneSettingUI
 from frontengine.user_setting.scene_setting import scene_json
 
 
-def make_page():
+def make_page(*, lifetime_factory):
+    lifetime_factory()
     scene_json.clear()
-    return SceneSettingUI()
+    return SceneSettingUI(lifetime=lifetime_factory())
 
 
-def test_visual_editor_and_json_apply_share_scene_without_recursive_resets():
-    page = make_page()
+def test_visual_editor_and_json_apply_share_scene_without_recursive_resets(*, lifetime_factory):
+    lifetime_factory()
+    page = make_page(lifetime_factory=lifetime_factory)
     editor, manager = page.visual_editor, page.scene_manager_ui
     key = editor.document.add({"type": "TEXT", "text": "Hello"})
     editor.document.update(key, {"x": 25})
@@ -33,8 +35,9 @@ def test_visual_editor_and_json_apply_share_scene_without_recursive_resets():
     page.close()
 
 
-def test_group_drag_and_lock_preserve_positions_and_undo():
-    page = make_page()
+def test_group_drag_and_lock_preserve_positions_and_undo(*, lifetime_factory):
+    lifetime_factory()
+    page = make_page(lifetime_factory=lifetime_factory)
     editor = page.visual_editor
     first = editor.document.add({"type": "TEXT", "text": "First"})
     second = editor.document.add({"type": "TEXT", "text": "Second"})
@@ -55,8 +58,9 @@ def test_group_drag_and_lock_preserve_positions_and_undo():
     page.close()
 
 
-def test_properties_resize_and_hide_are_undoable():
-    page = make_page()
+def test_properties_resize_and_hide_are_undoable(*, lifetime_factory):
+    lifetime_factory()
+    page = make_page(lifetime_factory=lifetime_factory)
     editor = page.visual_editor
     key = editor.document.add({"type": "TEXT", "text": "First"})
     editor.layers.item(0).setSelected(True)
@@ -70,8 +74,9 @@ def test_properties_resize_and_hide_are_undoable():
     page.close()
 
 
-def test_static_image_preview_does_not_open_overlay_windows(tmp_path):
-    page = make_page()
+def test_static_image_preview_does_not_open_overlay_windows(tmp_path, *, lifetime_factory):
+    lifetime_factory()
+    page = make_page(lifetime_factory=lifetime_factory)
     editor = page.visual_editor
     image = QImage(40, 30, QImage.Format.Format_RGB32)
     image.fill(Qt.GlobalColor.blue)
@@ -87,8 +92,9 @@ def test_static_image_preview_does_not_open_overlay_windows(tmp_path):
     page.close()
 
 
-def test_empty_properties_disabled_and_bad_legacy_font_can_render():
-    page = make_page()
+def test_empty_properties_disabled_and_bad_legacy_font_can_render(*, lifetime_factory):
+    lifetime_factory()
+    page = make_page(lifetime_factory=lifetime_factory)
     editor = page.visual_editor
     assert all(not field.isEnabled() for field in editor.fields.values())
     key = editor.document.add({"type": "TEXT", "text": "Legacy", "font_size": "invalid"})
@@ -100,12 +106,13 @@ def test_empty_properties_disabled_and_bad_legacy_font_can_render():
     page.close()
 
 
-def test_scene_toolbar_menus_keep_layer_edits_and_inspector_state(monkeypatch):
+def test_scene_toolbar_menus_keep_layer_edits_and_inspector_state(monkeypatch, *, lifetime_factory):
     from PySide6.QtWidgets import QInputDialog
     from frontengine.ui.page.action_menu import ActionMenu
     from frontengine.utils.multi_language.retranslate import translate
 
-    page = make_page()
+    lifetime_factory()
+    page = make_page(lifetime_factory=lifetime_factory)
     editor = page.visual_editor
     monkeypatch.setattr(QInputDialog, "getMultiLineText", lambda *_args, **_kwargs: ("New text", True))
     try:

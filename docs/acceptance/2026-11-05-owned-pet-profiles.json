@@ -1,0 +1,85 @@
+{
+  "base": "da4f965",
+  "scope": "Explicit owner-bound profiles and pet retention; global settings facade, MainUI and HomeSaveStore integration remains issue52.",
+  "focused_tests": {
+    "passed": 119,
+    "skipped": 1,
+    "skip": "POSIX fork on Windows",
+    "seconds": 52.07,
+    "terminal_exit": 0,
+    "log": ".audit/worktrees/owned-profiles/.audit/owned-profiles-final-tests.txt"
+  },
+  "native_process": {
+    "ready": {
+      "ready": true,
+      "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\owned-profiles\\frontengine\\user_setting\\storage_session.py",
+      "id": "78b12ee7182d44088799654f0e3e62f2"
+    },
+    "close": {
+      "closed": true,
+      "stale_rejected": true
+    },
+    "contender_exit": 2,
+    "actor_exit": 0,
+    "reopened_name": "Latest owner",
+    "reopened_mood": 61,
+    "scope": "Real Windows process lock and explicit owned pet; save failure injected; no ambient UI claim."
+  },
+  "negative_control": {
+    "terminal_exit": 1,
+    "meaning": "Admission-only context without settings mutex fails rollback concurrency regression",
+    "log": ".audit/worktrees/owned-profiles/.audit/rollback-without-settings-mutex.txt"
+  },
+  "source_sha256": {
+    "frontengine/user_setting/storage_session.py": "e285168f71db95d7877f5d455a213b1db47d6e9968c0814f2d19a3790148b364",
+    "frontengine/user_setting/pet_profiles.py": "9d2afaa60b2cce33c51f4a9bf08876157ba0647f14843070f3fe7804f0166447",
+    "frontengine/show/pet/pet_profile_session.py": "8c5dbb67d227e89e0fae41913c3feef7da43ee3fa56c95584903dfc353d081de",
+    "tests/unit_test/test_owned_pet_profiles.py": "a23556559002f5def77c7c8b1d2f3dd03cea96981aeed30dec3643783d1fcfa0"
+  },
+  "limits": [
+    "Borrowed raw settings mutation is not synchronized",
+    "No malicious path-swap protection",
+    "Ambient home/UI ownership remains unintegrated",
+    "Process probe injects save failure; directory contention is native"
+  ],
+  "implementation_commit": "e74b643",
+  "independent_review": {
+    "verdict": "accept bounded explicit-owned-profile unit",
+    "base": "da4f965",
+    "tests": {
+      "cases": 26,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0,
+      "actual_process_exit": 0
+    },
+    "files": {
+      "frontengine/user_setting/storage_session.py": "e285168f71db95d7877f5d455a213b1db47d6e9968c0814f2d19a3790148b364",
+      "frontengine/user_setting/pet_profiles.py": "9d2afaa60b2cce33c51f4a9bf08876157ba0647f14843070f3fe7804f0166447",
+      "frontengine/show/pet/pet_profile_session.py": "8c5dbb67d227e89e0fae41913c3feef7da43ee3fa56c95584903dfc353d081de"
+    },
+    "scope": "Independent review of explicit owned profiles, pet uses, transactions and export path policy. Ambient facade/HomeSaveStore/runtime integration still pending. No hostile filesystem path-swap or POSIX execution claim.",
+    "comments": {
+      "deletions": 0,
+      "holds": 0,
+      "must_kill": 0,
+      "reason": "New scoped docstrings define public API contracts."
+    }
+  },
+  "integrated_commit_before_journal_amend": "09c2c96",
+  "prior_full_suite": {
+    "passed": true,
+    "child_exit": 0,
+    "pytest_exit": 0,
+    "cases": 2986,
+    "failures": 0,
+    "skips": 2,
+    "python": "3.14.5 (tags/v3.14.5:5607950, May 10 2026, 10:43:50) [MSC v.1944 64 bit (AMD64)]",
+    "source": "3c819cb; subsequent da4f965 and 41af433 were documentation only. Does not include owned-profile implementation.",
+    "seconds": 827.56,
+    "skip_reasons": [
+      "POSIX permission semantics",
+      "Requires POSIX fork"
+    ]
+  }
+}

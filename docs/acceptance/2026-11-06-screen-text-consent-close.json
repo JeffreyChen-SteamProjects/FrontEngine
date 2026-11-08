@@ -1,0 +1,142 @@
+{
+  "status": "partial",
+  "base": "8e270efe",
+  "problem": "Text and screenshot consent prompts persisted a late Yes even after the parent was closed or destroyed.",
+  "change": "Reject consent entry and returned answers when a supplied parent is invalid or hidden. Parentless calls remain supported.",
+  "reproduction": {
+    "log": ".audit/ocr-consent-red.log",
+    "result": "4 failed, 11 deselected in 3.91s",
+    "cases": "Text and capture consent after parent rejection, with or without destruction.",
+    "observed": "Consent returned True and attempted a settings write after parent closure."
+  },
+  "verification": {
+    "command": "D:/Codes/FrontEngine/.audit/host-runtime-612/Scripts/python.exe -m pytest tests/unit_test/test_ocr_tls_dialogs.py tests/unit_test/test_ocr_ui_integration.py tests/unit_test/test_runtime_ownership.py -q",
+    "log": ".audit/ocr-consent-green.log",
+    "exit_code": 0,
+    "passed": 56,
+    "seconds": 10.43,
+    "coverage": [
+      "Four closure cases return False, preserve consent flags and perform no settings writes or repeated prompts.",
+      "Both consent types support No, reopening, Yes and reuse of existing consent, without changing the other permission.",
+      "Four real ToolsSettingUI caller cases preserve the previous result and neither present a result nor retry after parent closure or destruction.",
+      "Four live caller cases verify that No presents the original result once and Yes retries the original request once."
+    ]
+  },
+  "limitations": [
+    "Offscreen Qt with substituted message-box answers and settings writes. These new tests send no data.",
+    "The existing related TLS test opens a loopback listener; the full selected suite is not a no-network test.",
+    "Full regression, independent review and integration remain pending. Native evidence does not cover OS keyboard input, real OCR or a cloud provider request.",
+    "No EXE was built."
+  ],
+  "caller_fix": {
+    "reproduction_log": ".audit/ocr-caller-red.log",
+    "reproduction_result": "4 failed, 2 deselected in 2.66s",
+    "observed": "ToolsSettingUI still presented the consent-required result after closure, even though the consent helper returned False.",
+    "change": "After consent returns, stop processing if the tools page is invalid, hidden or its lifetime no longer accepts work. Local results without consent retain their existing path."
+  },
+  "native": {
+    "directory": ".audit/native-ocr-consent",
+    "platform": "Windows private desktop, Traditional_Chinese, dark, 900x740 main window",
+    "entry": "Actual tools page callback and consent helpers create real QMessageBox dialogs. No/Yes use widget-local Tab/Space. Closure cases close the tools page and force a late Yes through QMessageBox.done.",
+    "substitutions": "read_result_async records synthetic requests without provider execution; result presentation is recorded. Settings writes use the real writer in an isolated temporary settings directory.",
+    "cases": {
+      "cases": [
+        {
+          "kind": "text",
+          "choice": "close",
+          "granted": false,
+          "request_count": 0,
+          "presented_count": 0
+        },
+        {
+          "kind": "text",
+          "choice": "no",
+          "granted": false,
+          "request_count": 0,
+          "presented_count": 1
+        },
+        {
+          "kind": "text",
+          "choice": "yes",
+          "granted": true,
+          "request_count": 1,
+          "presented_count": 0
+        },
+        {
+          "kind": "capture",
+          "choice": "close",
+          "granted": false,
+          "request_count": 0,
+          "presented_count": 0
+        },
+        {
+          "kind": "capture",
+          "choice": "no",
+          "granted": false,
+          "request_count": 0,
+          "presented_count": 1
+        },
+        {
+          "kind": "capture",
+          "choice": "yes",
+          "granted": true,
+          "request_count": 1,
+          "presented_count": 0
+        }
+      ],
+      "real_message_boxes": true,
+      "close_case_forced_late_yes": true,
+      "provider_replaced": true,
+      "final_permissions": {
+        "screen_text_consent": false,
+        "screen_text_text_consent": false
+      }
+    },
+    "observer": {
+      "before": {
+        "foreground": 2558004,
+        "cursor": [
+          768,
+          432
+        ]
+      },
+      "after": {
+        "foreground": 2558004,
+        "cursor": [
+          768,
+          432
+        ]
+      },
+      "child_exit": 0
+    },
+    "runtime_closed": true,
+    "temporary_directory_removed": true,
+    "stderr_empty": true,
+    "cold_home": {
+      "passed": true,
+      "initial_snapshot_exact": true,
+      "profiles_exact": true,
+      "leases_reacquired": true,
+      "saved_exact": true,
+      "temporary_directory_removed": true
+    },
+    "cold_permissions": {
+      "separate_permissions_exact": true,
+      "settings_bytes_unchanged": true
+    }
+  },
+  "documentation": {
+    "files": 17,
+    "checks": "54 passed in 3.45s",
+    "sphinx": "HTML build with -W passed",
+    "rendered_paragraphs_exact": [
+      "Eng",
+      "Zh",
+      "ZhCn",
+      "De",
+      "Fr",
+      "Ru",
+      "It"
+    ]
+  }
+}

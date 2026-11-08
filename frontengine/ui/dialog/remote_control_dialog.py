@@ -14,6 +14,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional
 from pathlib import Path
+from shiboken6 import isValid
 
 from PySide6.QtCore import QSignalBlocker
 from PySide6.QtGui import QGuiApplication
@@ -58,6 +59,8 @@ class RemoteControlDialog(QDialog):
     def __init__(self, parent: Optional[QWidget] = None, remote=None, midi=None) -> None:
         front_engine_logger.info("[RemoteControlDialog] Init")
         super().__init__(parent)
+        self._closed = False
+        self.finished.connect(self._mark_closed)
         self.setWindowTitle(_t("remote_title", "Remote control"))
         self._remote = remote
         self._midi = midi
@@ -153,13 +156,16 @@ class RemoteControlDialog(QDialog):
             fingerprint=certificate.fingerprint,
             expires=certificate.expires_at.strftime("%Y-%m-%d UTC"))
 
+    def _mark_closed(self) -> None:
+        self._closed = True
+
     def export_certificate(self) -> bool:
-        if self._remote is None:
+        if self._closed or not isValid(self) or self._remote is None:
             return False
         filename, _ = QFileDialog.getSaveFileName(
             self, _t("remote_certificate_export", "Export public certificate"),
             "frontengine-remote.crt", "Certificate (*.crt *.pem)")
-        if not filename:
+        if self._closed or not isValid(self) or not filename:
             return False
         success = self._remote.export_certificate(Path(filename))
         self.remote_url_label.setText(self.remote_status())

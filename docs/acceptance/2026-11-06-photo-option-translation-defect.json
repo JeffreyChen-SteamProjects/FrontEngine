@@ -1,0 +1,79 @@
+{
+  "product_test_commit": "acb004d2",
+  "options": [
+    {
+      "language": "English",
+      "actual": "\u62cd\u651d\u6642\u7684\u59ff\u52e2",
+      "expected": "Captured pose",
+      "selected_data": null
+    },
+    {
+      "language": "Traditional_Chinese",
+      "actual": "\u62cd\u651d\u6642\u7684\u59ff\u52e2",
+      "expected": "\u62cd\u651d\u6642\u7684\u59ff\u52e2",
+      "selected_data": null
+    },
+    {
+      "language": "Simplified_Chinese",
+      "actual": "\u62cd\u651d\u6642\u7684\u59ff\u52e2",
+      "expected": "\u62cd\u6444\u65f6\u7684\u59ff\u52bf",
+      "selected_data": null
+    },
+    {
+      "language": "Deutsch",
+      "actual": "\u62cd\u651d\u6642\u7684\u59ff\u52e2",
+      "expected": "Aufgenommene Pose",
+      "selected_data": null
+    },
+    {
+      "language": "Russian",
+      "actual": "\u62cd\u651d\u6642\u7684\u59ff\u52e2",
+      "expected": "\u0421\u043d\u044f\u0442\u0430\u044f \u043f\u043e\u0437\u0430",
+      "selected_data": null
+    },
+    {
+      "language": "France",
+      "actual": "\u62cd\u651d\u6642\u7684\u59ff\u52e2",
+      "expected": "Pose captur\u00e9e",
+      "selected_data": null
+    },
+    {
+      "language": "Italy",
+      "actual": "\u62cd\u651d\u6642\u7684\u59ff\u52e2",
+      "expected": "Posa acquisita",
+      "selected_data": null
+    }
+  ],
+  "mismatched_languages": 6,
+  "observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "child_exit": 0
+  },
+  "cold_reopen": {
+    "passed": true,
+    "initial_snapshot_exact": true,
+    "profiles_exact": true,
+    "leases_reacquired": true,
+    "saved_exact": true,
+    "temporary_directory_removed": true
+  },
+  "runtime_closed": true,
+  "source": "frontengine/ui/dialog/pet_photo.py adds initial item using translate once; no item retranslation binding.",
+  "status": "reproduced; fix pending",
+  "limits": [
+    "Synthetic photo through MainUI pet action; no claim of every photo control or status translation tested."
+  ]
+}

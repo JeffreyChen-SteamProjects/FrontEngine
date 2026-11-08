@@ -1,13 +1,16 @@
 """The Collection tab: every piece of furniture and how to get it, what the pets made, and the photo album."""
 from __future__ import annotations
 
-from os import getcwd
+from frontengine.ui.page.wrapping_buttons import WrappingPushButton as QPushButton
+
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from frontengine.ui.runtime_lifetime import owned_action
+
 from PySide6.QtCore import QSize, Qt, QUrl
 from PySide6.QtGui import QDesktopServices, QIcon, QImage, QPixmap
-from PySide6.QtWidgets import QLabel, QPushButton
+from PySide6.QtWidgets import QLabel
 
 from frontengine.ui.page.pet_game.goals_panel import ALBUM_FOLDER
 from frontengine.ui.page.pet_game.home_things import ThingGrid, thing_icon
@@ -36,7 +39,7 @@ def how_to_get(world, definition) -> str:
         return translate("pet_home_made_at_station", "made at a workstation")
     if not goals.unlocked(world, definition.unlock_level):
         return translate("pet_home_unlock_level", "home level {level}").format(level=definition.unlock_level)
-    return translate("pet_home_price_short", "{price} coins").format(price=definition.price)
+    return translate("pet_home_price_short", "{price} coins").format(price=world.coin_amount(definition.price))
 
 
 def creations(world) -> list[tuple[str, int]]:
@@ -56,9 +59,11 @@ def album_photos(folder: Path, limit: int = MAX_PHOTOS) -> list[Path]:
 class CollectionPanel:
     def __init__(self, page: PetHomePage) -> None:
         self.page = page
+        self.lifetime = page.lifetime
         self._thumbnails: dict[tuple[str, float], QIcon] = {}
         section = self.section = page.add_section("pet_home_collection_section", "Collection")
         self.count = QLabel()
+        self.count.setWordWrap(True)
         section.add_widget(self.count)
         self.encyclopedia = ThingGrid(rows=3)
         section.add_widget(self.encyclopedia, "pet_home_encyclopedia", "Furniture guide")
@@ -72,7 +77,7 @@ class CollectionPanel:
         section.add_inline(self.open_album)
 
     def folder(self) -> Path:
-        return Path(getcwd()) / ALBUM_FOLDER
+        return self.page.lifetime.storage.directory / ALBUM_FOLDER
 
     def refresh_lists(self) -> None:
         world, zone = self.page.service.world, self.page.zone
@@ -103,6 +108,7 @@ class CollectionPanel:
             self._thumbnails[key] = QIcon(pixmap)
         return self._thumbnails[key]
 
+    @owned_action
     def _open_album(self) -> None:
         folder = self.folder()
         folder.mkdir(exist_ok=True)

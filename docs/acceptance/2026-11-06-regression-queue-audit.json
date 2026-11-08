@@ -1,0 +1,404 @@
+{
+  "observed_utc": "2026-11-06T06:17:29.261235+00:00",
+  "base": "e456e053",
+  "counts": {
+    "queued_live": 23,
+    "verified_pass": 11,
+    "running_live": 1
+  },
+  "all_sources_match_plans": true,
+  "plans": [
+    {
+      "tree": "asset-library-modal-close",
+      "commit": "6f1a9021",
+      "collected": 3398,
+      "source_files": 753,
+      "source_matches_plan": true,
+      "queue_pids": [
+        65984
+      ],
+      "status": "queued_live"
+    },
+    {
+      "tree": "background-desktop-audit",
+      "commit": "7ce9fb23",
+      "collected": 3495,
+      "source_files": 755,
+      "source_matches_plan": true,
+      "queue_pids": [
+        71104
+      ],
+      "status": "queued_live"
+    },
+    {
+      "tree": "capture-editor-modal-close",
+      "commit": "c6bbadc1",
+      "collected": 3383,
+      "source_files": 753,
+      "source_matches_plan": true,
+      "queue_pids": [
+        68572
+      ],
+      "status": "queued_live"
+    },
+    {
+      "tree": "form-text-keyboard",
+      "commit": "11c1a855",
+      "collected": 3476,
+      "source_files": 754,
+      "source_matches_plan": true,
+      "queue_pids": [
+        56400
+      ],
+      "status": "queued_live"
+    },
+    {
+      "tree": "home-adopt-retry",
+      "commit": "dcf098e5",
+      "collected": 3260,
+      "source_files": 751,
+      "source_matches_plan": true,
+      "exit": 0,
+      "status": "verified_pass",
+      "passed": 3257,
+      "skipped": 3
+    },
+    {
+      "tree": "home-birthday-anniversary",
+      "commit": "4e8ae0a5",
+      "collected": 3234,
+      "source_files": 750,
+      "source_matches_plan": true,
+      "exit": 0,
+      "status": "verified_pass",
+      "passed": 3231,
+      "skipped": 3
+    },
+    {
+      "tree": "home-bubble-bounds",
+      "commit": "7a4419dc",
+      "collected": 3246,
+      "source_files": 751,
+      "source_matches_plan": true,
+      "exit": 0,
+      "status": "verified_pass",
+      "passed": 3243,
+      "skipped": 3
+    },
+    {
+      "tree": "home-caption-bounds",
+      "commit": "f0336e45",
+      "collected": 3242,
+      "source_files": 751,
+      "source_matches_plan": true,
+      "exit": 0,
+      "status": "verified_pass",
+      "passed": 3239,
+      "skipped": 3
+    },
+    {
+      "tree": "home-profile-create-retry",
+      "commit": "70275848",
+      "collected": 3263,
+      "source_files": 751,
+      "source_matches_plan": true,
+      "exit": 0,
+      "status": "verified_pass",
+      "passed": 3260,
+      "skipped": 3
+    },
+    {
+      "tree": "home-release-retry",
+      "commit": "0b2f459e",
+      "collected": 3257,
+      "source_files": 751,
+      "source_matches_plan": true,
+      "exit": 0,
+      "status": "verified_pass",
+      "passed": 3254,
+      "skipped": 3
+    },
+    {
+      "tree": "home-resident-selection",
+      "commit": "76618453",
+      "collected": 3256,
+      "source_files": 751,
+      "source_matches_plan": true,
+      "exit": 0,
+      "status": "verified_pass",
+      "passed": 3253,
+      "skipped": 3
+    },
+    {
+      "tree": "home-return-rest",
+      "commit": "35c9fb52",
+      "collected": 3253,
+      "source_files": 751,
+      "source_matches_plan": true,
+      "exit": 0,
+      "status": "verified_pass",
+      "passed": 3250,
+      "skipped": 3
+    },
+    {
+      "tree": "image-compare-modal-close",
+      "commit": "947085c7",
+      "collected": 3450,
+      "source_files": 753,
+      "source_matches_plan": true,
+      "queue_pids": [
+        67640
+      ],
+      "status": "queued_live"
+    },
+    {
+      "tree": "palette-modal-close",
+      "commit": "d4daab99",
+      "collected": 3421,
+      "source_files": 753,
+      "source_matches_plan": true,
+      "queue_pids": [
+        66504
+      ],
+      "status": "queued_live"
+    },
+    {
+      "tree": "pet-customization-labels",
+      "commit": "d63a94c5",
+      "collected": 3321,
+      "source_files": 752,
+      "source_matches_plan": true,
+      "queue_pids": [
+        56728
+      ],
+      "status": "queued_live"
+    },
+    {
+      "tree": "pet-dialog-labels",
+      "commit": "acb004d2",
+      "collected": 3334,
+      "source_files": 753,
+      "source_matches_plan": true,
+      "queue_pids": [
+        62492
+      ],
+      "status": "queued_live"
+    },
+    {
+      "tree": "pet-event-coverage",
+      "commit": "20069297",
+      "collected": 3492,
+      "source_files": 754,
+      "source_matches_plan": true,
+      "queue_pids": [
+        70956
+      ],
+      "status": "queued_live"
+    },
+    {
+      "tree": "pet-manager-feedback",
+      "commit": "69a3b6c1",
+      "collected": 3313,
+      "source_files": 752,
+      "source_matches_plan": true,
+      "queue_pids": [
+        61676
+      ],
+      "status": "queued_live"
+    },
+    {
+      "tree": "pet-pack-modal-close",
+      "commit": "664f64ce",
+      "collected": 3365,
+      "source_files": 753,
+      "source_matches_plan": true,
+      "queue_pids": [
+        68616
+      ],
+      "status": "queued_live"
+    },
+    {
+      "tree": "pet-photo-close-save",
+      "commit": "a8d59245",
+      "collected": 3343,
+      "source_files": 753,
+      "source_matches_plan": true,
+      "queue_pids": [
+        10496
+      ],
+      "status": "queued_live"
+    },
+    {
+      "tree": "pet-photo-translation",
+      "commit": "c64b2e8d",
+      "collected": 3336,
+      "source_files": 753,
+      "source_matches_plan": true,
+      "queue_pids": [
+        62328
+      ],
+      "status": "queued_live"
+    },
+    {
+      "tree": "remote-export-close",
+      "commit": "4d4022dc",
+      "collected": 3428,
+      "source_files": 753,
+      "source_matches_plan": true,
+      "queue_pids": [
+        61028
+      ],
+      "status": "queued_live"
+    },
+    {
+      "tree": "rules-modal-close",
+      "commit": "5c14d867",
+      "collected": 3460,
+      "source_files": 753,
+      "source_matches_plan": true,
+      "queue_pids": [
+        45868
+      ],
+      "status": "queued_live"
+    },
+    {
+      "tree": "scene-dynamic-translations",
+      "commit": "a6d0c721",
+      "collected": 3303,
+      "source_files": 752,
+      "source_matches_plan": true,
+      "queue_pids": [
+        46956
+      ],
+      "status": "queued_live"
+    },
+    {
+      "tree": "scene-option-translations",
+      "commit": "026840b2",
+      "collected": 3273,
+      "source_files": 752,
+      "source_matches_plan": true,
+      "exit": 0,
+      "status": "verified_pass",
+      "passed": 3270,
+      "skipped": 3
+    },
+    {
+      "tree": "scene-output-modal-close",
+      "commit": "a6dd7f28",
+      "collected": 3445,
+      "source_files": 753,
+      "source_matches_plan": true,
+      "queue_pids": [
+        44140
+      ],
+      "status": "queued_live"
+    },
+    {
+      "tree": "scene-tab-translations",
+      "commit": "7743fd6b",
+      "collected": 3282,
+      "source_files": 752,
+      "source_matches_plan": true,
+      "exit": 0,
+      "status": "verified_pass",
+      "passed": 3279,
+      "skipped": 3
+    },
+    {
+      "tree": "screen-text-consent-close",
+      "commit": "86505b6a",
+      "collected": 3474,
+      "source_files": 753,
+      "source_matches_plan": true,
+      "queue_pids": [
+        66976
+      ],
+      "status": "queued_live"
+    },
+    {
+      "tree": "shared-option-translations",
+      "commit": "9eba3a44",
+      "collected": 3299,
+      "source_files": 752,
+      "source_matches_plan": true,
+      "queue_pids": [
+        59460
+      ],
+      "status": "running_live",
+      "pytest_pid": 69564
+    },
+    {
+      "tree": "signage-save-retry",
+      "commit": "5845b3f8",
+      "collected": 3482,
+      "source_files": 754,
+      "source_matches_plan": true,
+      "queue_pids": [
+        30088
+      ],
+      "status": "queued_live"
+    },
+    {
+      "tree": "todo-modal-close",
+      "commit": "7bc103d4",
+      "collected": 3406,
+      "source_files": 753,
+      "source_matches_plan": true,
+      "queue_pids": [
+        66264
+      ],
+      "status": "queued_live"
+    },
+    {
+      "tree": "tool-option-translations",
+      "commit": "acbe8d21",
+      "collected": 3268,
+      "source_files": 752,
+      "source_matches_plan": true,
+      "exit": 0,
+      "status": "verified_pass",
+      "passed": 3265,
+      "skipped": 3
+    },
+    {
+      "tree": "wardrobe-install-progress",
+      "commit": "825a6c41",
+      "collected": 3310,
+      "source_files": 752,
+      "source_matches_plan": true,
+      "queue_pids": [
+        6196
+      ],
+      "status": "queued_live"
+    },
+    {
+      "tree": "wardrobe-modal-close",
+      "commit": "9fdf4cc8",
+      "collected": 3349,
+      "source_files": 753,
+      "source_matches_plan": true,
+      "queue_pids": [
+        70096
+      ],
+      "status": "queued_live"
+    },
+    {
+      "tree": "workshop-modal-close",
+      "commit": "5a032881",
+      "collected": 3441,
+      "source_files": 753,
+      "source_matches_plan": true,
+      "queue_pids": [
+        61356
+      ],
+      "status": "queued_live"
+    }
+  ],
+  "limits": [
+    "Point-in-time process snapshot; not a future liveness guarantee.",
+    "Verified pass means matching strict-verifier evidence and unchanged sources for that commit; it does not establish later commits, native hardware, independent review or overall completion.",
+    "No queued or running regression was restarted, stopped or reordered."
+  ],
+  "process_snapshot_sha256": "0fcc2dac1520c8cdc66518774deed524746159f8faf45b154c35b9505a5d6e08"
+}

@@ -1,0 +1,45 @@
+{
+  "base_commit": "9b3e820a",
+  "status": "focused fix and verification complete; full regression, independent review and integration pending",
+  "problems": [
+    "CSS/JSON export consumes the selected destination after closure and creates or overwrites files.",
+    "Populated QTableWidget traps Tab within its three columns, preventing keyboard access to export buttons."
+  ],
+  "red": [
+    "12 export closure cases failed in 4.02s.",
+    "Native Tab traversal failed with visible/enabled export button and active ColorPaletteDialog; focused widget remained QTableWidget.",
+    "Standalone Tab probe repeated columns 0,1,2 and Ctrl+Tab also stayed in the table.",
+    "Keyboard exit regression failed in 2.02s."
+  ],
+  "fix": "Check validity/visibility before and after export picker; disable table Tab cell navigation so Tab/Backtab follows the form while arrow keys retain cell navigation.",
+  "related_tests": "50 passed in 9.31s",
+  "coverage": "12 close cases, two cancel/reopen/retry cases and one arrow/Tab/Backtab regression; exact CSS/JSON contents and existing bytes checked.",
+  "native": {
+    "output": ".audit/native-palette-fixed",
+    "surface": "Private Windows desktop, Traditional Chinese dark MainUI 900x740, synthetic persisted swatch.",
+    "activation": "Tools page method opens palette, then actual local Tab/Space activates CSS and JSON export buttons.",
+    "result": "Both injected picker returns close the dialog; original destination bytes and palette remain unchanged.",
+    "shutdown": "Normal shutdown, temporary settings removed, stderr empty, foreground/cursor unchanged.",
+    "cold": "Independent processes verify home/profiles and exact palette export from saved settings; settings bytes unchanged.",
+    "earlier_attempts": "Initial and settled attempts failed keyboard navigation; diagnostic attempt identified table focus. These are real pre-fix failures, not passing native runs."
+  },
+  "pending": [
+    "Full regression, independent review and integration.",
+    "Remote certificate export was inspected but not reproduced or changed."
+  ],
+  "limits": "Injected picker return, no system file-picker or OS input automation. No EXE conversion.",
+  "documentation": {
+    "files": 17,
+    "checks": "31 passed in 2.14s",
+    "sphinx": "HTML build with -W passed",
+    "rendered_paragraphs_exact": [
+      "Eng",
+      "Zh",
+      "ZhCn",
+      "De",
+      "Fr",
+      "Ru",
+      "It"
+    ]
+  }
+}

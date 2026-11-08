@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from PySide6.QtCore import QRectF, Qt
 from PySide6.QtGui import QColor, QPainter, QPaintEvent
-from PySide6.QtWidgets import QTabWidget, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QComboBox, QSizePolicy, QSlider, QTabWidget, QVBoxLayout, QWidget
 
 from frontengine.show.pet_game.furniture_art import picture
 from frontengine.utils.multi_language.retranslate import retranslator, translate
@@ -30,6 +30,11 @@ class HomeTabs(QTabWidget):
         retranslator.bind_call(self.retranslate)
 
     def add_section(self, key: str, fallback: str, section: QWidget) -> None:
+        for combo in section.findChildren(QComboBox):
+            combo.setMinimumWidth(100)
+            combo.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Fixed)
+        for slider in section.findChildren(QSlider):
+            slider.setMinimumWidth(80)
         holder = QWidget()
         holder.setObjectName("homeTabPage")
         layout = QVBoxLayout(holder)

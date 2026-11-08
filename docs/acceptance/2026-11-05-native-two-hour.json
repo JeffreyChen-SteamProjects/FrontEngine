@@ -1,0 +1,166 @@
+{
+  "result": {
+    "seconds_requested": 7200,
+    "samples": 720,
+    "elapsed_s": 7200.111876499999,
+    "counts": {
+      "art_frames": 924132,
+      "paint": 154022,
+      "max_paint_gap_ms": 236.76919999707025,
+      "tick": 35423,
+      "max_tick_gap_ms": 337.72339999268297,
+      "saved": 362
+    },
+    "events": {
+      "activity": 675,
+      "goal_claimed": 10,
+      "life_event": 11,
+      "settled": 125,
+      "completed": 629,
+      "commission_done": 6,
+      "interrupted": 24,
+      "helped": 25,
+      "wish_granted": 2,
+      "shared": 21,
+      "greeted": 18,
+      "auto_job": 9
+    },
+    "completed": {
+      "work": 68,
+      "sleep": 43,
+      "eat": 29,
+      "wander": 144,
+      "help": 25,
+      "play": 124,
+      "idle": 69,
+      "relax": 79,
+      "greet": 36,
+      "tidy": 12
+    },
+    "errors": [],
+    "shutdown": true,
+    "persisted": true,
+    "platform": "windows",
+    "passed": true
+  },
+  "observer": {
+    "before": {
+      "foreground": 133262,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 133262,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "desktop": "FrontEngineHomeSoak39996",
+    "child_exit": 0
+  },
+  "runtime": {
+    "revision": "21ca014929e678e47a5d46a0d4d3c692daaef0fb",
+    "python": "3.14.5 (tags/v3.14.5:5607950, May 10 2026, 10:43:50) [MSC v.1944 64 bit (AMD64)]",
+    "pyside": "6.11.2",
+    "cores": 12,
+    "tier": "balanced",
+    "harness_sha256": "d09429ed2bdd1995081ede6a4a3ed32105b85a33d86f7d975439abe58d21aff0",
+    "screens": [
+      {
+        "name": "BenQ GW2490",
+        "dpr": 1.25,
+        "geometry": [
+          0,
+          0,
+          1536,
+          864
+        ]
+      }
+    ],
+    "strip_hwnd": 21761110
+  },
+  "metrics": {
+    "working_set_mb": {
+      "first": 413.046875,
+      "last": 368.81640625,
+      "min": 365.29296875,
+      "max": 413.33203125
+    },
+    "weighted_process_one_core_percent": 27.129135750489144,
+    "weighted_machine_percent": 89.60600649224588,
+    "scope": "One stability run on busy host. Not a comparative performance or budget-compliance claim."
+  },
+  "unchanged_paint_sources": [
+    "frontengine/show/pet_game/home_strip.py",
+    "frontengine/show/pet_game/resident_art.py"
+  ],
+  "save_sha256": "e0a029c42134afb27686bcbd0ea743c0ff4b3e81de5b5f105b818d721ec19aa7",
+  "profiles_sha256": "d9d06965406a1e8e14f5ef042dd72609e3b4e1a8f966cd87109ec131cbb8f0d3",
+  "cold_reload": {
+    "passed": true,
+    "python": "3.14.5 (tags/v3.14.5:5607950, May 10 2026, 10:43:50) [MSC v.1944 64 bit (AMD64)]",
+    "source": "D:\\Codes\\FrontEngine\\.audit\\soak-cold-input",
+    "world_snapshot_equal": true,
+    "resident_profiles_persisted": true,
+    "leases_reacquired": true,
+    "residents": [
+      "00000000000000000000000000000001",
+      "00000000000000000000000000000002",
+      "00000000000000000000000000000003",
+      "00000000000000000000000000000004",
+      "00000000000000000000000000000005",
+      "00000000000000000000000000000006"
+    ],
+    "ledger_coins": 1001041,
+    "scope": "Fresh process settings and world reload from copied captured files"
+  },
+  "installed_wheel": {
+    "source": "fea4d72",
+    "wheel": ".audit\\wheels-storage\\frontengine_dev-1.0.86-py3-none-any.whl",
+    "sha256": "3e785dc90d552e07fdd043a860998b8c52b3b1a03935c16c2be83b3fc8728d0e",
+    "exact_files": [
+      "frontengine/user_setting/storage_session.py",
+      "frontengine/user_setting/user_setting_file.py",
+      "frontengine/ui/page/pet_game/home_page.py"
+    ]
+  },
+  "installed_storage": {
+    "package": "D:\\Codes\\FrontEngine\\.audit\\install-current-ui\\Lib\\site-packages\\frontengine",
+    "python": "3.14.5 (tags/v3.14.5:5607950, May 10 2026, 10:43:50) [MSC v.1944 64 bit (AMD64)]",
+    "module_sha256": "5d903b3895ea8d27440d4f9c9ee350105feab20f37055bb19f33ad269f4e932f",
+    "contender_exit": 2,
+    "unchanged_on_refusal": true,
+    "reopen_latest": true,
+    "stale_callback_rejected": true,
+    "scope": "Installed wheel on same Windows host; independent storage boundary only"
+  },
+  "installed_home": {
+    "python": "3.14.5 (tags/v3.14.5:5607950, May 10 2026, 10:43:50) [MSC v.1944 64 bit (AMD64)]",
+    "prefix": "D:\\Codes\\FrontEngine\\.audit\\install-current-ui",
+    "package": "D:\\Codes\\FrontEngine\\.audit\\install-current-ui\\Lib\\site-packages\\frontengine",
+    "version": 8,
+    "residents": 1,
+    "furniture": 3,
+    "photo_saved": true,
+    "home_saved": true,
+    "tile_caption_visible_24px": true,
+    "aggregate_save_recovery": true
+  },
+  "acceptance_scope": {
+    "closed": "Issue 48 compatible-runtime native stability and same-host installed-wheel acceptance; issue 31 six-resident, sixty-furniture baseline only.",
+    "excluded": [
+      "Clean-machine packaging",
+      "Latest shutdown implementation in historical soak or installed wheel",
+      "Puppet, video and Web loads",
+      "Repeated panel and mode switching",
+      "Mixed DPI and lock-session hardware behavior",
+      "Performance-budget or memory-leak proof"
+    ],
+    "review": "Independent soak_acceptance_review accepted this bounded closure.",
+    "capture": "Before screenshot exists; no after screenshot was produced. Runtime counters and terminal results substantiate stability.",
+    "load": "Prebuilt six-resident, sixty-furniture world with funded balance and normal simulation time."
+  }
+}

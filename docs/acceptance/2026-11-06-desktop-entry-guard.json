@@ -1,0 +1,31 @@
+{
+  "base": "917fdfc3",
+  "test_commit": "f1f6f3c3",
+  "implementation_commit": "7ce9fb23",
+  "defect": "A --child argument alone previously admitted the probe body even on the input desktop.",
+  "reproduction": "Two actual subprocesses on the input desktop, with and without redirected stderr, entered the sentinel body; both expected-rejection tests failed. Private desktop control passed.",
+  "fix": "At is_child entry, read thread/input desktop names through Win32 APIs. Record names when an output directory is supplied; reject equal names and propagate API errors. Close the opened input-desktop handle in finally. No desktop switch or input injection.",
+  "validation": {
+    "red": "2 failed, 1 passed",
+    "host_python_311": "3 passed",
+    "full_python_314": "7 passed including progress-layout checks",
+    "collected": 3495
+  },
+  "scope": "Windows native-probe helper, not application functionality. Same public signatures and no Qt construction in probes.",
+  "status": "755 source/test files frozen; full regression queued and incomplete.",
+  "regression_plan": "docs/acceptance/2026-11-06-desktop-guard-regression-plan.json",
+  "limits": [
+    "Entry check is not continuous monitoring. A child could later change desktops or issue forbidden input; probe code still requires review.",
+    "No claim that earlier foreground/cursor mismatches were caused by --child misuse. Those observations remain unresolved.",
+    "Actual tests cover same-desktop refusal and private-desktop admission; unavailable Win32 API paths were not induced.",
+    "Three tests require Windows desktops and skip on other platforms.",
+    "Independent review and full product integration remain incomplete. No EXE, push, merge or release."
+  ],
+  "evidence_sha256": {
+    "desktop-guard-red.log": "00d25d7852db48aeea89489eafbe321b90331e4ac3a62ad7268db5c351dee962",
+    "desktop-guard-green.log": "d5280ac4d9594011fe01f9619468b27d6d4eec725f60fc436332efdd9992a933",
+    "desktop-guard-final.log": "d43f9959b758d102c1ddcd9e098639ab089705237fe238da482e0a48053fd934",
+    "desktop-guard-612-final.log": "36babfe563a833f1133eab130a07e631d94b61a0a3ffeaa3e397aabef8c10e98",
+    "desktop-guard-collection.log": "9a9e2f607b6ed1dd58a364a6794e1babe30a254eebbe5995e06c38ab2e0871a8"
+  }
+}

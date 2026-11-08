@@ -1,0 +1,49 @@
+{
+  "python": "3.14.5 (tags/v3.14.5:5607950, May 10 2026, 10:43:50) [MSC v.1944 64 bit (AMD64)]",
+  "platform": "windows",
+  "cases": [
+    {
+      "target": "home",
+      "old_file_preserved": true,
+      "strip_retained": true,
+      "art_retained": true,
+      "identities_retained": true,
+      "timer_retry": true,
+      "shutdown_after_retry": true
+    },
+    {
+      "target": "profiles",
+      "old_file_preserved": true,
+      "strip_retained": true,
+      "art_retained": true,
+      "identities_retained": true,
+      "timer_retry": true,
+      "shutdown_after_retry": true
+    }
+  ],
+  "input": "controlled energy change; native file sharing denial; normal retry timers",
+  "source_base": "34782d8",
+  "source_sha256": {
+    "frontengine/ui/page/pet_game/home_page.py": "4be86118584367130a50068d4bf45514d144e99c2e47550d333bb1eb9e286aee",
+    "frontengine/show/pet_game/home_service.py": "82cc0524b99c57f34e7b3d45da38367d621aa1d8274db4037ec371b8f1514d19"
+  },
+  "observer": {
+    "before": {
+      "foreground": 133262,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 133262,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "child_exit": 0
+  },
+  "raw_evidence": ".audit/home-shutdown-native-complete/",
+  "scope": "PetHomePage shutdown failure, not MainUI final settings failure or cross-process ownership"
+}

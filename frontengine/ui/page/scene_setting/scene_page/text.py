@@ -1,3 +1,4 @@
+from frontengine.ui.runtime_lifetime import owned_action
 from PySide6.QtWidgets import QComboBox, QLabel, QLineEdit, QPushButton
 
 from frontengine.ui.page.scene_setting.scene_manager import SceneManagerUI
@@ -6,8 +7,8 @@ from frontengine.utils.multi_language.retranslate import tr
 
 
 class TextSceneSettingUI(BaseSceneSettingUI):
-    def __init__(self, script_ui: SceneManagerUI):
-        super().__init__(script_ui)
+    def __init__(self, script_ui: SceneManagerUI, *, lifetime):
+        super().__init__(script_ui, lifetime=lifetime)
 
         opacity_label, self.opacity_value, self.opacity_slider = self._build_slider("Opacity", 1, 100, 20)
         font_size_label, self.font_size_value, self.font_size_slider = self._build_slider("Font size", 1, 600, 100)
@@ -32,6 +33,7 @@ class TextSceneSettingUI(BaseSceneSettingUI):
         self.grid_layout.addWidget(self.update_scene_button, 3, 0)
         self.grid_layout.addWidget(self.line_edit, 3, 1)
 
+    @owned_action
     def _update_scene(self) -> None:
         if not self.line_edit.text().strip():
             self._warn_not_prepared()

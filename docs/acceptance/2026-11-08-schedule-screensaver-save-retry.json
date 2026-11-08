@@ -1,0 +1,30 @@
+{
+  "item": "#112",
+  "date": "2026-11-08",
+  "base": "890a48cd",
+  "test_commit": "bf7dbfa0",
+  "product_commit": "a96c6bcc",
+  "runtime": "D:/Codes/FrontEngine/.audit/test-runtime-3145 (Python 3.14.5, offscreen)",
+  "reproduced_before_fix": {
+    "save_failure": "12 of 12 cases failed: OSError/ValueError raised out of accept with the unsaved settings already in user_setting_dict",
+    "source_retranslation": "source list stayed English after switching to Traditional Chinese",
+    "dialog_release": "2 of 2 menu entries left their dialogs alive under the main window"
+  },
+  "after_fix": {
+    "focused_tests": "137 passed (new file, schedule accessibility/weekdays, screensaver, signage, form keyboard, live language switch, translations)",
+    "documentation_tests": "54 passed (documentation, progress layout, translations)",
+    "sphinx": "html build, 0 warnings",
+    "pyflakes": "no output"
+  },
+  "limits": [
+    "The dialogs are modal, so a language change while one is open is only reachable programmatically today; the fix keeps it consistent with the labels that already followed.",
+    "Error text is the raw exception message, as the signage dialog already shows it.",
+    "Not covered: full regression of this commit, independent review, native-desktop check, real screen reader."
+  ],
+  "logs_sha256": {
+    ".audit/save-retry-red.log": "dd29b8355cf26181cb623e947926b85979c50f1e925349707ff2d359661b50b9",
+    ".audit/dispose-red.log": "35d30d55e815b08dfb07170da9d92c97d9be6856d4d9b3cf083e7c6b5ac1c8c2",
+    ".audit/save-retry-focused.log": "2b55bc572807ede0126696dae1c3e8a69cd8179921052b0f6a30421ead7c6601",
+    ".audit/sphinx-save-retry.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

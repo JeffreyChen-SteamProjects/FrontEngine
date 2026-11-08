@@ -1,0 +1,171 @@
+{
+  "base_commit": "6ba8f8c",
+  "branch": "fix/home-accessibility",
+  "problem": "The visible Work list has an empty QAccessible Name while its sibling controls have names.",
+  "fix": "Bind the existing translated Work label to setAccessibleName through the normal retranslator. No new translation key or visible layout change.",
+  "red": {
+    "test": "test_work_list_accessible_name_follows_language",
+    "failure": "assert '' == 'Work'",
+    "summary": "1 failed, 30 deselected in 16.64s"
+  },
+  "green": {
+    "page_and_shortcut_tests": 36,
+    "documentation_and_progress_tests": 27,
+    "languages_in_accessible_name_test": 7,
+    "pyflakes_exit": 0,
+    "sphinx_W_exit": 0
+  },
+  "accessible_before": {
+    "work_list": {
+      "name": "",
+      "description": "",
+      "role": "Role.List",
+      "visible": true
+    },
+    "cancel_job": {
+      "name": "Cancel job",
+      "description": "",
+      "role": "Role.Button",
+      "visible": true
+    },
+    "newcomers": {
+      "name": "Pets moving in with you (tick the ones you want)",
+      "description": "",
+      "role": "Role.List",
+      "visible": false
+    },
+    "zone": {
+      "name": "Zone",
+      "description": "",
+      "role": "Role.ComboBox",
+      "visible": false
+    },
+    "furniture_storage": {
+      "name": "In storage",
+      "description": "",
+      "role": "Role.List",
+      "visible": false
+    },
+    "theme": {
+      "name": "Theme",
+      "description": "",
+      "role": "Role.ComboBox",
+      "visible": false
+    },
+    "arrange": {
+      "name": "Arrange",
+      "description": "",
+      "role": "Role.Button",
+      "visible": false
+    }
+  },
+  "accessible_after": {
+    "work_list": {
+      "name": "Work",
+      "description": "",
+      "role": "Role.List",
+      "visible": true
+    },
+    "cancel_job": {
+      "name": "Cancel job",
+      "description": "",
+      "role": "Role.Button",
+      "visible": true
+    },
+    "newcomers": {
+      "name": "Pets moving in with you (tick the ones you want)",
+      "description": "",
+      "role": "Role.List",
+      "visible": false
+    },
+    "zone": {
+      "name": "Zone",
+      "description": "",
+      "role": "Role.ComboBox",
+      "visible": false
+    },
+    "furniture_storage": {
+      "name": "In storage",
+      "description": "",
+      "role": "Role.List",
+      "visible": false
+    },
+    "theme": {
+      "name": "Theme",
+      "description": "",
+      "role": "Role.ComboBox",
+      "visible": false
+    },
+    "arrange": {
+      "name": "Arrange",
+      "description": "",
+      "role": "Role.Button",
+      "visible": false
+    }
+  },
+  "keyboard_after": {
+    "created_home": true,
+    "cancelled_automatic_work": true,
+    "entered_and_escaped_arranging": true,
+    "tab_routes": [
+      {
+        "target": "primaryAction",
+        "tabs": 5
+      },
+      {
+        "target": "qt_tabwidget_tabbar",
+        "tabs": 13
+      },
+      {
+        "target": "QListWidget",
+        "tabs": 1
+      },
+      {
+        "target": "WrappingPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "qt_tabwidget_tabbar",
+        "tabs": 14
+      },
+      {
+        "target": "WrappingPushButton",
+        "tabs": 3
+      }
+    ],
+    "selection": {
+      "after_home": {
+        "row": 0,
+        "selected": 0,
+        "count": 1,
+        "focus": "QListWidget"
+      },
+      "after_down": {
+        "row": 0,
+        "selected": 0
+      },
+      "after_space": {
+        "row": 0,
+        "selected": 1
+      }
+    },
+    "final_focus": "WrappingPushButton"
+  },
+  "harnesses": {
+    "check_home_accessible_names.py": {
+      "sha256": "baa308e06da98c6852c487186e5e611c1589765ef04f22b9feac7293e2702576",
+      "source": "from pathlib import Path\nimport json\n\nROOT = Path(__file__).resolve().parents[1]\nnames = {}\n\n\ndef capture_names(page):\n    from PySide6.QtGui import QAccessible\n    targets = {'work_list': page.work.tasks, 'cancel_job': page.work.cancel_button,\n               'newcomers': page.newcomers, 'zone': page.zone_combo,\n               'furniture_storage': page.layout_panel.storage,\n               'theme': page.layout_panel.theme, 'arrange': page.layout_panel.arrange}\n    for key, widget in targets.items():\n        interface = QAccessible.queryAccessibleInterface(widget)\n        assert interface is not None, key\n        names[key] = {'name': interface.text(QAccessible.Text.Name),\n                      'description': interface.text(QAccessible.Text.Description),\n                      'role': str(interface.role()), 'visible': widget.isVisible()}\n\n\nsource = (ROOT / '.audit/check_home_keyboard_flow.py').read_text(encoding='utf-8')\nsource = source.replace('            tab_to(app, window, page.work.tasks)\\n',\n                        '            capture_names(page)\\n            tab_to(app, window, page.work.tasks)\\n')\nsource = source.replace(\"'.audit/home-keyboard-flow-result.json'\", \"'.audit/home-accessibility-keyboard-result.json'\")\nexec(compile(source, str(ROOT / '.audit/check_home_keyboard_flow.py'), 'exec'))\n(ROOT / '.audit/home-accessible-names.json').write_text(json.dumps(names, indent=2), encoding='utf-8')\nprint(json.dumps(names), flush=True)\n"
+    },
+    "check_home_keyboard_flow.py": {
+      "sha256": "439259eea9ecbcb66b1ff6da449447a56530253621a80e6d941055cb9393a0bb",
+      "source": "\"\"\"Widget-local keyboard events in an offscreen full MainUI.\"\"\"\nimport json\nimport logging\nimport os\nfrom pathlib import Path\nimport sys\nimport tempfile\nfrom time import monotonic\n\nROOT = Path(__file__).resolve().parents[1]\nsys.path.insert(0, str(ROOT))\nos.environ['QT_QPA_PLATFORM'] = 'offscreen'\ntrace = []\n\n\ndef tab_to(app, window, target):\n    for count in range(400):\n        current = app.focusWidget()\n        if current is target:\n            trace.append({'target': target.objectName() or type(target).__name__, 'tabs': count})\n            return\n        QTest.keyClick(current or window, Qt.Key.Key_Tab)\n        app.processEvents()\n    raise AssertionError(('Unreachable by Tab', type(target).__name__, target.objectName()))\n\n\nprevious = Path.cwd()\nwith tempfile.TemporaryDirectory(prefix='front-keyboard-flow-') as name:\n    os.chdir(name)\n    try:\n        Path('user_setting.json').write_text(json.dumps({'language': 'English', 'smart_pause': False,\n            'pet_home_on_desktop': False, 'pet_home_running': False}))\n        from PySide6.QtCore import QCoreApplication, QEvent, Qt\n        from PySide6.QtTest import QTest\n        from PySide6.QtWidgets import QApplication\n        from frontengine.ui import main_ui\n        from frontengine.ui.page.pet_game import home_page\n        from frontengine.utils.pet_game import simulation\n        from frontengine.utils.session_lock import session_lock\n        main_ui.CriticalExit.init_critical_exit = lambda self: None\n        main_ui.HotkeyService.start = lambda self: False\n        main_ui.AppProfileService.start = lambda self: None\n        main_ui.ShareWatchService.start = lambda self: None\n        home_page.workshop_pack_roots = lambda: []\n        session_lock.is_session_locked = lambda: False\n        app = QApplication([])\n        app.setQuitOnLastWindowClosed(False)\n        window = main_ui.FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)\n        try:\n            window.resize(1280, 900)\n            window.show()\n            app.processEvents()\n            page = window.pet_home_ui\n            assert page.isVisible()\n            tab_to(app, window, page.create_button)\n            QTest.keyClick(app.focusWidget(), Qt.Key.Key_Space)\n            app.processEvents()\n            assert page.service.world is not None and len(page.service.world.residents) == 1\n            page.service.pause('keyboard-probe')\n            simulation.advance(page.service.world, 180000)\n            page.refresh()\n            assert page.service.world.tasks\n            bar = page.tabs.tabBar()\n            tab_to(app, window, bar)\n            while page.tabs.currentIndex() != 1:\n                QTest.keyClick(bar, Qt.Key.Key_Right)\n                app.processEvents()\n            tab_to(app, window, page.work.tasks)\n            QTest.keyClick(app.focusWidget(), Qt.Key.Key_Home)\n            app.processEvents()\n            selection = {'after_home': {'row': page.work.tasks.currentRow(),\n                         'selected': len(page.work.tasks.selectedItems()),\n                         'count': page.work.tasks.count(),\n                         'focus': type(app.focusWidget()).__name__}}\n            QTest.keyClick(app.focusWidget(), Qt.Key.Key_Down)\n            app.processEvents()\n            selection['after_down'] = {'row': page.work.tasks.currentRow(),\n                                       'selected': len(page.work.tasks.selectedItems())}\n            QTest.keyClick(app.focusWidget(), Qt.Key.Key_Space)\n            app.processEvents()\n            selection['after_space'] = {'row': page.work.tasks.currentRow(),\n                                        'selected': len(page.work.tasks.selectedItems())}\n            (ROOT / '.audit/home-keyboard-selection.json').write_text(json.dumps(selection, indent=2))\n            assert page.work.tasks.selectedItems()\n            before = len(page.service.world.tasks)\n            tab_to(app, window, page.work.cancel_button)\n            QTest.keyClick(app.focusWidget(), Qt.Key.Key_Space)\n            app.processEvents()\n            assert len(page.service.world.tasks) == before - 1\n            tab_to(app, window, bar)\n            QTest.keyClick(bar, Qt.Key.Key_Right)\n            app.processEvents()\n            assert page.tabs.currentIndex() == 2\n            tab_to(app, window, page.layout_panel.arrange)\n            QTest.keyClick(app.focusWidget(), Qt.Key.Key_Space)\n            app.processEvents()\n            assert page.layout_panel.arranging\n            QTest.keyClick(app.focusWidget(), Qt.Key.Key_Escape)\n            app.processEvents()\n            assert not page.layout_panel.arranging\n            assert app.focusWidget() is not None and app.focusWidget().isVisible()\n            result = {'created_home': True, 'cancelled_automatic_work': True,\n                      'entered_and_escaped_arranging': True, 'tab_routes': trace,\n                      'selection': selection,\n                      'final_focus': type(app.focusWidget()).__name__}\n        finally:\n            window.request_shutdown()\n            deadline = monotonic() + 90\n            while not window.lifetime.closed and monotonic() < deadline:\n                QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)\n                app.processEvents()\n            assert window.lifetime.closed\n            window.deleteLater()\n            QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)\n        logging.shutdown()\n    finally:\n        os.chdir(previous)\n(ROOT / '.audit/home-keyboard-flow-result.json').write_text(json.dumps(result, indent=2), encoding='utf-8')\nprint(json.dumps(result), flush=True)\n"
+    }
+  },
+  "limits": [
+    "QAccessible provider data and Qt offscreen MainUI only; no NVDA, Narrator, speech output or platform accessibility bridge acceptance.",
+    "Seven-language test checks the live accessible interface after retranslation; the full MainUI probe checks English.",
+    "OS/Workshop service substitutions from the existing keyboard probe remain.",
+    "This isolated branch is not yet integrated. Integration full regression on frozen 6ba8f8c remains live.",
+    "No EXE build, push, merge or release."
+  ]
+}

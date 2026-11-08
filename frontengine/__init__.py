@@ -1,3 +1,4 @@
+from frontengine.ui.runtime_lifetime import DefaultSettingsLifetime, CloseDisposition
 from frontengine.show.gif.paint_gif import GifWidget
 from frontengine.show.image.paint_image import ImageWidget
 from frontengine.show.load.load_someone_make_ui import load_extend_ui_file
@@ -24,6 +25,7 @@ from frontengine.ui.main_ui import FrontEngine_EXTEND_TAB
 from frontengine.utils.redirect_manager.redirect_manager_class import RedirectManager
 
 __all__ = [
+    "DefaultSettingsLifetime", "CloseDisposition",
     "start_front_engine", "GifWidget", "SoundPlayer", "SoundEffectWidget", "TextWidget",
     "WebWidget", "ImageWidget", "VideoWidget", "language_wrapper", "load_extend_ui_file", "load_ui_file",
     "TextSettingUI", "WEBSettingUI", "GIFSettingUI", "ImageSettingUI", "SoundPlayerSettingUI",

@@ -1,0 +1,233 @@
+{
+  "scope": "Signage settings save failure and retry; broader UI/UX, pet events, review and integration remain incomplete",
+  "base": "bbf1d2bd",
+  "status": "Product and test commits created; 754 source/test files frozen. Full regression queued and incomplete.",
+  "root_cause": "SignageDialog.accept replaced the settings entry before calling the writer and did not restore it on write failure.",
+  "change": "Restore the exact previous entry, including absence or null, on OSError/ValueError; retain dialog draft and display error; accept only after successful save.",
+  "red": {
+    "failed": 6,
+    "deselected": 20,
+    "assertion": "state == before"
+  },
+  "green": {
+    "passed": 69,
+    "files": [
+      "test_signage_and_canvas.py",
+      "test_form_text_keyboard.py",
+      "test_rules_and_profiles.py"
+    ]
+  },
+  "native": {
+    "failed_save_preserved_memory_and_disk": true,
+    "draft_preserved": true,
+    "retry_saved": true,
+    "attempts": 2,
+    "settings": {
+      "enabled": false,
+      "presets": [
+        "Retry preset"
+      ],
+      "interval_minutes": 5,
+      "hide_window": true
+    }
+  },
+  "shutdown": {
+    "selected_pet_only": true,
+    "pet_completion_affection_delta": 2,
+    "work_mode_selected_only": true,
+    "cancel_feed_no_reward": true,
+    "hidden_pet_unchanged": true,
+    "hidden_feedback": "請先啟動或顯示這隻寵物，再進行互動。",
+    "tab_routes": [
+      {
+        "target": "primaryAction",
+        "tabs": 5
+      },
+      {
+        "target": "qt_tabwidget_tabbar",
+        "tabs": 13
+      },
+      {
+        "target": "QListWidget",
+        "tabs": 1
+      },
+      {
+        "target": "WrappingPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "qt_tabwidget_tabbar",
+        "tabs": 14
+      },
+      {
+        "target": "WrappingPushButton",
+        "tabs": 3
+      },
+      {
+        "target": "qt_tabwidget_tabbar",
+        "tabs": 25
+      },
+      {
+        "target": "QListWidget",
+        "tabs": 4
+      },
+      {
+        "target": "WrappingPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "WrappingPushButton",
+        "tabs": 6
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 1
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 6
+      },
+      {
+        "target": "QPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 19
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 6
+      },
+      {
+        "target": "QPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 25
+      },
+      {
+        "target": "QPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 25
+      },
+      {
+        "target": "QPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 25
+      },
+      {
+        "target": "QPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "QPlainTextEdit",
+        "tabs": 1
+      },
+      {
+        "target": "QPushButton",
+        "tabs": 3
+      }
+    ],
+    "theme": "dark",
+    "language": "Traditional_Chinese",
+    "actual_window_size": [
+      900,
+      740
+    ],
+    "runtime_closed": true,
+    "temporary_directory_removed": true
+  },
+  "cold_home_and_profiles": {
+    "passed": true,
+    "initial_snapshot_exact": true,
+    "profiles_exact": true,
+    "leases_reacquired": true,
+    "saved_exact": true,
+    "temporary_directory_removed": true
+  },
+  "observer": {
+    "before": {
+      "foreground": 3413904,
+      "cursor": [
+        2538,
+        162
+      ]
+    },
+    "after": {
+      "foreground": 3413904,
+      "cursor": [
+        2601,
+        102
+      ]
+    },
+    "child_exit": 0
+  },
+  "limitations": [
+    "Widget-local QTest events on private Windows desktop; no OS keyboard/mouse injection.",
+    "Foreground HWND unchanged but cursor coordinates differ. Cause not established; cursor stability is not proven.",
+    "First native attempt used an invalid language identifier and terminated before feature verification.",
+    "Next native attempts compared a disk baseline taken before modal entry; baseline changed before save. Final baseline is captured immediately before the save click.",
+    "Injected OSError on first writer call; retry uses the real temporary-storage writer. This does not simulate every physical disk failure.",
+    "Independent review agents remain errored due to usage limits. Full regression and integration remain pending.",
+    "No EXE build, push, merge or release."
+  ],
+  "evidence": [
+    {
+      "path": ".audit\\signage-save-red.log",
+      "sha256": "4144edc437dbfc7bc77d3ea76edfe4ae223d2dd6c065969d7d4c6049b31b783c"
+    },
+    {
+      "path": ".audit\\signage-save-green.log",
+      "sha256": "b7616dd6525bb065218e6c6ea5cb276d9ca551e17c9122bc8bd99f280f47943e"
+    },
+    {
+      "path": ".audit\\native-signage-final\\result.json",
+      "sha256": "1f27e657c9023b7c4d7e12261cb1db93c2226533d1e8fc1b719748e5bcaf4723"
+    },
+    {
+      "path": ".audit\\native-signage-final\\signage-save.json",
+      "sha256": "45df5479f738e9d3ee9cc4ab296b967c58b4e7f0ebfe4a5e0afabc7ff33dcc01"
+    },
+    {
+      "path": ".audit\\native-signage-final\\observer.json",
+      "sha256": "f59bfd7e46404cf0609198ac6717730128c2ba3f6c10d90fc703bb1975c9d300"
+    },
+    {
+      "path": ".audit\\native-signage-final\\cold-result.json",
+      "sha256": "5bd41edb786e3fe553500e96167a938f64483ad3f1f564c603795a88e3110cbc"
+    },
+    {
+      "path": ".audit\\native-signage-final\\save-failure.png",
+      "sha256": "1a8429808e795ac6cde3dd1f700aa88a8869f022458fb7a9daee42e56aad69ef"
+    },
+    {
+      "path": ".audit\\native-signage-final\\stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "documentation": {
+    "files": 17,
+    "checks": "54 passed",
+    "sphinx": "HTML build with -W passed",
+    "rendered_paragraphs_exact": [
+      "Eng",
+      "Zh",
+      "ZhCn",
+      "De",
+      "Fr",
+      "Ru",
+      "It"
+    ]
+  },
+  "test_commit": "4e921dec",
+  "product_commit": "5845b3f8",
+  "regression_plan": "docs/acceptance/2026-11-06-signage-regression-plan.json"
+}

@@ -1,12 +1,13 @@
 """3D viewport, transforms and scene controls integrated with the existing editor."""
 from __future__ import annotations
+from frontengine.ui.runtime_lifetime import captured_lifetime, owned_callback
 
 from copy import deepcopy
 from pathlib import Path
 from threading import Event
 
 import numpy as np
-from PySide6.QtCore import QObject, QRunnable, QThreadPool, QTimer, Qt, Signal
+from PySide6.QtCore import QObject, QRunnable, QTimer, Qt, Signal
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QComboBox, QDoubleSpinBox,
                               QCheckBox, QPushButton, QLabel, QFileDialog, QTreeWidget, QTreeWidgetItem,
@@ -47,6 +48,8 @@ class Scene3DEditor(QWidget):
 
     def __init__(self, editor):
         super().__init__(editor)
+        self.lifetime = captured_lifetime(editor)
+        self.lifetime.adopt(self)
         self.editor, self.document = editor, editor.document
         self.runtime, self.generation, self.closed = None, 0, False
         self.cancel = Event()
@@ -58,9 +61,11 @@ class Scene3DEditor(QWidget):
         row = QHBoxLayout()
         self.tool, self.axis = QComboBox(), QComboBox()
         for value in ('move', 'rotate', 'scale'):
-            self.tool.addItem(translate('scene3d_'+value, value), value)
+            self.tool.addItem('', value)
+            retranslator.bind(self.tool, 'scene3d_'+value, value, 'setItemText', self.tool.count() - 1)
         for value in ('free', 'x', 'y', 'z'):
-            self.axis.addItem(translate('scene3d_'+value, value.upper()), value)
+            self.axis.addItem('', value)
+            retranslator.bind(self.axis, 'scene3d_'+value, value.upper(), 'setItemText', self.axis.count() - 1)
         self.local = tr(QCheckBox(), 'scene3d_local', 'Local axes')
         self.snap = tr(QCheckBox(), 'scene3d_snap', 'Snap')
         for widget in (self.tool, self.axis, self.local, self.snap):
@@ -106,8 +111,9 @@ class Scene3DEditor(QWidget):
         self.inspector = page
         section = page.add_section('scene3d_transform', '3D transform')
         self.space = QComboBox()
-        self.space.addItem(translate('scene3d_world', 'World'), 'world')
-        self.space.addItem(translate('scene3d_screen', 'Screen'), 'screen')
+        for value in ('world', 'screen'):
+            self.space.addItem('', value)
+            retranslator.bind(self.space, 'scene3d_'+value, value.title(), 'setItemText', self.space.count() - 1)
         self.space.currentIndexChanged.connect(self._apply)
         section.add_row('scene3d_space', self.space)
         self.parent_box = QComboBox()
@@ -141,13 +147,15 @@ class Scene3DEditor(QWidget):
             self.properties[name] = spin
             section.add_row('scene3d_'+name, spin)
         self.projection = QComboBox()
-        self.projection.addItem(translate('scene3d_perspective', 'Perspective'), 'perspective')
-        self.projection.addItem(translate('scene3d_orthographic', 'Orthographic'), 'orthographic')
+        for value in ('perspective', 'orthographic'):
+            self.projection.addItem('', value)
+            retranslator.bind(self.projection, 'scene3d_'+value, value.title(), 'setItemText', self.projection.count() - 1)
         self.projection.currentIndexChanged.connect(self._apply)
         section.add_row('scene3d_projection', self.projection)
         self.light_type = QComboBox()
-        self.light_type.addItem(translate('scene3d_directional', 'Directional'), 'directional')
-        self.light_type.addItem(translate('scene3d_point', 'Point'), 'point')
+        for value in ('directional', 'point'):
+            self.light_type.addItem('', value)
+            retranslator.bind(self.light_type, 'scene3d_'+value, value.title(), 'setItemText', self.light_type.count() - 1)
         self.light_type.currentIndexChanged.connect(self._apply)
         section.add_row('scene3d_light_type', self.light_type)
         self.clip = QComboBox()
@@ -198,7 +206,7 @@ class Scene3DEditor(QWidget):
         section.add_row('scene3d_rate', self.rate)
         self.duration = QDoubleSpinBox()
         self.duration.setRange(0, 3600)
-        self.duration.setSpecialValueText(translate('scene3d_auto', 'Automatic'))
+        retranslator.bind(self.duration, 'scene3d_auto', 'Automatic', 'setSpecialValueText')
         self.duration.editingFinished.connect(self._playback_settings)
         section.add_row('scene3d_duration', self.duration)
         self.loop = tr(QCheckBox(), 'scene3d_loop', 'Loop')
@@ -262,8 +270,9 @@ class Scene3DEditor(QWidget):
             self.runtime = None
         retranslator.set_text(self.status, 'scene_action_loading', 'Loading scene…')
         self.cancel = Event()
-        QThreadPool.globalInstance().start(_Prepare(self.generation, document.copy(), self.signals, self.cancel))
+        self.lifetime.submit(_Prepare(self.generation, document.copy(), self.signals, self.cancel))
 
+    @owned_callback
     def _prepared(self, generation, document, models, error):
         if self.closed or generation != self.generation:
             return
@@ -280,7 +289,7 @@ class Scene3DEditor(QWidget):
         candidate = None
         try:
             candidate = Scene3DRuntime(document, models, preview=True,
-                                       enable_media=self.editor.media_enabled.isChecked())
+                                       enable_media=self.editor.media_enabled.isChecked(), lifetime=self.lifetime)
             from frontengine.show.scene.view3d import OffscreenScene3D
             probe = OffscreenScene3D(candidate, (320, 180))
             try:
@@ -342,7 +351,9 @@ class Scene3DEditor(QWidget):
             self.space.setEnabled(enabled and kind in MEDIA_TYPES)
             self.space.setCurrentIndex(self.space.findData((entry or {}).get('space', 'screen' if kind in MEDIA_TYPES else 'world')))
             self.parent_box.clear()
-            self.parent_box.addItem(translate('scene3d_no_parent', 'No parent'), None)
+            retranslator.forget(self.parent_box)
+            self.parent_box.addItem('', None)
+            retranslator.bind(self.parent_box, 'scene3d_no_parent', 'No parent', 'setItemText', 0)
             for key, value in self.document.entries.items():
                 if key not in self.selected and value['type'] == 'GROUP':
                     self.parent_box.addItem(key, key)

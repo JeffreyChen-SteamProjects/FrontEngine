@@ -3,7 +3,7 @@ Pagina Mascotte
 
 Un compagno che vive sulla scrivania.
 
-La pagina si apre con *La tua mascotta*: fai clic su uno dei personaggi integrati e una mascotta vestita così compare subito sul desktop, oppure scegli *La tua immagine…*. Sotto sono elencate le mascotte sul desktop con *Guardaroba*, *Riporta l’animale* e *Metti via* (un doppio clic ne riporta una); tutte le altre impostazioni restano chiuse finché non apri la loro sezione.
+La pagina si apre con *La tua mascotta*: fai clic su uno dei personaggi integrati e una mascotta vestita così compare subito sul desktop, oppure scegli *La tua immagine…*. Sotto sono elencate le mascotte sul desktop con *Guardaroba*, *Riporta l’animale* e *Metti via* (un doppio clic ne riporta una); tutte le altre impostazioni restano chiuse finché non apri la loro sezione. Al primo avvio, senza ancora un animale né una casa, FrontEngine si apre su questa pagina.
 
 * Scegli l'immagine della mascotte - una sola immagine.
 * Scegli un pacchetto mascotte… - una cartella con le immagini walk / idle /
@@ -19,6 +19,9 @@ La pagina si apre con *La tua mascotta*: fai clic su uno dei personaggi integrat
 * Fumetti - brevi battute secondo l'ora, quando le si dà da mangiare e così via.
 * Fermo mentre scrivi - l'animaletto si ferma mentre digiti e riparte un paio di
   secondi dopo, così non attraversa la riga che stai leggendo.
+* Riporta gli animali all'avvio di FrontEngine - attivo per impostazione predefinita:
+  gli animali sul desktop alla chiusura tornano, così come sono, all'avvio successivo;
+  un animale messo via resta via.
 * Leggere ad alta voce - pronunciare quelle battute.
 * Giocare a rincorrersi - due o più mascotte si inseguono.
 * Reagire all'audio - la mascotte si muove a tempo. Può seguire gli
@@ -41,6 +44,8 @@ L'impostazione predefinita del menu Comportamento, Ciclo di tutte le azioni (cas
 :doc:`runtime_interoperability`
 
 Animale → Identità salva UUID, nome, umore, sazietà e affetto indipendenti per ogni sprite o puppet. Prima di crearlo seleziona un’identità salvata per riprendere dopo il riavvio; Nuovo animale ricomincia. Solo la prima identità migra una volta i vecchi valori comuni. La clonazione copia i valori attuali in una nuova identità; nutrire non modifica gli altri animali. Rinomina, aggiorna, esporta o importa singoli salvataggi JSON; l’importazione crea sempre una nuova identità. Ogni identità può essere attiva una sola volta. I salvataggi non includono immagini, script o chat; le preimpostazioni portatili escludono gli ID locali. Fino a 256 identità restano nelle impostazioni; le modifiche sprite vengono salvate dopo un breve ritardo e alla chiusura. Nutrire un puppet modifica solo i valori salvati, non i movimenti o le dimensioni Imervue.
+
+Esporta i salvataggi degli animali con un nome di file diverso. L’esportazione rifiuta i nomi riservati a impostazioni, casa, copie di sicurezza, file temporanei e di blocco, nonché i file di destinazione collegati.
 
 Animale → Crea pacchetto associa walk/idle/sleep/climb/fall/drag, mostra dimensione e velocità di camminata ed esporta una cartella portatile con pet.json. Almeno un’azione; azioni assenti segnalate e gestite dal ripiego del caricatore. PNG/JPEG/GIF/WebP: 64 MiB e 16 megapixel per file, totale 256 MiB. Importazione/esportazione in background, annullabile, senza sovrascrivere cartelle esistenti. Cartelle trasferibili, selezionabili in Animale e condivisibili come pacchetti Workshop. Importa solo sprite selezionati, nome, dimensione e velocità, senza suoni, script o dialoghi. Imervue .puppet usa un formato di creazione separato. Chiusura/Escape libera animazioni e annulla operazioni.
 
@@ -69,7 +74,7 @@ Personalizza animale imposta anche Chiacchiere (Spento, Raramente, Normale, Spes
 
 L’elenco interazioni del gestore offre anche i comandi di menu dell’animale attivo selezionato: foto, stato, promemoria, chat se è collegato un servizio, clona e chiudi, oltre a ogni movimento ed espressione di un modello Puppet. Tutto il menu contestuale è quindi raggiungibile da tastiera.
 
-Usa il personaggio integrato nella pagina Animale installa in background il personaggio INKSIDE scelto con il suo guardaroba e lo seleziona come sorgente. Avvia crea poi un normale animale sprite con quel personaggio: cammina e si arrampica con i fotogrammi di passo disegnati a mano, si può vestire nel guardaroba e mantiene l'abito se indossa già quel personaggio. Usa il modello Puppet integrato, accanto, crea ancora la versione Imervue Puppet.
+Usa il personaggio integrato nella pagina Animale installa in background il personaggio INKSIDE scelto con il suo guardaroba e lo seleziona come sorgente. Avvia crea poi un normale animale sprite con quel personaggio: cammina e si arrampica con i fotogrammi di passo disegnati a mano, si può vestire nel guardaroba e mantiene l'abito se indossa già quel personaggio. Usa il modello Puppet integrato, accanto, crea ancora la versione Imervue Puppet. Il personaggio viene installato per primo, quindi un animale creato da una scheda compare in un paio di secondi; i vestiti finiscono di installarsi in background e il guardaroba aggiunge all'apertura quelli che mancano.
 
 Usa il modello Puppet integrato nella pagina Animale disegna in background il personaggio INKSIDE scelto come modello Imervue .puppet: testa, braccia, coda e corpo con rig, dieci movimenti, tre espressioni e uno script che vi collega le azioni del compagno. Viene salvato in pet-assets/puppets e scelto come sorgente con il suo script, così Avvia lo crea come animale Puppet.
 
@@ -126,3 +131,21 @@ Puppet supporta Vieni qui dal menu o dagli scostamenti da tastiera del gestore. 
 Puppet può inseguire un punto luminoso trascinabile dal menu. Il gestore permette a Sprite e Puppet di posizionarlo da tastiera. Rilasciato vicino all’animale per mezzo secondo avvia il gioco comune di tre secondi; l’affetto arriva solo al termine, con l’attesa normale. Richiamo e luce condividono una meta. Riporre, terminare, curare, trascinare, cambiare modalità o nascondere annulla.
 
 Anche il menu Puppet offre Lancia una palla, e i gestori Sprite e Puppet possono lanciarla per l’identità scelta. Fisica, rilancio trascinando, rimozione con clic destro, 1 affetto e 30 secondi di attesa sono condivisi con Sprite; la finestra Puppet insegue la palla, la raccoglie e la riporta al centro originale, restando nell’area di lavoro. Ogni rilancio riavvia il timeout. Palla, luce e Vieni qui condividono una meta: avviarne una sostituisce l’altra. Cura, trascinamento, cambio modalità o nascondere annullano senza premio. L’animazione di riporto dedicata è in sospeso.
+
+Quando aggiungi un personaggio integrato, una barra mostra i progressi della generazione e dell’installazione verificata del personaggio e dei vestiti. La percentuale indica i passaggi completati, non il tempo rimanente. La barra scompare al termine o in caso di errore. Chiudere il guardaroba annulla il lavoro ancora in corso.
+
+I messaggi delle interazioni appaiono sopra il pulsante di esecuzione, vicino al focus della tastiera. Nelle finestre strette, i titoli delle sezioni e i pulsanti dei dettagli vanno a capo. I campi di identità e interazione mantengono una larghezza minima leggibile e, se necessario, passano sotto le etichette. Selezione, valori e comandi restano invariati.
+
+I campi di personalizzazione espongono le etichette visibili tramite l’accessibilità Qt. I nomi di snack preferiti e sgraditi, dimensioni, velocità, volume, comportamento, loquacità e ampiezza delle animazioni seguono la lingua dell’interfaccia.
+
+I campi del guardaroba e delle foto espongono le etichette visibili tramite l’accessibilità Qt, inclusi gli slot degli abiti, i completi salvati, la posa e il relativo istante. I nomi seguono la lingua dell’interfaccia senza modificare la bozza o la foto.
+
+L’opzione «Posa acquisita» segue la lingua dell’interfaccia, mantenendo la posa selezionata, il relativo istante e la foto.
+
+Se la finestra della foto si chiude durante la scelta della destinazione, il percorso restituito viene ignorato. Non viene scritta una nuova foto e i file esistenti restano invariati. La finestra chiusa rifiuta anche le successive richieste di salvataggio.
+
+Chiudere il guardaroba durante la scelta di una cartella o di un colore scarta il risultato. Non viene avviata alcuna installazione e il colore non cambia. Anche le successive richieste di selezione del guardaroba chiuso vengono ignorate.
+
+Se l’editor dei pacchetti di sprite viene chiuso durante la scelta di un’immagine, della cartella di importazione, della cartella di esportazione o del nome di esportazione, la scelta restituita viene ignorata. Non viene avviata una nuova attività e la bozza resta invariata. Annullando solo la finestra di selezione, è possibile riprovare nell’editor.
+
+La cena tra amici si verifica quando almeno tre abitanti mangiano nella stessa zona. I pasti in zone separate non contano come un unico incontro. L’evento viene registrato al massimo una volta per giorno della casa, anche dopo il salvataggio e la riapertura.

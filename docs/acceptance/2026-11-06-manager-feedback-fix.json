@@ -1,0 +1,722 @@
+{
+  "status": "implemented-targeted-validation-passed",
+  "base_commit": "e51222a9",
+  "changes": [
+    "Feedback before interaction action",
+    "Shared section heading wraps title and toggle using existing FlowLayout",
+    "Pet selector/name/interaction fields keep160px minimum with form wrapping",
+    "Empty pet list text wraps"
+  ],
+  "tests": {
+    "red_cases": 3,
+    "related_passed": 34,
+    "related_seconds": 4.89,
+    "docs_passed": 54,
+    "docs_seconds": 3.68
+  },
+  "rendered_paragraphs": [
+    "Eng/pet",
+    "Eng/ui",
+    "Zh/pet",
+    "Zh/ui",
+    "ZhCn/pet",
+    "ZhCn/ui",
+    "De/pet",
+    "De/ui",
+    "Fr/pet",
+    "Fr/ui",
+    "It/pet",
+    "It/ui",
+    "Ru/pet",
+    "Ru/ui"
+  ],
+  "native": {
+    "native-manager-readable-English": {
+      "result": {
+        "selected_pet_only": true,
+        "pet_completion_affection_delta": 2,
+        "work_mode_selected_only": true,
+        "cancel_feed_no_reward": true,
+        "hidden_pet_unchanged": true,
+        "hidden_feedback": "Start or show this pet before interacting.",
+        "tab_routes": [
+          {
+            "target": "primaryAction",
+            "tabs": 5
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 13
+          },
+          {
+            "target": "QListWidget",
+            "tabs": 2
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 14
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 5
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 22
+          },
+          {
+            "target": "QListWidget",
+            "tabs": 5
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 6
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 6
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 19
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 6
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 25
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 25
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 29
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          }
+        ],
+        "theme": "dark",
+        "language": "English",
+        "actual_window_size": [
+          588,
+          740
+        ],
+        "runtime_closed": true,
+        "temporary_directory_removed": true
+      },
+      "observer": {
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "child_exit": 0
+      },
+      "cold": {
+        "passed": true,
+        "initial_snapshot_exact": true,
+        "profiles_exact": true,
+        "leases_reacquired": true,
+        "saved_exact": true,
+        "temporary_directory_removed": true
+      },
+      "sha256": {
+        "cold-result.json": "5bd41edb786e3fe553500e96167a938f64483ad3f1f564c603795a88e3110cbc",
+        "feedback-text-visibility.json": "4cc2313f5a42e933394fcc20e88f8da7f119feb17e8618351ff803e7b5d101cb",
+        "feedback-visibility.json": "aa9f63f69eb9139c16930600087a86f7ac74b5ef9c07fcc13f1abc03bbb7d694",
+        "observer.json": "2a689a216983485f51c03e4b2a63a0f1987f03f7adf42f973f92f921c1195c1f",
+        "profiles.json": "f3ee03db4ea8fa70f0b61cdc74f548f956aa4c8f4f44929e1f56dd0a80b15dce",
+        "result.json": "4865bcf7a3d44bf872e7e86f097a018322bc4c39b6aa8f733fa960be8e453766",
+        "selection.json": "8c9b9b56727cede9d820b9d0c07e963ca7d30af8c25186d2b662dc7e679e59bb",
+        "shutdown-world.json": "c3d76e5c87ff5bd4ba7997696e2a0ee9dc7333a28983348a5590071a262c4509",
+        "widths.json": "651e4eae3dfddf8582b2ac454c0d7e381db9dd8b21f491c78ef0028852e9b987"
+      },
+      "text_visibility": {
+        "text_rect": [
+          48,
+          416,
+          173,
+          34
+        ],
+        "viewport": [
+          340,
+          546
+        ],
+        "fully_visible": true
+      }
+    },
+    "native-manager-final-Traditional_Chinese": {
+      "result": {
+        "selected_pet_only": true,
+        "pet_completion_affection_delta": 2,
+        "work_mode_selected_only": true,
+        "cancel_feed_no_reward": true,
+        "hidden_pet_unchanged": true,
+        "hidden_feedback": "\u8acb\u5148\u555f\u52d5\u6216\u986f\u793a\u9019\u96bb\u5bf5\u7269\uff0c\u518d\u9032\u884c\u4e92\u52d5\u3002",
+        "tab_routes": [
+          {
+            "target": "primaryAction",
+            "tabs": 5
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 13
+          },
+          {
+            "target": "QListWidget",
+            "tabs": 2
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 14
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 4
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 22
+          },
+          {
+            "target": "QListWidget",
+            "tabs": 5
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 6
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 6
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 19
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 6
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 25
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 29
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 29
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          }
+        ],
+        "theme": "light",
+        "language": "Traditional_Chinese",
+        "actual_window_size": [
+          546,
+          740
+        ],
+        "runtime_closed": true,
+        "temporary_directory_removed": true
+      },
+      "observer": {
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "child_exit": 0
+      },
+      "cold": {
+        "passed": true,
+        "initial_snapshot_exact": true,
+        "profiles_exact": true,
+        "leases_reacquired": true,
+        "saved_exact": true,
+        "temporary_directory_removed": true
+      },
+      "sha256": {
+        "cold-result.json": "5bd41edb786e3fe553500e96167a938f64483ad3f1f564c603795a88e3110cbc",
+        "feedback-text-visibility.json": "d2026b99f229b2619b91d607832cbcd5cac64d40af6410422f246104e07d4dd4",
+        "feedback-visibility.json": "f15212eccfc9a5f2d89757fb4de9aedd2ab43c6da2b34502822b13d77ff35f20",
+        "observer.json": "2a689a216983485f51c03e4b2a63a0f1987f03f7adf42f973f92f921c1195c1f",
+        "profiles.json": "1ea0e0664fddc3729815f68f000805eaee8147ede46f9970cee84a515acb4f34",
+        "result.json": "460c174b7b703813ff9f74e1f77a531c72bba138e2f1e0dc59695f5ad19e0e56",
+        "selection.json": "8c9b9b56727cede9d820b9d0c07e963ca7d30af8c25186d2b662dc7e679e59bb",
+        "shutdown-world.json": "9a0a2dc7a950b50f3a6ae3876db91bf39bab863e8ca3675c1eec0ef09dc1d61d",
+        "widths.json": "de59d3dfd6f7325ccd1d083b719bb540f7936311b3fa27ed6c7003f3e6a051b6"
+      },
+      "text_visibility": {
+        "text_rect": [
+          48,
+          417,
+          208,
+          34
+        ],
+        "viewport": [
+          298,
+          538
+        ],
+        "fully_visible": true
+      }
+    },
+    "native-manager-final-Deutsch": {
+      "result": {
+        "selected_pet_only": true,
+        "pet_completion_affection_delta": 2,
+        "work_mode_selected_only": true,
+        "cancel_feed_no_reward": true,
+        "hidden_pet_unchanged": true,
+        "hidden_feedback": "Starten oder zeigen Sie dieses Tier vor der Interaktion.",
+        "tab_routes": [
+          {
+            "target": "primaryAction",
+            "tabs": 5
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 13
+          },
+          {
+            "target": "QListWidget",
+            "tabs": 2
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 14
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 4
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 22
+          },
+          {
+            "target": "QListWidget",
+            "tabs": 5
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 6
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 6
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 19
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 6
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 29
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 29
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 29
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          }
+        ],
+        "theme": "light",
+        "language": "Deutsch",
+        "actual_window_size": [
+          900,
+          740
+        ],
+        "runtime_closed": true,
+        "temporary_directory_removed": true
+      },
+      "observer": {
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "child_exit": 0
+      },
+      "cold": {
+        "passed": true,
+        "initial_snapshot_exact": true,
+        "profiles_exact": true,
+        "leases_reacquired": true,
+        "saved_exact": true,
+        "temporary_directory_removed": true
+      },
+      "sha256": {
+        "cold-result.json": "5bd41edb786e3fe553500e96167a938f64483ad3f1f564c603795a88e3110cbc",
+        "feedback-text-visibility.json": "def88b314f1fc4ace2e4a9590bef3caacb840bb2ec89caf012a02069f0d05a3c",
+        "feedback-visibility.json": "d0c634c9dd6c43bd78a5dc84c85b711110ba4a5d18fe73ff3291bf5ce918ace0",
+        "observer.json": "2a689a216983485f51c03e4b2a63a0f1987f03f7adf42f973f92f921c1195c1f",
+        "profiles.json": "82168f31478f6459649400937d2dbf60d487bfb989d30dc9a8b2c586e78ca8c0",
+        "result.json": "f7b3532f578f9d90bbf8611ca62a1383eb1ec78bf8695960f32c421eb3dc244b",
+        "selection.json": "8c9b9b56727cede9d820b9d0c07e963ca7d30af8c25186d2b662dc7e679e59bb",
+        "shutdown-world.json": "45317481f905dde192b006e2c498bd8d5b43c845736e0f2a66be61b623c5aa7c",
+        "widths.json": "88c0016a20ef650cd8f190fc21417cb3b58b83e316a78db1544ba2d90c48cfbc"
+      },
+      "text_visibility": {
+        "text_rect": [
+          49,
+          433,
+          328,
+          17
+        ],
+        "viewport": [
+          652,
+          546
+        ],
+        "fully_visible": true
+      }
+    },
+    "native-manager-final-Russian": {
+      "result": {
+        "selected_pet_only": true,
+        "pet_completion_affection_delta": 2,
+        "work_mode_selected_only": true,
+        "cancel_feed_no_reward": true,
+        "hidden_pet_unchanged": true,
+        "hidden_feedback": "\u0421\u043d\u0430\u0447\u0430\u043b\u0430 \u0437\u0430\u043f\u0443\u0441\u0442\u0438\u0442\u0435 \u0438\u043b\u0438 \u043f\u043e\u043a\u0430\u0436\u0438\u0442\u0435 \u044d\u0442\u043e\u0433\u043e \u043f\u0438\u0442\u043e\u043c\u0446\u0430.",
+        "tab_routes": [
+          {
+            "target": "primaryAction",
+            "tabs": 5
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 13
+          },
+          {
+            "target": "QListWidget",
+            "tabs": 2
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 14
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 4
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 22
+          },
+          {
+            "target": "QListWidget",
+            "tabs": 5
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 6
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 6
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 19
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 6
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 25
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 25
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 25
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          }
+        ],
+        "theme": "dark",
+        "language": "Russian",
+        "actual_window_size": [
+          823,
+          740
+        ],
+        "runtime_closed": true,
+        "temporary_directory_removed": true
+      },
+      "observer": {
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "child_exit": 0
+      },
+      "cold": {
+        "passed": true,
+        "initial_snapshot_exact": true,
+        "profiles_exact": true,
+        "leases_reacquired": true,
+        "saved_exact": true,
+        "temporary_directory_removed": true
+      },
+      "sha256": {
+        "cold-result.json": "5bd41edb786e3fe553500e96167a938f64483ad3f1f564c603795a88e3110cbc",
+        "feedback-text-visibility.json": "762e0433a7dfd77634865f732f3f4c3e584906b80c44c243e4848acd1a7d5ac4",
+        "feedback-visibility.json": "4e38017810d09a140ea3f4966e19ea3b6afba8f7c5677ac66ade15f0490ae598",
+        "observer.json": "2a689a216983485f51c03e4b2a63a0f1987f03f7adf42f973f92f921c1195c1f",
+        "profiles.json": "7490ed19b4e1397a5253358cd13985a7a59396df74c9693d233889e3c3e1419b",
+        "result.json": "0f75e21fc2b8e6195859b22f23200e116c2ff09af09fea253c879a41e5ef459b",
+        "selection.json": "8c9b9b56727cede9d820b9d0c07e963ca7d30af8c25186d2b662dc7e679e59bb",
+        "shutdown-world.json": "a1a3ed5c43cc68ce5c5d5669af2683f335b013107a7ad2c444f6da9bad582023",
+        "widths.json": "115d9c2b2b0769ecd7be161cfec7ff6eaee8c2a09f374663e2f7c969bd8fe85b"
+      },
+      "text_visibility": {
+        "text_rect": [
+          49,
+          433,
+          289,
+          17
+        ],
+        "viewport": [
+          575,
+          546
+        ],
+        "fully_visible": true
+      }
+    },
+    "native-pages-final": {
+      "result": {
+        "passed": true,
+        "pages": 17,
+        "languages": 7,
+        "cases": 238,
+        "callback_errors": [],
+        "runtime_closed": true,
+        "temporary_directory_removed": true
+      },
+      "observer": {
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "child_exit": 0,
+        "observation_only": true
+      },
+      "cold": {
+        "passed": true,
+        "initial_snapshot_exact": true,
+        "profiles_exact": true,
+        "leases_reacquired": true,
+        "saved_exact": true,
+        "temporary_directory_removed": true
+      },
+      "sha256": {
+        "cold-result.json": "5bd41edb786e3fe553500e96167a938f64483ad3f1f564c603795a88e3110cbc",
+        "observer.json": "108902181ee471ddb835401d5d799d056e70c9ac4aead7d271ce043e584e29a5",
+        "profiles.json": "f3ee03db4ea8fa70f0b61cdc74f548f956aa4c8f4f44929e1f56dd0a80b15dce",
+        "result.json": "21ac80a8cbbd9748dad62ab6f51e3aa227bec539149de1b8e20b46c6f884ef15",
+        "shutdown-world.json": "c3d76e5c87ff5bd4ba7997696e2a0ee9dc7333a28983348a5590071a262c4509"
+      }
+    }
+  },
+  "visual_inspection": [
+    "native-manager-readable-English/manager-final.png",
+    "native-manager-final-Traditional_Chinese/manager-final.png"
+  ],
+  "excluded_experiments": [
+    "Whole-label rectangle exceeded viewport while English text itself remained visible; replaced with text-bounds assertion and original image inspection.",
+    "Zero-width selectors passed feedback geometry but were unreadable; replaced with160px minimum.",
+    "Initial layout test needed event-loop settling; final unchanged regression cases failed original code and passed current code."
+  ],
+  "limits": [
+    "Self-review only; independent review, full regression and integration pending",
+    "Synthetic sprite and controlled care time; not normal-speed or production-art validation",
+    "Native current DPI only; some pages retain horizontal scrolling",
+    "Navigation coverage does not cover all tool actions"
+  ]
+}

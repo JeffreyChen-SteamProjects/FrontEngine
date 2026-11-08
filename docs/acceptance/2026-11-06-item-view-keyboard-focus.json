@@ -1,0 +1,402 @@
+{
+  "base_commit": "b29ce12",
+  "problem": "The item-view stylesheet removes the native outline and supplies no focus border. The unselected Work list looks identical with and without keyboard focus.",
+  "fix": "Use the existing accent token for focused list, tree and table borders. Preserve border width, geometry and selection semantics.",
+  "red": {
+    "test": "test_item_view_focus_is_visible_without_selection_or_resizing[QListView-light]",
+    "failure": "QListView light: border does not change when keyboard focus enters",
+    "summary": "1 failed, 17 deselected in 12.87s"
+  },
+  "green": [
+    {
+      "runtime": "Python 3.11.9 / Qt 6.12.0",
+      "scope": "design system and wrapping buttons",
+      "passed": 31,
+      "seconds": 15.33
+    },
+    {
+      "runtime": "Python 3.14.5 / Qt 6.11.2",
+      "scope": "design system, documentation and progress",
+      "passed": 56,
+      "seconds": 115.98
+    }
+  ],
+  "checks": {
+    "pyflakes": 0,
+    "sphinx_html_W_keep_going": 0,
+    "sphinx_sources": 152,
+    "readmes_updated": 10,
+    "home_doc_languages_updated": 7
+  },
+  "native": {
+    "before": {
+      "result.json": {
+        "created_home": true,
+        "cancelled_automatic_work": true,
+        "entered_and_escaped_arranging": true,
+        "tab_routes": [
+          {
+            "target": "primaryAction",
+            "tabs": 5
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 13
+          },
+          {
+            "target": "QListWidget",
+            "tabs": 1
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 14
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 3
+          }
+        ],
+        "selection": {
+          "after_home": {
+            "row": 0,
+            "selected": 0,
+            "count": 1,
+            "focus": "QListWidget"
+          },
+          "after_down": {
+            "row": 0,
+            "selected": 0
+          },
+          "after_space": {
+            "row": 0,
+            "selected": 1
+          }
+        },
+        "final_focus": "WrappingPushButton"
+      },
+      "focus-captures.json": [
+        {
+          "widget": "WrappingPushButton",
+          "name": "primaryAction",
+          "changed_pixels": 436,
+          "width": 141,
+          "height": 38
+        },
+        {
+          "widget": "QTabBar",
+          "name": "qt_tabwidget_tabbar",
+          "changed_pixels": 248,
+          "width": 976,
+          "height": 37
+        },
+        {
+          "widget": "QListWidget",
+          "name": "",
+          "changed_pixels": 0,
+          "width": 936,
+          "height": 192
+        },
+        {
+          "widget": "WrappingPushButton",
+          "name": "",
+          "changed_pixels": 600,
+          "width": 94,
+          "height": 32
+        },
+        {
+          "widget": "QTabBar",
+          "name": "qt_tabwidget_tabbar",
+          "changed_pixels": 140,
+          "width": 976,
+          "height": 37
+        },
+        {
+          "widget": "WrappingPushButton",
+          "name": "",
+          "changed_pixels": 516,
+          "width": 80,
+          "height": 32
+        }
+      ],
+      "observer.json": {
+        "before": {
+          "foreground": 90180054,
+          "cursor": [
+            959,
+            540
+          ]
+        },
+        "after": {
+          "foreground": 90180054,
+          "cursor": [
+            959,
+            539
+          ]
+        },
+        "exit": 0
+      },
+      "image_sha256": {
+        "2-focused.png": "fa072ce85e2e89fec5b8db6fff558c87192a07425608c9b5d0b4d25111f728e2",
+        "2-unfocused.png": "fa072ce85e2e89fec5b8db6fff558c87192a07425608c9b5d0b4d25111f728e2"
+      }
+    },
+    "light": {
+      "result.json": {
+        "created_home": true,
+        "cancelled_automatic_work": true,
+        "entered_and_escaped_arranging": true,
+        "tab_routes": [
+          {
+            "target": "primaryAction",
+            "tabs": 5
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 13
+          },
+          {
+            "target": "QListWidget",
+            "tabs": 1
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 14
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 3
+          }
+        ],
+        "selection": {
+          "after_home": {
+            "row": 0,
+            "selected": 0,
+            "count": 1,
+            "focus": "QListWidget"
+          },
+          "after_down": {
+            "row": 0,
+            "selected": 0
+          },
+          "after_space": {
+            "row": 0,
+            "selected": 1
+          }
+        },
+        "final_focus": "WrappingPushButton"
+      },
+      "focus-captures.json": [
+        {
+          "widget": "WrappingPushButton",
+          "name": "primaryAction",
+          "changed_pixels": 436,
+          "width": 141,
+          "height": 38
+        },
+        {
+          "widget": "QTabBar",
+          "name": "qt_tabwidget_tabbar",
+          "changed_pixels": 248,
+          "width": 976,
+          "height": 37
+        },
+        {
+          "widget": "QListWidget",
+          "name": "",
+          "changed_pixels": 2276,
+          "width": 936,
+          "height": 192
+        },
+        {
+          "widget": "WrappingPushButton",
+          "name": "",
+          "changed_pixels": 600,
+          "width": 94,
+          "height": 32
+        },
+        {
+          "widget": "QTabBar",
+          "name": "qt_tabwidget_tabbar",
+          "changed_pixels": 140,
+          "width": 976,
+          "height": 37
+        },
+        {
+          "widget": "WrappingPushButton",
+          "name": "",
+          "changed_pixels": 516,
+          "width": 80,
+          "height": 32
+        }
+      ],
+      "observer.json": {
+        "before": {
+          "foreground": 90180054,
+          "cursor": [
+            959,
+            539
+          ]
+        },
+        "after": {
+          "foreground": 90180054,
+          "cursor": [
+            959,
+            539
+          ]
+        },
+        "exit": 0
+      },
+      "image_sha256": {
+        "2-focused.png": "79d46929a55c41b1411aab4ae6458af35754e9113bf6ae7040e7aa4d16397bd3",
+        "2-unfocused.png": "53474e32ae4168d580f1c11afa4ff19d30c22d033f91cba7ee91a1fa8eb29bf5"
+      }
+    },
+    "dark": {
+      "result.json": {
+        "created_home": true,
+        "cancelled_automatic_work": true,
+        "entered_and_escaped_arranging": true,
+        "tab_routes": [
+          {
+            "target": "primaryAction",
+            "tabs": 5
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 13
+          },
+          {
+            "target": "QListWidget",
+            "tabs": 1
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 14
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 3
+          }
+        ],
+        "selection": {
+          "after_home": {
+            "row": 0,
+            "selected": 0,
+            "count": 1,
+            "focus": "QListWidget"
+          },
+          "after_down": {
+            "row": 0,
+            "selected": 0
+          },
+          "after_space": {
+            "row": 0,
+            "selected": 1
+          }
+        },
+        "final_focus": "WrappingPushButton"
+      },
+      "focus-captures.json": [
+        {
+          "widget": "WrappingPushButton",
+          "name": "primaryAction",
+          "changed_pixels": 436,
+          "width": 141,
+          "height": 38
+        },
+        {
+          "widget": "QTabBar",
+          "name": "qt_tabwidget_tabbar",
+          "changed_pixels": 248,
+          "width": 976,
+          "height": 37
+        },
+        {
+          "widget": "QListWidget",
+          "name": "",
+          "changed_pixels": 2276,
+          "width": 936,
+          "height": 192
+        },
+        {
+          "widget": "WrappingPushButton",
+          "name": "",
+          "changed_pixels": 600,
+          "width": 94,
+          "height": 32
+        },
+        {
+          "widget": "QTabBar",
+          "name": "qt_tabwidget_tabbar",
+          "changed_pixels": 140,
+          "width": 976,
+          "height": 37
+        },
+        {
+          "widget": "WrappingPushButton",
+          "name": "",
+          "changed_pixels": 516,
+          "width": 80,
+          "height": 32
+        }
+      ],
+      "observer.json": {
+        "before": {
+          "foreground": 90180054,
+          "cursor": [
+            959,
+            540
+          ]
+        },
+        "after": {
+          "foreground": 90180054,
+          "cursor": [
+            959,
+            539
+          ]
+        },
+        "exit": 0
+      },
+      "image_sha256": {
+        "2-focused.png": "01c17e4bb96a57f92c5a8225ac2b3fadaf0ab59830a645b905616de78367b842",
+        "2-unfocused.png": "ed17ad216c3828812517969106eeed04f055b07c12f9ae388502304d05fce1d5"
+      }
+    }
+  },
+  "visual_inspection": "Inspected actual native focused Work-list crops in light and dark themes: orange border visible. Baseline primary button already had a visible native focus rectangle and was not changed.",
+  "limits": [
+    "Native windows run on private hidden Win32 desktops with Qt widget-local key events, no desktop input injection.",
+    "Foreground observations match in all runs. Cursor changes by one vertical pixel in baseline and dark run; cause is unknown. Light-run cursor is unchanged.",
+    "OS/Workshop startup substitutions from the earlier MainUI keyboard probe remain.",
+    "English native flow only. Does not cover every specialized borderless view, screen readers, other languages or mixed-DPI keyboard flows.",
+    "Full regression on this product change remains pending; previous 3147-pass result applies to 1c24853.",
+    "No EXE build, push, merge or release."
+  ],
+  "harnesses": {
+    "check_home_keyboard_native.py": {
+      "sha256": "0843b81b7402c14e7364606edeb15a4b70eb562b35eec5960e3ada0494b41d56",
+      "source": "from pathlib import Path\nimport ctypes\nfrom ctypes import wintypes\nimport json\nimport sys\nimport uuid\n\nROOT = Path(__file__).resolve().parents[1]\nsys.path.insert(0, str(ROOT / 'tests/integration'))\nimport hidden_desktop\n\nOUT = ROOT / '.audit/home-keyboard-native'\nOUT.mkdir(exist_ok=True)\n\n\ndef observe():\n    api = ctypes.windll.user32\n    api.GetForegroundWindow.restype = wintypes.HWND\n    point = wintypes.POINT()\n    assert api.GetCursorPos(ctypes.byref(point))\n    return {'foreground': int(api.GetForegroundWindow() or 0), 'cursor': [point.x, point.y]}\n\n\nif not hidden_desktop.is_child(OUT):\n    hidden_desktop.DESKTOP = 'FrontHomeKeyboard_' + uuid.uuid4().hex[:12]\n    before = observe()\n    code = hidden_desktop.run_on_hidden_desktop(__file__, timeout_ms=240000)\n    (OUT / 'observer.json').write_text(json.dumps({'before': before, 'after': observe(), 'exit': code}, indent=2))\n    raise SystemExit(code)\n\ncaptures = []\n\n\ndef capture_focus(app, window, target):\n    from PySide6.QtCore import Qt\n    from PySide6.QtTest import QTest\n    index = len(captures)\n    QTest.qWait(40)\n    focused = target.grab().toImage()\n    focused.save(str(OUT / f'{index}-focused.png'))\n    if index == 0:\n        window.grab().save(str(OUT / 'create-focused-window.png'))\n    QTest.keyClick(target, Qt.Key.Key_Tab)\n    app.processEvents()\n    assert app.focusWidget() is not target\n    QTest.qWait(40)\n    unfocused = target.grab().toImage()\n    unfocused.save(str(OUT / f'{index}-unfocused.png'))\n    changed = sum(focused.pixel(x, y) != unfocused.pixel(x, y)\n                  for y in range(focused.height()) for x in range(focused.width()))\n    QTest.keyClick(app.focusWidget(), Qt.Key.Key_Backtab)\n    app.processEvents()\n    assert app.focusWidget() is target\n    captures.append({'widget': type(target).__name__, 'name': target.objectName(),\n                     'changed_pixels': changed, 'width': focused.width(), 'height': focused.height()})\n\n\nsource = (ROOT / '.audit/check_home_keyboard_flow.py').read_text(encoding='utf-8')\nsource = source.replace(\"os.environ['QT_QPA_PLATFORM'] = 'offscreen'\", \"os.environ['QT_QPA_PLATFORM'] = 'windows'\")\nsource = source.replace(\"        if current is target:\\n\", \"        if current is target:\\n            capture_focus(app, window, target)\\n\")\nsource = source.replace('            window.show()\\n', \"            window._apply_theme('light')\\n            window.show()\\n            window.activateWindow()\\n\")\nsource = source.replace(\"'.audit/home-keyboard-flow-result.json'\", \"'.audit/home-keyboard-native/result.json'\")\nexec(compile(source, str(ROOT / '.audit/check_home_keyboard_flow.py'), 'exec'))\n(OUT / 'focus-captures.json').write_text(json.dumps(captures, indent=2), encoding='utf-8')\n"
+    },
+    "check_home_keyboard_native_fixed_light.py": {
+      "sha256": "2493ce41a2135a5c526435a9360e066dc95311678518179c2d32e01b49891861",
+      "source": "from pathlib import Path\nimport ctypes\nfrom ctypes import wintypes\nimport json\nimport sys\nimport uuid\n\nROOT = Path(__file__).resolve().parents[1]\nsys.path.insert(0, str(ROOT / 'tests/integration'))\nimport hidden_desktop\n\nOUT = ROOT / '.audit/home-keyboard-native-fixed-light'\nOUT.mkdir(exist_ok=True)\n\n\ndef observe():\n    api = ctypes.windll.user32\n    api.GetForegroundWindow.restype = wintypes.HWND\n    point = wintypes.POINT()\n    assert api.GetCursorPos(ctypes.byref(point))\n    return {'foreground': int(api.GetForegroundWindow() or 0), 'cursor': [point.x, point.y]}\n\n\nif not hidden_desktop.is_child(OUT):\n    hidden_desktop.DESKTOP = 'FrontHomeKeyboard_' + uuid.uuid4().hex[:12]\n    before = observe()\n    code = hidden_desktop.run_on_hidden_desktop(__file__, timeout_ms=240000)\n    (OUT / 'observer.json').write_text(json.dumps({'before': before, 'after': observe(), 'exit': code}, indent=2))\n    raise SystemExit(code)\n\ncaptures = []\n\n\ndef capture_focus(app, window, target):\n    from PySide6.QtCore import Qt\n    from PySide6.QtTest import QTest\n    index = len(captures)\n    QTest.qWait(40)\n    focused = target.grab().toImage()\n    focused.save(str(OUT / f'{index}-focused.png'))\n    if index == 0:\n        window.grab().save(str(OUT / 'create-focused-window.png'))\n    QTest.keyClick(target, Qt.Key.Key_Tab)\n    app.processEvents()\n    assert app.focusWidget() is not target\n    QTest.qWait(40)\n    unfocused = target.grab().toImage()\n    unfocused.save(str(OUT / f'{index}-unfocused.png'))\n    changed = sum(focused.pixel(x, y) != unfocused.pixel(x, y)\n                  for y in range(focused.height()) for x in range(focused.width()))\n    QTest.keyClick(app.focusWidget(), Qt.Key.Key_Backtab)\n    app.processEvents()\n    assert app.focusWidget() is target\n    captures.append({'widget': type(target).__name__, 'name': target.objectName(),\n                     'changed_pixels': changed, 'width': focused.width(), 'height': focused.height()})\n\n\nsource = (ROOT / '.audit/check_home_keyboard_flow.py').read_text(encoding='utf-8')\nsource = source.replace(\"os.environ['QT_QPA_PLATFORM'] = 'offscreen'\", \"os.environ['QT_QPA_PLATFORM'] = 'windows'\")\nsource = source.replace(\"        if current is target:\\n\", \"        if current is target:\\n            capture_focus(app, window, target)\\n\")\nsource = source.replace('            window.show()\\n', \"            window._apply_theme('light')\\n            window.show()\\n            window.activateWindow()\\n\")\nsource = source.replace(\"'.audit/home-keyboard-flow-result.json'\", \"'.audit/home-keyboard-native-fixed-light/result.json'\")\nexec(compile(source, str(ROOT / '.audit/check_home_keyboard_flow.py'), 'exec'))\n(OUT / 'focus-captures.json').write_text(json.dumps(captures, indent=2), encoding='utf-8')\n\nassert captures[2]['changed_pixels'] > 0, captures[2]\n"
+    },
+    "check_home_keyboard_native_fixed_dark.py": {
+      "sha256": "5a5ed22b81c4093fbcb206390d95917ec4f82b4005a40be91f4ecd54cdce9d74",
+      "source": "from pathlib import Path\nimport ctypes\nfrom ctypes import wintypes\nimport json\nimport sys\nimport uuid\n\nROOT = Path(__file__).resolve().parents[1]\nsys.path.insert(0, str(ROOT / 'tests/integration'))\nimport hidden_desktop\n\nOUT = ROOT / '.audit/home-keyboard-native-fixed-dark'\nOUT.mkdir(exist_ok=True)\n\n\ndef observe():\n    api = ctypes.windll.user32\n    api.GetForegroundWindow.restype = wintypes.HWND\n    point = wintypes.POINT()\n    assert api.GetCursorPos(ctypes.byref(point))\n    return {'foreground': int(api.GetForegroundWindow() or 0), 'cursor': [point.x, point.y]}\n\n\nif not hidden_desktop.is_child(OUT):\n    hidden_desktop.DESKTOP = 'FrontHomeKeyboard_' + uuid.uuid4().hex[:12]\n    before = observe()\n    code = hidden_desktop.run_on_hidden_desktop(__file__, timeout_ms=240000)\n    (OUT / 'observer.json').write_text(json.dumps({'before': before, 'after': observe(), 'exit': code}, indent=2))\n    raise SystemExit(code)\n\ncaptures = []\n\n\ndef capture_focus(app, window, target):\n    from PySide6.QtCore import Qt\n    from PySide6.QtTest import QTest\n    index = len(captures)\n    QTest.qWait(40)\n    focused = target.grab().toImage()\n    focused.save(str(OUT / f'{index}-focused.png'))\n    if index == 0:\n        window.grab().save(str(OUT / 'create-focused-window.png'))\n    QTest.keyClick(target, Qt.Key.Key_Tab)\n    app.processEvents()\n    assert app.focusWidget() is not target\n    QTest.qWait(40)\n    unfocused = target.grab().toImage()\n    unfocused.save(str(OUT / f'{index}-unfocused.png'))\n    changed = sum(focused.pixel(x, y) != unfocused.pixel(x, y)\n                  for y in range(focused.height()) for x in range(focused.width()))\n    QTest.keyClick(app.focusWidget(), Qt.Key.Key_Backtab)\n    app.processEvents()\n    assert app.focusWidget() is target\n    captures.append({'widget': type(target).__name__, 'name': target.objectName(),\n                     'changed_pixels': changed, 'width': focused.width(), 'height': focused.height()})\n\n\nsource = (ROOT / '.audit/check_home_keyboard_flow.py').read_text(encoding='utf-8')\nsource = source.replace(\"os.environ['QT_QPA_PLATFORM'] = 'offscreen'\", \"os.environ['QT_QPA_PLATFORM'] = 'windows'\")\nsource = source.replace(\"        if current is target:\\n\", \"        if current is target:\\n            capture_focus(app, window, target)\\n\")\nsource = source.replace('            window.show()\\n', \"            window._apply_theme('dark')\\n            window.show()\\n            window.activateWindow()\\n\")\nsource = source.replace(\"'.audit/home-keyboard-flow-result.json'\", \"'.audit/home-keyboard-native-fixed-dark/result.json'\")\nexec(compile(source, str(ROOT / '.audit/check_home_keyboard_flow.py'), 'exec'))\n(OUT / 'focus-captures.json').write_text(json.dumps(captures, indent=2), encoding='utf-8')\n\nassert captures[2]['changed_pixels'] > 0, captures[2]\n"
+    }
+  },
+  "keyboard_helper_source_report": "2026-11-05-home-keyboard-flow.json"
+}

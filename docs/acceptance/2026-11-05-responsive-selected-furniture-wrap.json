@@ -1,0 +1,29 @@
+{
+  "base": "1d28e7c",
+  "cause": "The unwrapped selected-furniture QLabel has a 178-pixel minimum width in Russian. QFormLayout adds 14 pixels, Section adds 40, and the hidden page contributes that minimum to every tab.",
+  "observed": {
+    "label_minimum": 178,
+    "form_minimum": 192,
+    "section_minimum": 232,
+    "outer_content_width": 292,
+    "viewport_width": 282,
+    "overflow": 10
+  },
+  "combo_control": "Combo layout items have minimum width 100 under Ignored policy; changing their content-size policy did not fix the failure.",
+  "fix": "Allow selected furniture names and prompts to wrap.",
+  "regression": "Registers Arial explicitly, checks actual window width 536, then checks zero outer horizontal scrolling across seven languages and nine tabs.",
+  "red": "1 failed in 63.44s; Russian shop maximum 10; actual width assertion passed.",
+  "green": "43 passed in 94.34s (0:01:34)",
+  "font_hygiene": "Both the OCR test and the new responsive test unregister their application font through pytest finalizers.",
+  "limits": [
+    "Offscreen Qt tests; native styled-window visual acceptance remains pending.",
+    "Full regression on unchanged 9ed1b2d remains live in ownership-integration.",
+    "No full-suite pass, merge, push, release, or independent-review claim."
+  ],
+  "evidence": {
+    "D:\\Codes\\FrontEngine\\.audit\\worktrees\\responsive-font-layout\\.audit\\responsive-red.log": "58837f7e5b2bd8f52530c91306f936a411f20918498ed4c6274d13ac462a0bb9",
+    "D:\\Codes\\FrontEngine\\.audit\\worktrees\\responsive-font-layout\\.audit\\responsive-green.log": "6b35c5e88afb6071ff58e0a15a9ace687f2538a67478da31196847e263461ae2",
+    "D:\\Codes\\FrontEngine\\.audit\\worktrees\\ownership-integration\\.audit\\responsive-layout-items.json": "f51731b4f0f31030e0f07786a2412a034bc3f3406723e573ceceee6ccb5facfa",
+    "D:\\Codes\\FrontEngine\\.audit\\worktrees\\ownership-integration\\.audit\\responsive-selected-wrap.log": "1b936610989cec956fdaeee653f6a5f7ff7862be9e83b1d60f5941e1385507ac"
+  }
+}

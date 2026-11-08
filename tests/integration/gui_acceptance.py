@@ -19,6 +19,7 @@ import logging
 import os
 import sys
 import tempfile
+import time
 import traceback
 import wave
 from pathlib import Path
@@ -35,7 +36,7 @@ if not is_child(OUTPUT):
 
 WORK = Path(tempfile.mkdtemp(prefix='fe-gui-acceptance-'))
 os.chdir(WORK)
-from PySide6.QtCore import QThreadPool, QTimer, QtMsgType, qInstallMessageHandler  # noqa: E402
+from PySide6.QtCore import QEventLoop, QTimer, QtMsgType, qInstallMessageHandler  # noqa: E402
 from PySide6.QtGui import QColor, QImage, QSurfaceFormat  # noqa: E402
 from PySide6.QtWidgets import QApplication, QDialog, QFileDialog, QMessageBox  # noqa: E402
 
@@ -43,6 +44,7 @@ surface = QSurfaceFormat.defaultFormat()
 surface.setSwapInterval(0)
 QSurfaceFormat.setDefaultFormat(surface)
 app = QApplication(sys.argv)
+app.setQuitOnLastWindowClosed(False)
 
 # --- error capture ----------------------------------------------------------
 events, current = [], {'step': 'startup'}
@@ -157,12 +159,23 @@ def page_steps():
     return steps
 
 
+def wait_until(predicate, message, timeout_ms=180000):
+    deadline = time.monotonic() + timeout_ms / 1000
+    while not predicate():
+        if time.monotonic() >= deadline:
+            raise AssertionError(message)
+        loop = QEventLoop()
+        QTimer.singleShot(20, loop.quit)
+        loop.exec()
+
+
 def pet_builtin():
     page = window.pet_setting_ui
     page.use_builtin_character()
-    QThreadPool.globalInstance().waitForDone(180000)
-    app.processEvents()
-    assert page.ready_to_play, 'built-in character did not become ready'
+    wait_until(lambda: page._sprite_install is None, 'built-in character install did not finish')
+    assert page._builtin_sprite is not None, page.profile_controls.status.text()
+    assert page._builtin_sprite[0] == page.builtin_character.currentData(), 'wrong character installed'
+    assert page.ready_to_play, 'installed character did not become ready'
     page.start_play_pet()
     return type(page.pet_list[-1]).__name__
 
@@ -217,12 +230,7 @@ def scene_template():
 
 def scene_applied():
     dialog = W.scene_setting_ui.templates_dialog
-    for _ in range(100):
-        if dialog.pending is None:
-            break
-        app.processEvents()
-        QThreadPool.globalInstance().waitForDone(100)
-    assert dialog.pending is None, 'template never finished applying'
+    wait_until(lambda: dialog.pending is None, 'template never finished applying')
     return {'status': dialog.status.text()[:120], 'dialog_hidden': not dialog.isVisible(),
             'scene_windows': [type(w).__name__ for w in overlays()]}
 
@@ -255,11 +263,8 @@ def pet_home_dressed():
     draft.choose_character(asset_reference(character))
     draft.apply()
     W.sidebar.select_page_id('tab_pet_home_text')
-    for _ in range(50):
-        app.processEvents()
-        if page.art.renderer(resident.identifier) is not None:
-            break
-        QThreadPool.globalInstance().waitForDone(100)
+    wait_until(lambda: page.art.renderer(resident.identifier) is not None,
+               'resident character did not become ready')
     strip = page.strip_list[0]
     assert page.art.frame(resident) is not None, 'no character frame'
     screenshot('pet-home-dressed')
@@ -376,13 +381,31 @@ def run(steps):
 def finish():
     current['step'] = 'shutdown'
     screenshot('final')
-    leftovers = sorted(type(w).__name__ for w in overlays())
-    closed = window.close()
-    report = {'results': results, 'events': events, 'leftover_before_close': leftovers, 'window_closed': closed,
+    report = {'results': results, 'events': events,
+              'leftover_before_close': sorted(type(w).__name__ for w in overlays()),
               'pet_home_saved': (WORK / 'pet-home.json').is_file()}
-    (OUTPUT / 'result.json').write_text(json.dumps(report, indent=1, ensure_ascii=False), encoding='utf-8')
-    QTimer.singleShot(500, app.quit)
+    timeout = QTimer(app)
+    timeout.setSingleShot(True)
+
+    def completed():
+        if 'status' in report:
+            return
+        timeout.stop()
+        report['window_closed'] = window.lifetime.closed
+        report['runtime_state'] = str(window.lifetime.state)
+        failures = any('raised' in item or item.get('window_ok') is False for item in results)
+        failures |= any(item['kind'] in ('exception', 'qt-critical') for item in events)
+        report['status'] = 'failed' if failures or not window.lifetime.closed else 'passed'
+        (OUTPUT / 'result.json').write_text(json.dumps(report, indent=1, ensure_ascii=False), encoding='utf-8')
+        app.exit(0 if report['status'] == 'passed' else 1)
+
+    window.shutdown_finished.connect(completed)
+    timeout.timeout.connect(completed)
+    timeout.start(180000)
+    window.close()
+    if window.lifetime.closed:
+        completed()
 
 
 QTimer.singleShot(3000, lambda: run(page_steps() + ACTIONS))
-app.exec()
+raise SystemExit(app.exec())

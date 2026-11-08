@@ -7,7 +7,6 @@ from PySide6.QtGui import QColor, QImage, QPainter
 from frontengine.show.pet_game.home_service import HomeService
 from frontengine.show.pet_game.strip_weather import paint_precipitation, precipitation
 from frontengine.ui.page.pet_game.home_page import PetHomePage
-from frontengine.user_setting.pet_game_save import HomeSaveStore
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.utils.pet_game.catalog import builtin_catalog
 from frontengine.utils.pet_game.environment import DAY_MS, weather
@@ -46,9 +45,10 @@ def _settings(monkeypatch):
 
 
 @pytest.fixture
-def strip(tmp_path):
-    service = HomeService(None, HomeSaveStore(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None))
-    page = PetHomePage(service)
+def strip(tmp_path, *, home_store_factory, lifetime_factory):
+    lifetime_factory()
+    service = HomeService(None, home_store_factory(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None))
+    page = PetHomePage(service, lifetime=lifetime_factory())
     page.create_home()
     assert len(page.strip_list) == 1
     yield page.strip_list[0]

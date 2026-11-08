@@ -1,0 +1,173 @@
+{
+  "product_commit": "459ec9e",
+  "passed_layout_cases": 252,
+  "matrix": {
+    "themes": [
+      "light",
+      "dark"
+    ],
+    "languages": 7,
+    "home_tabs": 9,
+    "widths": [
+      1000,
+      1280
+    ]
+  },
+  "source_unchanged": true,
+  "lifetime_closed": true,
+  "temporary_directory_removed": true,
+  "minimum_width_observations": [
+    {
+      "theme": "light",
+      "language": "English",
+      "requested": 536,
+      "actual": 588,
+      "largest_page_hint": "GIFSettingUI",
+      "hint_width": 348
+    },
+    {
+      "theme": "light",
+      "language": "Traditional_Chinese",
+      "requested": 536,
+      "actual": 588,
+      "largest_page_hint": "GIFSettingUI",
+      "hint_width": 348
+    },
+    {
+      "theme": "light",
+      "language": "Simplified_Chinese",
+      "requested": 536,
+      "actual": 588,
+      "largest_page_hint": "GIFSettingUI",
+      "hint_width": 348
+    },
+    {
+      "theme": "light",
+      "language": "Deutsch",
+      "requested": 536,
+      "actual": 588,
+      "largest_page_hint": "GIFSettingUI",
+      "hint_width": 348
+    },
+    {
+      "theme": "light",
+      "language": "Russian",
+      "requested": 536,
+      "actual": 588,
+      "largest_page_hint": "GIFSettingUI",
+      "hint_width": 348
+    },
+    {
+      "theme": "light",
+      "language": "France",
+      "requested": 536,
+      "actual": 588,
+      "largest_page_hint": "GIFSettingUI",
+      "hint_width": 348
+    },
+    {
+      "theme": "light",
+      "language": "Italy",
+      "requested": 536,
+      "actual": 785,
+      "largest_page_hint": "SoundPlayerSettingUI",
+      "hint_width": 545
+    },
+    {
+      "theme": "dark",
+      "language": "English",
+      "requested": 536,
+      "actual": 785,
+      "largest_page_hint": "GIFSettingUI",
+      "hint_width": 348
+    },
+    {
+      "theme": "dark",
+      "language": "Traditional_Chinese",
+      "requested": 536,
+      "actual": 588,
+      "largest_page_hint": "GIFSettingUI",
+      "hint_width": 348
+    },
+    {
+      "theme": "dark",
+      "language": "Simplified_Chinese",
+      "requested": 536,
+      "actual": 588,
+      "largest_page_hint": "GIFSettingUI",
+      "hint_width": 348
+    },
+    {
+      "theme": "dark",
+      "language": "Deutsch",
+      "requested": 536,
+      "actual": 588,
+      "largest_page_hint": "GIFSettingUI",
+      "hint_width": 348
+    },
+    {
+      "theme": "dark",
+      "language": "Russian",
+      "requested": 536,
+      "actual": 588,
+      "largest_page_hint": "GIFSettingUI",
+      "hint_width": 348
+    },
+    {
+      "theme": "dark",
+      "language": "France",
+      "requested": 536,
+      "actual": 588,
+      "largest_page_hint": "GIFSettingUI",
+      "hint_width": 348
+    },
+    {
+      "theme": "dark",
+      "language": "Italy",
+      "requested": 536,
+      "actual": 588,
+      "largest_page_hint": "GIFSettingUI",
+      "hint_width": 348
+    }
+  ],
+  "observer": {
+    "before": {
+      "foreground": 37293566,
+      "cursor": [
+        413,
+        287
+      ]
+    },
+    "after": {
+      "foreground": 3413904,
+      "cursor": [
+        2864,
+        114
+      ]
+    },
+    "child_exit": 0
+  },
+  "visual_inspection": [
+    "Light and dark French full-window Backpack screenshots inspected.",
+    "Furniture total is readable; home drawing retains its own horizontal scrolling.",
+    "English creation notification remains visible after switching the UI to French."
+  ],
+  "new_defect": {
+    "observed": "1 pets moved in.",
+    "expected_french": "1 mascottes ont emménagé.",
+    "source": "create_home formats pet_home_moved_in immediately; report_text stores only the rendered text, with no retranslation binding."
+  },
+  "limits": [
+    "Native complete MainUI layout with temporary profile, but OS hotkeys, app-profile/share detection, Workshop and session-lock boundaries substituted.",
+    "No desktop input injection; foreground and cursor observations differ with unknown cause.",
+    "Requests for width 536 result in actual 588 or 785, so no 536-pixel full-window pass is claimed.",
+    "No full feature-flow, physical-input, mixed-DPI, or independent-review acceptance claim.",
+    "Complete regression remains running on unchanged 459ec9e."
+  ],
+  "evidence_sha256": {
+    "result.json": "9b2b1e612bab2c7f545c5bc7c92aeacaaf7226bd03a3889f97b766b2fc50c724",
+    "light-France-backpack.png": "e2baf086ea0781eb91cee9812edfd44c8b90a34662a2b491ca6fb78bb0ec798c",
+    "dark-France-backpack.png": "2baa9761638832311819e0da54e12cd5c85db47f53d16b159d799a9392a83a32",
+    "check_main_home_native.py": "073803d7d22eb7f9d71cb1e26918892ef5e4724dd29eeea83ff5b16f21e36342"
+  }
+}

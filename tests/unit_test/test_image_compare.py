@@ -1,16 +1,51 @@
 import threading
+import pytest
 
 from PySide6.QtCore import QCoreApplication
 from PySide6.QtGui import QColor, QImage
 
 from frontengine.show.reference.image_compare import align_images, checked_image, difference_image
-from frontengine.ui.dialog.image_compare_dialog import ImageCompareDialog, comparison_pool
+from frontengine.ui.dialog.image_compare_dialog import ImageCompareDialog
 
 
 def _image(width, height, color):
     image = QImage(width, height, QImage.Format.Format_RGBA8888)
     image.fill(QColor(color))
     return image
+
+
+@pytest.mark.parametrize('count', [1, 2])
+@pytest.mark.parametrize('destroy', [False, True])
+def test_closed_comparison_discards_picker_result(tmp_path, monkeypatch, lifetime_factory, count, destroy):
+    from PySide6.QtCore import QEvent
+    from PySide6.QtWidgets import QFileDialog
+    from shiboken6 import isValid
+
+    dialog = ImageCompareDialog(lifetime=lifetime_factory())
+    dialog.show()
+    before_status = dialog.status.text()
+    def choose(*_args):
+        dialog.reject()
+        if destroy:
+            dialog.deleteLater()
+            QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+        return [str(tmp_path / f'{index}.png') for index in range(count)], ''
+    monkeypatch.setattr(QFileDialog, 'getOpenFileNames', choose)
+    try:
+        dialog.choose_images()
+        assert dialog._paths == ()
+        assert dialog._request is None
+        assert not dialog._busy
+        if isValid(dialog):
+            assert dialog.status.text() == before_status
+            assert not dialog.scene.items()
+        def unexpected(*_args):
+            pytest.fail('Closed comparison reopened its picker')
+        monkeypatch.setattr(QFileDialog, 'getOpenFileNames', unexpected)
+        dialog.choose_images()
+    finally:
+        if isValid(dialog):
+            dialog.close()
 
 
 def test_different_sizes_have_explicit_origin_center_and_proportional_fit():
@@ -59,17 +94,46 @@ def test_reader_rejects_bad_data_and_limits_before_decode(tmp_path):
 
 
 def _finish(dialog):
-    assert comparison_pool().waitForDone(5000)
+    assert dialog.lifetime.pool('comparison').waitForDone(5000)
     QCoreApplication.processEvents()
     # An obsolete result may schedule the latest coalesced request.
     if dialog._busy:
-        assert comparison_pool().waitForDone(5000)
+        assert dialog.lifetime.pool('comparison').waitForDone(5000)
         QCoreApplication.processEvents()
     assert not dialog._busy
 
 
-def test_async_modes_share_transform_slider_avoids_decode_and_failure_keeps_pair(tmp_path, monkeypatch):
+def test_comparison_picker_cancel_preserves_pair_then_retry_replaces_it(tmp_path, monkeypatch, lifetime_factory):
+    from PySide6.QtWidgets import QFileDialog
+
+    paths = [tmp_path / f'{name}.png' for name in ('red', 'blue', 'green', 'white')]
+    for path in paths:
+        assert _image(12, 8, path.stem).save(str(path))
+    dialog = ImageCompareDialog(lifetime=lifetime_factory())
+    dialog.show()
+    try:
+        dialog.load_paths([str(path) for path in paths[:2]])
+        _finish(dialog)
+        before = [item.pixmap().toImage() for item in dialog._items]
+        status = dialog.status.text()
+        answers = iter([[], [str(path) for path in paths[2:]]])
+        monkeypatch.setattr(QFileDialog, 'getOpenFileNames', lambda *_args: (next(answers), ''))
+        dialog.choose_images()
+        assert [item.pixmap().toImage() for item in dialog._items] == before
+        assert dialog.status.text() == status
+        assert not dialog._busy
+        dialog.choose_images()
+        _finish(dialog)
+        assert dialog._items[0].pixmap().toImage().pixelColor(0, 0) == QColor('green')
+        assert dialog._items[1].pixmap().toImage().pixelColor(0, 0) == QColor('white')
+        assert dialog.status.text() == 'A: green.png · B: white.png'
+    finally:
+        dialog.close()
+
+
+def test_async_modes_share_transform_slider_avoids_decode_and_failure_keeps_pair(tmp_path, monkeypatch, *, lifetime_factory):
     import frontengine.ui.dialog.image_compare_dialog as module
+    lifetime_factory()
     paths = [tmp_path / 'a.png', tmp_path / 'b.png']
     _image(10, 6, 'red').save(str(paths[0]))
     _image(6, 10, 'blue').save(str(paths[1]))
@@ -82,7 +146,7 @@ def test_async_modes_share_transform_slider_avoids_decode_and_failure_keeps_pair
         return original(path)
 
     monkeypatch.setattr(module, 'checked_image', record)
-    dialog = ImageCompareDialog()
+    dialog = ImageCompareDialog(lifetime=lifetime_factory())
     dialog.load_paths([str(path) for path in paths])
     _finish(dialog)
     assert len(calls) == 2 and all(identifier != gui_thread for identifier in calls)
@@ -107,11 +171,12 @@ def test_async_modes_share_transform_slider_avoids_decode_and_failure_keeps_pair
     assert not dialog.scene.items() and not dialog._items
 
 
-def test_only_latest_pending_selection_is_applied_and_close_ignores_late_result(tmp_path):
+def test_only_latest_pending_selection_is_applied_and_close_ignores_late_result(tmp_path, *, lifetime_factory):
+    lifetime_factory()
     paths = [tmp_path / 'a.png', tmp_path / 'b.png']
     for path in paths:
         _image(12, 8, 'red').save(str(path))
-    dialog = ImageCompareDialog()
+    dialog = ImageCompareDialog(lifetime=lifetime_factory())
     dialog.load_paths([str(path) for path in paths])
     dialog.alignment.setCurrentIndex(dialog.alignment.findData('center'))
     dialog.alignment.setCurrentIndex(dialog.alignment.findData('fit'))
@@ -123,9 +188,10 @@ def test_only_latest_pending_selection_is_applied_and_close_ignores_late_result(
     assert dialog._closed and not dialog.scene.items()
 
 
-def test_scene_output_matches_wipe_overlay_and_difference_controls():
+def test_scene_output_matches_wipe_overlay_and_difference_controls(*, lifetime_factory):
     from PySide6.QtGui import QPainter
-    dialog = ImageCompareDialog()
+    lifetime_factory()
+    dialog = ImageCompareDialog(lifetime=lifetime_factory())
     request = ('a.png', 'b.png', 'origin', 1)
     dialog._request = request
     a, b = _image(4, 2, 'red'), _image(4, 2, 'blue')
@@ -152,7 +218,7 @@ def test_scene_output_matches_wipe_overlay_and_difference_controls():
     dialog.close()
 
 
-def test_closed_queued_job_skips_decode_and_pool_has_a_global_bound(monkeypatch):
+def test_closed_queued_job_skips_decode_and_owned_pool_has_a_bound(monkeypatch, *, lifetime_factory):
     from threading import Event
     from unittest.mock import Mock
     import frontengine.ui.dialog.image_compare_dialog as module
@@ -162,4 +228,4 @@ def test_closed_queued_job_skips_decode_and_pool_has_a_global_bound(monkeypatch)
     monkeypatch.setattr(module, 'checked_image', decode)
     module._CompareJob(('a', 'b', 'origin', 1), cancelled).run()
     decode.assert_not_called()
-    assert comparison_pool().maxThreadCount() == 2
+    assert lifetime_factory().pool('comparison').maxThreadCount() == 2

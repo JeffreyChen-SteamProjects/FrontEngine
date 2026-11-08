@@ -1,0 +1,99 @@
+{
+  "base_commit": "1078c8cb",
+  "status": "focused fix and verification complete; full regression, independent review and integration pending",
+  "cause": "Asset picker and relink confirmation results are consumed after the reusable library dialog closes or is destroyed, starting new jobs and mutating persistent catalog/scene references.",
+  "red": [
+    "6 failed, 10 deselected in 5.26s for add, add_pet and confirmation.",
+    "2 failed, 16 deselected in 2.55s for the replacement picker."
+  ],
+  "fix": "Check Qt validity and visibility at picker/review entry and before consuming results. Existing in-flight completion and rollback behavior is preserved.",
+  "coverage": [
+    "Five paths times reject/reject-and-destroy, using the real background service and filesystem; includes image and pet-directory replacement pickers.",
+    "No new service request, unchanged scene, catalog and referenced scene/preset bytes.",
+    "All four entry points ignore repeated calls after closure.",
+    "Live confirmation cancellation then retry updates document, catalog, saved scene and preset.",
+    "Four live picker cancellation/retry cases add or relink image and pet assets successfully."
+  ],
+  "pending": [
+    "Full regression, independent review and integration."
+  ],
+  "limits": "Native picker results injected; no OS input or system file-dialog interaction claim. Native scene is unchanged; referenced scene and preset repair tested in the focused suite. No EXE conversion.",
+  "related_tests": "54 passed in 13.04s",
+  "native": {
+    "cases": [
+      {
+        "operation": "add",
+        "started": [],
+        "catalog_unchanged": true,
+        "scene_unchanged": true
+      },
+      {
+        "operation": "add_pet",
+        "started": [],
+        "catalog_unchanged": true,
+        "scene_unchanged": true
+      },
+      {
+        "operation": "relink",
+        "started": [],
+        "catalog_unchanged": true,
+        "scene_unchanged": true
+      },
+      {
+        "operation": "relink_pet",
+        "started": [],
+        "catalog_unchanged": true,
+        "scene_unchanged": true
+      },
+      {
+        "operation": "review",
+        "started": [
+          "plan"
+        ],
+        "catalog_unchanged": true,
+        "scene_unchanged": true
+      }
+    ],
+    "observer": {
+      "before": {
+        "foreground": 2558004,
+        "cursor": [
+          768,
+          432
+        ]
+      },
+      "after": {
+        "foreground": 2558004,
+        "cursor": [
+          768,
+          432
+        ]
+      },
+      "child_exit": 0
+    },
+    "cold": {
+      "passed": true,
+      "initial_snapshot_exact": true,
+      "profiles_exact": true,
+      "leases_reacquired": true,
+      "saved_exact": true,
+      "temporary_directory_removed": true
+    },
+    "scope": "Private Windows desktop, Traditional Chinese dark MainUI at 900x740. MainUI method opens the reusable library; local Tab/Space activates actual buttons. Picker/confirmation returns injected after reject. Real service processes the review plan, with no commit after closure.",
+    "shutdown": "Normal runtime shutdown, temporary settings removed, blank stderr, unchanged foreground/cursor. Independent process reopens exact home world/profiles and saves with reacquired leases."
+  },
+  "documentation": {
+    "files": 17,
+    "checks": "31 passed in 2.30s",
+    "sphinx": "HTML build with -W passed",
+    "rendered_paragraphs_exact": [
+      "Eng",
+      "Zh",
+      "ZhCn",
+      "De",
+      "Fr",
+      "Ru",
+      "It"
+    ]
+  }
+}

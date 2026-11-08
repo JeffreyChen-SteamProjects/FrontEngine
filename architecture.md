@@ -1,5 +1,7 @@
 # FrontEngine Architecture
 
+PetHomePage keeps operation feedback as either raw diagnostic text or a translated message value (key, fallback, captured parameters, save-failure classification). Panel actions use report_message for localized feedback and report_text for raw errors; refresh re-renders without repeating operations. Save completion clears only an outstanding save-failure message.
+
 Windows requirements include the PyWinRT Media.Control projection for song metadata. Nuitka explicitly includes `winrt` because the Now playing loader imports its namespace dynamically; legacy `winsdk` remains a runtime fallback.
 
 The executable builder checks platform-filtered dependency metadata and version constraints before invoking Nuitka, preventing incomplete build environments from silently producing broken distributions.
@@ -30,7 +32,7 @@ on Steam (app 2793470) with Workshop import. JEditor embeds its main window as a
 | `frontengine/__init__.py` | Public API: overlay widgets, setting pages, `ControlCenterUI`, `FrontEngineMainUI`, `FrontEngine_EXTEND_TAB`, `start_front_engine`, `language_wrapper`, `RedirectManager`. It imports `ui/main_ui.py`, so `import frontengine` loads the whole UI |
 | `frontengine/__main__.py` | `python -m frontengine` → `main()` |
 | `frontengine/ui/main_ui.py` | `FrontEngineMainUI`: assembles pages, menus and tray; owns the background services; dispatches hotkey, remote and MIDI actions; handles shutdown. Also holds `start_front_engine()` and `main()` |
-| `frontengine/ui/page/` | Feature pages share card sections, wrapping form fields, collapsible details and a persistent footer in `layout_kit.py`. `flow_layout.py` wraps inline controls; `action_menu.py` mirrors secondary button commands and live state into compact menus. `control_center/` provides batch control; the scene editor places its canvas beside a tabbed inspector. `utils.py` handles multi-monitor dispatch |
+| `frontengine/ui/page/` | Feature pages share card sections, wrapping form fields, collapsible details and a persistent footer in `layout_kit.py`. `flow_layout.py` wraps inline controls and respects height-for-width captions; `wrapping_buttons.py` provides native checkbox and push-button behavior with wrapped, accessible captions; `action_menu.py` mirrors secondary button commands and live state into compact menus. `control_center/` provides batch control; the scene editor places its canvas beside a tabbed inspector. `utils.py` handles multi-monitor dispatch |
 | `frontengine/ui/nav/`, `menu/`, `dialog/`, `style/` | Grouped sidebar with a persistent command-search entry; application menus and dialogs; FrontEngine's own design system (`style/tokens.py` light and dark token sets in the INKSIDE ink, paper and orange; `style/app_style.py` builds the whole stylesheet and palette; theme system / light / dark, chosen in Settings → Theme or by the day/night schedule without replacing the user's choice). Command search retains failed input for retry and clears arguments when changing commands |
 | `frontengine/show/` | Overlay widgets. Shared base `base_widget.py` (`BaseWidget`), `window_helpers.py`, and `overlay_factory.py` (scene JSON → widget) |
 | `frontengine/show/compositor/` | Shared layers, real OpenGL shader/texture renderer, software fallback and RGBA output; BaseWidget caches CPU raster content |
@@ -50,6 +52,29 @@ on Steam (app 2793470) with Workshop import. JEditor embeds its main window as a
 
 Dependencies point downwards: `ui/` → `show/` → `user_setting/` + `utils/`. The one known inversion
 is `user_setting/scene_setting.py`, which imports `ui/dialog/choose_file_dialog`.
+
+`user_setting/storage_session.py` supplies explicit directory ownership before settings reads,
+using persistent native file locks and client/I/O lifetime checks. Its captured paths and writers
+remain tied to one session. Its cached `profiles()` adapter serializes complete profile
+read/modify/save/rollback transactions with settings serialization. Explicitly injected pet
+sessions retain the owner through failed or canceled closure and release it only after finalization.
+Profile exports validate both their destination and temporary path against managed names and linked
+files. Borrowed settings mappings still require a live caller lifetime and direct mutations are not
+serialized. `default_storage.py` binds the existing exported dictionary to one captured owner
+without reloading while scopes remain live. Home stores require that owner, claim their mode
+before reading and retain it through their attached service. History, palettes and pet assets
+use owner-bound transactions and paths.
+
+`utils/work_lifetime.py` owns callback admission and Python-slot signal argument adaptation,
+private worker pools, producer completion and
+QObject retirement without importing the UI layer. `ui/runtime_lifetime.py` adds the default
+settings binding and the single-main-window claim. Settings pages require `lifetime=`; MainUI
+retains its public constructor and exposes `request_shutdown()` and `shutdown_finished`.
+Preparation defers callbacks, refusal replays them, and retirement discards them. Storage is
+released only after owned workers and objects finish. JEditor and PyBreeze gate container and
+application closure on this completion and reuse the existing embedded window.
+The embedding and cooperative plugin contracts are in
+[`docs/formats/runtime-lifetime.md`](docs/formats/runtime-lifetime.md).
 
 ## 3. Entry points and public interfaces
 
@@ -83,7 +108,8 @@ frontengine | python -m frontengine → main() → start_front_engine() → QApp
 
 ```
 feature page (ui/page/<kind>/) → dispatch_to_monitors() (ui/page/utils.py)
-  → show/<kind> widget(s) on the chosen monitor(s) (BaseWidget.paintEvent → draw_content())
+  → show/<kind> widget(s) on the chosen monitor(s)
+  → BaseWidget: direct paint → draw_content(); compositor paint/update → queued layer submission
   → page's widget list, registered via ControlCenterUI.register_overlay_source()
   → control center hides / closes / locks / re-tiers every overlay in one action
 ```
@@ -91,11 +117,16 @@ feature page (ui/page/<kind>/) → dispatch_to_monitors() (ui/page/utils.py)
 **Shutdown**
 
 ```
-closeEvent() | close() → _shutdown() (runs once) → flush pet profiles → pet home shutdown (save, release leases;
-  failure keeps the app open) → save session if enabled → stop _CLOSING_SERVICES
-  → cancel recording/native sessions → close scenes → release scene extraction leases
-  → save page state and geometry → write_user_setting() → close overlays
+closeEvent() | close() → _shutdown() → cancel preset preview → prepare pet/home closes
+  → save session, notes, clipboard, geometry and usage history → write_user_setting()
+  → finalize prepared closes without another profile/home write → stop services and close overlays
+  → release scene assets and owned resources
 ```
+
+A failure in these composed saves cancels preparation and retains the same home, pet identities,
+renderers, service timers and retry path. Home activity cancellation and focus-mode restoration
+are retained; earlier successful files are not rolled back. Independent Workshop, plugin and
+background repository persistence retain their existing shutdown contracts.
 
 ## 5. Extension points
 
@@ -135,10 +166,15 @@ closeEvent() | close() → _shutdown() (runs once) → flush pet profiles → pe
   Detailed formats and capability boundaries: `docs/formats/interoperability.md`.
 
 - **JEditor (downstream)**: JEditor lists `frontengine` as a dependency and embeds
-  `FrontEngineMainUI` as a tab (`je_editor/pyside_ui/main_ui/menu/tab_menu/build_tab_tools_menu.py`,
-  `show_system_tray_ray=False, redirect_output=False`) and as a dock
-  (`je_editor/pyside_ui/main_ui/menu/dock_menu/build_dock_menu.py`, `redirect_output=False`). The
-  constructor's keywords and side effects are therefore a contract. PyBreeze inherits both entries
+  `FrontEngineMainUI` as a tab and as a dock. Released JEditor builds call
+  `FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)` (tab) and
+  `FrontEngineMainUI(redirect_output=False)` (dock) directly. JEditor branch
+  `fix/frontengine-storage-lifetime` (not merged yet) replaces both with one shared host,
+  `je_editor/pyside_ui/main_ui/frontengine_host.py`, that builds the window once with
+  `show_system_tray_ray=False, redirect_output=False`, reuses it across tab and dock, and closes
+  through `request_shutdown()` (`CloseDisposition` from `frontengine.ui.runtime_lifetime`),
+  `shutdown_finished` and `MainRuntimeInUse` (a `RuntimeError`). The constructor's keywords, those
+  names and their side effects are therefore a contract. PyBreeze inherits both entries
   through `EditorMain`.
 - **Release channel**: JEditor depends on the stable `frontengine` package. A change reaches it only
   after a `dev → main` release. `release.yml` copies `stable.toml` over `pyproject.toml` to build it.
@@ -190,7 +226,7 @@ re-check this file.
 
 Application actions: `utils/actions/action_registry.py` owns stable built-in IDs and translated labels. MainUI binds instance callbacks once; hotkeys, authenticated remote commands, MIDI and rule dispatch use the same registry. Existing remote/rule allow-lists remain at their input boundaries. Duplicate IDs are rejected, unknown IDs are ignored, and parameterized actions require values. Hotkey/rule dialogs share these label definitions.
 
-`utils/actions/command_history.py` validates bounded recent/favorite stable IDs in user settings and searches localized labels plus English/IDs with Unicode folding. `ui/dialog/command_palette_dialog.py` provides keyboard search/selection/value input and queued-free GUI-thread dispatch through ActionRegistry. MainUI registers built-in page and tool commands, owns one persistent dialog, installs Ctrl+K/Ctrl+Shift+P application shortcuts and closes the palette on shutdown. Arguments/search queries are not persisted.
+`utils/actions/command_history.py` validates bounded recent/favorite stable IDs in user settings and searches localized labels plus English/IDs with Unicode folding. `ui/dialog/command_palette_dialog.py` provides keyboard search/selection/value input and queued-free GUI-thread dispatch through ActionRegistry. MainUI registers built-in and loaded-plugin page commands plus tool commands, owns one persistent dialog, installs Ctrl+K/Ctrl+Shift+P application shortcuts and closes the palette on shutdown. Arguments/search queries are not persisted. Loaded plugin pages use `plugin:<name>` sidebar IDs and `page.plugin:<name>` command IDs. The Features menu uses the same sidebar IDs; plugin names and preset namespaces remain unchanged. This keeps plugin names distinct from built-in translation keys and command IDs.
 
 `utils/text_source/local_file_source.py` reads bounded regular UTF-8 TXT/JSON/CSV files with a single pending QRunnable per QObject feed, explicit queued delivery, metadata cache and recoverable status codes. LocalFileTextSource owns its polling timer; TextWidget adopts its lifetime and stops it on replacement/close. TextSettingUI exposes file/field/interval and bounded previews; MainUI stops page previews during shutdown. Scene text factories accept the same local source fields; scene asset normalization/packages include text_file explicitly. Preset state preserves source configuration. No file I/O occurs on the GUI thread.
 
@@ -243,3 +279,19 @@ Cancellation tombstones count toward the 500-record limit and prevent stale impo
 `utils/linux` provides explicit X11/Wayland session policy, EWMH/python-xlib window list/physical-frame geometry/pin/move, compositing-manager-gated opacity and physical XRandR work areas. Native Wayland arbitrary-window control/global pynput input/profile positioning are rejected with concrete reasons, not described as global Xwayland support. Linux-only python-xlib dependency aligns requirements and both manifests. PulseCapture launches fixed distro parec paths on one worker, default output monitor or microphone, one sanitized 2048-float memory frame; lazy PulseMeter construction does not start disabled reactive audio. Stop handles spawning races, kills only own child, worker reaps; shared captures stop on MainUI shutdown and join only through GUI-polled barrier. WASAPI peak-only behavior unchanged; Linux meter requires real audio samples, explicit docs distinction. LoopbackSpectrum/SystemAudioMeter/MicrophoneMeter route Linux to this adapter. platform_info/capabilities.py and Help platform_capabilities_dialog display read-only prerequisites/original failure reasons without enabling capture/listeners. Protocol acceptance uses isolated Linux display/audio servers; physical Mac/Linux audio/multi-monitor acceptance remains separate.
 
 - Windows entry `exe/start_front_engine.py` delegates normal startup to the published main_ui.main CLI (--preset/--debug). Explicit --verify-scene-build FIXTURES REPORT calls the fixed exe/scene_build_acceptance.py probe with isolated temporary settings and local seven-type inputs (tests/integration/scene_build_fixtures.py). It verifies compiled native media/editor/export/cleanup and writes bounded owned screenshots/report, never supplied Python scripts. Fixture generation optionally needs PyAV; native Puppet acceptance needs the optional runtime in the build environment. Installed Pillow decoder plugins and Imervue package data are included by build_exe.py.
+
+`show/gif/paint_gif.py` owns its QMovie as a Qt child, so overlay deletion releases the source file independently of retained Python references. The home page places status text above wrapping action buttons; its welcome heading also wraps for longer translations.
+
+PetSettingUI, PetProfileControls and home ResidentPanel wardrobes resolve default asset libraries, generated models and previews against their captured settings storage. PetHomePage injects a directory-bound library factory into ResidentArt. Explicit asset libraries on existing pets are preserved across cloning and wardrobe access. Home photo writes, CollectionPanel album reads and the local content-pack folder button resolve against lifetime.storage.directory, matching the pack loader.
+
+Home panels retain their page lifetime and guard user-command entry points with owned_action. Blueprint selection results pass through after_dialog before writes or dialog creation; refresh and shutdown cleanup remain separate from new-action admission.
+
+HomeTabs permits home combo boxes and sliders to shrink within their panels; the shared form layout still stacks labels when needed. Home shortcuts use FlowLayout. The home canvas retains its own horizontal scroll area.
+
+Daily commission changes emit `commissions_refreshed` once per generated game day from `utils/pet_game/goals.py`. The home page consumes the event to refresh visible offers without waiting for unrelated life or reward events.
+
+Inbox history keeps copied event payloads with the resident name and recipe translation key/fallback captured at arrival. Rendering uses the current language; repeat identity uses event values rather than translated text. Records retain no world or widget reference. The home refresh path includes the inbox. Inbox refresh also updates the pending list and its visibility, so arrival and mark-read actions work while paused. Initial inbox refresh runs after the page finishes constructing its panels.
+
+Built-in wardrobe installation reports completed steps through install_builtin(progress) and PetAssetLibrary.install_many(progress). Generation and validated publication each contribute one step per missing asset; publication progress is emitted only after installation succeeds. PetBuiltinInstall sends the counts through a queued BuiltinInstallSignals.progress signal. PetWardrobeDialog owns the progress bar and hides it on completion or failure; closed dialogs ignore late progress. The percentage is a step count, not a time estimate. Batch cancellation preserves assets already published.
+
+Section headers use the existing FlowLayout for the title and details toggle, with word-wrapped titles, so their combined natural widths do not force a horizontal overflow. PetProfileControls keeps feedback immediately before the interaction action. Its selector, name and interaction fields ignore natural horizontal hints but retain a 160 logical-pixel minimum, allowing the existing form layout to stack rows without reducing selectors to a few characters. PetQuickStart wraps its empty-state label. These layout changes retain existing widgets, callbacks and focus order.

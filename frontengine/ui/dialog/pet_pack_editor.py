@@ -1,10 +1,12 @@
 """GUI sprite-pack mapping, movement preview and cancellable folder export."""
 from __future__ import annotations
+from frontengine.ui.runtime_lifetime import captured_lifetime, owned_callback
 
 from pathlib import Path
 from threading import Event
+from shiboken6 import isValid
 
-from PySide6.QtCore import QObject, QRunnable, QThreadPool, Qt, Signal
+from PySide6.QtCore import QObject, QRunnable, Qt, Signal
 from PySide6.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QGridLayout, QLabel, QLineEdit, QPushButton, QSpinBox, QComboBox, QFileDialog, QInputDialog
 
 from frontengine.ui.dialog.pet_pack_preview import PetPackPreview
@@ -38,8 +40,10 @@ class PetPackEditor(QDialog):
 
     pack_selected = Signal(str)
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent=None, *, lifetime=None) -> None:
         super().__init__(parent)
+        self.lifetime = lifetime or captured_lifetime(parent)
+        self.lifetime.adopt(self)
         tr(self, 'pack_editor_title', setter='setWindowTitle')
         self.resize(820, 700)
         self.actions, self.paths = {}, {}
@@ -131,8 +135,10 @@ class PetPackEditor(QDialog):
 
     def choose_action(self, state: str) -> None:
         """Map an existing sprite file to one action, with explicit invalid-resource errors."""
+        if self.closed or not isValid(self) or not self.lifetime.accepting:
+            return
         path, _filter = QFileDialog.getOpenFileName(self, translate('pack_editor_choose'), '', 'Sprites (*.gif *.webp *.png *.jpg *.jpeg)')
-        if not path:
+        if self.closed or not isValid(self) or not self.lifetime.accepting or not path:
             return
         try:
             self.actions[state] = str(validate_sprite(path))
@@ -169,17 +175,21 @@ class PetPackEditor(QDialog):
 
     def import_folder(self) -> None:
         """Read a bounded legacy pack on the worker without changing current choices on failure."""
+        if self.closed or not isValid(self) or not self.lifetime.accepting:
+            return
         folder = QFileDialog.getExistingDirectory(self, translate('pack_editor_import'))
-        if folder:
+        if not self.closed and isValid(self) and self.lifetime.accepting and folder:
             self._start_job('import', lambda cancel: load_pack(folder, cancel=cancel))
 
     def export_folder(self) -> None:
         """Export into a new named folder inside the explicitly chosen parent."""
+        if self.closed or not isValid(self) or not self.lifetime.accepting:
+            return
         parent = QFileDialog.getExistingDirectory(self, translate('pack_editor_export'))
-        if not parent:
+        if self.closed or not isValid(self) or not self.lifetime.accepting or not parent:
             return
         name, accepted = QInputDialog.getText(self, translate('pack_editor_export'), translate('pack_editor_folder'), text='sprite-pet')
-        if not accepted:
+        if self.closed or not isValid(self) or not self.lifetime.accepting or not accepted:
             return
         if not name.strip() or Path(name).name != name or name in ('.', '..'):
             self._error(translate('pack_editor_bad_folder'))
@@ -195,8 +205,9 @@ class PetPackEditor(QDialog):
             button.setEnabled(False)
         self.status_kind = 'working'
         retranslator.set_text(self.status, 'pack_editor_working')
-        QThreadPool.globalInstance().start(_PackJob(kind, function, self.pending, self.signals))
+        self.lifetime.submit(_PackJob(kind, function, self.pending, self.signals))
 
+    @owned_callback
     def _job_done(self, kind: str, value, error: str) -> None:
         self.pending = None
         for button in self.job_buttons + self.edit_controls:

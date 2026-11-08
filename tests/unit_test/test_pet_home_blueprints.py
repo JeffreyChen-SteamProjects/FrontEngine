@@ -5,7 +5,6 @@ import pytest
 
 from frontengine.show.pet_game.home_service import HomeService
 from frontengine.ui.page.pet_game.home_page import PetHomePage
-from frontengine.user_setting.pet_game_save import HomeSaveStore
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.user_setting.user_setting_file import user_setting_dict
 from frontengine.utils.pet_game.blueprint import (
@@ -83,11 +82,12 @@ def test_an_oversized_blueprint_is_refused_before_parsing():
 
 
 @pytest.fixture
-def page(tmp_path, monkeypatch):
+def page(tmp_path, monkeypatch, *, home_store_factory, lifetime_factory):
+    lifetime_factory()
     monkeypatch.setitem(user_setting_dict, "pet_home_running", False)
     monkeypatch.setitem(user_setting_dict, "pet_home_on_desktop", False)
-    service = HomeService(None, HomeSaveStore(tmp_path, CATALOG), PetProfiles({}, lambda: None))
-    widget = PetHomePage(service)
+    service = HomeService(None, home_store_factory(tmp_path, CATALOG), PetProfiles({}, lambda: None))
+    widget = PetHomePage(service, lifetime=lifetime_factory())
     widget.create_home()
     yield widget
     widget.shutdown()

@@ -3,7 +3,7 @@ Page Mascotte
 
 Un compagnon qui vit sur le bureau.
 
-La page s’ouvre sur *Votre mascotte* : cliquez sur un des personnages intégrés et une mascotte habillée comme lui apparaît aussitôt sur le bureau, ou choisissez *Votre propre image…*. En dessous, les mascottes du bureau sont listées avec *Garde-robe*, *Ramener l’animal* et *Ranger* (un double-clic en ramène une) ; tous les autres réglages restent repliés jusqu’à ce que vous ouvriez leur section.
+La page s’ouvre sur *Votre mascotte* : cliquez sur un des personnages intégrés et une mascotte habillée comme lui apparaît aussitôt sur le bureau, ou choisissez *Votre propre image…*. En dessous, les mascottes du bureau sont listées avec *Garde-robe*, *Ramener l’animal* et *Ranger* (un double-clic en ramène une) ; tous les autres réglages restent repliés jusqu’à ce que vous ouvriez leur section. Au premier démarrage, sans animal ni maison, FrontEngine s'ouvre sur cette page.
 
 * Choisir l'image de la mascotte - une seule image.
 * Choisir un pack de mascotte… - un dossier contenant les images walk / idle /
@@ -20,6 +20,9 @@ La page s’ouvre sur *Votre mascotte* : cliquez sur un des personnages intégr�
 * Rester tranquille pendant la frappe - le compagnon s'arrête tant que vous tapez
   et repart une ou deux secondes après, pour ne pas traverser la ligne que vous
   êtes en train de lire.
+* Faire revenir les animaux au démarrage de FrontEngine - activé par défaut : les
+  animaux présents sur le bureau à la fermeture reviennent tels quels au démarrage
+  suivant ; un animal rangé reste rangé.
 * Lire à voix haute - dire ces remarques.
 * Jouer à chat - deux mascottes ou plus se poursuivent.
 * Réagir au son - la mascotte bouge en rythme. Elle peut suivre vos
@@ -43,6 +46,8 @@ Le choix par défaut du menu Comportement, Enchaîner toutes les actions (au has
 :doc:`runtime_interoperability`
 
 Compagnon → Identités enregistre une UUID, un nom, l’humeur, la satiété et l’affection propres à chaque sprite ou puppet. Choisissez une identité enregistrée avant de le créer pour reprendre après redémarrage ; Nouveau compagnon recommence. Seule la première identité migre une fois les anciennes valeurs communes. Cloner copie les valeurs actuelles vers une nouvelle identité ; nourrir ne change pas les autres compagnons. Renommez, actualisez, exportez ou importez des sauvegardes JSON individuelles ; l’import crée toujours une nouvelle identité. Une identité ne peut être active qu’une fois. Les sauvegardes ne contiennent ni images, scripts, ni historique de discussion ; les préréglages portables excluent les IDs locaux. Jusqu’à 256 identités sont conservées dans les réglages ; les changements des sprites sont enregistrés après un bref délai et à la fermeture. Nourrir un puppet ne modifie que les valeurs sauvegardées, pas les mouvements ni la taille Imervue.
+
+Exportez les sauvegardes des compagnons sous un autre nom de fichier. L’export refuse les noms réservés aux réglages, au foyer, aux sauvegardes, aux fichiers temporaires et de verrouillage, ainsi que les fichiers de destination liés.
 
 Animal → Création de pack associe walk/idle/sleep/climb/fall/drag, prévisualise taille et vitesse de marche et exporte un dossier portable avec pet.json. Au moins une action ; les actions absentes sont signalées et utilisent le repli du chargeur. PNG/JPEG/GIF/WebP : 64 MiB et 16 mégapixels par fichier, 256 MiB au total. Import/export en arrière-plan, annulable, sans écraser les dossiers existants. Dossiers déplaçables, sélectionnables dans Animal et partageables comme packs Workshop. Import conserve uniquement sprites choisis, nom, taille et vitesse, sans sons, scripts ni dialogue. Imervue .puppet garde son format de création distinct. Fermer/Escape libère les animations et annule les opérations.
 
@@ -71,7 +76,7 @@ Personnaliser l’animal règle aussi le Bavardage (Désactivé, Rarement, Norma
 
 La liste d’interactions du gestionnaire propose aussi les commandes de menu de l’animal actif choisi : photo, état, rappel, discussion si un service est connecté, cloner et fermer, ainsi que chaque mouvement et expression d’un modèle Puppet. Tout le menu contextuel est donc accessible au clavier.
 
-Utiliser le personnage intégré, sur la page Animal, installe en arrière-plan le personnage INKSIDE choisi avec sa garde-robe et le sélectionne comme source. Démarrer crée alors un animal sprite ordinaire sous ce personnage : il marche et grimpe avec les images de pas dessinées à la main, peut être habillé dans la garde-robe et garde sa tenue s'il porte déjà ce personnage. Utiliser le modèle Puppet intégré, juste à côté, produit toujours la version Imervue Puppet.
+Utiliser le personnage intégré, sur la page Animal, installe en arrière-plan le personnage INKSIDE choisi avec sa garde-robe et le sélectionne comme source. Démarrer crée alors un animal sprite ordinaire sous ce personnage : il marche et grimpe avec les images de pas dessinées à la main, peut être habillé dans la garde-robe et garde sa tenue s'il porte déjà ce personnage. Utiliser le modèle Puppet intégré, juste à côté, produit toujours la version Imervue Puppet. Le personnage lui-même est installé en premier : un animal lancé depuis une carte apparaît en une ou deux secondes ; ses vêtements finissent de s'installer en arrière-plan, et la garde-robe ajoute à l'ouverture ceux qui manquent encore.
 
 Utiliser le modèle Puppet intégré, sur la page Animal, dessine en arrière-plan le personnage INKSIDE choisi comme modèle Imervue .puppet : tête, bras, queue et corps riggés, dix mouvements, trois expressions et un script qui y associe les actions du compagnon. Il est enregistré dans pet-assets/puppets et choisi comme source avec son script ; Démarrer le lance comme animal Puppet.
 
@@ -128,3 +133,21 @@ Puppet accepte aussi Viens ici depuis son menu ou les décalages clavier du gest
 Puppet peut poursuivre un point lumineux déplaçable depuis son menu. Le gestionnaire permet à Sprite et Puppet de placer ce point au clavier. Relâché près de l’animal pendant une demi-seconde, il lance le jeu commun de trois secondes ; l’affection arrive seulement à la fin, avec le délai normal. Appel et lumière partagent une cible. Ranger, terminer, soigner, déplacer manuellement, changer de mode ou masquer annule.
 
 Le menu Puppet propose aussi Lancer une balle, et les gestionnaires Sprite et Puppet peuvent la lancer pour l’identité choisie. Physique, relance par glisser, rangement par clic droit, 1 affection et 30 secondes de récupération sont partagés avec Sprite ; la fenêtre Puppet poursuit la balle, la ramasse et la rapporte à son centre d’origine, sans quitter la zone de travail. Chaque relance redémarre le délai. Balle, lumière et Viens ici partagent une cible : en lancer un remplace l’autre. Soins, déplacement manuel, changement de mode ou masquage annulent sans récompense. L’animation de rapport dédiée reste à faire.
+
+L’ajout d’un personnage intégré affiche la progression de la création et de l’installation validée du personnage et de ses vêtements. Le pourcentage indique les étapes terminées, pas le temps restant. La barre disparaît après réussite ou échec. Fermer la garde-robe annule le travail restant.
+
+Les messages d’interaction apparaissent au-dessus du bouton d’exécution, près du focus clavier. Dans les fenêtres étroites, les titres de section et les boutons de détails passent à la ligne. Les champs d’identité et d’interaction gardent une largeur minimale lisible et passent sous leur libellé si nécessaire. La sélection, les valeurs et les commandes sont conservées.
+
+Les champs de personnalisation exposent leurs libellés visibles via l’accessibilité Qt. Les noms des friandises préférées ou détestées, de la taille, de la vitesse, du volume, du comportement, du bavardage et de l’amplitude des animations suivent la langue de l’interface.
+
+Les champs de garde-robe et de photo exposent leurs libellés visibles via l’accessibilité Qt, notamment les emplacements de vêtements, les tenues enregistrées, la pose et son instant. Ces noms suivent la langue de l’interface sans modifier le brouillon ni la photo.
+
+L’option « Pose capturée » suit la langue de l’interface sans changer la pose sélectionnée, son instant ni la photo.
+
+Si la fenêtre photo se ferme pendant le choix de l’emplacement, le chemin retourné est ignoré. Aucune nouvelle photo n’est écrite et les fichiers existants restent inchangés. Une fenêtre photo fermée refuse aussi les demandes ultérieures d’enregistrement.
+
+Fermer la garde-robe pendant le choix d’un dossier ou d’une couleur annule le résultat retourné. Aucune installation ne démarre et aucune couleur ne change. Les demandes ultérieures de sélection de cette garde-robe fermée sont aussi ignorées.
+
+Si l’éditeur de packs de sprites se ferme pendant le choix d’une image, d’un dossier d’importation, d’un dossier d’exportation ou d’un nom d’exportation, le choix renvoyé est ignoré. Aucune nouvelle tâche ne démarre et le brouillon reste inchangé. Annuler uniquement le sélecteur permet de réessayer dans l’éditeur.
+
+Le dîner entre amis se déclenche lorsque trois habitants au moins mangent dans la même zone. Des repas dans des zones séparées ne constituent pas une même réunion. Cet événement est enregistré au plus une fois par jour du foyer, même après sauvegarde et réouverture.

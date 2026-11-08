@@ -1,0 +1,80 @@
+{
+  "base_commit": "8fc8aa14",
+  "status": "focused fix and verification complete; full regression, independent review and integration pending",
+  "cause": "TodoPanel consumes clear confirmation and calendar-picker results after its editor closes, submitting persistent changes.",
+  "red": "6 failed, 13 deselected in 5.78s",
+  "fix": "Check panel Qt validity and visibility before either modal and before consuming its return value.",
+  "related_tests": "50 passed in 11.26s",
+  "coverage": [
+    "Clear/import times reject/close/destruction; no new request, exact saved bytes, unchanged service and shared Today panel.",
+    "Repeated modal entry after closure is ignored.",
+    "Cancellation, editor reopen and retry clear/import successfully; shared checklist updates."
+  ],
+  "original_reproduction": "Actual service/repository now retains one persisted task after reject and returned Yes.",
+  "native": {
+    "cases": [
+      {
+        "operation": "clear",
+        "started": [],
+        "persisted_tasks": 1,
+        "bytes_unchanged": true
+      },
+      {
+        "operation": "import",
+        "started": [],
+        "persisted_tasks": 1,
+        "bytes_unchanged": true
+      }
+    ],
+    "observer": {
+      "before": {
+        "foreground": 2558004,
+        "cursor": [
+          768,
+          432
+        ]
+      },
+      "after": {
+        "foreground": 2558004,
+        "cursor": [
+          768,
+          432
+        ]
+      },
+      "child_exit": 0
+    },
+    "cold_home": {
+      "passed": true,
+      "initial_snapshot_exact": true,
+      "profiles_exact": true,
+      "leases_reacquired": true,
+      "saved_exact": true,
+      "temporary_directory_removed": true
+    }
+  },
+  "pending": [
+    "Full regression, independent review and integration."
+  ],
+  "limits": "Private Windows desktop, Traditional Chinese dark MainUI 900x740. Page method opens editor; local Tab/Space activates actual buttons. Picker/confirmation returns injected. Independent cold verification covers home and profiles. No OS input or EXE conversion.",
+  "documentation": {
+    "files": 17,
+    "checks": "31 passed in 2.14s",
+    "sphinx": "HTML build with -W passed",
+    "rendered_paragraphs_exact": [
+      "Eng",
+      "Zh",
+      "ZhCn",
+      "De",
+      "Fr",
+      "Ru",
+      "It"
+    ]
+  },
+  "cold_todo": {
+    "persisted_tasks": 1,
+    "expected_task_fields_exact": true,
+    "read_preserves_bytes": true,
+    "sha256": "afa5bbb6d88bb32d81ee026f9ac642c2d614c5d41b266db28b9a2f40e79b73af",
+    "scope": "Independent process reads saved native-run task file; no new task mutation."
+  }
+}

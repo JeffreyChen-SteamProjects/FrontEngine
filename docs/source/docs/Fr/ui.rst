@@ -3,6 +3,12 @@ Comment l'utiliser
 
 .. image:: ../image/main/FrontEngine.png
 
+.. note::
+
+    Python 3.11 et les versions ultérieures sont pris en charge, sauf 3.14.0 à 3.14.4. Pour Python 3.14, utilisez 3.14.5 ou une version ultérieure.
+
+    Un plantage natif de Qt a été reproduit sous Windows avec Python 3.14.4 ; les correctifs antérieurs de 3.14 sont exclus par précaution. Recréez les environnements virtuels existants avec un interpréteur compatible et utilisez-le aussi pour exécuter le code source. Les EXE qui intègrent une version exclue doivent être reconstruits avec un interpréteur compatible. Mettre à jour le paquet FrontEngine ne met pas Python à jour.
+
 FrontEngine place des choses par-dessus votre écran - une vidéo, une image, une
 page web, du texte, une mascotte - et les y garde pendant que vous continuez à
 travailler. Chacune s'appelle un calque. Vous pouvez en faire tourner autant que
@@ -116,3 +122,7 @@ Quand d'autres regardent votre écran
   pense-bêtes.
 
 Et :doc:`control_center` pour tout commander d'un coup.
+
+Changer la langue de l’interface actualise les choix d’écran cible et l’indication des fichiers récents. Les écrans cibles, noms et chemins des fichiers et valeurs sélectionnées restent inchangés, y compris après le rechargement de la liste des fichiers récents.
+
+Les messages d’interaction apparaissent au-dessus du bouton d’exécution, près du focus clavier. Dans les fenêtres étroites, les titres de section et les boutons de détails passent à la ligne. Les champs d’identité et d’interaction gardent une largeur minimale lisible et passent sous leur libellé si nécessaire. La sélection, les valeurs et les commandes sont conservées.

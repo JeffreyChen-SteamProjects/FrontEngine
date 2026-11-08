@@ -127,8 +127,11 @@ class ScreenAudioMeters:
 _screen_meters = ScreenAudioMeters()
 
 
-def audio_level_provider_for_screen(screen):
+def audio_level_provider_for_screen(screen, *, lifetime=None):
     """便利函式：取得跟隨指定螢幕音源的取樣函式（共用電表快取）。"""
+    if sys.platform.startswith('linux') and lifetime is not None:
+        from frontengine.utils.linux.audio import owned_level_provider
+        return owned_level_provider(lifetime)
     if sys.platform == 'darwin':
         from frontengine.utils.macos.audio import MacAudioLevelProvider
         return MacAudioLevelProvider()

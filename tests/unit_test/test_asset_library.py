@@ -232,3 +232,167 @@ def test_dialog_static_search_and_commit_restore_scene_on_worker_failure(tmp_pat
         dialog.close()
         owner.deleteLater()
         QCoreApplication.sendPostedEvents(owner, QEvent.Type.DeferredDelete)
+
+
+@pytest.mark.parametrize('destroy', [False, True])
+@pytest.mark.parametrize('operation', ['add', 'add_pet', 'relink', 'relink_pet', 'review'])
+def test_closed_asset_dialog_discards_modal_result(tmp_path, monkeypatch, destroy, operation):
+    from PySide6.QtWidgets import QFileDialog, QMessageBox
+    from shiboken6 import isValid
+
+    repository, identity, _old, new, scene, scene_path, preset = fixture(tmp_path)
+    if operation == 'relink_pet':
+        original_pet = tmp_path / 'original-pet'
+        original_pet.mkdir()
+        picture(original_pet / 'walk.png')
+        identity = repository.add(original_pet)
+    service = AssetLibraryService(tmp_path)
+    document = SceneEditorDocument()
+    document.reset(scene)
+    dialog = AssetLibraryDialog(service, document)
+    dialog.show()
+    wait(lambda: not service.busy)
+    from PySide6.QtCore import Qt
+    for row in range(dialog.entries.count()):
+        if dialog.entries.item(row).data(Qt.ItemDataRole.UserRole)['id'] == identity:
+            dialog.entries.setCurrentRow(row)
+            break
+    started = []
+    service.started.connect(started.append)
+    original_assets = deepcopy(AssetRepository(tmp_path).assets)
+    originals = {path: path.read_bytes() for path in (scene_path, preset)}
+    pet_folder = tmp_path / 'pet'
+    pet_folder.mkdir()
+    picture(pet_folder / 'walk.png')
+    def retire():
+        dialog.reject()
+        if destroy:
+            dialog.deleteLater()
+            QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+    def choose_file(*_args):
+        retire()
+        return str(new), ''
+    def choose_folder(*_args):
+        retire()
+        return str(pet_folder)
+    def confirm(*_args):
+        retire()
+        return QMessageBox.StandardButton.Yes
+    monkeypatch.setattr(QFileDialog, 'getOpenFileName', choose_file)
+    monkeypatch.setattr(QFileDialog, 'getExistingDirectory', choose_folder)
+    monkeypatch.setattr(QMessageBox, 'question', confirm)
+    try:
+        if operation == 'review':
+            plan = plan_relink(repository, identity, str(new), deepcopy(document.entries))
+            dialog._review(plan)
+        elif operation == 'add_pet':
+            dialog._add_pet()
+        elif operation in ('relink', 'relink_pet'):
+            dialog._relink()
+        else:
+            dialog._add()
+        wait(lambda: not service.busy)
+        assert started == []
+        assert document.entries == scene
+        assert AssetRepository(tmp_path).assets == original_assets
+        assert {path: path.read_bytes() for path in originals} == originals
+        def unexpected_prompt(*_args):
+            pytest.fail('closed asset dialog reopened a prompt')
+        monkeypatch.setattr(QFileDialog, 'getOpenFileName', unexpected_prompt)
+        monkeypatch.setattr(QFileDialog, 'getExistingDirectory', unexpected_prompt)
+        monkeypatch.setattr(QMessageBox, 'question', unexpected_prompt)
+        dialog._add()
+        dialog._add_pet()
+        dialog._relink()
+        dialog._review({})
+    finally:
+        service.stop()
+        if service.thread:
+            service.thread.join(5)
+        if isValid(dialog):
+            dialog.close()
+
+
+def test_asset_relink_confirmation_cancel_then_retry(tmp_path, monkeypatch):
+    from PySide6.QtWidgets import QMessageBox
+
+    repository, identity, _old, new, scene, scene_path, preset = fixture(tmp_path)
+    service = AssetLibraryService(tmp_path)
+    document = SceneEditorDocument()
+    document.reset(scene)
+    dialog = AssetLibraryDialog(service, document)
+    answers = iter([QMessageBox.StandardButton.No, QMessageBox.StandardButton.Yes])
+    monkeypatch.setattr(QMessageBox, 'question', lambda *_args: next(answers))
+    try:
+        dialog.show()
+        wait(lambda: not service.busy)
+        plan = plan_relink(repository, identity, str(new), deepcopy(scene))
+        before = {path: path.read_bytes() for path in (scene_path, preset)}
+        dialog._review(plan)
+        assert document.entries == scene
+        assert {path: path.read_bytes() for path in before} == before
+        assert not service.busy
+        dialog._review(plan)
+        wait(lambda: not service.busy and dialog.plan is None)
+        assert document.entries == plan['scene_after']
+        assert document.entries['layer']['file_path'] == str(new)
+        assert AssetRepository(tmp_path).assets[identity]['path'] == str(new)
+        assert json.loads(scene_path.read_text(encoding='utf-8'))['layer']['file_path'] == str(new)
+        assert json.loads(preset.read_text(encoding='utf-8'))['image']['image_path'] == str(new)
+    finally:
+        service.stop()
+        if service.thread:
+            service.thread.join(5)
+        dialog.close()
+
+
+@pytest.mark.parametrize('operation', ['add', 'add_pet', 'relink', 'relink_pet'])
+def test_asset_picker_cancel_allows_retry(tmp_path, monkeypatch, operation):
+    from PySide6.QtCore import Qt
+    from PySide6.QtWidgets import QFileDialog, QMessageBox
+
+    repository, identity, _old, replacement, scene, _scene_path, _preset = fixture(tmp_path)
+    if operation in ('add_pet', 'relink_pet'):
+        replacement = tmp_path / 'replacement-pet'
+        replacement.mkdir()
+        picture(replacement / 'walk.png')
+    if operation == 'relink_pet':
+        old_pet = tmp_path / 'original-pet'
+        old_pet.mkdir()
+        picture(old_pet / 'walk.png')
+        identity = repository.add(old_pet)
+    service = AssetLibraryService(tmp_path)
+    document = SceneEditorDocument()
+    document.reset(scene)
+    dialog = AssetLibraryDialog(service, document)
+    choices = iter(['', str(replacement)])
+    monkeypatch.setattr(QFileDialog, 'getOpenFileName', lambda *_args: (next(choices), ''))
+    monkeypatch.setattr(QFileDialog, 'getExistingDirectory', lambda *_args: next(choices))
+    monkeypatch.setattr(QMessageBox, 'question', lambda *_args: QMessageBox.StandardButton.Yes)
+    try:
+        dialog.show()
+        wait(lambda: not service.busy)
+        for row in range(dialog.entries.count()):
+            if dialog.entries.item(row).data(Qt.ItemDataRole.UserRole)['id'] == identity:
+                dialog.entries.setCurrentRow(row)
+                break
+        before = deepcopy(AssetRepository(tmp_path).assets)
+        action = dialog._add if operation == 'add' else dialog._add_pet if operation == 'add_pet' else dialog._relink
+        action()
+        assert not service.busy
+        assert AssetRepository(tmp_path).assets == before
+        assert document.entries == scene
+        action()
+        wait(lambda: not service.busy and dialog.plan is None)
+        assets = AssetRepository(tmp_path).assets
+        if operation.startswith('relink'):
+            assert len(assets) == len(before)
+            assert assets[identity]['path'] == str(replacement)
+        else:
+            assert len(assets) == len(before) + 1
+            assert any(asset['path'] == str(replacement) for asset in assets.values())
+    finally:
+        service.stop()
+        if service.thread:
+            service.thread.join(5)
+        dialog.close()

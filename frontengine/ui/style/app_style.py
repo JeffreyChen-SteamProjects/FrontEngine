@@ -286,6 +286,8 @@ QListView, QListWidget, QTreeView, QTreeWidget, QTableView, QTableWidget {{
     border: 1px solid {c['border']}; border-radius: {RADIUS}px; outline: 0;
     selection-background-color: {c['accent_soft']}; selection-color: {c['text']};
 }}
+QListView:focus, QListWidget:focus, QTreeView:focus, QTreeWidget:focus,
+QTableView:focus, QTableWidget:focus {{ border-color: {c['accent']}; }}
 QListView::item, QListWidget::item, QTreeView::item, QTreeWidget::item {{ padding: 4px 6px; border-radius: 4px; }}
 QListView::item:hover, QListWidget::item:hover, QTreeView::item:hover, QTreeWidget::item:hover {{
     background-color: {c['surface_alt']}; }}

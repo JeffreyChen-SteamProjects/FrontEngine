@@ -1,3 +1,5 @@
+from frontengine.ui.runtime_lifetime import owned_action
+from frontengine.ui.runtime_lifetime import OwnedWidgetList
 from typing import Optional
 
 from PySide6.QtCore import Qt
@@ -19,13 +21,13 @@ _NOT_READY = "Not Ready"
 
 
 class SoundPlayerSettingUI(SettingPage):
-    def __init__(self):
+    def __init__(self, *, lifetime):
         front_engine_logger.info("[SoundPlayerSettingUI] Init")
         super().__init__("tab_sound_text", "page_subtitle_sound",
-                         "Sound", "Play a sound or a piece of music.")
+                         "Sound", "Play a sound or a piece of music.", lifetime=lifetime)
 
         # Init variable
-        self.sound_widget_list = []
+        self.sound_widget_list = OwnedWidgetList(self.lifetime)
         # 這一頁有兩個各自獨立的選擇器。共用一個 ready_to_play 的話，在音樂選擇
         # 對話框按下取消會把「WAV 已就緒」一起清掉，明明選好的音效反而變成
         # 「尚未準備」。就緒狀態要跟著各自的路徑走。
@@ -86,12 +88,13 @@ class SoundPlayerSettingUI(SettingPage):
         self.finish_body()
         self.set_footer(primary=self.start_player_button, extra=[self.start_wav_button])
 
+    @owned_action
     def start_play_wav(self) -> None:
         front_engine_logger.info("[SoundPlayerSettingUI] start_play_wav")
         if not self.wav_sound_path or not self.wav_ready_to_play:
             message_box = QMessageBox(self)
             message_box.setText(language_wrapper.language_word_dict.get("sound_player_setting_message_box_wav"))
-            message_box.exec()
+            self.lifetime.after_dialog(message_box.exec())
             return
 
         sound_widget = SoundEffectWidget(sound_path=self.wav_sound_path)
@@ -99,6 +102,7 @@ class SoundPlayerSettingUI(SettingPage):
         self.sound_widget_list.append(sound_widget)
         sound_widget.showFullScreen()
 
+    @owned_action
     def start_play_sound(self) -> None:
         front_engine_logger.info("[SoundPlayerSettingUI] start_play_sound")
         if not self.player_sound_path:
@@ -110,23 +114,26 @@ class SoundPlayerSettingUI(SettingPage):
         self.sound_widget_list.append(sound_player)
         sound_player.showFullScreen()
 
+    @owned_action
     def choose_and_copy_wav_file_to_cwd_sound_dir_then_play(self) -> None:
         front_engine_logger.info("[SoundPlayerSettingUI] choose_and_copy_wav_file_to_cwd_sound_dir_then_play")
         retranslator.set_text(self.wav_ready_label, _NOT_READY)
         self.wav_ready_to_play = False
-        self.wav_sound_path = choose_wav_sound(self)
+        self.wav_sound_path = self.lifetime.after_dialog(choose_wav_sound(self))
         if self.wav_sound_path:
             retranslator.set_text(self.wav_ready_label, "Ready")
             self.wav_ready_to_play = True
 
+    @owned_action
     def choose_and_copy_sound_file_to_cwd_sound_dir_then_play(self) -> None:
         front_engine_logger.info("[SoundPlayerSettingUI] choose_and_copy_sound_file_to_cwd_sound_dir_then_play")
         retranslator.set_text(self.player_ready_label, _NOT_READY)
-        self.player_sound_path = choose_player_sound(self)
+        self.player_sound_path = self.lifetime.after_dialog(choose_player_sound(self))
         if self.player_sound_path:
             retranslator.set_text(self.player_ready_label, "Ready")
             self.start_play_sound()                   # chosen means playing: no second click
 
+    @owned_action
     def volume_trick(self) -> None:
         front_engine_logger.info("[SoundPlayerSettingUI] volume_trick")
         self.volume_slider_value_label.setText(str(self.volume_slider.value()))

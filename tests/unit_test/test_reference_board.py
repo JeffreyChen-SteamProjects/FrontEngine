@@ -145,7 +145,7 @@ def test_removing_with_nothing_selected_removes_nothing(tmp_path):
     board.close()
 
 
-def test_the_board_is_reachable_from_the_control_center(tmp_path):
+def test_the_board_is_reachable_from_the_control_center(tmp_path, *, lifetime_factory):
     """
     圖板是置頂視窗。控制中心的「全部關閉」看不到它的話，使用者就只能一塊一塊
     自己找出來關。
@@ -156,8 +156,9 @@ def test_the_board_is_reachable_from_the_control_center(tmp_path):
 
     original = os.getcwd()
     os.chdir(tmp_path)
+    lifetime_factory()
     try:
-        page = ImageSettingUI()
+        page = ImageSettingUI(lifetime=lifetime_factory())
         assert hasattr(page, "board_widget_list")
         assert page.board_widget_list == []
     finally:

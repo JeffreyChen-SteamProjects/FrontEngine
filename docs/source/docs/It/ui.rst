@@ -3,6 +3,12 @@ Come si usa
 
 .. image:: ../image/main/FrontEngine.png
 
+.. note::
+
+    Sono supportate le versioni di Python dalla 3.11 in poi, escluse quelle dalla 3.14.0 alla 3.14.4. Per Python 3.14, usare la 3.14.5 o successiva.
+
+    Un arresto anomalo nel codice nativo Qt è stato riprodotto su Windows con Python 3.14.4; le patch precedenti della 3.14 sono escluse per precauzione. Ricreare gli ambienti virtuali esistenti con un interprete compatibile e usarlo anche per eseguire il codice sorgente. Gli EXE che incorporano una versione esclusa devono essere ricompilati con un interprete compatibile. Aggiornare il pacchetto FrontEngine non aggiorna Python.
+
 FrontEngine mette cose sopra il tuo schermo - un video, un'immagine, una pagina
 web, del testo, una mascotte - e ce le lascia mentre tu continui a lavorare.
 Ognuna di queste si chiama overlay. Puoi tenerne quanti vuoi insieme, da schede
@@ -112,3 +118,7 @@ Quando lo schermo lo guardano altri
 * :doc:`widgets` - spettro audio, monitor di sistema, in riproduzione, foglietti.
 
 E :doc:`control_center` per comandare tutto quanto insieme.
+
+Il cambio della lingua aggiorna le opzioni dello schermo di destinazione e l’indicazione dei file recenti. Schermi selezionati, nomi e percorsi dei file e valori selezionati restano invariati, anche dopo aver ricaricato l’elenco dei file recenti.
+
+I messaggi delle interazioni appaiono sopra il pulsante di esecuzione, vicino al focus della tastiera. Nelle finestre strette, i titoli delle sezioni e i pulsanti dei dettagli vanno a capo. I campi di identità e interazione mantengono una larghezza minima leggibile e, se necessario, passano sotto le etichette. Selezione, valori e comandi restano invariati.

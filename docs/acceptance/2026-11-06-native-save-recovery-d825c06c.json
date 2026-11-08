@@ -1,0 +1,220 @@
+{
+  "product_test_commit": "d825c06c",
+  "passed": true,
+  "cases": [
+    {
+      "case": "corrupt-restore",
+      "native": {
+        "passed": true,
+        "case": "corrupt-restore",
+        "protected_bytes_unchanged_before_action": true,
+        "actual_button_clicked": true,
+        "backup_restored_exactly": true,
+        "old_file_preserved": false,
+        "runtime_closed": true,
+        "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+        "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-stage-layout\\.audit\\profession-owned-fixed",
+        "saved_snapshot_sha256": "c471f2056e3bf47d41a8073e4a214f8eccec310f6c85a5f6088181f0c4b05172",
+        "scope": "Native private MainUI with actual recovery buttons and synthetic corrupt/newer main files; seeded valid backup. Host services substituted. Not physical corruption or OS input.",
+        "temporary_directory_removed": true
+      },
+      "cold": {
+        "passed": true,
+        "initial_snapshot_exact": true,
+        "profiles_exact": true,
+        "leases_reacquired": true,
+        "saved_exact": true,
+        "temporary_directory_removed": true
+      },
+      "observer": {
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "child_exit": 0,
+        "observation_only": true
+      },
+      "sha256": {
+        "result.json": "7a6b304fcabcc534fea4d92c70cb3b0b189e36cdea509973746bc2ddf56cb852",
+        "cold-result.json": "5bd41edb786e3fe553500e96167a938f64483ad3f1f564c603795a88e3110cbc",
+        "protected.png": "75b9c06951354ef90318a05886c91d362291c67d8e1b836e808c1681b38ccca0",
+        "recovered.png": "b65e624327807855a8e42f80c81cc7c0fe43b57240bf409f28d7c34bab11ba5b",
+        "shutdown-world.json": "72f1d723d91c7ed81bff134186601648228f3c4debc2d1df02150e9d6c68a131"
+      }
+    },
+    {
+      "case": "newer-restore",
+      "native": {
+        "passed": true,
+        "case": "newer-restore",
+        "protected_bytes_unchanged_before_action": true,
+        "actual_button_clicked": true,
+        "backup_restored_exactly": true,
+        "old_file_preserved": false,
+        "runtime_closed": true,
+        "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+        "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-stage-layout\\.audit\\profession-owned-fixed",
+        "saved_snapshot_sha256": "c471f2056e3bf47d41a8073e4a214f8eccec310f6c85a5f6088181f0c4b05172",
+        "scope": "Native private MainUI with actual recovery buttons and synthetic corrupt/newer main files; seeded valid backup. Host services substituted. Not physical corruption or OS input.",
+        "temporary_directory_removed": true
+      },
+      "cold": {
+        "passed": true,
+        "initial_snapshot_exact": true,
+        "profiles_exact": true,
+        "leases_reacquired": true,
+        "saved_exact": true,
+        "temporary_directory_removed": true
+      },
+      "observer": {
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "child_exit": 0,
+        "observation_only": true
+      },
+      "sha256": {
+        "result.json": "55fceac3f2e5ec9453e0e59c9d19ec8b5f06bbedee12f3e5240f624f4e2a86b1",
+        "cold-result.json": "5bd41edb786e3fe553500e96167a938f64483ad3f1f564c603795a88e3110cbc",
+        "protected.png": "06d8a750887a752b601d491c1f17f9d027945d164d3301f5c7c3ff1c1d14b3b5",
+        "recovered.png": "b65e624327807855a8e42f80c81cc7c0fe43b57240bf409f28d7c34bab11ba5b",
+        "shutdown-world.json": "72f1d723d91c7ed81bff134186601648228f3c4debc2d1df02150e9d6c68a131"
+      }
+    },
+    {
+      "case": "corrupt-aside",
+      "native": {
+        "passed": true,
+        "case": "corrupt-aside",
+        "protected_bytes_unchanged_before_action": true,
+        "actual_button_clicked": true,
+        "backup_restored_exactly": false,
+        "old_file_preserved": true,
+        "runtime_closed": true,
+        "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+        "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-stage-layout\\.audit\\profession-owned-fixed",
+        "saved_snapshot_sha256": "c471f2056e3bf47d41a8073e4a214f8eccec310f6c85a5f6088181f0c4b05172",
+        "scope": "Native private MainUI with actual recovery buttons and synthetic corrupt/newer main files; seeded valid backup. Host services substituted. Not physical corruption or OS input.",
+        "temporary_directory_removed": true
+      },
+      "cold": {
+        "passed": true,
+        "initial_snapshot_exact": true,
+        "profiles_exact": true,
+        "leases_reacquired": true,
+        "saved_exact": true,
+        "temporary_directory_removed": true
+      },
+      "observer": {
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "child_exit": 0,
+        "observation_only": true
+      },
+      "sha256": {
+        "result.json": "92a90836d75f6d078044a663d77d1e94ab7bb050649fb392abc5bad729f3dd1b",
+        "cold-result.json": "5bd41edb786e3fe553500e96167a938f64483ad3f1f564c603795a88e3110cbc",
+        "protected.png": "75b9c06951354ef90318a05886c91d362291c67d8e1b836e808c1681b38ccca0",
+        "recovered.png": "0a7581c213401be12b6c48366da04697e3ffdffde070c5b37bd6b916f8fbb0c6",
+        "shutdown-world.json": "8fe195a0b73367bce4c3b37bee5f21b2de10412e820ff82861e51081b2c2a8ca"
+      }
+    },
+    {
+      "case": "newer-aside",
+      "native": {
+        "passed": true,
+        "case": "newer-aside",
+        "protected_bytes_unchanged_before_action": true,
+        "actual_button_clicked": true,
+        "backup_restored_exactly": false,
+        "old_file_preserved": true,
+        "runtime_closed": true,
+        "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+        "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-stage-layout\\.audit\\profession-owned-fixed",
+        "saved_snapshot_sha256": "c471f2056e3bf47d41a8073e4a214f8eccec310f6c85a5f6088181f0c4b05172",
+        "scope": "Native private MainUI with actual recovery buttons and synthetic corrupt/newer main files; seeded valid backup. Host services substituted. Not physical corruption or OS input.",
+        "temporary_directory_removed": true
+      },
+      "cold": {
+        "passed": true,
+        "initial_snapshot_exact": true,
+        "profiles_exact": true,
+        "leases_reacquired": true,
+        "saved_exact": true,
+        "temporary_directory_removed": true
+      },
+      "observer": {
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "child_exit": 0,
+        "observation_only": true
+      },
+      "sha256": {
+        "result.json": "b1a9144f0f2353b7f7c28a791f86bf6e4e06799c3eb245649377dd120b8295fa",
+        "cold-result.json": "5bd41edb786e3fe553500e96167a938f64483ad3f1f564c603795a88e3110cbc",
+        "protected.png": "06d8a750887a752b601d491c1f17f9d027945d164d3301f5c7c3ff1c1d14b3b5",
+        "recovered.png": "125b5056e59fac7851371e15508bc5113067bf3278f67a1b466e5903fc7f5ebd",
+        "shutdown-world.json": "92b7fe925df0b621fdda15733d33f68792203e5feb447eaf28650cd693eed6ea"
+      }
+    }
+  ],
+  "screenshots_viewed": [
+    "corrupt-restore/protected.png",
+    "newer-restore/protected.png",
+    "newer-aside/recovered.png"
+  ],
+  "script_sha256": {
+    "native_save_recovery.py": "61699f361d10255c87fdd25babea637ec315eb571194805ed814f77806a56068",
+    "cold_save_recovery.py": "8036f53574ba6c68e74c48f86aaf30f11a824b3a274ca70d33059421352a85ec"
+  },
+  "limits": [
+    "Synthetic invalid JSON/version999 and valid managed backup only.",
+    "Private Win32 desktop with widget-local clicks and substituted host services.",
+    "No physical corruption, invalid backup, all-mode or continuous foreground observation claim."
+  ]
+}

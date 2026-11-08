@@ -1,14 +1,15 @@
 """Growth: tutorial goals, daily commissions, residents' wishes, life events and the celebration.
 
-Everything here is derived from world state and counters, checked every 30 s
-of world time, and seeded from the home identity rather than the simulation's
-random stream, so looking at goals never changes what happens in the home.
+Furniture wishes and goals are checked every 30 s of world time; personal
+activity wishes are completed by their participants. Selection is seeded from
+the home identity rather than the simulation's random stream, so looking at goals never changes what happens in the home.
 Rewards are paid once through the ledger with goal-specific transaction IDs.
 Nothing expires: there are no streaks, timers or missed-day penalties.
 """
 from __future__ import annotations
 
 import hashlib
+from collections import Counter
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Callable
 
@@ -19,10 +20,13 @@ from frontengine.utils.pet_game.schedule import DAY_MS, game_day
 
 if TYPE_CHECKING:
     from frontengine.utils.pet_game.world import World
+    from frontengine.utils.pet_game.resident import Resident
 
 CHECK_MS = 30000
 MAX_STATS = 256
 MAX_EVENTS = 50
+# Far above what play produces (at most 12 residents at a time); bounds a bloated or crafted save.
+MAX_EVENT_SCOPES = 4096
 WISH_COOLDOWN_MS = 5 * 60 * 1000
 BIRTHDAY_EVERY_DAYS = 7
 CELEBRATION_COINS = 100
@@ -102,9 +106,9 @@ COMMISSIONS = (("herb", 3, 18), ("herb", 5, 30), ("flower", 2, 24), ("toy", 1, 4
                ("furniture:stool", 1, 70))
 WISHES = {
     "plant": lambda w, r: placed(w, "decoration"),
-    "friend_meal": lambda w, r: _stat(w, "shared"),
+    "friend_meal": None,
     "new_leisure": lambda w, r: placed(w, "leisure"),
-    "play_time": lambda w, r: _stat(w, "completed:play"),
+    "play_time": None,
     "cozy_bed": lambda w, r: sum(1 for p in w.furniture.values() if p.definition == "bed_cozy"),
 }
 
@@ -130,6 +134,7 @@ class Progress:
     wishes: dict[str, dict] = field(default_factory=dict)        # resident -> {wish, base, ready}
     arrivals: dict[str, int] = field(default_factory=dict)       # resident -> world time it moved in
     events: list[dict] = field(default_factory=list)
+    event_days: dict[str, dict[str, int]] = field(default_factory=dict)
     upgrades: dict[str, int] = field(default_factory=dict)       # workstation kind -> level 2..3
     next_check_ms: int = 0                                       # runtime only
 
@@ -142,12 +147,14 @@ class Progress:
                 "commissions": {"day": self.commissions["day"], "offers": [dict(o) for o in self.commissions["offers"]]},
                 "wishes": {key: dict(value) for key, value in sorted(self.wishes.items())},
                 "arrivals": dict(sorted(self.arrivals.items())), "events": [dict(e) for e in self.events],
-                "upgrades": dict(sorted(self.upgrades.items()))}
+                "upgrades": dict(sorted(self.upgrades.items())),
+                "event_days": {kind: dict(sorted(scopes.items())) for kind, scopes in sorted(self.event_days.items())}}
 
     @classmethod
-    def from_dict(cls, data: object) -> Progress:
+    def from_dict(cls, data: object, version: int = 8) -> Progress:
         keys = {"stats", "goals", "commissions", "wishes", "arrivals", "events"}
-        if not isinstance(data, dict) or set(data) not in (keys, keys | {"upgrades"}):   # upgrades: version 6
+        required = keys | ({"event_days"} if version >= 8 else set())
+        if not isinstance(data, dict) or not required <= set(data) <= keys | {"upgrades", "event_days"}:
             raise ValueError("Invalid home progress")
         progress = cls()
         progress.stats = _checked_counts(data["stats"], MAX_STATS)
@@ -158,7 +165,15 @@ class Progress:
                              for key, value in _checked_residents(data["arrivals"]).items()}
         progress.events = _checked_events(data["events"])
         progress.upgrades = _checked_upgrades(data.get("upgrades", {}))
+        progress.event_days = _checked_event_days(data.get("event_days", {}))
+        for event in progress.events:
+            progress.record_event_day(event["kind"], event["resident"], event["day"])
         return progress
+
+    def record_event_day(self, kind: str, resident: str | None, day: int) -> None:
+        scope = resident if LIFE_EVENT_RULES[kind].per_resident else ""
+        days = self.event_days.setdefault(kind, {})
+        days[scope] = max(days.get(scope, 0), day)
 
 
 # ----- validation of saved progress ------------------------------------------------------
@@ -231,7 +246,29 @@ def _checked_events(value: object) -> list[dict]:
                 or event["kind"] not in LIFE_EVENTS or not isinstance(event["resident"], (str, type(None)))):
             raise ValueError("Invalid life event")
         checked_int(event["day"], 1, 10 ** 7, "event day")
+        if LIFE_EVENT_RULES[event["kind"]].per_resident and (
+                not isinstance(event["resident"], str) or not RESIDENT_ID.fullmatch(event["resident"])):
+            raise ValueError("Invalid event resident")
     return [dict(event) for event in value]
+
+
+def _checked_event_days(value: object) -> dict[str, dict[str, int]]:
+    if not isinstance(value, dict) or set(value) - LIFE_EVENT_RULES.keys():
+        raise ValueError("Invalid event days")
+    result = {}
+    for kind, scopes in value.items():
+        if not isinstance(scopes, dict):
+            raise ValueError("Invalid event scopes")
+        for scope, day in scopes.items():
+            if (not isinstance(scope, str)
+                    or (LIFE_EVENT_RULES[kind].per_resident and not RESIDENT_ID.fullmatch(scope))
+                    or (not LIFE_EVENT_RULES[kind].per_resident and scope != "")):
+                raise ValueError("Invalid event scope")
+            checked_int(day, 1, 10 ** 7, "event day")
+        # Keep the most recent scopes rather than refusing the whole save.
+        recent = sorted(scopes.items(), key=lambda item: item[1], reverse=True)[:MAX_EVENT_SCOPES]
+        result[kind] = dict(recent)
+    return result
 
 
 # ----- tutorial and level ---------------------------------------------------------------
@@ -261,10 +298,11 @@ def claim(world: World, identifier: str) -> str:
         return "unknown"
     if goal_state(world, goal) != "done":
         return "not_ready"
-    result = world.ledger.apply("goal:" + identifier, "goal", goal.coins)
+    coins = world.coin_amount(goal.coins)
+    result = world.ledger.apply("goal:" + identifier, "goal", coins)
     if result in ("accepted", "duplicate"):
         world.progress.goals[identifier] = "claimed"
-        world.emit("goal_claimed", goal=identifier, coins=goal.coins)
+        world.emit("goal_claimed", goal=identifier, coins=coins)
     return result
 
 
@@ -296,7 +334,7 @@ def celebrate(world: World) -> str:
     """A one-time home party; free life simply continues afterwards."""
     if not celebration_ready(world):
         return "not_ready"
-    result = world.ledger.apply("goal:celebration", "celebration", CELEBRATION_COINS)
+    result = world.ledger.apply("goal:celebration", "celebration", world.coin_amount(CELEBRATION_COINS))
     if result not in ("accepted", "duplicate"):
         return result
     world.progress.goals["celebration"] = "claimed"
@@ -325,6 +363,7 @@ def refresh_commissions(world: World) -> None:
         item, count, coins = pool.pop((seed >> (index * 8)) % len(pool))
         offers.append({"item": item, "count": count, "coins": coins, "done": False})
     world.progress.commissions = {"day": day, "offers": offers}
+    world.emit("commissions_refreshed", day=day)
 
 
 def deliver(world: World, index: int) -> str:
@@ -333,12 +372,13 @@ def deliver(world: World, index: int) -> str:
         return "unknown"
     offer = offers[index]
     transaction = f"commission:{world.progress.commissions['day']}:{index}"
-    result = world.ledger.apply(transaction, "commission", offer["coins"], {offer["item"]: -offer["count"]})
+    coins = world.coin_amount(offer["coins"])
+    result = world.ledger.apply(transaction, "commission", coins, {offer["item"]: -offer["count"]})
     if result == "insufficient":
         return "none_stored"
     if result in ("accepted", "duplicate"):
         offer["done"] = True
-        world.emit("commission_done", item=offer["item"], coins=offer["coins"])
+        world.emit("commission_done", item=offer["item"], coins=coins)
     return result
 
 
@@ -351,13 +391,23 @@ def _update_wish(world: World, resident) -> None:
         if world.time_ms >= state["ready"]:
             names = sorted(WISHES)
             wish = names[_seeded(world, resident.identifier, _stat(world, "wish_granted")) % len(names)]
-            state.update(wish=wish, base=WISHES[wish](world, resident))
+            measure = WISHES[wish]
+            state.update(wish=wish, base=measure(world, resident) if measure is not None else 0)
         return
-    if WISHES[wish](world, resident) > state["base"]:
-        resident.needs["mood"] = min(100, resident.needs["mood"] + WISH_MOOD)
-        resident.affection = min(MAX_AFFECTION, resident.affection + WISH_AFFECTION)
-        state.update(wish=None, base=0, ready=world.time_ms + WISH_COOLDOWN_MS)
-        world.emit("wish_granted", resident=resident.identifier, wish=wish)
+    measure = WISHES[wish]
+    if measure is not None and measure(world, resident) > state["base"]:
+        complete_wish(world, resident, wish)
+
+
+def complete_wish(world: World, resident: Resident, wish: str) -> None:
+    """Complete only this resident's matching active wish, once."""
+    state = world.progress.wishes.get(resident.identifier)
+    if state is None or state["wish"] != wish:
+        return
+    resident.needs["mood"] = min(100, resident.needs["mood"] + WISH_MOOD)
+    resident.affection = min(MAX_AFFECTION, resident.affection + WISH_AFFECTION)
+    state.update(wish=None, base=0, ready=world.time_ms + WISH_COOLDOWN_MS)
+    world.emit("wish_granted", resident=resident.identifier, wish=wish)
 
 
 # ----- life events ---------------------------------------------------------------------------
@@ -373,6 +423,7 @@ FRIEND_LEVEL, SKILLED_LEVEL, GREEN_HOME_DECORATIONS, FULL_HOUSE, HARVEST_UNITS =
 
 
 def _life_event(world: World, kind: str, resident: str | None) -> None:
+    world.progress.record_event_day(kind, resident, game_day(world.time_ms))
     world.progress.events = (world.progress.events + [
         {"kind": kind, "day": game_day(world.time_ms), "resident": resident}])[-MAX_EVENTS:]
     world.emit("life_event", event=kind, resident=resident)
@@ -382,12 +433,9 @@ def due(world: World, kind: str, resident: str | None = None) -> bool:
     """Whether the event's rule lets it happen today (for this pet, when it is about one pet)."""
     rule = LIFE_EVENT_RULES[kind]
     today = game_day(world.time_ms)
-    for event in world.progress.events:
-        if event["kind"] != kind or (rule.per_resident and event["resident"] != resident):
-            continue
-        if rule.cooldown_days == 0 or today - event["day"] < rule.cooldown_days:
-            return False
-    return True
+    scope = resident if rule.per_resident else ""
+    last_day = world.progress.event_days.get(kind, {}).get(scope)
+    return last_day is None or (rule.cooldown_days > 0 and today - last_day >= rule.cooldown_days)
 
 
 def _once_events(world: World) -> None:
@@ -409,8 +457,9 @@ def _daily_events(world: World, day: int) -> None:
     awake = [r for r in world.residents.values() if not r.parked and not r.away
              and (r.activity is None or r.activity.kind not in ("sleep", "nap"))]
     eating = [r for r in awake if r.activity is not None and r.activity.kind == "eat" and r.activity.phase == "using"]
+    diners_by_zone = Counter(resident.zone for resident in eating)
     today = {
-        "friends_dinner": len(eating) >= 3,
+        "friends_dinner": any(count >= 3 for count in diners_by_zone.values()),
         "rainy_day": bool(awake) and weather(world.home, world.time_ms) in ("rain", "snow"),
         "starry_night": bool(awake) and sky(world.time_ms) == "night"
         and weather(world.home, world.time_ms) == "clear",
@@ -442,6 +491,10 @@ def _check_events(world: World) -> None:
         days = (world.time_ms - since) // DAY_MS
         if days and days % BIRTHDAY_EVERY_DAYS == 0 and identifier in world.residents \
                 and due(world, "birthday", identifier):
+            anniversary_day = game_day(since + days * DAY_MS)
+            last_day = world.progress.event_days.get("birthday", {}).get(identifier)
+            if last_day is not None and last_day >= anniversary_day:
+                continue
             world.residents[identifier].needs["mood"] = min(100, world.residents[identifier].needs["mood"] + 10)
             _life_event(world, "birthday", identifier)
 

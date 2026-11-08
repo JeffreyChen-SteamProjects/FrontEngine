@@ -1,3 +1,4 @@
+import pytest
 import test_pet_social_modes as fixtures
 import test_puppet_petting as puppet_fixtures
 
@@ -81,9 +82,10 @@ def test_manager_clears_pointer_interaction_and_keeps_cooldown(social_pets):
     assert controls.interaction.currentData() == selected
 
 
-def test_manager_puppet_care_uses_same_completion(puppet):
+def test_manager_puppet_care_uses_same_completion(puppet, *, lifetime_factory):
     from frontengine.ui.page.pet.pet_setting_ui import PetSettingUI
-    page = PetSettingUI()
+    lifetime_factory()
+    page = PetSettingUI(lifetime=lifetime_factory())
     try:
         controls = page.profile_controls
         controls.profiles = puppet.profile_session.profiles
@@ -97,3 +99,35 @@ def test_manager_puppet_care_uses_same_completion(puppet):
         assert puppet.profile_session.companion.mode == 'rest'
     finally:
         page.close()
+
+
+@pytest.mark.parametrize('width', [650, 350])
+def test_keyboard_interaction_feedback_stays_in_the_visible_page(social_pets, width):
+    from PySide6.QtCore import QPoint, Qt
+    from PySide6.QtTest import QTest
+    from PySide6.QtWidgets import QApplication
+    page, pets = social_pets
+    controls = page.profile_controls
+    controls.profiles = pets[0].profile_session.profiles
+    controls.refresh(selected=pets[0].profile_session.identifier)
+    section = controls.interaction.parentWidget()
+    while not hasattr(section, 'toggle_button'):
+        section = section.parentWidget()
+    section.toggle_button.setChecked(True)
+    page.resize(width, 740)
+    page.show()
+    pets[0].hide()
+    page.activateWindow()
+    QTest.qWait(20)
+    controls.interaction.setCurrentIndex(controls.interaction.findData('pet'))
+    controls.interact_button.setFocus()
+    page._scroll.ensureWidgetVisible(controls.interact_button)
+    QTest.keyClick(controls.interact_button, Qt.Key.Key_Space)
+    QApplication.processEvents()
+    viewport = page._scroll.viewport()
+    feedback = controls.status.fontMetrics().boundingRect(
+        controls.status.contentsRect(), int(controls.status.alignment() | Qt.TextFlag.TextWordWrap), controls.status.text())
+    feedback.translate(controls.status.mapTo(viewport, QPoint()))
+    assert controls.status.text()
+    assert viewport.rect().contains(feedback), (feedback, viewport.rect())
+    assert controls.interact_button.hasFocus()

@@ -130,19 +130,19 @@ def test_shutdown_stops_and_releases_every_player(sound, made):
     assert sound.current is None
 
 
-def test_the_page_setting_turns_it_on_and_remembers_volume(tmp_path, monkeypatch, made):
+def test_the_page_setting_turns_it_on_and_remembers_volume(tmp_path, monkeypatch, made, *, home_store_factory, lifetime_factory):
     from frontengine.show.pet_game.home_service import HomeService
     from frontengine.ui.page.pet_game import home_page
-    from frontengine.user_setting.pet_game_save import HomeSaveStore
     from frontengine.user_setting.pet_profiles import PetProfiles
     from frontengine.user_setting.user_setting_file import user_setting_dict
     from frontengine.utils.pet_game.catalog import builtin_catalog
 
+    lifetime_factory()
     monkeypatch.setattr(ambience, "_sound_effect", lambda parent: FakePlayer(made, parent))
     monkeypatch.setitem(user_setting_dict, home_page.AMBIENT_KEY, False)
     monkeypatch.setitem(user_setting_dict, home_page.AMBIENT_VOLUME_KEY, 30)
-    service = HomeService(None, HomeSaveStore(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None))
-    page = home_page.PetHomePage(service)
+    service = HomeService(None, home_store_factory(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None))
+    page = home_page.PetHomePage(service, lifetime=lifetime_factory())
     try:
         assert not page.ambience.enabled
         assert not page.ambient_slider.isEnabled()

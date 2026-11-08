@@ -97,7 +97,7 @@ def _cap_width(widget: QWidget) -> QWidget:
     return widget
 
 
-class Section(QWidget):
+class _SectionShell(QWidget):
     """
     一組相關欄位，帶一個小標題。標題用 objectName 上樣式，不在這裡寫死顏色。
     A group of related fields under a small heading. The heading is styled by
@@ -120,9 +120,9 @@ class Section(QWidget):
         # translated, so reusing it needs no new language key.
         self.title_label = title if isinstance(title, QLabel) else tr(QLabel(), title, fallback)
         self.title_label.setObjectName("sectionHeader")
-        heading = QHBoxLayout()
+        self.title_label.setWordWrap(True)
+        heading = FlowLayout(spacing=8)
         heading.addWidget(self.title_label)
-        heading.addStretch()
         self.toggle_button = QToolButton()
         self.toggle_button.setObjectName("sectionToggle")
         self.toggle_button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
@@ -135,13 +135,6 @@ class Section(QWidget):
 
         self.content = QWidget()
         self.content.setObjectName("sectionContent")
-        self._form = QFormLayout(self.content)
-        self._form.setContentsMargins(0, 0, 0, 0)
-        self._form.setHorizontalSpacing(14)
-        self._form.setVerticalSpacing(ROW_SPACING)
-        self._form.setRowWrapPolicy(QFormLayout.RowWrapPolicy.WrapLongRows)
-        self._form.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
-        self._form.setLabelAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
         self._column_layout.addWidget(self.content)
 
     def set_collapsible(self, collapsed: bool = True) -> None:
@@ -150,14 +143,45 @@ class Section(QWidget):
         self.toggle_button.setChecked(not collapsed)
         self._set_expanded(not collapsed)
 
-    def set_stacked(self) -> None:
-        """Place every label above its field in a narrow inspector panel."""
-        self._form.setRowWrapPolicy(QFormLayout.RowWrapPolicy.WrapAllRows)
-
     def _set_expanded(self, expanded: bool) -> None:
         self.content.setVisible(expanded)
         self.toggle_button.setArrowType(Qt.ArrowType.DownArrow if expanded else Qt.ArrowType.RightArrow)
         retranslator.set_text(self.toggle_button, "ui_hide_details" if expanded else "ui_show_details")
+
+
+class ContentSection(_SectionShell):
+    """Stack full-width content without the sizing rules of a two-column form."""
+
+    def __init__(self, title: "str | QLabel", fallback: str = "",
+                 parent: Optional[QWidget] = None):
+        super().__init__(title, fallback, parent)
+        self._contents = QVBoxLayout(self.content)
+        self._contents.setContentsMargins(0, 0, 0, 0)
+        self._contents.setSpacing(ROW_SPACING)
+
+    def add_widget(self, widget: QWidget) -> QWidget:
+        """Append content in visual and keyboard-navigation order."""
+        self._contents.addWidget(widget)
+        return widget
+
+
+class Section(_SectionShell):
+    """Align labeled controls and wrap their labels when the form narrows."""
+
+    def __init__(self, title: "str | QLabel", fallback: str = "",
+                 parent: Optional[QWidget] = None):
+        super().__init__(title, fallback, parent)
+        self._form = QFormLayout(self.content)
+        self._form.setContentsMargins(0, 0, 0, 0)
+        self._form.setHorizontalSpacing(14)
+        self._form.setVerticalSpacing(ROW_SPACING)
+        self._form.setRowWrapPolicy(QFormLayout.RowWrapPolicy.WrapLongRows)
+        self._form.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
+        self._form.setLabelAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+
+    def set_stacked(self) -> None:
+        """Place every label above its field in a narrow inspector panel."""
+        self._form.setRowWrapPolicy(QFormLayout.RowWrapPolicy.WrapAllRows)
 
     def add_actions(self, *buttons: QPushButton, prominent: int = 1,
                     menu_key: str = "ui_more_actions") -> QWidget:
@@ -275,8 +299,14 @@ class SettingPage(QWidget):
 
     def __init__(self, title_key: str, subtitle_key: str = "",
                  title_fallback: str = "", subtitle_fallback: str = "", *, compact: bool = False,
-                 wide: bool = False):
+                 wide: bool = False, lifetime):
         super().__init__()
+        from frontengine.ui.runtime_lifetime import DefaultSettingsLifetime
+        if not isinstance(lifetime, DefaultSettingsLifetime):
+            raise TypeError("Settings pages require a DefaultSettingsLifetime")
+        lifetime.require_live()
+        self.lifetime = lifetime
+        lifetime.adopt(self)
         self.setProperty("settingPage", True)
         self._wide = wide or compact
         self._page_layout = QVBoxLayout(self)
@@ -354,6 +384,12 @@ class SettingPage(QWidget):
         section = Section(title, fallback)
         if collapsed:
             section.set_collapsible()
+        self._body_layout.addWidget(section)
+        return section
+
+    def add_content_section(self, title: "str | QLabel", fallback: str = "") -> ContentSection:
+        """Group full-width content in a vertically stacked card."""
+        section = ContentSection(title, fallback)
         self._body_layout.addWidget(section)
         return section
 

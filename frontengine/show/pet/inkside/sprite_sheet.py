@@ -169,7 +169,7 @@ def fit_frames(frames: list[numpy.ndarray], canvas: int = 256, height: int = 225
 SPRITES = Path(__file__).resolve().parent / 'sprites'
 # Four-frame home poses drawn by Codex for every built-in character: action -> ms per frame.
 HOME_POSE_MS = {'sit': 420, 'sleep': 650, 'feed': 300, 'play': 220, 'write': 320, 'garden': 300,
-                'craft': 200}
+                'craft': 200, 'read': 480, 'music': 220, 'paint': 320, 'watch': 520, 'bathe': 360, 'dress': 300}
 
 
 def character_sprites(name: str) -> dict:

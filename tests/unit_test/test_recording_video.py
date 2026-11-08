@@ -132,9 +132,10 @@ def test_pause_resume_excludes_wall_time_from_gif_and_can_stop_while_paused(tmp_
     recorder.close()
 
 
-def test_recording_ui_avi_duration_pause_resume_cancel_restores_controls(tmp_path, monkeypatch):
+def test_recording_ui_avi_duration_pause_resume_cancel_restores_controls(tmp_path, monkeypatch, *, lifetime_factory):
     from frontengine.ui.page.tools.tools_setting_ui import ToolsSettingUI
-    page = ToolsSettingUI()
+    lifetime_factory()
+    page = ToolsSettingUI(lifetime=lifetime_factory())
     target = tmp_path / 'ui.avi'
     target.write_bytes(b'original')
     monkeypatch.setattr(QFileDialog, 'getSaveFileName', lambda *_args: (str(target), ''))

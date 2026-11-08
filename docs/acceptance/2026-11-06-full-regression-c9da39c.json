@@ -1,0 +1,60 @@
+{
+  "exit": 0,
+  "source_unchanged": true,
+  "source_count": 748,
+  "interpreter": "D:\\Codes\\FrontEngine\\.audit\\test-runtime-3145\\Scripts\\python.exe",
+  "product_test_commit": "c9da39c",
+  "total": 3165,
+  "passed": 3162,
+  "failed": 0,
+  "skipped": [
+    {
+      "module": "tests.unit_test.test_default_storage_binding",
+      "name": "test_forked_empty_default_registry_rejects_inherited_locked_mutex",
+      "reason": "Requires POSIX fork"
+    },
+    {
+      "module": "tests.unit_test.test_remote_tls",
+      "name": "test_private_key_and_directory_are_owner_only",
+      "reason": "POSIX permission semantics"
+    },
+    {
+      "module": "tests.unit_test.test_storage_session",
+      "name": "test_forked_child_cannot_use_or_release_parent_owner",
+      "reason": "Requires POSIX fork"
+    }
+  ],
+  "junit_suite_seconds": "2297.703",
+  "focus_cases": [
+    "test_item_view_focus_is_visible_without_selection_or_resizing[QListView-light]",
+    "test_item_view_focus_is_visible_without_selection_or_resizing[QListView-dark]",
+    "test_item_view_focus_is_visible_without_selection_or_resizing[QListWidget-light]",
+    "test_item_view_focus_is_visible_without_selection_or_resizing[QListWidget-dark]",
+    "test_item_view_focus_is_visible_without_selection_or_resizing[QTreeView-light]",
+    "test_item_view_focus_is_visible_without_selection_or_resizing[QTreeView-dark]",
+    "test_item_view_focus_is_visible_without_selection_or_resizing[QTreeWidget-light]",
+    "test_item_view_focus_is_visible_without_selection_or_resizing[QTreeWidget-dark]",
+    "test_item_view_focus_is_visible_without_selection_or_resizing[QTableView-light]",
+    "test_item_view_focus_is_visible_without_selection_or_resizing[QTableView-dark]",
+    "test_item_view_focus_is_visible_without_selection_or_resizing[QTableWidget-light]",
+    "test_item_view_focus_is_visible_without_selection_or_resizing[QTableWidget-dark]"
+  ],
+  "accessibility_and_search_cases": [
+    "test_exact_page_name_enter_opens_matching_page[]",
+    "test_exact_page_name_enter_opens_matching_page[Control]",
+    "test_work_list_accessible_name_follows_language"
+  ],
+  "pytest_reported_seconds": 2299.38,
+  "evidence_sha256": {
+    "pytest.log": "c2533a36f0f873537fbec3dda615fd7ceb1a6fbc80c813f6af77d5bf58dc3bf5",
+    "junit.xml": "0093ce61a4045fa0656a297ea47544a2cd9e5d7e94220bc568f15614d5b9e496",
+    "source-manifest.json": "812964afd9892d0ba75e5d24dba004f91781ff70f1efd47a861d6db35ca15f77",
+    "result.json": "dfe34e45a451f3e73a3aa5b015cb06fd7087645ac1d0a904fc5df48a509ef4a1"
+  },
+  "limits": [
+    "Windows offscreen Qt tests; native input, hardware and independent review remain open.",
+    "This revision includes accessible-name and exact-command search fixes; it predates the plugin-search and plugin-ID namespace fixes.",
+    "POSIX-only tests skipped."
+  ],
+  "diagnostic": "No faulthandler timeout, FAILED or ERROR marker appeared in the captured log."
+}

@@ -1,0 +1,574 @@
+{
+  "base_commit": "f693d36a",
+  "change": "Bind scene script and seven registered media tab labels to existing setTabText retranslation; no page replacement or API change.",
+  "red": {
+    "failed": 9,
+    "seconds": 6.74,
+    "failure": "Scene script remained English where Traditional Chinese scene-script label was expected.",
+    "log": ".audit/scene-tabs-red.txt"
+  },
+  "green": {
+    "options_scene_lifecycle": {
+      "passed": 47,
+      "seconds": 8.59
+    },
+    "docs_translations_progress": {
+      "passed": 54,
+      "seconds": 2.84
+    },
+    "pyflakes": "both changed Python files clean",
+    "diff_check": "clean"
+  },
+  "native": {
+    "passed": true,
+    "pages": 1,
+    "languages": 7,
+    "cases": 7,
+    "routes": [
+      {
+        "language": "English",
+        "page": "tab_scene_text",
+        "label": "Scene",
+        "requested_width": 1400,
+        "actual_size": [
+          1400,
+          850
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "English-1400-tab_scene_text.png"
+      },
+      {
+        "language": "Traditional_Chinese",
+        "page": "tab_scene_text",
+        "label": "場景",
+        "requested_width": 1400,
+        "actual_size": [
+          1400,
+          850
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "Traditional_Chinese-1400-tab_scene_text.png"
+      },
+      {
+        "language": "Simplified_Chinese",
+        "page": "tab_scene_text",
+        "label": "场景",
+        "requested_width": 1400,
+        "actual_size": [
+          1400,
+          850
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "Simplified_Chinese-1400-tab_scene_text.png"
+      },
+      {
+        "language": "Deutsch",
+        "page": "tab_scene_text",
+        "label": "Szene",
+        "requested_width": 1400,
+        "actual_size": [
+          1400,
+          850
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "Deutsch-1400-tab_scene_text.png"
+      },
+      {
+        "language": "Russian",
+        "page": "tab_scene_text",
+        "label": "Сцена",
+        "requested_width": 1400,
+        "actual_size": [
+          1400,
+          850
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "Russian-1400-tab_scene_text.png"
+      },
+      {
+        "language": "France",
+        "page": "tab_scene_text",
+        "label": "Scène",
+        "requested_width": 1400,
+        "actual_size": [
+          1400,
+          850
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "France-1400-tab_scene_text.png"
+      },
+      {
+        "language": "Italy",
+        "page": "tab_scene_text",
+        "label": "Scena",
+        "requested_width": 1400,
+        "actual_size": [
+          1400,
+          850
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "Italy-1400-tab_scene_text.png"
+      }
+    ],
+    "combo_mismatches": [],
+    "selected_values": {
+      "tool": "move",
+      "axis": "free",
+      "space": "world",
+      "projection": "perspective",
+      "light_type": "directional"
+    },
+    "index_changes": {
+      "tool": [],
+      "axis": [],
+      "space": [],
+      "projection": [],
+      "light_type": []
+    },
+    "callback_errors": [],
+    "home_world_unchanged": true,
+    "home_service_and_leases_reused": true,
+    "command_palette_reused": true,
+    "tab_mismatches": [],
+    "visible_controls": [
+      {
+        "language": "English",
+        "control": "tool",
+        "rect": [
+          552,
+          339,
+          108,
+          26
+        ]
+      },
+      {
+        "language": "English",
+        "control": "axis",
+        "rect": [
+          666,
+          339,
+          108,
+          26
+        ]
+      },
+      {
+        "language": "English",
+        "control": "space",
+        "rect": [
+          1025,
+          419,
+          310,
+          26
+        ]
+      },
+      {
+        "language": "English",
+        "control": "projection",
+        "rect": [
+          1025,
+          664,
+          310,
+          26
+        ]
+      },
+      {
+        "language": "English",
+        "control": "light_type",
+        "rect": [
+          1025,
+          704,
+          310,
+          26
+        ]
+      },
+      {
+        "language": "Traditional_Chinese",
+        "control": "tool",
+        "rect": [
+          552,
+          339,
+          108,
+          26
+        ]
+      },
+      {
+        "language": "Traditional_Chinese",
+        "control": "axis",
+        "rect": [
+          666,
+          339,
+          108,
+          26
+        ]
+      },
+      {
+        "language": "Traditional_Chinese",
+        "control": "space",
+        "rect": [
+          1025,
+          405,
+          310,
+          26
+        ]
+      },
+      {
+        "language": "Traditional_Chinese",
+        "control": "projection",
+        "rect": [
+          1025,
+          664,
+          310,
+          26
+        ]
+      },
+      {
+        "language": "Traditional_Chinese",
+        "control": "light_type",
+        "rect": [
+          1025,
+          704,
+          310,
+          26
+        ]
+      },
+      {
+        "language": "Simplified_Chinese",
+        "control": "tool",
+        "rect": [
+          552,
+          339,
+          108,
+          26
+        ]
+      },
+      {
+        "language": "Simplified_Chinese",
+        "control": "axis",
+        "rect": [
+          666,
+          339,
+          108,
+          26
+        ]
+      },
+      {
+        "language": "Simplified_Chinese",
+        "control": "space",
+        "rect": [
+          1025,
+          405,
+          310,
+          26
+        ]
+      },
+      {
+        "language": "Simplified_Chinese",
+        "control": "projection",
+        "rect": [
+          1025,
+          664,
+          310,
+          26
+        ]
+      },
+      {
+        "language": "Simplified_Chinese",
+        "control": "light_type",
+        "rect": [
+          1025,
+          704,
+          310,
+          26
+        ]
+      },
+      {
+        "language": "Deutsch",
+        "control": "tool",
+        "rect": [
+          552,
+          339,
+          108,
+          26
+        ]
+      },
+      {
+        "language": "Deutsch",
+        "control": "axis",
+        "rect": [
+          666,
+          339,
+          108,
+          26
+        ]
+      },
+      {
+        "language": "Deutsch",
+        "control": "space",
+        "rect": [
+          1025,
+          405,
+          310,
+          26
+        ]
+      },
+      {
+        "language": "Deutsch",
+        "control": "projection",
+        "rect": [
+          1025,
+          658,
+          310,
+          26
+        ]
+      },
+      {
+        "language": "Deutsch",
+        "control": "light_type",
+        "rect": [
+          1025,
+          698,
+          310,
+          26
+        ]
+      },
+      {
+        "language": "Russian",
+        "control": "tool",
+        "rect": [
+          552,
+          339,
+          108,
+          26
+        ]
+      },
+      {
+        "language": "Russian",
+        "control": "axis",
+        "rect": [
+          666,
+          339,
+          108,
+          26
+        ]
+      },
+      {
+        "language": "Russian",
+        "control": "space",
+        "rect": [
+          1025,
+          405,
+          310,
+          26
+        ]
+      },
+      {
+        "language": "Russian",
+        "control": "projection",
+        "rect": [
+          1025,
+          658,
+          310,
+          26
+        ]
+      },
+      {
+        "language": "Russian",
+        "control": "light_type",
+        "rect": [
+          1025,
+          698,
+          310,
+          26
+        ]
+      },
+      {
+        "language": "France",
+        "control": "tool",
+        "rect": [
+          552,
+          339,
+          108,
+          26
+        ]
+      },
+      {
+        "language": "France",
+        "control": "axis",
+        "rect": [
+          666,
+          339,
+          108,
+          26
+        ]
+      },
+      {
+        "language": "France",
+        "control": "space",
+        "rect": [
+          1025,
+          405,
+          310,
+          26
+        ]
+      },
+      {
+        "language": "France",
+        "control": "projection",
+        "rect": [
+          1025,
+          658,
+          310,
+          26
+        ]
+      },
+      {
+        "language": "France",
+        "control": "light_type",
+        "rect": [
+          1025,
+          698,
+          310,
+          26
+        ]
+      },
+      {
+        "language": "Italy",
+        "control": "tool",
+        "rect": [
+          552,
+          339,
+          108,
+          26
+        ]
+      },
+      {
+        "language": "Italy",
+        "control": "axis",
+        "rect": [
+          666,
+          339,
+          108,
+          26
+        ]
+      },
+      {
+        "language": "Italy",
+        "control": "space",
+        "rect": [
+          1025,
+          405,
+          310,
+          26
+        ]
+      },
+      {
+        "language": "Italy",
+        "control": "projection",
+        "rect": [
+          1025,
+          664,
+          310,
+          26
+        ]
+      },
+      {
+        "language": "Italy",
+        "control": "light_type",
+        "rect": [
+          1025,
+          704,
+          310,
+          26
+        ]
+      }
+    ],
+    "scene_unchanged": true,
+    "undo_unchanged": true,
+    "gl_frame_size": [
+      563,
+      395
+    ],
+    "runtime_closed": true,
+    "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-stage-layout\\.audit\\profession-owned-fixed",
+    "saved_snapshot_sha256": "c471f2056e3bf47d41a8073e4a214f8eccec310f6c85a5f6088181f0c4b05172",
+    "scope": "Private native MainUI, seven language menu actions, five existing 3D editor option groups. Reads widget labels and checks stable data/order/no index signals. Host services substituted. Native 3D cube preview produced a nonempty framebuffer; controls shown and checked within the window. No OS input or full GPU compatibility claim.",
+    "temporary_directory_removed": true
+  },
+  "observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "child_exit": 0,
+    "observation_only": true
+  },
+  "visual_review": "Traditional Chinese full-resolution screenshot confirms translated scene-script/media tabs and rendered cube.",
+  "documentation": {
+    "updated": 17,
+    "html": [
+      {
+        "language": "Eng",
+        "latest_paragraph_present": true,
+        "html_sha256": "0617158f6c9c22f3725bf0ee1b2aae10bdfcd4aaa1a71a7599a490720d74d5b1"
+      },
+      {
+        "language": "Zh",
+        "latest_paragraph_present": true,
+        "html_sha256": "4a2c205500dadda1b678330e352cd779bd4d725db767ee886c1862e144c6f22d"
+      },
+      {
+        "language": "ZhCn",
+        "latest_paragraph_present": true,
+        "html_sha256": "338f965ef9f8b1f540afe41006b226cbfa0f5c73244bc6efd68a1fddf57e2f37"
+      },
+      {
+        "language": "De",
+        "latest_paragraph_present": true,
+        "html_sha256": "ff4ea325661bd6d1fb40812567e2239f9ab9f0a94e03b409b61eae2f85560c07"
+      },
+      {
+        "language": "Fr",
+        "latest_paragraph_present": true,
+        "html_sha256": "2a720013a87baeb1cee874dea45641b2862c755651a997e5db88741107c8cf8d"
+      },
+      {
+        "language": "It",
+        "latest_paragraph_present": true,
+        "html_sha256": "4a72a738a8fe91b5bfa7cfa8286619db0ebd231c0faf94c80c3a8608f1cb5a53"
+      },
+      {
+        "language": "Ru",
+        "latest_paragraph_present": true,
+        "html_sha256": "4c88fa89ce280924e104349e3174045804be3b2721f9dfb1fe8c42729312daf7"
+      }
+    ],
+    "sphinx": "-W --keep-going success without warnings/errors"
+  },
+  "collection": {
+    "total": 3282,
+    "seconds": 6.83
+  },
+  "pending": [
+    "Full regression",
+    "Independent review and integration",
+    "Full narrow layout and all native tool actions"
+  ]
+}

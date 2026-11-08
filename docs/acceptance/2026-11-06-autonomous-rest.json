@@ -1,0 +1,173 @@
+{
+  "source_commit": "c3b201b",
+  "verified": {
+    "source_files": 502,
+    "measured_elapsed_s": 527.125,
+    "world_elapsed_s": 527.2,
+    "observed_rest": {
+      "96b68c7e5f234eeeb8858e4eb4461194": {
+        "activity": "sleep",
+        "reason": "tired",
+        "energy": 15,
+        "caption": "Sleeping (tired)",
+        "furniture": "f2",
+        "elapsed_s": 126.46899999998277
+      },
+      "35eca29b417c40a4bf32165a8f42ae84": {
+        "activity": "nap",
+        "reason": "tired",
+        "energy": 15,
+        "caption": "Napping on the floor (tired)",
+        "furniture": null,
+        "elapsed_s": 128.59399999998277
+      }
+    },
+    "completed_rest": {
+      "96b68c7e5f234eeeb8858e4eb4461194": {
+        "activity": "sleep",
+        "energy": 95,
+        "elapsed_s": 286.81299999999464
+      },
+      "35eca29b417c40a4bf32165a8f42ae84": {
+        "activity": "nap",
+        "energy": 95,
+        "elapsed_s": 528.625
+      }
+    },
+    "event_count": 22,
+    "snapshot_and_persisted_settings_equal": true,
+    "cold_reopen_verified": true,
+    "final_coins": 114,
+    "scope": "Two residents sharing one bed, normal speed, no care commands; not six-resident or OS-offline acceptance."
+  },
+  "runtime_result": {
+    "passed": true,
+    "world_snapshot_equal": true,
+    "resident_profiles_persisted": true,
+    "leases_reacquired": true,
+    "residents": [
+      "35eca29b417c40a4bf32165a8f42ae84",
+      "96b68c7e5f234eeeb8858e4eb4461194"
+    ],
+    "ledger_coins": 90,
+    "initial_needs": {
+      "35eca29b417c40a4bf32165a8f42ae84": {
+        "energy": 28,
+        "fullness": 87,
+        "mood": 100,
+        "comfort": 50,
+        "social": 87,
+        "hygiene": 63
+      },
+      "96b68c7e5f234eeeb8858e4eb4461194": {
+        "energy": 23,
+        "fullness": 90,
+        "mood": 98,
+        "comfort": 54,
+        "social": 59,
+        "hygiene": 68
+      }
+    },
+    "observed_rest": {
+      "96b68c7e5f234eeeb8858e4eb4461194": {
+        "activity": "sleep",
+        "reason": "tired",
+        "energy": 15,
+        "caption": "Sleeping (tired)",
+        "furniture": "f2",
+        "elapsed_s": 126.46899999998277
+      },
+      "35eca29b417c40a4bf32165a8f42ae84": {
+        "activity": "nap",
+        "reason": "tired",
+        "energy": 15,
+        "caption": "Napping on the floor (tired)",
+        "furniture": null,
+        "elapsed_s": 128.59399999998277
+      }
+    },
+    "completed_rest": {
+      "96b68c7e5f234eeeb8858e4eb4461194": {
+        "activity": "sleep",
+        "energy": 95,
+        "elapsed_s": 286.81299999999464
+      },
+      "35eca29b417c40a4bf32165a8f42ae84": {
+        "activity": "nap",
+        "energy": 95,
+        "elapsed_s": 528.625
+      }
+    },
+    "elapsed_s": 528.7030000000086,
+    "measured_elapsed_s": 527.125,
+    "world_elapsed_s": 527.2,
+    "direct_commands": 0,
+    "realtime_verified": true,
+    "runtime_closed": true,
+    "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "saved_snapshot_sha256": "ef252074bb0aba520bb00efed3948ee0a168e9920368aba877ab8e45db606388",
+    "scope": "Normal-speed two-resident autonomous rest using actual prior gameplay save; no direct care commands or need/time injection; private desktop with host service starts and Workshop/session-lock queries substituted",
+    "temporary_directory_removed": true
+  },
+  "cold_result": {
+    "passed": true,
+    "world_snapshot_equal": true,
+    "resident_profiles_persisted": true,
+    "leases_reacquired": true,
+    "residents": [
+      "35eca29b417c40a4bf32165a8f42ae84",
+      "96b68c7e5f234eeeb8858e4eb4461194"
+    ],
+    "ledger_coins": 114,
+    "runtime_closed": true,
+    "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "saved_snapshot_sha256": "411498710b50fbd9f12859dd001db390d0353a6875ff239e7d05fd6cdcd23bfb",
+    "scope": "Fresh full MainUI native process on private desktop; copied captured settings; global hotkey/emergency/app-profile/share-watch starts, Workshop discovery and session-lock query substituted",
+    "temporary_directory_removed": true
+  },
+  "previous_failed_run": {
+    "passed": false,
+    "world_snapshot_equal": true,
+    "resident_profiles_persisted": true,
+    "leases_reacquired": true,
+    "residents": [
+      "35eca29b417c40a4bf32165a8f42ae84",
+      "96b68c7e5f234eeeb8858e4eb4461194"
+    ],
+    "ledger_coins": 90,
+    "error": "Traceback (most recent call last):\n  File \"D:\\Codes\\FrontEngine\\.audit\\worktrees\\ownership-integration\\.audit\\autonomous_rest_native.py\", line 137, in <module>\n    assert 0.95 * elapsed <= (world.time_ms - start_world) / 1000 <= elapsed + 2\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n"
+  },
+  "timing_correction": "HomeService starts during MainUI construction. Measurement now samples world and monotonic baselines together after the initial Qt event drain; the 95 percent and plus-two-second limits are unchanged.",
+  "visual_checks": "Both current-run resident-card images were inspected: Sleeping (tired) at the bed and Napping on the floor (tired) without a bed.",
+  "limits": [
+    "Two residents and one bed from the preceding real gameplay save; not six-resident normal-speed acceptance or all population schedules.",
+    "No direct care commands, need injection or simulation-time adjustment.",
+    "Private native desktop; host hotkey/emergency/app-profile/share-watch starts and Workshop/session-lock queries substituted.",
+    "No OS-network isolation, physical device, native desktop input or independent-review acceptance.",
+    "runtime_result.ledger_coins and world_snapshot_equal refer to the initial load; verified.final_coins and cold_result describe the final save."
+  ],
+  "harnesses": {
+    "observer": {
+      "source": "import hashlib\nimport json\nimport logging\nimport os\nfrom pathlib import Path\nimport shutil\nimport sys\nimport tempfile\nimport traceback\nimport uuid\nfrom time import monotonic\n\nfrom complete_main_onboarding_native import observation\n\nROOT = Path(__file__).resolve().parents[1]\nsys.path.insert(0, str(ROOT))\nsys.path.insert(0, str(ROOT / 'tests/integration'))\nimport hidden_desktop\n\nsource = Path(sys.argv[1]).resolve()\noutput = Path(sys.argv[2]).resolve()\noutput.mkdir(parents=True, exist_ok=True)\nif not hidden_desktop.is_child(output):\n    assert not (output / 'result.json').exists(), 'Use a fresh output directory'\n    hidden_desktop.DESKTOP = f'FrontEngineColdReload{os.getpid()}_{uuid.uuid4().hex[:8]}'\n    before = observation()\n    manifest = {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()\n                for p in (ROOT / 'frontengine').rglob('*.py')}\n    (output / 'source-manifest.json').write_text(json.dumps(manifest, indent=2))\n    shutil.copy2(__file__, output / 'harness.py')\n    code = hidden_desktop.run_on_hidden_desktop(__file__, str(source), str(output), timeout_ms=1980000)\n    unchanged = all(hashlib.sha256((ROOT / name).read_bytes()).hexdigest() == digest\n                    for name, digest in manifest.items())\n    (output / 'observer.json').write_text(json.dumps({'before': before, 'after': observation(),\n        'child_exit': code, 'source_unchanged': unchanged, 'observation_only': True}, indent=2), encoding='utf-8')\n    raise SystemExit(code)\n\nos.environ['QT_QPA_PLATFORM'] = 'windows'\nexpected = json.loads((source / 'shutdown-world.json').read_text(encoding='utf-8'))\nresult = {'passed': False}\ntry:\n    with tempfile.TemporaryDirectory(prefix='fe-current-cold-reload-') as folder:\n        shutil.copytree(source / 'settings', folder, dirs_exist_ok=True)\n        previous = Path.cwd()\n        os.chdir(folder)\n        try:\n            from PySide6.QtCore import QCoreApplication, QEvent, Qt\n            from PySide6.QtTest import QTest\n            from PySide6.QtWidgets import QApplication\n            from frontengine.ui.page.pet_game import home_page\n            from frontengine.utils.session_lock import session_lock\n            from frontengine.user_setting.user_setting_file import user_setting_dict\n            from frontengine.utils.pet_game import snapshot\n\n            home_page.workshop_pack_roots = lambda: []\n            session_lock.is_session_locked = lambda: False\n            app = QApplication([])\n            app.setQuitOnLastWindowClosed(False)\n            from frontengine.ui import main_ui\n            main_ui.CriticalExit.init_critical_exit = lambda self: None\n            main_ui.HotkeyService.start = lambda self: False\n            main_ui.AppProfileService.start = lambda self: None\n            main_ui.ShareWatchService.start = lambda self: None\n            window = main_ui.FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)\n            lifetime = window.lifetime\n            page = window.pet_home_ui\n            try:\n                actual = snapshot.to_dict(page.service.world)\n                assert actual == expected, 'Cold process world differs from final shutdown snapshot'\n                residents = set(page.service.world.residents)\n                records = user_setting_dict['pet_profiles']['records']\n                assert residents <= set(records), 'Resident profiles missing from settings'\n                assert residents == set(page.service.sessions), 'Resident identity leases were not reacquired'\n                result.update(world_snapshot_equal=True, resident_profiles_persisted=True,\n                    leases_reacquired=True, residents=sorted(residents), ledger_coins=page.service.world.ledger.coins)\n                world = page.service.world\n                initial_needs = {key: dict(resident.needs) for key, resident in world.residents.items()}\n                started = monotonic()\n                completed = {}\n                observed = {}\n                journal = (output / 'events.jsonl').open('w', encoding='utf-8', buffering=1)\n                def events_ready(batch):\n                    for event in batch:\n                        journal.write(json.dumps({'elapsed_s': monotonic() - started, 'event': event}) + '\\n')\n                        if event['kind'] == 'completed' and event.get('activity') in ('sleep', 'nap'):\n                            resident = world.residents[event['resident']]\n                            assert resident.needs['energy'] >= 95\n                            assert all(resident.identifier not in piece.users.values() for piece in world.furniture.values())\n                            completed[resident.identifier] = {'activity': event['activity'],\n                                'energy': resident.needs['energy'], 'elapsed_s': monotonic() - started}\n                page.service.events_ready.connect(events_ready)\n                window.resize(1280, 960)\n                window.show()\n                page.tabs.setCurrentIndex(page.tabs.keys().index('pet_home_residents_section'))\n                QTest.qWait(1000)\n                if not page.service.running:\n                    page.run_button.click()\n                timing_started = monotonic()\n                start_world = world.time_ms\n                last_heartbeat = -1.0\n                while monotonic() - started < 1800:\n                    QTest.qWait(200)\n                    for key, resident in world.residents.items():\n                        assert not resident.commands, 'Direct command appeared in autonomous observation'\n                        activity = resident.activity\n                        if activity and activity.kind in ('sleep', 'nap') and activity.phase == 'using' and key not in observed:\n                            assert activity.reason in ('tired', 'bedtime'), activity.reason\n                            if activity.furniture:\n                                piece = world.furniture[activity.furniture]\n                                assert piece.users.get(activity.point) == key\n                                assert resident.x_milli == activity.target_x\n                            for index in range(page.residents.list.count()):\n                                if page.residents.list.item(index).data(Qt.ItemDataRole.UserRole) == key:\n                                    page.residents.list.setCurrentRow(index)\n                                    break\n                            page._scroll.ensureWidgetVisible(page.residents.activity)\n                            app.processEvents()\n                            caption = page.residents.activity.text()\n                            assert ('sleep' in caption.casefold()) if activity.kind == 'sleep' else ('nap' in caption.casefold())\n                            assert not page.residents.activity.visibleRegion().isEmpty()\n                            observed[key] = {'activity': activity.kind, 'reason': activity.reason,\n                                'energy': resident.needs['energy'], 'caption': caption,\n                                'furniture': activity.furniture, 'elapsed_s': monotonic() - started}\n                            assert window.grab().save(str(output / (key + '-rest.png')))\n                    occupied = [identifier for piece in world.furniture.values() for identifier in piece.users.values()]\n                    assert len(occupied) == len(set(occupied)), 'Resident reserved multiple furniture points'\n                    elapsed = monotonic() - started\n                    if elapsed - last_heartbeat >= 1:\n                        (output / 'heartbeat.json').write_text(json.dumps({'elapsed_s': elapsed,\n                            'measured_elapsed_s': monotonic() - timing_started,\n                            'world_elapsed_s': (world.time_ms - start_world) / 1000,\n                            'needs': {key: dict(resident.needs) for key, resident in world.residents.items()},\n                            'observed': observed, 'completed': completed}), encoding='utf-8')\n                        last_heartbeat = elapsed\n                    if set(completed) == residents:\n                        break\n                journal.close()\n                assert set(observed) == set(completed) == residents, (observed, completed)\n                elapsed = monotonic() - started\n                measured_elapsed = monotonic() - timing_started\n                world_elapsed = (world.time_ms - start_world) / 1000\n                result.update(initial_needs=initial_needs, observed_rest=observed, completed_rest=completed,\n                              elapsed_s=elapsed, measured_elapsed_s=measured_elapsed,\n                              world_elapsed_s=world_elapsed, direct_commands=0)\n                assert 0.95 * measured_elapsed <= world_elapsed <= measured_elapsed + 2\n                result['realtime_verified'] = True\n            finally:\n                window.request_shutdown()\n                deadline = monotonic() + 120\n                while not lifetime.closed and monotonic() < deadline:\n                    QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)\n                    app.processEvents()\n                    QTest.qWait(10)\n                assert lifetime.closed, (lifetime.state, lifetime.error)\n                if 'completed_rest' in result:\n                    (output / 'shutdown-world.json').write_text(json.dumps(snapshot.to_dict(world), indent=2))\n                    shutil.copytree(folder, output / 'settings', dirs_exist_ok=True)\n            result.update(passed=True, runtime_closed=True, python=sys.version,\n                source=str(source), saved_snapshot_sha256=hashlib.sha256((source / 'shutdown-world.json').read_bytes()).hexdigest(),\n                scope='Normal-speed two-resident autonomous rest using actual prior gameplay save; no direct care commands or need/time injection; private desktop with host service starts and Workshop/session-lock queries substituted')\n        finally:\n            logging.shutdown()\n            os.chdir(previous)\n    result['temporary_directory_removed'] = True\nexcept Exception:\n    result.update(passed=False, error=traceback.format_exc())\n(output / 'result.json').write_text(json.dumps(result, indent=2), encoding='utf-8')\nraise SystemExit(0 if result['passed'] else 1)\n",
+      "sha256": "8a6f096136106910e00186b46078d1e80c81c551ac9357305d41532193c5a1e2"
+    },
+    "cold_reload": {
+      "source": "import hashlib\nimport json\nimport logging\nimport os\nfrom pathlib import Path\nimport shutil\nimport sys\nimport tempfile\nimport traceback\nimport uuid\nfrom time import monotonic\n\nfrom complete_main_onboarding_native import observation\n\nROOT = Path(__file__).resolve().parents[1]\nsys.path.insert(0, str(ROOT))\nsys.path.insert(0, str(ROOT / 'tests/integration'))\nimport hidden_desktop\n\nsource = Path(sys.argv[1]).resolve()\noutput = Path(sys.argv[2]).resolve()\noutput.mkdir(parents=True, exist_ok=True)\nif not hidden_desktop.is_child(output):\n    assert not (output / 'result.json').exists(), 'Use a fresh output directory'\n    hidden_desktop.DESKTOP = f'FrontEngineColdReload{os.getpid()}_{uuid.uuid4().hex[:8]}'\n    before = observation()\n    code = hidden_desktop.run_on_hidden_desktop(__file__, str(source), str(output), timeout_ms=180000)\n    (output / 'observer.json').write_text(json.dumps({'before': before, 'after': observation(),\n        'child_exit': code, 'observation_only': True}, indent=2), encoding='utf-8')\n    raise SystemExit(code)\n\nos.environ['QT_QPA_PLATFORM'] = 'windows'\nexpected = json.loads((source / 'shutdown-world.json').read_text(encoding='utf-8'))\nresult = {'passed': False}\ntry:\n    with tempfile.TemporaryDirectory(prefix='fe-current-cold-reload-') as folder:\n        shutil.copytree(source / 'settings', folder, dirs_exist_ok=True)\n        previous = Path.cwd()\n        os.chdir(folder)\n        try:\n            from PySide6.QtCore import QCoreApplication, QEvent\n            from PySide6.QtTest import QTest\n            from PySide6.QtWidgets import QApplication\n            from frontengine.ui.page.pet_game import home_page\n            from frontengine.utils.session_lock import session_lock\n            from frontengine.user_setting.user_setting_file import user_setting_dict\n            from frontengine.utils.pet_game import snapshot\n\n            home_page.workshop_pack_roots = lambda: []\n            session_lock.is_session_locked = lambda: False\n            app = QApplication([])\n            app.setQuitOnLastWindowClosed(False)\n            from frontengine.ui import main_ui\n            main_ui.CriticalExit.init_critical_exit = lambda self: None\n            main_ui.HotkeyService.start = lambda self: False\n            main_ui.AppProfileService.start = lambda self: None\n            main_ui.ShareWatchService.start = lambda self: None\n            window = main_ui.FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)\n            lifetime = window.lifetime\n            page = window.pet_home_ui\n            try:\n                actual = snapshot.to_dict(page.service.world)\n                assert actual == expected, 'Cold process world differs from final shutdown snapshot'\n                residents = set(page.service.world.residents)\n                records = user_setting_dict['pet_profiles']['records']\n                assert residents <= set(records), 'Resident profiles missing from settings'\n                assert residents == set(page.service.sessions), 'Resident identity leases were not reacquired'\n                result.update(world_snapshot_equal=True, resident_profiles_persisted=True,\n                    leases_reacquired=True, residents=sorted(residents), ledger_coins=page.service.world.ledger.coins)\n            finally:\n                window.request_shutdown()\n                deadline = monotonic() + 120\n                while not lifetime.closed and monotonic() < deadline:\n                    QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)\n                    app.processEvents()\n                    QTest.qWait(10)\n                assert lifetime.closed, (lifetime.state, lifetime.error)\n            result.update(passed=True, runtime_closed=True, python=sys.version,\n                source=str(source), saved_snapshot_sha256=hashlib.sha256((source / 'shutdown-world.json').read_bytes()).hexdigest(),\n                scope='Fresh full MainUI native process on private desktop; copied captured settings; global hotkey/emergency/app-profile/share-watch starts, Workshop discovery and session-lock query substituted')\n        finally:\n            logging.shutdown()\n            os.chdir(previous)\n    result['temporary_directory_removed'] = True\nexcept Exception:\n    result.update(passed=False, error=traceback.format_exc())\n(output / 'result.json').write_text(json.dumps(result, indent=2), encoding='utf-8')\nraise SystemExit(0 if result['passed'] else 1)\n",
+      "sha256": "45a34e9ad800c3aff9615a2ba0b1bc31836ec06d660e53a6a328ef0581f1fbd8"
+    },
+    "verifier": {
+      "source": "from pathlib import Path\nimport hashlib\nimport json\nimport sys\n\nroot = Path(__file__).resolve().parents[1]\nfolder, cold = (Path(value).resolve() for value in sys.argv[1:3])\nread = lambda path: json.loads(path.read_text(encoding='utf-8'))\nresult = read(folder / 'result.json')\nobserver = read(folder / 'observer.json')\nassert result['passed'] and result['realtime_verified'] and result['direct_commands'] == 0\nassert result['runtime_closed'] and result['temporary_directory_removed']\nassert observer['child_exit'] == 0 and observer['source_unchanged']\nmanifest = read(folder / 'source-manifest.json')\ncurrent = {str(path.relative_to(root)): hashlib.sha256(path.read_bytes()).hexdigest()\n           for path in (root / 'frontengine').rglob('*.py')}\nassert current == manifest\nresidents = set(result['residents'])\nassert len(residents) == 2\nassert set(result['observed_rest']) == set(result['completed_rest']) == residents\nelapsed = result['measured_elapsed_s']\nassert 0.95 * elapsed <= result['world_elapsed_s'] <= elapsed + 2\nevents = [json.loads(line) for line in (folder / 'events.jsonl').read_text().splitlines()]\nfor identifier in residents:\n    observed, completed = result['observed_rest'][identifier], result['completed_rest'][identifier]\n    assert observed['reason'] in ('tired', 'bedtime')\n    assert completed['activity'] == observed['activity'] and completed['energy'] >= 95\n    assert completed['elapsed_s'] > observed['elapsed_s']\n    starts = [row for row in events if row['event'].get('resident') == identifier\n              and row['event']['kind'] == 'activity' and row['event'].get('activity') == observed['activity']]\n    ends = [row for row in events if row['event'].get('resident') == identifier\n            and row['event']['kind'] == 'completed' and row['event'].get('activity') == completed['activity']]\n    assert any(row['event'].get('reason') == observed['reason'] for row in starts)\n    assert any(abs(row['elapsed_s'] - completed['elapsed_s']) < 0.25 for row in ends)\n    assert (folder / (identifier + '-rest.png')).is_file()\nassert {entry['activity'] for entry in result['observed_rest'].values()} == {'sleep', 'nap'}\nassert not any(row['event'].get('reason') == 'command' for row in events)\nworld = read(folder / 'shutdown-world.json')\nassert world == read(folder / 'settings/pet-home.json')\ncold_result = read(cold / 'result.json')\nassert all(cold_result[key] for key in ('passed', 'world_snapshot_equal', 'resident_profiles_persisted',\n                                      'leases_reacquired', 'runtime_closed', 'temporary_directory_removed'))\nassert read(cold / 'observer.json')['child_exit'] == 0\nassert cold_result['saved_snapshot_sha256'] == hashlib.sha256((folder / 'shutdown-world.json').read_bytes()).hexdigest()\nassert cold_result['ledger_coins'] == world['ledger']['coins']\nsummary = {'source_files': len(manifest), 'measured_elapsed_s': elapsed,\n           'world_elapsed_s': result['world_elapsed_s'], 'observed_rest': result['observed_rest'],\n           'completed_rest': result['completed_rest'], 'event_count': len(events),\n           'snapshot_and_persisted_settings_equal': True, 'cold_reopen_verified': True,\n           'final_coins': world['ledger']['coins'], 'scope': 'Two residents sharing one bed, normal speed, no care commands; not six-resident or OS-offline acceptance.'}\n(folder / 'verified-summary.json').write_text(json.dumps(summary, indent=2), encoding='utf-8')\nprint(json.dumps(summary))\n",
+      "sha256": "b3d38aa90be3b71ea525073409baebd18668e26b7e44e6803c0043b87d78598e"
+    }
+  },
+  "artifacts_sha256": {
+    "result.json": "0cffd14aaaee45a14468ce10ae3649d86e2b6aa9a165d7f0f4242047b0a6b9cc",
+    "observer.json": "47b66074c92f6d0d93e0dcad61ca23191242ef89e3b6280f62ac8e250e91bf5e",
+    "events.jsonl": "c7dc21990ee2a1baf443e2957f0be69f2597a175aeded28dda648924c53e67d1",
+    "source-manifest.json": "9d283ce6667de6b179c040f88dd3835a6574ab9efb46d18e5c9a40d198f9f2e1",
+    "shutdown-world.json": "411498710b50fbd9f12859dd001db390d0353a6875ff239e7d05fd6cdcd23bfb",
+    "settings/pet-home.json": "fbdfe758245e696c9efbe0b9538730178f07f273040c5dfe154e621c8353ed26",
+    "96b68c7e5f234eeeb8858e4eb4461194-rest.png": "75db88f10403ec2c86797559509feb6baf5147dbaef27c64019f78daf5d88eb2",
+    "35eca29b417c40a4bf32165a8f42ae84-rest.png": "642ab91f2a5ed06e89ef56bf7d9f049ce31ed61618d446e274457921b4283e19"
+  }
+}

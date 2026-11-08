@@ -161,7 +161,7 @@ def build_settings_menu(ui: "FrontEngineMainUI") -> None:
 
     screensaver_action = QAction(_t("settings_menu_screensaver", "Screensaver..."), menu)
     retranslator.bind(screensaver_action, "settings_menu_screensaver", "Screensaver...")
-    screensaver_action.triggered.connect(lambda: ScreensaverDialog(ui).exec())
+    screensaver_action.triggered.connect(lambda: _run_dialog(ScreensaverDialog(ui)))
     menu.addAction(screensaver_action)
     ui.screensaver_action = screensaver_action
 
@@ -169,7 +169,7 @@ def build_settings_menu(ui: "FrontEngineMainUI") -> None:
         _t("settings_menu_preset_schedule", "Scheduled preset..."), menu)
     retranslator.bind(preset_schedule_action, "settings_menu_preset_schedule",
                       "Scheduled preset...")
-    preset_schedule_action.triggered.connect(lambda: PresetScheduleDialog(ui).exec())
+    preset_schedule_action.triggered.connect(lambda: _run_dialog(PresetScheduleDialog(ui)))
     menu.addAction(preset_schedule_action)
     ui.preset_schedule_action = preset_schedule_action
 
@@ -250,6 +250,12 @@ def _dispose(dialog: QDialog) -> None:
     dialog.settings() after exec() returns.
     """
     dialog.deleteLater()
+
+
+def _run_dialog(dialog: QDialog) -> None:
+    """Run a self-saving settings dialog, then release it."""
+    dialog.exec()
+    _dispose(dialog)
 
 
 def _toggle_keep_awake(ui: "FrontEngineMainUI", enabled: bool) -> None:

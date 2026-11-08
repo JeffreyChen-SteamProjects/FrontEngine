@@ -1,5 +1,6 @@
 """Visual scene layers with local image/GIF/text preview and undoable transforms."""
 from __future__ import annotations
+from frontengine.ui.runtime_lifetime import owned_action
 
 import copy
 from pathlib import Path
@@ -123,8 +124,8 @@ class SceneLayerItem(QGraphicsObject):
 
 
 class SceneVisualEditor(SettingPage):
-    def __init__(self, manager, parent=None) -> None:
-        super().__init__("scene_visual_editor", "scene_visual_hint", compact=True)
+    def __init__(self, manager, parent=None, *, lifetime) -> None:
+        super().__init__("scene_visual_editor", "scene_visual_hint", compact=True, lifetime=lifetime)
         self.setParent(parent)
         self.manager = manager
         self.document = SceneEditorDocument(self)
@@ -154,7 +155,7 @@ class SceneVisualEditor(SettingPage):
         split.setStretchFactor(1, 1)
         self._build_actions()
         self._build_workspace(split)
-        self.three_d_page = SettingPage('scene3d_title', 'scene3d_hint', compact=True)
+        self.three_d_page = SettingPage('scene3d_title', 'scene3d_hint', compact=True, lifetime=self.lifetime)
         self.editor3d.build_inspector(self.three_d_page)
         self.three_d_page.finish_body()
         index = self.inspector_tabs.addTab(self.three_d_page, '3D')
@@ -178,9 +179,9 @@ class SceneVisualEditor(SettingPage):
         self.inspector_tabs = QTabWidget()
         self.inspector_tabs.setObjectName("sceneInspector")
         self.inspector_tabs.setMinimumWidth(320)
-        self.properties_page = SettingPage("scene_layer_properties", compact=True)
-        self.preview_page = SettingPage("scene_media_preview_title", compact=True)
-        self.animation_page = SettingPage("scene_animation_title", compact=True)
+        self.properties_page = SettingPage("scene_layer_properties", compact=True, lifetime=self.lifetime)
+        self.preview_page = SettingPage("scene_media_preview_title", compact=True, lifetime=self.lifetime)
+        self.animation_page = SettingPage("scene_animation_title", compact=True, lifetime=self.lifetime)
         for page, key in ((self.properties_page, "ui_properties"),
                           (self.preview_page, "ui_preview"),
                           (self.animation_page, "ui_animation")):
@@ -318,6 +319,7 @@ class SceneVisualEditor(SettingPage):
                 item.setPos(value['x'], value['y'])
                 item.setOpacity(value['opacity'] / 100 if item.entry.get('visible', True) else .15)
 
+    @owned_action
     def _edit_animation(self) -> None:
         keys = self._selected_keys()
         if len(keys) != 1 or self.document.entries[keys[0]].get('locked'):
@@ -341,6 +343,7 @@ class SceneVisualEditor(SettingPage):
         dialog, self.animation_dialog = self.animation_dialog, None
         dialog.deleteLater()
 
+    @owned_action
     def _playback_animation(self, operation: str) -> None:
         seen = set()
         from shiboken6 import isValid
@@ -361,6 +364,7 @@ class SceneVisualEditor(SettingPage):
             if item.key == key:
                 item.update()
 
+    @owned_action
     def _interact_media(self) -> None:
         for key in self._selected_keys():
             source = self.editor3d.runtime.sources.get(key) if self.document.scene.mode == '3d' and self.editor3d.runtime else None
@@ -369,6 +373,7 @@ class SceneVisualEditor(SettingPage):
             else:
                 self.media_preview.interact(key)
 
+    @owned_action
     def _audition_media(self) -> None:
         for key in self._selected_keys():
             source = self.editor3d.runtime.sources.get(key) if self.document.scene.mode == '3d' and self.editor3d.runtime else None
@@ -392,6 +397,7 @@ class SceneVisualEditor(SettingPage):
             except ValueError as error:
                 QMessageBox.warning(self, translate('scene_visual_editor'), str(error))
 
+    @owned_action
     def _change_mode(self):
         if self.syncing:
             return
@@ -477,6 +483,7 @@ class SceneVisualEditor(SettingPage):
             checkbox.setChecked(entry.get(key, default) if entry else default)
         self.editor3d.select(keys)
 
+    @owned_action
     def _apply_properties(self) -> None:
         if self.timeline.previewing:
             return
@@ -486,6 +493,7 @@ class SceneVisualEditor(SettingPage):
             changes.update(locked=self.locked.isChecked(), visible=self.visible.isChecked())
             self.document.update(keys[0], changes)
 
+    @owned_action
     def commit_canvas(self) -> None:
         if self.timeline.previewing:
             return
@@ -495,29 +503,32 @@ class SceneVisualEditor(SettingPage):
                 after[item.key].update(x=item.pos().x(), y=item.pos().y(), width=item.width, height=item.height)
         self.document.replace(after, "Move / resize layers")
 
+    @owned_action
     def _add_media(self, kind: str) -> None:
         file_filter = "GIF (*.gif *.webp)" if kind == "GIF" else "Image (*.png *.jpg *.jpeg *.webp *.bmp)"
-        path, _ = QFileDialog.getOpenFileName(self, translate("scene_add_" + kind.lower()), "", file_filter)
+        path, _ = self.lifetime.after_dialog(QFileDialog.getOpenFileName(self, translate("scene_add_" + kind.lower()), "", file_filter))
         if path:
             if not QImageReader(path).canRead():
-                QMessageBox.warning(self, translate("scene_visual_editor"), translate("scene_invalid_media"))
+                self.lifetime.after_dialog(QMessageBox.warning(self, translate("scene_visual_editor"), translate("scene_invalid_media")))
                 return
             self._select_layer(self.document.add({"type": kind, "file_path": path}))
 
+    @owned_action
     def _add_text(self) -> None:
         text, ok = QInputDialog.getMultiLineText(self, translate("scene_add_text"), translate("scene_text"))
         if ok and text:
             self._select_layer(self.document.add({"type": "TEXT", "text": text, "font_size": 32}))
 
+    @owned_action
     def _add_native_media(self, kind: str) -> None:
         if kind == 'WEB':
-            url, accepted = QInputDialog.getText(self, translate('scene_add_web'), translate('web_url'))
+            url, accepted = self.lifetime.after_dialog(QInputDialog.getText(self, translate('scene_add_web'), translate('web_url')))
             if accepted and url.strip():
                 self._select_layer(self.document.add({'type': 'WEB', 'url': url.strip()}))
             return
         filters = {'VIDEO': 'Video (*.mp4 *.webm *.avi *.mov *.mkv)',
                    'SOUND': 'Audio (*.wav *.mp3 *.ogg *.flac *.m4a)', 'PUPPET': 'Puppet (*.puppet)'}
-        path, _filter = QFileDialog.getOpenFileName(self, translate('scene_add_' + kind.lower()), '', filters[kind])
+        path, _filter = self.lifetime.after_dialog(QFileDialog.getOpenFileName(self, translate('scene_add_' + kind.lower()), '', filters[kind]))
         if not path:
             return
         try:
@@ -528,7 +539,7 @@ class SceneVisualEditor(SettingPage):
                 validate_puppet(path)
             self._select_layer(self.document.add({'type': kind, 'file_path': path}))
         except (OSError, ValueError) as error:
-            QMessageBox.warning(self, translate('scene_visual_editor'), str(error))
+            self.lifetime.after_dialog(QMessageBox.warning(self, translate('scene_visual_editor'), str(error)))
 
     def _select_layer(self, key: str) -> None:
         self.layers.clearSelection()
@@ -539,10 +550,12 @@ class SceneVisualEditor(SettingPage):
                 self.layers.scrollToItem(row)
                 break
 
+    @owned_action
     def _duplicate(self) -> None:
         for key in self._selected_keys():
             self.document.duplicate(key)
 
+    @owned_action
     def _remove(self) -> None:
         for key in self._selected_keys():
             if key not in self.document.entries:
@@ -550,11 +563,13 @@ class SceneVisualEditor(SettingPage):
             try:
                 self.document.remove(key)
             except ValueError as error:
-                QMessageBox.warning(self, translate('scene_visual_editor'), str(error))
+                self.lifetime.after_dialog(QMessageBox.warning(self, translate('scene_visual_editor'), str(error)))
 
+    @owned_action
     def _align(self, direction: str) -> None:
         self.document.align(self._selected_keys(), direction)
 
+    @owned_action
     def _fit(self) -> None:
         if self.document.scene.mode == '3d':
             self.editor3d.focus()

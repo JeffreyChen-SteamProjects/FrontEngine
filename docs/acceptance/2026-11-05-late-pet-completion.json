@@ -1,0 +1,18 @@
+{
+  "shutdown_done": true,
+  "calls_before_events": 0,
+  "spawn_calls_after_events": [
+    {
+      "shutdown_done": true
+    }
+  ],
+  "ready_to_play_after_shutdown": true,
+  "actual_callback": "PetSettingUI._builtin_character_ready",
+  "scope": "Actual MainUI close and queued Qt completion; worker and spawn replaced, no actual asset install or pet created.",
+  "process": {
+    "child_exit": 0
+  },
+  "revision": "da4f9651ec384bf52ce087a0e5557018f3575a81",
+  "reproduction_sha256": "e341602dfc2ddd61300d8b6f6467a39a6b132af5b200899422b0fdffb6162336",
+  "expected_after_fix": "Queued completion after successful shutdown neither spawns a pet nor mutates page state. Failed shutdown keeps the page usable."
+}

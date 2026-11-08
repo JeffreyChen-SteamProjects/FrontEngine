@@ -1,0 +1,306 @@
+{
+  "status": "native-and-cold-passed",
+  "result": {
+    "created_home": true,
+    "cancelled_automatic_work": true,
+    "entered_and_escaped_arranging": true,
+    "tab_routes": [
+      {
+        "target": "primaryAction",
+        "tabs": 5
+      },
+      {
+        "target": "qt_tabwidget_tabbar",
+        "tabs": 13
+      },
+      {
+        "target": "QListWidget",
+        "tabs": 2
+      },
+      {
+        "target": "WrappingPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "qt_tabwidget_tabbar",
+        "tabs": 14
+      },
+      {
+        "target": "WrappingPushButton",
+        "tabs": 4
+      },
+      {
+        "target": "qt_tabwidget_tabbar",
+        "tabs": 22
+      },
+      {
+        "target": "QListWidget",
+        "tabs": 5
+      },
+      {
+        "target": "WrappingPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "WrappingPushButton",
+        "tabs": 6
+      },
+      {
+        "target": "WrappingPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "QPushButton",
+        "tabs": 11
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 4
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 1
+      },
+      {
+        "target": "primaryAction",
+        "tabs": 27
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 4
+      }
+    ],
+    "selection": {
+      "after_home": {
+        "row": 0,
+        "selected": 0,
+        "count": 1,
+        "focus": "QListWidget"
+      },
+      "after_down": {
+        "row": 0,
+        "selected": 0
+      },
+      "after_space": {
+        "row": 0,
+        "selected": 1
+      }
+    },
+    "final_focus": "WrappingPushButton",
+    "keyboard_commands": [
+      {
+        "command": "sleep",
+        "queue": [
+          "sleep"
+        ]
+      },
+      {
+        "command": "stop",
+        "queue": []
+      }
+    ],
+    "wardrobe_applied": {
+      "character": {
+        "id": "inkside-mochi",
+        "version": "2"
+      },
+      "head": {
+        "id": "inkside-mochi-party-hat",
+        "version": "2"
+      },
+      "cancel_preserved_applied": true,
+      "reopen_exact": true
+    },
+    "theme": "dark",
+    "language": "English",
+    "requested_width": 900,
+    "actual_window_size": [
+      900,
+      740
+    ],
+    "runtime_closed": true,
+    "temporary_directory_removed": true
+  },
+  "observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "child_exit": 0
+  },
+  "cold": {
+    "passed": true,
+    "initial_snapshot_exact": true,
+    "profiles_exact": true,
+    "leases_reacquired": true,
+    "saved_exact": true,
+    "temporary_directory_removed": true
+  },
+  "progress_values": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    80,
+    81,
+    82,
+    83,
+    84,
+    85,
+    86,
+    87,
+    88
+  ],
+  "excluded_runs": {
+    "native-wardrobe-progress": "Full-profile comparison preceded pending home care save; not product failure",
+    "native-wardrobe-progress-diagnostic": "Confirmed only fullness70to64,energy70to67,mood60to58 after injected180000ms simulation; fixed harness by save_now before baseline"
+  },
+  "viewed_original_images": [
+    "native-wardrobe-progress/installation-progress.png",
+    "native-wardrobe-progress-verified/wardrobe-staged.png"
+  ],
+  "limits": [
+    "English dark theme,900x740 main window,current DPI; not all languages or screen readers",
+    "Widget-local QTest on private hidden desktop; not OS input",
+    "Self-review only; independent review and full regression pending"
+  ],
+  "sha256": {
+    "cold-result.json": "5bd41edb786e3fe553500e96167a938f64483ad3f1f564c603795a88e3110cbc",
+    "install-progress.json": "79b2126518622ab05e12746608b026d6bfe1ec86557c7c0f5d01d84b881d8086",
+    "observer.json": "2a689a216983485f51c03e4b2a63a0f1987f03f7adf42f973f92f921c1195c1f",
+    "profile-before.json": "d89cf8fb04824c667cb79188ba21b8b6198d3a2829a00c1d07ff39b81a6d6255",
+    "profile-current.json": "d89cf8fb04824c667cb79188ba21b8b6198d3a2829a00c1d07ff39b81a6d6255",
+    "profiles.json": "d8c04409cc525e4fc243fdca758f4c952e6479c9d4b1853e41077b69f1b75253",
+    "progress-values.json": "b0b89ae86c3a3cabd975a803a5af12790c5f05ba373a765948e9b71b74764a6d",
+    "result.json": "851f7273934547ac2db66788c4c3a359edb62a8d03429e9ff2c0ffcdfadce2b0",
+    "selection.json": "8c9b9b56727cede9d820b9d0c07e963ca7d30af8c25186d2b662dc7e679e59bb",
+    "shutdown-world.json": "298b1c84cff1b39edb28cf641d87169fb24703da15343dec98118628fb2b6da7"
+  },
+  "change": "Built-in wardrobe installation progress through generation and validated publication",
+  "tests": {
+    "red": {
+      "failed": 2,
+      "seconds": 7.56
+    },
+    "boundaries": {
+      "passed": 35,
+      "seconds": 4.09
+    },
+    "real_install": {
+      "passed": 7,
+      "seconds": 15.39
+    },
+    "documentation_translation_progress": {
+      "passed": 54,
+      "seconds": 3.22
+    },
+    "language_accessibility": {
+      "passed": 2,
+      "seconds": 1.95
+    }
+  },
+  "docs": {
+    "html_paragraphs_verified": [
+      "Eng",
+      "Zh",
+      "ZhCn",
+      "De",
+      "Fr",
+      "It",
+      "Ru"
+    ],
+    "sphinx_warnings_as_errors": true
+  },
+  "review": "Self-review only; independent review unavailable and remains required",
+  "parent_native_run": {
+    "status": "excluded",
+    "exit": 1,
+    "install_completed": true,
+    "reason": "Same full-profile baseline assertion after delayed care save; no successful outfit acceptance claim"
+  }
+}

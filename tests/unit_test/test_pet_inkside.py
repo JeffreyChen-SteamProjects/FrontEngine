@@ -147,7 +147,7 @@ def test_builtin_install_is_validated_and_idempotent(tmp_path):
     library = PetAssetLibrary(tmp_path / 'library')
     progress = []
     assert install_builtin(library, 'inkside-ink', progress=lambda done, total: progress.append(done)) == 1 + len(GARMENTS)
-    assert progress[-1] == 1 + len(GARMENTS)
+    assert progress == list(range(2 * (1 + len(GARMENTS)) + 1))
     assert install_builtin(library, 'inkside-ink') == 0
     catalog, errors = library.scan()
     assert errors == ()
@@ -156,25 +156,26 @@ def test_builtin_install_is_validated_and_idempotent(tmp_path):
         install_builtin(library, 'nobody')
 
 
-def _finish_jobs():
-    from PySide6.QtCore import QCoreApplication, QThreadPool
-    assert QThreadPool.globalInstance().waitForDone(120000)
+def _finish_jobs(lifetime):
+    from PySide6.QtCore import QCoreApplication
+    assert lifetime.pool().waitForDone(120000)
     QCoreApplication.processEvents()
 
 
-def test_wardrobe_installs_dresses_and_applies_a_builtin_character(tmp_path):
+def test_wardrobe_installs_dresses_and_applies_a_builtin_character(tmp_path, *, lifetime_factory):
     from frontengine.ui.dialog.pet_wardrobe import PetWardrobeDialog
     from frontengine.user_setting.pet_profiles import PetProfiles
 
+    lifetime_factory()
     profiles = PetProfiles({}, lambda: None)
     record = profiles.create('Mochi')
-    dialog = PetWardrobeDialog(profiles, record['id'], library=PetAssetLibrary(tmp_path / 'library'))
+    dialog = PetWardrobeDialog(profiles, record['id'], library=PetAssetLibrary(tmp_path / 'library'), lifetime=lifetime_factory())
     try:
         assert dialog.builtin.count() == len(TEMPLATES)
         dialog.builtin.setCurrentIndex(dialog.builtin.findData('inkside-mochi'))
         dialog._install_builtin()
         assert not dialog.builtin_button.isEnabled() and not dialog.install_button.isEnabled()
-        _finish_jobs()
+        _finish_jobs(dialog.lifetime)
         assert dialog._install_job is None and dialog.builtin_button.isEnabled()
         character = {'id': 'inkside-mochi', 'version': VERSION}
         dialog.character.setCurrentIndex(dialog.character.findData(character))
@@ -192,36 +193,38 @@ def test_wardrobe_installs_dresses_and_applies_a_builtin_character(tmp_path):
         dialog.close()
 
 
-def test_closing_the_wardrobe_cancels_a_builtin_install(tmp_path):
+def test_closing_the_wardrobe_cancels_a_builtin_install(tmp_path, *, lifetime_factory):
     from frontengine.ui.dialog.pet_wardrobe import PetWardrobeDialog
     from frontengine.user_setting.pet_profiles import PetProfiles
 
+    lifetime_factory()
     profiles = PetProfiles({}, lambda: None)
     record = profiles.create()
     library = PetAssetLibrary(tmp_path / 'library')
-    dialog = PetWardrobeDialog(profiles, record['id'], library=library)
+    dialog = PetWardrobeDialog(profiles, record['id'], library=library, lifetime=lifetime_factory())
     dialog._install_builtin()
     job = dialog._install_job
     dialog.reject()
     assert job.cancel.is_set()
-    _finish_jobs()
+    _finish_jobs(dialog.lifetime)
     assert library.scan()[0].assets('character') == ()
     assert not any(path.name.startswith('.install-') for path in (tmp_path / 'library').glob('*'))
 
 
-def test_builtin_part_and_garment_labels_follow_the_language(tmp_path):
+def test_builtin_part_and_garment_labels_follow_the_language(tmp_path, *, lifetime_factory):
     from frontengine.show.pet.inkside.labels import asset_label, label
     from frontengine.ui.dialog.pet_wardrobe import PetWardrobeDialog
     from frontengine.user_setting.pet_profiles import PetProfiles
     from frontengine.utils.multi_language.language_wrapper import language_wrapper
     from frontengine.utils.multi_language.retranslate import retranslator
 
+    lifetime_factory()
     library = PetAssetLibrary(tmp_path / 'library')
     install_builtin(library, 'inkside-moss')
     profiles = PetProfiles({}, lambda: None)
     record = profiles.create()
     original = language_wrapper.language
-    dialog = PetWardrobeDialog(profiles, record['id'], library=library)
+    dialog = PetWardrobeDialog(profiles, record['id'], library=library, lifetime=lifetime_factory())
     try:
         dialog.character.setCurrentIndex(dialog.character.findData({'id': 'inkside-moss', 'version': VERSION}))
         dialog._choose_character()

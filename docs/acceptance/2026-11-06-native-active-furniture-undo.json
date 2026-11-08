@@ -1,0 +1,73 @@
+{
+  "date": "2026-11-06",
+  "product_test_commit": "d825c06c",
+  "native": {
+    "passed": true,
+    "actual_store_button": true,
+    "undo_clicks": 2,
+    "redo_clicks": 1,
+    "actual_play_clicks": 2,
+    "interrupted_without_reward": true,
+    "layout_restored": true,
+    "furniture_totals_preserved": true,
+    "coins_unchanged": true,
+    "wish_grants": [
+      {
+        "kind": "wish_granted",
+        "resident": "cd53a59142a7496d92090f3a38904067",
+        "time": 56522800,
+        "wish": "play_time"
+      }
+    ],
+    "affection_before": 3,
+    "affection_after": 6,
+    "runtime_closed": true,
+    "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-stage-layout\\.audit\\profession-owned-fixed",
+    "saved_snapshot_sha256": "c471f2056e3bf47d41a8073e4a214f8eccec310f6c85a5f6088181f0c4b05172",
+    "scope": "Native private MainUI; actual Play/Put away/Undo/Redo buttons; explicit wish and needs plus injected ticks, fixture shop purchase if needed. Not mouse dragging, normal-speed or all furniture acceptance.",
+    "temporary_directory_removed": true
+  },
+  "cold_reopen": {
+    "passed": true,
+    "initial_snapshot_exact": true,
+    "profile_affection": 6,
+    "leases_reacquired": true,
+    "ticks": 155,
+    "no_repeated_wish": true,
+    "saved_exact": true,
+    "temporary_directory_removed": true
+  },
+  "observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "child_exit": 0,
+    "observation_only": true
+  },
+  "screenshots_reviewed": [
+    "stored-active-toy.png",
+    "replayed-wish.png"
+  ],
+  "evidence_sha256": {
+    "result.json": "934121de31b63c1a61d44116e919feb81fa7b196fbf03b005054a4f379e48e54",
+    "cold-result.json": "0722d497e4e578b3fc373cb93d9dbedd92f07c2c8c120f271787d971e925514e",
+    "observer.json": "108902181ee471ddb835401d5d799d056e70c9ac4aead7d271ce043e584e29a5",
+    "shutdown-world.json": "0905b423a3a6ca12e2a9bf56d0ee2b3865fe634238f91bbdddbaa25bdbca1b6e"
+  },
+  "limits": [
+    "Actual widget-local buttons on private native desktop; not OS mouse dragging or all furniture types.",
+    "Explicit wish/needs, optional fixture purchase and injected clock; not normal-speed acceptance."
+  ]
+}

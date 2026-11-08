@@ -1,0 +1,365 @@
+{
+  "product_test_commit": "825a6c41",
+  "runs": {
+    "native-wardrobe-save-retry": {
+      "result": {
+        "created_home": true,
+        "cancelled_automatic_work": true,
+        "entered_and_escaped_arranging": true,
+        "tab_routes": [
+          {
+            "target": "primaryAction",
+            "tabs": 5
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 13
+          },
+          {
+            "target": "QListWidget",
+            "tabs": 2
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 14
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 4
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 22
+          },
+          {
+            "target": "QListWidget",
+            "tabs": 5
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 6
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 11
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 4
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 1
+          },
+          {
+            "target": "primaryAction",
+            "tabs": 27
+          },
+          {
+            "target": "primaryAction",
+            "tabs": 0
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 4
+          }
+        ],
+        "selection": {
+          "after_home": {
+            "row": 0,
+            "selected": 0,
+            "count": 1,
+            "focus": "QListWidget"
+          },
+          "after_down": {
+            "row": 0,
+            "selected": 0
+          },
+          "after_space": {
+            "row": 0,
+            "selected": 1
+          }
+        },
+        "final_focus": "WrappingPushButton",
+        "keyboard_commands": [
+          {
+            "command": "sleep",
+            "queue": [
+              "sleep"
+            ]
+          },
+          {
+            "command": "stop",
+            "queue": []
+          }
+        ],
+        "wardrobe_applied": {
+          "character": {
+            "id": "inkside-mochi",
+            "version": "2"
+          },
+          "head": {
+            "id": "inkside-mochi-party-hat",
+            "version": "2"
+          },
+          "cancel_preserved_applied": true,
+          "reopen_exact": true
+        },
+        "theme": "dark",
+        "language": "English",
+        "requested_width": 900,
+        "actual_window_size": [
+          900,
+          740
+        ],
+        "runtime_closed": true,
+        "temporary_directory_removed": true
+      },
+      "observer": {
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "child_exit": 0
+      },
+      "cold": {
+        "passed": true,
+        "initial_snapshot_exact": true,
+        "profiles_exact": true,
+        "leases_reacquired": true,
+        "saved_exact": true,
+        "temporary_directory_removed": true
+      },
+      "retry": {
+        "injected_replacements": 1,
+        "profiles_unchanged": true,
+        "settings_bytes_unchanged": true,
+        "draft_preserved": true,
+        "preview_preserved": true,
+        "error_text": "Cannot save JSON file: Wardrobe acceptance injected write failure"
+      },
+      "sha256": {
+        "cold-result.json": "5bd41edb786e3fe553500e96167a938f64483ad3f1f564c603795a88e3110cbc",
+        "install-progress.json": "cff44858b5bf4deb194f9471a45bb51342c5a3846b7ecccbd503f7e4ea7e5a17",
+        "observer.json": "2a689a216983485f51c03e4b2a63a0f1987f03f7adf42f973f92f921c1195c1f",
+        "profile-before.json": "7871629c198a7e2f55772cf7d0172c2689d3e45b8068d7b62d40b115b2892ebf",
+        "profile-current.json": "7871629c198a7e2f55772cf7d0172c2689d3e45b8068d7b62d40b115b2892ebf",
+        "profiles.json": "cd1493cd4ca1be91e85fc74b82ffeb34ef6e31642788b636449268badeb35e06",
+        "progress-values.json": "b0b89ae86c3a3cabd975a803a5af12790c5f05ba373a765948e9b71b74764a6d",
+        "result.json": "61a369420a4420ec04ecc6a26117c614afd9214aa574be6475f9c984a6685373",
+        "save-retry.json": "28f2847fa3d77127452724e83dc46a621224827d9c6e6ebdf547a85703432e00",
+        "selection.json": "8c9b9b56727cede9d820b9d0c07e963ca7d30af8c25186d2b662dc7e679e59bb",
+        "shutdown-world.json": "c7a3f809d370c380bd10609720c8fd8f676fe806544312e835cb48cbc35489cf"
+      }
+    },
+    "native-wardrobe-save-retry-events": {
+      "result": {
+        "created_home": true,
+        "cancelled_automatic_work": true,
+        "entered_and_escaped_arranging": true,
+        "tab_routes": [
+          {
+            "target": "primaryAction",
+            "tabs": 5
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 13
+          },
+          {
+            "target": "QListWidget",
+            "tabs": 2
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 14
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 4
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 22
+          },
+          {
+            "target": "QListWidget",
+            "tabs": 5
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 6
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 11
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 4
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 1
+          },
+          {
+            "target": "primaryAction",
+            "tabs": 27
+          },
+          {
+            "target": "primaryAction",
+            "tabs": 0
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 4
+          }
+        ],
+        "selection": {
+          "after_home": {
+            "row": 0,
+            "selected": 0,
+            "count": 1,
+            "focus": "QListWidget"
+          },
+          "after_down": {
+            "row": 0,
+            "selected": 0
+          },
+          "after_space": {
+            "row": 0,
+            "selected": 1
+          }
+        },
+        "final_focus": "WrappingPushButton",
+        "keyboard_commands": [
+          {
+            "command": "sleep",
+            "queue": [
+              "sleep"
+            ]
+          },
+          {
+            "command": "stop",
+            "queue": []
+          }
+        ],
+        "wardrobe_applied": {
+          "character": {
+            "id": "inkside-mochi",
+            "version": "2"
+          },
+          "head": {
+            "id": "inkside-mochi-party-hat",
+            "version": "2"
+          },
+          "cancel_preserved_applied": true,
+          "reopen_exact": true
+        },
+        "theme": "dark",
+        "language": "English",
+        "requested_width": 900,
+        "actual_window_size": [
+          900,
+          740
+        ],
+        "runtime_closed": true,
+        "temporary_directory_removed": true
+      },
+      "observer": {
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "child_exit": 0
+      },
+      "cold": {
+        "passed": true,
+        "initial_snapshot_exact": true,
+        "profiles_exact": true,
+        "leases_reacquired": true,
+        "saved_exact": true,
+        "temporary_directory_removed": true
+      },
+      "retry": {
+        "injected_replacements": 1,
+        "profiles_unchanged": true,
+        "settings_bytes_unchanged": true,
+        "draft_preserved": true,
+        "preview_preserved": true,
+        "error_text": "Cannot save JSON file: Wardrobe acceptance injected write failure"
+      },
+      "sha256": {
+        "appearance-events.json": "7c34fc194e78d66f2cbe20a8d85430560546e54e6ea5f9b8d40f0ff5d58e5c70",
+        "cold-result.json": "5bd41edb786e3fe553500e96167a938f64483ad3f1f564c603795a88e3110cbc",
+        "install-progress.json": "a239a5b37fba52296e35d83672075a504ac90bf98ac9f1c6ec1613ab32917489",
+        "observer.json": "2a689a216983485f51c03e4b2a63a0f1987f03f7adf42f973f92f921c1195c1f",
+        "profile-before.json": "a0b6a645de03208dbd83415c363aeba15f133b5c6c6f137500f0d3418d206bf3",
+        "profile-current.json": "a0b6a645de03208dbd83415c363aeba15f133b5c6c6f137500f0d3418d206bf3",
+        "profiles.json": "cbca9f9972f3815b4391add54e4acd13332b94b6e64a2aff7fd9393f45832c8f",
+        "progress-values.json": "0ab553cc10684197a007538da9487ba6eaea2c629fd52a1d18bbb4c85479fc71",
+        "result.json": "61a369420a4420ec04ecc6a26117c614afd9214aa574be6475f9c984a6685373",
+        "save-retry.json": "28f2847fa3d77127452724e83dc46a621224827d9c6e6ebdf547a85703432e00",
+        "selection.json": "8c9b9b56727cede9d820b9d0c07e963ca7d30af8c25186d2b662dc7e679e59bb",
+        "shutdown-world.json": "3fbce228ffd488eb6066dd9ad48701ef2ca045a82e2da9b12ef3f06331bf076f"
+      },
+      "events": {
+        "failed_apply_events": 0,
+        "successful_retry_events": 1,
+        "live_renderer_preserved_on_failure": true,
+        "live_renderer_replaced_on_success": true
+      }
+    }
+  },
+  "original_image_inspected": "native-wardrobe-save-retry/save-failed.png",
+  "limits": [
+    "Injected one os.replace failure at the owned user_setting.json; not a real disk-full or permission test",
+    "English dark900x740 on private hidden desktop with widget-local keys; not OS input",
+    "The successful retry changes appearance once; no claim about every pet event",
+    "Full regression, independent review and integration remain pending"
+  ]
+}

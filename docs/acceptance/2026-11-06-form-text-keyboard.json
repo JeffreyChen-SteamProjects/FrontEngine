@@ -1,0 +1,82 @@
+{
+  "status": "partial",
+  "base": "ff0b1cde",
+  "problem": "The screen-text editor and signage playlist consumed Tab instead of moving focus to the next form control.",
+  "change": "Enable tabChangesFocus on both multiline form fields. Enter still inserts a newline.",
+  "reproduction": {
+    "log": ".audit/form-keyboard-red.log",
+    "result": "2 failed in 4.56s",
+    "observed": "Tab failed to focus Copy or the signage interval control."
+  },
+  "verification": {
+    "command": "D:/Codes/FrontEngine/.audit/host-runtime-612/Scripts/python.exe -m pytest tests/unit_test/test_form_text_keyboard.py tests/unit_test/test_ocr_tls_dialogs.py tests/unit_test/test_signage_and_canvas.py tests/unit_test/test_runtime_ownership.py -q",
+    "log": ".audit/form-keyboard-green.log",
+    "passed": 68,
+    "seconds": 11.19,
+    "exit_code": 0,
+    "coverage": "Tab and Backtab move focus without changing text. Enter creates a second line, and signage reads the two lines as two playlist entries."
+  },
+  "native": {
+    "directory": ".audit/native-form-keyboard",
+    "platform": "Windows private desktop, Traditional_Chinese, dark, 900x740 main window",
+    "entry": "Real Tools result presentation and settings-menu SignageDialog entry. Widget-local Tab/Backtab/Enter/Space operates real form controls.",
+    "cases": [
+      "Screen text to Copy and back, edit two lines, keyboard Close",
+      "Signage playlist to interval and back, edit two entries, keyboard Cancel"
+    ],
+    "settings_unchanged": true,
+    "copy_not_activated": true,
+    "runtime_closed": true,
+    "temporary_directory_removed": true,
+    "observer": {
+      "before": {
+        "foreground": 2558004,
+        "cursor": [
+          2633,
+          249
+        ]
+      },
+      "after": {
+        "foreground": 2558004,
+        "cursor": [
+          2783,
+          52
+        ]
+      },
+      "child_exit": 0
+    },
+    "foreground_unchanged": true,
+    "cursor_unchanged": false,
+    "stderr_empty": true,
+    "cold_home": {
+      "passed": true,
+      "initial_snapshot_exact": true,
+      "profiles_exact": true,
+      "leases_reacquired": true,
+      "saved_exact": true,
+      "temporary_directory_removed": true
+    }
+  },
+  "limitations": [
+    "Native evidence covers widget-local keyboard events, not OS input or a screen reader.",
+    "No clipboard write or cloud request was triggered by the new keyboard cases. The related pre-existing TLS test opens a loopback listener.",
+    "Full regression, independent review and integration remain pending.",
+    "Independent reviewers still report the existing usage-limit error; no retry was dispatched.",
+    "No EXE was built.",
+    "Cursor positions differed across observation snapshots. The cause is not established; this run does not prove cursor stability. The driver uses a private desktop and widget-local events."
+  ],
+  "documentation": {
+    "files": 17,
+    "checks": "54 passed in 8.59s",
+    "sphinx": "HTML build with -W passed",
+    "rendered_paragraphs_exact": [
+      "Eng",
+      "Zh",
+      "ZhCn",
+      "De",
+      "Fr",
+      "Ru",
+      "It"
+    ]
+  }
+}

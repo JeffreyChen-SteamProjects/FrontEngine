@@ -137,3 +137,19 @@ def test_removing_a_pack_keeps_its_pieces_dormant_until_it_returns(tmp_path):
     assert not any(piece.definition == "cozy__moon_lamp" for piece in without.furniture.values())
     back = snapshot.from_dict(snapshot.to_dict(without), with_pack)
     assert any(piece.definition == "cozy__moon_lamp" for piece in back.furniture.values())
+
+
+def test_paid_station_upgrade_survives_saving_without_its_pack(tmp_path):
+    desk = dict(SEAT, id="desk", category="workstation", profession="writing")
+    pack = load_pack(_pack(tmp_path, furniture=(desk,)))
+    catalog = catalog_with_packs([pack])
+    world = World(catalog, "a" * 32, "manage", seed=1)
+    world.add_zone("s", 0, 0, 30)
+    world.ledger.apply("gift", "test", 1000)
+    assert world.upgrade("cozy__desk", "upgrade") == "accepted"
+    coins = world.ledger.coins
+    without = snapshot.from_dict(snapshot.to_dict(world), builtin_catalog())
+    assert without.upgrade_cost("cozy__desk") is None
+    back = snapshot.from_dict(snapshot.to_dict(without), catalog)
+    assert back.station_level("cozy__desk") == 2
+    assert back.ledger.coins == coins

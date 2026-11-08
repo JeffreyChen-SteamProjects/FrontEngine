@@ -1,6 +1,7 @@
 """Static local library, organization and explicit reviewed reference repair."""
 from copy import deepcopy
 from pathlib import Path
+from shiboken6 import isValid
 
 from PySide6.QtCore import Qt, QSize, QTimer
 from PySide6.QtGui import QIcon, QPixmap
@@ -94,14 +95,18 @@ class AssetLibraryDialog(QDialog):
             self.current_query = query
 
     def _add(self) -> None:
+        if not isValid(self) or not self.isVisible():
+            return
         path, _ = QFileDialog.getOpenFileName(self, translate('assets_add'), '',
                                              'Assets (*.png *.jpg *.jpeg *.webp *.bmp *.gif *.puppet *.json *.fescene)')
-        if path:
+        if isValid(self) and self.isVisible() and path:
             self.service.request('add', path=path)
 
     def _add_pet(self) -> None:
+        if not isValid(self) or not self.isVisible():
+            return
         path = QFileDialog.getExistingDirectory(self, translate('assets_add_pet'))
-        if path:
+        if isValid(self) and self.isVisible() and path:
             self.service.request('add', path=path)
 
     def _save(self) -> None:
@@ -121,6 +126,8 @@ class AssetLibraryDialog(QDialog):
             self.service.request('references', identity=entry['id'], scene=deepcopy(self.document.entries))
 
     def _relink(self) -> None:
+        if not isValid(self) or not self.isVisible():
+            return
         entry = self._entry()
         if not entry:
             return
@@ -128,7 +135,7 @@ class AssetLibraryDialog(QDialog):
             replacement = QFileDialog.getExistingDirectory(self, translate('assets_relink'))
         else:
             replacement, _ = QFileDialog.getOpenFileName(self, translate('assets_relink'))
-        if replacement:
+        if isValid(self) and self.isVisible() and replacement:
             self.service.request('plan', identity=entry['id'], replacement=replacement, scene=deepcopy(self.document.entries))
 
     def _started(self, _action: str) -> None:
@@ -189,13 +196,13 @@ class AssetLibraryDialog(QDialog):
             self.reload()
 
     def _review(self, plan: dict) -> None:
-        if not self.isVisible():
+        if not isValid(self) or not self.isVisible():
             return
         text = self._show_references(plan['references'])
         reply = QMessageBox.question(self, translate('assets_relink'),
                                      translate('assets_confirm') + '\n' + plan['old'] + '\n→ ' + plan['new'] + '\n\n' + text,
                                      QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.No)
-        if reply == QMessageBox.StandardButton.Yes:
+        if isValid(self) and self.isVisible() and reply == QMessageBox.StandardButton.Yes:
             self.commit_plan(plan)
 
     def commit_plan(self, plan: dict) -> None:

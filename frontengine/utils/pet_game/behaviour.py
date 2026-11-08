@@ -10,7 +10,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from frontengine.utils.pet_game.catalog import CELL_PIXELS
-from frontengine.utils.pet_game.goals import unlocked
+from frontengine.utils.pet_game.goals import complete_wish, unlocked
 from frontengine.utils.pet_game.layout import AREA_FOR_ACTIVITY
 from frontengine.utils.pet_game.resident import PROFESSION_TRAITS, Activity, Resident
 from frontengine.utils.pet_game.schedule import block_at, game_hour
@@ -291,18 +291,20 @@ def _start_free(world: World, resident: Resident, reason: str = "free_time") -> 
 
 def _follow_command(world: World, resident: Resident, command: str) -> None:
     reason = refusal(world, resident, command)
+    if reason is None and command == "work":
+        reason = start_work(world, resident, "command")
+        if reason is None:
+            return
     if reason is not None:
-        resident.last_refusal = reason
         world.emit("refused", resident=resident.identifier, command=command, reason=reason)
         decide(world, resident)
+        resident.last_refusal = reason
     elif command == "sleep":
         start_rest(world, resident, "command")
     elif command == "eat":
         start_meal(world, resident, "command")
     elif command == "wash":
         start_wash(world, resident, "command")
-    elif command == "work":
-        start_work(world, resident, "command")
     else:
         found = _free_piece(world, resident, command)
         if found is None:
@@ -352,7 +354,9 @@ def decide(world: World, resident: Resident) -> None:
         if why is None:
             return None
         if why not in ("no_task",):
+            _start_free(world, resident)
             resident.last_refusal = why
+            return None
     _start_free(world, resident)
 
 # ----- residents together -------------------------------------------------------------
@@ -484,6 +488,13 @@ def shared_completed(world: World, resident: Resident, piece_id: str | None) -> 
     piece = world.furniture.get(piece_id) if piece_id else None
     if piece is None:
         return
+    if resident.activity is not None and resident.activity.kind == "eat":
+        for user in piece.users.values():
+            partner = world.residents.get(user)
+            if user != resident.identifier and partner is not None and partner.activity is not None \
+                    and partner.activity.kind == "eat":
+                complete_wish(world, resident, "friend_meal")
+                complete_wish(world, partner, "friend_meal")
     for user in piece.users.values():
         key = "shared:" + world.pair(resident.identifier, user)
         if user == resident.identifier or world.social_ready.get(key, 0) > world.time_ms:

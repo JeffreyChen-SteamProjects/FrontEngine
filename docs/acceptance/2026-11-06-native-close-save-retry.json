@@ -1,0 +1,198 @@
+{
+  "product": "70275848",
+  "cases": {
+    "home": {
+      "native": {
+        "passed": true,
+        "actual_window_close": true,
+        "failure_target": "home",
+        "failure_phase": {
+          "target": "pet-home.json",
+          "home_prepared": true,
+          "prepared_profiles": 0
+        },
+        "refused_close": true,
+        "lifetime_live_after_refusal": true,
+        "identity_leases_retained": true,
+        "desktop_strips_retained": true,
+        "owned_selection_action_still_works": true,
+        "failed_target_bytes_unchanged": true,
+        "work_progress_retained": 20020,
+        "reserved_materials_retained": true,
+        "retry_close_requested": true,
+        "runtime_closed": true,
+        "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+        "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-stage-layout\\.audit\\profession-owned-fixed",
+        "saved_snapshot_sha256": "c471f2056e3bf47d41a8073e4a214f8eccec310f6c85a5f6088181f0c4b05172",
+        "scope": "Private native MainUI close event during a toy order with visible home strips; one-shot home/profile/final-settings replace failure, restored writer and close retry. Injected work clock, no OS input, all overlays or crash guarantee.",
+        "temporary_directory_removed": true
+      },
+      "cold": {
+        "passed": true,
+        "initial_snapshot_exact": true,
+        "profiles_exact": true,
+        "leases_reacquired": true,
+        "saved_exact": true,
+        "temporary_directory_removed": true
+      },
+      "observer": {
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "child_exit": 0,
+        "observation_only": true
+      },
+      "sha256": {
+        "cold-result.json": "5bd41edb786e3fe553500e96167a938f64483ad3f1f564c603795a88e3110cbc",
+        "observer.json": "108902181ee471ddb835401d5d799d056e70c9ac4aead7d271ce043e584e29a5",
+        "profiles.json": "0467d731d9e34a30122ac86c41e524f970575a5ca7d9681d5d8d2a5e7de1cdf7",
+        "result.json": "4be10f6efb993e8d0eb33ee42f4519672d63cc141085b3194a5db963cbed60d8",
+        "shutdown-world.json": "28126f35952e52d076b3955329ceaf4d64c65e9e835e53492f184b50e4b158af",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "profiles": {
+      "native": {
+        "passed": true,
+        "actual_window_close": true,
+        "failure_target": "profiles",
+        "failure_phase": {
+          "target": "user_setting.json",
+          "home_prepared": true,
+          "prepared_profiles": 0
+        },
+        "refused_close": true,
+        "lifetime_live_after_refusal": true,
+        "identity_leases_retained": true,
+        "desktop_strips_retained": true,
+        "owned_selection_action_still_works": true,
+        "failed_target_bytes_unchanged": true,
+        "work_progress_retained": 20020,
+        "reserved_materials_retained": true,
+        "retry_close_requested": true,
+        "runtime_closed": true,
+        "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+        "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-stage-layout\\.audit\\profession-owned-fixed",
+        "saved_snapshot_sha256": "c471f2056e3bf47d41a8073e4a214f8eccec310f6c85a5f6088181f0c4b05172",
+        "scope": "Private native MainUI close event during a toy order with visible home strips; one-shot home/profile/final-settings replace failure, restored writer and close retry. Injected work clock, no OS input, all overlays or crash guarantee.",
+        "temporary_directory_removed": true
+      },
+      "cold": {
+        "passed": true,
+        "initial_snapshot_exact": true,
+        "profiles_exact": true,
+        "leases_reacquired": true,
+        "saved_exact": true,
+        "temporary_directory_removed": true
+      },
+      "observer": {
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "child_exit": 0,
+        "observation_only": true
+      },
+      "sha256": {
+        "cold-result.json": "5bd41edb786e3fe553500e96167a938f64483ad3f1f564c603795a88e3110cbc",
+        "observer.json": "108902181ee471ddb835401d5d799d056e70c9ac4aead7d271ce043e584e29a5",
+        "profiles.json": "2d5155f4c634b45800f85ea620193a26068051aebd22994481b37cbc6ecee96c",
+        "result.json": "b0a7a8fd56fbfc11877dc2e0cfca1d840bd11190196879b43020bc38a0a3bd40",
+        "shutdown-world.json": "7e9cdf4ba3881c72392ec752f6951545460f9c7fb12785703b8c45fc76639155",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "settings": {
+      "native": {
+        "passed": true,
+        "actual_window_close": true,
+        "failure_target": "settings",
+        "failure_phase": {
+          "target": "user_setting.json",
+          "home_prepared": true,
+          "prepared_profiles": 1
+        },
+        "refused_close": true,
+        "lifetime_live_after_refusal": true,
+        "identity_leases_retained": true,
+        "desktop_strips_retained": true,
+        "owned_selection_action_still_works": true,
+        "failed_target_bytes_unchanged": true,
+        "work_progress_retained": 20020,
+        "reserved_materials_retained": true,
+        "retry_close_requested": true,
+        "runtime_closed": true,
+        "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+        "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-stage-layout\\.audit\\profession-owned-fixed",
+        "saved_snapshot_sha256": "c471f2056e3bf47d41a8073e4a214f8eccec310f6c85a5f6088181f0c4b05172",
+        "scope": "Private native MainUI close event during a toy order with visible home strips; one-shot home/profile/final-settings replace failure, restored writer and close retry. Injected work clock, no OS input, all overlays or crash guarantee.",
+        "temporary_directory_removed": true
+      },
+      "cold": {
+        "passed": true,
+        "initial_snapshot_exact": true,
+        "profiles_exact": true,
+        "leases_reacquired": true,
+        "saved_exact": true,
+        "temporary_directory_removed": true
+      },
+      "observer": {
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "child_exit": 0,
+        "observation_only": true
+      },
+      "sha256": {
+        "cold-result.json": "5bd41edb786e3fe553500e96167a938f64483ad3f1f564c603795a88e3110cbc",
+        "observer.json": "108902181ee471ddb835401d5d799d056e70c9ac4aead7d271ce043e584e29a5",
+        "profiles.json": "0467d731d9e34a30122ac86c41e524f970575a5ca7d9681d5d8d2a5e7de1cdf7",
+        "result.json": "ec0c67d5ed45f178985dc06910585ea933da9acafa9edbc3ee79beb70939b5b4",
+        "shutdown-world.json": "28126f35952e52d076b3955329ceaf4d64c65e9e835e53492f184b50e4b158af",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "scope": "Private native MainUI QCloseEvent during toy work, with home strips visible; refusal/retry in home save, profile save and later main settings save.",
+  "harness_correction": "Initial phase probe incorrectly assumed HomeService._prepared_close was absent during its save. Source inspection shows it is allocated before saving. Two probe runs failed that harness assertion and are excluded; corrected phase check requires prepared profile tokens only for the later settings write. Product code unchanged.",
+  "limits": [
+    "Work uses an injected clock and fixture materials. These are one-shot write refusals, not crashes or all filesystem failures.",
+    "Actual close event is widget-local, not OS input. Other overlay types and external services are not covered.",
+    "Closing policy interrupts activities; task progress, reservations and identity are retained after refusal, not the activity object.",
+    "Foreground and cursor equality is sampled before and after."
+  ],
+  "frozen_sources_unchanged": 751,
+  "harness_sha256": "3ef32cd3ded7ba1b9991f5ef2a7e3b7ab2f88793489f002506933c8bc1e7da63"
+}

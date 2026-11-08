@@ -1,5 +1,5 @@
 """The Pet page's built-in character starts sprite pets dressed as that character."""
-from PySide6.QtCore import QCoreApplication, QEvent, QThreadPool
+from PySide6.QtCore import QCoreApplication, QEvent
 
 from frontengine.show.pet.inkside.library import VERSION
 from frontengine.show.pet.desktop_pet import DesktopPetWidget
@@ -8,17 +8,18 @@ from frontengine.user_setting.pet_profiles import PetProfiles
 REFERENCE = {'id': 'inkside-pip', 'version': VERSION}
 
 
-def _ready_page(tmp_path, monkeypatch):
+def _ready_page(tmp_path, monkeypatch, *, lifetime_factory):
     from frontengine.ui.page.pet.pet_setting_ui import PetSettingUI
     monkeypatch.chdir(tmp_path)
-    page = PetSettingUI()
+    lifetime_factory()
+    page = PetSettingUI(lifetime=lifetime_factory())
     page.profile_controls.profiles = PetProfiles({}, lambda: None)
     page.profile_controls.refresh()
     monkeypatch.setattr(page, '_target_geometry', lambda: None)
     page.builtin_character.setCurrentIndex(page.builtin_character.findData('inkside-pip'))
     page.use_builtin_character()
     assert not page.builtin_sprite_button.isEnabled()
-    assert QThreadPool.globalInstance().waitForDone(120000)
+    assert page.lifetime.pool().waitForDone(120000)
     QCoreApplication.processEvents()
     return page
 
@@ -30,8 +31,9 @@ def _close(page):
     QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
 
 
-def test_built_in_character_spawns_a_dressed_sprite_pet(tmp_path, monkeypatch):
-    page = _ready_page(tmp_path, monkeypatch)
+def test_built_in_character_spawns_a_dressed_sprite_pet(tmp_path, monkeypatch, *, lifetime_factory):
+    lifetime_factory()
+    page = _ready_page(tmp_path, monkeypatch, lifetime_factory=lifetime_factory)
     try:
         assert page.builtin_sprite_button.isEnabled() and page.ready_to_play
         assert page.pet_image_path == str(tmp_path / 'pet-previews' / 'inkside-pip.png')
@@ -49,9 +51,10 @@ def test_built_in_character_spawns_a_dressed_sprite_pet(tmp_path, monkeypatch):
         _close(page)
 
 
-def test_a_pet_already_wearing_the_character_keeps_its_outfit(tmp_path, monkeypatch):
+def test_a_pet_already_wearing_the_character_keeps_its_outfit(tmp_path, monkeypatch, *, lifetime_factory):
     from frontengine.show.pet.wardrobe import WardrobeDraft
-    page = _ready_page(tmp_path, monkeypatch)
+    lifetime_factory()
+    page = _ready_page(tmp_path, monkeypatch, lifetime_factory=lifetime_factory)
     try:
         page.start_play_pet()
         first = page.pet_list[-1]
@@ -70,9 +73,10 @@ def test_a_pet_already_wearing_the_character_keeps_its_outfit(tmp_path, monkeypa
         _close(page)
 
 
-def test_choosing_another_image_does_not_dress_the_pet(tmp_path, monkeypatch):
+def test_choosing_another_image_does_not_dress_the_pet(tmp_path, monkeypatch, *, lifetime_factory):
     from test_pet_profile_sessions import _sprite
-    page = _ready_page(tmp_path, monkeypatch)
+    lifetime_factory()
+    page = _ready_page(tmp_path, monkeypatch, lifetime_factory=lifetime_factory)
     try:
         page.pet_image_path = _sprite(tmp_path)
         page.start_play_pet()

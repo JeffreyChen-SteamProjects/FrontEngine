@@ -40,6 +40,10 @@ def choose_file(
         filter=file_filter
     )[0]
 
+    lifetime = getattr(trigger_ui, 'lifetime', None)
+    if lifetime is not None and not lifetime.accepting:
+        return None
+
     if not file_path_str:
         # 使用者按了取消。那是刻意的動作，不是選錯檔案，別跳警告框罵人。
         # The user pressed Cancel. That is a deliberate action, not a bad pick,

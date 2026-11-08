@@ -149,7 +149,7 @@ def test_argument_is_kept_for_same_command_and_cleared_for_another():
         dialog.close()
 
 
-def test_main_palette_shortcut_opens_and_page_command_routes(monkeypatch):
+def test_main_palette_shortcut_opens_and_page_command_routes(monkeypatch, lifetime_factory):
     from types import MethodType, SimpleNamespace
     from unittest.mock import Mock
     from PySide6.QtWidgets import QMainWindow, QWidget, QApplication
@@ -159,6 +159,7 @@ def test_main_palette_shortcut_opens_and_page_command_routes(monkeypatch):
 
     monkeypatch.setattr(module, "write_user_setting", lambda: None)
     window = QMainWindow()
+    window.lifetime = lifetime_factory()
     window.menu_bar = window.menuBar()
     window.action_registry = ActionRegistry()
     window.sidebar = NavigationSidebar(window)
@@ -201,3 +202,59 @@ def test_every_page_command_still_opens_its_page_once_after_the_redesign(make_ma
         assert window.page_stack.currentWidget() is first
     assert [window.page_stack.widget(index) for index in range(window.page_stack.count())] == pages
     assert len({id(page) for page in pages}) == len(pages)
+
+
+@pytest.mark.parametrize("previous_query", ["", "Control"])
+def test_exact_page_name_enter_opens_matching_page(previous_query):
+    calls = []
+    registry = ActionRegistry()
+    registry.register(Action("page.tab_control_center_text", "test_control_name", "Control Center",
+                             lambda value: calls.append("control")))
+    registry.register(Action("page.tab_text_text", "test_text_name", "Text",
+                             lambda value: calls.append("text")))
+    history = CommandHistory({}, lambda: None)
+    history.toggle_favorite("page.tab_control_center_text", set(registry.actions))
+    history.record("page.tab_control_center_text", set(registry.actions))
+    dialog = CommandPaletteDialog(registry, history)
+    try:
+        dialog.show()
+        if previous_query:
+            dialog.search_input.setText(previous_query)
+        dialog.search_input.setText("Text")
+        QTest.keyClick(dialog.search_input, Qt.Key.Key_Return)
+        assert calls == ["text"]
+    finally:
+        dialog.close()
+
+
+@pytest.mark.parametrize("name", ["Example clock", "tab_text_text"])
+def test_registered_plugin_page_is_searchable_without_recreating_it(monkeypatch, make_main_window, name):
+    from frontengine.ui import main_ui
+    from examples.plugins.clock.plugin import ClockPage
+
+    monkeypatch.setattr(main_ui, "FrontEngine_EXTEND_TAB", {name: ClockPage})
+    monkeypatch.setattr(main_ui, "load_plugins", lambda *_args, **_kwargs: [])
+    window = make_main_window()
+    page = window.plugin_pages[name]
+    page.caption.setText("Keep my caption")
+    for _ in range(2):
+        window.sidebar.select_page(0)
+        window.command_palette_action.trigger()
+        palette = window.command_palette
+        palette.search_input.setText(name)
+        assert palette.selected_id() == "page.plugin:" + name
+        QTest.keyClick(palette.search_input, Qt.Key.Key_Return)
+        assert window.page_stack.currentWidget() is page
+        assert page.caption.text() == "Keep my caption"
+    recent = window.command_history.values("recent", set(window.action_registry.actions))
+    assert recent[0] == "page.plugin:" + name
+    assert window.sidebar.select_page_id("plugin:" + name)
+    assert window.page_stack.currentWidget() is page
+    window.features_menu.aboutToShow.emit()
+    action = next(action for action, entry in window.features_menu.entries.items()
+                  if entry.kind == "page" and entry.target == "plugin:" + name)
+    window.sidebar.select_page(0)
+    action.trigger()
+    assert window.page_stack.currentWidget() is page
+    assert window.action_registry.execute("page.tab_text_text")
+    assert window.page_stack.currentWidget() is window.text_setting_ui

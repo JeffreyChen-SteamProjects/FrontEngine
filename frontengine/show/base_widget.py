@@ -57,6 +57,7 @@ class BaseWidget(QWidget):
         self._drag_origin = None
         self._geometry_restored = False
         self._compositor = None
+        self._compositor_pending = False
         self._render_revision = 0
         self._raster_cache = None
         self._raster_signature = None
@@ -132,6 +133,11 @@ class BaseWidget(QWidget):
 
     def remember_geometry(self) -> None:
         """記住目前位置與大小，之後同類覆蓋層會開在同一處。"""
+        # Only a retiring owner blocks the write; overlays outside any lifetime, such as
+        # plugin overlays, keep remembering where they were left.
+        lifetime = getattr(self, '_frontengine_lifetime', None)
+        if lifetime is not None and not lifetime.accepting:
+            return
         if not self.overlay_remembers_geometry:
             return
         geometry = self.geometry()
@@ -173,7 +179,7 @@ class BaseWidget(QWidget):
 
     def paintEvent(self, event) -> None:
         if self._compositor is not None:
-            self._update_compositor()
+            self._queue_compositor()
             return
         front_engine_logger.debug(f"{self.__class__.__name__} paintEvent | event: {event}")
         painter = QPainter(self)
@@ -237,13 +243,17 @@ class BaseWidget(QWidget):
     def update(self, *args) -> None:
         # QWidget.update is not virtual; Python content setters all call this hook.
         self._render_revision = getattr(self, '_render_revision', 0) + 1
-        if getattr(self, '_compositor', None) is not None and not getattr(self, '_compositor_pending', False):
+        if getattr(self, '_compositor', None) is not None:
             # Hand new content to the GPU compositor outside the parent's paint pass: layers
             # submitted from inside paintEvent were not presented on screen, so animated
             # content stayed frozen while the window moved.
+            self._queue_compositor()
+        super().update(*args)
+
+    def _queue_compositor(self) -> None:
+        if not self._compositor_pending:
             self._compositor_pending = True
             QTimer.singleShot(0, self, self._flush_compositor)
-        super().update(*args)
 
     def _flush_compositor(self) -> None:
         self._compositor_pending = False

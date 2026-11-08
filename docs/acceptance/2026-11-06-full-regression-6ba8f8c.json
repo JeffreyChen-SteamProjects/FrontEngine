@@ -1,0 +1,55 @@
+{
+  "exit": 0,
+  "source_unchanged": true,
+  "source_count": 748,
+  "interpreter": "D:\\Codes\\FrontEngine\\.audit\\test-runtime-3145\\Scripts\\python.exe",
+  "product_test_commit": "6ba8f8c",
+  "total": 3162,
+  "passed": 3159,
+  "failed": 0,
+  "skipped": [
+    {
+      "module": "tests.unit_test.test_default_storage_binding",
+      "name": "test_forked_empty_default_registry_rejects_inherited_locked_mutex",
+      "reason": "Requires POSIX fork"
+    },
+    {
+      "module": "tests.unit_test.test_remote_tls",
+      "name": "test_private_key_and_directory_are_owner_only",
+      "reason": "POSIX permission semantics"
+    },
+    {
+      "module": "tests.unit_test.test_storage_session",
+      "name": "test_forked_child_cannot_use_or_release_parent_owner",
+      "reason": "Requires POSIX fork"
+    }
+  ],
+  "junit_suite_seconds": "2743.193",
+  "focus_cases": [
+    "test_item_view_focus_is_visible_without_selection_or_resizing[QListView-light]",
+    "test_item_view_focus_is_visible_without_selection_or_resizing[QListView-dark]",
+    "test_item_view_focus_is_visible_without_selection_or_resizing[QListWidget-light]",
+    "test_item_view_focus_is_visible_without_selection_or_resizing[QListWidget-dark]",
+    "test_item_view_focus_is_visible_without_selection_or_resizing[QTreeView-light]",
+    "test_item_view_focus_is_visible_without_selection_or_resizing[QTreeView-dark]",
+    "test_item_view_focus_is_visible_without_selection_or_resizing[QTreeWidget-light]",
+    "test_item_view_focus_is_visible_without_selection_or_resizing[QTreeWidget-dark]",
+    "test_item_view_focus_is_visible_without_selection_or_resizing[QTableView-light]",
+    "test_item_view_focus_is_visible_without_selection_or_resizing[QTableView-dark]",
+    "test_item_view_focus_is_visible_without_selection_or_resizing[QTableWidget-light]",
+    "test_item_view_focus_is_visible_without_selection_or_resizing[QTableWidget-dark]"
+  ],
+  "evidence_sha256": {
+    "pytest.log": "9aad722a7df117c90a73bf2a7e2433b11e8aa059097e11abdb142f16fb1043e1",
+    "junit.xml": "051b8a5c3b7b821f52b52c6a1f395a9753e3f066e1596645d2e5ae6efbb02a3b",
+    "source-manifest.json": "1c4df3b5219d632119b6eaf1752eb6309f8256ce916b99b72c5031f9919ace99",
+    "result.json": "dfe34e45a451f3e73a3aa5b015cb06fd7087645ac1d0a904fc5df48a509ef4a1"
+  },
+  "limits": [
+    "Windows offscreen Qt tests; native input, hardware and independent review remain open.",
+    "This revision predates accessible-name3cd6d73 and command-search607cc6a fixes.",
+    "POSIX-only tests skipped."
+  ],
+  "diagnostic": "180second faulthandler stack in layered_renderer._read_image during test_pet_inkside; same process continued without restart.",
+  "pytest_reported_seconds": 2746.25
+}

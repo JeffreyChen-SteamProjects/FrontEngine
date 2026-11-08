@@ -9,7 +9,7 @@ from __future__ import annotations
 import zlib
 from time import monotonic
 
-from PySide6.QtCore import QPointF, QRectF, Qt, Signal
+from PySide6.QtCore import QEvent, QPointF, QRectF, Qt, Signal
 from PySide6.QtGui import QColor, QFont, QMouseEvent, QPainter, QPaintEvent, QPen
 from PySide6.QtWidgets import QSizePolicy, QWidget
 
@@ -53,8 +53,9 @@ class HomeView(QWidget):
     zoomable = False              # Ctrl+wheel zooms only where the page allows it
     scroll_x = 0.0                # how far the content is shifted left; only a strip larger than its screen scrolls
     zoom_changed = Signal(float)
-    drag_enabled = False          # while arranging, pieces can be dragged to a new cell
-    area_tool: str | None = None  # an area tag (or "clear") while painting floor areas
+    _drag_enabled = False
+    _area_tool: str | None = None
+    edit_cancelled = Signal()
     area_painted = Signal(int, int)
     piece_hovered = Signal(str, int)
     piece_dropped = Signal(str, int)
@@ -69,6 +70,7 @@ class HomeView(QWidget):
         self.selected: str | None = None
         self.preview: tuple[str, int, bool, str | None] | None = None
         self._painting: tuple[int, int] | None = None
+        self._piece_drag: tuple[str, float] | None = None
         self.badges: dict[str, float] = {}       # piece -> until when its "finished" tick shows
         self.badge_clock = monotonic
         self.setFixedHeight(170)
@@ -78,9 +80,43 @@ class HomeView(QWidget):
 
     def set_world(self, world: World | None, zone: str | None) -> None:
         """A wide zone keeps readable cells and scrolls instead of shrinking."""
+        if world is not self.world or zone != self.zone:
+            self.cancel_edit_gesture()
         self.world, self.zone = world, zone
         self._fit_width()
         self.update()
+
+    @property
+    def drag_enabled(self) -> bool:
+        return self._drag_enabled
+
+    @drag_enabled.setter
+    def drag_enabled(self, enabled: bool) -> None:
+        if enabled != self._drag_enabled:
+            self.cancel_edit_gesture()
+            self._drag_enabled = enabled
+
+    @property
+    def area_tool(self) -> str | None:
+        return self._area_tool
+
+    @area_tool.setter
+    def area_tool(self, tool: str | None) -> None:
+        if tool != self._area_tool:
+            self.cancel_edit_gesture()
+            self._area_tool = tool
+
+    def cancel_edit_gesture(self) -> None:
+        active = self._piece_drag is not None or self._painting is not None
+        self._piece_drag = self._painting = None
+        if active:
+            self.set_preview(None)
+            self.edit_cancelled.emit()
+
+    def event(self, event: QEvent) -> bool:
+        if event.type() in (QEvent.Type.Hide, QEvent.Type.UngrabMouse):
+            self.cancel_edit_gesture()
+        return super().event(event)
 
     def _fit_width(self) -> None:
         cells = self.world.zones[self.zone].width_cells if self.world is not None and self.zone in self.world.zones else 0
@@ -269,9 +305,8 @@ class HomeView(QWidget):
         for event in events:
             if event.get("kind") != "settled":
                 continue
-            resident = world.residents.get(event.get("resident"))
-            station = resident.activity.furniture if resident is not None and resident.activity else None
-            if station is not None:
+            station = event.get("station")
+            if station in world.furniture:
                 self.badges[station] = self.badge_clock() + DONE_SECONDS
         self.update()
 
@@ -376,16 +411,17 @@ class HomeView(QWidget):
         painter.drawEllipse(box)
 
     def _paint_resident(self, painter: QPainter, resident) -> None:
-        center = self.resident_center(resident)
         self._paint_body(painter, resident)
         kind = resident.activity.kind if resident.activity is not None else "idle"
         caption = resident.name + (" " + GLYPHS.get(kind, "") if GLYPHS.get(kind) else "")
         box = self.caption_rect(resident)
+        caption = painter.fontMetrics().elidedText(caption, Qt.TextElideMode.ElideRight,
+                                                   max(0, int(box.width()) - 10))
         if self.caption_backdrop:
             painter.setPen(Qt.PenStyle.NoPen)
             painter.setBrush(QColor(0, 0, 0, 150))
             plate = painter.fontMetrics().horizontalAdvance(caption) + 10
-            painter.drawRoundedRect(QRectF(center.x() - plate / 2, box.top(), plate, box.height()), 5, 5)
+            painter.drawRoundedRect(QRectF(box.center().x() - plate / 2, box.top(), plate, box.height()), 5, 5)
             painter.setPen(QColor("white"))
         else:
             painter.setPen(self.ink())
@@ -402,12 +438,17 @@ class HomeView(QWidget):
 
     def caption_rect(self, resident) -> QRectF:
         box = self.resident_box(resident)
-        return QRectF(box.center().x() - 70, box.top() - 20, 140, 18)
+        caption = QRectF(box.center().x() - 70, box.top() - 20, 140, 18)
+        if box.right() < 0 or box.left() > self.width():
+            return caption
+        caption.setWidth(min(caption.width(), self.width()))
+        caption.moveLeft(max(0.0, min(caption.left(), self.width() - caption.width())))
+        return caption
 
     # ----- input -----------------------------------------------------------------------
 
     def _drag_cell(self, event: QMouseEvent) -> int:
-        _identifier, grab = self._dragging
+        _identifier, grab = self._piece_drag
         return max(0, int(round(self.x_cell(event.position().x() - grab))))
 
     def _floor_cell(self, x: float) -> int:
@@ -419,21 +460,24 @@ class HomeView(QWidget):
             self._painting = (self._painting[0], self._floor_cell(event.position().x()))
             self.update()
             return
-        if getattr(self, "_dragging", None) is not None:
-            self.piece_hovered.emit(self._dragging[0], self._drag_cell(event))
+        if self._piece_drag is not None:
+            self.piece_hovered.emit(self._piece_drag[0], self._drag_cell(event))
             return
         super().mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event: QMouseEvent) -> None:
+        if event.button() != Qt.MouseButton.LeftButton:
+            super().mouseReleaseEvent(event)
+            return
         if self._painting is not None:
             first, last = sorted(self._painting)
             self._painting = None
             self.update()
             self.area_painted.emit(first, last)
             return
-        if getattr(self, "_dragging", None) is not None:
-            identifier, cell = self._dragging[0], self._drag_cell(event)
-            self._dragging = None
+        if self._piece_drag is not None:
+            identifier, cell = self._piece_drag[0], self._drag_cell(event)
+            self._piece_drag = None
             self.piece_dropped.emit(identifier, cell)
             return
         super().mouseReleaseEvent(event)
@@ -443,6 +487,7 @@ class HomeView(QWidget):
             super().mousePressEvent(event)
             return
         point = event.position()
+        self.cancel_edit_gesture()
         if self.area_tool is not None:
             cell = self._floor_cell(point.x())
             self._painting = (cell, cell)
@@ -451,7 +496,7 @@ class HomeView(QWidget):
         if self.drag_enabled:
             for piece, definition in self.world.in_zone(self.zone):
                 if self.piece_rect(piece, definition).contains(point):
-                    self._dragging = (piece.identifier, point.x() - self.piece_rect(piece, definition).left())
+                    self._piece_drag = (piece.identifier, point.x() - self.piece_rect(piece, definition).left())
                     self.furniture_selected.emit(piece.identifier)
                     return
         for resident in sorted(self.world.residents.values(), key=lambda item: item.identifier):

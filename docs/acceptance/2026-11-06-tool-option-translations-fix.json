@@ -1,0 +1,400 @@
+{
+  "baseline": "70275848",
+  "change": "Bind five existing option groups to existing Retranslator.setItemText updates; preserve item data/order and selected values, without index-change signals. No new interface or translation keys.",
+  "red": "5 failed in 6.43s; actual labels remained English when Traditional Chinese was expected.",
+  "green": "88 passed in 5.39s including five new option cases, control-center batches, tools and desktop widgets.",
+  "docs_checks": "54 passed in 3.42s; 31 user documents synchronized; all 21 relevant translated HTML pages parsed.",
+  "collected": 3268,
+  "native": {
+    "passed": true,
+    "pages": 3,
+    "languages": 7,
+    "cases": 21,
+    "routes": [
+      {
+        "language": "English",
+        "page": "tab_widgets_text",
+        "label": "Widgets",
+        "requested_width": 900,
+        "actual_size": [
+          900,
+          740
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "English-900-tab_widgets_text.png"
+      },
+      {
+        "language": "English",
+        "page": "tab_tools_text",
+        "label": "Tools",
+        "requested_width": 900,
+        "actual_size": [
+          900,
+          740
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "English-900-tab_tools_text.png"
+      },
+      {
+        "language": "English",
+        "page": "tab_control_center_text",
+        "label": "Control Center",
+        "requested_width": 900,
+        "actual_size": [
+          900,
+          740
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "English-900-tab_control_center_text.png"
+      },
+      {
+        "language": "Traditional_Chinese",
+        "page": "tab_widgets_text",
+        "label": "\u5c0f\u5de5\u5177",
+        "requested_width": 900,
+        "actual_size": [
+          900,
+          740
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "Traditional_Chinese-900-tab_widgets_text.png"
+      },
+      {
+        "language": "Traditional_Chinese",
+        "page": "tab_tools_text",
+        "label": "\u5de5\u5177",
+        "requested_width": 900,
+        "actual_size": [
+          900,
+          740
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "Traditional_Chinese-900-tab_tools_text.png"
+      },
+      {
+        "language": "Traditional_Chinese",
+        "page": "tab_control_center_text",
+        "label": "\u63a7\u5236\u4e2d\u5fc3",
+        "requested_width": 900,
+        "actual_size": [
+          900,
+          740
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "Traditional_Chinese-900-tab_control_center_text.png"
+      },
+      {
+        "language": "Simplified_Chinese",
+        "page": "tab_widgets_text",
+        "label": "\u5c0f\u5de5\u5177",
+        "requested_width": 900,
+        "actual_size": [
+          900,
+          740
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "Simplified_Chinese-900-tab_widgets_text.png"
+      },
+      {
+        "language": "Simplified_Chinese",
+        "page": "tab_tools_text",
+        "label": "\u5de5\u5177",
+        "requested_width": 900,
+        "actual_size": [
+          900,
+          740
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "Simplified_Chinese-900-tab_tools_text.png"
+      },
+      {
+        "language": "Simplified_Chinese",
+        "page": "tab_control_center_text",
+        "label": "\u63a7\u5236\u4e2d\u5fc3",
+        "requested_width": 900,
+        "actual_size": [
+          900,
+          740
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "Simplified_Chinese-900-tab_control_center_text.png"
+      },
+      {
+        "language": "Deutsch",
+        "page": "tab_widgets_text",
+        "label": "Widgets",
+        "requested_width": 900,
+        "actual_size": [
+          900,
+          740
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "Deutsch-900-tab_widgets_text.png"
+      },
+      {
+        "language": "Deutsch",
+        "page": "tab_tools_text",
+        "label": "Werkzeuge",
+        "requested_width": 900,
+        "actual_size": [
+          900,
+          740
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "Deutsch-900-tab_tools_text.png"
+      },
+      {
+        "language": "Deutsch",
+        "page": "tab_control_center_text",
+        "label": "Kontrollzentrum",
+        "requested_width": 900,
+        "actual_size": [
+          900,
+          740
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "Deutsch-900-tab_control_center_text.png"
+      },
+      {
+        "language": "Russian",
+        "page": "tab_widgets_text",
+        "label": "\u0412\u0438\u0434\u0436\u0435\u0442\u044b",
+        "requested_width": 900,
+        "actual_size": [
+          900,
+          740
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "Russian-900-tab_widgets_text.png"
+      },
+      {
+        "language": "Russian",
+        "page": "tab_tools_text",
+        "label": "\u0418\u043d\u0441\u0442\u0440\u0443\u043c\u0435\u043d\u0442\u044b",
+        "requested_width": 900,
+        "actual_size": [
+          900,
+          740
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "Russian-900-tab_tools_text.png"
+      },
+      {
+        "language": "Russian",
+        "page": "tab_control_center_text",
+        "label": "\u0426\u0435\u043d\u0442\u0440 \u0443\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u044f",
+        "requested_width": 900,
+        "actual_size": [
+          900,
+          740
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "Russian-900-tab_control_center_text.png"
+      },
+      {
+        "language": "France",
+        "page": "tab_widgets_text",
+        "label": "Widgets",
+        "requested_width": 900,
+        "actual_size": [
+          900,
+          740
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "France-900-tab_widgets_text.png"
+      },
+      {
+        "language": "France",
+        "page": "tab_tools_text",
+        "label": "Outils",
+        "requested_width": 900,
+        "actual_size": [
+          900,
+          740
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "France-900-tab_tools_text.png"
+      },
+      {
+        "language": "France",
+        "page": "tab_control_center_text",
+        "label": "Centre de contr\u00f4le",
+        "requested_width": 900,
+        "actual_size": [
+          900,
+          740
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "France-900-tab_control_center_text.png"
+      },
+      {
+        "language": "Italy",
+        "page": "tab_widgets_text",
+        "label": "Widget",
+        "requested_width": 900,
+        "actual_size": [
+          900,
+          740
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "Italy-900-tab_widgets_text.png"
+      },
+      {
+        "language": "Italy",
+        "page": "tab_tools_text",
+        "label": "Strumenti",
+        "requested_width": 900,
+        "actual_size": [
+          900,
+          740
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "Italy-900-tab_tools_text.png"
+      },
+      {
+        "language": "Italy",
+        "page": "tab_control_center_text",
+        "label": "Centro di controllo",
+        "requested_width": 900,
+        "actual_size": [
+          900,
+          740
+        ],
+        "screen_dpr": 1.25,
+        "sidebar_and_search_passed": true,
+        "image": "Italy-900-tab_control_center_text.png"
+      }
+    ],
+    "combo_mismatches": [],
+    "selected_values": {
+      "spectrum_style_combobox": "ring",
+      "measure_mode_combobox": "angle",
+      "screen_text_combobox": "ask",
+      "camera_shape_combobox": "rectangle",
+      "quality_combobox": "saver"
+    },
+    "index_changes": {
+      "spectrum_style_combobox": [],
+      "measure_mode_combobox": [],
+      "screen_text_combobox": [],
+      "camera_shape_combobox": [],
+      "quality_combobox": []
+    },
+    "callback_errors": [],
+    "home_world_unchanged": true,
+    "home_service_and_leases_reused": true,
+    "command_palette_reused": true,
+    "runtime_closed": true,
+    "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-stage-layout\\.audit\\profession-owned-fixed",
+    "saved_snapshot_sha256": "c471f2056e3bf47d41a8073e4a214f8eccec310f6c85a5f6088181f0c4b05172",
+    "scope": "Private native MainUI, seven language menu actions, five option groups on three pages at requested width 900. Checks translated item labels, selected item data, stable item order and no index-change signals; host services substituted. No OS input or all-tool localization claim.",
+    "temporary_directory_removed": true
+  },
+  "cold_reopen": {
+    "passed": true,
+    "initial_snapshot_exact": true,
+    "profiles_exact": true,
+    "leases_reacquired": true,
+    "saved_exact": true,
+    "temporary_directory_removed": true
+  },
+  "observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "child_exit": 0,
+    "observation_only": true
+  },
+  "rendered_html_sha256": {
+    "Eng/tools": "c0df70eb1852630cfa2c4a949df3a858b0f747cec708f6b24f9b8123b8fa3ac3",
+    "Eng/widgets": "c6e6e103a15c8ae5a4e760500bd0278de2bf0692ff377445f700259257827cdb",
+    "Eng/control_center": "45025607e6dd552342db1bb19005f6dbcf12b1d9adcb12f1ac1c210434e4223d",
+    "Zh/tools": "58a31c44e6b252613dd54fb5fbe7ec7cabfea5b5ca9c1f58cb812f7325e1f635",
+    "Zh/widgets": "1fb2123dc98406a728c2a5e3b26b46329f51af0c85324657eec40110ebff6cf6",
+    "Zh/control_center": "ba8d7be6a596941f175f6dd462ef514d1947a01594bb672351da1ce59eacad83",
+    "ZhCn/tools": "55788e2958bb337e75eaa767a111278127d4595e4aad3ebe076fdb26072caea7",
+    "ZhCn/widgets": "d95a546b8e23b3fe66d7652d32684435a05ee89148526fcea9915bc78576d163",
+    "ZhCn/control_center": "48e462599b0f3de8cedd36e27f90458bdf90851bce3d1173a7112768f337bfef",
+    "De/tools": "c9d2093533231bf4823fc5f6263cfd94cacc17ff3e4689d885626e4e56f2e4ec",
+    "De/widgets": "3117416669d1b0b442b96cbbf93c7c07f9afa6100a4e3ccc6b58cc6152b64051",
+    "De/control_center": "2077400cc0f076e8b27331401702627b288484b84e36b7aaf61a8942b0463144",
+    "Fr/tools": "78ba66e1132f7c0aa75671bc3bde98b216e98912c2700fadf6876d8627aacd7b",
+    "Fr/widgets": "53d9fa5d2e5eb40f147adea048e397d96f4a9af436738c1ff2aafb02c00f601a",
+    "Fr/control_center": "1854a698b6293d0bf23a0096b2bf0fb37c631ed392c0c4649dc459e7065c7c0a",
+    "Ru/tools": "4f35a18f92d075a2f2dc978fde610140ea0e2e6ff728c163218252c141cd85ab",
+    "Ru/widgets": "77d5a6498725e658172e272b2e1f43a123adaa101b68963d91cb4d699200826c",
+    "Ru/control_center": "9c94154bc4063e6a9ea990cabfbeff85f97692f1e9098518a2e29504518a4d7c",
+    "It/tools": "bb6f3f1c6cc71e93ed52eb3346892225abb1dccf4db4958412d07e06110d7fda",
+    "It/widgets": "745775999d9c3ee4fbeb70b485c3817a5f9c1689222d95a33550ddd6b3c5a0bd",
+    "It/control_center": "eb1c9ad8a4f7978576d93d281cb5bb2440a599908e5a6ebb1c1cbfcf32825c76"
+  },
+  "scope": [
+    "Seven languages, five option groups on three pages; no claim that every translated control or tool action was covered.",
+    "Native control snapshots assert labels even for collapsed sections; screenshots sampled quality/measurement/spectrum.",
+    "Source survey found other construction-time choices in scene editor/shared page helpers requiring separate verification.",
+    "A separate sidebar text-clipping observation remains pending.",
+    "Full regression, integration and independent review pending."
+  ],
+  "evidence_sha256": {
+    "cold-result.json": "5bd41edb786e3fe553500e96167a938f64483ad3f1f564c603795a88e3110cbc",
+    "Deutsch-900-tab_control_center_text.png": "4182cf1efb7f7c0edca2c80a614d3b6837ef12c83bb19b5f884d1d1c535c89b7",
+    "Deutsch-900-tab_tools_text.png": "2b1d732b77f15609420c3d7a8aa7eca03afd28f28a637e599d271abbcf528de7",
+    "Deutsch-900-tab_widgets_text.png": "0979233285b88f71a6a0a51ec82efda475aa8017212b2d851a87758bd4e9c3f2",
+    "English-900-tab_control_center_text.png": "3ba2ef184074eaac2e9ed16bf058057889bd034fc5a5a5e92af65e7a95592518",
+    "English-900-tab_tools_text.png": "0453480ab99e114ee3bc3c29bb3c1e2552c1ffa4b74c605c077a7424f2108ef4",
+    "English-900-tab_widgets_text.png": "506a1f183d140e2120bf7254c973cb604d7469143d59b7fea933ba3052a95550",
+    "France-900-tab_control_center_text.png": "ae463fe2fcebbf7f13c55953debf60042fe4a394a37f79d2ad1791a39b7f7945",
+    "France-900-tab_tools_text.png": "5f773da2cb0854f21c1f5dbae962f8144c841d305a42537d1e1517f90ae8ee3f",
+    "France-900-tab_widgets_text.png": "9986111fab9f6ad74532110c74fddc40406b28de6309d54ccfb48e3a736df3db",
+    "Italy-900-tab_control_center_text.png": "6492c5a33f80b242c5a6ec207c18a848a6e4413599e7beb9874b774da37b768f",
+    "Italy-900-tab_tools_text.png": "7b4b92bdb234d56d287c444835dee431aa114c10d1e35b3103accb91082f4a27",
+    "Italy-900-tab_widgets_text.png": "b2ce6be6677e7185e4e2d3ab5419fc22e86a416ada8ed1a90b58ed32de82741c",
+    "observer.json": "108902181ee471ddb835401d5d799d056e70c9ac4aead7d271ce043e584e29a5",
+    "profiles.json": "00c3bb5ac1f8b370d59c48a3d787625861cb3e1302b7754d987853a812a3ec3b",
+    "result.json": "d51302f7a43fb9c671f2c48143925e52f6042a6c098552930bf806295adf8647",
+    "routes.jsonl": "c6ee4eb9da98512ca4464000090b7b0bc3b33913b7dcf42cf0a378a1845d65eb",
+    "Russian-900-tab_control_center_text.png": "89916422423005e4957b429338ccefd43a81c6f43bd3fc9416e5fb222c9f6f73",
+    "Russian-900-tab_tools_text.png": "3ee38d7a8bfd0a3908a8556451120c27287c2853ca8060dbf1a954655e8a5b90",
+    "Russian-900-tab_widgets_text.png": "4de690b1c974737a170cf45ef27ad9636afaeb7dbc25f57e0fcb571d896187fd",
+    "shutdown-world.json": "72f1d723d91c7ed81bff134186601648228f3c4debc2d1df02150e9d6c68a131",
+    "Simplified_Chinese-900-tab_control_center_text.png": "225cfe5a624f0b1158ab3d76f50f2ddc77c2872f30e09aa4fc6b049839c96f25",
+    "Simplified_Chinese-900-tab_tools_text.png": "e0a637138bed46ccf771661e1ec52692fd0f6abe6309803aa24afe4977927baf",
+    "Simplified_Chinese-900-tab_widgets_text.png": "b58dacc2373e3394424d29cf5f05162f5fc6303c61f18190e605fc1815dc6067",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "Traditional_Chinese-900-tab_control_center_text.png": "6f2e15f386f2fe7816be7a646d405087b8e9710672293f7703d84fb33f7ac70e",
+    "Traditional_Chinese-900-tab_tools_text.png": "912acfef0282bcfd1ecaa84d52c533c3e09dff66993fb4d6b565f07c743a1e86",
+    "Traditional_Chinese-900-tab_widgets_text.png": "ea769af41810560ef75bd82dd458bd3098127c99ddb456d765a3e00b28543950"
+  }
+}

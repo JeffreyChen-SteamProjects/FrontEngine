@@ -3,6 +3,12 @@ How to use
 
 .. image:: ../image/main/FrontEngine.png
 
+.. note::
+
+    Python 3.11+ is supported, except 3.14.0 through 3.14.4. For Python 3.14, use 3.14.5 or later.
+
+    A native Qt crash was reproduced on Windows with Python 3.14.4; earlier 3.14 patches are excluded as a precaution. Recreate existing virtual environments with a compatible interpreter, and use that interpreter for source runs. EXEs that embed an excluded version need a rebuild with a compatible interpreter. Updating the FrontEngine package does not upgrade Python.
+
 FrontEngine puts things on top of your screen - a video, an image, a web page,
 some text, a desktop pet - and keeps them there while you carry on working.
 Each of those is called an overlay. You can run as many as you like at once,
@@ -112,3 +118,7 @@ Showing your screen to other people
 * :doc:`widgets` - audio spectrum, system monitor, now playing, sticky notes.
 
 And :doc:`control_center` to command all of them at once.
+
+Target-monitor choices and the Recent placeholder update when you change the interface language. Monitor targets, recent file names and paths, and selected values stay unchanged. Recent lists retain this behavior after reloading.
+
+Pet interaction feedback appears above Perform interaction so it remains near the keyboard focus. In narrow windows, section headings and their details buttons wrap; pet identity and interaction fields keep a readable minimum width and move below their labels when needed. Selected pets, field values and commands are preserved.

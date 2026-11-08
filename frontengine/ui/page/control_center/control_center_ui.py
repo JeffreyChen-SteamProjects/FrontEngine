@@ -1,3 +1,4 @@
+from frontengine.ui.runtime_lifetime import owned_action
 from typing import Callable
 
 from PySide6.QtCore import QTimer, Qt, Signal
@@ -19,7 +20,6 @@ from frontengine.user_setting.user_setting_file import clear_overlay_geometry, u
 from frontengine.ui.page.layout_kit import SettingPage
 from frontengine.ui.page.action_menu import ActionMenu
 from frontengine.utils.logging.loggin_instance import front_engine_logger
-from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import retranslator, tr, translate
 from frontengine.utils.screen_privacy import capture_affinity
 from frontengine.utils.virtual_desktop import virtual_desktop
@@ -58,7 +58,7 @@ class ControlCenterUI(SettingPage):
             particle_setting_ui: ParticleSettingUI,
             redirect_output: bool = True,
             pet_setting_ui=None,
-    ):
+            *, lifetime):
         front_engine_logger.info(
             f"[ControlCenterUI] Init | video={video_setting_ui}, image={image_setting_ui}, web={web_setting_ui}, "
             f"gif={gif_setting_ui}, sound={sound_player_setting_ui}, text={text_setting_ui}, "
@@ -66,7 +66,7 @@ class ControlCenterUI(SettingPage):
         )
         super().__init__("tab_control_center_text", "page_subtitle_control_center",
                          "Control Center",
-                         "Reach every overlay on screen, whichever page opened it.")
+                         "Reach every overlay on screen, whichever page opened it.", lifetime=lifetime)
 
         # Layout
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
@@ -133,8 +133,9 @@ class ControlCenterUI(SettingPage):
                 (TIER_HIGH, "control_center_quality_high", "High"),
                 (TIER_BALANCED, "control_center_quality_balanced", "Balanced"),
                 (TIER_SAVER, "control_center_quality_saver", "Saver")):
-            self.quality_combobox.addItem(
-                language_wrapper.language_word_dict.get(key, fallback), tier)
+            self.quality_combobox.addItem("", tier)
+            retranslator.bind(self.quality_combobox, key, fallback, "setItemText",
+                              self.quality_combobox.count() - 1)
         self.quality_combobox.currentIndexChanged.connect(self._apply_quality_tier)
 
         # Log panel
@@ -186,6 +187,7 @@ class ControlCenterUI(SettingPage):
             self.redirect_timer.start()
             redirect_manager_instance.set_redirect()
 
+    @owned_action
     def _create_button(self, label_key: str, callback) -> QPushButton:
         """
         建立按鈕、綁定事件，並記住文字來自哪個鍵，換語言時才跟得上。
@@ -305,6 +307,7 @@ class ControlCenterUI(SettingPage):
             widgets.extend(widget_list)
         return widgets
 
+    @owned_action
     def set_desktop_pin(self, pinned: bool) -> None:
         """
         開關「綁在目前的虛擬桌面」。真正的隱藏／還原由主視窗上的服務執行，
@@ -323,6 +326,7 @@ class ControlCenterUI(SettingPage):
     def desktop_pinned(self) -> bool:
         return self._desktop_pinned
 
+    @owned_action
     def toggle_desktop_pin(self) -> None:
         self.set_desktop_pin(not self._desktop_pinned)
 
@@ -386,18 +390,21 @@ class ControlCenterUI(SettingPage):
                 except Exception as error:
                     front_engine_logger.warning(f'[ControlCenterUI] overlay action failed: {error!r}')
 
+    @owned_action
     def hide_all(self) -> None:
         """暫時隱藏所有覆蓋層 / Temporarily hide every overlay."""
         front_engine_logger.info("ControlCenterUI hide_all")
         self.overlay_visibility_changed.emit(True)
         self._for_each_overlay(lambda widget: widget.hide())
 
+    @owned_action
     def show_all(self) -> None:
         """重新顯示所有覆蓋層 / Re-show every overlay."""
         front_engine_logger.info("ControlCenterUI show_all")
         self._for_each_overlay(lambda widget: widget.show())
         self.overlay_visibility_changed.emit(False)
 
+    @owned_action
     def set_mute_all(self, muted: bool) -> None:
         """靜音／取消靜音所有支援的覆蓋層 / Mute or unmute every overlay that supports it."""
         front_engine_logger.info(f"ControlCenterUI set_mute_all | muted={muted}")
@@ -414,6 +421,7 @@ class ControlCenterUI(SettingPage):
             "control_center_unmute_all" if self._muted else "control_center_mute_all",
             "Unmute all" if self._muted else "Mute all",)
 
+    @owned_action
     def toggle_mute_all(self) -> None:
         """切換全域靜音狀態 / Toggle the global mute state."""
         self.set_mute_all(not getattr(self, "_muted", False))
@@ -421,6 +429,7 @@ class ControlCenterUI(SettingPage):
     # --- lock / chroma key / positions -----------------------------------
     CHROMA_KEY_COLOR = "#00ff00"
 
+    @owned_action
     def set_lock_all(self, locked: bool) -> None:
         """
         鎖定＝所有覆蓋層點擊穿透；解鎖＝可以用滑鼠把覆蓋層拖到想要的位置，
@@ -437,10 +446,12 @@ class ControlCenterUI(SettingPage):
             "control_center_unlock_all" if self._overlays_locked else "control_center_lock_all",
             "Unlock overlays" if self._overlays_locked else "Lock overlays",)
 
+    @owned_action
     def toggle_lock_all(self) -> None:
         """切換覆蓋層鎖定狀態 / Toggle the overlay lock."""
         self.set_lock_all(not getattr(self, "_overlays_locked", True))
 
+    @owned_action
     def set_chroma_key(self, enabled: bool) -> None:
         """開關綠幕背景（給 OBS 之類的軟體去背用）。"""
         front_engine_logger.info(f"ControlCenterUI set_chroma_key | enabled={enabled}")
@@ -458,15 +469,18 @@ class ControlCenterUI(SettingPage):
             "control_center_chroma_key_off" if self._chroma_key else "control_center_chroma_key_on",
             "Chroma key off" if self._chroma_key else "Chroma key on",)
 
+    @owned_action
     def toggle_chroma_key(self) -> None:
         """切換綠幕背景 / Toggle the chroma key background."""
         self.set_chroma_key(not getattr(self, "_chroma_key", False))
 
+    @owned_action
     def reset_overlay_positions(self) -> None:
         """忘掉記住的覆蓋層位置，之後開的覆蓋層回到各自的預設顯示方式。"""
         front_engine_logger.info("ControlCenterUI reset_overlay_positions")
         clear_overlay_geometry()
 
+    @owned_action
     def set_low_power(self, enabled: bool) -> None:
         """省電模式：讓支援的覆蓋層把更新頻率調慢。"""
         front_engine_logger.info(f"ControlCenterUI set_low_power | enabled={enabled}")
@@ -485,6 +499,7 @@ class ControlCenterUI(SettingPage):
             "control_center_low_power_off" if self._low_power else "control_center_low_power_on",
             "Low power off" if self._low_power else "Low power on",)
 
+    @owned_action
     def set_hide_from_capture(self, hidden: bool) -> int:
         """
         分享畫面時把覆蓋層藏起來（自己看得到、對方看不到）。標了
@@ -514,6 +529,7 @@ class ControlCenterUI(SettingPage):
             "Show in capture" if self._hidden_from_capture else "Hide from capture")
         return applied
 
+    @owned_action
     def toggle_hide_from_capture(self) -> None:
         """切換分享時是否隱藏覆蓋層。"""
         self.set_hide_from_capture(not self._hidden_from_capture)
@@ -522,6 +538,7 @@ class ControlCenterUI(SettingPage):
     def hidden_from_capture(self) -> bool:
         return self._hidden_from_capture
 
+    @owned_action
     def toggle_low_power(self) -> None:
         """切換省電模式 / Toggle low-power mode."""
         self.set_low_power(not getattr(self, "_low_power", False))
@@ -530,6 +547,7 @@ class ControlCenterUI(SettingPage):
         """目前選到的畫質檔位。"""
         return normalize_tier(self.quality_combobox.currentData())
 
+    @owned_action
     def set_quality_tier(self, tier: str) -> None:
         """把畫質檔位套用到所有支援的覆蓋層，並記住這個選擇。"""
         tier = normalize_tier(tier)
@@ -565,6 +583,7 @@ class ControlCenterUI(SettingPage):
                     return float(value)
         return 0.2
 
+    @owned_action
     def step_opacity_all(self, delta: float) -> None:
         """
         以 delta 調整所有覆蓋層的不透明度（夾在 0.1~1.0），套用到支援
@@ -589,6 +608,7 @@ class ControlCenterUI(SettingPage):
 
         self._for_each_overlay(apply)
 
+    @owned_action
     def redirect(self) -> None:
         if not redirect_manager_instance.std_out_queue.empty():
             output_message = redirect_manager_instance.std_out_queue.get_nowait()

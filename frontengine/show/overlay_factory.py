@@ -53,6 +53,9 @@ class OverlayFactory(ABC):
     from the scene JSON) to a configured widget instance.
     """
 
+    def __init__(self, *, lifetime=None):
+        self.lifetime = lifetime
+
     @abstractmethod
     def create(self, setting_dict: Dict[str, Any]) -> QWidget:
         ...
@@ -88,7 +91,7 @@ class TextOverlayFactory(OverlayFactory):
             from frontengine.utils.text_source.local_file_source import LocalFileTextSource
             widget.set_text_source(LocalFileTextSource(
                 _require(setting_dict, "text_file", "text"), str(setting_dict.get("text_file_field", "")),
-                _normalize_int(setting_dict.get("text_file_interval"), 1) * 1000))
+                _normalize_int(setting_dict.get("text_file_interval"), 1) * 1000, lifetime=self.lifetime))
         widget.set_ui_variable(_normalize_percent(setting_dict.get("opacity"), 0.2))
         widget.set_font_variable(_normalize_int(setting_dict.get("font_size"), 100))
         widget.set_alignment(setting_dict.get("alignment", "Center"))
@@ -136,9 +139,14 @@ OVERLAY_FACTORY_REGISTRY: Dict[str, Type[OverlayFactory]] = {
 }
 
 
-def build_overlay(kind: str, setting_dict: Dict[str, Any]) -> QWidget:
+def build_overlay(kind: str, setting_dict: Dict[str, Any], *, lifetime=None) -> QWidget:
     """Convenience entry point: look the factory up by kind and build the widget."""
+    if lifetime is not None:
+        lifetime.require_live()
     factory_cls = OVERLAY_FACTORY_REGISTRY.get(kind)
     if factory_cls is None:
         raise ValueError(f"Unknown overlay kind: {kind}")
-    return factory_cls().create(setting_dict)
+    widget = factory_cls(lifetime=lifetime).create(setting_dict)
+    if lifetime is not None:
+        lifetime.adopt(widget)
+    return widget

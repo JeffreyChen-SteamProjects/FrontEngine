@@ -1,3 +1,4 @@
+from frontengine.ui.runtime_lifetime import owned_action
 from PySide6.QtWidgets import QLabel, QLineEdit, QPushButton
 
 from frontengine.ui.page.scene_setting.scene_manager import SceneManagerUI
@@ -6,8 +7,8 @@ from frontengine.utils.multi_language.retranslate import tr
 
 
 class WebSceneSettingUI(BaseSceneSettingUI):
-    def __init__(self, script_ui: SceneManagerUI):
-        super().__init__(script_ui)
+    def __init__(self, script_ui: SceneManagerUI, *, lifetime):
+        super().__init__(script_ui, lifetime=lifetime)
 
         opacity_label, self.opacity_value, self.opacity_slider = self._build_slider("Opacity", 1, 100, 20)
 
@@ -24,6 +25,7 @@ class WebSceneSettingUI(BaseSceneSettingUI):
         self.grid_layout.addWidget(self.web_url_input, 1, 1)
         self.grid_layout.addWidget(self.update_scene_button, 2, 0)
 
+    @owned_action
     def _update_scene(self) -> None:
         if not self.web_url_input.text().strip():
             self._warn_not_prepared()

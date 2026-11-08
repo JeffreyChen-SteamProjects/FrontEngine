@@ -1,0 +1,119 @@
+{
+  "baseline_product": "35c9fb52",
+  "defect": "Selecting a resident in a different zone changes the resident card while leaving the overview in the old zone.",
+  "before_native": {
+    "passed": false,
+    "selected_resident": "cd53a59142a7496d92090f3a38904067",
+    "resident_zone": "z23",
+    "displayed_zone": "z1",
+    "view_zone": "z1",
+    "selected_via_actual_list": true,
+    "error": "Traceback (most recent call last):\n  File \"D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-return-rest\\.audit\\native_resident_zone_selection_view.py\", line 105, in <module>\n    assert page.zone == away, (page.zone, away)\n           ^^^^^^^^^^^^^^^^^\nAssertionError: ('z1', 'z23')\n"
+  },
+  "after_native": {
+    "passed": true,
+    "selected_resident": "cd53a59142a7496d92090f3a38904067",
+    "resident_zone": "z23",
+    "displayed_zone": "z23",
+    "view_zone": "z23",
+    "selected_via_actual_list": true,
+    "runtime_closed": true,
+    "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-stage-layout\\.audit\\profession-owned-fixed",
+    "saved_snapshot_sha256": "c471f2056e3bf47d41a8073e4a214f8eccec310f6c85a5f6088181f0c4b05172",
+    "scope": "Native MainUI resident-list selection in another logical zone; overview follows selected resident. Two logical zones on one screen, no OS input or physical monitor claim.",
+    "temporary_directory_removed": true
+  },
+  "cold_reopen": {
+    "passed": true,
+    "initial_snapshot_exact": true,
+    "profiles_exact": true,
+    "leases_reacquired": true,
+    "saved_exact": true,
+    "temporary_directory_removed": true
+  },
+  "observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "child_exit": 0,
+    "observation_only": true
+  },
+  "fix": "Resolve the selected resident in the current world and use existing choose_zone when its zone differs; keep same-zone and cleared selection behavior. No signature or architecture change.",
+  "tests": {
+    "red": "1 failed, 12 deselected in 4.98s; z1 != z5",
+    "green": "1 passed, 12 deselected in 8.61s",
+    "translations_documentation": "50 passed in 3.14s",
+    "expanded": "54 page/layout tests passed in 399.99s",
+    "zones": "15 passed in 85.97s",
+    "full_collection": "3256 collected in 8.24s; not yet run"
+  },
+  "limits": [
+    "Two logical zones on one physical screen, native widget-local list selection.",
+    "No OS input, physical multi-monitor, all scrolling positions or independent-review claim.",
+    "Full regression, integration and independent review remain pending."
+  ],
+  "hashes": {
+    "frontengine\\ui\\page\\pet_game\\home_page.py": "7f53f5da600d96bbabcf856f3479c0324718209803ad1348ca83cfdac0fee08a",
+    "tests\\unit_test\\test_pet_home_zones.py": "13434f3025ccc932c0d385c6f4e25b793224e36b9a2a22e9bd18ee2438350b8c",
+    ".audit\\native_resident_zone_selection.py": "b1baf3372566486a151f32cef06a993731070f47a6a451a6f6e660aa13ee8c24",
+    ".audit\\native-resident-zone-after-view\\cold-result.json": "5bd41edb786e3fe553500e96167a938f64483ad3f1f564c603795a88e3110cbc",
+    ".audit\\native-resident-zone-after-view\\observer.json": "108902181ee471ddb835401d5d799d056e70c9ac4aead7d271ce043e584e29a5",
+    ".audit\\native-resident-zone-after-view\\profiles.json": "00c3bb5ac1f8b370d59c48a3d787625861cb3e1302b7754d987853a812a3ec3b",
+    ".audit\\native-resident-zone-after-view\\result.json": "492242287f1e35a9a7166785baaaa328f3d7ca61b926362936ca67b03d918ae0",
+    ".audit\\native-resident-zone-after-view\\shutdown-world.json": "df5ee0cb35c9a522db27879c2861019be10a5d9167b7ea06c802a7353bd0d1af",
+    ".audit\\native-resident-zone-after-view\\selected-resident.png": "237e001b251b1f30d483eca26f902a1014b8d8b9c713d0a16e0ff1d033ddf496",
+    ".audit\\native-resident-zone-after-view\\selected-zone.png": "272526b23df7102420f0e90654c64b2871089c27a425c541a7f3c300acdde772"
+  },
+  "docs": {
+    "build": "Sphinx HTML -W --keep-going succeeded without warnings",
+    "pages": [
+      {
+        "language": "Eng",
+        "latest_paragraph_present": true,
+        "html_sha256": "6293316b6c358eb81ce8cd593eb37a7884dff6808ce4c1fb6f261dd68d889c00"
+      },
+      {
+        "language": "Zh",
+        "latest_paragraph_present": true,
+        "html_sha256": "4aa6835e0d9fafed5f8db28bfa36aceeef4528f180d47851b013ae3c6cbe53d7"
+      },
+      {
+        "language": "ZhCn",
+        "latest_paragraph_present": true,
+        "html_sha256": "b8e81420d091a6d3f7136edc2cae3c930cdae492fd3d9be5b02412359d659c48"
+      },
+      {
+        "language": "De",
+        "latest_paragraph_present": true,
+        "html_sha256": "aac45c32372b56013de89c474aa545fab13e351a372d14f2a281abad276cad5a"
+      },
+      {
+        "language": "Ru",
+        "latest_paragraph_present": true,
+        "html_sha256": "2c7042b97e0f589f6390dd67e0ed9227377f739e3a779eda8c013e916cc2ea29"
+      },
+      {
+        "language": "Fr",
+        "latest_paragraph_present": true,
+        "html_sha256": "d139f97d1586e77e8eb1e1dc5001c350cd1b1c576af3467e16e933440bf9c53b"
+      },
+      {
+        "language": "It",
+        "latest_paragraph_present": true,
+        "html_sha256": "353b5a95841ee17f12fa537c69e4ae1a7cf63aa979e18590fa94d147ae79e10e"
+      }
+    ]
+  }
+}

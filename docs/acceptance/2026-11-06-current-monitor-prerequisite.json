@@ -1,0 +1,64 @@
+{
+  "product": "76618453",
+  "status": "blocked_by_current_display_topology",
+  "required_connected_screens": 2,
+  "qt_private_desktop": [
+    {
+      "name": "BenQ GW2490",
+      "dpr": 1.25,
+      "geometry": [
+        0,
+        0,
+        1536,
+        864
+      ]
+    }
+  ],
+  "windows_inventory": {
+    "windows_monitor_count": 1,
+    "monitors": [
+      {
+        "device": "\\\\.\\DISPLAY6",
+        "primary": true,
+        "monitor_rect": [
+          0,
+          0,
+          1536,
+          864
+        ]
+      }
+    ],
+    "read_only": true
+  },
+  "failed_gate": "Two connected physical screens required",
+  "observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "child_exit": 1,
+    "observation_only": true
+  },
+  "scope": "Read-only topology verification; cross-screen travel was not started. No OS input or display configuration change.",
+  "limits": [
+    "Previous two-monitor evidence describes an earlier configuration.",
+    "This run proves the current environment does not meet the two-screen precondition; it does not prove mixed-DPI travel behavior."
+  ],
+  "evidence_sha256": {
+    ".audit\\native_mixed_dpi_travel.py": "bed079d3ca6ad1c2e80657bec6fc3c0eab940d544c92af8b6ea494b8962310eb",
+    ".audit\\current-monitor-inventory.json": "af7fbee33678a69998817f87fa65f6a8c839c37bef1553234837b9dd333ddec6",
+    ".audit\\native-travel-mixed-dpi-forward\\result.json": "29048b09eb14b3debeefe591de31f4fe607ea2b898a50cab2cb3cf7a8c1afbcf",
+    ".audit\\native-travel-mixed-dpi-forward\\observer.json": "d314eef80ba48b814556966ad9dda568266e019fdb594765f8c590f6d7313c65",
+    ".audit\\native-travel-mixed-dpi-forward\\stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

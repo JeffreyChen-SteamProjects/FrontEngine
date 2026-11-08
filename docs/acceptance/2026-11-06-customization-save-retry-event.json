@@ -1,0 +1,116 @@
+{
+  "product_test_commit": "d63a94c5",
+  "unchanged_files": 752,
+  "preferences": {
+    "conflicting_tastes_refused": true,
+    "failed_save_preserves_draft_disk_live": true,
+    "failed_save_events": 0,
+    "successful_retry_events": 1,
+    "preferences": {
+      "auto_rest": true,
+      "allow_throw": true,
+      "allow_social": true,
+      "presentation": null,
+      "taste": {
+        "favorite": "music",
+        "disliked": "book"
+      }
+    }
+  },
+  "feed_event": {
+    "before": {
+      "id": "6435f97097944589a333b1a46c8f924f",
+      "name": "Pet 2",
+      "mood": 72,
+      "fullness": 70,
+      "affection": 2,
+      "energy": 70,
+      "mode": "play",
+      "appearance": {
+        "character": null,
+        "equipped": {
+          "head": null,
+          "neck": null,
+          "body": null,
+          "back": null
+        },
+        "saved_outfits": []
+      },
+      "preferences": {
+        "auto_rest": true,
+        "allow_throw": true,
+        "allow_social": true,
+        "presentation": null,
+        "taste": {
+          "favorite": "music",
+          "disliked": "book"
+        }
+      }
+    },
+    "after": {
+      "id": "6435f97097944589a333b1a46c8f924f",
+      "name": "Pet 2",
+      "mood": 96,
+      "fullness": 85,
+      "affection": 7,
+      "energy": 70,
+      "mode": "play",
+      "appearance": {
+        "character": null,
+        "equipped": {
+          "head": null,
+          "neck": null,
+          "body": null,
+          "back": null
+        },
+        "saved_outfits": []
+      },
+      "preferences": {
+        "auto_rest": true,
+        "allow_throw": true,
+        "allow_social": true,
+        "presentation": null,
+        "taste": {
+          "favorite": "music",
+          "disliked": "book"
+        }
+      }
+    },
+    "visual_action": "food_like",
+    "controlled_seconds": 2,
+    "reward_only_on_completion": true
+  },
+  "cold_reopen": {
+    "passed": true,
+    "initial_snapshot_exact": true,
+    "profiles_exact": true,
+    "leases_reacquired": true,
+    "saved_exact": true,
+    "temporary_directory_removed": true
+  },
+  "observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "child_exit": 0
+  },
+  "runtime_closed": true,
+  "temporary_directory_removed": true,
+  "limits": [
+    "Full MainUI on private Windows desktop with widget-local keyboard events, Traditional Chinese dark at requested 900x740.",
+    "Synthetic sprite and controlled two-second care advance. food_like is the reaction state, not proof of authored animation artwork.",
+    "Injected settings os.replace failure, not physical disk failure or power loss.",
+    "No independent review or full-goal completion claim."
+  ]
+}

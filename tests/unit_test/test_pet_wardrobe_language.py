@@ -13,7 +13,8 @@ from test_pet_variants import variant_asset
 from test_pet_layered import write
 
 
-def test_language_switch_preserves_pending_wardrobe_and_preview(tmp_path):
+def test_language_switch_preserves_pending_wardrobe_and_preview(tmp_path, *, lifetime_factory):
+    lifetime_factory()
     source = tmp_path / 'cat'
     variant_asset(source)
     data = json.loads((source / 'layered-pet.json').read_text(encoding='utf-8'))
@@ -29,7 +30,7 @@ def test_language_switch_preserves_pending_wardrobe_and_preview(tmp_path):
     record = profiles.create()
     original_language = language_wrapper.language
     language_wrapper.reset_language('English')
-    dialog = PetWardrobeDialog(profiles, record['id'], library=library)
+    dialog = PetWardrobeDialog(profiles, record['id'], library=library, lifetime=lifetime_factory())
     try:
         dialog.show()
         dialog.character.setCurrentIndex(dialog.character.findData(asset_reference(asset)))
@@ -52,6 +53,7 @@ def test_language_switch_preserves_pending_wardrobe_and_preview(tmp_path):
         for language in list(language_wrapper.choose_language_dict) * 3:
             language_wrapper.reset_language(language)
             retranslator.apply()
+            assert dialog.install_progress.accessibleName() == translate('pet_wardrobe_builtin_busy')
             assert dialog.character.itemText(0) == translate('pet_wardrobe_none')
             assert all(control.itemText(0) == translate('pet_wardrobe_none')
                        for control in dialog.slots.values())
@@ -74,7 +76,8 @@ def test_language_switch_preserves_pending_wardrobe_and_preview(tmp_path):
         retranslator.apply()
 
 
-def test_missing_asset_label_retranslates_without_changing_saved_reference(tmp_path):
+def test_missing_asset_label_retranslates_without_changing_saved_reference(tmp_path, *, lifetime_factory):
+    lifetime_factory()
     profiles = PetProfiles({}, lambda: None)
     record = profiles.create()
     appearance = deepcopy(record['appearance'])
@@ -82,7 +85,7 @@ def test_missing_asset_label_retranslates_without_changing_saved_reference(tmp_p
     profiles.update(record['id'], {'appearance': appearance})
     original_language = language_wrapper.language
     language_wrapper.reset_language('English')
-    dialog = PetWardrobeDialog(profiles, record['id'], library=PetAssetLibrary(tmp_path / 'empty'))
+    dialog = PetWardrobeDialog(profiles, record['id'], library=PetAssetLibrary(tmp_path / 'empty'), lifetime=lifetime_factory())
     try:
         language_wrapper.reset_language('Traditional_Chinese')
         retranslator.apply()

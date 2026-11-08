@@ -1,0 +1,275 @@
+{
+  "product_commit": "4e51881",
+  "runs": {
+    "native-home-wrap": {
+      "harness_passed": false,
+      "cases": 47,
+      "width_mismatches": [
+        {
+          "width": 313,
+          "requested_width": 296,
+          "language": "France",
+          "tab": "pet_home_work_section",
+          "horizontal_maximum": 0
+        }
+      ],
+      "overflow_cases": [],
+      "observer": {
+        "before": {
+          "foreground": 21169838,
+          "cursor": [
+            2094,
+            -62
+          ]
+        },
+        "after": {
+          "foreground": 21169838,
+          "cursor": [
+            1452,
+            331
+          ]
+        },
+        "child_exit": 1
+      },
+      "source_sha256": "7ebeb8bdb837265617de19c218555ea0bd1f46fe439435e7dfaef90b3258235b",
+      "result_sha256": "d14f17c27fa585f88e7e98c221757a37dd02992afe054f91dfd01168ed6d43ac"
+    },
+    "native-home-wrap-widths": {
+      "harness_passed": true,
+      "cases": 126,
+      "width_mismatches": [
+        {
+          "width": 313,
+          "requested_width": 296,
+          "language": "France",
+          "tab": "pet_home_work_section",
+          "horizontal_maximum": 0
+        },
+        {
+          "width": 313,
+          "requested_width": 296,
+          "language": "France",
+          "tab": "pet_home_layout_section",
+          "horizontal_maximum": 0
+        },
+        {
+          "width": 313,
+          "requested_width": 296,
+          "language": "France",
+          "tab": "pet_home_shop_section",
+          "horizontal_maximum": 0
+        },
+        {
+          "width": 313,
+          "requested_width": 296,
+          "language": "France",
+          "tab": "pet_home_storage_section",
+          "horizontal_maximum": 0
+        },
+        {
+          "width": 313,
+          "requested_width": 296,
+          "language": "France",
+          "tab": "pet_home_goals_section",
+          "horizontal_maximum": 0
+        },
+        {
+          "width": 313,
+          "requested_width": 296,
+          "language": "France",
+          "tab": "pet_home_inbox_section",
+          "horizontal_maximum": 0
+        },
+        {
+          "width": 313,
+          "requested_width": 296,
+          "language": "France",
+          "tab": "pet_home_collection_section",
+          "horizontal_maximum": 0
+        },
+        {
+          "width": 313,
+          "requested_width": 296,
+          "language": "France",
+          "tab": "pet_home_settings_section",
+          "horizontal_maximum": 0
+        },
+        {
+          "width": 313,
+          "requested_width": 296,
+          "language": "Italy",
+          "tab": "pet_home_residents_section",
+          "horizontal_maximum": 0
+        },
+        {
+          "width": 313,
+          "requested_width": 296,
+          "language": "Italy",
+          "tab": "pet_home_work_section",
+          "horizontal_maximum": 0
+        },
+        {
+          "width": 313,
+          "requested_width": 296,
+          "language": "Italy",
+          "tab": "pet_home_layout_section",
+          "horizontal_maximum": 0
+        },
+        {
+          "width": 313,
+          "requested_width": 296,
+          "language": "Italy",
+          "tab": "pet_home_shop_section",
+          "horizontal_maximum": 0
+        },
+        {
+          "width": 313,
+          "requested_width": 296,
+          "language": "Italy",
+          "tab": "pet_home_storage_section",
+          "horizontal_maximum": 0
+        },
+        {
+          "width": 313,
+          "requested_width": 296,
+          "language": "Italy",
+          "tab": "pet_home_goals_section",
+          "horizontal_maximum": 0
+        },
+        {
+          "width": 313,
+          "requested_width": 296,
+          "language": "Italy",
+          "tab": "pet_home_inbox_section",
+          "horizontal_maximum": 0
+        },
+        {
+          "width": 313,
+          "requested_width": 296,
+          "language": "Italy",
+          "tab": "pet_home_collection_section",
+          "horizontal_maximum": 0
+        },
+        {
+          "width": 313,
+          "requested_width": 296,
+          "language": "Italy",
+          "tab": "pet_home_settings_section",
+          "horizontal_maximum": 0
+        }
+      ],
+      "overflow_cases": [],
+      "observer": {
+        "before": {
+          "foreground": 21169838,
+          "cursor": [
+            1234,
+            825
+          ]
+        },
+        "after": {
+          "foreground": 21169838,
+          "cursor": [
+            1341,
+            0
+          ]
+        },
+        "child_exit": 0
+      },
+      "source_sha256": "7ebeb8bdb837265617de19c218555ea0bd1f46fe439435e7dfaef90b3258235b",
+      "result_sha256": "85b17ed8e481c806081647271710f874bec6067c87fea05a5f7474d62e8077ee",
+      "constraint_sample": [
+        {
+          "class": "PetHomePage",
+          "name": "",
+          "minimum": 313,
+          "hint": 313,
+          "text": ""
+        },
+        {
+          "class": "QWidget",
+          "name": "pageHeader",
+          "minimum": 0,
+          "hint": 313,
+          "text": ""
+        },
+        {
+          "class": "QWidget",
+          "name": "pageColumn",
+          "minimum": 0,
+          "hint": 257,
+          "text": ""
+        },
+        {
+          "class": "QLabel",
+          "name": "pageTitle",
+          "minimum": 0,
+          "hint": 257,
+          "text": "Maison des mascottes"
+        },
+        {
+          "class": "QWidget",
+          "name": "pageContent",
+          "minimum": 0,
+          "hint": 262,
+          "text": ""
+        },
+        {
+          "class": "QComboBox",
+          "name": "",
+          "minimum": 100,
+          "hint": 260,
+          "text": ""
+        }
+      ]
+    },
+    "native-home-wrap-title": {
+      "harness_passed": false,
+      "cases": 50,
+      "width_mismatches": [],
+      "overflow_cases": [
+        {
+          "width": 296,
+          "requested_width": 296,
+          "language": "France",
+          "tab": "pet_home_storage_section",
+          "horizontal_maximum": 7
+        }
+      ],
+      "observer": {
+        "before": {
+          "foreground": 21169838,
+          "cursor": [
+            1290,
+            352
+          ]
+        },
+        "after": {
+          "foreground": 21169838,
+          "cursor": [
+            1071,
+            606
+          ]
+        },
+        "child_exit": 1
+      },
+      "source_sha256": "7ebeb8bdb837265617de19c218555ea0bd1f46fe439435e7dfaef90b3258235b",
+      "result_sha256": "978aac373c42f3c481c38e2e28684c9c3924622c03490ddebde8ff48b612f682"
+    }
+  },
+  "scope": "Native standalone PetHomePage with application style, seven languages and nine tabs, widths 296 and 536; private hidden Win32 desktop; temporary profile; Workshop and session-lock sources substituted.",
+  "conclusion": "Russian selected-furniture wrapping is visually confirmed. Complete 296-pixel styled-home acceptance is not achieved.",
+  "limits": [
+    "Not a full MainUI, physical input, or DPI-transition test.",
+    "Foreground window observations agree; cursor positions differ with unknown cause.",
+    "The title-wrap variant is process-local diagnostic code, not a product fix.",
+    "Original full regression remains live against unchanged integration sources."
+  ],
+  "findings": [
+    "The strict first run stops when French Work expands from requested 296 to actual 313.",
+    "The width-observation run completes 126 cases without horizontal overflow, but 17 French/Italian cases use width 313 instead of 296.",
+    "French pageTitle minimum hint 257 plus header margins 56 produces minimum page width 313.",
+    "Wrapping only the title restores width 296 but exposes horizontal overflow 7 in the French storage tab.",
+    "Inspected native Russian furniture screenshot shows the selected prompt on two readable lines."
+  ]
+}

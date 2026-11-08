@@ -114,3 +114,11 @@ and does not establish compatibility with every GPU or window compositor.
 The supported Qt range is 6.11.2 to below 6.13. The optional Imervue runtime pins
 Qt 6.11.2; install the Puppet extra before building a distribution that includes
 Puppet. Python 3.14 executable builds require Nuitka 4.3.1 or newer.
+
+Changing the interface language updates the 3D editor’s transform tool, axis, coordinate space, projection and light-type choices. Selected values, scene content and undo history stay unchanged.
+
+Scene script and media sub-tab labels also follow the interface language without changing the selected tab or recreating its page. Scene content and undo history are preserved.
+
+The 3D editor’s Automatic duration and No parent labels follow interface-language changes. Duration values and parent relationships stay unchanged, including after selecting another object and returning.
+
+Closing scene output while choosing a camera background discards the returned color and stops the preview. Cancelling only the color picker preserves the current color and keeps the preview running. Reopen scene output to choose a new color. Previewing does not open a camera.

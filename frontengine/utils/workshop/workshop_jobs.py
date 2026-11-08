@@ -1,7 +1,8 @@
 """Bounded Qt worker jobs for Workshop validation, hashing and file copying."""
 from __future__ import annotations
+from frontengine.utils.work_lifetime import captured_lifetime, owned_callback
 
-from PySide6.QtCore import QObject, QRunnable, QThreadPool, Qt, Signal
+from PySide6.QtCore import QObject, QRunnable, Qt, Signal
 
 
 class JobSignals(QObject):
@@ -25,21 +26,24 @@ class WorkshopJobs(QObject):
     completed = Signal(str, object)
     failed = Signal(str, str)
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent=None, *, lifetime=None) -> None:
         super().__init__(parent)
-        self.pool = QThreadPool.globalInstance()
+        self.lifetime = lifetime or captured_lifetime(parent)
+        self.lifetime.adopt(self)
+        self.pool = self.lifetime.pool()
         self.pending = {}
         self.closed = False
 
     def submit(self, key: str, function) -> bool:
-        if self.closed or key in self.pending or len(self.pending) >= 2:
+        if self.closed or not self.lifetime.accepting or key in self.pending or len(self.pending) >= 2:
             return False
         signals = JobSignals()
         signals.finished.connect(self._finished, Qt.ConnectionType.QueuedConnection)
         self.pending[key] = signals
-        self.pool.start(Job(key, function, signals))
+        self.lifetime.submit(Job(key, function, signals))
         return True
 
+    @owned_callback
     def _finished(self, key: str, result, error: str) -> None:
         self.pending.pop(key, None)
         if not self.closed:

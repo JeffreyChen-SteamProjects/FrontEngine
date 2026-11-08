@@ -55,6 +55,7 @@ class PetQuickStart:
         tr(self.pets, "pet_quick_on_desktop", "Your pets on the desktop", "setAccessibleName")
         self.pets.itemDoubleClicked.connect(lambda _item: self.bring_back())
         self.empty = tr(QLabel(), "pet_quick_none", "No pet on the desktop yet.")
+        self.empty.setWordWrap(True)
         section.add_widget(self.pets, "pet_quick_on_desktop", "Your pets on the desktop")
         section.add_widget(self.empty)
         self.wardrobe_button = self._button("pet_wardrobe_title", "Wardrobe", self.wardrobe)

@@ -1,3 +1,5 @@
+from frontengine.ui.runtime_lifetime import owned_action
+from frontengine.ui.runtime_lifetime import OwnedWidgetList
 from typing import Optional
 
 from PySide6.QtCore import Qt, QTimer
@@ -11,6 +13,8 @@ from frontengine.ui.dialog.choose_file_dialog import choose_image
 from frontengine.ui.page.layout_kit import SettingPage
 from frontengine.ui.page.utils import (
     build_recent_combobox,
+    apply_target_monitor_state,
+    target_monitor_state,
     build_target_monitor_combobox,
     coerce_int,
     dispatch_to_monitors,
@@ -32,14 +36,14 @@ from frontengine.utils.multi_language.retranslate import tr
 
 
 class ImageSettingUI(SettingPage):
-    def __init__(self):
+    def __init__(self, *, lifetime):
         front_engine_logger.info("[ImageSettingUI] Init")
         super().__init__("tab_image_text", "page_subtitle_image",
-                         "Image", "Put a picture on top of everything else.")
+                         "Image", "Put a picture on top of everything else.", lifetime=lifetime)
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
 
         # Init variable
-        self.image_widget_list = []
+        self.image_widget_list = OwnedWidgetList(self.lifetime)
         self.show_all_screen = False
         self.ready_to_play = False
         self.image_path: Optional[str] = None
@@ -100,7 +104,7 @@ class ImageSettingUI(SettingPage):
         self.slideshow_shuffle_checkbox = tr(QCheckBox(), "slideshow_shuffle", "Shuffle")
         # 參考圖板：好幾張圖攤在同一塊畫布上，各自可以搬動
         # Reference board: several pictures on one canvas, each movable
-        self.board_widget_list: list = []
+        self.board_widget_list: list = OwnedWidgetList(self.lifetime)
         self.board_choose_button = tr(QPushButton(), "image_board_choose",
                                       "Open reference board...")
         self.board_choose_button.clicked.connect(self.open_reference_board)
@@ -149,17 +153,18 @@ class ImageSettingUI(SettingPage):
         self.finish_body()
         self.set_footer(primary=self.start_button, status=self.ready_label)
 
+    @owned_action
     def open_reference_board(self):
         """
         挑幾張圖開一塊參考圖板。一張都沒挑就不要開空白畫布——那看起來像壞掉。
         Open a board from several chosen pictures. Nothing chosen opens nothing:
         an empty canvas reads as a fault.
         """
-        paths, _ = QFileDialog.getOpenFileNames(
+        paths, _ = self.lifetime.after_dialog(QFileDialog.getOpenFileNames(
             self,
             language_wrapper.language_word_dict.get("image_board_choose", "Open reference board..."),
             "",
-            "Images (*.png *.jpg *.jpeg *.webp *.bmp *.gif)")
+            "Images (*.png *.jpg *.jpeg *.webp *.bmp *.gif)"))
         if not paths:
             return None
         board = ReferenceBoardWidget()
@@ -181,6 +186,7 @@ class ImageSettingUI(SettingPage):
                 pass
         self.board_widget_list.clear()
 
+    @owned_action
     def add_reference_image(self, image) -> None:
         """Place an explicitly reused history image into a registered reference board."""
         from PySide6.QtGui import QPixmap
@@ -192,6 +198,7 @@ class ImageSettingUI(SettingPage):
         else:
             board.close()
 
+    @owned_action
     def open_image_compare(self) -> None:
         """Open a fresh comparison dialog after a previous one released its images."""
         from frontengine.ui.dialog.image_compare_dialog import ImageCompareDialog
@@ -214,10 +221,12 @@ class ImageSettingUI(SettingPage):
         self.close_image_compare()
         super().closeEvent(event)
 
+    @owned_action
     def set_show_all_screen(self) -> None:
         front_engine_logger.info("[ImageSettingUI] set_show_all_screen")
         self.show_all_screen = self.show_on_all_screen_checkbox.isChecked()
 
+    @owned_action
     def _create_image_widget(self) -> ImageWidget:
         front_engine_logger.info("[ImageSettingUI] _create_image_widget")
         image_widget = ImageWidget(image_path=self.image_path)
@@ -226,6 +235,7 @@ class ImageSettingUI(SettingPage):
         self.image_widget_list.append(image_widget)
         return image_widget
 
+    @owned_action
     def start_play_image(self) -> None:
         front_engine_logger.info("[ImageSettingUI] start_play_image")
         # In slideshow mode, prime the first image from the chosen folder.
@@ -248,11 +258,12 @@ class ImageSettingUI(SettingPage):
         if slideshow:
             self._slideshow_timer.start(self._slideshow_interval_ms())
 
+    @owned_action
     def choose_slideshow_folder(self) -> None:
         front_engine_logger.info("[ImageSettingUI] choose_slideshow_folder")
-        folder = QFileDialog.getExistingDirectory(
+        folder = self.lifetime.after_dialog(QFileDialog.getExistingDirectory(
             self, language_wrapper.language_word_dict.get("slideshow_choose_folder", "Choose folder")
-        )
+        ))
         if folder:
             self.slideshow_folder = folder
 
@@ -262,6 +273,7 @@ class ImageSettingUI(SettingPage):
         except (TypeError, ValueError):
             return 5000
 
+    @owned_action
     def _prime_slideshow(self) -> bool:
         """載入資料夾清單並以第一張圖作為起始 / Load the folder and prime the first image."""
         if not self.slideshow_folder:
@@ -284,6 +296,7 @@ class ImageSettingUI(SettingPage):
         self.ready_to_play = True
         return True
 
+    @owned_action
     def _advance_slideshow(self) -> None:
         """輪播下一張，並清除已被關閉的覆蓋層 / Advance to the next image, pruning dead overlays."""
         if not self._slideshow_paths:
@@ -305,11 +318,12 @@ class ImageSettingUI(SettingPage):
         if not self.image_widget_list:
             self._slideshow_timer.stop()
 
+    @owned_action
     def choose_and_copy_file_to_cwd_image_dir_then_play(self) -> None:
         front_engine_logger.info("[ImageSettingUI] choose_and_copy_file_to_cwd_image_dir_then_play")
         self.ready_label.setText(language_wrapper.language_word_dict.get("Not Ready"))
         self.ready_to_play = False
-        self.image_path = choose_image(self)
+        self.image_path = self.lifetime.after_dialog(choose_image(self))
         if self.image_path:
             self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
             self.ready_to_play = True
@@ -317,6 +331,7 @@ class ImageSettingUI(SettingPage):
             reload_recent_combobox(self.recent_files_combobox, "image")
             self.start_play_image()  # chosen means shown: no second click
 
+    @owned_action
     def _apply_recent_file(self, _index: int = 0) -> None:
         path = self.recent_files_combobox.currentData()
         self.recent_files_combobox.setCurrentIndex(0)
@@ -327,6 +342,7 @@ class ImageSettingUI(SettingPage):
         self.ready_to_play = True
         self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
 
+    @owned_action
     def _on_file_dropped(self, path: str) -> None:
         front_engine_logger.info(f"[ImageSettingUI] _on_file_dropped | path={path}")
         self.image_path = path
@@ -336,6 +352,7 @@ class ImageSettingUI(SettingPage):
         reload_recent_combobox(self.recent_files_combobox, "image")
         self.start_play_image()  # a dropped file is shown at once
 
+    @owned_action
     def opacity_trick(self) -> None:
         front_engine_logger.info("[ImageSettingUI] opacity_trick")
         self.opacity_slider_value_label.setText(str(self.opacity_slider.value()))
@@ -347,7 +364,7 @@ class ImageSettingUI(SettingPage):
             "fullscreen": self.fullscreen_checkbox.isChecked(),
             "show_on_all_screen": self.show_on_all_screen_checkbox.isChecked(),
             "show_on_bottom": self.show_on_bottom_checkbox.isChecked(),
-            "target_monitor": self.target_monitor_combobox.currentText(),
+            "target_monitor": target_monitor_state(self.target_monitor_combobox),
         }
 
     def set_state(self, state: dict) -> None:
@@ -365,7 +382,4 @@ class ImageSettingUI(SettingPage):
             self.show_all_screen = bool(state["show_on_all_screen"])
         if "show_on_bottom" in state:
             self.show_on_bottom_checkbox.setChecked(bool(state["show_on_bottom"]))
-        if state.get("target_monitor") is not None:
-            index = self.target_monitor_combobox.findText(str(state["target_monitor"]))
-            if index >= 0:
-                self.target_monitor_combobox.setCurrentIndex(index)
+        apply_target_monitor_state(self.target_monitor_combobox, state.get("target_monitor"))

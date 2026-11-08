@@ -75,13 +75,19 @@ Help menu
 
 Plugins: enabling loading does not authorize a plugin. A plugin.json or single-file sidecar declares version, identity, entrypoint and capabilities; approval is checked before Python import and tied to the content digest. Changed code or declarations require approval again; legacy plugins require explicit full trust. Settings → Revoke plugin grants removes stored approvals; restart to unload already running code. Python plugins still run with full application privileges: declarations and consent are not an OS sandbox.
 
-Rendering: Settings → Overlay rendering selects Auto, GPU or Software and shows the backend actually used. The GPU compositor uses OpenGL textures, shaders and framebuffers for layer order, transforms, opacity and clipping; initialization failure falls back to software with a reason. Existing QPainter content can still be rasterized on the CPU before texture upload; web/video/native widgets may use separate windows. Capture or recording may read a GPU frame back to the CPU. These paths are not a promise of zero-copy capture or measured speed gains. Scene GPU composition currently covers IMAGE, GIF and TEXT; puppet rendering uses its own Imervue window.
+Rendering: Settings → Overlay rendering selects Auto, GPU or Software and shows the backend actually used. The GPU compositor uses OpenGL textures, shaders and framebuffers for layer order, transforms, opacity and clipping; initialization failure falls back to software with a reason. Existing QPainter content can still be rasterized on the CPU before texture upload; web/video/native widgets may use separate windows. Capture or recording may read a GPU frame back to the CPU. These paths are not a promise of zero-copy capture or measured speed gains. Scene GPU composition currently covers IMAGE, GIF and TEXT; puppet rendering uses its own Imervue window. Overlay redraws queue compositor updates until the parent window finishes painting, including when switching backends or monitors.
 
 :doc:`runtime_interoperability`
 
 Settings → macOS permissions and capabilities lists each feature as available, unavailable or unsupported and shows the permission or installation reason.
 
 Open Commands from the menu bar or press Ctrl+K / Ctrl+Shift+P inside FrontEngine. Search the current interface language, English labels or stable command names; Up/Down selects and Enter runs. Commands include page navigation, capture, notes, the screen filter, Workshop and existing global actions. Preset/quality actions accept a value. Favorites and the last 20 commands survive restart; arguments and search text are not saved.
+
+Plugin names do not replace built-in page entries.
+
+Loaded plugin pages also appear in command search. Opening a result returns to the existing page and preserves its current input.
+
+An exact name in the current interface language appears before favorites and recent commands. Changing the search selects its best match; updating favorites or the interface language without changing the query keeps the selected command and its argument.
 
 Settings use grouped cards: common actions stay visible, and secondary commands move into More actions menus. Advanced tools and messages expand with Show details. The scene editor places the canvas beside Properties, Preview and Animation tabs. Fields and inline controls wrap in narrow windows; the bottom action remains visible. Commands show favorite state and keyboard hints. A failed command keeps its input for retry; selecting a different command clears the previous argument.
 
@@ -100,3 +106,17 @@ Settings → Asset library registers selected images/GIFs, sprite pet folders, .
 Help → Platform capabilities shows read-only adapter prerequisites and precise latest failures without starting capture/listeners. Linux audio uses distro pulseaudio-utils (parec) with PulseAudio or PipeWire Pulse compatibility: default output monitor for spectrum/reactivity, default microphone for lip sync. Unlike the Windows peak-only meter, Linux meter/reactivity reads actual audio samples; lazy first enabled sample starts one owned worker/child, keeps only 2048 sanitized float samples in memory, drops stale data and never writes/sends audio. Stop/close/app shutdown reaps only owned capture children without GUI joins. Device/server/permission failures are explicit. Linux foreign-window geometry/layout/topmost/monitor movement uses python-xlib (installed on Linux), EWMH and physical XRandR work areas; opacity requires a compositing manager. X11 pynput supports desktop input with DISPLAY/server access. Native Wayland arbitrary-window positioning and desktop-wide pynput input are unavailable, even with Xwayland; the UI gives this reason and monitor restoration refuses unsupported movement. Other native Wayland applications are never described as globally monitored. Linux protocol acceptance uses an isolated X11/Wayland server and virtual Pulse devices; physical Linux audio/multi-monitor and macOS hardware acceptance remain pending.
 
 A meter stops its owned capture within 1.25 seconds after reactive sampling ends; a new enabled sample can restart it.
+
+Closing remote-control settings while choosing a public-certificate export path discards the destination. That export creates no certificate or output file and does not overwrite an existing file. Cancelling only the file picker allows another attempt in the open settings dialog.
+
+In Rules, Tab moves from the table to the other controls; arrow keys move between cells. Closing a scene action editor during file selection discards the returned path. Closing Rules while its target editor is open prevents the returned target from changing the rule. Cancelling either picker preserves the previous value, and you can reopen it to try again. Confirming a target changes the draft; confirm Rules to save it.
+
+In the screen-text result editor and the signage preset list, Tab moves to the next control and Shift+Tab moves back without changing the text. Enter still inserts a new line. You can reach Copy or the rotation interval, then close or cancel with the keyboard. Cancelling signage leaves its saved settings unchanged.
+
+If saving signage settings fails, the dialog shows the error and keeps your edits. The previous settings remain active. Correct the problem and confirm again to retry, or cancel to discard your edits.
+
+The signage preset list and rotation interval expose their visible labels as accessibility names. These names follow language changes without altering your settings.
+
+Scheduled presets show separate Hour and Minute labels. The preset, hour, minute, screensaver idle duration and source fields expose their visible labels as accessibility names, which follow language changes without changing the selected values.
+
+If saving the screensaver or scheduled preset settings fails, the dialog shows the error and keeps your choices. The previous settings remain active. Correct the problem and confirm again to retry, or cancel to discard your changes. The screensaver source names also follow language changes without changing the selected source.

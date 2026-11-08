@@ -5,6 +5,7 @@ from hashlib import sha256
 from pathlib import Path
 import tempfile
 from threading import Event
+from typing import Callable
 
 from frontengine.show.pet.layered_renderer import LayeredRenderer
 from frontengine.show.pet.wardrobe import AssetCatalog
@@ -79,16 +80,20 @@ class PetAssetLibrary:
             stage.rename(target)
         return load_layered_asset(target)
 
-    def install_many(self, sources, *, cancel: Event | None = None) -> list:
+    def install_many(self, sources, *, cancel: Event | None = None,
+                     progress: Callable[[int, int], None] | None = None) -> list:
         """Install a batch after a single scan; any invalid asset stops the batch."""
         self._check_root()
         cancel = cancel or Event()
         self.scan()
+        sources = tuple(sources)
         installed = []
         for source in sources:
             if cancel.is_set():
                 raise InterruptedError('Asset installation cancelled')
             installed.append(self.install(source, cancel=cancel, scanned=True))
+            if progress is not None:
+                progress(len(installed), len(sources))
         return installed
 
     def _copy_resources(self, asset, stage: Path, cancel: Event) -> None:

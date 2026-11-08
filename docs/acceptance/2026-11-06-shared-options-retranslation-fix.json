@@ -1,0 +1,125 @@
+{
+  "base_commit": "f6d4d431",
+  "change": "Bind target-monitor choices and recent placeholder to existing retranslator. Reload forgets obsolete item bindings before binding the replacement placeholder. No signature or settings schema change.",
+  "red": {
+    "failed": 17,
+    "seconds": 9.41,
+    "failure": "This screen remained English after switching to Traditional Chinese; recent placeholder and span entry also failed expected-label assertions.",
+    "log": ".audit/shared-options-red.txt"
+  },
+  "green": {
+    "options_monitor_tests": {
+      "passed": 53,
+      "seconds": 12.98
+    },
+    "docs_translations_progress": {
+      "passed": 54,
+      "seconds": 3.25
+    },
+    "pyflakes": "both changed Python files clean",
+    "diff_check": "clean"
+  },
+  "native": {
+    "pages": 10,
+    "languages": 7,
+    "page_visits": 70,
+    "option_comparisons": 105,
+    "mismatches": [],
+    "index_changes": {
+      "('tab_video_text', 'target_monitor_combobox')": [],
+      "('tab_video_text', 'recent_files_combobox')": [],
+      "('tab_image_text', 'target_monitor_combobox')": [],
+      "('tab_image_text', 'recent_files_combobox')": [],
+      "('tab_web_text', 'target_monitor_combobox')": [],
+      "('tab_gif_text', 'target_monitor_combobox')": [],
+      "('tab_gif_text', 'recent_files_combobox')": [],
+      "('tab_text_text', 'target_monitor_combobox')": [],
+      "('tab_particle_text', 'target_monitor_combobox')": [],
+      "('tab_particle_text', 'recent_files_combobox')": [],
+      "('tab_pet_text', 'target_monitor_combobox')": [],
+      "('tab_pet_text', 'recent_files_combobox')": [],
+      "('tab_focus_text', 'target_monitor_combobox')": [],
+      "('tab_screen_care_text', 'target_monitor_combobox')": [],
+      "('tab_presentation_text', 'target_monitor_combobox')": []
+    },
+    "callback_errors": [],
+    "runtime_closed": true,
+    "temporary_directory_removed": true,
+    "home_world_unchanged": true
+  },
+  "observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "child_exit": 0,
+    "observation_only": true
+  },
+  "evidence_sha256": {
+    "result.json": "54de0a6512b2c0803383f1ba7d9cc4fdeb69c088f8c1bc784c654ee0d83c8cea",
+    "observer.json": "108902181ee471ddb835401d5d799d056e70c9ac4aead7d271ce043e584e29a5",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "Traditional_Chinese-900-tab_video_text.png": "9657258a4e14e5aea4f88519fa4b19838fdf578b5ac7b4fd5d4489e984084c90"
+  },
+  "visual_review": "Original-resolution Traditional Chinese video page confirms translated Recent and target-monitor labels.",
+  "documentation": {
+    "updated": 17,
+    "html": [
+      {
+        "language": "Eng",
+        "latest_paragraph_present": true,
+        "html_sha256": "7aca17b516f3dacf62f671ec5fd87c0df6860df0d0909fbcef01a9d334753bd5"
+      },
+      {
+        "language": "Zh",
+        "latest_paragraph_present": true,
+        "html_sha256": "5373f1f5eb619f525f20868aea962142233209921d4ebe022aa368baaf25a576"
+      },
+      {
+        "language": "ZhCn",
+        "latest_paragraph_present": true,
+        "html_sha256": "531826b2b877f10e9b024d18195e38e625112c35451b8ee0cb52b7fc416844e6"
+      },
+      {
+        "language": "De",
+        "latest_paragraph_present": true,
+        "html_sha256": "ee176e417429e741b6c5f09978b80d69ac0ce254738a9d42eccd2bdd41fe4992"
+      },
+      {
+        "language": "Fr",
+        "latest_paragraph_present": true,
+        "html_sha256": "845f177dd9cdbf11a06b828a3dc12fb9514dc3f64d08b24ff74b240316c809c4"
+      },
+      {
+        "language": "It",
+        "latest_paragraph_present": true,
+        "html_sha256": "6efe62cc8b8916ca63a73a287ee4279c45926fc08ae1b62cb29badb7ad357989"
+      },
+      {
+        "language": "Ru",
+        "latest_paragraph_present": true,
+        "html_sha256": "4028f978c8af8e9b4fb2d04319a76be91503c8fcff8735c49ef166c1de5d0fde"
+      }
+    ],
+    "sphinx": "-W --keep-going success without warnings/errors"
+  },
+  "collection": {
+    "total": 3299,
+    "seconds": 7.34
+  },
+  "pending": [
+    "Full regression",
+    "Independent review and integration",
+    "Physical multi-monitor/hotplug acceptance; span test used two injected monitor objects"
+  ]
+}

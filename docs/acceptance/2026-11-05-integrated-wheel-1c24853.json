@@ -1,0 +1,156 @@
+{
+  "product_commit": "1c24853",
+  "integrated_commits": {
+    "075594f": "34457c8",
+    "cbe7bf2": "1c24853"
+  },
+  "previous_full_regression": {
+    "exit": 1,
+    "source_unchanged": true,
+    "source_count": 748,
+    "interpreter": "D:\\Codes\\FrontEngine\\.audit\\test-runtime-3145\\Scripts\\python.exe",
+    "passed": 3140,
+    "skipped": 3,
+    "failed": 1,
+    "seconds": 2131.09,
+    "failure": "Explicit-Arial test actually used unresolved Sans Serif, producing width 754 instead of 536."
+  },
+  "wheel": {
+    "source_revision": "1c24853",
+    "wheel": "frontengine_dev-1.0.86-py3-none-any.whl",
+    "sha256": "fb730ba604453a0853427f463a6e2b55f5b894fc021b7c07e0e48879393f6674",
+    "python_files_equal": 502,
+    "pet_game_assets_equal": 149,
+    "installed_package_files_equal": 711,
+    "installed_python_set_equal": true,
+    "scope": "Existing isolated dependency environment, not fresh dependency resolution or clean-machine acceptance."
+  },
+  "steps": [
+    {
+      "step": "install",
+      "exit": 0
+    },
+    {
+      "step": "pip-check",
+      "exit": 0
+    },
+    {
+      "step": "smoke",
+      "exit": 0
+    }
+  ],
+  "installed_smoke": {
+    "message_languages": [
+      "English",
+      "Traditional_Chinese",
+      "Simplified_Chinese",
+      "Deutsch",
+      "Russian",
+      "France",
+      "Italy"
+    ],
+    "photo_message_translated": true,
+    "rendering_checks": [
+      {
+        "requested_backend": "auto",
+        "actual_backend": "software",
+        "red_then_blue": true,
+        "resized_pixels": [
+          280,
+          140
+        ],
+        "submitted_during_paint": false
+      },
+      {
+        "requested_backend": "gpu",
+        "actual_backend": "software",
+        "red_then_blue": true,
+        "resized_pixels": [
+          280,
+          140
+        ],
+        "submitted_during_paint": false
+      },
+      {
+        "requested_backend": "software",
+        "actual_backend": "software",
+        "red_then_blue": true,
+        "resized_pixels": [
+          280,
+          140
+        ],
+        "submitted_during_paint": false
+      }
+    ],
+    "overlay_checks": [
+      {
+        "backend": "auto",
+        "note_text_pixels": 520,
+        "toolbar_brightness_ratio": 1.0
+      },
+      {
+        "backend": "gpu",
+        "note_text_pixels": 520,
+        "toolbar_brightness_ratio": 1.0
+      },
+      {
+        "backend": "software",
+        "note_text_pixels": 520,
+        "toolbar_brightness_ratio": 1.0
+      }
+    ],
+    "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "prefix": "D:\\Codes\\FrontEngine\\.audit\\clean-front-integration-311",
+    "package": "D:\\Codes\\FrontEngine\\.audit\\clean-front-integration-311\\Lib\\site-packages\\frontengine\\__init__.py",
+    "qt": "6.12.0",
+    "snapshot_version": 8,
+    "residents": 1,
+    "furniture": 3,
+    "work_empty_state": true,
+    "cancel_selection": true,
+    "tutorial_skip_hidden": true,
+    "snapshot_equal_after_reopen": true,
+    "photo_saved": true,
+    "home_saved": true,
+    "same_app_reopened": true,
+    "closed": true,
+    "scope": "Current wheel reinstalled into existing isolated dependency environment, fresh temporary settings, Qt offscreen; OS key listeners, foreground watcher, share watcher, session lock and Workshop discovery replaced at boundary; no native device acceptance"
+  },
+  "next_full_regression": {
+    "source": "1c24853",
+    "status_at_recording": "running",
+    "source_files": 748,
+    "process": {
+      "pid": 44472,
+      "parent_pid": 28120,
+      "command": [
+        "D:\\Codes\\FrontEngine\\.audit\\test-runtime-3145\\Scripts\\python.exe",
+        "-m",
+        "pytest",
+        "-p",
+        "live_failure_reporter",
+        "-p",
+        "responsive_failure_probe_1c24853",
+        "tests/",
+        "-q",
+        "--maxfail=5",
+        "-o",
+        "faulthandler_timeout=180",
+        "--junitxml=D:\\Codes\\FrontEngine\\.audit\\worktrees\\ownership-integration\\.audit\\full-regression-1c24853\\junit.xml"
+      ]
+    },
+    "failure_probe": "Captures both home responsive tests, including actual QFontInfo family; assertions stay unchanged."
+  },
+  "limits": [
+    "Existing isolated dependency environment; not fresh resolution, published lifetime-API compatibility, or clean-machine acceptance.",
+    "Installed smoke uses Qt offscreen and substitutes OS/Workshop boundaries; actual compositor backend is software for every preference.",
+    "Latest full-suite result and independent review remain pending."
+  ],
+  "evidence_sha256": {
+    "installed_1c24853_smoke.py": "5a0398fc555865e0adce979a50c289a7dbb44a72dcdf8c32d2a8af526be22e89",
+    "run_installed_1c24853.py": "4687956c5ff302eed747523fcec7d1bbfa538c3060bd5a9684b20b4b0ee10520",
+    "verify_wheel_1c24853.py": "99b9e54a93dab6fc0a9d8581b4ad27c18a8b4b7574bd0d4ae5a0f190eb4dc4b4",
+    "responsive_failure_probe_1c24853.py": "c65d16fc6bdce707bf6f39136029d5a115eb8af2f4d7f24968bc26095f7801a8",
+    "junit.xml": "da6a92ee04f62c4beedf8dd549d00685babe5cc940966834cae3977ef82c31b8"
+  }
+}

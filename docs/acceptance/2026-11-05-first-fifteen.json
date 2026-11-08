@@ -1,0 +1,39 @@
+{
+  "passed": true,
+  "requirement": "progress.md #23",
+  "launched_revision": "1821e85f907c65cb84898a7aedb2612e06df8c7d",
+  "python": "3.14.5 (tags/v3.14.5:5607950, May 10 2026, 10:43:50) [MSC v.1944 64 bit (AMD64)]",
+  "elapsed_s": 900.5480069999903,
+  "milestones_s": {
+    "home_established": 2.2715286999882665,
+    "first_life_interaction": 30.56015199999092,
+    "first_work_paid": 266.5936655999976,
+    "furniture_purchase": 267.534056199991
+  },
+  "world_elapsed_s": 898.2,
+  "active_elapsed_s": 898.276478300002,
+  "cold_reload": {
+    "world_equal": true,
+    "profiles_persisted": true,
+    "leases_reacquired": true
+  },
+  "recording": {
+    "source_frames": 161,
+    "first_capture_s": 1.4809202999895206,
+    "last_capture_s": 896.5431000999961,
+    "session_end_s": 900.5480069999903,
+    "gap_min_s": 5.000048499990953,
+    "gap_max_s": 6.008118300000206,
+    "video_duration_s": 899.2,
+    "source_coverage_s": 899.0670867000008,
+    "decoded": true
+  },
+  "artifact_sha256": {
+    "final-save.json": "57eda2953abc046b14490e4883ae2f2383e3d3d4896f32dad9ef9900360f8493",
+    "actions.jsonl": "1860753e13e994a6f8524b485019ae33059746976d421cf6a30b3922e903900b",
+    "sampled-session.mp4": "11e0bdf017c6c1b4816e7865dcb3fa99a5c34c4d78e3ff04a30595611944e97d"
+  },
+  "scope": "Fresh-save standalone PetHomePage; widget-local controls; actual normal timers on hidden Windows desktop. Sampled widget recording, no audio or continuous motion capture. Not full offline/physical-input/hardware acceptance.",
+  "evidence_directory": ".audit/first-fifteen-full",
+  "cold_reload_evidence": ".audit/first-fifteen-full-cold"
+}

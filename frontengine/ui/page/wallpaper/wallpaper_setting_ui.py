@@ -6,6 +6,7 @@ The wallpaper page: rotate a folder of images and animations beneath every
 window, optionally shuffled and pulsing with the system audio level — and each
 monitor can point at a different folder.
 """
+from frontengine.ui.runtime_lifetime import owned_action
 from datetime import datetime
 from typing import Callable, Dict
 
@@ -37,10 +38,10 @@ from frontengine.utils.playlist.playlist import (
 class WallpaperSettingUI(SettingPage):
     """桌布設定頁 / The wallpaper settings page."""
 
-    def __init__(self):
+    def __init__(self, *, lifetime):
         front_engine_logger.info("[WallpaperSettingUI] Init")
         super().__init__("tab_wallpaper_text", "page_subtitle_wallpaper",
-                         "Wallpaper", "A rotating wallpaper that sits below every window.")
+                         "Wallpaper", "A rotating wallpaper that sits below every window.", lifetime=lifetime)
 
         # 每個螢幕各自的資料夾、桌布與播放清單
         # Per-monitor folder, wallpaper widget and playlist.
@@ -139,32 +140,37 @@ class WallpaperSettingUI(SettingPage):
         data = self.monitor_combobox.currentData()
         return int(data) if data is not None else 0
 
+    @owned_action
     def choose_folder(self) -> None:
         """為目前選到的螢幕挑一個資料夾。"""
-        folder = QFileDialog.getExistingDirectory(
+        folder = self.lifetime.after_dialog(QFileDialog.getExistingDirectory(
             self, language_wrapper.language_word_dict.get(
-                "wallpaper_choose_folder", "Choose folder..."))
+                "wallpaper_choose_folder", "Choose folder...")))
         if folder:
             self.set_folder(self.current_monitor(), folder)
 
+    @owned_action
     def set_folder(self, monitor: int, folder: str) -> None:
         """指定某螢幕使用的資料夾。"""
         self.folders[int(monitor)] = str(folder)
         self._show_folder_for_monitor()
 
+    @owned_action
     def choose_quiet_folder(self) -> None:
         """為目前選到的螢幕挑一個「工作時段」資料夾。"""
-        folder = QFileDialog.getExistingDirectory(
+        folder = self.lifetime.after_dialog(QFileDialog.getExistingDirectory(
             self, language_wrapper.language_word_dict.get(
-                "wallpaper_quiet_folder", "Quiet folder..."))
+                "wallpaper_quiet_folder", "Quiet folder...")))
         if folder:
             self.set_quiet_folder(self.current_monitor(), folder)
 
+    @owned_action
     def set_quiet_folder(self, monitor: int, folder: str) -> None:
         """指定某螢幕在工作時段使用的資料夾。"""
         self.quiet_folders[int(monitor)] = str(folder)
         self._show_folder_for_monitor()
 
+    @owned_action
     def _show_folder_for_monitor(self) -> None:
         empty = language_wrapper.language_word_dict.get(
             "wallpaper_no_folder", _NO_FOLDER)
@@ -204,12 +210,14 @@ class WallpaperSettingUI(SettingPage):
         return schedule.playlist_for(self.now_provider().hour) or schedule.default
 
     # --- lifecycle -------------------------------------------------------
+    @owned_action
     def toggle_wallpaper(self) -> None:
         if self.wallpaper_widgets:
             self.stop_wallpaper()
         else:
             self.start_wallpaper()
 
+    @owned_action
     def start_wallpaper(self) -> None:
         """為每個有指定資料夾的螢幕開一張桌布。"""
         front_engine_logger.info("[WallpaperSettingUI] start_wallpaper")
@@ -221,7 +229,7 @@ class WallpaperSettingUI(SettingPage):
             schedule = self.build_schedule(monitor)
             playlist = schedule.playlist_for(self.now_provider().hour) or schedule.default
             if playlist is None or not len(playlist):
-                front_engine_logger.warning(f"[WallpaperSettingUI] no media in {folder}")
+                self.lifetime.after_dialog(front_engine_logger.warning(f"[WallpaperSettingUI] no media in {folder}"))
                 continue
             widget = WallpaperWidget(react_strength=self.react_strength_slider.value())
             widget.set_ui_window_flag(show_on_bottom=True)
@@ -229,7 +237,7 @@ class WallpaperSettingUI(SettingPage):
             widget.setScreen(screen)
             widget.setGeometry(screen.geometry())
             widget.set_media(playlist.next())
-            widget.set_audio_level_provider(audio_level_provider_for_screen(screen))
+            widget.set_audio_level_provider(audio_level_provider_for_screen(screen, lifetime=self.lifetime))
             widget.set_audio_react(self.react_checkbox.isChecked(),
                                    self.react_strength_slider.value())
             widget.show()
@@ -260,6 +268,7 @@ class WallpaperSettingUI(SettingPage):
         retranslator.set_text(
             self.start_button, "wallpaper_start", "Start wallpaper")
 
+    @owned_action
     def advance_all(self) -> None:
         """每個螢幕各自換到「此刻該用的清單」的下一張。"""
         for monitor, widget in tuple(self.wallpaper_widgets.items()):
@@ -273,11 +282,13 @@ class WallpaperSettingUI(SettingPage):
             except RuntimeError:
                 self.wallpaper_widgets.pop(monitor, None)
 
+    @owned_action
     def _apply_interval(self) -> None:
         if self.advance_timer.isActive():
             self.advance_timer.start(
                 clamp_interval(self.interval_combobox.currentData()) * 1000)
 
+    @owned_action
     def _apply_audio_react(self) -> None:
         for widget in tuple(self.wallpaper_widgets.values()):
             try:

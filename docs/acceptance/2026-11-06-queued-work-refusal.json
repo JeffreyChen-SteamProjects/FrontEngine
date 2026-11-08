@@ -1,0 +1,77 @@
+{
+  "baseline": "3b65d5d8",
+  "result": {
+    "passed": true,
+    "sleep_status": "accepted",
+    "parked": false,
+    "away": false,
+    "resident_present": true,
+    "refused_caption": "四處走走（自由時間） · 大約還剩 1 分鐘\n婉拒：太累了，沒辦法工作。",
+    "accepted_sleep_caption": "睡覺中（你交代的）",
+    "events": [
+      {
+        "kind": "refused",
+        "time": 1200200,
+        "resident": "ab84ee5fc719442993d2b2dd3b3e0e24",
+        "command": "work",
+        "reason": "too_tired"
+      },
+      {
+        "kind": "activity",
+        "time": 1200200,
+        "resident": "ab84ee5fc719442993d2b2dd3b3e0e24",
+        "activity": "wander",
+        "reason": "free_time"
+      },
+      {
+        "kind": "commissions_refreshed",
+        "time": 1200200,
+        "day": 1
+      }
+    ],
+    "accepted_activity": "sleep",
+    "runtime_closed": true,
+    "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\queued-work-refusal\\queued",
+    "scope": "Native MainUI on private desktop; deterministic initial accumulator fixture; two explicit ordinary simulation steps, service timer stopped, validates visible captions and recovery only; global service starts, Workshop and lock query substituted",
+    "temporary_directory_removed": true
+  },
+  "observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "child_exit": 0,
+    "observation_only": true
+  },
+  "harness_source": "import hashlib\nimport json\nimport logging\nimport os\nfrom pathlib import Path\nimport shutil\nimport sys\nimport tempfile\nimport traceback\nimport uuid\nfrom time import monotonic\n\nfrom complete_main_onboarding_native import observation\n\nROOT = Path(__file__).resolve().parents[1]\nsys.path.insert(0, str(ROOT))\nsys.path.insert(0, str(ROOT / 'tests/integration'))\nimport hidden_desktop\n\nsource = Path(sys.argv[1]).resolve()\noutput = Path(sys.argv[2]).resolve()\noutput.mkdir(parents=True, exist_ok=True)\nif not hidden_desktop.is_child(output):\n    assert not (output / 'result.json').exists(), 'Use a fresh output directory'\n    hidden_desktop.DESKTOP = f'FrontEngineColdReload{os.getpid()}_{uuid.uuid4().hex[:8]}'\n    before = observation()\n    code = hidden_desktop.run_on_hidden_desktop(__file__, str(source), str(output), timeout_ms=180000)\n    (output / 'observer.json').write_text(json.dumps({'before': before, 'after': observation(),\n        'child_exit': code, 'observation_only': True}, indent=2), encoding='utf-8')\n    raise SystemExit(code)\n\nos.environ['QT_QPA_PLATFORM'] = 'windows'\ncase = source.name\nresult = {'passed': False}\ntry:\n    with tempfile.TemporaryDirectory(prefix='fe-current-cold-reload-') as folder:\n        previous = Path.cwd()\n        os.chdir(folder)\n        try:\n            from PySide6.QtCore import QCoreApplication, QEvent\n            from PySide6.QtTest import QTest\n            from PySide6.QtWidgets import QApplication\n            from frontengine.ui.page.pet_game import home_page\n            from frontengine.utils.session_lock import session_lock\n            from frontengine.user_setting.user_setting_file import user_setting_dict\n            from frontengine.utils.pet_game import snapshot\n\n            home_page.workshop_pack_roots = lambda: []\n            session_lock.is_session_locked = lambda: False\n            app = QApplication([])\n            app.setQuitOnLastWindowClosed(False)\n            from frontengine.ui import main_ui\n            main_ui.CriticalExit.init_critical_exit = lambda self: None\n            main_ui.HotkeyService.start = lambda self: False\n            main_ui.AppProfileService.start = lambda self: None\n            main_ui.ShareWatchService.start = lambda self: None\n            window = main_ui.FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)\n            lifetime = window.lifetime\n            page = window.pet_home_ui\n            try:\n                from frontengine.utils.pet_game import simulation\n                from frontengine.show.pet_game.captions import result_text\n                service = page.service\n                from PySide6.QtGui import QGuiApplication\n                screen = QGuiApplication.primaryScreen()\n                area = screen.availableGeometry()\n                world = service.create_home((screen.name() or 'primary')[:128], area.x(), area.bottom(), 48, seed=5, furnish=True)\n                world.automatic = False\n                pet = service.profiles.create('Mochi')['id']\n                service.profiles.update(pet, {'mood': 80, 'fullness': 90, 'energy': 26})\n                assert service.adopt(pet) == 'accepted'\n                resident = world.residents[pet]\n                resident.accumulators['energy'] = -59800\n                assert world.create_task('letter', pet)[0] == 'accepted'\n                world.drain_events()\n                assert world.command(pet, 'work') == 'accepted'\n                simulation.step(world)\n                events = world.drain_events()\n                assert resident.needs['energy'] == 25\n                assert any(e['kind'] == 'refused' and e['reason'] == 'too_tired' for e in events)\n                window.resize(1280, 960)\n                window.show()\n                page.refresh()\n                page.tabs.setCurrentIndex(page.tabs.keys().index('pet_home_residents_section'))\n                page.select_resident(pet)\n                QTest.qWait(1000)\n                page._scroll.ensureWidgetVisible(page.residents.activity)\n                QTest.qWait(200)\n                caption = page.residents.activity.text()\n                assert result_text('too_tired') in caption, caption\n                assert not page.residents.activity.visibleRegion().isEmpty()\n                assert window.grab().save(str(output / 'refused.png'))\n                sleep_status = world.command(pet, 'sleep')\n                result.update(sleep_status=sleep_status, parked=resident.parked, away=resident.away, resident_present=pet in world.residents, refused_caption=caption)\n                assert sleep_status == 'accepted', result\n                simulation.step(world)\n                assert resident.activity.kind == 'sleep'\n                page.refresh()\n                recovered = page.residents.activity.text()\n                assert result_text('too_tired') not in recovered\n                page._scroll.ensureWidgetVisible(page.residents.activity)\n                QTest.qWait(200)\n                assert window.grab().save(str(output / 'accepted-sleep.png'))\n                result.update(refused_caption=caption, accepted_sleep_caption=recovered,\n                              events=events, accepted_activity=resident.activity.kind)\n            finally:\n                window.request_shutdown()\n                deadline = monotonic() + 120\n                while not lifetime.closed and monotonic() < deadline:\n                    QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)\n                    app.processEvents()\n                    QTest.qWait(10)\n                assert lifetime.closed, (lifetime.state, lifetime.error)\n            result.update(passed=True, runtime_closed=True, python=sys.version,\n                source=str(source),\n                scope='Native MainUI on private desktop; deterministic initial accumulator fixture; two explicit ordinary simulation steps, service timer stopped, validates visible captions and recovery only; global service starts, Workshop and lock query substituted')\n        finally:\n            logging.shutdown()\n            os.chdir(previous)\n    result['temporary_directory_removed'] = True\nexcept Exception:\n    result.update(passed=False, error=traceback.format_exc())\n(output / 'result.json').write_text(json.dumps(result, indent=2), encoding='utf-8')\nraise SystemExit(0 if result['passed'] else 1)\n",
+  "harness_sha256": "193b58891c9e66078ee476f2b03a195a8ad59983f7d910ff97cae066acbc0b37",
+  "screenshots": {
+    "refused.png": "a1b8f06b216f50b586f777700626b1c2d6841f5a7f39fc1a3e9b49821d0fa0f1",
+    "accepted-sleep.png": "74c9ab0fa724d6def3fc4a1369fc65f95fcb1a9ec98887b281478e09b3b73dc3"
+  },
+  "failed_first_probe": {
+    "passed": false,
+    "error": "Traceback (most recent call last):\n  File \"D:\\Codes\\FrontEngine\\.audit\\worktrees\\queued-work-refusal\\.audit\\native_queued_refusal.py\", line 90, in <module>\n    assert world.command(pet, 'sleep') == 'accepted'\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n"
+  },
+  "measurement_correction": "Initial fixture named nonexistent screen; captured parked caption and screens_changed implementation show why sleep could be refused. Final fixture uses actual primary screen identity.",
+  "checks": {
+    "red": "Expected Too tired to work. absent from Walking around (free time).",
+    "green": "43 automation/life/profession tests passed in8.40s;54 page/documentation tests passed in124.36s."
+  },
+  "limits": [
+    "Two explicit simulation steps with fixed initial accumulator; not normal-speed acceptance.",
+    "Global service starts, Workshop and session-lock substituted.",
+    "Integration, complete regression of this revision and independent review pending."
+  ]
+}

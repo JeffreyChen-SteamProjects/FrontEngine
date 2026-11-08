@@ -1,0 +1,19 @@
+{
+  "product_test_commit": "c64b2e8d",
+  "collected": 3336,
+  "expected_passed": 3333,
+  "expected_skipped": 3,
+  "parent_queue_pid": 62492,
+  "source_files": 753,
+  "collection_seconds": 6.91,
+  "required_new_regressions": 2,
+  "status": "queued; full regression not yet run",
+  "running_predecessor_observation": {
+    "product": "dcf098e5",
+    "runner_pid": 63360,
+    "pytest_launcher_pid": 59700,
+    "pytest_process_pid": 20892,
+    "last_completed_progress_percent": 37,
+    "terminal_result_present": false
+  }
+}

@@ -108,13 +108,14 @@ def test_scene_clear_tolerates_manually_closed_native_windows():
     assert manager.graphic_scene.items() == []
 
 
-def test_close_scene_tolerates_manually_closed_views_then_clears_remaining_content():
+def test_close_scene_tolerates_manually_closed_views_then_clears_remaining_content(*, lifetime_factory):
     from PySide6.QtCore import QCoreApplication, QEvent
     from PySide6.QtWidgets import QWidget
     from shiboken6 import isValid
     from frontengine.show.scene.compositor_view import SceneCompositorView
     from frontengine.ui.page.scene_setting.scene_setting_ui import SceneSettingUI
-    page = SceneSettingUI()
+    lifetime_factory()
+    page = SceneSettingUI(lifetime=lifetime_factory())
     closed = SceneCompositorView(page.scene.graphic_scene, backend='software')
     live = SceneCompositorView(page.scene.graphic_scene, backend='software')
     page.scene.view_list.extend([closed, live])

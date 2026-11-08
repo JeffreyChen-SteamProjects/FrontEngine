@@ -27,6 +27,112 @@ def wait(predicate) -> None:
     assert predicate()
 
 
+@pytest.mark.parametrize('operation', ['clear', 'import'])
+@pytest.mark.parametrize('closing', ['reject', 'close', 'destroy'])
+def test_closed_todo_panel_discards_modal_result(tmp_path, monkeypatch, operation, closing):
+    from copy import deepcopy
+    from PySide6.QtWidgets import QFileDialog, QMessageBox
+    from shiboken6 import isValid
+    from frontengine.ui.dialog.todo_dialog import TodoPanel
+
+    path = tmp_path / 'tasks.json'
+    service = TodoService(path)
+    dialog = TodoDialog(service)
+    today = TodoPanel(service, editor=False)
+    calendar_path = tmp_path / 'import.ics'
+    calendar_path.write_bytes(calendar('UID:extra\r\nSUMMARY:extra\r\nDTSTART:20261008T090000Z'))
+    try:
+        dialog.show()
+        today.show()
+        wait(lambda: service.loaded and not service.busy)
+        assert service.request('add', title='retain this task', due=None)
+        wait(lambda: not service.busy)
+        before = deepcopy(service.items)
+        before_bytes = path.read_bytes()
+        started = []
+        service.started.connect(started.append)
+        panel = dialog.panel
+        def retire():
+            if closing == 'reject':
+                dialog.reject()
+            elif closing == 'close':
+                dialog.close()
+            else:
+                dialog.deleteLater()
+                QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+        def confirm(*_args):
+            retire()
+            return QMessageBox.StandardButton.Yes
+        def choose(*_args):
+            retire()
+            return str(calendar_path), ''
+        monkeypatch.setattr(QMessageBox, 'question', confirm)
+        monkeypatch.setattr(QFileDialog, 'getOpenFileName', choose)
+        (panel._clear if operation == 'clear' else panel._import)()
+        wait(lambda: not service.busy)
+        assert started == []
+        assert service.items == before
+        assert path.read_bytes() == before_bytes
+        assert today.entries.count() == 1
+        def unexpected(*_args):
+            pytest.fail('closed todo panel reopened a modal')
+        monkeypatch.setattr(QMessageBox, 'question', unexpected)
+        monkeypatch.setattr(QFileDialog, 'getOpenFileName', unexpected)
+        panel._clear()
+        panel._import()
+    finally:
+        service.stop()
+        if service.thread:
+            service.thread.join(5)
+        today.close()
+        if isValid(dialog):
+            dialog.close()
+
+
+@pytest.mark.parametrize('operation', ['clear', 'import'])
+def test_todo_modal_cancel_then_reopen_and_retry(tmp_path, monkeypatch, operation):
+    from PySide6.QtWidgets import QFileDialog, QMessageBox
+    from frontengine.ui.dialog.todo_dialog import TodoPanel
+
+    path = tmp_path / 'tasks.json'
+    calendar_path = tmp_path / 'import.ics'
+    calendar_path.write_bytes(calendar('UID:extra\r\nSUMMARY:extra\r\nDTSTART:20261008T090000Z'))
+    service = TodoService(path)
+    dialog = TodoDialog(service)
+    shared = TodoPanel(service, editor=False)
+    shared.today.setChecked(False)
+    answers = iter([QMessageBox.StandardButton.No, QMessageBox.StandardButton.Yes])
+    paths = iter([('', ''), (str(calendar_path), '')])
+    monkeypatch.setattr(QMessageBox, 'question', lambda *_args: next(answers))
+    monkeypatch.setattr(QFileDialog, 'getOpenFileName', lambda *_args: next(paths))
+    try:
+        dialog.show()
+        shared.show()
+        wait(lambda: service.loaded and not service.busy)
+        assert service.request('add', title='original task', due=None)
+        wait(lambda: not service.busy)
+        original = path.read_bytes()
+        action = dialog.panel._clear if operation == 'clear' else dialog.panel._import
+        action()
+        assert not service.busy
+        assert path.read_bytes() == original
+        dialog.reject()
+        dialog.show()
+        QApplication.processEvents()
+        action()
+        wait(lambda: not service.busy)
+        count = 0 if operation == 'clear' else 2
+        assert len(TodoRepository(path).items) == count
+        assert len(service.items) == count
+        assert dialog.panel.entries.count() == shared.entries.count() == count
+    finally:
+        service.stop()
+        if service.thread:
+            service.thread.join(5)
+        shared.close()
+        dialog.close()
+
+
 def test_folded_escaped_text_all_day_and_exclusive_end():
     entries = parse_calendar(calendar('UID:day-1\r\nSUMMARY:Long\\, title\r\n continued\r\n'
                                       'DESCRIPTION:one\\ntwo\\;three\\\\four\r\n'

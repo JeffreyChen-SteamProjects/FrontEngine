@@ -1,0 +1,55 @@
+{
+  "product_test_commit": "026840b2",
+  "source_count_unchanged": 752,
+  "sphinx": "HTML -W --keep-going succeeded; no warning/error markers",
+  "languages": [
+    {
+      "language": "Eng",
+      "latest_paragraph_present": true,
+      "html_sha256": "3c285d2d67a6ed17f2781590ae685e59f43495b7935d92459c39c5c61fe0f7ae"
+    },
+    {
+      "language": "Zh",
+      "latest_paragraph_present": true,
+      "html_sha256": "456b6fa008ab9fdeb2640c8ac3cd0cfb1e4ff069b6c81a3a483dee6357b71749"
+    },
+    {
+      "language": "ZhCn",
+      "latest_paragraph_present": true,
+      "html_sha256": "5d33dee0307f7325304e4a5a4a4ffcd6d40b1974135aaf5e40eb1bdda873d8a7"
+    },
+    {
+      "language": "De",
+      "latest_paragraph_present": true,
+      "html_sha256": "1ddb9beef0b0f8bb22d1ed4683e5648a4fba580dc98546d7fb76502fbc384112"
+    },
+    {
+      "language": "Fr",
+      "latest_paragraph_present": true,
+      "html_sha256": "8663e412c5b3fdb97a66ea7de1f3a9d41bc07c6609c45f477b56a6f7fb7e5d78"
+    },
+    {
+      "language": "It",
+      "latest_paragraph_present": true,
+      "html_sha256": "c194876b3dbea8949f36a1bcddfb5ad9135baf5c40b04941431c9ecbe26d51ab"
+    },
+    {
+      "language": "Ru",
+      "latest_paragraph_present": true,
+      "html_sha256": "1b7bcc96ec15ac5f434ad80a883c1660adfb29df144cb94df76353ca9c97ad15"
+    }
+  ],
+  "log_sha256": "18932bf9cfb4872f92564d59a166343cf970b5a64603fc8dbfb3755d53612c9f",
+  "full_regression": {
+    "session": 80480,
+    "parent_queue_pid": 48428,
+    "collected": 3273,
+    "expected_passed": 3270,
+    "expected_skipped": 3,
+    "state": "queued; no completion claim"
+  },
+  "limits": [
+    "HTML construction and text validation only; not visual review.",
+    "Full regression and independent review remain pending."
+  ]
+}

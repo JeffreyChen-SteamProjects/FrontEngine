@@ -11,7 +11,8 @@ class AudioProvider:
         self.closed += 1
 
 
-def test_pet_closes_native_provider_on_replace_and_close(tmp_path):
+def test_pet_closes_native_provider_on_replace_and_close(tmp_path, lifetime_factory):
+    lifetime_factory()
     pet = DesktopPetWidget(str(tmp_path / 'missing.png'))
     first, second = AudioProvider(), AudioProvider()
     pet.set_audio_level_provider(first)

@@ -1,5 +1,6 @@
 """Bounded UTF-8 file feeds; all filesystem access happens in a Qt worker."""
 from __future__ import annotations
+from frontengine.utils.work_lifetime import WorkLifetime, owned_callback
 
 import csv
 import io
@@ -10,7 +11,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
 
-from PySide6.QtCore import QObject, QRunnable, QThreadPool, QTimer, Qt, Signal
+from PySide6.QtCore import QObject, QRunnable, QTimer, Qt, Signal
 
 from frontengine.utils.multi_language.retranslate import translate
 from frontengine.utils.power_mode.power_mode import scaled_interval
@@ -155,8 +156,11 @@ class LocalFileTextSource(QObject):
     refresh_interval_ms = 0
 
     def __init__(self, path: str, field: str = "", interval_ms: int = 1000, parent=None,
-                 reader: Callable = read_file_text) -> None:
+                 reader: Callable = read_file_text, *, lifetime=None) -> None:
         super().__init__(parent)
+        self._owns_lifetime = lifetime is None
+        self.lifetime = lifetime or WorkLifetime()
+        self.lifetime.adopt(self)
         self.path, self.field, self.reader = path, field, reader
         try:
             self.interval_ms = max(500, min(3600000, int(interval_ms)))
@@ -177,13 +181,14 @@ class LocalFileTextSource(QObject):
 
     def refresh(self) -> None:
         """Schedule one bounded read without doing filesystem work on the UI thread."""
-        if self.closed or self.pending is not None:
+        if self.closed or not self.lifetime.accepting or self.pending is not None:
             return
         self.pending = _FileSignals()
         self.pending.finished.connect(self._finished, Qt.ConnectionType.QueuedConnection)
-        QThreadPool.globalInstance().start(_FileJob(
+        self.lifetime.submit(_FileJob(
             self.reader, (self.path, self.field, self.result), self.pending))
 
+    @owned_callback
     def _finished(self, result: FileTextResult) -> None:
         self.pending = None
         if self.closed:
@@ -204,4 +209,7 @@ class LocalFileTextSource(QObject):
     def stop(self) -> None:
         """Stop polling and suppress completion callbacks during teardown."""
         self.closed = True
+        self.pending = None
         self.timer.stop()
+        if self._owns_lifetime:
+            self.lifetime.close()

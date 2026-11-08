@@ -97,11 +97,12 @@ def test_plain_floor_mode_only_walks_idles_and_sleeps():
     assert set(_picks(_floor_pet(behaviour=BEHAVIOUR_FLOOR))) <= {'walk', 'idle'}
 
 
-def test_cycling_all_actions_is_the_default_everywhere(tmp_path):
+def test_cycling_all_actions_is_the_default_everywhere(tmp_path, *, lifetime_factory):
     from frontengine.ui.page.pet.pet_setting_ui import PetSettingUI
     from frontengine.user_setting.pet_profile_schema import presentation_defaults
+    lifetime_factory()
     assert presentation_defaults()['behaviour'] == BEHAVIOUR_ACTIONS
-    page = PetSettingUI()
+    page = PetSettingUI(lifetime=lifetime_factory())
     try:
         assert page.behaviour_combobox.currentData() == BEHAVIOUR_ACTIONS
         assert page.customization_defaults()['behaviour'] == BEHAVIOUR_ACTIONS

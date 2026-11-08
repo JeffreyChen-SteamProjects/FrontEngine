@@ -1,0 +1,27 @@
+{
+  "product": "76618453",
+  "exit": 0,
+  "tracked_python_count": 770,
+  "source_unchanged": true,
+  "diagnostics": "",
+  "limits": [
+    "Pyflakes checks static name/import errors, not behavior, security, native Qt lifecycle or independent review.",
+    "No entry-point script, build tool or EXE conversion was executed by this static scan."
+  ],
+  "scope_counts": {
+    "benchmarks": 5,
+    "docs": 1,
+    "examples": 4,
+    "exe": 4,
+    "frontengine": 502,
+    "steam_assets": 2,
+    "tests": 249,
+    "tools": 3
+  },
+  "evidence_sha256": {
+    "static-76618453.json": "a95cfc4476642c6d10286848456677842b519007f54c3c343e13eac6254f39d6",
+    "static-76618453.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "outstanding_review_note": "Inbox module header still describes category switches absent from its implementation; previously recorded in event-routing audit. Source remains frozen for full regression; this scan does not resolve that documentation debt.",
+  "frozen_product_test_files_unchanged": 751
+}

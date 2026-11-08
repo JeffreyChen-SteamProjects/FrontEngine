@@ -1,0 +1,90 @@
+{
+  "base_commit": "608223fa",
+  "red_regressions": 2,
+  "related_tests": {
+    "passed": 20,
+    "seconds": 2.65
+  },
+  "options": [
+    {
+      "language": "English",
+      "actual": "Captured pose",
+      "expected": "Captured pose",
+      "selected_data": null
+    },
+    {
+      "language": "Traditional_Chinese",
+      "actual": "\u62cd\u651d\u6642\u7684\u59ff\u52e2",
+      "expected": "\u62cd\u651d\u6642\u7684\u59ff\u52e2",
+      "selected_data": null
+    },
+    {
+      "language": "Simplified_Chinese",
+      "actual": "\u62cd\u6444\u65f6\u7684\u59ff\u52bf",
+      "expected": "\u62cd\u6444\u65f6\u7684\u59ff\u52bf",
+      "selected_data": null
+    },
+    {
+      "language": "Deutsch",
+      "actual": "Aufgenommene Pose",
+      "expected": "Aufgenommene Pose",
+      "selected_data": null
+    },
+    {
+      "language": "Russian",
+      "actual": "\u0421\u043d\u044f\u0442\u0430\u044f \u043f\u043e\u0437\u0430",
+      "expected": "\u0421\u043d\u044f\u0442\u0430\u044f \u043f\u043e\u0437\u0430",
+      "selected_data": null
+    },
+    {
+      "language": "France",
+      "actual": "Pose captur\u00e9e",
+      "expected": "Pose captur\u00e9e",
+      "selected_data": null
+    },
+    {
+      "language": "Italy",
+      "actual": "Posa acquisita",
+      "expected": "Posa acquisita",
+      "selected_data": null
+    }
+  ],
+  "observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "child_exit": 0
+  },
+  "cold_reopen": {
+    "passed": true,
+    "initial_snapshot_exact": true,
+    "profiles_exact": true,
+    "leases_reacquired": true,
+    "saved_exact": true,
+    "temporary_directory_removed": true
+  },
+  "runtime_closed": true,
+  "temporary_directory_removed": true,
+  "documentation": {
+    "files_updated": 17,
+    "sphinx_warning_as_error": true,
+    "rendered_paragraphs_checked": 7,
+    "checks_passed": 31
+  },
+  "limits": [
+    "Native MainUI synthetic captured pose; authored sleep pose/time preservation checked in unit regression.",
+    "Qt widget-local interactions on private desktop, not OS keyboard or screen-reader validation.",
+    "Full regression, independent review and integration pending."
+  ]
+}

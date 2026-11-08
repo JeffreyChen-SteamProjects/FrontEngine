@@ -5,7 +5,6 @@ from PySide6.QtGui import QMouseEvent
 
 from frontengine.show.pet_game.home_service import HomeService
 from frontengine.ui.page.pet_game.home_page import PetHomePage
-from frontengine.user_setting.pet_game_save import HomeSaveStore
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.utils.pet_game import behaviour, snapshot
 from frontengine.utils.pet_game.catalog import builtin_catalog
@@ -104,12 +103,13 @@ class FakeScreen:
 
 
 @pytest.fixture
-def page(tmp_path, monkeypatch):
+def page(tmp_path, monkeypatch, *, home_store_factory, lifetime_factory):
     from frontengine.user_setting.user_setting_file import user_setting_dict
+    lifetime_factory()
     monkeypatch.setitem(user_setting_dict, "pet_home_running", False)
     monkeypatch.setitem(user_setting_dict, "pet_home_on_desktop", True)
-    service = HomeService(None, HomeSaveStore(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None))
-    widget = PetHomePage(service)
+    service = HomeService(None, home_store_factory(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None))
+    widget = PetHomePage(service, lifetime=lifetime_factory())
     widget.resize(1200, 900)
     widget.show()
     widget.create_home()
@@ -150,3 +150,87 @@ def test_painting_an_area_on_the_overview(page):
         {QEvent.Type.MouseButtonPress: view.mousePressEvent, QEvent.Type.MouseMove: view.mouseMoveEvent,
          QEvent.Type.MouseButtonRelease: view.mouseReleaseEvent}[kind](event)
     assert page.service.world.zones[page.zone].areas == ((2, 6, "work"),)
+
+
+def test_strip_placement_uses_clicked_room(page):
+    world = page.service.world
+    first = page.zone
+    second = page.add_zone(FakeScreen('second', 1280))
+    bed = next(piece for piece in world.furniture.values() if piece.definition == 'bed_basic')
+    world.store(bed.identifier)
+    page.choose_zone(first)
+    page.layout_panel.toggle_arrange()
+    assert page.layout_panel.storage.select_key('bed_basic')
+    strip = next(strip for strip in page.strip_list if strip.zone == second)
+    strip.cell_clicked.emit(20)
+    placed = next(piece for piece in world.furniture.values() if piece.definition == 'bed_basic')
+    assert (placed.zone, placed.cell) == (second, 20)
+    assert page.zone == second
+
+
+def test_preview_only_appears_in_selected_room(page):
+    first = page.zone
+    page.add_zone(FakeScreen('second', 1280))
+    page.choose_zone(first)
+    preview = ('bed_basic', 5, False, None)
+    page.set_preview(preview)
+    for strip in page.strip_list:
+        assert strip.preview == (preview if strip.zone == first else None)
+
+
+def test_follow_from_other_strip_selects_residents_room(page):
+    world = page.service.world
+    first = page.zone
+    second = page.add_zone(FakeScreen('second', 1280))
+    resident = next(iter(world.residents))
+    assert world.transfer_resident(resident, second) == 'accepted'
+    page.choose_zone(first)
+    strip = next(strip for strip in page.strip_list if strip.zone == second)
+    strip.action_requested.emit('follow', resident)
+    assert page.zone == second
+    assert page.followed == resident
+
+
+def test_strip_move_does_not_place_previously_selected_storage_item(page):
+    world = page.service.world
+    bed = next(piece for piece in world.furniture.values() if piece.definition == 'bed_basic')
+    desk = next(piece for piece in world.furniture.values() if piece.definition == 'desk_basic')
+    world.store(bed.identifier)
+    page.refresh()
+    assert page.layout_panel.storage.select_key('bed_basic')
+    strip = page.strip_list[0]
+    strip.action_requested.emit('move', desk.identifier)
+    strip.cell_clicked.emit(20)
+    assert desk.cell == 20
+    assert world.stored('bed_basic') == 1
+
+
+def test_selecting_resident_from_list_shows_its_zone(page):
+    world = page.service.world
+    first = page.zone
+    second = page.add_zone(FakeScreen("second", 1280))
+    identifier = next(iter(world.residents))
+    assert world.transfer_resident(identifier, second) == "accepted"
+    page.choose_zone(first)
+    page.select_resident(None)
+    page.residents.list.setCurrentRow(0)
+    assert page.selected_resident == identifier
+    assert page.zone == second
+    assert page.view.zone == second
+    assert page.zone_combo.currentData() == second
+    assert page.view.selected == identifier
+
+
+@pytest.mark.parametrize("clear_selection", [False, True])
+def test_resident_selection_within_zone_keeps_layout_context(page, clear_selection):
+    identifier = next(iter(page.service.world.residents))
+    zone = page.zone
+    piece = next(iter(page.service.world.furniture))
+    page.select_furniture(piece)
+    preview = ("bed_basic", 20, False, None)
+    page.set_preview(preview)
+    page.select_resident(None if clear_selection else identifier)
+    assert page.zone == zone
+    assert page.selected_furniture == piece
+    assert page.view.preview == preview
+    assert page.view.selected == (piece if clear_selection else identifier)

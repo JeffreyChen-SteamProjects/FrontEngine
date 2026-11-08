@@ -76,13 +76,19 @@ Menü „Hilfe“
 
 Plugins: Aktiviertes Laden ist noch keine Freigabe. plugin.json oder eine Begleitdatei für ein einzelnes Plugin deklariert Version, Identität, Einstiegspunkt und Fähigkeiten. Zustimmung wird vor Python-Import geprüft und an die Inhaltsprüfsumme gebunden. Geänderter Code oder geänderte Deklarationen erfordern neue Zustimmung; alte Plugins benötigen ausdrückliches volles Vertrauen. Einstellungen → Plugin-Freigaben widerrufen löscht gespeicherte Freigaben; laufenden Code entlädt erst ein Neustart. Python-Plugins haben weiterhin alle Anwendungsrechte; Deklaration und Zustimmung sind keine Betriebssystem-Sandbox.
 
-Darstellung: Einstellungen → Overlay-Darstellung bietet Automatisch, GPU oder Software und zeigt den tatsächlich verwendeten Dienst. Der GPU-Compositor verwendet OpenGL-Texturen, Shader und Framebuffer für Reihenfolge, Transformation, Deckkraft und Ausschnitt; bei Initialisierungsfehler wird mit Begründung auf Software zurückgefallen. QPainter-Inhalte können weiter auf der CPU rasterisiert und hochgeladen werden; Web-/Video-/native Widgets können eigene Fenster verwenden. Aufnahme kann GPU-Bilder zur CPU zurücklesen. Das verspricht weder kopierfreie Aufnahme noch gemessene Leistungsgewinne. GPU-Szenenkomposition umfasst derzeit IMAGE, GIF und TEXT; Puppet-Darstellung verwendet ein eigenes Imervue-Fenster.
+Darstellung: Einstellungen → Overlay-Darstellung bietet Automatisch, GPU oder Software und zeigt den tatsächlich verwendeten Dienst. Der GPU-Compositor verwendet OpenGL-Texturen, Shader und Framebuffer für Reihenfolge, Transformation, Deckkraft und Ausschnitt; bei Initialisierungsfehler wird mit Begründung auf Software zurückgefallen. QPainter-Inhalte können weiter auf der CPU rasterisiert und hochgeladen werden; Web-/Video-/native Widgets können eigene Fenster verwenden. Aufnahme kann GPU-Bilder zur CPU zurücklesen. Das verspricht weder kopierfreie Aufnahme noch gemessene Leistungsgewinne. GPU-Szenenkomposition umfasst derzeit IMAGE, GIF und TEXT; Puppet-Darstellung verwendet ein eigenes Imervue-Fenster. Beim Neuzeichnen von Overlays wird der Compositor erst aktualisiert, nachdem das übergeordnete Fenster fertig gezeichnet wurde. Das gilt auch beim Wechsel des Backends oder Monitors.
 
 :doc:`runtime_interoperability`
 
 Einstellungen → macOS-Berechtigungen und Fähigkeiten zeigt jede Funktion als verfügbar, nicht verfügbar oder nicht unterstützt, mit Berechtigungs- oder Installationsgrund.
 
 Öffnen Sie Befehle in der Menüleiste oder drücken Sie in FrontEngine Strg+K / Strg+Umschalt+P. Suchen Sie in der aktuellen Sprache, mit englischen Namen oder festen Befehlsnamen; Pfeiltasten wählen, Enter führt aus. Enthalten sind Seitennavigation, Aufnahme, Notizen, Bildschirmfilter, Workshop und bestehende globale Aktionen. Preset/Qualität akzeptieren einen Wert. Favoriten und die letzten 20 Befehle bleiben erhalten; Parameter und Suchtext werden nicht gespeichert.
+
+Plugin-Namen ersetzen keine Einträge integrierter Seiten.
+
+Geladene Plugin-Seiten erscheinen auch in der Befehlssuche. Ein Suchergebnis öffnet die vorhandene Seite und erhält ihre aktuellen Eingaben.
+
+Ein exakt passender Name in der aktuellen Oberflächensprache steht vor Favoriten und zuletzt verwendeten Befehlen. Eine neue Suchanfrage wählt den besten Treffer. Werden bei unveränderter Anfrage Favoriten oder die Oberflächensprache geändert, bleiben der ausgewählte Befehl und sein Argument erhalten.
 
 Einstellungen sind in Karten gegliedert: häufige Aktionen bleiben sichtbar, weitere Befehle stehen unter Weitere Aktionen. Zusätzliche Werkzeuge und Meldungen öffnen sich mit Details anzeigen. Im Szeneneditor steht die Zeichenfläche neben den Reitern Eigenschaften, Vorschau und Animation. Schmale Fenster umbrechen Felder und Steuerelemente; die untere Aktion bleibt sichtbar. Die Befehlssuche zeigt Favoritenstatus und Tastaturhinweise. Nach einem Fehler bleibt die Eingabe für einen neuen Versuch erhalten; ein Befehlswechsel löscht den vorherigen Parameter.
 
@@ -101,3 +107,17 @@ Einstellungen → Materialbibliothek: Bilder/GIF, Sprite-Pet-Ordner, .puppet-Tex
 Hilfe → Plattformfähigkeiten zeigt Voraussetzungen/letzte Fehler ohne Capture/Listener. Linux: pulseaudio-utils (parec) und PulseAudio/PipeWire-Pulse; Standard-Ausgabemonitor für Spektrum/Reaktion, Standardmikrofon für Lippensync. Anders als Windows-Peakmeter liest Linux echte Samples; erst aktivierte Abfrage startet eigenen Worker/Prozess, 2048 bereinigte Float-Samples im RAM, veraltete verworfen, keine Speicherung/Übertragung. Stop/Schließen/Exit beendet nur eigene Kinder ohne GUI-Join, Geräte/Server/Rechtefehler sichtbar. Linux-Fenstergeometrie/Layout/Topmost/Monitorwechsel via python-xlib (Linux installiert), EWMH/physischem XRandR; Deckkraft braucht Compositor. X11-pynput braucht DISPLAY/Zugriff. Native Wayland-Positionierung/fremde Fenster und desktopweite pynput-Eingabe fehlen auch mit Xwayland; UI erklärt, Profilbewegung verweigert. Keine globale Beobachtungsbehauptung für andere Wayland-Apps. Protokollabnahme nutzt isolierte X11/Wayland-Server/virtuelle Pulse-Geräte; physische Linux-Audio/Mehrmonitor- und Mac-Abnahme offen.
 
 Ein Pegelmesser beendet seine eigene Aufnahme innerhalb von 1,25 Sekunden nach Ende der reaktiven Abfragen; eine neue aktivierte Abfrage kann sie neu starten.
+
+Werden die Fernsteuerungseinstellungen während der Auswahl eines Exportpfads für das öffentliche Zertifikat geschlossen, wird der Pfad verworfen. Dieser Export erstellt weder ein Zertifikat noch eine Ausgabedatei und überschreibt keine vorhandene Datei. Wird nur die Dateiauswahl abgebrochen, ist im geöffneten Einstellungsdialog ein weiterer Versuch möglich.
+
+In Regeln wechselt Tab von der Tabelle zu den anderen Bedienelementen; Pfeiltasten wechseln zwischen Zellen. Wird der Szenenaktionseditor während der Dateiauswahl geschlossen, wird der Pfad verworfen. Wird das Regelfenster bei geöffnetem Zieleditor geschlossen, ändert dessen Ergebnis die Regel nicht. Abbrechen behält den bisherigen Wert; erneutes Öffnen erlaubt einen weiteren Versuch. Das Bestätigen des Ziels ändert den Entwurf. Erst das Bestätigen des Regelfensters speichert ihn.
+
+Im Bildschirmtext-Editor und in der Signage-Preset-Liste wechselt Tab zum nächsten Bedienelement und Umschalt+Tab zurück, ohne den Text zu ändern. Enter fügt weiterhin einen Zeilenumbruch ein. Kopieren, Wechselintervall, Schließen und Abbrechen sind per Tastatur erreichbar. Das Abbrechen der Signage-Einstellungen lässt die gespeicherten Werte unverändert.
+
+Wenn die Signage-Einstellungen nicht gespeichert werden können, zeigt der Dialog den Fehler und behält Ihre Eingaben. Die bisherigen Einstellungen bleiben aktiv. Beheben Sie das Problem und bestätigen Sie erneut, oder brechen Sie ab, um die Änderungen zu verwerfen.
+
+Die Signage-Preset-Liste und das Wechselintervall verwenden ihre sichtbaren Beschriftungen als barrierefreie Namen. Diese folgen dem Sprachwechsel, ohne Ihre Einstellungen zu ändern.
+
+Geplante Presets zeigen getrennte Beschriftungen für Stunde und Minute. Preset, Stunde, Minute sowie Leerlaufdauer und Quelle des Bildschirmschoners verwenden ihre sichtbaren Beschriftungen als barrierefreie Namen. Diese folgen dem Sprachwechsel, ohne die ausgewählten Werte zu ändern.
+
+Schlägt das Speichern der Einstellungen für Bildschirmschoner oder geplante Presets fehl, zeigt der Dialog den Fehler an und behält Ihre Auswahl. Die bisherigen Einstellungen bleiben aktiv. Beheben Sie das Problem und bestätigen Sie erneut, um es noch einmal zu versuchen, oder brechen Sie ab, um die Änderungen zu verwerfen. Die Quellennamen des Bildschirmschoners folgen außerdem dem Sprachwechsel, ohne die gewählte Quelle zu ändern.

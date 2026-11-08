@@ -7,12 +7,40 @@ from weakref import WeakValueDictionary
 from PySide6.QtCore import QObject, QTimer, Signal
 
 from frontengine.user_setting.pet_profiles import PetProfiles
-from frontengine.user_setting.user_setting_file import user_setting_dict, write_user_setting
+from frontengine.user_setting.default_storage import default_storage
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.retranslate import translate
 from frontengine.utils.pet_companion import CompanionState
 
 _ACTIVE = WeakValueDictionary()
+
+
+class _PreparedPetClose:
+    def __init__(self, session: PetProfileSession) -> None:
+        self.session = session
+        self.running = session.care_timer.isActive()
+
+    def cancel(self) -> None:
+        session = self.session
+        if session._prepared_close is not self:
+            return
+        session._prepared_close = None
+        if self.running:
+            session.resume()
+        if not session.timer.isActive():
+            session.schedule()
+
+    def finalize(self) -> None:
+        session = self.session
+        if session._prepared_close is not self:
+            return
+        session._closed = True
+        session._prepared_close = None
+        session.appearance_renderer = None
+        session.timer.stop()
+        if _ACTIVE.get(session._key) is session:
+            _ACTIVE.pop(session._key, None)
+        session._storage_use.release()
 
 
 class PetProfileSession(QObject):
@@ -23,30 +51,39 @@ class PetProfileSession(QObject):
     def __init__(self, parent: QObject, identifier: str | None = None,
                  profiles: PetProfiles | None = None, name: str = "") -> None:
         super().__init__(parent)
-        self.profiles = profiles or PetProfiles(user_setting_dict, write_user_setting)
-        record = self.profiles.get(identifier) if identifier else self.profiles.create(name)
-        self.identifier = record["id"]
-        self._key = (id(self.profiles.settings), self.identifier)
-        if self._key in _ACTIVE:
-            raise ValueError(translate('pet_profile_active', 'This pet identity is already active; clone it to create another'))
-        _ACTIVE[self._key] = self
-        self._closed = False
-        self.initial = record
-        self.companion = CompanionState(record)
-        self.mode_revision = 0
-        self.appearance_renderer = None
-        self._clock = monotonic
-        self._last_tick = None
-        self.care_timer = QTimer(self)
-        self.care_timer.setInterval(100)
-        self.care_timer.timeout.connect(self._tick)
-        self.timer = QTimer(self)
-        self.timer.setSingleShot(True)
-        self.timer.timeout.connect(self.flush)
+        self.profiles = profiles if profiles is not None else default_storage().profiles()
+        self._storage_use = self.profiles._acquire_use()
+        self._key = None
+        try:
+            record = self.profiles.get(identifier) if identifier else self.profiles.create(name)
+            self.identifier = record["id"]
+            self._key = (self.profiles.identity_key, self.identifier)
+            if self._key in _ACTIVE:
+                raise ValueError(translate('pet_profile_active', 'This pet identity is already active; clone it to create another'))
+            _ACTIVE[self._key] = self
+            self._closed = False
+            self._prepared_close: _PreparedPetClose | None = None
+            self.initial = record
+            self.companion = CompanionState(record)
+            self.mode_revision = 0
+            self.appearance_renderer = None
+            self._clock = monotonic
+            self._last_tick = None
+            self.care_timer = QTimer(self)
+            self.care_timer.setInterval(100)
+            self.care_timer.timeout.connect(self._tick)
+            self.timer = QTimer(self)
+            self.timer.setSingleShot(True)
+            self.timer.timeout.connect(self.flush)
+        except BaseException:
+            if self._key is not None and _ACTIVE.get(self._key) is self:
+                _ACTIVE.pop(self._key, None)
+            self._storage_use.release()
+            raise
 
     def schedule(self) -> None:
         """Coalesce changes in the same interaction without constant disk writes."""
-        if not self._closed:
+        if not self._closed and self._prepared_close is None:
             self.timer.start(500)
 
     def state(self) -> dict:
@@ -56,7 +93,7 @@ class PetProfileSession(QObject):
 
     def resume(self) -> None:
         """Begin active-time care without simulating time spent hidden or offline."""
-        if not self._closed and not self.care_timer.isActive():
+        if not self._closed and self._prepared_close is None and not self.care_timer.isActive():
             self._last_tick = self._clock()
             self.care_timer.start()
 
@@ -72,7 +109,7 @@ class PetProfileSession(QObject):
             self.advance(elapsed)
 
     def advance(self, seconds: float) -> None:
-        if self._closed:
+        if self._closed or self._prepared_close is not None:
             return
         before = (self.companion.snapshot(), self.companion.action, self.companion.visual_action)
         self.companion.advance(seconds)
@@ -85,7 +122,7 @@ class PetProfileSession(QObject):
             self.changed.emit()
 
     def request(self, action: str, kind: str = "snack") -> str:
-        if self._closed:
+        if self._closed or self._prepared_close is not None:
             return "unsupported"
         result = self.companion.request(action, kind)
         if result == "accepted":
@@ -93,7 +130,7 @@ class PetProfileSession(QObject):
         return result
 
     def set_mode(self, mode: str) -> str:
-        if self._closed:
+        if self._closed or self._prepared_close is not None:
             return "unsupported"
         result = self.companion.set_mode(mode)
         if result == "accepted":
@@ -103,7 +140,8 @@ class PetProfileSession(QObject):
         return result
 
     def reward(self, kind: str) -> str:
-        result = "unsupported" if self._closed else self.companion.reward(kind)
+        result = ("unsupported" if self._closed or self._prepared_close is not None
+                  else self.companion.reward(kind))
         if result == "accepted":
             self.schedule()
             self.changed.emit()
@@ -111,7 +149,8 @@ class PetProfileSession(QObject):
 
     def reward_focus(self) -> bool:
         """Apply a controller-deduplicated completion to an available working pet."""
-        if self._closed or self.companion.mode != 'work' or self.companion.action is not None:
+        if (self._closed or self._prepared_close is not None
+                or self.companion.mode != 'work' or self.companion.action is not None):
             return False
         self.companion.growth.add(3)
         self.companion.mood.pet(5)
@@ -120,15 +159,15 @@ class PetProfileSession(QObject):
         return True
 
     def present(self, action: str) -> bool:
-        if self._closed or not self.companion.present(action):
+        if self._closed or self._prepared_close is not None or not self.companion.present(action):
             return False
         self.changed.emit()
         return True
 
     def apply_appearance(self, expected: dict, candidate: dict, prepared=None, present: bool = True) -> None:
         """Persist a prevalidated/preloaded wardrobe draft without stale overwrites."""
-        if self._closed:
-            raise ValueError("Pet session is closed")
+        if self._closed or self._prepared_close is not None:
+            raise ValueError("Pet session is closing or closed")
         saved = self.profiles.get(self.identifier)
         if saved["appearance"] != expected:
             raise ValueError("Pet appearance changed while previewing")
@@ -140,8 +179,8 @@ class PetProfileSession(QObject):
 
     def apply_preferences(self, expected: dict, candidate: dict) -> None:
         """Commit a detached customization draft before changing the live pet."""
-        if self._closed:
-            raise ValueError("Pet session is closed")
+        if self._closed or self._prepared_close is not None:
+            raise ValueError("Pet session is closing or closed")
         saved = self.profiles.get(self.identifier)
         if saved["preferences"] != expected:
             raise ValueError("Pet preferences changed while editing")
@@ -152,6 +191,8 @@ class PetProfileSession(QObject):
 
     def flush(self) -> bool:
         """Save this pet only; retry failures while the widget remains alive."""
+        if self._closed:
+            return True
         self.timer.stop()
         try:
             state = self.state()
@@ -168,17 +209,23 @@ class PetProfileSession(QObject):
         """Release the identity only after a successful flush; retain failed writes."""
         if self._closed:
             return True
-        if not self.flush():
+        prepared = self._prepare_close()
+        if prepared is None:
             return False
-        self.pause()
-        self._closed = True
-        self.appearance_renderer = None
-        self.timer.stop()
-        if _ACTIVE.get(self._key) is self:
-            _ACTIVE.pop(self._key, None)
+        prepared.finalize()
         return True
+
+    def _prepare_close(self) -> _PreparedPetClose | None:
+        if self._closed or self._prepared_close is not None:
+            return None
+        prepared = self._prepared_close = _PreparedPetClose(self)
+        self.pause()
+        if not self.flush():
+            prepared.cancel()
+            return None
+        return prepared
 
     @staticmethod
     def active(profiles: PetProfiles, identifier: str) -> PetProfileSession | None:
         """Return an active session for export/rename without creating a widget."""
-        return _ACTIVE.get((id(profiles.settings), identifier))
+        return _ACTIVE.get((profiles.identity_key, identifier))

@@ -73,7 +73,7 @@ def test_applying_zoom_resizes_the_widget():
     widget.close()
 
 
-def test_pinning_with_nothing_captured_opens_nothing(tmp_path):
+def test_pinning_with_nothing_captured_opens_nothing(tmp_path, *, lifetime_factory):
     """
     沒截過東西就按「釘選上一張」，開一個空白視窗會讓人以為截圖壞了。什麼都不做
     比較誠實。
@@ -84,8 +84,9 @@ def test_pinning_with_nothing_captured_opens_nothing(tmp_path):
 
     original = os.getcwd()
     os.chdir(tmp_path)
+    lifetime_factory()
     try:
-        page = ToolsSettingUI()
+        page = ToolsSettingUI(lifetime=lifetime_factory())
         assert page.last_capture is None
         assert page.pin_last_capture() is None
         assert page.pinned_widget_list == []
@@ -93,7 +94,7 @@ def test_pinning_with_nothing_captured_opens_nothing(tmp_path):
         os.chdir(original)
 
 
-def test_a_pinned_capture_is_remembered_and_can_be_closed(tmp_path):
+def test_a_pinned_capture_is_remembered_and_can_be_closed(tmp_path, *, lifetime_factory):
     """
     釘住的圖是最上層視窗，關程式時一定要收——不然會留在畫面上，而且來源程式
     已經不在了，使用者只能自己去工作管理員。
@@ -104,8 +105,9 @@ def test_a_pinned_capture_is_remembered_and_can_be_closed(tmp_path):
 
     original = os.getcwd()
     os.chdir(tmp_path)
+    lifetime_factory()
     try:
-        page = ToolsSettingUI()
+        page = ToolsSettingUI(lifetime=lifetime_factory())
         page.last_capture = QPixmap(120, 90)
 
         pinned = page.pin_last_capture()
@@ -118,7 +120,7 @@ def test_a_pinned_capture_is_remembered_and_can_be_closed(tmp_path):
         os.chdir(original)
 
 
-def test_several_captures_can_be_pinned_at_once(tmp_path):
+def test_several_captures_can_be_pinned_at_once(tmp_path, *, lifetime_factory):
     """釘兩張參考圖是常見用法，不能後一張把前一張踢掉。"""
     import os
 
@@ -126,8 +128,9 @@ def test_several_captures_can_be_pinned_at_once(tmp_path):
 
     original = os.getcwd()
     os.chdir(tmp_path)
+    lifetime_factory()
     try:
-        page = ToolsSettingUI()
+        page = ToolsSettingUI(lifetime=lifetime_factory())
         page.last_capture = QPixmap(100, 100)
         first = page.pin_last_capture()
         second = page.pin_last_capture()

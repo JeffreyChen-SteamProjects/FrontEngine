@@ -1,0 +1,413 @@
+{
+  "product": "acbe8d21",
+  "conclusion": "The original Italian screenshot has intact leading labels at original resolution. Its bytes match both later native runs and before/after geometry-query captures. The prior rendered-view observation is not evidence of a product clipping defect.",
+  "original_report_hash_verified": true,
+  "checks": [
+    {
+      "language": "English",
+      "page": "tab_widgets_text",
+      "all_four_captures_identical": true,
+      "hashes": [
+        "506a1f183d140e2120bf7254c973cb604d7469143d59b7fea933ba3052a95550",
+        "506a1f183d140e2120bf7254c973cb604d7469143d59b7fea933ba3052a95550",
+        "506a1f183d140e2120bf7254c973cb604d7469143d59b7fea933ba3052a95550",
+        "506a1f183d140e2120bf7254c973cb604d7469143d59b7fea933ba3052a95550"
+      ],
+      "geometry": {
+        "scroll_value": 0,
+        "scroll_maximum": 0,
+        "item_x": 0,
+        "item_width": 216,
+        "viewport_width": 204,
+        "hint_width": 216
+      }
+    },
+    {
+      "language": "English",
+      "page": "tab_tools_text",
+      "all_four_captures_identical": true,
+      "hashes": [
+        "0453480ab99e114ee3bc3c29bb3c1e2552c1ffa4b74c605c077a7424f2108ef4",
+        "0453480ab99e114ee3bc3c29bb3c1e2552c1ffa4b74c605c077a7424f2108ef4",
+        "0453480ab99e114ee3bc3c29bb3c1e2552c1ffa4b74c605c077a7424f2108ef4",
+        "0453480ab99e114ee3bc3c29bb3c1e2552c1ffa4b74c605c077a7424f2108ef4"
+      ],
+      "geometry": {
+        "scroll_value": 0,
+        "scroll_maximum": 0,
+        "item_x": 0,
+        "item_width": 216,
+        "viewport_width": 204,
+        "hint_width": 216
+      }
+    },
+    {
+      "language": "English",
+      "page": "tab_control_center_text",
+      "all_four_captures_identical": true,
+      "hashes": [
+        "3ba2ef184074eaac2e9ed16bf058057889bd034fc5a5a5e92af65e7a95592518",
+        "3ba2ef184074eaac2e9ed16bf058057889bd034fc5a5a5e92af65e7a95592518",
+        "3ba2ef184074eaac2e9ed16bf058057889bd034fc5a5a5e92af65e7a95592518",
+        "3ba2ef184074eaac2e9ed16bf058057889bd034fc5a5a5e92af65e7a95592518"
+      ],
+      "geometry": {
+        "scroll_value": 0,
+        "scroll_maximum": 0,
+        "item_x": 0,
+        "item_width": 216,
+        "viewport_width": 204,
+        "hint_width": 216
+      }
+    },
+    {
+      "language": "Traditional_Chinese",
+      "page": "tab_widgets_text",
+      "all_four_captures_identical": true,
+      "hashes": [
+        "ea769af41810560ef75bd82dd458bd3098127c99ddb456d765a3e00b28543950",
+        "ea769af41810560ef75bd82dd458bd3098127c99ddb456d765a3e00b28543950",
+        "ea769af41810560ef75bd82dd458bd3098127c99ddb456d765a3e00b28543950",
+        "ea769af41810560ef75bd82dd458bd3098127c99ddb456d765a3e00b28543950"
+      ],
+      "geometry": {
+        "scroll_value": 0,
+        "scroll_maximum": 0,
+        "item_x": 0,
+        "item_width": 216,
+        "viewport_width": 204,
+        "hint_width": 216
+      }
+    },
+    {
+      "language": "Traditional_Chinese",
+      "page": "tab_tools_text",
+      "all_four_captures_identical": true,
+      "hashes": [
+        "912acfef0282bcfd1ecaa84d52c533c3e09dff66993fb4d6b565f07c743a1e86",
+        "912acfef0282bcfd1ecaa84d52c533c3e09dff66993fb4d6b565f07c743a1e86",
+        "912acfef0282bcfd1ecaa84d52c533c3e09dff66993fb4d6b565f07c743a1e86",
+        "912acfef0282bcfd1ecaa84d52c533c3e09dff66993fb4d6b565f07c743a1e86"
+      ],
+      "geometry": {
+        "scroll_value": 0,
+        "scroll_maximum": 0,
+        "item_x": 0,
+        "item_width": 216,
+        "viewport_width": 204,
+        "hint_width": 216
+      }
+    },
+    {
+      "language": "Traditional_Chinese",
+      "page": "tab_control_center_text",
+      "all_four_captures_identical": true,
+      "hashes": [
+        "6f2e15f386f2fe7816be7a646d405087b8e9710672293f7703d84fb33f7ac70e",
+        "6f2e15f386f2fe7816be7a646d405087b8e9710672293f7703d84fb33f7ac70e",
+        "6f2e15f386f2fe7816be7a646d405087b8e9710672293f7703d84fb33f7ac70e",
+        "6f2e15f386f2fe7816be7a646d405087b8e9710672293f7703d84fb33f7ac70e"
+      ],
+      "geometry": {
+        "scroll_value": 0,
+        "scroll_maximum": 0,
+        "item_x": 0,
+        "item_width": 216,
+        "viewport_width": 204,
+        "hint_width": 216
+      }
+    },
+    {
+      "language": "Simplified_Chinese",
+      "page": "tab_widgets_text",
+      "all_four_captures_identical": true,
+      "hashes": [
+        "b58dacc2373e3394424d29cf5f05162f5fc6303c61f18190e605fc1815dc6067",
+        "b58dacc2373e3394424d29cf5f05162f5fc6303c61f18190e605fc1815dc6067",
+        "b58dacc2373e3394424d29cf5f05162f5fc6303c61f18190e605fc1815dc6067",
+        "b58dacc2373e3394424d29cf5f05162f5fc6303c61f18190e605fc1815dc6067"
+      ],
+      "geometry": {
+        "scroll_value": 0,
+        "scroll_maximum": 0,
+        "item_x": 0,
+        "item_width": 216,
+        "viewport_width": 204,
+        "hint_width": 216
+      }
+    },
+    {
+      "language": "Simplified_Chinese",
+      "page": "tab_tools_text",
+      "all_four_captures_identical": true,
+      "hashes": [
+        "e0a637138bed46ccf771661e1ec52692fd0f6abe6309803aa24afe4977927baf",
+        "e0a637138bed46ccf771661e1ec52692fd0f6abe6309803aa24afe4977927baf",
+        "e0a637138bed46ccf771661e1ec52692fd0f6abe6309803aa24afe4977927baf",
+        "e0a637138bed46ccf771661e1ec52692fd0f6abe6309803aa24afe4977927baf"
+      ],
+      "geometry": {
+        "scroll_value": 0,
+        "scroll_maximum": 0,
+        "item_x": 0,
+        "item_width": 216,
+        "viewport_width": 204,
+        "hint_width": 216
+      }
+    },
+    {
+      "language": "Simplified_Chinese",
+      "page": "tab_control_center_text",
+      "all_four_captures_identical": true,
+      "hashes": [
+        "225cfe5a624f0b1158ab3d76f50f2ddc77c2872f30e09aa4fc6b049839c96f25",
+        "225cfe5a624f0b1158ab3d76f50f2ddc77c2872f30e09aa4fc6b049839c96f25",
+        "225cfe5a624f0b1158ab3d76f50f2ddc77c2872f30e09aa4fc6b049839c96f25",
+        "225cfe5a624f0b1158ab3d76f50f2ddc77c2872f30e09aa4fc6b049839c96f25"
+      ],
+      "geometry": {
+        "scroll_value": 0,
+        "scroll_maximum": 0,
+        "item_x": 0,
+        "item_width": 216,
+        "viewport_width": 204,
+        "hint_width": 216
+      }
+    },
+    {
+      "language": "Deutsch",
+      "page": "tab_widgets_text",
+      "all_four_captures_identical": true,
+      "hashes": [
+        "0979233285b88f71a6a0a51ec82efda475aa8017212b2d851a87758bd4e9c3f2",
+        "0979233285b88f71a6a0a51ec82efda475aa8017212b2d851a87758bd4e9c3f2",
+        "0979233285b88f71a6a0a51ec82efda475aa8017212b2d851a87758bd4e9c3f2",
+        "0979233285b88f71a6a0a51ec82efda475aa8017212b2d851a87758bd4e9c3f2"
+      ],
+      "geometry": {
+        "scroll_value": 0,
+        "scroll_maximum": 0,
+        "item_x": 0,
+        "item_width": 216,
+        "viewport_width": 204,
+        "hint_width": 216
+      }
+    },
+    {
+      "language": "Deutsch",
+      "page": "tab_tools_text",
+      "all_four_captures_identical": true,
+      "hashes": [
+        "2b1d732b77f15609420c3d7a8aa7eca03afd28f28a637e599d271abbcf528de7",
+        "2b1d732b77f15609420c3d7a8aa7eca03afd28f28a637e599d271abbcf528de7",
+        "2b1d732b77f15609420c3d7a8aa7eca03afd28f28a637e599d271abbcf528de7",
+        "2b1d732b77f15609420c3d7a8aa7eca03afd28f28a637e599d271abbcf528de7"
+      ],
+      "geometry": {
+        "scroll_value": 0,
+        "scroll_maximum": 0,
+        "item_x": 0,
+        "item_width": 216,
+        "viewport_width": 204,
+        "hint_width": 216
+      }
+    },
+    {
+      "language": "Deutsch",
+      "page": "tab_control_center_text",
+      "all_four_captures_identical": true,
+      "hashes": [
+        "4182cf1efb7f7c0edca2c80a614d3b6837ef12c83bb19b5f884d1d1c535c89b7",
+        "4182cf1efb7f7c0edca2c80a614d3b6837ef12c83bb19b5f884d1d1c535c89b7",
+        "4182cf1efb7f7c0edca2c80a614d3b6837ef12c83bb19b5f884d1d1c535c89b7",
+        "4182cf1efb7f7c0edca2c80a614d3b6837ef12c83bb19b5f884d1d1c535c89b7"
+      ],
+      "geometry": {
+        "scroll_value": 0,
+        "scroll_maximum": 0,
+        "item_x": 0,
+        "item_width": 216,
+        "viewport_width": 204,
+        "hint_width": 216
+      }
+    },
+    {
+      "language": "Russian",
+      "page": "tab_widgets_text",
+      "all_four_captures_identical": true,
+      "hashes": [
+        "4de690b1c974737a170cf45ef27ad9636afaeb7dbc25f57e0fcb571d896187fd",
+        "4de690b1c974737a170cf45ef27ad9636afaeb7dbc25f57e0fcb571d896187fd",
+        "4de690b1c974737a170cf45ef27ad9636afaeb7dbc25f57e0fcb571d896187fd",
+        "4de690b1c974737a170cf45ef27ad9636afaeb7dbc25f57e0fcb571d896187fd"
+      ],
+      "geometry": {
+        "scroll_value": 0,
+        "scroll_maximum": 0,
+        "item_x": 0,
+        "item_width": 216,
+        "viewport_width": 204,
+        "hint_width": 216
+      }
+    },
+    {
+      "language": "Russian",
+      "page": "tab_tools_text",
+      "all_four_captures_identical": true,
+      "hashes": [
+        "3ee38d7a8bfd0a3908a8556451120c27287c2853ca8060dbf1a954655e8a5b90",
+        "3ee38d7a8bfd0a3908a8556451120c27287c2853ca8060dbf1a954655e8a5b90",
+        "3ee38d7a8bfd0a3908a8556451120c27287c2853ca8060dbf1a954655e8a5b90",
+        "3ee38d7a8bfd0a3908a8556451120c27287c2853ca8060dbf1a954655e8a5b90"
+      ],
+      "geometry": {
+        "scroll_value": 0,
+        "scroll_maximum": 0,
+        "item_x": 0,
+        "item_width": 216,
+        "viewport_width": 204,
+        "hint_width": 216
+      }
+    },
+    {
+      "language": "Russian",
+      "page": "tab_control_center_text",
+      "all_four_captures_identical": true,
+      "hashes": [
+        "89916422423005e4957b429338ccefd43a81c6f43bd3fc9416e5fb222c9f6f73",
+        "89916422423005e4957b429338ccefd43a81c6f43bd3fc9416e5fb222c9f6f73",
+        "89916422423005e4957b429338ccefd43a81c6f43bd3fc9416e5fb222c9f6f73",
+        "89916422423005e4957b429338ccefd43a81c6f43bd3fc9416e5fb222c9f6f73"
+      ],
+      "geometry": {
+        "scroll_value": 0,
+        "scroll_maximum": 0,
+        "item_x": 0,
+        "item_width": 216,
+        "viewport_width": 204,
+        "hint_width": 216
+      }
+    },
+    {
+      "language": "France",
+      "page": "tab_widgets_text",
+      "all_four_captures_identical": true,
+      "hashes": [
+        "9986111fab9f6ad74532110c74fddc40406b28de6309d54ccfb48e3a736df3db",
+        "9986111fab9f6ad74532110c74fddc40406b28de6309d54ccfb48e3a736df3db",
+        "9986111fab9f6ad74532110c74fddc40406b28de6309d54ccfb48e3a736df3db",
+        "9986111fab9f6ad74532110c74fddc40406b28de6309d54ccfb48e3a736df3db"
+      ],
+      "geometry": {
+        "scroll_value": 0,
+        "scroll_maximum": 0,
+        "item_x": 0,
+        "item_width": 216,
+        "viewport_width": 204,
+        "hint_width": 216
+      }
+    },
+    {
+      "language": "France",
+      "page": "tab_tools_text",
+      "all_four_captures_identical": true,
+      "hashes": [
+        "5f773da2cb0854f21c1f5dbae962f8144c841d305a42537d1e1517f90ae8ee3f",
+        "5f773da2cb0854f21c1f5dbae962f8144c841d305a42537d1e1517f90ae8ee3f",
+        "5f773da2cb0854f21c1f5dbae962f8144c841d305a42537d1e1517f90ae8ee3f",
+        "5f773da2cb0854f21c1f5dbae962f8144c841d305a42537d1e1517f90ae8ee3f"
+      ],
+      "geometry": {
+        "scroll_value": 0,
+        "scroll_maximum": 0,
+        "item_x": 0,
+        "item_width": 216,
+        "viewport_width": 204,
+        "hint_width": 216
+      }
+    },
+    {
+      "language": "France",
+      "page": "tab_control_center_text",
+      "all_four_captures_identical": true,
+      "hashes": [
+        "ae463fe2fcebbf7f13c55953debf60042fe4a394a37f79d2ad1791a39b7f7945",
+        "ae463fe2fcebbf7f13c55953debf60042fe4a394a37f79d2ad1791a39b7f7945",
+        "ae463fe2fcebbf7f13c55953debf60042fe4a394a37f79d2ad1791a39b7f7945",
+        "ae463fe2fcebbf7f13c55953debf60042fe4a394a37f79d2ad1791a39b7f7945"
+      ],
+      "geometry": {
+        "scroll_value": 0,
+        "scroll_maximum": 0,
+        "item_x": 0,
+        "item_width": 216,
+        "viewport_width": 204,
+        "hint_width": 216
+      }
+    },
+    {
+      "language": "Italy",
+      "page": "tab_widgets_text",
+      "all_four_captures_identical": true,
+      "hashes": [
+        "b2ce6be6677e7185e4e2d3ab5419fc22e86a416ada8ed1a90b58ed32de82741c",
+        "b2ce6be6677e7185e4e2d3ab5419fc22e86a416ada8ed1a90b58ed32de82741c",
+        "b2ce6be6677e7185e4e2d3ab5419fc22e86a416ada8ed1a90b58ed32de82741c",
+        "b2ce6be6677e7185e4e2d3ab5419fc22e86a416ada8ed1a90b58ed32de82741c"
+      ],
+      "geometry": {
+        "scroll_value": 0,
+        "scroll_maximum": 0,
+        "item_x": 0,
+        "item_width": 216,
+        "viewport_width": 204,
+        "hint_width": 216
+      }
+    },
+    {
+      "language": "Italy",
+      "page": "tab_tools_text",
+      "all_four_captures_identical": true,
+      "hashes": [
+        "7b4b92bdb234d56d287c444835dee431aa114c10d1e35b3103accb91082f4a27",
+        "7b4b92bdb234d56d287c444835dee431aa114c10d1e35b3103accb91082f4a27",
+        "7b4b92bdb234d56d287c444835dee431aa114c10d1e35b3103accb91082f4a27",
+        "7b4b92bdb234d56d287c444835dee431aa114c10d1e35b3103accb91082f4a27"
+      ],
+      "geometry": {
+        "scroll_value": 0,
+        "scroll_maximum": 0,
+        "item_x": 0,
+        "item_width": 216,
+        "viewport_width": 204,
+        "hint_width": 216
+      }
+    },
+    {
+      "language": "Italy",
+      "page": "tab_control_center_text",
+      "all_four_captures_identical": true,
+      "hashes": [
+        "6492c5a33f80b242c5a6ec207c18a848a6e4413599e7beb9874b774da37b768f",
+        "6492c5a33f80b242c5a6ec207c18a848a6e4413599e7beb9874b774da37b768f",
+        "6492c5a33f80b242c5a6ec207c18a848a6e4413599e7beb9874b774da37b768f",
+        "6492c5a33f80b242c5a6ec207c18a848a6e4413599e7beb9874b774da37b768f"
+      ],
+      "geometry": {
+        "scroll_value": 0,
+        "scroll_maximum": 0,
+        "item_x": 0,
+        "item_width": 216,
+        "viewport_width": 204,
+        "hint_width": 216
+      }
+    }
+  ],
+  "identical_four_capture_cases": 21,
+  "original_resolution_review": "Italy-900-tab_widgets_text-before-geometry.png,1125x925; scene, focus, presentation and control-center labels intact.",
+  "limits": [
+    "This withdraws the specific leading-text observation; it is not complete sidebar/narrow-view/accessibility acceptance.",
+    "No cause is assigned to the earlier inspection display discrepancy."
+  ],
+  "no_product_change": true
+}

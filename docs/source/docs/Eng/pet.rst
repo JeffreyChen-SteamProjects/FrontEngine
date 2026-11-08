@@ -3,7 +3,7 @@ Pet Page
 
 A companion that lives on the desktop.
 
-The page opens with *Your pet*: click one of the built-in characters and a pet dressed as it appears on the desktop at once, or pick *Your own picture…*. Below, the pets on the desktop are listed with *Wardrobe*, *Bring pet back* and *Put away* (a double-click brings one back); every other setting is folded away until you open its section.
+The page opens with *Your pet*: click one of the built-in characters and a pet dressed as it appears on the desktop at once, or pick *Your own picture…*. Below, the pets on the desktop are listed with *Wardrobe*, *Bring pet back* and *Put away* (a double-click brings one back); every other setting is folded away until you open its section. A first start, with no pet and no home yet, opens on this page.
 
 * Choose pet sprite - a single image.
 * Choose pet pack... - a folder holding walk / idle / sleep / climb / fall /
@@ -18,6 +18,9 @@ The page opens with *Your pet*: click one of the built-in characters and a pet d
 * Settle while typing - the pet stops moving while you are at the keyboard and
   carries on a couple of seconds after you stop, so it does not walk across the
   line you are reading.
+* Bring pets back when FrontEngine starts - on by default: the pets on the desktop
+  when FrontEngine closes come back, as themselves, the next time it starts; a pet
+  you put away stays away.
 * Speak out loud - read those remarks aloud.
 * Play tag with each other - two or more pets chase one another.
 * React to audio - the pet moves in time with sound. It can follow your
@@ -39,6 +42,8 @@ The Behaviour menu's default, Cycle all actions (random), has a free pet pick wh
 :doc:`runtime_interoperability`
 
 Pet → Pet identities saves an independent UUID, name, mood, fullness and affection for every sprite or puppet pet. Choose a saved identity before spawning to resume it after restart; New pet creates fresh state. The first identity migrates the old shared values once. Cloning copies current stats to a new identity; feeding never changes another pet. Rename, refresh, export or import individual JSON saves; import always creates a new identity. One saved identity can be active only once. Saves contain no sprites, scripts or chat history, and local identity IDs are excluded from portable presets. Up to 256 identities are stored in user settings; sprite changes are saved after a short debounce and on close. Puppet feeding updates only saved stats and does not alter Imervue motions or geometry.
+
+Export pet saves under a separate filename. Exports reject reserved settings, home, backup, temporary and lock filenames, and linked destination files.
 
 Pet → Sprite pet pack editor maps walk/idle/sleep/climb/fall/drag images, previews size and walking speed, and exports a portable folder with pet.json. At least one action is required; missing actions are listed and use the existing loader fallback. PNG/JPEG/GIF/WebP sprites are limited to 64 MiB and 16 megapixels each, 256 MiB total. Import/export runs off the GUI thread, can be cancelled and never overwrites an existing export folder. Exported folders can be relocated, selected on the Pet page and shared as Workshop pet packs. Import retains selected sprites, name, size and speed only; sounds, scripts and speech are not copied. Imervue .puppet uses its separate authoring format. Closing or Escape releases preview movies and cancels pending file work.
 
@@ -67,7 +72,7 @@ Customize pet also sets Chatter (Off, Rarely, Normal, Often) for lines the pet s
 
 The pet manager's interaction list also offers the selected live pet's own menu commands: photo, status, reminder, chat when a chat service is attached, clone and close, plus every motion and expression of a Puppet model. Everything in a pet's right-click menu can therefore be done with the keyboard.
 
-Use built-in character on the Pet page installs the chosen INKSIDE character and its wardrobe in the background and selects it as the source. Start then spawns an ordinary sprite pet wearing that character: it walks and climbs with the hand-drawn step frames, can be dressed in the wardrobe, and keeps its outfit when it already wears the character. Use built-in Puppet model beside it still makes the Imervue Puppet version.
+Use built-in character on the Pet page installs the chosen INKSIDE character and its wardrobe in the background and selects it as the source. Start then spawns an ordinary sprite pet wearing that character: it walks and climbs with the hand-drawn step frames, can be dressed in the wardrobe, and keeps its outfit when it already wears the character. Use built-in Puppet model beside it still makes the Imervue Puppet version. The character itself is installed first, so a pet from a character card appears within a second or two; its clothes finish installing in the background, and the wardrobe adds any that are not there yet when it opens.
 
 Use built-in Puppet model on the Pet page draws the chosen INKSIDE character as an Imervue .puppet model in the background: rigged head, arms, tail and body, ten motions, three expressions and a pet script that maps companion actions to them. It is saved under pet-assets/puppets and selected as the source with its script, so Start spawns it as a Puppet pet.
 
@@ -124,3 +129,21 @@ Puppet also supports Come here from its menu or the manager’s keyboard offsets
 Puppet can chase a draggable light spot from its menu. Both Sprite and Puppet managers offer light play with keyboard offsets. Releasing the light near the pet for half a second starts the shared three-second play action; affection is awarded only on completion and follows the normal cooldown. Calls and light play share one target. Put toy away, End interaction, care, manual dragging, mode changes or hiding cancel it.
 
 Puppet pets also offer Throw a ball from their menu, and both Sprite and Puppet managers can throw one for the selected identity. The ball physics, drag-to-rethrow, right-click dismissal, one-affection reward and 30-second cooldown are shared with Sprite; the Puppet window chases, picks up and carries the ball back to its original centre, staying inside the work area. Each rethrow starts a fresh timeout. Ball, light and Come here share one target, so starting one replaces the other. Care, manual dragging, mode changes or hiding cancel without a reward. Authored fetch animation remains pending.
+
+Adding a built-in character shows installation progress while its character and clothes are generated and validated. The percentage counts completed steps, not remaining time. The progress bar closes when the operation succeeds or fails; closing the wardrobe cancels unfinished work.
+
+Pet interaction feedback appears above Perform interaction so it remains near the keyboard focus. In narrow windows, section headings and their details buttons wrap; pet identity and interaction fields keep a readable minimum width and move below their labels when needed. Selected pets, field values and commands are preserved.
+
+Pet customization fields expose their visible labels through Qt accessibility. Favorite and disliked treats, size, speed, volume, behaviour, chatter and animation size keep their names in sync when the interface language changes.
+
+Wardrobe and pet-photo fields expose their visible labels through Qt accessibility, including clothing slots, saved outfits, pose and pose time. These names follow interface-language changes without changing the draft or photo.
+
+The pet-photo Captured pose option follows interface-language changes while preserving the selected pose, pose time and photo.
+
+If the pet-photo window closes while a save location is being chosen, the returned destination is ignored. No new photo is written and an existing file is left unchanged. Closed photo windows also reject later save requests.
+
+Closing the wardrobe while choosing an asset folder or color discards the returned choice. It starts no installation and makes no color change. Later picker requests from that closed wardrobe are also ignored.
+
+Closing the sprite-pack editor while choosing a sprite, import folder, export folder or export name discards the returned choice. It starts no new job and leaves the draft unchanged. Cancelling only the picker keeps the editor available for another attempt.
+
+Dinner with friends occurs when at least three residents are eating in the same area. Residents eating in separate areas do not count as one gathering. The event is recorded at most once per home day, including after saving and reopening the home.

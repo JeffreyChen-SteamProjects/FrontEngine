@@ -25,7 +25,7 @@ FIELDS_V1 = {"format", "version", "home", "mode", "time_ms", "rng", "next_id", "
 FIELDS_V2 = FIELDS_V1 | {"relations"}
 FIELDS = FIELDS_V2 | {"progress"}
 FIELDS_BY_VERSION = {1: FIELDS_V1, 2: FIELDS_V2, 3: FIELDS, 4: FIELDS, 5: FIELDS, 6: FIELDS,
-                     7: FIELDS}  # 4-7: inner fields
+                     7: FIELDS, 8: FIELDS}  # 4-8: inner fields
 ZONE_DEFAULTS = {4: ("areas", []), 5: ("link", None)}     # fields zones gained in that version
 _PAIR = re.compile(r"[0-9a-f]{32}\|[0-9a-f]{32}")
 MAX_TIME_MS = 10 ** 13
@@ -125,12 +125,7 @@ def from_dict(data: object, catalog: Catalog) -> World:
     world = World(catalog, data["home"], data["mode"], data["rng"])
     world.time_ms = checked_int(data["time_ms"], 0, MAX_TIME_MS, "home time")
     world.next_id = checked_int(data["next_id"], 1, 999_999_999, "identity counter")
-    raw_zones = _list(data, "zones", MAX_ZONES)
-    for version, (key, default) in ZONE_DEFAULTS.items():
-        if data["version"] < version:
-            raw_zones = [{**raw, key: default} if isinstance(raw, dict) and key not in raw else raw
-                         for raw in raw_zones]
-    world.zones = _unique([Zone.from_dict(raw) for raw in raw_zones], "zone")
+    world.zones = _unique([Zone.from_dict(raw) for raw in _migrated_zones(data)], "zone")
     revived = _saved_dormant(_list(data, "dormant", MAX_DORMANT))
     pieces, dormant_pieces = _split(_list(data, "furniture", MAX_FURNITURE) + revived["furniture"],
                                     catalog, "furniture")
@@ -142,6 +137,7 @@ def from_dict(data: object, catalog: Catalog) -> World:
                               "resident")
     world.tasks = _unique([Task.from_dict(raw, catalog) for raw in tasks], "task")
     world.ledger = Ledger.from_dict(data["ledger"])
+    world.ledger.coins = world.coin_amount(world.ledger.coins)
     flags = _list(data, "flags", _FLAGS)
     if any(not isinstance(flag, str) or not 0 < len(flag) <= 48 for flag in flags):
         raise ValueError("Invalid home flags")
@@ -150,17 +146,31 @@ def from_dict(data: object, catalog: Catalog) -> World:
     if len(world.dormant) > MAX_DORMANT:
         raise ValueError("Too many unavailable records")
     world.relations = _checked_relations(data.get("relations", {}), world)
-    world.progress = Progress.from_dict(data["progress"]) if "progress" in data else Progress()
-    world.progress.upgrades = {key: level for key, level in world.progress.upgrades.items()
-                               if key in catalog.furniture and catalog.furniture[key].profession}
-    for identifier in world.residents:              # homes saved before version 3 start counting now
-        world.progress.arrivals.setdefault(identifier, world.time_ms)
-    world.progress.arrivals = {key: value for key, value in world.progress.arrivals.items()
-                               if key in world.residents}
-    world.progress.wishes = {key: value for key, value in world.progress.wishes.items()
-                             if key in world.residents}
+    world.progress = _loaded_progress(data, world, catalog)
     _check_references(world)
     return world
+
+
+def _migrated_zones(data: dict) -> list:
+    """Zone records with the fields added by later save versions filled in."""
+    raw_zones = _list(data, "zones", MAX_ZONES)
+    for version, (key, default) in ZONE_DEFAULTS.items():
+        if data["version"] < version:
+            raw_zones = [{**raw, key: default} if isinstance(raw, dict) and key not in raw else raw
+                         for raw in raw_zones]
+    return raw_zones
+
+
+def _loaded_progress(data: dict, world: World, catalog: Catalog) -> Progress:
+    """Saved progress, keeping only upgrades and per-resident records that still apply."""
+    progress = Progress.from_dict(data["progress"], data["version"]) if "progress" in data else Progress()
+    progress.upgrades = {key: level for key, level in progress.upgrades.items()
+                         if key not in catalog.furniture or catalog.furniture[key].profession}
+    for identifier in world.residents:              # homes saved before version 3 start counting now
+        progress.arrivals.setdefault(identifier, world.time_ms)
+    progress.arrivals = {key: value for key, value in progress.arrivals.items() if key in world.residents}
+    progress.wishes = {key: value for key, value in progress.wishes.items() if key in world.residents}
+    return progress
 
 
 def _checked_relations(value: object, world: World) -> dict[str, int]:

@@ -1,0 +1,236 @@
+{
+  "observations": [
+    {
+      "print_window_return": 1,
+      "kind": "video",
+      "target": "BenQ GW2486TC",
+      "actual_screen": "BenQ GW2486TC",
+      "dpr": 1.0,
+      "logical_size": [
+        320,
+        180
+      ],
+      "pixels": [
+        320,
+        180
+      ],
+      "on_screen": true,
+      "file": "video-0.png",
+      "windows": [
+        {
+          "class": "QWidgetWindow",
+          "visible": true,
+          "exposed": true,
+          "size": [
+            320,
+            180
+          ],
+          "dpr": 1.0,
+          "surface": "SurfaceType.RasterSurface"
+        },
+        {
+          "class": "QWindow",
+          "visible": false,
+          "exposed": false,
+          "size": [
+            0,
+            0
+          ],
+          "dpr": 1.0,
+          "surface": "SurfaceType.RasterSurface"
+        },
+        {
+          "class": "QVideoWindow",
+          "visible": true,
+          "exposed": true,
+          "size": [
+            320,
+            180
+          ],
+          "dpr": 1.0,
+          "surface": "SurfaceType.Direct3DSurface"
+        }
+      ],
+      "decoded_image_colors": 51,
+      "decoded_frames": 10,
+      "rendered_colors": 55,
+      "player_error": 0,
+      "passed": true
+    },
+    {
+      "print_window_return": 1,
+      "kind": "video",
+      "target": "BenQ GW2490",
+      "actual_screen": "BenQ GW2490",
+      "dpr": 1.25,
+      "logical_size": [
+        320,
+        180
+      ],
+      "pixels": [
+        400,
+        225
+      ],
+      "on_screen": true,
+      "file": "video-1.png",
+      "windows": [
+        {
+          "class": "QWidgetWindow",
+          "visible": true,
+          "exposed": true,
+          "size": [
+            320,
+            180
+          ],
+          "dpr": 1.25,
+          "surface": "SurfaceType.RasterSurface"
+        },
+        {
+          "class": "QWindow",
+          "visible": false,
+          "exposed": false,
+          "size": [
+            0,
+            0
+          ],
+          "dpr": 1.0,
+          "surface": "SurfaceType.RasterSurface"
+        },
+        {
+          "class": "QVideoWindow",
+          "visible": true,
+          "exposed": true,
+          "size": [
+            320,
+            180
+          ],
+          "dpr": 1.25,
+          "surface": "SurfaceType.Direct3DSurface"
+        }
+      ],
+      "decoded_image_colors": 52,
+      "decoded_frames": 11,
+      "rendered_colors": 73,
+      "player_error": 0,
+      "passed": true
+    },
+    {
+      "print_window_return": 1,
+      "kind": "video",
+      "target": "BenQ GW2486TC",
+      "actual_screen": "BenQ GW2486TC",
+      "dpr": 1.0,
+      "logical_size": [
+        320,
+        180
+      ],
+      "pixels": [
+        320,
+        180
+      ],
+      "on_screen": true,
+      "file": "video-2.png",
+      "windows": [
+        {
+          "class": "QWidgetWindow",
+          "visible": true,
+          "exposed": true,
+          "size": [
+            320,
+            180
+          ],
+          "dpr": 1.0,
+          "surface": "SurfaceType.RasterSurface"
+        },
+        {
+          "class": "QWindow",
+          "visible": false,
+          "exposed": false,
+          "size": [
+            0,
+            0
+          ],
+          "dpr": 1.0,
+          "surface": "SurfaceType.RasterSurface"
+        },
+        {
+          "class": "QVideoWindow",
+          "visible": true,
+          "exposed": true,
+          "size": [
+            320,
+            180
+          ],
+          "dpr": 1.0,
+          "surface": "SurfaceType.Direct3DSurface"
+        }
+      ],
+      "decoded_image_colors": 56,
+      "decoded_frames": 11,
+      "rendered_colors": 56,
+      "player_error": 0,
+      "passed": true
+    }
+  ],
+  "closed": [
+    {
+      "kind": "video",
+      "widget_deleted": true,
+      "player_stopped": true
+    }
+  ],
+  "errors": [],
+  "passed": true,
+  "scope": "Video diagnostic only. Own hidden-desktop windows and silent fixture. Captures only the owned QVideoWindow HWND with PrintWindow; compares with decoded image and native child window exposure; decoded image does not prove presented pixels.",
+  "source_head": "27d61861815a08eaf9069f4e64f8f8122358a551",
+  "observer": {
+    "exit_code": 0,
+    "profile_removed": true,
+    "source_unchanged": true,
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        2362,
+        117
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        2362,
+        117
+      ]
+    },
+    "observation_only": true,
+    "desktop": "FrontEngineVideoWebDpi_6934b361a8f0"
+  },
+  "artifact_directory": ".audit\\video-native-capture-27d6186-v2",
+  "artifact_sha256": {
+    "decoded-0.png": "b3130ced4e488efbaaac3ae7626cfc6f359d8ea85f1740ec53d875e0d941100b",
+    "decoded-1.png": "c845d5c83ebe23feaa4394c839237492143f1a286f58ee86770ebdf927b21b70",
+    "decoded-2.png": "9ed0a31ead954d7d45756965a08003573fa2ffa080c50529c9ba7fb85fe3acce",
+    "harness.py": "6cc7f80d6a74613bf195922bba94d150c710cae0895487d4b7d4788fdc44d7ee",
+    "native-0.png": "62fb6daa974526f7e51cbbb00d0526bb53df1cf054541076acfd5b648bd8502d",
+    "native-1.png": "f3129895f4358536b040ee5dc8947f797643377b7a6bad29a8c349e531558b7d",
+    "native-2.png": "1ca5c80118b7e37a6dce8c75f91d32ae2e4e1143545abeb1b99b6b8c226fb4fc",
+    "observer.json": "cefdf72da433c56f53de92ef9f5e53247563e64c1c0ffa575079141127cbd9d9",
+    "result.json": "dd1aafdccaae1d98ea03e174a677c8e2cafd417c625e0689d59e6f6a41c53055",
+    "silent.mp4": "978c5686441b6330167d0512a045434027d1dec5467bb75ad6bf565ee84fe464",
+    "stderr.txt": "670f96a7dc9d156b9116c19129a1879fa7d324e1b39d3bd88ea70da9a9f6bf6e",
+    "video-0.png": "62fb6daa974526f7e51cbbb00d0526bb53df1cf054541076acfd5b648bd8502d",
+    "video-1.png": "f3129895f4358536b040ee5dc8947f797643377b7a6bad29a8c349e531558b7d",
+    "video-2.png": "1ca5c80118b7e37a6dce8c75f91d32ae2e4e1143545abeb1b99b6b8c226fb4fc"
+  },
+  "references": [
+    "https://raw.githubusercontent.com/qt/qtmultimedia/v6.12.0/src/multimediawidgets/qvideowidget.cpp",
+    "https://doc.qt.io/qt-6/qwidget.html#createWindowContainer"
+  ],
+  "diagnosis": "QWidget grab does not capture the embedded QVideoWindow. Owned native HWND capture returns the actual rendered video at all three screen positions. No product fix was needed.",
+  "stderr_assessment": "FFmpeg prints input metadata and AV1/HEVC MFT discovery failures. The H264 fixture decodes, QMediaPlayer reports NoError and actual native captured content passes. stderr is not empty.",
+  "limitations": [
+    "Silent local H264 fixture only, not audio or other codecs.",
+    "Hidden Win32 desktop; no user input desktop capture or foreground switch.",
+    "No fullscreen, input transparency, physical monitor reconfiguration or long-running media acceptance.",
+    "The initial native capture attempt did not run because win32gui was unavailable; final probe uses ctypes without dependency changes."
+  ]
+}

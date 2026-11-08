@@ -108,6 +108,7 @@ class FrameRecorder(QObject):
         self._native_capture = None
         self._inset_provider = None
         self._writer = None
+        self._writer_threads = []
         self._destroy_cleanup = None
         self._writer_factory = writer_factory
         self._clock = clock
@@ -225,6 +226,7 @@ class FrameRecorder(QObject):
                                       callback=self._notify_done,
                                       writer_factory=factory)
         # Destruction must cancel independently of the Python QObject wrapper.
+        self._writer_threads.append(self._writer.worker_thread)
         worker = self._writer
         self._destroy_cleanup = lambda *_args: worker.cancel()
         self.destroyed.connect(self._destroy_cleanup)
@@ -251,6 +253,10 @@ class FrameRecorder(QObject):
         if self._writer is not None:
             self._set_state('cancelling')
             self._writer.cancel()
+
+    def pending(self) -> bool:
+        self._writer_threads[:] = [thread for thread in self._writer_threads if thread.is_alive()]
+        return bool(self._writer_threads)
 
     def clear(self) -> None:
         self.close()

@@ -28,8 +28,8 @@ from frontengine.utils.pet_game.rng import GameRandom
 from frontengine.utils.pet_game.schedule import TEMPLATES, initial_time
 
 FORMAT = "frontengine.pet-home"
-VERSION = 7              # 2: needs, relationships; 3: goals, progress; 4: zone areas; 5: crossings; 6: upgrades;
-                         # 7: hygiene
+VERSION = 8              # 2: needs, relationships; 3: goals, progress; 4: zone areas; 5: crossings; 6: upgrades;
+                         # 7: hygiene; 8: persistent life-event days
 RELATION_LIMIT = 100
 MODES = ("manage", "sandbox")
 MAX_RESIDENTS = 12
@@ -210,9 +210,13 @@ class World:
         self.offline_zones = zones
         return changed
 
+    def coin_amount(self, amount: int) -> int:
+        """Resolve catalog currency for this home; free arranging has no currency."""
+        return 0 if self.sandbox else amount
+
     def grant_starter_kit(self) -> str:
         """Initial coins and basic furniture, at most once per home even if rerun."""
-        result = self.ledger.apply("starter-kit", "starter", STARTER_COINS, STARTER_KIT)
+        result = self.ledger.apply("starter-kit", "starter", self.coin_amount(STARTER_COINS), STARTER_KIT)
         self.flags.add("starter_kit")
         return result
 
@@ -298,7 +302,7 @@ class World:
             return "not_for_sale"
         if type(count) is not int or not 1 <= count <= 999:
             return "invalid"
-        result = self.ledger.apply(transaction, "sell:" + name, item.sell_price * count, {name: -count})
+        result = self.ledger.apply(transaction, "sell:" + name, self.coin_amount(item.sell_price * count), {name: -count})
         return "none_stored" if result == "insufficient" else result
 
     def free_cell(self, definition: str, zone: str) -> int | None:

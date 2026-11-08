@@ -98,10 +98,11 @@ def test_live_pet_states_close_flush_and_resume_independently(tmp_path):
         second.close()
 
 
-def test_page_clone_rename_export_and_import_use_distinct_identities(tmp_path, monkeypatch):
+def test_page_clone_rename_export_and_import_use_distinct_identities(tmp_path, monkeypatch, *, lifetime_factory):
     from PySide6.QtWidgets import QFileDialog
     from frontengine.ui.page.pet.pet_setting_ui import PetSettingUI
-    page = PetSettingUI()
+    lifetime_factory()
+    page = PetSettingUI(lifetime=lifetime_factory())
     controls = page.profile_controls
     controls.profiles = PetProfiles({}, lambda: None)
     controls.refresh()
@@ -148,18 +149,17 @@ def test_page_clone_rename_export_and_import_use_distinct_identities(tmp_path, m
         page.close()
 
 
-def test_a_pet_moves_from_the_desktop_into_the_home_and_back_without_losing_care(tmp_path):
+def test_a_pet_moves_from_the_desktop_into_the_home_and_back_without_losing_care(tmp_path, *, home_store_factory):
     """The home is the new front door: a live desktop pet stays away until it closes, then moves in;
     the home's care values are mirrored into the profile, and closing the home frees the identity."""
     from frontengine.show.pet.pet_profile_session import PetProfileSession
     from frontengine.show.pet_game.home_service import HomeService
-    from frontengine.user_setting.pet_game_save import HomeSaveStore
     from frontengine.utils.pet_game.catalog import builtin_catalog
 
     profiles = PetProfiles({}, lambda: None)
     pet = DesktopPetWidget(_sprite(tmp_path), profiles=profiles, talk=False, sit_on_windows=False)
     identifier = pet.profile_session.identifier
-    service = HomeService(None, HomeSaveStore(tmp_path, builtin_catalog()), profiles)
+    service = HomeService(None, home_store_factory(tmp_path, builtin_catalog()), profiles)
     try:
         service.create_home("screen", 0, 900, 30, seed=2)
         assert service.adopt(identifier) == "active_elsewhere"       # never two of the same pet

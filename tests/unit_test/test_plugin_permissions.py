@@ -68,14 +68,17 @@ def test_manifest_entry_cannot_escape_plugin(tmp_path, entry):
     assert not marker.exists()
 
 
-def test_imported_settings_cannot_grant_plugin_execution(tmp_path, monkeypatch):
+def test_imported_settings_cannot_grant_plugin_execution(tmp_path, monkeypatch, lifetime_factory):
     from frontengine.user_setting import user_setting_file as settings
-    monkeypatch.setattr(settings, 'write_user_setting', lambda: None)
-    monkeypatch.setattr(settings, 'user_setting_dict', {'plugin_grants': {'original': 'digest'}})
+    lifetime_factory()
+    monkeypatch.setitem(settings.user_setting_dict, 'plugin_grants', {'original': 'digest'})
     path = tmp_path / 'settings.json'
     path.write_text(json.dumps({'plugin_grants': {'attacker': 'digest'}, 'opacity': 20}), encoding='utf-8')
     settings.import_user_setting(path)
     assert settings.user_setting_dict['plugin_grants'] == {'original': 'digest'}
+    saved = json.loads((tmp_path / 'user_setting.json').read_text(encoding='utf-8'))
+    assert saved['plugin_grants'] == {'original': 'digest'}
+    assert saved['opacity'] == 20
 
 
 def test_modified_timestamp_valid_bytecode_requires_approval(tmp_path):

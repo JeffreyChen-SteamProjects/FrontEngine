@@ -14,7 +14,7 @@ import uuid
 from time import monotonic
 from typing import Callable
 
-from PySide6.QtCore import QPoint, QPointF, QRect, QRectF, Qt, QTimer, Signal
+from PySide6.QtCore import QEvent, QPoint, QPointF, QRect, QRectF, Qt, QTimer, Signal
 from PySide6.QtGui import (
     QCloseEvent, QColor, QGuiApplication, QHideEvent, QMouseEvent, QPainter, QPen, QRegion, QShowEvent,
 )
@@ -74,6 +74,7 @@ class HomeStrip(HomeView):
     quiet = False                          # focus mode: no bubbles and no cards
     closed = Signal()                      # at close time, before the deferred delete
     arrange_finished = Signal()            # the strip's own way out of arranging (it takes no keys)
+    hide_requested = Signal()              # "Hide the home": the page unticks Show the home on the desktop
     overlay_lockable = False              # lock-all must not make the home unclickable
     overlay_remembers_geometry = False
 
@@ -88,6 +89,8 @@ class HomeStrip(HomeView):
         self._stepped_at = clock()
         self._press: tuple[str, QPointF] | None = None
         self._dragging: tuple[str, float] | None = None
+        # Arranging: (piece, where it was pressed, grab offset, cell it started on, moved yet)
+        self._piece_press: tuple[str, QPointF, float, int, bool] | None = None
         self.setWindowFlags(strip_flags(self.layer))
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
@@ -215,6 +218,21 @@ class HomeStrip(HomeView):
 
     # ----- interpolation ---------------------------------------------------------------
 
+    def follow_world(self, world) -> None:
+        """Rebind a kept strip to the home now running.
+
+        Both homes number their first zone "z1", so a strip survives a manage/sandbox switch;
+        without this it kept drawing the other home and could not finish a drag on this one.
+        """
+        if world is self.world:
+            return
+        self._finish_pointer(commit=False)
+        self._before, self._after = {}, {}
+        self.bubbles.clear()
+        self.set_world(world, self.zone)
+        self.place_on_screen()
+        self._stepped()
+
     def _stepped(self) -> None:
         world = self.service.world
         if world is None:
@@ -259,11 +277,14 @@ class HomeStrip(HomeView):
 
     def bubble_rect(self, resident) -> QRectF | None:
         bubble = self.bubbles.get(resident.identifier)
-        if bubble is None or bubble[1] < self._clock():
+        if self.quiet or bubble is None or bubble[1] < self._clock():
             return None
-        width = self.fontMetrics().horizontalAdvance(bubble[0]) + 14
+        if not QRectF(self.rect()).intersects(self.resident_box(resident)):
+            return None
+        width = min(self.width(), self.fontMetrics().horizontalAdvance(bubble[0]) + 14)
         caption = self.caption_rect(resident)
-        return QRectF(caption.center().x() - width / 2, caption.top() - 24, width, 20)
+        left = max(0.0, min(caption.center().x() - width / 2, self.width() - width))
+        return QRectF(left, caption.top() - 24, width, 20)
 
     def paintEvent(self, event) -> None:
         super().paintEvent(event)
@@ -279,7 +300,9 @@ class HomeStrip(HomeView):
                 painter.setBrush(QColor(255, 255, 255, 235))
                 painter.drawRoundedRect(rect, 8, 8)
                 painter.setPen(QColor(30, 30, 30))
-                painter.drawText(rect, Qt.AlignmentFlag.AlignCenter, self.bubbles[resident.identifier][0])
+                text = painter.fontMetrics().elidedText(self.bubbles[resident.identifier][0],
+                                                       Qt.TextElideMode.ElideRight, max(0, int(rect.width()) - 14))
+                painter.drawText(rect, Qt.AlignmentFlag.AlignCenter, text)
         painter.end()
 
     def _paint_dusk(self, painter: QPainter) -> None:
@@ -493,7 +516,13 @@ class HomeStrip(HomeView):
         modes = menu.addMenu(translate("pet_home_mode", "Mode"))
         for mode in HOME_MODES:
             modes.addAction(translate("pet_home_mode_" + mode, mode), lambda m=mode: self.mode_requested.emit(m))
-        menu.addAction(translate("pet_home_hide", "Hide the home"), self.hide)
+        menu.addAction(translate("pet_home_hide", "Hide the home"), self._hide_home)
+
+    def _hide_home(self) -> None:
+        # The page turns the setting off and closes every strip; hiding first also covers a strip
+        # that nothing is listening to.
+        self.hide_requested.emit()
+        self.hide()
 
     # ----- mouse -------------------------------------------------------------------------------
 
@@ -521,9 +550,31 @@ class HomeStrip(HomeView):
         elif event.button() == Qt.MouseButton.LeftButton and resident is not None:
             self._press = (resident, point)
         elif event.button() == Qt.MouseButton.LeftButton and self.arranging:
-            self.cell_clicked.emit(int(self.x_cell(point.x())))
+            if not self._press_piece(point):
+                self.cell_clicked.emit(int(self.x_cell(point.x())))
+
+    def _press_piece(self, point: QPointF) -> bool:
+        """Arranging: pressing on a piece selects it and starts a drag; a click alone only selects it."""
+        identifier = self._piece_at(point)
+        piece = self.service.world.furniture.get(identifier) if identifier else None
+        if piece is None:
+            return False
+        rect = self.piece_rect(piece, self.service.world.definition(piece))
+        self._piece_press = (identifier, point, point.x() - rect.left(), piece.cell, False)
+        self.furniture_selected.emit(identifier)
+        return True
+
+    def _piece_cell(self, x: float) -> int:
+        return max(0, int(round(self.x_cell(x - self._piece_press[2]))))
 
     def mouseMoveEvent(self, event: QMouseEvent) -> None:
+        if self._piece_press is not None:
+            identifier, origin, grab, start, moved = self._piece_press
+            if not moved and (event.position() - origin).manhattanLength() < DRAG_START_PX:
+                return
+            self._piece_press = (identifier, origin, grab, start, True)
+            self.piece_hovered.emit(identifier, self._piece_cell(event.position().x()))
+            return
         if self._press is None:
             return
         identifier, origin = self._press
@@ -536,21 +587,52 @@ class HomeStrip(HomeView):
         self.update()
 
     def mouseReleaseEvent(self, event: QMouseEvent) -> None:
-        if self._press is None:
+        if event.button() == Qt.MouseButton.LeftButton and self._piece_press is not None:
+            identifier, _origin, _grab, _start, moved = self._piece_press
+            cell = self._piece_cell(event.position().x())
+            self._piece_press = None
+            if moved:
+                self.piece_dropped.emit(identifier, cell)
+            return
+        if event.button() != Qt.MouseButton.LeftButton or self._press is None:
             return
         identifier, _origin = self._press
         self._press = None
         if self._dragging is not None:
-            x_milli = int(self._dragging[1])
-            self._dragging = None
-            self.service.run(lambda world: world.drag(identifier, x_milli))
-            self._after[identifier] = self._before[identifier] = self.service.world.residents[identifier].x_milli
-            self.update_mask()
+            self._finish_pointer(commit=True)
             return
         self.chosen = identifier
         self.refresh_info()
         self.resident_selected.emit(identifier)
         self.show_card(identifier, event.globalPosition().toPoint())
+
+    def _cancel_piece_drag(self) -> None:
+        """A furniture drag that loses the mouse leaves the piece where it was and clears the preview."""
+        press, self._piece_press = getattr(self, "_piece_press", None), None
+        if press is not None and press[4]:
+            self.piece_dropped.emit(press[0], press[3])
+
+    def _finish_pointer(self, *, commit: bool) -> None:
+        self._cancel_piece_drag()
+        dragging = self._dragging
+        self._press = self._dragging = None
+        world = self.service.world
+        if dragging is not None and world is not None and world is self.world:
+            identifier, preview = dragging
+            resident = world.residents.get(identifier)
+            if resident is not None:
+                if resident.activity is not None and resident.activity.kind == "drag":
+                    position = int(preview) if commit else resident.x_milli
+                    self.service.run(lambda current: current.drag(identifier, position))
+                self._after[identifier] = self._before[identifier] = resident.x_milli
+        self.update_mask()
+        self.update()
+
+    def event(self, event: QEvent) -> bool:
+        if event.type() == QEvent.Type.UngrabMouse and (getattr(self, "_press", None) is not None
+                                                        or getattr(self, "_piece_press", None) is not None):
+            self._finish_pointer(commit=False)
+        return super().event(event)
 
     def mouseDoubleClickEvent(self, event: QMouseEvent) -> None:
         """Double-clicking a pet pats it: the most common care without opening a menu."""
@@ -662,6 +744,7 @@ class HomeStrip(HomeView):
 
     def hideEvent(self, event: QHideEvent) -> None:
         """Hidden (for example by Hide all) means paused, and the status says so."""
+        self._finish_pointer(commit=False)
         super().hideEvent(event)
         self.weather_layer.sync()
         if not self.isVisible() and not getattr(self, "_closing", False):
@@ -669,6 +752,7 @@ class HomeStrip(HomeView):
 
     def closeEvent(self, event: QCloseEvent) -> None:
         """Closing removes the desktop drawing only; the home keeps its state and clock."""
+        self._finish_pointer(commit=False)
         self._closing = True
         self.frame_timer.stop()
         self.weather_layer.close()

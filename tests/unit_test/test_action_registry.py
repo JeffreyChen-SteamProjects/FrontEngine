@@ -21,12 +21,12 @@ def test_registry_rejects_unknown_duplicate_and_missing_values():
         registry.register(action)
 
 
-def test_main_bindings_preserve_all_hotkey_and_rule_routes(monkeypatch):
+def test_main_bindings_preserve_all_hotkey_and_rule_routes(monkeypatch, lifetime_factory):
     import frontengine.ui.main_ui as module
     controls = SimpleNamespace(**{name: Mock() for name in (
         "clear_all", "hide_all", "show_all", "toggle_mute_all", "step_opacity_all",
         "toggle_lock_all", "set_quality_tier")})
-    window = SimpleNamespace(control_center_ui=controls,
+    window = SimpleNamespace(lifetime=lifetime_factory(), control_center_ui=controls,
                              web_setting_ui=SimpleNamespace(show_next_dashboard_page=Mock()),
                              presentation_setting_ui=SimpleNamespace(toggle_freeze=Mock()),
                              scene_setting_ui=SimpleNamespace(actions=SimpleNamespace(

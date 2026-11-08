@@ -1,0 +1,35 @@
+{
+  "passed": true,
+  "product_commit": "76618453",
+  "wheel": "frontengine_dev-1.0.86-py3-none-any.whl",
+  "sha256": "c9578a644b099acd60a08577bee98c39c5c130454837c8687d98138845bed9ea",
+  "python_files_equal": 502,
+  "pet_assets_equal": 149,
+  "installed_package_files_equal": 711,
+  "loaded_installed_modules": 430,
+  "localized_goal_completion": {
+    "English": "Goal completed",
+    "Traditional_Chinese": "目標已完成",
+    "Simplified_Chinese": "目标已完成",
+    "Deutsch": "Ziel erreicht",
+    "Russian": "Цель достигнута",
+    "France": "Objectif atteint",
+    "Italy": "Obiettivo completato"
+  },
+  "sandbox_zero_currency_saved": true,
+  "resident_selection_follows_zone": true,
+  "sleep_command_reaches_owned_bed": true,
+  "actual_visit_bubble_within_strip": true,
+  "runtime_closed": true,
+  "temporary_directory_removed": true,
+  "scope": "Fresh --target package directory, existing Python3.11/Qt6.12 dependency environment; offscreen MainUI, host services substituted. Not clean-machine dependency or native acceptance.",
+  "frozen_source_files_unchanged": 751,
+  "harness_correction": "Initial event count included the fixture transfer into the away zone. The final harness first asserts and drains that one setup moved_zone event, then requires one actual command-driven crossing. Initial failure log retained; no product change.",
+  "evidence_sha256": {
+    "wheel-76618453-build.log": "8bf11a7cfe510437908426091ca94f70557660b9ba508025fb10abf5de2be8e7",
+    "wheel-76618453-install.log": "20ce8afb322bc3ceda022f73bdf4d8a4176bdcaf2109189f38af3fd3834250bd",
+    "verify_installed_76618453.py": "79cbd2d02df206c6b54ec23fd73d584a825776a8c50a6bdf895d1bda97986896",
+    "installed-76618453.log": "295b2f0302e08bcf12809e5d74fbf42f9a206823c662491dee5c1999a3d4c73d",
+    "installed-76618453-verified.log": "6f77542e29f61d6243375de509e520a44de3acb4ecc2a67843e7a618e2d9fa54"
+  }
+}

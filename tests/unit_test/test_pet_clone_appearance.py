@@ -8,8 +8,19 @@ from test_pet_profile_sessions import _sprite
 from test_pet_variants import variant_asset
 
 
-def test_clone_uses_source_sprite_and_custom_parts_after_page_selection_changes(tmp_path, monkeypatch):
-    page = PetSettingUI()
+def _same_moment(*pets):
+    """Compare looks at one animation time: the clone starts playing later than its source."""
+    for pet in pets:
+        playback = pet._layered_playback
+        playback.clock = lambda: 0.0
+        playback._elapsed = 0.0
+        if playback._started is not None:
+            playback._started = 0.0
+
+
+def test_clone_uses_source_sprite_and_custom_parts_after_page_selection_changes(tmp_path, monkeypatch, *, lifetime_factory):
+    lifetime_factory()
+    page = PetSettingUI(lifetime=lifetime_factory())
     profiles = PetProfiles({}, lambda: None)
     page.profile_controls.profiles = profiles
     page.profile_controls.refresh()
@@ -39,11 +50,13 @@ def test_clone_uses_source_sprite_and_custom_parts_after_page_selection_changes(
         assert clone._base_size == source._base_size
         assert clone.profile_session.identifier != source.profile_session.identifier
         assert clone.profile_session.state()['appearance'] == before['appearance']
+        _same_moment(source, clone)
         assert clone._current_pixmap().toImage() == source._current_pixmap().toImage()
         edited = WardrobeDraft(profiles, clone.profile_session.identifier, catalog)
         edited.set_variant('eyes', 'narrow')
         edited.apply()
         assert source.profile_session.state()['appearance'] == before['appearance']
+        _same_moment(source, clone)
         assert clone._current_pixmap().toImage() != source._current_pixmap().toImage()
         assert page.pet_image_path == str(tmp_path / 'unrelated.puppet')
     finally:
@@ -52,12 +65,13 @@ def test_clone_uses_source_sprite_and_custom_parts_after_page_selection_changes(
         page.close()
 
 
-def test_puppet_clone_keeps_model_and_size_when_page_selects_sprite(tmp_path, monkeypatch):
+def test_puppet_clone_keeps_model_and_size_when_page_selects_sprite(tmp_path, monkeypatch, *, lifetime_factory):
     import pytest
+    lifetime_factory()
     pytest.importorskip('Imervue.puppet.document_io')
     from test_puppet_startup_lifecycle import asset
     from frontengine.show.pet.puppet_pet import PuppetPetWidget
-    page = PetSettingUI()
+    page = PetSettingUI(lifetime=lifetime_factory())
     page.profile_controls.profiles = PetProfiles({}, lambda: None)
     page.profile_controls.refresh()
     page.pet_image_path = str(asset(tmp_path))

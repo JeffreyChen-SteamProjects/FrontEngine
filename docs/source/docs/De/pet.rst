@@ -3,7 +3,7 @@ Haustier-Seite
 
 Ein Begleiter, der auf dem Desktop lebt.
 
-Die Seite beginnt mit *Ihr Haustier*: Ein Klick auf eine der eingebauten Figuren bringt sofort ein so gekleidetes Haustier auf den Desktop, oder wählen Sie *Eigenes Bild…*. Darunter stehen die Haustiere auf dem Desktop mit *Garderobe*, *Tier zurückholen* und *Wegräumen* (Doppelklick holt eines zurück); alle anderen Einstellungen bleiben eingeklappt, bis Sie ihren Abschnitt öffnen.
+Die Seite beginnt mit *Ihr Haustier*: Ein Klick auf eine der eingebauten Figuren bringt sofort ein so gekleidetes Haustier auf den Desktop, oder wählen Sie *Eigenes Bild…*. Darunter stehen die Haustiere auf dem Desktop mit *Garderobe*, *Tier zurückholen* und *Wegräumen* (Doppelklick holt eines zurück); alle anderen Einstellungen bleiben eingeklappt, bis Sie ihren Abschnitt öffnen. Beim ersten Start, solange es weder Haustier noch Zuhause gibt, öffnet FrontEngine diese Seite.
 
 * Haustier-Bild wählen - ein einzelnes Bild.
 * Haustier-Paket wählen… - ein Ordner mit Bildern für walk / idle / sleep /
@@ -19,6 +19,9 @@ Die Seite beginnt mit *Ihr Haustier*: Ein Klick auf eine der eingebauten Figuren
 * Beim Tippen still halten - das Tier bleibt stehen, solange Sie tippen, und geht
   ein paar Sekunden danach weiter, damit es nicht über die Zeile läuft, die Sie
   gerade lesen.
+* Haustiere beim Start von FrontEngine zurückholen - standardmäßig an: Die Haustiere,
+  die beim Schließen auf dem Desktop waren, kommen beim nächsten Start als sie selbst
+  zurück; ein weggeräumtes Haustier bleibt weg.
 * Laut vorlesen - diese Bemerkungen ausgesprochen.
 * Fangen spielen - zwei oder mehr Haustiere jagen einander.
 * Auf Audio reagieren - das Haustier bewegt sich zum Ton. Es folgt wahlweise
@@ -41,6 +44,8 @@ Die Standardeinstellung im Verhaltensmenü, Alle Aktionen durchlaufen (zufällig
 :doc:`runtime_interoperability`
 
 Tier → Tieridentitäten speichert für jedes Sprite- oder Puppet-Tier eine eigene UUID, einen Namen, Stimmung, Sättigung und Zuneigung. Zum Fortsetzen nach Neustart vor dem Erzeugen eine gespeicherte Identität wählen; Neues Tier beginnt neu. Nur die erste Identität übernimmt einmal die alten gemeinsamen Werte. Klonen kopiert aktuelle Werte in eine neue Identität; Füttern verändert andere Tiere nicht. Einzelne JSON-Spielstände lassen sich umbenennen, aktualisieren, exportieren und importieren; Import erzeugt immer eine neue Identität. Eine Identität darf nur einmal aktiv sein. Spielstände enthalten keine Grafiken, Skripte oder Chatverläufe; portable Vorlagen enthalten keine lokalen IDs. Bis zu 256 Identitäten bleiben in den Benutzereinstellungen; Sprite-Änderungen werden gebündelt und beim Schließen gespeichert. Puppet-Füttern ändert nur gespeicherte Werte, keine Imervue-Bewegungen oder Größen.
+
+Exportieren Sie Tier-Spielstände unter einem eigenen Dateinamen. Reservierte Namen für Einstellungen, Zuhause, Sicherungen, temporäre Dateien und Sperrdateien sowie verknüpfte Zieldateien werden beim Export abgelehnt.
 
 Tier → Sprite-Tierpaket erstellt Zuordnungen für walk/idle/sleep/climb/fall/drag, zeigt Größe und Gehgeschwindigkeit und exportiert einen portablen Ordner mit pet.json. Mindestens eine Aktion; fehlende Aktionen werden gemeldet und nutzen den vorhandenen Loader-Fallback. PNG/JPEG/GIF/WebP: je 64 MiB und 16 Megapixel, insgesamt 256 MiB. Import/Export im Hintergrund, abbrechbar, keine vorhandenen Ordner überschrieben. Ordner können verschoben, auf der Tierseite gewählt und als Workshop-Tierpaket geteilt werden. Import übernimmt nur gewählte Sprites, Namen, Größe und Geschwindigkeit; keine Klänge, Skripte oder Sprache. Imervue .puppet hat ein eigenes Autorenformat. Schließen/Escape gibt Vorschaufilme frei und bricht Dateivorgänge ab.
 
@@ -69,7 +74,7 @@ Tier anpassen stellt außerdem Plaudern (Aus, Selten, Normal, Oft) für Sätze, 
 
 Die Interaktionsliste der Tierverwaltung bietet außerdem die Menübefehle des gewählten aktiven Tiers an: Foto, Status, Erinnerung, Chat bei angebundenem Chatdienst, Klonen und Schließen sowie jede Bewegung und jeden Ausdruck eines Puppet-Modells. Alles aus dem Rechtsklickmenü ist damit auch per Tastatur erreichbar.
 
-Integrierte Figur verwenden auf der Tierseite installiert die gewählte INKSIDE-Figur samt Garderobe im Hintergrund und wählt sie als Quelle. Start erzeugt dann ein normales Sprite-Tier in dieser Figur: Es läuft und klettert mit den handgezeichneten Schrittbildern, lässt sich in der Garderobe einkleiden und behält sein Outfit, wenn es die Figur schon trägt. Integriertes Puppet-Modell verwenden daneben erzeugt weiterhin die Imervue-Puppet-Version.
+Integrierte Figur verwenden auf der Tierseite installiert die gewählte INKSIDE-Figur samt Garderobe im Hintergrund und wählt sie als Quelle. Start erzeugt dann ein normales Sprite-Tier in dieser Figur: Es läuft und klettert mit den handgezeichneten Schrittbildern, lässt sich in der Garderobe einkleiden und behält sein Outfit, wenn es die Figur schon trägt. Integriertes Puppet-Modell verwenden daneben erzeugt weiterhin die Imervue-Puppet-Version. Die Figur selbst wird zuerst installiert, sodass ein Haustier von einer Figurenkarte nach ein, zwei Sekunden erscheint; die Kleidung wird im Hintergrund fertig installiert, und der Kleiderschrank ergänzt beim Öffnen, was noch fehlt.
 
 Integriertes Puppet-Modell verwenden auf der Tierseite zeichnet die gewählte INKSIDE-Figur im Hintergrund als Imervue-.puppet-Modell: geriggter Kopf, Arme, Schwanz und Körper, zehn Bewegungen, drei Ausdrücke und ein Tierskript, das Begleitaktionen darauf abbildet. Es wird unter pet-assets/puppets gespeichert und mit seinem Skript als Quelle gewählt, sodass Start es als Puppet-Tier erzeugt.
 
@@ -126,3 +131,21 @@ Puppet unterstützt Komm her über Menü oder Tastaturversatz im Manager. Das ge
 Puppet kann über sein Menü einem ziehbaren Lichtpunkt folgen. Im Manager bieten Sprite und Puppet Lichtspiel mit Tastaturversatz. Nach einer halben Sekunde losgelassen in der Nähe beginnt das gemeinsame dreisekündige Spiel; Zuneigung gibt es erst nach Abschluss mit normaler Wartezeit. Ruf und Licht teilen ein Ziel. Spielzeug weglegen, Interaktion beenden, Pflege, Ziehen, Moduswechsel oder Ausblenden brechen ab.
 
 Puppet-Tiere bieten Ball werfen ebenfalls im Menü an, und die Manager für Sprite und Puppet können für die gewählte Identität werfen. Ballphysik, erneutes Werfen per Ziehen, Entfernen per Rechtsklick, 1 Zuneigung und 30 Sekunden Abklingzeit sind mit Sprite gemeinsam; das Puppet-Fenster jagt den Ball, hebt ihn auf und trägt ihn zur ursprünglichen Mitte zurück, stets im Arbeitsbereich. Jeder neue Wurf startet ein neues Zeitlimit. Ball, Licht und Komm her teilen ein Ziel; ein neues ersetzt das alte. Pflege, Ziehen, Moduswechsel oder Ausblenden brechen ohne Belohnung ab. Eigene Apportier-Animation steht aus.
+
+Beim Hinzufügen einer integrierten Figur zeigt ein Fortschrittsbalken die Erstellung und geprüfte Installation der Figur und ihrer Kleidung an. Der Prozentsatz zählt abgeschlossene Schritte und schätzt keine Restzeit. Nach Erfolg oder Fehler wird der Balken ausgeblendet. Das Schließen der Garderobe bricht ausstehende Arbeit ab.
+
+Rückmeldungen zu Tierinteraktionen stehen über „Interaktion ausführen“ und damit nahe am Tastaturfokus. In schmalen Fenstern werden Abschnittstitel und Detailschaltflächen umgebrochen. Identitäts- und Interaktionsfelder behalten eine lesbare Mindestbreite und stehen bei Bedarf unter ihren Beschriftungen. Auswahl, Werte und Befehle bleiben erhalten.
+
+Die Felder zur Haustieranpassung stellen ihre sichtbaren Beschriftungen über die Qt-Barrierefreiheit bereit. Die Namen für bevorzugte und ungeliebte Leckerlis, Größe, Geschwindigkeit, Lautstärke, Verhalten, Gesprächigkeit und Animationsumfang folgen der Sprache der Oberfläche.
+
+Die Felder für Garderobe und Haustierfotos stellen ihre sichtbaren Beschriftungen über die Qt-Barrierefreiheit bereit, einschließlich Kleidungsplätzen, gespeicherten Outfits, Pose und Posenzeit. Die Namen folgen der Oberflächensprache, ohne Entwurf oder Foto zu ändern.
+
+Die Option „Aufgenommene Pose“ für Haustierfotos folgt der Oberflächensprache. Ausgewählte Pose, Posenzeit und Foto bleiben erhalten.
+
+Wird das Fotofenster während der Wahl des Speicherorts geschlossen, wird der zurückgegebene Pfad ignoriert. Es wird kein neues Foto geschrieben und keine vorhandene Datei überschrieben. Geschlossene Fotofenster lehnen auch spätere Speicheranfragen ab.
+
+Wird die Garderobe während der Ordner- oder Farbauswahl geschlossen, wird die zurückgegebene Auswahl verworfen. Es startet keine Installation und keine Farbe wird geändert. Weitere Auswahlaufrufe der geschlossenen Garderobe werden ebenfalls ignoriert.
+
+Wird der Sprite-Paketeditor während der Auswahl eines Bildes, Importordners, Exportordners oder Exportnamens geschlossen, verwirft er die zurückgegebene Auswahl. Er startet keinen neuen Auftrag und lässt den Entwurf unverändert. Wird nur der Auswahldialog abgebrochen, bleibt der Editor für einen weiteren Versuch verfügbar.
+
+Das Ereignis „Abendessen mit Freunden“ tritt auf, wenn mindestens drei Bewohner im selben Bereich essen. Mahlzeiten in getrennten Bereichen zählen nicht als gemeinsames Treffen. Das Ereignis wird höchstens einmal pro Heimtag erfasst, auch nach dem Speichern und erneuten Öffnen.

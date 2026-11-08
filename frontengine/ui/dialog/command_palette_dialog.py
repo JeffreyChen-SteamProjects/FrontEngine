@@ -51,7 +51,7 @@ class CommandPaletteDialog(QDialog):
         buttons.addStretch()
         buttons.addWidget(self.run_button)
         layout.addLayout(buttons)
-        self.search_input.textChanged.connect(self.refresh)
+        self.search_input.textChanged.connect(self._search_changed)
         self.favorites_only.toggled.connect(self.refresh)
         self.results.currentItemChanged.connect(self._selection_changed)
         self.results.itemActivated.connect(self.execute_selected)
@@ -70,6 +70,11 @@ class CommandPaletteDialog(QDialog):
         """Return the selected stable ID, or an empty string for no match."""
         item = self.results.currentItem()
         return item.data(Qt.ItemDataRole.UserRole) if item else ""
+
+    def _search_changed(self, _text: str) -> None:
+        """Select the best match for a new query instead of retaining an old match."""
+        self.results.setCurrentRow(-1)
+        self.refresh()
 
     def refresh(self, *_args) -> None:
         """Re-evaluate current-language labels and keep the selected command."""
