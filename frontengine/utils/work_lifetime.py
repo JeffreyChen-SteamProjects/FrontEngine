@@ -221,7 +221,7 @@ class WorkLifetime(QObject):
                     pass
             self._connections.clear()
             from frontengine.utils.multi_language.retranslate import retranslator
-            retranslator.retire(self, tuple(self._roots.values()))
+            retranslator.retire(self)
             self._poll_timer.start()
             QTimer.singleShot(0, self, self._poll)
         return CloseDisposition.DRAINING

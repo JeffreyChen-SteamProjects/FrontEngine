@@ -278,9 +278,8 @@ class StorageSession:
 
     @contextmanager
     def _settings_transaction(self) -> Iterator[None]:
-        with self._operation():
-            with self._settings_mutex:
-                yield
+        with self._operation(), self._settings_mutex:
+            yield
 
     def _hold(self, kind: str) -> _Use:
         self._check_pid()

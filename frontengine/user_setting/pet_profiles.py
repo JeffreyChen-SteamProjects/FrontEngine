@@ -31,7 +31,7 @@ def _profile_operation(method):
 
 class _MemoryUse:
     def release(self) -> None:
-        pass
+        """Nothing to release: in-memory profiles hold no storage use."""
 
 
 class PetProfiles:

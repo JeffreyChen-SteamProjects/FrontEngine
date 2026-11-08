@@ -97,11 +97,10 @@ class HomeSaveStore:
                     self._operations -= 1
 
     def _attach_service(self, service) -> None:
-        with self._operation():
-            with self._mutex:
-                if self._service is not None:
-                    raise HomeRuntimeInUse('Home store already has a service')
-                self._service = service
+        with self._operation(), self._mutex:
+            if self._service is not None:
+                raise HomeRuntimeInUse('Home store already has a service')
+            self._service = service
 
     def _detach_service(self, service) -> None:
         self.storage._check_pid()

@@ -444,6 +444,17 @@ class FrontEngineMainUI(QMainWindow):
         self.lifetime.connect_owned(self.screensaver_service.screensaver_stopped, self._stop_screensaver)
         self.screensaver_service.start()
 
+        self._restore_startup_state()
+
+        # Debug 模式下自動關閉
+        # Auto close in debug mode
+        if debug:
+            self.debug_timer = QTimer()
+            self.debug_timer.setInterval(10000)
+            self.lifetime.connect_owned(self.debug_timer.timeout, self.debug_close)
+            self.debug_timer.start()
+
+    def _restore_startup_state(self) -> None:
         # 還原上次工作階段（若有開啟），再套用啟動預設集
         # Restore the last session when enabled, then apply the startup preset.
         if user_setting_dict.get("restore_last_session"):
@@ -454,14 +465,6 @@ class FrontEngineMainUI(QMainWindow):
         # Once the window and the home are up: the pets on the desktop at the last close come back.
         QTimer.singleShot(0, self.pet_setting_ui, self.pet_setting_ui.bring_pets_back)
         self._open_first_pet_page()
-
-        # Debug 模式下自動關閉
-        # Auto close in debug mode
-        if debug:
-            self.debug_timer = QTimer()
-            self.debug_timer.setInterval(10000)
-            self.lifetime.connect_owned(self.debug_timer.timeout, self.debug_close)
-            self.debug_timer.start()
 
     def _open_first_pet_page(self) -> None:
         """Nobody has a pet or a home yet: start where one click puts a pet on the desktop."""

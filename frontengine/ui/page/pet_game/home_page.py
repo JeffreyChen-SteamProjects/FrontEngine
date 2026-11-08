@@ -978,16 +978,8 @@ class PetHomePage(SettingPage):
     @owned_action
     def strip_action(self, action: str, target: str, zone: str | None = None) -> None:
         """The desktop strip's toolbar and right-click menus: arranging stays on the desktop, the rest opens here."""
-        world = self.service.world
-        if world is None:
+        if not self._strip_zone(action, target, zone):
             return
-        item = world.furniture.get(target) if action == "move" else world.residents.get(target)
-        zone = item.zone if item is not None else zone
-        if zone is not None:
-            if zone not in world.zones:
-                return
-            if zone != self.zone:
-                self.choose_zone(zone)
         if action in ("arrange", "move"):
             if action == "move":
                 self.select_furniture(target)
@@ -998,6 +990,24 @@ class PetHomePage(SettingPage):
         if action == "tab":
             self._select_home_tab(target)
             return
+        self._strip_resident_action(action, target)
+
+    def _strip_zone(self, action: str, target: str, zone: str | None) -> bool:
+        """Show the area the strip's item lives in; False when there is no home or no such area."""
+        world = self.service.world
+        if world is None:
+            return False
+        item = world.furniture.get(target) if action == "move" else world.residents.get(target)
+        zone = item.zone if item is not None else zone
+        if zone is None:
+            return True
+        if zone not in world.zones:
+            return False
+        if zone != self.zone:
+            self.choose_zone(zone)
+        return True
+
+    def _strip_resident_action(self, action: str, target: str) -> None:
         self.select_resident(target)
         if action == "wardrobe":
             self.residents.wardrobe()

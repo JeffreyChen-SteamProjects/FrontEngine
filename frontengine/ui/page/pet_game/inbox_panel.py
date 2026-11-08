@@ -78,6 +78,16 @@ class _InboxHistory:
     unread: int = 0
 
 
+def _named(event: dict, world) -> dict:
+    """The event with the names it shows: the resident's and the recipe's, as they are now."""
+    message = dict(event)
+    resident = world.residents.get(event.get("resident")) if world is not None else None
+    recipe = world.catalog.recipes.get(event.get("recipe")) if world is not None else None
+    message["resident_name"] = resident.name if resident else ""
+    message["recipe_label"] = (recipe.label_key, recipe.fallback) if recipe else ("", event.get("recipe", ""))
+    return message
+
+
 class InboxPanel:
     def __init__(self, page: PetHomePage) -> None:
         self.page = page
@@ -117,12 +127,7 @@ class InboxPanel:
         for event in events:
             name = category(event)
             if name is not None and self.wanted(name):
-                message = dict(event)
-                resident = world.residents.get(event.get("resident")) if world is not None else None
-                recipe = world.catalog.recipes.get(event.get("recipe")) if world is not None else None
-                message["resident_name"] = resident.name if resident else ""
-                message["recipe_label"] = (recipe.label_key, recipe.fallback) if recipe else ("", event.get("recipe", ""))
-                self._add(message, name)
+                self._add(_named(event, world), name)
         self.refresh_lists()
 
     def add_error(self, text: str, time_ms: int) -> None:

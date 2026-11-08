@@ -29,6 +29,26 @@ def _file(value: object) -> Path | None:
         return None
 
 
+def _checked_puppet(identifier: str, entry: dict) -> dict | None:
+    model = _file(entry["path"])
+    if model is None:
+        return None
+    checked = {"id": identifier, "path": str(model)}
+    if "script" in entry:
+        script = _file(entry["script"])
+        if script is None:
+            return None
+        checked["script"] = str(script)
+    return checked
+
+
+def _checked_picture(identifier: str, entry: dict) -> dict | None:
+    if "script" in entry:
+        return None
+    picture = checked_sprite(entry["path"])
+    return {"id": identifier, "path": str(picture)} if picture is not None else None
+
+
 def _checked_entry(entry: object) -> dict | None:
     if not isinstance(entry, dict) or not {"id", "path"} <= set(entry) <= _KEYS:
         return None
@@ -38,20 +58,8 @@ def _checked_entry(entry: object) -> dict | None:
     if not isinstance(path, str) or not path or len(path) > MAX_PATH:
         return None
     if Path(path).suffix.lower() == ".puppet":
-        model = _file(path)
-        if model is None:
-            return None
-        checked = {"id": identifier, "path": str(model)}
-        if "script" in entry:
-            script = _file(entry["script"])
-            if script is None:
-                return None
-            checked["script"] = str(script)
-        return checked
-    if "script" in entry:
-        return None
-    picture = checked_sprite(path)
-    return {"id": identifier, "path": str(picture)} if picture is not None else None
+        return _checked_puppet(identifier, entry)
+    return _checked_picture(identifier, entry)
 
 
 def checked_returning(value: object) -> list[dict]:

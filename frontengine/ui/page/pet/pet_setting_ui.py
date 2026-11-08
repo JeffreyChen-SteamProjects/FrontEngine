@@ -394,6 +394,31 @@ class PetSettingUI(SettingPage):
             self.quick.refresh()
         return returned
 
+    def _desktop_pet_inputs(self, source_pet) -> tuple[dict, str | None, bool]:
+        """Presentation, sound and audio reaction: copied from the source pet of a clone, else the page."""
+        if source_pet is None:
+            return self.customization_defaults(), self.pet_sound_path, self.audio_react_checkbox.isChecked()
+        sound = source_pet._sound.source().toLocalFile() if source_pet._sound is not None else None
+        return source_pet._presentation_defaults, sound, source_pet._audio_react
+
+    def _connect_desktop_pet(self, pet) -> None:
+        pet.clone_requested.connect(lambda: self._spawn_pet(pet.profile_session.state(), source_pet=pet))
+        pet.customize_requested.connect(lambda: self.profile_controls.customize(pet.profile_session.identifier))
+        pet.profile_session.changed.connect(self._on_settle_typing_toggled)
+        pet.set_peers_provider(lambda me=pet: self._peer_centers(me))
+        pet.profile_session.changed.connect(self._start_tag_game)
+        pet.wardrobe_requested.connect(lambda: self.profile_controls.wardrobe(pet.profile_session.identifier))
+
+    def _give_voice(self, pet, source_pet) -> None:
+        """Speech and chat: a clone keeps its source's, a new pet follows the page."""
+        speak = source_pet._speak if source_pet is not None else self.speech_checkbox.isChecked()
+        if speak:
+            pet.set_speech_enabled(True)
+        if source_pet is not None:
+            pet.set_chat_service(source_pet._chat_service)
+        elif self.chat_checkbox.isChecked():
+            pet.set_chat_service(self.chat_service())
+
     @owned_action
     def _spawn_profile_pet(self, identifier: str | None, *, source_pet=None, path: str | None = None,
                            script: str | None = None, report: bool = True) -> None:
@@ -404,9 +429,7 @@ class PetSettingUI(SettingPage):
             self._spawn_puppet(identifier, source_pet=source_pet, path=path if returning else None,
                                script=script, report=report)
             return
-        presentation = source_pet._presentation_defaults if source_pet is not None else self.customization_defaults()
-        sound = (source_pet._sound.source().toLocalFile() if source_pet._sound is not None else None) if source_pet is not None else self.pet_sound_path
-        audio_react = source_pet._audio_react if source_pet is not None else self.audio_react_checkbox.isChecked()
+        presentation, sound, audio_react = self._desktop_pet_inputs(source_pet)
         pet = DesktopPetWidget(
             image_path=path,
             size=presentation['size'], speed=presentation['speed'],
@@ -424,19 +447,8 @@ class PetSettingUI(SettingPage):
                     and path == self._builtin_sprite[1]):
                 self._dress_as_builtin(pet, self._builtin_sprite[0])
             self.profile_controls.profiles.remember_sprite(pet.profile_session.identifier, path)
-            pet.clone_requested.connect(lambda: self._spawn_pet(pet.profile_session.state(), source_pet=pet))
-            pet.customize_requested.connect(lambda: self.profile_controls.customize(pet.profile_session.identifier))
-            pet.profile_session.changed.connect(self._on_settle_typing_toggled)
-            pet.set_peers_provider(lambda me=pet: self._peer_centers(me))
-            pet.profile_session.changed.connect(self._start_tag_game)
-            pet.wardrobe_requested.connect(lambda: self.profile_controls.wardrobe(pet.profile_session.identifier))
-            speak = source_pet._speak if source_pet is not None else self.speech_checkbox.isChecked()
-            if speak:
-                pet.set_speech_enabled(True)
-            if source_pet is not None:
-                pet.set_chat_service(source_pet._chat_service)
-            elif self.chat_checkbox.isChecked():
-                pet.set_chat_service(self.chat_service())
+            self._connect_desktop_pet(pet)
+            self._give_voice(pet, source_pet)
             geometry = self._target_geometry()
             if audio_react:
                 pet.set_audio_level_provider(self._audio_provider(geometry))

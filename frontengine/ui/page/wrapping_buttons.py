@@ -32,22 +32,22 @@ class _WrappingCaption:
         layout.endLayout()
         return '\n'.join(lines)
 
-    def heightForWidth(self, width: int) -> int:
+    def heightForWidth(self, width: int) -> int:  # NOSONAR - Qt override name
         metrics = self.fontMetrics()
         text_height = metrics.size(Qt.TextFlag.TextShowMnemonic, self._wrapped_text(width)).height()
         return max(super().sizeHint().height(), text_height + 8)
 
-    def minimumSizeHint(self) -> QSize:
+    def minimumSizeHint(self) -> QSize:  # NOSONAR - Qt override name
         option = QStyleOptionButton()
         self.initStyleOption(option)
         contents = self.style().subElementRect(self._contents_element, option, self)
         inset = self.width() - contents.width()
         return QSize(inset + self.fontMetrics().averageCharWidth() + 8, super().sizeHint().height())
 
-    def hitButton(self, position: QPoint) -> bool:
+    def hitButton(self, position: QPoint) -> bool:  # NOSONAR - Qt override name
         return self.rect().contains(position)
 
-    def paintEvent(self, event: QPaintEvent) -> None:
+    def paintEvent(self, event: QPaintEvent) -> None:  # NOSONAR - Qt override name
         option = QStyleOptionButton()
         self.initStyleOption(option)
         option.text = self._wrapped_text(self.width())

@@ -212,7 +212,7 @@ class HomeService(QObject):
         for token in preparation.tokens:
             token.cancel()
         preparation.tokens.clear()
-        for identifier, session in list(preparation.sessions.items()):
+        for identifier, session in list(preparation.sessions.items()):  # NOSONAR - the loop pops from the dict
             if session.close():
                 preparation.sessions.pop(identifier)
         if preparation.sessions:

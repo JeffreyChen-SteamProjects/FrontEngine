@@ -46,6 +46,57 @@ def translate(key: str, fallback: str = "") -> str:
     return language_wrapper.language_word_dict.get(key) or fallback or key
 
 
+# What happened to one entry on a language change: rewritten, kept for later, or gone.
+_DONE, _KEEP, _DROP = "done", "keep", "drop"
+
+
+def _held(lifetime) -> str | None:
+    """A retiring owner's entries wait while it prepares to close and are dropped once it retires."""
+    if lifetime is not None and not lifetime.accepting:
+        return _KEEP if lifetime.state.value == "preparing" else _DROP
+    return None
+
+
+def _still_live(lifetime) -> bool:
+    return lifetime is None or lifetime.state.value in ("live", "preparing")
+
+
+def _apply_entry(entry: list) -> str:
+    reference, setter, key, fallback, args, lifetime = entry
+    widget = reference()
+    if widget is None:
+        return _DROP
+    entry[5] = lifetime = lifetime or _scope(widget)
+    held = _held(lifetime)
+    if held is not None:
+        return held
+    method: Optional[Callable[..., Any]] = getattr(widget, setter, None)
+    if method is None:
+        return _DROP
+    try:
+        method(*args, translate(key, fallback))
+    except RuntimeError:
+        # 底層物件已被銷毀，這筆不用留 / The C++ object is gone.
+        return _DROP
+    return _DONE
+
+
+def _apply_callback(entry: list) -> str:
+    reference, lifetime = entry
+    callback = reference()
+    if callback is None:
+        return _DROP
+    entry[1] = lifetime = lifetime or _scope(getattr(callback, "__self__", None))
+    held = _held(lifetime)
+    if held is not None:
+        return held
+    try:
+        callback()
+    except RuntimeError:
+        return _DROP
+    return _DONE
+
+
 class Retranslator:
     """
     控制項與鍵的對照表。bind() 記一筆，apply() 用目前語言重寫全部。
@@ -125,7 +176,7 @@ class Retranslator:
         self._entries = [entry for entry in self._entries
                          if entry[0]() is not None and entry[0]() is not widget]
 
-    def retire(self, lifetime, roots=()) -> None:
+    def retire(self, lifetime) -> None:
         """Retire only this generation, including callbacks copied by an active apply."""
         for entry in self._entries:
             if entry[5] is None:
@@ -143,47 +194,21 @@ class Retranslator:
         Rewrite every entry in the current language and return how many were
         rewritten, pruning whatever has gone away.
         """
-        alive = []
         applied = 0
+        alive = []
         for entry in self._entries:
-            reference, setter, key, fallback, args, lifetime = entry
-            widget = reference()
-            if widget is None:
-                continue
-            entry[5] = lifetime = lifetime or _scope(widget)
-            if lifetime is not None and not lifetime.accepting:
-                if lifetime.state.value == "preparing":
-                    alive.append(entry)
-                continue
-            method: Optional[Callable[..., Any]] = getattr(widget, setter, None)
-            if method is None:
-                continue
-            try:
-                method(*args, translate(key, fallback))
-            except RuntimeError:
-                # 底層物件已被銷毀，這筆不用留 / The C++ object is gone.
-                continue
-            alive.append(entry)
-            applied += 1
-        self._entries = [entry for entry in alive if entry[5] is None or entry[5].state.value in ("live", "preparing")]
+            result = _apply_entry(entry)
+            if result is not _DROP:
+                alive.append(entry)
+            applied += result is _DONE
+        self._entries = [entry for entry in alive if _still_live(entry[5])]
         alive_callbacks = []
         for entry in self._callbacks:
-            reference, lifetime = entry
-            callback = reference()
-            if callback is None:
-                continue
-            entry[1] = lifetime = lifetime or _scope(getattr(callback, "__self__", None))
-            if lifetime is not None and not lifetime.accepting:
-                if lifetime.state.value == "preparing":
-                    alive_callbacks.append(entry)
-                continue
-            try:
-                callback()
-            except RuntimeError:
-                continue
-            alive_callbacks.append(entry)
-            applied += 1
-        self._callbacks = [entry for entry in alive_callbacks if entry[1] is None or entry[1].state.value in ("live", "preparing")]
+            result = _apply_callback(entry)
+            if result is not _DROP:
+                alive_callbacks.append(entry)
+            applied += result is _DONE
+        self._callbacks = [entry for entry in alive_callbacks if _still_live(entry[1])]
         front_engine_logger.info(
             f"[Retranslator] applied {applied} strings in {language_wrapper.language}")
         return applied

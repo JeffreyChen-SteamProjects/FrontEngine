@@ -125,12 +125,7 @@ def from_dict(data: object, catalog: Catalog) -> World:
     world = World(catalog, data["home"], data["mode"], data["rng"])
     world.time_ms = checked_int(data["time_ms"], 0, MAX_TIME_MS, "home time")
     world.next_id = checked_int(data["next_id"], 1, 999_999_999, "identity counter")
-    raw_zones = _list(data, "zones", MAX_ZONES)
-    for version, (key, default) in ZONE_DEFAULTS.items():
-        if data["version"] < version:
-            raw_zones = [{**raw, key: default} if isinstance(raw, dict) and key not in raw else raw
-                         for raw in raw_zones]
-    world.zones = _unique([Zone.from_dict(raw) for raw in raw_zones], "zone")
+    world.zones = _unique([Zone.from_dict(raw) for raw in _migrated_zones(data)], "zone")
     revived = _saved_dormant(_list(data, "dormant", MAX_DORMANT))
     pieces, dormant_pieces = _split(_list(data, "furniture", MAX_FURNITURE) + revived["furniture"],
                                     catalog, "furniture")
@@ -151,17 +146,31 @@ def from_dict(data: object, catalog: Catalog) -> World:
     if len(world.dormant) > MAX_DORMANT:
         raise ValueError("Too many unavailable records")
     world.relations = _checked_relations(data.get("relations", {}), world)
-    world.progress = Progress.from_dict(data["progress"], data["version"]) if "progress" in data else Progress()
-    world.progress.upgrades = {key: level for key, level in world.progress.upgrades.items()
-                               if key not in catalog.furniture or catalog.furniture[key].profession}
-    for identifier in world.residents:              # homes saved before version 3 start counting now
-        world.progress.arrivals.setdefault(identifier, world.time_ms)
-    world.progress.arrivals = {key: value for key, value in world.progress.arrivals.items()
-                               if key in world.residents}
-    world.progress.wishes = {key: value for key, value in world.progress.wishes.items()
-                             if key in world.residents}
+    world.progress = _loaded_progress(data, world, catalog)
     _check_references(world)
     return world
+
+
+def _migrated_zones(data: dict) -> list:
+    """Zone records with the fields added by later save versions filled in."""
+    raw_zones = _list(data, "zones", MAX_ZONES)
+    for version, (key, default) in ZONE_DEFAULTS.items():
+        if data["version"] < version:
+            raw_zones = [{**raw, key: default} if isinstance(raw, dict) and key not in raw else raw
+                         for raw in raw_zones]
+    return raw_zones
+
+
+def _loaded_progress(data: dict, world: World, catalog: Catalog) -> Progress:
+    """Saved progress, keeping only upgrades and per-resident records that still apply."""
+    progress = Progress.from_dict(data["progress"], data["version"]) if "progress" in data else Progress()
+    progress.upgrades = {key: level for key, level in progress.upgrades.items()
+                         if key not in catalog.furniture or catalog.furniture[key].profession}
+    for identifier in world.residents:              # homes saved before version 3 start counting now
+        progress.arrivals.setdefault(identifier, world.time_ms)
+    progress.arrivals = {key: value for key, value in progress.arrivals.items() if key in world.residents}
+    progress.wishes = {key: value for key, value in progress.wishes.items() if key in world.residents}
+    return progress
 
 
 def _checked_relations(value: object, world: World) -> dict[str, int]:
