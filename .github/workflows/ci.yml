@@ -38,7 +38,7 @@ jobs:
       matrix:
         python-version: ["3.11", "3.12", "3.13", "3.14"]
     runs-on: windows-latest
-    timeout-minutes: 15  # about 3x the slowest recent run, at least 15
+    timeout-minutes: 90  # the suite grew to about 3,550 tests, roughly 40 minutes here; about twice that
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
@@ -86,7 +86,7 @@ jobs:
 
   macos:
     runs-on: macos-latest
-    timeout-minutes: 20
+    timeout-minutes: 90  # the same full suite as smoke
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:

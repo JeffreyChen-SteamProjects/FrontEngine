@@ -1,5 +1,5 @@
 import pytest
-from PySide6.QtGui import QAccessible
+from accessibility_assertions import assert_named_by
 
 from frontengine.ui.dialog.preset_schedule_dialog import PresetScheduleDialog
 from frontengine.ui.dialog.screensaver_dialog import ScreensaverDialog
@@ -22,12 +22,11 @@ def test_schedule_field_names_follow_labels_without_changing_values(kind, field,
     try:
         before = dialog.collect()
         control = getattr(dialog, field)
-        accessible = QAccessible.queryAccessibleInterface(control)
-        assert accessible.text(QAccessible.Text.Name) == expected
         label = getattr(dialog, label_name)
         assert label.text() == expected
+        assert_named_by(control, label)
         label.setText('Updated ' + expected)
-        assert accessible.text(QAccessible.Text.Name) == label.text()
+        assert_named_by(control, label)
         assert dialog.collect() == before
     finally:
         dialog.reject()

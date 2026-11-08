@@ -1,5 +1,6 @@
 import pytest
-from PySide6.QtGui import QAccessible, QImage
+from PySide6.QtGui import QImage
+from accessibility_assertions import assert_named_by
 from PySide6.QtWidgets import QFormLayout
 
 from frontengine.show.pet.asset_library import PetAssetLibrary
@@ -20,10 +21,9 @@ def test_wardrobe_field_accessible_name_tracks_visible_label(field, tmp_path, li
     try:
         control = dialog.slots[field] if field in dialog.slots else getattr(dialog, field)
         label = dialog.findChild(QFormLayout).labelForField(control)
-        accessible = QAccessible.queryAccessibleInterface(control)
-        assert accessible.text(QAccessible.Text.Name) == label.text()
+        assert_named_by(control, label)
         label.setText('Updated ' + label.text())
-        assert accessible.text(QAccessible.Text.Name) == label.text()
+        assert_named_by(control, label)
         assert profiles.get(record['id']) == record
     finally:
         dialog.close()
@@ -37,10 +37,9 @@ def test_photo_field_accessible_name_tracks_visible_label(field):
     try:
         control = getattr(dialog, field)
         label = dialog.findChild(QFormLayout).labelForField(control)
-        accessible = QAccessible.queryAccessibleInterface(control)
-        assert accessible.text(QAccessible.Text.Name) == label.text()
+        assert_named_by(control, label)
         label.setText('Updated ' + label.text())
-        assert accessible.text(QAccessible.Text.Name) == label.text()
+        assert_named_by(control, label)
         assert dialog.image == image
     finally:
         dialog.close()

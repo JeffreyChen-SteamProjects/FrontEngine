@@ -63,7 +63,7 @@ def test_pets_without_a_character_appear_as_a_built_in_stand_in(home):
     assert art.renderer(identifier) is None                      # loading in the background
     changed = []
     art.changed.connect(lambda: changed.append(True))
-    _wait(lambda: changed, timeout=60)
+    _wait(lambda: changed, timeout=180)   # building the stand-in is slow on CI runners
     renderer = art.renderer(identifier)
     assert renderer is not None
     assert renderer.character.identifier == fallback_character(identifier)

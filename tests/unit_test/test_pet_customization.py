@@ -12,8 +12,8 @@ from frontengine.user_setting.pet_profiles import PetProfiles
 @pytest.mark.parametrize('field', ['favorite', 'disliked', 'size', 'speed', 'volume',
                                   'behaviour', 'chatter', 'motion'])
 def test_customization_fields_expose_their_visible_label_to_accessibility(field):
-    from PySide6.QtGui import QAccessible
     from PySide6.QtWidgets import QFormLayout
+    from accessibility_assertions import assert_named_by
 
     profiles = PetProfiles({}, lambda: None)
     record = profiles.create()
@@ -24,10 +24,9 @@ def test_customization_fields_expose_their_visible_label_to_accessibility(field)
         form = dialog.findChild(QFormLayout)
         label = form.labelForField(control)
         assert label.text()
-        interface = QAccessible.queryAccessibleInterface(control)
-        assert interface.text(QAccessible.Text.Name) == label.text()
+        assert_named_by(control, label)
         label.setText('Updated ' + label.text())
-        assert interface.text(QAccessible.Text.Name) == label.text()
+        assert_named_by(control, label)
     finally:
         dialog.close()
 
