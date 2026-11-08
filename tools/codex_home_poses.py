@@ -26,7 +26,8 @@ SPRITES = REPO / "frontengine/show/pet/inkside/sprites"
 CHARACTERS = json.loads((Path(__file__).resolve().parent / "codex_characters.json").read_text(encoding="utf-8"))
 # Character height in the 256 px canvas: standing poses match the walk (225), sitting ones are
 # shorter and lying down shorter still; fit_frames still keeps the widest frame inside.
-HEIGHTS = {"sit": 180, "feed": 180, "write": 185, "sleep": 120, "play": 225, "garden": 225, "craft": 225}
+HEIGHTS = {"sit": 180, "feed": 180, "write": 185, "sleep": 120, "play": 225, "garden": 225, "craft": 225,
+           "read": 180, "music": 185, "paint": 225, "watch": 180, "bathe": 150, "dress": 225}
 
 POSES = {
     "sit": "SITTING calmly on an invisible low stool (do NOT draw the stool), seen in SIDE VIEW facing RIGHT, feet forward. A gentle idle loop: a slight breathing bob, one slow blink, the tail sways a little.",
@@ -36,6 +37,12 @@ POSES = {
     "write": "SITTING at an invisible desk at chest height on its RIGHT (do NOT draw the desk or chair), seen in SIDE VIEW facing RIGHT, writing on one off-white sheet of paper with a short black pencil: the pencil moves across the paper, the head nods slightly, a short pause to think.",
     "garden": "STANDING, seen in SIDE VIEW facing RIGHT, watering an invisible plant on the ground to its RIGHT with a small orange watering can: the can tilts forward, three black water drops fall from the spout, the can tilts back.",
     "craft": "STANDING at an invisible workbench on its RIGHT (do NOT draw the bench), seen in SIDE VIEW facing RIGHT, hammering a small off-white wooden block with a small black mallet: mallet raised, mallet coming down, impact, recovering.",
+    "read": "SITTING on the ground, seen in SIDE VIEW facing RIGHT, READING an open off-white book held in front of it with both hands: eyes move along the page, one page turns, a small nod, the tail sways a little. The book has no letters or text, only a few thin black lines.",
+    "music": "SITTING on an invisible bench (do NOT draw the bench or a piano), seen in SIDE VIEW facing RIGHT, PLAYING an invisible piano keyboard at chest height on its RIGHT: both hands press down in turn, the head bobs to the beat, the body sways. No musical notes, symbols or text.",
+    "paint": "STANDING, seen in SIDE VIEW facing RIGHT, PAINTING on an invisible canvas at head height on its RIGHT (do NOT draw the canvas or easel) with a small brush that has an orange tip: the brush reaches forward and makes a stroke, pulls back, tilts the head to look, strokes again.",
+    "watch": "SITTING on the ground, seen in SIDE VIEW facing RIGHT, WATCHING something interesting off to its RIGHT at eye height (do NOT draw what it watches): leans forward with wide eyes, blinks slowly, tilts the head, the tail sways contentedly.",
+    "bathe": "SITTING in an invisible shallow bath (do NOT draw the tub or water surface), seen in SIDE VIEW facing RIGHT, WASHING: rubs its head with both hands, a few small round off-white soap bubbles float up and pop, eyes closed happily. No water splash shapes, no text.",
+    "dress": "STANDING, seen in SIDE VIEW facing RIGHT toward an invisible mirror on its RIGHT (do NOT draw the mirror), ADMIRING itself: turns a little to one side, smooths its chest with one hand, does a small proud twirl and a pleased pose.",
 }
 NO_HANDS = {"ink": " INK has no hands: it holds and uses items with its wing tips or its beak."}
 
@@ -50,7 +57,9 @@ def prompt(character: str, action: str) -> str:
         f"seamless looping animation. Pose and motion: {POSES[action]} Any prop uses only the same three inks. "
         "Same character size, same design and same ground baseline in every cell; the whole body and any prop fit "
         "inside each cell with margin; no cell borders, no grid lines, no numbers, no text, no shadows on the ground. "
-        "The attached walk-cycle strip shows this exact character already drawn in this style; match it.\n\n"
+        "The attached walk-cycle strip shows this exact character already drawn in this style; match it, including "
+        "its STRICT SIDE PROFILE facing RIGHT: the same view angle as the walk strip, never a three-quarter or "
+        "front view.\n\n"
         "Background: perfectly flat solid pure magenta #FF00FF everywhere outside the character and props, so it can "
         "be removed exactly. Do not use magenta anywhere on the character or props."
     )
