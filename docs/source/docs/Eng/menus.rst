@@ -118,3 +118,5 @@ If saving signage settings fails, the dialog shows the error and keeps your edit
 The signage preset list and rotation interval expose their visible labels as accessibility names. These names follow language changes without altering your settings.
 
 Scheduled presets show separate Hour and Minute labels. The preset, hour, minute, screensaver idle duration and source fields expose their visible labels as accessibility names, which follow language changes without changing the selected values.
+
+If saving the screensaver or scheduled preset settings fails, the dialog shows the error and keeps your choices. The previous settings remain active. Correct the problem and confirm again to retry, or cancel to discard your changes. The screensaver source names also follow language changes without changing the selected source.

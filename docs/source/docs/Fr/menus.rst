@@ -121,3 +121,5 @@ Si l’enregistrement des réglages d’affichage échoue, la boîte de dialogue
 La liste des préréglages d’affichage et l’intervalle de rotation utilisent leurs libellés visibles comme noms accessibles. Ces noms suivent les changements de langue sans modifier vos réglages.
 
 Les préréglages planifiés affichent des libellés distincts pour l’heure et les minutes. Le préréglage, l’heure, les minutes, la durée d’inactivité et la source de l’économiseur d’écran utilisent leurs libellés visibles comme noms accessibles. Ces noms suivent la langue sans changer les valeurs sélectionnées.
+
+Si l’enregistrement des réglages de l’économiseur d’écran ou des préréglages planifiés échoue, la fenêtre affiche l’erreur et conserve vos choix. Les réglages précédents restent actifs. Corrigez le problème puis confirmez à nouveau pour réessayer, ou annulez pour abandonner les modifications. Les noms des sources de l’économiseur d’écran suivent aussi la langue sans changer la source sélectionnée.

@@ -119,3 +119,5 @@ Wenn die Signage-Einstellungen nicht gespeichert werden können, zeigt der Dialo
 Die Signage-Preset-Liste und das Wechselintervall verwenden ihre sichtbaren Beschriftungen als barrierefreie Namen. Diese folgen dem Sprachwechsel, ohne Ihre Einstellungen zu ändern.
 
 Geplante Presets zeigen getrennte Beschriftungen für Stunde und Minute. Preset, Stunde, Minute sowie Leerlaufdauer und Quelle des Bildschirmschoners verwenden ihre sichtbaren Beschriftungen als barrierefreie Namen. Diese folgen dem Sprachwechsel, ohne die ausgewählten Werte zu ändern.
+
+Schlägt das Speichern der Einstellungen für Bildschirmschoner oder geplante Presets fehl, zeigt der Dialog den Fehler an und behält Ihre Auswahl. Die bisherigen Einstellungen bleiben aktiv. Beheben Sie das Problem und bestätigen Sie erneut, um es noch einmal zu versuchen, oder brechen Sie ab, um die Änderungen zu verwerfen. Die Quellennamen des Bildschirmschoners folgen außerdem dem Sprachwechsel, ohne die gewählte Quelle zu ändern.

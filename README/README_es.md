@@ -786,3 +786,5 @@ La cena con amigos ocurre cuando al menos tres residentes comen en la misma zona
 La lista de preajustes de señalización y el intervalo de rotación usan sus etiquetas visibles como nombres accesibles. Estos nombres cambian con el idioma sin modificar la configuración.
 
 Los preajustes programados muestran etiquetas separadas para hora y minuto. Los campos de preajuste, hora, minuto, tiempo de inactividad y fuente del salvapantallas usan sus etiquetas visibles como nombres accesibles. Los nombres siguen el idioma sin cambiar los valores seleccionados.
+
+Si falla el guardado de la configuración del salvapantallas o de los preajustes programados, el diálogo muestra el error y conserva tu selección. La configuración anterior sigue activa. Corrige el problema y confirma de nuevo para reintentarlo, o cancela para descartar los cambios. Los nombres de las fuentes del salvapantallas también siguen el idioma sin cambiar la fuente seleccionada.
