@@ -366,3 +366,20 @@ def test_saved_birthday_marker_blocks_same_anniversary_but_not_next(version, rec
     goals.update(world)
     assert len([e for e in world.drain_events() if e.get("event") == "birthday"]) == 1
     assert world.residents[A].needs["mood"] == 30
+
+
+def test_oversized_event_days_load_with_the_most_recent_scopes():
+    """A bloated or crafted save is bounded at the boundary without refusing to load."""
+    world, zone = _world()
+    _adopt(world, zone, A)
+    limit = goals.MAX_EVENT_SCOPES
+    scopes = {f"{index:032x}": index + 1 for index in range(limit + 5)}
+    world.progress.event_days = {"birthday": scopes}
+    data = snapshot.to_dict(world)
+    loaded = snapshot.from_dict(data, world.catalog)
+    kept = loaded.progress.event_days["birthday"]
+    assert len(kept) == limit
+    assert set(kept.values()) == set(range(6, limit + 6))
+    small = {"birthday": {A: 3}}
+    world.progress.event_days = small
+    assert snapshot.from_dict(snapshot.to_dict(world), world.catalog).progress.event_days == small

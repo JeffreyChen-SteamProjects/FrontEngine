@@ -25,6 +25,8 @@ if TYPE_CHECKING:
 CHECK_MS = 30000
 MAX_STATS = 256
 MAX_EVENTS = 50
+# Far above what play produces (at most 12 residents at a time); bounds a bloated or crafted save.
+MAX_EVENT_SCOPES = 4096
 WISH_COOLDOWN_MS = 5 * 60 * 1000
 BIRTHDAY_EVERY_DAYS = 7
 CELEBRATION_COINS = 100
@@ -263,7 +265,9 @@ def _checked_event_days(value: object) -> dict[str, dict[str, int]]:
                     or (not LIFE_EVENT_RULES[kind].per_resident and scope != "")):
                 raise ValueError("Invalid event scope")
             checked_int(day, 1, 10 ** 7, "event day")
-        result[kind] = dict(scopes)
+        # Keep the most recent scopes rather than refusing the whole save.
+        recent = sorted(scopes.items(), key=lambda item: item[1], reverse=True)[:MAX_EVENT_SCOPES]
+        result[kind] = dict(recent)
     return result
 
 
