@@ -1295,7 +1295,11 @@ class FrontEngineMainUI(QMainWindow):
                 sessions[id(session)] = session
         prepared, success = [], True
         for session in sessions.values():
-            pet = session._prepare_close()
+            try:
+                pet = session._prepare_close()
+            except Exception:  # keep the pets already prepared cancellable
+                front_engine_logger.exception('[FrontEngineMainUI] pet close preparation failed')
+                pet = None
             if pet is None:
                 success = False
             else:
@@ -1334,7 +1338,7 @@ class FrontEngineMainUI(QMainWindow):
             if usage is not None:
                 usage.save()
             write_user_setting()
-        except (OSError, ValueError, KeyError, RuntimeError) as error:
+        except Exception as error:  # any failure must hand back the prepared pets and home
             for token in reversed(prepared):
                 token.cancel()
             front_engine_logger.warning(f"[FrontEngineMainUI] shutdown save failed: {error!r}")
@@ -1351,7 +1355,11 @@ class FrontEngineMainUI(QMainWindow):
             if not isinstance(child, QLayout):
                 self.lifetime.adopt(child)
         self.lifetime.begin_prepare()
-        prepared = self._prepare_shutdown()
+        try:
+            prepared = self._prepare_shutdown()
+        except Exception:  # an unexpected error must not leave the lifetime stuck preparing
+            front_engine_logger.exception('[FrontEngineMainUI] shutdown preparation failed')
+            prepared = None
         if prepared is None:
             self.lifetime.cancel_prepare()
             return CloseDisposition.REFUSED

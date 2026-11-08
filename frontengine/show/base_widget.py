@@ -133,8 +133,10 @@ class BaseWidget(QWidget):
 
     def remember_geometry(self) -> None:
         """記住目前位置與大小，之後同類覆蓋層會開在同一處。"""
+        # Only a retiring owner blocks the write; overlays outside any lifetime, such as
+        # plugin overlays, keep remembering where they were left.
         lifetime = getattr(self, '_frontengine_lifetime', None)
-        if lifetime is None or not lifetime.accepting:
+        if lifetime is not None and not lifetime.accepting:
             return
         if not self.overlay_remembers_geometry:
             return

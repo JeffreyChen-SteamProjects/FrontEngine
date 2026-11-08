@@ -1,5 +1,6 @@
 from frontengine.ui.runtime_lifetime import owned_action
 from frontengine.ui.runtime_lifetime import OwnedWidgetList, owned_callback
+from contextlib import contextmanager
 from typing import Optional
 from pathlib import Path
 import sys
@@ -343,6 +344,25 @@ class PetSettingUI(SettingPage):
         except (OSError, ValueError, RuntimeError) as error:
             self.profile_controls.status.setText(str(error))
 
+    @contextmanager
+    def _until_tracked(self, pet):
+        """Release a pet that fails before it reaches pet_list; nothing else would close it."""
+        try:
+            yield
+        except BaseException:
+            self._abandon_spawn(pet)
+            raise
+
+    def _abandon_spawn(self, pet) -> None:
+        try:
+            pet.close()
+        except RuntimeError:  # pragma: no cover - the C++ widget is already gone
+            return
+        session = getattr(pet, 'profile_session', None)
+        if session is not None and not session._closed and pet not in self.pet_list:
+            # The identity could not be released, so keep the pet where shutdown flushes and retries it.
+            self.pet_list.append(pet)
+
     @owned_action
     def _spawn_profile_pet(self, identifier: str | None, *, source_pet=None) -> None:
         path = (getattr(source_pet, 'image_path', getattr(source_pet, 'path', None))
@@ -365,26 +385,27 @@ class PetSettingUI(SettingPage):
             profile_id=identifier, profiles=self.profile_controls.profiles,
             profile_name=self.profile_controls.name.text(),
         )
-        if source_pet is None and self._builtin_sprite is not None and path == self._builtin_sprite[1]:
-            self._dress_as_builtin(pet, self._builtin_sprite[0])
-        self.profile_controls.profiles.remember_sprite(pet.profile_session.identifier, path)
-        pet.clone_requested.connect(lambda: self._spawn_pet(pet.profile_session.state(), source_pet=pet))
-        pet.customize_requested.connect(lambda: self.profile_controls.customize(pet.profile_session.identifier))
-        pet.profile_session.changed.connect(self._on_settle_typing_toggled)
-        pet.set_peers_provider(lambda me=pet: self._peer_centers(me))
-        pet.profile_session.changed.connect(self._start_tag_game)
-        pet.wardrobe_requested.connect(lambda: self.profile_controls.wardrobe(pet.profile_session.identifier))
-        speak = source_pet._speak if source_pet is not None else self.speech_checkbox.isChecked()
-        if speak:
-            pet.set_speech_enabled(True)
-        if source_pet is not None:
-            pet.set_chat_service(source_pet._chat_service)
-        elif self.chat_checkbox.isChecked():
-            pet.set_chat_service(self.chat_service())
-        geometry = self._target_geometry()
-        if audio_react:
-            pet.set_audio_level_provider(self._audio_provider(geometry))
-        pet.set_pet_window_flag()
+        with self._until_tracked(pet):
+            if source_pet is None and self._builtin_sprite is not None and path == self._builtin_sprite[1]:
+                self._dress_as_builtin(pet, self._builtin_sprite[0])
+            self.profile_controls.profiles.remember_sprite(pet.profile_session.identifier, path)
+            pet.clone_requested.connect(lambda: self._spawn_pet(pet.profile_session.state(), source_pet=pet))
+            pet.customize_requested.connect(lambda: self.profile_controls.customize(pet.profile_session.identifier))
+            pet.profile_session.changed.connect(self._on_settle_typing_toggled)
+            pet.set_peers_provider(lambda me=pet: self._peer_centers(me))
+            pet.profile_session.changed.connect(self._start_tag_game)
+            pet.wardrobe_requested.connect(lambda: self.profile_controls.wardrobe(pet.profile_session.identifier))
+            speak = source_pet._speak if source_pet is not None else self.speech_checkbox.isChecked()
+            if speak:
+                pet.set_speech_enabled(True)
+            if source_pet is not None:
+                pet.set_chat_service(source_pet._chat_service)
+            elif self.chat_checkbox.isChecked():
+                pet.set_chat_service(self.chat_service())
+            geometry = self._target_geometry()
+            if audio_react:
+                pet.set_audio_level_provider(self._audio_provider(geometry))
+            pet.set_pet_window_flag()
         self.pet_list.append(pet)
         self._on_settle_typing_toggled()
         pet.show()
@@ -409,17 +430,18 @@ class PetSettingUI(SettingPage):
         except (ValueError, OSError, RuntimeError) as error:
             self.lifetime.after_dialog(QMessageBox.warning(self, 'Imervue puppet', str(error)))
             return
-        if source_pet is not None:
-            for expression in source_pet.canvas.active_expressions():
-                pet.canvas.add_expression(expression)
-        pet.clone_requested.connect(lambda: self._spawn_pet(pet.profile_session.state(), source_pet=pet))
-        pet.customize_requested.connect(lambda: self.profile_controls.customize(pet.profile_session.identifier))
-        pet.profile_session.changed.connect(self._on_settle_typing_toggled)
-        geometry = self._target_geometry()
-        if geometry is not None:
-            pet.setScreen(geometry[1])
-            bounds = geometry[0]
-            pet.move(bounds.left(), bounds.bottom() - pet.height())
+        with self._until_tracked(pet):
+            if source_pet is not None:
+                for expression in source_pet.canvas.active_expressions():
+                    pet.canvas.add_expression(expression)
+            pet.clone_requested.connect(lambda: self._spawn_pet(pet.profile_session.state(), source_pet=pet))
+            pet.customize_requested.connect(lambda: self.profile_controls.customize(pet.profile_session.identifier))
+            pet.profile_session.changed.connect(self._on_settle_typing_toggled)
+            geometry = self._target_geometry()
+            if geometry is not None:
+                pet.setScreen(geometry[1])
+                bounds = geometry[0]
+                pet.move(bounds.left(), bounds.bottom() - pet.height())
         self.pet_list.append(pet)
         pet.show()
         self._on_settle_typing_toggled()
