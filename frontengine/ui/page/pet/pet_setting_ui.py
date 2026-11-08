@@ -116,6 +116,7 @@ class PetSettingUI(SettingPage):
         self.builtin_puppet_button.clicked.connect(self.use_builtin_puppet)
         self._puppet_export = None
         self._sprite_install = None
+        self._wardrobe_installs = []      # characters already on the desktop whose wardrobe still installs
         # (character id, preview image): Start dresses a sprite pet spawned from that image as the character.
         self._builtin_sprite: tuple[str, str] | None = None
         self.ready_label = tr(QLabel(), "Not Ready")
@@ -544,11 +545,19 @@ class PetSettingUI(SettingPage):
                                self.builtin_character.currentData(), directory / 'pet-previews')
         self._sprite_install = job
         job.signals.finished.connect(self._builtin_character_ready, Qt.ConnectionType.QueuedConnection)
+        job.signals.wardrobe.connect(self._wardrobe_installed, Qt.ConnectionType.QueuedConnection)
         self.lifetime.submit(job)
 
     @owned_callback
+    def _wardrobe_installed(self, _error: str) -> None:
+        self._wardrobe_installs = [job for job in self._wardrobe_installs if not job.done]
+
+    @owned_callback
     def _builtin_character_ready(self, preview: str, error: str) -> None:
-        identifier, self._sprite_install = self._sprite_install.identifier, None
+        job, self._sprite_install = self._sprite_install, None
+        identifier = job.identifier
+        if not error:
+            self._wardrobe_installs.append(job)
         self.builtin_sprite_button.setEnabled(True)
         if error:
             self.profile_controls.status.setText(error)
@@ -805,6 +814,8 @@ class PetSettingUI(SettingPage):
         self._spawn_when_installed = False
         if self._sprite_install is not None:
             self._sprite_install.cancel.set()
+        for job in self._wardrobe_installs:
+            job.cancel.set()
 
     def close_pack_editor(self) -> None:
         """Cancel file work and release animation resources before application shutdown."""
