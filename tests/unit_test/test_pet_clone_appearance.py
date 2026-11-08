@@ -8,6 +8,16 @@ from test_pet_profile_sessions import _sprite
 from test_pet_variants import variant_asset
 
 
+def _same_moment(*pets):
+    """Compare looks at one animation time: the clone starts playing later than its source."""
+    for pet in pets:
+        playback = pet._layered_playback
+        playback.clock = lambda: 0.0
+        playback._elapsed = 0.0
+        if playback._started is not None:
+            playback._started = 0.0
+
+
 def test_clone_uses_source_sprite_and_custom_parts_after_page_selection_changes(tmp_path, monkeypatch, *, lifetime_factory):
     lifetime_factory()
     page = PetSettingUI(lifetime=lifetime_factory())
@@ -40,11 +50,13 @@ def test_clone_uses_source_sprite_and_custom_parts_after_page_selection_changes(
         assert clone._base_size == source._base_size
         assert clone.profile_session.identifier != source.profile_session.identifier
         assert clone.profile_session.state()['appearance'] == before['appearance']
+        _same_moment(source, clone)
         assert clone._current_pixmap().toImage() == source._current_pixmap().toImage()
         edited = WardrobeDraft(profiles, clone.profile_session.identifier, catalog)
         edited.set_variant('eyes', 'narrow')
         edited.apply()
         assert source.profile_session.state()['appearance'] == before['appearance']
+        _same_moment(source, clone)
         assert clone._current_pixmap().toImage() != source._current_pixmap().toImage()
         assert page.pet_image_path == str(tmp_path / 'unrelated.puppet')
     finally:
