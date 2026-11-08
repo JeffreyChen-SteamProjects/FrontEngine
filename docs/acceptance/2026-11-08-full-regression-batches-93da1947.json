@@ -1,0 +1,63 @@
+{
+  "item": "#113",
+  "date": "2026-11-08",
+  "head": "93da1947",
+  "branch": "fix/cumulative-review-findings",
+  "runtime": "D:/Codes/FrontEngine/.audit/test-runtime-3145 (Python 3.14.5, offscreen)",
+  "method": "same tests, plugins and environment as the single-process runner, split into 8 sequential batches in fresh pytest processes (three single-process runs were stopped for low machine memory at 34-38%)",
+  "result": {
+    "collected": 3551,
+    "tests": 3551,
+    "passed": 3548,
+    "skipped": 3,
+    "failures": 0,
+    "errors": 0,
+    "batch_exits": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "modules": 231,
+    "source_files": 761,
+    "source_unchanged": true
+  },
+  "skipped": [
+    "test_default_storage_binding (Requires POSIX fork)",
+    "test_remote_tls (POSIX permission semantics)",
+    "test_storage_session (Requires POSIX fork)"
+  ],
+  "earlier_runs": {
+    "88412757": "3 failed (load-sensitive shortcut test, #117)",
+    "538fd5f8": "stopped at 37% (memory)",
+    "ae393935": "access violation at 97%, fixed in c9f6d1de",
+    "c9f6d1de": "1 failed (clone animation timing), fixed in be0295d5",
+    "be0295d5": "stopped at 34% (memory)",
+    "d020f9b6": "stopped at 38% (memory)"
+  },
+  "sha256": {
+    "batch-0.exit": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+    "batch-0.xml": "b1635a4dc70231b9258e5c33b0d597997493388aa907b2f6017322a627c3ae32",
+    "batch-1.exit": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+    "batch-1.xml": "729c23eb3f6d0948d95b4c2bade1ca96d733e1a9cdde00c9edc1c3b580616256",
+    "batch-2.exit": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+    "batch-2.xml": "7ea7f29c01ccf36d737af25775bc3430d3cd57562959a280cabc385a2780490a",
+    "batch-3.exit": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+    "batch-3.xml": "e4313cfeadcd6982e0246347df1d2d9f85700f3b2393ccf3acdfcb25e0645a20",
+    "batch-4.exit": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+    "batch-4.xml": "70dab79da567d5628bf40b3e56f117bec0e4c02e65584e4fd1ce994c9b114881",
+    "batch-5.exit": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+    "batch-5.xml": "837196f3612833b23e5517b1077d64d7d12f7f98e6bcc38d0c1f95503b5fd502",
+    "batch-6.exit": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+    "batch-6.xml": "0fbb16559dc6171694b9a51cf7f4aaa01ffa38f132c5721229bf4eac19fa74e6",
+    "batch-7.exit": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+    "batch-7.xml": "41a4971df9dbb0ab76238d13bfe9932f4a7a0dfd6c9701c61ed40da7a28fe28b",
+    "plan.json": "e938290a45d734aefa50a7773be7efa5314f778ee046ce783cb808b5a67f8f79",
+    "result.json": "33f813286e128e9fde9a38867810f2766061ecb59964eb22749d39973ba58d55",
+    "source-manifest.json": "833db1eb9b45ae01c2aaa259f5fe99bbfaed2cf096161f695f5d6fca09702d33"
+  }
+}
