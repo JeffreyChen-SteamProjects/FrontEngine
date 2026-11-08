@@ -453,6 +453,7 @@ class FrontEngineMainUI(QMainWindow):
         apply_startup_preset(self)
         # Once the window and the home are up: the pets on the desktop at the last close come back.
         QTimer.singleShot(0, self.pet_setting_ui, self.pet_setting_ui.bring_pets_back)
+        self._open_first_pet_page()
 
         # Debug 模式下自動關閉
         # Auto close in debug mode
@@ -461,6 +462,18 @@ class FrontEngineMainUI(QMainWindow):
             self.debug_timer.setInterval(10000)
             self.lifetime.connect_owned(self.debug_timer.timeout, self.debug_close)
             self.debug_timer.start()
+
+    def _open_first_pet_page(self) -> None:
+        """Nobody has a pet or a home yet: start where one click puts a pet on the desktop."""
+        home = getattr(self, 'pet_home_ui', None)
+        if home is not None and home.service.world is not None:
+            return
+        try:
+            if self.pet_setting_ui.profile_controls.profiles.profiles():
+                return
+        except (OSError, ValueError):
+            return
+        self.sidebar.select_page_id("tab_pet_text")
 
     def _open_pet_home(self) -> None:
         """The desktop home's button brings the main window back on the Pet home page."""

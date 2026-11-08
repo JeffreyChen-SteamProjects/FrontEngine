@@ -44,6 +44,7 @@ def test_created_home_fits_actual_narrow_window_with_arial(make_main_window, req
 
 def test_empty_home_fits_narrow_window_in_every_language(make_main_window):
     window = make_main_window()
+    window.sidebar.select_page_id("tab_pet_home_text")    # a first start opens on the Pet page
     window.resize(536, 500)
     window.show()
     page = window.pet_home_ui
@@ -96,6 +97,7 @@ def test_work_recovery_keeps_toolbar_below_home(make_main_window):
     from frontengine.utils.pet_game import behaviour, simulation
 
     window = make_main_window()
+    window.sidebar.select_page_id("tab_pet_home_text")    # a first start opens on the Pet page
     page = window.pet_home_ui
     screen = QApplication.primaryScreen()
     area = screen.availableGeometry()

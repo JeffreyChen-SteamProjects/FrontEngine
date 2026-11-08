@@ -3,7 +3,7 @@ Page Mascotte
 
 Un compagnon qui vit sur le bureau.
 
-La page s’ouvre sur *Votre mascotte* : cliquez sur un des personnages intégrés et une mascotte habillée comme lui apparaît aussitôt sur le bureau, ou choisissez *Votre propre image…*. En dessous, les mascottes du bureau sont listées avec *Garde-robe*, *Ramener l’animal* et *Ranger* (un double-clic en ramène une) ; tous les autres réglages restent repliés jusqu’à ce que vous ouvriez leur section.
+La page s’ouvre sur *Votre mascotte* : cliquez sur un des personnages intégrés et une mascotte habillée comme lui apparaît aussitôt sur le bureau, ou choisissez *Votre propre image…*. En dessous, les mascottes du bureau sont listées avec *Garde-robe*, *Ramener l’animal* et *Ranger* (un double-clic en ramène une) ; tous les autres réglages restent repliés jusqu’à ce que vous ouvriez leur section. Au premier démarrage, sans animal ni maison, FrontEngine s'ouvre sur cette page.
 
 * Choisir l'image de la mascotte - une seule image.
 * Choisir un pack de mascotte… - un dossier contenant les images walk / idle /

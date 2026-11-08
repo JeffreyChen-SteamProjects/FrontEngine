@@ -3,7 +3,7 @@ Pet Page
 
 A companion that lives on the desktop.
 
-The page opens with *Your pet*: click one of the built-in characters and a pet dressed as it appears on the desktop at once, or pick *Your own picture…*. Below, the pets on the desktop are listed with *Wardrobe*, *Bring pet back* and *Put away* (a double-click brings one back); every other setting is folded away until you open its section.
+The page opens with *Your pet*: click one of the built-in characters and a pet dressed as it appears on the desktop at once, or pick *Your own picture…*. Below, the pets on the desktop are listed with *Wardrobe*, *Bring pet back* and *Put away* (a double-click brings one back); every other setting is folded away until you open its section. A first start, with no pet and no home yet, opens on this page.
 
 * Choose pet sprite - a single image.
 * Choose pet pack... - a folder holding walk / idle / sleep / climb / fall /
