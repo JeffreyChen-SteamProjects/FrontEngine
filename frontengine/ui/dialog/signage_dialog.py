@@ -12,7 +12,9 @@ from PySide6.QtWidgets import (
     QCheckBox, QDialog, QDialogButtonBox, QGridLayout, QLabel, QPlainTextEdit, QSpinBox, QWidget,
 )
 
-from frontengine.user_setting.user_setting_file import user_setting_dict, write_user_setting
+from frontengine.user_setting.user_setting_file import (
+    replace_setting, user_setting_dict, write_user_setting,
+)
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import tr
@@ -100,16 +102,9 @@ class SignageDialog(QDialog):
 
     def accept(self) -> None:
         settings = self.settings()
-        had_settings = SETTING_KEY in user_setting_dict
-        previous = user_setting_dict.get(SETTING_KEY)
-        user_setting_dict[SETTING_KEY] = settings
         try:
-            write_user_setting()
+            replace_setting(user_setting_dict, SETTING_KEY, settings, write_user_setting)
         except (OSError, ValueError) as error:
-            if had_settings:
-                user_setting_dict[SETTING_KEY] = previous
-            else:
-                user_setting_dict.pop(SETTING_KEY, None)
             self.status.setText(str(error))
             return
         front_engine_logger.info(f"[SignageDialog] saved | {len(settings['presets'])} preset(s)")

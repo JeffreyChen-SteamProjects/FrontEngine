@@ -1,6 +1,6 @@
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 from frontengine.utils.json.json_repository import JsonRepository
 from frontengine.utils.preset_schedule.preset_schedule_service import DEFAULT_PRESET_SCHEDULE
@@ -140,6 +140,29 @@ user_setting_dict: Dict[str, Any] = default_settings()
 def write_user_setting() -> Path:
     from frontengine.user_setting.default_storage import default_storage
     return default_storage().save_settings()
+
+
+_ABSENT = object()
+
+
+def replace_setting(settings: Dict[str, Any], key: str, value: Any,
+                    write: Callable[[], Any]) -> None:
+    """Store one entry and save it; if saving fails, put back the previous entry.
+
+    Services read the live dictionary, so leaving the new value in place after a
+    failed write would apply settings that are not on disk. A missing entry is
+    removed again rather than restored as None. The write error is re-raised.
+    """
+    previous = settings.get(key, _ABSENT)
+    settings[key] = value
+    try:
+        write()
+    except BaseException:
+        if previous is _ABSENT:
+            settings.pop(key, None)
+        else:
+            settings[key] = previous
+        raise
 
 
 def read_user_setting() -> Path:
