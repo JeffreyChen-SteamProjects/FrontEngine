@@ -1,0 +1,65 @@
+{
+  "items": [
+    "#111",
+    "#113"
+  ],
+  "date": "2026-11-08",
+  "review": {
+    "base": "d2a8e7c0 (merge-base with dev)",
+    "head_reviewed": "88412757",
+    "commits_ahead": 238,
+    "product_files": 121,
+    "method": "three independent read-only reviewers split by area (storage/shutdown, pet home, general UI); every finding re-read against the code before fixing"
+  },
+  "fixed": {
+    "S1": "failed pet spawn kept its profile session, identity and storage use; final storage close refused forever",
+    "S2": "unexpected exception during shutdown preparation left the lifetime PREPARING; later closes refused",
+    "UI1": "WorkLifetime kept every adopted widget (and pixmaps) alive until shutdown",
+    "UI2": "overlays outside any lifetime (plugin overlays) stopped remembering geometry",
+    "PG1": "desktop strip kept across manage/sandbox switch stayed bound to the other world; drags left pets frozen",
+    "UI3": "screen filter colour saved as translated text; list did not follow language",
+    "UI4": "six Start/Stop buttons reverted to Start after a language switch",
+    "UI5": "screen-text consent skipped when another sidebar page was in front of Tools",
+    "UI6": "weather lookup thread raised _ActionCancelled and updated the service after retirement"
+  },
+  "commits": {
+    "lifecycle": "80cf6f8d",
+    "home_strip": "20eabdf3",
+    "ui": "affad1bf"
+  },
+  "tests": {
+    "new_red": "19 failed + 1 teardown error before the fixes (UI file re-run alone: 11 failed, positive control passed)",
+    "new_green": "19 passed",
+    "related_modules": "701 passed (55 modules)",
+    "pyflakes": "no output"
+  },
+  "open": {
+    "S3": "JEditor does not follow the close/reopen contract; uncommitted work exists in .audit/worktrees/jeditor-ownership (JEditor repo)",
+    "S4": "tray quit can end the event loop before retirement drains (also present before this branch)",
+    "PG2": "goals event_days has no scope limit; rejecting could make long-lived saves unloadable",
+    "flaky": "test_pet_home_shortcuts fails under load (see full_regression_88412757)"
+  },
+  "full_regression_88412757": {
+    "exit": 1,
+    "passed": 3522,
+    "skipped": 3,
+    "failed": 3,
+    "seconds": 2264.17,
+    "source_files": 758,
+    "source_unchanged": true,
+    "failed_tests": "test_pet_home_shortcuts::test_stage_shortcut_reveals_content_even_when_tab_is_already_selected [False-backpack-900, True-backpack-500, True-goals-900]",
+    "context": "ran concurrently with three reviewers and focused runs; the module passed 16/16 twice alone; forcing 300 service ticks did not reproduce",
+    "sha256": {
+      "result.json": "0cd20255e86eeea312ba580ee7076602eb9ddc8e4b69d1e2d260a70d78724c28",
+      "junit.xml": "8d6fe6a7357bf71e5b6b26424103ee485289bc1d521f575c8dfd456e8f824080",
+      "pytest.log": "2f79f7f81d88d52aa183ec459925225595d0d45e773cba76552e0ff25abf9d0c",
+      "failures.txt": "7d630366846abe3db969f45bac344fdce1b2d14361fbcf8ebca064502c91c472"
+    }
+  },
+  "logs_sha256": {
+    "review-findings-red.log": "42ec06639f9bc7854f8851ac872142099e5f2257e7cafacd72c282d1096df724",
+    "review-ui-red.log": "38f3bb9357f4f8cdd95875853fca0791d059c919da2218e06c20b3f0abdd25d6",
+    "review-findings-green.log": "79075f6f8a8464c8fd2ee26f176723c9202a7cc58b9c4ec92b5ce25b26cc3c64",
+    "review-findings-related.log": "7568d73999482f03371e3ec83cf3131c04d27bdc901fcebaa51d4857c4101b7a"
+  }
+}
