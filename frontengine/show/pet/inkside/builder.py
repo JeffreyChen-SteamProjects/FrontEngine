@@ -23,7 +23,7 @@ from frontengine.show.pet.inkside.rig import Pose, timelines
 
 FORMAT = 'frontengine.layered-pet/1'
 # Version of every built-in asset; 2 added the home poses as whole-body frames.
-ASSET_VERSION = '2'
+ASSET_VERSION = '3'
 LICENSE = 'FrontEngine built-in INKSIDE artwork, generated from frontengine/show/pet/inkside (MIT)'
 CANVAS = 256
 _SCRATCH = 448

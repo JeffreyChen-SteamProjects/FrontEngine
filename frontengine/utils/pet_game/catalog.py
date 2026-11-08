@@ -133,7 +133,8 @@ def _check_footprint(definition: FurnitureDefinition) -> None:
 
 # What a character is asked to do while using a piece, best first; a character without a pose
 # falls back to the next one and finally to standing (idle), so every piece stays usable.
-POSES = ("sleep", "feed", "sit", "play", "greet", "write", "garden", "craft", "idle")
+POSES = ("sleep", "feed", "sit", "play", "greet", "write", "garden", "craft", "read", "music", "paint", "watch",
+         "bathe", "dress", "idle")
 ACTIVITY_POSES = {"sleep": ("sleep", "sit"), "eat": ("feed", "sit"), "relax": ("sit",), "play": ("play", "greet"),
                   "work": ("sit",), "wash": ("sit",)}
 
@@ -304,7 +305,7 @@ def _furniture() -> list[FurnitureDefinition]:
                             {"mood": 8, "energy": 8, "comfort": 18}, price=55, sell_back=25, use_ms=(40000, 60000)),
         FurnitureDefinition("bookshelf", "pet_game_bookshelf", "Bookshelf", "leisure", 2, True, (0,), "relax",
                             {"mood": 12, "comfort": 6}, price=70, sell_back=35, comfort=1, use_ms=(40000, 70000),
-                            unlock_level=2),
+                            unlock_level=2, poses=("read", "sit")),
         FurnitureDefinition("ball_pit", "pet_game_ball_pit", "Ball pit", "leisure", 3, True, (0, 2), "play",
                             {"mood": 25, "energy": -6}, price=95, sell_back=45, use_ms=(30000, 45000),
                             unlock_level=2),
@@ -313,16 +314,20 @@ def _furniture() -> list[FurnitureDefinition]:
                             comfort=2, use_ms=(40000, 60000), unlock_level=2),
         FurnitureDefinition("piano", "pet_game_piano", "Piano", "leisure", 3, True, (1,), "play",
                             {"mood": 18, "social": 4, "energy": -3}, price=150, sell_back=75,
-                            use_ms=(40000, 60000), unlock_level=4),
+                            use_ms=(40000, 60000), unlock_level=4, poses=("music", "sit")),
         FurnitureDefinition("rug", "pet_game_rug", "Rug", "decoration", 4, False, price=40, sell_back=20, comfort=3),
-        FurnitureDefinition("easel", "pet_game_easel", "Easel painting", "decoration", 1, False, price=30,
-                            sell_back=15, comfort=2, unlock_level=2),
+        # Decorations a pet also uses: paint at the easel, watch the fish or the clock, dress up at the wardrobe.
+        FurnitureDefinition("easel", "pet_game_easel", "Easel painting", "decoration", 1, False, (0,), "play",
+                            {"mood": 14, "energy": -2}, price=30, sell_back=15, comfort=2, use_ms=(30000, 45000),
+                            unlock_level=2, poses=("paint", "play")),
         FurnitureDefinition("string_lights", "pet_game_string_lights", "String lights", "decoration", 3, False,
                             price=35, sell_back=15, comfort=3, unlock_level=3),
-        FurnitureDefinition("aquarium", "pet_game_aquarium", "Aquarium", "decoration", 2, False, price=130,
-                            sell_back=65, comfort=4, unlock_level=4),
+        FurnitureDefinition("aquarium", "pet_game_aquarium", "Aquarium", "decoration", 2, False, (0,), "relax",
+                            {"mood": 10, "comfort": 8}, price=130, sell_back=65, comfort=4, use_ms=(40000, 60000),
+                            unlock_level=4, poses=("watch", "sit")),
         FurnitureDefinition("grandfather_clock", "pet_game_grandfather_clock", "Grandfather clock", "decoration", 1,
-                            False, price=60, sell_back=30, comfort=2, unlock_level=5),
+                            False, (0,), "relax", {"mood": 4, "comfort": 6}, price=60, sell_back=30, comfort=2,
+                            use_ms=(20000, 30000), unlock_level=5, poses=("watch", "sit")),
         # Platforms: a raised point is reached by a pet that climbs, or by anyone over pet stairs beside it.
         FurnitureDefinition("pet_stairs", "pet_game_pet_stairs", "Pet stairs", "decoration", 2, False,
                             price=25, sell_back=12, steps=True),
@@ -334,14 +339,16 @@ def _furniture() -> list[FurnitureDefinition]:
                             unlock_level=3, raised=True),
         # Washing: the floor always works (a pet tidies itself up); a tub is quicker and nicer.
         FurnitureDefinition("bath_tub", "pet_game_bath_tub", "Bath tub", "bath", 3, True, (1,), "wash",
-                            {"hygiene": 60, "mood": 3, "comfort": 10}, price=70, sell_back=35, comfort=1),
+                            {"hygiene": 60, "mood": 3, "comfort": 10}, price=70, sell_back=35, comfort=1,
+                            poses=("bathe", "sit")),
         # The second furniture collection: more to sleep on, eat at, relax with and look at.
         FurnitureDefinition("floor_lamp", "pet_game_floor_lamp", "Floor lamp", "decoration", 1, False,
                             price=30, sell_back=15, comfort=2),
         FurnitureDefinition("hanging_plants", "pet_game_hanging_plants", "Hanging plants", "decoration", 2, False,
                             price=45, sell_back=22, comfort=3, unlock_level=2),
         FurnitureDefinition("wardrobe_closet", "pet_game_wardrobe_closet", "Wardrobe", "decoration", 2, False,
-                            price=70, sell_back=35, comfort=2, unlock_level=2),
+                            (0,), "relax", {"mood": 10, "social": 2}, price=70, sell_back=35, comfort=2,
+                            use_ms=(20000, 35000), unlock_level=2, poses=("dress", "greet")),
         FurnitureDefinition("futon", "pet_game_futon", "Futon", "bed", 3, True, (1,), "sleep",
                             {"energy": 35, "comfort": 18}, price=70, sell_back=35, comfort=1),
         FurnitureDefinition("kotatsu", "pet_game_kotatsu", "Kotatsu", "table", 3, True, (0, 2), "eat",
@@ -349,18 +356,18 @@ def _furniture() -> list[FurnitureDefinition]:
                             unlock_level=4),
         FurnitureDefinition("tv_set", "pet_game_tv_set", "TV set", "leisure", 2, True, (0, 1), "relax",
                             {"mood": 14, "energy": 2, "social": 3}, price=120, sell_back=60, use_ms=(40000, 60000),
-                            unlock_level=3),
+                            unlock_level=3, poses=("watch", "sit")),
         FurnitureDefinition("fireplace", "pet_game_fireplace", "Fireplace", "leisure", 3, True, (1,), "relax",
                             {"mood": 8, "energy": 4, "comfort": 22}, price=160, sell_back=80, comfort=3,
-                            use_ms=(40000, 60000), unlock_level=4),
+                            use_ms=(40000, 60000), unlock_level=4, poses=("watch", "sit")),
         FurnitureDefinition("rocking_horse", "pet_game_rocking_horse", "Rocking horse", "leisure", 2, True, (0,),
                             "play", {"mood": 18, "energy": -4}, price=90, sell_back=45, use_ms=(30000, 45000),
                             unlock_level=2),
         FurnitureDefinition("telescope", "pet_game_telescope", "Telescope", "leisure", 1, True, (0,), "play",
                             {"mood": 16, "energy": -2}, price=75, sell_back=37, use_ms=(30000, 45000),
-                            unlock_level=3),
+                            unlock_level=3, poses=("watch", "play")),
         FurnitureDefinition("shower", "pet_game_shower", "Shower", "bath", 1, True, (0,), "wash",
-                            {"hygiene": 70, "mood": 2}, price=90, sell_back=45, unlock_level=3),
+                            {"hygiene": 70, "mood": 2}, price=90, sell_back=45, unlock_level=3, poses=("bathe", "sit")),
     ]
 
 

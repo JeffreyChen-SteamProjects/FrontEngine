@@ -53,9 +53,12 @@ def semantic_action(resident, world=None, renderer=None) -> str:
             return pose
     pose = USING_ACTIONS.get(activity.kind, "idle")
     piece = getattr(world, "furniture", {}).get(activity.furniture or "")
-    if piece is not None and renderer is not None and not renderer.has_action(pose):
-        # The piece says what else will do: a character without a sleeping pose sits on the bed.
-        return next((other for other in wanted_poses(world.definition(piece)) if renderer.has_action(other)), "idle")
+    if piece is not None and renderer is not None:
+        # A piece's own pose comes first (reading at the bookshelf), then the activity's, then what
+        # else will do: a character without a sleeping pose sits on the bed.
+        definition = world.definition(piece)
+        return next((other for other in (*definition.poses, pose, *wanted_poses(definition))
+                     if renderer.has_action(other)), "idle")
     return pose
 
 
