@@ -166,10 +166,15 @@ background repository persistence retain their existing shutdown contracts.
   Detailed formats and capability boundaries: `docs/formats/interoperability.md`.
 
 - **JEditor (downstream)**: JEditor lists `frontengine` as a dependency and embeds
-  `FrontEngineMainUI` as a tab (`je_editor/pyside_ui/main_ui/menu/tab_menu/build_tab_tools_menu.py`,
-  `show_system_tray_ray=False, redirect_output=False`) and as a dock
-  (`je_editor/pyside_ui/main_ui/menu/dock_menu/build_dock_menu.py`, `redirect_output=False`). The
-  constructor's keywords and side effects are therefore a contract. PyBreeze inherits both entries
+  `FrontEngineMainUI` as a tab and as a dock. Released JEditor builds call
+  `FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)` (tab) and
+  `FrontEngineMainUI(redirect_output=False)` (dock) directly. JEditor branch
+  `fix/frontengine-storage-lifetime` (not merged yet) replaces both with one shared host,
+  `je_editor/pyside_ui/main_ui/frontengine_host.py`, that builds the window once with
+  `show_system_tray_ray=False, redirect_output=False`, reuses it across tab and dock, and closes
+  through `request_shutdown()` (`CloseDisposition` from `frontengine.ui.runtime_lifetime`),
+  `shutdown_finished` and `MainRuntimeInUse` (a `RuntimeError`). The constructor's keywords, those
+  names and their side effects are therefore a contract. PyBreeze inherits both entries
   through `EditorMain`.
 - **Release channel**: JEditor depends on the stable `frontengine` package. A change reaches it only
   after a `dev → main` release. `release.yml` copies `stable.toml` over `pyproject.toml` to build it.
