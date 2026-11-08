@@ -89,6 +89,8 @@ class HomeStrip(HomeView):
         self._stepped_at = clock()
         self._press: tuple[str, QPointF] | None = None
         self._dragging: tuple[str, float] | None = None
+        # Arranging: (piece, where it was pressed, grab offset, cell it started on, moved yet)
+        self._piece_press: tuple[str, QPointF, float, int, bool] | None = None
         self.setWindowFlags(strip_flags(self.layer))
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
@@ -548,9 +550,31 @@ class HomeStrip(HomeView):
         elif event.button() == Qt.MouseButton.LeftButton and resident is not None:
             self._press = (resident, point)
         elif event.button() == Qt.MouseButton.LeftButton and self.arranging:
-            self.cell_clicked.emit(int(self.x_cell(point.x())))
+            if not self._press_piece(point):
+                self.cell_clicked.emit(int(self.x_cell(point.x())))
+
+    def _press_piece(self, point: QPointF) -> bool:
+        """Arranging: pressing on a piece selects it and starts a drag; a click alone only selects it."""
+        identifier = self._piece_at(point)
+        piece = self.service.world.furniture.get(identifier) if identifier else None
+        if piece is None:
+            return False
+        rect = self.piece_rect(piece, self.service.world.definition(piece))
+        self._piece_press = (identifier, point, point.x() - rect.left(), piece.cell, False)
+        self.furniture_selected.emit(identifier)
+        return True
+
+    def _piece_cell(self, x: float) -> int:
+        return max(0, int(round(self.x_cell(x - self._piece_press[2]))))
 
     def mouseMoveEvent(self, event: QMouseEvent) -> None:
+        if self._piece_press is not None:
+            identifier, origin, grab, start, moved = self._piece_press
+            if not moved and (event.position() - origin).manhattanLength() < DRAG_START_PX:
+                return
+            self._piece_press = (identifier, origin, grab, start, True)
+            self.piece_hovered.emit(identifier, self._piece_cell(event.position().x()))
+            return
         if self._press is None:
             return
         identifier, origin = self._press
@@ -563,6 +587,13 @@ class HomeStrip(HomeView):
         self.update()
 
     def mouseReleaseEvent(self, event: QMouseEvent) -> None:
+        if event.button() == Qt.MouseButton.LeftButton and self._piece_press is not None:
+            identifier, _origin, _grab, _start, moved = self._piece_press
+            cell = self._piece_cell(event.position().x())
+            self._piece_press = None
+            if moved:
+                self.piece_dropped.emit(identifier, cell)
+            return
         if event.button() != Qt.MouseButton.LeftButton or self._press is None:
             return
         identifier, _origin = self._press
@@ -575,7 +606,14 @@ class HomeStrip(HomeView):
         self.resident_selected.emit(identifier)
         self.show_card(identifier, event.globalPosition().toPoint())
 
+    def _cancel_piece_drag(self) -> None:
+        """A furniture drag that loses the mouse leaves the piece where it was and clears the preview."""
+        press, self._piece_press = getattr(self, "_piece_press", None), None
+        if press is not None and press[4]:
+            self.piece_dropped.emit(press[0], press[3])
+
     def _finish_pointer(self, *, commit: bool) -> None:
+        self._cancel_piece_drag()
         dragging = self._dragging
         self._press = self._dragging = None
         world = self.service.world
@@ -591,7 +629,8 @@ class HomeStrip(HomeView):
         self.update()
 
     def event(self, event: QEvent) -> bool:
-        if event.type() == QEvent.Type.UngrabMouse and getattr(self, "_press", None) is not None:
+        if event.type() == QEvent.Type.UngrabMouse and (getattr(self, "_press", None) is not None
+                                                        or getattr(self, "_piece_press", None) is not None):
             self._finish_pointer(commit=False)
         return super().event(event)
 

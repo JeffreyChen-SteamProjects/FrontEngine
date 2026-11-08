@@ -706,6 +706,9 @@ class PetHomePage(SettingPage):
             strip.arrange_finished.connect(self._strip_done_arranging)
             strip.layer_requested.connect(self.choose_layer)
             strip.hide_requested.connect(self._hide_from_desktop)
+            strip.furniture_selected.connect(lambda identifier, z=zone: self._strip_piece_selected(z, identifier))
+            strip.piece_hovered.connect(self.layout_panel.drag_hover)
+            strip.piece_dropped.connect(self.layout_panel.drop)
             strip.resident_selected.connect(self.select_resident)
             strip.cell_clicked.connect(lambda cell, z=zone: self._strip_cell_clicked(z, cell))
             strip.closed.connect(lambda s=strip: self._forget_strip(s))
@@ -956,6 +959,14 @@ class PetHomePage(SettingPage):
         self.update_ambience()
 
     @owned_action
+    def _strip_piece_selected(self, zone: str, identifier: str) -> None:
+        world = self.service.world
+        if world is None or zone not in world.zones or identifier not in world.furniture:
+            return
+        if zone != self.zone:
+            self.choose_zone(zone)
+        self.select_furniture(identifier)
+
     def _strip_cell_clicked(self, zone: str, cell: int) -> None:
         world = self.service.world
         if world is None or zone not in world.zones:
