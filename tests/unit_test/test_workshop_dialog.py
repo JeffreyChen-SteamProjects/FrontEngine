@@ -87,7 +87,7 @@ def test_closed_workshop_discards_modal_choice(tmp_path, monkeypatch, lifetime_f
         assert requested == []
         assert not backend.initialized
         if isValid(dialog):
-            assert (dialog.source.text(), dialog.preview.text(), dialog.title.text()) == before
+            assert before == (dialog.source.text(), dialog.preview.text(), dialog.title.text())
         def unexpected(*_args, **_kwargs):
             pytest.fail('Closed Workshop reopened a modal')
         monkeypatch.setattr(QFileDialog, 'getOpenFileName', unexpected)
@@ -141,7 +141,8 @@ def test_workshop_preset_close_cancel_reopen_then_import(tmp_path, monkeypatch, 
         assert not target.exists('ClosedImport')
         dialog.show()
         dialog._load_item(ready)
-        assert not dialog.jobs.pending and not target.exists('CancelledImport')
+        assert not dialog.jobs.pending
+        assert not target.exists('CancelledImport')
         dialog._load_item(ready)
         flush_jobs(dialog)
         assert target.load('Imported') == source.load('Original')

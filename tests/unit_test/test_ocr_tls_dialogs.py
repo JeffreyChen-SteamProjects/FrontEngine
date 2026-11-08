@@ -100,7 +100,8 @@ def test_remote_export_discards_path_after_dialog_closes(tmp_path, monkeypatch, 
     try:
         assert not dialog.export_certificate()
         assert destination.read_bytes() == b'original certificate file' if existing else not destination.exists()
-        assert server.certificate is None and not server.running
+        assert server.certificate is None
+        assert not server.running
         def unexpected(*_args):
             pytest.fail('Closed remote dialog reopened the export picker')
         monkeypatch.setattr(QFileDialog, 'getSaveFileName', unexpected)
@@ -126,7 +127,8 @@ def test_remote_export_picker_cancel_then_retry_without_listener(tmp_path, monke
     monkeypatch.setattr(QFileDialog, 'getSaveFileName', lambda *_args: next(choices))
     try:
         assert not dialog.export_certificate()
-        assert not target.exists() and server.certificate is None
+        assert not target.exists()
+        assert server.certificate is None
         assert dialog.export_certificate()
         assert target.read_bytes() == server.certificate.certificate_path.read_bytes()
         assert target.read_bytes().startswith(b'-----BEGIN CERTIFICATE-----')

@@ -32,13 +32,15 @@ def test_hiding_the_home_from_its_menu_unticks_the_setting(page):
     from frontengine.user_setting.user_setting_file import user_setting_dict
     page.desktop_check.setChecked(True)
     page.create_home()
-    assert page.strip_list and page.desktop_check.isChecked()
+    assert page.strip_list
+    assert page.desktop_check.isChecked()
     _hide_action(page.strip_list[0]).trigger()
     assert not page.desktop_check.isChecked()
     assert user_setting_dict[DESKTOP_KEY] is False
     assert page.strip_list == []
     page.desktop_check.setChecked(True)               # ticking it again brings the home back
-    assert page.strip_list and page.strip_list[0].isVisible()
+    assert page.strip_list
+    assert page.strip_list[0].isVisible()
 
 
 def _mouse(kind, x, y, button=None):
@@ -69,7 +71,8 @@ def test_dragging_furniture_on_the_desktop_strip_moves_it(page):
     strip.mousePressEvent(_mouse(QEvent.Type.MouseButtonPress, x, y))
     assert page.selected_furniture == desk.identifier
     strip.mouseMoveEvent(_mouse(QEvent.Type.MouseMove, target, y))
-    assert strip.preview is not None and strip.preview[1] == start + 4
+    assert strip.preview is not None
+    assert strip.preview[1] == start + 4
     strip.mouseReleaseEvent(_mouse(QEvent.Type.MouseButtonRelease, target, y))
     assert world.furniture[desk.identifier].cell == start + 4
     assert strip.preview is None
@@ -86,7 +89,8 @@ def test_a_cancelled_strip_drag_leaves_the_piece_where_it_was(page):
     strip.mouseMoveEvent(_mouse(QEvent.Type.MouseMove, x + 4 * strip.cell_width(), y))
     strip.hide()
     assert world.furniture[desk.identifier].cell == start
-    assert strip.preview is None and page.view.preview is None
+    assert strip.preview is None
+    assert page.view.preview is None
 
 
 def test_clicking_a_piece_without_dragging_only_selects_it(page):

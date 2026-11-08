@@ -66,8 +66,10 @@ def test_final_save_refusal_retains_home_and_pet_until_retry(running_home_and_pe
         _refuse_save(window, patch, failure)
         assert window._shutdown() is False
         assert not window._shutdown_done
-        assert window.isVisible() and pet.isVisible()
-        assert home.strip_list == strips and all(strip.isVisible() for strip in strips)
+        assert window.isVisible()
+        assert pet.isVisible()
+        assert home.strip_list == strips
+        assert all(strip.isVisible() for strip in strips)
         assert not home.art.closed
         assert home.service.sessions == sessions
         assert home.service.running
@@ -111,7 +113,8 @@ def _assert_retry_completes(window, pet, tmp_path, monkeypatch):
     assert saved == [True]
     assert not late_saves
     assert window._shutdown_done
-    assert not home.service.sessions and home.art.closed
+    assert not home.service.sessions
+    assert home.art.closed
     assert PetProfileSession.active(home.profiles, session.identifier) is None
     assert session._closed
     assert session.appearance_renderer is None
@@ -158,7 +161,8 @@ def test_prepared_pet_retains_renderer_and_freezes_care_until_cancel_or_finalize
         ready.finalize()
         ready.finalize()
         assert session.close()
-        assert session._closed and session.appearance_renderer is None
+        assert session._closed
+        assert session.appearance_renderer is None
         assert PetProfileSession.active(profiles, session.identifier) is None
     finally:
         session.close()

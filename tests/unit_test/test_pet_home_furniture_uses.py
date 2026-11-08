@@ -30,7 +30,8 @@ def test_only_lights_plants_rug_and_stairs_have_no_use():
 def test_pieces_ask_for_their_own_pose_first(piece, pose):
     definition = builtin_catalog().furniture[piece]
     assert definition.poses[0] == pose
-    assert pose in POSES and pose in HOME_POSES
+    assert pose in POSES
+    assert pose in HOME_POSES
 
 
 @pytest.mark.parametrize("pose", sorted(set(OWN_POSES.values())))

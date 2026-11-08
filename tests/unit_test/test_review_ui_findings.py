@@ -98,7 +98,8 @@ def test_consent_is_asked_for_a_page_behind_another_page_of_a_visible_window(mon
     stack.setCurrentWidget(other)
     stack.show()
     try:
-        assert not tools.isVisible() and tools.window().isVisible()
+        assert not tools.isVisible()
+        assert tools.window().isVisible()
         assert ask(tools)
         assert asked == [True]
         assert screen_text_dialog.user_setting_dict[key] is True

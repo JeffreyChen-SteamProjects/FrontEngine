@@ -34,7 +34,8 @@ def test_closed_comparison_discards_picker_result(tmp_path, monkeypatch, lifetim
     try:
         dialog.choose_images()
         assert dialog._paths == ()
-        assert dialog._request is None and not dialog._busy
+        assert dialog._request is None
+        assert not dialog._busy
         if isValid(dialog):
             assert dialog.status.text() == before_status
             assert not dialog.scene.items()

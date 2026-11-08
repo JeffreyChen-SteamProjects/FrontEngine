@@ -47,7 +47,8 @@ def test_owned_jobs_hold_binding_but_unrelated_jobs_do_not(tmp_path, monkeypatch
     lifetime.submit(Job(started, release))
     QThreadPool.globalInstance().start(Job(unrelated_started, unrelated_release))
     try:
-        assert started.wait(5) and unrelated_started.wait(5)
+        assert started.wait(5)
+        assert unrelated_started.wait(5)
         lifetime.close()
         pump()
         assert not lifetime.closed

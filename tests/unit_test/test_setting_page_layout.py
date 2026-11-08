@@ -166,7 +166,8 @@ def test_section_heading_wraps_without_losing_toggle_or_field_value(*, lifetime_
         section.toggle_button.setFocus()
         QTest.keyClick(section.toggle_button, Qt.Key.Key_Space)
         settle_layout()
-        assert section.content.isVisible() and field.text() == 'Keep this value'
+        assert section.content.isVisible()
+        assert field.text() == 'Keep this value'
         page.resize(850, 600)
         settle_layout()
         assert section.toggle_button.y() == section.title_label.y()

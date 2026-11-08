@@ -65,7 +65,8 @@ def test_failed_worker_is_reported_before_its_queued_notification(service, opera
     else:
         assert home.switch_mode('sandbox') is None
         assert home.mode == 'manage'
-    assert failures and 'disk full' in failures[-1]
+    assert failures
+    assert 'disk full' in failures[-1]
 
 
 def test_old_completion_cannot_allow_two_unfinished_writes(service):
@@ -102,7 +103,8 @@ def test_background_save_retries_profiles_before_announcing_success(service, mon
             home._save_soon()
             writer.finish(0)
             QCoreApplication.processEvents()
-            assert failures and not saved
+            assert failures
+            assert not saved
             assert len(attempts) == 2
             first, second = identifiers
             assert home.profiles.get(first)["energy"] != home.world.residents[first].needs["energy"]

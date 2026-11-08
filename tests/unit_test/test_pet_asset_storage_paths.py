@@ -109,7 +109,8 @@ def test_home_files_keep_their_owners_directory(action, lifetime_factory, tmp_pa
             picture = QPixmap(16, 16)
             picture.fill(QColor('orange'))
             photo = page.goals.save_photo(picture)
-            assert photo is not None and photo.is_file()
+            assert photo is not None
+            assert photo.is_file()
             assert photo.parent == directory / 'pet-album'
         elif action == 'album':
             assert page.collection.folder() == directory / 'pet-album'

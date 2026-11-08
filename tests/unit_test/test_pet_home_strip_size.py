@@ -143,7 +143,8 @@ def test_edge_caption_remains_inside_strip_and_its_input_mask(page, edge):
     for _ in range(60):
         strip._ease_scroll()
     caption = strip.caption_rect(pet)
-    assert caption.left() >= 0 and caption.right() <= strip.width()
+    assert caption.left() >= 0
+    assert caption.right() <= strip.width()
     assert strip.interactive_region().contains(caption.toAlignedRect())
 
 
@@ -160,7 +161,8 @@ def test_activity_bubble_stays_within_strip_at_edge(page, edge):
     strip._events([{"kind": "activity", "activity": "visit", "resident": pet.identifier}])
     bubble = strip.bubble_rect(pet)
     assert bubble is not None
-    assert bubble.left() >= 0 and bubble.right() <= strip.width(), (bubble, strip.width())
+    assert bubble.left() >= 0, (bubble, strip.width())
+    assert bubble.right() <= strip.width(), (bubble, strip.width())
     assert strip.interactive_region().contains(bubble.toAlignedRect())
 
 
@@ -189,7 +191,9 @@ def test_bubble_bounds_in_all_languages_and_narrow_strip(page):
             assert language_wrapper.reset_language(language)
             strip._events([{"kind": "activity", "activity": "visit", "resident": pet.identifier}])
             rect = strip.bubble_rect(pet)
-            assert rect is not None and rect.left() >= 0 and rect.right() <= 120
+            assert rect is not None
+            assert rect.left() >= 0
+            assert rect.right() <= 120
             assert strip.interactive_region().contains(rect.toAlignedRect())
     finally:
         language_wrapper.reset_language(previous)

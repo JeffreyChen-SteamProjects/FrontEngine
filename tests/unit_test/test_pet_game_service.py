@@ -132,7 +132,7 @@ def test_resident_live_elsewhere_is_away_until_released(tmp_path, profiles, *, h
     reopened.start()
     for _ in range(100):
         _tick(reopened, clock, 0.2)
-    assert (dict(resident.needs), resident.x_milli) == before
+    assert before == (dict(resident.needs), resident.x_milli)
     live.close()
     assert reopened.retry_leases() == [record["id"]]
     assert not resident.away

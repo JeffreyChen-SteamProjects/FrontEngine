@@ -188,7 +188,8 @@ def test_output_background_cancel_reopen_retry_changes_sent_frame(tmp_path, monk
         assert camera.sent[-1][-1, -1].tolist() == [255, 0, 255]
         dialog.reject()
         wait(lambda: camera.closed and not dialog.stopping_senders)
-        assert dialog.session is None and not dialog.timer.isActive()
+        assert dialog.session is None
+        assert not dialog.timer.isActive()
     finally:
         dialog.close()
         wait(lambda: not dialog.stopping_senders)

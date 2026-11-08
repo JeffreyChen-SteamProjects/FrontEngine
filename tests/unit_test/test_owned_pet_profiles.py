@@ -168,7 +168,8 @@ def test_profile_transaction_serializes_save_and_keeps_both_edits(tmp_path, monk
         release.set()
         a.join(10)
         b.join(10)
-        assert not a.is_alive() and not b.is_alive()
+        assert not a.is_alive()
+        assert not b.is_alive()
         assert failures == []
         records = json.loads((tmp_path / 'user_setting.json').read_text())['pet_profiles']['records']
         assert records[first['id']]['name'] == 'AA'
@@ -217,7 +218,8 @@ def test_failed_profile_transaction_cannot_roll_back_another_committed_edit(tmp_
         release.set()
         a.join(10)
         b.join(10)
-        assert not a.is_alive() and not b.is_alive()
+        assert not a.is_alive()
+        assert not b.is_alive()
         assert failures == ['AA']
         assert profiles.get(first['id'])['name'] == 'A'
         assert profiles.get(second['id'])['name'] == 'BB'

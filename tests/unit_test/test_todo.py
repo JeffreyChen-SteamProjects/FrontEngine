@@ -114,7 +114,8 @@ def test_todo_modal_cancel_then_reopen_and_retry(tmp_path, monkeypatch, operatio
         original = path.read_bytes()
         action = dialog.panel._clear if operation == 'clear' else dialog.panel._import
         action()
-        assert not service.busy and path.read_bytes() == original
+        assert not service.busy
+        assert path.read_bytes() == original
         dialog.reject()
         dialog.show()
         QApplication.processEvents()

@@ -56,8 +56,9 @@ def test_competing_owner_refuses_before_settings_read(owner, monkeypatch):
     with pytest.raises(StorageInUse):
         StorageSession.open(owner.directory / ".")
     if os.name == "nt":
+        upper = Path(str(owner.directory).upper())
         with pytest.raises(StorageInUse):
-            StorageSession.open(Path(str(owner.directory).upper()))
+            StorageSession.open(upper)
 
 
 def test_independent_directories_have_independent_nested_settings(owner, tmp_path):
@@ -158,7 +159,8 @@ def test_admitted_worker_prevents_release_and_stale_callback_cannot_write(owner,
         finally:
             finish.set()
             worker.join(10)
-        assert not worker.is_alive() and not errors
+        assert not worker.is_alive()
+        assert not errors
     owner.close()
     successor = StorageSession.open(owner.directory)
     try:

@@ -216,7 +216,8 @@ def test_text_prompt_discards_result_after_capture_closes(monkeypatch, closing, 
                         Qt.MouseButton.LeftButton, Qt.MouseButton.NoButton, Qt.KeyboardModifier.NoModifier)
     try:
         canvas.mouseReleaseEvent(event)
-        assert document.marks == [] and document.history == []
+        assert document.marks == []
+        assert document.history == []
         assert changed == []
     finally:
         if isValid(dialog):
@@ -244,8 +245,10 @@ def test_capture_text_cancel_then_retry(monkeypatch):
                                 Qt.MouseButton.LeftButton, Qt.MouseButton.NoButton, Qt.KeyboardModifier.NoModifier)
             canvas.mouseReleaseEvent(event)
             if attempt == 0:
-                assert dialog.document.marks == [] and dialog.document.history == []
-                assert canvas.origin is None and canvas.rubber is None
+                assert dialog.document.marks == []
+                assert dialog.document.history == []
+                assert canvas.origin is None
+                assert canvas.rubber is None
         assert len(dialog.document.marks) == 1
         assert dialog.document.marks[0]['text'] == 'keep'
         assert dialog.document.render() != dialog.document.original

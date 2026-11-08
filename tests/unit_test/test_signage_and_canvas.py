@@ -63,7 +63,8 @@ def test_signage_save_failure_preserves_settings_and_allows_retry(tmp_path, monk
             assert state[module.SETTING_KEY] is original
         assert destination.read_bytes() == before_bytes
         assert not errors
-        assert dialog.isVisible() and dialog.result() != QDialog.DialogCode.Accepted
+        assert dialog.isVisible()
+        assert dialog.result() != QDialog.DialogCode.Accepted
         assert 'Cannot save signage' in dialog.status.text()
         assert dialog.settings() == desired
         dialog.accept()
@@ -71,7 +72,8 @@ def test_signage_save_failure_preserves_settings_and_allows_retry(tmp_path, monk
         assert not dialog.isVisible()
         assert state[module.SETTING_KEY] == desired
         assert json.loads(destination.read_text(encoding='utf-8')) == state
-        assert state['unrelated'] == 'keep' and len(attempts) == 2
+        assert state['unrelated'] == 'keep'
+        assert len(attempts) == 2
     finally:
         dialog.close()
 

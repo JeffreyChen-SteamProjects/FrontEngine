@@ -254,7 +254,8 @@ def test_editor_picker_cancel_allows_retry(tmp_path, monkeypatch, lifetime_facto
             dialog.export_folder()
     try:
         invoke()
-        assert not dialog.closed and dialog.pending is None
+        assert not dialog.closed
+        assert dialog.pending is None
         assert dialog.actions == before
         assert not (tmp_path / 'exported').exists()
         invoke()

@@ -205,7 +205,8 @@ def test_raw_message_replaces_save_failure_and_survives_language_change(page):
         page.report_text('')
         language_wrapper.reset_language('English')
         retranslator.apply()
-        assert page.message.text() == '' and page.message.isHidden()
+        assert page.message.text() == ''
+        assert page.message.isHidden()
     finally:
         language_wrapper.reset_language('English')
         retranslator.apply()
@@ -217,7 +218,8 @@ def test_refused_shutdown_keeps_desktop_home_until_save_retry(page, monkeypatch,
     page.desktop_check.setChecked(True)
     page.sync_strip()
     strips = list(page.strip_list)
-    assert strips and all(strip.isVisible() for strip in strips)
+    assert strips
+    assert all(strip.isVisible() for strip in strips)
     identities = set(page.service.sessions)
     next(iter(page.service.world.residents.values())).needs["energy"] -= 10
 

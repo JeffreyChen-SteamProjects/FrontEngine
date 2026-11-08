@@ -156,7 +156,8 @@ def test_other_button_release_does_not_finish_left_drag(page):
     strip.mousePressEvent(_mouse(QEvent.Type.MouseButtonPress, center))
     strip.mouseMoveEvent(_mouse(QEvent.Type.MouseMove, target))
     strip.mouseReleaseEvent(_mouse(QEvent.Type.MouseButtonRelease, target, Qt.MouseButton.RightButton))
-    assert resident.activity is not None and resident.activity.kind == 'drag'
+    assert resident.activity is not None
+    assert resident.activity.kind == 'drag'
     strip.mouseReleaseEvent(_mouse(QEvent.Type.MouseButtonRelease, target))
     assert resident.activity is None or resident.activity.kind != 'drag'
 

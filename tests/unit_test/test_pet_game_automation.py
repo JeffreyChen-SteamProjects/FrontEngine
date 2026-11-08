@@ -179,7 +179,8 @@ def test_manual_work_reports_start_failure_and_can_retry(reason):
     simulation.step(world)
     refused = [event for event in world.drain_events() if event["kind"] == "refused"]
     assert [event["reason"] for event in refused] == [reason]
-    assert refused[0]["command"] == "work" and refused[0]["resident"] == PET
+    assert refused[0]["command"] == "work"
+    assert refused[0]["resident"] == PET
     assert result_text(reason) in activity_text(resident, world)
 
     if reason == "waiting_materials":

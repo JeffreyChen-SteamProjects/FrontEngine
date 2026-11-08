@@ -75,8 +75,9 @@ def test_malformed_event_days_are_rejected(value):
 def test_current_save_requires_persistent_event_days():
     data = snapshot.to_dict(_world())
     data["progress"].pop("event_days", None)
+    catalog = builtin_catalog()
     with pytest.raises(ValueError):
-        snapshot.from_dict(data, builtin_catalog())
+        snapshot.from_dict(data, catalog)
 
 
 def test_repeated_daily_events_update_one_marker_and_clock_rollback_stays_blocked():
@@ -96,5 +97,6 @@ def test_legacy_resident_event_cannot_migrate_an_invalid_scope(resident):
     data["version"] = 7
     del data["progress"]["event_days"]
     data["progress"]["events"] = [{"kind": "skilled", "day": 1, "resident": resident}]
+    catalog = builtin_catalog()
     with pytest.raises(ValueError):
-        snapshot.from_dict(data, builtin_catalog())
+        snapshot.from_dict(data, catalog)

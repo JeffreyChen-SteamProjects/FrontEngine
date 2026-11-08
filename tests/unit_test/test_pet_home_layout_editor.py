@@ -82,9 +82,11 @@ def test_blocked_undo_keeps_the_live_world_and_history_for_retry():
     assert world.events == before["events"]
     assert world.progress == before["progress"]
     assert all(world.furniture[key] is piece for key, piece in pieces.items())
-    assert world.residents[pet_id] is resident and resident.activity is activity
+    assert world.residents[pet_id] is resident
+    assert resident.activity is activity
     assert activity == before["residents"][pet_id].activity
-    assert history.can_undo() and not history.can_redo()
+    assert history.can_undo()
+    assert not history.can_redo()
     world.store(moved)
     assert history.undo(world, zone)
     assert history.redo(world, zone)
@@ -104,7 +106,8 @@ def test_blocked_redo_keeps_its_step_until_inventory_returns():
     before = arrangement.snapshot(world, zone)
     assert not history.redo(world, zone)
     assert arrangement.snapshot(world, zone) == before
-    assert history.can_redo() and not history.can_undo()
+    assert history.can_redo()
+    assert not history.can_undo()
     world.store(moved)
     assert history.redo(world, zone)
 
@@ -133,7 +136,8 @@ def test_undo_refuses_storage_overflow_without_consuming_history():
     assert world.place("bed_basic", zone, 1)[0] == "accepted"
     world.ledger.apply("refill", "test", items={"furniture:bed_basic": 1})
     assert not history.undo(world, zone)
-    assert len(world.furniture) == 1 and history.can_undo()
+    assert len(world.furniture) == 1
+    assert history.can_undo()
     world.ledger.apply("free_space", "test", items={"furniture:bed_basic": -1})
     assert history.undo(world, zone)
     assert not world.furniture

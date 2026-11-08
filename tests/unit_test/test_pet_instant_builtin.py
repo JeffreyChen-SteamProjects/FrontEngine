@@ -24,7 +24,8 @@ def test_the_pet_is_ready_before_the_wardrobe_and_the_wardrobe_follows(tmp_path)
         (preview, error, library.is_installed(CHARACTER, VERSION), _wardrobe_installed(library))))
     job.run()
     (preview, error, character_ready, wardrobe_at_ready), = seen
-    assert error == '' and preview.endswith(f'{CHARACTER}.png')
+    assert error == ''
+    assert preview.endswith(f'{CHARACTER}.png')
     assert character_ready
     assert wardrobe_at_ready == 0
     assert _wardrobe_installed(library) == len(GARMENTS)

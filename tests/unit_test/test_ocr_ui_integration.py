@@ -34,7 +34,9 @@ def test_ocr_consent_return_after_page_closure_does_not_present_or_retry(monkeyp
     try:
         result = ScreenTextResult('consent_required', 'Recognized locally', 'local', consent_required=kind)
         page._handle_screen_text_result(result, b'test image', 'translate', 'English', '')
-        assert presented == [] and requests == [] and writes == []
+        assert presented == []
+        assert requests == []
+        assert writes == []
         assert page.last_screen_text == 'Previous result'
     finally:
         if isValid(page):

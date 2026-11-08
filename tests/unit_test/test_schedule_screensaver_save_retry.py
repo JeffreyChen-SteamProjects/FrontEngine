@@ -72,7 +72,8 @@ def test_save_failure_keeps_previous_settings_and_allows_retry(
         if stored == 'settings':
             assert state[module.SETTING_KEY] is original
         assert destination.read_bytes() == before_bytes
-        assert dialog.isVisible() and dialog.result() != QDialog.DialogCode.Accepted
+        assert dialog.isVisible()
+        assert dialog.result() != QDialog.DialogCode.Accepted
         assert 'Cannot save settings' in dialog.status.text()
         assert dialog.collect() == desired
         dialog.accept()
@@ -80,7 +81,8 @@ def test_save_failure_keeps_previous_settings_and_allows_retry(
         assert not dialog.isVisible()
         assert state[module.SETTING_KEY] == desired
         assert json.loads(destination.read_text(encoding='utf-8')) == state
-        assert state['unrelated'] == 'keep' and len(attempts) == 2
+        assert state['unrelated'] == 'keep'
+        assert len(attempts) == 2
         assert dialog.status.text() == ''
     finally:
         dialog.close()

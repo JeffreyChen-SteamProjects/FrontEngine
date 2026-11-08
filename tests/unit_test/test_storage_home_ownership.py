@@ -10,10 +10,11 @@ def test_duplicate_store_and_service_keep_first_owner(tmp_path):
     store = HomeSaveStore(owner, builtin_catalog())
     service = HomeService(None, store, owner.profiles())
     try:
+        catalog, records = builtin_catalog(), owner.profiles()
         with pytest.raises(StorageBusy):
-            HomeSaveStore(owner, builtin_catalog())
+            HomeSaveStore(owner, catalog)
         with pytest.raises(StorageBusy):
-            HomeService(None, store, owner.profiles())
+            HomeService(None, store, records)
         with pytest.raises(StorageBusy):
             owner.close()
     finally:
@@ -46,7 +47,8 @@ def test_mode_switch_refusal_keeps_old_world_and_store(tmp_path):
     try:
         world = service.create_home('screen', 0, 0, 12)
         assert service.switch_mode('sandbox') is None
-        assert service.store is store and service.world is world
+        assert service.store is store
+        assert service.world is world
     finally:
         blocked.close()
         service.shutdown()
@@ -85,7 +87,8 @@ def test_mode_transfer_reuses_shared_identity_and_preserves_failed_save(tmp_path
         with monkeypatch.context() as patch:
             patch.setattr(service.store, '_write', lambda *_: (_ for _ in ()).throw(PermissionError('disk')))
             assert service.switch_mode('sandbox') is None
-            assert service.world is world and service.sessions[pet['id']] is session
+            assert service.world is world
+            assert service.sessions[pet['id']] is session
         assert service.switch_mode('sandbox').status == 'loaded'
         assert service.mode == 'sandbox'
         assert service.sessions[pet['id']] is session
@@ -126,10 +129,12 @@ def test_pending_target_cleanup_retains_claim_until_retry(tmp_path, monkeypatch)
             patch.setattr(profiles, 'get', get)
             patch.setattr(service, '_session_factory', construct)
             assert service.switch_mode('sandbox') is None
-            assert service.world is world and service.mode == 'manage'
+            assert service.world is world
+            assert service.mode == 'manage'
             assert ids[2] in service.sessions
+            catalog = builtin_catalog()
             with pytest.raises(StorageBusy):
-                HomeSaveStore(owner, builtin_catalog(), 'sandbox')
+                HomeSaveStore(owner, catalog, 'sandbox')
             assert service.shutdown() is False
         assert service.switch_mode('sandbox').status == 'loaded'
         assert service.mode == 'sandbox'
@@ -161,7 +166,8 @@ def test_finalization_does_not_drop_identity_while_store_write_is_admitted(tmp_p
         assert entered.wait(10)
         with pytest.raises(StorageBusy):
             token.finalize()
-        assert identifier in service.sessions and not service._closed
+        assert identifier in service.sessions
+        assert not service._closed
         release.set()
         worker.join(10)
         assert not worker.is_alive()
@@ -192,7 +198,8 @@ def test_resident_release_refusal_keeps_world_and_identity(tmp_path, monkeypatch
             patch.setattr(service.world, 'remove_resident', lambda _identifier: 'refused')
             assert service.release(identifier) == 'refused'
             assert identifier in service.world.residents
-            assert service.sessions[identifier] is session and not session._closed
+            assert service.sessions[identifier] is session
+            assert not session._closed
         assert service.release(identifier) == 'accepted'
         from frontengine.show.pet.pet_profile_session import PetProfileSession
         desktop = PetProfileSession(None, identifier, profiles)
@@ -218,7 +225,8 @@ def test_rejected_adoption_retains_refused_cleanup_for_retry(tmp_path, monkeypat
             assert service.adopt(identifier, zone='missing') == 'unavailable'
             session = PetProfileSession.active(profiles, identifier)
             assert identifier not in service.world.residents
-            assert service.sessions.get(identifier) is session and session is not None
+            assert service.sessions.get(identifier) is session
+            assert session is not None
             assert service.shutdown() is False
             with pytest.raises(StorageBusy):
                 owner.close()
