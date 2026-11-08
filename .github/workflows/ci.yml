@@ -86,7 +86,7 @@ jobs:
 
   macos:
     runs-on: macos-latest
-    timeout-minutes: 90  # the same full suite as smoke
+    timeout-minutes: 90  # everything but the pet home page tests, which the four smoke jobs run
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
@@ -103,7 +103,9 @@ jobs:
       - name: Compile and test
         run: |
           python -m compileall -q frontengine
-          python -X faulthandler -m pytest tests/ -q
+          # The pet home page tests take about 25 seconds each on this runner (hours in all) and hold
+          # nothing macOS-specific; every smoke job runs them in full.
+          python -X faulthandler -m pytest tests/ -q --ignore-glob='tests/unit_test/test_pet_home_*.py'
       - name: Install built wheel
         run: |
           python -m build --wheel --outdir dist
