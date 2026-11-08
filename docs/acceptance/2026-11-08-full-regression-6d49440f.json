@@ -1,0 +1,33 @@
+{
+  "item": "#111",
+  "date": "2026-11-08",
+  "head": "6d49440f",
+  "product_commit": "4e98b94d",
+  "worktree": "D:/Codes/FrontEngine/.audit/worktrees/monitor-state-language",
+  "output": ".audit/full-regression-6d49440f",
+  "runtime": "D:/Codes/FrontEngine/.audit/test-runtime-3145 (Python 3.14.5, offscreen)",
+  "result": {
+    "exit": 0,
+    "tests": 3513,
+    "passed": 3510,
+    "skipped": 3,
+    "failures": 0,
+    "errors": 0,
+    "seconds": 2036.81,
+    "source_files": 757,
+    "source_unchanged": true
+  },
+  "skipped": [
+    "test_default_storage_binding::test_forked_empty_default_registry_rejects_inherited_locked_mutex (Requires POSIX fork)",
+    "test_remote_tls::test_private_key_and_directory_are_owner_only (POSIX permission semantics)",
+    "test_storage_session::test_forked_child_cannot_use_or_release_parent_owner (Requires POSIX fork)"
+  ],
+  "ancestor_failure": "shared-option-translations/.audit/full-regression-9eba3a44 (1 failed, test_switching_leaves_the_user_alone) kept unchanged; that test passes here.",
+  "not_covered": "Independent review of the cumulative branch, native and hardware acceptance.",
+  "sha256": {
+    "result.json": "82287bf5a8addc23e50701229b9d464530ecdee897601696f108a4989d45f1f1",
+    "junit.xml": "b99c951c90d6f53e977083e33f923ec9e8fde69d1bac0fd64da80706a3dc6914",
+    "pytest.log": "c0b8def508ffb2b38a1f6ae400385e5e47f1d9fcdd0167b49ec89d2a3242c46c",
+    "source-manifest.json": "6e39a8cc4cd3f4bbac7cef9dcca444432c740834adf28bd6bffbbfcf873d38b6"
+  }
+}
