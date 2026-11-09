@@ -15,6 +15,7 @@ from __future__ import annotations
 import hashlib
 import json
 import tempfile
+import threading
 import weakref
 from pathlib import Path
 from time import monotonic
@@ -105,6 +106,10 @@ class _Prepare(QRunnable):
 
 
 FALLBACK_PREFIX = "fallback:"
+# Stand-ins never change, so each is built once per process and shared by every pet drawn as it:
+# building one takes seconds, and every home (and every test) used to build its own again.
+_STAND_INS: dict = {}
+_STAND_INS_LOCK = threading.Lock()
 PICTURE_PREFIX = "picture:"
 
 
@@ -139,19 +144,32 @@ class _PrepareFallback(QRunnable):
         self.owner_ref, self.identifier, self.key = weakref.ref(owner), identifier, key
 
     def run(self) -> None:
-        from frontengine.show.pet.inkside.assemble import build_character
-        from frontengine.show.pet.inkside.library import _template
-        from frontengine.show.pet.layered_renderer import LayeredRenderer
-        from frontengine.utils.pet_pack.layered import load_layered_asset
         try:
-            template = _template(self.key.removeprefix(FALLBACK_PREFIX))
-            with tempfile.TemporaryDirectory(prefix="frontengine-home-") as folder:
-                asset = load_layered_asset(build_character(template, Path(folder).resolve() / template.ident))
-                renderer = LayeredRenderer(asset)        # decodes every image now; the folder can go
+            renderer = _stand_in(self.key.removeprefix(FALLBACK_PREFIX))
         except (OSError, ValueError) as error:
             front_engine_logger.warning(f"[PetHome] stand-in character for {self.identifier}: {error}")
             renderer = None
         _deliver(self.owner_ref, self.identifier, self.key, (renderer, None, None))
+
+
+def _stand_in(identifier: str):
+    """The shared renderer for one built-in stand-in, built on first use (the rest wait for it)."""
+    with _STAND_INS_LOCK:
+        renderer = _STAND_INS.get(identifier)
+        if renderer is None:
+            renderer = _STAND_INS[identifier] = _build_stand_in(identifier)
+        return renderer
+
+
+def _build_stand_in(identifier: str):
+    from frontengine.show.pet.inkside import assemble
+    from frontengine.show.pet.inkside.library import _template
+    from frontengine.show.pet.layered_renderer import LayeredRenderer
+    from frontengine.utils.pet_pack.layered import load_layered_asset
+    template = _template(identifier)
+    with tempfile.TemporaryDirectory(prefix="frontengine-home-") as folder:
+        asset = load_layered_asset(assemble.build_character(template, Path(folder).resolve() / template.ident))
+        return LayeredRenderer(asset)        # decodes every image now; the folder can go
 
 
 class ResidentArt(QObject):
