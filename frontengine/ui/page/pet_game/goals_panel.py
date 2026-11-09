@@ -12,9 +12,9 @@ from frontengine.ui.runtime_lifetime import owned_action
 from PySide6.QtCore import Qt, QTemporaryFile
 from PySide6.QtWidgets import QLabel, QListWidget, QListWidgetItem
 
-from frontengine.show.pet_game.captions import item_label
+from frontengine.show.pet_game.captions import dispatch_text, item_label
 from frontengine.utils.multi_language.retranslate import translate, tr
-from frontengine.utils.pet_game import goals
+from frontengine.utils.pet_game import commission_work, goals
 from frontengine.utils.pet_game.schedule import game_day
 
 if TYPE_CHECKING:
@@ -46,6 +46,11 @@ class GoalsPanel:
         self.commissions = QListWidget()
         self.commissions.setMaximumHeight(90)
         section.add_widget(self.commissions, "pet_home_commissions", "Today's commissions")
+        self.commissions.itemDoubleClicked.connect(lambda _item: self.dispatch())
+        self.commissions.currentItemChanged.connect(lambda *_args: self._dispatch_enabled())
+        self.dispatch_button = _button("pet_home_dispatch", "Send a pet to make it", self.dispatch)
+        self.dispatch_button.setEnabled(False)
+        section.add_inline(self.dispatch_button)
         auto = tr(QLabel(), "pet_home_goals_auto",
                   "Rewards are collected and commissions handed in by themselves once they are ready.")
         auto.setWordWrap(True)
@@ -69,6 +74,7 @@ class GoalsPanel:
         offers = world.progress.commissions["offers"]
         self._fill(self.commissions, [(str(index), self._offer_line(world, offer))
                                       for index, offer in enumerate(offers)])
+        self._dispatch_enabled()
         self.celebrate_button.setEnabled(goals.celebration_ready(world))
         recent = world.progress.events[-EVENTS_SHOWN:][::-1]
         self.events.setText("\n".join(self._event_line(world, event) for event in recent)
@@ -127,6 +133,29 @@ class GoalsPanel:
             index = int(item.data(ROLE_ID))
             self.page.report(self.page.service.run(lambda world: goals.deliver(world, index)))
             self.page.refresh()
+
+    def _offer(self, world) -> tuple[int, dict] | None:
+        item = self.commissions.currentItem()
+        offers = world.progress.commissions["offers"] if world is not None else []
+        index = int(item.data(ROLE_ID)) if item is not None else -1
+        return (index, offers[index]) if 0 <= index < len(offers) else None
+
+    def _dispatch_enabled(self) -> None:
+        found = self._offer(self.page.service.world)
+        self.dispatch_button.setEnabled(found is not None and not found[1]["done"])
+
+    @owned_action
+    def dispatch(self) -> None:
+        """Send the best-suited pet to make what the selected commission still lacks; say who, or why not."""
+        found = self._offer(self.page.service.world)
+        if found is None:
+            return
+        index, offer = found
+        sent = self.page.service.run(lambda world: commission_work.dispatch(world, index))
+        world = self.page.service.world
+        if world is not None:
+            self.page.report_text(dispatch_text(world, sent, offer["item"]))
+        self.page.refresh()
 
     @owned_action
     def celebrate(self) -> None:

@@ -94,7 +94,7 @@ Tras crear un hogar, los accesos y los textos largos de botones y casillas se aj
 
 Los mensajes de acciones del hogar cambian con el idioma y conservan cantidades, rutas y detalles originales de los errores. Guardar correctamente elimina el aviso de fallo correspondiente sin borrar mensajes posteriores.
 
-Los encargos diarios se actualizan en pantalla al cambiar el día del juego, aunque no ocurra otro evento de vida o recompensa.
+Los encargos diarios se actualizan en pantalla al cambiar el día del juego, aunque no ocurra otro evento de vida o recompensa. Haz doble clic en un encargo de la pestaña *Objetivos*, o elígelo en *Encargos* en la barra de herramientas de la franja del escritorio, para enviar una mascota a fabricar lo que aún falta: va la mascota que vive donde hay un puesto de trabajo adecuado y tiene habilidad suficiente (primero la que tiene la personalidad de ese oficio, luego la más hábil y luego la que tiene menos trabajo), sin interrumpir lo que está haciendo. Primero se cuenta lo que ya cubren el almacén y los trabajos pendientes, un encargo que ya se puede completar se entrega en el acto y, cuando nadie puede ir, se muestra el motivo: no hay puesto de trabajo, falta habilidad, faltan materiales o se necesita un nivel de hogar más alto.
 
 Los eventos existentes de la bandeja de entrada cambian de idioma y conservan sus repeticiones, nombres originales de mascotas y recompensas. Las notas nuevas y marcar todo como leído actualizan la lista de pendientes de inmediato, incluso con el hogar en pausa.
 

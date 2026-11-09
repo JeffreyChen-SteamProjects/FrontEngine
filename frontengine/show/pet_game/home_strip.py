@@ -20,13 +20,14 @@ from PySide6.QtGui import (
 )
 from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QMenu, QToolButton, QToolTip
 
-from frontengine.show.pet_game.captions import card_text, result_text
+from frontengine.show.pet_game.captions import card_text, dispatch_text, item_label, result_text
 from frontengine.show.pet_game.home_service import HomeService
 from frontengine.show.pet_game.home_view import HomeView
 from frontengine.show.pet_game.strip_weather import StripWeather
 from frontengine.show.pet_game.themes import NIGHT_TINT, floor_color, glyph, night_shade
 from frontengine.utils.multi_language.retranslate import translate
 from frontengine.utils.pet_game.catalog import CELL_PIXELS
+from frontengine.utils.pet_game.commission_work import dispatch
 from frontengine.utils.pet_game.simulation import STEP_MS
 from frontengine.user_setting.user_setting_file import user_setting_dict
 from frontengine.utils.pet_game.world import COMMANDS, INTERACTIONS
@@ -415,9 +416,45 @@ class HomeStrip(HomeView):
             button.clicked.connect(lambda _checked=False, a=action, t=target: self.action_requested.emit(a, t))
             row.addWidget(button)
             self.shortcut_buttons.append(button)
+        self.commission_button = self._commission_button(bar)
+        row.addWidget(self.commission_button)
+        self.shortcut_buttons.append(self.commission_button)
         self.info = QLabel(bar)
         row.addWidget(self.info)
         return bar
+
+    def _commission_button(self, bar: QFrame) -> QToolButton:
+        """Today's commissions; choosing one sends the best-suited pet to make what it still lacks."""
+        button = QToolButton(bar)
+        button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        button.setText(translate("pet_home_toolbar_commissions", "Commissions"))
+        button.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
+        menu = QMenu(button)
+        menu.aboutToShow.connect(lambda: self._fill_commission_menu(menu))
+        button.setMenu(menu)
+        return button
+
+    def _fill_commission_menu(self, menu: QMenu) -> None:
+        menu.clear()
+        world = self.service.world
+        offers = world.progress.commissions["offers"] if world is not None else []
+        for index, offer in enumerate(offers):
+            line = translate("pet_home_offer_line", "{count} × {item} → {coins} coins").format(
+                count=offer["count"], item=item_label(world, offer["item"]), coins=world.coin_amount(offer["coins"]))
+            action = menu.addAction(("✔ " if offer["done"] else "") + line,
+                                    lambda i=index, item=offer["item"]: self.dispatch_commission(i, item))
+            action.setEnabled(not offer["done"])
+        if not offers:
+            menu.addAction(translate("pet_home_commissions_none", "No commissions today.")).setEnabled(False)
+
+    def dispatch_commission(self, index: int, item: str) -> str:
+        """Send a pet for commission ``index`` and say who goes, or why nobody can, beside the button."""
+        sent = self.service.run(lambda world: dispatch(world, index))
+        text = dispatch_text(self.service.world, sent, item)
+        QToolTip.showText(self.commission_button.mapToGlobal(self.commission_button.rect().bottomLeft()), text, self)
+        self.refresh_info()
+        self.update()
+        return text
 
     @property
     def toolbar_open(self) -> bool:

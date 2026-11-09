@@ -26,7 +26,7 @@ Le azioni dei pannelli della casa vengono rifiutate durante la preparazione e l�
 
 Dopo la creazione della casa, scorciatoie e testi lunghi di pulsanti e caselle vanno a capo nelle finestre strette. I controlli si adattano al pannello; il disegno della casa mantiene il proprio scorrimento orizzontale.
 
-Le commissioni giornaliere si aggiornano sullo schermo al cambio del giorno di gioco, anche senza altri eventi di vita o ricompense.
+Le commissioni giornaliere si aggiornano sullo schermo al cambio del giorno di gioco, anche senza altri eventi di vita o ricompense. Fai doppio clic su una commissione nella scheda *Obiettivi*, oppure sceglila in *Commissioni* nella barra degli strumenti della striscia sul desktop, per mandare una mascotta a preparare ciò che ancora manca: ci va la mascotta che vive dove c’è una postazione di lavoro adatta e ha abbastanza abilità (prima quella con la personalità del mestiere, poi la più abile, poi quella con meno lavoro), senza interrompere ciò che sta facendo. Prima si conta ciò che deposito e lavori aperti coprono già, una commissione già completabile viene consegnata subito e, quando nessuno può andare, viene mostrato il motivo: nessuna postazione, abilità insufficiente, materiali mancanti o un livello della casa più alto necessario.
 
 Gli eventi già ricevuti seguono i cambi di lingua e conservano il numero di ripetizioni, i nomi originali degli animali e gli importi delle ricompense. Le nuove notifiche e il comando per segnare tutto come letto aggiornano subito anche l’elenco delle attività in attesa mentre la casa è in pausa.
 
