@@ -75,7 +75,7 @@ def test_desktop_pets_always_paint_through_qt(tmp_path, lifetime_factory):
     image = QImage(32, 32, QImage.Format.Format_ARGB32)
     image.fill(QColor('red'))
     image.save(str(tmp_path / 'pet.png'))
-    pet = DesktopPetWidget(str(tmp_path / 'pet.png'), size=64, talk=False, sit_on_windows=False)
+    pet = DesktopPetWidget(size=64, talk=False, sit_on_windows=False)
     try:
         pet.set_render_backend('gpu')
         pet.show()

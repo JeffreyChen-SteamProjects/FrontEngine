@@ -291,7 +291,9 @@ class PetWardrobeDialog(QDialog):
 
     def _retranslate_choices(self) -> None:
         appearance = self.draft.appearance
-        self._fill(self.character, self.draft.catalog.assets('character'), appearance['character'])
+        # Pets are layered only: there is no "None" character, except as a placeholder until one is chosen.
+        self._fill(self.character, self.draft.catalog.assets('character'), appearance['character'],
+                   none=appearance['character'] is None)
         character = self.draft.preview.character if self.draft.preview else None
         for slot, control in self.slots.items():
             fits = [(asset, garment_fit(character, asset)) for asset in self.draft.catalog.assets('garment')
@@ -310,8 +312,7 @@ class PetWardrobeDialog(QDialog):
             self.variant_choice.setItemText(0, translate('pet_custom_reset', 'Reset defaults'))
         self._relabel_parts(character)
         if character is None and not self.status.text():
-            self.status.setText(translate('pet_wardrobe_legacy', 'This pet shows a whole-image sprite. Choose '
-                                          'a layered character to dress it piece by piece.'))
+            self.status.setText(translate('pet_wardrobe_legacy', 'Choose a character for this pet to wear.'))
 
     def _relabel_parts(self, character) -> None:
         """Rename part entries in place so a language switch keeps every selection."""
@@ -408,9 +409,10 @@ class PetWardrobeDialog(QDialog):
             self._attempt(lambda: self.draft.set_color(*selected, color))
 
     @staticmethod
-    def _fill(control, assets, selected) -> None:
+    def _fill(control, assets, selected, *, none: bool = True) -> None:
         control.clear()
-        control.addItem(translate('pet_wardrobe_none', 'None'), None)
+        if none:
+            control.addItem(translate('pet_wardrobe_none', 'None'), None)
         for asset in assets:
             control.addItem(asset_label(asset) + ' · ' + asset.version, asset_reference(asset))
         index = control.findData(selected)
@@ -422,6 +424,8 @@ class PetWardrobeDialog(QDialog):
     @owned_action
     def _choose_character(self, _index=0) -> None:
         reference = self.character.currentData()
+        if reference is None:            # the placeholder: a pet always wears a layered character
+            return
         self._attempt(lambda: self.draft.choose_character(reference))
 
     @owned_action

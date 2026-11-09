@@ -2,7 +2,6 @@
 import json
 
 from PySide6.QtCore import QCoreApplication
-from PySide6.QtGui import QColor, QPixmap
 
 
 def _settle():
@@ -16,15 +15,11 @@ def test_a_first_start_opens_on_the_pet_page(make_main_window):
     assert window.page_stack.currentWidget() is window.pet_setting_ui
 
 
-def test_someone_with_a_pet_starts_where_they_always_did(make_main_window, tmp_path, monkeypatch):
+def test_someone_with_a_pet_starts_where_they_always_did(make_main_window, tmp_path, monkeypatch, *, layered_pets):
     window = make_main_window()
     page = window.pet_setting_ui
     monkeypatch.setattr(page, '_target_geometry', lambda: None)
-    picture = tmp_path / 'sprite.png'
-    image = QPixmap(64, 64)
-    image.fill(QColor('#d3a231'))
-    assert image.save(str(picture))
-    page.pet_image_path = str(picture)
+    layered_pets(page)
     page._spawn_pet()
     page.pet_list[0].close()                 # put away: the pet is not on the desktop, but it exists
     window.close()

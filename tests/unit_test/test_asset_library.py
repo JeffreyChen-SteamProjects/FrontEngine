@@ -69,14 +69,15 @@ def test_static_thumbnails_tags_favorites_search_and_missing_path_retention(tmp_
     assert scene_path.exists() and identity not in repository.assets
 
 
-def test_gif_sprite_pet_puppet_and_portable_scene_static_thumbnails(tmp_path):
+def test_gif_puppet_and_portable_scene_static_thumbnails_and_no_pet_folders(tmp_path):
     gif = tmp_path/'one.gif'
     gif.write_bytes(base64.b64decode('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'))
     assert inspect_asset(gif)[0] == 'gif'
     pet = tmp_path/'pet'
     pet.mkdir()
     texture = picture(pet/'walk.png')
-    assert inspect_asset(pet)[0] == 'pet'
+    with pytest.raises(ValueError):             # sprite pet folders: pets are layered only
+        inspect_asset(pet)
     puppet = tmp_path/'fixture.puppet'
     manifest = {'version': 1, 'size': [32, 24], 'drawables': [{'texture': 'textures/one.png'}],
                 'deformers': [], 'parameters': []}
@@ -235,17 +236,12 @@ def test_dialog_static_search_and_commit_restore_scene_on_worker_failure(tmp_pat
 
 
 @pytest.mark.parametrize('destroy', [False, True])
-@pytest.mark.parametrize('operation', ['add', 'add_pet', 'relink', 'relink_pet', 'review'])
+@pytest.mark.parametrize('operation', ['add', 'relink', 'review'])
 def test_closed_asset_dialog_discards_modal_result(tmp_path, monkeypatch, destroy, operation):
     from PySide6.QtWidgets import QFileDialog, QMessageBox
     from shiboken6 import isValid
 
     repository, identity, _old, new, scene, scene_path, preset = fixture(tmp_path)
-    if operation == 'relink_pet':
-        original_pet = tmp_path / 'original-pet'
-        original_pet.mkdir()
-        picture(original_pet / 'walk.png')
-        identity = repository.add(original_pet)
     service = AssetLibraryService(tmp_path)
     document = SceneEditorDocument()
     document.reset(scene)
@@ -261,9 +257,6 @@ def test_closed_asset_dialog_discards_modal_result(tmp_path, monkeypatch, destro
     service.started.connect(started.append)
     original_assets = deepcopy(AssetRepository(tmp_path).assets)
     originals = {path: path.read_bytes() for path in (scene_path, preset)}
-    pet_folder = tmp_path / 'pet'
-    pet_folder.mkdir()
-    picture(pet_folder / 'walk.png')
     def retire():
         dialog.reject()
         if destroy:
@@ -272,22 +265,16 @@ def test_closed_asset_dialog_discards_modal_result(tmp_path, monkeypatch, destro
     def choose_file(*_args):
         retire()
         return str(new), ''
-    def choose_folder(*_args):
-        retire()
-        return str(pet_folder)
     def confirm(*_args):
         retire()
         return QMessageBox.StandardButton.Yes
     monkeypatch.setattr(QFileDialog, 'getOpenFileName', choose_file)
-    monkeypatch.setattr(QFileDialog, 'getExistingDirectory', choose_folder)
     monkeypatch.setattr(QMessageBox, 'question', confirm)
     try:
         if operation == 'review':
             plan = plan_relink(repository, identity, str(new), deepcopy(document.entries))
             dialog._review(plan)
-        elif operation == 'add_pet':
-            dialog._add_pet()
-        elif operation in ('relink', 'relink_pet'):
+        elif operation == 'relink':
             dialog._relink()
         else:
             dialog._add()
@@ -299,10 +286,8 @@ def test_closed_asset_dialog_discards_modal_result(tmp_path, monkeypatch, destro
         def unexpected_prompt(*_args):
             pytest.fail('closed asset dialog reopened a prompt')
         monkeypatch.setattr(QFileDialog, 'getOpenFileName', unexpected_prompt)
-        monkeypatch.setattr(QFileDialog, 'getExistingDirectory', unexpected_prompt)
         monkeypatch.setattr(QMessageBox, 'question', unexpected_prompt)
         dialog._add()
-        dialog._add_pet()
         dialog._relink()
         dialog._review({})
     finally:
@@ -346,28 +331,18 @@ def test_asset_relink_confirmation_cancel_then_retry(tmp_path, monkeypatch):
         dialog.close()
 
 
-@pytest.mark.parametrize('operation', ['add', 'add_pet', 'relink', 'relink_pet'])
+@pytest.mark.parametrize('operation', ['add', 'relink'])
 def test_asset_picker_cancel_allows_retry(tmp_path, monkeypatch, operation):
     from PySide6.QtCore import Qt
     from PySide6.QtWidgets import QFileDialog, QMessageBox
 
     repository, identity, _old, replacement, scene, _scene_path, _preset = fixture(tmp_path)
-    if operation in ('add_pet', 'relink_pet'):
-        replacement = tmp_path / 'replacement-pet'
-        replacement.mkdir()
-        picture(replacement / 'walk.png')
-    if operation == 'relink_pet':
-        old_pet = tmp_path / 'original-pet'
-        old_pet.mkdir()
-        picture(old_pet / 'walk.png')
-        identity = repository.add(old_pet)
     service = AssetLibraryService(tmp_path)
     document = SceneEditorDocument()
     document.reset(scene)
     dialog = AssetLibraryDialog(service, document)
     choices = iter(['', str(replacement)])
     monkeypatch.setattr(QFileDialog, 'getOpenFileName', lambda *_args: (next(choices), ''))
-    monkeypatch.setattr(QFileDialog, 'getExistingDirectory', lambda *_args: next(choices))
     monkeypatch.setattr(QMessageBox, 'question', lambda *_args: QMessageBox.StandardButton.Yes)
     try:
         dialog.show()
@@ -377,7 +352,7 @@ def test_asset_picker_cancel_allows_retry(tmp_path, monkeypatch, operation):
                 dialog.entries.setCurrentRow(row)
                 break
         before = deepcopy(AssetRepository(tmp_path).assets)
-        action = dialog._add if operation == 'add' else dialog._add_pet if operation == 'add_pet' else dialog._relink
+        action = dialog._add if operation == 'add' else dialog._relink
         action()
         assert not service.busy
         assert AssetRepository(tmp_path).assets == before
@@ -385,7 +360,7 @@ def test_asset_picker_cancel_allows_retry(tmp_path, monkeypatch, operation):
         action()
         wait(lambda: not service.busy and dialog.plan is None)
         assets = AssetRepository(tmp_path).assets
-        if operation.startswith('relink'):
+        if operation == 'relink':
             assert len(assets) == len(before)
             assert assets[identity]['path'] == str(replacement)
         else:
@@ -396,3 +371,12 @@ def test_asset_picker_cancel_allows_retry(tmp_path, monkeypatch, operation):
         if service.thread:
             service.thread.join(5)
         dialog.close()
+
+
+def test_sprite_pet_folders_saved_before_pets_were_layered_only_are_dropped_on_load(tmp_path):
+    from frontengine.utils.asset_library.repository import checked_assets
+    folder = tmp_path / 'old-pet'
+    folder.mkdir()
+    entries = [{'id': 'a' * 32, 'path': str(folder), 'kind': 'pet', 'tags': [], 'favorite': False},
+               {'id': 'b' * 32, 'path': str(tmp_path / 'one.png'), 'kind': 'image', 'tags': [], 'favorite': True}]
+    assert list(checked_assets(entries)) == ['b' * 32]

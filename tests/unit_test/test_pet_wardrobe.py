@@ -131,8 +131,7 @@ def test_apply_publishes_to_desktop_only_after_save_and_playback_pauses(wardrobe
     from frontengine.show.pet.desktop_pet import DesktopPetWidget
 
     profiles, first, _, draft, character, garment = wardrobe
-    body = draft.catalog.assets('character')[0]
-    pet = DesktopPetWidget(str(body.root / 'layer.png'), profiles=profiles,
+    pet = DesktopPetWidget(profiles=profiles,
                            profile_id=first['id'], talk=False, sit_on_windows=False)
     now = [0.0]
     pet._layered_playback.clock = lambda: now[0]
@@ -174,8 +173,7 @@ def test_hiding_pet_suspends_existing_update_timers(wardrobe):
     from frontengine.show.pet.desktop_pet import DesktopPetWidget
 
     profiles, first, _, draft, _, _ = wardrobe
-    body = draft.catalog.assets('character')[0]
-    pet = DesktopPetWidget(str(body.root / 'layer.png'), profiles=profiles,
+    pet = DesktopPetWidget(profiles=profiles,
                            profile_id=first['id'], talk=False, sit_on_windows=False)
     try:
         pet.show()

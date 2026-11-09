@@ -21,7 +21,6 @@ import tempfile
 import traceback
 
 from PySide6.QtCore import QTimer, Qt
-from PySide6.QtGui import QColor, QImage
 from PySide6.QtWidgets import QApplication
 
 WM_MOUSEMOVE, WM_LBUTTONDOWN, WM_LBUTTONUP, MK_LBUTTON = 0x0200, 0x0201, 0x0202, 0x0001
@@ -210,10 +209,7 @@ class Probe:
         from frontengine.user_setting.pet_profiles import PetProfiles
         library = PetAssetLibrary(self.folder / 'library')
         install_builtin(library, 'inkside-mochi')
-        image = QImage(64, 64, QImage.Format.Format_ARGB32)
-        image.fill(QColor(240, 96, 42))
-        image.save(str(self.folder / 'pet.png'))
-        pet = DesktopPetWidget(str(self.folder / 'pet.png'), size=160, profiles=PetProfiles({}, lambda: None),
+        pet = DesktopPetWidget(size=160, profiles=PetProfiles({}, lambda: None),
                                talk=False, sit_on_windows=False, asset_library=library)
         self.pets.append(pet)
         draft = WardrobeDraft(pet.profile_session.profiles, pet.profile_session.identifier, library.scan()[0])

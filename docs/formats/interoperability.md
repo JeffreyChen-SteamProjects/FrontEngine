@@ -5,7 +5,8 @@ FrontEngine reads the version 1 `.puppet` container produced by
 Install `pip install "frontengine[puppet]"` for its actual Canvas, motion,
 expression, idle/input and pet script runtime. FrontEngine owns its windows,
 settings and lifecycle; opening a puppet does not instantiate Imervue's PetWindow
-or modify Imervue preferences. Sprite images and existing sprite manifests remain supported.
+or modify Imervue preferences. Other desktop pets are layered characters
+([layered-pet-v1](layered-pet-v1.md)); sprite images and `pet.json` sprite packs are no longer read.
 
 ## Puppet container
 
@@ -24,7 +25,7 @@ Containers are validated before optional runtime creation: at most 4096 entries,
 Windows drive, duplicate and symlink members are rejected. Unknown container
 versions and missing referenced resources fail explicitly.
 
-## Pet scripts and sprite packs
+## Pet scripts
 
 An optional Imervue `.petscript.json` is a data document loaded by the upstream
 `Imervue.desktop_pet.pet_script` engine:
@@ -46,22 +47,8 @@ refer to the puppet document. Scheduled entries run while the pet is visible.
 Invalid/missing selected script files report a load error before window allocation.
 No Python code is stored in these data files.
 
-Existing FrontEngine sprite packs are folders with optional `pet.json` and
-state images. Recognized state filename stems are `walk/run/move`, `idle/sit/stand`,
-`sleep/zzz/rest`, `climb/grab/wall`, `fall/jump`, `drag/pinch/grabbed/held`, using
-GIF, WEBP, PNG or JPEG. Missing states fall back to available idle/walk images.
-
-```json
-{
-  "name": "Mochi", "size": 96, "speed": 5,
-  "climb": true, "talk": true, "sit_on_windows": false,
-  "sound": "meow.wav", "lines": {"any": ["Hello!"], "morning": ["Morning!"]}
-}
-```
-
-Sprite manifest fields are optional; unknown or malformed fields are ignored.
-This sprite manifest and the Imervue puppet/script documents remain distinct
-formats. FrontEngine's pet UI accepts both, and stores the selected puppet script
+The Imervue puppet/script documents are FrontEngine's only non-layered pet
+formats. FrontEngine's pet UI stores the selected puppet script
 in its own preset `puppet_script` field.
 
 ## Scene version 1

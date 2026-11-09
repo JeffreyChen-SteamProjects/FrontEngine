@@ -254,7 +254,7 @@ def _desktop_pet(window, tmp_path):
     picture = QPixmap(48, 48)
     picture.fill(QColor("#d3a231"))
     assert picture.save(str(sprite))
-    pet = DesktopPetWidget(str(sprite), profiles=window.pet_setting_ui.profile_controls.profiles, talk=False,
+    pet = DesktopPetWidget(profiles=window.pet_setting_ui.profile_controls.profiles, talk=False,
                            sit_on_windows=False)
     window.pet_setting_ui.pet_list.append(pet)
     pet.show()

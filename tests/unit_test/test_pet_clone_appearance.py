@@ -4,7 +4,6 @@ from frontengine.show.pet.asset_library import PetAssetLibrary
 from frontengine.show.pet.wardrobe import WardrobeDraft, asset_reference
 from frontengine.ui.page.pet.pet_setting_ui import PetSettingUI
 from frontengine.user_setting.pet_profiles import PetProfiles
-from test_pet_profile_sessions import _sprite
 from test_pet_variants import variant_asset
 
 
@@ -18,13 +17,14 @@ def _same_moment(*pets):
             playback._started = 0.0
 
 
-def test_clone_uses_source_sprite_and_custom_parts_after_page_selection_changes(tmp_path, monkeypatch, *, lifetime_factory):
+def test_clone_uses_source_character_and_custom_parts_after_page_selection_changes(tmp_path, monkeypatch, *,
+                                                                                   lifetime_factory, layered_pets):
     lifetime_factory()
     page = PetSettingUI(lifetime=lifetime_factory())
     profiles = PetProfiles({}, lambda: None)
     page.profile_controls.profiles = profiles
     page.profile_controls.refresh()
-    page.pet_image_path = _sprite(tmp_path)
+    layered_pets(page)
     monkeypatch.setattr(page, '_target_geometry', lambda: None)
     page._spawn_pet()
     source = page.pet_list[0]
@@ -45,7 +45,6 @@ def test_clone_uses_source_sprite_and_custom_parts_after_page_selection_changes(
         source.clone_requested.emit()
         assert len(page.pet_list) == 2
         clone = page.pet_list[-1]
-        assert clone.image_path == source.image_path
         assert clone.asset_library is source.asset_library
         assert clone._base_size == source._base_size
         assert clone.profile_session.identifier != source.profile_session.identifier
@@ -65,7 +64,7 @@ def test_clone_uses_source_sprite_and_custom_parts_after_page_selection_changes(
         page.close()
 
 
-def test_puppet_clone_keeps_model_and_size_when_page_selects_sprite(tmp_path, monkeypatch, *, lifetime_factory):
+def test_puppet_clone_keeps_model_and_size_when_page_selects_a_character(tmp_path, monkeypatch, *, lifetime_factory):
     import pytest
     lifetime_factory()
     pytest.importorskip('Imervue.puppet.document_io')
@@ -79,7 +78,7 @@ def test_puppet_clone_keeps_model_and_size_when_page_selects_sprite(tmp_path, mo
     page._spawn_pet()
     source = page.pet_list[0]
     try:
-        page.pet_image_path = _sprite(tmp_path)
+        page._choose_character('inkside-mochi')
         page.size_combobox.setCurrentText('256')
         source.clone_requested.emit()
         clone = page.pet_list[-1]

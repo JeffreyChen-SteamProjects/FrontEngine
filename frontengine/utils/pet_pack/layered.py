@@ -16,12 +16,14 @@ ATLAS_SIDE = 2048
 ACTIONS = ('idle', 'walk', 'sleep', 'climb', 'fall', 'drag', 'greet', 'pet',
            'feed', 'groom', 'play', 'celebrate', 'outfit_show', 'wake', 'sleep_in', 'food_like', 'food_dislike',
            'sit', 'land', 'peer_greet', 'catch')
-# Optional whole-body frame alternatives; the renderer uses them only for an undressed default pet.
-# The home poses after walk/climb also cover home activities with no layered counterpart
-# (write, garden, craft): a renderer without them is asked for a fallback instead.
+# The poses a pet takes at home furniture. The first four are required actions; the rest are
+# optional layered actions, so older assets without them still load and fall back to another pose.
 HOME_POSES = ('sit', 'sleep', 'feed', 'play', 'write', 'garden', 'craft', 'read', 'music', 'paint', 'watch',
               'bathe', 'dress')
-SPRITE_ACTIONS = ('walk_sprite', 'climb_sprite') + tuple(pose + '_sprite' for pose in HOME_POSES)
+OPTIONAL_ACTIONS = ('write', 'garden', 'craft', 'read', 'music', 'paint', 'watch', 'bathe', 'dress')   # HOME_POSES - ACTIONS
+# Whole-body frames older built-in assets carried for an undressed pet. Pets are layered only now:
+# these are still accepted so such an asset loads, and nothing ever plays them.
+LEGACY_SPRITE_ACTIONS = ('walk_sprite', 'climb_sprite') + tuple(pose + '_sprite' for pose in HOME_POSES)
 _TOKEN = re.compile(r'[A-Za-z0-9][A-Za-z0-9_.-]{0,127}')
 
 
@@ -228,7 +230,8 @@ def _frame(value, root: Path, checked: dict) -> Frame:
 
 
 def _animations(value, root: Path) -> Mapping[str, Animation]:
-    if not isinstance(value, dict) or not value or set(value) - set(ACTIONS) - set(SPRITE_ACTIONS):
+    if (not isinstance(value, dict) or not value
+            or set(value) - set(ACTIONS) - set(OPTIONAL_ACTIONS) - set(LEGACY_SPRITE_ACTIONS)):
         raise ValueError('Unknown or empty layered actions')
     actions = {}
     checked = {}

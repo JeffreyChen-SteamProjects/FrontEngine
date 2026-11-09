@@ -20,7 +20,6 @@ def test_generation_keeps_its_owners_directory(action, lifetime_factory, tmp_pat
         job = jobs[0]
         if action == 'use_builtin_character':
             assert job.library.root == owner_directory / 'pet-assets'
-            assert job.preview_folder == owner_directory / 'pet-previews'
         else:
             assert job.folder == owner_directory / 'pet-assets' / 'puppets'
     finally:
@@ -43,17 +42,13 @@ def test_saved_pet_wardrobe_keeps_its_owners_directory(lifetime_factory, tmp_pat
         page.close()
 
 
-def test_spawned_pet_reads_assets_from_its_owners_directory(lifetime_factory, tmp_path, monkeypatch):
-    from PySide6.QtGui import QColor, QImage
+def test_spawned_pet_reads_assets_from_its_owners_directory(lifetime_factory, tmp_path, monkeypatch, *,
+                                                           layered_pets):
     from frontengine.show.pet.asset_library import PetAssetLibrary
     lifetime = lifetime_factory()
     owner_directory = lifetime.storage.directory
     page = PetSettingUI(lifetime=lifetime)
-    image = QImage(16, 16, QImage.Format.Format_ARGB32)
-    image.fill(QColor('orange'))
-    source = tmp_path / 'pet.png'
-    assert image.save(str(source))
-    page.pet_image_path = str(source)
+    layered_pets(page)
     page.talk_checkbox.setChecked(False)
     page.sit_checkbox.setChecked(False)
     other = tmp_path / 'other-host-directory'

@@ -136,9 +136,8 @@ def test_try_on_replacement_note_and_comparison_preview(closet, *, lifetime_fact
 
 def test_live_pet_switches_outfit_only_after_a_drag_ends(tmp_path, closet):
     from frontengine.show.pet.desktop_pet import DesktopPetWidget
-    from test_pet_profile_sessions import _sprite
     profiles, record, catalog, assets = closet
-    pet = DesktopPetWidget(_sprite(tmp_path), profiles=profiles, profile_id=record['id'], sit_on_windows=False)
+    pet = DesktopPetWidget(profiles=profiles, profile_id=record['id'], sit_on_windows=False)
     pet.show()
     try:
         first = WardrobeDraft(profiles, record['id'], catalog)

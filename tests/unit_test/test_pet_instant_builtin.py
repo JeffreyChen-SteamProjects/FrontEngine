@@ -6,7 +6,7 @@ from frontengine.show.pet.asset_library import PetAssetLibrary
 from frontengine.show.pet.inkside.assemble import garment_identifier
 from frontengine.show.pet.inkside.garments import GARMENTS
 from frontengine.show.pet.inkside.library import VERSION, _template, install_builtin
-from frontengine.ui.dialog.pet_asset_install import PetBuiltinSprite
+from frontengine.ui.dialog.pet_asset_install import PetBuiltinCharacter
 
 CHARACTER = 'inkside-pip'
 
@@ -18,14 +18,15 @@ def _wardrobe_installed(library) -> int:
 
 def test_the_pet_is_ready_before_the_wardrobe_and_the_wardrobe_follows(tmp_path):
     library = PetAssetLibrary(tmp_path / 'pet-assets')
-    job = PetBuiltinSprite(library, CHARACTER, tmp_path / 'previews')
+    job = PetBuiltinCharacter(library, CHARACTER)
     seen = []
-    job.signals.finished.connect(lambda preview, error: seen.append(
-        (preview, error, library.is_installed(CHARACTER, VERSION), _wardrobe_installed(library))))
+    job.signals.finished.connect(lambda character, error: seen.append(
+        (character, error, library.is_installed(CHARACTER, VERSION), _wardrobe_installed(library))))
     job.run()
-    (preview, error, character_ready, wardrobe_at_ready), = seen
+    (character, error, character_ready, wardrobe_at_ready), = seen
     assert error == ''
-    assert preview.endswith(f'{CHARACTER}.png')
+    assert character == CHARACTER
+    assert not (tmp_path / 'pet-previews').exists()            # layered only: no picture is rendered
     assert character_ready
     assert wardrobe_at_ready == 0
     assert _wardrobe_installed(library) == len(GARMENTS)
@@ -33,9 +34,9 @@ def test_the_pet_is_ready_before_the_wardrobe_and_the_wardrobe_follows(tmp_path)
 
 def test_cancelling_after_the_pet_appeared_stops_the_wardrobe_quietly(tmp_path):
     library = PetAssetLibrary(tmp_path / 'pet-assets')
-    job = PetBuiltinSprite(library, CHARACTER, tmp_path / 'previews')
+    job = PetBuiltinCharacter(library, CHARACTER)
     errors = []
-    job.signals.finished.connect(lambda _preview, error: (errors.append(error), job.cancel.set()))
+    job.signals.finished.connect(lambda _character, error: (errors.append(error), job.cancel.set()))
     job.run()
     assert errors == ['']
     assert library.is_installed(CHARACTER, VERSION)
@@ -67,10 +68,10 @@ def test_closing_the_page_also_cancels_a_wardrobe_still_installing(tmp_path, *, 
     lifetime_factory()
     page = PetSettingUI(lifetime=lifetime_factory())
     try:
-        job = PetBuiltinSprite(PetAssetLibrary(tmp_path / 'pet-assets'), CHARACTER, tmp_path / 'previews')
-        page._sprite_install = job
-        page._builtin_character_ready(str(tmp_path / 'preview.png'), '')
-        assert page._sprite_install is None
+        job = PetBuiltinCharacter(PetAssetLibrary(tmp_path / 'pet-assets'), CHARACTER)
+        page._installing[CHARACTER] = job
+        page._character_installed(CHARACTER, '')
+        assert page._installing == {}
         assert not job.cancel.is_set()
         page.stop_asset_preparation()
         assert job.cancel.is_set()

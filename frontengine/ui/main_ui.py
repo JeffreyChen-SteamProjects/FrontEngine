@@ -272,8 +272,7 @@ class FrontEngineMainUI(QMainWindow):
         self.workshop_dialog = None
         self.lifetime.connect_owned(self.scene_setting_ui.scene_manager_ui.workshop_requested, lambda: self.open_workshop("scene"))
         self.lifetime.connect_owned(self.pet_setting_ui.focus_phase, self.pet_home_ui.focus_phase_changed)
-        self.lifetime.connect_owned(self.pet_setting_ui.workshop_requested,
-            lambda: self.open_workshop("pet_pack", self.pet_setting_ui.pet_image_path or ""))
+        self.lifetime.connect_owned(self.pet_setting_ui.workshop_requested, lambda: self.open_workshop("preset"))
         build_language_menu(self)
         build_help_menu(self)
         build_how_to_menu(self)
@@ -1417,7 +1416,6 @@ class FrontEngineMainUI(QMainWindow):
         self._stop_services()
         self.text_setting_ui.stop_file_preview()
         self.image_setting_ui.close_image_compare()
-        self.pet_setting_ui.close_pack_editor()
         self.pet_setting_ui.stop_asset_preparation()
         self.tools_setting_ui.close_palette()
         self.tools_setting_ui.close_capture_editor()

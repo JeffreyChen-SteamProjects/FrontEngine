@@ -1,10 +1,9 @@
-"""Picture and Puppet pets drawn as themselves in the home, behind the layered renderer's interface.
+"""Puppet pets drawn as themselves in the home, behind the layered renderer's interface.
 
-A sprite pack brings walk / idle / sleep / drag animations of its own; a single GIF or
-picture brings one; a Puppet pet brings a still portrait (its rig cannot run in the home).
-Whatever is missing is made up the same way for every pet, so the home never needs to
-know which kind it is drawing: an action without frames uses idle, and a pet with a single
-still frame bounces while walking, hops while playing and settles down while sleeping.
+A Puppet pet brings a still portrait (its rig cannot run in the home). The home's actions are
+made up from it the same way a layered pet's are played, so the home never needs to know which
+kind it is drawing: an action without frames uses idle, and a single still frame bounces while
+walking, hops while playing and settles down while sleeping.
 
 Loading reads files and decodes images, so it runs on a worker thread; ``render`` only
 paints already decoded frames.
@@ -18,14 +17,11 @@ from types import SimpleNamespace
 from PySide6.QtCore import QPointF, QRectF, Qt
 from PySide6.QtGui import QImage, QImageReader, QPainter
 
-from frontengine.utils.pet_pack.pack_builder import load_pack, validate_sprite
-
 MAX_FRAMES = 96                  # per action: long GIFs are cut, not refused
 MAX_HEIGHT = 256                 # frames are scaled down to this; the home draws them about 70 px tall
 DEFAULT_DELAY_MS = 100
 HEADROOM = 1.15                  # room above the picture for a hop
-PACK_ACTIONS = ("walk", "idle", "sleep", "drag")     # the sprite-pack states the home can use
-# Home actions with no sprite of their own borrow one of these, then idle.
+# Home actions with no frames of their own borrow one of these, then idle.
 BORROW = {"sit": "idle", "feed": "idle", "greet": "idle", "play": "walk", "write": "idle", "garden": "idle",
           "craft": "idle"}
 
@@ -49,15 +45,10 @@ def read_frames(path: Path) -> list[tuple[QImage, int]]:
 
 
 def load_picture(kind: str, path: Path, identifier: str) -> PictureRenderer:
-    """A renderer for a portrait, a sprite file or a sprite-pack folder; ValueError when nothing loads."""
-    if kind == "portrait":
-        actions = {"idle": read_frames(path)}
-    elif path.is_dir():
-        draft = load_pack(path)
-        actions = {state: read_frames(validate_sprite(file)) for state, file in draft.actions.items()
-                   if state in PACK_ACTIONS}
-    else:
-        actions = {"idle": read_frames(validate_sprite(path))}
+    """A renderer for a Puppet portrait; ValueError for any other kind or when nothing loads."""
+    if kind != "portrait":
+        raise ValueError(f"Not a pet look the home can draw: {kind}")
+    actions = {"idle": read_frames(path)}
     actions = {state: frames for state, frames in actions.items() if frames}
     if not actions:
         raise ValueError(f"No readable picture for this pet: {path.name}")

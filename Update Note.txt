@@ -10,7 +10,7 @@ FrontEngine now comes with six drawn characters, [b]MOCHI[/b], [b]MOSS[/b], [b]P
 
 The wardrobe works by slot: head, neck, body and back. Putting on a piece replaces whatever already sits in that slot and tells you what it took off. Each character also has eye, mouth and body-part choices and colour regions you can repaint, and you can pin the current look beside your changes to compare before you apply them. Each pet can keep up to twenty saved outfits, and a pet that is busy with something changes clothes once it is done.
 
-Undressed and in its default look, a character walks and climbs with hand-drawn step frames. Dressed, it uses the layered animation that keeps every piece in place.
+Every pose is built from the character's own layers, so it walks, climbs, sits at the desk, reads, paints or plays the piano the same way whether it is dressed or not, and every piece stays in place. Desktop pets are now always one of these layered characters: pictures, GIFs and sprite-pack folders are no longer used as pets. A pet you once started from a picture comes back as the built-in character the pet home already shows for it, and keeps it from then on. Puppet models still work as before, through [b]Choose Puppet model…[/b].
 
 [h2]A pet you can look after[/h2]
 
@@ -44,7 +44,7 @@ A scene can also be sent on its own to a virtual camera at a fixed 640x480, 1280
 
 [h2]Publish to the Steam Workshop[/h2]
 
-Presets, then Manage Workshop, now publishes as well as imports. Scenes, preset packages and sprite pet packs can be shared, privately too. Subscribed items are checked before they are used, and an interrupted upload can be picked up again.
+Presets, then Manage Workshop, now publishes as well as imports. Scenes, preset packages and pet home furniture, themes and layouts can be shared, privately too. Subscribed items are checked before they are used, and an interrupted upload can be picked up again.
 
 [hr][/hr]
 
@@ -77,7 +77,7 @@ Presets, then Manage Workshop, now publishes as well as imports. Scenes, preset 
 [*][b]Command search[/b]: Ctrl+K finds and runs any command, in your language.
 [*][b]Tasks and Today[/b]: a task list with due times, calendar import from .ics files, and a Today widget.
 [*][b]Capture history[/b], searchable by the text in your captures and recognised on your own machine, and [b]image clipboard history[/b]. Both are off until you turn them on.
-[*][b]Asset library[/b]: tag, search and favourite the images, pet packs and scenes you use.
+[*][b]Asset library[/b]: tag, search and favourite the images, Puppet models and scenes you use.
 [/list]
 
 [h2]A tidier interface[/h2]

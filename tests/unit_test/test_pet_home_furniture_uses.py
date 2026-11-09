@@ -3,8 +3,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from frontengine.show.pet.inkside.cast import TEMPLATES
-from frontengine.show.pet.inkside.sprite_sheet import HOME_POSE_MS, SPRITES
+from frontengine.show.pet.inkside.rig import timelines
 from frontengine.show.pet_game.resident_art import semantic_action
 from frontengine.utils.pet_game import simulation
 from frontengine.utils.pet_game.catalog import POSES, builtin_catalog
@@ -35,12 +34,10 @@ def test_pieces_ask_for_their_own_pose_first(piece, pose):
 
 
 @pytest.mark.parametrize("pose", sorted(set(OWN_POSES.values())))
-def test_every_builtin_character_has_a_drawn_loop_for_each_new_pose(pose):
-    assert pose in HOME_POSE_MS
-    for template in TEMPLATES:
-        name = template.ident.removeprefix("inkside-")
-        assert (SPRITES / f"inkside-{name}-{pose}.png").is_file(), (template.ident, pose)
-        assert f"{pose}_sprite" in template.sprite_actions
+def test_every_new_pose_is_a_rigged_layered_loop(pose):
+    loop, frames = timelines()[pose]
+    assert loop
+    assert len(frames) >= 2
 
 
 def _home_with(piece: str) -> World:
@@ -93,10 +90,10 @@ def _using(piece: str):
 
 @pytest.mark.parametrize("piece, own", [("bookshelf", "read"), ("piano", "music"), ("bath_tub", "bathe"),
                                         ("wardrobe_closet", "dress")])
-def test_a_drawn_pose_wins_and_a_dressed_pet_falls_back(piece, own):
+def test_the_pieces_own_pose_wins_and_an_asset_without_it_falls_back(piece, own):
     world, resident = _using(piece)
-    undressed = _Renderer({"idle", "sit", "play", "greet", own})
-    assert semantic_action(resident, world, undressed) == own
-    dressed = _Renderer({"idle", "sit", "play", "greet"})
-    assert semantic_action(resident, world, dressed) in {"sit", "play", "greet"}
+    rigged = _Renderer({"idle", "sit", "play", "greet", own})
+    assert semantic_action(resident, world, rigged) == own
+    older = _Renderer({"idle", "sit", "play", "greet"})       # a third-party asset without the optional pose
+    assert semantic_action(resident, world, older) in {"sit", "play", "greet"}
     assert semantic_action(resident, world, _Renderer({"idle"})) == "idle"

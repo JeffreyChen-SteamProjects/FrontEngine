@@ -41,15 +41,15 @@ class Service(QObject):
 
 @pytest.fixture
 def publication(tmp_path):
-    source = tmp_path / "pet"
-    source.mkdir()
+    from frontengine.utils.scene_format.scene_package import save_package
+    source = tmp_path / "source.fescene"
     preview = tmp_path / "preview.png"
     image = QImage(16, 16, QImage.Format.Format_RGB32)
     image.fill(0xffffcc00)
     assert image.save(str(preview))
-    assert image.save(str(source / "walk.png"))
+    save_package({"image": {"type": "IMAGE", "file_path": str(preview)}}, source)
     store = PublicationStore(123, tmp_path / "managed")
-    record = store.prepare("pet_pack", source, "Pet", preview, "Description", ["Pet"])
+    record = store.prepare("scene", source, "Scene", preview, "Description", ["Scene"])
     service = Service()
     publisher = WorkshopPublisher(service, store, clock=lambda: 10.0)
     yield publisher, service, store, record

@@ -3,9 +3,9 @@
 The world only says what a resident is doing (sleep, eat, work, walk to the
 desk…). This module turns that into one of the layered character's actions,
 so a pet without a work animation still sits at its desk instead of failing.
-Picture and Puppet pets use the look the pet page recorded for them
-(``user_setting.pet_looks``) through ``picture_renderer``; a pet with no usable
-look of its own is drawn as a built-in stand-in.
+Puppet pets use the portrait the pet page recorded for them
+(``user_setting.pet_looks``) through ``picture_renderer``; a pet with no layered
+character yet is drawn as its built-in stand-in.
 Renderers are prepared on a private, lifetime-owned pool (scanning the asset library
 and decoding images is file work) and handed back through a queued signal; until
 then, and for pets without a layered character, views draw the usual marker.
@@ -114,7 +114,7 @@ PICTURE_PREFIX = "picture:"
 
 
 class _PreparePicture(QRunnable):
-    """Decode a picture or Puppet pet's own frames off the GUI thread; None when they cannot be read."""
+    """Decode a Puppet pet's portrait off the GUI thread; None when it cannot be read."""
 
     def __init__(self, owner: ResidentArt, identifier: str, look: tuple[str, Path], key: str) -> None:
         super().__init__()
@@ -130,7 +130,8 @@ class _PreparePicture(QRunnable):
 
 
 def fallback_character(identifier: str) -> str:
-    """The built-in character a pet without one is drawn as in the home: stable per pet, never saved."""
+    """The built-in character a pet without one wears: stable per pet. The home only draws it; the
+    desktop dresses the pet as it when the pet is spawned there."""
     from frontengine.show.pet.inkside.library import builtin_names
     names = [ident for ident, _name in builtin_names()]
     return names[int(hashlib.sha256(identifier.encode("utf-8")).hexdigest(), 16) % len(names)]
@@ -231,7 +232,7 @@ class ResidentArt(QObject):
         return cached[1] if cached is not None else None
 
     def _picture(self, identifier: str):
-        """The pet's own picture or Puppet portrait when one is recorded and loads; else the stand-in."""
+        """The Puppet portrait when one is recorded and loads; else the stand-in."""
         look = self.service.profiles.look_for(identifier)
         if look is None:
             return self._fallback(identifier)
@@ -251,7 +252,8 @@ class ResidentArt(QObject):
         return None
 
     def _fallback(self, identifier: str):
-        """Pets without a layered character (picture pets, new pets) still appear as a character here."""
+        """Pets without a layered character (new pets, pets from before pets were layered only) still
+        appear as a character here."""
         key = FALLBACK_PREFIX + fallback_character(identifier)
         cached = self._renderers.get(identifier)
         if cached is not None and cached[0] == key:

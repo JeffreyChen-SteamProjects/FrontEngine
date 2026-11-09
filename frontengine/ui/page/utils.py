@@ -329,7 +329,7 @@ def list_media_files(folder: str, extensions, recursive: bool = False) -> list:
         return []
 
 
-def reload_recent_combobox(combobox: QComboBox, category: str) -> None:
+def reload_recent_combobox(combobox: QComboBox, category: str, keep: Optional[Callable[[str], bool]] = None) -> None:
     """
     以某分類最近使用的檔案重建下拉選單：第一項為佔位提示 (data=None)，
     其後每項顯示檔名、data 存完整路徑。
@@ -342,15 +342,16 @@ def reload_recent_combobox(combobox: QComboBox, category: str) -> None:
     combobox.addItem("", None)
     retranslator.bind(combobox, "recent_files_label", "Recent", "setItemText", 0)
     for path in get_recent_files(category):
-        combobox.addItem(Path(path).name, path)
+        if keep is None or keep(path):
+            combobox.addItem(Path(path).name, path)
     combobox.setCurrentIndex(0)
     combobox.blockSignals(False)
 
 
-def build_recent_combobox(category: str) -> QComboBox:
-    """Build a combobox populated with the recent files for `category`."""
+def build_recent_combobox(category: str, keep: Optional[Callable[[str], bool]] = None) -> QComboBox:
+    """Build a combobox populated with the recent files for `category` (only those ``keep`` accepts)."""
     combobox = QComboBox()
-    reload_recent_combobox(combobox, category)
+    reload_recent_combobox(combobox, category, keep)
     return combobox
 
 

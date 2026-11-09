@@ -9,7 +9,7 @@ from PySide6.QtWidgets import QFileDialog, QInputDialog, QMessageBox
 
 from frontengine.user_setting.preset_repository import PresetRepository
 from frontengine.utils.workshop.workshop_content import (
-    KIND_PET_PACK, KIND_PRESET, find_workshop_dir, preset_files, scan_workshop_items,
+    KIND_PRESET, find_workshop_dir, preset_files, scan_workshop_items,
 )
 from frontengine.user_setting.user_setting_file import user_setting_dict, write_user_setting
 from frontengine.utils.logging.loggin_instance import front_engine_logger
@@ -387,26 +387,18 @@ def _workshop_action(ui: "FrontEngineMainUI") -> Callable[[], None]:
                 ui, title,
                 _t("workshop_no_items", "Nothing subscribed yet - subscribe in Steam first."))
             return
-        imported, packs = _install_workshop_items(items)
-        lines = [
-            _t("workshop_imported_presets", "Presets imported: {count}").format(count=imported),
-            _t("workshop_found_packs", "Pet packs available: {count}").format(count=len(packs)),
-        ]
-        lines.extend(f"- {title_}: {path}" for title_, path in packs[:8])
-        QMessageBox.information(ui, title, chr(10).join(lines))
+        imported = _install_workshop_items(items)
+        QMessageBox.information(
+            ui, title, _t("workshop_imported_presets", "Presets imported: {count}").format(count=imported))
 
     return handler
 
 
-def _install_workshop_items(items) -> tuple:
-    """把預設集複製進本機的 presets/，並回傳可用的動作包 (名稱, 路徑)。"""
+def _install_workshop_items(items) -> int:
+    """把預設集複製進本機的 presets/，回傳匯入的數量 / Copy presets into presets/ and count them."""
     repository = PresetRepository()
     imported = 0
-    packs = []
     for item in items:
-        if item["kind"] == KIND_PET_PACK:
-            packs.append((item["title"], item["path"]))
-            continue
         if item["kind"] != KIND_PRESET:
             continue
         for preset_path in preset_files(item["path"]):
@@ -416,7 +408,7 @@ def _install_workshop_items(items) -> tuple:
             except Exception as error:  # pragma: no cover - third-party content
                 front_engine_logger.warning(
                     f"[PresetMenu] workshop preset failed: {preset_path} ({error!r})")
-    return (imported, packs)
+    return imported
 
 
 def build_preset_menu(ui: "FrontEngineMainUI") -> None:

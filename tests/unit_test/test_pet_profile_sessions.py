@@ -1,23 +1,13 @@
-from PySide6.QtGui import QColor, QPixmap
-
 from frontengine.show.pet.desktop_pet import DesktopPetWidget
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.utils.json.json_repository import JsonRepository
-
-
-def _sprite(tmp_path):
-    path = tmp_path / 'sprite.png'
-    image = QPixmap(64, 64)
-    image.fill(QColor('#d3a231'))
-    assert image.save(str(path))
-    return str(path)
 
 
 def test_failed_close_retains_live_pet_and_retries_without_losing_stats(tmp_path, monkeypatch):
     from frontengine.show.pet.pet_profile_session import PetProfileSession
 
     profiles = PetProfiles({}, lambda: None)
-    pet = DesktopPetWidget(_sprite(tmp_path), talk=False, profiles=profiles)
+    pet = DesktopPetWidget(talk=False, profiles=profiles)
     identifier = pet.profile_session.identifier
     try:
         pet.show()
@@ -50,7 +40,7 @@ def test_reward_at_affection_limit_stays_saveable(tmp_path):
     profiles = PetProfiles({}, lambda: None)
     record = profiles.create()
     profiles.update(record['id'], {'affection': MAX_AFFECTION - 1})
-    pet = DesktopPetWidget(_sprite(tmp_path), talk=False, profiles=profiles, profile_id=record['id'])
+    pet = DesktopPetWidget(talk=False, profiles=profiles, profile_id=record['id'])
     try:
         pet.feed()
         pet.profile_session.advance(2)
@@ -66,13 +56,12 @@ def test_live_pet_states_close_flush_and_resume_independently(tmp_path):
     settings = {}
     disk = JsonRepository(tmp_path / 'settings.json')
     profiles = PetProfiles(settings, lambda: disk.save(settings))
-    path = _sprite(tmp_path)
-    first = DesktopPetWidget(path, talk=False, profiles=profiles, profile_name='Amber')
-    second = DesktopPetWidget(path, talk=False, profiles=profiles, profile_name='Blue')
+    first = DesktopPetWidget(talk=False, profiles=profiles, profile_name='Amber')
+    second = DesktopPetWidget(talk=False, profiles=profiles, profile_name='Blue')
     identifier = first.profile_session.identifier
     try:
         with pytest.raises(ValueError, match='already active'):
-            DesktopPetWidget(path, profiles=profiles, profile_id=identifier)
+            DesktopPetWidget(profiles=profiles, profile_id=identifier)
         first.feed()
         first.profile_session.advance(2)
         second._mood.decay(15)
@@ -84,7 +73,7 @@ def test_live_pet_states_close_flush_and_resume_independently(tmp_path):
         assert not second.profile_session.timer.isActive()
         first.close()
         reopened = PetProfiles(disk.load(), lambda: None)
-        restored = DesktopPetWidget(path, talk=False, profiles=reopened, profile_id=identifier)
+        restored = DesktopPetWidget(talk=False, profiles=reopened, profile_id=identifier)
         try:
             assert restored._growth.affection == 5
             assert restored._mood.value == 72
@@ -98,7 +87,8 @@ def test_live_pet_states_close_flush_and_resume_independently(tmp_path):
         second.close()
 
 
-def test_page_clone_rename_export_and_import_use_distinct_identities(tmp_path, monkeypatch, *, lifetime_factory):
+def test_page_clone_rename_export_and_import_use_distinct_identities(tmp_path, monkeypatch, *, lifetime_factory,
+                                                                    layered_pets):
     from PySide6.QtWidgets import QFileDialog
     from frontengine.ui.page.pet.pet_setting_ui import PetSettingUI
     lifetime_factory()
@@ -107,7 +97,7 @@ def test_page_clone_rename_export_and_import_use_distinct_identities(tmp_path, m
     controls.profiles = PetProfiles({}, lambda: None)
     controls.refresh()
     controls.name.setText('Amber')
-    page.pet_image_path = _sprite(tmp_path)
+    layered_pets(page)
     monkeypatch.setattr(page, '_target_geometry', lambda: None)
     page._spawn_pet()
     first = page.pet_list[0]
@@ -157,7 +147,7 @@ def test_a_pet_moves_from_the_desktop_into_the_home_and_back_without_losing_care
     from frontengine.utils.pet_game.catalog import builtin_catalog
 
     profiles = PetProfiles({}, lambda: None)
-    pet = DesktopPetWidget(_sprite(tmp_path), profiles=profiles, talk=False, sit_on_windows=False)
+    pet = DesktopPetWidget(profiles=profiles, talk=False, sit_on_windows=False)
     identifier = pet.profile_session.identifier
     service = HomeService(None, home_store_factory(tmp_path, builtin_catalog()), profiles)
     try:
@@ -173,7 +163,7 @@ def test_a_pet_moves_from_the_desktop_into_the_home_and_back_without_losing_care
         assert service.shutdown() is True
     assert PetProfileSession.active(profiles, identifier) is None
     assert profiles.get(identifier)["mood"] == 33
-    again = DesktopPetWidget(_sprite(tmp_path), profile_id=identifier, profiles=profiles, talk=False,
+    again = DesktopPetWidget(profile_id=identifier, profiles=profiles, talk=False,
                              sit_on_windows=False)
     try:
         assert again.profile_session.state()["mood"] == 33

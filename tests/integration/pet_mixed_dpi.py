@@ -12,7 +12,6 @@ import tempfile
 from pathlib import Path
 
 from PySide6.QtCore import QCoreApplication
-from PySide6.QtGui import QColor, QImage
 from PySide6.QtWidgets import QApplication
 
 LAYOUT = {'synchronousWindowSystemEvents': True, 'windowFrameMargins': False, 'screens': [
@@ -41,12 +40,23 @@ def check_edges(app) -> dict:
     return {'converted': logical}
 
 
-def _sprite(folder: Path, profiles):
+def _dressed_pet(folder: Path, profiles, **options):
+    """A desktop pet wearing a built-in character: pets are layered only, so one without draws nothing."""
+    from frontengine.show.pet.asset_library import PetAssetLibrary
     from frontengine.show.pet.desktop_pet import DesktopPetWidget
-    image = QImage(64, 64, QImage.Format.Format_ARGB32)
-    image.fill(QColor(240, 96, 42))
-    image.save(str(folder / 'pet.png'))
-    pet = DesktopPetWidget(str(folder / 'pet.png'), size=128, profiles=profiles, talk=False, sit_on_windows=False)
+    from frontengine.show.pet.inkside.library import install_builtin, VERSION
+    from frontengine.show.pet.wardrobe import WardrobeDraft
+    library = PetAssetLibrary(folder / 'library')
+    install_builtin(library, 'inkside-mochi', wardrobe=False)
+    pet = DesktopPetWidget(profiles=profiles, talk=False, sit_on_windows=False, asset_library=library, **options)
+    draft = WardrobeDraft(profiles, pet.profile_session.identifier, library.scan()[0])
+    draft.choose_character({'id': 'inkside-mochi', 'version': VERSION})
+    draft.apply(present=False)
+    return pet
+
+
+def _sprite(folder: Path, profiles):
+    pet = _dressed_pet(folder, profiles, size=128)
     pet.set_pet_window_flag()
     return pet
 

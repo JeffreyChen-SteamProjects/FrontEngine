@@ -14,6 +14,10 @@ from frontengine.utils.asset_library.inspect import inspect_asset, read_json
 from frontengine.utils.todo.repository import atomic_write
 
 
+KINDS = ('image', 'gif', 'puppet', 'scene')
+LEGACY_PET_KIND = 'pet'
+
+
 def checked_assets(value) -> dict:
     """Validate at most 200 paths and bounded tags before using saved catalog metadata."""
     if not isinstance(value, list) or len(value) > 200:
@@ -22,12 +26,14 @@ def checked_assets(value) -> dict:
     for entry in value:
         if not isinstance(entry, dict) or set(entry) != {'id', 'path', 'kind', 'tags', 'favorite'}:
             raise ValueError('Invalid asset catalog fields')
+        if entry['kind'] == LEGACY_PET_KIND:
+            continue                # sprite pet folders from before pets were layered only: dropped
         if not isinstance(entry['id'], str) or not re.fullmatch('[0-9a-f]{32}', entry['id']) or entry['id'] in result:
             raise ValueError('Invalid asset identifier')
         if not isinstance(entry['path'], str) or len(entry['path']) > 4096 or not Path(entry['path']).is_absolute():
             raise ValueError('Asset path must be absolute and within 4096 characters')
         key = normcase(str(Path(entry['path']).absolute()))
-        if key in paths or entry['kind'] not in ('image', 'gif', 'pet', 'puppet', 'scene') or type(entry['favorite']) is not bool:
+        if key in paths or entry['kind'] not in KINDS or type(entry['favorite']) is not bool:
             raise ValueError('Duplicate asset path or invalid kind/favorite')
         tags = entry['tags']
         if not isinstance(tags, list) or len(tags) > 32 or any(not isinstance(tag, str) or not tag.strip() or len(tag) > 40 for tag in tags):

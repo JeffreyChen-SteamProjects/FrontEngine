@@ -70,7 +70,7 @@ def test_saved_outfit_reopens_from_library_and_missing_asset_can_be_repaired(tmp
     draft.equip(asset_reference(garment))
     draft.apply()
     saved = profiles.get(record['id'])
-    pet = DesktopPetWidget(str(body / 'layer.png'), profiles=profiles,
+    pet = DesktopPetWidget(profiles=profiles,
                            profile_id=record['id'], talk=False, asset_library=library)
     try:
         pet._set_active_sprite('idle')
@@ -81,7 +81,7 @@ def test_saved_outfit_reopens_from_library_and_missing_asset_can_be_repaired(tmp
     image = garment.root / 'layer.png'
     original = image.read_bytes()
     image.write_bytes(b'broken image')
-    pet = DesktopPetWidget(str(body / 'layer.png'), profiles=profiles,
+    pet = DesktopPetWidget(profiles=profiles,
                            profile_id=record['id'], talk=False, asset_library=library)
     try:
         assert pet.appearance_error
