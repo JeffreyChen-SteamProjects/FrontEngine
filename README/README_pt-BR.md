@@ -97,7 +97,7 @@ Após criar uma casa, os atalhos e os textos longos de botões e caixas de sele�
 
 As mensagens de ações da casa acompanham as mudanças de idioma e preservam quantidades, caminhos de arquivos e detalhes originais dos erros. Salvar com sucesso limpa o aviso de falha correspondente sem apagar mensagens mais recentes.
 
-As encomendas diárias são atualizadas na tela quando o dia do jogo muda, mesmo sem outro evento de vida ou recompensa.
+As encomendas diárias são atualizadas na tela quando o dia do jogo muda, mesmo sem outro evento de vida ou recompensa. Clique duas vezes em uma encomenda na aba *Objetivos*, ou escolha-a em *Encomendas* na barra de ferramentas da faixa da área de trabalho, para mandar um pet fazer o que ainda falta: vai o pet que mora onde há uma bancada adequada e tem habilidade suficiente (primeiro o que tem a personalidade daquele ofício, depois o mais habilidoso, depois o que tem menos trabalho), sem interromper o que está fazendo. O que o estoque e os trabalhos em aberto já cobrem é contado primeiro, uma encomenda que já pode ser atendida é entregue na hora e, quando ninguém pode ir, o motivo aparece: nenhuma bancada, pouca habilidade, materiais faltando ou um nível de lar mais alto necessário.
 
 Os eventos já recebidos acompanham as mudanças de idioma e mantêm suas contagens de repetição, nomes originais dos animais e valores das recompensas. Novas notas e a ação de marcar tudo como lido também atualizam imediatamente a lista de pendências enquanto o lar está pausado.
 

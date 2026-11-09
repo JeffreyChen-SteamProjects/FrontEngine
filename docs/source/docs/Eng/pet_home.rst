@@ -26,7 +26,7 @@ Home panel actions are rejected while closing is prepared or in progress; bluepr
 
 After creating a home, shortcuts and long button or checkbox captions wrap in narrow windows. Home controls can shrink to fit their panel; the home drawing keeps its own horizontal scrolling.
 
-Daily commissions refresh on screen when the game day changes, even when no other life or reward event occurs.
+Daily commissions refresh on screen when the game day changes, even when no other life or reward event occurs. Double-click a commission on the *Goals* tab, or choose it under *Commissions* in the desktop strip's toolbar, to send a pet to make what it still lacks: the pet living by a matching workstation with enough skill goes (the one with the trade's trait first, then the most skilled, then the one with the least work), without stopping what it is doing. What storage and open orders already cover is counted first, a commission that can already be filled is handed in at once, and when nobody can go the reason is shown: no workstation, too little skill, missing materials or a higher home level needed.
 
 Existing inbox events follow language changes and retain their repeat counts, original pet names and reward amounts. New notes and marking all as read also update the pending list immediately while the home is paused.
 

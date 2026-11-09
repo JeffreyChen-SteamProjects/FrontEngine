@@ -26,7 +26,7 @@ Während der Vorbereitung und Durchführung des Schließens werden Aktionen der 
 
 Nach dem Erstellen eines Heims werden Schnellaktionen sowie lange Schaltflächen- und Kontrollkästchentexte in schmalen Fenstern umgebrochen. Die Bedienelemente passen sich dem Panel an; die Heimansicht behält ihre eigene horizontale Bildlaufleiste.
 
-Die täglichen Aufträge werden beim Wechsel des Spieltags auf dem Bildschirm aktualisiert, auch wenn kein anderes Lebens- oder Belohnungsereignis eintritt.
+Die täglichen Aufträge werden beim Wechsel des Spieltags auf dem Bildschirm aktualisiert, auch wenn kein anderes Lebens- oder Belohnungsereignis eintritt. Doppelklicke einen Auftrag im Reiter *Ziele* oder wähle ihn unter *Aufträge* in der Werkzeugleiste des Desktop-Streifens, um ein Haustier herstellen zu lassen, was noch fehlt: Es geht das Haustier, das dort wohnt, wo ein passender Arbeitsplatz steht, und geübt genug ist (zuerst eines mit der Persönlichkeit für den Beruf, dann das geübteste, dann das mit der wenigsten Arbeit), ohne zu unterbrechen, was es gerade tut. Was Lager und offene Arbeitsaufträge schon abdecken, wird zuerst angerechnet, ein Auftrag, der sich schon erfüllen lässt, wird sofort abgegeben, und wenn niemand gehen kann, wird der Grund angezeigt: kein Arbeitsplatz, zu wenig Fertigkeit, fehlende Materialien oder eine höhere Zuhause-Stufe nötig.
 
 Vorhandene Eingangsmeldungen folgen Sprachwechseln und behalten ihre Wiederholungszahlen, ursprünglichen Tiernamen und Belohnungsbeträge. Neue Meldungen und das Markieren aller Meldungen als gelesen aktualisieren die Aufgabenliste sofort, auch bei pausiertem Heim.
 

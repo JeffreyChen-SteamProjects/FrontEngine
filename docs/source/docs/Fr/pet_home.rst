@@ -26,7 +26,7 @@ Les actions des panneaux du foyer sont refusées pendant la préparation et l’
 
 Après la création du foyer, les raccourcis et les longs textes des boutons et cases à cocher passent à la ligne dans les fenêtres étroites. Les commandes s’adaptent au panneau ; le dessin du foyer garde son propre défilement horizontal.
 
-Les commandes quotidiennes se mettent à jour à l’écran au changement de journée du jeu, même sans autre événement de vie ou de récompense.
+Les commandes quotidiennes se mettent à jour à l’écran au changement de journée du jeu, même sans autre événement de vie ou de récompense. Double-cliquez sur une commande dans l’onglet *Objectifs*, ou choisissez-la sous *Commandes* dans la barre d’outils de la bande du bureau, pour envoyer une mascotte fabriquer ce qui manque encore : y va la mascotte qui vit là où se trouve un poste de travail adapté et qui a le niveau suffisant (d’abord celle qui a la personnalité du métier, puis la plus expérimentée, puis celle qui a le moins de travail), sans interrompre ce qu’elle fait. Ce que la réserve et les tâches en cours couvrent déjà est compté d’abord, une commande déjà réalisable est livrée aussitôt et, quand personne ne peut y aller, le motif s’affiche : pas de poste de travail, niveau insuffisant, matériel manquant ou niveau de maison plus élevé requis.
 
 Les événements déjà reçus suivent les changements de langue et conservent leur nombre de répétitions, les noms d’origine des animaux et les montants des récompenses. Les nouvelles notes et le marquage de tous les messages comme lus mettent aussi à jour immédiatement la liste des éléments à traiter, même lorsque le foyer est en pause.
 
