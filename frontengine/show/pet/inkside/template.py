@@ -14,7 +14,7 @@ from PySide6.QtCore import QPointF
 from PySide6.QtGui import QPainterPath
 
 from frontengine.show.pet.inkside.faces import EyeStyle, MouthStyle, draw_eye, draw_mouth
-from frontengine.show.pet.inkside.ink import ORANGE, PAPER, INK, Brush, ellipse, polygon, rounded
+from frontengine.show.pet.inkside.ink import ORANGE, PAPER, INK, Brush, ellipse, line, polygon, rounded
 
 DEFAULT_BASE = {
     'head': (128, 124), 'neck': (128, 166), 'body': (128, 194), 'tail': (150, 210),
@@ -63,8 +63,6 @@ class Template:
     mouth_default = ''
     torso_region = 'coat'
     fx_origin = (0.0, -60.0)
-    # Generated whole-body frames: {'walk_sprite': (atlas file in sprites/, frames, ms per frame)}.
-    sprite_actions: dict = {}
     fx_region = 'accent'
 
     # --- body parts -------------------------------------------------------
@@ -145,6 +143,97 @@ class Template:
             b.shape(ellipse(x, by, 15, 15), 'paper', 4.5)
             b.clip(ellipse(x, by, 15, 15), lambda: b.solid(polygon((x - 16, by - 2), (x + 16, by - 8),
                                                                    (x + 16, by + 2), (x - 16, by + 8))))
+        else:
+            _prop(b, name, self.fx_region)
+
+
+# --- home pose props: drawn head-local like the effects, in front of the paws that hold them ------
+def _prop(b: Brush, name: str, region: str) -> None:
+    drawers = {'book': lambda: _book(b, False), 'book_turn': lambda: _book(b, True), 'paper': lambda: _paper(b),
+               'keys': lambda: _keys(b), 'block': lambda: _block(b), 'drops': lambda: _drops(b, 0),
+               'drops_low': lambda: _drops(b, 12), 'spark_small': lambda: _spark(b, 70, 76, 0.6, region)}
+    if name in drawers:
+        drawers[name]()
+    elif name.startswith('pencil_'):
+        _pencil(b, int(name[-1]), region)
+    elif name.startswith('can_'):
+        _can(b, int(name[-1]), region)
+    elif name.startswith('mallet_'):
+        _mallet(b, {'up': 0, 'mid': 1, 'down': 2}[name.split('_', 1)[1]], region)
+    elif name.startswith('brush_'):
+        _brush(b, int(name[-1]), region)
+    elif name.startswith('bubbles_'):
+        _bubbles(b, int(name[-1]))
+
+
+def _book(b: Brush, turning: bool) -> None:
+    left = polygon((-40, 58), (-2, 64), (-2, 94), (-40, 88))
+    right = polygon((2, 64), (40, 58), (40, 88), (2, 94))
+    for page in (left, right):
+        b.shape(page, 'paper', 4)
+    for row in range(3):
+        b.outline(line((-32, 68 + row * 7), (-10, 72 + row * 7)), 2.5)
+        b.outline(line((10, 72 + row * 7), (32, 68 + row * 7)), 2.5)
+    if turning:
+        b.shape(polygon((2, 64), (26, 46), (30, 74), (2, 94)), 'paper', 4)
+
+
+def _paper(b: Brush) -> None:
+    b.shape(polygon((12, 84), (78, 78), (82, 98), (16, 104)), 'paper', 4)
+    for row in range(2):
+        b.outline(line((22, 88 + row * 7), (54, 85 + row * 7)), 2.5)
+
+
+def _pencil(b: Brush, step: int, region: str) -> None:
+    tip_x = 40 + step * 16
+    b.shape(polygon((tip_x, 92), (tip_x + 14, 56), (tip_x + 24, 60), (tip_x + 8, 95)), region, 3.5)
+    b.shape(polygon((tip_x, 92), (tip_x + 4, 84), (tip_x + 9, 86)), 'ink', 2)
+
+
+def _keys(b: Brush) -> None:
+    b.shape(rounded(-58, 88, 116, 18, 4), 'paper', 4)
+    for index in range(1, 8):
+        b.outline(line((-58 + index * 14.5, 88), (-58 + index * 14.5, 106)), 2.5)
+
+
+def _can(b: Brush, tilt: int, region: str) -> None:
+    dy = 6 * tilt
+    b.shape(rounded(58, 38 + dy, 34, 26, 6), region, 4)
+    b.shape(polygon((90, 46 + dy), (110, 32 + dy * 2), (114, 38 + dy * 2), (92, 56 + dy)), region, 3.5)
+    b.outline(line((64, 38 + dy), (76, 26 + dy)), 3.5)
+
+
+def _drops(b: Brush, fall: int) -> None:
+    for dx, dy in ((0, 0), (7, 14), (-5, 22)):
+        b.shape(ellipse(112 + dx, 52 + dy + fall, 4, 5.5), 'paper', 2.5)
+
+
+def _block(b: Brush) -> None:
+    b.shape(rounded(66, 86, 40, 20, 3), 'paper', 4)
+
+
+# (paw end of the handle, mallet head) for raised, swinging and striking
+MALLET = (((58, -8), (50, -32)), ((78, 34), (86, 12)), ((76, 62), (92, 76)))
+# (paw end of the handle, brush tip) for the three strokes
+BRUSH = (((70, 34), (96, 14)), ((76, 22), (108, 4)), ((66, 46), (90, 34)))
+
+
+def _mallet(b: Brush, step: int, region: str) -> None:
+    (hx, hy), (cx, cy) = MALLET[step]
+    b.outline(line((hx, hy), (cx, cy)), 6)
+    b.shape(rounded(cx - 16, cy - 10, 32, 20, 4), region, 3.5)
+
+
+def _brush(b: Brush, step: int, region: str) -> None:
+    (hx, hy), (tx, ty) = BRUSH[step]
+    b.outline(line((hx, hy), (tx, ty)), 4)
+    b.shape(ellipse(tx + 3, ty - 2, 6, 5), region, 2.5)
+
+
+def _bubbles(b: Brush, step: int) -> None:
+    spots = ((-34, -66, 7), (18, -84, 5), (40, -58, 6)) if step == 0 else ((-26, -78, 6), (30, -96, 4), (46, -70, 7))
+    for x, y, r in spots:
+        b.shape(ellipse(x, y, r, r), 'paper', 3)
 
 
 def _heart(b: Brush, x: float, y: float, size: float, region: str) -> None:

@@ -17,18 +17,17 @@ from frontengine.show.pet.inkside.library import builtin_names
 from frontengine.show.pet.pet_profile_session import PetProfileSession
 from frontengine.utils.multi_language.retranslate import tr, translate
 
-SPRITES = Path(__file__).resolve().parents[3] / "show" / "pet" / "inkside" / "sprites"
+ICONS = Path(__file__).resolve().parents[3] / "show" / "pet" / "inkside" / "icons"
 CARD_ICON = 56
 CARD_COLUMNS = 3                 # seven cards in three rows: fits even a narrow window
 REFRESH_MS = 1000
 
 
 def card_icon(identifier: str) -> QIcon:
-    """The character's first sitting frame (256 px cells in the sheet), as a card picture."""
-    sheet = QImage(str(SPRITES / f"{identifier}-sit.png"))
-    if sheet.isNull():
+    """The character's first sitting frame, rendered from its layered rig by tools/inkside_icons.py."""
+    frame = QImage(str(ICONS / f"{identifier}.png"))
+    if frame.isNull():
         return QIcon()
-    frame = sheet.copy(0, 0, sheet.height(), sheet.height())
     return QIcon(QPixmap.fromImage(frame.scaled(CARD_ICON, CARD_ICON, Qt.AspectRatioMode.KeepAspectRatio,
                                                 Qt.TransformationMode.SmoothTransformation)))
 

@@ -24,7 +24,6 @@ class Pose:
     fx: tuple = ()
     front: tuple = ()        # arms drawn in front of the head (paws at the mouth)
     gaze: tuple = (0, 0)     # eyes and mouth shift toward where the pet is heading
-    sprite: tuple | None = None  # (atlas file, frame index) for whole-body sprite frames
 
     def offset(self, part: str) -> tuple[int, int]:
         dx, dy = self.moves.get(part, (0, 0))
@@ -226,12 +225,112 @@ def _catch() -> tuple[bool, list[Pose]]:
                   pose(220, turns=ARMS_UP, eyes='happy', fx=('ball_hold',))]
 
 
+# --- home poses: what a pet does at a piece of furniture, with its props drawn as layers --------
+SITTING = dict(torso='sit', moves=SIT)
+HOLD_FRONT = {'arm_l': 96, 'arm_r': -96}
+
+
+def _write() -> tuple[bool, list[Pose]]:
+    """Sitting at a desk: the right paw moves a pencil across a sheet, a short pause to think."""
+    down = {'head': 4}
+    return True, [
+        pose(320, turns={**down, 'arm_r': -78}, gaze=(6, 6), fx=('paper', 'pencil_0'), front=('arm_r',), **SITTING),
+        pose(320, turns={**down, 'arm_r': -88}, gaze=(8, 6), fx=('paper', 'pencil_1'), front=('arm_r',), **SITTING),
+        pose(320, turns={**down, 'arm_r': -78}, gaze=(6, 6), fx=('paper', 'pencil_0'), front=('arm_r',), **SITTING),
+        pose(420, root=(0, 1), turns={'head': -4, 'arm_r': -70}, eyes='closed', fx=('paper', 'pencil_0'),
+             front=('arm_r',), **SITTING),
+    ]
+
+
+def _garden() -> tuple[bool, list[Pose]]:
+    """Standing by a plant: the watering can tilts forward, drops fall, the can tilts back."""
+    hold = {'arm_r': -96}
+    return True, [pose(300, turns=hold, gaze=(8, 4), fx=('can_0',)),
+                  pose(300, turns={'arm_r': -84, 'head': 4}, gaze=(10, 6), fx=('can_1', 'drops')),
+                  pose(300, root=(0, 1), turns={'arm_r': -84, 'head': 4}, gaze=(10, 6), fx=('can_1', 'drops_low')),
+                  pose(300, turns=hold, gaze=(8, 4), eyes='happy', fx=('can_0',))]
+
+
+def _craft() -> tuple[bool, list[Pose]]:
+    """At a workbench: mallet raised, coming down, impact on the block, recovering."""
+    return True, [pose(200, turns={'arm_r': -150}, gaze=(8, 4), fx=('block', 'mallet_up')),
+                  pose(140, turns={'arm_r': -110}, gaze=(8, 6), fx=('block', 'mallet_mid')),
+                  pose(160, root=(0, 2), turns={'arm_r': -74, 'head': 3}, eyes='squint', gaze=(8, 6),
+                       fx=('block', 'mallet_down', 'spark_small')),
+                  pose(200, turns={'arm_r': -96}, gaze=(8, 4), fx=('block', 'mallet_mid'))]
+
+
+def _read() -> tuple[bool, list[Pose]]:
+    """Sitting with an open book held in both paws: reading along, a page turns, a small nod."""
+    paws = ('arm_l', 'arm_r')
+    return True, [pose(480, turns={**HOLD_FRONT, 'head': 3}, gaze=(2, 6), fx=('book',), front=paws, **SITTING),
+                  pose(480, root=(0, 1), turns={**HOLD_FRONT, 'head': 5}, gaze=(6, 6), fx=('book',), front=paws,
+                       **SITTING),
+                  pose(360, turns={'arm_l': 96, 'arm_r': -120, 'head': 3}, gaze=(4, 6), fx=('book_turn',),
+                       front=paws, **SITTING),
+                  pose(480, turns={**HOLD_FRONT, 'head': 3}, eyes='closed', fx=('book',), front=paws, **SITTING)]
+
+
+def _music() -> tuple[bool, list[Pose]]:
+    """Sitting at a keyboard: the paws press in turn, the head bobs to the beat."""
+    return True, [pose(220, root=(0, 1), turns={'arm_l': 70, 'arm_r': -96, 'head': -4}, gaze=(4, 4),
+                       fx=('keys',), **SITTING),
+                  pose(220, turns={'arm_l': 96, 'arm_r': -70, 'head': 4}, gaze=(4, 4), eyes='happy',
+                       fx=('keys', 'note'), **SITTING),
+                  pose(220, root=(0, 1), turns={'arm_l': 70, 'arm_r': -96, 'head': -4}, gaze=(4, 4),
+                       fx=('keys',), **SITTING),
+                  pose(220, turns={'arm_l': 96, 'arm_r': -70, 'head': 4}, gaze=(4, 4), mouth='open',
+                       fx=('keys', 'note'), **SITTING)]
+
+
+def _paint() -> tuple[bool, list[Pose]]:
+    """Standing at an easel: the brush reaches out for a stroke, pulls back, the head tilts to look."""
+    return True, [pose(320, turns={'arm_r': -112}, gaze=(8, 0), fx=('brush_0',)),
+                  pose(320, turns={'arm_r': -128}, gaze=(10, -2), fx=('brush_1',)),
+                  pose(320, turns={'arm_r': -96, 'head': -6}, gaze=(6, 0), fx=('brush_2',)),
+                  pose(320, turns={'arm_r': -112, 'head': -6}, eyes='happy', gaze=(8, 0), fx=('brush_0',))]
+
+
+def _watch() -> tuple[bool, list[Pose]]:
+    """Sitting and watching something off to the side: leaning in, a slow blink, a head tilt."""
+    return True, [pose(520, turns={'head': 4, 'tail': 10}, gaze=(12, -2), **SITTING),
+                  pose(520, root=(0, 1), turns={'head': 6, 'tail': -10}, gaze=(14, -2), **SITTING),
+                  pose(200, turns={'head': 6, 'tail': 10}, gaze=(14, -2), eyes='closed', **SITTING),
+                  pose(520, turns={'head': 10, 'tail': -10}, gaze=(12, -4), **SITTING)]
+
+
+def _bathe() -> tuple[bool, list[Pose]]:
+    """Sitting in the bath: both paws rub the head, soap bubbles float up and pop."""
+    paws = ('arm_l', 'arm_r')
+    scrub = {'arm_l': (12, -14), 'arm_r': (-12, -14)}
+    return True, [pose(360, moves={**SIT, **scrub}, turns={'arm_l': 160, 'arm_r': -160}, eyes='happy',
+                       fx=('bubbles_0',), front=paws, torso='sit'),
+                  pose(360, root=(0, 1), moves={**SIT, **scrub}, turns={'arm_l': 150, 'arm_r': -168, 'head': 4},
+                       eyes='closed', fx=('bubbles_1',), front=paws, torso='sit'),
+                  pose(360, moves={**SIT, **scrub}, turns={'arm_l': 168, 'arm_r': -150, 'head': -4},
+                       eyes='happy', fx=('bubbles_0',), front=paws, torso='sit'),
+                  pose(360, root=(0, 1), moves={**SIT, **scrub}, turns={'arm_l': 160, 'arm_r': -160},
+                       eyes='closed', mouth='open', fx=('bubbles_1',), front=paws, torso='sit')]
+
+
+def _dress() -> tuple[bool, list[Pose]]:
+    """Admiring itself in the wardrobe mirror: a turn to one side, smoothing its chest, a proud pose."""
+    return True, [pose(300, root=(-3, 0), turns={'arm_r': -150, 'head': -6}, moves={'arm_r': (-10, -6)},
+                       front=('arm_r',), eyes='happy'),
+                  pose(300, root=(3, 0), turns={'arm_l': 150, 'head': 6}, moves={'arm_l': (10, -6)},
+                       front=('arm_l',), eyes='happy'),
+                  pose(300, root=(0, -6), turns=ARMS_UP, eyes='happy', mouth='open', fx=('sparkle',)),
+                  pose(300, turns={'arm_l': 40, 'arm_r': -40}, eyes='happy')]
+
+
 TIMELINES = {
     'idle': _idle, 'walk': _walk, 'sleep': _sleep, 'sit': _sit, 'climb': _climb, 'fall': _fall,
     'drag': _drag, 'land': _land, 'greet': _greet, 'pet': _pet, 'feed': _feed, 'groom': _groom,
     'play': _play, 'celebrate': _celebrate, 'outfit_show': _outfit_show, 'wake': _wake,
     'sleep_in': _sleep_in, 'food_like': _food_like, 'food_dislike': _food_dislike,
     'peer_greet': _peer_greet, 'catch': _catch,
+    'write': _write, 'garden': _garden, 'craft': _craft, 'read': _read, 'music': _music,
+    'paint': _paint, 'watch': _watch, 'bathe': _bathe, 'dress': _dress,
 }
 
 

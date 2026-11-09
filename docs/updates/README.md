@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261109-03 | 2026-11-09 | Stage125：內建角色全面改用分層圖片，家中姿勢改由骨架產生 | #done 桌面寵物／家園 | [2026-11](2026-11.md) |
 | U-20261109-02 | 2026-11-09 | Stage124：替身角色每個程序只建一次，macOS CI 恢復完整執行 | #done 效能／CI | [2026-11](2026-11.md) |
 | U-20261109-01 | 2026-11-09 | Stage123：家具互動與桌面寵物簡化整條分支的完整回歸 | #done 驗證 | [2026-11](2026-11.md) |
 | U-20261108-10 | 2026-11-08 | Stage122：在桌面長條上直接拖曳家具 | #done 桌面寵物／家園 | [2026-11](2026-11.md) |
@@ -451,6 +452,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 235 |
+| [2026-11.md](2026-11.md) | 2026-11 | 236 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

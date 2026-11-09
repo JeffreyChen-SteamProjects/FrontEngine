@@ -1,4 +1,4 @@
-"""Home poses drawn by Codex: built-in characters work, eat and sleep in their own frames."""
+"""Rigged home poses: built-in characters work, eat and sleep in their own layered loops, dressed or not."""
 import copy
 from types import SimpleNamespace
 
@@ -12,7 +12,7 @@ from frontengine.show.pet_game.resident_art import PROFESSION_ACTIONS, ResidentA
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.utils.pet_game.catalog import builtin_catalog
 from frontengine.utils.pet_game.resident import Activity
-from frontengine.utils.pet_pack.layered import HOME_POSES, SPRITE_ACTIONS
+from frontengine.utils.pet_pack.layered import ACTIONS, HOME_POSES, LEGACY_SPRITE_ACTIONS, OPTIONAL_ACTIONS
 from test_pet_home_art import _wait
 
 APPEARANCE = {"character": {"id": "inkside-mochi", "version": "1"},
@@ -21,8 +21,10 @@ APPEARANCE = {"character": {"id": "inkside-mochi", "version": "1"},
               "variants": {}}
 
 
-def test_every_home_pose_is_an_optional_sprite_action():
-    assert {pose + "_sprite" for pose in HOME_POSES} <= set(SPRITE_ACTIONS)
+def test_every_home_pose_is_a_layered_action_and_old_whole_body_names_stay_readable():
+    assert set(HOME_POSES) <= set(ACTIONS) | set(OPTIONAL_ACTIONS)
+    assert not set(OPTIONAL_ACTIONS) & set(ACTIONS)
+    assert {pose + "_sprite" for pose in HOME_POSES} <= set(LEGACY_SPRITE_ACTIONS)
 
 
 def test_older_builtin_references_move_to_the_current_version_and_keep_the_rest():
@@ -78,16 +80,16 @@ def library(tmp_path_factory):
     return library
 
 
-def test_builtin_renderers_have_the_home_poses_only_when_undressed(library):
+def test_builtin_renderers_have_the_home_poses_dressed_or_not(library):
     catalog, _ = library.scan()
     character = catalog.resolve({"id": "inkside-mochi", "version": VERSION}, "character")
-    assert {pose + "_sprite" for pose in HOME_POSES} <= set(character.actions)
+    assert set(HOME_POSES) <= set(character.actions)
+    assert not {action for action in character.actions if action.endswith("_sprite")}
     bare = catalog.prepare({"character": {"id": "inkside-mochi", "version": VERSION}, "equipped": {}})
     assert all(bare.has_action(pose) for pose in HOME_POSES)
     cap = {"id": "inkside-mochi-work-cap", "version": VERSION}
     dressed = catalog.prepare({"character": {"id": "inkside-mochi", "version": VERSION}, "equipped": {"head": cap}})
-    assert dressed.has_action("sit")
-    assert not dressed.has_action("write")
+    assert all(dressed.has_action(pose) for pose in HOME_POSES)
 
 
 def test_a_resident_wearing_an_older_builtin_is_upgraded_through_a_checked_change(tmp_path, library, *, home_store_factory, lifetime_factory):
@@ -133,4 +135,4 @@ def test_an_upgraded_recoloured_builtin_still_prepares(library):
            "colors": {"inkside-mochi@1": {"coat": "#00a080"}}, "variants": {}}
     renderer = catalog.prepare(upgrade_builtin(old))
     assert renderer is not None
-    assert not renderer.has_action("write")      # recoloured: layered only
+    assert all(renderer.has_action(pose) for pose in HOME_POSES)      # recoloured: same rigged poses
