@@ -12,11 +12,8 @@ from frontengine.user_setting.preset_repository import PresetRepository
 from frontengine.utils.imervue.puppet_asset import checked_members, read_json_member
 from frontengine.utils.scene_format.scene_package import load_package, save_package
 from frontengine.utils.workshop.workshop_manifest import (
-    FORMAT, VERSION, checked_tree, read_manifest, safe_path,
+    FORMAT, KINDS, VERSION, checked_tree, read_manifest, safe_path,
 )
-
-PET_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp"}
-
 
 def validate_content(root: Path) -> dict:
     """Validate all files and the actual packaged payload before it is used."""
@@ -39,7 +36,7 @@ def validate_content(root: Path) -> dict:
     elif manifest["kind"] == "home_blueprint":
         _validate_blueprint(entry)
     else:
-        _validate_pet(entry)
+        raise ValueError("This Workshop content kind is unsupported")
     return manifest
 
 
@@ -70,24 +67,6 @@ def requirements(kind: str, source: Path) -> list[str]:
     return []
 
 
-def _validate_pet(source: Path) -> None:
-    pictures = [p for p in checked_tree(source) if p.suffix.lower() in PET_EXTENSIONS]
-    if not pictures:
-        raise ValueError("A pet pack must contain sprite images")
-    from PySide6.QtGui import QImageReader
-    for image in pictures:
-        reader = QImageReader(str(image))
-        size = reader.size()
-        if not reader.canRead() or not 0 < size.width() * size.height() <= 16_777_216:
-            raise ValueError(f"Invalid or oversized sprite: {image.name}")
-    manifest = source / "pet.json"
-    if manifest.exists():
-        if manifest.stat().st_size > 64 * 1024:
-            raise ValueError("Pet manifest exceeds its size limit")
-        if not isinstance(json.loads(manifest.read_text(encoding="utf-8")), dict):
-            raise ValueError("Pet manifest must be an object")
-
-
 def _copy_home_pack(kind: str, source: Path, content: Path) -> str:
     """Copy only the manifest, the thumbnail and furniture pictures; the folder keeps the pack id."""
     pack = _validate_home_pack(kind, source)
@@ -111,18 +90,6 @@ def _copy_payload(kind: str, source: Path, content: Path) -> str:
     if kind == "home_blueprint":                  # only the checked layout: nothing personal can ride along
         (content / "blueprint.json").write_text(_validate_blueprint(source), encoding="utf-8")
         return "content/blueprint.json"
-    if kind == "pet_pack":
-        _validate_pet(source)
-        target = content / "pet-pack"
-        target.mkdir()
-        for path in checked_tree(source):
-            if path.suffix.lower() not in PET_EXTENSIONS and path.name != "pet.json":
-                continue
-            relative = path.relative_to(source)
-            output = target / relative
-            output.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(path, output)
-        return "content/pet-pack"
     if not source.is_file() or source.stat().st_size > 256 * 1024 * 1024:
         raise ValueError("Publication source exceeds its size limit")
     if kind == "scene":
@@ -144,6 +111,8 @@ def create_snapshot(kind: str, source: Path, title: str, preview: Path,
                     destination: Path) -> dict:
     """Publish only explicit resources into a new directory; never overwrite a snapshot."""
     from PySide6.QtGui import QImageReader
+    if kind not in KINDS:                  # sprite pet packs among them: pets are layered only
+        raise ValueError("Unsupported Workshop content kind")
     if (preview.is_symlink() or not preview.is_file() or preview.stat().st_size >= 1_000_000 or
             getattr(preview.lstat(), "st_file_attributes", 0) & 0x400):
         raise ValueError("Preview must be a regular image smaller than 1 MB")

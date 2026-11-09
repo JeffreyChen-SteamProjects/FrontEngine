@@ -22,7 +22,6 @@ import tempfile
 import traceback
 
 from PySide6.QtCore import QTimer, Qt
-from PySide6.QtGui import QColor, QImage
 from PySide6.QtWidgets import QApplication
 
 WM_KEYDOWN, WM_KEYUP, WM_CHAR = 0x0100, 0x0101, 0x0102
@@ -60,17 +59,23 @@ def _offscreen(app, widget) -> None:
     widget.move(max(screen.geometry().right() for screen in app.screens()) + 1024, 0)
 
 
-def _sprite(folder: Path) -> str:
-    image = QImage(128, 128, QImage.Format.Format_ARGB32)
-    image.fill(QColor(240, 96, 42))
-    path = folder / 'pet.png'
-    image.save(str(path))
-    return str(path)
+def _dressed_pet(folder: Path, profiles, **options):
+    """A desktop pet wearing a built-in character: pets are layered only, so one without draws nothing."""
+    from frontengine.show.pet.asset_library import PetAssetLibrary
+    from frontengine.show.pet.desktop_pet import DesktopPetWidget
+    from frontengine.show.pet.inkside.library import install_builtin, VERSION
+    from frontengine.show.pet.wardrobe import WardrobeDraft
+    library = PetAssetLibrary(folder / 'library')
+    install_builtin(library, 'inkside-mochi', wardrobe=False)
+    pet = DesktopPetWidget(profiles=profiles, talk=False, sit_on_windows=False, asset_library=library, **options)
+    draft = WardrobeDraft(profiles, pet.profile_session.identifier, library.scan()[0])
+    draft.choose_character({'id': 'inkside-mochi', 'version': VERSION})
+    draft.apply(present=False)
+    return pet
 
 
 class Probe:
     def __init__(self, app, output: Path, folder: Path) -> None:
-        from frontengine.show.pet.desktop_pet import DesktopPetWidget
         from frontengine.ui.page.pet.pet_setting_ui import PetSettingUI
         from frontengine.user_setting.pet_profiles import PetProfiles
         from frontengine.ui.runtime_lifetime import DefaultSettingsLifetime
@@ -78,7 +83,7 @@ class Probe:
         self.result = {'status': 'failed', 'platform': app.platformName()}
         self.foreground, self.cursors = [], []
         profiles = PetProfiles({}, lambda: None)
-        self.pet = DesktopPetWidget(_sprite(folder), profiles=profiles, talk=False, sit_on_windows=False)
+        self.pet = _dressed_pet(folder, profiles)
         self.lifetime = DefaultSettingsLifetime.open()
         self.page = PetSettingUI(lifetime=self.lifetime)
         self.page.profile_controls.profiles = profiles

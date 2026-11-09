@@ -8,8 +8,9 @@ from pathlib import Path, PurePosixPath
 
 FORMAT = "frontengine.workshop"
 VERSION = 1
-KINDS = ("scene", "preset", "pet_pack", "home_furniture", "home_theme", "home_blueprint")
-FOLDER_KINDS = ("pet_pack", "home_furniture", "home_theme")      # the entry is a folder, not a file
+# Sprite pet packs ("pet_pack") were dropped when pets became layered only: such items are unsupported.
+KINDS = ("scene", "preset", "home_furniture", "home_theme", "home_blueprint")
+FOLDER_KINDS = ("home_furniture", "home_theme")      # the entry is a folder, not a file
 MAX_REQUIRES = 16
 _PACK_ID = re.compile(r"[a-z][a-z0-9_]{0,23}")
 MAX_BYTES = 256 * 1024 * 1024

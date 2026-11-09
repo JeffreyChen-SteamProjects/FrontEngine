@@ -249,7 +249,7 @@ class PetProfileControls:
         session = PetProfileSession.active(self.profiles, identifier)
         owner = session.parent() if session else None
         if isinstance(owner, PuppetPetWidget):
-            self.status.setText(translate('pet_wardrobe_unsupported', 'This model does not support layered sprite clothing'))
+            self.status.setText(translate('pet_wardrobe_unsupported', 'This model does not support layered clothing'))
             return
         if identifier in self._wardrobes:
             self._wardrobes[identifier].show()
@@ -284,7 +284,7 @@ class PetProfileControls:
 
     @owned_action
     def import_save(self) -> None:
-        """Import into a fresh identity; choose a sprite/puppet before spawning."""
+        """Import into a fresh identity; it wears its saved character (or its built-in) when spawned."""
         source, _filter = self.lifetime.after_dialog(QFileDialog.getOpenFileName(self.page, translate('pet_profile_import'), '', 'JSON (*.json)'))
         if not source:
             return

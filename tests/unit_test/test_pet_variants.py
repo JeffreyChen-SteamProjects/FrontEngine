@@ -139,7 +139,7 @@ def test_live_parts_publish_only_after_save_and_restore_on_reopen(tmp_path, monk
     record = profiles.create()
     catalog, _ = library.scan()
     draft = WardrobeDraft(profiles, record['id'], catalog)
-    pet = DesktopPetWidget(str(source / 'layer.png'), profiles=profiles,
+    pet = DesktopPetWidget(profiles=profiles,
                            profile_id=record['id'], talk=False, sit_on_windows=False,
                            asset_library=library)
     try:
@@ -157,7 +157,7 @@ def test_live_parts_publish_only_after_save_and_restore_on_reopen(tmp_path, monk
         assert pet._current_pixmap().toImage().pixelColor(2, 2) == QColor('red')
     finally:
         pet.close()
-    reopened = DesktopPetWidget(str(source / 'layer.png'), profiles=profiles,
+    reopened = DesktopPetWidget(profiles=profiles,
                                 profile_id=record['id'], talk=False, sit_on_windows=False,
                                 asset_library=library)
     try:

@@ -8,7 +8,6 @@ import zipfile
 from PySide6.QtCore import Qt, QSize, QBuffer, QIODevice, QRectF
 from PySide6.QtGui import QImage, QImageReader, QPainter, QColor, QFont
 
-from frontengine.utils.pet_pack.pack_builder import load_pack
 from frontengine.utils.imervue.puppet_asset import validate_puppet, checked_members
 from frontengine.utils.scene_format.scene_package import load_package
 from frontengine.utils.scene_format.scene_editor_document import validate_geometry
@@ -130,8 +129,7 @@ def inspect_asset(path: str | Path) -> tuple[str, QImage]:
     if path.is_symlink() or not path.exists():
         raise ValueError('Asset is missing or linked')
     if path.is_dir():
-        draft = load_pack(path)
-        return 'pet', read_image(Path(next(iter(draft.actions.values()))))
+        raise ValueError('Folders are not assets; choose image/GIF, .puppet or scene JSON/.fescene')
     if path.stat().st_size > 256 * 1024 * 1024:
         raise ValueError('Asset exceeds 256 MiB')
     if path.suffix.lower() in IMAGE_SUFFIXES:
@@ -151,4 +149,4 @@ def inspect_asset(path: str | Path) -> tuple[str, QImage]:
         finally:
             if lease is not None:
                 lease.cleanup()
-    raise ValueError('Choose image/GIF, sprite pet folder, .puppet or scene JSON/.fescene')
+    raise ValueError('Choose image/GIF, .puppet or scene JSON/.fescene')

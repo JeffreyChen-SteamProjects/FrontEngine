@@ -83,17 +83,17 @@ def test_retirement_destroys_owned_roots_before_rebinding(tmp_path, monkeypatch)
 def test_main_queued_builtin_completion_is_rejected_after_close(make_main_window):
     from types import SimpleNamespace
     from PySide6.QtCore import Qt
-    from frontengine.ui.dialog.pet_asset_install import SpriteSignals
+    from frontengine.ui.dialog.pet_asset_install import CharacterSignals
     from frontengine.ui.runtime_lifetime import CloseDisposition
     window = make_main_window({'language': 'English', 'pet_home_running': False})
     page = window.pet_setting_ui
     calls = []
-    page._spawn_pet = lambda: calls.append('spawn')
-    page._sprite_install = SimpleNamespace(identifier='inkside-pip', cancel=Event())
-    page._spawn_when_installed = True
-    signal = SpriteSignals()
-    signal.finished.connect(page._builtin_character_ready, Qt.ConnectionType.QueuedConnection)
-    signal.finished.emit('not-created.png', '')
+    page._spawn_layered = lambda *_args: calls.append('spawn')
+    page._installing['inkside-pip'] = SimpleNamespace(cancel=Event(), done=False)
+    page._waiting = [('inkside-pip', None, {})]           # a card's pet waits for its character
+    signal = CharacterSignals()
+    signal.finished.connect(page._character_installed, Qt.ConnectionType.QueuedConnection)
+    signal.finished.emit('inkside-pip', '')
     assert window.request_shutdown() is CloseDisposition.DRAINING
     for _ in range(30):
         pump()
@@ -175,20 +175,20 @@ def test_scoped_text_source_holds_settings_until_actual_read_finishes(tmp_path, 
 def test_failed_save_replays_queued_builtin_result_once(make_main_window, monkeypatch):
     from types import SimpleNamespace
     from PySide6.QtCore import Qt
-    from frontengine.ui.dialog.pet_asset_install import SpriteSignals
+    from frontengine.ui.dialog.pet_asset_install import CharacterSignals
     from frontengine.ui.runtime_lifetime import CloseDisposition
     import frontengine.ui.main_ui as main_module
     window = make_main_window({'language': 'English', 'pet_home_running': False})
     page = window.pet_setting_ui
     calls = []
-    page._spawn_pet = lambda: calls.append('spawn')
-    page._sprite_install = SimpleNamespace(identifier='inkside-pip', cancel=Event())
-    page._spawn_when_installed = True
-    signal = SpriteSignals()
-    signal.finished.connect(page._builtin_character_ready, Qt.ConnectionType.QueuedConnection)
+    page._spawn_layered = lambda *_args: calls.append('spawn')
+    page._installing['inkside-pip'] = SimpleNamespace(cancel=Event(), done=False)
+    page._waiting = [('inkside-pip', None, {})]           # a card's pet waits for its character
+    signal = CharacterSignals()
+    signal.finished.connect(page._character_installed, Qt.ConnectionType.QueuedConnection)
     original = main_module.write_user_setting
     def fail_after_queued_result():
-        signal.finished.emit('preview.png', '')
+        signal.finished.emit('inkside-pip', '')
         QCoreApplication.processEvents()
         assert calls == []
         raise OSError('disk unavailable')

@@ -108,12 +108,12 @@ def choose_player_sound(trigger_ui: QWidget) -> Optional[str]:
 
 
 def choose_pet(trigger_ui: QWidget) -> Optional[str]:
-    """選擇桌面寵物圖片 (gif/webp/png/jpg) / Choose a desktop-pet sprite."""
+    """選擇 Puppet 模型 / Choose an Imervue Puppet model; other pets are layered characters."""
     return choose_file(
         trigger_ui,
-        file_filter="Pet sprite / Imervue puppet (*.gif;*.webp;*.png;*.jpg;*.puppet)",
-        extensions=[_GIF, _WEBP, ".png", ".jpg", '.puppet'],
-        warning_message=language_wrapper.language_word_dict.get("gif_setting_message_box")
+        file_filter="Imervue puppet (*.puppet)",
+        extensions=['.puppet'],
+        warning_message=language_wrapper.language_word_dict.get("pet_choose_puppet_message")
     )
 
 

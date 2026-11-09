@@ -233,3 +233,33 @@ def home_store_factory(storage_factory, lifetime_factory):
     yield create
     for store in reversed(stores):
         store.close()
+
+
+@pytest.fixture(scope="session")
+def _builtin_pet_assets(tmp_path_factory):
+    """One built-in character, installed once per run: building it takes seconds."""
+    from frontengine.show.pet.asset_library import PetAssetLibrary
+    from frontengine.show.pet.inkside.library import install_builtin
+    root = tmp_path_factory.mktemp("builtin-pet-assets").resolve() / "pet-assets"
+    install_builtin(PetAssetLibrary(root), "inkside-mochi", wardrobe=False)
+    return root
+
+
+@pytest.fixture
+def layered_pets(_builtin_pet_assets, monkeypatch):
+    """Ready a pet page to spawn layered pets at once: the built-in is in its library and chosen.
+
+    Pets are layered only, so a page spawns a pet wearing a character; without this it would
+    install one in the background first. Only the character is installed (its clothes take most of
+    a minute), so a wardrobe opened here does not start adding the missing built-in clothes.
+    """
+    import shutil
+    from frontengine.ui.dialog.pet_wardrobe import PetWardrobeDialog
+    monkeypatch.setattr(PetWardrobeDialog, "missing_builtin_clothes", lambda self: None)
+
+    def ready(page, character="inkside-mochi"):
+        target = page.lifetime.storage.directory / "pet-assets"
+        shutil.copytree(_builtin_pet_assets, target, dirs_exist_ok=True)
+        page._choose_character(character)
+        return page
+    return ready

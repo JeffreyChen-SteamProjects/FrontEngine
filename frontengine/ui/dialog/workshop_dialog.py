@@ -293,12 +293,6 @@ class WorkshopDialog(QDialog):
             retranslator.set_text(self.upload_status, "workshop_home_pack_ready")
         elif item["kind"] == KIND_HOME_BLUEPRINT:
             self.owner.pet_home_ui.layout_panel.visit_blueprint(str(entry))
-        elif item["kind"] in ("pet_pack", "media"):
-            if item["kind"] == "media":
-                entry = next(path for path in entry.iterdir() if path.suffix.lower() in {".png", ".jpg", ".jpeg", ".gif", ".webp"})
-            page = self.owner.pet_setting_ui
-            page.set_state({"pet_image_path": str(entry)})
-            retranslator.set_text(self.upload_status, "workshop_loaded")
 
     def _accept_update(self) -> None:
         item = self._selected()

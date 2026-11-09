@@ -2,7 +2,7 @@
 
 Implementation: `utils/pet_pack/layered.py` and `show/pet/layered_renderer.py`.
 The wardrobe UI installs these assets and previews or applies them to desktop pets.
-Existing `pet.json` sprite packs keep their original format and loader.
+Every desktop pet is drawn from this format; `pet.json` sprite packs are no longer read.
 
 Each character or garment occupies a folder containing `layered-pet.json` and
 static PNG images. No scripts or archive extraction are involved. The manifest

@@ -235,7 +235,7 @@ class WardrobeDraft:
         session = PetProfileSession.active(self.profiles, self.identifier)
         if session:
             if not getattr(session.parent(), 'supports_layered_wardrobe', True):
-                raise ValueError('This active pet does not support layered sprite clothing')
+                raise ValueError('This active pet does not support layered clothing')
             session.apply_appearance(self._expected, candidate, prepared, present=present)
         else:
             if self.profiles.get(self.identifier)['appearance'] != self._expected:

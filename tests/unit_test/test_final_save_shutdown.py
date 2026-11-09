@@ -23,7 +23,7 @@ def running_home_and_pet(make_main_window, tmp_path):
     image.fill(QColor("orange"))
     path = tmp_path / "pet.png"
     assert image.save(str(path))
-    pet = DesktopPetWidget(str(path), profiles=home.profiles, talk=False, sit_on_windows=False)
+    pet = DesktopPetWidget(profiles=home.profiles, talk=False, sit_on_windows=False)
     window.pet_setting_ui.pet_list.append(pet)
     pet.show()
     usage = window.usage_service
@@ -61,7 +61,7 @@ def test_final_save_refusal_retains_home_and_pet_until_retry(running_home_and_pe
     window, pet = running_home_and_pet
     home, usage, session = window.pet_home_ui, window.usage_service, pet.profile_session
     strips, sessions = list(home.strip_list), dict(home.service.sessions)
-    renderer, sprites = home.art, pet._sprites
+    renderer, playback = home.art, pet._layered_playback
     with monkeypatch.context() as patch:
         _refuse_save(window, patch, failure)
         assert window._shutdown() is False
@@ -75,7 +75,7 @@ def test_final_save_refusal_retains_home_and_pet_until_retry(running_home_and_pe
         assert home.service.running
         assert usage.running
         assert home.art is renderer
-        assert pet._sprites is sprites
+        assert pet._layered_playback is playback
         assert PetProfileSession.active(home.profiles, session.identifier) is session
         assert session.set_mode("work") == "accepted"
         assert home.service.run(lambda world: world.home) == home.service.world.home

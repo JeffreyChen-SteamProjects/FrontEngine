@@ -114,7 +114,6 @@ import frontengine.ui.page.image.image_setting_ui as image_page  # noqa: E402
 import frontengine.ui.page.gif.gif_setting_ui as gif_page  # noqa: E402
 import frontengine.ui.page.video.video_setting_ui as video_page  # noqa: E402
 import frontengine.ui.page.particle.particle_setting_ui as particle_page  # noqa: E402
-import frontengine.ui.page.pet.pet_setting_ui as pet_page  # noqa: E402
 import frontengine.ui.page.sound_player.sound_player_setting_ui as sound_page  # noqa: E402
 
 image_page.choose_image = lambda *a, **k: str(fixtures / 'picture.png')
@@ -122,7 +121,6 @@ particle_page.choose_image = image_page.choose_image
 gif_page.choose_gif = lambda *a, **k: str(gif_path) if gif_path else ''
 video_page.choose_video = lambda *a, **k: str(VIDEO)
 sound_page.choose_wav_sound = lambda *a, **k: str(fixtures / 'quiet.wav')
-pet_page.choose_pet = lambda *a, **k: str(fixtures / 'picture.png')
 
 try:
     window = FrontEngineMainUI(main_app=app, debug=False, show_system_tray_ray=False)
@@ -172,12 +170,13 @@ def wait_until(predicate, message, timeout_ms=180000):
 def pet_builtin():
     page = window.pet_setting_ui
     page.use_builtin_character()
-    wait_until(lambda: page._sprite_install is None, 'built-in character install did not finish')
-    assert page._builtin_sprite is not None, page.profile_controls.status.text()
-    assert page._builtin_sprite[0] == page.builtin_character.currentData(), 'wrong character installed'
-    assert page.ready_to_play, 'installed character did not become ready'
+    wait_until(lambda: not page._installing, 'built-in character install did not finish')
+    assert page._chosen_character == page.builtin_character.currentData(), 'wrong character chosen'
+    assert page.ready_to_play, page.profile_controls.status.text()
     page.start_play_pet()
-    return type(page.pet_list[-1]).__name__
+    pet = page.pet_list[-1]
+    assert pet.profile_session.appearance_renderer is not None, 'the pet does not wear its character'
+    return type(pet).__name__
 
 
 def pet_moved():
@@ -310,7 +309,6 @@ ACTIONS = [
                                          W.sound_player_setting_ui.choose_and_copy_wav_file_to_cwd_sound_dir_then_play()), 0),
     ('particle: choose then start', lambda: (W.particle_setting_ui.choose_and_copy_file_to_cwd_image_dir_then_play(),
                                              first_monitor(W.particle_setting_ui), W.particle_setting_ui.start_play_particle()), 1),
-    ('pet: picture pet', lambda: (W.pet_setting_ui.choose_and_play(), W.pet_setting_ui.start_play_pet()), 1),
     ('pet: built-in character', pet_builtin, 1),
     ('pet: is moving', pet_moved, 0),
     ('pet home: time passes and the resident works', pet_home_running, 0),

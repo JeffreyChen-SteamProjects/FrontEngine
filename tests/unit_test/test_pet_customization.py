@@ -164,8 +164,8 @@ def test_sprite_customization_applies_independently_and_survives_reopen(tmp_path
     settings = {}
     disk = JsonRepository(tmp_path / 'settings.json')
     profiles = PetProfiles(settings, lambda: disk.save(settings))
-    first = DesktopPetWidget(str(path), size=96, talk=False, profiles=profiles)
-    second = DesktopPetWidget(str(path), size=128, talk=False, profiles=profiles)
+    first = DesktopPetWidget(size=96, talk=False, profiles=profiles)
+    second = DesktopPetWidget(size=128, talk=False, profiles=profiles)
     identifier = first.profile_session.identifier
     dialog = PetCustomizationDialog(profiles, identifier)
     try:
@@ -185,7 +185,7 @@ def test_sprite_customization_applies_independently_and_survives_reopen(tmp_path
         assert second.profile_session.state()['preferences']['presentation'] is None
         first.close()
         reopened = PetProfiles(disk.load(), lambda: None)
-        restored = DesktopPetWidget(str(path), profiles=reopened, profile_id=identifier)
+        restored = DesktopPetWidget(profiles=reopened, profile_id=identifier)
         try:
             assert restored._base_size == 192
             assert restored.motion.speed == 7

@@ -55,7 +55,7 @@ def test_closed_workshop_discards_modal_choice(tmp_path, monkeypatch, lifetime_f
     service = WorkshopService(owner, backend)
     dialog = WorkshopDialog(owner, service, tmp_path / 'storage')
     dialog.cache = WorkshopCache(123, tmp_path / 'cache')
-    dialog.kind.setCurrentIndex(dialog.kind.findData('pet_pack' if operation == 'source_folder' else 'scene'))
+    dialog.kind.setCurrentIndex(dialog.kind.findData('home_furniture' if operation == 'source_folder' else 'scene'))
     dialog.show()
     before = (dialog.source.text(), dialog.preview.text(), dialog.title.text())
     requested = []
@@ -163,7 +163,7 @@ def test_workshop_picker_cancel_reopen_then_retry(tmp_path, monkeypatch, lifetim
     backend = Backend()
     service = WorkshopService(owner, backend)
     dialog = WorkshopDialog(owner, service, tmp_path / 'storage')
-    dialog.kind.setCurrentIndex(dialog.kind.findData('pet_pack' if operation == 'source_folder' else 'scene'))
+    dialog.kind.setCurrentIndex(dialog.kind.findData('home_furniture' if operation == 'source_folder' else 'scene'))
     chosen = tmp_path / ('assets' if operation == 'source_folder' else 'chosen.png')
     if operation == 'source_folder':
         chosen.mkdir()
@@ -236,14 +236,14 @@ def test_dialog_is_lazy_and_close_does_not_cancel_upload(tmp_path, lifetime_fact
     assert not backend.initialized
     dialog.connect_steam()
     assert backend.initialized
-    source = tmp_path / "pet"
-    source.mkdir()
+    from frontengine.utils.scene_format.scene_package import save_package
+    source = tmp_path / "source.fescene"
     preview = tmp_path / "preview.png"
     image = QImage(16, 16, QImage.Format.Format_RGB32)
     image.fill(0xffccdd00)
     assert image.save(str(preview))
-    assert image.save(str(source / "walk.png"))
-    dialog.select_source("pet_pack", str(source))
+    save_package({"image": {"type": "IMAGE", "file_path": str(preview)}}, source)
+    dialog.select_source("scene", str(source))
     dialog.preview.setText(str(preview))
     assert dialog.visibility.currentData() == 2
     dialog._prepare()

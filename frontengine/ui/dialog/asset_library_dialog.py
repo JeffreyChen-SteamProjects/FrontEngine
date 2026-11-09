@@ -68,8 +68,7 @@ class AssetLibraryDialog(QDialog):
     def _build_actions(self, layout) -> None:
         self.buttons = []
         row = QHBoxLayout()
-        for key, action in [('assets_add', self._add), ('assets_add_pet', self._add_pet),
-                            ('assets_save', self._save), ('assets_remove', self._remove),
+        for key, action in [('assets_add', self._add), ('assets_save', self._save), ('assets_remove', self._remove),
                             ('assets_references', self._references), ('assets_relink', self._relink)]:
             button = tr(QPushButton(), key)
             button.clicked.connect(action)
@@ -102,13 +101,6 @@ class AssetLibraryDialog(QDialog):
         if isValid(self) and self.isVisible() and path:
             self.service.request('add', path=path)
 
-    def _add_pet(self) -> None:
-        if not isValid(self) or not self.isVisible():
-            return
-        path = QFileDialog.getExistingDirectory(self, translate('assets_add_pet'))
-        if isValid(self) and self.isVisible() and path:
-            self.service.request('add', path=path)
-
     def _save(self) -> None:
         entry = self._entry()
         if entry:
@@ -131,10 +123,7 @@ class AssetLibraryDialog(QDialog):
         entry = self._entry()
         if not entry:
             return
-        if entry['kind'] == 'pet':
-            replacement = QFileDialog.getExistingDirectory(self, translate('assets_relink'))
-        else:
-            replacement, _ = QFileDialog.getOpenFileName(self, translate('assets_relink'))
+        replacement, _ = QFileDialog.getOpenFileName(self, translate('assets_relink'))
         if isValid(self) and self.isVisible() and replacement:
             self.service.request('plan', identity=entry['id'], replacement=replacement, scene=deepcopy(self.document.entries))
 

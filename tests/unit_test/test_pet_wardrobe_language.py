@@ -54,7 +54,8 @@ def test_language_switch_preserves_pending_wardrobe_and_preview(tmp_path, *, lif
             language_wrapper.reset_language(language)
             retranslator.apply()
             assert dialog.install_progress.accessibleName() == translate('pet_wardrobe_builtin_busy')
-            assert dialog.character.itemText(0) == translate('pet_wardrobe_none')
+            assert all(dialog.character.itemData(index) is not None      # no "None" character
+                       for index in range(dialog.character.count()))
             assert all(control.itemText(0) == translate('pet_wardrobe_none')
                        for control in dialog.slots.values())
             assert dialog.variant_choice.itemText(0) == translate('pet_custom_reset')
@@ -97,3 +98,27 @@ def test_missing_asset_label_retranslates_without_changing_saved_reference(tmp_p
         QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
         language_wrapper.reset_language(original_language)
         retranslator.apply()
+
+
+def test_a_pet_always_wears_a_character_so_none_is_only_a_placeholder(tmp_path, *, lifetime_factory):
+    """Pets are layered only: "None" shows only until a character is chosen, and choosing it changes nothing."""
+    lifetime_factory()
+    source = tmp_path / 'cat'
+    variant_asset(source)
+    library = PetAssetLibrary(tmp_path / 'library')
+    asset = library.install(source)
+    profiles = PetProfiles({}, lambda: None)
+    record = profiles.create()
+    dialog = PetWardrobeDialog(profiles, record['id'], library=library, lifetime=lifetime_factory())
+    try:
+        assert dialog.character.itemData(0) is None                      # the placeholder
+        assert dialog.status.text() == translate('pet_wardrobe_legacy')
+        dialog.character.setCurrentIndex(0)
+        dialog._choose_character()
+        assert dialog.draft.appearance['character'] is None
+        dialog.character.setCurrentIndex(dialog.character.findData(asset_reference(asset)))
+        dialog._choose_character()
+        assert all(dialog.character.itemData(index) is not None for index in range(dialog.character.count()))
+    finally:
+        dialog.close()
+        QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)

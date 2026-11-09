@@ -1,4 +1,4 @@
-"""Independent sprite pet identities and bounded portable local state."""
+"""Independent pet identities and bounded portable local state."""
 from __future__ import annotations
 
 import copy
@@ -148,7 +148,7 @@ class PetProfiles:
 
     @_profile_operation
     def export_profile(self, identifier: str, destination: Path) -> None:
-        """Atomically export this pet only, without sprites or other settings."""
+        """Atomically export this pet only, without its asset files or other settings."""
         from frontengine.user_setting.storage_session import checked_export_destination
         destination = checked_export_destination(destination)
         JsonRepository(destination).save({"format": "frontengine.pet-save", "version": 2,
@@ -195,12 +195,6 @@ class PetProfiles:
         """Read a pet look from the captured settings and portrait directory."""
         from frontengine.user_setting.pet_looks import look_for
         return look_for(self.settings, identifier, self._looks_folder(identifier))
-
-    @_profile_operation
-    def remember_sprite(self, identifier: str, path: str | Path) -> bool:
-        """Record a sprite reference while its settings owner is admitted."""
-        from frontengine.user_setting.pet_looks import remember_sprite
-        return remember_sprite(self.settings, identifier, path)
 
     @_profile_operation
     def remember_portrait(self, identifier: str, image) -> bool:

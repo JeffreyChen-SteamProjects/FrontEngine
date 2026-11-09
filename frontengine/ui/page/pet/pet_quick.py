@@ -1,8 +1,7 @@
 """The top of the desktop pet page: put a pet on the desktop in one click, and look after the ones there.
 
 Every built-in character is a card; clicking one installs it if needed and puts a pet dressed
-as it on the desktop at once. *Your own picture…* opens the chooser and does the same with the
-chosen file. Below, the pets on the desktop are listed with what people do most: open the
+as it on the desktop at once. Below, the pets on the desktop are listed with what people do most: open the
 wardrobe, bring a pet back into view, or put it away. Everything else on the page is folded away.
 """
 from __future__ import annotations
@@ -19,7 +18,7 @@ from frontengine.utils.multi_language.retranslate import tr, translate
 
 ICONS = Path(__file__).resolve().parents[3] / "show" / "pet" / "inkside" / "icons"
 CARD_ICON = 56
-CARD_COLUMNS = 3                 # seven cards in three rows: fits even a narrow window
+CARD_COLUMNS = 3                 # six cards in two rows: fits even a narrow window
 REFRESH_MS = 1000
 
 
@@ -46,9 +45,7 @@ class PetQuickStart:
             card = self._card(name, card_icon(identifier))
             card.clicked.connect(lambda _checked=False, i=identifier: page.quick_builtin(i))
             self.cards[identifier] = card
-        self.own_picture = tr(self._card("", QIcon.fromTheme("document-open")), "pet_quick_own", "Your own picture…")
-        self.own_picture.clicked.connect(page.choose_and_play)
-        section.add_button_grid(*self.cards.values(), self.own_picture, columns=CARD_COLUMNS)
+        section.add_button_grid(*self.cards.values(), columns=CARD_COLUMNS)
         self.pets = QListWidget()
         self.pets.setMaximumHeight(110)
         tr(self.pets, "pet_quick_on_desktop", "Your pets on the desktop", "setAccessibleName")

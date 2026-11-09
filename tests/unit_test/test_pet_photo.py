@@ -100,7 +100,7 @@ def test_photo_png_preserves_alpha_parts_and_pose_without_changing_pet(tmp_path)
     asset = variant_asset(tmp_path / 'cat')
     profiles = PetProfiles({}, lambda: None)
     record = profiles.create()
-    pet = DesktopPetWidget(str(asset.root / 'layer.png'), profiles=profiles,
+    pet = DesktopPetWidget(profiles=profiles,
                            profile_id=record['id'], talk=False, sit_on_windows=False)
     renderer = LayeredRenderer(asset, variants={'eyes': 'sleepy'})
     pet._layered_playback.set_renderer(renderer)

@@ -9,18 +9,11 @@ import weakref
 from types import SimpleNamespace
 
 from PySide6.QtCore import QCoreApplication, QEvent, Qt
-from PySide6.QtGui import QColor, QPixmap
+from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QWidget
 
 from frontengine.user_setting.pet_profiles import PetProfiles
 
-
-def _sprite(tmp_path):
-    path = tmp_path / 'sprite.png'
-    image = QPixmap(64, 64)
-    image.fill(QColor('#d3a231'))
-    assert image.save(str(path))
-    return str(path)
 
 
 def _active_sessions(profiles):
@@ -29,28 +22,28 @@ def _active_sessions(profiles):
             if key[0] == profiles.identity_key]
 
 
-def test_failed_spawn_releases_the_half_built_pet_identity(tmp_path, monkeypatch, *, lifetime_factory):
+def test_failed_spawn_releases_the_half_built_pet_identity(tmp_path, monkeypatch, *, lifetime_factory, layered_pets):
     from frontengine.ui.page.pet.pet_setting_ui import PetSettingUI
     lifetime_factory()
     page = PetSettingUI(lifetime=lifetime_factory())
     controls = page.profile_controls
     controls.profiles = PetProfiles({}, lambda: None)
     controls.refresh()
-    page.pet_image_path = _sprite(tmp_path)
+    layered_pets(page)
     monkeypatch.setattr(page, '_target_geometry', lambda: None)
-    original = controls.profiles.remember_sprite
+    original = page._dress_as_builtin
 
     def fail(*_args):
         raise OSError('settings file is locked')
 
-    monkeypatch.setattr(controls.profiles, 'remember_sprite', fail)
+    monkeypatch.setattr(page, '_dress_as_builtin', fail)
     try:
         page._spawn_pet()
         QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
         assert 'settings file is locked' in controls.status.text()
         assert page.pet_list == []
         assert _active_sessions(controls.profiles) == []
-        monkeypatch.setattr(controls.profiles, 'remember_sprite', original)
+        monkeypatch.setattr(page, '_dress_as_builtin', original)
         page._spawn_pet()
         assert len(page.pet_list) == 1
     finally:
@@ -59,20 +52,21 @@ def test_failed_spawn_releases_the_half_built_pet_identity(tmp_path, monkeypatch
         page.close()
 
 
-def test_refused_close_of_a_failed_spawn_keeps_the_pet_for_shutdown(tmp_path, monkeypatch, *, lifetime_factory):
+def test_refused_close_of_a_failed_spawn_keeps_the_pet_for_shutdown(tmp_path, monkeypatch, *, lifetime_factory,
+                                                                   layered_pets):
     from frontengine.ui.page.pet.pet_setting_ui import PetSettingUI
     lifetime_factory()
     page = PetSettingUI(lifetime=lifetime_factory())
     controls = page.profile_controls
     controls.profiles = PetProfiles({}, lambda: None)
     controls.refresh()
-    page.pet_image_path = _sprite(tmp_path)
+    layered_pets(page)
     monkeypatch.setattr(page, '_target_geometry', lambda: None)
 
     def fail(*_args):
         raise OSError('settings file is locked')
 
-    monkeypatch.setattr(controls.profiles, 'remember_sprite', fail)
+    monkeypatch.setattr(page, '_dress_as_builtin', fail)
     from frontengine.show.pet.pet_profile_session import PetProfileSession
     monkeypatch.setattr(PetProfileSession, 'close', lambda self: False)
     try:
