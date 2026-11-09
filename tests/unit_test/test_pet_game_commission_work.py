@@ -50,7 +50,9 @@ def test_the_pet_with_a_planter_is_sent_for_the_missing_herbs_and_the_commission
     sent = dispatch(world, index)
     assert (sent.result, sent.resident, sent.recipe, sent.units) == ("accepted", MOCHI, "herbs", 3)  # 2 per unit
     [task] = world.tasks.values()
-    assert task.priority == PRIORITY and task.units == 3 and task.resident == MOCHI
+    assert task.priority == PRIORITY
+    assert task.units == 3
+    assert task.resident == MOCHI
     assert "work" in world.residents[MOCHI].commands
     world.automatic = True                     # handing in is the home's automation
     for _ in range(40 * MINUTE // simulation.STEP_MS):
@@ -79,7 +81,8 @@ def test_a_commission_that_can_already_be_filled_is_handed_in_at_once():
     coins = world.ledger.coins
     assert dispatch(world, index).result == "delivered"
     assert world.progress.commissions["offers"][index]["done"]
-    assert world.ledger.coins > coins and not world.tasks
+    assert world.ledger.coins > coins
+    assert not world.tasks
 
 
 @pytest.mark.parametrize("setup, item, result", [
@@ -95,7 +98,8 @@ def test_why_no_pet_can_go_is_said_and_nothing_is_created(setup, item, result, m
     index = _offer(world, item, 3 if item == "herb" else 2)
     sent = dispatch(world, index)
     assert sent.result == result
-    assert not world.tasks and not world.residents[MOCHI].commands
+    assert not world.tasks
+    assert not world.residents[MOCHI].commands
     if result == "missing_materials":
         assert sent.missing == {"wood": 4}                    # two toys, two wood each, none stored
 
@@ -126,14 +130,17 @@ def test_a_busy_pet_finishes_what_it_is_doing_and_a_tired_one_starts_later():
     resident = world.residents[MOCHI]
     before = resident.activity
     sent = dispatch(world, _offer(world, "herb", 3))
-    assert sent.result == "accepted" and not sent.later
+    assert sent.result == "accepted"
+    assert not sent.later
     assert resident.activity is before                       # nothing it was doing is cut short
     world.cancel_task(next(iter(world.tasks)))
     resident.commands.clear()
     resident.needs["energy"] = 10
     sent = dispatch(world, 0)
-    assert sent.result == "accepted" and sent.later
-    assert len(world.tasks) == 1 and "work" not in resident.commands
+    assert sent.result == "accepted"
+    assert sent.later
+    assert len(world.tasks) == 1
+    assert "work" not in resident.commands
 
 
 def test_a_finished_or_unknown_commission_is_left_alone():

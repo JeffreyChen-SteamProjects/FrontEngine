@@ -94,18 +94,21 @@ def test_the_strip_toolbar_lists_todays_commissions_and_sends_a_pet(page):
     strip = page.strip_list[0]
     assert strip.commission_button.isHidden()                # folded away with the rest of the toolbar
     strip.set_toolbar_open(True)
-    assert strip.commission_button in strip.shortcut_buttons and not strip.commission_button.isHidden()
+    assert strip.commission_button in strip.shortcut_buttons
+    assert not strip.commission_button.isHidden()
     menu = strip.commission_button.menu()
     menu.aboutToShow.emit()
     [action] = menu.actions()
-    assert action.isEnabled() and "3" in action.text()
+    assert action.isEnabled()
+    assert "3" in action.text()
     action.trigger()
     QCoreApplication.processEvents()
     world = page.service.world
     assert [task.resident for task in world.tasks.values()] == [pet]
     page.service.run(lambda w: w.progress.commissions["offers"][0].update(done=True))
     menu.aboutToShow.emit()
-    assert not menu.actions()[0].isEnabled() and menu.actions()[0].text().startswith("✔")
+    assert not menu.actions()[0].isEnabled()
+    assert menu.actions()[0].text().startswith("✔")
     page.service.run(lambda w: w.progress.commissions.update(offers=[]))
     menu.aboutToShow.emit()
     assert [a.text() for a in menu.actions()] == [english_word_dict["pet_home_commissions_none"]]
