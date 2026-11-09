@@ -24,6 +24,7 @@ APPEARANCE = {"character": {"id": "inkside-mochi", "version": "1"},
 def test_every_home_pose_is_a_layered_action_and_old_whole_body_names_stay_readable():
     assert set(HOME_POSES) <= set(ACTIONS) | set(OPTIONAL_ACTIONS)
     assert not set(OPTIONAL_ACTIONS) & set(ACTIONS)
+    assert OPTIONAL_ACTIONS == tuple(pose for pose in HOME_POSES if pose not in ACTIONS)   # written out, same order
     assert {pose + "_sprite" for pose in HOME_POSES} <= set(LEGACY_SPRITE_ACTIONS)
 
 

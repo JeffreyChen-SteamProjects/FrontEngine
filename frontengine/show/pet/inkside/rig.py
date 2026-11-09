@@ -226,7 +226,7 @@ def _catch() -> tuple[bool, list[Pose]]:
 
 
 # --- home poses: what a pet does at a piece of furniture, with its props drawn as layers --------
-SITTING = dict(torso='sit', moves=SIT)
+SITTING = {'torso': 'sit', 'moves': SIT}
 HOLD_FRONT = {'arm_l': 96, 'arm_r': -96}
 
 

@@ -20,7 +20,7 @@ ACTIONS = ('idle', 'walk', 'sleep', 'climb', 'fall', 'drag', 'greet', 'pet',
 # optional layered actions, so older assets without them still load and fall back to another pose.
 HOME_POSES = ('sit', 'sleep', 'feed', 'play', 'write', 'garden', 'craft', 'read', 'music', 'paint', 'watch',
               'bathe', 'dress')
-OPTIONAL_ACTIONS = tuple(pose for pose in HOME_POSES if pose not in ACTIONS)
+OPTIONAL_ACTIONS = ('write', 'garden', 'craft', 'read', 'music', 'paint', 'watch', 'bathe', 'dress')   # HOME_POSES - ACTIONS
 # Whole-body frames older built-in assets carried for an undressed pet. Pets are layered only now:
 # these are still accepted so such an asset loads, and nothing ever plays them.
 LEGACY_SPRITE_ACTIONS = ('walk_sprite', 'climb_sprite') + tuple(pose + '_sprite' for pose in HOME_POSES)

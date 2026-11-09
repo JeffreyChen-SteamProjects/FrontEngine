@@ -39,7 +39,8 @@ def test_the_page_opens_with_the_cards_and_everything_else_folded(tmp_path, monk
         assert set(page.quick.cards) == {identifier for identifier, _name in builtin_names()}
         assert all(not card.icon().isNull() for card in page.quick.cards.values())
         assert not hasattr(page.quick, "own_picture")            # pets are layered only: no picture card
-        assert not hasattr(page, "choose_pack_button") and not hasattr(page, "pack_editor_button")
+        assert not hasattr(page, "choose_pack_button")
+        assert not hasattr(page, "pack_editor_button")
         assert page.quick.empty.isVisibleTo(page) and not page.quick.pets.isVisibleTo(page)
         assert not page.quick.wardrobe_button.isEnabled()
     finally:
@@ -98,7 +99,8 @@ def test_start_with_nothing_chosen_dresses_the_pet_as_its_stable_built_in(tmp_pa
         record = page.profile_controls.profiles.create("Old picture pet")
         page.profile_controls.refresh(selected=record["id"])
         page.start_play_pet()
-        assert page.pet_list == [] and page._waiting                 # its character installs first
+        assert page.pet_list == []                                    # its character installs first
+        assert page._waiting
         assert page.lifetime.pool().waitForDone(120000)
         QCoreApplication.processEvents()
         assert [pet.profile_session.identifier for pet in page.pet_list] == [record["id"]]
@@ -119,7 +121,8 @@ def test_only_a_puppet_model_is_taken_from_a_drop_a_recent_file_or_a_preset(tmp_
         for picture in ("cat.png", "walk.gif", str(tmp_path)):
             page._on_file_dropped(str(tmp_path / picture))
             page.set_state({"pet_image_path": str(tmp_path / picture)})
-        assert spawned == [] and page.pet_image_path is None
+        assert spawned == []
+        assert page.pet_image_path is None
         page._choose_character("inkside-pip")
         page._on_file_dropped(str(tmp_path / "rig.puppet"))
         assert spawned == [str(tmp_path / "rig.puppet")]

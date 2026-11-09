@@ -255,7 +255,8 @@ def test_every_home_pose_is_drawn_from_layers_dressed_or_not(built, ident):
     dressed = LayeredRenderer(character, (next(iter(garments.values())),))
     sitting = _pixels(bare.render('sit', 0))
     for pose in OPTIONAL_ACTIONS:
-        assert bare.has_action(pose) and dressed.has_action(pose), pose
+        assert bare.has_action(pose), pose
+        assert dressed.has_action(pose), pose
         moving = {_pixels(bare.render(pose, index * 150)) for index in range(8)}
         assert len(moving) >= 2, pose
         assert _pixels(dressed.render(pose, 0)) != _pixels(bare.render(pose, 0)), pose
