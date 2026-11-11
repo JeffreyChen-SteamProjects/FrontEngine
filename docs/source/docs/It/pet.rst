@@ -37,7 +37,7 @@ La pagina si apre con *La tua mascotta*: fai clic su uno dei personaggi integrat
 Trascina un file sulla mascotte per darle da mangiare, oppure un link perché lo
 vada a prendere.
 
-Animali puppet: installa l’opzione puppet e un runtime Imervue disponibile, poi scegli o trascina un file originale Imervue .puppet v1 sulla pagina Animale. I puppet usano canvas, movimenti ed espressioni di Imervue, si possono clonare o chiudere e seguono controlli delle sovrapposizioni e preset. Un .petscript.json facoltativo usa il motore di script esistente di Imervue. Versioni sconosciute, percorsi di archivio pericolosi e risorse invalide sono rifiutati prima del caricamento.
+Animali puppet: installa un runtime Rigora disponibile, poi scegli o trascina un file originale Rigora .puppet v1 sulla pagina Animale. I puppet usano canvas, movimenti ed espressioni di Rigora, si possono clonare o chiudere e seguono controlli delle sovrapposizioni e preset. Un .petscript.json facoltativo usa il motore di script esistente di Rigora. Versioni sconosciute, percorsi di archivio pericolosi e risorse invalide sono rifiutati prima del caricamento.
 
 Gli animali Puppet passeggiano anche da soli: dopo qualche secondo di riposo camminano per un breve tratto a sinistra o a destra alla loro altezza attuale con il movimento di camminata, restano nell'area di lavoro dello schermo e poi si riposano di nuovo. Trascinamento, carezze, Vieni qui e giocattoli, la calma durante la digitazione e le modalità che non consentono di agire da soli hanno la precedenza.
 
@@ -45,7 +45,7 @@ L'impostazione predefinita del menu Comportamento, Ciclo di tutte le azioni (cas
 
 :doc:`runtime_interoperability`
 
-Animale → Identità salva UUID, nome, umore, sazietà e affetto indipendenti per ogni animale a livelli o Puppet. Prima di crearlo seleziona un’identità salvata per riprendere dopo il riavvio; Nuovo animale ricomincia. Solo la prima identità migra una volta i vecchi valori comuni. La clonazione copia i valori attuali in una nuova identità; nutrire non modifica gli altri animali. Rinomina, aggiorna, esporta o importa singoli salvataggi JSON; l’importazione crea sempre una nuova identità. Ogni identità può essere attiva una sola volta. I salvataggi non includono file di risorse, script o chat; le preimpostazioni portatili escludono gli ID locali. Fino a 256 identità restano nelle impostazioni; le modifiche all’animale sul desktop vengono salvate dopo un breve ritardo e alla chiusura. Nutrire un puppet modifica solo i valori salvati, non i movimenti o le dimensioni Imervue.
+Animale → Identità salva UUID, nome, umore, sazietà e affetto indipendenti per ogni animale a livelli o Puppet. Prima di crearlo seleziona un’identità salvata per riprendere dopo il riavvio; Nuovo animale ricomincia. Solo la prima identità migra una volta i vecchi valori comuni. La clonazione copia i valori attuali in una nuova identità; nutrire non modifica gli altri animali. Rinomina, aggiorna, esporta o importa singoli salvataggi JSON; l’importazione crea sempre una nuova identità. Ogni identità può essere attiva una sola volta. I salvataggi non includono file di risorse, script o chat; le preimpostazioni portatili escludono gli ID locali. Fino a 256 identità restano nelle impostazioni; le modifiche all’animale sul desktop vengono salvate dopo un breve ritardo e alla chiusura. Nutrire un puppet modifica solo i valori salvati, non i movimenti o le dimensioni Rigora.
 
 Esporta i salvataggi degli animali con un nome di file diverso. L’esportazione rifiuta i nomi riservati a impostazioni, casa, copie di sicurezza, file temporanei e di blocco, nonché i file di destinazione collegati.
 
@@ -74,9 +74,9 @@ Personalizza animale imposta anche Chiacchiere (Spento, Raramente, Normale, Spes
 
 L’elenco interazioni del gestore offre anche i comandi di menu dell’animale attivo selezionato: foto, stato, promemoria, chat se è collegato un servizio, clona e chiudi, oltre a ogni movimento ed espressione di un modello Puppet. Tutto il menu contestuale è quindi raggiungibile da tastiera.
 
-Usa il personaggio integrato nella pagina Animale installa in background il personaggio INKSIDE scelto con il suo guardaroba e lo seleziona come sorgente. Avvia crea poi un animale con quel personaggio: si può vestire nel guardaroba e mantiene l'abito se indossa già quel personaggio. Usa il modello Puppet integrato, accanto, crea ancora la versione Imervue Puppet. Il personaggio viene installato per primo, quindi un animale creato da una scheda compare in un paio di secondi; i vestiti finiscono di installarsi in background e il guardaroba aggiunge all'apertura quelli che mancano.
+Usa il personaggio integrato nella pagina Animale installa in background il personaggio INKSIDE scelto con il suo guardaroba e lo seleziona come sorgente. Avvia crea poi un animale con quel personaggio: si può vestire nel guardaroba e mantiene l'abito se indossa già quel personaggio. Usa il modello Puppet integrato, accanto, crea ancora la versione Rigora Puppet. Il personaggio viene installato per primo, quindi un animale creato da una scheda compare in un paio di secondi; i vestiti finiscono di installarsi in background e il guardaroba aggiunge all'apertura quelli che mancano.
 
-Usa il modello Puppet integrato nella pagina Animale disegna in background il personaggio INKSIDE scelto come modello Imervue .puppet: testa, braccia, coda e corpo con rig, dieci movimenti, tre espressioni e uno script che vi collega le azioni del compagno. Viene salvato in pet-assets/puppets e scelto come sorgente con il suo script, così Avvia lo crea come animale Puppet.
+Usa il modello Puppet integrato nella pagina Animale disegna in background il personaggio INKSIDE scelto come modello Rigora .puppet: testa, braccia, coda e corpo con rig, dieci movimenti, tre espressioni e uno script che vi collega le azioni del compagno. Viene salvato in pet-assets/puppets e scelto come sorgente con il suo script, così Avvia lo crea come animale Puppet.
 
 Con più monitor a scale diverse, un animale trascinato o riportato su un altro monitor mantiene le sue dimensioni, resta nell’area di lavoro di quel monitor e cammina lì. I bordi delle finestre sui monitor scalati sono misurati nelle stesse coordinate dell’animale, che si posa quindi esattamente sulle finestre.
 
@@ -92,7 +92,7 @@ All’avvio della concentrazione i compagni si dispongono in basso a destra nel 
 
 I personaggi a livelli possono offrire varianti del viso e del corpo. Il guardaroba le mostra per animale; Applica le salva e gli abiti conservano personaggio e parti. Ogni variante deve coprire tutti i fotogrammi. La grafica definitiva dei sei personaggi resta da realizzare.
 
-Il menu degli animali a livelli offre una foto: congela l’aspetto attuale o scegli una posa a livelli e salva un PNG trasparente. Desktop e fumetti sono esclusi. Le foto Puppet usano un renderer Imervue compatibile e inizializzato per un’immagine trasparente fissa, senza catturare il desktop. La verifica GL nativa resta da eseguire.
+Il menu degli animali a livelli offre una foto: congela l’aspetto attuale o scegli una posa a livelli e salva un PNG trasparente. Desktop e fumetti sono esclusi. Le foto Puppet usano un renderer Rigora compatibile e inizializzato per un’immagine trasparente fissa, senza catturare il desktop. La verifica GL nativa resta da eseguire.
 
 Per gli animali a livelli scegli Accarezza e muovi il puntatore avanti e indietro. Tre movimenti netti avviano una reazione; piccoli tremori non contano. Trascinamento e gioco sociale si fermano. Uscire, nascondere, cambiare modalità o terminare annulla la carezza incompleta. I premi richiedono completamento e attesa.
 

@@ -34,7 +34,7 @@ The page opens with *Your pet*: click one of the built-in characters and a pet d
 
 Drop a file onto the pet to feed it, or a link to have it fetched.
 
-Puppet pets: install the optional puppet extra and an available Imervue runtime, then choose an original Imervue .puppet v1 file on the Pet page or drop it there. Puppet pets use Imervue's canvas, motions and expressions, can be cloned or closed, and participate in FrontEngine's overlay controls and presets. Choose an optional .petscript.json for Imervue's existing script engine. Unknown versions, unsafe archive paths and invalid assets are rejected before runtime loading.
+Puppet pets: install an available Rigora runtime, then choose an original Rigora .puppet v1 file on the Pet page or drop it there. Puppet pets use Rigora's canvas, motions and expressions, can be cloned or closed, and participate in FrontEngine's overlay controls and presets. Choose an optional .petscript.json for Rigora's existing script engine. Unknown versions, unsafe archive paths and invalid assets are rejected before runtime loading.
 
 Puppet pets also stroll on their own: after a few seconds' rest they walk a short way left or right along their current height with the walk motion, stay inside the screen's work area, then rest again. A stroll gives way to dragging, petting, Come here and toys, settling while typing, and modes that do not allow acting alone.
 
@@ -42,7 +42,7 @@ The Behaviour menu's default, Cycle all actions (random), has a free pet pick wh
 
 :doc:`runtime_interoperability`
 
-Pet → Pet identities saves an independent UUID, name, mood, fullness and affection for every layered or Puppet pet. Choose a saved identity before spawning to resume it after restart; New pet creates fresh state. The first identity migrates the old shared values once. Cloning copies current stats to a new identity; feeding never changes another pet. Rename, refresh, export or import individual JSON saves; import always creates a new identity. One saved identity can be active only once. Saves contain no asset files, scripts or chat history, and local identity IDs are excluded from portable presets. Up to 256 identities are stored in user settings; desktop pet changes are saved after a short debounce and on close. Puppet feeding updates only saved stats and does not alter Imervue motions or geometry.
+Pet → Pet identities saves an independent UUID, name, mood, fullness and affection for every layered or Puppet pet. Choose a saved identity before spawning to resume it after restart; New pet creates fresh state. The first identity migrates the old shared values once. Cloning copies current stats to a new identity; feeding never changes another pet. Rename, refresh, export or import individual JSON saves; import always creates a new identity. One saved identity can be active only once. Saves contain no asset files, scripts or chat history, and local identity IDs are excluded from portable presets. Up to 256 identities are stored in user settings; desktop pet changes are saved after a short debounce and on close. Puppet feeding updates only saved stats and does not alter Rigora motions or geometry.
 
 Export pet saves under a separate filename. Exports reject reserved settings, home, backup, temporary and lock filenames, and linked destination files.
 
@@ -71,9 +71,9 @@ Customize pet also sets Chatter (Off, Rarely, Normal, Often) for lines the pet s
 
 The pet manager's interaction list also offers the selected live pet's own menu commands: photo, status, reminder, chat when a chat service is attached, clone and close, plus every motion and expression of a Puppet model. Everything in a pet's right-click menu can therefore be done with the keyboard.
 
-Use built-in character on the Pet page installs the chosen INKSIDE character and its wardrobe in the background and selects it as the source. Start then spawns a pet wearing that character: it can be dressed in the wardrobe, and keeps its outfit when it already wears the character. Use built-in Puppet model beside it still makes the Imervue Puppet version. The character itself is installed first, so a pet from a character card appears within a second or two; its clothes finish installing in the background, and the wardrobe adds any that are not there yet when it opens.
+Use built-in character on the Pet page installs the chosen INKSIDE character and its wardrobe in the background and selects it as the source. Start then spawns a pet wearing that character: it can be dressed in the wardrobe, and keeps its outfit when it already wears the character. Use built-in Puppet model beside it still makes the Rigora Puppet version. The character itself is installed first, so a pet from a character card appears within a second or two; its clothes finish installing in the background, and the wardrobe adds any that are not there yet when it opens.
 
-Use built-in Puppet model on the Pet page draws the chosen INKSIDE character as an Imervue .puppet model in the background: rigged head, arms, tail and body, ten motions, three expressions and a pet script that maps companion actions to them. It is saved under pet-assets/puppets and selected as the source with its script, so Start spawns it as a Puppet pet.
+Use built-in Puppet model on the Pet page draws the chosen INKSIDE character as a Rigora .puppet model in the background: rigged head, arms, tail and body, ten motions, three expressions and a pet script that maps companion actions to them. It is saved under pet-assets/puppets and selected as the source with its script, so Start spawns it as a Puppet pet.
 
 On setups with several monitors at different scaling, a pet dragged or brought back to another monitor keeps its size, stays inside that monitor’s work area and walks there. Window ledges on scaled monitors are measured in the same coordinates as the pet, so it perches exactly on top of windows.
 
@@ -89,7 +89,7 @@ Focus mode arranges companions in the lower-right work area of their screen when
 
 Layered characters can declare selectable face/body parts. Wardrobe previews part choices per pet; Apply persists them and saved outfits retain the character and parts. Every declared choice must cover every animation frame. Production artwork for the six characters remains unfinished.
 
-The layered pet menu offers Pet photo: freeze its current appearance or select an authored layered pose, then save a transparent PNG. Captures contain only the pet, without desktop pixels or speech bubbles. Puppet pets also offer a frozen transparent photo through a compatible initialized Imervue renderer; no desktop pixels are captured. Native GL photo acceptance remains pending.
+The layered pet menu offers Pet photo: freeze its current appearance or select an authored layered pose, then save a transparent PNG. Captures contain only the pet, without desktop pixels or speech bubbles. Puppet pets also offer a frozen transparent photo through a compatible initialized Rigora renderer; no desktop pixels are captured. Native GL photo acceptance remains pending.
 
 For layered pets, choose Pet gently, then move the pointer back and forth over the pet. Three deliberate stroke segments start one petting reaction; jitter does not count. Dragging and social play pause during this mode. Leaving, hiding, changing mode or End interaction cancels unfinished petting. Rewards remain subject to completion and cooldown.
 

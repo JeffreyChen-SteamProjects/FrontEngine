@@ -755,7 +755,7 @@ germany_word_dict = {
     'render_no_overlays': 'Keine Overlays mit Compositor sind geöffnet.',
     'pet_choose_script': 'Puppet-Skript wählen…',
     'scene_puppet': 'Puppet',
-    'scene_puppet_hint': 'Eine Imervue-Figur in dieser Szene verwenden.',
+    'scene_puppet_hint': 'Eine Rigora-Figur in dieser Szene verwenden.',
     'scene_puppet_choose': '.puppet wählen…',
     'scene_puppet_add': 'Puppet zur Szene hinzufügen',
     'scene_x': 'X',

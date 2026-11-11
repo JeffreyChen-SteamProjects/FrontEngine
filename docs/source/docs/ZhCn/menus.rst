@@ -60,7 +60,7 @@
 
 插件：启用加载不代表授权插件。plugin.json 或单文件 sidecar 声明版本、身份、入口与能力；Python import 前检查同意，授权绑定内容摘要。程序或声明改变就需重新同意；旧插件需明确完全信任。Settings → Revoke plugin grants 可撤销保存的授权；已在运行的程序需重新启动才能卸载。Python 插件仍具有完整应用程序权限，声明与同意不是操作系统沙箱。
 
-渲染：Settings → Overlay rendering 可选 Auto、GPU 或 Software，并查看实际后端。GPU 合成器以 OpenGL texture、shader 与 framebuffer 处理图层顺序、变换、不透明度与裁剪；初始化失败时回退软件并显示原因。已有 QPainter 内容仍可能先由 CPU 转成光栅图再上传；web／video／原生 widget 可能使用独立窗口。捕获与录制可能将 GPU 画面读回 CPU，这不代表零拷贝捕获或已测得性能提升。 场景 GPU 合成目前涵盖 IMAGE、GIF 与 TEXT；puppet 使用自己的 Imervue 窗口绘制。 覆盖层重绘会将合成器更新排到父窗口绘制完成后执行，切换后端或屏幕时也遵循此顺序。
+渲染：Settings → Overlay rendering 可选 Auto、GPU 或 Software，并查看实际后端。GPU 合成器以 OpenGL texture、shader 与 framebuffer 处理图层顺序、变换、不透明度与裁剪；初始化失败时回退软件并显示原因。已有 QPainter 内容仍可能先由 CPU 转成光栅图再上传；web／video／原生 widget 可能使用独立窗口。捕获与录制可能将 GPU 画面读回 CPU，这不代表零拷贝捕获或已测得性能提升。 场景 GPU 合成目前涵盖 IMAGE、GIF 与 TEXT；puppet 使用自己的 Rigora 窗口绘制。 覆盖层重绘会将合成器更新排到父窗口绘制完成后执行，切换后端或屏幕时也遵循此顺序。
 
 :doc:`runtime_interoperability`
 

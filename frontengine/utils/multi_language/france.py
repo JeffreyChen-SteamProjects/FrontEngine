@@ -752,7 +752,7 @@ french_word_dict = {
     'render_no_overlays': 'Aucune superposition utilisant le compositeur n’est ouverte.',
     'pet_choose_script': 'Choisir un script puppet…',
     'scene_puppet': 'Puppet',
-    'scene_puppet_hint': 'Utiliser un personnage Imervue dans cette scène.',
+    'scene_puppet_hint': 'Utiliser un personnage Rigora dans cette scène.',
     'scene_puppet_choose': 'Choisir un .puppet…',
     'scene_puppet_add': 'Ajouter le puppet à la scène',
     'scene_x': 'X',

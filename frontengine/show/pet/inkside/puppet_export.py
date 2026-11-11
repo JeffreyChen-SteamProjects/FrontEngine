@@ -1,4 +1,4 @@
-"""Export a built-in INKSIDE character as an Imervue .puppet model plus a FrontEngine pet script.
+"""Export a built-in INKSIDE character as an Rigora .puppet model plus a FrontEngine pet script.
 
 The layered character is composed into one texture per rigged part (tail, feet,
 body, arms, head, eye states, mouth states, crown appendages). Rotation
@@ -159,7 +159,7 @@ def _motions() -> dict[str, dict]:
         'pet': (1.2, True, {'AngleZ': [(0, .12), (.6, .06), (1.2, .12)], 'Tail': [(0, .3), (.6, -.3), (1.2, .3)]}),
     }
     # A finished one-shot motion holds its last values, so each must end neutral. Eye
-    # states belong to expressions only: Imervue restores a stopped motion's parameters
+    # states belong to expressions only: Rigora restores a stopped motion's parameters
     # to their pre-motion values, which already include any expression overlay.
     # Without a fade-out, stopping snaps to frame 0; easing back reaches the defaults.
     return {name: {'version': 1, 'duration': duration, 'loop': loop, 'fade_in_duration': 0.15,

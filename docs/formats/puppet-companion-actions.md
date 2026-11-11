@@ -1,7 +1,7 @@
 # Puppet companion action bindings
 
 FrontEngine reads the optional `frontengine_actions` object from the selected
-`.petscript.json`. The existing Imervue message/schedule fields remain unchanged.
+`.petscript.json`. The existing Rigora message/schedule fields remain unchanged.
 No bindings means no guessed native motion names.
 
 ```json
@@ -52,5 +52,5 @@ only to reactions that the model actually provides.
 `.petscript.json` with these bindings. Its parts are textured quads: rotation deformers turn the head,
 arms and tail; warps move the whole body and push a raised arm's shoulder outward; opacity keys switch
 eye and mouth states. Eye states belong to expressions only, and every motion declares a fade-out,
-because Imervue snaps a stopped motion without one to frame 0 and restores pre-motion values that
+because Rigora snaps a stopped motion without one to frame 0 and restores pre-motion values that
 already include an expression overlay.

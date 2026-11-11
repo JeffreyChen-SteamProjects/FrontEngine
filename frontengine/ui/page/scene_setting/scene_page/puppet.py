@@ -1,4 +1,4 @@
-"""Author a scene entry pointing at the shared Imervue puppet format."""
+"""Author a scene entry pointing at the shared Rigora puppet format."""
 from frontengine.ui.runtime_lifetime import owned_action
 import json
 
@@ -12,7 +12,7 @@ from frontengine.utils.multi_language.retranslate import tr
 
 class PuppetSceneSettingUI(SettingPage):
     def __init__(self, script_ui, *, lifetime) -> None:
-        super().__init__('scene_puppet', 'scene_puppet_hint', 'Puppet', 'Use an Imervue character in this scene.', lifetime=lifetime)
+        super().__init__('scene_puppet', 'scene_puppet_hint', 'Puppet', 'Use a Rigora character in this scene.', lifetime=lifetime)
         self.script_ui = script_ui
         self.path = QLineEdit()
         self.script_path = QLineEdit()
@@ -47,7 +47,7 @@ class PuppetSceneSettingUI(SettingPage):
 
     @owned_action
     def choose_puppet(self) -> None:
-        path, _ = self.lifetime.after_dialog(QFileDialog.getOpenFileName(self, 'Imervue puppet', '', 'Imervue puppet (*.puppet)'))
+        path, _ = self.lifetime.after_dialog(QFileDialog.getOpenFileName(self, 'Rigora puppet', '', 'Rigora puppet (*.puppet)'))
         if path:
             self.path.setText(path)
 

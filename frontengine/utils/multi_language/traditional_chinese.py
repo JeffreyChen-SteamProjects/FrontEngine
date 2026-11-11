@@ -761,7 +761,7 @@ traditional_chinese_word_dict = {
     'render_no_overlays': '目前沒有開啟使用合成器的覆蓋層。',
     'pet_choose_script': '選擇 puppet 腳本…',
     'scene_puppet': 'Puppet 角色',
-    'scene_puppet_hint': '在場景中使用 Imervue 角色。',
+    'scene_puppet_hint': '在場景中使用 Rigora 角色。',
     'scene_puppet_choose': '選擇 .puppet…',
     'scene_puppet_add': '將 puppet 加入場景',
     'scene_x': 'X',

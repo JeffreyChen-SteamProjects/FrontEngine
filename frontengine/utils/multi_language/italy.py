@@ -752,7 +752,7 @@ italian_word_dict = {
     'render_no_overlays': 'Nessuna sovrapposizione con compositore è aperta.',
     'pet_choose_script': 'Scegli script puppet…',
     'scene_puppet': 'Puppet',
-    'scene_puppet_hint': 'Usa un personaggio Imervue in questa scena.',
+    'scene_puppet_hint': 'Usa un personaggio Rigora in questa scena.',
     'scene_puppet_choose': 'Scegli .puppet…',
     'scene_puppet_add': 'Aggiungi puppet alla scena',
     'scene_x': 'X',

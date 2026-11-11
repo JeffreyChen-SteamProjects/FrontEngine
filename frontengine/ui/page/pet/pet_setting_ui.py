@@ -510,7 +510,7 @@ class PetSettingUI(SettingPage):
         except (ValueError, OSError, RuntimeError) as error:
             if not report:
                 raise
-            self.lifetime.after_dialog(QMessageBox.warning(self, 'Imervue puppet', str(error)))
+            self.lifetime.after_dialog(QMessageBox.warning(self, 'Rigora puppet', str(error)))
             return
         with self._until_tracked(pet):
             if source_pet is not None:
@@ -643,7 +643,7 @@ class PetSettingUI(SettingPage):
 
     @owned_action
     def choose_puppet_script(self) -> None:
-        path, _ = self.lifetime.after_dialog(QFileDialog.getOpenFileName(self, 'Imervue pet script', '', 'Pet script (*.petscript.json)'))
+        path, _ = self.lifetime.after_dialog(QFileDialog.getOpenFileName(self, 'Rigora pet script', '', 'Pet script (*.petscript.json)'))
         if path:
             self.puppet_script_path = path
 

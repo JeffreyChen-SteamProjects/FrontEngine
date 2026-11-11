@@ -1,4 +1,4 @@
-"""FrontEngine-owned pet window sharing Imervue's canvas, drivers and script."""
+"""FrontEngine-owned pet window sharing Rigora's canvas, drivers and script."""
 from __future__ import annotations
 
 from pathlib import Path

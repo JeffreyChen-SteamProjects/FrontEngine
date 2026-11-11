@@ -75,7 +75,7 @@ def test_scene_package_round_trip_and_traversal_rejection(tmp_path):
 
 
 def test_reference_imervue_reader_round_trip(tmp_path):
-    reader = pytest.importorskip('Imervue.puppet.document_io')
+    reader = pytest.importorskip('rigora.puppet.document_io')
     from frontengine.utils.imervue.puppet_asset import validate_puppet
     path = write_puppet(tmp_path / 'tiny.puppet')
     document = reader.load_puppet(path)
@@ -115,7 +115,7 @@ def test_scene_package_canonicalizes_extraction_directory_alias(tmp_path, monkey
 
 def test_puppet_pet_uses_reference_canvas_without_imervue_preferences(tmp_path, lifetime_factory):
     lifetime_factory()
-    pytest.importorskip('Imervue.puppet.document_io')
+    pytest.importorskip('rigora.puppet.document_io')
     from frontengine.show.pet.puppet_pet import PuppetPetWidget
     path = write_puppet(tmp_path / 'tiny.puppet')
     pet = PuppetPetWidget(path, size=(64, 96))

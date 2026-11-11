@@ -752,7 +752,7 @@ russian_word_dict = {
     'render_no_overlays': 'Нет открытых наложений с композитором.',
     'pet_choose_script': 'Выбрать скрипт puppet…',
     'scene_puppet': 'Puppet',
-    'scene_puppet_hint': 'Использовать персонажа Imervue в этой сцене.',
+    'scene_puppet_hint': 'Использовать персонажа Rigora в этой сцене.',
     'scene_puppet_choose': 'Выбрать .puppet…',
     'scene_puppet_add': 'Добавить puppet в сцену',
     'scene_x': 'X',

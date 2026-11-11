@@ -155,15 +155,19 @@ background repository persistence retain their existing shutdown contracts.
 
 ## 6. Cross-project boundaries
 
-- **Imervue (optional upstream)**: the `puppet` extra installs `Imervue>=1.0.90`.
-  `utils/imervue/runtime.py` consumes `Imervue.puppet.document_io.load_puppet`,
-  `Imervue.puppet.canvas.PuppetCanvas`, the motion/idle/input controllers and
-  `Imervue.desktop_pet.pet_script` loader/engine. Version 1 `.puppet` ZIP resources are validated
+- **Rigora (optional upstream)**: Rigora is private and unpublished; install its GUI runtime
+  from an authorized local checkout or wheel. No registry extra is declared.
+  `utils/imervue/runtime.py` consumes `rigora.puppet.document_io.load_puppet`,
+  `rigora.puppet.canvas.PuppetCanvas`, the motion/idle/input controllers and
+  `rigora.desktop_pet.pet_script` loader/engine. Version 1 `.puppet` ZIP resources are validated
   before invoking the reader. FrontEngine owns window geometry, lifecycle and settings;
-  it does not instantiate Imervue's PetWindow or write Imervue preferences.
-  Scenes reference puppets via version 1 PUPPET entries; `.fescene` bundles referenced
-  resources. Imervue is not expected to read the FrontEngine scene envelope.
-  Detailed formats and capability boundaries: `docs/formats/interoperability.md`.
+  it does not instantiate Rigora's PetWindow or write Rigora preferences.
+  The internal `utils/imervue` adapter path stays stable for existing callers;
+  its runtime imports now use only `rigora`. The `.puppet` MIME and saved scene/pet
+  schemas retain their existing identifiers. Scenes reference puppets via version 1
+  PUPPET entries; `.fescene` bundles referenced resources. Rigora is not expected to
+  read the FrontEngine scene envelope. Detailed formats and capability boundaries:
+  `docs/formats/interoperability.md`.
 
 - **JEditor (downstream)**: JEditor lists `frontengine` as a dependency and embeds
   `FrontEngineMainUI` as a tab and as a dock. Released JEditor builds call
@@ -244,7 +248,7 @@ Application actions: `utils/actions/action_registry.py` owns stable built-in IDs
 
 `utils/scene_format/scene_templates.py` defines three self-contained translated TEXT layouts, independent editable entries, proportional fitting to logical available screen size and missing-resource diagnostics. `ui/dialog/scene_templates_dialog.py` owns bounded QGraphics preview items, template/screen selection, target revalidation and owner-specific cancellation. SceneManagerUI and the command palette open one page-owned library. SceneActions.request_entries uses the same hidden candidate/adoption path as file scenes; cancel_request cancels only its matching pending/wanted operation. Application replaces the document after successful candidate preparation, preserving existing portable scene exports. The focus starter contains static editable reminders; existing scheduling/timer tools retain those responsibilities.
 
-`show/scene/media_frame.py` owns bounded Qt video sink polling, hidden web surfaces and Imervue public offscreen Puppet rendering. Native decoder callbacks never run Python directly: polling retains the newest sink frame without queued-frame accumulation or stop/GIL deadlocks. Explicit activity pauses media and hidden hosts; shutdown stops and disconnects before disposal. Named VIDEO/WEB/PUPPET scene entries now share software/GPU layer transforms/z with IMAGE/GIF/TEXT; SOUND exposes a transparent frame. Standalone overlays and legacy unnamed add_puppet remain compatible. SceneCompositorView tracks visible-view owners, forwards mute and opens the same native web/Puppet host on double-click. `ui/page/scene_setting/scene_media_preview.py` retains at most eight manually enabled, initially muted providers across geometry edits; disabling/replacing closes them. Hidden editor previews pause, scripts are disabled for preview, and scene Puppet profiles are ephemeral. Provider factories permit device/network-free tests.
+`show/scene/media_frame.py` owns bounded Qt video sink polling, hidden web surfaces and Rigora public offscreen Puppet rendering. Native decoder callbacks never run Python directly: polling retains the newest sink frame without queued-frame accumulation or stop/GIL deadlocks. Explicit activity pauses media and hidden hosts; shutdown stops and disconnects before disposal. Named VIDEO/WEB/PUPPET scene entries now share software/GPU layer transforms/z with IMAGE/GIF/TEXT; SOUND exposes a transparent frame. Standalone overlays and legacy unnamed add_puppet remain compatible. SceneCompositorView tracks visible-view owners, forwards mute and opens the same native web/Puppet host on double-click. `ui/page/scene_setting/scene_media_preview.py` retains at most eight manually enabled, initially muted providers across geometry edits; disabling/replacing closes them. Hidden editor previews pause, scripts are disabled for preview, and scene Puppet profiles are ephemeral. Provider factories permit device/network-free tests.
 
 `utils/recording/avi_writer.py` implements silent incremental MJPEG AVI using Qt JPEG encoding, disk-streamed RIFF chunks and a disk index (one JPEG retained; 2 GiB/one hour/72,000 frames bounded). Dropped-frame intervals repeat the last JPEG to retain effective timing. It implements the existing AsyncGifWriter worker factory contract without changing GIF import paths. FrameRecorder selects GIF/AVI, exposes recording/paused/finalizing/cancelling/idle signals and accepted-frame/effective-duration/drop progress, excludes pauses using a monotonic offset and stops native region capture during pause. Resume reopens capture; stop while paused finalizes the same clip. GIF defaults/limits remain compatible; AVI supports teaching-length clips. ToolsSettingUI owns format, pause/resume/cancel controls and localized live status. Worker errors/cancel remove temporary output before any target replacement; index storage does not grow RAM with clip length.
 
@@ -276,7 +280,7 @@ Cancellation tombstones count toward the 500-record limit and prevent stale impo
 
 `utils/linux` provides explicit X11/Wayland session policy, EWMH/python-xlib window list/physical-frame geometry/pin/move, compositing-manager-gated opacity and physical XRandR work areas. Native Wayland arbitrary-window control/global pynput input/profile positioning are rejected with concrete reasons, not described as global Xwayland support. Linux-only python-xlib dependency aligns requirements and both manifests. PulseCapture launches fixed distro parec paths on one worker, default output monitor or microphone, one sanitized 2048-float memory frame; lazy PulseMeter construction does not start disabled reactive audio. Stop handles spawning races, kills only own child, worker reaps; shared captures stop on MainUI shutdown and join only through GUI-polled barrier. WASAPI peak-only behavior unchanged; Linux meter requires real audio samples, explicit docs distinction. LoopbackSpectrum/SystemAudioMeter/MicrophoneMeter route Linux to this adapter. platform_info/capabilities.py and Help platform_capabilities_dialog display read-only prerequisites/original failure reasons without enabling capture/listeners. Protocol acceptance uses isolated Linux display/audio servers; physical Mac/Linux audio/multi-monitor acceptance remains separate.
 
-- Windows entry `exe/start_front_engine.py` delegates normal startup to the published main_ui.main CLI (--preset/--debug). Explicit --verify-scene-build FIXTURES REPORT calls the fixed exe/scene_build_acceptance.py probe with isolated temporary settings and local seven-type inputs (tests/integration/scene_build_fixtures.py). It verifies compiled native media/editor/export/cleanup and writes bounded owned screenshots/report, never supplied Python scripts. Fixture generation optionally needs PyAV; native Puppet acceptance needs the optional runtime in the build environment. Installed Pillow decoder plugins and Imervue package data are included by build_exe.py.
+- Windows entry `exe/start_front_engine.py` delegates normal startup to the published main_ui.main CLI (--preset/--debug). Explicit --verify-scene-build FIXTURES REPORT calls the fixed exe/scene_build_acceptance.py probe with isolated temporary settings and local seven-type inputs (tests/integration/scene_build_fixtures.py). It verifies compiled native media/editor/export/cleanup and writes bounded owned screenshots/report, never supplied Python scripts. Fixture generation optionally needs PyAV; native Puppet acceptance needs the optional runtime in the build environment. Installed Pillow decoder plugins and Rigora package data are included by build_exe.py.
 
 `show/gif/paint_gif.py` owns its QMovie as a Qt child, so overlay deletion releases the source file independently of retained Python references. The home page places status text above wrapping action buttons; its welcome heading also wraps for longer translations.
 

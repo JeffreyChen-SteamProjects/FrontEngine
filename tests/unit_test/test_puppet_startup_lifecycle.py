@@ -20,7 +20,7 @@ def asset(tmp_path):
 
 
 def test_puppet_failed_close_keeps_native_resources_until_saved(tmp_path, monkeypatch):
-    pytest.importorskip('Imervue.puppet.document_io')
+    pytest.importorskip('rigora.puppet.document_io')
     from frontengine.show.pet.puppet_pet import PuppetPetWidget
     from frontengine.user_setting.pet_profiles import PetProfiles
 
@@ -51,7 +51,7 @@ def test_puppet_failed_close_keeps_native_resources_until_saved(tmp_path, monkey
 
 
 def test_puppet_profiles_feed_resume_and_close_independently(tmp_path):
-    pytest.importorskip("Imervue.puppet.document_io")
+    pytest.importorskip("rigora.puppet.document_io")
     from frontengine.user_setting.pet_profiles import PetProfiles
     from frontengine.show.pet.puppet_pet import PuppetPetWidget
     profiles = PetProfiles({}, lambda: None)
@@ -77,7 +77,7 @@ def test_puppet_profiles_feed_resume_and_close_independently(tmp_path):
 
 
 def test_puppet_customization_preserves_aspect_and_disables_unsupported_controls(tmp_path):
-    pytest.importorskip('Imervue.puppet.document_io')
+    pytest.importorskip('rigora.puppet.document_io')
     from frontengine.show.pet.puppet_pet import PuppetPetWidget
     from frontengine.ui.dialog.pet_customization import PetCustomizationDialog
     from frontengine.user_setting.pet_profiles import PetProfiles
@@ -110,7 +110,7 @@ def test_puppet_customization_preserves_aspect_and_disables_unsupported_controls
 @pytest.mark.parametrize("malformed", [False, True])
 def test_reference_runtime_script_failure_allocates_no_child_window(tmp_path, malformed, lifetime_factory):
     lifetime_factory()
-    pytest.importorskip("Imervue.puppet.document_io")
+    pytest.importorskip("rigora.puppet.document_io")
     from frontengine.show.pet.puppet_pet import PuppetPetWidget
     owner = QWidget()
     script = tmp_path / "lines.petscript.json"
@@ -130,7 +130,7 @@ def test_missing_runtime_leaves_no_visible_or_retained_scene_view(tmp_path, monk
     scene = SceneManager()
     scene.add_puppet({"file_path": str(asset(tmp_path))})
     def unavailable():
-        raise ValueError("Install frontengine[puppet]")
+        raise ValueError("Install Rigora GUI from an authorized local checkout or wheel")
     monkeypatch.setattr(puppet_pet, "puppet_runtime", unavailable)
     warnings = []
     monkeypatch.setattr("frontengine.ui.page.scene_setting.scene_manager.QMessageBox.warning",
@@ -140,7 +140,7 @@ def test_missing_runtime_leaves_no_visible_or_retained_scene_view(tmp_path, monk
         assert page._open_view(None) is False
         assert scene.native_widgets == []
         assert scene.view_list == []
-        assert warnings == ["Install frontengine[puppet]"]
+        assert warnings == ["Install Rigora GUI from an authorized local checkout or wheel"]
     finally:
         for view in scene.view_list:
             view.close()
@@ -197,7 +197,7 @@ def test_puppet_only_success_opens_native_window_without_empty_graphics_view(mon
 
 def test_real_canvas_left_drag_moves_pet_window(tmp_path, lifetime_factory):
     lifetime_factory()
-    pytest.importorskip("Imervue.puppet.document_io")
+    pytest.importorskip("rigora.puppet.document_io")
     from PySide6.QtCore import QPoint, Qt
     from PySide6.QtTest import QTest
     from frontengine.show.pet.puppet_pet import PuppetPetWidget
@@ -219,8 +219,8 @@ def test_real_canvas_left_drag_moves_pet_window(tmp_path, lifetime_factory):
 @pytest.mark.parametrize("hit_response", [False, True])
 def test_hit_signal_plays_linked_motion_toggles_expression_and_selects_script_line(tmp_path, hit_response, lifetime_factory):
     lifetime_factory()
-    pytest.importorskip("Imervue.puppet.document_io")
-    from Imervue.puppet.document import HitArea, Motion, Expression
+    pytest.importorskip("rigora.puppet.document_io")
+    from rigora.puppet.document import HitArea, Motion, Expression
     from frontengine.show.pet.puppet_pet import PuppetPetWidget
     script = tmp_path / "lines.petscript.json"
     script.write_text(json.dumps({"greetings": ["generic hello"],
@@ -245,7 +245,7 @@ def test_hit_signal_plays_linked_motion_toggles_expression_and_selects_script_li
 
 def test_hit_without_specific_line_uses_time_of_day_greeting(tmp_path, lifetime_factory):
     lifetime_factory()
-    pytest.importorskip("Imervue.puppet.document_io")
+    pytest.importorskip("rigora.puppet.document_io")
     from frontengine.show.pet.puppet_pet import PuppetPetWidget
     script = tmp_path / "lines.petscript.json"
     script.write_text(json.dumps({"greetings": ["generic hello"],

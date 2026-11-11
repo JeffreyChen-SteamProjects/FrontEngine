@@ -44,7 +44,6 @@ Homepage = "https://github.com/JeffreyChen-SteamProjects/FrontEngine"
 Code = "https://github.com/JeffreyChen-SteamProjects/FrontEngine"
 
 [project.optional-dependencies]
-puppet = ["Imervue>=1.0.90"]
 macos = [
     "pyobjc-framework-Cocoa>=10.3; sys_platform == 'darwin'",
     "pyobjc-framework-Quartz>=10.3; sys_platform == 'darwin'",

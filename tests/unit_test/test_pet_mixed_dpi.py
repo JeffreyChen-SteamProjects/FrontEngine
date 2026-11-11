@@ -61,7 +61,7 @@ def test_windows_reports_each_window_with_its_monitor():
 
 
 def test_pets_across_two_screens_with_different_scaling(tmp_path):
-    pytest.importorskip('Imervue.puppet.document_io')
+    pytest.importorskip('rigora.puppet.document_io')
     sys.path.insert(0, str(REPO / 'tests' / 'integration'))
     try:
         from pet_mixed_dpi import LAYOUT

@@ -67,7 +67,7 @@ def test_clone_uses_source_character_and_custom_parts_after_page_selection_chang
 def test_puppet_clone_keeps_model_and_size_when_page_selects_a_character(tmp_path, monkeypatch, *, lifetime_factory):
     import pytest
     lifetime_factory()
-    pytest.importorskip('Imervue.puppet.document_io')
+    pytest.importorskip('rigora.puppet.document_io')
     from test_puppet_startup_lifecycle import asset
     from frontengine.show.pet.puppet_pet import PuppetPetWidget
     page = PetSettingUI(lifetime=lifetime_factory())

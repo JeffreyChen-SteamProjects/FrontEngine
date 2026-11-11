@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261111-01 | 2026-11-11 | Puppet 消費端改用獨立 Rigora | #done 跨專案／桌面寵物 | [2026-11](2026-11.md) |
 | U-20261110-01 | 2026-11-10 | Stage127：點委託就能派寵物去做 | #done 桌面寵物／家園 | [2026-11](2026-11.md) |
 | U-20261109-04 | 2026-11-09 | Stage126：桌面寵物只用分層角色，移除圖片、GIF 與動作包來源 | #done 桌面寵物／家園 | [2026-11](2026-11.md) |
 | U-20261109-03 | 2026-11-09 | Stage125：內建角色全面改用分層圖片，家中姿勢改由骨架產生 | #done 桌面寵物／家園 | [2026-11](2026-11.md) |
@@ -454,6 +455,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 238 |
+| [2026-11.md](2026-11.md) | 2026-11 | 251 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

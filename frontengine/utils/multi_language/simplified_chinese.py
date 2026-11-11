@@ -754,7 +754,7 @@ simplified_chinese_word_dict = {
     'render_no_overlays': '目前没有打开使用合成器的覆盖层。',
     'pet_choose_script': '选择 puppet 脚本…',
     'scene_puppet': 'Puppet 角色',
-    'scene_puppet_hint': '在场景中使用 Imervue 角色。',
+    'scene_puppet_hint': '在场景中使用 Rigora 角色。',
     'scene_puppet_choose': '选择 .puppet…',
     'scene_puppet_add': '将 puppet 加入场景',
     'scene_x': 'X',

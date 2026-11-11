@@ -1,11 +1,14 @@
-# FrontEngine / Imervue interchange
+# FrontEngine / Rigora interchange
 
 FrontEngine reads the version 1 `.puppet` container produced by
-[Imervue](https://github.com/JeffreyChen-s-Utils/Imervue).
-Install `pip install "frontengine[puppet]"` for its actual Canvas, motion,
+Rigora (formerly Imervue Puppet).
+Rigora is private and unpublished. Install from an authorized sibling checkout
+with `pip install "../Rigora[gui]"`, or a trusted local wheel with GUI dependencies.
+FrontEngine declares no Puppet registry extra until Rigora is published.
+The runtime provides the actual Canvas, motion,
 expression, idle/input and pet script runtime. FrontEngine owns its windows,
-settings and lifecycle; opening a puppet does not instantiate Imervue's PetWindow
-or modify Imervue preferences. Other desktop pets are layered characters
+settings and lifecycle; opening a puppet does not instantiate Rigora's PetWindow
+or modify Rigora preferences. Other desktop pets are layered characters
 ([layered-pet-v1](layered-pet-v1.md)); sprite images and `pet.json` sprite packs are no longer read.
 
 ## Puppet container
@@ -15,10 +18,10 @@ or modify Imervue preferences. Other desktop pets are layered characters
 `size: [width, height]`, and lists `drawables`, `deformers`, `parameters`.
 Drawable textures reside under `textures/`; named `motions` and `expressions`
 reference their JSON members, and optional `physics` references a physics member.
-These documents use the upstream Imervue reader/writer unchanged. FrontEngine
+These documents use the upstream Rigora reader/writer unchanged. FrontEngine
 passes selected motion/expression names and finite numeric parameter overrides
 to that runtime. Select an optional `.petscript.json` via the pet or scene editor
-for Imervue's speech, hit-area and scheduled pet interactions.
+for Rigora's speech, hit-area and scheduled pet interactions.
 
 Containers are validated before optional runtime creation: at most 4096 entries,
 256 MiB uncompressed total and 8 MiB per JSON member. Absolute, traversal,
@@ -27,8 +30,8 @@ versions and missing referenced resources fail explicitly.
 
 ## Pet scripts
 
-An optional Imervue `.petscript.json` is a data document loaded by the upstream
-`Imervue.desktop_pet.pet_script` engine:
+An optional Rigora `.petscript.json` is a data document loaded by the upstream
+`rigora.desktop_pet.pet_script` engine:
 
 ```json
 {
@@ -47,7 +50,7 @@ refer to the puppet document. Scheduled entries run while the pet is visible.
 Invalid/missing selected script files report a load error before window allocation.
 No Python code is stored in these data files.
 
-The Imervue puppet/script documents are FrontEngine's only non-layered pet
+The Rigora puppet/script documents are FrontEngine's only non-layered pet
 formats. FrontEngine's pet UI stores the selected puppet script
 in its own preset `puppet_script` field.
 
@@ -94,8 +97,8 @@ The writer deduplicates shared sources and atomically replaces the output only
 when all resources have been written and validated. Import enforces the puppet
 archive resource/path limits, rejects references outside the package, and keeps
 extracted resources alive until application shutdown. A `.puppet` can also be
-opened directly as a single-entry scene. FrontEngine scenes can reference Imervue
-puppets; Imervue does not read FrontEngine's entire scene envelope.
+opened directly as a single-entry scene. FrontEngine scenes can reference Rigora
+puppets; Rigora does not read FrontEngine's entire scene envelope.
 
 ## Plugin permissions version 1
 

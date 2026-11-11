@@ -7,7 +7,7 @@ from test_puppet_startup_lifecycle import asset
 
 @pytest.fixture
 def puppet(tmp_path):
-    pytest.importorskip('Imervue.puppet.document_io')
+    pytest.importorskip('rigora.puppet.document_io')
     from frontengine.show.pet.puppet_pet import PuppetPetWidget
     from frontengine.user_setting.pet_profiles import PetProfiles
     pet = PuppetPetWidget(asset(tmp_path), size=(128, 192), profiles=PetProfiles({}, lambda: None))

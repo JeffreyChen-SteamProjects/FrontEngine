@@ -108,10 +108,10 @@ def choose_player_sound(trigger_ui: QWidget) -> Optional[str]:
 
 
 def choose_pet(trigger_ui: QWidget) -> Optional[str]:
-    """選擇 Puppet 模型 / Choose an Imervue Puppet model; other pets are layered characters."""
+    """選擇 Puppet 模型 / Choose an Rigora Puppet model; other pets are layered characters."""
     return choose_file(
         trigger_ui,
-        file_filter="Imervue puppet (*.puppet)",
+        file_filter="Rigora puppet (*.puppet)",
         extensions=['.puppet'],
         warning_message=language_wrapper.language_word_dict.get("pet_choose_puppet_message")
     )

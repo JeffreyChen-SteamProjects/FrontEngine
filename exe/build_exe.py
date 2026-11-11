@@ -99,8 +99,8 @@ def build_command(version: str, onefile: bool, output_dir: Path | None = None, j
     # Pillow loads decoder plugins dynamically; optional puppet assets may need package data.
     if find_spec('PIL') is not None:
         command.append('--include-package=PIL')
-    if find_spec('Imervue') is not None:
-        command.append('--include-package-data=Imervue')
+    if find_spec('rigora') is not None:
+        command.extend(('--include-package=rigora', '--include-package-data=rigora'))
     for package in ('av', 'pyvirtualcam'):
         if find_spec(package) is not None:
             command.append('--include-package='+package)

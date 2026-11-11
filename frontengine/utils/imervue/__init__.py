@@ -1,1 +1,1 @@
-"""Optional, validated interoperability with Imervue's open puppet runtime."""
+"""Optional, validated interoperability with Rigora's open puppet runtime."""

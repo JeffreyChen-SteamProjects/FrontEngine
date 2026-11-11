@@ -11,13 +11,13 @@ from frontengine.show.pet.inkside.puppet_export import BINDINGS, export_puppet
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.utils.pet_pack.layered import ACTIONS
 
-pytest.importorskip('Imervue.puppet.document_io')
+pytest.importorskip('rigora.puppet.document_io')
 
 
 @pytest.mark.parametrize('template', TEMPLATES, ids=lambda template: template.ident)
 def test_every_character_exports_a_valid_bound_puppet(tmp_path, template):
-    from Imervue.puppet.document_io import load_puppet
-    from Imervue.puppet.validator import validate
+    from rigora.puppet.document_io import load_puppet
+    from rigora.puppet.validator import validate
     model, script = export_puppet(template.ident, tmp_path)
     with zipfile.ZipFile(model) as archive:
         assert archive.namelist()[0] == 'mimetype'

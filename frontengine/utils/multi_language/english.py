@@ -761,7 +761,7 @@ english_word_dict = {
     'render_no_overlays': 'No composited overlays are open.',
     'pet_choose_script': 'Choose puppet script...',
     'scene_puppet': 'Puppet',
-    'scene_puppet_hint': 'Use an Imervue character in this scene.',
+    'scene_puppet_hint': 'Use a Rigora character in this scene.',
     'scene_puppet_choose': 'Choose .puppet...',
     'scene_puppet_add': 'Add puppet to scene',
     'scene_x': 'X',

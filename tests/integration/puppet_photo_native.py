@@ -24,8 +24,8 @@ def require(condition, message: str) -> None:
 
 
 def fixture(path: Path) -> None:
-    from Imervue.puppet.document import Drawable, Expression, ExpressionParam, Parameter, PuppetDocument
-    from Imervue.puppet.document_io import save_puppet
+    from rigora.puppet.document import Drawable, Expression, ExpressionParam, Parameter, PuppetDocument
+    from rigora.puppet.document_io import save_puppet
 
     texture = QImage(8, 8, QImage.Format.Format_RGBA8888)
     texture.fill(QColor(255, 128, 0, 128))
