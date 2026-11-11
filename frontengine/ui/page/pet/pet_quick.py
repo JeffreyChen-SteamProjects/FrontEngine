@@ -82,7 +82,7 @@ class PetQuickStart:
 
     def live_pets(self) -> list:
         pets = []
-        for pet in list(self.page.pet_list):
+        for pet in self.page.pet_list:
             try:
                 session = pet.profile_session
                 if not session._closed:

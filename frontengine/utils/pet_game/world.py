@@ -138,7 +138,7 @@ class World:
         found.screen, found.x, found.y, found.width_cells = screen, int(x), int(y), width
         found.areas = tuple((first, min(last, width - 1), tag) for first, last, tag in found.areas if first < width)
         found.entrance = min(found.entrance, width - 1)
-        for piece, definition in list(self.in_zone(zone)):
+        for piece, definition in self.in_zone(zone):
             if piece.cell + definition.width > width:
                 self.store(piece.identifier)
         for resident in self.residents.values():

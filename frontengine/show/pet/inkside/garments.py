@@ -17,6 +17,10 @@ from frontengine.show.pet.inkside.template import Template
 
 HAT_Z, NECK_Z, BODY_Z, STRAP_Z, BACK_Z = 60, 49, 33, 37, 14
 
+_WINTER_WALK = 'WINTER WALK'
+_SCHOOL_DAY = 'SCHOOL DAY'
+_BEACH_DAY = 'BEACH DAY'
+
 
 @dataclass(frozen=True)
 class Piece:
@@ -474,8 +478,8 @@ GARMENTS = (
     _g('big-scarf', 'SLOW SUNDAY', 'Big scarf', ['neck'], {'cloth': C}, Piece('head', NECK_Z, _scarf)),
     _g('sweater', 'SLOW SUNDAY', 'Wide sweater', ['body'], {'cloth': K, 'pocket': P, 'sleeve': K, 'cuff': P},
        Piece('body', BODY_Z, _sweater), *_sleeves(_cuffed_sleeve)),
-    _g('knit-beanie', 'WINTER WALK', 'Knit beanie', ['head'], {'cloth': C, 'trim': P}, Piece('head', HAT_Z, _knit_beanie)),
-    _g('puffer-jacket', 'WINTER WALK', 'Puffer jacket', ['body'], {'cloth': C, 'trim': K, 'sleeve': C, 'cuff': K},
+    _g('knit-beanie', _WINTER_WALK, 'Knit beanie', ['head'], {'cloth': C, 'trim': P}, Piece('head', HAT_Z, _knit_beanie)),
+    _g('puffer-jacket', _WINTER_WALK, 'Puffer jacket', ['body'], {'cloth': C, 'trim': K, 'sleeve': C, 'cuff': K},
        Piece('body', BODY_Z, _puffer), *_sleeves(_cuffed_sleeve)),
     _g('chef-hat', 'KITCHEN', 'Chef hat', ['head'], {'cloth': P}, Piece('head', HAT_Z, _chef_hat)),
     _g('neckerchief', 'KITCHEN', 'Neckerchief', ['neck'], {'cloth': C, 'trim': K}, Piece('head', NECK_Z, _neckerchief)),
@@ -484,13 +488,13 @@ GARMENTS = (
     _g('party-hat', 'PARTY', 'Party hat', ['head'], {'cloth': C, 'trim': P}, Piece('head', HAT_Z, _party_hat)),
     _g('confetti-shirt', 'PARTY', 'Confetti shirt', ['body'], {'cloth': K, 'trim': C, 'pocket': P, 'sleeve': K},
        Piece('body', BODY_Z, _confetti_shirt), *_sleeves()),
-    _g('student-cap', 'SCHOOL DAY', 'Student cap', ['head'], {'cloth': K, 'trim': C}, Piece('head', HAT_Z, _student_cap)),
-    _g('blazer', 'SCHOOL DAY', 'Blazer', ['body'], {'cloth': K, 'trim': P, 'pocket': C, 'sleeve': K, 'cuff': P},
+    _g('student-cap', _SCHOOL_DAY, 'Student cap', ['head'], {'cloth': K, 'trim': C}, Piece('head', HAT_Z, _student_cap)),
+    _g('blazer', _SCHOOL_DAY, 'Blazer', ['body'], {'cloth': K, 'trim': P, 'pocket': C, 'sleeve': K, 'cuff': P},
        Piece('body', BODY_Z, _blazer), *_sleeves(_cuffed_sleeve)),
-    _g('satchel', 'SCHOOL DAY', 'Satchel', ['back'], {'cloth': C, 'trim': K}, Piece('body', STRAP_Z, _satchel)),
-    _g('straw-hat', 'BEACH DAY', 'Straw hat', ['head'], {'cloth': P, 'trim': C}, Piece('head', HAT_Z, _straw_hat)),
-    _g('flower-lei', 'BEACH DAY', 'Flower lei', ['neck'], {'cloth': C, 'trim': P}, Piece('head', NECK_Z, _flower_lei)),
-    _g('striped-tee', 'BEACH DAY', 'Striped tee', ['body'], {'cloth': P, 'trim': C, 'sleeve': P},
+    _g('satchel', _SCHOOL_DAY, 'Satchel', ['back'], {'cloth': C, 'trim': K}, Piece('body', STRAP_Z, _satchel)),
+    _g('straw-hat', _BEACH_DAY, 'Straw hat', ['head'], {'cloth': P, 'trim': C}, Piece('head', HAT_Z, _straw_hat)),
+    _g('flower-lei', _BEACH_DAY, 'Flower lei', ['neck'], {'cloth': C, 'trim': P}, Piece('head', NECK_Z, _flower_lei)),
+    _g('striped-tee', _BEACH_DAY, 'Striped tee', ['body'], {'cloth': P, 'trim': C, 'sleeve': P},
        Piece('body', BODY_Z, _striped_tee), *_sleeves()),
 )
 
@@ -511,9 +515,9 @@ OUTFITS = (
     ('LAST TRAIN', 'inkside-ink', ('conductor-cap', 'bow-tie', 'train-cape')),
     ('DEEP DIVE', 'inkside-gill', ('goggles', 'wetsuit', 'gear-pack')),
     ('SLOW SUNDAY', 'inkside-gill', ('big-scarf', 'sweater')),
-    ('WINTER WALK', 'inkside-mochi', ('knit-beanie', 'puffer-jacket', 'big-scarf')),
+    (_WINTER_WALK, 'inkside-mochi', ('knit-beanie', 'puffer-jacket', 'big-scarf')),
     ('KITCHEN', 'inkside-moss', ('chef-hat', 'neckerchief', 'chef-jacket')),
     ('PARTY', 'inkside-pip', ('party-hat', 'bow-tie', 'confetti-shirt')),
-    ('SCHOOL DAY', 'inkside-bolt', ('student-cap', 'blazer', 'satchel')),
-    ('BEACH DAY', 'inkside-gill', ('straw-hat', 'flower-lei', 'striped-tee')),
+    (_SCHOOL_DAY, 'inkside-bolt', ('student-cap', 'blazer', 'satchel')),
+    (_BEACH_DAY, 'inkside-gill', ('straw-hat', 'flower-lei', 'striped-tee')),
 )

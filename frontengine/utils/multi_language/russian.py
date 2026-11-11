@@ -1,3 +1,6 @@
+_SIZE_LABEL = 'Размер'
+
+
 russian_word_dict = {
     # Menubar
     "menu_bar_language": "Выбор языка",
@@ -46,7 +49,7 @@ russian_word_dict = {
     "presentation_zoom": "Масштаб",
     "widgets_style": "Стиль",
     "widgets_history": "История",
-    "focus_mask_size_label": "Размер",
+    "focus_mask_size_label": _SIZE_LABEL,
     "tools_mode": "Режим",
     "tools_action": "Действие",
     "tools_fps": "Кадров в секунду",
@@ -434,7 +437,7 @@ russian_word_dict = {
     "focus_mask_region_full": "Весь экран",
     "focus_hint": "Оба слоя пропускают щелчки насквозь — то, что они закрывают, продолжает работать, просто перестаёт отвлекать.",
     "tab_pet_text": "Питомец",
-    "pet_size_label": "Размер",
+    "pet_size_label": _SIZE_LABEL,
     "pet_speed_label": "Скорость",
     "pet_behaviour_label": "Поведение",
     'pet_chatter_label': "Болтовня",
@@ -1700,7 +1703,7 @@ russian_word_dict = {
     "pet_game_wish_cozy_bed": "уютная кровать (поставьте её)",
     "pet_home_theme": "Тема",
     "pet_home_reduced_motion": "Меньше движения",
-    "pet_home_strip_size": "Размер",
+    "pet_home_strip_size": _SIZE_LABEL,
     "pet_home_strip_size_setting": "Размер на рабочем столе",
     "pet_home_strip_size_hint": "Её также меняет Ctrl + колесо мыши над питомцем или мебелью на рабочем столе.",
     "pet_home_card_hint": "Двойной щелчок — погладить · правый щелчок — ещё",

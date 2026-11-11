@@ -55,7 +55,7 @@ def snapshot(world: World, zone: str) -> list[dict]:
 
 def restore(world: World, zone: str, saved: list[dict]) -> int:
     """Put the zone back; nonzero means a storage or placement operation failed."""
-    for piece, _definition in list(world.in_zone(zone)):
+    for piece, _definition in world.in_zone(zone):
         if world.store(piece.identifier) != "accepted":
             return 1
     missed = 0
@@ -165,7 +165,7 @@ def apply_layout(world: World, zone: str, pieces, transaction: str, buy_missing:
                 continue
             for index in range(count):
                 world.buy(name, f"{transaction}:{name}:{index}")
-    for piece, _definition in list(world.in_zone(zone)):
+    for piece, _definition in world.in_zone(zone):
         world.store(piece.identifier)
     pieces = list(pieces)
     ordered = (pieces[index] for index in _stairs_first(world, (name for name, _cell, _flipped in pieces)))

@@ -147,7 +147,8 @@ def test_layout_codes_round_trip_and_reject_anything_else():
     world, zone = _world()
     code = arrangement.encode_layout(world, zone)
     assert arrangement.decode_layout(code, CATALOG) == arrangement.layout_of(world, zone)
-    assert "ledger" not in code and "residents" not in code
+    assert "ledger" not in code
+    assert "residents" not in code
     for bad in ("not json", json.dumps({"format": "other"}), json.dumps(
             {"format": arrangement.LAYOUT_FORMAT, "version": 1, "pieces": [["../../evil", 1, False]]}),
             json.dumps({"format": arrangement.LAYOUT_FORMAT, "version": 1, "pieces": [["bed_basic", "1", False]]}),

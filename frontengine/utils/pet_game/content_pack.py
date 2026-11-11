@@ -116,6 +116,13 @@ def _picture(root: Path, theme: str, art: str) -> Path | None:
     return candidate
 
 
+def _piece_art(raw: dict, local: str) -> str:
+    art = raw.get("art", local)
+    if not isinstance(art, str) or not _LOCAL_ID.fullmatch(art):
+        raise ValueError("Invalid pack furniture art")
+    return art
+
+
 def _piece(raw: object, pack: str) -> tuple[FurnitureDefinition, str]:
     if not isinstance(raw, dict) or not set(raw) <= _PIECE_FIELDS or not (_PIECE_FIELDS - _OPTIONAL_PIECE_FIELDS) <= set(raw):
         raise ValueError("Invalid pack furniture fields")
@@ -135,9 +142,7 @@ def _piece(raw: object, pack: str) -> tuple[FurnitureDefinition, str]:
     points = raw.get("points", [])
     if not isinstance(points, list):
         raise ValueError("Invalid pack furniture points")
-    art = raw.get("art", local)
-    if not isinstance(art, str) or not _LOCAL_ID.fullmatch(art):
-        raise ValueError("Invalid pack furniture art")
+    art = _piece_art(raw, local)
     price = _int(raw.get("price", 0), 0, 10000, "price")
     identifier = f"{pack}__{local}"
     definition = FurnitureDefinition(
@@ -232,7 +237,7 @@ def load_packs(folder: Path, extra_roots: list[Path] = ()) -> tuple[list[Content
             pack = load_pack(root)
             if pack.identifier in seen:
                 raise ValueError("Duplicate pack id")
-        except (OSError, ValueError, UnicodeDecodeError) as error:
+        except (OSError, ValueError) as error:
             errors[root.name] = str(error)
             continue
         seen.add(pack.identifier)

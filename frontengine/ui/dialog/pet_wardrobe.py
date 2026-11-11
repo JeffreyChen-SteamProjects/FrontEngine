@@ -141,7 +141,7 @@ class PetWardrobeDialog(QDialog):
             builtin_row.addWidget(widget)
         builtin_row.addStretch(1)
         layout.addLayout(builtin_row)
-        apply, cancel = self._buttons(layout, (
+        apply, _ = self._buttons(layout, (
             ('pet_custom_apply', 'Apply', self.apply_changes),
             ('pet_custom_cancel', 'Cancel', self.reject),
         ), right=True)

@@ -66,6 +66,10 @@ def test_unknown_pieces_are_counted_as_missing_not_trusted():
     lambda d: d["zones"][0].update(areas=[[0, 99, "living"]]),
     lambda d: d["pieces"].append([5, "bed_basic", 1, False]),
     lambda d: d["pieces"].append([0, "bed_basic", "1", False]),
+    lambda d: d["pieces"].append([0, "bed_basic", True, False]),
+    lambda d: d["pieces"].append([False, "bed_basic", 1, False]),
+    lambda d: d["pieces"].append([0, "bed_basic", 1.0, False]),
+    lambda d: d["pieces"].append([0, "bed_basic", -1, False]),
     lambda d: d["pieces"].append([0, "../../evil", 1, False]),
 ])
 def test_a_malformed_blueprint_is_refused(change):

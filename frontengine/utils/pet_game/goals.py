@@ -44,6 +44,10 @@ class Goal:
 YEAR_DAYS = 28                                      # four seven-day seasons (environment.SEASONS)
 
 
+SETTLED_FLOWERS = "settled:flowers"
+SETTLED_HERBS = "settled:herbs"
+
+
 def day_of_year(world: World) -> int:
     return (game_day(world.time_ms) - 1) % YEAR_DAYS + 1
 
@@ -95,7 +99,7 @@ TUTORIAL = (
 MILESTONES = (
     lambda w: all(goal_done(w, goal) for goal in TUTORIAL),
     lambda w: _stat(w, "settled:letter", "settled:story") > 0,
-    lambda w: _stat(w, "settled:herbs", "settled:flowers") > 0,
+    lambda w: _stat(w, SETTLED_HERBS, SETTLED_FLOWERS) > 0,
     lambda w: _stat(w, "settled:toy", "settled:stool") > 0,
     lambda w: len(w.residents) >= 3,
     lambda w: len(w.furniture) >= 10,
@@ -275,9 +279,9 @@ def _checked_event_days(value: object) -> dict[str, dict[str, int]]:
 
 # Each season asks for one thing the home does anyway; missing it only means waiting for next year.
 SEASONAL = (
-    Goal("spring_flowers", lambda w: (_stat(w, "settled:flowers"), 2), 30, window=(1, 7)),
+    Goal("spring_flowers", lambda w: (_stat(w, SETTLED_FLOWERS), 2), 30, window=(1, 7)),
     Goal("summer_play", lambda w: (_stat(w, "completed:play"), 5), 30, window=(8, 14)),
-    Goal("autumn_harvest", lambda w: (_stat(w, "settled:herbs"), 4), 30, window=(15, 21)),
+    Goal("autumn_harvest", lambda w: (_stat(w, SETTLED_HERBS), 4), 30, window=(15, 21)),
     Goal("winter_cozy", lambda w: (_stat(w, "completed:relax"), 5), 30, window=(22, 28)),
 )
 ALL_GOALS = TUTORIAL + SEASONAL
@@ -443,7 +447,7 @@ def _once_events(world: World) -> None:
     reached = {
         "first_creation": _stat(world, "settled:toy", "settled:stool") > 0,
         "first_story": _stat(world, "settled:story") > 0,
-        "harvest": _stat(world, "settled:herbs", "settled:flowers") >= HARVEST_UNITS,
+        "harvest": _stat(world, SETTLED_HERBS, SETTLED_FLOWERS) >= HARVEST_UNITS,
         "green_home": placed(world, "decoration") >= GREEN_HOME_DECORATIONS,
         "full_house": len(world.residents) >= FULL_HOUSE,
     }
@@ -452,7 +456,7 @@ def _once_events(world: World) -> None:
             _life_event(world, kind, None)
 
 
-def _daily_events(world: World, day: int) -> None:
+def _daily_events(world: World) -> None:
     """Moments that can come back on another day: dinners and the sky."""
     awake = [r for r in world.residents.values() if not r.parked and not r.away
              and (r.activity is None or r.activity.kind not in ("sleep", "nap"))]
@@ -483,9 +487,8 @@ def _resident_events(world: World) -> None:
 
 
 def _check_events(world: World) -> None:
-    day = game_day(world.time_ms)
     _once_events(world)
-    _daily_events(world, day)
+    _daily_events(world)
     _resident_events(world)
     for identifier, since in world.progress.arrivals.items():
         days = (world.time_ms - since) // DAY_MS

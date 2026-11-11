@@ -160,10 +160,12 @@ def test_dragging_and_parking_release_furniture_without_stopping_others():
     world.drag(PET, 10**9)
     assert world.residents[PET].x_milli < world.zones[zone].width_pixels * 1000
     assert world.park(PET, True) == "accepted"
-    frozen = dict(world.residents[PET].needs), world.residents[PET].x_milli
+    frozen_needs = dict(world.residents[PET].needs)
+    frozen_position = world.residents[PET].x_milli
     other_before = world.residents[other].x_milli, dict(world.residents[other].needs)
     _run(world, 2 * MINUTE)
-    assert (dict(world.residents[PET].needs), world.residents[PET].x_milli) == frozen
+    assert dict(world.residents[PET].needs) == frozen_needs
+    assert world.residents[PET].x_milli == frozen_position
     assert (world.residents[other].x_milli, dict(world.residents[other].needs)) != other_before
 
 

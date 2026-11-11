@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from frontengine.utils.pet_game.catalog import CELL_PIXELS
+from frontengine.utils.pet_game.catalog import CELL_PIXELS, Recipe
 from frontengine.utils.pet_game.goals import complete_wish, unlocked
 from frontengine.utils.pet_game.layout import AREA_FOR_ACTIVITY
 from frontengine.utils.pet_game.resident import PROFESSION_TRAITS, Activity, Resident
@@ -213,6 +213,14 @@ def start_work(world: World, resident: Resident, reason: str) -> str | None:
     return blocked or "no_task"
 
 
+def _auto_recipe_available(world: World, recipe: Recipe) -> bool:
+    if not unlocked(world, recipe.unlock_level):
+        return False
+    if any(world.ledger.available(item) < count for item, count in recipe.inputs.items()):
+        return False
+    return not recipe.outputs or any(world.ledger.available(item) < AUTO_STOCK_LIMIT for item in recipe.outputs)
+
+
 def auto_task(world: World, resident: Resident) -> str | None:
     """A resident with nothing to do takes a job it can do here, without anyone setting it up.
 
@@ -226,12 +234,8 @@ def auto_task(world: World, resident: Resident) -> str | None:
     for recipe in world.catalog.recipes.values():
         if recipe.profession not in trades or resident.level(recipe.profession) < recipe.min_level:
             continue
-        if not unlocked(world, recipe.unlock_level):
+        if not _auto_recipe_available(world, recipe):
             continue
-        if any(world.ledger.available(item) < count for item, count in recipe.inputs.items()):
-            continue
-        if recipe.outputs and all(world.ledger.available(item) >= AUTO_STOCK_LIMIT for item in recipe.outputs):
-            continue                       # storage is full of these already
         rank = (PROFESSION_TRAITS.get(recipe.profession) in resident.traits, resident.level(recipe.profession),
                 recipe.min_level, recipe.coins + recipe.experience, recipe.identifier)
         if best is None or rank > best[0]:
@@ -257,7 +261,7 @@ def refusal(world: World, resident: Resident, command: str) -> str | None:
     return None
 
 
-def _start_free(world: World, resident: Resident, reason: str = "free_time") -> None:
+def _free_choices(world: World, resident: Resident, reason: str) -> list[tuple[str, int]]:
     weights = dict(FREE_WEIGHTS)
     if reason == "cheer_up":
         weights["idle"] = 0
@@ -271,7 +275,11 @@ def _start_free(world: World, resident: Resident, reason: str = "free_time") -> 
         choices.append(("visit", VISIT_WEIGHT))
     if _help_partner(world, resident) is not None:
         choices.append(("help", HELP_WEIGHT))
-    kind = world.rng.weighted(choices)
+    return choices
+
+
+def _start_free(world: World, resident: Resident, reason: str = "free_time") -> None:
+    kind = world.rng.weighted(_free_choices(world, resident, reason))
     if kind == "visit":
         start_visit(world, resident, "visiting")
         return

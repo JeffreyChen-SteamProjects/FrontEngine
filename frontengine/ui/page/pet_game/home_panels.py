@@ -523,7 +523,7 @@ class LayoutPanel:
             with source.open("rb") as stream:
                 raw = stream.read(MAX_BLUEPRINT_BYTES + 1)
             world, missing = visit_blueprint(raw.decode("utf-8"), self.page.service.store.catalog)
-        except (OSError, ValueError, UnicodeDecodeError) as error:
+        except (OSError, ValueError) as error:
             self.page.report_message("pet_home_blueprint_invalid", "That file is not a home blueprint ({error}).",
                                      error=str(error))
             return None
