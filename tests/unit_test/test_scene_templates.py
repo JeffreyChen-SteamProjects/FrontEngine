@@ -44,8 +44,9 @@ def test_builtin_templates_are_independent_finite_self_contained_layouts():
             fit_template(second, size)
 
 
-def test_missing_assets_disable_template_apply_and_leave_editor_unchanged(tmp_path):
-    page = SceneSettingUI()
+def test_missing_assets_disable_template_apply_and_leave_editor_unchanged(tmp_path, *, lifetime_factory):
+    lifetime_factory()
+    page = SceneSettingUI(lifetime=lifetime_factory())
     page.visual_editor.document.reset({'original': {'type': 'TEXT', 'text': 'Keep'}})
     missing = tmp_path / 'missing.png'
     template = SimpleNamespace(identifier='missing', title_key='template_work',
@@ -65,8 +66,9 @@ def test_missing_assets_disable_template_apply_and_leave_editor_unchanged(tmp_pa
         page.close()
 
 
-def test_apply_template_creates_editable_playback_and_portable_export(tmp_path):
-    page = SceneSettingUI()
+def test_apply_template_creates_editable_playback_and_portable_export(tmp_path, *, lifetime_factory):
+    lifetime_factory()
+    page = SceneSettingUI(lifetime=lifetime_factory())
     dialog = SceneTemplatesDialog(page)
     try:
         dialog.list.setCurrentRow(2)
@@ -96,8 +98,9 @@ def test_apply_template_creates_editable_playback_and_portable_export(tmp_path):
         page.close()
 
 
-def test_close_template_dialog_cancels_only_its_waiting_request():
-    page = SceneSettingUI()
+def test_close_template_dialog_cancels_only_its_waiting_request(*, lifetime_factory):
+    lifetime_factory()
+    page = SceneSettingUI(lifetime=lifetime_factory())
     page.actions.deleteLater()
     gate, started = Event(), Event()
     original = {'original': {'type': 'TEXT', 'text': 'Keep'}}
@@ -128,8 +131,9 @@ def test_close_template_dialog_cancels_only_its_waiting_request():
         page.close()
 
 
-def test_closed_old_dialog_does_not_cancel_a_newer_scene_request():
-    page = SceneSettingUI()
+def test_closed_old_dialog_does_not_cancel_a_newer_scene_request(*, lifetime_factory):
+    lifetime_factory()
+    page = SceneSettingUI(lifetime=lifetime_factory())
     dialog = SceneTemplatesDialog(page)
     try:
         dialog.apply_template()
@@ -144,8 +148,9 @@ def test_closed_old_dialog_does_not_cancel_a_newer_scene_request():
         page.close()
 
 
-def test_template_requests_validate_screen_values_before_allocation():
-    page = SceneSettingUI()
+def test_template_requests_validate_screen_values_before_allocation(*, lifetime_factory):
+    lifetime_factory()
+    page = SceneSettingUI(lifetime=lifetime_factory())
     try:
         for screen in (True, -1, 'unknown'):
             with pytest.raises(ValueError):

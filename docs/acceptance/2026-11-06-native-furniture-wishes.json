@@ -1,0 +1,215 @@
+{
+  "product_commit": "fbf7ea5c",
+  "cases": {
+    "new_leisure": {
+      "native": {
+        "passed": true,
+        "granted": [
+          {
+            "kind": "wish_granted",
+            "resident": "cd53a59142a7496d92090f3a38904067",
+            "time": 56478000,
+            "wish": "new_leisure"
+          }
+        ],
+        "inbox_rows": [
+          {
+            "key": [
+              "wish_granted",
+              "cd53a59142a7496d92090f3a38904067",
+              null,
+              null,
+              null,
+              null,
+              null,
+              "Recovery worker",
+              [
+                "",
+                ""
+              ]
+            ],
+            "event": {
+              "kind": "wish_granted",
+              "resident": "cd53a59142a7496d92090f3a38904067",
+              "time": 56478000,
+              "wish": "new_leisure",
+              "resident_name": "Recovery worker",
+              "recipe_label": [
+                "",
+                ""
+              ]
+            },
+            "count": 1,
+            "time": 56478000,
+            "category": "life"
+          }
+        ],
+        "coins_before": 191,
+        "coins_after": 270,
+        "affection_before": 3,
+        "affection_after": 6,
+        "wish_state": {
+          "wish": null,
+          "base": 0,
+          "ready": 56778000
+        },
+        "purchase_price": 60,
+        "furniture": "armchair",
+        "purchase_button_clicked": true,
+        "cooldown_no_repeat": true,
+        "explicit_ticks": 310,
+        "automatic": true,
+        "fixture": "Existing earned-inventory home, new_leisure wish assigned explicitly; runtime default automation also claims available goals and commissions.",
+        "runtime_closed": true,
+        "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+        "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-stage-layout\\.audit\\profession-owned-fixed",
+        "saved_snapshot_sha256": "c471f2056e3bf47d41a8073e4a214f8eccec310f6c85a5f6088181f0c4b05172",
+        "scope": "Native MainUI private desktop; new_leisure wish fixture; real local shop button, 310 injected200ms ticks, actual service signals/Inbox/save; host starts/Workshop/lock query substituted. Not random-wish-generation or normal-speed acceptance.",
+        "temporary_directory_removed": true
+      },
+      "cold": {
+        "passed": true,
+        "world_exact": true,
+        "profiles_exact": true,
+        "leases_reacquired": true,
+        "automatic_ticks": 155,
+        "wish_events_after_reopen": 0,
+        "coins_after_reopen": 270,
+        "reward_state_unchanged": true,
+        "saved_snapshot_exact": true,
+        "temporary_directory_removed": true,
+        "scope": "Independent offscreen process, disk-owned profiles and home; normal shutdown only."
+      },
+      "observer": {
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "child_exit": 0,
+        "observation_only": true
+      },
+      "image_sha256": "29d94e7116cc29cca2fcf9d2bab9d9031295d313436149ba0b907918b3d1db46",
+      "native_harness": "import hashlib\nimport json\nimport logging\nimport os\nfrom pathlib import Path\nimport shutil\nimport sys\nimport tempfile\nimport traceback\nimport uuid\nfrom time import monotonic\n\nsys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'ownership-integration/.audit'))\nfrom complete_main_onboarding_native import observation\n\nROOT = Path(__file__).resolve().parents[1]\nsys.path.insert(0, str(ROOT))\nsys.path.insert(0, str(ROOT / 'tests/integration'))\nimport hidden_desktop\n\nsource = Path(sys.argv[1]).resolve()\noutput = Path(sys.argv[2]).resolve()\noutput.mkdir(parents=True, exist_ok=True)\nif not hidden_desktop.is_child(output):\n    assert not (output / 'result.json').exists(), 'Use a fresh output directory'\n    hidden_desktop.DESKTOP = f'FrontEngineColdReload{os.getpid()}_{uuid.uuid4().hex[:8]}'\n    before = observation()\n    code = hidden_desktop.run_on_hidden_desktop(__file__, str(source), str(output), timeout_ms=180000)\n    (output / 'observer.json').write_text(json.dumps({'before': before, 'after': observation(),\n        'child_exit': code, 'observation_only': True}, indent=2), encoding='utf-8')\n    raise SystemExit(code)\n\nos.environ['QT_QPA_PLATFORM'] = 'windows'\nexpected = json.loads((source / 'shutdown-world.json').read_text(encoding='utf-8'))\nresult = {'passed': False}\ntry:\n    with tempfile.TemporaryDirectory(prefix='fe-current-cold-reload-') as folder:\n        shutil.copytree(source / 'settings', folder, dirs_exist_ok=True)\n        previous = Path.cwd()\n        os.chdir(folder)\n        try:\n            from PySide6.QtCore import QCoreApplication, QEvent\n            from PySide6.QtTest import QTest\n            from PySide6.QtWidgets import QApplication\n            from frontengine.ui.page.pet_game import home_page\n            from frontengine.utils.session_lock import session_lock\n            from frontengine.user_setting.user_setting_file import user_setting_dict\n            from frontengine.utils.pet_game import snapshot\n\n            home_page.workshop_pack_roots = lambda: []\n            session_lock.is_session_locked = lambda: False\n            app = QApplication([])\n            app.setQuitOnLastWindowClosed(False)\n            screen = app.primaryScreen()\n            for zone in expected['zones']:\n                zone['screen'] = (screen.name() or 'primary')[:128]\n            Path('pet-home.json').write_text(json.dumps(expected, ensure_ascii=False), encoding='utf-8')\n            from frontengine.ui import main_ui\n            main_ui.CriticalExit.init_critical_exit = lambda self: None\n            main_ui.HotkeyService.start = lambda self: False\n            main_ui.AppProfileService.start = lambda self: None\n            main_ui.ShareWatchService.start = lambda self: None\n            window = main_ui.FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)\n            lifetime = window.lifetime\n            page = window.pet_home_ui\n            try:\n                actual = snapshot.to_dict(page.service.world)\n                assert actual == expected, 'Cold process world differs from final shutdown snapshot'\n                residents = set(page.service.world.residents)\n                records = user_setting_dict['pet_profiles']['records']\n                assert residents <= set(records), 'Resident profiles missing from settings'\n                assert residents == set(page.service.sessions), 'Resident identity leases were not reacquired'\n                page.service.pause('acceptance')\n                window.resize(1280, 960)\n                window.show()\n                window.sidebar.select_page_id(\"tab_pet_home_text\")\n                page.refresh()\n                from frontengine.utils.pet_game import goals\n                from frontengine.ui.page.pet_game.home_things import ROLE_KEY\n                from frontengine.ui.page.wrapping_buttons import WrappingPushButton\n                from frontengine.utils.multi_language.retranslate import translate\n                service = page.service\n                world = service.world\n                pet = next(iter(world.residents))\n                resident = world.residents[pet]\n                world.progress.wishes[pet] = {'wish':'new_leisure', 'base':goals.WISHES['new_leisure'](world,resident), 'ready':0}\n                affection_before = resident.affection\n                coins_before = world.ledger.coins\n                planted_before = goals.WISHES['new_leisure'](world,resident)\n                events = []\n                service.events_ready.connect(events.extend)\n                page.refresh()\n                QTest.qWait(200)\n                page._select_home_tab('pet_home_shop_section')\n                QTest.qWait(200)\n                item = next(page.shop.items.item(i) for i in range(page.shop.items.count())\n                            if page.shop.items.item(i).data(ROLE_KEY) == 'furniture:armchair')\n                page.shop.items.setCurrentItem(item)\n                button = next(b for b in page.shop.section.findChildren(WrappingPushButton)\n                              if b.text() == translate('pet_home_buy','Buy'))\n                button.click()\n                assert world.ledger.coins == coins_before - 60\n                assert goals.WISHES['new_leisure'](world,resident) == planted_before + 1\n                service.timer.stop()\n                service.periodic.stop()\n                clock = [100.0]\n                service._clock = lambda: clock[0]\n                service._last = clock[0]\n                for _ in range(155):\n                    clock[0] += .2\n                    service._tick()\n                granted = [e for e in events if e['kind']=='wish_granted']\n                assert len(granted)==1 and granted[0]['wish']=='new_leisure' and granted[0]['resident']==pet\n                assert resident.affection == affection_before + goals.WISH_AFFECTION\n                state = dict(world.progress.wishes[pet])\n                assert state['wish'] is None and state['ready'] > world.time_ms\n                rows = [e for e in page.inbox.entries if e['event']['kind']=='wish_granted']\n                assert len(rows)==1 and rows[0]['count']==1\n                affection_after = resident.affection\n                for _ in range(155):\n                    clock[0] += .2\n                    service._tick()\n                assert len([e for e in events if e['kind']=='wish_granted'])==1\n                assert resident.affection == affection_after\n                assert world.progress.wishes[pet] == state\n                assert service.save_now()\n                assert json.loads(service.store.path.read_text(encoding='utf-8')) == snapshot.to_dict(world)\n                page._select_home_tab('pet_home_inbox_section')\n                QTest.qWait(200)\n                assert not page.inbox.list.visibleRegion().isEmpty()\n                assert window.grab().save(str(output/'wish-inbox.png'))\n                result.update(granted=granted, inbox_rows=rows, coins_before=coins_before,coins_after=world.ledger.coins,\n                              affection_before=affection_before,affection_after=affection_after,wish_state=state,\n                              purchase_price=60, furniture='armchair', purchase_button_clicked=True,cooldown_no_repeat=True,explicit_ticks=310,\n                              automatic=world.automatic, fixture='Existing earned-inventory home, new_leisure wish assigned explicitly; runtime default automation also claims available goals and commissions.')\n                final_world = snapshot.to_dict(world)\n                final_profiles = service.profiles.profiles()\n            finally:\n                window.request_shutdown()\n                deadline = monotonic() + 120\n                while not lifetime.closed and monotonic() < deadline:\n                    QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)\n                    app.processEvents()\n                    QTest.qWait(10)\n                assert lifetime.closed, (lifetime.state, lifetime.error)\n            final_world = snapshot.to_dict(world)\n            shutil.copytree(folder, output / 'settings', ignore=shutil.ignore_patterns('.frontengine-owner.lock'))\n            (output / 'shutdown-world.json').write_text(json.dumps(final_world, ensure_ascii=False), encoding='utf-8')\n            (output / 'profiles.json').write_text(json.dumps(final_profiles, ensure_ascii=False), encoding='utf-8')\n            result.update(passed=True, runtime_closed=True, python=sys.version,\n                source=str(source), saved_snapshot_sha256=hashlib.sha256((source / 'shutdown-world.json').read_bytes()).hexdigest(),\n                scope='Native MainUI private desktop; new_leisure wish fixture; real local shop button, 310 injected200ms ticks, actual service signals/Inbox/save; host starts/Workshop/lock query substituted. Not random-wish-generation or normal-speed acceptance.')\n        finally:\n            logging.shutdown()\n            os.chdir(previous)\n    result['temporary_directory_removed'] = True\nexcept Exception:\n    result.update(passed=False, error=traceback.format_exc())\n(output / 'result.json').write_text(json.dumps(result, indent=2), encoding='utf-8')\nraise SystemExit(0 if result['passed'] else 1)\n",
+      "cold_harness": "import json\nimport os\nfrom pathlib import Path\nimport shutil\nimport sys\nimport tempfile\n\nROOT = Path(__file__).resolve().parents[1]\nSOURCE = ROOT / '.audit/native-new_leisure-wish'\nsys.path.insert(0, str(ROOT))\nos.environ['QT_QPA_PLATFORM'] = 'offscreen'\nexpected = json.loads((SOURCE / 'shutdown-world.json').read_text(encoding='utf-8'))\nexpected_profiles = json.loads((SOURCE / 'profiles.json').read_text(encoding='utf-8'))\nprogression = json.loads((SOURCE / 'result.json').read_text(encoding='utf-8'))\nwith tempfile.TemporaryDirectory(prefix='fe-profession-cold-') as folder:\n    previous = Path.cwd()\n    os.chdir(folder)\n    shutil.copytree(SOURCE / 'settings', Path(folder) / 'settings')\n    from PySide6.QtWidgets import QApplication\n    from frontengine.show.pet_game.home_service import HomeService\n    from frontengine.user_setting.storage_session import StorageSession\n    from frontengine.user_setting.pet_game_save import HomeSaveStore\n    from frontengine.utils.pet_game.catalog import builtin_catalog\n    from frontengine.utils.pet_game import snapshot\n    app = QApplication([])\n    owner = StorageSession.open(Path(folder) / 'settings')\n    store = HomeSaveStore(owner, builtin_catalog())\n    service = HomeService(None, store, owner.profiles())\n    retried = 0\n    try:\n        assert service.open().status == 'loaded'\n        world = service.world\n        def differences(left, right, path=''):\n            if isinstance(left, dict) and isinstance(right, dict):\n                return [d for k in left.keys() | right.keys() for d in differences(left.get(k), right.get(k), path+'/'+k)]\n            return [] if left == right else [(path, left, right)]\n        assert snapshot.to_dict(world) == expected, differences(expected, snapshot.to_dict(world))\n        assert owner.profiles().profiles() == expected_profiles\n        assert set(service.sessions) == set(world.residents)\n        from frontengine.utils.pet_game import goals\n        events = []\n        service.events_ready.connect(events.extend)\n        service.timer.stop()\n        service.periodic.stop()\n        clock = [100.0]\n        service._clock = lambda: clock[0]\n        service._last = clock[0]\n        for _ in range(155):\n            clock[0] += .2\n            service._tick()\n        assert not [e for e in events if e['kind'] in ('wish_granted',)]\n        after = snapshot.to_dict(world)\n        assert after['ledger'] == expected['ledger']\n        assert after['progress']['wishes'] == expected['progress']['wishes']\n        assert [r['affection'] for r in after['residents']] == [r['affection'] for r in expected['residents']]\n        assert after['progress']['goals'] == expected['progress']['goals']\n        assert after['progress']['commissions'] == expected['progress']['commissions']\n        assert service.save_now()\n        assert json.loads(store.path.read_text(encoding='utf-8')) == after\n        assert service.shutdown()\n    finally:\n        service.shutdown()\n        store.close()\n        owner.close()\n        os.chdir(previous)\nresult = {'passed': True, 'world_exact': True, 'profiles_exact': True,\n          'leases_reacquired': True, 'automatic_ticks': 155, 'wish_events_after_reopen': 0, 'coins_after_reopen': world.ledger.coins,\n          'reward_state_unchanged': True, 'saved_snapshot_exact': True,\n          'temporary_directory_removed': not Path(folder).exists(),\n          'scope': 'Independent offscreen process, disk-owned profiles and home; normal shutdown only.'}\n(SOURCE / 'cold-result.json').write_text(json.dumps(result, indent=2), encoding='utf-8')\nprint(json.dumps(result))\n"
+    },
+    "cozy_bed": {
+      "native": {
+        "passed": true,
+        "granted": [
+          {
+            "kind": "wish_granted",
+            "resident": "cd53a59142a7496d92090f3a38904067",
+            "time": 56478000,
+            "wish": "cozy_bed"
+          }
+        ],
+        "inbox_rows": [
+          {
+            "key": [
+              "wish_granted",
+              "cd53a59142a7496d92090f3a38904067",
+              null,
+              null,
+              null,
+              null,
+              null,
+              "Recovery worker",
+              [
+                "",
+                ""
+              ]
+            ],
+            "event": {
+              "kind": "wish_granted",
+              "resident": "cd53a59142a7496d92090f3a38904067",
+              "time": 56478000,
+              "wish": "cozy_bed",
+              "resident_name": "Recovery worker",
+              "recipe_label": [
+                "",
+                ""
+              ]
+            },
+            "count": 1,
+            "time": 56478000,
+            "category": "life"
+          }
+        ],
+        "coins_before": 191,
+        "coins_after": 210,
+        "affection_before": 3,
+        "affection_after": 6,
+        "wish_state": {
+          "wish": null,
+          "base": 0,
+          "ready": 56778000
+        },
+        "purchase_price": 120,
+        "furniture": "bed_cozy",
+        "purchase_button_clicked": true,
+        "cooldown_no_repeat": true,
+        "explicit_ticks": 310,
+        "automatic": true,
+        "fixture": "Existing earned-inventory home, cozy_bed wish assigned explicitly; runtime default automation also claims available goals and commissions.",
+        "runtime_closed": true,
+        "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+        "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-stage-layout\\.audit\\profession-owned-fixed",
+        "saved_snapshot_sha256": "c471f2056e3bf47d41a8073e4a214f8eccec310f6c85a5f6088181f0c4b05172",
+        "scope": "Native MainUI private desktop; cozy_bed wish fixture; real local shop button, 310 injected200ms ticks, actual service signals/Inbox/save; host starts/Workshop/lock query substituted. Not random-wish-generation or normal-speed acceptance.",
+        "temporary_directory_removed": true
+      },
+      "cold": {
+        "passed": true,
+        "world_exact": true,
+        "profiles_exact": true,
+        "leases_reacquired": true,
+        "automatic_ticks": 155,
+        "wish_events_after_reopen": 0,
+        "coins_after_reopen": 210,
+        "reward_state_unchanged": true,
+        "saved_snapshot_exact": true,
+        "temporary_directory_removed": true,
+        "scope": "Independent offscreen process, disk-owned profiles and home; normal shutdown only."
+      },
+      "observer": {
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "child_exit": 0,
+        "observation_only": true
+      },
+      "image_sha256": "29d94e7116cc29cca2fcf9d2bab9d9031295d313436149ba0b907918b3d1db46",
+      "native_harness": "import hashlib\nimport json\nimport logging\nimport os\nfrom pathlib import Path\nimport shutil\nimport sys\nimport tempfile\nimport traceback\nimport uuid\nfrom time import monotonic\n\nsys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'ownership-integration/.audit'))\nfrom complete_main_onboarding_native import observation\n\nROOT = Path(__file__).resolve().parents[1]\nsys.path.insert(0, str(ROOT))\nsys.path.insert(0, str(ROOT / 'tests/integration'))\nimport hidden_desktop\n\nsource = Path(sys.argv[1]).resolve()\noutput = Path(sys.argv[2]).resolve()\noutput.mkdir(parents=True, exist_ok=True)\nif not hidden_desktop.is_child(output):\n    assert not (output / 'result.json').exists(), 'Use a fresh output directory'\n    hidden_desktop.DESKTOP = f'FrontEngineColdReload{os.getpid()}_{uuid.uuid4().hex[:8]}'\n    before = observation()\n    code = hidden_desktop.run_on_hidden_desktop(__file__, str(source), str(output), timeout_ms=180000)\n    (output / 'observer.json').write_text(json.dumps({'before': before, 'after': observation(),\n        'child_exit': code, 'observation_only': True}, indent=2), encoding='utf-8')\n    raise SystemExit(code)\n\nos.environ['QT_QPA_PLATFORM'] = 'windows'\nexpected = json.loads((source / 'shutdown-world.json').read_text(encoding='utf-8'))\nresult = {'passed': False}\ntry:\n    with tempfile.TemporaryDirectory(prefix='fe-current-cold-reload-') as folder:\n        shutil.copytree(source / 'settings', folder, dirs_exist_ok=True)\n        previous = Path.cwd()\n        os.chdir(folder)\n        try:\n            from PySide6.QtCore import QCoreApplication, QEvent\n            from PySide6.QtTest import QTest\n            from PySide6.QtWidgets import QApplication\n            from frontengine.ui.page.pet_game import home_page\n            from frontengine.utils.session_lock import session_lock\n            from frontengine.user_setting.user_setting_file import user_setting_dict\n            from frontengine.utils.pet_game import snapshot\n\n            home_page.workshop_pack_roots = lambda: []\n            session_lock.is_session_locked = lambda: False\n            app = QApplication([])\n            app.setQuitOnLastWindowClosed(False)\n            screen = app.primaryScreen()\n            for zone in expected['zones']:\n                zone['screen'] = (screen.name() or 'primary')[:128]\n            Path('pet-home.json').write_text(json.dumps(expected, ensure_ascii=False), encoding='utf-8')\n            from frontengine.ui import main_ui\n            main_ui.CriticalExit.init_critical_exit = lambda self: None\n            main_ui.HotkeyService.start = lambda self: False\n            main_ui.AppProfileService.start = lambda self: None\n            main_ui.ShareWatchService.start = lambda self: None\n            window = main_ui.FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)\n            lifetime = window.lifetime\n            page = window.pet_home_ui\n            try:\n                actual = snapshot.to_dict(page.service.world)\n                assert actual == expected, 'Cold process world differs from final shutdown snapshot'\n                residents = set(page.service.world.residents)\n                records = user_setting_dict['pet_profiles']['records']\n                assert residents <= set(records), 'Resident profiles missing from settings'\n                assert residents == set(page.service.sessions), 'Resident identity leases were not reacquired'\n                page.service.pause('acceptance')\n                window.resize(1280, 960)\n                window.show()\n                window.sidebar.select_page_id(\"tab_pet_home_text\")\n                page.refresh()\n                from frontengine.utils.pet_game import goals\n                from frontengine.ui.page.pet_game.home_things import ROLE_KEY\n                from frontengine.ui.page.wrapping_buttons import WrappingPushButton\n                from frontengine.utils.multi_language.retranslate import translate\n                service = page.service\n                world = service.world\n                pet = next(iter(world.residents))\n                resident = world.residents[pet]\n                world.progress.wishes[pet] = {'wish':'cozy_bed', 'base':goals.WISHES['cozy_bed'](world,resident), 'ready':0}\n                affection_before = resident.affection\n                coins_before = world.ledger.coins\n                planted_before = goals.WISHES['cozy_bed'](world,resident)\n                events = []\n                service.events_ready.connect(events.extend)\n                page.refresh()\n                QTest.qWait(200)\n                page._select_home_tab('pet_home_shop_section')\n                QTest.qWait(200)\n                item = next(page.shop.items.item(i) for i in range(page.shop.items.count())\n                            if page.shop.items.item(i).data(ROLE_KEY) == 'furniture:bed_cozy')\n                page.shop.items.setCurrentItem(item)\n                button = next(b for b in page.shop.section.findChildren(WrappingPushButton)\n                              if b.text() == translate('pet_home_buy','Buy'))\n                button.click()\n                assert world.ledger.coins == coins_before - 120\n                assert goals.WISHES['cozy_bed'](world,resident) == planted_before + 1\n                service.timer.stop()\n                service.periodic.stop()\n                clock = [100.0]\n                service._clock = lambda: clock[0]\n                service._last = clock[0]\n                for _ in range(155):\n                    clock[0] += .2\n                    service._tick()\n                granted = [e for e in events if e['kind']=='wish_granted']\n                assert len(granted)==1 and granted[0]['wish']=='cozy_bed' and granted[0]['resident']==pet\n                assert resident.affection == affection_before + goals.WISH_AFFECTION\n                state = dict(world.progress.wishes[pet])\n                assert state['wish'] is None and state['ready'] > world.time_ms\n                rows = [e for e in page.inbox.entries if e['event']['kind']=='wish_granted']\n                assert len(rows)==1 and rows[0]['count']==1\n                affection_after = resident.affection\n                for _ in range(155):\n                    clock[0] += .2\n                    service._tick()\n                assert len([e for e in events if e['kind']=='wish_granted'])==1\n                assert resident.affection == affection_after\n                assert world.progress.wishes[pet] == state\n                assert service.save_now()\n                assert json.loads(service.store.path.read_text(encoding='utf-8')) == snapshot.to_dict(world)\n                page._select_home_tab('pet_home_inbox_section')\n                QTest.qWait(200)\n                assert not page.inbox.list.visibleRegion().isEmpty()\n                assert window.grab().save(str(output/'wish-inbox.png'))\n                result.update(granted=granted, inbox_rows=rows, coins_before=coins_before,coins_after=world.ledger.coins,\n                              affection_before=affection_before,affection_after=affection_after,wish_state=state,\n                              purchase_price=120, furniture='bed_cozy', purchase_button_clicked=True,cooldown_no_repeat=True,explicit_ticks=310,\n                              automatic=world.automatic, fixture='Existing earned-inventory home, cozy_bed wish assigned explicitly; runtime default automation also claims available goals and commissions.')\n                final_world = snapshot.to_dict(world)\n                final_profiles = service.profiles.profiles()\n            finally:\n                window.request_shutdown()\n                deadline = monotonic() + 120\n                while not lifetime.closed and monotonic() < deadline:\n                    QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)\n                    app.processEvents()\n                    QTest.qWait(10)\n                assert lifetime.closed, (lifetime.state, lifetime.error)\n            final_world = snapshot.to_dict(world)\n            shutil.copytree(folder, output / 'settings', ignore=shutil.ignore_patterns('.frontengine-owner.lock'))\n            (output / 'shutdown-world.json').write_text(json.dumps(final_world, ensure_ascii=False), encoding='utf-8')\n            (output / 'profiles.json').write_text(json.dumps(final_profiles, ensure_ascii=False), encoding='utf-8')\n            result.update(passed=True, runtime_closed=True, python=sys.version,\n                source=str(source), saved_snapshot_sha256=hashlib.sha256((source / 'shutdown-world.json').read_bytes()).hexdigest(),\n                scope='Native MainUI private desktop; cozy_bed wish fixture; real local shop button, 310 injected200ms ticks, actual service signals/Inbox/save; host starts/Workshop/lock query substituted. Not random-wish-generation or normal-speed acceptance.')\n        finally:\n            logging.shutdown()\n            os.chdir(previous)\n    result['temporary_directory_removed'] = True\nexcept Exception:\n    result.update(passed=False, error=traceback.format_exc())\n(output / 'result.json').write_text(json.dumps(result, indent=2), encoding='utf-8')\nraise SystemExit(0 if result['passed'] else 1)\n",
+      "cold_harness": "import json\nimport os\nfrom pathlib import Path\nimport shutil\nimport sys\nimport tempfile\n\nROOT = Path(__file__).resolve().parents[1]\nSOURCE = ROOT / '.audit/native-cozy_bed-wish'\nsys.path.insert(0, str(ROOT))\nos.environ['QT_QPA_PLATFORM'] = 'offscreen'\nexpected = json.loads((SOURCE / 'shutdown-world.json').read_text(encoding='utf-8'))\nexpected_profiles = json.loads((SOURCE / 'profiles.json').read_text(encoding='utf-8'))\nprogression = json.loads((SOURCE / 'result.json').read_text(encoding='utf-8'))\nwith tempfile.TemporaryDirectory(prefix='fe-profession-cold-') as folder:\n    previous = Path.cwd()\n    os.chdir(folder)\n    shutil.copytree(SOURCE / 'settings', Path(folder) / 'settings')\n    from PySide6.QtWidgets import QApplication\n    from frontengine.show.pet_game.home_service import HomeService\n    from frontengine.user_setting.storage_session import StorageSession\n    from frontengine.user_setting.pet_game_save import HomeSaveStore\n    from frontengine.utils.pet_game.catalog import builtin_catalog\n    from frontengine.utils.pet_game import snapshot\n    app = QApplication([])\n    owner = StorageSession.open(Path(folder) / 'settings')\n    store = HomeSaveStore(owner, builtin_catalog())\n    service = HomeService(None, store, owner.profiles())\n    retried = 0\n    try:\n        assert service.open().status == 'loaded'\n        world = service.world\n        def differences(left, right, path=''):\n            if isinstance(left, dict) and isinstance(right, dict):\n                return [d for k in left.keys() | right.keys() for d in differences(left.get(k), right.get(k), path+'/'+k)]\n            return [] if left == right else [(path, left, right)]\n        assert snapshot.to_dict(world) == expected, differences(expected, snapshot.to_dict(world))\n        assert owner.profiles().profiles() == expected_profiles\n        assert set(service.sessions) == set(world.residents)\n        from frontengine.utils.pet_game import goals\n        events = []\n        service.events_ready.connect(events.extend)\n        service.timer.stop()\n        service.periodic.stop()\n        clock = [100.0]\n        service._clock = lambda: clock[0]\n        service._last = clock[0]\n        for _ in range(155):\n            clock[0] += .2\n            service._tick()\n        assert not [e for e in events if e['kind'] in ('wish_granted',)]\n        after = snapshot.to_dict(world)\n        assert after['ledger'] == expected['ledger']\n        assert after['progress']['wishes'] == expected['progress']['wishes']\n        assert [r['affection'] for r in after['residents']] == [r['affection'] for r in expected['residents']]\n        assert after['progress']['goals'] == expected['progress']['goals']\n        assert after['progress']['commissions'] == expected['progress']['commissions']\n        assert service.save_now()\n        assert json.loads(store.path.read_text(encoding='utf-8')) == after\n        assert service.shutdown()\n    finally:\n        service.shutdown()\n        store.close()\n        owner.close()\n        os.chdir(previous)\nresult = {'passed': True, 'world_exact': True, 'profiles_exact': True,\n          'leases_reacquired': True, 'automatic_ticks': 155, 'wish_events_after_reopen': 0, 'coins_after_reopen': world.ledger.coins,\n          'reward_state_unchanged': True, 'saved_snapshot_exact': True,\n          'temporary_directory_removed': not Path(folder).exists(),\n          'scope': 'Independent offscreen process, disk-owned profiles and home; normal shutdown only.'}\n(SOURCE / 'cold-result.json').write_text(json.dumps(result, indent=2), encoding='utf-8')\nprint(json.dumps(result))\n"
+    }
+  },
+  "limits": [
+    "Explicit wish fixtures; random selection not tested.",
+    "Local shop button plus310 injected ticks; independent offscreen reopen plus155ticks.",
+    "Native host integrations substituted; normal shutdown only.",
+    "Other automatic rewards also settle; final balance is not wish currency.",
+    "Friend meal, play time and isolated mood reward remain unverified."
+  ],
+  "visual_review": "Both screenshots opened; identical generic wish notification UI. Per-wish identity and purchase checked through actual event and state assertions."
+}

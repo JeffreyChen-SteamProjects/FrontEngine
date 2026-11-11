@@ -5,7 +5,6 @@ from frontengine.show.pet_game.furniture_art import ITEM_FOLDER, item_picture
 from frontengine.show.pet_game.home_service import HomeService
 from frontengine.ui.page.pet_game.home_page import PetHomePage
 from frontengine.ui.page.pet_game.home_things import RECIPE_ICONS, ROLE_KEY, ThingGrid, thing_icon, thing_pixmap
-from frontengine.user_setting.pet_game_save import HomeSaveStore
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.utils.pet_game.catalog import FURNITURE_PREFIX, builtin_catalog
 
@@ -48,12 +47,72 @@ def test_grid_keeps_the_selection_when_refilled():
     assert not grid.select_key("missing")
 
 
+def test_grid_refreshes_icon_and_tooltip_without_losing_selection():
+    from PySide6.QtGui import QColor, QIcon, QPixmap
+
+    grid = ThingGrid()
+    first, second = QPixmap(8, 8), QPixmap(8, 8)
+    first.fill(QColor('red'))
+    second.fill(QColor('blue'))
+    grid.set_things([('bed', QIcon(first), 'Bed × 1')])
+    grid.select_key('bed')
+    grid.set_things([('bed', QIcon(second), 'Bed × 2')])
+    assert grid.current_key() == 'bed'
+    assert grid.item(0).icon().pixmap(8, 8).toImage().pixelColor(4, 4) == QColor('blue')
+    assert grid.item(0).toolTip() == 'Bed × 2'
+
+
+@pytest.mark.parametrize('font_size', [14, 20, 24])
+def test_grid_reserves_name_and_caption_space_after_styling(font_size, _qt_application):
+    from PySide6.QtCore import QRect, Qt
+    from PySide6.QtWidgets import QStyle, QStyleOptionViewItem
+    from frontengine.ui.style.app_style import build_stylesheet
+
+    grid = ThingGrid(rows=2)
+    grid.resize(450, grid.height())
+    things = [('long', thing_icon('wood'), 'A very long furniture name with many words — 120 coins'),
+              ('short', thing_icon('toy'), 'Toy')] + [
+                  (f'other-{number}', thing_icon('wood'), 'Wood') for number in range(6)]
+    grid.set_things(things)
+    grid.select_key('long')
+    grid.setStyleSheet(build_stylesheet('light') + f'QWidget {{ font-size: {font_size}px; }}')
+    grid.show()
+    _qt_application.processEvents()
+    try:
+        for entries in (things, [('long', thing_icon('wood'), things[0][2].replace('120', '90')),
+                                *things[1:]], [*things[1:], things[0]]):
+            grid.set_things(entries)
+            grid.doItemsLayout()
+            assert grid.current_key() == 'long'
+            index = grid.model().index(grid.currentRow(), 0)
+            option = QStyleOptionViewItem()
+            grid.initViewItemOption(option)
+            grid.itemDelegate().initStyleOption(option, index)
+            option.rect = grid.visualRect(index)
+            text_rect = grid.style().subElementRect(QStyle.SubElement.SE_ItemViewItemText, option, grid)
+            flags = Qt.TextFlag.TextWordWrap if grid.wordWrap() else Qt.TextFlag(0)
+            required = option.fontMetrics.boundingRect(
+                QRect(0, 0, text_rect.width(), 10000), int(flags), option.text)
+            assert text_rect.height() >= required.height(), (text_rect, required, option.text)
+            caption = grid.currentItem().text().split('\n')[1]
+            assert text_rect.width() >= option.fontMetrics.horizontalAdvance(caption)
+            grid.scrollToTop()
+            rectangles = [grid.visualRect(grid.model().index(row, 0)) for row in range(grid.count())]
+            row_tops = sorted({rectangle.top() for rectangle in rectangles})
+            assert len(row_tops) >= 2
+            second_row = [rectangle for rectangle in rectangles if rectangle.top() == row_tops[1]]
+            assert all(grid.viewport().rect().contains(rectangle) for rectangle in second_row)
+    finally:
+        grid.close()
+
+
 @pytest.fixture
-def page(tmp_path, monkeypatch):
+def page(tmp_path, monkeypatch, *, home_store_factory, lifetime_factory):
     from frontengine.user_setting.user_setting_file import user_setting_dict
+    lifetime_factory()
     monkeypatch.setitem(user_setting_dict, "pet_home_running", False)
-    service = HomeService(None, HomeSaveStore(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None))
-    widget = PetHomePage(service)
+    service = HomeService(None, home_store_factory(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None))
+    widget = PetHomePage(service, lifetime=lifetime_factory())
     widget.create_home()
     yield widget
     widget.shutdown()

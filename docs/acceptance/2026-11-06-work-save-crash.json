@@ -1,0 +1,156 @@
+{
+  "passed": true,
+  "cases": [
+    {
+      "mode": "manage",
+      "recipe": "letter",
+      "replacement_phase": "before",
+      "child_exit": 73,
+      "replayed_settlements": 1,
+      "currency": 22,
+      "items": {
+        "furniture:bed_basic": 1,
+        "furniture:desk_basic": 1,
+        "furniture:table_basic": 1,
+        "wood": 4
+      },
+      "reservations_empty": true,
+      "duplicate_rejected": true,
+      "second_reopen_verified": true,
+      "temporary_directory_removed": true
+    },
+    {
+      "mode": "manage",
+      "recipe": "letter",
+      "replacement_phase": "after",
+      "child_exit": 73,
+      "replayed_settlements": 0,
+      "currency": 22,
+      "items": {
+        "furniture:bed_basic": 1,
+        "furniture:desk_basic": 1,
+        "furniture:table_basic": 1,
+        "wood": 4
+      },
+      "reservations_empty": true,
+      "duplicate_rejected": true,
+      "second_reopen_verified": true,
+      "temporary_directory_removed": true
+    },
+    {
+      "mode": "manage",
+      "recipe": "toy",
+      "replacement_phase": "before",
+      "child_exit": 73,
+      "replayed_settlements": 1,
+      "currency": 10,
+      "items": {
+        "furniture:bed_basic": 1,
+        "furniture:desk_basic": 1,
+        "furniture:table_basic": 1,
+        "toy": 1,
+        "wood": 2
+      },
+      "reservations_empty": true,
+      "duplicate_rejected": true,
+      "second_reopen_verified": true,
+      "temporary_directory_removed": true
+    },
+    {
+      "mode": "manage",
+      "recipe": "toy",
+      "replacement_phase": "after",
+      "child_exit": 73,
+      "replayed_settlements": 0,
+      "currency": 10,
+      "items": {
+        "furniture:bed_basic": 1,
+        "furniture:desk_basic": 1,
+        "furniture:table_basic": 1,
+        "toy": 1,
+        "wood": 2
+      },
+      "reservations_empty": true,
+      "duplicate_rejected": true,
+      "second_reopen_verified": true,
+      "temporary_directory_removed": true
+    },
+    {
+      "mode": "sandbox",
+      "recipe": "letter",
+      "replacement_phase": "before",
+      "child_exit": 73,
+      "replayed_settlements": 1,
+      "currency": 0,
+      "items": {
+        "furniture:desk_basic": 1,
+        "wood": 4
+      },
+      "reservations_empty": true,
+      "duplicate_rejected": true,
+      "second_reopen_verified": true,
+      "temporary_directory_removed": true
+    },
+    {
+      "mode": "sandbox",
+      "recipe": "letter",
+      "replacement_phase": "after",
+      "child_exit": 73,
+      "replayed_settlements": 0,
+      "currency": 0,
+      "items": {
+        "furniture:desk_basic": 1,
+        "wood": 4
+      },
+      "reservations_empty": true,
+      "duplicate_rejected": true,
+      "second_reopen_verified": true,
+      "temporary_directory_removed": true
+    },
+    {
+      "mode": "sandbox",
+      "recipe": "toy",
+      "replacement_phase": "before",
+      "child_exit": 73,
+      "replayed_settlements": 1,
+      "currency": 0,
+      "items": {
+        "furniture:workbench": 1,
+        "toy": 1,
+        "wood": 2
+      },
+      "reservations_empty": true,
+      "duplicate_rejected": true,
+      "second_reopen_verified": true,
+      "temporary_directory_removed": true
+    },
+    {
+      "mode": "sandbox",
+      "recipe": "toy",
+      "replacement_phase": "after",
+      "child_exit": 73,
+      "replayed_settlements": 0,
+      "currency": 0,
+      "items": {
+        "furniture:workbench": 1,
+        "toy": 1,
+        "wood": 2
+      },
+      "reservations_empty": true,
+      "duplicate_rejected": true,
+      "second_reopen_verified": true,
+      "temporary_directory_removed": true
+    }
+  ],
+  "product_test_commit": "d825c06c",
+  "scope": "Actual StorageSession/HomeService with isolated child os._exit(73) immediately before/after main home-file os.replace; actual accelerated simulation completes one persisted order.",
+  "limits": [
+    "Two recipes and two modes; not all recipes or crash boundaries.",
+    "Not physical power loss, native input, disk-full injection or normal-speed acceptance."
+  ],
+  "evidence_sha256": {
+    "check_work_save_crash.py": "076aea7edc4c0f0670be6f6b0b379f6b4c0efa65676d3ac14b444e6f1f886e10",
+    "work-save-crash.json": "31629c25018954c6a18f00f2545186913a91a2f2b50358a048e92f5a50b2b893",
+    "work-save-crash.log": "879348093214303c7a259bffaf6f3edfda88a809bd630c746cf4325e4c9ac735"
+  }
+}

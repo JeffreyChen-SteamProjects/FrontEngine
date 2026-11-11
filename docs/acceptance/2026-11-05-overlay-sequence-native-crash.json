@@ -1,0 +1,899 @@
+{
+  "source_head": "919f7e4",
+  "documentation_head": "34efcea",
+  "status": "unresolved_native_access_violation",
+  "runtime": "Python3.11.9, Qt6.12.0, Windows native hidden desktop",
+  "runs": {
+    "static-tools-dpi-919f7e4": {
+      "directory": ".audit\\static-tools-dpi-919f7e4",
+      "observer": {
+        "exit_code": 3221225477,
+        "profile_removed": true,
+        "source_unchanged": true,
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            2070,
+            399
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            2070,
+            399
+          ]
+        },
+        "observation_only": true,
+        "desktop": "FrontEngineVideoWebDpi_48f8be0e48bf"
+      },
+      "stderr": "Windows fatal exception: access violation\n\nCurrent thread 0x000077c0 (most recent call first):\n  File \"D:\\Codes\\FrontEngine\\.audit\\worktrees\\ownership-integration\\.audit\\check_static_tools_dpi.py\", line 56 in <module>\n",
+      "sha256": {
+        "freeze-None-0.png": "50ee766e26ba1cf394d99fdcfcc2674954df3beff06d177b21839660c021fcba",
+        "freeze-None-1.png": "50ee766e26ba1cf394d99fdcfcc2674954df3beff06d177b21839660c021fcba",
+        "freeze-None-2.png": "50ee766e26ba1cf394d99fdcfcc2674954df3beff06d177b21839660c021fcba",
+        "observer.json": "41faec23d1159aa310f05fc738ab34ddc1a08e528455fe4268cbb5b6c676e89f",
+        "pinned-None-0.png": "72d7ddeebae84d21f82fdbc29dba9b846322252c8bffd95295425fee08c7d6ed",
+        "pinned-None-1.png": "bdfda0e59172376b6be4067cc03f6e34eaeee064963e3e9c45cb7f04ca6e4cdb",
+        "pinned-None-2.png": "72d7ddeebae84d21f82fdbc29dba9b846322252c8bffd95295425fee08c7d6ed",
+        "shortcuts-gpu-0.png": "d799a060103effe9a5d42fcb950b6bb2bbb762828b12887f729246bc0866da39",
+        "shortcuts-gpu-1.png": "3ebcad0ca24ecf38eac5b8bd08f62da91c7b9fb475e6573ef2d6ce442953a8f7",
+        "shortcuts-software-0.png": "d799a060103effe9a5d42fcb950b6bb2bbb762828b12887f729246bc0866da39",
+        "shortcuts-software-1.png": "b609b08fd8d7c8541b4f16f343500757adf7b9f3c8e50a5f9ad25420bea4dfc0",
+        "shortcuts-software-2.png": "4d047a6975d0ae62491a3d6490d35bcfe79ec90c1e4a76c230caaeff98567d05",
+        "stderr.txt": "6c583cdf68fb09b269e5110da07852a2e41621c1b1da01816b50bf196b7a6edf",
+        "harness.py": "968ce49b19218789c53b30ee79892d760c8c57d4839a05e64457cde6d92133a7"
+      }
+    },
+    "shortcut-gpu-dpi-isolated": {
+      "directory": ".audit\\shortcut-gpu-dpi-isolated",
+      "observer": {
+        "exit_code": 1,
+        "profile_removed": true,
+        "source_unchanged": true,
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            2070,
+            399
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            2070,
+            399
+          ]
+        },
+        "observation_only": true,
+        "desktop": "FrontEngineVideoWebDpi_c649d8947a7f"
+      },
+      "stderr": "",
+      "result.json": {
+        "observations": [
+          {
+            "kind": "shortcuts",
+            "backend": "gpu",
+            "actual_backend": "gpu",
+            "target": "BenQ GW2486TC",
+            "actual_screen": "BenQ GW2486TC",
+            "dpr": 1.0,
+            "logical_size": [
+              600,
+              280
+            ],
+            "expected_size": [
+              600,
+              280
+            ],
+            "pixels": [
+              600,
+              280
+            ],
+            "content_present": true,
+            "fullscreen": false,
+            "file": "shortcuts-gpu-0.png",
+            "passed": true
+          },
+          {
+            "kind": "shortcuts",
+            "backend": "gpu",
+            "actual_backend": "gpu",
+            "target": "BenQ GW2490",
+            "actual_screen": "BenQ GW2490",
+            "dpr": 1.25,
+            "logical_size": [
+              598,
+              274
+            ],
+            "expected_size": [
+              600,
+              280
+            ],
+            "pixels": [
+              748,
+              343
+            ],
+            "content_present": true,
+            "fullscreen": false,
+            "file": "shortcuts-gpu-1.png",
+            "passed": false
+          },
+          {
+            "kind": "shortcuts",
+            "backend": "gpu",
+            "actual_backend": "gpu",
+            "target": "BenQ GW2486TC",
+            "actual_screen": "BenQ GW2486TC",
+            "dpr": 1.0,
+            "logical_size": [
+              600,
+              282
+            ],
+            "expected_size": [
+              600,
+              280
+            ],
+            "pixels": [
+              600,
+              282
+            ],
+            "content_present": true,
+            "fullscreen": false,
+            "file": "shortcuts-gpu-2.png",
+            "passed": false
+          }
+        ],
+        "closed": [
+          {
+            "kind": "shortcuts",
+            "backend": "gpu",
+            "deleted": true
+          }
+        ],
+        "errors": [],
+        "passed": false,
+        "scope": "Owned native hidden Win32 desktop. Synthetic four-color image; no screen capture source or real global hotkeys. Freeze uses actual fullscreen show_on; others windowed. No desktop keyboard/mouse injection, actual input pass-through or physical display reconfiguration."
+      },
+      "partial.json": [
+        {
+          "kind": "shortcuts",
+          "backend": "gpu",
+          "actual_backend": "gpu",
+          "target": "BenQ GW2486TC",
+          "actual_screen": "BenQ GW2486TC",
+          "dpr": 1.0,
+          "logical_size": [
+            600,
+            280
+          ],
+          "expected_size": [
+            600,
+            280
+          ],
+          "pixels": [
+            600,
+            280
+          ],
+          "content_present": true,
+          "fullscreen": false,
+          "file": "shortcuts-gpu-0.png",
+          "passed": true
+        },
+        {
+          "kind": "shortcuts",
+          "backend": "gpu",
+          "actual_backend": "gpu",
+          "target": "BenQ GW2490",
+          "actual_screen": "BenQ GW2490",
+          "dpr": 1.25,
+          "logical_size": [
+            598,
+            274
+          ],
+          "expected_size": [
+            600,
+            280
+          ],
+          "pixels": [
+            748,
+            343
+          ],
+          "content_present": true,
+          "fullscreen": false,
+          "file": "shortcuts-gpu-1.png",
+          "passed": false
+        },
+        {
+          "kind": "shortcuts",
+          "backend": "gpu",
+          "actual_backend": "gpu",
+          "target": "BenQ GW2486TC",
+          "actual_screen": "BenQ GW2486TC",
+          "dpr": 1.0,
+          "logical_size": [
+            600,
+            282
+          ],
+          "expected_size": [
+            600,
+            280
+          ],
+          "pixels": [
+            600,
+            282
+          ],
+          "content_present": true,
+          "fullscreen": false,
+          "file": "shortcuts-gpu-2.png",
+          "passed": false
+        }
+      ],
+      "stage.json": {
+        "kind": "shortcuts",
+        "backend": "gpu",
+        "index": 2,
+        "screen": "BenQ GW2486TC"
+      },
+      "sha256": {
+        "observer.json": "9a2838b14a1fa154b3c551a7c3d2a1e62b065d52acac139c683d5d726b74c365",
+        "partial.json": "d49395c2d7ba33f4e42b2c475f61e3a865e341c9171fce051759a29e49177f55",
+        "result.json": "e8e2eaeaed0597b5740379af3ccc189b04b84cea2415e6b6219ed7e9de8ef9ca",
+        "shortcuts-gpu-0.png": "d799a060103effe9a5d42fcb950b6bb2bbb762828b12887f729246bc0866da39",
+        "shortcuts-gpu-1.png": "3ebcad0ca24ecf38eac5b8bd08f62da91c7b9fb475e6573ef2d6ce442953a8f7",
+        "shortcuts-gpu-2.png": "4d047a6975d0ae62491a3d6490d35bcfe79ec90c1e4a76c230caaeff98567d05",
+        "stage.json": "fb4851f08b35bd2fc5d762e3047f28ce8bcc26ec2cfaed67a1bc98ea2874beb2",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "harness.py": "60b0e18627e0ed5e5ce2bfbe65526352701a186ed56b021058dffbce1815b720"
+      }
+    },
+    "static-tools-dpi-configured": {
+      "directory": ".audit\\static-tools-dpi-configured",
+      "observer": {
+        "exit_code": 3221225477,
+        "profile_removed": true,
+        "source_unchanged": true,
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            2070,
+            399
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            2070,
+            399
+          ]
+        },
+        "observation_only": true,
+        "desktop": "FrontEngineVideoWebDpi_0494c7a1148a"
+      },
+      "stderr": "Windows fatal exception: access violation\n\nCurrent thread 0x0000d1c8 (most recent call first):\n  File \"D:\\Codes\\FrontEngine\\.audit\\worktrees\\ownership-integration\\.audit\\check_static_tools_dpi_configured.py\", line 62 in <module>\n",
+      "partial.json": [
+        {
+          "kind": "pinned",
+          "backend": null,
+          "actual_backend": null,
+          "target": "BenQ GW2486TC",
+          "actual_screen": "BenQ GW2486TC",
+          "dpr": 1.0,
+          "logical_size": [
+            320,
+            180
+          ],
+          "expected_size": [
+            320,
+            180
+          ],
+          "pixels": [
+            320,
+            180
+          ],
+          "content_present": true,
+          "fullscreen": false,
+          "file": "pinned-None-0.png",
+          "passed": true
+        },
+        {
+          "kind": "pinned",
+          "backend": null,
+          "actual_backend": null,
+          "target": "BenQ GW2490",
+          "actual_screen": "BenQ GW2490",
+          "dpr": 1.25,
+          "logical_size": [
+            320,
+            180
+          ],
+          "expected_size": [
+            320,
+            180
+          ],
+          "pixels": [
+            400,
+            225
+          ],
+          "content_present": true,
+          "fullscreen": false,
+          "file": "pinned-None-1.png",
+          "passed": true
+        },
+        {
+          "kind": "pinned",
+          "backend": null,
+          "actual_backend": null,
+          "target": "BenQ GW2486TC",
+          "actual_screen": "BenQ GW2486TC",
+          "dpr": 1.0,
+          "logical_size": [
+            320,
+            180
+          ],
+          "expected_size": [
+            320,
+            180
+          ],
+          "pixels": [
+            320,
+            180
+          ],
+          "content_present": true,
+          "fullscreen": false,
+          "file": "pinned-None-2.png",
+          "passed": true
+        },
+        {
+          "kind": "freeze",
+          "backend": null,
+          "actual_backend": null,
+          "target": "BenQ GW2486TC",
+          "actual_screen": "BenQ GW2486TC",
+          "dpr": 1.0,
+          "logical_size": [
+            1920,
+            1080
+          ],
+          "expected_size": [
+            1920,
+            1080
+          ],
+          "pixels": [
+            1920,
+            1080
+          ],
+          "content_present": true,
+          "fullscreen": true,
+          "file": "freeze-None-0.png",
+          "passed": true
+        },
+        {
+          "kind": "freeze",
+          "backend": null,
+          "actual_backend": null,
+          "target": "BenQ GW2490",
+          "actual_screen": "BenQ GW2490",
+          "dpr": 1.25,
+          "logical_size": [
+            1536,
+            864
+          ],
+          "expected_size": [
+            1536,
+            864
+          ],
+          "pixels": [
+            1920,
+            1080
+          ],
+          "content_present": true,
+          "fullscreen": true,
+          "file": "freeze-None-1.png",
+          "passed": true
+        },
+        {
+          "kind": "freeze",
+          "backend": null,
+          "actual_backend": null,
+          "target": "BenQ GW2486TC",
+          "actual_screen": "BenQ GW2486TC",
+          "dpr": 1.0,
+          "logical_size": [
+            1920,
+            1080
+          ],
+          "expected_size": [
+            1920,
+            1080
+          ],
+          "pixels": [
+            1920,
+            1080
+          ],
+          "content_present": true,
+          "fullscreen": true,
+          "file": "freeze-None-2.png",
+          "passed": true
+        },
+        {
+          "kind": "shortcuts",
+          "backend": "software",
+          "actual_backend": "software",
+          "target": "BenQ GW2486TC",
+          "actual_screen": "BenQ GW2486TC",
+          "dpr": 1.0,
+          "logical_size": [
+            1920,
+            1080
+          ],
+          "expected_size": [
+            1920,
+            1080
+          ],
+          "pixels": [
+            1920,
+            1080
+          ],
+          "content_present": true,
+          "fullscreen": true,
+          "file": "shortcuts-software-0.png",
+          "passed": true
+        },
+        {
+          "kind": "shortcuts",
+          "backend": "software",
+          "actual_backend": "software",
+          "target": "BenQ GW2490",
+          "actual_screen": "BenQ GW2490",
+          "dpr": 1.25,
+          "logical_size": [
+            1536,
+            864
+          ],
+          "expected_size": [
+            1536,
+            864
+          ],
+          "pixels": [
+            1920,
+            1080
+          ],
+          "content_present": true,
+          "fullscreen": true,
+          "file": "shortcuts-software-1.png",
+          "passed": true
+        },
+        {
+          "kind": "shortcuts",
+          "backend": "software",
+          "actual_backend": "software",
+          "target": "BenQ GW2486TC",
+          "actual_screen": "BenQ GW2486TC",
+          "dpr": 1.0,
+          "logical_size": [
+            1920,
+            1080
+          ],
+          "expected_size": [
+            1920,
+            1080
+          ],
+          "pixels": [
+            1920,
+            1080
+          ],
+          "content_present": true,
+          "fullscreen": true,
+          "file": "shortcuts-software-2.png",
+          "passed": true
+        },
+        {
+          "kind": "shortcuts",
+          "backend": "gpu",
+          "actual_backend": "gpu",
+          "target": "BenQ GW2486TC",
+          "actual_screen": "BenQ GW2486TC",
+          "dpr": 1.0,
+          "logical_size": [
+            1920,
+            1080
+          ],
+          "expected_size": [
+            1920,
+            1080
+          ],
+          "pixels": [
+            1920,
+            1080
+          ],
+          "content_present": true,
+          "fullscreen": true,
+          "file": "shortcuts-gpu-0.png",
+          "passed": true
+        },
+        {
+          "kind": "shortcuts",
+          "backend": "gpu",
+          "actual_backend": "gpu",
+          "target": "BenQ GW2490",
+          "actual_screen": "BenQ GW2490",
+          "dpr": 1.25,
+          "logical_size": [
+            1536,
+            864
+          ],
+          "expected_size": [
+            1536,
+            864
+          ],
+          "pixels": [
+            1920,
+            1080
+          ],
+          "content_present": true,
+          "fullscreen": true,
+          "file": "shortcuts-gpu-1.png",
+          "passed": true
+        },
+        {
+          "kind": "shortcuts",
+          "backend": "gpu",
+          "actual_backend": "gpu",
+          "target": "BenQ GW2486TC",
+          "actual_screen": "BenQ GW2486TC",
+          "dpr": 1.0,
+          "logical_size": [
+            1920,
+            1080
+          ],
+          "expected_size": [
+            1920,
+            1080
+          ],
+          "pixels": [
+            1920,
+            1080
+          ],
+          "content_present": true,
+          "fullscreen": true,
+          "file": "shortcuts-gpu-2.png",
+          "passed": true
+        },
+        {
+          "kind": "mask",
+          "backend": "software",
+          "actual_backend": "software",
+          "target": "BenQ GW2486TC",
+          "actual_screen": "BenQ GW2486TC",
+          "dpr": 1.0,
+          "logical_size": [
+            1920,
+            64
+          ],
+          "expected_size": [
+            1920,
+            64
+          ],
+          "pixels": [
+            1920,
+            64
+          ],
+          "content_present": true,
+          "fullscreen": false,
+          "file": "mask-software-0.png",
+          "passed": true
+        },
+        {
+          "kind": "mask",
+          "backend": "software",
+          "actual_backend": "software",
+          "target": "BenQ GW2490",
+          "actual_screen": "BenQ GW2490",
+          "dpr": 1.25,
+          "logical_size": [
+            1536,
+            51
+          ],
+          "expected_size": [
+            1536,
+            51
+          ],
+          "pixels": [
+            1920,
+            64
+          ],
+          "content_present": true,
+          "fullscreen": false,
+          "file": "mask-software-1.png",
+          "passed": true
+        },
+        {
+          "kind": "mask",
+          "backend": "software",
+          "actual_backend": "software",
+          "target": "BenQ GW2486TC",
+          "actual_screen": "BenQ GW2486TC",
+          "dpr": 1.0,
+          "logical_size": [
+            1920,
+            64
+          ],
+          "expected_size": [
+            1920,
+            64
+          ],
+          "pixels": [
+            1920,
+            64
+          ],
+          "content_present": true,
+          "fullscreen": false,
+          "file": "mask-software-2.png",
+          "passed": true
+        },
+        {
+          "kind": "mask",
+          "backend": "gpu",
+          "actual_backend": "gpu",
+          "target": "BenQ GW2486TC",
+          "actual_screen": "BenQ GW2486TC",
+          "dpr": 1.0,
+          "logical_size": [
+            1920,
+            64
+          ],
+          "expected_size": [
+            1920,
+            64
+          ],
+          "pixels": [
+            1920,
+            64
+          ],
+          "content_present": true,
+          "fullscreen": false,
+          "file": "mask-gpu-0.png",
+          "passed": true
+        }
+      ],
+      "stage.json": {
+        "kind": "mask",
+        "backend": "gpu",
+        "index": 1
+      },
+      "sha256": {
+        "freeze-None-0.png": "50ee766e26ba1cf394d99fdcfcc2674954df3beff06d177b21839660c021fcba",
+        "freeze-None-1.png": "50ee766e26ba1cf394d99fdcfcc2674954df3beff06d177b21839660c021fcba",
+        "freeze-None-2.png": "50ee766e26ba1cf394d99fdcfcc2674954df3beff06d177b21839660c021fcba",
+        "mask-gpu-0.png": "d9189256d302a1bb35a1e8557b03b1696d4d299ca588c34f42b2074a35c73c6a",
+        "mask-software-0.png": "d9189256d302a1bb35a1e8557b03b1696d4d299ca588c34f42b2074a35c73c6a",
+        "mask-software-1.png": "d9189256d302a1bb35a1e8557b03b1696d4d299ca588c34f42b2074a35c73c6a",
+        "mask-software-2.png": "d9189256d302a1bb35a1e8557b03b1696d4d299ca588c34f42b2074a35c73c6a",
+        "observer.json": "7b86478a15e23e864ad39ef5e0fd9d4a8c2109600022d2d0f8cf06539aa5fce2",
+        "partial.json": "29603a275d182ed7cb8bdbc5c48445617b6b220ff89eaf9c94cb7b7296dab398",
+        "pinned-None-0.png": "72d7ddeebae84d21f82fdbc29dba9b846322252c8bffd95295425fee08c7d6ed",
+        "pinned-None-1.png": "bdfda0e59172376b6be4067cc03f6e34eaeee064963e3e9c45cb7f04ca6e4cdb",
+        "pinned-None-2.png": "72d7ddeebae84d21f82fdbc29dba9b846322252c8bffd95295425fee08c7d6ed",
+        "shortcuts-gpu-0.png": "461711bb9213c02c190772fc0eb38afc4b95e2c9746091e8537c112266222ffa",
+        "shortcuts-gpu-1.png": "f38fe86bd758399bfdabd5289789cc6d236ba18b4fac204000ba76fd95dc0992",
+        "shortcuts-gpu-2.png": "461711bb9213c02c190772fc0eb38afc4b95e2c9746091e8537c112266222ffa",
+        "shortcuts-software-0.png": "461711bb9213c02c190772fc0eb38afc4b95e2c9746091e8537c112266222ffa",
+        "shortcuts-software-1.png": "f38fe86bd758399bfdabd5289789cc6d236ba18b4fac204000ba76fd95dc0992",
+        "shortcuts-software-2.png": "461711bb9213c02c190772fc0eb38afc4b95e2c9746091e8537c112266222ffa",
+        "stage.json": "e801de4dcef1a9a4adfb50941f4b99890a4eb5b6579019c0ec1a4313fc4089f2",
+        "stderr.txt": "0f99a39837229374d055c2ed0f1d40c7242bb0c61c543e9da44a956c32cc3e04",
+        "harness.py": "b3fda47981e932772220af21412ee3f82ab265ff34ece16efb2f6dff3d5cc33b"
+      }
+    },
+    "mask-gpu-dpi-isolated": {
+      "directory": ".audit\\mask-gpu-dpi-isolated",
+      "observer": {
+        "exit_code": 0,
+        "profile_removed": true,
+        "source_unchanged": true,
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            2070,
+            399
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            2070,
+            399
+          ]
+        },
+        "observation_only": true,
+        "desktop": "FrontEngineVideoWebDpi_be18fffb3803"
+      },
+      "stderr": "",
+      "result.json": {
+        "observations": [
+          {
+            "kind": "mask",
+            "backend": "gpu",
+            "actual_backend": "gpu",
+            "target": "BenQ GW2486TC",
+            "actual_screen": "BenQ GW2486TC",
+            "dpr": 1.0,
+            "logical_size": [
+              1920,
+              64
+            ],
+            "expected_size": [
+              1920,
+              64
+            ],
+            "pixels": [
+              1920,
+              64
+            ],
+            "content_present": true,
+            "fullscreen": false,
+            "file": "mask-gpu-0.png",
+            "passed": true
+          },
+          {
+            "kind": "mask",
+            "backend": "gpu",
+            "actual_backend": "gpu",
+            "target": "BenQ GW2490",
+            "actual_screen": "BenQ GW2490",
+            "dpr": 1.25,
+            "logical_size": [
+              1536,
+              51
+            ],
+            "expected_size": [
+              1536,
+              51
+            ],
+            "pixels": [
+              1920,
+              64
+            ],
+            "content_present": true,
+            "fullscreen": false,
+            "file": "mask-gpu-1.png",
+            "passed": true
+          },
+          {
+            "kind": "mask",
+            "backend": "gpu",
+            "actual_backend": "gpu",
+            "target": "BenQ GW2486TC",
+            "actual_screen": "BenQ GW2486TC",
+            "dpr": 1.0,
+            "logical_size": [
+              1920,
+              64
+            ],
+            "expected_size": [
+              1920,
+              64
+            ],
+            "pixels": [
+              1920,
+              64
+            ],
+            "content_present": true,
+            "fullscreen": false,
+            "file": "mask-gpu-2.png",
+            "passed": true
+          }
+        ],
+        "closed": [
+          {
+            "kind": "mask",
+            "backend": "gpu",
+            "deleted": true
+          }
+        ],
+        "errors": [],
+        "passed": true,
+        "scope": "Owned native hidden Win32 desktop. Synthetic four-color image; no screen capture source or real global hotkeys. Freeze uses actual fullscreen show_on. Shortcuts use fullscreen and overlay flags as MainUI does; mask uses screen region geometry and flags as FocusSettings does; pinned image is windowed. No desktop keyboard/mouse injection, actual input pass-through or physical display reconfiguration."
+      },
+      "partial.json": [
+        {
+          "kind": "mask",
+          "backend": "gpu",
+          "actual_backend": "gpu",
+          "target": "BenQ GW2486TC",
+          "actual_screen": "BenQ GW2486TC",
+          "dpr": 1.0,
+          "logical_size": [
+            1920,
+            64
+          ],
+          "expected_size": [
+            1920,
+            64
+          ],
+          "pixels": [
+            1920,
+            64
+          ],
+          "content_present": true,
+          "fullscreen": false,
+          "file": "mask-gpu-0.png",
+          "passed": true
+        },
+        {
+          "kind": "mask",
+          "backend": "gpu",
+          "actual_backend": "gpu",
+          "target": "BenQ GW2490",
+          "actual_screen": "BenQ GW2490",
+          "dpr": 1.25,
+          "logical_size": [
+            1536,
+            51
+          ],
+          "expected_size": [
+            1536,
+            51
+          ],
+          "pixels": [
+            1920,
+            64
+          ],
+          "content_present": true,
+          "fullscreen": false,
+          "file": "mask-gpu-1.png",
+          "passed": true
+        },
+        {
+          "kind": "mask",
+          "backend": "gpu",
+          "actual_backend": "gpu",
+          "target": "BenQ GW2486TC",
+          "actual_screen": "BenQ GW2486TC",
+          "dpr": 1.0,
+          "logical_size": [
+            1920,
+            64
+          ],
+          "expected_size": [
+            1920,
+            64
+          ],
+          "pixels": [
+            1920,
+            64
+          ],
+          "content_present": true,
+          "fullscreen": false,
+          "file": "mask-gpu-2.png",
+          "passed": true
+        }
+      ],
+      "stage.json": {
+        "kind": "mask",
+        "backend": "gpu",
+        "index": 2
+      },
+      "sha256": {
+        "mask-gpu-0.png": "d9189256d302a1bb35a1e8557b03b1696d4d299ca588c34f42b2074a35c73c6a",
+        "mask-gpu-1.png": "d9189256d302a1bb35a1e8557b03b1696d4d299ca588c34f42b2074a35c73c6a",
+        "mask-gpu-2.png": "d9189256d302a1bb35a1e8557b03b1696d4d299ca588c34f42b2074a35c73c6a",
+        "observer.json": "751faab382dbdb75cc40da4936b048e633769bd95aaefefe9f57b3f1defc49e1",
+        "partial.json": "48871b91603489575adfcb8297e99f97f89efa591f44f35d783d993a841c9864",
+        "result.json": "d709e06a67d210686efe31d577ff8df7d2c547a11ee3d99a3e1aa059389fe0b4",
+        "stage.json": "bb0fa5c2df448c2853a4c401d3edff6b0994fba6ced4d5244c6f0adb22457b55",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "harness.py": "d5bef064b2f8b394969574963f00b893ed3a98cbfc49f9ede3d98cb1c52bea16"
+      }
+    }
+  },
+  "conclusions": [
+    "Initial combined probe lacked production overlay flags and fullscreen shortcut setup, so its failure is not sufficient evidence of a production defect.",
+    "After correcting flags and display setup, 16 completed cases passed before the process exited with access violation3221225477 at GPU mask second-screen wait.",
+    "An isolated GPU mask completed all three screen positions and exited0; this does not clear the combined-sequence failure.",
+    "Root cause is not yet established; possible teardown/display-transition interactions require a reduced reproduction.",
+    "No product or test sources were edited; full regression remains active at source919f7e4."
+  ],
+  "scope": "Synthetic images and owned hidden-desktop windows only. No actual desktop capture, global shortcuts or input injection."
+}

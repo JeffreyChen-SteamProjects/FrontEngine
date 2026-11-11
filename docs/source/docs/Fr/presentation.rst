@@ -28,3 +28,5 @@ Page Présentation
       dessinée.
 
 Présentation → Tableau possède des pages éditables indépendantes, modes dessin/sélection, multiséléction Maj, déplacement/suppression de traits et 20 états d’annulation au total. Bouton central déplace, molette zoome ; sélection/mouvement en coordonnées de toile, vue propre à chaque page. Sauver/ouvrir .fewhiteboard JSON versionné conserve traits vectoriels/vues pour poursuivre les éditions. Un travailleur valide et lit/écrit ; erreurs préservent tableau/fichier. PNG de page exclut contrôles/sélection/transformation, avec marges de plume complètes. Limites : 50 pages, 2000 traits/page, 100000 points, huit MiB JSON ; PNG 8192 pixels/côté et 16 mégapixels. Fermer/Escape annule les écritures et ignore les lectures tardives.
+
+Les commandes du tableau blanc restent au-dessus de la toile et lisibles lors du changement du moteur de rendu.

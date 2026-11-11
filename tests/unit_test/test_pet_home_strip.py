@@ -6,7 +6,6 @@ from PySide6.QtGui import QMouseEvent
 from frontengine.show.pet_game.home_service import HomeService
 from frontengine.show.pet_game.home_strip import FRAME_MS, HIDDEN_REASON, HomeStrip
 from frontengine.ui.page.pet_game.home_page import PetHomePage
-from frontengine.user_setting.pet_game_save import HomeSaveStore
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.utils.pet_game.catalog import builtin_catalog
 
@@ -22,21 +21,24 @@ class Clock:
 @pytest.fixture(autouse=True)
 def _settings(monkeypatch):
     from frontengine.user_setting.user_setting_file import user_setting_dict
-    for key, value in (("pet_home_running", False), ("pet_home_on_desktop", True), ("pet_home_layer", "top")):
+    for key, value in (("pet_home_running", False), ("pet_home_on_desktop", True), ("pet_home_layer", "top"),
+                       ("pet_home_mode", "normal")):
         monkeypatch.setitem(user_setting_dict, key, value)
 
 
 @pytest.fixture
-def page(tmp_path):
+def page(tmp_path, *, home_store_factory, lifetime_factory):
+    lifetime_factory()
     clock = Clock()
-    service = HomeService(None, HomeSaveStore(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None),
+    service = HomeService(None, home_store_factory(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None),
                           clock=clock)
-    widget = PetHomePage(service)
+    widget = PetHomePage(service, lifetime=lifetime_factory())
     widget.clock = clock
     widget.create_home()                      # the starter kit is set out by itself
-    widget.residents.new_pet()
+    # creating a home with no pets brings a first one
     yield widget
     widget.shutdown()
+    widget.deleteLater()
 
 
 def _strip(page) -> HomeStrip:
@@ -118,13 +120,82 @@ def test_quality_tier_sets_the_frame_rate(page):
         assert strip.frame_timer.interval() == interval
 
 
+@pytest.mark.parametrize('interrupt', ['hide', 'close', 'ungrab', 'meeting'])
+def test_interrupted_drag_releases_resident(page, interrupt):
+    from frontengine.utils.pet_game.simulation import advance
+
+    strip = _strip(page)
+    resident = next(iter(page.service.world.residents.values()))
+    center = strip.resident_center(resident)
+    original_x = resident.x_milli
+    strip.mousePressEvent(_mouse(QEvent.Type.MouseButtonPress, center))
+    strip.mouseMoveEvent(_mouse(QEvent.Type.MouseMove, center + QPointF(200, 0)))
+    assert resident.activity.kind == 'drag'
+    if interrupt == 'ungrab':
+        from PySide6.QtWidgets import QApplication
+        QApplication.sendEvent(strip, QEvent(QEvent.Type.UngrabMouse))
+    elif interrupt == 'meeting':
+        page.set_mode('meeting')
+        page.set_mode('normal')
+    else:
+        getattr(strip, interrupt)()
+    assert resident.x_milli == original_x
+    advance(page.service.world, 1000)
+    assert resident.activity is None or resident.activity.kind != 'drag'
+    if interrupt == 'hide':
+        strip.show()
+        empty = QPoint(strip.width() - 10, strip.height() - 8)
+        assert not strip.mask().contains(empty)
+
+
+def test_other_button_release_does_not_finish_left_drag(page):
+    strip = _strip(page)
+    resident = next(iter(page.service.world.residents.values()))
+    center = strip.resident_center(resident)
+    target = center + QPointF(200, 0)
+    strip.mousePressEvent(_mouse(QEvent.Type.MouseButtonPress, center))
+    strip.mouseMoveEvent(_mouse(QEvent.Type.MouseMove, target))
+    strip.mouseReleaseEvent(_mouse(QEvent.Type.MouseButtonRelease, target, Qt.MouseButton.RightButton))
+    assert resident.activity is not None
+    assert resident.activity.kind == 'drag'
+    strip.mouseReleaseEvent(_mouse(QEvent.Type.MouseButtonRelease, target))
+    assert resident.activity is None or resident.activity.kind != 'drag'
+
+
+def test_resident_moving_out_during_drag_can_be_released(page):
+    strip = _strip(page)
+    resident = next(iter(page.service.world.residents.values()))
+    center = strip.resident_center(resident)
+    strip.mousePressEvent(_mouse(QEvent.Type.MouseButtonPress, center))
+    strip.mouseMoveEvent(_mouse(QEvent.Type.MouseMove, center + QPointF(200, 0)))
+    assert page.service.release(resident.identifier) == 'accepted'
+    strip.mouseReleaseEvent(_mouse(QEvent.Type.MouseButtonRelease, center))
+    assert resident.identifier not in page.service.world.residents
+    assert not strip.mask().contains(QPoint(strip.width() - 10, strip.height() - 8))
+
+
+def test_late_drag_release_preserves_new_command(page):
+    strip = _strip(page)
+    resident = next(iter(page.service.world.residents.values()))
+    original_x = resident.x_milli
+    center = strip.resident_center(resident)
+    target = center + QPointF(200, 0)
+    strip.mousePressEvent(_mouse(QEvent.Type.MouseButtonPress, center))
+    strip.mouseMoveEvent(_mouse(QEvent.Type.MouseMove, target))
+    assert page.service.run(lambda world: world.command(resident.identifier, 'sleep')) == 'accepted'
+    strip.mouseReleaseEvent(_mouse(QEvent.Type.MouseButtonRelease, target))
+    assert resident.x_milli == original_x
+    assert resident.commands == ['sleep']
+
+
 def test_right_click_commands_and_drag(page):
     strip = _strip(page)
     world = page.service.world
     resident = next(iter(world.residents.values()))
     center = strip.resident_center(resident)
     strip.mousePressEvent(_mouse(QEvent.Type.MouseButtonPress, center, Qt.MouseButton.RightButton))
-    sleep = next(action for action in strip.last_menu.actions() if action.text() == "Sleep")
+    ask = next(action.menu() for action in strip.last_menu.actions() if action.text() == "Ask to")
+    sleep = next(action for action in ask.actions() if action.text() == "Sleep")
     sleep.trigger()
     assert resident.commands == ["sleep"]
     strip.last_menu.close()

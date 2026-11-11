@@ -73,8 +73,10 @@ def test_installed_optional_image_plugins_and_puppet_data_are_packaged(builder, 
     monkeypatch.setattr(builder, 'find_spec', lambda name: object())
     command = builder.build_command('1.0.81', False)
     assert '--include-package=PIL' in command
-    assert '--include-package-data=Imervue' in command
+    assert '--include-package-data=rigora' in command
+    assert '--include-package=rigora' in command
     monkeypatch.setattr(builder, 'find_spec', lambda name: None)
     command = builder.build_command('1.0.81', False)
     assert '--include-package=PIL' not in command
-    assert '--include-package-data=Imervue' not in command
+    assert '--include-package-data=rigora' not in command
+    assert '--include-package=rigora' not in command

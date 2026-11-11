@@ -1,0 +1,475 @@
+{
+  "product_test_commit": "d825c06c",
+  "domain_event_kinds": 25,
+  "events": [
+    {
+      "kind": "activity",
+      "producers": [
+        {
+          "path": "frontengine/utils/pet_game/behaviour.py",
+          "line": 82,
+          "payload_fields": [
+            "resident",
+            "activity",
+            "reason"
+          ]
+        }
+      ],
+      "inbox_category": null,
+      "conditional_inbox": null,
+      "station_badge": false,
+      "debounced_save_event": false
+    },
+    {
+      "kind": "arrived",
+      "producers": [
+        {
+          "path": "frontengine/utils/pet_game/world.py",
+          "line": 450,
+          "payload_fields": [
+            "resident"
+          ]
+        }
+      ],
+      "inbox_category": null,
+      "conditional_inbox": null,
+      "station_badge": false,
+      "debounced_save_event": true
+    },
+    {
+      "kind": "auto_job",
+      "producers": [
+        {
+          "path": "frontengine/utils/pet_game/behaviour.py",
+          "line": 243,
+          "payload_fields": [
+            "resident",
+            "recipe"
+          ]
+        }
+      ],
+      "inbox_category": "work",
+      "conditional_inbox": null,
+      "station_badge": false,
+      "debounced_save_event": false
+    },
+    {
+      "kind": "bought",
+      "producers": [
+        {
+          "path": "frontengine/utils/pet_game/world.py",
+          "line": 272,
+          "payload_fields": [
+            "definition"
+          ]
+        }
+      ],
+      "inbox_category": null,
+      "conditional_inbox": null,
+      "station_badge": false,
+      "debounced_save_event": false
+    },
+    {
+      "kind": "commission_done",
+      "producers": [
+        {
+          "path": "frontengine/utils/pet_game/goals.py",
+          "line": 376,
+          "payload_fields": [
+            "item",
+            "coins"
+          ]
+        }
+      ],
+      "inbox_category": "work",
+      "conditional_inbox": null,
+      "station_badge": false,
+      "debounced_save_event": false
+    },
+    {
+      "kind": "commissions_refreshed",
+      "producers": [
+        {
+          "path": "frontengine/utils/pet_game/goals.py",
+          "line": 361,
+          "payload_fields": [
+            "day"
+          ]
+        }
+      ],
+      "inbox_category": null,
+      "conditional_inbox": null,
+      "station_badge": false,
+      "debounced_save_event": false
+    },
+    {
+      "kind": "completed",
+      "producers": [
+        {
+          "path": "frontengine/utils/pet_game/simulation.py",
+          "line": 216,
+          "payload_fields": [
+            "resident",
+            "activity"
+          ]
+        }
+      ],
+      "inbox_category": null,
+      "conditional_inbox": null,
+      "station_badge": false,
+      "debounced_save_event": false
+    },
+    {
+      "kind": "goal_claimed",
+      "producers": [
+        {
+          "path": "frontengine/utils/pet_game/goals.py",
+          "line": 300,
+          "payload_fields": [
+            "goal",
+            "coins"
+          ]
+        }
+      ],
+      "inbox_category": "work",
+      "conditional_inbox": null,
+      "station_badge": false,
+      "debounced_save_event": false
+    },
+    {
+      "kind": "greeted",
+      "producers": [
+        {
+          "path": "frontengine/utils/pet_game/behaviour.py",
+          "line": 467,
+          "payload_fields": [
+            "resident",
+            "partner"
+          ]
+        }
+      ],
+      "inbox_category": null,
+      "conditional_inbox": null,
+      "station_badge": false,
+      "debounced_save_event": false
+    },
+    {
+      "kind": "helped",
+      "producers": [
+        {
+          "path": "frontengine/utils/pet_game/behaviour.py",
+          "line": 447,
+          "payload_fields": [
+            "resident",
+            "partner"
+          ]
+        }
+      ],
+      "inbox_category": null,
+      "conditional_inbox": null,
+      "station_badge": false,
+      "debounced_save_event": false
+    },
+    {
+      "kind": "interacted",
+      "producers": [
+        {
+          "path": "frontengine/utils/pet_game/world.py",
+          "line": 587,
+          "payload_fields": [
+            "resident",
+            "interaction"
+          ]
+        }
+      ],
+      "inbox_category": null,
+      "conditional_inbox": null,
+      "station_badge": false,
+      "debounced_save_event": false
+    },
+    {
+      "kind": "interrupted",
+      "producers": [
+        {
+          "path": "frontengine/utils/pet_game/behaviour.py",
+          "line": 55,
+          "payload_fields": [
+            "resident",
+            "activity",
+            "reason"
+          ]
+        }
+      ],
+      "inbox_category": null,
+      "conditional_inbox": "needs only for tired/hungry",
+      "station_badge": false,
+      "debounced_save_event": false
+    },
+    {
+      "kind": "life_event",
+      "producers": [
+        {
+          "path": "frontengine/utils/pet_game/goals.py",
+          "line": 424,
+          "payload_fields": [
+            "event",
+            "resident"
+          ]
+        }
+      ],
+      "inbox_category": "life",
+      "conditional_inbox": null,
+      "station_badge": false,
+      "debounced_save_event": false
+    },
+    {
+      "kind": "moved_zone",
+      "producers": [
+        {
+          "path": "frontengine/utils/pet_game/world.py",
+          "line": 188,
+          "payload_fields": [
+            "resident",
+            "zone"
+          ]
+        }
+      ],
+      "inbox_category": null,
+      "conditional_inbox": null,
+      "station_badge": false,
+      "debounced_save_event": false
+    },
+    {
+      "kind": "placed",
+      "producers": [
+        {
+          "path": "frontengine/utils/pet_game/world.py",
+          "line": 360,
+          "payload_fields": [
+            "furniture",
+            "definition"
+          ]
+        }
+      ],
+      "inbox_category": null,
+      "conditional_inbox": null,
+      "station_badge": false,
+      "debounced_save_event": true
+    },
+    {
+      "kind": "refused",
+      "producers": [
+        {
+          "path": "frontengine/utils/pet_game/behaviour.py",
+          "line": 299,
+          "payload_fields": [
+            "resident",
+            "command",
+            "reason"
+          ]
+        },
+        {
+          "path": "frontengine/utils/pet_game/world.py",
+          "line": 604,
+          "payload_fields": [
+            "resident",
+            "command",
+            "reason"
+          ]
+        }
+      ],
+      "inbox_category": null,
+      "conditional_inbox": null,
+      "station_badge": false,
+      "debounced_save_event": false
+    },
+    {
+      "kind": "routine_set",
+      "producers": [
+        {
+          "path": "frontengine/utils/pet_game/world.py",
+          "line": 642,
+          "payload_fields": [
+            "resident",
+            "routine"
+          ]
+        }
+      ],
+      "inbox_category": null,
+      "conditional_inbox": null,
+      "station_badge": false,
+      "debounced_save_event": false
+    },
+    {
+      "kind": "settle_failed",
+      "producers": [
+        {
+          "path": "frontengine/utils/pet_game/simulation.py",
+          "line": 257,
+          "payload_fields": [
+            "resident",
+            "task",
+            "reason"
+          ]
+        }
+      ],
+      "inbox_category": "errors",
+      "conditional_inbox": null,
+      "station_badge": false,
+      "debounced_save_event": true
+    },
+    {
+      "kind": "settled",
+      "producers": [
+        {
+          "path": "frontengine/utils/pet_game/simulation.py",
+          "line": 262,
+          "payload_fields": [
+            "resident",
+            "task",
+            "recipe",
+            "coins",
+            "transaction",
+            "station"
+          ]
+        }
+      ],
+      "inbox_category": "work",
+      "conditional_inbox": null,
+      "station_badge": true,
+      "debounced_save_event": true
+    },
+    {
+      "kind": "shared",
+      "producers": [
+        {
+          "path": "frontengine/utils/pet_game/behaviour.py",
+          "line": 504,
+          "payload_fields": [
+            "resident",
+            "partner"
+          ]
+        }
+      ],
+      "inbox_category": null,
+      "conditional_inbox": null,
+      "station_badge": false,
+      "debounced_save_event": false
+    },
+    {
+      "kind": "squabble",
+      "producers": [
+        {
+          "path": "frontengine/utils/pet_game/behaviour.py",
+          "line": 482,
+          "payload_fields": [
+            "resident",
+            "partner"
+          ]
+        }
+      ],
+      "inbox_category": null,
+      "conditional_inbox": null,
+      "station_badge": false,
+      "debounced_save_event": false
+    },
+    {
+      "kind": "tagged",
+      "producers": [
+        {
+          "path": "frontengine/utils/pet_game/behaviour.py",
+          "line": 457,
+          "payload_fields": [
+            "resident",
+            "partner"
+          ]
+        }
+      ],
+      "inbox_category": null,
+      "conditional_inbox": null,
+      "station_badge": false,
+      "debounced_save_event": false
+    },
+    {
+      "kind": "theme_set",
+      "producers": [
+        {
+          "path": "frontengine/utils/pet_game/world.py",
+          "line": 433,
+          "payload_fields": [
+            "zone",
+            "theme"
+          ]
+        }
+      ],
+      "inbox_category": null,
+      "conditional_inbox": null,
+      "station_badge": false,
+      "debounced_save_event": false
+    },
+    {
+      "kind": "upgraded",
+      "producers": [
+        {
+          "path": "frontengine/utils/pet_game/world.py",
+          "line": 491,
+          "payload_fields": [
+            "definition",
+            "level"
+          ]
+        }
+      ],
+      "inbox_category": null,
+      "conditional_inbox": null,
+      "station_badge": false,
+      "debounced_save_event": false
+    },
+    {
+      "kind": "wish_granted",
+      "producers": [
+        {
+          "path": "frontengine/utils/pet_game/goals.py",
+          "line": 405,
+          "payload_fields": [
+            "resident",
+            "wish"
+          ]
+        }
+      ],
+      "inbox_category": "life",
+      "conditional_inbox": null,
+      "station_badge": false,
+      "debounced_save_event": false
+    }
+  ],
+  "additional_ui_event": {
+    "kind": "save_failed",
+    "source": "PetHomePage._on_save_failed -> InboxPanel.add_error",
+    "category": "errors"
+  },
+  "source_review": [
+    "World.emit records time and persistent counters; drain_events clears the queue.",
+    "HomeService._publish drains before events_ready; four event kinds schedule a save after the 800 ms debounce. Other timer mutations are dirty for the 30-second periodic save.",
+    "HomeService.run schedules save for all admitted commands; timer advancement marks state dirty for periodic save.",
+    "PetHomePage._on_events forwards the same batch to HomeView and InboxPanel; service world supplies resident/recipe labels.",
+    "HomeView only uses settled events with an extant station for completion badges.",
+    "Inbox ignores ordinary activity/meal/nap chatter; refuses are presented by resident status rather than the Inbox."
+  ],
+  "limits": [
+    "One sequential self-review of event routing, not independent or whole-repository review.",
+    "AST inventory covers literal emit names in the domain package; classification probes use synthetic events and do not prove every producer is reachable.",
+    "No UI rendering or timer scheduling claim from these probes."
+  ],
+  "observation": [
+    "Inbox module docstring claims individually switchable categories, but wanted() currently accepts all four and no category controls were found. Public README describes grouping, not switches. This is a stale internal description, not evidence of a missing promised user control."
+  ],
+  "evidence_sha256": {
+    ".audit/audit_event_routing.py": "c1cb9673bc3f2d9890780d9d5178fe6a68e7654ec212639b2e03af4abf8c7faf",
+    "frontengine/utils/pet_game/world.py": "b7f4b55f226b0687f2585473334a7fb087704e32f04204a781c849be138feaf4",
+    "frontengine/show/pet_game/home_service.py": "172519c6a57d45b5b0938facb42e5f233e4b1c2ff6158b3563234af40fc63e97",
+    "frontengine/show/pet_game/home_view.py": "f07de786b767b73dff99a2a11b2db37d9e8400bea0ac1b367c7be49f6988caa6",
+    "frontengine/show/pet_game/captions.py": "99fe6813578c8d795cba616b40ba34a65a0c7ded56107594790479969bc7507c",
+    "frontengine/ui/page/pet_game/home_page.py": "34421c401308917ac26f84b1fb059af94fdb3566307c8b66ce282636f233360c",
+    "frontengine/ui/page/pet_game/inbox_panel.py": "c24a55025ca6f98b5084729a2abc69622f5d8f8db1c60b4cf78bfda5ec0c2fb5"
+  }
+}

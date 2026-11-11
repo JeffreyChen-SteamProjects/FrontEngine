@@ -49,8 +49,9 @@ def test_menu_updates_toggled_labels_and_current_language():
         menu.close()
 
 
-def test_collapsing_settings_preserves_input_and_keyboard_access():
-    page = SettingPage("tab_tools_text")
+def test_collapsing_settings_preserves_input_and_keyboard_access(*, lifetime_factory):
+    lifetime_factory()
+    page = SettingPage("tab_tools_text", lifetime=lifetime_factory())
     section = page.add_section("section_appearance", collapsed=True)
     field = QLineEdit("Keep this value")
     section.add_row("url", field)

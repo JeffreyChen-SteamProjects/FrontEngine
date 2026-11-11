@@ -70,7 +70,7 @@ def test_saved_outfit_reopens_from_library_and_missing_asset_can_be_repaired(tmp
     draft.equip(asset_reference(garment))
     draft.apply()
     saved = profiles.get(record['id'])
-    pet = DesktopPetWidget(str(body / 'layer.png'), profiles=profiles,
+    pet = DesktopPetWidget(profiles=profiles,
                            profile_id=record['id'], talk=False, asset_library=library)
     try:
         pet._set_active_sprite('idle')
@@ -81,7 +81,7 @@ def test_saved_outfit_reopens_from_library_and_missing_asset_can_be_repaired(tmp
     image = garment.root / 'layer.png'
     original = image.read_bytes()
     image.write_bytes(b'broken image')
-    pet = DesktopPetWidget(str(body / 'layer.png'), profiles=profiles,
+    pet = DesktopPetWidget(profiles=profiles,
                            profile_id=record['id'], talk=False, asset_library=library)
     try:
         assert pet.appearance_error
@@ -94,3 +94,30 @@ def test_saved_outfit_reopens_from_library_and_missing_asset_can_be_repaired(tmp
         assert pet._current_pixmap().toImage().pixelColor(2, 2) == QColor('red')
     finally:
         pet.close()
+
+
+@pytest.mark.parametrize('interruption', ['none', 'cancel', 'invalid'])
+def test_batch_progress_counts_only_published_assets(tmp_path, interruption):
+    from threading import Event
+    body, hat = tmp_path / 'cat', tmp_path / 'hat'
+    make_asset(body)
+    make_asset(hat, garment=True)
+    if interruption == 'invalid':
+        (hat / 'layer.png').write_bytes(b'broken PNG')
+    library = PetAssetLibrary(tmp_path / 'library')
+    cancel = Event()
+    observed = []
+    def progress(done, total):
+        catalog, errors = library.scan()
+        assert not errors
+        assert len(catalog.assets('character')) + len(catalog.assets('garment')) == done
+        observed.append((done, total))
+        if interruption == 'cancel':
+            cancel.set()
+    if interruption == 'none':
+        library.install_many([body, hat], cancel=cancel, progress=progress)
+        assert observed == [(1, 2), (2, 2)]
+    else:
+        with pytest.raises(InterruptedError if interruption == 'cancel' else ValueError):
+            library.install_many([body, hat], cancel=cancel, progress=progress)
+        assert observed == [(1, 2)]

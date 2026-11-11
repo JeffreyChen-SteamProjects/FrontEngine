@@ -1,0 +1,188 @@
+{
+  "product_test_commit": "3c086b2e",
+  "result": {
+    "passed": true,
+    "default_clock_is_monotonic": true,
+    "samples": [
+      {
+        "recipe": "letter",
+        "units": 10,
+        "coins": 120,
+        "transactions": [
+          "t5:u0",
+          "t5:u1",
+          "t5:u2",
+          "t5:u3",
+          "t5:u4",
+          "t5:u5",
+          "t5:u6",
+          "t5:u7",
+          "t5:u8",
+          "t5:u9"
+        ]
+      },
+      {
+        "recipe": "letter",
+        "units": 20,
+        "coins": 320,
+        "transactions": [
+          "t7:u0",
+          "t7:u1",
+          "t7:u2",
+          "t7:u3",
+          "t7:u4",
+          "t7:u5",
+          "t7:u6",
+          "t7:u7",
+          "t7:u8",
+          "t7:u9",
+          "t7:u10",
+          "t7:u11",
+          "t7:u12",
+          "t7:u13",
+          "t7:u14",
+          "t7:u15",
+          "t7:u16",
+          "t7:u17",
+          "t7:u18",
+          "t7:u19"
+        ]
+      },
+      {
+        "recipe": "letter",
+        "units": 10,
+        "coins": 440,
+        "transactions": [
+          "t8:u0",
+          "t8:u1",
+          "t8:u2",
+          "t8:u3",
+          "t8:u4",
+          "t8:u5",
+          "t8:u6",
+          "t8:u7",
+          "t8:u8",
+          "t8:u9"
+        ]
+      },
+      {
+        "recipe": "herbs",
+        "units": 1,
+        "coins": 64,
+        "transactions": [
+          "t11:u0"
+        ]
+      },
+      {
+        "recipe": "toy",
+        "units": 1,
+        "coins": 64,
+        "transactions": [
+          "t12:u0"
+        ]
+      },
+      {
+        "initial_ledger": {
+          "coins": 0,
+          "items": {},
+          "reserved": {},
+          "applied": [
+            "starter-kit",
+            "place:f2",
+            "place:f3",
+            "place:f4",
+            "fixture-zero"
+          ],
+          "journal": [
+            {
+              "id": "starter-kit",
+              "reason": "starter",
+              "coins": 10,
+              "items": {
+                "furniture:bed_basic": 1,
+                "furniture:table_basic": 1,
+                "furniture:desk_basic": 1
+              }
+            },
+            {
+              "id": "place:f2",
+              "reason": "place",
+              "coins": 0,
+              "items": {
+                "furniture:bed_basic": -1
+              }
+            },
+            {
+              "id": "place:f3",
+              "reason": "place",
+              "coins": 0,
+              "items": {
+                "furniture:table_basic": -1
+              }
+            },
+            {
+              "id": "place:f4",
+              "reason": "place",
+              "coins": 0,
+              "items": {
+                "furniture:desk_basic": -1
+              }
+            },
+            {
+              "id": "fixture-zero",
+              "reason": "zero-currency starting condition",
+              "coins": -10,
+              "items": {}
+            }
+          ]
+        },
+        "final_coins": 92,
+        "invariant_checks": 40804,
+        "settlements": 42,
+        "saved_world_equal": true,
+        "reserved": {}
+      }
+    ],
+    "source_sha256": "172519c6a57d45b5b0938facb42e5f233e4b1c2ff6158b3563234af40fc63e97",
+    "scope": "Offscreen real HomeService, one resident, starter furniture, zero starting currency and no wood. Manual orders with injected ticks; no later currency or need grants.",
+    "limitations": "Not native UI, normal-speed autonomy, all advanced recipes, cold restart, or crash acceptance."
+  },
+  "initial_probe": {
+    "passed": false,
+    "terminal_session": 79967,
+    "reason": "20-letter order stalled after18 completions in150000 injected ticks with starter furniture only.",
+    "resident_needs": {
+      "energy": 72,
+      "fullness": 77,
+      "mood": 8,
+      "comfort": 31,
+      "social": 0,
+      "hygiene": 60
+    },
+    "task_done": 18,
+    "task_progress_ms": 0,
+    "task_state": "paused",
+    "interpretation": "Mood recovery takes priority over work. Starter furniture has no mood-recovering leisure item. Revised workflow buys toy box using first10 letters income; no extra currency or needs injection."
+  },
+  "source_files_unchanged": 748,
+  "harness_source": "\"\"\"Isolated service clock probe; never changes the operating system clock.\"\"\"\nimport hashlib\nimport inspect\nimport json\nimport os\nfrom pathlib import Path\nimport sys\nimport tempfile\nimport time\n\nROOT = Path(__file__).resolve().parents[1]\nOUTPUT = ROOT / '.audit/zero-currency-recovery-result.json'\nsys.path.insert(0, str(ROOT))\nos.environ['QT_QPA_PLATFORM'] = 'offscreen'\n\nwith tempfile.TemporaryDirectory(prefix='frontengine-clock-') as temporary:\n    previous = Path.cwd()\n    os.chdir(temporary)\n    from PySide6.QtWidgets import QApplication\n    from frontengine.show.pet_game.home_service import HomeService, MAX_GAP_MS\n    from frontengine.user_setting.storage_session import StorageSession\n    from frontengine.user_setting.pet_game_save import HomeSaveStore\n    from frontengine.user_setting.pet_profiles import PetProfiles\n    from frontengine.utils.pet_game.catalog import builtin_catalog\n\n    app = QApplication([])\n    assert inspect.signature(HomeService).parameters['clock'].default is time.monotonic\n    owner = StorageSession.open(Path(temporary) / 'settings')\n    store = HomeSaveStore(owner, builtin_catalog())\n    now = [100.0]\n    profiles = PetProfiles({}, lambda: None)\n    pet = profiles.create(\"Recovery worker\")[\"id\"]\n    service = HomeService(None, store, profiles, clock=lambda: now[0])\n    events = []\n    service.events_ready.connect(events.extend)\n    samples = []\n    try:\n        world = service.create_home('fixture', 0, 900, 48, seed=3)\n        world.automatic = False\n        zone = next(iter(world.zones))\n        world.furnish(zone)\n        assert service.adopt(pet, zone) == 'accepted'\n        assert world.ledger.apply('fixture-zero', 'zero-currency starting condition', -world.ledger.coins) == 'accepted'\n        assert world.ledger.coins == 0 and world.ledger.count('wood') == 0\n        initial = world.ledger.to_dict()\n        service.start()\n        checks = [0]\n        def complete(recipe, units=1):\n            result, task = service.run(lambda w: w.create_task(recipe, pet, units=units))\n            assert result == 'accepted', (recipe, result)\n            for _ in range(150000):\n                now[0] += 0.2\n                service._tick()\n                checks[0] += 1\n                assert world.ledger.coins >= 0\n                assert all(amount >= 0 for amount in world.ledger.items.values())\n                assert all(0 <= amount <= world.ledger.count(item) for item, amount in world.ledger.reserved.items())\n                if task not in world.tasks:\n                    break\n            assert task not in world.tasks, (recipe, world.tasks[task].to_dict(), world.residents[pet].to_dict())\n            settlements = [e for e in events if e['kind'] == 'settled' and e['task'] == task]\n            assert len(settlements) == units\n            samples.append({'recipe': recipe, 'units': units, 'coins': world.ledger.coins,\n                            'transactions': [e['transaction'] for e in settlements]})\n        complete('letter', 10)\n        assert world.ledger.coins == 120\n        assert service.run(lambda w: w.buy_and_place('toy_box', zone, 'buy-toy-box')) == 'accepted'\n        complete('letter', 20)\n        complete('letter', 10)\n        assert world.ledger.coins == 440\n        assert service.run(lambda w: w.buy_and_place('planter', zone, 'buy-garden')) == 'accepted'\n        assert service.run(lambda w: w.buy_and_place('workbench', zone, 'buy-bench')) == 'accepted'\n        assert service.run(lambda w: w.buy_item('wood', 2, 'buy-wood')) == 'accepted'\n        complete('herbs')\n        complete('toy')\n        assert world.ledger.count('herb') == 2 and world.ledger.count('toy') == 1\n        assert world.ledger.count('wood') == 0 and not world.ledger.reserved\n        assert service.run(lambda w: w.sell_item('herb', 2, 'sell-herbs')) == 'accepted'\n        assert service.run(lambda w: w.sell_item('toy', 1, 'sell-toy')) == 'accepted'\n        assert world.ledger.coins == 92\n        from frontengine.utils.pet_game import snapshot\n        assert service.save_now()\n        assert json.loads(store.path.read_text(encoding='utf-8')) == snapshot.to_dict(world)\n        all_ids = [e['transaction'] for e in events if e['kind'] == 'settled']\n        assert len(all_ids) == len(set(all_ids)) == 42\n        assert all(world.ledger.applied(identifier) for identifier in all_ids)\n        samples.append({'initial_ledger': initial, 'final_coins': world.ledger.coins,\n                        'invariant_checks': checks[0], 'settlements': len(all_ids),\n                        'saved_world_equal': True, 'reserved': world.ledger.reserved})\n        assert service.shutdown()\n    finally:\n        service.shutdown()\n        store.close()\n        owner.close()\n        os.chdir(previous)\n\nsource = ROOT / 'frontengine/show/pet_game/home_service.py'\nOUTPUT.write_text(json.dumps({\n    'passed': True, 'default_clock_is_monotonic': True, 'samples': samples,\n    'source_sha256': hashlib.sha256(source.read_bytes()).hexdigest(),\n    'scope': 'Offscreen real HomeService, one resident, starter furniture, zero starting currency and no wood. Manual orders with injected ticks; no later currency or need grants.',\n    'limitations': 'Not native UI, normal-speed autonomy, all advanced recipes, cold restart, or crash acceptance.'\n}, indent=2) + '\\n', encoding='utf-8')\nprint(OUTPUT.read_text(encoding='utf-8'))\n",
+  "harness_sha256": "55d9492f598e111b12129310fc19bb7be2a9162250e6701c229fec84d5e4aafc",
+  "accounting": {
+    "writing_income": 480,
+    "toy_box": -40,
+    "planter": -150,
+    "workbench": -220,
+    "two_wood": -6,
+    "two_herbs_sold": 4,
+    "one_toy_sold": 24,
+    "final_coins": 92
+  },
+  "limits": [
+    "Offscreen injected ticks and explicit manual orders/purchases, not native interaction or normal-speed autonomy.",
+    "Starter bed/table/desk retained; only spendable currency set to zero.",
+    "Three basic recipes, not complete profession unlock trees.",
+    "One generated resident; initial traits not separately captured, so this is not a reproducibility claim for all residents.",
+    "Saved disk equals live world, but no cold-reopen or crash acceptance in this probe.",
+    "First stalled scenario retained; buying leisure furniture is part of the successful workflow."
+  ]
+}

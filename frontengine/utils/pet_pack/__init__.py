@@ -1,1 +1,1 @@
-"""Portable sprite-pack construction using the existing pet.json layout."""
+"""The layered pet asset format: manifests, palettes and part variants."""

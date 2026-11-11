@@ -100,14 +100,15 @@ def test_invalid_draft_keeps_last_preview_and_saved_state(tmp_path):
     assert profiles.get(record['id']) == record
 
 
-def test_installed_parts_dialog_preview_apply_and_cancel(tmp_path):
+def test_installed_parts_dialog_preview_apply_and_cancel(tmp_path, *, lifetime_factory):
+    lifetime_factory()
     source = tmp_path / 'cat'
     variant_asset(source)
     library = PetAssetLibrary(tmp_path / 'library')
     asset = library.install(source)
     profiles = PetProfiles({}, lambda: None)
     record = profiles.create()
-    dialog = PetWardrobeDialog(profiles, record['id'], library=library)
+    dialog = PetWardrobeDialog(profiles, record['id'], library=library, lifetime=lifetime_factory())
     try:
         assert not dialog.variant_choice.isEnabled()
         dialog.character.setCurrentIndex(dialog.character.findData(asset_reference(asset)))
@@ -138,7 +139,7 @@ def test_live_parts_publish_only_after_save_and_restore_on_reopen(tmp_path, monk
     record = profiles.create()
     catalog, _ = library.scan()
     draft = WardrobeDraft(profiles, record['id'], catalog)
-    pet = DesktopPetWidget(str(source / 'layer.png'), profiles=profiles,
+    pet = DesktopPetWidget(profiles=profiles,
                            profile_id=record['id'], talk=False, sit_on_windows=False,
                            asset_library=library)
     try:
@@ -156,7 +157,7 @@ def test_live_parts_publish_only_after_save_and_restore_on_reopen(tmp_path, monk
         assert pet._current_pixmap().toImage().pixelColor(2, 2) == QColor('red')
     finally:
         pet.close()
-    reopened = DesktopPetWidget(str(source / 'layer.png'), profiles=profiles,
+    reopened = DesktopPetWidget(profiles=profiles,
                                 profile_id=record['id'], talk=False, sit_on_windows=False,
                                 asset_library=library)
     try:

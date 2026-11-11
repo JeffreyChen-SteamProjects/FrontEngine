@@ -40,13 +40,14 @@ def test_a_widget_built_from_nothing_does_not_crash_on_paint():
 
 
 @pytest.fixture
-def presentation_page(tmp_path):
+def presentation_page(tmp_path, *, lifetime_factory):
     from frontengine.ui.page.presentation.presentation_setting_ui import PresentationSettingUI
 
     original = os.getcwd()
     os.chdir(tmp_path)
+    lifetime_factory()
     try:
-        yield PresentationSettingUI()
+        yield PresentationSettingUI(lifetime=lifetime_factory())
     finally:
         os.chdir(original)
 

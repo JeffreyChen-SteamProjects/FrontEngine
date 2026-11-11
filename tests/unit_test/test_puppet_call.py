@@ -108,12 +108,13 @@ def test_puppet_call_limits_full_window_and_replaces_single_marker(puppet, monke
 
 
 @pytest.mark.parametrize('activity', ['call', 'light'])
-def test_puppet_manager_call_uses_keyboard_offsets(puppet, monkeypatch, activity):
+def test_puppet_manager_call_uses_keyboard_offsets(puppet, monkeypatch, activity, *, lifetime_factory):
     from frontengine.ui.page.pet.pet_setting_ui import PetSettingUI
     from test_pet_keyboard_call import call_controls
     from PySide6.QtTest import QTest
+    lifetime_factory()
     prepare(puppet, monkeypatch)
-    page = PetSettingUI()
+    page = PetSettingUI(lifetime=lifetime_factory())
     try:
         controls = call_controls(page, puppet)
         if activity == 'light':

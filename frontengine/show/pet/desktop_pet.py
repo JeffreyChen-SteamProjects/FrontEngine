@@ -1,4 +1,3 @@
-import json
 import sys
 import random as _random_module
 from datetime import datetime, timedelta
@@ -9,10 +8,10 @@ from typing import Optional, Tuple
 
 from PySide6.QtCore import Qt, QRect, QTimer, QUrl, Signal
 from PySide6.QtGui import (
-    QAction, QColor, QCursor, QFont, QFontMetrics, QGuiApplication, QImage, QMovie, QPainter, QPixmap, QTransform,
+    QAction, QColor, QCursor, QFont, QFontMetrics, QGuiApplication, QImage, QPainter, QPixmap, QTransform,
 )
 from PySide6.QtMultimedia import QSoundEffect
-from PySide6.QtWidgets import QApplication, QMenu, QMessageBox, QWidget
+from PySide6.QtWidgets import QApplication, QMenu, QWidget
 
 from frontengine.show.base_widget import BaseWidget
 from frontengine.show.window_helpers import apply_overlay_window_flags
@@ -56,42 +55,13 @@ SURFACE_LEFT = "left"
 SURFACE_CEILING = "ceiling"
 SURFACE_RIGHT = "right"
 
-# 視覺狀態（決定顯示哪張精靈）/ Visual states (which sprite to show)
+# 視覺狀態（決定播放哪個分層動作）/ Visual states (which layered action to play)
 STATE_WALK = "walk"
 STATE_IDLE = "idle"
 STATE_SLEEP = "sleep"
 STATE_CLIMB = "climb"
 STATE_FALL = "fall"
 STATE_DRAG = "drag"
-
-# 動作包（資料夾）中，各狀態可接受的檔名（不含副檔名，先命中者為準）
-# Accepted file stems per state inside a pet pack folder (first match wins).
-_PACK_STATE_ALIASES = {
-    STATE_WALK: ("walk", "run", "move"),
-    STATE_IDLE: ("idle", "sit", "stand"),
-    STATE_SLEEP: ("sleep", "zzz", "rest"),
-    STATE_CLIMB: ("climb", "grab", "wall"),
-    STATE_FALL: ("fall", "jump"),
-    STATE_DRAG: ("drag", "pinch", "grabbed", "held"),
-    "greet": ("greet",), "pet": ("pet",), "groom": ("groom",),
-    "feed": ("eat", "feed"), "play": ("play",),
-    "sit": ("sit",), "land": ("land",), "catch": ("catch",), "peer_greet": ("wave",),
-    "wake": ("wake",), "sleep_in": ("yawn",),
-}
-_PACK_EXTS = (".gif", ".webp", ".png", ".jpg", ".jpeg")
-
-# 缺該狀態精靈時的退回順序 / Fallback order when a state's sprite is missing
-_STATE_FALLBACKS = {
-    STATE_SLEEP: (STATE_IDLE, STATE_WALK),
-    STATE_IDLE: (STATE_WALK,),
-    STATE_CLIMB: (STATE_WALK,),
-    STATE_FALL: (STATE_WALK,),
-    STATE_DRAG: (STATE_WALK,),
-    **{action: (STATE_IDLE, STATE_WALK) for action in ("greet", "pet", "groom", "feed", "play", "sit",
-                                                       "land", "catch", "peer_greet", "wake",
-                                                       "celebrate", "outfit_show")},
-    "sleep_in": (STATE_SLEEP, STATE_IDLE, STATE_WALK),
-}
 
 # What a free pet does on its own, picked at random whenever its current state ends:
 # (state, weight, min ticks, max ticks) at 33 ms per tick. "climb" walks to the nearer
@@ -113,32 +83,6 @@ _CHATTER_MS = {"rare": (40000, 90000), "normal": (15000, 35000), "often": (8000,
 _PULSE_AMPLITUDE = {"calm": 0.12, "normal": 0.3, "lively": 0.45}
 
 
-def scan_pet_pack(folder: str) -> dict:
-    """
-    掃描動作包資料夾，回傳「視覺狀態 -> 圖片路徑」對應。非資料夾回傳空 dict。
-    Scan a pet-pack folder and return a ``state -> image path`` mapping.
-    Returns {} when `folder` is not a directory.
-    """
-    result: dict = {}
-    try:
-        folder_path = Path(folder)
-        if not folder_path.is_dir():
-            return result
-        by_stem = {
-            path.stem.lower(): path
-            for path in sorted(folder_path.iterdir())
-            if path.is_file() and path.suffix.lower() in _PACK_EXTS
-        }
-        for state, aliases in _PACK_STATE_ALIASES.items():
-            for alias in aliases:
-                if alias in by_stem:
-                    result[state] = str(by_stem[alias])
-                    break
-    except OSError:
-        pass
-    return result
-
-
 # 可以請寵物幫忙開啟的網址協定 / URL schemes the pet will open for you
 _WEB_SCHEMES = frozenset({"http", "https"})
 # 可以當寵物音效的副檔名。音效路徑可能來自匯入的預設集或 Workshop 內容，
@@ -147,11 +91,6 @@ _WEB_SCHEMES = frozenset({"http", "https"})
 # preset or Workshop content, so only an existing file with one of these is
 # honoured.
 _SOUND_SUFFIXES = (".wav", ".mp3", ".ogg", ".m4a", ".flac")
-
-
-# 拖進寵物的檔案分類 / What a file dropped onto the pet means
-DROP_SPRITE = "sprite"  # 圖片或動作包 -> 換一套外觀
-DROP_FOOD = "food"      # 其他檔案 -> 當成食物餵給寵物
 
 
 def acceptable_sound(sound_path) -> Optional[Path]:
@@ -176,21 +115,12 @@ def acceptable_sound(sound_path) -> Optional[Path]:
     return None
 
 
-def classify_drop(path) -> Optional[str]:
-    """
-    判斷拖到寵物身上的檔案要換裝還是當食物；路徑無效或空資料夾回傳 None。
-    Classify a file dropped onto the pet: a sprite/pack to wear, food to eat,
-    or None when the path is unusable.
-    """
+def droppable_food(path) -> bool:
+    """An existing file dropped onto the pet is food; folders and unusable paths are not."""
     try:
-        target = Path(path)
-        if not target.exists():
-            return None
+        return Path(path).is_file()
     except (OSError, TypeError, ValueError):
-        return None
-    if target.is_dir():
-        return DROP_SPRITE if scan_pet_pack(str(target)) else None
-    return DROP_SPRITE if target.suffix.lower() in _PACK_EXTS else DROP_FOOD
+        return False
 
 
 # 食物種類（依副檔名猜）與各自的效果 / Food kinds guessed from the suffix
@@ -218,57 +148,8 @@ def classify_food(path) -> str:
     return FOOD_SNACK
 
 
-# 動作包設定檔：放在動作包資料夾裡，用來描述這隻寵物的個性與參數
-# Pack manifest: sits inside a pet pack folder describing that pet's traits.
-PACK_MANIFEST_NAME = "pet.json"
-_MANIFEST_NUMBERS = ("size", "speed")
-_MANIFEST_FLAGS = ("climb", "talk", "sit_on_windows")
-
-
-def read_pet_manifest(folder) -> dict:
-    """
-    讀取動作包裡的 pet.json（可選）。只取認得的欄位，型別不符就略過，
-    讀不到或格式錯誤一律回傳空 dict，讓動作包永遠不會弄壞寵物。
-
-    Read a pack's optional pet.json. Only known, well-typed fields are kept and
-    anything unreadable yields {}, so a pack can never break the pet.
-    """
-    manifest: dict = {}
-    try:
-        path = Path(folder) / PACK_MANIFEST_NAME
-        if not path.is_file():
-            return manifest
-        with path.open("r", encoding="utf-8") as handle:
-            raw = json.load(handle)
-    except (OSError, ValueError, TypeError):
-        return manifest
-    if not isinstance(raw, dict):
-        return manifest
-    for key in _MANIFEST_NUMBERS:
-        try:
-            if key in raw:
-                manifest[key] = max(1, int(raw[key]))
-        except (TypeError, ValueError):
-            continue
-    for key in _MANIFEST_FLAGS:
-        if isinstance(raw.get(key), bool):
-            manifest[key] = raw[key]
-    if isinstance(raw.get("name"), str):
-        manifest["name"] = raw["name"]
-    if isinstance(raw.get("sound"), str):
-        manifest["sound"] = raw["sound"]
-    lines = raw.get("lines")
-    if isinstance(lines, dict):
-        manifest["lines"] = {
-            str(pool): [str(line) for line in values if str(line).strip()]
-            for pool, values in lines.items()
-            if isinstance(values, list) and values
-        }
-    return manifest
-
-
 def derive_visual_state(dragging: bool, airborne: bool, surface: str, motion_state: str) -> str:
-    """依目前情形推導應顯示的視覺狀態 / Derive which sprite state to show."""
+    """依目前情形推導應顯示的視覺狀態 / Derive which visual state to show."""
     if dragging:
         return STATE_DRAG
     if airborne:
@@ -1134,22 +1015,22 @@ class PetMotion:
 
 class DesktopPetWidget(BaseWidget):
     """
-    桌面寵物：可自主走動、可拖曳丟出、可追游標的動畫精靈。支援 GIF 與靜態圖。
-    A draggable, throwable, cursor-chasing animated sprite (GIF or image).
+    桌面寵物：可自主走動、可拖曳丟出、可追游標，外觀由分層角色繪製。
+    A draggable, throwable, cursor-chasing pet drawn from its identity's layered character.
     """
 
     clone_requested = Signal()
     customize_requested = Signal()
     wardrobe_requested = Signal()
 
-    def __init__(self, image_path: str, size: int = 128, speed: int = 3,
+    def __init__(self, size: int = 128, speed: int = 3,
                  behaviour: str = BEHAVIOUR_FLOOR, climb: bool = True, talk: bool = True,
                  sound_path: Optional[str] = None, sit_on_windows: bool = True,
                  volume: float = 1.0, audio_react: bool = False, *,
                  profile_id: Optional[str] = None, profiles: Optional[PetProfiles] = None,
                  profile_name: str = "", asset_library: Optional[PetAssetLibrary] = None):
         front_engine_logger.info(
-            f"[DesktopPetWidget] Init | path={image_path}, size={size}, speed={speed}, "
+            f"[DesktopPetWidget] Init | profile={profile_id}, size={size}, speed={speed}, "
             f"behaviour={behaviour}, climb={climb}, talk={talk}, sound={sound_path}, "
             f"sit_on_windows={sit_on_windows}"
         )
@@ -1175,28 +1056,16 @@ class DesktopPetWidget(BaseWidget):
         self._base_size: int = max(16, int(size))
         self._growth = self.companion.growth
         self.pet_size: int = size_for_level(self._base_size, self._growth.level())
-        self.image_path: Path = Path(image_path)
         self._dragging: bool = False
         self._drag_offset = None
         self._pointer_origin = None
         self.placement_revision = 0
         self._last_move_delta: Tuple[int, int] = (0, 0)
-        # 視覺狀態 -> ("movie"|"pixmap", 物件) / state -> sprite
-        self._sprites: dict = {}
-        self._active = None
-        self._active_state = None
         self._layered_playback = LayeredPlayback()
         self._hidden_timers = []
 
-        self._load_sprites(self.image_path)
-        if not self._sprites:
-            front_engine_logger.error(f"[DesktopPetWidget] No sprite found: {self.image_path}")
-            message_box = QMessageBox(self)
-            message_box.setText(language_wrapper.language_word_dict.get("pet_message_box_text", "Pet image not found"))
-            message_box.show()
-
         self.resize(self.pet_size, self.pet_size)
-        self.setAcceptDrops(True)  # drop an image to dress it up, anything else to feed it
+        self.setAcceptDrops(True)  # drop a file to feed it, a link to have it fetched
         self.motion = PetMotion(
             0, 0, self.pet_size, self.pet_size, (0, 0, 1920, 1080), speed, behaviour, climb=climb
         )
@@ -1216,13 +1085,9 @@ class DesktopPetWidget(BaseWidget):
         self._hunger = self.companion.hunger
         self._hunger_warned = False
         self._messages = self._load_messages()
-        # 動作包自帶的設定（可含台詞、速度、體型、音效）
-        # Traits shipped inside the pack (lines, speed, size, sound).
-        self.manifest = read_pet_manifest(self.image_path) if self.image_path.is_dir() else {}
-        self._apply_manifest()
         self._volume = max(0.0, min(1.0, float(volume)))
         self._sound: Optional[QSoundEffect] = None
-        self._init_sound(self.manifest.get("sound_path", sound_path))
+        self._init_sound(sound_path)
         # 語音朗讀（可選，缺少 QtTextToSpeech 時自動停用）
         # Optional spoken lines; disabled automatically without QtTextToSpeech.
         self._speech = None
@@ -1480,79 +1345,12 @@ class DesktopPetWidget(BaseWidget):
         if pool:
             self.say(pool[self._chatter_rng.randrange(len(pool))])
 
-    def _load_sprite(self, path: str):
-        """載入一張精靈；檔案損毀或格式不支援時回傳 None。"""
-        if Path(path).suffix.lower() in (".gif", ".webp"):
-            movie = QMovie(str(path))
-            if not movie.isValid():
-                return None
-            movie.frameChanged.connect(self.update)
-            return ("movie", movie)
-        pixmap = QPixmap(str(path))
-        return None if pixmap.isNull() else ("pixmap", pixmap)
-
-    def _load_sprites(self, image_path: Path) -> None:
-        """單一檔 -> 所有狀態共用；資料夾 -> 依檔名對應各狀態；載不起來的略過。"""
-        if image_path.is_dir():
-            for state, path in scan_pet_pack(str(image_path)).items():
-                sprite = self._load_sprite(path)
-                if sprite is not None:
-                    self._sprites[state] = sprite
-        elif image_path.is_file():
-            sprite = self._load_sprite(str(image_path))
-            if sprite is not None:
-                self._sprites["default"] = sprite
-
-    def change_sprite(self, path) -> None:
-        """換一套外觀（拖圖片或動作包到寵物身上時觸發）；載不到就維持原樣。"""
-        image_path = Path(path)
-        previous = self._sprites
-        self._sprites = {}
-        self._load_sprites(image_path)
-        if not self._sprites:
-            front_engine_logger.warning(f"[DesktopPetWidget] change_sprite ignored: {image_path}")
-            self._sprites = previous
-            return
-        front_engine_logger.info(f"[DesktopPetWidget] change_sprite | path={image_path}")
-        for kind, obj in previous.values():
-            if kind == "movie":
-                obj.stop()
-        self.image_path = image_path
-        self._active = None
-        self._active_state = None
-        self._set_active_sprite(self._visual_state())
-        pool = self._messages.get("costume") or []
-        if pool:
-            self.say(pool[self._chatter_rng.randrange(len(pool))])
-
-    def _sprite_for(self, state: str):
-        if "default" in self._sprites:
-            return self._sprites["default"]
-        if state in self._sprites:
-            return self._sprites[state]
-        for fallback in _STATE_FALLBACKS.get(state, (STATE_WALK,)):
-            if fallback in self._sprites:
-                return self._sprites[fallback]
-        return next(iter(self._sprites.values()), None)
-
     def set_render_backend(self, backend: str = 'auto') -> None:
         """Pets stay on ordinary Qt painting; see the note in ``__init__``."""
         self._requested_render_backend = 'software'
 
     def _set_active_sprite(self, state: str) -> None:
         self._layered_playback.set_action(state)
-        if self._layered_playback.renderer is not None:
-            self.update()
-            return
-        sprite = self._sprite_for(state)
-        if sprite is None or sprite is self._active:
-            return
-        if self._active is not None and self._active[0] == "movie":
-            self._active[1].stop()
-        self._active = sprite
-        self._active_state = state
-        if sprite[0] == "movie":
-            sprite[1].start()
         self.update()
 
     def _visual_state(self) -> str:
@@ -1562,12 +1360,7 @@ class DesktopPetWidget(BaseWidget):
 
     def _current_pixmap(self) -> Optional[QPixmap]:
         frame = self._layered_playback.frame()
-        if frame is not None:
-            return QPixmap.fromImage(frame)
-        if self._active is None:
-            return None
-        kind, obj = self._active
-        return obj.currentPixmap() if kind == "movie" else obj
+        return None if frame is None else QPixmap.fromImage(frame)
 
     def set_audio_level_provider(self, provider) -> None:
         """設定回傳目前音量 (0~1 或 None) 的函式 / Provider of the current audio level."""
@@ -1656,28 +1449,6 @@ class DesktopPetWidget(BaseWidget):
         self._reminder_timer.start(10000)
         if self._timeline_start is None:
             self._timeline_start = self._now_provider()
-
-    def _apply_manifest(self) -> None:
-        """套用動作包設定：台詞併入句庫，速度／體型／音效覆寫預設值。"""
-        if not self.manifest:
-            return
-        front_engine_logger.info(f"[DesktopPetWidget] pack manifest | {self.manifest}")
-        for pool, lines in (self.manifest.get("lines") or {}).items():
-            self._messages[pool] = list(lines)
-        if "speed" in self.manifest:
-            self.motion.speed = max(1, int(self.manifest["speed"]))
-        if "size" in self.manifest:
-            self._base_size = max(16, int(self.manifest["size"]))
-            self._apply_growth_size()
-        if "climb" in self.manifest:
-            self.motion.climb = bool(self.manifest["climb"])
-        if "talk" in self.manifest:
-            self._talk = bool(self.manifest["talk"])
-        sound = self.manifest.get("sound")
-        if sound:
-            candidate = self.image_path / sound
-            if candidate.is_file():
-                self.manifest["sound_path"] = str(candidate)
 
     def set_speech_enabled(self, enabled: bool) -> bool:
         """
@@ -1835,9 +1606,6 @@ class DesktopPetWidget(BaseWidget):
         current = self._layered_playback.renderer
         if renderer is not current and not (busy and current is not None and renderer is not None):
             self._layered_playback.set_renderer(renderer)
-            if self._active is not None and self._active[0] == "movie":
-                self._active[1].stop()
-            self._active = None
         self._apply_customization()
         self._apply_growth_size()
         if not self.companion.allows_autonomy or not self.companion.preferences['allow_social']:
@@ -2335,8 +2103,6 @@ class DesktopPetWidget(BaseWidget):
         for timer, remaining in self._hidden_timers:
             timer.start(remaining if timer.isSingleShot() else timer.interval())
         self._hidden_timers = []
-        if self._active is not None and self._active[0] == "movie":
-            self._active[1].setPaused(False)
         if not self._welcomed:
             self._welcome()
         self.profile_session.changed.emit()
@@ -2354,11 +2120,9 @@ class DesktopPetWidget(BaseWidget):
                                (self._timer, self._chatter_timer, self._reminder_timer) if timer.isActive()]
         for timer, _remaining in self._hidden_timers:
             timer.stop()
-        if self._active is not None and self._active[0] == "movie":
-            self._active[1].setPaused(True)
         super().hideEvent(event)
 
-    # --- drop a file onto the pet: wear it (image / pack) or eat it ---
+    # --- drop a file onto the pet to feed it, or a link to have it fetched ---
     @staticmethod
     def dropped_path(mime_data) -> Optional[str]:
         """從拖曳資料取出第一個可用的本機路徑；沒有可用者回傳 None。"""
@@ -2366,7 +2130,7 @@ class DesktopPetWidget(BaseWidget):
             return None
         for url in mime_data.urls():
             local_path = url.toLocalFile()
-            if local_path and classify_drop(local_path) is not None:
+            if local_path and droppable_food(local_path):
                 return local_path
         return None
 
@@ -2416,8 +2180,6 @@ class DesktopPetWidget(BaseWidget):
         self.motion.wake()
         if link is not None:
             self.fetch_link(link)
-        elif classify_drop(path) == DROP_SPRITE:
-            self.change_sprite(path)
         else:
             self.feed(classify_food(path))
         event.acceptProposedAction()
@@ -2457,7 +2219,4 @@ class DesktopPetWidget(BaseWidget):
         if self._reminder_timer.isActive():
             self._reminder_timer.stop()
         self._bubble.close()
-        for kind, obj in self._sprites.values():
-            if kind == "movie":
-                obj.stop()
         super().closeEvent(event)

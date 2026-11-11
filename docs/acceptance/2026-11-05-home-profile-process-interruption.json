@@ -1,0 +1,58 @@
+{
+  "cases": [
+    {
+      "completed_profile_writes": 0,
+      "exit": {
+        "pid": 55060,
+        "profiles": 0
+      },
+      "home_snapshot_preserved": true,
+      "profiles_converged": true,
+      "ledger_unchanged_on_retry_and_second_reopen": true
+    },
+    {
+      "completed_profile_writes": 1,
+      "exit": {
+        "pid": 44344,
+        "profiles": 1
+      },
+      "home_snapshot_preserved": true,
+      "profiles_converged": true,
+      "ledger_unchanged_on_retry_and_second_reopen": true
+    },
+    {
+      "completed_profile_writes": 2,
+      "exit": {
+        "pid": 55480,
+        "profiles": 2
+      },
+      "home_snapshot_preserved": true,
+      "profiles_converged": true,
+      "ledger_unchanged_on_retry_and_second_reopen": true
+    }
+  ],
+  "product_commit": "1c24853",
+  "parent_exit_code": 0,
+  "source_unchanged": true,
+  "source_count": 748,
+  "method": "Actual HomeService.save_now writes the home, then profiles through StorageSession. Child calls os._exit(73) before the first profile save, after the first save, or after the second save.",
+  "verified": [
+    "Two actual stored pet identities are adopted into a furnished home and a three-unit letter work order is created.",
+    "Worker advances 300000 simulated milliseconds and changes each resident care value before saving.",
+    "After abrupt exit, stored profiles match exactly the expected mix of old and new care values.",
+    "HomeService.open restores the complete normalized committed home snapshot and acquires both identity leases.",
+    "save_now converges both stored profiles to home care values without changing the ledger.",
+    "A second service restart preserves profile care and the ledger."
+  ],
+  "limits": [
+    "QCoreApplication only, no GUI or desktop input. No natural-time or physical-input acceptance.",
+    "Deterministic abrupt process exit, not power loss, random external termination, or disk failure.",
+    "Home and profiles are not one atomic file transaction; the verified guarantee is recovery and convergence after reopening the home and retrying its save.",
+    "Does not prove launching a standalone pet before reopening the home reconciles stale care values.",
+    "Does not prove arbitrary settlement-ID replay or every profession and task lifecycle.",
+    "Full regression session 81120 remains running; independent review remains outstanding."
+  ],
+  "harness_path": ".audit/check_home_profile_interruption.py",
+  "harness_sha256": "4fa609ab2766c5561bc0b94c7156aa042dc558e19aa446f3dffe682c4d7b616c",
+  "harness_source": "\"\"\"Abrupt process exit between the home commit and each profile mirror.\"\"\"\nimport json\nimport os\nfrom pathlib import Path\nimport subprocess\nimport sys\nimport tempfile\n\nROOT = Path(__file__).resolve().parents[1]\nsys.path.insert(0, str(ROOT))\nfrom PySide6.QtCore import QCoreApplication\nfrom frontengine.show.pet_game.home_service import HomeService\nfrom frontengine.user_setting.pet_game_save import HomeSaveStore\nfrom frontengine.user_setting.storage_session import StorageSession\nfrom frontengine.utils.pet_game import simulation, snapshot\nfrom frontengine.utils.pet_game.catalog import builtin_catalog\n\n\ndef open_home(directory):\n    owner = StorageSession.open(directory)\n    home = HomeService(None, HomeSaveStore(owner, builtin_catalog()), owner.profiles())\n    return owner, home\n\n\ndef care(record):\n    return {key: record[key] for key in ('energy', 'fullness', 'mood', 'affection')}\n\n\ndef expected_care(resident):\n    return {**{key: resident.needs[key] for key in ('energy', 'fullness', 'mood')},\n            'affection': resident.affection}\n\n\ndef close_home(owner, home):\n    assert home.shutdown()\n    home.deleteLater()\n    owner.close()\n\n\ndef worker(directory, completed):\n    owner, home = open_home(directory)\n    assert home.open().status == 'loaded'\n    simulation.advance(home.world, 300000)\n    for index, identifier in enumerate(sorted(home.world.residents)):\n        resident = home.world.residents[identifier]\n        resident.needs.update(energy=31 + index, fullness=41 + index, mood=51 + index)\n        resident.affection = 21 + index\n    (directory / 'expected.json').write_bytes(home.store.encode(home.world))\n    original = owner.profiles().save\n    count = 0\n\n    def stop():\n        (directory / 'exit.json').write_text(json.dumps({'pid': os.getpid(), 'profiles': count}))\n        os._exit(73)\n\n    def save():\n        nonlocal count\n        if completed == 0:\n            stop()\n        original()\n        count += 1\n        if count == completed:\n            stop()\n\n    owner.profiles().save = save\n    home.save_now()\n    raise AssertionError('Requested interruption was not reached')\n\n\ndef check(completed):\n    with tempfile.TemporaryDirectory(prefix='front-aggregate-crash-') as name:\n        directory = Path(name)\n        owner, home = open_home(directory)\n        identifiers = sorted(owner.profiles().create(label)['id'] for label in ('One', 'Two'))\n        home.create_home('screen', 0, 900, 40, seed=5, furnish=True, home='a' * 32)\n        for identifier in identifiers:\n            assert home.adopt(identifier) == 'accepted'\n        assert home.world.create_task('letter', identifiers[0], units=3)[0] == 'accepted'\n        assert home.save_now()\n        old = {identifier: care(owner.profiles().get(identifier)) for identifier in identifiers}\n        close_home(owner, home)\n        process = subprocess.Popen([sys.executable, str(Path(__file__).resolve()),\n                                    'worker', name, str(completed)],\n                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE,\n                                   creationflags=subprocess.CREATE_NO_WINDOW)\n        stdout, stderr = process.communicate(timeout=240)\n        assert process.returncode == 73, (process.returncode, stdout, stderr)\n        exit_record = json.loads((directory / 'exit.json').read_text())\n        assert exit_record['profiles'] == completed\n        expected = snapshot.from_dict(json.loads((directory / 'expected.json').read_bytes()), builtin_catalog())\n        owner, home = open_home(directory)\n        for index, identifier in enumerate(identifiers):\n            target = expected_care(expected.residents[identifier]) if index < completed else old[identifier]\n            assert care(owner.profiles().get(identifier)) == target\n        assert home.open().status == 'loaded'\n        assert snapshot.to_dict(home.world) == snapshot.to_dict(expected)\n        ledger = home.world.ledger.to_dict()\n        assert home.save_now()\n        for identifier in identifiers:\n            assert care(owner.profiles().get(identifier)) == expected_care(expected.residents[identifier])\n        assert home.world.ledger.to_dict() == ledger\n        close_home(owner, home)\n        owner, home = open_home(directory)\n        assert home.open().status == 'loaded'\n        assert home.world.ledger.to_dict() == ledger\n        for identifier in identifiers:\n            assert care(owner.profiles().get(identifier)) == expected_care(home.world.residents[identifier])\n        close_home(owner, home)\n        return {'completed_profile_writes': completed, 'exit': exit_record,\n                'home_snapshot_preserved': True, 'profiles_converged': True,\n                'ledger_unchanged_on_retry_and_second_reopen': True}\n\n\nif __name__ == '__main__':\n    app = QCoreApplication([])\n    if len(sys.argv) > 1:\n        worker(Path(sys.argv[2]), int(sys.argv[3]))\n    else:\n        results = []\n        for completed in (0, 1, 2):\n            result = check(completed)\n            results.append(result)\n            print(json.dumps(result), flush=True)\n        output = ROOT / '.audit/home-profile-interruption-result.json'\n        output.write_text(json.dumps({'cases': results}, indent=2), encoding='utf-8')\n"
+}

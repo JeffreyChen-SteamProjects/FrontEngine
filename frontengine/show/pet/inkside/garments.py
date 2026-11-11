@@ -1,4 +1,4 @@
-"""The INKSIDE wardrobe: fourteen outfits split into wearable slot pieces.
+"""The INKSIDE wardrobe: nineteen outfits split into wearable slot pieces.
 
 Pieces are drawn from the template's own geometry - crown, chin and torso
 outline - so one drawing fits every pose and every body type: torso garments
@@ -16,6 +16,10 @@ from frontengine.show.pet.inkside.ink import INK, ORANGE, PAPER, Brush, ellipse,
 from frontengine.show.pet.inkside.template import Template
 
 HAT_Z, NECK_Z, BODY_Z, STRAP_Z, BACK_Z = 60, 49, 33, 37, 14
+
+_WINTER_WALK = 'WINTER WALK'
+_SCHOOL_DAY = 'SCHOOL DAY'
+_BEACH_DAY = 'BEACH DAY'
 
 
 @dataclass(frozen=True)
@@ -318,6 +322,113 @@ def _gear_pack(b: Brush, t: Template, kind: str) -> None:
 C, P, K = ORANGE, PAPER, INK
 
 
+# --- the second wardrobe: winter, kitchen, party, school and beach -------------------
+def _knit_beanie(b: Brush, t: Template, _kind: str) -> None:
+    top, hw = _crown(t)
+    dome = QPainterPath(QPointF(-hw * 0.68, top + 2))
+    dome.quadTo(QPointF(-hw * 0.7, top - 40), QPointF(0, top - 40))
+    dome.quadTo(QPointF(hw * 0.7, top - 40), QPointF(hw * 0.68, top + 2))
+    dome.closeSubpath()
+    _hat(b, dome, 'cloth')
+    b.clip(dome, lambda: [b.outline(line((x, top - 32), (x, top - 6)), 3) for x in (-hw * 0.3, 0, hw * 0.3)])
+    _hat(b, rounded(-hw * 0.74, top - 8, hw * 1.48, 14, 6), 'trim', 5)
+    _hat(b, ellipse(0, top - 44, 10, 10), 'trim', 4.5)
+
+
+def _chef_hat(b: Brush, t: Template, _kind: str) -> None:
+    top, hw = _crown(t)
+    puff = ellipse(-hw * 0.3, top - 32, hw * 0.34, 17).united(ellipse(hw * 0.3, top - 32, hw * 0.34, 17))
+    puff = puff.united(ellipse(0, top - 40, hw * 0.4, 19))
+    _hat(b, puff, 'cloth')
+    _hat(b, rect(-hw * 0.5, top - 20, hw, 20), 'cloth')
+    b.outline(line((-hw * 0.5, top - 20), (hw * 0.5, top - 20)), 3.5)
+
+
+def _party_hat(b: Brush, t: Template, _kind: str) -> None:
+    top, hw = _crown(t)
+    cone = polygon((-hw * 0.42, top + 2), (hw * 0.06, top - 50), (hw * 0.46, top + 2))
+    _hat(b, cone, 'cloth')
+    b.clip(cone, lambda: [b.fill(polygon((-hw, top - y), (hw, top - y - 14), (hw, top - y - 6), (-hw, top - y + 8)),
+                                 'trim') for y in (6, 24, 42)])
+    b.outline(cone)
+    _hat(b, ellipse(hw * 0.06, top - 52, 9, 9), 'trim', 4)
+
+
+def _student_cap(b: Brush, t: Template, _kind: str) -> None:
+    top, hw = _crown(t)
+    _hat(b, ellipse(hw * 0.46, top + 2, hw * 0.52, 8), 'trim', 4.5)
+    _hat(b, rounded(-hw * 0.62, top - 28, hw * 1.24, 32, 14), 'cloth')
+    b.shape(ellipse(0, top - 28, 6, 5), 'trim', 3)
+
+
+def _straw_hat(b: Brush, t: Template, _kind: str) -> None:
+    top, hw = _crown(t)
+    brim = ellipse(0, top - 2, hw * 1.3, 15)
+    _hat(b, brim, 'cloth')
+    crown = rounded(-hw * 0.56, top - 28, hw * 1.12, 28, 12)
+    _hat(b, crown, 'cloth')
+    b.clip(crown, lambda: b.fill(rect(-hw, top - 12, hw * 2, 9), 'trim'))
+    b.outline(crown)
+    b.outline(line((-hw * 1.0, top + 2), (-hw * 0.7, top + 4)), 2.5)
+    b.outline(line((hw * 0.7, top + 4), (hw * 1.0, top + 2)), 2.5)
+
+
+def _neckerchief(b: Brush, t: Template, _kind: str) -> None:
+    y = _chin(t) + 4
+    b.shape(polygon((-26, y - 6), (26, y - 6), (0, y + 24)), 'cloth', 5)
+    b.shape(ellipse(0, y - 4, 8, 7), 'trim', 4)
+
+
+def _flower_lei(b: Brush, t: Template, _kind: str) -> None:
+    y = _chin(t) + 6
+    for index, x in enumerate((-36, -24, -12, 0, 12, 24, 36)):
+        dip = 8 - abs(x) / 6
+        b.shape(ellipse(x, y + dip, 8, 8), 'cloth' if index % 2 else 'trim', 3.5)
+
+
+def _puffer(b: Brush, t: Template, kind: str) -> None:
+    _clipped(b, t, kind, 'cloth', lambda: ([b.outline(line((-120, y), (120, y)), 3.5) for y in (-26, -8, 10, 28)],
+                                         b.fill(rect(-3, -120, 6, 240), 'trim')))
+
+
+def _chef_jacket(b: Brush, t: Template, kind: str) -> None:
+    def details() -> None:
+        for x in (-10, 10):
+            for y in (-20, -4, 12):
+                b.fill(ellipse(x, y, 3.5, 3.5), 'trim')
+    _clipped(b, t, kind, 'cloth', details)
+
+
+def _confetti_shirt(b: Brush, t: Template, kind: str) -> None:
+    def details() -> None:
+        spots = ((-30, -30), (12, -36), (-8, -14), (28, -10), (-26, 8), (6, 14), (30, 26), (-12, 30))
+        for index, (x, y) in enumerate(spots):
+            b.fill(rect(x - 4, y - 4, 8, 8) if index % 2 else ellipse(x, y, 4.5, 4.5),
+                   'trim' if index % 3 else 'pocket')
+    _clipped(b, t, kind, 'cloth', details)
+
+
+def _blazer(b: Brush, t: Template, kind: str) -> None:
+    _clipped(b, t, kind, 'cloth', lambda: (b.fill(polygon((-28, -44), (0, -44), (-6, 0)), 'trim'),
+                                         b.fill(polygon((28, -44), (0, -44), (6, 0)), 'trim'),
+                                         b.outline(line((0, 0), (0, 40)), 3),
+                                         b.shape(rect(-30, -8, 12, 7), 'pocket', 3)))
+
+
+def _striped_tee(b: Brush, t: Template, kind: str) -> None:
+    _clipped(b, t, kind, 'cloth', lambda: [b.fill(rect(-120, y, 240, 7), 'trim') for y in (-30, -14, 2, 18, 34)])
+
+
+def _satchel(b: Brush, t: Template, kind: str) -> None:
+    if kind == 'lie':
+        return
+    b.outline(line((26, -30), (-34, 12)), 5)
+    bag = rounded(-58, 4, 34, 30, 5)
+    b.shape(bag, 'cloth')
+    b.shape(polygon((-58, 4), (-24, 4), (-28, 18), (-54, 18)), 'trim', 4)
+    b.fill(rect(-44, 15, 6, 6), 'cloth')
+
+
 def _g(ident, outfit, name, slots, palette, *pieces) -> Garment:
     return Garment(ident, outfit, name, tuple(slots), palette, tuple(pieces))
 
@@ -367,6 +478,24 @@ GARMENTS = (
     _g('big-scarf', 'SLOW SUNDAY', 'Big scarf', ['neck'], {'cloth': C}, Piece('head', NECK_Z, _scarf)),
     _g('sweater', 'SLOW SUNDAY', 'Wide sweater', ['body'], {'cloth': K, 'pocket': P, 'sleeve': K, 'cuff': P},
        Piece('body', BODY_Z, _sweater), *_sleeves(_cuffed_sleeve)),
+    _g('knit-beanie', _WINTER_WALK, 'Knit beanie', ['head'], {'cloth': C, 'trim': P}, Piece('head', HAT_Z, _knit_beanie)),
+    _g('puffer-jacket', _WINTER_WALK, 'Puffer jacket', ['body'], {'cloth': C, 'trim': K, 'sleeve': C, 'cuff': K},
+       Piece('body', BODY_Z, _puffer), *_sleeves(_cuffed_sleeve)),
+    _g('chef-hat', 'KITCHEN', 'Chef hat', ['head'], {'cloth': P}, Piece('head', HAT_Z, _chef_hat)),
+    _g('neckerchief', 'KITCHEN', 'Neckerchief', ['neck'], {'cloth': C, 'trim': K}, Piece('head', NECK_Z, _neckerchief)),
+    _g('chef-jacket', 'KITCHEN', 'Chef jacket', ['body'], {'cloth': P, 'trim': K, 'sleeve': P, 'cuff': K},
+       Piece('body', BODY_Z, _chef_jacket), *_sleeves(_cuffed_sleeve)),
+    _g('party-hat', 'PARTY', 'Party hat', ['head'], {'cloth': C, 'trim': P}, Piece('head', HAT_Z, _party_hat)),
+    _g('confetti-shirt', 'PARTY', 'Confetti shirt', ['body'], {'cloth': K, 'trim': C, 'pocket': P, 'sleeve': K},
+       Piece('body', BODY_Z, _confetti_shirt), *_sleeves()),
+    _g('student-cap', _SCHOOL_DAY, 'Student cap', ['head'], {'cloth': K, 'trim': C}, Piece('head', HAT_Z, _student_cap)),
+    _g('blazer', _SCHOOL_DAY, 'Blazer', ['body'], {'cloth': K, 'trim': P, 'pocket': C, 'sleeve': K, 'cuff': P},
+       Piece('body', BODY_Z, _blazer), *_sleeves(_cuffed_sleeve)),
+    _g('satchel', _SCHOOL_DAY, 'Satchel', ['back'], {'cloth': C, 'trim': K}, Piece('body', STRAP_Z, _satchel)),
+    _g('straw-hat', _BEACH_DAY, 'Straw hat', ['head'], {'cloth': P, 'trim': C}, Piece('head', HAT_Z, _straw_hat)),
+    _g('flower-lei', _BEACH_DAY, 'Flower lei', ['neck'], {'cloth': C, 'trim': P}, Piece('head', NECK_Z, _flower_lei)),
+    _g('striped-tee', _BEACH_DAY, 'Striped tee', ['body'], {'cloth': P, 'trim': C, 'sleeve': P},
+       Piece('body', BODY_Z, _striped_tee), *_sleeves()),
 )
 
 # The authored combinations and the body type each was designed on first. Every
@@ -386,4 +515,9 @@ OUTFITS = (
     ('LAST TRAIN', 'inkside-ink', ('conductor-cap', 'bow-tie', 'train-cape')),
     ('DEEP DIVE', 'inkside-gill', ('goggles', 'wetsuit', 'gear-pack')),
     ('SLOW SUNDAY', 'inkside-gill', ('big-scarf', 'sweater')),
+    (_WINTER_WALK, 'inkside-mochi', ('knit-beanie', 'puffer-jacket', 'big-scarf')),
+    ('KITCHEN', 'inkside-moss', ('chef-hat', 'neckerchief', 'chef-jacket')),
+    ('PARTY', 'inkside-pip', ('party-hat', 'bow-tie', 'confetti-shirt')),
+    (_SCHOOL_DAY, 'inkside-bolt', ('student-cap', 'blazer', 'satchel')),
+    (_BEACH_DAY, 'inkside-gill', ('straw-hat', 'flower-lei', 'striped-tee')),
 )

@@ -46,6 +46,10 @@ class ExportSignals(QObject):
     finished = Signal(str, str, str)
 
 
+class BuiltinInstallSignals(InstallSignals):
+    progress = Signal(int, int)
+
+
 class PetBuiltinInstall(QRunnable):
     """Draw one built-in character and its wardrobe off the GUI thread, then install them."""
 
@@ -53,43 +57,60 @@ class PetBuiltinInstall(QRunnable):
         super().__init__()
         self.library, self.identifier = library, identifier
         self.cancel = Event()
-        self.signals = InstallSignals()
+        self.signals = BuiltinInstallSignals()
 
     def run(self) -> None:
         from frontengine.show.pet.inkside.library import install_builtin
         error = ''
         try:
-            install_builtin(self.library, self.identifier, self.cancel)
+            install_builtin(self.library, self.identifier, self.cancel, self.signals.progress.emit)
         except (OSError, ValueError) as failure:
             error = str(failure)
         self.signals.finished.emit(error)
 
 
-class SpriteSignals(QObject):
-    finished = Signal(str, str)   # preview image path, error
+class CharacterSignals(QObject):
+    finished = Signal(str, str)   # character identifier, error
+    wardrobe = Signal(str)        # the wardrobe that follows: error, empty when installed
 
 
-class PetBuiltinSprite(QRunnable):
-    """Install a built-in character for sprite pets and render its idle frame as the pet image."""
+class PetBuiltinCharacter(QRunnable):
+    """Install a built-in character so a desktop pet can wear it.
 
-    def __init__(self, library, identifier, preview_folder):
+    The character alone comes first, so the pet can appear at once; its wardrobe follows in the
+    same job and reports separately. Cancelling stops whichever part is running.
+    """
+
+    def __init__(self, library, identifier):
         super().__init__()
-        self.library, self.identifier, self.preview_folder = library, identifier, preview_folder
+        self.library, self.identifier = library, identifier
         self.cancel = Event()
-        self.signals = SpriteSignals()
+        self.signals = CharacterSignals()
+        self.done = False
 
     def run(self) -> None:
+        if self._character():
+            self._wardrobe()
+        self.done = True
+
+    def _wardrobe(self) -> None:
+        from frontengine.show.pet.inkside.library import install_builtin
+        error = ''
+        if not self.cancel.is_set():
+            try:
+                install_builtin(self.library, self.identifier, self.cancel)
+            except (OSError, ValueError) as failure:      # the wardrobe installs it again when opened
+                error = str(failure)
+        self.signals.wardrobe.emit(error)
+
+    def _character(self) -> bool:
         from frontengine.show.pet.inkside.library import VERSION, install_builtin
-        from frontengine.show.pet.layered_renderer import LayeredRenderer
         try:
-            install_builtin(self.library, self.identifier, self.cancel)
+            install_builtin(self.library, self.identifier, self.cancel, wardrobe=False)
             catalog, _errors = self.library.scan()
-            character = catalog.resolve({'id': self.identifier, 'version': VERSION}, 'character')
-            self.preview_folder.mkdir(parents=True, exist_ok=True)
-            preview = self.preview_folder / f'{self.identifier}.png'
-            if not LayeredRenderer(character).render('idle', 0).save(str(preview), 'PNG'):
-                raise OSError(f'Could not write {preview}')
+            catalog.resolve({'id': self.identifier, 'version': VERSION}, 'character')
         except (OSError, ValueError) as failure:
-            self.signals.finished.emit('', str(failure))
-            return
-        self.signals.finished.emit(str(preview), '')
+            self.signals.finished.emit(self.identifier, str(failure))
+            return False
+        self.signals.finished.emit(self.identifier, '')
+        return True

@@ -16,7 +16,7 @@ class CriticalExit(Thread):
     Critical Exit Listener: Runs in a background thread, listens for a key press, and exits the app immediately
     """
 
-    def __init__(self, default_daemon: bool = True):
+    def __init__(self, default_daemon: bool = True, *, on_exit=None):
         """
         初始化 CriticalExit，預設監聽 F12 鍵
         Initialize CriticalExit, default key is F12
@@ -25,6 +25,7 @@ class CriticalExit(Thread):
         """
         super().__init__()
         self.daemon = default_daemon
+        self._on_exit = on_exit
         self._stopped = Event()
         # 預設退出鍵為 F7
         # Default exit key is F7
@@ -72,10 +73,16 @@ class CriticalExit(Thread):
         Thread main loop: Continuously listens for the key, exits app when pressed
         """
         try:
+            pressed = False
             while not self._stopped.wait(0.1):
-                if check_key_is_press(self._exit_check_key):
-                    QMetaObject.invokeMethod(QApplication.instance(), 'quit', Qt.ConnectionType.QueuedConnection)
-                    sys.exit(0)
+                down = check_key_is_press(self._exit_check_key)
+                if down and not pressed:
+                    if self._on_exit is not None:
+                        self._on_exit()
+                    else:
+                        QMetaObject.invokeMethod(QApplication.instance(), 'quit', Qt.ConnectionType.QueuedConnection)
+                        return
+                pressed = down
         except SystemExit:
             raise
         except Exception as error:

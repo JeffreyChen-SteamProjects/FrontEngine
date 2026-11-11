@@ -1,0 +1,37 @@
+{
+  "product": "0b2f459e",
+  "rendered_documents": {
+    "Eng": {
+      "paragraph": "If saving a pet profile fails during Move out, the resident stays selected so you can retry after restoring write access.",
+      "html_sha256": "09d2a9580847545784d6d97f347575b6fa34ba26aa999f52a16e701af2c9bb5e"
+    },
+    "Zh": {
+      "paragraph": "搬出時若角色資料儲存失敗，會保留居民選取，恢復寫入後可直接重試。",
+      "html_sha256": "c042f2e9c427dcbbe797db46916179ca01a033046a435010f208f649ebdbd0a4"
+    },
+    "ZhCn": {
+      "paragraph": "搬出时若角色资料保存失败，会保留居民选择，恢复写入后可直接重试。",
+      "html_sha256": "c989461462fb7653b69957595def82eeadcad23f468b62eb65cd04117fa628fd"
+    },
+    "De": {
+      "paragraph": "Wenn das Speichern des Tierprofils beim Auszug fehlschlägt, bleibt der Bewohner ausgewählt. Sobald das Schreiben wieder möglich ist, können Sie den Auszug erneut versuchen.",
+      "html_sha256": "fbc17bd4d54c8034b7c9dcee9758a65e73bc30ad80c958a7c214cdaa01b9452b"
+    },
+    "Fr": {
+      "paragraph": "Si l’enregistrement du profil échoue lors du départ, le résident reste sélectionné pour permettre une nouvelle tentative une fois l’accès en écriture rétabli.",
+      "html_sha256": "423f6963f1a0889f162bbf9863fc9d1dadc877d10d52c55334937b3a12477d51"
+    },
+    "Ru": {
+      "paragraph": "Если при выселении не удалось сохранить профиль питомца, житель остаётся выбранным: после восстановления доступа для записи можно повторить попытку.",
+      "html_sha256": "d787730761ae251acc54a1bb05429b06971b7ac62fcca733a163ff2f408555e9"
+    },
+    "It": {
+      "paragraph": "Se il salvataggio del profilo dell’animale non riesce durante il trasferimento fuori casa, il residente resta selezionato per poter riprovare quando l’accesso in scrittura viene ripristinato.",
+      "html_sha256": "674395e1903bb57c472ea00009956009c9fc8c6b5b83a92c3d80eaa055f415f7"
+    }
+  },
+  "source_count_unchanged": 751,
+  "collected": 3257,
+  "full_regression": "queued after selection version; not a passing result",
+  "parent_queue_pid": 69236
+}

@@ -1,0 +1,1101 @@
+{
+  "baseline_product": "f0336e45",
+  "native": {
+    "native-bubble-before": {
+      "native": {
+        "passed": true,
+        "variant": "baseline",
+        "cases": [
+          {
+            "language": "English",
+            "width": 800,
+            "edge": "left",
+            "inside": false,
+            "rect": [
+              -8.0,
+              71.4,
+              156.0,
+              20.0
+            ]
+          },
+          {
+            "language": "English",
+            "width": 800,
+            "edge": "right",
+            "inside": false,
+            "rect": [
+              652.0,
+              71.4,
+              156.0,
+              20.0
+            ]
+          },
+          {
+            "language": "English",
+            "width": 240,
+            "edge": "left",
+            "inside": false,
+            "rect": [
+              -8.0,
+              71.4,
+              156.0,
+              20.0
+            ]
+          },
+          {
+            "language": "English",
+            "width": 240,
+            "edge": "right",
+            "inside": false,
+            "rect": [
+              92.0,
+              71.4,
+              156.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Traditional_Chinese",
+            "width": 800,
+            "edge": "left",
+            "inside": true,
+            "rect": [
+              27.0,
+              71.4,
+              86.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Traditional_Chinese",
+            "width": 800,
+            "edge": "right",
+            "inside": true,
+            "rect": [
+              687.0,
+              71.4,
+              86.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Traditional_Chinese",
+            "width": 240,
+            "edge": "left",
+            "inside": true,
+            "rect": [
+              27.0,
+              34.599999999999994,
+              86.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Traditional_Chinese",
+            "width": 240,
+            "edge": "right",
+            "inside": true,
+            "rect": [
+              127.0,
+              34.599999999999994,
+              86.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Simplified_Chinese",
+            "width": 800,
+            "edge": "left",
+            "inside": true,
+            "rect": [
+              27.0,
+              34.599999999999994,
+              86.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Simplified_Chinese",
+            "width": 800,
+            "edge": "right",
+            "inside": true,
+            "rect": [
+              687.0,
+              34.599999999999994,
+              86.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Simplified_Chinese",
+            "width": 240,
+            "edge": "left",
+            "inside": true,
+            "rect": [
+              27.0,
+              34.599999999999994,
+              86.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Simplified_Chinese",
+            "width": 240,
+            "edge": "right",
+            "inside": true,
+            "rect": [
+              127.0,
+              34.599999999999994,
+              86.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Deutsch",
+            "width": 800,
+            "edge": "left",
+            "inside": false,
+            "rect": [
+              -44.0,
+              34.599999999999994,
+              228.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Deutsch",
+            "width": 800,
+            "edge": "right",
+            "inside": false,
+            "rect": [
+              616.0,
+              34.599999999999994,
+              228.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Deutsch",
+            "width": 240,
+            "edge": "left",
+            "inside": false,
+            "rect": [
+              -44.0,
+              34.599999999999994,
+              228.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Deutsch",
+            "width": 240,
+            "edge": "right",
+            "inside": false,
+            "rect": [
+              56.0,
+              34.599999999999994,
+              228.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Russian",
+            "width": 800,
+            "edge": "left",
+            "inside": true,
+            "rect": [
+              2.0,
+              34.599999999999994,
+              136.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Russian",
+            "width": 800,
+            "edge": "right",
+            "inside": true,
+            "rect": [
+              662.0,
+              34.599999999999994,
+              136.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Russian",
+            "width": 240,
+            "edge": "left",
+            "inside": true,
+            "rect": [
+              2.0,
+              34.599999999999994,
+              136.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Russian",
+            "width": 240,
+            "edge": "right",
+            "inside": true,
+            "rect": [
+              102.0,
+              34.599999999999994,
+              136.0,
+              20.0
+            ]
+          },
+          {
+            "language": "France",
+            "width": 800,
+            "edge": "left",
+            "inside": false,
+            "rect": [
+              -4.0,
+              34.599999999999994,
+              148.0,
+              20.0
+            ]
+          },
+          {
+            "language": "France",
+            "width": 800,
+            "edge": "right",
+            "inside": false,
+            "rect": [
+              656.0,
+              34.599999999999994,
+              148.0,
+              20.0
+            ]
+          },
+          {
+            "language": "France",
+            "width": 240,
+            "edge": "left",
+            "inside": false,
+            "rect": [
+              -4.0,
+              34.599999999999994,
+              148.0,
+              20.0
+            ]
+          },
+          {
+            "language": "France",
+            "width": 240,
+            "edge": "right",
+            "inside": false,
+            "rect": [
+              96.0,
+              34.599999999999994,
+              148.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Italy",
+            "width": 800,
+            "edge": "left",
+            "inside": true,
+            "rect": [
+              2.5,
+              34.599999999999994,
+              135.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Italy",
+            "width": 800,
+            "edge": "right",
+            "inside": true,
+            "rect": [
+              662.5,
+              34.599999999999994,
+              135.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Italy",
+            "width": 240,
+            "edge": "left",
+            "inside": true,
+            "rect": [
+              2.5,
+              34.599999999999994,
+              135.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Italy",
+            "width": 240,
+            "edge": "right",
+            "inside": true,
+            "rect": [
+              102.5,
+              34.599999999999994,
+              135.0,
+              20.0
+            ]
+          }
+        ],
+        "existing_bubble_hidden_in_focus": false,
+        "actual_service_signal": true,
+        "mask_covers_bubble": true,
+        "runtime_closed": true,
+        "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+        "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-stage-layout\\.audit\\profession-owned-fixed",
+        "saved_snapshot_sha256": "c471f2056e3bf47d41a8073e4a214f8eccec310f6c85a5f6088181f0c4b05172",
+        "scope": "Native private MainUI/strip: actual language switching and service event signal; seven languages,two widths,two edges,focus mode. Explicit visit event fixture; not real zone traversal or OS click-through.",
+        "temporary_directory_removed": true
+      },
+      "observer": {
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "child_exit": 0,
+        "observation_only": true
+      },
+      "png_sha256": {
+        "Deutsch-240-left.png": "cc428abef7b61b1af12f8daf1e34d73ba765410c50cddfc73d2264fe571a97fe",
+        "Deutsch-240-right.png": "a597c168b49ab5be6cfe5b2df44eff1fb36189e6f303dbb377462eaf585196e4",
+        "Deutsch-800-left.png": "03db9562b783311217f80ec69282c28954d7ddbac822e6c5b984b5a5e1e59dc1",
+        "Deutsch-800-right.png": "0640ec1a323cb866c553d0a7112e989d8b45660eaf756bb7ccb65cfa1e46ed7b",
+        "English-240-left.png": "b3cfdad1b0193ce89130ed205dc4d297f159e872a7177671e5966f48ef1fa855",
+        "English-240-right.png": "e9d48ac0a56bc2b2253c0722b81232425c5797c1bb635da346de199e4867ef24",
+        "English-800-left.png": "dc8f7f12e77619c2b2247d20c04d062fb9857c224b195304c321382aaaf0fba3",
+        "English-800-right.png": "25b1785521208f11958ef73d3b5ad44aa124897e42e77518a6dc7a823e991fa8",
+        "focus.png": "0e745460d00bb9b04962324ff62323986a0ba0578d976315e8347a5b3016b0d8",
+        "France-240-left.png": "48e385773556934848dcbd32b602de444646ea4340ec6431a97fce5158fc03be",
+        "France-240-right.png": "f99e9d5dbb7c3f236d0ee46f5c2ac725d8558690be90af04e1b449b56cbd1d80",
+        "France-800-left.png": "1661ef8f9c0480cd1cb1769aa1b7ee5ca1ed508f935d7bcf5293deeecd83c21a",
+        "France-800-right.png": "6ef91e58cd186dd45e294dcfd9be8cb5bc9030f71e7d69e2c72f66e55c9c8b20",
+        "Italy-240-left.png": "dd99f66704f1865c10c1837f7bf5ce7374d81cc5724cd4712fbf36e8642dbb6e",
+        "Italy-240-right.png": "0e745460d00bb9b04962324ff62323986a0ba0578d976315e8347a5b3016b0d8",
+        "Italy-800-left.png": "9639c29ec0f67ad7254bbf28af52003fec355736d7af32556c08f9d9a8d8f19a",
+        "Italy-800-right.png": "21513c3cd5a52bde878356bbb427c10d6e4eaedf87fd662c5b9a2ca60ca0be60",
+        "Russian-240-left.png": "9a988ac91d09d7b7acee148fa9a8b370f7bcc575b9bd167223c9c73e03dd047c",
+        "Russian-240-right.png": "79a1ff9dfdbbcf67c8390f1cb11a42042fdfd8935198fa2849f14e2fa493b133",
+        "Russian-800-left.png": "a3d60b329a773a2c04c42a9a495c8762dd4b710ee41e86c9e1a8f1a3044cc4ef",
+        "Russian-800-right.png": "16d1dcc8b85f311f64b58a0105610bbf6d00a55ed569744f7419d49e40e682f2",
+        "Simplified_Chinese-240-left.png": "30d43593cdb39a6a68f504da1978570db602a4e44d4d37d76b8ef7c7a68ba253",
+        "Simplified_Chinese-240-right.png": "c82ba1d62cd5165d49313a7193a9b4d3d5e8e69d664921660ba3bf70834401c3",
+        "Simplified_Chinese-800-left.png": "37197711c09be3fa9a02e8865152f5894a3f908c43c577d2aaba3b0f69eba3b0",
+        "Simplified_Chinese-800-right.png": "d568118ec4aa5b9d6d9aad66522bfcaaca958ab80f2759cdc10fed9bd683346c",
+        "Traditional_Chinese-240-left.png": "02f3bad77d04fe7edf4f7ca22d449a287c7eb8b6021de087e516204cd85a6164",
+        "Traditional_Chinese-240-right.png": "ed2eafefe6eb8d3091024a4ae945f88e944e7cd5d8c87c68daa9d66f1f8c2c9c",
+        "Traditional_Chinese-800-left.png": "6bcf98c9aab73845ef6fa6fe41fc888f5c4e8aab0c8058e7eea79e5adcb6d6e9",
+        "Traditional_Chinese-800-right.png": "d93bd7b93d5fbb96af830be51e16521f5c8dbedb1243ee84b0b9570362b26572"
+      }
+    },
+    "native-bubble-after": {
+      "native": {
+        "passed": true,
+        "variant": "fixed",
+        "cases": [
+          {
+            "language": "English",
+            "width": 800,
+            "edge": "left",
+            "inside": true,
+            "rect": [
+              0.0,
+              71.4,
+              156.0,
+              20.0
+            ]
+          },
+          {
+            "language": "English",
+            "width": 800,
+            "edge": "right",
+            "inside": true,
+            "rect": [
+              644.0,
+              71.4,
+              156.0,
+              20.0
+            ]
+          },
+          {
+            "language": "English",
+            "width": 240,
+            "edge": "left",
+            "inside": true,
+            "rect": [
+              0.0,
+              34.599999999999994,
+              156.0,
+              20.0
+            ]
+          },
+          {
+            "language": "English",
+            "width": 240,
+            "edge": "right",
+            "inside": true,
+            "rect": [
+              84.0,
+              34.599999999999994,
+              156.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Traditional_Chinese",
+            "width": 800,
+            "edge": "left",
+            "inside": true,
+            "rect": [
+              27.0,
+              34.599999999999994,
+              86.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Traditional_Chinese",
+            "width": 800,
+            "edge": "right",
+            "inside": true,
+            "rect": [
+              687.0,
+              34.599999999999994,
+              86.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Traditional_Chinese",
+            "width": 240,
+            "edge": "left",
+            "inside": true,
+            "rect": [
+              27.0,
+              34.599999999999994,
+              86.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Traditional_Chinese",
+            "width": 240,
+            "edge": "right",
+            "inside": true,
+            "rect": [
+              127.0,
+              34.599999999999994,
+              86.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Simplified_Chinese",
+            "width": 800,
+            "edge": "left",
+            "inside": true,
+            "rect": [
+              27.0,
+              34.599999999999994,
+              86.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Simplified_Chinese",
+            "width": 800,
+            "edge": "right",
+            "inside": true,
+            "rect": [
+              687.0,
+              34.599999999999994,
+              86.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Simplified_Chinese",
+            "width": 240,
+            "edge": "left",
+            "inside": true,
+            "rect": [
+              27.0,
+              34.599999999999994,
+              86.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Simplified_Chinese",
+            "width": 240,
+            "edge": "right",
+            "inside": true,
+            "rect": [
+              127.0,
+              34.599999999999994,
+              86.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Deutsch",
+            "width": 800,
+            "edge": "left",
+            "inside": true,
+            "rect": [
+              0.0,
+              34.599999999999994,
+              228.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Deutsch",
+            "width": 800,
+            "edge": "right",
+            "inside": true,
+            "rect": [
+              572.0,
+              34.599999999999994,
+              228.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Deutsch",
+            "width": 240,
+            "edge": "left",
+            "inside": true,
+            "rect": [
+              0.0,
+              34.599999999999994,
+              228.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Deutsch",
+            "width": 240,
+            "edge": "right",
+            "inside": true,
+            "rect": [
+              12.0,
+              34.599999999999994,
+              228.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Russian",
+            "width": 800,
+            "edge": "left",
+            "inside": true,
+            "rect": [
+              2.0,
+              34.599999999999994,
+              136.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Russian",
+            "width": 800,
+            "edge": "right",
+            "inside": true,
+            "rect": [
+              662.0,
+              34.599999999999994,
+              136.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Russian",
+            "width": 240,
+            "edge": "left",
+            "inside": true,
+            "rect": [
+              2.0,
+              34.599999999999994,
+              136.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Russian",
+            "width": 240,
+            "edge": "right",
+            "inside": true,
+            "rect": [
+              102.0,
+              34.599999999999994,
+              136.0,
+              20.0
+            ]
+          },
+          {
+            "language": "France",
+            "width": 800,
+            "edge": "left",
+            "inside": true,
+            "rect": [
+              0.0,
+              34.599999999999994,
+              148.0,
+              20.0
+            ]
+          },
+          {
+            "language": "France",
+            "width": 800,
+            "edge": "right",
+            "inside": true,
+            "rect": [
+              652.0,
+              34.599999999999994,
+              148.0,
+              20.0
+            ]
+          },
+          {
+            "language": "France",
+            "width": 240,
+            "edge": "left",
+            "inside": true,
+            "rect": [
+              0.0,
+              34.599999999999994,
+              148.0,
+              20.0
+            ]
+          },
+          {
+            "language": "France",
+            "width": 240,
+            "edge": "right",
+            "inside": true,
+            "rect": [
+              92.0,
+              34.599999999999994,
+              148.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Italy",
+            "width": 800,
+            "edge": "left",
+            "inside": true,
+            "rect": [
+              2.5,
+              34.599999999999994,
+              135.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Italy",
+            "width": 800,
+            "edge": "right",
+            "inside": true,
+            "rect": [
+              662.5,
+              34.599999999999994,
+              135.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Italy",
+            "width": 240,
+            "edge": "left",
+            "inside": true,
+            "rect": [
+              2.5,
+              34.599999999999994,
+              135.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Italy",
+            "width": 240,
+            "edge": "right",
+            "inside": true,
+            "rect": [
+              102.5,
+              34.599999999999994,
+              135.0,
+              20.0
+            ]
+          }
+        ],
+        "existing_bubble_hidden_in_focus": true,
+        "actual_service_signal": true,
+        "mask_covers_bubble": true,
+        "runtime_closed": true,
+        "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+        "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-stage-layout\\.audit\\profession-owned-fixed",
+        "saved_snapshot_sha256": "c471f2056e3bf47d41a8073e4a214f8eccec310f6c85a5f6088181f0c4b05172",
+        "scope": "Native private MainUI/strip: actual language switching and service event signal; seven languages,two widths,two edges,focus mode. Explicit visit event fixture; not real zone traversal or OS click-through.",
+        "temporary_directory_removed": true
+      },
+      "observer": {
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "child_exit": 0,
+        "observation_only": true
+      },
+      "png_sha256": {
+        "Deutsch-240-left.png": "5634d13bf92edc184835608076c9fd85dae011edbd1a923c78ce08ce393a11b8",
+        "Deutsch-240-right.png": "532f7d554bce4da9cd8b4f7b62472c7533a9462b941c84de4f260306084d2b8a",
+        "Deutsch-800-left.png": "ad54a7e6c2f078820886c8b1169db157adcf4dd04dc1fae1b5cf6521b79fb83f",
+        "Deutsch-800-right.png": "1661bcd1d5374dd60b6ae62156d1d5b6eab85366833b2a40602944130563969b",
+        "English-240-left.png": "add6b4ded8fdcf4b532a752209a43954f7f85a78ad83a336a38435442f3e06ee",
+        "English-240-right.png": "e1eacc11e2c2cfb4a4605e61c3b526f0de89481f3eece70e13d9d54e51ff9bde",
+        "English-800-left.png": "37531f20abd47064ac7a43dc5d21bfa451899803d2c87ae8cb2a4883f02f3b6c",
+        "English-800-right.png": "e6f83fed679314f5d5c6b33bda9abf2991174b8d54dd32856a77844301c492f8",
+        "focus.png": "025eb5e50bb80a3cc133b52418502c80c72ccc76df593fa3688277c66cd1656b",
+        "France-240-left.png": "383d2df33052987f9ad33c485aa61a5990f2fd4aa659eef54524fc7c5b5625b7",
+        "France-240-right.png": "1ba92cc6590122bc834690096956c753207cafecc9cbf3ba25cf8ef57b84ca52",
+        "France-800-left.png": "1b0a7e86a73fbb6202769a1501d4a91e67be0bd7cf5f0630861f908d3d0fede6",
+        "France-800-right.png": "2d221e8b5bf6fdf565433cf81feb08ec1b110d53e50608ba65ae758554c87692",
+        "Italy-240-left.png": "dd99f66704f1865c10c1837f7bf5ce7374d81cc5724cd4712fbf36e8642dbb6e",
+        "Italy-240-right.png": "b731d60cb4aabf49f710f49617f1123f32918394cef6b5fde7801b502ee8dc97",
+        "Italy-800-left.png": "9639c29ec0f67ad7254bbf28af52003fec355736d7af32556c08f9d9a8d8f19a",
+        "Italy-800-right.png": "21513c3cd5a52bde878356bbb427c10d6e4eaedf87fd662c5b9a2ca60ca0be60",
+        "Russian-240-left.png": "a1a7e52a546a5c129d86c8b483fa312a594068e93acded4a3a9e95ee5f38f136",
+        "Russian-240-right.png": "a5a0c9410ec07b50e08fb6b4caf75c89aa6725b37fe85210316e984f026fd582",
+        "Russian-800-left.png": "a6e2a6ee0ab839cc3b2b243e5d0dff0049810958ec963f50789f7189c8a3ac91",
+        "Russian-800-right.png": "663cb9495a24f7a0d4548467414c797ade03872242d9f9bd65b213b3edd7ba68",
+        "Simplified_Chinese-240-left.png": "30d43593cdb39a6a68f504da1978570db602a4e44d4d37d76b8ef7c7a68ba253",
+        "Simplified_Chinese-240-right.png": "c82ba1d62cd5165d49313a7193a9b4d3d5e8e69d664921660ba3bf70834401c3",
+        "Simplified_Chinese-800-left.png": "37197711c09be3fa9a02e8865152f5894a3f908c43c577d2aaba3b0f69eba3b0",
+        "Simplified_Chinese-800-right.png": "d568118ec4aa5b9d6d9aad66522bfcaaca958ab80f2759cdc10fed9bd683346c",
+        "Traditional_Chinese-240-left.png": "02f3bad77d04fe7edf4f7ca22d449a287c7eb8b6021de087e516204cd85a6164",
+        "Traditional_Chinese-240-right.png": "cb4c1f5ad764de2aa821753f2d173ffb3b1915a0a3345b0ab577a4321f64c690",
+        "Traditional_Chinese-800-left.png": "005da06e9a18adcdc383f07c9724f62da3c0d7cbabd3dafe27d6fec798dcafbe",
+        "Traditional_Chinese-800-right.png": "a443d91a63d1f38f1330556adff5c47d21af2d6ca36c4002ce437cfca03a764e"
+      }
+    },
+    "native-bubble-after-narrow": {
+      "native": {
+        "passed": true,
+        "variant": "fixed",
+        "cases": [
+          {
+            "language": "English",
+            "width": 120,
+            "edge": "left",
+            "inside": true,
+            "rect": [
+              0.0,
+              71.4,
+              120.0,
+              20.0
+            ]
+          },
+          {
+            "language": "English",
+            "width": 120,
+            "edge": "right",
+            "inside": true,
+            "rect": [
+              0.0,
+              71.4,
+              120.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Traditional_Chinese",
+            "width": 120,
+            "edge": "left",
+            "inside": true,
+            "rect": [
+              17.0,
+              34.599999999999994,
+              86.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Traditional_Chinese",
+            "width": 120,
+            "edge": "right",
+            "inside": true,
+            "rect": [
+              17.0,
+              34.599999999999994,
+              86.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Simplified_Chinese",
+            "width": 120,
+            "edge": "left",
+            "inside": true,
+            "rect": [
+              17.0,
+              34.599999999999994,
+              86.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Simplified_Chinese",
+            "width": 120,
+            "edge": "right",
+            "inside": true,
+            "rect": [
+              17.0,
+              34.599999999999994,
+              86.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Deutsch",
+            "width": 120,
+            "edge": "left",
+            "inside": true,
+            "rect": [
+              0.0,
+              34.599999999999994,
+              120.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Deutsch",
+            "width": 120,
+            "edge": "right",
+            "inside": true,
+            "rect": [
+              0.0,
+              34.599999999999994,
+              120.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Russian",
+            "width": 120,
+            "edge": "left",
+            "inside": true,
+            "rect": [
+              0.0,
+              34.599999999999994,
+              120.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Russian",
+            "width": 120,
+            "edge": "right",
+            "inside": true,
+            "rect": [
+              0.0,
+              34.599999999999994,
+              120.0,
+              20.0
+            ]
+          },
+          {
+            "language": "France",
+            "width": 120,
+            "edge": "left",
+            "inside": true,
+            "rect": [
+              0.0,
+              34.599999999999994,
+              120.0,
+              20.0
+            ]
+          },
+          {
+            "language": "France",
+            "width": 120,
+            "edge": "right",
+            "inside": true,
+            "rect": [
+              0.0,
+              34.599999999999994,
+              120.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Italy",
+            "width": 120,
+            "edge": "left",
+            "inside": true,
+            "rect": [
+              0.0,
+              34.599999999999994,
+              120.0,
+              20.0
+            ]
+          },
+          {
+            "language": "Italy",
+            "width": 120,
+            "edge": "right",
+            "inside": true,
+            "rect": [
+              0.0,
+              34.599999999999994,
+              120.0,
+              20.0
+            ]
+          }
+        ],
+        "existing_bubble_hidden_in_focus": true,
+        "actual_service_signal": true,
+        "mask_covers_bubble": true,
+        "runtime_closed": true,
+        "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+        "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-stage-layout\\.audit\\profession-owned-fixed",
+        "saved_snapshot_sha256": "c471f2056e3bf47d41a8073e4a214f8eccec310f6c85a5f6088181f0c4b05172",
+        "scope": "Native private MainUI/strip: actual language switching and service event signal; seven languages,two widths,two edges,focus mode. Explicit visit event fixture; not real zone traversal or OS click-through.",
+        "temporary_directory_removed": true
+      },
+      "observer": {
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "child_exit": 0,
+        "observation_only": true
+      },
+      "png_sha256": {
+        "Deutsch-120-left.png": "58388e8a2dfa929960991ef7a46420ea4facf6a6e3aa7c291cac01e1bef5299a",
+        "Deutsch-120-right.png": "33e56b29fc6b59e7b7c4ee28833ac3ecf10fef106ff6f552b5a220c1c4fee5ae",
+        "English-120-left.png": "b6ca875ece19897063d687c8c7c9b40c981bf57a57c8d880961c5234d52e16cf",
+        "English-120-right.png": "7531bd6c15cf5432eb7074d5ab4047c0afaeed7b2e77cc9f41aae5ec73d5526d",
+        "focus.png": "79337e68ebf72d8903acfae2da9efd7c2861b5f7fea4f198c208c764d5ad45b9",
+        "France-120-left.png": "069ff615bf6b7a45e8a5204253aeb5d060dbcd97bed3e8aadbbba2ecb3fccecd",
+        "France-120-right.png": "6a9dec2f721983c27c710e4f056b831051240ea5912c175713e42078134fae8f",
+        "Italy-120-left.png": "2d105191b576b1a6b20ec252c3a9b0debf2f40b414b3e5d498729e89660600af",
+        "Italy-120-right.png": "2107c5d9ff3eff2b8a31c41dd1e8f7b0928ffb48d7bedd63ac440dfc13d5d060",
+        "Russian-120-left.png": "361b71a9954bb5275b31093270d709bb4abe673778c69733cfbd9b0402a75e1f",
+        "Russian-120-right.png": "ded3fd85581aea6fbfb24835f410457560af9f84a0deae0f46f44ef90d0f1b07",
+        "Simplified_Chinese-120-left.png": "5002a598b7ddd4040afff22363e0e4e15c9679d53c444041c196cc73841b2eb4",
+        "Simplified_Chinese-120-right.png": "f02bd4daa81d9a6ac92939b1b5a861efdea7495a85027524c0fa26d464644b0b",
+        "Traditional_Chinese-120-left.png": "a3a9e42eae1d2acb698e6d9eb960815238b75161002e450fa9d6cfa93db694ee",
+        "Traditional_Chinese-120-right.png": "86561021788fc03240b4e649a0b646d77bad0cd4da3b3bdf345018bfd0e82c19"
+      }
+    }
+  },
+  "screenshot_review": [
+    "English-800-left before/after",
+    "Deutsch-240-right after",
+    "Deutsch-120-right after (ellipsis visible)"
+  ],
+  "limits": [
+    "Explicit visit-event fixture through service signal; not actual multi-zone traversal.",
+    "Mask geometry only, not OS click-through or monitor/DPI hardware acceptance.",
+    "Expanded focused suite passed; full regression and independent review remain pending."
+  ],
+  "change": "Bound visible activity bubbles to strip width, elide oversized text, suppress offscreen bubbles and hide existing bubbles in quiet modes.",
+  "red": [
+    "Edge cases failed2/2 in19.65s: x=-81 or right=881 in800px strip.",
+    "Existing-bubble focus case failed1/1 in4.23s."
+  ],
+  "validation": [
+    "Focused edge cases2passed19.37s.",
+    "Expanded strip-size/mode tests32passed277.07s.",
+    "Translations/progress31passed2.31s.",
+    "Full collection3246 in7.46s; execution pending.",
+    "Pyflakes changed Python files clean."
+  ],
+  "docs": {
+    "passed": true,
+    "pages": [
+      {
+        "language": "Eng",
+        "latest_paragraph_present": true,
+        "sha256": "086c2691377d0dfe0847dcc3f3423c54f410a3d118a2db37344a6bf98a2acbe1"
+      },
+      {
+        "language": "Zh",
+        "latest_paragraph_present": true,
+        "sha256": "d45d16dcf67863a61928407d6de39df9f865bf985aee854ba68fd6eaee4279ae"
+      },
+      {
+        "language": "ZhCn",
+        "latest_paragraph_present": true,
+        "sha256": "70f82a0c7189f011157cac39544f5baa2b72ff6ab8d2f70fe09fed0cc9df545c"
+      },
+      {
+        "language": "De",
+        "latest_paragraph_present": true,
+        "sha256": "9cce9831eac194adfdd2e689b3210714637fd49e249c0acd44c8ff3c9d462d01"
+      },
+      {
+        "language": "Fr",
+        "latest_paragraph_present": true,
+        "sha256": "8cd0cf99aa2603f39f45a3a5c518172725e8b500e71b37cf4db450f025fc4ee2"
+      },
+      {
+        "language": "Ru",
+        "latest_paragraph_present": true,
+        "sha256": "28242d85d3efc0c7f261f5811597f240128951cd968198a38b8b3874e39ed153"
+      },
+      {
+        "language": "It",
+        "latest_paragraph_present": true,
+        "sha256": "097459812674c00a763e1686fd933216b1b96a347214b2c371c7facc88c519e3"
+      }
+    ],
+    "log_sha256": "a6f60fc00e3ec37854dcb3a26c4f25175edaeabc6786426a5d1afc2f8d87b172"
+  },
+  "hashes": {
+    "frontengine/show/pet_game/home_strip.py": "ca20f2ca4039f19f874449ae1769aae3c10da908a0fdf9734c2649f8206f18cf",
+    "tests/unit_test/test_pet_home_strip_size.py": "0b2c6f16c61e49d027d3b758e3b51a523ae222efe89f2e5ad683ea1f963216c1",
+    ".audit/bubble-red.log": "9b9bcd8edc4c86ee3dfd9e4b8d55d5778a1e27f9943cd6f2c24e387698b4783e",
+    ".audit/bubble-focus-red.log": "7a916381b03161547ec8e180828235e54ff35d19d837bb032b9b5cf44aa5f3c6",
+    ".audit/bubble-expanded.log": "57fcc48f93b65e99e80ca541916b508cb724047d3de3594098206cadbc95fca4",
+    ".audit/native_bubble_bounds.py": "816351d7a28216bb535d89a9dbf3683504dfb44e3416a48d41f64fedd45b661a",
+    ".audit/native_bubble_narrow.py": "3f20e7a2d957b4eb2fd3a2451e021b87682a413b205fce8ce49f2d275d282d3f"
+  }
+}

@@ -1,0 +1,160 @@
+{
+  "product": "35c9fb52",
+  "cases": [
+    {
+      "native": {
+        "passed": true,
+        "replacement_command": "stop",
+        "events": [
+          {
+            "activity": "visit",
+            "kind": "activity",
+            "reason": "going_home",
+            "resident": "cd53a59142a7496d92090f3a38904067",
+            "time": 56478000
+          },
+          {
+            "activity": "visit",
+            "kind": "interrupted",
+            "reason": "command_stop",
+            "resident": "cd53a59142a7496d92090f3a38904067",
+            "time": 56478000
+          }
+        ],
+        "visit_interrupted_once": true,
+        "no_crossing": true,
+        "no_reward": true,
+        "bed_claim_preserved": true,
+        "actual_sleep_and_replacement_buttons": true,
+        "after_command_activity": null,
+        "runtime_closed": true,
+        "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+        "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-stage-layout\\.audit\\profession-owned-fixed",
+        "saved_snapshot_sha256": "c471f2056e3bf47d41a8073e4a214f8eccec310f6c85a5f6088181f0c4b05172",
+        "scope": "Private native MainUI Sleep then Stop/Eat buttons during travel, actual interruption event and next simulation step, no crossing or reward, preserved bed ownership and cold save. Injected clock and two logical zones on one physical screen; not OS input or all cancellation timings.",
+        "temporary_directory_removed": true
+      },
+      "cold": {
+        "passed": true,
+        "initial_snapshot_exact": true,
+        "profiles_exact": true,
+        "leases_reacquired": true,
+        "saved_exact": true,
+        "temporary_directory_removed": true
+      },
+      "observer": {
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "child_exit": 0,
+        "observation_only": true
+      },
+      "stderr_empty": true,
+      "hashes": {
+        "cold-result.json": "5bd41edb786e3fe553500e96167a938f64483ad3f1f564c603795a88e3110cbc",
+        "observer.json": "108902181ee471ddb835401d5d799d056e70c9ac4aead7d271ce043e584e29a5",
+        "profiles.json": "441028be467760ab4c3b505c11c19ae40543d5a17053043c46414e13e78b6863",
+        "replaced-command.png": "f4c4ce7245cd38f0a0c8eb332d22351fd657bb573c893b35f261e1210f48ae1b",
+        "result.json": "3efc4680e8ec7ce5045dc88588e3f2527c42fe4b3c055b6f38582ef63c3cff81",
+        "shutdown-world.json": "1b3e61b849f3cbb6aa249c55938db7fdf94e78ff592534dd1ea23bb7c0d3048b",
+        "walking-home.png": "f678fb8330266d2a4059c35434053f3a18c69e906b43863f2c2c30783953e8da"
+      }
+    },
+    {
+      "native": {
+        "passed": true,
+        "replacement_command": "eat",
+        "events": [
+          {
+            "activity": "visit",
+            "kind": "activity",
+            "reason": "going_home",
+            "resident": "cd53a59142a7496d92090f3a38904067",
+            "time": 56478000
+          },
+          {
+            "activity": "visit",
+            "kind": "interrupted",
+            "reason": "command",
+            "resident": "cd53a59142a7496d92090f3a38904067",
+            "time": 56478000
+          },
+          {
+            "activity": "snack",
+            "kind": "activity",
+            "reason": "command",
+            "resident": "cd53a59142a7496d92090f3a38904067",
+            "time": 56478200
+          }
+        ],
+        "visit_interrupted_once": true,
+        "no_crossing": true,
+        "no_reward": true,
+        "bed_claim_preserved": true,
+        "actual_sleep_and_replacement_buttons": true,
+        "after_command_activity": "snack",
+        "runtime_closed": true,
+        "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+        "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-stage-layout\\.audit\\profession-owned-fixed",
+        "saved_snapshot_sha256": "c471f2056e3bf47d41a8073e4a214f8eccec310f6c85a5f6088181f0c4b05172",
+        "scope": "Private native MainUI Sleep then Stop/Eat buttons during travel, actual interruption event and next simulation step, no crossing or reward, preserved bed ownership and cold save. Injected clock and two logical zones on one physical screen; not OS input or all cancellation timings.",
+        "temporary_directory_removed": true
+      },
+      "cold": {
+        "passed": true,
+        "initial_snapshot_exact": true,
+        "profiles_exact": true,
+        "leases_reacquired": true,
+        "saved_exact": true,
+        "temporary_directory_removed": true
+      },
+      "observer": {
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "child_exit": 0,
+        "observation_only": true
+      },
+      "stderr_empty": true,
+      "hashes": {
+        "cold-result.json": "5bd41edb786e3fe553500e96167a938f64483ad3f1f564c603795a88e3110cbc",
+        "observer.json": "108902181ee471ddb835401d5d799d056e70c9ac4aead7d271ce043e584e29a5",
+        "profiles.json": "441028be467760ab4c3b505c11c19ae40543d5a17053043c46414e13e78b6863",
+        "replaced-command.png": "f4c4ce7245cd38f0a0c8eb332d22351fd657bb573c893b35f261e1210f48ae1b",
+        "result.json": "1fcd23f782f43a361cc8913ecf8a678b323ea3a6418665c6ac7f5b5c5eb6e289",
+        "shutdown-world.json": "f6ed9527f9bf22b78def58320e23655307ff04f4fff1bd6fca980da329a85df1",
+        "walking-home.png": "f678fb8330266d2a4059c35434053f3a18c69e906b43863f2c2c30783953e8da"
+      }
+    }
+  ],
+  "source_files_unchanged": 751,
+  "harness_sha256": "efb7c22788da88d64f878a8e4423f32ce3bbacdb6744b4a7abdcbcc312b97596",
+  "limits": [
+    "Two native cases with injected simulation time and two logical zones on one screen.",
+    "Checks the immediate replacement and next simulation step, then normal save/shutdown and independent cold reopen.",
+    "No claim that autonomous future behavior stops permanently; Stop cancels the current command, not the life simulation.",
+    "Does not cover all timing boundaries, physical monitors, OS input, full regression or independent review."
+  ]
+}

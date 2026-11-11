@@ -1,0 +1,50 @@
+{
+  "accessible_name_comparisons": 147,
+  "photo_pose_seven_languages": true,
+  "closed_photo_preserves_existing_file": true,
+  "passed": true,
+  "product_commit": "a8d59245",
+  "wheel": "frontengine_dev-1.0.86-py3-none-any.whl",
+  "sha256": "aaaccb9e32b439209577caa99ba41c6776d75f0ebce8ee4a27236ac8e758636a",
+  "python_files_equal": 502,
+  "pet_assets_equal": 149,
+  "installed_package_files_equal": 711,
+  "loaded_installed_modules": 435,
+  "localized_goal_completion": {
+    "English": "Goal completed",
+    "Traditional_Chinese": "目標已完成",
+    "Simplified_Chinese": "目标已完成",
+    "Deutsch": "Ziel erreicht",
+    "Russian": "Цель достигнута",
+    "France": "Objectif atteint",
+    "Italy": "Obiettivo completato"
+  },
+  "sandbox_zero_currency_saved": true,
+  "resident_selection_follows_zone": true,
+  "sleep_command_reaches_owned_bed": true,
+  "actual_visit_bubble_within_strip": true,
+  "option_group_language_comparisons": 175,
+  "scene_tab_language_comparisons": 63,
+  "dynamic_label_language_comparisons": 14,
+  "scene_and_undo_unchanged": true,
+  "runtime_closed": true,
+  "temporary_directory_removed": true,
+  "scope": "Fresh --target package directory, existing Python3.11/Qt6.12 dependency environment; offscreen MainUI, host services substituted. Not clean-machine dependency or native acceptance.",
+  "source_test_files_unchanged": 753,
+  "package_source_wheel_installed_bytes_equal": 711,
+  "build_warnings": [
+    "WARNING Package 'frontengine.show.pet.inkside.sprites' is absent from the `packages` configuration.",
+    "WARNING Package 'frontengine.show.pet_game.ambience' is absent from the `packages` configuration.",
+    "WARNING Package 'frontengine.show.pet_game.furniture.green_studio' is absent from the `packages` configuration.",
+    "WARNING Package 'frontengine.show.pet_game.furniture.night_studio' is absent from the `packages` configuration.",
+    "WARNING Package 'frontengine.show.pet_game.furniture.warm_home' is absent from the `packages` configuration.",
+    "WARNING Package 'frontengine.show.pet_game.items' is absent from the `packages` configuration.",
+    "WARNING Package 'frontengine.ui.style.icons' is absent from the `packages` configuration."
+  ],
+  "build_warning_assessment": "Setuptools reports data directories absent from package discovery. All 711 wheel package entries match source and installed bytes; these warnings did not omit the checked files.",
+  "limits": [
+    "Existing dependency environment, no clean machine or Steam acceptance.",
+    "Offscreen Qt with host services substituted; independent review and full regression pending.",
+    "Wheel build and ordinary wheel installation only; no application EXE conversion."
+  ]
+}

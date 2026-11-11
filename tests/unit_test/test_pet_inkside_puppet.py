@@ -3,7 +3,7 @@ import json
 import zipfile
 
 import pytest
-from PySide6.QtCore import QCoreApplication, QEvent, QThreadPool
+from PySide6.QtCore import QCoreApplication, QEvent
 from PySide6.QtTest import QTest
 
 from frontengine.show.pet.inkside.cast import TEMPLATES
@@ -11,13 +11,13 @@ from frontengine.show.pet.inkside.puppet_export import BINDINGS, export_puppet
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.utils.pet_pack.layered import ACTIONS
 
-pytest.importorskip('Imervue.puppet.document_io')
+pytest.importorskip('rigora.puppet.document_io')
 
 
 @pytest.mark.parametrize('template', TEMPLATES, ids=lambda template: template.ident)
 def test_every_character_exports_a_valid_bound_puppet(tmp_path, template):
-    from Imervue.puppet.document_io import load_puppet
-    from Imervue.puppet.validator import validate
+    from rigora.puppet.document_io import load_puppet
+    from rigora.puppet.validator import validate
     model, script = export_puppet(template.ident, tmp_path)
     with zipfile.ZipFile(model) as archive:
         assert archive.namelist()[0] == 'mimetype'
@@ -34,6 +34,15 @@ def test_every_character_exports_a_valid_bound_puppet(tmp_path, template):
         assert motion.fade_out_duration > 0  # stopping eases back instead of snapping to frame 0
 
 
+def _wait_until(condition, timeout_ms: int = 5000) -> bool:
+    """Process events until the condition holds; a loaded machine only makes this slower, not wrong."""
+    for _ in range(timeout_ms // 20):
+        if condition():
+            return True
+        QTest.qWait(20)
+    return condition()
+
+
 def test_reactions_move_the_rig_and_return_to_defaults(tmp_path):
     from frontengine.show.pet.puppet_pet import PuppetPetWidget
     model, script = export_puppet('inkside-mochi', tmp_path)
@@ -43,30 +52,33 @@ def test_reactions_move_the_rig_and_return_to_defaults(tmp_path):
         values = pet.canvas.parameter_values
         defaults = dict(values())
         assert pet.profile_session.request('greet') == 'accepted'
-        QTest.qWait(400)
-        assert values()['ArmR'] < -1.0
+        assert _wait_until(lambda: values()['ArmR'] < -1.0)
         assert pet.canvas.active_expressions() == ['happy']  # eyes are owned by the expression
         pet.profile_session.advance(1)
-        QTest.qWait(600)
-        assert pet.canvas.active_expressions() == []
-        assert {key: round(value, 3) for key, value in values().items()} == {
-            key: round(value, 3) for key, value in defaults.items()}
+
+        def rested():
+            return {key: round(value, 3) for key, value in values().items()} == {
+                key: round(value, 3) for key, value in defaults.items()}
+        # The fade back runs on timers: in a full run on a busy machine it took over five seconds
+        # (U-20261102-23), so the return to defaults gets more time; it still has to happen.
+        assert _wait_until(lambda: not pet.canvas.active_expressions() and rested(), timeout_ms=20000)
     finally:
         pet.close()
         QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
 
 
-def test_pet_page_generates_and_spawns_a_builtin_puppet(tmp_path, monkeypatch):
+def test_pet_page_generates_and_spawns_a_builtin_puppet(tmp_path, monkeypatch, *, lifetime_factory):
     from frontengine.show.pet.puppet_pet import PuppetPetWidget
     from frontengine.ui.page.pet.pet_setting_ui import PetSettingUI
     monkeypatch.chdir(tmp_path)
-    page = PetSettingUI()
+    lifetime_factory()
+    page = PetSettingUI(lifetime=lifetime_factory())
     try:
         page.profile_controls.profiles = PetProfiles({}, lambda: None)
         page.builtin_character.setCurrentIndex(page.builtin_character.findData('inkside-gill'))
         page.use_builtin_puppet()
         assert not page.builtin_puppet_button.isEnabled()
-        assert QThreadPool.globalInstance().waitForDone(60000)
+        assert page.lifetime.pool().waitForDone(60000)
         QCoreApplication.processEvents()
         assert page.builtin_puppet_button.isEnabled()
         assert page.pet_image_path == str(tmp_path / 'pet-assets' / 'puppets' / 'inkside-gill.puppet')

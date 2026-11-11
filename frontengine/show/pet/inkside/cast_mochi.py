@@ -6,7 +6,6 @@ from PySide6.QtGui import QPainterPath
 
 from frontengine.show.pet.inkside.faces import EyeStyle, MouthStyle
 from frontengine.show.pet.inkside.ink import INK, ORANGE, PAPER, Brush, ellipse, polygon, rect, rounded
-from frontengine.show.pet.inkside.sprite_sheet import character_sprites
 from frontengine.show.pet.inkside.template import Group, Template
 
 HEAD = rounded(-74, -46, 148, 90, 36)
@@ -55,7 +54,6 @@ class Mochi(Template):
               'crooked': ('Crooked', MouthStyle('crooked', 20)),
               'line': ('Short line', MouthStyle('line', 14))}
     eye_default, mouth_default = 'narrow', 'tooth'
-    sprite_actions = character_sprites('mochi')
 
     def head(self, b: Brush) -> None:
         b.fill(HEAD, 'fur')

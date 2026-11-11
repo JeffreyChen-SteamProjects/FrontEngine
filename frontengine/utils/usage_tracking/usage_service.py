@@ -55,17 +55,23 @@ class UsageTrackingService(QObject):
         self.tracker.pause()
         self._timer.start()
 
-    def stop(self) -> None:
+    def save(self) -> None:
+        """Persist before composed shutdown without stopping the sampling timer."""
+        self.tracker.save(raise_errors=True)
+
+    def stop(self, *, save: bool = True) -> None:
         """
         停止並把統計寫回本機檔案。沒有任何紀錄時 save() 不會建立檔案，所以
         「一直關著」的使用者磁碟上不會多出東西。
         Stop and flush to the local file. With nothing recorded save() creates
         no file, so a user who leaves this off never gains one.
+        Composed shutdown passes ``save=False`` after its final writes succeed.
         """
         front_engine_logger.info("[UsageTracking] stop")
         self._timer.stop()
         self.tracker.pause()
-        self.tracker.save()
+        if save:
+            self.tracker.save()
 
     def poll_once(self) -> None:
         """取樣一次（測試會直接呼叫）。"""

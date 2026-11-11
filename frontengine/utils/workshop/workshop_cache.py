@@ -11,7 +11,7 @@ from pathlib import Path
 
 from frontengine.utils.workshop.workshop_content import classify_item, preset_files, read_item_title
 from frontengine.utils.workshop.workshop_manifest import checked_tree, read_manifest, safe_path
-from frontengine.utils.workshop.workshop_package import _validate_pet, validate_content
+from frontengine.utils.workshop.workshop_package import validate_content
 from frontengine.utils.workshop.workshop_publications import PublicationStore, fingerprints, item_id
 
 
@@ -21,11 +21,7 @@ def validate_installed(root: Path) -> dict:
     if (root / "workshop.json").exists():
         return validate_content(root)
     kind = classify_item(root)
-    if kind in ("pet_pack", "media"):
-        _validate_pet(root)
-    elif kind == "preset" and preset_files(root):
-        pass
-    else:
+    if kind != "preset" or not preset_files(root):
         raise ValueError("This Workshop content format is unsupported")
     return {"kind": kind, "title": read_item_title(root), "legacy": True}
 

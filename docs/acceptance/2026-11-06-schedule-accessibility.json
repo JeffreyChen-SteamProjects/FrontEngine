@@ -1,0 +1,397 @@
+{
+  "base": "41f581e2",
+  "status": "Not launched. Prior parent queue PID 70172 absent and no parent result available; re-audit queue before scheduling.",
+  "defect": "Preset schedule preset/hour/minute and screensaver idle/source controls exposed empty accessible names.",
+  "change": "Connect five visible labels to controls. Add separate visible hour/minute labels with seven translations; retain value ranges, time controls, collection schema and settings.",
+  "red": "5 failed in 21.20s",
+  "green": "52 passed in 32.41s across schedule accessibility/weekdays, multiline keyboard and translations",
+  "native": {
+    "cases": [
+      {
+        "dialog": "PresetScheduleDialog",
+        "language": "English",
+        "names": [
+          "Preset",
+          "Hour",
+          "Minute"
+        ],
+        "tab_order": true,
+        "draft_unchanged": true
+      },
+      {
+        "dialog": "PresetScheduleDialog",
+        "language": "Traditional_Chinese",
+        "names": [
+          "預設集",
+          "時",
+          "分"
+        ],
+        "tab_order": true,
+        "draft_unchanged": true
+      },
+      {
+        "dialog": "PresetScheduleDialog",
+        "language": "Simplified_Chinese",
+        "names": [
+          "预设",
+          "时",
+          "分"
+        ],
+        "tab_order": true,
+        "draft_unchanged": true
+      },
+      {
+        "dialog": "PresetScheduleDialog",
+        "language": "Deutsch",
+        "names": [
+          "Voreinstellung",
+          "Stunde",
+          "Minute"
+        ],
+        "tab_order": true,
+        "draft_unchanged": true
+      },
+      {
+        "dialog": "PresetScheduleDialog",
+        "language": "France",
+        "names": [
+          "Préréglage",
+          "Heure",
+          "Minute"
+        ],
+        "tab_order": true,
+        "draft_unchanged": true
+      },
+      {
+        "dialog": "PresetScheduleDialog",
+        "language": "Russian",
+        "names": [
+          "Пресет",
+          "Час",
+          "Минута"
+        ],
+        "tab_order": true,
+        "draft_unchanged": true
+      },
+      {
+        "dialog": "PresetScheduleDialog",
+        "language": "Italy",
+        "names": [
+          "Preimpostazione",
+          "Ora",
+          "Minuto"
+        ],
+        "tab_order": true,
+        "draft_unchanged": true
+      },
+      {
+        "dialog": "ScreensaverDialog",
+        "language": "English",
+        "names": [
+          "Idle for (minutes)",
+          "Show"
+        ],
+        "tab_order": true,
+        "draft_unchanged": true
+      },
+      {
+        "dialog": "ScreensaverDialog",
+        "language": "Traditional_Chinese",
+        "names": [
+          "閒置多久（分鐘）",
+          "顯示"
+        ],
+        "tab_order": true,
+        "draft_unchanged": true
+      },
+      {
+        "dialog": "ScreensaverDialog",
+        "language": "Simplified_Chinese",
+        "names": [
+          "空闲多久（分钟）",
+          "显示"
+        ],
+        "tab_order": true,
+        "draft_unchanged": true
+      },
+      {
+        "dialog": "ScreensaverDialog",
+        "language": "Deutsch",
+        "names": [
+          "Untätig seit (Minuten)",
+          "Anzeigen"
+        ],
+        "tab_order": true,
+        "draft_unchanged": true
+      },
+      {
+        "dialog": "ScreensaverDialog",
+        "language": "France",
+        "names": [
+          "Inactif depuis (minutes)",
+          "Afficher"
+        ],
+        "tab_order": true,
+        "draft_unchanged": true
+      },
+      {
+        "dialog": "ScreensaverDialog",
+        "language": "Russian",
+        "names": [
+          "Простой (минут)",
+          "Показывать"
+        ],
+        "tab_order": true,
+        "draft_unchanged": true
+      },
+      {
+        "dialog": "ScreensaverDialog",
+        "language": "Italy",
+        "names": [
+          "Inattivo da (minuti)",
+          "Mostra"
+        ],
+        "tab_order": true,
+        "draft_unchanged": true
+      }
+    ],
+    "settings_unchanged": true
+  },
+  "observer": {
+    "before": {
+      "foreground": 133262,
+      "cursor": [
+        1607,
+        232
+      ]
+    },
+    "after": {
+      "foreground": 133262,
+      "cursor": [
+        514,
+        649
+      ]
+    },
+    "child_exit": 0
+  },
+  "desktop": {
+    "thread_desktop": "FrontEngineKeyboard10356_078d3355",
+    "input_desktop": "Default"
+  },
+  "shutdown": {
+    "selected_pet_only": true,
+    "pet_completion_affection_delta": 2,
+    "work_mode_selected_only": true,
+    "cancel_feed_no_reward": true,
+    "hidden_pet_unchanged": true,
+    "hidden_feedback": "心情 60/100 · 飽足 70/100 · 好感度 0",
+    "tab_routes": [
+      {
+        "target": "primaryAction",
+        "tabs": 5
+      },
+      {
+        "target": "qt_tabwidget_tabbar",
+        "tabs": 13
+      },
+      {
+        "target": "QListWidget",
+        "tabs": 1
+      },
+      {
+        "target": "WrappingPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "qt_tabwidget_tabbar",
+        "tabs": 14
+      },
+      {
+        "target": "WrappingPushButton",
+        "tabs": 3
+      },
+      {
+        "target": "qt_tabwidget_tabbar",
+        "tabs": 25
+      },
+      {
+        "target": "QListWidget",
+        "tabs": 4
+      },
+      {
+        "target": "WrappingPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "WrappingPushButton",
+        "tabs": 6
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 1
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 6
+      },
+      {
+        "target": "QPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 19
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 6
+      },
+      {
+        "target": "QPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 25
+      },
+      {
+        "target": "QPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 25
+      },
+      {
+        "target": "QPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 25
+      },
+      {
+        "target": "QPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 1
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 11
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 11
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 11
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 11
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 11
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 11
+      },
+      {
+        "target": "QPushButton",
+        "tabs": 9
+      },
+      {
+        "target": "QSpinBox",
+        "tabs": 1
+      },
+      {
+        "target": "QSpinBox",
+        "tabs": 4
+      },
+      {
+        "target": "QSpinBox",
+        "tabs": 4
+      },
+      {
+        "target": "QSpinBox",
+        "tabs": 4
+      },
+      {
+        "target": "QSpinBox",
+        "tabs": 4
+      },
+      {
+        "target": "QSpinBox",
+        "tabs": 4
+      },
+      {
+        "target": "QSpinBox",
+        "tabs": 4
+      },
+      {
+        "target": "QPushButton",
+        "tabs": 2
+      }
+    ],
+    "theme": "dark",
+    "language": "Traditional_Chinese",
+    "actual_window_size": [
+      900,
+      740
+    ],
+    "runtime_closed": true,
+    "temporary_directory_removed": true
+  },
+  "cold": {
+    "passed": true,
+    "initial_snapshot_exact": true,
+    "profiles_exact": true,
+    "leases_reacquired": true,
+    "saved_exact": true,
+    "temporary_directory_removed": true
+  },
+  "limits": [
+    "Actual settings-menu exec on private Windows desktop with widget-local Tab/Space and QAccessible queries; not actual screen-reader speech or OS input acceptance.",
+    "Fourteen dialog/language combinations and 35 field names verified; Traditional Chinese dark screenshots visually inspected. Other language layouts not visually reviewed.",
+    "Preset list in native temporary settings is empty; populated selection is covered by focused tests with a repository fixture.",
+    "Foreground HWND unchanged but cursor coordinates differ; cause unestablished. Entry desktop check proves initial isolation only.",
+    "Native process handle expired before polling; observer records child_exit 0, result records normal shutdown and temporary cleanup, and CIM found no matching process. No duplicate run started.",
+    "Known adjacent save-failure handling in these dialogs and screensaver option retranslation have not been addressed in this change.",
+    "No EXE, push, merge or release."
+  ],
+  "evidence_sha256": {
+    ".audit\\schedule-accessible-red.log": "ab86cb434c14adb5c09716643a2499220cf269d8e9adeb98159c92db0e58ad8a",
+    ".audit\\schedule-accessible-green.log": "f6823cbb141c49267179c51bd1f28e4aa8113db9d8d11da415d335fdd0240692",
+    ".audit\\native-schedule\\schedule-accessible.json": "f5ee09c7e60a308bad172e1d6c42e34da9bc64432b463aed638e05e23c8f90f0",
+    ".audit\\native-schedule\\desktop.json": "3acb282d838b0a1788e57b700ee04cbe8f169ae257b0d2822906cabea1a8aa8f",
+    ".audit\\native-schedule\\observer.json": "b3c5a9122af90204ebe4da8c65cd2d374d0a671bb329741f8f3e7e49d29b0a0e",
+    ".audit\\native-schedule\\result.json": "4729ccacb00584ae3b96550ca0a2e23b957334038b937b36c20efef907e47f13",
+    ".audit\\native-schedule\\cold-result.json": "5bd41edb786e3fe553500e96167a938f64483ad3f1f564c603795a88e3110cbc",
+    ".audit\\native-schedule\\stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    ".audit\\native-schedule\\PresetScheduleDialog.png": "74e0ada622502d91c97b6e7cda10d2a95002fd3596f2f47ca550459b432bf344",
+    ".audit\\native-schedule\\ScreensaverDialog.png": "0a036782dfc0251e1c7c0ad0f5fe661f3e12fc5aec51838a699d878a97f46381"
+  },
+  "documentation": {
+    "files": 17,
+    "checks": "54 passed",
+    "sphinx": "-W build passed",
+    "rendered_exact": [
+      "Eng",
+      "Zh",
+      "ZhCn",
+      "De",
+      "Fr",
+      "Ru",
+      "It"
+    ]
+  },
+  "test_commit": "916eb1b7",
+  "product_commit": "8b13ba28",
+  "regression_plan": "docs/acceptance/2026-11-06-schedule-accessibility-regression-plan.json"
+}

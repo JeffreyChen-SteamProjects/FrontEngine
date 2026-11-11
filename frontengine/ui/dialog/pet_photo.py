@@ -1,5 +1,6 @@
 """Frozen pet-only photographs; no desktop capture or live-state mutation."""
 from pathlib import Path
+from shiboken6 import isValid
 
 from PySide6.QtCore import QIODevice, QSaveFile, Qt
 from PySide6.QtGui import QImage, QPixmap
@@ -26,6 +27,8 @@ def save_photo(image: QImage, destination: str | Path) -> None:
 class PetPhotoDialog(QDialog):
     def __init__(self, snapshot: QImage, renderer=None, *, mirrored=False, parent=None):
         super().__init__(parent)
+        self._closed = False
+        self.finished.connect(self._mark_closed)
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         tr(self, 'pet_photo_title', 'Pet photo', 'setWindowTitle')
         self.snapshot = snapshot.copy()
@@ -42,7 +45,8 @@ class PetPhotoDialog(QDialog):
         form = QFormLayout()
         layout.addLayout(form)
         self.pose = QComboBox()
-        self.pose.addItem(translate('pet_photo_current', 'Captured pose'), None)
+        self.pose.addItem('', None)
+        tr(self.pose, 'pet_photo_current', 'Captured pose', 'setItemText', 0)
         if renderer:
             for action in renderer.character.actions:
                 self.pose.addItem(action, action)
@@ -50,6 +54,8 @@ class PetPhotoDialog(QDialog):
         self.time = QSpinBox()
         self.time.setSuffix(' ms')
         form.addRow(tr(QLabel(), 'pet_photo_time', 'Pose time'), self.time)
+        for control in (self.pose, self.time):
+            form.labelForField(control).setBuddy(control)
         self.pose.currentIndexChanged.connect(self._pose_changed)
         self.time.valueChanged.connect(self._render)
         self.status = QLabel()
@@ -79,7 +85,12 @@ class PetPhotoDialog(QDialog):
             Qt.TransformationMode.SmoothTransformation))
         self.save_button.setEnabled(not self.image.isNull())
 
+    def _mark_closed(self) -> None:
+        self._closed = True
+
     def save_to(self, destination) -> bool:
+        if self._closed or not isValid(self):
+            return False
         try:
             save_photo(self.image, destination)
         except (OSError, ValueError):
@@ -89,6 +100,8 @@ class PetPhotoDialog(QDialog):
         return True
 
     def choose_destination(self):
+        if self._closed or not isValid(self):
+            return
         destination, _ = QFileDialog.getSaveFileName(
             self, translate('pet_photo_save', 'Save transparent PNG'), 'pet.png', 'PNG (*.png)')
         if destination:

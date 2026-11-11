@@ -1,0 +1,207 @@
+{
+  "baseline": "4014cf9e",
+  "cases": [
+    {
+      "result": {
+        "passed": true,
+        "refusal_events": [
+          {
+            "kind": "refused",
+            "time": 200,
+            "resident": "e2738d655c2b4fe8b3f38b3c07342daa",
+            "command": "work",
+            "reason": "waiting_materials"
+          },
+          {
+            "kind": "activity",
+            "time": 200,
+            "resident": "e2738d655c2b4fe8b3f38b3c07342daa",
+            "activity": "wander",
+            "reason": "free_time"
+          },
+          {
+            "kind": "commissions_refreshed",
+            "time": 200,
+            "day": 1
+          },
+          {
+            "kind": "life_event",
+            "time": 200,
+            "event": "starry_night",
+            "resident": null
+          }
+        ],
+        "case": "waiting_materials",
+        "blocked_caption": "四處走走（自由時間） · 大約還剩 1 分鐘\n婉拒：等待材料。",
+        "recovered_caption": "工作中（你交代的） · 大約還剩 3 分鐘",
+        "recovered_activity": "work",
+        "runtime_closed": true,
+        "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+        "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\manual-work-feedback\\waiting_materials",
+        "scope": "Native MainUI on private desktop; deterministic fixture and two manual work commands followed by explicit normal simulation steps, service timer stopped, validates visible captions and recovery only; global service starts, Workshop and lock query substituted",
+        "temporary_directory_removed": true
+      },
+      "observer": {
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "child_exit": 0,
+        "observation_only": true
+      },
+      "screenshots": {
+        "blocked.png": "c9aad26bd6475ee5b75fcef0a48efe286e56ca842ae8b25d0c54fe1ba81784fe",
+        "recovered.png": "439046de65830f31a322392522609a5c12e5f2b8a3562acc72e5d8dd83f5c803"
+      }
+    },
+    {
+      "result": {
+        "passed": true,
+        "refusal_events": [
+          {
+            "kind": "refused",
+            "time": 200,
+            "resident": "0355e180838d4a6aade7522c7000fde7",
+            "command": "work",
+            "reason": "no_station"
+          },
+          {
+            "kind": "activity",
+            "time": 200,
+            "resident": "0355e180838d4a6aade7522c7000fde7",
+            "activity": "wander",
+            "reason": "free_time"
+          },
+          {
+            "kind": "commissions_refreshed",
+            "time": 200,
+            "day": 1
+          },
+          {
+            "kind": "life_event",
+            "time": 200,
+            "event": "starry_night",
+            "resident": null
+          }
+        ],
+        "case": "no_station",
+        "blocked_caption": "四處走走（自由時間） · 大約還剩 1 分鐘\n婉拒：沒有這項工作的工作站。",
+        "recovered_caption": "工作中（你交代的） · 大約還剩 2 分鐘",
+        "recovered_activity": "work",
+        "runtime_closed": true,
+        "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+        "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\manual-work-feedback\\no_station",
+        "scope": "Native MainUI on private desktop; deterministic fixture and two manual work commands followed by explicit normal simulation steps, service timer stopped, validates visible captions and recovery only; global service starts, Workshop and lock query substituted",
+        "temporary_directory_removed": true
+      },
+      "observer": {
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "child_exit": 0,
+        "observation_only": true
+      },
+      "screenshots": {
+        "blocked.png": "09b0f46ebf8451e9d9bef29dc1aeb34895be967db6c835bf1538760c5a4f2822",
+        "recovered.png": "781655842243cb9b48a10f04f4fc3fc464dd5da94a31361b37efba3051f2ce8e"
+      }
+    },
+    {
+      "result": {
+        "passed": true,
+        "refusal_events": [
+          {
+            "kind": "refused",
+            "time": 200,
+            "resident": "13faf1c8b1904830bb325dee8a20ac5b",
+            "command": "work",
+            "reason": "station_busy"
+          },
+          {
+            "kind": "activity",
+            "time": 200,
+            "resident": "13faf1c8b1904830bb325dee8a20ac5b",
+            "activity": "wander",
+            "reason": "free_time"
+          },
+          {
+            "kind": "commissions_refreshed",
+            "time": 200,
+            "day": 1
+          },
+          {
+            "kind": "life_event",
+            "time": 200,
+            "event": "starry_night",
+            "resident": null
+          }
+        ],
+        "case": "station_busy",
+        "blocked_caption": "四處走走（自由時間） · 大約還剩 1 分鐘\n婉拒：工作站有人在用。",
+        "recovered_caption": "工作中（你交代的） · 大約還剩 2 分鐘",
+        "recovered_activity": "work",
+        "runtime_closed": true,
+        "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+        "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\manual-work-feedback\\station_busy",
+        "scope": "Native MainUI on private desktop; deterministic fixture and two manual work commands followed by explicit normal simulation steps, service timer stopped, validates visible captions and recovery only; global service starts, Workshop and lock query substituted",
+        "temporary_directory_removed": true
+      },
+      "observer": {
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "child_exit": 0,
+        "observation_only": true
+      },
+      "screenshots": {
+        "blocked.png": "f8628b2dbf0848a5e47cb6a55b7145fb57b99b2ee4e2b123d67f24473fda13f3",
+        "recovered.png": "2511ff383342b74035a7f8bacb1c393602ee6b9334fb8d3e53958b322af34771"
+      }
+    }
+  ],
+  "harness_source": "import hashlib\nimport json\nimport logging\nimport os\nfrom pathlib import Path\nimport shutil\nimport sys\nimport tempfile\nimport traceback\nimport uuid\nfrom time import monotonic\n\nfrom complete_main_onboarding_native import observation\n\nROOT = Path(__file__).resolve().parents[1]\nsys.path.insert(0, str(ROOT))\nsys.path.insert(0, str(ROOT / 'tests/integration'))\nimport hidden_desktop\n\nsource = Path(sys.argv[1]).resolve()\noutput = Path(sys.argv[2]).resolve()\noutput.mkdir(parents=True, exist_ok=True)\nif not hidden_desktop.is_child(output):\n    assert not (output / 'result.json').exists(), 'Use a fresh output directory'\n    hidden_desktop.DESKTOP = f'FrontEngineColdReload{os.getpid()}_{uuid.uuid4().hex[:8]}'\n    before = observation()\n    code = hidden_desktop.run_on_hidden_desktop(__file__, str(source), str(output), timeout_ms=180000)\n    (output / 'observer.json').write_text(json.dumps({'before': before, 'after': observation(),\n        'child_exit': code, 'observation_only': True}, indent=2), encoding='utf-8')\n    raise SystemExit(code)\n\nos.environ['QT_QPA_PLATFORM'] = 'windows'\ncase = source.name\nresult = {'passed': False}\ntry:\n    with tempfile.TemporaryDirectory(prefix='fe-current-cold-reload-') as folder:\n        previous = Path.cwd()\n        os.chdir(folder)\n        try:\n            from PySide6.QtCore import QCoreApplication, QEvent\n            from PySide6.QtTest import QTest\n            from PySide6.QtWidgets import QApplication\n            from frontengine.ui.page.pet_game import home_page\n            from frontengine.utils.session_lock import session_lock\n            from frontengine.user_setting.user_setting_file import user_setting_dict\n            from frontengine.utils.pet_game import snapshot\n\n            home_page.workshop_pack_roots = lambda: []\n            session_lock.is_session_locked = lambda: False\n            app = QApplication([])\n            app.setQuitOnLastWindowClosed(False)\n            from frontengine.ui import main_ui\n            main_ui.CriticalExit.init_critical_exit = lambda self: None\n            main_ui.HotkeyService.start = lambda self: False\n            main_ui.AppProfileService.start = lambda self: None\n            main_ui.ShareWatchService.start = lambda self: None\n            window = main_ui.FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)\n            lifetime = window.lifetime\n            page = window.pet_home_ui\n            try:\n                from frontengine.utils.pet_game import behaviour, simulation\n                from frontengine.show.pet_game.captions import result_text\n                service = page.service\n                from PySide6.QtGui import QGuiApplication\n                screen = QGuiApplication.primaryScreen()\n                area = screen.availableGeometry()\n                world = service.create_home((screen.name() or 'primary')[:128], area.x(), area.bottom(), 48, seed=5)\n                world.time_ms = 0\n                world.automatic = False\n                zone = next(iter(world.zones))\n                world.ledger.apply('fixture', 'native acceptance setup', 500)\n                pet = service.profiles.create('Mochi')['id']\n                service.profiles.update(pet, {'mood': 80, 'fullness': 90, 'energy': 95})\n                assert service.adopt(pet, zone) == 'accepted'\n                resident = world.residents[pet]\n                recipe = 'toy' if case == 'waiting_materials' else 'letter'\n                if case == 'waiting_materials':\n                    assert world.buy_and_place('workbench', zone, 'bench') == 'accepted'\n                elif case == 'station_busy':\n                    world.furnish(zone)\n                    other = service.profiles.create('Desk user')['id']\n                    service.profiles.update(other, {'mood': 80, 'fullness': 90, 'energy': 95})\n                    assert service.adopt(other, zone) == 'accepted'\n                    assert world.create_task('letter', other)[0] == 'accepted'\n                    assert behaviour.start_work(world, world.residents[other], 'command') is None\n                    assert world.residents[other].activity.kind == 'work'\n                else:\n                    assert case == 'no_station'\n                assert world.create_task(recipe, pet)[0] == 'accepted'\n                world.drain_events()\n                assert world.command(pet, 'work') == 'accepted'\n                simulation.step(world)\n                command_events = world.drain_events()\n                assert resident.activity.kind != 'work'\n                assert [e['reason'] for e in command_events if e['kind'] == 'refused'] == [case]\n                result['refusal_events'] = command_events\n                window.resize(1280, 960)\n                window.show()\n                page.refresh()\n                page.tabs.setCurrentIndex(page.tabs.keys().index('pet_home_residents_section'))\n                page.select_resident(pet)\n                QTest.qWait(1000)\n                page._scroll.ensureWidgetVisible(page.residents.activity)\n                QTest.qWait(200)\n                caption = page.residents.activity.text()\n                assert result_text(case) in caption, caption\n                assert not page.residents.activity.visibleRegion().isEmpty()\n                assert window.grab().save(str(output / 'blocked.png'))\n                if case == 'waiting_materials':\n                    world.ledger.apply('wood', 'native acceptance setup', items={'wood': 2})\n                elif case == 'no_station':\n                    world.furnish(zone)\n                else:\n                    behaviour.cancel_activity(world, world.residents[other], 'fixture')\n                behaviour.cancel_activity(world, resident, 'fixture')\n                world.drain_events()\n                assert world.command(pet, 'work') == 'accepted'\n                simulation.step(world)\n                command_events = world.drain_events()\n                page.refresh()\n                assert resident.activity.kind == 'work'\n                recovered = page.residents.activity.text()\n                assert result_text(case) not in recovered\n                page._scroll.ensureWidgetVisible(page.residents.activity)\n                QTest.qWait(200)\n                assert window.grab().save(str(output / 'recovered.png'))\n                assert not [e for e in command_events if e['kind'] == 'refused']\n                result.update(case=case, blocked_caption=caption, recovered_caption=recovered,\n                              recovered_activity=resident.activity.kind)\n            finally:\n                window.request_shutdown()\n                deadline = monotonic() + 120\n                while not lifetime.closed and monotonic() < deadline:\n                    QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)\n                    app.processEvents()\n                    QTest.qWait(10)\n                assert lifetime.closed, (lifetime.state, lifetime.error)\n            result.update(passed=True, runtime_closed=True, python=sys.version,\n                source=str(source),\n                scope='Native MainUI on private desktop; deterministic fixture and two manual work commands followed by explicit normal simulation steps, service timer stopped, validates visible captions and recovery only; global service starts, Workshop and lock query substituted')\n        finally:\n            logging.shutdown()\n            os.chdir(previous)\n    result['temporary_directory_removed'] = True\nexcept Exception:\n    result.update(passed=False, error=traceback.format_exc())\n(output / 'result.json').write_text(json.dumps(result, indent=2), encoding='utf-8')\nraise SystemExit(0 if result['passed'] else 1)\n",
+  "harness_sha256": "93bdadb0e067ae1e4a7dae38f6a922a610ed368b3fac3a2318e7a961952fafbb",
+  "checks": {
+    "red": "All three cases: [] versus expected [waiting_materials], [no_station], or [station_busy].",
+    "green": "46 behavior tests passed in26.05s;82 page/documentation/event-history tests passed in216.89s."
+  },
+  "limits": [
+    "Native MainUI with stopped service timer and explicit normal simulation steps; not normal-speed gameplay.",
+    "Global starts, Workshop and lock query substituted.",
+    "Refused events are emitted but Inbox does not display that event category.",
+    "Captions reviewed in six images; not a full layout/portrait acceptance.",
+    "Integration, complete regression of this revision and independent review pending."
+  ]
+}

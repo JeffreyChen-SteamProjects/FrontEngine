@@ -1,16 +1,21 @@
+from frontengine.ui.runtime_lifetime import owned_action
+from frontengine.ui.runtime_lifetime import OwnedWidgetList
 import threading
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QSlider, QLabel, QLineEdit, QPushButton, QCheckBox, QComboBox, \
-    QFontComboBox, QMessageBox, QFileDialog, QSpinBox
+    QFontComboBox, QFileDialog, QSpinBox
 
 from frontengine.show.text.draw_text import TextWidget
 from frontengine.ui.page.utils import (
     apply_checkbox_state,
+    ask_for_input,
     apply_combobox_data_state,
     apply_combobox_text_state,
     apply_slider_state,
+    apply_target_monitor_state,
+    target_monitor_state,
     build_target_monitor_combobox,
     dispatch_to_monitors,
     resolve_preferred_monitor,
@@ -52,13 +57,13 @@ def _t(key: str, fallback: str) -> str:
 
 
 class TextSettingUI(SettingPage):
-    def __init__(self):
+    def __init__(self, *, lifetime):
         front_engine_logger.info("[TextSettingUI] Init")
         super().__init__("tab_text_text", "page_subtitle_text",
-                         "Text", "Put a line of text on top of everything else.")
+                         "Text", "Put a line of text on top of everything else.", lifetime=lifetime)
 
         # Init variable
-        self.text_widget_list = []
+        self.text_widget_list = OwnedWidgetList(self.lifetime)
         self.show_all_screen = False
         # 已經解析過座標的地名，避免每台螢幕都重新查一次
         # The city already resolved to coordinates, so each monitor does not
@@ -83,6 +88,7 @@ class TextSettingUI(SettingPage):
 
         # Text input
         self.line_edit = QLineEdit()
+        self.line_edit.returnPressed.connect(lambda: self.start_draw_text_on_screen())   # type, Enter, shown
 
         # Start Button
         self.start_button = tr(QPushButton(), "text_setting_start_draw")
@@ -203,6 +209,7 @@ class TextSettingUI(SettingPage):
         self.set_footer(primary=self.start_button)
         self._update_source_hint()
 
+    @owned_action
     def set_show_all_screen(self) -> None:
         front_engine_logger.info("[TextSettingUI] set_show_all_screen")
         self.show_all_screen = self.show_on_all_screen_checkbox.isChecked()
@@ -235,12 +242,13 @@ class TextSettingUI(SettingPage):
             self.file_section.setVisible(kind == "local_file")
             self._restart_file_preview()
 
+    @owned_action
     def _build_text_source(self) -> TextSource | LocalFileTextSource:
         """依目前設定組出文字來源；天氣來源會先把地名解析成座標。"""
         kind = self.text_source_combobox.currentData() or SOURCE_STATIC
         if kind == "local_file":
             return LocalFileTextSource(self.file_path_edit.text(), self.file_field_combo.currentText(),
-                                       self.file_interval_spin.value() * 1000)
+                                       self.file_interval_spin.value() * 1000, lifetime=self.lifetime)
         if kind == SOURCE_WEATHER:
             self._apply_weather_location()
         return TextSource(
@@ -257,6 +265,7 @@ class TextSettingUI(SettingPage):
             self._file_preview.deleteLater()
             self._file_preview = None
 
+    @owned_action
     def _restart_file_preview(self, *_args) -> None:
         self.stop_file_preview()
         if self.text_source_combobox.currentData() != "local_file":
@@ -278,9 +287,10 @@ class TextSettingUI(SettingPage):
             self.file_field_combo.setCurrentText(selected)
             self.file_field_combo.blockSignals(False)
 
+    @owned_action
     def _choose_text_file(self) -> None:
-        path, _ = QFileDialog.getOpenFileName(self, _t("text_file_choose", "Choose file"), "",
-                                             "Data (*.txt *.json *.csv)")
+        path, _ = self.lifetime.after_dialog(QFileDialog.getOpenFileName(self, _t("text_file_choose", "Choose file"), "",
+                                             "Data (*.txt *.json *.csv)"))
         if path:
             self.file_path_edit.setText(path)
             self.file_field_combo.setCurrentText("")
@@ -290,6 +300,7 @@ class TextSettingUI(SettingPage):
         self.stop_file_preview()
         super().closeEvent(event)
 
+    @owned_action
     def _apply_weather_location(self) -> None:
         """
         把使用者填的地名換成座標；查不到就沿用預設地點。
@@ -312,6 +323,9 @@ class TextSettingUI(SettingPage):
 
         def resolve() -> None:
             found = lookup_city(city)
+            # This runs off the UI thread: a retired page neither raises here nor touches the service.
+            if not self.lifetime.accepting:
+                return
             if found is None:
                 front_engine_logger.warning(f"[TextSettingUI] weather city not found: {city}")
                 # 查失敗就忘掉，下次按開始才會再試一次
@@ -322,6 +336,7 @@ class TextSettingUI(SettingPage):
 
         threading.Thread(target=resolve, name="frontengine-city-lookup", daemon=True).start()
 
+    @owned_action
     def _create_text_widget(self) -> TextWidget:
         front_engine_logger.info("[TextSettingUI] _create_text_widget")
         text_widget = TextWidget(
@@ -344,10 +359,12 @@ class TextSettingUI(SettingPage):
         self.text_widget_list.append(text_widget)
         return text_widget
 
+    @owned_action
     def opacity_trick(self) -> None:
         front_engine_logger.info("[TextSettingUI] opacity_trick")
         self.opacity_slider_value_label.setText(str(self.opacity_slider.value()))
 
+    @owned_action
     def font_size_trick(self) -> None:
         front_engine_logger.info("[TextSettingUI] font_size_trick")
         self.font_size_slider_value_label.setText(str(self.font_size_slider.value()))
@@ -360,7 +377,7 @@ class TextSettingUI(SettingPage):
             "alignment": self.text_position_combobox.currentText(),
             "show_on_all_screen": self.show_on_all_screen_checkbox.isChecked(),
             "show_on_bottom": self.show_on_bottom_checkbox.isChecked(),
-            "target_monitor": self.target_monitor_combobox.currentText(),
+            "target_monitor": target_monitor_state(self.target_monitor_combobox),
             "color": self.text_color_combobox.currentText(),
             "font_family": self.font_family_combobox.currentFont().family(),
             "marquee": self.marquee_checkbox.isChecked(),
@@ -376,11 +393,11 @@ class TextSettingUI(SettingPage):
 
     def set_state(self, state: dict) -> None:
         """把預設集的內容還原到這一頁的控制項上。"""
+        apply_target_monitor_state(self.target_monitor_combobox, state.get("target_monitor"))
         apply_slider_state(state, ((self.opacity_slider, "opacity"),
                                    (self.font_size_slider, "font_size")))
         apply_combobox_text_state(state, (
             (self.text_position_combobox, "alignment"),
-            (self.target_monitor_combobox, "target_monitor"),
             (self.text_color_combobox, "color"),
             (self.marquee_speed_combobox, "marquee_speed"),
             (self.outline_color_combobox, "outline_color"),
@@ -405,6 +422,7 @@ class TextSettingUI(SettingPage):
 
         self._restore_file_source(state)
 
+    @owned_action
     def _restore_file_source(self, state: dict) -> None:
         """Restore validated file-feed controls before restarting the preview."""
         if "text_file" in state:
@@ -418,6 +436,7 @@ class TextSettingUI(SettingPage):
                 self.file_interval_spin.setValue(1)
         self._restart_file_preview()
 
+    @owned_action
     def start_draw_text_on_screen(self) -> None:
         front_engine_logger.info("[TextSettingUI] start_draw_text_on_screen")
 
@@ -426,7 +445,7 @@ class TextSettingUI(SettingPage):
         # text has to be filled in.
         is_static = (self.text_source_combobox.currentData() or SOURCE_STATIC) == SOURCE_STATIC
         if is_static and not self.line_edit.text().strip():
-            QMessageBox.warning(self, "Warning", language_wrapper.language_word_dict.get("not_prepare"))
+            ask_for_input(self.line_edit)            # no dialog to dismiss: the field asks for the text
             return
 
         def present_on_monitor(widget: TextWidget, monitor, _idx: int) -> None:

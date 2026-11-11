@@ -18,8 +18,8 @@ def test_reaction_bindings_reject_unknown_native_assets(tmp_path, binding):
 
 
 def test_reactions_use_native_player_and_restore_only_owned_expression(tmp_path, monkeypatch):
-    pytest.importorskip('Imervue.puppet.document_io')
-    from Imervue.puppet.document import Motion, Expression
+    pytest.importorskip('rigora.puppet.document_io')
+    from rigora.puppet.document import Motion, Expression
     from frontengine.show.pet.puppet_pet import PuppetPetWidget
     from frontengine.user_setting.pet_profiles import PetProfiles
     from test_puppet_startup_lifecycle import asset

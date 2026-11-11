@@ -1,0 +1,156 @@
+{
+  "product": "d825c06c",
+  "terminal_handle": 89325,
+  "terminal_exit": 0,
+  "original_plan": {
+    "product_commit": "d825c06c",
+    "required_elapsed_seconds": 7200,
+    "minimum_actions": 200,
+    "required_work_settlements": 1,
+    "live_handle": 89325,
+    "source_count": 750,
+    "script_sha256": "1efd612d1f7594f6df4eebb42d72f197e4d4604fe483637d8016e4b9a5b812e2",
+    "checks": [
+      "no callback exceptions",
+      "no duplicate work settlement or goal events per home",
+      "sandbox zero currency and unchanged profile",
+      "inbox roundtrip preservation",
+      "save equals world snapshot",
+      "leases match residents",
+      "nonnegative inventory and valid reservations",
+      "both worlds advance on real timers",
+      "normal shutdown and temporary cleanup"
+    ],
+    "limits": [
+      "Home-only workload; no Puppet/video/Web overlays.",
+      "CPU/RSS are one-run diagnostics under concurrent test load, not performance comparison.",
+      "Foreground/cursor observations are sampled before/after, not proof of continuous noninterference."
+    ],
+    "completion": "Check terminal handle, result.json, stderr, observer, source hashes, elapsed/actions/paints/events and cold-reopen exported saves before recording acceptance."
+  },
+  "native": {
+    "passed": true,
+    "elapsed": 7200.156000000017,
+    "requested_seconds": 7200.0,
+    "actions": 240,
+    "samples": 717,
+    "paint_events": 1855930,
+    "events": {
+      "activity": 626,
+      "goal_claimed": 9,
+      "commission_done": 4,
+      "arrived": 1,
+      "commissions_refreshed": 3,
+      "completed": 396,
+      "auto_job": 5,
+      "interrupted": 2,
+      "settled": 4,
+      "life_event": 3
+    },
+    "simulated_ms": {
+      "manage": 3562400,
+      "sandbox": 3577400
+    },
+    "unique_work_settlements": 4,
+    "unique_goal_events": 9,
+    "state_checks_passed": true,
+    "real_clock": true,
+    "callback_errors": [],
+    "runtime_closed": true,
+    "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-stage-layout\\.audit\\profession-owned-fixed",
+    "saved_snapshot_sha256": "c471f2056e3bf47d41a8073e4a214f8eccec310f6c85a5f6088181f0c4b05172",
+    "scope": "Native private MainUI with normal Qt world timers; repeated home mode buttons, panel selection and service save. Seeded progressed home; host services substituted. One-run stability diagnostics under concurrent test load, not a comparative performance benchmark or all-overlay soak.",
+    "temporary_directory_removed": true
+  },
+  "original_gates": {
+    "passed": true,
+    "frozen_sources": 750,
+    "final_world_matches_disk": true,
+    "preclose_profile_differences": {},
+    "script_hash_matches_original_plan": true
+  },
+  "cold_managed": {
+    "passed": true,
+    "mode": "manage",
+    "world_exact": true,
+    "profiles_exact": true,
+    "leases_reacquired": true,
+    "saved_exact": true,
+    "other_mode_unchanged": true,
+    "source_unchanged": true,
+    "temporary_directory_removed": true,
+    "resident_count": 1,
+    "source_hashes": {
+      "pet-home-sandbox.json": "b1642a92bac8013622fc890f258a6b147f59d9f89495a632b163c6a17f4eb126",
+      "pet-home-sandbox.json.bak": "dce8dbd499ea586cbe4a1c3b46859e991b2413f3d38a0d99ef7cbf0e3b4c7958",
+      "pet-home.json": "d6fd7675c9884769aec0f7b4c5841ba8544ba38c2f3efcd49c10324e87c91b4c",
+      "pet-home.json.bak": "15ffb0905b43769f2c873f58936cf6bd6e52554c5555591db576445e3b8b2a77",
+      "user_setting.json": "4fed1caaa5061338a7b98699f00f30cc9585775abb853fe89a8a7a1c1811602e"
+    }
+  },
+  "cold_sandbox": {
+    "passed": true,
+    "mode": "sandbox",
+    "world_exact": true,
+    "profiles_exact": true,
+    "leases_reacquired": true,
+    "saved_exact": true,
+    "other_mode_unchanged": true,
+    "source_unchanged": true,
+    "temporary_directory_removed": true,
+    "resident_count": 1,
+    "source_hashes": {
+      "pet-home-sandbox.json": "b1642a92bac8013622fc890f258a6b147f59d9f89495a632b163c6a17f4eb126",
+      "pet-home-sandbox.json.bak": "dce8dbd499ea586cbe4a1c3b46859e991b2413f3d38a0d99ef7cbf0e3b4c7958",
+      "pet-home.json": "d6fd7675c9884769aec0f7b4c5841ba8544ba38c2f3efcd49c10324e87c91b4c",
+      "pet-home.json.bak": "15ffb0905b43769f2c873f58936cf6bd6e52554c5555591db576445e3b8b2a77",
+      "user_setting.json": "4fed1caaa5061338a7b98699f00f30cc9585775abb853fe89a8a7a1c1811602e"
+    }
+  },
+  "observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "child_exit": 0,
+    "observation_only": true
+  },
+  "sample_count_verified": 717,
+  "screenshots_reviewed": [
+    "start.png",
+    "end.png"
+  ],
+  "limits": [
+    "This is one completed home-only stability run on d825c06c, not the latest product version or a comparative performance benchmark.",
+    "Puppet, video, Web, clean-machine installation, OS input, mixed-DPI screens and independent review are not covered.",
+    "Screenshot captures do not establish complete visual-layout correctness; the initial capture precedes the timed event-processing loop and the final capture shows the Shop panel.",
+    "Foreground and cursor were sampled only before and after.",
+    "Profiles captured before shutdown were separately compared to final settings: no differences in this run. Cold checks use actual exported settings and both world files."
+  ],
+  "evidence_sha256": {
+    "cold-managed.json": "10040d46b0d537cff0ace2f09ea428d2cd18bb1b073ba2031d56c30d6542abc4",
+    "cold-sandbox.json": "57c90c0eea056285bf19776c2e866bc0fd4454fdc0ae5f00f1e7bb4e9355f2f4",
+    "end.png": "9e554070338addedba5b83d9cc82073279b398609ca1fe5391dc3dd3ca9b6f06",
+    "observer.json": "108902181ee471ddb835401d5d799d056e70c9ac4aead7d271ce043e584e29a5",
+    "original-gates-verified.json": "951b410ad9fdc19e08c00d7f1bdf00527db1077ada86eaf66ccaa6709b3b5369",
+    "profiles.json": "75bacc833486c2c06b7288ec4dbb484cbae927f838d26092efb06c43a737670e",
+    "result.json": "b408c10d80788d5acca5fa15a8283fe78d883e9750e66360646065141c2a45b5",
+    "run-plan.json": "45d538be6aea6325aec44334e599be5ac87bdab367f3068fa77a0fb2a809f15f",
+    "samples.jsonl": "9fa4326b6d05c918ab9e049e32739cad38ddf3180c07a354ada1d4315c245835",
+    "shutdown-world.json": "7037a33db1fe299629e2fc1a1e90c2a79ddaf962e825bcb11861394b49c5d8e3",
+    "source-manifest.json": "a8f5566cb8bd16308a8bd7140286a3ffd1be61416bf3669df517beb39de149b5",
+    "start.png": "a3379880042a49ace38054051e7330ef22921e1f9ccb1d03038c772a6ee6984c",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

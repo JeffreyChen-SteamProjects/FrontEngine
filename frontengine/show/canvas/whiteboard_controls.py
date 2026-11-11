@@ -1,9 +1,10 @@
 """Board-local page controls and asynchronous editable-file operations."""
 from __future__ import annotations
+from frontengine.utils.work_lifetime import captured_lifetime, owned_callback
 
 from threading import Event
 from copy import deepcopy
-from PySide6.QtCore import QObject, QRunnable, QThreadPool, Qt, Signal
+from PySide6.QtCore import QObject, QRunnable, Qt, Signal
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QComboBox, QLabel, QFileDialog
 from frontengine.utils.whiteboard.document import read_document, write_document
 from frontengine.utils.whiteboard.raster import save_page
@@ -36,6 +37,8 @@ class WhiteboardControls(QWidget):
 
     def __init__(self, board) -> None:
         super().__init__(board)
+        self.lifetime = captured_lifetime(board)
+        self.lifetime.adopt(self)
         self.board, self.closed, self.pending = board, False, None
         self.setAutoFillBackground(True)
         self.result = _Result(self)
@@ -122,8 +125,9 @@ class WhiteboardControls(QWidget):
         for button in self.buttons:
             button.setEnabled(False)
         retranslator.set_text(self.status, 'board_working')
-        QThreadPool.globalInstance().start(_FileJob(kind, function, self.result))
+        self.lifetime.submit(_FileJob(kind, function, self.result))
 
+    @owned_callback
     def _done(self, kind: str, value, error: str) -> None:
         self.pending = None
         if self.closed:
@@ -144,3 +148,4 @@ class WhiteboardControls(QWidget):
         self.closed = True
         if self.pending is not None:
             self.pending.set()
+            self.pending = None

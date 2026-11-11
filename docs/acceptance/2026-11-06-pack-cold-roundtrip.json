@@ -1,0 +1,77 @@
+{
+  "passed": true,
+  "cases": [
+    {
+      "phase": "setup",
+      "mode": "manage",
+      "loaded_packs": 1,
+      "furniture": 2,
+      "dormant": 0,
+      "tasks": 1,
+      "coins": 810,
+      "station_level": 2
+    },
+    {
+      "phase": "missing",
+      "mode": "manage",
+      "loaded_packs": 0,
+      "furniture": 0,
+      "dormant": 2,
+      "tasks": 1,
+      "coins": 810,
+      "station_level": 2
+    },
+    {
+      "phase": "restored",
+      "mode": "manage",
+      "loaded_packs": 1,
+      "furniture": 2,
+      "dormant": 0,
+      "tasks": 0,
+      "coins": 822,
+      "station_level": 2
+    },
+    {
+      "phase": "setup",
+      "mode": "sandbox",
+      "loaded_packs": 1,
+      "furniture": 2,
+      "dormant": 0,
+      "tasks": 1,
+      "coins": 0,
+      "station_level": 2
+    },
+    {
+      "phase": "missing",
+      "mode": "sandbox",
+      "loaded_packs": 0,
+      "furniture": 0,
+      "dormant": 2,
+      "tasks": 1,
+      "coins": 0,
+      "station_level": 2
+    },
+    {
+      "phase": "restored",
+      "mode": "sandbox",
+      "loaded_packs": 1,
+      "furniture": 2,
+      "dormant": 0,
+      "tasks": 0,
+      "coins": 0,
+      "station_level": 2
+    }
+  ],
+  "scope": "Real pack files renamed outside and back into discovery folder; three independent StorageSession/HomeSaveStore processes per mode. Exact furniture restored and paid upgrade retained; retained letter order finishes once.",
+  "limits": [
+    "Synthetic pack and needs; no native rendering, Workshop, external recipes or Puppet.",
+    "Missing station clears task station binding by existing loader policy; reinstall restores furniture but order chooses a suitable station instead of restoring its old binding."
+  ],
+  "product_test_commit": "4e8ae0a5",
+  "evidence_sha256": {
+    "check_pack_cold_roundtrip.py": "2caa545400d5e2c358be024a427464083a5508fc51b4365d1ba3236dde63af01",
+    "pack-cold-roundtrip.json": "92646ad4ba682b0f17e76a31d85bb46686ca1e4532e25d22c59f6465e03419a0",
+    "pack-cold-roundtrip.log": "de493d0d6e67c2afecbd43efb62e3f3bc9c56982ad03c952e12d83e047c4fbde"
+  },
+  "fixture_correction": "Initial sandbox setup assumed buy_and_place also places furniture; sandbox requires explicit place_anywhere. Corrected fixture without changing product."
+}

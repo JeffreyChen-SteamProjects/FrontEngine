@@ -31,3 +31,5 @@
 控制中心 → 屏幕配置可保存／恢复每组硬件屏幕位置（20 组、200 窗口、本地 monitor-profiles.json 上限 512 KiB）。工作区比例位置适应分辨率、主屏及 DPI 变化，保留逻辑尺寸；无配置时把屏幕外窗口移回主屏。自动调整单独启用、默认关闭，500 ms 合并新覆盖层和 Qt 屏幕事件，不修改系统显示设置。硬件身份不明报错；同类同名窗口不保存恢复，但可移回可见区。跳过全屏／场景及正在跟随目标的覆盖层，不创建覆盖层或猜 handle。全程 Qt 逻辑坐标。单台 Windows 125% 屏幕原生保存、恢复及移回通过；真实接拔、主屏切换和混合 DPI 待其他设备。
 
 静态软件合成复用一张上限 16 MP 缓存；图像／DPR、变换、透明度、堆叠、裁剪、输出尺寸与 DPI 变化重绘，无变化提交跳过重绘，动画／视频仍更新，GPU 读回不变。退出与全部关闭共用覆盖层登记来源，先各关闭一次再清列表、重置壁纸播放和清理，然后释放场景资源；取消中的本地文件／绘图工作完成前用非阻塞定时器保留 Qt。外挂 manifest 支持 API v1，examples/plugins/clock 示例 QWidget 的 overlay_widgets、可选 release_overlay_resources／shutdown 和 get_state／set_state；已加载插件预设以 plugin:<页名> 命名并支持事务回滚，预设不加载代码。复制示例目录到 plugins/，明确启用和授权内容摘要；声明／授权不是 OS 沙箱。开发测量：py -m benchmarks.scene_composition --output build/scene-benchmark.json，可选可信 --baseline-file 比较准确像素；数据和复现见 docs/benchmarks/README.md。
+
+切换界面语言时，画质、测量模式、读取文字动作、摄像机外框与频谱样式的选项文字也会更新。原有选择值保持不变，不会因切换语言而应用不同的工具设置。

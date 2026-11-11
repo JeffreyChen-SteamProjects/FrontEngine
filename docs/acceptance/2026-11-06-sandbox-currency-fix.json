@@ -1,0 +1,99 @@
+{
+  "date": "2026-11-06",
+  "issue": 71,
+  "status": "focused, UI, native and cold-process validation passed; full regression and independent review pending",
+  "policy": "World.coin_amount resolves sandbox currency to zero for transactions, events and UI. Activities, inventory and local progression remain supported. Snapshot loading normalizes old sandbox balances after validation, preserving historical journal entries and IDs. Managed balance remains unchanged.",
+  "red": {
+    "currency_routes": "7 sandbox failed, 7 managed passed, 1.81s",
+    "legacy_load": "1 sandbox failed, 1 managed passed, 1.82s",
+    "neutral_notices": "3 failed, 1.75s"
+  },
+  "green": {
+    "domain_suite": "90 passed, 13.35s",
+    "new_cases_and_translations": "46 passed, 2.17s",
+    "price_duplicate_and_documentation": "50 passed, 2.81s",
+    "ui_modes": "24 passed, 205.51s",
+    "final_new_cases_and_translations": "51 passed, 1.82s"
+  },
+  "native": {
+    "passed": true,
+    "granted": [
+      {
+        "kind": "wish_granted",
+        "resident": "cd53a59142a7496d92090f3a38904067",
+        "time": 1238000,
+        "wish": "play_time"
+      }
+    ],
+    "managed_world_unchanged": true,
+    "profiles_unchanged": true,
+    "sandbox_reward_retained": true,
+    "mode_button_clicks": 3,
+    "create_button_clicked": true,
+    "sandbox_notes": [
+      "Recovery worker's wish came true",
+      "Goal completed"
+    ],
+    "managed_notes": [],
+    "sandbox_unread": 2,
+    "managed_unread": 0,
+    "restored_inbox": true,
+    "sandbox_coins": 0,
+    "zero_currency_events": true,
+    "explicit_ticks": 190,
+    "runtime_closed": true,
+    "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-stage-layout\\.audit\\profession-owned-fixed",
+    "saved_snapshot_sha256": "c471f2056e3bf47d41a8073e4a214f8eccec310f6c85a5f6088181f0c4b05172",
+    "scope": "Native private MainUI; actual mode/create/Play buttons with service furniture placement and explicit play wish; injected ticks; host services substituted. Not crash or normal-speed acceptance.",
+    "temporary_directory_removed": true
+  },
+  "observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "child_exit": 0,
+    "observation_only": true
+  },
+  "cold_processes": {
+    "passed": true,
+    "phases": [
+      {
+        "phase": "normalize",
+        "coins": 0,
+        "world_except_balance_unchanged": true,
+        "profiles_and_managed_save_unchanged": true,
+        "leases_reacquired": true,
+        "saved_exact": true
+      },
+      {
+        "phase": "reopen",
+        "coins": 0,
+        "world_except_balance_unchanged": true,
+        "profiles_and_managed_save_unchanged": true,
+        "leases_reacquired": true,
+        "saved_exact": true
+      }
+    ],
+    "original_unchanged": true,
+    "temporary_directory_removed": true
+  },
+  "screenshot_review": "sandbox-inbox-zero-currency.png inspected: Goal completed, no +0; wish notice retained.",
+  "limits": [
+    "Full regression, integration and independent review remain outstanding.",
+    "Native flow uses explicit wish, fixture furniture placement and injected ticks; not normal-speed or crash acceptance."
+  ],
+  "review": "Self-review caught an over-broad text replacement that made auto_job report completion. Added a failing start-not-completion test (1 failed, 1.68s), removed the unintended branch, and included it in the final 51-case pass. This is not independent review.",
+  "static": "pyflakes clean for all changed non-dictionary Python files and new test; diff --check clean"
+}

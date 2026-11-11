@@ -1,0 +1,108 @@
+{
+  "result": {
+    "source_revision": "607cc6a",
+    "platform": "offscreen",
+    "os_services_stubbed": true,
+    "languages": [
+      {
+        "language": "English",
+        "repeat": 0,
+        "page_actions": 16,
+        "shared_menu_instances": 5
+      },
+      {
+        "language": "English",
+        "repeat": 1,
+        "page_actions": 16,
+        "shared_menu_instances": 5
+      },
+      {
+        "language": "Traditional_Chinese",
+        "repeat": 0,
+        "page_actions": 16,
+        "shared_menu_instances": 5
+      },
+      {
+        "language": "Traditional_Chinese",
+        "repeat": 1,
+        "page_actions": 16,
+        "shared_menu_instances": 5
+      },
+      {
+        "language": "Simplified_Chinese",
+        "repeat": 0,
+        "page_actions": 16,
+        "shared_menu_instances": 5
+      },
+      {
+        "language": "Simplified_Chinese",
+        "repeat": 1,
+        "page_actions": 16,
+        "shared_menu_instances": 5
+      },
+      {
+        "language": "Deutsch",
+        "repeat": 0,
+        "page_actions": 16,
+        "shared_menu_instances": 5
+      },
+      {
+        "language": "Deutsch",
+        "repeat": 1,
+        "page_actions": 16,
+        "shared_menu_instances": 5
+      },
+      {
+        "language": "Russian",
+        "repeat": 0,
+        "page_actions": 16,
+        "shared_menu_instances": 5
+      },
+      {
+        "language": "Russian",
+        "repeat": 1,
+        "page_actions": 16,
+        "shared_menu_instances": 5
+      },
+      {
+        "language": "France",
+        "repeat": 0,
+        "page_actions": 16,
+        "shared_menu_instances": 5
+      },
+      {
+        "language": "France",
+        "repeat": 1,
+        "page_actions": 16,
+        "shared_menu_instances": 5
+      },
+      {
+        "language": "Italy",
+        "repeat": 0,
+        "page_actions": 16,
+        "shared_menu_instances": 5
+      },
+      {
+        "language": "Italy",
+        "repeat": 1,
+        "page_actions": 16,
+        "shared_menu_instances": 5
+      }
+    ],
+    "activation": "actual QAction.trigger, not direct run_entry callback",
+    "page_instances_reused": true,
+    "shared_menu_actions_preserved": true
+  },
+  "exit_code": 0,
+  "harness": {
+    "source": "\"\"\"Widget-local keyboard events in an offscreen full MainUI.\"\"\"\nimport json\nimport logging\nimport os\nfrom pathlib import Path\nimport sys\nimport tempfile\nfrom time import monotonic\n\nROOT = Path(__file__).resolve().parents[1]\nsys.path.insert(0, str(ROOT))\nos.environ['QT_QPA_PLATFORM'] = 'offscreen'\ntrace = []\n\n\ndef tab_to(app, window, target):\n    for count in range(400):\n        current = app.focusWidget()\n        if current is target:\n            trace.append({'target': target.objectName() or type(target).__name__, 'tabs': count})\n            return\n        QTest.keyClick(current or window, Qt.Key.Key_Tab)\n        app.processEvents()\n    raise AssertionError(('Unreachable by Tab', type(target).__name__, target.objectName()))\n\n\nprevious = Path.cwd()\nwith tempfile.TemporaryDirectory(prefix='front-keyboard-flow-') as name:\n    os.chdir(name)\n    try:\n        Path('user_setting.json').write_text(json.dumps({'language': 'English', 'smart_pause': False,\n            'pet_home_on_desktop': False, 'pet_home_running': False}))\n        from PySide6.QtCore import QCoreApplication, QEvent, Qt\n        from PySide6.QtTest import QTest\n        from PySide6.QtWidgets import QApplication\n        from frontengine.ui import main_ui\n        from frontengine.ui.page.pet_game import home_page\n        from frontengine.utils.pet_game import simulation\n        from frontengine.utils.session_lock import session_lock\n        main_ui.CriticalExit.init_critical_exit = lambda self: None\n        main_ui.HotkeyService.start = lambda self: False\n        main_ui.AppProfileService.start = lambda self: None\n        main_ui.ShareWatchService.start = lambda self: None\n        home_page.workshop_pack_roots = lambda: []\n        session_lock.is_session_locked = lambda: False\n        app = QApplication([])\n        app.setQuitOnLastWindowClosed(False)\n        window = main_ui.FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)\n        try:\n            window.resize(1280, 900)\n            window.show()\n            app.processEvents()\n            from frontengine.ui.menu.language_menu import LANGUAGES, set_language\n            from frontengine.ui.menu.features_menu import CATEGORIES\n            from shiboken6 import getCppPointer\n            pages = {key: widget for widget, key, index in window.command_pages}\n            expected = set(pages) - {'tab_pet_home_text'}\n            shared_names = [entry.target for _, _, entries in CATEGORIES\n                            for entry in entries if entry.kind == 'menu']\n            shared = {name: getattr(window, name) for name in shared_names}\n            original_actions = {name: [getCppPointer(a)[0] for a in menu.actions()]\n                                for name, menu in shared.items()}\n            result = {'source_revision': '607cc6a', 'platform': 'offscreen',\n                      'os_services_stubbed': True, 'languages': [],\n                      'activation': 'actual QAction.trigger, not direct run_entry callback'}\n            for _, language in LANGUAGES:\n                assert set_language(language, window)\n                for repeat in range(2):\n                    window.features_menu.aboutToShow.emit()\n                    QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)\n                    app.processEvents()\n                    routes = [(action, entry) for action, entry in window.features_menu.entries.items()\n                              if entry.kind == 'page']\n                    assert {entry.target for action, entry in routes} == expected\n                    for action, entry in routes:\n                        assert action.isEnabled() and action.text() == window.sidebar.page_label(\n                            window.sidebar.page_index(entry.target))\n                        action.trigger()\n                        app.processEvents()\n                        assert window.page_stack.currentWidget() is pages[entry.target], (language, entry.target)\n                        recent = window.command_history.values('recent', set(window.action_registry.actions))\n                        assert recent[0] == 'page.' + entry.target\n                    for name, menu in shared.items():\n                        assert getattr(window, name) is menu\n                        assert [getCppPointer(a)[0] for a in menu.actions()] == original_actions[name]\n                    assert all(window.page_stack.widget(index) is widget\n                               for widget, key, index in window.command_pages)\n                    result['languages'].append({'language': language, 'repeat': repeat,\n                        'page_actions': len(routes), 'shared_menu_instances': len(shared)})\n                print('verified ' + language, flush=True)\n            result['page_instances_reused'] = True\n            result['shared_menu_actions_preserved'] = True\n        finally:\n            window.request_shutdown()\n            deadline = monotonic() + 90\n            while not window.lifetime.closed and monotonic() < deadline:\n                QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)\n                app.processEvents()\n            assert window.lifetime.closed\n            window.deleteLater()\n            QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)\n        logging.shutdown()\n    finally:\n        os.chdir(previous)\n(ROOT / '.audit/features-entry-points-result.json').write_text(json.dumps(result, indent=2), encoding='utf-8')\nprint(json.dumps(result), flush=True)\n",
+    "sha256": "bb7efdb598958d955caeff1215f34f654a3b745a0fb5855a16bcb4aaf65ee20b"
+  },
+  "limits": [
+    "Qt offscreen actual MainUI, OS/Workshop/session-lock substitutions.",
+    "Actual QAction signals, not native pointer or menu-keyboard traversal.",
+    "Only16built-in tool pages; home remains accessible through sidebar/search. No plugin or command side effects exercised.",
+    "Original shared menu QAction C++ identities and page identities preserved; no claim about all service instances or timers.",
+    "This run covers607cc6a isolated branch; integration6ba8f8c full suite still running."
+  ]
+}

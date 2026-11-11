@@ -1,3 +1,4 @@
+from frontengine.ui.runtime_lifetime import owned_action
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QTabWidget, QLabel, QPushButton
 
@@ -7,34 +8,33 @@ from frontengine.show.scene.scene import SceneManager
 from frontengine.ui.page.scene_setting.scene_manager import SceneManagerUI
 from frontengine.ui.page.scene_setting.scene_page.registry import SCENE_PAGE_REGISTRY
 from frontengine.utils.logging.loggin_instance import front_engine_logger
-from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.ui.page.scene_setting.scene_visual_editor import SceneVisualEditor
 from frontengine.utils.multi_language.retranslate import retranslator, tr
 from frontengine.ui.page.scene_setting.scene_actions import SceneActions
 
 
 class SceneSettingUI(SettingPage):
-    def __init__(self):
+    def __init__(self, *, lifetime):
         front_engine_logger.info("[SceneSettingUI] Init")
         super().__init__("tab_scene_text", "page_subtitle_scene",
-                         "Scene", "Arrange several overlays together as one scene.", wide=True)
+                         "Scene", "Arrange several overlays together as one scene.", wide=True, lifetime=lifetime)
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
 
         # scene
-        self.scene = SceneManager()
+        self.scene = SceneManager(lifetime=self.lifetime)
 
         # Tab
         self.tab_widget = QTabWidget(self)
         self.scene_manager_ui = SceneManagerUI(self.scene)
-        self.visual_editor = SceneVisualEditor(self.scene_manager_ui)
+        self.visual_editor = SceneVisualEditor(self.scene_manager_ui, lifetime=self.lifetime)
         visual_index = self.tab_widget.addTab(self.visual_editor, "")
         retranslator.bind(self.tab_widget, "scene_visual_editor", "", "setTabText", visual_index)
-        self.tab_widget.addTab(
-            self.scene_manager_ui, language_wrapper.language_word_dict.get("scene_script")
-        )
+        script_index = self.tab_widget.addTab(self.scene_manager_ui, "")
+        retranslator.bind(self.tab_widget, "scene_script", "", "setTabText", script_index)
 
         for ui_class, label_key in SCENE_PAGE_REGISTRY:
-            self.tab_widget.addTab(ui_class(self.scene_manager_ui), language_wrapper.language_word_dict.get(label_key))
+            index = self.tab_widget.addTab(ui_class(self.scene_manager_ui, lifetime=self.lifetime), "")
+            retranslator.bind(self.tab_widget, label_key, "", "setTabText", index)
 
         # 場景的子分頁留著：那是「這個場景裡有哪些東西」，和主導覽是不同層次的
         # 選擇，攤平反而看不出它們屬於同一個場景。
@@ -83,6 +83,7 @@ class SceneSettingUI(SettingPage):
         self.actions.shutdown()
         self.visual_editor.editor3d.shutdown()
 
+    @owned_action
     def open_output(self) -> None:
         """Preview/send a snapshot of the editor independently of desktop playback."""
         from frontengine.ui.dialog.scene_output_dialog import SceneOutputDialog
@@ -92,6 +93,7 @@ class SceneSettingUI(SettingPage):
         self.output_dialog.raise_()
         self.output_dialog.activateWindow()
 
+    @owned_action
     def open_templates(self) -> None:
         """Reuse one local template library with layout preview and screen choice."""
         from frontengine.ui.dialog.scene_templates_dialog import SceneTemplatesDialog

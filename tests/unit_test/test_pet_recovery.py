@@ -87,7 +87,7 @@ def test_inactive_recovery_reports_status_without_spawning(social_pets):
 
 
 def test_puppet_recovery_keeps_identity_and_model(tmp_path):
-    pytest.importorskip('Imervue.puppet.document_io')
+    pytest.importorskip('rigora.puppet.document_io')
     from frontengine.show.pet.puppet_pet import PuppetPetWidget
     from frontengine.user_setting.pet_profiles import PetProfiles
     from test_puppet_startup_lifecycle import asset

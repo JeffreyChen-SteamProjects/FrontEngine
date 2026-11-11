@@ -1,0 +1,454 @@
+{
+  "product_test_commit": "3c086b2e",
+  "progression": {
+    "passed": true,
+    "default_clock_is_monotonic": true,
+    "samples": [
+      {
+        "recipe": "letter",
+        "units": 10,
+        "coins": 120,
+        "skills": {
+          "writing": 50
+        },
+        "transactions": [
+          "t5:u0",
+          "t5:u1",
+          "t5:u2",
+          "t5:u3",
+          "t5:u4",
+          "t5:u5",
+          "t5:u6",
+          "t5:u7",
+          "t5:u8",
+          "t5:u9"
+        ]
+      },
+      {
+        "recipe": "letter",
+        "units": 20,
+        "coins": 320,
+        "skills": {
+          "writing": 150
+        },
+        "transactions": [
+          "t7:u0",
+          "t7:u1",
+          "t7:u2",
+          "t7:u3",
+          "t7:u4",
+          "t7:u5",
+          "t7:u6",
+          "t7:u7",
+          "t7:u8",
+          "t7:u9",
+          "t7:u10",
+          "t7:u11",
+          "t7:u12",
+          "t7:u13",
+          "t7:u14",
+          "t7:u15",
+          "t7:u16",
+          "t7:u17",
+          "t7:u18",
+          "t7:u19"
+        ]
+      },
+      {
+        "recipe": "letter",
+        "units": 10,
+        "coins": 440,
+        "skills": {
+          "writing": 200
+        },
+        "transactions": [
+          "t8:u0",
+          "t8:u1",
+          "t8:u2",
+          "t8:u3",
+          "t8:u4",
+          "t8:u5",
+          "t8:u6",
+          "t8:u7",
+          "t8:u8",
+          "t8:u9"
+        ]
+      },
+      {
+        "recipe": "herbs",
+        "units": 1,
+        "coins": 64,
+        "skills": {
+          "writing": 200,
+          "gardening": 5
+        },
+        "transactions": [
+          "t11:u0"
+        ]
+      },
+      {
+        "recipe": "toy",
+        "units": 1,
+        "coins": 64,
+        "skills": {
+          "writing": 200,
+          "gardening": 5,
+          "crafting": 6
+        },
+        "transactions": [
+          "t12:u0"
+        ]
+      },
+      {
+        "recipe": "story",
+        "units": 8,
+        "coins": 380,
+        "skills": {
+          "writing": 312,
+          "gardening": 5,
+          "crafting": 6
+        },
+        "transactions": [
+          "t13:u0",
+          "t13:u1",
+          "t13:u2",
+          "t13:u3",
+          "t13:u4",
+          "t13:u5",
+          "t13:u6",
+          "t13:u7"
+        ]
+      },
+      {
+        "recipe": "novel",
+        "units": 1,
+        "coins": 500,
+        "skills": {
+          "writing": 342,
+          "gardening": 5,
+          "crafting": 6
+        },
+        "transactions": [
+          "t14:u0"
+        ]
+      },
+      {
+        "recipe": "herbs",
+        "units": 7,
+        "coins": 500,
+        "skills": {
+          "writing": 342,
+          "gardening": 40,
+          "crafting": 6
+        },
+        "transactions": [
+          "t15:u0",
+          "t15:u1",
+          "t15:u2",
+          "t15:u3",
+          "t15:u4",
+          "t15:u5",
+          "t15:u6"
+        ]
+      },
+      {
+        "recipe": "flowers",
+        "units": 20,
+        "coins": 500,
+        "skills": {
+          "writing": 342,
+          "gardening": 200,
+          "crafting": 6
+        },
+        "transactions": [
+          "t16:u0",
+          "t16:u1",
+          "t16:u2",
+          "t16:u3",
+          "t16:u4",
+          "t16:u5",
+          "t16:u6",
+          "t16:u7",
+          "t16:u8",
+          "t16:u9",
+          "t16:u10",
+          "t16:u11",
+          "t16:u12",
+          "t16:u13",
+          "t16:u14",
+          "t16:u15",
+          "t16:u16",
+          "t16:u17",
+          "t16:u18",
+          "t16:u19"
+        ]
+      },
+      {
+        "recipe": "flowers",
+        "units": 13,
+        "coins": 500,
+        "skills": {
+          "writing": 342,
+          "gardening": 304,
+          "crafting": 6
+        },
+        "transactions": [
+          "t17:u0",
+          "t17:u1",
+          "t17:u2",
+          "t17:u3",
+          "t17:u4",
+          "t17:u5",
+          "t17:u6",
+          "t17:u7",
+          "t17:u8",
+          "t17:u9",
+          "t17:u10",
+          "t17:u11",
+          "t17:u12"
+        ]
+      },
+      {
+        "recipe": "bouquet",
+        "units": 1,
+        "coins": 500,
+        "skills": {
+          "writing": 342,
+          "gardening": 320,
+          "crafting": 6
+        },
+        "transactions": [
+          "t18:u0"
+        ]
+      },
+      {
+        "recipe": "toy",
+        "units": 6,
+        "coins": 464,
+        "skills": {
+          "writing": 342,
+          "gardening": 320,
+          "crafting": 42
+        },
+        "transactions": [
+          "t19:u0",
+          "t19:u1",
+          "t19:u2",
+          "t19:u3",
+          "t19:u4",
+          "t19:u5"
+        ]
+      },
+      {
+        "recipe": "stool",
+        "units": 20,
+        "coins": 200,
+        "skills": {
+          "writing": 342,
+          "gardening": 320,
+          "crafting": 282
+        },
+        "transactions": [
+          "t20:u0",
+          "t20:u1",
+          "t20:u2",
+          "t20:u3",
+          "t20:u4",
+          "t20:u5",
+          "t20:u6",
+          "t20:u7",
+          "t20:u8",
+          "t20:u9",
+          "t20:u10",
+          "t20:u11",
+          "t20:u12",
+          "t20:u13",
+          "t20:u14",
+          "t20:u15",
+          "t20:u16",
+          "t20:u17",
+          "t20:u18",
+          "t20:u19"
+        ]
+      },
+      {
+        "recipe": "stool",
+        "units": 2,
+        "coins": 200,
+        "skills": {
+          "writing": 342,
+          "gardening": 320,
+          "crafting": 306
+        },
+        "transactions": [
+          "t21:u0",
+          "t21:u1"
+        ]
+      },
+      {
+        "recipe": "music_box",
+        "units": 1,
+        "coins": 191,
+        "skills": {
+          "writing": 342,
+          "gardening": 320,
+          "crafting": 330
+        },
+        "transactions": [
+          "t22:u0"
+        ]
+      },
+      {
+        "initial_resident": {
+          "id": "cd53a59142a7496d92090f3a38904067",
+          "name": "Recovery worker",
+          "zone": "z1",
+          "x": 16000,
+          "needs": {
+            "energy": 70,
+            "fullness": 70,
+            "mood": 60,
+            "comfort": 60,
+            "social": 60,
+            "hygiene": 80
+          },
+          "affection": 0,
+          "skills": {},
+          "traits": [
+            "handy",
+            "green_thumb"
+          ],
+          "routine": "standard",
+          "parked": false
+        },
+        "final_resident": {
+          "id": "cd53a59142a7496d92090f3a38904067",
+          "name": "Recovery worker",
+          "zone": "z1",
+          "x": 720000,
+          "needs": {
+            "energy": 26,
+            "fullness": 78,
+            "mood": 100,
+            "comfort": 92,
+            "social": 0,
+            "hygiene": 28
+          },
+          "affection": 3,
+          "skills": {
+            "crafting": 330,
+            "gardening": 320,
+            "writing": 342
+          },
+          "traits": [
+            "handy",
+            "green_thumb"
+          ],
+          "routine": "standard",
+          "parked": false
+        },
+        "home_level": 4,
+        "all_nine_recipes_completed": true
+      },
+      {
+        "initial_ledger": {
+          "coins": 0,
+          "items": {},
+          "reserved": {},
+          "applied": [
+            "starter-kit",
+            "place:f2",
+            "place:f3",
+            "place:f4",
+            "fixture-zero"
+          ],
+          "journal": [
+            {
+              "id": "starter-kit",
+              "reason": "starter",
+              "coins": 10,
+              "items": {
+                "furniture:bed_basic": 1,
+                "furniture:table_basic": 1,
+                "furniture:desk_basic": 1
+              }
+            },
+            {
+              "id": "place:f2",
+              "reason": "place",
+              "coins": 0,
+              "items": {
+                "furniture:bed_basic": -1
+              }
+            },
+            {
+              "id": "place:f3",
+              "reason": "place",
+              "coins": 0,
+              "items": {
+                "furniture:table_basic": -1
+              }
+            },
+            {
+              "id": "place:f4",
+              "reason": "place",
+              "coins": 0,
+              "items": {
+                "furniture:desk_basic": -1
+              }
+            },
+            {
+              "id": "fixture-zero",
+              "reason": "zero-currency starting condition",
+              "coins": -10,
+              "items": {}
+            }
+          ]
+        },
+        "final_coins": 191,
+        "invariant_checks": 276389,
+        "settlements": 121,
+        "saved_world_equal": true,
+        "reserved": {}
+      }
+    ],
+    "source_sha256": "172519c6a57d45b5b0938facb42e5f233e4b1c2ff6158b3563234af40fc63e97",
+    "scope": "Offscreen real HomeService with storage-owned disk-backed profiles, one resident, starter furniture, zero starting currency and no wood. Manual orders with injected ticks; no later currency or need grants.",
+    "limitations": "Not native UI, normal-speed autonomy, cold restart, all residents/seeds, or crash acceptance."
+  },
+  "cold_reopen": {
+    "passed": true,
+    "world_exact": true,
+    "profiles_exact": true,
+    "leases_reacquired": true,
+    "replayed_transactions": 121,
+    "replay_unchanged": true,
+    "saved_snapshot_exact": true,
+    "temporary_directory_removed": true,
+    "scope": "Independent offscreen process, disk-owned profiles and home; normal shutdown only."
+  },
+  "source_files_unchanged": 748,
+  "harnesses": {
+    "check_profession_owned.py": {
+      "source": "\"\"\"Isolated service clock probe; never changes the operating system clock.\"\"\"\nimport hashlib\nimport inspect\nimport json\nimport os\nfrom pathlib import Path\nimport sys\nimport tempfile\nimport time\n\nROOT = Path(__file__).resolve().parents[1]\nOUTPUT = ROOT / '.audit/profession-owned-fixed/result.json'\nOUTPUT.parent.mkdir(exist_ok=False)\nsys.path.insert(0, str(ROOT))\nos.environ['QT_QPA_PLATFORM'] = 'offscreen'\n\nwith tempfile.TemporaryDirectory(prefix='frontengine-clock-') as temporary:\n    previous = Path.cwd()\n    os.chdir(temporary)\n    from PySide6.QtWidgets import QApplication\n    from frontengine.show.pet_game.home_service import HomeService, MAX_GAP_MS\n    from frontengine.user_setting.storage_session import StorageSession\n    from frontengine.user_setting.pet_game_save import HomeSaveStore\n    from frontengine.user_setting.pet_profiles import PetProfiles\n    from frontengine.utils.pet_game.catalog import builtin_catalog\n\n    app = QApplication([])\n    assert inspect.signature(HomeService).parameters['clock'].default is time.monotonic\n    owner = StorageSession.open(Path(temporary) / 'settings')\n    store = HomeSaveStore(owner, builtin_catalog())\n    now = [100.0]\n    profiles = owner.profiles()\n    pet = profiles.create(\"Recovery worker\")[\"id\"]\n    service = HomeService(None, store, profiles, clock=lambda: now[0])\n    events = []\n    service.events_ready.connect(events.extend)\n    samples = []\n    try:\n        world = service.create_home('fixture', 0, 900, 48, seed=3)\n        world.automatic = False\n        zone = next(iter(world.zones))\n        world.furnish(zone)\n        assert service.adopt(pet, zone) == 'accepted'\n        assert world.ledger.apply('fixture-zero', 'zero-currency starting condition', -world.ledger.coins) == 'accepted'\n        assert world.ledger.coins == 0 and world.ledger.count('wood') == 0\n        initial = world.ledger.to_dict()\n        initial_resident = world.residents[pet].to_dict()\n        service.start()\n        checks = [0]\n        def complete(recipe, units=1):\n            result, task = service.run(lambda w: w.create_task(recipe, pet, units=units))\n            assert result == 'accepted', (recipe, result)\n            for _ in range(150000):\n                now[0] += 0.2\n                service._tick()\n                checks[0] += 1\n                assert world.ledger.coins >= 0\n                assert all(amount >= 0 for amount in world.ledger.items.values())\n                assert all(0 <= amount <= world.ledger.count(item) for item, amount in world.ledger.reserved.items())\n                if task not in world.tasks:\n                    break\n            assert task not in world.tasks, (recipe, world.tasks[task].to_dict(), world.residents[pet].to_dict())\n            settlements = [e for e in events if e['kind'] == 'settled' and e['task'] == task]\n            assert len(settlements) == units\n            samples.append({'recipe': recipe, 'units': units, 'coins': world.ledger.coins,\n                            'skills': dict(world.residents[pet].skills),\n                            'transactions': [e['transaction'] for e in settlements]})\n        complete('letter', 10)\n        assert world.ledger.coins == 120\n        assert service.run(lambda w: w.buy_and_place('toy_box', zone, 'buy-toy-box')) == 'accepted'\n        complete('letter', 20)\n        complete('letter', 10)\n        assert world.ledger.coins == 440\n        assert service.run(lambda w: w.buy_and_place('planter', zone, 'buy-garden')) == 'accepted'\n        assert service.run(lambda w: w.buy_and_place('workbench', zone, 'buy-bench')) == 'accepted'\n        assert service.run(lambda w: w.buy_item('wood', 2, 'buy-wood')) == 'accepted'\n        complete('herbs')\n        complete('toy')\n        assert world.ledger.count('herb') == 2 and world.ledger.count('toy') == 1\n        assert world.ledger.count('wood') == 0 and not world.ledger.reserved\n        assert service.run(lambda w: w.sell_item('herb', 2, 'sell-herbs')) == 'accepted'\n        assert service.run(lambda w: w.sell_item('toy', 1, 'sell-toy')) == 'accepted'\n        assert world.ledger.coins == 92\n        from frontengine.utils.pet_game.goals import home_level\n        assert home_level(world) >= 4\n        assert service.run(lambda w: w.create_task('novel', pet))[0] == 'skill_too_low'\n        complete('story', 8)\n        complete('novel')\n        complete('herbs', 7)\n        complete('flowers', 20)\n        complete('flowers', 13)\n        complete('bouquet')\n        assert service.run(lambda w: w.buy_item('wood', 12, 'wood-toy-training')) == 'accepted'\n        complete('toy', 6)\n        assert service.run(lambda w: w.buy_item('wood', 88, 'wood-stool-training')) == 'accepted'\n        complete('stool', 20)\n        complete('stool', 2)\n        assert service.run(lambda w: w.buy_item('wood', 3, 'wood-music-box')) == 'accepted'\n        complete('music_box')\n        resident = world.residents[pet]\n        assert all(resident.level(profession) >= 4 for profession in ('writing', 'gardening', 'crafting'))\n        assert {entry['recipe'] for entry in samples} == set(world.catalog.recipes)\n        assert world.ledger.coins == 191\n        assert not world.ledger.reserved\n        samples.append({'initial_resident': initial_resident, 'final_resident': resident.to_dict(),\n                        'home_level': home_level(world), 'all_nine_recipes_completed': True})\n        from frontengine.utils.pet_game import snapshot\n        assert service.save_now()\n        assert json.loads(store.path.read_text(encoding='utf-8')) == snapshot.to_dict(world)\n        all_ids = [e['transaction'] for e in events if e['kind'] == 'settled']\n        assert len(all_ids) == len(set(all_ids)) == 121\n        assert all(world.ledger.applied(identifier) for identifier in all_ids)\n        samples.append({'initial_ledger': initial, 'final_coins': world.ledger.coins,\n                        'invariant_checks': checks[0], 'settlements': len(all_ids),\n                        'saved_world_equal': True, 'reserved': world.ledger.reserved})\n        assert service.shutdown()\n        final_snapshot = snapshot.to_dict(world)\n        final_profiles = profiles.profiles()\n        store.close()\n        owner.close()\n        import shutil\n        shutil.copytree(Path(temporary) / 'settings', OUTPUT.parent / 'settings')\n        (OUTPUT.parent / 'shutdown-world.json').write_text(json.dumps(final_snapshot, ensure_ascii=False), encoding='utf-8')\n        (OUTPUT.parent / 'profiles.json').write_text(json.dumps(final_profiles, ensure_ascii=False), encoding='utf-8')\n    finally:\n        service.shutdown()\n        store.close()\n        owner.close()\n        os.chdir(previous)\n\nsource = ROOT / 'frontengine/show/pet_game/home_service.py'\nOUTPUT.write_text(json.dumps({\n    'passed': True, 'default_clock_is_monotonic': True, 'samples': samples,\n    'source_sha256': hashlib.sha256(source.read_bytes()).hexdigest(),\n    'scope': 'Offscreen real HomeService with storage-owned disk-backed profiles, one resident, starter furniture, zero starting currency and no wood. Manual orders with injected ticks; no later currency or need grants.',\n    'limitations': 'Not native UI, normal-speed autonomy, cold restart, all residents/seeds, or crash acceptance.'\n}, indent=2) + '\\n', encoding='utf-8')\nprint(json.dumps({'passed': True, 'samples': len(samples), 'final': samples[-1]}))\n",
+      "sha256": "1e36a1eb2068de9d3956345369a7d48e07f96af6e38d86bcb3fe5fb597556c79"
+    },
+    "cold_profession_reload.py": {
+      "source": "import json\nimport os\nfrom pathlib import Path\nimport shutil\nimport sys\nimport tempfile\n\nROOT = Path(__file__).resolve().parents[1]\nSOURCE = ROOT / '.audit/profession-owned-fixed'\nsys.path.insert(0, str(ROOT))\nos.environ['QT_QPA_PLATFORM'] = 'offscreen'\nexpected = json.loads((SOURCE / 'shutdown-world.json').read_text(encoding='utf-8'))\nexpected_profiles = json.loads((SOURCE / 'profiles.json').read_text(encoding='utf-8'))\nprogression = json.loads((SOURCE / 'result.json').read_text(encoding='utf-8'))\nwith tempfile.TemporaryDirectory(prefix='fe-profession-cold-') as folder:\n    previous = Path.cwd()\n    os.chdir(folder)\n    shutil.copytree(SOURCE / 'settings', Path(folder) / 'settings')\n    from PySide6.QtWidgets import QApplication\n    from frontengine.show.pet_game.home_service import HomeService\n    from frontengine.user_setting.storage_session import StorageSession\n    from frontengine.user_setting.pet_game_save import HomeSaveStore\n    from frontengine.utils.pet_game.catalog import builtin_catalog\n    from frontengine.utils.pet_game import snapshot\n    app = QApplication([])\n    owner = StorageSession.open(Path(folder) / 'settings')\n    store = HomeSaveStore(owner, builtin_catalog())\n    service = HomeService(None, store, owner.profiles())\n    retried = 0\n    try:\n        assert service.open().status == 'loaded'\n        world = service.world\n        assert snapshot.to_dict(world) == expected\n        assert owner.profiles().profiles() == expected_profiles\n        assert set(service.sessions) == set(world.residents)\n        for batch in progression['samples']:\n            if 'recipe' not in batch:\n                continue\n            recipe = world.catalog.recipes[batch['recipe']]\n            items = {**{key: -value for key, value in recipe.inputs.items()}, **recipe.outputs}\n            for identifier in batch['transactions']:\n                assert world.ledger.apply(identifier, 'work:' + recipe.identifier,\n                                          recipe.coins, items) == 'duplicate'\n                retried += 1\n        assert retried == 121\n        assert snapshot.to_dict(world) == expected\n        assert service.save_now()\n        assert json.loads(store.path.read_text(encoding='utf-8')) == expected\n        assert service.shutdown()\n    finally:\n        service.shutdown()\n        store.close()\n        owner.close()\n        os.chdir(previous)\nresult = {'passed': True, 'world_exact': True, 'profiles_exact': True,\n          'leases_reacquired': True, 'replayed_transactions': retried,\n          'replay_unchanged': True, 'saved_snapshot_exact': True,\n          'temporary_directory_removed': not Path(folder).exists(),\n          'scope': 'Independent offscreen process, disk-owned profiles and home; normal shutdown only.'}\n(SOURCE / 'cold-result.json').write_text(json.dumps(result, indent=2), encoding='utf-8')\nprint(json.dumps(result))\n",
+      "sha256": "9ab6a756fc55636baa7bc7f2f01f37e347c7251256dba89d7d74fb5a2590a8d5"
+    }
+  },
+  "evidence_sha256": {
+    "shutdown-world.json": "c471f2056e3bf47d41a8073e4a214f8eccec310f6c85a5f6088181f0c4b05172",
+    "profiles.json": "00c3bb5ac1f8b370d59c48a3d787625861cb3e1302b7754d987853a812a3ec3b",
+    "result.json": "9ca217fbdf0ce14ec8363e281d86e17b5f4491e339303dc7550a23b5184847ec",
+    "cold-result.json": "8605b1859f863bb254203ebdaf587fd9f9446d430ddfca57c931a8d4728d11f6"
+  },
+  "limits": [
+    "One generated resident and world seed3; accelerated offscreen service commands.",
+    "Independent-process clean reopen and duplicate ledger retries; not forced crash, power loss or native MainUI.",
+    "Profile persistence uses StorageSession.profiles() and actual save_settings, unlike the earlier in-memory profile fixture."
+  ],
+  "probe_error": "Initial harness used owner.profiles as property, failed before creating resident. Corrected to owner.profiles() and profiles.profiles().",
+  "cleanup_block": "Initial failed probe left only settings/.frontengine-owner.lock in C:/Users/USER/AppData/Local/Temp/frontengine-clock-1ij3uypd. Automatic approval rejected cleanup with blocked by policy; no further removal attempted."
+}

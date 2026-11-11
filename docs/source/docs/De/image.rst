@@ -16,7 +16,7 @@ Bild-Seite
     * Zufällig - gemischte Reihenfolge.
     * Unterordner einbeziehen.
 
-* Zielbildschirm - welcher Bildschirm, oder jedes Mal nachfragen.
+* Zielbildschirm - welcher Bildschirm; ohne Nachfrage standardmäßig der, auf dem FrontEngine ist.
 * Zuletzt verwendet - vorher gezeigte Bilder.
 * Referenztafel öffnen… - mehrere Bilder auf einmal wählen und auf einer Fläche
   über dem Schreibtisch ausbreiten. Einzelne ziehen zum Anordnen, den Hintergrund
@@ -24,3 +24,5 @@ Bild-Seite
   Escape schließt die Tafel. Das Kontrollzentrum erreicht sie ebenfalls.
 
 Bild → Bilder vergleichen zeigt zwei Referenzen in einer gemeinsam zoombaren und verschiebbaren Ansicht: nebeneinander, transparent überlagert, mit verschiebbarer Trennlinie oder als absolute RGB-Differenz. Oben links oder mittig ohne Skalierung ausrichten, oder B proportional in A einpassen. Scrollen zoomt beide; der Regler steuert B-Deckkraft oder Trennlinie. Transparenz und Ränder werden auf Weiß verglichen; Schwarz bedeutet gleiche RGB-Werte. Animationen verwenden nur das erste Bild. Ein Hintergrundauftrag decodiert, richtet aus und berechnet Differenzen; nur die neueste Auswahl wird angewendet. Deckkraft/Trennlinie verwenden vorhandene Pixmaps. Grenzen: 64 MiB je Datei, 8.192 Pixel je Seite und 16.777.216 Pixel je Bild/ausgerichteter Fläche. Fehler erhalten das vorige Paar; Schließen leert Bilder und ignoriert späte Ergebnisse.
+
+Wird der Bildvergleich während der Dateiauswahl geschlossen, wird die Auswahl verworfen. Beim erneuten Öffnen über die Bildseite entsteht ein neues Vergleichsfenster. Wird nur die Dateiauswahl abgebrochen, bleiben die aktuellen Bilder erhalten. Ein neues Bildpaar ersetzt sie erst nach erfolgreicher Dekodierung.

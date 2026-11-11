@@ -1,0 +1,143 @@
+{
+  "base": "be50cc6",
+  "model": "Raw string or frozen translated-message value with key, fallback, captured parameter pairs and save-failure classification. Existing refresh re-renders; operations are not replayed.",
+  "migrated_feedback": [
+    "operation result codes",
+    "pets moved in",
+    "old save kept aside",
+    "photo saved/failed",
+    "blueprint saved/invalid",
+    "save failure"
+  ],
+  "red": "5 failed, 1 passed, 24 deselected in 66.66s; all translated messages retained English after switching to French.",
+  "green": "15 passed, 15 deselected in 128.24s; message and save recovery tests.",
+  "related": "55 passed in 46.18s; blueprints, collection, documentation and progress.",
+  "native": {
+    "cases": 14,
+    "themes": [
+      "light",
+      "dark"
+    ],
+    "languages": 7,
+    "messages": [
+      {
+        "theme": "light",
+        "language": "English",
+        "message": "1 pets moved in.",
+        "expected": "1 pets moved in."
+      },
+      {
+        "theme": "light",
+        "language": "Traditional_Chinese",
+        "message": "1 隻寵物搬進來了。",
+        "expected": "1 隻寵物搬進來了。"
+      },
+      {
+        "theme": "light",
+        "language": "Simplified_Chinese",
+        "message": "1 只宠物搬进来了。",
+        "expected": "1 只宠物搬进来了。"
+      },
+      {
+        "theme": "light",
+        "language": "Deutsch",
+        "message": "1 Haustiere sind eingezogen.",
+        "expected": "1 Haustiere sind eingezogen."
+      },
+      {
+        "theme": "light",
+        "language": "Russian",
+        "message": "Въехало питомцев: 1.",
+        "expected": "Въехало питомцев: 1."
+      },
+      {
+        "theme": "light",
+        "language": "France",
+        "message": "1 mascottes ont emménagé.",
+        "expected": "1 mascottes ont emménagé."
+      },
+      {
+        "theme": "light",
+        "language": "Italy",
+        "message": "1 mascotte si sono trasferite.",
+        "expected": "1 mascotte si sono trasferite."
+      },
+      {
+        "theme": "dark",
+        "language": "English",
+        "message": "1 pets moved in.",
+        "expected": "1 pets moved in."
+      },
+      {
+        "theme": "dark",
+        "language": "Traditional_Chinese",
+        "message": "1 隻寵物搬進來了。",
+        "expected": "1 隻寵物搬進來了。"
+      },
+      {
+        "theme": "dark",
+        "language": "Simplified_Chinese",
+        "message": "1 只宠物搬进来了。",
+        "expected": "1 只宠物搬进来了。"
+      },
+      {
+        "theme": "dark",
+        "language": "Deutsch",
+        "message": "1 Haustiere sind eingezogen.",
+        "expected": "1 Haustiere sind eingezogen."
+      },
+      {
+        "theme": "dark",
+        "language": "Russian",
+        "message": "Въехало питомцев: 1.",
+        "expected": "Въехало питомцев: 1."
+      },
+      {
+        "theme": "dark",
+        "language": "France",
+        "message": "1 mascottes ont emménagé.",
+        "expected": "1 mascottes ont emménagé."
+      },
+      {
+        "theme": "dark",
+        "language": "Italy",
+        "message": "1 mascotte si sono trasferite.",
+        "expected": "1 mascotte si sono trasferite."
+      }
+    ],
+    "source_unchanged": true,
+    "lifetime_closed": true,
+    "observer": {
+      "before": {
+        "foreground": 2558004,
+        "cursor": [
+          2508,
+          189
+        ]
+      },
+      "after": {
+        "foreground": 3413904,
+        "cursor": [
+          1246,
+          508
+        ]
+      },
+      "child_exit": 0
+    },
+    "visual": "Inspected French light-theme MainUI screenshot; moved-in message is now French."
+  },
+  "test_harness_correction": "First attempt passed a path to the no-argument share_blueprint action and entered its file chooser. Stopped only that owned test child, then injected choose_save_path in the corrected test; no product failure claim from the first attempt.",
+  "limits": [
+    "Native MainUI uses a private hidden desktop and temporary profile; OS hotkey/app-profile/share detection, Workshop and session-lock sources substituted.",
+    "Foreground and cursor observations differ with unknown cause; no desktop input injection.",
+    "Independent review remains unavailable; no merge/push/release claim.",
+    "Integration full regression on 459ec9e remains live and has failed actual width 536 versus 754 in the English explicit-Arial test; this message fix is not part of that run."
+  ],
+  "evidence_sha256": {
+    "messages-red-v2.log": "75a5d5a7cc9fabc3cd1843eee329e207baa0dcbf9d79541f788d413af408b466",
+    "messages-green.log": "3311f3ede0ea9045f41e50de4b4442a7f67071fb651de3667acf2fd09385f423",
+    "messages-related.log": "4208cea556e747663b3dccf1b7fe132722b816b1f580c621aaa6ebb124b57e63",
+    "result.json": "232aff9225abf95f126a11130a0eeabcb1ba93eef39cc9227de839274cb5fbc9",
+    "light-France-backpack.png": "f6b88b265c13e0cf617610295ba31a050fa69d8be26bcdf5fda84cbe27766788"
+  }
+}

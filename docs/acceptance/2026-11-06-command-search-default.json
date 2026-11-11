@@ -1,0 +1,82 @@
+{
+  "source_revision": "6ba8f8c",
+  "result": {
+    "query": "Text",
+    "selected_id": "page.tab_control_center_text",
+    "result_count": 17,
+    "labels": [
+      "Control Center",
+      "Eye care",
+      "Focus",
+      "GIF & WebP",
+      "Image",
+      "Particle",
+      "Pet",
+      "Pet home",
+      "Presenting",
+      "Scene",
+      "Sound",
+      "Text",
+      "Tools",
+      "Video",
+      "Wallpaper",
+      "Web",
+      "Widgets"
+    ],
+    "opened_text_page": false,
+    "opened_page": "tab_control_center_text"
+  },
+  "exit_code": 0,
+  "harness": {
+    "source": "\"\"\"Widget-local keyboard events in an offscreen full MainUI.\"\"\"\nimport json\nimport logging\nimport os\nfrom pathlib import Path\nimport sys\nimport tempfile\nfrom time import monotonic\n\nROOT = Path(__file__).resolve().parents[1]\nsys.path.insert(0, str(ROOT))\nos.environ['QT_QPA_PLATFORM'] = 'offscreen'\ntrace = []\n\n\ndef tab_to(app, window, target):\n    for count in range(400):\n        current = app.focusWidget()\n        if current is target:\n            trace.append({'target': target.objectName() or type(target).__name__, 'tabs': count})\n            return\n        QTest.keyClick(current or window, Qt.Key.Key_Tab)\n        app.processEvents()\n    raise AssertionError(('Unreachable by Tab', type(target).__name__, target.objectName()))\n\n\nprevious = Path.cwd()\nwith tempfile.TemporaryDirectory(prefix='front-keyboard-flow-') as name:\n    os.chdir(name)\n    try:\n        Path('user_setting.json').write_text(json.dumps({'language': 'English', 'smart_pause': False,\n            'pet_home_on_desktop': False, 'pet_home_running': False}))\n        from PySide6.QtCore import QCoreApplication, QEvent, Qt\n        from PySide6.QtTest import QTest\n        from PySide6.QtWidgets import QApplication\n        from frontengine.ui import main_ui\n        from frontengine.ui.page.pet_game import home_page\n        from frontengine.utils.pet_game import simulation\n        from frontengine.utils.session_lock import session_lock\n        main_ui.CriticalExit.init_critical_exit = lambda self: None\n        main_ui.HotkeyService.start = lambda self: False\n        main_ui.AppProfileService.start = lambda self: None\n        main_ui.ShareWatchService.start = lambda self: None\n        home_page.workshop_pack_roots = lambda: []\n        session_lock.is_session_locked = lambda: False\n        app = QApplication([])\n        app.setQuitOnLastWindowClosed(False)\n        window = main_ui.FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)\n        try:\n            window.resize(1280, 900)\n            window.show()\n            app.processEvents()\n            window.command_palette_action.trigger()\n            app.processEvents()\n            palette = window.command_palette\n            palette.search_input.setText('Text')\n            app.processEvents()\n            result = {'query': 'Text', 'selected_id': palette.selected_id(),\n                      'result_count': palette.results.count(),\n                      'labels': [palette.results.item(i).text() for i in range(palette.results.count())]}\n            QTest.keyClick(palette.search_input, Qt.Key.Key_Return)\n            app.processEvents()\n            result['opened_text_page'] = window.page_stack.currentWidget() is window.text_setting_ui\n            result['opened_page'] = next(key for widget, key, _ in window.command_pages\n                                         if widget is window.page_stack.currentWidget())\n        finally:\n            window.request_shutdown()\n            deadline = monotonic() + 90\n            while not window.lifetime.closed and monotonic() < deadline:\n                QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)\n                app.processEvents()\n            assert window.lifetime.closed\n            window.deleteLater()\n            QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)\n        logging.shutdown()\n    finally:\n        os.chdir(previous)\n(ROOT / '.audit/text-search-default-result.json').write_text(json.dumps(result, indent=2), encoding='utf-8')\nprint(json.dumps(result), flush=True)\n",
+    "sha256": "d2888e56d69db67111f0b50655b1121984f56f15d1e57e86636440b1034ff9c2"
+  },
+  "limits": [
+    "Actual MainUI with fresh temporary settings and offscreen Qt.",
+    "OS/Workshop services substituted; no physical input.",
+    "Fix is isolated on top of3cd6d73 while integration full regression runs on6ba8f8c. Integration/full regression/independent review remain pending."
+  ],
+  "fixed_result": {
+    "query": "Text",
+    "selected_id": "page.tab_text_text",
+    "result_count": 17,
+    "labels": [
+      "Text",
+      "Control Center",
+      "Eye care",
+      "Focus",
+      "GIF & WebP",
+      "Image",
+      "Particle",
+      "Pet",
+      "Pet home",
+      "Presenting",
+      "Scene",
+      "Sound",
+      "Tools",
+      "Video",
+      "Wallpaper",
+      "Web",
+      "Widgets"
+    ],
+    "opened_text_page": true,
+    "opened_page": "tab_text_text"
+  },
+  "fixed_exit_code": 0,
+  "red_tests": {
+    "cases": 2,
+    "failure": "assert ['control'] == ['text']",
+    "summary": "2 failed, 9 deselected in 76.68s"
+  },
+  "green_tests": {
+    "summary": "11 passed in 52.18s",
+    "suite": "tests/unit_test/test_command_palette.py"
+  },
+  "fix": "Rank normalized exact current-language names before favorite/recent preferences. Clear the previous selection on query edits before refreshing; leave ordinary refresh selection preservation in place.",
+  "validation": {
+    "command_palette_tests": 11,
+    "documentation_and_progress_tests": 27,
+    "pyflakes_exit_code": 0,
+    "sphinx_warnings_as_errors_exit_code": 0
+  }
+}

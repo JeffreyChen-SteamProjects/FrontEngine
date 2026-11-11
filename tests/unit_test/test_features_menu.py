@@ -1,6 +1,7 @@
 """Every existing tool stays reachable once the game is the main page."""
 import pytest
 from PySide6.QtGui import QAction
+from PySide6.QtCore import QCoreApplication, QEvent
 from PySide6.QtWidgets import QMenu
 from shiboken6 import getCppPointer
 
@@ -76,6 +77,27 @@ def test_command_entries_use_registered_actions(window):
                 assert entry.target in window.action_registry.actions, entry.target
             elif entry.kind == "menu":
                 assert isinstance(getattr(window, entry.target), QMenu), entry.target
+
+
+@pytest.mark.parametrize("operation", ["rebuild", "language"])
+def test_shared_menus_survive_successive_features_rebuilds(window, operation):
+    from frontengine.ui.menu.language_menu import LANGUAGES
+
+    shared = [getattr(window, entry.target)
+              for _key, _fallback, entries in CATEGORIES
+              for entry in entries if entry.kind == "menu"]
+    original_actions = [(menu, menu.actions()) for menu in shared]
+    for index in range(len(LANGUAGES)):
+        if operation == "language":
+            window.language_menu.actions()[index].trigger()
+        else:
+            window.features_menu.rebuild()
+        QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+        reachable = {_key(action) for action in _actions(window.features_menu)}
+        for menu, actions in original_actions:
+            assert menu.actions() == actions
+            assert _key(menu.menuAction()) in reachable
+            assert all(_key(action) in reachable for action in actions)
 
 
 def test_folded_sidebar_groups_are_remembered_and_unfold_for_their_page(window):

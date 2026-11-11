@@ -1,0 +1,235 @@
+{
+  "product_revision": "919f7e4",
+  "full_regression": {
+    "result": {
+      "exit": 1,
+      "source_unchanged": true,
+      "source_count": 748,
+      "interpreter": "D:\\Codes\\FrontEngine\\.audit\\test-runtime-3145\\Scripts\\python.exe"
+    },
+    "summary": "1 failed, 3137 passed, 3 skipped in 1631.32s",
+    "failures": [
+      {
+        "class": "tests.unit_test.test_pet_home_responsive",
+        "name": "test_created_home_does_not_widen_the_whole_page",
+        "message": "AssertionError: ('Russian', 'pet_home_shop_section', 536)\nassert 10 == 0\n +  where 10 = <built-in method maximum of PySide6.QtWidgets.QScrollBar object at 0x000001E718FBFB80>()\n +    where <built-in method maximum of PySide6.QtWidgets.QScrollBar object at 0x000001E718FBFB80> = <PySide6.QtWidgets.QScrollBar(0x1e7118a1170) at 0x000001E718FBFB80>.maximum\n +      where <PySide6.QtWidgets.QScrollBar(0x1e7118a1170) at 0x000001E718FBFB80> = <built-in method horizontalScrollBar of PySide6.QtWidgets.QScrollArea object at 0x000001E7189891C0>()\n +        where <built-in method horizontalScrollBar of PySide6.QtWidgets.QScrollArea object at 0x000001E7189891C0> = <PySide6.QtWidgets.QScrollArea(0x1e712c4c7b0) at 0x000001E7189891C0>.horizontalScrollBar\n +          where <PySide6.QtWidgets.QScrollArea(0x1e712c4c7b0) at 0x000001E7189891C0> = <frontengine.ui.page.pet_game.home_page.PetHomePage(0x1e70eb02920) at 0x000001E71402BBC0>._scroll"
+      }
+    ],
+    "artifact_sha256": {
+      "result.json": "ff349fdb1e1e4070a0628193f358442ad226fb6ded14fb96ab7f766b1c2eaaa5",
+      "source-manifest.json": "3bf0e97e58a822a11edb01d4bc41634dabe2f72effb2b71bde6aa498e34b8576",
+      "junit.xml": "638116b1f35c975e4e1795f4e75af71be5f4a8c38b87f45827e6439a19edee9e",
+      "pytest.log": "de3c3ab6a48103e932af3d36b4f972bb487674d49c3fa5b2180cfe2a29e61ea3",
+      "failures.txt": "5b29550195921c1e378758583fc77521ef5c946a85fe7745e8ffd61c9f6ae5b7"
+    },
+    "scope": "Qt offscreen full suite. Not native hardware acceptance."
+  },
+  "native_probes": {
+    "lifecycle": {
+      "observer": {
+        "exit_code": 3221225477,
+        "profile_removed": true,
+        "source_unchanged": true,
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            2070,
+            399
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            2070,
+            399
+          ]
+        },
+        "observation_only": true,
+        "desktop": "FrontEngineVideoWebDpi_c2915d3b760f"
+      },
+      "completed_cases": 22,
+      "completed_cases_passed": true,
+      "planned_cases": 30,
+      "stage": {
+        "kind": "shortcuts",
+        "backend": "gpu",
+        "index": 1,
+        "completed_widgets": 7
+      },
+      "native_exceptions": [
+        {
+          "code": "0xc0000005",
+          "module": "C:\\Windows\\System32\\DriverStore\\FileRepository\\amdogl.inf_amd64_dca60211d7f7de81\\atio6axx.dll",
+          "module_offset": "0x32d8580",
+          "operation": 8
+        }
+      ],
+      "instrumentation": "GL method wrappers",
+      "artifact_sha256": {
+        "harness.py": "579231445002927b17e251eaa1c3930615b112b5d8e872314415979edc85b6e5",
+        "lifecycle.jsonl": "24d7a726020936eb5b9facbf74f2bae0e88f3a53fea46cbcf810999ed5ac5ef9",
+        "native-exceptions.jsonl": "2f5b7323225ebedf791271c37ffdbf2f5d69d1885ed661e7d5d5b16d697a6121",
+        "observer.json": "bb1776db667ca3455c381b35dd128bc1c4d30a6ed141779cd01d83de49575f95",
+        "partial.json": "e1c050c15fc7be15ccbfe78ec8282279388112eaabe75a3b8876ecf1023fa0ed",
+        "shortcuts-gpu-10.png": "f38fe86bd758399bfdabd5289789cc6d236ba18b4fac204000ba76fd95dc0992",
+        "shortcuts-gpu-11.png": "461711bb9213c02c190772fc0eb38afc4b95e2c9746091e8537c112266222ffa",
+        "shortcuts-gpu-15.png": "461711bb9213c02c190772fc0eb38afc4b95e2c9746091e8537c112266222ffa",
+        "shortcuts-gpu-16.png": "f38fe86bd758399bfdabd5289789cc6d236ba18b4fac204000ba76fd95dc0992",
+        "shortcuts-gpu-17.png": "461711bb9213c02c190772fc0eb38afc4b95e2c9746091e8537c112266222ffa",
+        "shortcuts-gpu-21.png": "461711bb9213c02c190772fc0eb38afc4b95e2c9746091e8537c112266222ffa",
+        "shortcuts-gpu-3.png": "461711bb9213c02c190772fc0eb38afc4b95e2c9746091e8537c112266222ffa",
+        "shortcuts-gpu-4.png": "f38fe86bd758399bfdabd5289789cc6d236ba18b4fac204000ba76fd95dc0992",
+        "shortcuts-gpu-5.png": "461711bb9213c02c190772fc0eb38afc4b95e2c9746091e8537c112266222ffa",
+        "shortcuts-gpu-9.png": "461711bb9213c02c190772fc0eb38afc4b95e2c9746091e8537c112266222ffa",
+        "shortcuts-software-0.png": "461711bb9213c02c190772fc0eb38afc4b95e2c9746091e8537c112266222ffa",
+        "shortcuts-software-1.png": "f38fe86bd758399bfdabd5289789cc6d236ba18b4fac204000ba76fd95dc0992",
+        "shortcuts-software-12.png": "461711bb9213c02c190772fc0eb38afc4b95e2c9746091e8537c112266222ffa",
+        "shortcuts-software-13.png": "f38fe86bd758399bfdabd5289789cc6d236ba18b4fac204000ba76fd95dc0992",
+        "shortcuts-software-14.png": "461711bb9213c02c190772fc0eb38afc4b95e2c9746091e8537c112266222ffa",
+        "shortcuts-software-18.png": "461711bb9213c02c190772fc0eb38afc4b95e2c9746091e8537c112266222ffa",
+        "shortcuts-software-19.png": "f38fe86bd758399bfdabd5289789cc6d236ba18b4fac204000ba76fd95dc0992",
+        "shortcuts-software-2.png": "461711bb9213c02c190772fc0eb38afc4b95e2c9746091e8537c112266222ffa",
+        "shortcuts-software-20.png": "461711bb9213c02c190772fc0eb38afc4b95e2c9746091e8537c112266222ffa",
+        "shortcuts-software-6.png": "461711bb9213c02c190772fc0eb38afc4b95e2c9746091e8537c112266222ffa",
+        "shortcuts-software-7.png": "f38fe86bd758399bfdabd5289789cc6d236ba18b4fac204000ba76fd95dc0992",
+        "shortcuts-software-8.png": "461711bb9213c02c190772fc0eb38afc4b95e2c9746091e8537c112266222ffa",
+        "stage.json": "c71cbda56cdcf44b665c579427e2901a923a18a17fba63ec86be4164dae19c6f",
+        "stderr.txt": "cacb081370379165dbc7e82f81b53a6fa22b7993d035a5b1a5c876867b8d452a"
+      }
+    },
+    "hide-old": {
+      "observer": {
+        "exit_code": 3221225477,
+        "profile_removed": true,
+        "source_unchanged": true,
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            2070,
+            399
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            2070,
+            399
+          ]
+        },
+        "observation_only": true,
+        "desktop": "FrontEngineVideoWebDpi_aa83c9ee01a9"
+      },
+      "completed_cases": 23,
+      "completed_cases_passed": true,
+      "planned_cases": 30,
+      "stage": {
+        "kind": "shortcuts",
+        "backend": "gpu",
+        "index": 2,
+        "completed_widgets": 7
+      },
+      "native_exceptions": [
+        {
+          "code": "0xc0000005",
+          "module": "C:\\Windows\\System32\\DriverStore\\FileRepository\\amdogl.inf_amd64_dca60211d7f7de81\\atio6axx.dll",
+          "module_offset": "0x32d8580",
+          "operation": 8
+        }
+      ],
+      "instrumentation": "GL method wrappers",
+      "artifact_sha256": {
+        "harness.py": "12b1e68052c2bb260296b185ed8bc68e7f090ad521dc19a01f060e760aa81491",
+        "lifecycle.jsonl": "71622958a95504265de9cb516b838f5354dcf0f6683e3253c351b8ad93bd6c58",
+        "native-exceptions.jsonl": "2f5b7323225ebedf791271c37ffdbf2f5d69d1885ed661e7d5d5b16d697a6121",
+        "observer.json": "3d89aac62ea87afa09bc8d872916e85642fc9a8ec9a4bfa8e94afbd828608adc",
+        "partial.json": "4d61808a672aa03fa618c129f155873b52c1c585e645ea342afca83ff055078c",
+        "shortcuts-gpu-10.png": "f38fe86bd758399bfdabd5289789cc6d236ba18b4fac204000ba76fd95dc0992",
+        "shortcuts-gpu-11.png": "461711bb9213c02c190772fc0eb38afc4b95e2c9746091e8537c112266222ffa",
+        "shortcuts-gpu-15.png": "461711bb9213c02c190772fc0eb38afc4b95e2c9746091e8537c112266222ffa",
+        "shortcuts-gpu-16.png": "f38fe86bd758399bfdabd5289789cc6d236ba18b4fac204000ba76fd95dc0992",
+        "shortcuts-gpu-17.png": "461711bb9213c02c190772fc0eb38afc4b95e2c9746091e8537c112266222ffa",
+        "shortcuts-gpu-21.png": "461711bb9213c02c190772fc0eb38afc4b95e2c9746091e8537c112266222ffa",
+        "shortcuts-gpu-22.png": "f38fe86bd758399bfdabd5289789cc6d236ba18b4fac204000ba76fd95dc0992",
+        "shortcuts-gpu-3.png": "461711bb9213c02c190772fc0eb38afc4b95e2c9746091e8537c112266222ffa",
+        "shortcuts-gpu-4.png": "f38fe86bd758399bfdabd5289789cc6d236ba18b4fac204000ba76fd95dc0992",
+        "shortcuts-gpu-5.png": "461711bb9213c02c190772fc0eb38afc4b95e2c9746091e8537c112266222ffa",
+        "shortcuts-gpu-9.png": "461711bb9213c02c190772fc0eb38afc4b95e2c9746091e8537c112266222ffa",
+        "shortcuts-software-0.png": "461711bb9213c02c190772fc0eb38afc4b95e2c9746091e8537c112266222ffa",
+        "shortcuts-software-1.png": "f38fe86bd758399bfdabd5289789cc6d236ba18b4fac204000ba76fd95dc0992",
+        "shortcuts-software-12.png": "461711bb9213c02c190772fc0eb38afc4b95e2c9746091e8537c112266222ffa",
+        "shortcuts-software-13.png": "f38fe86bd758399bfdabd5289789cc6d236ba18b4fac204000ba76fd95dc0992",
+        "shortcuts-software-14.png": "461711bb9213c02c190772fc0eb38afc4b95e2c9746091e8537c112266222ffa",
+        "shortcuts-software-18.png": "461711bb9213c02c190772fc0eb38afc4b95e2c9746091e8537c112266222ffa",
+        "shortcuts-software-19.png": "f38fe86bd758399bfdabd5289789cc6d236ba18b4fac204000ba76fd95dc0992",
+        "shortcuts-software-2.png": "461711bb9213c02c190772fc0eb38afc4b95e2c9746091e8537c112266222ffa",
+        "shortcuts-software-20.png": "461711bb9213c02c190772fc0eb38afc4b95e2c9746091e8537c112266222ffa",
+        "shortcuts-software-6.png": "461711bb9213c02c190772fc0eb38afc4b95e2c9746091e8537c112266222ffa",
+        "shortcuts-software-7.png": "f38fe86bd758399bfdabd5289789cc6d236ba18b4fac204000ba76fd95dc0992",
+        "shortcuts-software-8.png": "461711bb9213c02c190772fc0eb38afc4b95e2c9746091e8537c112266222ffa",
+        "stage.json": "8a2a29bfecdac3ed7fa792f4c619d09910aabe3e95b144042d74ba960c9057e1",
+        "stderr.txt": "515d05e3a0de2f198f57fee35939230159d41277304eb517a40bea3967c577cc"
+      }
+    },
+    "hide-only": {
+      "observer": {
+        "exit_code": 3221225477,
+        "profile_removed": true,
+        "source_unchanged": true,
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            2070,
+            399
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            2070,
+            399
+          ]
+        },
+        "observation_only": true,
+        "desktop": "FrontEngineVideoWebDpi_175d8fd4b610"
+      },
+      "completed_cases": 4,
+      "completed_cases_passed": true,
+      "planned_cases": 30,
+      "stage": {
+        "kind": "shortcuts",
+        "backend": "gpu",
+        "index": 1,
+        "completed_widgets": 1
+      },
+      "native_exceptions": [
+        {
+          "code": "0xc0000005",
+          "module": "C:\\Windows\\System32\\DriverStore\\FileRepository\\amdogl.inf_amd64_dca60211d7f7de81\\atio6axx.dll",
+          "module_offset": "0x32d8580",
+          "operation": 8
+        }
+      ],
+      "instrumentation": "No GL method wrappers",
+      "artifact_sha256": {
+        "harness.py": "b1b2bade20e2ef5099512a1b3279994e0c29224d62580eea5a3c6bc1f1b19450",
+        "native-exceptions.jsonl": "2f5b7323225ebedf791271c37ffdbf2f5d69d1885ed661e7d5d5b16d697a6121",
+        "observer.json": "03ded167e76a5d9b5e59c6eb8ce4815687b91a854b7953538b2db0c73c9b18ee",
+        "partial.json": "b9b71f62a600c9267a0d1d80e1f0997c99707f41660253a7b40c6aaa453cface",
+        "shortcuts-gpu-3.png": "461711bb9213c02c190772fc0eb38afc4b95e2c9746091e8537c112266222ffa",
+        "shortcuts-software-0.png": "461711bb9213c02c190772fc0eb38afc4b95e2c9746091e8537c112266222ffa",
+        "shortcuts-software-1.png": "f38fe86bd758399bfdabd5289789cc6d236ba18b4fac204000ba76fd95dc0992",
+        "shortcuts-software-2.png": "461711bb9213c02c190772fc0eb38afc4b95e2c9746091e8537c112266222ffa",
+        "stage.json": "03a8cea556e4e50d579ba1f2f4126a970deb2a6c7dcfd8f0ead86c7af3564038",
+        "stderr.txt": "b3b7c76b56bb2d9216c11e28caf04da8345c77177f44877f6fe66015257f84f7"
+      }
+    }
+  },
+  "interpretation": [
+    "The full regression is terminal and failed. Isolated responsive passes do not supersede it.",
+    "The GL wrappers observed paintGL after cleanup with program zero; paintGL returns when program is zero.",
+    "The wrappers also raised RuntimeError while reading a deleted GLCompositor during destruction. Those runs are diagnostic and confounded.",
+    "The hide-only run changes only CompositorWidget.shutdown to hide before the original cleanup. Its result must be read separately.",
+    "No product fix is accepted. The AMD fault location does not establish root-cause ownership.",
+    "All native runs used owned hidden Win32 desktops without desktop input or real-screen source capture."
+  ]
+}

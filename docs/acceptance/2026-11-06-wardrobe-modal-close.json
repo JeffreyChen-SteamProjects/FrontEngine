@@ -1,0 +1,77 @@
+{
+  "base_commit": "9be694e5",
+  "red_cases": 4,
+  "final_picker_cases": 6,
+  "related_tests": {
+    "passed": 49,
+    "seconds": 10.29
+  },
+  "expanded_picker_tests": {
+    "passed": 6,
+    "seconds": 2.05,
+    "note": "Overlaps related suite; adds direct deletion cases."
+  },
+  "cause": "owned_action and after_dialog guard the application lifetime. The individual wardrobe can finish or be destroyed while that lifetime remains live.",
+  "fix": "Reject local closed/invalid dialogs at picker entry and before consuming returned directory/color.",
+  "scope": [
+    "Asset picker must not construct installation job after dialog closure.",
+    "Color picker must not invoke draft color change after dialog closure.",
+    "Reject, reject with deferred destruction, and direct deferred destruction."
+  ],
+  "limits": [
+    "Private native Windows desktop and actual widget-local button activation, injected picker return closes/destroys wardrobe. No OS picker interaction claim.",
+    "Synthetic layered asset; no full production wardrobe artwork acceptance.",
+    "Full regression, independent review and integration pending."
+  ],
+  "closed_reentry": "Both picker entry points reject repeated calls after each of the six closure cases.",
+  "native": [
+    {
+      "picker": "asset",
+      "new_jobs": 0,
+      "draft_color_calls": 0,
+      "profile_unchanged": true,
+      "dialog_destroyed_before_return": true
+    },
+    {
+      "picker": "color",
+      "new_jobs": 0,
+      "draft_color_calls": 0,
+      "profile_unchanged": true,
+      "dialog_destroyed_before_return": true
+    }
+  ],
+  "observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "child_exit": 0
+  },
+  "cold_reopen": {
+    "passed": true,
+    "initial_snapshot_exact": true,
+    "profiles_exact": true,
+    "leases_reacquired": true,
+    "saved_exact": true,
+    "temporary_directory_removed": true
+  },
+  "runtime_closed": true,
+  "temporary_directory_removed": true,
+  "documentation": {
+    "updated_files": 17,
+    "sphinx_warning_as_error": true,
+    "rendered_paragraphs_checked": 7,
+    "checks_passed": 31
+  },
+  "excluded_run": "native-wardrobe-modal attempted to install identical fixture twice; duplicate version correctly rejected. Corrected fixture setup installs once, then reuses it."
+}

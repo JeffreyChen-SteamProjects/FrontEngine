@@ -1,0 +1,708 @@
+{
+  "source_head": "090b33f89c2412bee161363d0e75b13e483d27fa",
+  "source_unchanged": true,
+  "child_exit": 0,
+  "foreground_before": 2558004,
+  "foreground_after": 2558004,
+  "foreground_observation_only": true,
+  "probe_sha256": "e7822d0eaaf94f3ec0ae1dd7c637a716cb3413f4f2d2cc15dbc521ed4915b286",
+  "scope": "Native Qt on private desktop; OS key listeners, foreground/share watchers and Workshop discovery replaced at boundary; file dialogs use fixtures; no hardware acceptance",
+  "assessment": "GUI steps and owned shutdown passed; SMTC native diagnostics remain unclassified for this run. Not a clean native acceptance verdict.",
+  "result": {
+    "results": [
+      {
+        "step": "visit page 0",
+        "returned": "'PetHomePage'",
+        "new_windows": 0,
+        "open_windows": 0,
+        "added": [],
+        "removed": []
+      },
+      {
+        "step": "visit page 1",
+        "returned": "'VideoSettingUI'",
+        "new_windows": 0,
+        "open_windows": 0,
+        "added": [],
+        "removed": []
+      },
+      {
+        "step": "visit page 2",
+        "returned": "'ImageSettingUI'",
+        "new_windows": 0,
+        "open_windows": 0,
+        "added": [],
+        "removed": []
+      },
+      {
+        "step": "visit page 3",
+        "returned": "'WEBSettingUI'",
+        "new_windows": 0,
+        "open_windows": 0,
+        "added": [],
+        "removed": []
+      },
+      {
+        "step": "visit page 4",
+        "returned": "'GIFSettingUI'",
+        "new_windows": 0,
+        "open_windows": 0,
+        "added": [],
+        "removed": []
+      },
+      {
+        "step": "visit page 5",
+        "returned": "'TextSettingUI'",
+        "new_windows": 0,
+        "open_windows": 0,
+        "added": [],
+        "removed": []
+      },
+      {
+        "step": "visit page 6",
+        "returned": "'SoundPlayerSettingUI'",
+        "new_windows": 0,
+        "open_windows": 0,
+        "added": [],
+        "removed": []
+      },
+      {
+        "step": "visit page 7",
+        "returned": "'SceneSettingUI'",
+        "new_windows": 0,
+        "open_windows": 0,
+        "added": [],
+        "removed": []
+      },
+      {
+        "step": "visit page 8",
+        "returned": "'ParticleSettingUI'",
+        "new_windows": 0,
+        "open_windows": 0,
+        "added": [],
+        "removed": []
+      },
+      {
+        "step": "visit page 9",
+        "returned": "'PetSettingUI'",
+        "new_windows": 0,
+        "open_windows": 0,
+        "added": [],
+        "removed": []
+      },
+      {
+        "step": "visit page 10",
+        "returned": "'WallpaperSettingUI'",
+        "new_windows": 0,
+        "open_windows": 0,
+        "added": [],
+        "removed": []
+      },
+      {
+        "step": "visit page 11",
+        "returned": "'WidgetsSettingUI'",
+        "new_windows": 0,
+        "open_windows": 0,
+        "added": [],
+        "removed": []
+      },
+      {
+        "step": "visit page 12",
+        "returned": "'FocusSettingUI'",
+        "new_windows": 0,
+        "open_windows": 0,
+        "added": [],
+        "removed": []
+      },
+      {
+        "step": "visit page 13",
+        "returned": "'ScreenCareSettingUI'",
+        "new_windows": 0,
+        "open_windows": 0,
+        "added": [],
+        "removed": []
+      },
+      {
+        "step": "visit page 14",
+        "returned": "'PresentationSettingUI'",
+        "new_windows": 0,
+        "open_windows": 0,
+        "added": [],
+        "removed": []
+      },
+      {
+        "step": "visit page 15",
+        "returned": "'ToolsSettingUI'",
+        "new_windows": 0,
+        "open_windows": 0,
+        "added": [],
+        "removed": []
+      },
+      {
+        "step": "visit page 16",
+        "returned": "'ControlCenterUI'",
+        "new_windows": 0,
+        "open_windows": 0,
+        "added": [],
+        "removed": []
+      },
+      {
+        "step": "pet home: create (furnishes and works by itself)",
+        "returned": "{'furniture': 3, 'tasks': 0, 'coins': 10}",
+        "new_windows": 1,
+        "open_windows": 1,
+        "added": [
+          "HomeStrip"
+        ],
+        "removed": [],
+        "window_ok": true
+      },
+      {
+        "step": "image: choose then start",
+        "returned": "(None, 0, None)",
+        "new_windows": 2,
+        "open_windows": 3,
+        "added": [
+          "ImageWidget",
+          "ImageWidget"
+        ],
+        "removed": [],
+        "window_ok": true
+      },
+      {
+        "step": "gif: choose then start",
+        "returned": "(None, 0, None)",
+        "new_windows": 2,
+        "open_windows": 5,
+        "added": [
+          "GifWidget",
+          "GifWidget"
+        ],
+        "removed": [],
+        "window_ok": true
+      },
+      {
+        "step": "video (muted): choose then start",
+        "returned": "(None, None, 0, None)",
+        "new_windows": 2,
+        "open_windows": 7,
+        "added": [
+          "VideoWidget",
+          "VideoWidget"
+        ],
+        "removed": [],
+        "window_ok": true
+      },
+      {
+        "step": "web: open local page",
+        "returned": "(None, 0, None)",
+        "new_windows": 1,
+        "open_windows": 8,
+        "added": [
+          "WebWidget"
+        ],
+        "removed": [],
+        "window_ok": true
+      },
+      {
+        "step": "text: draw on screen",
+        "returned": "(None, 0, None)",
+        "new_windows": 1,
+        "open_windows": 9,
+        "added": [
+          "TextWidget"
+        ],
+        "removed": [],
+        "window_ok": true
+      },
+      {
+        "step": "sound (muted): play wav",
+        "returned": "(None, None)",
+        "new_windows": 0,
+        "open_windows": 9,
+        "added": [],
+        "removed": [],
+        "window_ok": true
+      },
+      {
+        "step": "particle: choose then start",
+        "returned": "(None, 0, None)",
+        "new_windows": 1,
+        "open_windows": 10,
+        "added": [
+          "ParticleOpenGLWidget"
+        ],
+        "removed": [],
+        "window_ok": true
+      },
+      {
+        "step": "pet: picture pet",
+        "returned": "(None, None)",
+        "new_windows": 2,
+        "open_windows": 12,
+        "added": [
+          "DesktopPetWidget",
+          "DesktopPetWidget"
+        ],
+        "removed": [],
+        "window_ok": true
+      },
+      {
+        "step": "pet: built-in character",
+        "returned": "'DesktopPetWidget'",
+        "new_windows": 1,
+        "open_windows": 13,
+        "added": [
+          "DesktopPetWidget"
+        ],
+        "removed": [],
+        "window_ok": true
+      },
+      {
+        "step": "pet: is moving",
+        "returned": "{'x': 81, 'mode': 'actions', 'state': 'walk'}",
+        "new_windows": 0,
+        "open_windows": 13,
+        "added": [],
+        "removed": [],
+        "window_ok": true
+      },
+      {
+        "step": "pet home: time passes and the resident works",
+        "returned": "{'elapsed_ms': 21600, 'activity': 'wander', 'progress_ms': None, 'status': '第 1 天 · 08:08 ☀ 晴朗 · 春 · 40 家園幣 · 進行中'}",
+        "new_windows": 0,
+        "open_windows": 13,
+        "added": [],
+        "removed": [],
+        "window_ok": true
+      },
+      {
+        "step": "pet home: the resident wears the built-in character",
+        "returned": "{'character': 'inkside-mochi', 'strip_box_height': 70.4, 'action': 'walk'}",
+        "new_windows": 0,
+        "open_windows": 13,
+        "added": [],
+        "removed": [],
+        "window_ok": true
+      },
+      {
+        "step": "wallpaper: choose folder and show",
+        "returned": "(None, None)",
+        "new_windows": 1,
+        "open_windows": 14,
+        "added": [
+          "WallpaperWidget"
+        ],
+        "removed": [],
+        "window_ok": true
+      },
+      {
+        "step": "widgets: spectrum",
+        "returned": "None",
+        "new_windows": 1,
+        "open_windows": 15,
+        "added": [
+          "SpectrumWidget"
+        ],
+        "removed": [],
+        "window_ok": true
+      },
+      {
+        "step": "widgets: system monitor",
+        "returned": "None",
+        "new_windows": 1,
+        "open_windows": 16,
+        "added": [
+          "SystemMonitorWidget"
+        ],
+        "removed": [],
+        "window_ok": true
+      },
+      {
+        "step": "widgets: now playing",
+        "returned": "None",
+        "new_windows": 1,
+        "open_windows": 17,
+        "added": [
+          "NowPlayingWidget"
+        ],
+        "removed": [],
+        "window_ok": true
+      },
+      {
+        "step": "widgets: today",
+        "returned": "None",
+        "new_windows": 1,
+        "open_windows": 18,
+        "added": [
+          "TodoWidget"
+        ],
+        "removed": [],
+        "window_ok": true
+      },
+      {
+        "step": "focus: dim",
+        "returned": "None",
+        "new_windows": 1,
+        "open_windows": 19,
+        "added": [
+          "DimBackgroundWidget"
+        ],
+        "removed": [],
+        "window_ok": true
+      },
+      {
+        "step": "focus: mask",
+        "returned": "None",
+        "new_windows": 1,
+        "open_windows": 20,
+        "added": [
+          "DistractionMaskWidget"
+        ],
+        "removed": [],
+        "window_ok": true
+      },
+      {
+        "step": "screen care: colour filter",
+        "returned": "None",
+        "new_windows": 1,
+        "open_windows": 21,
+        "added": [
+          "ScreenFilterWidget"
+        ],
+        "removed": [],
+        "window_ok": true
+      },
+      {
+        "step": "screen care: reading ruler",
+        "returned": "None",
+        "new_windows": 1,
+        "open_windows": 22,
+        "added": [
+          "ReadingRulerWidget"
+        ],
+        "removed": [],
+        "window_ok": true
+      },
+      {
+        "step": "screen care: colour vision",
+        "returned": "None",
+        "new_windows": 1,
+        "open_windows": 23,
+        "added": [
+          "ColorVisionWidget"
+        ],
+        "removed": [],
+        "window_ok": true
+      },
+      {
+        "step": "screen care: break reminder",
+        "returned": "None",
+        "new_windows": 0,
+        "open_windows": 23,
+        "added": [],
+        "removed": [],
+        "window_ok": true
+      },
+      {
+        "step": "presentation: annotation",
+        "returned": "None",
+        "new_windows": 1,
+        "open_windows": 24,
+        "added": [
+          "AnnotationOverlay"
+        ],
+        "removed": [],
+        "window_ok": true
+      },
+      {
+        "step": "presentation: annotation off",
+        "returned": "None",
+        "new_windows": -1,
+        "open_windows": 23,
+        "added": [],
+        "removed": [
+          "AnnotationOverlay"
+        ],
+        "window_ok": true
+      },
+      {
+        "step": "presentation: cursor effects",
+        "returned": "None",
+        "new_windows": 1,
+        "open_windows": 24,
+        "added": [
+          "CursorEffectWidget"
+        ],
+        "removed": [],
+        "window_ok": true
+      },
+      {
+        "step": "presentation: magnifier",
+        "returned": "None",
+        "new_windows": 1,
+        "open_windows": 25,
+        "added": [
+          "MagnifierWidget"
+        ],
+        "removed": [],
+        "window_ok": true
+      },
+      {
+        "step": "presentation: whiteboard",
+        "returned": "None",
+        "new_windows": 1,
+        "open_windows": 26,
+        "added": [
+          "WhiteboardWidget"
+        ],
+        "removed": [],
+        "window_ok": true
+      },
+      {
+        "step": "tools: measure on",
+        "returned": "None",
+        "new_windows": 1,
+        "open_windows": 27,
+        "added": [
+          "MeasureWidget"
+        ],
+        "removed": [],
+        "window_ok": true
+      },
+      {
+        "step": "tools: measure off",
+        "returned": "None",
+        "new_windows": -1,
+        "open_windows": 26,
+        "added": [],
+        "removed": [
+          "MeasureWidget"
+        ],
+        "window_ok": true
+      },
+      {
+        "step": "tools: colour palette",
+        "returned": "None",
+        "new_windows": 1,
+        "open_windows": 27,
+        "added": [
+          "ColorPaletteDialog"
+        ],
+        "removed": [],
+        "window_ok": true
+      },
+      {
+        "step": "control center: hide all",
+        "returned": "None",
+        "new_windows": -26,
+        "open_windows": 1,
+        "added": [],
+        "removed": [
+          "ColorVisionWidget",
+          "CursorEffectWidget",
+          "DesktopPetWidget",
+          "DesktopPetWidget",
+          "DesktopPetWidget",
+          "DimBackgroundWidget",
+          "DistractionMaskWidget",
+          "GifWidget",
+          "GifWidget",
+          "HomeStrip",
+          "ImageWidget",
+          "ImageWidget",
+          "MagnifierWidget",
+          "NowPlayingWidget",
+          "ParticleOpenGLWidget",
+          "ReadingRulerWidget",
+          "ScreenFilterWidget",
+          "SpectrumWidget",
+          "SystemMonitorWidget",
+          "TextWidget",
+          "TodoWidget",
+          "VideoWidget",
+          "VideoWidget",
+          "WallpaperWidget",
+          "WebWidget",
+          "WhiteboardWidget"
+        ]
+      },
+      {
+        "step": "control center: show all",
+        "returned": "None",
+        "new_windows": 26,
+        "open_windows": 27,
+        "added": [
+          "ColorVisionWidget",
+          "CursorEffectWidget",
+          "DesktopPetWidget",
+          "DesktopPetWidget",
+          "DesktopPetWidget",
+          "DimBackgroundWidget",
+          "DistractionMaskWidget",
+          "GifWidget",
+          "GifWidget",
+          "HomeStrip",
+          "ImageWidget",
+          "ImageWidget",
+          "MagnifierWidget",
+          "NowPlayingWidget",
+          "ParticleOpenGLWidget",
+          "ReadingRulerWidget",
+          "ScreenFilterWidget",
+          "SpectrumWidget",
+          "SystemMonitorWidget",
+          "TextWidget",
+          "TodoWidget",
+          "VideoWidget",
+          "VideoWidget",
+          "WallpaperWidget",
+          "WebWidget",
+          "WhiteboardWidget"
+        ],
+        "removed": []
+      },
+      {
+        "step": "control center: close all",
+        "returned": "None",
+        "new_windows": -26,
+        "open_windows": 1,
+        "added": [],
+        "removed": [
+          "ColorVisionWidget",
+          "CursorEffectWidget",
+          "DesktopPetWidget",
+          "DesktopPetWidget",
+          "DesktopPetWidget",
+          "DimBackgroundWidget",
+          "DistractionMaskWidget",
+          "GifWidget",
+          "GifWidget",
+          "HomeStrip",
+          "ImageWidget",
+          "ImageWidget",
+          "MagnifierWidget",
+          "NowPlayingWidget",
+          "ParticleOpenGLWidget",
+          "ReadingRulerWidget",
+          "ScreenFilterWidget",
+          "SpectrumWidget",
+          "SystemMonitorWidget",
+          "TextWidget",
+          "TodoWidget",
+          "VideoWidget",
+          "VideoWidget",
+          "WallpaperWidget",
+          "WebWidget",
+          "WhiteboardWidget"
+        ],
+        "left_open": [
+          "ColorPaletteDialog"
+        ]
+      },
+      {
+        "step": "command search: find and run \"pet\"",
+        "returned": "{'first_result': '寵物家園', 'page_now': 'PetHomePage'}",
+        "new_windows": 0,
+        "open_windows": 1,
+        "added": [],
+        "removed": []
+      },
+      {
+        "step": "presets: collect and re-apply every page",
+        "returned": "['gif', 'image', 'particle', 'pet', 'sound', 'text']",
+        "new_windows": 0,
+        "open_windows": 1,
+        "added": [],
+        "removed": []
+      },
+      {
+        "step": "language: switch through all seven and back",
+        "returned": "{'switched': 7, 'back_to': 'Traditional_Chinese'}",
+        "new_windows": 0,
+        "open_windows": 1,
+        "added": [],
+        "removed": []
+      },
+      {
+        "step": "scene: apply the first template",
+        "returned": "{'template': '工作桌面', 'status': '正在準備場景…'}",
+        "new_windows": 4,
+        "open_windows": 5,
+        "added": [
+          "SceneCompositorView",
+          "TextWidget",
+          "TextWidget",
+          "TextWidget"
+        ],
+        "removed": []
+      },
+      {
+        "step": "scene: template applied",
+        "returned": "{'status': '正在準備場景…', 'dialog_hidden': True, 'scene_windows': ['TextWidget', 'TextWidget', 'SceneCompositorView', 'ColorPaletteDialog', 'TextWidget']}",
+        "new_windows": 0,
+        "open_windows": 5,
+        "added": [],
+        "removed": []
+      },
+      {
+        "step": "control center: close all again",
+        "returned": "None",
+        "new_windows": -4,
+        "open_windows": 1,
+        "added": [],
+        "removed": [
+          "SceneCompositorView",
+          "TextWidget",
+          "TextWidget",
+          "TextWidget"
+        ],
+        "left_open": [
+          "ColorPaletteDialog"
+        ]
+      }
+    ],
+    "events": [],
+    "leftover_before_close": [
+      "ColorPaletteDialog"
+    ],
+    "pet_home_saved": true,
+    "window_closed": true,
+    "runtime_state": "RuntimeState.CLOSED",
+    "status": "passed"
+  },
+  "temporary_directory_removed": true,
+  "stderr_sha256": "54d3eb55d493c86aa6ea4c921d553baf24f636c7a4c4fd35a75f4d6583b4da8e",
+  "native_diagnostics": {
+    "code": "0x8001010e",
+    "occurrences": 4,
+    "stack": "monitor_widget.refresh -> now_playing -> smtc_now_playing -> asyncio.run",
+    "prior_record": "U-20261030-08 reports internally handled occurrences with successful query results; that does not establish current query success.",
+    "minimal_readonly_probe": "Three native Qt main-thread queries returned None without stderr diagnostics; no media contents retained.",
+    "reference": "https://learn.microsoft.com/en-us/windows/win32/com/com-error-codes-3"
+  },
+  "screenshots": {
+    "final.png": "a0c2966363dbc9b91d1dca48becdbddaa4af1b8898e2a0e4c4244a0b7f290ad9",
+    "page-00-PetHomePage.png": "3cf55968e8d60520739ff08c683be523259ed1ff2d242d4dee854193cd165bff",
+    "page-01-VideoSettingUI.png": "336e123f7c792b400968940096d93193d45757ed3fb7e1ff3ff4e4e590022e78",
+    "page-02-ImageSettingUI.png": "308d0a138acf4f980e12c800f39d8e408420d277ad30234195e83d024c96cfdf",
+    "page-03-WEBSettingUI.png": "b063140169a2647169b84b494f07881e9bb65569633bb3d0b1235b81f60b9810",
+    "page-04-GIFSettingUI.png": "830fdd0e2233addce5b2729ce046d7085e40d8c1db521079ab97066fe8025d33",
+    "page-05-TextSettingUI.png": "6547a7307e0be4214177b4785a8e1d25c1027764004d3be33e59167d3b356e98",
+    "page-06-SoundPlayerSettingUI.png": "6a101709441bc1ba2f2ce43e7cc877e7f5cf12dbda0d772fba34c2de24ed211f",
+    "page-07-SceneSettingUI.png": "acb7e85cc90f9d0c76942a8ea5c2d59250e147f9bd9e3fe7bd89b9fc6772d042",
+    "page-08-ParticleSettingUI.png": "2cf0d9fae3c42fd52e2c5fef9dc2efddfc76bfe4fd0c2bc937735dae75112aeb",
+    "page-09-PetSettingUI.png": "a0c2966363dbc9b91d1dca48becdbddaa4af1b8898e2a0e4c4244a0b7f290ad9",
+    "page-10-WallpaperSettingUI.png": "28d9dc127237109cf3c3cbf5892df207d663180226be003b14d960d708dca2e3",
+    "page-11-WidgetsSettingUI.png": "255690982705099c602a2f719a0d9e04b1e17877dfabe486ffb5aba5e9c5386b",
+    "page-12-FocusSettingUI.png": "8c55002487c33180d2f222b21b0d155734bd141a74ed3b97845d1ba306581101",
+    "page-13-ScreenCareSettingUI.png": "e5fa846edac7e0eedc7b58705f6afb9d56bebe88295d98301eb884996fce64d2",
+    "page-14-PresentationSettingUI.png": "451b20a8d129af8620084ab7c0df2de971152d4498ff5280d33d0db9bfbd1d4f",
+    "page-15-ToolsSettingUI.png": "50090905f80ce36ab5f68da21ac276054f8f6d794c90953662cd0c9b965b62ee",
+    "page-16-ControlCenterUI.png": "4230ada72715d635985a35eccb09731a581866cf51204fd83430d74a37e916f1",
+    "pet-home-dressed.png": "74e42824d612c5b223bf9b94798001d47b1e7bac9b6d50af9ee88506a303167b",
+    "pet-home-running.png": "74e42824d612c5b223bf9b94798001d47b1e7bac9b6d50af9ee88506a303167b",
+    "pet-home-strip-dressed.png": "6ef7dbfb4a9e7bbb6bbb304e147c7ed741129611ffb814eb17e7832b992ba68f",
+    "pet-page-Italy.png": "9fbd1133fc76e729cd58a6f71973dc87df2fa59bf2627cffd75b4a73c152e9fa"
+  }
+}

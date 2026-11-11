@@ -1,0 +1,283 @@
+{
+  "base": "e6065ef1",
+  "status": "755 source/test files frozen; full regression queued and incomplete. Independent review and integration pending.",
+  "defect": "The signage playlist editor and interval spinbox exposed empty accessible names despite visible translated labels.",
+  "fix": "Associate each existing QLabel with its control using setBuddy; accessible names follow visible label updates without duplicated translation bindings.",
+  "red": "2 failed, 2 deselected; accessible Name was empty for both fields",
+  "green": "43 passed: multiline keyboard, signage/canvas and pet dialog accessibility",
+  "native": {
+    "cases": [
+      {
+        "language": "English",
+        "accessible_names": [
+          "Presets, one per line:",
+          "Change every (minutes)"
+        ],
+        "tab_backtab": true,
+        "draft_unchanged": true
+      },
+      {
+        "language": "Traditional_Chinese",
+        "accessible_names": [
+          "預設集，一行一個：",
+          "每隔幾分鐘換一次"
+        ],
+        "tab_backtab": true,
+        "draft_unchanged": true
+      },
+      {
+        "language": "Simplified_Chinese",
+        "accessible_names": [
+          "预设，一行一个:",
+          "每隔几分钟更换"
+        ],
+        "tab_backtab": true,
+        "draft_unchanged": true
+      },
+      {
+        "language": "Deutsch",
+        "accessible_names": [
+          "Voreinstellungen, eine pro Zeile:",
+          "Wechseln alle (Minuten)"
+        ],
+        "tab_backtab": true,
+        "draft_unchanged": true
+      },
+      {
+        "language": "France",
+        "accessible_names": [
+          "Préréglages, un par ligne :",
+          "Changer toutes les (minutes)"
+        ],
+        "tab_backtab": true,
+        "draft_unchanged": true
+      },
+      {
+        "language": "Russian",
+        "accessible_names": [
+          "Пресеты, по одному на строку:",
+          "Менять каждые (минут)"
+        ],
+        "tab_backtab": true,
+        "draft_unchanged": true
+      },
+      {
+        "language": "Italy",
+        "accessible_names": [
+          "Preimpostazioni, una per riga:",
+          "Cambia ogni (minuti)"
+        ],
+        "tab_backtab": true,
+        "draft_unchanged": true
+      }
+    ],
+    "settings_unchanged": true
+  },
+  "desktop": {
+    "thread_desktop": "FrontEngineKeyboard55256_b69ddcac",
+    "input_desktop": "Default"
+  },
+  "observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        2538,
+        75
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        2504,
+        86
+      ]
+    },
+    "child_exit": 0
+  },
+  "shutdown": {
+    "selected_pet_only": true,
+    "pet_completion_affection_delta": 2,
+    "work_mode_selected_only": true,
+    "cancel_feed_no_reward": true,
+    "hidden_pet_unchanged": true,
+    "hidden_feedback": "心情 60/100 · 飽足 70/100 · 好感度 3",
+    "tab_routes": [
+      {
+        "target": "primaryAction",
+        "tabs": 5
+      },
+      {
+        "target": "qt_tabwidget_tabbar",
+        "tabs": 13
+      },
+      {
+        "target": "QListWidget",
+        "tabs": 1
+      },
+      {
+        "target": "WrappingPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "qt_tabwidget_tabbar",
+        "tabs": 14
+      },
+      {
+        "target": "WrappingPushButton",
+        "tabs": 3
+      },
+      {
+        "target": "qt_tabwidget_tabbar",
+        "tabs": 25
+      },
+      {
+        "target": "QListWidget",
+        "tabs": 4
+      },
+      {
+        "target": "WrappingPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "WrappingPushButton",
+        "tabs": 6
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 1
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 6
+      },
+      {
+        "target": "QPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 23
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 6
+      },
+      {
+        "target": "QPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 29
+      },
+      {
+        "target": "QPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 29
+      },
+      {
+        "target": "QPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 29
+      },
+      {
+        "target": "QPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "QPlainTextEdit",
+        "tabs": 1
+      },
+      {
+        "target": "QPlainTextEdit",
+        "tabs": 0
+      },
+      {
+        "target": "QPlainTextEdit",
+        "tabs": 0
+      },
+      {
+        "target": "QPlainTextEdit",
+        "tabs": 0
+      },
+      {
+        "target": "QPlainTextEdit",
+        "tabs": 0
+      },
+      {
+        "target": "QPlainTextEdit",
+        "tabs": 0
+      },
+      {
+        "target": "QPlainTextEdit",
+        "tabs": 0
+      },
+      {
+        "target": "QPushButton",
+        "tabs": 4
+      }
+    ],
+    "theme": "dark",
+    "language": "Traditional_Chinese",
+    "actual_window_size": [
+      900,
+      740
+    ],
+    "runtime_closed": true,
+    "temporary_directory_removed": true
+  },
+  "cold_home": {
+    "passed": true,
+    "initial_snapshot_exact": true,
+    "profiles_exact": true,
+    "leases_reacquired": true,
+    "saved_exact": true,
+    "temporary_directory_removed": true
+  },
+  "settings_observation": {
+    "changed_before_entry": [],
+    "changed_during_form": []
+  },
+  "limits": [
+    "Actual settings-menu dialog exec on a private Windows desktop; QAccessible names and widget-local Tab/Backtab/Space. Does not prove screen-reader speech, OS keyboard handling or every accessibility requirement.",
+    "Initial full-settings comparison failed because prior home simulation had pending profile persistence (energy 70 to 65, mood 60 to 59, fullness 70 to 64). Final fixture saves home and flushes paused pet sessions before the baseline; full settings then remain exact through seven-language retranslation.",
+    "Foreground HWND was unchanged but cursor coordinates differed; cause remains unestablished. Entry desktop guard verified separation, not continuous non-interference.",
+    "Screenshot inspected in Traditional Chinese dark theme. Other language names were queried through QAccessible; not all seven layouts received visual inspection.",
+    "No EXE, push, merge or release."
+  ],
+  "evidence_sha256": {
+    ".audit\\signage-accessible-red.log": "c7625d6a75b9dbed9bcff4cb824672d4def9a5a82c8c7eafe868539d115b48ce",
+    ".audit\\signage-accessible-green.log": "a56449d2f6af257e2a159041f71e7ab8d0559667d1fe0f26203d05ec823212d9",
+    ".audit\\native-signage-accessible-final\\signage-accessible.json": "013c6f5a1c489480c74b5895bf4d467db14de1729a332e7f26582ed1ea46be25",
+    ".audit\\native-signage-accessible-final\\settings-observation.json": "0325b01aea81fa3dce832db6a0425f6f9f7f901da2f61ae33dee86b4e095f3d8",
+    ".audit\\native-signage-accessible-final\\desktop.json": "cb9df03923c1f752d1f8ad08775ca032a05cb21d0c359bec1154efb6c67a9818",
+    ".audit\\native-signage-accessible-final\\observer.json": "835a9b7f52f4da64506b1b635d6edf991410cc04582e12c38d6351d6863e107b",
+    ".audit\\native-signage-accessible-final\\result.json": "871a56f42d4ae42fed93ca52e7012d50a5b243b541689d8802e62b44d1506f6f",
+    ".audit\\native-signage-accessible-final\\cold-result.json": "5bd41edb786e3fe553500e96167a938f64483ad3f1f564c603795a88e3110cbc",
+    ".audit\\native-signage-accessible-final\\signage-accessible.png": "e80ca98c48005f72f008f755c743f7343af6bf8fdb6846784c165f7b1034a649",
+    ".audit\\native-signage-accessible-final\\stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "documentation": {
+    "files": 17,
+    "checks": "54 passed",
+    "sphinx": "-W build passed",
+    "rendered_exact": [
+      "Eng",
+      "Zh",
+      "ZhCn",
+      "De",
+      "Fr",
+      "Ru",
+      "It"
+    ]
+  },
+  "test_commit": "d6a25315",
+  "product_commit": "82bae6db",
+  "regression_plan": "docs/acceptance/2026-11-06-signage-accessibility-regression-plan.json"
+}

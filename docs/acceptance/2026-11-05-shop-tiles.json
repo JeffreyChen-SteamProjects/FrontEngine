@@ -1,0 +1,19 @@
+{
+  "passed": true,
+  "base_revision": "d5a6353",
+  "source_sha256": "59635560bf5ee3f1b8e227eab8c0dd51c461bff98326f78cc2aca4b916c100fd",
+  "requirement": "progress.md #50",
+  "shop_item_measurements": 903,
+  "shared_consumer_cases": 63,
+  "languages": 7,
+  "font_px": [
+    14,
+    20,
+    24
+  ],
+  "screen_ratio": 1.25,
+  "window_width_logical": 900,
+  "python": "3.14.5 (tags/v3.14.5:5607950, May 10 2026, 10:43:50) [MSC v.1944 64 bit (AMD64)]",
+  "source_directory": ".audit/shop-layout-native-all-consumers",
+  "scope": "Private native Windows desktop; actual Shop prices and two-line geometry, Collection/Backpack/stored furniture no horizontal overflow in tested viewport. Full names remain in tooltips; no arbitrary-width or physical-input claim."
+}

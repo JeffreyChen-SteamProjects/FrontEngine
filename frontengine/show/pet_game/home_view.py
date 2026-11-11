@@ -7,8 +7,9 @@ later, the transparent desktop strip without either one computing rewards.
 from __future__ import annotations
 
 import zlib
+from time import monotonic
 
-from PySide6.QtCore import QPointF, QRectF, Qt, Signal
+from PySide6.QtCore import QEvent, QPointF, QRectF, Qt, Signal
 from PySide6.QtGui import QColor, QFont, QMouseEvent, QPainter, QPaintEvent, QPen
 from PySide6.QtWidgets import QSizePolicy, QWidget
 
@@ -16,19 +17,25 @@ from frontengine.show.pet_game.furniture_art import SURFACES, aspect, picture
 from frontengine.show.pet_game.themes import floor_color, paint_sky
 from frontengine.utils.pet_game.environment import daylight
 from frontengine.utils.multi_language.retranslate import translate
-from frontengine.utils.pet_game.catalog import CELL_PIXELS
+from frontengine.utils.pet_game.catalog import CELL_PIXELS, art_name
 from frontengine.utils.pet_game.world import World
 
 # Footprint heights in cells, so a bed reads lower than a desk at a glance.
-HEIGHTS = {"bed": 1.3, "table": 1.6, "workstation": 1.9, "leisure": 1.4, "decoration": 1.5}
+HEIGHTS = {"bed": 1.3, "table": 1.6, "workstation": 1.9, "leisure": 1.4, "decoration": 1.5, "bath": 1.4}
 COLORS = {"bed": "#7c9fd6", "table": "#c99a63", "workstation": "#8fb67a", "leisure": "#d58fb8",
-          "decoration": "#6fbfb3"}
+          "decoration": "#6fbfb3", "bath": "#8cc8e8"}
 FLOOR_HEIGHT = 16
 MIN_CELL = 20.0          # below this, furniture labels stop being readable
 MAX_CELL = 40.0
 SPRITE_CELLS = 2.2           # a character stands a little over two cells tall
+ZOOMS = (1.0, 1.25, 1.5, 2.0)
+TOOL_ICONS = {"writing": "✎", "gardening": "❀", "crafting": "⚒"}
+DONE_SECONDS = 4.0
+AREA_COLORS = {"living": "#B8C7E6", "work": "#C9D9A5", "leisure": "#F2C6A8", "dining": "#F1DD9A",
+               "clear": "#D8D2C6"}
 GLYPHS = {"sleep": "Zz", "nap": "Zz", "eat": "~", "snack": "~", "work": "✎", "play": "♪",
-          "relax": "☕", "wait": "…", "wander": "", "idle": "", "drag": "✋"}
+          "relax": "☕", "wait": "…", "wander": "", "visit": "", "help": "🤝", "come": "", "tag": "🏃", "idle": "", "drag": "✋",
+          "wash": "≈", "tidy": "≈"}
 
 
 def resident_color(identifier: str) -> QColor:
@@ -42,6 +49,16 @@ class HomeView(QWidget):
     caption_backdrop = False      # a dark plate behind names, for drawing over any desktop
     art = None                    # ResidentArt; without it residents are drawn as markers
     reduced_motion = False        # no in-between movement and no moving rain
+    zoom = 1.0                    # cell size multiplier (ZOOMS); the desktop strip stays at 1
+    zoomable = False              # Ctrl+wheel zooms only where the page allows it
+    scroll_x = 0.0                # how far the content is shifted left; only a strip larger than its screen scrolls
+    zoom_changed = Signal(float)
+    _drag_enabled = False
+    _area_tool: str | None = None
+    edit_cancelled = Signal()
+    area_painted = Signal(int, int)
+    piece_hovered = Signal(str, int)
+    piece_dropped = Signal(str, int)
     resident_selected = Signal(str)
     furniture_selected = Signal(str)
     cell_clicked = Signal(int)
@@ -52,6 +69,10 @@ class HomeView(QWidget):
         self.zone: str | None = None
         self.selected: str | None = None
         self.preview: tuple[str, int, bool, str | None] | None = None
+        self._painting: tuple[int, int] | None = None
+        self._piece_drag: tuple[str, float] | None = None
+        self.badges: dict[str, float] = {}       # piece -> until when its "finished" tick shows
+        self.badge_clock = monotonic
         self.setFixedHeight(170)
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.setFocusPolicy(Qt.FocusPolicy.ClickFocus)
@@ -59,10 +80,67 @@ class HomeView(QWidget):
 
     def set_world(self, world: World | None, zone: str | None) -> None:
         """A wide zone keeps readable cells and scrolls instead of shrinking."""
+        if world is not self.world or zone != self.zone:
+            self.cancel_edit_gesture()
         self.world, self.zone = world, zone
-        cells = world.zones[zone].width_cells if world is not None and zone in world.zones else 0
-        self.setMinimumWidth(int(cells * MIN_CELL) + 2)
+        self._fit_width()
         self.update()
+
+    @property
+    def drag_enabled(self) -> bool:
+        return self._drag_enabled
+
+    @drag_enabled.setter
+    def drag_enabled(self, enabled: bool) -> None:
+        if enabled != self._drag_enabled:
+            self.cancel_edit_gesture()
+            self._drag_enabled = enabled
+
+    @property
+    def area_tool(self) -> str | None:
+        return self._area_tool
+
+    @area_tool.setter
+    def area_tool(self, tool: str | None) -> None:
+        if tool != self._area_tool:
+            self.cancel_edit_gesture()
+            self._area_tool = tool
+
+    def cancel_edit_gesture(self) -> None:
+        active = self._piece_drag is not None or self._painting is not None
+        self._piece_drag = self._painting = None
+        if active:
+            self.set_preview(None)
+            self.edit_cancelled.emit()
+
+    def event(self, event: QEvent) -> bool:
+        if event.type() in (QEvent.Type.Hide, QEvent.Type.UngrabMouse):
+            self.cancel_edit_gesture()
+        return super().event(event)
+
+    def _fit_width(self) -> None:
+        cells = self.world.zones[self.zone].width_cells if self.world is not None and self.zone in self.world.zones else 0
+        self.setMinimumWidth(int(cells * MIN_CELL * self.zoom) + 2)
+
+    def set_zoom(self, zoom: float) -> float:
+        """Make cells (and everything on them) bigger; the overview then scrolls sideways."""
+        self.zoom = min(ZOOMS[-1], max(ZOOMS[0], zoom))
+        self._fit_width()
+        self.update()
+        self.zoom_changed.emit(self.zoom)
+        return self.zoom
+
+    def step_zoom(self, steps: int) -> float:
+        index = min(range(len(ZOOMS)), key=lambda i: abs(ZOOMS[i] - self.zoom))
+        return self.set_zoom(ZOOMS[max(0, min(len(ZOOMS) - 1, index + steps))])
+
+    def wheelEvent(self, event) -> None:
+        """Ctrl+wheel zooms; a plain wheel still scrolls the page."""
+        if event.modifiers() & Qt.KeyboardModifier.ControlModifier and self.zoomable:
+            self.step_zoom(1 if event.angleDelta().y() > 0 else -1)
+            event.accept()
+            return
+        super().wheelEvent(event)
 
     def set_selected(self, identifier: str | None) -> None:
         self.selected = identifier
@@ -77,10 +155,18 @@ class HomeView(QWidget):
         if self.world is None or self.zone not in self.world.zones:
             return MIN_CELL
         cells = self.world.zones[self.zone].width_cells
-        return max(MIN_CELL, min(MAX_CELL, (self.width() - 2) / cells))
+        return max(MIN_CELL * self.zoom, min(MAX_CELL * self.zoom, (self.width() - 2) / cells))
 
     def _floor_y(self) -> float:
         return self.height() - FLOOR_HEIGHT - 4
+
+    def cell_x(self, cell: float) -> float:
+        """Widget x of a (fractional) cell's left edge."""
+        return cell * self.cell_width() - self.scroll_x
+
+    def x_cell(self, x: float) -> float:
+        """The (fractional) cell under a widget x."""
+        return (x + self.scroll_x) / self.cell_width()
 
     # ----- painting ---------------------------------------------------------------
 
@@ -111,18 +197,40 @@ class HomeView(QWidget):
     def _paint_floor(self, painter: QPainter) -> None:
         zone = self.world.zones[self.zone]
         width = self.cell_width()
-        floor = QRectF(0, self._floor_y(), width * zone.width_cells, FLOOR_HEIGHT)
+        floor = QRectF(self.cell_x(0), self._floor_y(), width * zone.width_cells, FLOOR_HEIGHT)
         painter.fillRect(floor, floor_color(zone.theme))
+        self._paint_areas(painter, floor)
         for cell in zone.restricted:
-            painter.fillRect(QRectF(cell * width, floor.top(), width, FLOOR_HEIGHT),
+            painter.fillRect(QRectF(self.cell_x(cell), floor.top(), width, FLOOR_HEIGHT),
                              QColor(200, 70, 70, 120))
-        door = QRectF(zone.entrance * width, self._floor_y() - width * 2, width, width * 2)
-        painter.setPen(QPen(self.ink(), 1, Qt.PenStyle.DashLine))
+        door = QRectF(self.cell_x(zone.entrance), self._floor_y() - width * 2, width, width * 2)
+        linked = self.world.crossing(self.zone) is not None
+        painter.setPen(QPen(self.ink(), 2 if linked else 1, Qt.PenStyle.SolidLine if linked else Qt.PenStyle.DashLine))
         painter.drawRect(door)
+        if linked:                    # a crossing point: pets may walk through to the linked zone
+            painter.drawText(door, Qt.AlignmentFlag.AlignCenter, "⇄")
         if self.preview is not None:
             painter.setPen(QPen(self.palette().mid().color(), 1))
             for cell in range(zone.width_cells + 1):
-                painter.drawLine(QPointF(cell * width, floor.top()), QPointF(cell * width, floor.bottom()))
+                painter.drawLine(QPointF(self.cell_x(cell), floor.top()), QPointF(self.cell_x(cell), floor.bottom()))
+
+    def _paint_areas(self, painter: QPainter, floor: QRectF) -> None:
+        """Labelled stretches of floor: a coloured band with the label, and the one being painted."""
+        zone, width = self.world.zones[self.zone], self.cell_width()
+        bands = list(zone.areas)
+        if self._painting is not None:
+            first, last = sorted(self._painting)
+            bands.append((first, last, self.area_tool))
+        font = QFont(self.font())
+        font.setPointSizeF(7.5)
+        painter.setFont(font)
+        for first, last, tag in bands:
+            color = QColor(AREA_COLORS.get(tag, "#9A9284"))
+            color.setAlpha(150)
+            band = QRectF(self.cell_x(first), floor.top(), (last - first + 1) * width, FLOOR_HEIGHT)
+            painter.fillRect(band, color)
+            painter.setPen(QColor("#171715"))
+            painter.drawText(band, Qt.AlignmentFlag.AlignCenter, translate("pet_home_area_" + tag, tag))
 
     def _theme(self) -> str:
         return self.world.zones[self.zone].theme
@@ -133,14 +241,14 @@ class HomeView(QWidget):
     def footprint_rect(self, cell: int, definition) -> QRectF:
         """The footprint's width; the picture's own height when there is one, else a height per category."""
         width = self.cell_width()
-        ratio = aspect(self._theme(), definition.identifier)
+        ratio = aspect(self._theme(), art_name(definition))
         height = definition.width * width * ratio if ratio is not None else HEIGHTS[definition.category] * width
         height = min(self._floor_y() - 24, height)
-        return QRectF(cell * width, self._floor_y() - height, definition.width * width, height)
+        return QRectF(self.cell_x(cell), self._floor_y() - height, definition.width * width, height)
 
     def _paint_piece(self, painter: QPainter, piece, definition) -> None:
         rect = self.piece_rect(piece, definition)
-        image = picture(self._theme(), definition.identifier)
+        image = picture(self._theme(), art_name(definition))
         if image is not None:
             painter.save()
             if piece.flipped:                          # mirrored about the piece's own centre
@@ -160,6 +268,47 @@ class HomeView(QWidget):
             painter.setPen(QPen(QColor("#1d1d1d"), 1))
             painter.setBrush(resident_color(piece.owner))
             painter.drawEllipse(QRectF(rect.right() - 10, rect.top() + 3, 7, 7))
+        badge = self.piece_badge(piece, definition)
+        if badge:
+            self._paint_badge(painter, rect, badge)
+
+    def piece_badge(self, piece, definition) -> str:
+        """What a piece shows above it: ✓ just after a job finished there, the trade's tool while
+        someone works at it, a dot while it is in use; nothing when it is free."""
+        until = self.badges.get(piece.identifier)
+        if until is not None and until > self.badge_clock():
+            return "✓"
+        if not piece.users:
+            return ""
+        if definition.profession is not None:
+            return TOOL_ICONS.get(definition.profession, "•")
+        return "•"
+
+    def _paint_badge(self, painter: QPainter, rect: QRectF, text: str) -> None:
+        size = max(14.0, self.cell_width() * 0.55)
+        circle = QRectF(rect.right() - size, rect.top() - size * 0.6, size, size)
+        painter.save()
+        painter.setPen(QPen(QColor("#171715"), 1))
+        painter.setBrush(QColor("#FFF3D9") if text != "✓" else QColor("#C9E7B0"))
+        painter.drawEllipse(circle)
+        font = QFont(self.font())
+        font.setPointSizeF(max(7.0, size * 0.42))
+        painter.setFont(font)
+        painter.drawText(circle, Qt.AlignmentFlag.AlignCenter, text)
+        painter.restore()
+
+    def note_events(self, events: list) -> None:
+        """A finished job ticks its station for a few seconds."""
+        world = self.world
+        if world is None:
+            return
+        for event in events:
+            if event.get("kind") != "settled":
+                continue
+            station = event.get("station")
+            if station in world.furniture:
+                self.badges[station] = self.badge_clock() + DONE_SECONDS
+        self.update()
 
     def _paint_block(self, painter: QPainter, rect: QRectF, definition) -> None:
         """Pieces without a picture: a block in the category's colour."""
@@ -218,7 +367,7 @@ class HomeView(QWidget):
     def resident_box(self, resident) -> QRectF:
         """Where the resident is drawn and clicked: its character standing on the floor, or the marker."""
         width = self.cell_width()
-        x = self.resident_x_milli(resident) / 1000 / CELL_PIXELS * width
+        x = self.cell_x(self.resident_x_milli(resident) / 1000 / CELL_PIXELS)
         size = self._sprite_size(resident)
         if size is not None:
             floor = self._floor_y() - self._rest_height(resident)
@@ -234,7 +383,7 @@ class HomeView(QWidget):
             return 0.0
         piece = self.world.furniture.get(activity.furniture)
         surface = SURFACES.get(piece.definition) if piece is not None else None
-        if surface is None or picture(self._theme(), piece.definition) is None:
+        if surface is None or picture(self._theme(), art_name(self.world.definition(piece))) is None:
             return 0.0
         return self.piece_rect(piece, self.world.definition(piece)).height() * surface
 
@@ -262,16 +411,17 @@ class HomeView(QWidget):
         painter.drawEllipse(box)
 
     def _paint_resident(self, painter: QPainter, resident) -> None:
-        center = self.resident_center(resident)
         self._paint_body(painter, resident)
         kind = resident.activity.kind if resident.activity is not None else "idle"
         caption = resident.name + (" " + GLYPHS.get(kind, "") if GLYPHS.get(kind) else "")
         box = self.caption_rect(resident)
+        caption = painter.fontMetrics().elidedText(caption, Qt.TextElideMode.ElideRight,
+                                                   max(0, int(box.width()) - 10))
         if self.caption_backdrop:
             painter.setPen(Qt.PenStyle.NoPen)
             painter.setBrush(QColor(0, 0, 0, 150))
             plate = painter.fontMetrics().horizontalAdvance(caption) + 10
-            painter.drawRoundedRect(QRectF(center.x() - plate / 2, box.top(), plate, box.height()), 5, 5)
+            painter.drawRoundedRect(QRectF(box.center().x() - plate / 2, box.top(), plate, box.height()), 5, 5)
             painter.setPen(QColor("white"))
         else:
             painter.setPen(self.ink())
@@ -288,25 +438,80 @@ class HomeView(QWidget):
 
     def caption_rect(self, resident) -> QRectF:
         box = self.resident_box(resident)
-        return QRectF(box.center().x() - 70, box.top() - 20, 140, 18)
+        caption = QRectF(box.center().x() - 70, box.top() - 20, 140, 18)
+        if box.right() < 0 or box.left() > self.width():
+            return caption
+        caption.setWidth(min(caption.width(), self.width()))
+        caption.moveLeft(max(0.0, min(caption.left(), self.width() - caption.width())))
+        return caption
 
     # ----- input -----------------------------------------------------------------------
+
+    def _drag_cell(self, event: QMouseEvent) -> int:
+        _identifier, grab = self._piece_drag
+        return max(0, int(round(self.x_cell(event.position().x() - grab))))
+
+    def _floor_cell(self, x: float) -> int:
+        cells = self.world.zones[self.zone].width_cells
+        return max(0, min(cells - 1, int(self.x_cell(x))))
+
+    def mouseMoveEvent(self, event: QMouseEvent) -> None:
+        if self._painting is not None:
+            self._painting = (self._painting[0], self._floor_cell(event.position().x()))
+            self.update()
+            return
+        if self._piece_drag is not None:
+            self.piece_hovered.emit(self._piece_drag[0], self._drag_cell(event))
+            return
+        super().mouseMoveEvent(event)
+
+    def mouseReleaseEvent(self, event: QMouseEvent) -> None:
+        if event.button() != Qt.MouseButton.LeftButton:
+            super().mouseReleaseEvent(event)
+            return
+        if self._painting is not None:
+            first, last = sorted(self._painting)
+            self._painting = None
+            self.update()
+            self.area_painted.emit(first, last)
+            return
+        if self._piece_drag is not None:
+            identifier, cell = self._piece_drag[0], self._drag_cell(event)
+            self._piece_drag = None
+            self.piece_dropped.emit(identifier, cell)
+            return
+        super().mouseReleaseEvent(event)
+
+    def _select_furniture(self, point: QPointF, dragging: bool = False) -> bool:
+        for piece, definition in self.world.in_zone(self.zone):
+            bounds = self.piece_rect(piece, definition)
+            if bounds.contains(point):
+                if dragging:
+                    self._piece_drag = (piece.identifier, point.x() - bounds.left())
+                self.furniture_selected.emit(piece.identifier)
+                return True
+        return False
 
     def mousePressEvent(self, event: QMouseEvent) -> None:
         if self.world is None or self.zone not in self.world.zones or event.button() != Qt.MouseButton.LeftButton:
             super().mousePressEvent(event)
             return
         point = event.position()
+        self.cancel_edit_gesture()
+        if self.area_tool is not None:
+            cell = self._floor_cell(point.x())
+            self._painting = (cell, cell)
+            self.update()
+            return
+        if self.drag_enabled and self._select_furniture(point, dragging=True):
+            return
         for resident in sorted(self.world.residents.values(), key=lambda item: item.identifier):
             if resident.zone == self.zone:
                 if self.resident_box(resident).adjusted(-3, -3, 3, 3).contains(point):
                     self.resident_selected.emit(resident.identifier)
                     return
-        if self.preview is None:
-            for piece, definition in self.world.in_zone(self.zone):
-                if self.piece_rect(piece, definition).contains(point):
-                    self.furniture_selected.emit(piece.identifier)
-                    return
-        cell = int(point.x() // self.cell_width())
+        if self.preview is None and self._select_furniture(point):
+            return
+        cell = int(self.x_cell(point.x()))
         if 0 <= cell < self.world.zones[self.zone].width_cells:
             self.cell_clicked.emit(cell)

@@ -1,0 +1,19 @@
+{
+  "baseline": "f0336e45",
+  "event": {
+    "kind": "activity",
+    "activity": "visit"
+  },
+  "caption": "Heading to the next zone",
+  "strip_width": 800,
+  "bubble_width": 302,
+  "left_edge_x": -81,
+  "right_edge_right": 881,
+  "red": "2 failed,8 deselected19.65s",
+  "focused_green": "2 passed,8 deselected19.37s",
+  "scope": "Real HomeStrip rectangle and input-region checks using its event handler; no native screenshot yet.",
+  "evidence_sha256": {
+    "bubble-red.log": "9b9bcd8edc4c86ee3dfd9e4b8d55d5778a1e27f9943cd6f2c24e387698b4783e",
+    "bubble-green.log": "c71af43a2d4ff5c3ff56580c422dac27b2ae4251414c51693133d5125b62cb46"
+  }
+}

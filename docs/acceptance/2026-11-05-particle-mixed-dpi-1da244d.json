@@ -1,0 +1,351 @@
+{
+  "observations": [
+    {
+      "direction": "down",
+      "target": "BenQ GW2486TC",
+      "actual_screen": "BenQ GW2486TC",
+      "dpr": 1.0,
+      "logical_size": [
+        320,
+        180
+      ],
+      "pixels": [
+        320,
+        180
+      ],
+      "on_screen": true,
+      "colored_pixels": 2299,
+      "timer_ticks": 8,
+      "frame_swaps": 8,
+      "particle_positions_changed": true,
+      "framebuffer_changed": true,
+      "context_valid": true,
+      "file": "down-0.png",
+      "passed": true
+    },
+    {
+      "direction": "down",
+      "target": "BenQ GW2490",
+      "actual_screen": "BenQ GW2490",
+      "dpr": 1.25,
+      "logical_size": [
+        320,
+        180
+      ],
+      "pixels": [
+        400,
+        225
+      ],
+      "on_screen": true,
+      "colored_pixels": 3556,
+      "timer_ticks": 8,
+      "frame_swaps": 8,
+      "particle_positions_changed": true,
+      "framebuffer_changed": true,
+      "context_valid": true,
+      "file": "down-1.png",
+      "passed": true
+    },
+    {
+      "direction": "down",
+      "target": "BenQ GW2486TC",
+      "actual_screen": "BenQ GW2486TC",
+      "dpr": 1.0,
+      "logical_size": [
+        320,
+        180
+      ],
+      "pixels": [
+        320,
+        180
+      ],
+      "on_screen": true,
+      "colored_pixels": 2274,
+      "timer_ticks": 8,
+      "frame_swaps": 8,
+      "particle_positions_changed": true,
+      "framebuffer_changed": true,
+      "context_valid": true,
+      "file": "down-2.png",
+      "passed": true
+    },
+    {
+      "direction": "up",
+      "target": "BenQ GW2486TC",
+      "actual_screen": "BenQ GW2486TC",
+      "dpr": 1.0,
+      "logical_size": [
+        320,
+        180
+      ],
+      "pixels": [
+        320,
+        180
+      ],
+      "on_screen": true,
+      "colored_pixels": 2375,
+      "timer_ticks": 8,
+      "frame_swaps": 8,
+      "particle_positions_changed": true,
+      "framebuffer_changed": true,
+      "context_valid": true,
+      "file": "up-0.png",
+      "passed": true
+    },
+    {
+      "direction": "up",
+      "target": "BenQ GW2490",
+      "actual_screen": "BenQ GW2490",
+      "dpr": 1.25,
+      "logical_size": [
+        320,
+        180
+      ],
+      "pixels": [
+        400,
+        225
+      ],
+      "on_screen": true,
+      "colored_pixels": 3605,
+      "timer_ticks": 8,
+      "frame_swaps": 8,
+      "particle_positions_changed": true,
+      "framebuffer_changed": true,
+      "context_valid": true,
+      "file": "up-1.png",
+      "passed": true
+    },
+    {
+      "direction": "up",
+      "target": "BenQ GW2486TC",
+      "actual_screen": "BenQ GW2486TC",
+      "dpr": 1.0,
+      "logical_size": [
+        320,
+        180
+      ],
+      "pixels": [
+        320,
+        180
+      ],
+      "on_screen": true,
+      "colored_pixels": 2352,
+      "timer_ticks": 8,
+      "frame_swaps": 8,
+      "particle_positions_changed": true,
+      "framebuffer_changed": true,
+      "context_valid": true,
+      "file": "up-2.png",
+      "passed": true
+    },
+    {
+      "direction": "left",
+      "target": "BenQ GW2486TC",
+      "actual_screen": "BenQ GW2486TC",
+      "dpr": 1.0,
+      "logical_size": [
+        320,
+        180
+      ],
+      "pixels": [
+        320,
+        180
+      ],
+      "on_screen": true,
+      "colored_pixels": 2333,
+      "timer_ticks": 8,
+      "frame_swaps": 8,
+      "particle_positions_changed": true,
+      "framebuffer_changed": true,
+      "context_valid": true,
+      "file": "left-0.png",
+      "passed": true
+    },
+    {
+      "direction": "left",
+      "target": "BenQ GW2490",
+      "actual_screen": "BenQ GW2490",
+      "dpr": 1.25,
+      "logical_size": [
+        320,
+        180
+      ],
+      "pixels": [
+        400,
+        225
+      ],
+      "on_screen": true,
+      "colored_pixels": 3646,
+      "timer_ticks": 8,
+      "frame_swaps": 8,
+      "particle_positions_changed": true,
+      "framebuffer_changed": true,
+      "context_valid": true,
+      "file": "left-1.png",
+      "passed": true
+    },
+    {
+      "direction": "left",
+      "target": "BenQ GW2486TC",
+      "actual_screen": "BenQ GW2486TC",
+      "dpr": 1.0,
+      "logical_size": [
+        320,
+        180
+      ],
+      "pixels": [
+        320,
+        180
+      ],
+      "on_screen": true,
+      "colored_pixels": 2282,
+      "timer_ticks": 8,
+      "frame_swaps": 8,
+      "particle_positions_changed": true,
+      "framebuffer_changed": true,
+      "context_valid": true,
+      "file": "left-2.png",
+      "passed": true
+    },
+    {
+      "direction": "right",
+      "target": "BenQ GW2486TC",
+      "actual_screen": "BenQ GW2486TC",
+      "dpr": 1.0,
+      "logical_size": [
+        320,
+        180
+      ],
+      "pixels": [
+        320,
+        180
+      ],
+      "on_screen": true,
+      "colored_pixels": 2334,
+      "timer_ticks": 8,
+      "frame_swaps": 8,
+      "particle_positions_changed": true,
+      "framebuffer_changed": true,
+      "context_valid": true,
+      "file": "right-0.png",
+      "passed": true
+    },
+    {
+      "direction": "right",
+      "target": "BenQ GW2490",
+      "actual_screen": "BenQ GW2490",
+      "dpr": 1.25,
+      "logical_size": [
+        320,
+        180
+      ],
+      "pixels": [
+        400,
+        225
+      ],
+      "on_screen": true,
+      "colored_pixels": 3617,
+      "timer_ticks": 8,
+      "frame_swaps": 8,
+      "particle_positions_changed": true,
+      "framebuffer_changed": true,
+      "context_valid": true,
+      "file": "right-1.png",
+      "passed": true
+    },
+    {
+      "direction": "right",
+      "target": "BenQ GW2486TC",
+      "actual_screen": "BenQ GW2486TC",
+      "dpr": 1.0,
+      "logical_size": [
+        320,
+        180
+      ],
+      "pixels": [
+        320,
+        180
+      ],
+      "on_screen": true,
+      "colored_pixels": 2331,
+      "timer_ticks": 8,
+      "frame_swaps": 8,
+      "particle_positions_changed": true,
+      "framebuffer_changed": true,
+      "context_valid": true,
+      "file": "right-2.png",
+      "passed": true
+    }
+  ],
+  "closed": [
+    {
+      "direction": "down",
+      "timer_stopped": true,
+      "widget_deleted": true
+    },
+    {
+      "direction": "up",
+      "timer_stopped": true,
+      "widget_deleted": true
+    },
+    {
+      "direction": "left",
+      "timer_stopped": true,
+      "widget_deleted": true
+    },
+    {
+      "direction": "right",
+      "timer_stopped": true,
+      "widget_deleted": true
+    }
+  ],
+  "errors": [],
+  "passed": true,
+  "scope": "Actual ParticleOpenGLWidget framebuffer on owned hidden Win32 desktop. Four directions and 100/125/100 percent screens, timer-driven state and rendered frame changes. No user desktop capture/input, fullscreen or physical display reconfiguration.",
+  "source_head": "1da244dfde4f7b3d4b751b4e7f856a25226e9a8a",
+  "observer": {
+    "exit_code": 0,
+    "profile_removed": true,
+    "source_unchanged": true,
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        2070,
+        399
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        2070,
+        399
+      ]
+    },
+    "observation_only": true,
+    "desktop": "FrontEngineVideoWebDpi_261b7fc0508c"
+  },
+  "artifact_directory": ".audit\\particle-dpi-1da244d",
+  "artifact_sha256": {
+    "down-0.png": "d85d54b220a4f957021305309a62bdbbd1c5d2fb58f64b1c937d11f1e509c16e",
+    "down-1.png": "95627bb4fa1accdd8ffed55e7223eb3bd92f7d9f300751f864e4fb37e2d0c930",
+    "down-2.png": "ed26d277c71038e6ed66f5ee78adbc6d83f3adda14b5c9ff86f7fb3d2c795ab7",
+    "harness.py": "7094db0a1afecf79b194310d3d30b955f0ce95b57635640437e8983348c5a666",
+    "left-0.png": "6d61d707b49dcc673606a6d2804db10be6dce585a2e0f25ac22308fa4f81390c",
+    "left-1.png": "27b6eb7f23f540ebacb38efc3fe72243947fd7aaf2ed0d670c0a503200ef7041",
+    "left-2.png": "73f0a6705a746645b5f2e8537e97616a1a22d20617199e32bf62921ecdfeaec5",
+    "observer.json": "8e595101884bc5e8a7cbba91ff5a2c7b1746c8cb8cd6e99083d75e327e98936d",
+    "result.json": "c08e7f1eb04b2b42f4985a2861ac0b2f87d869085a7fc77ac69833d2ad86a87b",
+    "right-0.png": "b42fea321af03551ee210426d78aaf04f4a29ccdb0086f7bc572f6b7cb3aac48",
+    "right-1.png": "8afc1ea431655b11c6ea1bf1b3776f9e5927048e19b7e59d0325a91d7ed7d7fc",
+    "right-2.png": "fefc5eddaf09410a75398d24073ef86a626c6ffbdb3c5c2f2b9357ee5cc38b86",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "up-0.png": "d5c99b6df5f3dda5ecebb3746668558a490ced771488e98beeae64452e565df6",
+    "up-1.png": "7bdf04659156227e576ad68c238b4879b8f227aaa7cb80391f69ea1737fc99d6",
+    "up-2.png": "cc4bdf258c03e9b15ccfbb244b67b659a564a39351ef32088d025bc15ca2e44e"
+  },
+  "limitations": [
+    "Framebuffer capture from the actual QOpenGLWidget, not the final Windows desktop composition.",
+    "Synthetic 64x64 opaque pink texture, 40 particles, 320x180 logical window; not every count, texture, opacity or performance load.",
+    "No fullscreen, input transparency, physical display reconfiguration or settings-page flow acceptance."
+  ]
+}

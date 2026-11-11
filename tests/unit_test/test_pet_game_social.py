@@ -45,7 +45,7 @@ def test_version_one_homes_gain_comfort_and_company_on_load():
     assert loaded.residents[A].needs["comfort"] == 60
     assert loaded.residents[A].needs["social"] == 60
     assert loaded.relations == {}
-    assert snapshot.to_dict(loaded)["version"] == 3
+    assert snapshot.to_dict(loaded)["version"] == snapshot.VERSION
 
 
 def test_relationships_survive_saving_and_reject_bad_pairs():
@@ -161,16 +161,15 @@ def test_the_card_names_personality_friends_and_time_left():
     assert "min left" in text
 
 
-def test_desktop_bubbles_follow_events(tmp_path):
+def test_desktop_bubbles_follow_events(tmp_path, *, home_store_factory):
     from frontengine.show.pet_game.home_service import HomeService
     from frontengine.show.pet_game.home_strip import HomeStrip, bubble_text
-    from frontengine.user_setting.pet_game_save import HomeSaveStore
     from frontengine.user_setting.pet_profiles import PetProfiles
 
     assert bubble_text({"kind": "greeted"}) == "Hi!"
     assert bubble_text({"kind": "settled", "coins": 12}) == "+12"
     assert bubble_text({"kind": "activity", "activity": "wander"}) == ""
-    service = HomeService(None, HomeSaveStore(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None))
+    service = HomeService(None, home_store_factory(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None))
     service.create_home("screen", 0, 900, 40, seed=3)
     record = service.profiles.create("Mochi")
     service.adopt(record["id"])

@@ -157,12 +157,19 @@ class LoopbackSpectrum:
             return
         front_engine_logger.info("[LoopbackCapture] stop")
         self._stop_event.set()
-        thread, self._thread = self._thread, None
+        thread = self._thread
         self._running = False
         if thread is not None and thread.is_alive():
             thread.join(timeout=2.0)
         with self._lock:
             self._bands = [0.0] * self.band_count
+
+    def pending(self) -> bool:
+        if self._linux_session is not None:
+            thread = self._linux_session.thread
+        else:
+            thread = self._thread
+        return thread is not None and thread.is_alive()
 
     def _run(self) -> None:
         try:

@@ -5,7 +5,6 @@ from PySide6.QtWidgets import QGraphicsProxyWidget
 
 from frontengine.show.overlay_factory import build_overlay
 from frontengine.show.scene.extend_graphic_scene import ExtendGraphicScene
-from frontengine.show.scene.extend_graphic_view import ExtendGraphicView
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 
 
@@ -15,12 +14,14 @@ class SceneManager:
     SceneManager: Unified manager for scene and multimedia widgets
     """
 
-    def __init__(self) -> None:
+    def __init__(self, *, lifetime=None) -> None:
         front_engine_logger.info("[SceneManager] Init")
         super().__init__()
+        self.lifetime = lifetime
         self.graphic_scene: ExtendGraphicScene = ExtendGraphicScene()
         self.widget_list: List[QGraphicsProxyWidget] = []
-        self.view_list: List[ExtendGraphicView] = []
+        from frontengine.utils.work_lifetime import OwnedWidgetList
+        self.view_list = OwnedWidgetList(lifetime) if lifetime is not None else []
         self.native_widgets: list = []
         self.puppet_settings: list[dict] = []
         self.layer_settings: dict[str, dict] = {}
@@ -96,7 +97,7 @@ class SceneManager:
             from frontengine.show.scene.media_frame import SceneMediaFrame
             widget = SceneMediaFrame({'type': kind.upper(), **setting_dict})
         else:
-            widget = build_overlay(kind, setting_dict)
+            widget = build_overlay(kind, setting_dict, lifetime=self.lifetime)
         try:
             widget.overlay_remembers_geometry = False
             if "width" in setting_dict or "height" in setting_dict:
@@ -146,7 +147,7 @@ class SceneManager:
 
     def open_native_widgets(self, monitor=None, *, show: bool = True) -> None:
         for setting in self.puppet_settings:
-            widget = build_overlay('puppet', setting)
+            widget = build_overlay('puppet', setting, lifetime=self.lifetime)
             widget.overlay_remembers_geometry = False
             origin = monitor.availableGeometry().topLeft() if monitor else None
             if monitor:

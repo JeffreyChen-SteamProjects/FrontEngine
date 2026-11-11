@@ -130,11 +130,12 @@ def test_imported_file_feed_cannot_read_outside_scene_package(tmp_path):
         load_package(target)
 
 
-def test_ui_settings_restore_file_field_interval_and_preview(tmp_path):
+def test_ui_settings_restore_file_field_interval_and_preview(tmp_path, *, lifetime_factory):
     from frontengine.ui.page.text.text_setting_ui import TextSettingUI
+    lifetime_factory()
     path = tmp_path / "stats.json"
     path.write_text('{"count":3}', encoding="utf-8")
-    page = TextSettingUI()
+    page = TextSettingUI(lifetime=lifetime_factory())
     page.set_state({"text_source": "local_file", "text_file": str(path),
                     "text_file_field": "/count", "text_file_interval": 2})
     wait_until(lambda: page._file_preview.result.status == "ready")

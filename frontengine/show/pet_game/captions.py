@@ -8,11 +8,12 @@ from frontengine.utils.pet_game.catalog import FURNITURE_PREFIX
 from frontengine.utils.pet_game.resident import Resident
 
 if TYPE_CHECKING:
+    from frontengine.utils.pet_game.commission_work import Dispatch
     from frontengine.utils.pet_game.world import World
 
 NEED_KEYS = (("energy", "pet_home_energy", "Energy"), ("fullness", "pet_home_fullness", "Fullness"),
              ("mood", "pet_home_mood", "Mood"), ("comfort", "pet_home_comfort", "Comfort"),
-             ("social", "pet_home_social", "Company"))
+             ("social", "pet_home_social", "Company"), ("hygiene", "pet_home_hygiene", "Cleanliness"))
 FRIENDS_SHOWN = 3
 
 
@@ -98,3 +99,30 @@ def card_text(resident: Resident, world: World | None = None) -> str:
     if world is not None:
         lines += [friends_text(world, resident), wish_text(world, resident)]
     return "\n".join(line for line in lines if line)
+
+
+DISPATCH_TEXT = {
+    "accepted": ("pet_home_dispatch_accepted", "{pet} will make {units} × {item}."),
+    "later": ("pet_home_dispatch_later", "{pet} will make {units} × {item} after a rest."),
+    "delivered": ("pet_home_dispatch_delivered", "Handed in: {item}."),
+    "already_queued": ("pet_home_dispatch_already_queued", "A pet is already making it."),
+    "no_station": ("pet_home_dispatch_no_station", "Nobody can make it yet: there is no {trade} workstation."),
+    "skill_too_low": ("pet_home_dispatch_skill_too_low", "Nobody is skilled enough yet: {trade} level {level} needed."),
+    "missing_materials": ("pet_home_dispatch_missing_materials", "Missing materials: {items}."),
+    "no_recipe": ("pet_home_dispatch_no_recipe", "Nothing in this home makes it."),
+    "unknown": ("pet_home_dispatch_unknown", "Choose a commission that is still open."),
+}
+
+
+def dispatch_text(world: World, sent: Dispatch, item: str) -> str:
+    """One sentence for what sending a pet to a commission did, or why nobody could go."""
+    key = "later" if sent.result == "accepted" and sent.later else sent.result
+    if key not in DISPATCH_TEXT:
+        return result_text(sent.result)            # locked, too many orders, ...
+    recipe = world.catalog.recipes.get(sent.recipe) if sent.recipe else None
+    resident = world.residents.get(sent.resident) if sent.resident else None
+    values = {"pet": resident.name if resident else "", "units": sent.units, "item": item_label(world, item),
+              "trade": translate("pet_home_profession_" + recipe.profession, recipe.profession) if recipe else "",
+              "level": recipe.min_level if recipe else 0,
+              "items": ", ".join(f"{count} × {item_label(world, name)}" for name, count in sent.missing.items())}
+    return translate(*DISPATCH_TEXT[key]).format(**values)

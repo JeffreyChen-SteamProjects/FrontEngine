@@ -120,13 +120,6 @@ def test_user_interactions_take_priority_over_flashes(social_pets, clock):
     assert pet._layered_playback.action == 'groom'
 
 
-def test_legacy_sprite_packs_fall_back_for_new_actions(social_pets):
-    _, pets = social_pets
-    pet = pets[0]
-    for action in ('sit', 'land', 'catch', 'peer_greet', 'wake', 'sleep_in'):
-        assert pet._sprite_for(action) is not None
-
-
 def test_bond_stages_vary_greetings_and_celebrate_once_when_reached():
     from frontengine.utils.pet_companion.stats import bond_stage
     assert [bond_stage(value) for value in (0, 19, 20, 99, 100, 249, 250)] == [
@@ -155,14 +148,13 @@ def test_status_names_the_relationship_stage(social_pets):
 def test_resummoned_pet_welcomes_once_and_new_pet_stays_quiet(tmp_path, monkeypatch):
     from frontengine.show.pet.desktop_pet import DesktopPetWidget
     from frontengine.user_setting.pet_profiles import PetProfiles
-    from test_pet_profile_sessions import _sprite
     profiles = PetProfiles({}, lambda: None)
     known = profiles.create('Known')
     profiles.update(known['id'], {'affection': 30})
     lines = []
     monkeypatch.setattr(DesktopPetWidget, 'say', lambda self, text=None: lines.append((self, text)))
-    fresh = DesktopPetWidget(_sprite(tmp_path), profiles=profiles, talk=True, sit_on_windows=False)
-    returning = DesktopPetWidget(_sprite(tmp_path), profiles=profiles, profile_id=known['id'], talk=True,
+    fresh = DesktopPetWidget(profiles=profiles, talk=True, sit_on_windows=False)
+    returning = DesktopPetWidget(profiles=profiles, profile_id=known['id'], talk=True,
                                  sit_on_windows=False)
     try:
         for pet in (fresh, returning):
@@ -182,8 +174,7 @@ def test_menu_close_waves_goodbye_before_closing(tmp_path, monkeypatch):
     from shiboken6 import isValid
     from frontengine.show.pet.desktop_pet import DesktopPetWidget
     from frontengine.user_setting.pet_profiles import PetProfiles
-    from test_pet_profile_sessions import _sprite
-    pet = DesktopPetWidget(_sprite(tmp_path), profiles=PetProfiles({}, lambda: None), sit_on_windows=False)
+    pet = DesktopPetWidget(profiles=PetProfiles({}, lambda: None), sit_on_windows=False)
     pet.show()
     lines = []
     monkeypatch.setattr(pet, 'say', lambda text=None: lines.append(text))

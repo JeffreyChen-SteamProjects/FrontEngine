@@ -1,5 +1,6 @@
 """Crop and mark captured pixels, with explicit original/flattened output."""
 from __future__ import annotations
+from shiboken6 import isValid
 
 from PySide6.QtCore import QPointF, QRectF, Qt, Signal
 from PySide6.QtGui import QImage, QPixmap, QPen, QColor, QGuiApplication
@@ -63,6 +64,8 @@ class CaptureCanvas(QGraphicsView):
                 text, accepted = ('', True)
                 if self.mode == 'text':
                     text, accepted = QInputDialog.getMultiLineText(self, translate('capture_edit_text'), translate('capture_edit_text'))
+                    if not isValid(self) or not self.isVisible():
+                        return
                 if accepted:
                     self.document.add(self.mode, start, end, text)
         except ValueError as error:
@@ -82,6 +85,8 @@ class CaptureEditor(QDialog):
 
     def __init__(self, image: QImage, parent=None) -> None:
         super().__init__(parent)
+        self._closed = False
+        self.finished.connect(self._mark_closed)
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         tr(self, 'capture_edit_title', setter='setWindowTitle')
         self.resize(920, 660)
@@ -139,10 +144,15 @@ class CaptureEditor(QDialog):
             target.setImage(self.document.render())
             retranslator.set_text(self.status, 'capture_edit_copied')
 
+    def _mark_closed(self) -> None:
+        self._closed = True
+
     def save_result(self) -> None:
         """Save edited pixels as PNG, with no original or hidden edit layers in the file."""
+        if self._closed or not isValid(self):
+            return
         path, _filter = QFileDialog.getSaveFileName(self, translate('capture_edit_save'), 'capture-edited.png', 'PNG (*.png)')
-        if path:
+        if not self._closed and isValid(self) and path:
             if not self.document.save(path):
                 self._error(translate('capture_edit_failed'))
             else:

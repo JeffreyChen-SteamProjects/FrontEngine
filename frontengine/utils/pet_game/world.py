@@ -10,27 +10,41 @@ from __future__ import annotations
 import re
 from collections import deque
 
-from frontengine.utils.pet_game.behaviour import cancel_activity, refusal, start
-from frontengine.utils.pet_game.goals import Progress
+from frontengine.utils.pet_game.behaviour import auto_task, cancel_activity, refusal, start
+from frontengine.utils.pet_game.goals import Progress, unlocked
 from frontengine.utils.pet_game.catalog import (
     CELL_PIXELS, STARTER_COINS, STARTER_KIT, Catalog, FurnitureDefinition,
 )
 from frontengine.utils.pet_game.jobs import MAX_TASKS, MAX_UNITS, Task
 from frontengine.utils.pet_game.layout import (
-    MAX_FURNITURE, THEMES, Furniture, Zone, placement_problem,
+    AREA_TAGS, MAX_FURNITURE, MAX_ZONE_CELLS, MIN_ZONE_CELLS, THEMES, Furniture, Zone, can_climb,
+    has_steps, placement_problem,
 )
+from frontengine.utils.pet_companion.stats import MAX_AFFECTION
+from frontengine.utils.pet_game.goals import MAX_STATION_LEVEL
 from frontengine.utils.pet_game.ledger import Ledger
 from frontengine.utils.pet_game.resident import Resident, resident_from_profile
 from frontengine.utils.pet_game.rng import GameRandom
 from frontengine.utils.pet_game.schedule import TEMPLATES, initial_time
 
 FORMAT = "frontengine.pet-home"
-VERSION = 3              # 2: comfort and social needs, relationships; 3: goals and progress
+VERSION = 8              # 2: needs, relationships; 3: goals, progress; 4: zone areas; 5: crossings; 6: upgrades;
+                         # 7: hygiene; 8: persistent life-event days
 RELATION_LIMIT = 100
 MODES = ("manage", "sandbox")
 MAX_RESIDENTS = 12
 MAX_ZONES = 8
-COMMANDS = ("sleep", "eat", "play", "relax", "work", "stop")
+COMMANDS = ("sleep", "eat", "wash", "play", "relax", "work", "stop")
+# The player's own care: a small, immediate lift with a cooldown per pet and kind, so it never farms.
+INTERACTIONS = {"feed": {"fullness": 15, "mood": 3}, "pat": {"mood": 8, "social": 5},
+                "talk": {"social": 12, "mood": 3}, "groom": {"hygiene": 15, "comfort": 12, "mood": 4},
+                "toy": {"mood": 10, "energy": -4}}
+# Moving a pet about is not for a pet that is busy at something that holds it in place.
+BUSY_KINDS = ("work", "eat", "snack", "sleep")
+PLAYFUL = ("toy",)
+TAG_MS = (8000, 12000)
+INTERACT_COOLDOWN_MS = 30_000
+UPGRADE_BASE_COINS = 80     # the basic desk is free, but its upgrades are not
 _HOME = re.compile(r"[0-9a-f]{32}")
 
 
@@ -55,6 +69,10 @@ class World:
         # Residents take jobs and rewards are collected by themselves. Runtime only, never saved:
         # tests of the bare mechanics switch it off.
         self.automatic = True
+        self.offline_zones: set[str] = set()     # zones whose screen is disconnected (runtime only)
+        self._offline_parked: set[str] = set()
+        self._interacted: dict[tuple[str, str], int] = {}     # (resident, kind) -> game time, runtime only
+        self._focus_owned: set[str] = set()                    # residents with a focus work request queued
         self.residents: dict[str, Resident] = {}
         self.tasks: dict[str, Task] = {}
         self.ledger = Ledger()
@@ -98,13 +116,107 @@ class World:
         identifier = self._new_id("z")
         zone = Zone.from_dict({"id": identifier, "screen": screen, "x": x, "y": y,
                                "width_cells": width_cells, "theme": "warm_home",
-                               "entrance": 0, "restricted": []})
+                               "entrance": 0, "restricted": [], "areas": [], "link": None})
         self.zones[identifier] = zone
         return identifier
 
+    def set_area(self, zone: str, first: int, last: int, tag: str | None) -> str:
+        """Label part of a zone's floor (``None`` clears it); it steers choices, never forbids them."""
+        if zone not in self.zones or (tag is not None and tag not in AREA_TAGS):
+            return "unknown"
+        self.zones[zone].areas = self.zones[zone].with_area(first, last, tag)
+        return "accepted"
+
+    def move_zone(self, zone: str, screen: str, x: int, y: int, width_cells: int) -> str:
+        """Give a zone another screen or size; pieces that no longer fit go back to storage."""
+        found = self.zones.get(zone)
+        if found is None or not isinstance(screen, str) or len(screen) > 128:
+            return "unknown"
+        if any(other.screen == screen for key, other in self.zones.items() if key != zone):
+            return "screen_taken"
+        width = max(MIN_ZONE_CELLS, min(MAX_ZONE_CELLS, int(width_cells)))
+        found.screen, found.x, found.y, found.width_cells = screen, int(x), int(y), width
+        found.areas = tuple((first, min(last, width - 1), tag) for first, last, tag in found.areas if first < width)
+        found.entrance = min(found.entrance, width - 1)
+        for piece, definition in self.in_zone(zone):
+            if piece.cell + definition.width > width:
+                self.store(piece.identifier)
+        for resident in self.residents.values():
+            if resident.zone == zone:
+                resident.x_milli = min(resident.x_milli, found.width_pixels * 1000 - 1)
+        return "accepted"
+
+    def link_zones(self, zone: str, other: str | None) -> str:
+        """Join two zones' entrances into a crossing point (``None`` removes the zone's crossing)."""
+        if zone not in self.zones or (other is not None and (other not in self.zones or other == zone)):
+            return "unknown"
+        for key in (zone, other, self.zones[zone].link, self.zones[other].link if other else None):
+            if key in self.zones and self.zones[key].link in (zone, other):
+                self.zones[key].link = None
+        self.zones[zone].link = other
+        if other is not None:
+            self.zones[other].link = zone
+        return "accepted"
+
+    def crossing(self, zone: str) -> str | None:
+        """Where this zone's entrance leads, when that zone's screen is connected."""
+        link = self.zones[zone].link if zone in self.zones else None
+        return link if link in self.zones and link not in self.offline_zones else None
+
+    def cross(self, identifier: str) -> str:
+        """A pet walks through a crossing point by itself; it keeps its bed in the old zone."""
+        resident = self.residents.get(identifier)
+        target = self.crossing(resident.zone) if resident is not None else None
+        if target is None:
+            return "unknown"
+        return self.transfer_resident(identifier, target, keep_claims=True)
+
+    def transfer_resident(self, identifier: str, zone: str, keep_claims: bool = False) -> str:
+        """Move a pet to another zone on purpose; it arrives at that zone's entrance."""
+        resident = self.residents.get(identifier)
+        if resident is None or zone not in self.zones:
+            return "unknown"
+        if resident.zone == zone:
+            return "duplicate"
+        cancel_activity(self, resident, "moved_zone")
+        for piece in self.furniture.values():
+            if piece.owner == identifier and piece.zone != zone and not keep_claims:
+                piece.owner = None
+        resident.zone = zone
+        entrance = self.zones[zone].entrance
+        resident.x_milli = (entrance * CELL_PIXELS + CELL_PIXELS // 2) * 1000
+        self.emit("moved_zone", resident=identifier, zone=zone)
+        return "accepted"
+
+    def set_offline(self, zones: set[str]) -> list[str]:
+        """Zones whose screen is gone: their pets wait, their furniture stays; nothing is copied.
+
+        Returns the residents whose waiting state changed. Reconnecting the screen lets them
+        carry on where they were.
+        """
+        zones = {zone for zone in zones if zone in self.zones}
+        changed = []
+        for identifier in sorted(self.residents):
+            resident = self.residents[identifier]
+            waiting = resident.zone in zones
+            if waiting and not resident.parked:
+                self.park(identifier, True)
+                self._offline_parked.add(identifier)
+                changed.append(identifier)
+            elif not waiting and identifier in self._offline_parked:
+                self.park(identifier, False)       # only pets this parked: a pet hidden on purpose stays
+                self._offline_parked.discard(identifier)
+                changed.append(identifier)
+        self.offline_zones = zones
+        return changed
+
+    def coin_amount(self, amount: int) -> int:
+        """Resolve catalog currency for this home; free arranging has no currency."""
+        return 0 if self.sandbox else amount
+
     def grant_starter_kit(self) -> str:
         """Initial coins and basic furniture, at most once per home even if rerun."""
-        result = self.ledger.apply("starter-kit", "starter", STARTER_COINS, STARTER_KIT)
+        result = self.ledger.apply("starter-kit", "starter", self.coin_amount(STARTER_COINS), STARTER_KIT)
         self.flags.add("starter_kit")
         return result
 
@@ -123,7 +235,26 @@ class World:
         found = self.catalog.furniture.get(definition)
         if found is None or zone not in self.zones:
             return "unknown"
-        return placement_problem(self.zones[zone], found, cell, self.in_zone(zone, moving))
+        others = self.in_zone(zone, moving)
+        problem = placement_problem(self.zones[zone], found, cell, others)
+        if problem is None and not self._reachable_after(zone, found, cell, others):
+            return "unreachable"
+        return problem
+
+    def _reachable_after(self, zone: str, definition, cell: int, others) -> bool:
+        """Would every raised piece still be reachable with this piece at ``cell``?"""
+        if any(can_climb(r.traits) for r in self.residents.values() if r.zone == zone):
+            return True
+        placed = Furniture("f0", definition.identifier, zone, cell)
+        pieces = [*others, (placed, definition)]
+        raised = [(piece, d) for piece, d in pieces if d.raised] if definition.steps else [(placed, definition)]
+        return all(has_steps(piece, d, pieces) for piece, d in raised if d.raised)
+
+    def reachable(self, resident, piece) -> bool:
+        """Ground is always connected; a raised point needs climbing or pet stairs beside it."""
+        definition = self.definition(piece)
+        return (not definition.raised or can_climb(resident.traits)
+                or has_steps(piece, definition, self.in_zone(piece.zone)))
 
     def buy(self, definition: str, transaction: str) -> str:
         found = self.catalog.furniture.get(definition)
@@ -133,6 +264,8 @@ class World:
             return "not_for_sale"
         if self.sandbox:
             return "accepted"
+        if not unlocked(self, found.unlock_level):
+            return "locked"
         result = self.ledger.apply(transaction, "buy:" + definition, -found.price,
                                    {furniture_item(definition): 1})
         if result == "accepted":
@@ -169,7 +302,7 @@ class World:
             return "not_for_sale"
         if type(count) is not int or not 1 <= count <= 999:
             return "invalid"
-        result = self.ledger.apply(transaction, "sell:" + name, item.sell_price * count, {name: -count})
+        result = self.ledger.apply(transaction, "sell:" + name, self.coin_amount(item.sell_price * count), {name: -count})
         return "none_stored" if result == "insufficient" else result
 
     def free_cell(self, definition: str, zone: str) -> int | None:
@@ -294,7 +427,7 @@ class World:
 
     def set_theme(self, zone: str, theme: str) -> str:
         """Change how a zone looks; furniture, paths and storage stay exactly as they are."""
-        if zone not in self.zones or theme not in THEMES:
+        if zone not in self.zones or (theme not in THEMES and theme not in self.catalog.themes):
             return "unknown"
         self.zones[zone].theme = theme
         self.emit("theme_set", zone=zone, theme=theme)
@@ -333,6 +466,125 @@ class World:
         self.progress.wishes.pop(identifier, None)
         self.progress.arrivals.pop(identifier, None)
         del self.residents[identifier]
+        return "accepted"
+
+    def station_level(self, definition: str) -> int:
+        """Every station of a kind shares its level, so storing or rearranging never loses one."""
+        return self.progress.upgrades.get(definition, 1)
+
+    def upgrade_cost(self, definition: str) -> int | None:
+        """Coins for the next level of a workstation kind; None when it cannot go higher."""
+        found = self.catalog.furniture.get(definition)
+        if found is None or found.profession is None or self.station_level(definition) >= MAX_STATION_LEVEL:
+            return None
+        return 0 if self.sandbox else max(found.price, UPGRADE_BASE_COINS) * self.station_level(definition)
+
+    def upgrade(self, definition: str, transaction: str) -> str:
+        cost = self.upgrade_cost(definition)
+        if cost is None:
+            return "not_upgradable"
+        if cost:
+            result = self.ledger.apply(transaction, "upgrade:" + definition, -cost)
+            if result != "accepted":
+                return "insufficient_coins" if result == "insufficient" else result
+        self.progress.upgrades[definition] = self.station_level(definition) + 1
+        self.emit("upgraded", definition=definition, level=self.progress.upgrades[definition])
+        return "accepted"
+
+    @staticmethod
+    def busy(resident) -> bool:
+        return resident.activity is not None and resident.activity.kind in BUSY_KINDS
+
+    def call(self, identifier: str, x_milli: int) -> str:
+        """Call a pet over: it walks to the spot and waits there a little, unless it is busy."""
+        resident = self.residents.get(identifier)
+        if resident is None:
+            return "unknown"
+        if resident.parked or resident.away:
+            return "parked"
+        if self.busy(resident):
+            return "busy"
+        width = self.zones[resident.zone].width_pixels * 1000
+        cancel_activity(self, resident, "called")
+        start(self, resident, "come", "called", duration=0)        # waits once it arrives
+        resident.activity.target_x = max(0, min(width - 1, int(x_milli)))
+        return "accepted"
+
+    def play_tag(self, identifier: str) -> str:
+        """Start a game of tag with the nearest free pet in the zone; never with a busy one."""
+        resident = self.residents.get(identifier)
+        if resident is None:
+            return "unknown"
+        if resident.parked or resident.away:
+            return "parked"
+        if self.busy(resident):
+            return "busy"
+        partners = sorted((abs(other.x_milli - resident.x_milli), key) for key, other in self.residents.items()
+                          if key != identifier and other.zone == resident.zone and not other.parked
+                          and not other.away and not self.busy(other))
+        if not partners:
+            return "no_partner"
+        runner = self.residents[partners[0][1]]
+        width = self.zones[resident.zone].width_pixels * 1000
+        away = width - 16000 if runner.x_milli >= resident.x_milli else 16000
+        duration = self.rng.randint(*TAG_MS)
+        for member, target in ((runner, away), (resident, away - (24000 if away > resident.x_milli else -24000))):
+            cancel_activity(self, member, "tag")
+            start(self, member, "tag", "playing_tag", duration=duration)
+            member.activity.target_x = max(0, min(width - 1, target))
+        resident.activity.partner = runner.identifier
+        return "accepted"
+
+    def focus_begin(self) -> list[str]:
+        """Pets keep you company while you focus: each free pet gets a work request queued.
+
+        Nothing running is interrupted (requests wait for the pet's next choice), a pet
+        without a job takes one the normal way, and rewards are ordinary work rewards. The
+        home remembers which requests are its own so ``focus_end`` withdraws only those.
+        """
+        queued = []
+        for identifier in sorted(self.residents):
+            resident = self.residents[identifier]
+            if (resident.parked or resident.away or resident.zone in self.offline_zones
+                    or "work" in resident.commands or identifier in self._focus_owned):
+                continue
+            if not self.open_tasks(identifier) and self.automatic:
+                auto_task(self, resident)
+            if refusal(self, resident, "work") is None:      # queued, never cancelling what it is doing
+                resident.commands.append("work")
+                self._focus_owned.add(identifier)
+                queued.append(identifier)
+        return queued
+
+    def focus_end(self) -> list[str]:
+        """Take back the work requests the focus session queued and nobody has acted on yet."""
+        withdrawn = []
+        for identifier in sorted(self._focus_owned):
+            resident = self.residents.get(identifier)
+            if resident is not None and "work" in resident.commands:
+                resident.commands.remove("work")
+                withdrawn.append(identifier)
+        self._focus_owned.clear()
+        return withdrawn
+
+    def interact(self, identifier: str, kind: str) -> str:
+        """Feed, pat or talk to a pet; it never interrupts what the pet is doing."""
+        resident = self.residents.get(identifier)
+        if resident is None or kind not in INTERACTIONS:
+            return "unknown"
+        if resident.parked or resident.away:
+            return "parked"
+        if kind in PLAYFUL and self.busy(resident):
+            return "busy"
+        last = self._interacted.get((identifier, kind))
+        if last is not None and self.time_ms - last < INTERACT_COOLDOWN_MS:
+            return "too_soon"
+        self._interacted[(identifier, kind)] = self.time_ms
+        for need, change in INTERACTIONS[kind].items():
+            resident.needs[need] = max(0, min(100, resident.needs[need] + change))
+        if kind == "pat":
+            resident.affection = min(MAX_AFFECTION, resident.affection + 1)
+        self.emit("interacted", resident=identifier, interaction=kind)
         return "accepted"
 
     def command(self, identifier: str, command: str) -> str:
@@ -402,6 +654,8 @@ class World:
             return "invalid", None
         if member.level(found.profession) < found.min_level:
             return "skill_too_low", None
+        if not unlocked(self, found.unlock_level):
+            return "locked", None
         if station is not None:
             piece = self.furniture.get(station)
             if piece is None or self.definition(piece).profession != found.profession:

@@ -164,3 +164,12 @@ def pending() -> bool:
 def errors() -> list[str]:
     """Report only bounded owned capture failures without reading any new audio."""
     return sorted({capture.last_error for capture in list(_captures) if capture.last_error})[:8]
+
+
+def owned_level_provider(lifetime, *, microphone=False):
+    """Capture one runtime's lazy meter and its actual process-reaping worker."""
+    meter = PulseMeter(microphone=microphone)
+    lifetime.register_stop(meter.close)
+    lifetime.register_pending(lambda: meter.capture.thread is not None and meter.capture.thread.is_alive())
+    lifetime.adopt(meter.idle_timer)
+    return meter.level

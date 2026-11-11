@@ -14,6 +14,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional
 from pathlib import Path
+from shiboken6 import isValid
 
 from PySide6.QtCore import QSignalBlocker
 from PySide6.QtGui import QGuiApplication
@@ -28,6 +29,7 @@ from frontengine.utils.midi.midi_input import available as midi_available, list_
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import tr
 from frontengine.utils.remote.remote_server import ALLOWED_ACTIONS
+from frontengine.ui.dialog.dialog_kit import button_row, roomy
 
 MIDI_KEY = "midi_bindings"
 REMOTE_KEY = "phone_remote"
@@ -57,6 +59,8 @@ class RemoteControlDialog(QDialog):
     def __init__(self, parent: Optional[QWidget] = None, remote=None, midi=None) -> None:
         front_engine_logger.info("[RemoteControlDialog] Init")
         super().__init__(parent)
+        self._closed = False
+        self.finished.connect(self._mark_closed)
         self.setWindowTitle(_t("remote_title", "Remote control"))
         self._remote = remote
         self._midi = midi
@@ -118,19 +122,17 @@ class RemoteControlDialog(QDialog):
         self.button_box.accepted.connect(self.accept)
         self.button_box.rejected.connect(self.reject)
 
-        layout = QGridLayout(self)
+        layout = roomy(QGridLayout(self))
         layout.addWidget(self.remote_checkbox, 0, 0, 1, 3)
         layout.addWidget(self.remote_url_label, 1, 0, 1, 2)
         layout.addWidget(self.remote_copy_button, 1, 2)
         layout.addWidget(self.remote_hint, 2, 0, 1, 3)
         layout.addWidget(self.certificate_label, 3, 0, 1, 3)
-        layout.addWidget(self.certificate_export_button, 4, 0, 1, 2)
-        layout.addWidget(self.certificate_regenerate_button, 4, 2)
+        layout.addWidget(button_row(self.certificate_export_button, self.certificate_regenerate_button), 4, 0, 1, 3)
         layout.addWidget(self.midi_label, 5, 0)
         layout.addWidget(self.midi_combobox, 5, 1, 1, 2)
         layout.addWidget(self.table, 6, 0, 1, 3)
-        layout.addWidget(self.learn_button, 7, 0)
-        layout.addWidget(self.remove_button, 7, 1)
+        layout.addWidget(button_row(self.learn_button, self.remove_button), 7, 0, 1, 3)
         layout.addWidget(self.button_box, 8, 0, 1, 3)
 
         for control, action in current_bindings().items():
@@ -154,13 +156,16 @@ class RemoteControlDialog(QDialog):
             fingerprint=certificate.fingerprint,
             expires=certificate.expires_at.strftime("%Y-%m-%d UTC"))
 
+    def _mark_closed(self) -> None:
+        self._closed = True
+
     def export_certificate(self) -> bool:
-        if self._remote is None:
+        if self._closed or not isValid(self) or self._remote is None:
             return False
         filename, _ = QFileDialog.getSaveFileName(
             self, _t("remote_certificate_export", "Export public certificate"),
             "frontengine-remote.crt", "Certificate (*.crt *.pem)")
-        if not filename:
+        if self._closed or not isValid(self) or not filename:
             return False
         success = self._remote.export_certificate(Path(filename))
         self.remote_url_label.setText(self.remote_status())

@@ -6,6 +6,8 @@ The presentation page: screen annotation, cursor emphasis (ring, click ripple,
 spotlight), a keystroke display and a region magnifier. Everything except the
 annotation layer passes clicks straight through.
 """
+from frontengine.ui.runtime_lifetime import owned_action
+from frontengine.ui.runtime_lifetime import OwnedWidgetList
 from typing import List, Optional
 
 from PySide6.QtCore import Qt
@@ -26,7 +28,13 @@ from frontengine.show.presentation.keystroke_display import (
 )
 from frontengine.show.presentation.magnifier import MagnifierWidget
 from frontengine.show.freeze.freeze_widget import FreezeWidget, capture_screen
-from frontengine.ui.page.utils import build_target_monitor_combobox, coerce_int, resolve_preferred_monitor
+from frontengine.ui.page.utils import (
+    apply_target_monitor_state,
+    target_monitor_state,
+    build_target_monitor_combobox,
+    coerce_int,
+    resolve_preferred_monitor,
+)
 from frontengine.utils.input_watch.input_watch_service import InputWatchService
 from frontengine.ui.page.layout_kit import SettingPage
 from frontengine.utils.logging.loggin_instance import front_engine_logger
@@ -37,16 +45,16 @@ from frontengine.utils.multi_language.retranslate import retranslator, tr
 class PresentationSettingUI(SettingPage):
     """簡報與教學工具設定頁。"""
 
-    def __init__(self):
+    def __init__(self, *, lifetime):
         front_engine_logger.info("[PresentationSettingUI] Init")
         super().__init__("tab_presentation_text", "page_subtitle_presentation",
-                         "Presenting", "Draw, magnify and highlight while you present.")
+                         "Presenting", "Draw, magnify and highlight while you present.", lifetime=lifetime)
 
-        self.annotation_widget_list: List[AnnotationOverlay] = []
-        self.whiteboard_widget_list: List[WhiteboardWidget] = []
-        self.cursor_widget_list: List[CursorEffectWidget] = []
-        self.keystroke_widget_list: List[KeystrokeDisplayWidget] = []
-        self.magnifier_widget_list: List[MagnifierWidget] = []
+        self.annotation_widget_list: List[AnnotationOverlay] = OwnedWidgetList(self.lifetime)
+        self.whiteboard_widget_list: List[WhiteboardWidget] = OwnedWidgetList(self.lifetime)
+        self.cursor_widget_list: List[CursorEffectWidget] = OwnedWidgetList(self.lifetime)
+        self.keystroke_widget_list: List[KeystrokeDisplayWidget] = OwnedWidgetList(self.lifetime)
+        self.magnifier_widget_list: List[MagnifierWidget] = OwnedWidgetList(self.lifetime)
         # 全域輸入監聽（按鍵顯示與點擊漣漪共用；pynput 不可用時自動停用）
         # Shared global input watching; disables itself without pynput.
         self.input_watch = InputWatchService(self)
@@ -133,7 +141,7 @@ class PresentationSettingUI(SettingPage):
         # 凍結畫面：把目標螢幕現在的樣子拍下來蓋上去，講解時可以先停住畫面
         # Freeze: cover the target screen with a photograph of itself, so an
         # explanation can be paced without the audience watching you work.
-        self.freeze_widget_list: list = []
+        self.freeze_widget_list: list = OwnedWidgetList(self.lifetime)
         self.freeze_label = tr(QLabel(), "presentation_freeze_label", "Freeze screen")
         self.freeze_button = tr(QPushButton(), "presentation_freeze_start", "Freeze")
         self.freeze_button.clicked.connect(self.toggle_freeze)
@@ -219,12 +227,14 @@ class PresentationSettingUI(SettingPage):
             self.input_watch.stop()
 
     # --- annotation ------------------------------------------------------
+    @owned_action
     def toggle_annotation(self) -> None:
         if self.annotation_widget_list:
             self.stop_annotation()
         else:
             self.start_annotation()
 
+    @owned_action
     def start_annotation(self) -> None:
         front_engine_logger.info("[PresentationSettingUI] start_annotation")
         self.stop_annotation()
@@ -250,6 +260,7 @@ class PresentationSettingUI(SettingPage):
         for widget in self.annotation_widget_list:
             widget.clear()
 
+    @owned_action
     def _apply_annotation_settings(self) -> None:
         for widget in self.annotation_widget_list[:]:
             try:
@@ -260,12 +271,14 @@ class PresentationSettingUI(SettingPage):
                 self.annotation_widget_list.remove(widget)
 
     # --- cursor effects --------------------------------------------------
+    @owned_action
     def toggle_cursor_effects(self) -> None:
         if self.cursor_widget_list:
             self.stop_cursor_effects()
         else:
             self.start_cursor_effects()
 
+    @owned_action
     def start_cursor_effects(self) -> None:
         front_engine_logger.info("[PresentationSettingUI] start_cursor_effects")
         self.stop_cursor_effects()
@@ -287,6 +300,7 @@ class PresentationSettingUI(SettingPage):
         retranslator.set_text(
             self.cursor_button, "cursor_effect_start", "Turn cursor effects on")
 
+    @owned_action
     def _apply_cursor_settings(self) -> None:
         for widget in self.cursor_widget_list[:]:
             try:
@@ -298,12 +312,14 @@ class PresentationSettingUI(SettingPage):
                 self.cursor_widget_list.remove(widget)
 
     # --- keystroke display -----------------------------------------------
+    @owned_action
     def toggle_keystrokes(self) -> None:
         if self.keystroke_widget_list:
             self.stop_keystrokes()
         else:
             self.start_keystrokes()
 
+    @owned_action
     def start_keystrokes(self) -> None:
         front_engine_logger.info("[PresentationSettingUI] start_keystrokes")
         self.stop_keystrokes()
@@ -325,6 +341,7 @@ class PresentationSettingUI(SettingPage):
         retranslator.set_text(
             self.keystroke_button, "keystroke_start", "Show keystrokes")
 
+    @owned_action
     def _apply_keystroke_settings(self) -> None:
         for widget in self.keystroke_widget_list[:]:
             try:
@@ -335,6 +352,7 @@ class PresentationSettingUI(SettingPage):
             except RuntimeError:
                 self.keystroke_widget_list.remove(widget)
 
+    @owned_action
     def _on_key_pressed(self, keys) -> None:
         for widget in self.keystroke_widget_list[:]:
             try:
@@ -342,6 +360,7 @@ class PresentationSettingUI(SettingPage):
             except RuntimeError:
                 self.keystroke_widget_list.remove(widget)
 
+    @owned_action
     def _on_mouse_pressed(self, button: str) -> None:
         for widget in self.keystroke_widget_list[:]:
             try:
@@ -349,6 +368,7 @@ class PresentationSettingUI(SettingPage):
             except RuntimeError:
                 self.keystroke_widget_list.remove(widget)
 
+    @owned_action
     def _on_mouse_clicked(self, x: int, y: int) -> None:
         from PySide6.QtCore import QPoint
 
@@ -359,12 +379,14 @@ class PresentationSettingUI(SettingPage):
                 self.cursor_widget_list.remove(widget)
 
     # --- magnifier -------------------------------------------------------
+    @owned_action
     def toggle_magnifier(self) -> None:
         if self.magnifier_widget_list:
             self.stop_magnifier()
         else:
             self.start_magnifier()
 
+    @owned_action
     def start_magnifier(self) -> None:
         front_engine_logger.info("[PresentationSettingUI] start_magnifier")
         self.stop_magnifier()
@@ -387,6 +409,7 @@ class PresentationSettingUI(SettingPage):
         retranslator.set_text(
             self.magnifier_button, "magnifier_start", "Turn magnifier on")
 
+    @owned_action
     def _apply_magnifier_settings(self) -> None:
         for widget in self.magnifier_widget_list[:]:
             try:
@@ -395,12 +418,14 @@ class PresentationSettingUI(SettingPage):
                 self.magnifier_widget_list.remove(widget)
 
     # --- whiteboard ------------------------------------------------------
+    @owned_action
     def toggle_whiteboard(self) -> None:
         if self.whiteboard_widget_list:
             self.stop_whiteboard()
         else:
             self.start_whiteboard()
 
+    @owned_action
     def toggle_freeze(self):
         """
         凍結／解除目標螢幕。已經凍結就解除，所以同一顆按鈕（和同一個快速鍵）
@@ -463,11 +488,12 @@ class PresentationSettingUI(SettingPage):
             # relabel, and nothing that needs relabelling.
             pass
 
+    @owned_action
     def start_whiteboard(self) -> None:
         """開一塊無限畫布（可平移縮放，畫過的東西留在畫布座標上）。"""
         front_engine_logger.info("[PresentationSettingUI] start_whiteboard")
         board = WhiteboardWidget(self.annotate_color_combobox.currentData(),
-                                 self.annotate_width_slider.value())
+                                 self.annotate_width_slider.value(), lifetime=self.lifetime)
         self._present(board)
         self.whiteboard_widget_list.append(board)
         retranslator.set_text(
@@ -478,13 +504,14 @@ class PresentationSettingUI(SettingPage):
         retranslator.set_text(
             self.whiteboard_button, "whiteboard_start", "Whiteboard")
 
+    @owned_action
     def save_whiteboard(self) -> Optional[str]:
         """把白板存成圖片；沒畫東西就不存。"""
         for board in self.whiteboard_widget_list[:]:
+            target = self.lifetime.after_dialog(QFileDialog.getSaveFileName(
+                self, language_wrapper.language_word_dict.get(
+                    "whiteboard_save", "Save whiteboard"), "whiteboard.png", "PNG (*.png)"))[0]
             try:
-                target = QFileDialog.getSaveFileName(
-                    self, language_wrapper.language_word_dict.get(
-                        "whiteboard_save", "Save whiteboard"), "whiteboard.png", "PNG (*.png)")[0]
                 if target:
                     return board.save_image(target)
             except RuntimeError:
@@ -504,7 +531,7 @@ class PresentationSettingUI(SettingPage):
             "keystroke_position": self.keystroke_position_combobox.currentData(),
             "keystroke_size": self.keystroke_size_combobox.currentText(),
             "keystroke_mouse": self.keystroke_mouse_checkbox.isChecked(),
-            "target_monitor": self.target_monitor_combobox.currentText(),
+            "target_monitor": target_monitor_state(self.target_monitor_combobox),
         }
 
     @staticmethod
@@ -521,13 +548,13 @@ class PresentationSettingUI(SettingPage):
             combobox.setCurrentIndex(index)
 
     def set_state(self, state: dict) -> None:
+        apply_target_monitor_state(self.target_monitor_combobox, state.get("target_monitor"))
         for combobox, key in ((self.annotate_tool_combobox, "annotate_tool"),
                               (self.keystroke_position_combobox, "keystroke_position")):
             self._select_by(combobox, state.get(key), "findData")
         for combobox, key in ((self.annotate_color_combobox, "annotate_color"),
                               (self.magnifier_zoom_combobox, "magnifier_zoom"),
-                              (self.keystroke_size_combobox, "keystroke_size"),
-                              (self.target_monitor_combobox, "target_monitor")):
+                              (self.keystroke_size_combobox, "keystroke_size")):
             self._select_by(combobox, state.get(key), "findText")
         width = coerce_int(state.get("annotate_width"))
         if width is not None:

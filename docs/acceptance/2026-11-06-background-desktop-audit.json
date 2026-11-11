@@ -1,0 +1,56 @@
+{
+  "base": "c1ac370a",
+  "scope": "Read-only desktop identity audit; no Qt window, desktop switch, input injection or cursor movement requested.",
+  "observed": {
+    "before": {
+      "pid": 15404,
+      "thread_desktop": "Default",
+      "input_desktop": "Default",
+      "foreground": 36114656,
+      "foreground_pid": 68308,
+      "cursor": [
+        959,
+        540
+      ]
+    },
+    "after": {
+      "pid": 15404,
+      "thread_desktop": "Default",
+      "input_desktop": "Default",
+      "foreground": 36114656,
+      "foreground_pid": 68308,
+      "cursor": [
+        959,
+        539
+      ]
+    },
+    "child_exit": 0,
+    "child": {
+      "pid": 51900,
+      "thread_desktop": "FrontEngineReadOnlyf804d69342594efc8876af2017dcb448",
+      "input_desktop": "Default"
+    }
+  },
+  "finding": "Existing CreateDesktopW/CreateProcessW lpDesktop path placed this child on its named private desktop while the input desktop remained Default.",
+  "interpretation": "Cursor samples differed by one pixel even in this no-UI probe. The samples contain no attribution information; neither user movement nor application interference is established.",
+  "change": "Correct hidden_desktop module documentation: private desktop assignment is not an unconditional guarantee about arbitrary child code or externally changing foreground/cursor state.",
+  "prior_results": "Native form/signage/dinner observer mismatches remain unresolved and are not reclassified as passes.",
+  "limits": [
+    "One short read-only child launch does not prove all native application paths are non-interfering.",
+    "No continuous input-desktop monitoring; before/after samples cannot exclude transient changes.",
+    "No historical foreground PID records exist for earlier probes, so those changes cannot be attributed retrospectively.",
+    "Follow-up native probes should record actual child desktop and input-desktop identity before constructing Qt windows; this audit does not add that guard to every prior script.",
+    "Only a test-helper docstring changed; no application behavior or function signatures changed.",
+    "Full UI/UX, pet events, independent review, integration and hardware acceptance remain incomplete."
+  ],
+  "sources": [
+    "https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getcursorpos",
+    "https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getforegroundwindow",
+    "https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-openinputdesktop"
+  ],
+  "evidence_sha256": {
+    ".audit\\desktop-isolation\\result.json": "59290cc3abbc4fd7193e05a66f1ad0cb23cd59933485cbe0fc9a75fdd18497c0",
+    ".audit\\observe_desktop_isolation.py": "e08a8afa89276593b00d235cbe293873379218439e86379ebcf1bc0ae44cf698",
+    ".audit\\desktop-isolation\\child.json": "680732704591683637bfd39b6af217fef7f59ac345f3d5d677ce4b29bdc45466"
+  }
+}

@@ -1,0 +1,107 @@
+{
+  "status": "partial",
+  "base": "283bcb2f",
+  "problem": "A picker returning after comparison closure modified cleared paths or status. A single returned image after destruction accessed an already deleted QLabel.",
+  "change": "Check Qt validity, the existing closed state and owner lifetime before opening the picker and before consuming its results.",
+  "reproduction": {
+    "log": ".audit/image-compare-modal-red.log",
+    "result": "4 failed, 7 deselected in 4.47s",
+    "cases": "One or two paths returned after rejection, with or without destruction.",
+    "observed": [
+      "Status changed after closure",
+      "Cleared paths were repopulated",
+      "Deleted QLabel raised RuntimeError"
+    ]
+  },
+  "verification": {
+    "command": "D:/Codes/FrontEngine/.audit/host-runtime-612/Scripts/python.exe -m pytest tests/unit_test/test_image_compare.py tests/unit_test/test_runtime_ownership.py -q",
+    "log": ".audit/image-compare-modal-green.log",
+    "exit_code": 0,
+    "passed": 41,
+    "seconds": 9.58,
+    "coverage": [
+      "Four closure cases preserve cleared paths and requests, avoid starting work or changing status, and refuse picker reentry.",
+      "Cancelling selection preserves decoded red/blue images and status; retrying decodes green/white images and updates displayed filenames.",
+      "Existing comparison rendering, latest-request handling and close-time cancellation remain covered."
+    ]
+  },
+  "limitations": [
+    "Offscreen Qt tests substitute picker return values.",
+    "Full regression, independent review and integration remain pending. Native checks do not cover OS keyboard input or the real file picker.",
+    "No EXE was built."
+  ],
+  "native": {
+    "directory": ".audit/native-image-compare",
+    "platform": "Windows private desktop, Traditional_Chinese, dark, 900x740 main window",
+    "entry": "Actual image page open_image_compare; widget-local Space on the focused choose button, with Tab navigation available. Picker results substituted.",
+    "cases": {
+      "cases": [
+        {
+          "choice": "close_one",
+          "passed": true
+        },
+        {
+          "choice": "close_two",
+          "passed": true
+        },
+        {
+          "choice": "initial",
+          "passed": true
+        },
+        {
+          "choice": "cancel",
+          "passed": true
+        },
+        {
+          "choice": "retry",
+          "passed": true
+        }
+      ],
+      "actual_image_entry": true,
+      "retired_dialogs_destroyed": true,
+      "final_dialog_destroyed": true
+    },
+    "observer": {
+      "before": {
+        "foreground": 2558004,
+        "cursor": [
+          768,
+          432
+        ]
+      },
+      "after": {
+        "foreground": 2558004,
+        "cursor": [
+          768,
+          432
+        ]
+      },
+      "child_exit": 0
+    },
+    "runtime_closed": true,
+    "temporary_directory_removed": true,
+    "stderr_empty": true,
+    "cold_home": {
+      "passed": true,
+      "initial_snapshot_exact": true,
+      "profiles_exact": true,
+      "leases_reacquired": true,
+      "saved_exact": true,
+      "temporary_directory_removed": true
+    }
+  },
+  "documentation": {
+    "files": 17,
+    "checks": "54 passed in 3.20s",
+    "sphinx": "HTML build with -W passed",
+    "rendered_paragraphs_exact": [
+      "Eng",
+      "Zh",
+      "ZhCn",
+      "De",
+      "Fr",
+      "Ru",
+      "It"
+    ]
+  }
+}

@@ -1,0 +1,299 @@
+{
+  "product_test_commit": "7743fd6b",
+  "status": "native defect reproduced; fix pending",
+  "pages": 10,
+  "languages": 7,
+  "page_visits": 70,
+  "option_groups": 15,
+  "comparison_count": 105,
+  "mismatches": 90,
+  "mismatch_count_by_language": {
+    "Traditional_Chinese": 15,
+    "Simplified_Chinese": 15,
+    "Deutsch": 15,
+    "Russian": 15,
+    "France": 15,
+    "Italy": 15
+  },
+  "affected_groups": [
+    {
+      "page": "tab_focus_text",
+      "control": "target_monitor_combobox"
+    },
+    {
+      "page": "tab_gif_text",
+      "control": "recent_files_combobox"
+    },
+    {
+      "page": "tab_gif_text",
+      "control": "target_monitor_combobox"
+    },
+    {
+      "page": "tab_image_text",
+      "control": "recent_files_combobox"
+    },
+    {
+      "page": "tab_image_text",
+      "control": "target_monitor_combobox"
+    },
+    {
+      "page": "tab_particle_text",
+      "control": "recent_files_combobox"
+    },
+    {
+      "page": "tab_particle_text",
+      "control": "target_monitor_combobox"
+    },
+    {
+      "page": "tab_pet_text",
+      "control": "recent_files_combobox"
+    },
+    {
+      "page": "tab_pet_text",
+      "control": "target_monitor_combobox"
+    },
+    {
+      "page": "tab_presentation_text",
+      "control": "target_monitor_combobox"
+    },
+    {
+      "page": "tab_screen_care_text",
+      "control": "target_monitor_combobox"
+    },
+    {
+      "page": "tab_text_text",
+      "control": "target_monitor_combobox"
+    },
+    {
+      "page": "tab_video_text",
+      "control": "recent_files_combobox"
+    },
+    {
+      "page": "tab_video_text",
+      "control": "target_monitor_combobox"
+    },
+    {
+      "page": "tab_web_text",
+      "control": "target_monitor_combobox"
+    }
+  ],
+  "traditional_chinese_examples": [
+    {
+      "language": "Traditional_Chinese",
+      "page": "tab_video_text",
+      "control": "target_monitor_combobox",
+      "actual": [
+        "This screen (where FrontEngine is)"
+      ],
+      "expected": [
+        "這個螢幕（FrontEngine 所在的螢幕）"
+      ]
+    },
+    {
+      "language": "Traditional_Chinese",
+      "page": "tab_video_text",
+      "control": "recent_files_combobox",
+      "actual": [
+        "Recent"
+      ],
+      "expected": [
+        "最近使用"
+      ]
+    },
+    {
+      "language": "Traditional_Chinese",
+      "page": "tab_image_text",
+      "control": "target_monitor_combobox",
+      "actual": [
+        "This screen (where FrontEngine is)"
+      ],
+      "expected": [
+        "這個螢幕（FrontEngine 所在的螢幕）"
+      ]
+    },
+    {
+      "language": "Traditional_Chinese",
+      "page": "tab_image_text",
+      "control": "recent_files_combobox",
+      "actual": [
+        "Recent"
+      ],
+      "expected": [
+        "最近使用"
+      ]
+    },
+    {
+      "language": "Traditional_Chinese",
+      "page": "tab_web_text",
+      "control": "target_monitor_combobox",
+      "actual": [
+        "This screen (where FrontEngine is)"
+      ],
+      "expected": [
+        "這個螢幕（FrontEngine 所在的螢幕）"
+      ]
+    },
+    {
+      "language": "Traditional_Chinese",
+      "page": "tab_gif_text",
+      "control": "target_monitor_combobox",
+      "actual": [
+        "This screen (where FrontEngine is)"
+      ],
+      "expected": [
+        "這個螢幕（FrontEngine 所在的螢幕）"
+      ]
+    },
+    {
+      "language": "Traditional_Chinese",
+      "page": "tab_gif_text",
+      "control": "recent_files_combobox",
+      "actual": [
+        "Recent"
+      ],
+      "expected": [
+        "最近使用"
+      ]
+    },
+    {
+      "language": "Traditional_Chinese",
+      "page": "tab_text_text",
+      "control": "target_monitor_combobox",
+      "actual": [
+        "This screen (where FrontEngine is)"
+      ],
+      "expected": [
+        "這個螢幕（FrontEngine 所在的螢幕）"
+      ]
+    },
+    {
+      "language": "Traditional_Chinese",
+      "page": "tab_particle_text",
+      "control": "target_monitor_combobox",
+      "actual": [
+        "This screen (where FrontEngine is)"
+      ],
+      "expected": [
+        "這個螢幕（FrontEngine 所在的螢幕）"
+      ]
+    },
+    {
+      "language": "Traditional_Chinese",
+      "page": "tab_particle_text",
+      "control": "recent_files_combobox",
+      "actual": [
+        "Recent"
+      ],
+      "expected": [
+        "最近使用"
+      ]
+    },
+    {
+      "language": "Traditional_Chinese",
+      "page": "tab_pet_text",
+      "control": "target_monitor_combobox",
+      "actual": [
+        "This screen (where FrontEngine is)"
+      ],
+      "expected": [
+        "這個螢幕（FrontEngine 所在的螢幕）"
+      ]
+    },
+    {
+      "language": "Traditional_Chinese",
+      "page": "tab_pet_text",
+      "control": "recent_files_combobox",
+      "actual": [
+        "Recent"
+      ],
+      "expected": [
+        "最近使用"
+      ]
+    },
+    {
+      "language": "Traditional_Chinese",
+      "page": "tab_focus_text",
+      "control": "target_monitor_combobox",
+      "actual": [
+        "This screen (where FrontEngine is)"
+      ],
+      "expected": [
+        "這個螢幕（FrontEngine 所在的螢幕）"
+      ]
+    },
+    {
+      "language": "Traditional_Chinese",
+      "page": "tab_screen_care_text",
+      "control": "target_monitor_combobox",
+      "actual": [
+        "This screen (where FrontEngine is)"
+      ],
+      "expected": [
+        "這個螢幕（FrontEngine 所在的螢幕）"
+      ]
+    },
+    {
+      "language": "Traditional_Chinese",
+      "page": "tab_presentation_text",
+      "control": "target_monitor_combobox",
+      "actual": [
+        "This screen (where FrontEngine is)"
+      ],
+      "expected": [
+        "這個螢幕（FrontEngine 所在的螢幕）"
+      ]
+    }
+  ],
+  "selection_and_data_unchanged": true,
+  "index_change_signals": {
+    "('tab_video_text', 'target_monitor_combobox')": [],
+    "('tab_video_text', 'recent_files_combobox')": [],
+    "('tab_image_text', 'target_monitor_combobox')": [],
+    "('tab_image_text', 'recent_files_combobox')": [],
+    "('tab_web_text', 'target_monitor_combobox')": [],
+    "('tab_gif_text', 'target_monitor_combobox')": [],
+    "('tab_gif_text', 'recent_files_combobox')": [],
+    "('tab_text_text', 'target_monitor_combobox')": [],
+    "('tab_particle_text', 'target_monitor_combobox')": [],
+    "('tab_particle_text', 'recent_files_combobox')": [],
+    "('tab_pet_text', 'target_monitor_combobox')": [],
+    "('tab_pet_text', 'recent_files_combobox')": [],
+    "('tab_focus_text', 'target_monitor_combobox')": [],
+    "('tab_screen_care_text', 'target_monitor_combobox')": [],
+    "('tab_presentation_text', 'target_monitor_combobox')": []
+  },
+  "callback_errors": [],
+  "runtime_closed": true,
+  "temporary_directory_removed": true,
+  "observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "child_exit": 1,
+    "observation_only": true
+  },
+  "source_cause": "build_target_monitor_combobox and reload_recent_combobox read language_wrapper only at construction/reload; no retranslation binding.",
+  "visual_review": "Original-resolution Traditional_Chinese-900-tab_video_text.png shows Recent and This screen in English within Chinese UI.",
+  "evidence_sha256": {
+    "result.json": "3c1131fcbfcabb652643614156bf340e1242443c2ee085156225c29379abaf3a",
+    "observer.json": "d314eef80ba48b814556966ad9dda568266e019fdb594765f8c590f6d7313c65",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "Traditional_Chinese-900-tab_video_text.png": "e4d4a0452c1b5fc8b8ec6d25202e9f81350e37a07d8ebdb52d30b9dc594e20e7"
+  },
+  "limits": [
+    "One actual monitor; span-all entry and hotplug not tested.",
+    "Recent lists used copied settings; populated file choice and reload behavior require regression.",
+    "No overlay launch, OS input or full accessibility acceptance."
+  ]
+}

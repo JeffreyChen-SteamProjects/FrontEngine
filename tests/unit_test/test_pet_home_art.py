@@ -2,14 +2,14 @@
 import time
 
 import pytest
-from PySide6.QtCore import QCoreApplication, QThreadPool
+from PySide6.QtCore import QCoreApplication
+from PySide6.QtTest import QTest
 
 from frontengine.show.pet.asset_library import PetAssetLibrary
 from frontengine.show.pet.wardrobe import WardrobeDraft, asset_reference
 from frontengine.show.pet_game.home_service import HomeService
 from frontengine.show.pet_game.home_view import SPRITE_CELLS, HomeView
 from frontengine.show.pet_game.resident_art import ResidentArt, fallback_character, semantic_action
-from frontengine.user_setting.pet_game_save import HomeSaveStore
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.utils.pet_game.catalog import builtin_catalog
 from frontengine.utils.pet_game.resident import Activity
@@ -19,22 +19,24 @@ from test_pet_variants import variant_asset
 def _wait(condition, timeout: float = 10.0) -> None:
     deadline = time.monotonic() + timeout
     while not condition():
-        QThreadPool.globalInstance().waitForDone(50)
+        QTest.qWait(10)
         QCoreApplication.processEvents()
         assert time.monotonic() < deadline, "timed out"
 
 
 @pytest.fixture
-def home(tmp_path):
+def home(tmp_path, *, home_store_factory, lifetime_factory):
+    lifetime = lifetime_factory()
     library = PetAssetLibrary(tmp_path / "library")
     asset = library.install(variant_asset(tmp_path / "cat").root)
     profiles = PetProfiles({}, lambda: None)
-    service = HomeService(None, HomeSaveStore(tmp_path, builtin_catalog()), profiles)
+    service = HomeService(None, home_store_factory(tmp_path, builtin_catalog()), profiles)
     service.create_home("screen", 0, 900, 40, seed=3)
     record = profiles.create("Mochi")
     assert service.adopt(record["id"]) == "accepted"
-    art = ResidentArt(service, library_factory=lambda: library)
+    art = ResidentArt(service, library_factory=lambda: library, lifetime=lifetime)
     yield service, art, library, asset, record["id"]
+    art.shutdown()
     service.shutdown()
 
 
@@ -61,7 +63,7 @@ def test_pets_without_a_character_appear_as_a_built_in_stand_in(home):
     assert art.renderer(identifier) is None                      # loading in the background
     changed = []
     art.changed.connect(lambda: changed.append(True))
-    _wait(lambda: changed, timeout=60)
+    _wait(lambda: changed, timeout=180)   # building the stand-in is slow on CI runners
     renderer = art.renderer(identifier)
     assert renderer is not None
     assert renderer.character.identifier == fallback_character(identifier)

@@ -98,7 +98,7 @@ def test_local_failure_and_empty_success_are_not_conflated():
 
 
 @pytest.mark.skipif(sys.platform != "win32", reason="Windows native OCR integration")
-def test_windows_ocr_reads_a_real_rendered_image_on_worker_thread():
+def test_windows_ocr_reads_a_real_rendered_image_on_worker_thread(request):
     from PySide6.QtCore import QBuffer, QByteArray, QIODevice
     from PySide6.QtGui import QColor, QFont, QFontDatabase, QImage, QPainter
     from pathlib import Path
@@ -109,7 +109,9 @@ def test_windows_ocr_reads_a_real_rendered_image_on_worker_thread():
     if not backend.available():
         pytest.skip("Windows OCR projection packages are not installed")
     font_file = Path(os.environ.get("WINDIR", "C:/Windows")) / "Fonts" / "arial.ttf"
-    assert QFontDatabase.addApplicationFont(str(font_file)) >= 0
+    identifier = QFontDatabase.addApplicationFont(str(font_file))
+    assert identifier >= 0
+    request.addfinalizer(lambda: QFontDatabase.removeApplicationFont(identifier))
     image = QImage(1100, 180, QImage.Format.Format_RGB32)
     image.fill(QColor("white"))
     painter = QPainter(image)

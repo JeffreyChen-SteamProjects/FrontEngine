@@ -1,4 +1,4 @@
-"""Sprite destination that ends in the shared greeting action."""
+"""Layered pet destination that ends in the shared greeting action."""
 from frontengine.show.pet.light_toy import LightToy
 
 

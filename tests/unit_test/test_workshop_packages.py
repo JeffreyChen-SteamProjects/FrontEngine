@@ -21,7 +21,7 @@ def preview(tmp_path):
     return path
 
 
-@pytest.mark.parametrize("kind", ["scene", "preset", "pet_pack"])
+@pytest.mark.parametrize("kind", ["scene", "preset"])
 def test_snapshot_payload_round_trip(tmp_path, preview, kind):
     if kind == "scene":
         source = tmp_path / "source.fescene"
@@ -30,11 +30,6 @@ def test_snapshot_payload_round_trip(tmp_path, preview, kind):
         repository = PresetRepository(tmp_path / "presets")
         repository.save("Test", {"image": {"file_path": str(preview)}})
         source = repository.export_package("Test", tmp_path / "preset.zip")
-    else:
-        source = tmp_path / "pet"
-        source.mkdir()
-        (source / "walk.png").write_bytes(preview.read_bytes())
-        (source / "pet.json").write_text('{"name": "Pet"}', encoding="utf-8")
     output = tmp_path / "snapshot"
     manifest = create_snapshot(kind, source, "My content", preview, output)
     assert validate_content(output) == manifest
@@ -60,7 +55,7 @@ def test_unknown_json_and_malformed_manifest_do_not_become_presets(tmp_path):
 def test_unknown_version_is_rejected(tmp_path):
     (tmp_path / "content").mkdir()
     (tmp_path / "workshop.json").write_text(json.dumps({
-        "format": FORMAT, "version": 2, "kind": "pet_pack", "title": "Pack", "entry": "content"}),
+        "format": FORMAT, "version": 2, "kind": "home_furniture", "title": "Pack", "entry": "content"}),
         encoding="utf-8")
     with pytest.raises(ValueError, match="version"):
         read_manifest(tmp_path)
@@ -76,13 +71,20 @@ def test_failed_snapshot_never_creates_destination(tmp_path, preview):
     assert not list(tmp_path.glob(".workshop-*"))
 
 
-def test_executable_pet_pack_is_rejected(tmp_path, preview):
+def test_sprite_pet_packs_are_neither_published_nor_read(tmp_path, preview):
+    """Pets are layered only: a pet_pack can no longer be published, and a subscribed one is unsupported."""
     source = tmp_path / "pet"
     source.mkdir()
     (source / "walk.png").write_bytes(preview.read_bytes())
-    (source / "plugin.py").write_text('raise RuntimeError("must never run")', encoding="utf-8")
-    with pytest.raises(ValueError, match="Executable"):
+    with pytest.raises(ValueError, match="Unsupported"):
         create_snapshot("pet_pack", source, "Pet", preview, tmp_path / "snapshot")
+    assert not (tmp_path / "snapshot").exists()
+    item = tmp_path / "subscribed"
+    (item / "content").mkdir(parents=True)
+    (item / "workshop.json").write_text(json.dumps({
+        "format": FORMAT, "version": 1, "kind": "pet_pack", "title": "Pack", "entry": "content"}), encoding="utf-8")
+    with pytest.raises(ValueError, match="Unsupported"):
+        read_manifest(item)
 
 
 def test_preset_flat_filename_collision_is_rejected_before_extraction(tmp_path):

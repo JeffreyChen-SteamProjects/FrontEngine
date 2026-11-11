@@ -113,3 +113,16 @@ def test_the_underlines_are_long_enough() -> None:
                     and len(line) < width(previous)):
                 short.append(f"{path.name}:{index + 1}")
     assert not short, f"title underline too short: {short[:8]}"
+
+
+def test_no_emphasis_closes_right_before_a_full_width_bracket() -> None:
+    """
+    A closing ``*`` must be followed by whitespace or punctuation docutils accepts; a full-width
+    opening bracket is not, so ``*name*（`` breaks the page into warnings. Write ``*name*\\ （``.
+    """
+    pattern = re.compile(r"(?<=[^\s*\\])\*(?=[（「『【《])")
+    found = [f"{path.parent.name}/{path.name}:{index + 1}"
+             for path in DOCS.rglob("*.rst")
+             for index, line in enumerate(path.read_text(encoding="utf-8").splitlines())
+             if pattern.search(line)]
+    assert not found, f"emphasis closing before a full-width bracket: {found[:8]}"

@@ -1,4 +1,4 @@
-"""Sprite guidance and arrival on the shared draggable target marker."""
+"""Layered pet guidance and arrival on the shared draggable target marker."""
 from time import monotonic
 
 from frontengine.show.pet.target_marker import TargetMarker

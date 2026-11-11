@@ -107,10 +107,11 @@ def test_scaled_view_gestures_map_to_crop_and_copy_pin_share_result():
         QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
 
 
-def test_editor_replacement_old_destroyed_signal_does_not_clear_new(tmp_path, monkeypatch):
+def test_editor_replacement_old_destroyed_signal_does_not_clear_new(tmp_path, monkeypatch, *, lifetime_factory):
     from frontengine.ui.page.tools.tools_setting_ui import ToolsSettingUI
     monkeypatch.chdir(tmp_path)
-    page = ToolsSettingUI()
+    lifetime_factory()
+    page = ToolsSettingUI(lifetime=lifetime_factory())
     try:
         page.last_capture = QPixmap.fromImage(image())
         page.edit_last_capture()
@@ -126,3 +127,130 @@ def test_editor_replacement_old_destroyed_signal_does_not_clear_new(tmp_path, mo
         page.close()
         page.deleteLater()
         QCoreApplication.sendPostedEvents(page, QEvent.Type.DeferredDelete)
+
+
+@pytest.mark.parametrize('closing', ['reject', 'close', 'destroy', 'reject_pending_delete'])
+@pytest.mark.parametrize('existing', [False, True])
+def test_closed_capture_editor_does_not_write_picker_destination(tmp_path, monkeypatch, closing, existing):
+    from PySide6.QtWidgets import QFileDialog
+    from shiboken6 import isValid
+
+    dialog = CaptureEditor(image())
+    destination = tmp_path / 'capture.png'
+    if existing:
+        destination.write_bytes(b'original file contents')
+    def choose_then_close(*_args):
+        if closing in ('reject', 'reject_pending_delete'):
+            dialog.reject()
+        elif closing == 'close':
+            dialog.close()
+        else:
+            dialog.deleteLater()
+        if closing != 'reject_pending_delete':
+            QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+        return str(destination), ''
+    monkeypatch.setattr(QFileDialog, 'getSaveFileName', choose_then_close)
+    try:
+        dialog.save_result()
+        assert destination.read_bytes() == b'original file contents' if existing else not destination.exists()
+        def unexpected_picker(*_args):
+            pytest.fail('closed capture editor reopened its save picker')
+        monkeypatch.setattr(QFileDialog, 'getSaveFileName', unexpected_picker)
+        dialog.save_result()
+    finally:
+        if isValid(dialog):
+            dialog.close()
+
+
+def test_capture_save_picker_cancel_then_retry_preserves_edits(tmp_path, monkeypatch):
+    from PySide6.QtWidgets import QFileDialog
+
+    dialog = CaptureEditor(image())
+    dialog.document.add('redact', (20, 20), (50, 50))
+    expected = dialog.document.render()
+    destination = tmp_path / 'capture.png'
+    choices = iter([('', ''), (str(destination), '')])
+    monkeypatch.setattr(QFileDialog, 'getSaveFileName', lambda *_args: next(choices))
+    try:
+        dialog.save_result()
+        assert not destination.exists()
+        assert dialog.document.render() == expected
+        dialog.save_result()
+        assert QImage(str(destination)) == expected
+        assert QImage(str(destination)).pixelColor(25, 25) == QColor('black')
+    finally:
+        dialog.close()
+
+
+@pytest.mark.parametrize('closing', ['reject', 'close', 'destroy', 'reject_pending_delete'])
+@pytest.mark.parametrize('accepted', [False, True])
+def test_text_prompt_discards_result_after_capture_closes(monkeypatch, closing, accepted):
+    from PySide6.QtCore import QPointF
+    from PySide6.QtGui import QMouseEvent
+    from PySide6.QtWidgets import QInputDialog
+    from shiboken6 import isValid
+
+    dialog = CaptureEditor(image())
+    document = dialog.document
+    changed = []
+    canvas = dialog.canvas
+    canvas.changed.connect(lambda: changed.append(True))
+    dialog.show()
+    QApplication.processEvents()
+    canvas.mode = 'text'
+    start = canvas.mapFromScene(10, 10)
+    end = canvas.mapFromScene(40, 40)
+    QTest.mousePress(canvas.viewport(), Qt.MouseButton.LeftButton, pos=start)
+    def prompt_then_close(*_args):
+        if closing in ('reject', 'reject_pending_delete'):
+            dialog.reject()
+        elif closing == 'close':
+            dialog.close()
+        else:
+            dialog.deleteLater()
+        if closing != 'reject_pending_delete':
+            QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+        return 'discard this text', accepted
+    monkeypatch.setattr(QInputDialog, 'getMultiLineText', prompt_then_close)
+    event = QMouseEvent(QEvent.Type.MouseButtonRelease, QPointF(end), QPointF(end),
+                        Qt.MouseButton.LeftButton, Qt.MouseButton.NoButton, Qt.KeyboardModifier.NoModifier)
+    try:
+        canvas.mouseReleaseEvent(event)
+        assert document.marks == []
+        assert document.history == []
+        assert changed == []
+    finally:
+        if isValid(dialog):
+            dialog.close()
+
+
+def test_capture_text_cancel_then_retry(monkeypatch):
+    from PySide6.QtCore import QPointF
+    from PySide6.QtGui import QMouseEvent
+    from PySide6.QtWidgets import QInputDialog
+
+    dialog = CaptureEditor(image())
+    choices = iter([('discard', False), ('keep', True)])
+    monkeypatch.setattr(QInputDialog, 'getMultiLineText', lambda *_args: next(choices))
+    try:
+        dialog.show()
+        QApplication.processEvents()
+        canvas = dialog.canvas
+        canvas.mode = 'text'
+        for attempt in range(2):
+            start = canvas.mapFromScene(10, 10)
+            end = canvas.mapFromScene(40, 40)
+            QTest.mousePress(canvas.viewport(), Qt.MouseButton.LeftButton, pos=start)
+            event = QMouseEvent(QEvent.Type.MouseButtonRelease, QPointF(end), QPointF(end),
+                                Qt.MouseButton.LeftButton, Qt.MouseButton.NoButton, Qt.KeyboardModifier.NoModifier)
+            canvas.mouseReleaseEvent(event)
+            if attempt == 0:
+                assert dialog.document.marks == []
+                assert dialog.document.history == []
+                assert canvas.origin is None
+                assert canvas.rubber is None
+        assert len(dialog.document.marks) == 1
+        assert dialog.document.marks[0]['text'] == 'keep'
+        assert dialog.document.render() != dialog.document.original
+    finally:
+        dialog.close()

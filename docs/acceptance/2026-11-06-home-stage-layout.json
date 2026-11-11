@@ -1,0 +1,648 @@
+{
+  "base": "14fb65d3",
+  "change": "Use vertically stacked ContentSection for the home stage; retain labeled Section layout and shared shell.",
+  "failing_before": {
+    "test": "test_work_recovery_keeps_toolbar_below_home",
+    "assertion": "toolbar.top() > view.bottom()",
+    "actual": "538 > 641 was false; view=(48,406,930,236), toolbar=(48,538,930,80)"
+  },
+  "checks": [
+    {
+      "suite": "focused",
+      "cases": 7,
+      "sha256": "1aad3beb27f3241c10940c9d18871e56e20a914434fea727d7d8aef704daa5e6"
+    },
+    {
+      "suite": "related",
+      "cases": 40,
+      "sha256": "837cac083337ae22da3afcd5c44be99103e78566c78fc1db77975dc8e86d6d38"
+    },
+    {
+      "suite": "quiescence",
+      "cases": 4,
+      "sha256": "7ae3b656feedf3631dfdc669125948d68c5d67d472a13d55f521bd6bdc2e4c6f"
+    }
+  ],
+  "native_geometry": [
+    {
+      "label": "after_capture",
+      "rectangles": {
+        "view_area": [
+          288,
+          53,
+          932,
+          234
+        ],
+        "view": [
+          288,
+          53,
+          962,
+          220
+        ],
+        "shortcuts": [
+          288,
+          301,
+          932,
+          26
+        ],
+        "desktop_button": [
+          288,
+          301,
+          81,
+          26
+        ],
+        "pending_box": [
+          288,
+          341,
+          932,
+          66
+        ]
+      },
+      "view_toolbar_intersect": false,
+      "view_button_intersect": false,
+      "button_inside_toolbar": true,
+      "scroll": 306,
+      "device_pixel_ratio": 1.25,
+      "form_geometry": [
+        0,
+        0,
+        932,
+        424
+      ],
+      "content_geometry": [
+        20,
+        18,
+        932,
+        424
+      ],
+      "content_minimum_hint": [
+        58,
+        424
+      ],
+      "items": [
+        {
+          "widget": "homeStatus",
+          "geometry": [
+            0,
+            0,
+            932,
+            16
+          ],
+          "minimum": [
+            31,
+            16
+          ],
+          "hint": [
+            229,
+            32
+          ]
+        },
+        {
+          "widget": "inlineActions",
+          "geometry": [
+            0,
+            30,
+            932,
+            26
+          ],
+          "minimum": [
+            18,
+            26
+          ],
+          "hint": [
+            18,
+            122
+          ]
+        },
+        {
+          "widget": "",
+          "geometry": [
+            0,
+            0,
+            640,
+            480
+          ],
+          "minimum": [
+            0,
+            0
+          ],
+          "hint": [
+            0,
+            0
+          ]
+        },
+        {
+          "widget": "emptyHome",
+          "geometry": [
+            0,
+            70,
+            944,
+            150
+          ],
+          "minimum": [
+            0,
+            0
+          ],
+          "hint": [
+            0,
+            0
+          ]
+        },
+        {
+          "widget": "",
+          "geometry": [
+            0,
+            0,
+            640,
+            480
+          ],
+          "minimum": [
+            0,
+            0
+          ],
+          "hint": [
+            0,
+            0
+          ]
+        },
+        {
+          "widget": "",
+          "geometry": [
+            0,
+            70,
+            932,
+            234
+          ],
+          "minimum": [
+            54,
+            234
+          ],
+          "hint": [
+            54,
+            234
+          ]
+        },
+        {
+          "widget": "",
+          "geometry": [
+            0,
+            318,
+            932,
+            26
+          ],
+          "minimum": [
+            40,
+            26
+          ],
+          "hint": [
+            40,
+            184
+          ]
+        },
+        {
+          "widget": "inlineActions",
+          "geometry": [
+            0,
+            358,
+            932,
+            66
+          ],
+          "minimum": [
+            58,
+            66
+          ],
+          "hint": [
+            256,
+            66
+          ]
+        }
+      ]
+    },
+    {
+      "label": "settled",
+      "rectangles": {
+        "view_area": [
+          288,
+          53,
+          932,
+          234
+        ],
+        "view": [
+          288,
+          53,
+          962,
+          220
+        ],
+        "shortcuts": [
+          288,
+          301,
+          932,
+          26
+        ],
+        "desktop_button": [
+          288,
+          301,
+          81,
+          26
+        ],
+        "pending_box": [
+          288,
+          341,
+          932,
+          66
+        ]
+      },
+      "view_toolbar_intersect": false,
+      "view_button_intersect": false,
+      "button_inside_toolbar": true,
+      "scroll": 306,
+      "device_pixel_ratio": 1.25,
+      "form_geometry": [
+        0,
+        0,
+        932,
+        424
+      ],
+      "content_geometry": [
+        20,
+        18,
+        932,
+        424
+      ],
+      "content_minimum_hint": [
+        58,
+        424
+      ],
+      "items": [
+        {
+          "widget": "homeStatus",
+          "geometry": [
+            0,
+            0,
+            932,
+            16
+          ],
+          "minimum": [
+            31,
+            16
+          ],
+          "hint": [
+            229,
+            32
+          ]
+        },
+        {
+          "widget": "inlineActions",
+          "geometry": [
+            0,
+            30,
+            932,
+            26
+          ],
+          "minimum": [
+            18,
+            26
+          ],
+          "hint": [
+            18,
+            122
+          ]
+        },
+        {
+          "widget": "",
+          "geometry": [
+            0,
+            0,
+            640,
+            480
+          ],
+          "minimum": [
+            0,
+            0
+          ],
+          "hint": [
+            0,
+            0
+          ]
+        },
+        {
+          "widget": "emptyHome",
+          "geometry": [
+            0,
+            70,
+            944,
+            150
+          ],
+          "minimum": [
+            0,
+            0
+          ],
+          "hint": [
+            0,
+            0
+          ]
+        },
+        {
+          "widget": "",
+          "geometry": [
+            0,
+            0,
+            640,
+            480
+          ],
+          "minimum": [
+            0,
+            0
+          ],
+          "hint": [
+            0,
+            0
+          ]
+        },
+        {
+          "widget": "",
+          "geometry": [
+            0,
+            70,
+            932,
+            234
+          ],
+          "minimum": [
+            54,
+            234
+          ],
+          "hint": [
+            54,
+            234
+          ]
+        },
+        {
+          "widget": "",
+          "geometry": [
+            0,
+            318,
+            932,
+            26
+          ],
+          "minimum": [
+            40,
+            26
+          ],
+          "hint": [
+            40,
+            184
+          ]
+        },
+        {
+          "widget": "inlineActions",
+          "geometry": [
+            0,
+            358,
+            932,
+            66
+          ],
+          "minimum": [
+            58,
+            66
+          ],
+          "hint": [
+            256,
+            66
+          ]
+        }
+      ]
+    },
+    {
+      "label": "repainted",
+      "rectangles": {
+        "view_area": [
+          288,
+          53,
+          932,
+          234
+        ],
+        "view": [
+          288,
+          53,
+          962,
+          220
+        ],
+        "shortcuts": [
+          288,
+          301,
+          932,
+          26
+        ],
+        "desktop_button": [
+          288,
+          301,
+          81,
+          26
+        ],
+        "pending_box": [
+          288,
+          341,
+          932,
+          66
+        ]
+      },
+      "view_toolbar_intersect": false,
+      "view_button_intersect": false,
+      "button_inside_toolbar": true,
+      "scroll": 306,
+      "device_pixel_ratio": 1.25,
+      "form_geometry": [
+        0,
+        0,
+        932,
+        424
+      ],
+      "content_geometry": [
+        20,
+        18,
+        932,
+        424
+      ],
+      "content_minimum_hint": [
+        58,
+        424
+      ],
+      "items": [
+        {
+          "widget": "homeStatus",
+          "geometry": [
+            0,
+            0,
+            932,
+            16
+          ],
+          "minimum": [
+            31,
+            16
+          ],
+          "hint": [
+            229,
+            32
+          ]
+        },
+        {
+          "widget": "inlineActions",
+          "geometry": [
+            0,
+            30,
+            932,
+            26
+          ],
+          "minimum": [
+            18,
+            26
+          ],
+          "hint": [
+            18,
+            122
+          ]
+        },
+        {
+          "widget": "",
+          "geometry": [
+            0,
+            0,
+            640,
+            480
+          ],
+          "minimum": [
+            0,
+            0
+          ],
+          "hint": [
+            0,
+            0
+          ]
+        },
+        {
+          "widget": "emptyHome",
+          "geometry": [
+            0,
+            70,
+            944,
+            150
+          ],
+          "minimum": [
+            0,
+            0
+          ],
+          "hint": [
+            0,
+            0
+          ]
+        },
+        {
+          "widget": "",
+          "geometry": [
+            0,
+            0,
+            640,
+            480
+          ],
+          "minimum": [
+            0,
+            0
+          ],
+          "hint": [
+            0,
+            0
+          ]
+        },
+        {
+          "widget": "",
+          "geometry": [
+            0,
+            70,
+            932,
+            234
+          ],
+          "minimum": [
+            54,
+            234
+          ],
+          "hint": [
+            54,
+            234
+          ]
+        },
+        {
+          "widget": "",
+          "geometry": [
+            0,
+            318,
+            932,
+            26
+          ],
+          "minimum": [
+            40,
+            26
+          ],
+          "hint": [
+            40,
+            184
+          ]
+        },
+        {
+          "widget": "inlineActions",
+          "geometry": [
+            0,
+            358,
+            932,
+            66
+          ],
+          "minimum": [
+            58,
+            66
+          ],
+          "hint": [
+            256,
+            66
+          ]
+        }
+      ]
+    }
+  ],
+  "native_cleanup": true,
+  "native_image_viewed": "repainted.png",
+  "native_observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "child_exit": 0,
+    "observation_only": true
+  },
+  "limitations": [
+    "Native Windows Qt 6.12.0 at 125% scaling, Traditional Chinese, private desktop; deterministic setup and explicit simulation steps.",
+    "Host service starts, Workshop discovery and session-lock query substituted. The inherited probe scope says service timer stopped, but probe source does not explicitly stop it; no normal-speed autonomy claim.",
+    "No full-suite or independent-review completion claim; integration pending.",
+    "The ContentSection test proves 100 event-drain iterations produce no additional LayoutRequest events after settling.",
+    "Focused and quiescence suites overlap three existing tests; counts are not additive distinct-test counts."
+  ],
+  "sha256": {
+    "frontengine/ui/page/layout_kit.py": "e3553683677763e8677baf89af0e14ce1da714faa426eea007aba8f08a4804ba",
+    "frontengine/ui/page/pet_game/home_page.py": "96d407caa8bab78b70c6b8c56c309c9817aed9f6f747c59806e785f2a7053b98",
+    "tests/unit_test/test_pet_home_responsive.py": "ab184eef502455f654bd0e6becd5e8dc28dc75be25b26e46da37b5d6093df328",
+    "tests/unit_test/test_setting_page_layout.py": "21d25bb773f758ec1ff76a6540df08cb484519593f285f840d383e3640ae9da8",
+    ".audit/native_stage_layout.py": "1cbd5bf1f3efb679d8c43c48122867f7cf56f4a5c33367e8491423a7065061b1",
+    ".audit/native-stage-layout/result.json": "0bddc3201c6ddaff53f55de4ed6c1692fa698434c59b8998b5fff3bf0d615ebc",
+    ".audit/native-stage-layout/repainted.png": "9cf8d70a986e8ea0d8daca07b830c9040e97c96d61e5005a63daef026718d2f1",
+    ".audit/native-stage-layout/observer.json": "108902181ee471ddb835401d5d799d056e70c9ac4aead7d271ce043e584e29a5"
+  },
+  "harness": "import hashlib\nimport json\nimport logging\nimport os\nfrom pathlib import Path\nimport shutil\nimport sys\nimport tempfile\nimport traceback\nimport uuid\nfrom time import monotonic\n\nsys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'manual-work-feedback/.audit'))\nfrom complete_main_onboarding_native import observation\n\nROOT = Path(__file__).resolve().parents[1]\nsys.path.insert(0, str(ROOT))\nsys.path.insert(0, str(ROOT / 'tests/integration'))\nimport hidden_desktop\n\nsource = Path(sys.argv[1]).resolve()\noutput = Path(sys.argv[2]).resolve()\noutput.mkdir(parents=True, exist_ok=True)\nif not hidden_desktop.is_child(output):\n    assert not (output / 'result.json').exists(), 'Use a fresh output directory'\n    hidden_desktop.DESKTOP = f'FrontEngineColdReload{os.getpid()}_{uuid.uuid4().hex[:8]}'\n    before = observation()\n    code = hidden_desktop.run_on_hidden_desktop(__file__, str(source), str(output), timeout_ms=180000)\n    (output / 'observer.json').write_text(json.dumps({'before': before, 'after': observation(),\n        'child_exit': code, 'observation_only': True}, indent=2), encoding='utf-8')\n    raise SystemExit(code)\n\nos.environ['QT_QPA_PLATFORM'] = 'windows'\ncase = source.name\nresult = {'passed': False}\ntry:\n    with tempfile.TemporaryDirectory(prefix='fe-current-cold-reload-') as folder:\n        previous = Path.cwd()\n        os.chdir(folder)\n        try:\n            from PySide6.QtCore import QCoreApplication, QEvent\n            from PySide6.QtTest import QTest\n            from PySide6.QtWidgets import QApplication, QSizePolicy\n            from frontengine.ui.page.pet_game import home_page\n            from frontengine.utils.session_lock import session_lock\n            from frontengine.user_setting.user_setting_file import user_setting_dict\n            from frontengine.utils.pet_game import snapshot\n\n            home_page.workshop_pack_roots = lambda: []\n            session_lock.is_session_locked = lambda: False\n            app = QApplication([])\n            app.setQuitOnLastWindowClosed(False)\n            from frontengine.ui import main_ui\n            main_ui.CriticalExit.init_critical_exit = lambda self: None\n            main_ui.HotkeyService.start = lambda self: False\n            main_ui.AppProfileService.start = lambda self: None\n            main_ui.ShareWatchService.start = lambda self: None\n            window = main_ui.FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)\n            lifetime = window.lifetime\n            page = window.pet_home_ui\n            try:\n                from frontengine.utils.pet_game import behaviour, simulation\n                from frontengine.show.pet_game.captions import result_text\n                service = page.service\n                from PySide6.QtGui import QGuiApplication\n                screen = QGuiApplication.primaryScreen()\n                area = screen.availableGeometry()\n                world = service.create_home((screen.name() or 'primary')[:128], area.x(), area.bottom(), 48, seed=5)\n                world.time_ms = 0\n                world.automatic = False\n                zone = next(iter(world.zones))\n                world.ledger.apply('fixture', 'native acceptance setup', 500)\n                pet = service.profiles.create('Mochi')['id']\n                service.profiles.update(pet, {'mood': 80, 'fullness': 90, 'energy': 95})\n                assert service.adopt(pet, zone) == 'accepted'\n                resident = world.residents[pet]\n                recipe = 'toy' if case == 'waiting_materials' else 'letter'\n                if case == 'waiting_materials':\n                    assert world.buy_and_place('workbench', zone, 'bench') == 'accepted'\n                elif case == 'station_busy':\n                    world.furnish(zone)\n                    other = service.profiles.create('Desk user')['id']\n                    service.profiles.update(other, {'mood': 80, 'fullness': 90, 'energy': 95})\n                    assert service.adopt(other, zone) == 'accepted'\n                    assert world.create_task('letter', other)[0] == 'accepted'\n                    assert behaviour.start_work(world, world.residents[other], 'command') is None\n                    assert world.residents[other].activity.kind == 'work'\n                else:\n                    assert case == 'no_station'\n                assert world.create_task(recipe, pet)[0] == 'accepted'\n                world.drain_events()\n                assert world.command(pet, 'work') == 'accepted'\n                simulation.step(world)\n                command_events = world.drain_events()\n                assert resident.activity.kind != 'work'\n                assert [e['reason'] for e in command_events if e['kind'] == 'refused'] == [case]\n                result['refusal_events'] = command_events\n                window.resize(1280, 960)\n                window.show()\n                page.refresh()\n                page.tabs.setCurrentIndex(page.tabs.keys().index('pet_home_residents_section'))\n                page.select_resident(pet)\n                QTest.qWait(1000)\n                page._scroll.ensureWidgetVisible(page.residents.activity)\n                QTest.qWait(200)\n                caption = page.residents.activity.text()\n                assert result_text(case) in caption, caption\n                assert not page.residents.activity.visibleRegion().isEmpty()\n                assert window.grab().save(str(output / 'blocked.png'))\n                if case == 'waiting_materials':\n                    world.ledger.apply('wood', 'native acceptance setup', items={'wood': 2})\n                elif case == 'no_station':\n                    world.furnish(zone)\n                else:\n                    behaviour.cancel_activity(world, world.residents[other], 'fixture')\n                behaviour.cancel_activity(world, resident, 'fixture')\n                world.drain_events()\n                assert world.command(pet, 'work') == 'accepted'\n                simulation.step(world)\n                command_events = world.drain_events()\n                page.refresh()\n                assert resident.activity.kind == 'work'\n                recovered = page.residents.activity.text()\n                assert result_text(case) not in recovered\n                page._scroll.ensureWidgetVisible(page.residents.activity)\n                QTest.qWait(200)\n                assert window.grab().save(str(output / 'recovered.png'))\n                from PySide6.QtCore import QPoint, QRect\n                geometry_samples = []\n                for label, delay in (('after_capture', 0), ('settled', 500), ('repainted', 500)):\n                    if label == 'form_invalidated':\n                        page.stage.content.layout().invalidate()\n                        page.stage.content.layout().activate()\n                    QTest.qWait(delay)\n                    if label == 'repainted':\n                        window.repaint()\n                        app.processEvents()\n                    rectangles = {}\n                    for name, widget in (('view_area', page.view_area), ('view', page.view),\n                                         ('shortcuts', page.shortcuts), ('desktop_button', page.desktop_button),\n                                         ('pending_box', page.pending_box)):\n                        rect = QRect(widget.mapTo(window, QPoint(0, 0)), widget.size())\n                        rectangles[name] = rect\n                    geometry_samples.append({'label': label, 'rectangles': {name: rect.getRect() for name, rect in rectangles.items()},\n                        'view_toolbar_intersect': rectangles['view_area'].intersects(rectangles['shortcuts']),\n                        'view_button_intersect': rectangles['view_area'].intersects(rectangles['desktop_button']),\n                        'button_inside_toolbar': rectangles['shortcuts'].contains(rectangles['desktop_button']),\n                        'scroll': page._scroll.verticalScrollBar().value(), 'device_pixel_ratio': window.devicePixelRatioF(),\n                        'form_geometry': page.stage.content.layout().geometry().getRect(),\n                        'content_geometry': page.stage.content.geometry().getRect(),\n                        'content_minimum_hint': (page.stage.content.minimumSizeHint().width(), page.stage.content.minimumSizeHint().height()),\n                        'items': [{'widget': item.widget().objectName() if item.widget() else None,\n                                   'geometry': item.geometry().getRect(),\n                                   'minimum': (item.minimumSize().width(), item.minimumSize().height()),\n                                   'hint': (item.sizeHint().width(), item.sizeHint().height())}\n                                  for item in (page.stage.content.layout().itemAt(i) for i in range(page.stage.content.layout().count()))]})\n                    assert window.grab().save(str(output / (label + '.png')))\n                result['geometry_samples'] = geometry_samples\n                assert all(not item['view_toolbar_intersect'] and not item['view_button_intersect'] for item in geometry_samples), geometry_samples\n\n                assert not [e for e in command_events if e['kind'] == 'refused']\n                result.update(case=case, blocked_caption=caption, recovered_caption=recovered,\n                              recovered_activity=resident.activity.kind)\n            finally:\n                window.request_shutdown()\n                deadline = monotonic() + 120\n                while not lifetime.closed and monotonic() < deadline:\n                    QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)\n                    app.processEvents()\n                    QTest.qWait(10)\n                assert lifetime.closed, (lifetime.state, lifetime.error)\n            result.update(passed=True, runtime_closed=True, python=sys.version,\n                source=str(source),\n                scope='Native MainUI on private desktop; deterministic fixture and two manual work commands followed by explicit normal simulation steps, service timer stopped, validates visible captions and recovery only; global service starts, Workshop and lock query substituted')\n        finally:\n            logging.shutdown()\n            os.chdir(previous)\n    result['temporary_directory_removed'] = True\nexcept Exception:\n    result.update(passed=False, error=traceback.format_exc())\n(output / 'result.json').write_text(json.dumps(result, indent=2), encoding='utf-8')\nraise SystemExit(0 if result['passed'] else 1)\n"
+}

@@ -1,0 +1,56 @@
+{
+  "source_revision": "ca1317ab8435fd4472195c39fcf3d215260c38a8",
+  "build_exit": 0,
+  "wheel": {
+    "wheel": "frontengine_dev-1.0.86-py3-none-any.whl",
+    "sha256": "a3e1d65221f8958ea1643f25da659c587db622f4803ebf5c61f19a2d96062ccb",
+    "python_files_equal": 502,
+    "pet_home_assets": 149,
+    "scope": "Wheel byte comparison only; no clean installation or native acceptance implied",
+    "pet_home_asset_files_equal": 149
+  },
+  "installation_steps": [
+    {
+      "step": "install",
+      "exit": 0
+    },
+    {
+      "step": "pip-check",
+      "exit": 0
+    },
+    {
+      "step": "smoke",
+      "exit": 0
+    }
+  ],
+  "installed_files": {
+    "installed_files_equal": 711,
+    "installed_python_files_equal": 502,
+    "package": "D:\\Codes\\FrontEngine\\.audit\\clean-front-integration-311\\Lib\\site-packages\\frontengine",
+    "isolated_mode": true
+  },
+  "smoke": {
+    "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "prefix": "D:\\Codes\\FrontEngine\\.audit\\clean-front-integration-311",
+    "package": "D:\\Codes\\FrontEngine\\.audit\\clean-front-integration-311\\Lib\\site-packages\\frontengine\\__init__.py",
+    "qt": "6.12.0",
+    "snapshot_version": 8,
+    "residents": 1,
+    "furniture": 3,
+    "work_empty_state": true,
+    "cancel_selection": true,
+    "tutorial_skip_hidden": true,
+    "snapshot_equal_after_reopen": true,
+    "photo_saved": true,
+    "home_saved": true,
+    "same_app_reopened": true,
+    "closed": true,
+    "scope": "Current wheel reinstalled into existing isolated dependency environment, fresh temporary settings, Qt offscreen; OS key listeners, foreground watcher, share watcher, session lock and Workshop discovery replaced at boundary; no native device acceptance"
+  },
+  "harness_sha256": "05791cb9aa8c47ddc65e933ce05345fad97fa5dba8c805a3990c58af1f7c9b7b",
+  "limitations": [
+    "Existing isolated Python 3.11 dependency environment reused; wheel installed with --no-deps --force-reinstall. This is not a new dependency resolution or clean-machine install.",
+    "pip check validates declared dependency metadata, not the required published host lifecycle APIs or version floors.",
+    "Qt offscreen and substituted OS/Workshop boundaries; no native device, OS-offline or independent code review acceptance."
+  ]
+}

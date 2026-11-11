@@ -12,7 +12,9 @@ from PySide6.QtWidgets import (
     QCheckBox, QDialog, QDialogButtonBox, QGridLayout, QLabel, QPlainTextEdit, QSpinBox, QWidget,
 )
 
-from frontengine.user_setting.user_setting_file import user_setting_dict, write_user_setting
+from frontengine.user_setting.user_setting_file import (
+    replace_setting, user_setting_dict, write_user_setting,
+)
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import tr
@@ -56,10 +58,13 @@ class SignageDialog(QDialog):
         self.enable_checkbox.setChecked(bool(settings.get("enabled")))
         self.presets_label = tr(QLabel(), "signage_presets_label", "Presets, one per line:")
         self.presets_edit = QPlainTextEdit("\n".join(settings.get("presets", [])))
+        self.presets_edit.setTabChangesFocus(True)
+        self.presets_label.setBuddy(self.presets_edit)
         self.interval_label = tr(QLabel(), "signage_interval_label", "Change every (minutes)")
         self.interval_spinbox = QSpinBox()
         self.interval_spinbox.setRange(MIN_INTERVAL_MINUTES, MAX_INTERVAL_MINUTES)
         self.interval_spinbox.setValue(settings.get("interval_minutes"))
+        self.interval_label.setBuddy(self.interval_spinbox)
         self.hide_checkbox = tr(QCheckBox(), "signage_hide_window",
             "Hide the main window while rotating")
         self.hide_checkbox.setChecked(bool(settings.get("hide_window", True)))
@@ -67,6 +72,8 @@ class SignageDialog(QDialog):
             "Presets are saved from the Presets menu. The rotation wraps at the end, so a "
             "machine left running keeps cycling.")
         self.hint_label.setWordWrap(True)
+        self.status = QLabel()
+        self.status.setWordWrap(True)
 
         self.button_box = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
@@ -81,7 +88,8 @@ class SignageDialog(QDialog):
         layout.addWidget(self.interval_spinbox, 3, 1)
         layout.addWidget(self.hide_checkbox, 4, 0, 1, 2)
         layout.addWidget(self.hint_label, 5, 0, 1, 2)
-        layout.addWidget(self.button_box, 6, 0, 1, 2)
+        layout.addWidget(self.status, 6, 0, 1, 2)
+        layout.addWidget(self.button_box, 7, 0, 1, 2)
 
     def settings(self) -> Dict[str, Any]:
         """對話框上目前的設定。"""
@@ -94,7 +102,10 @@ class SignageDialog(QDialog):
 
     def accept(self) -> None:
         settings = self.settings()
-        user_setting_dict[SETTING_KEY] = settings
-        write_user_setting()
+        try:
+            replace_setting(user_setting_dict, SETTING_KEY, settings, write_user_setting)
+        except (OSError, ValueError) as error:
+            self.status.setText(str(error))
+            return
         front_engine_logger.info(f"[SignageDialog] saved | {len(settings['presets'])} preset(s)")
         super().accept()

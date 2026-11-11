@@ -1,6 +1,6 @@
 # CLAUDE.md - FrontEngine
 
-PySide6 desktop overlay app (Python 3.10+, PyOpenGL, numpy; own design system, no qt-material).
+PySide6 desktop overlay app (Python 3.11+, PyOpenGL, numpy; own design system, no qt-material).
 Published on PyPI as `frontengine` (stable, `stable.toml`) and `frontengine_dev`
 (dev, `pyproject.toml`). What it does and how to run it: `README.md`.
 
@@ -14,7 +14,14 @@ planning so you resume where the last session stopped.
 - It is tracked, so keep it free of anything that should not be public. Only
   `.claude/settings.local.json` stays ignored.
 - Rules and standing knowledge live in this file ("Deliberately removed" and
-  "Environment notes" below), never in `progress.md`.
+  "Environment notes" below), never in `progress.md` - the one exception is
+  the placement rule in its header, which `test_progress_layout.py` enforces.
+- **Real-device acceptance goes first.** Every item that needs a real machine,
+  a person or hardware to verify (native windows, DPI, monitors, recorded play
+  sessions, long real-time runs, packaging on a clean machine) lives in the
+  `## 實機驗收待辦` section at the very top of `progress.md`, above all
+  implementation to-dos. Plan sections never keep their own acceptance
+  paragraphs; when a new one comes up, add it to that top section instead.
 
 ## Architecture
 

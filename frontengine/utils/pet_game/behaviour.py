@@ -9,6 +9,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from frontengine.utils.pet_game.catalog import CELL_PIXELS, Recipe
+from frontengine.utils.pet_game.goals import complete_wish, unlocked
+from frontengine.utils.pet_game.layout import AREA_FOR_ACTIVITY
 from frontengine.utils.pet_game.resident import PROFESSION_TRAITS, Activity, Resident
 from frontengine.utils.pet_game.schedule import block_at, game_hour
 
@@ -20,12 +23,18 @@ URGENT_FULLNESS = 25
 WORK_MIN_ENERGY = 25
 LOW_MOOD = 30
 LOW_SOCIAL = 35
+LOW_HYGIENE = 30                 # below this a pet goes to wash, and feeling grubby wears on mood
 GREET_MS = 2500
 GREET_REACH_CELLS = 8
 GREET_COOLDOWN_MS = 5 * 60 * 1000
 SQUABBLE_COOLDOWN_MS = 10 * 60 * 1000
 WAIT_MS = 5000
 FREE_WEIGHTS = {"play": 3, "relax": 3, "wander": 4, "idle": 2, "greet": 2}
+VISIT_WEIGHT = 1                 # free time over a crossing point into the linked zone
+HELP_WEIGHT = 2                  # free time lending a hand to a pet at work
+MAX_HELPERS = 2                  # each helper adds a quarter to the worker's speed
+HELP_MS = (30000, 60000)
+AUTO_STOCK_LIMIT = 20            # automatic jobs stop making goods once storage holds this many
 TRAIT_WEIGHTS = {"playful": {"play": 3}, "quiet": {"relax": 3, "play": -2, "greet": -1},
                  "social": {"wander": 2, "greet": 3}}
 SHARED_COOLDOWN_MS = 10 * 60 * 1000
@@ -73,6 +82,14 @@ def start(world: World, resident: Resident, kind: str, reason: str, furniture: s
     world.emit("activity", resident=resident.identifier, activity=kind, reason=reason)
 
 
+def _area_rank(world: World, piece, activity: str) -> int:
+    """0 inside an area labelled for this activity, 1 unlabelled, 2 in an area meant for something else."""
+    tag = world.zones[piece.zone].area_at(piece.cell)
+    if tag is None:
+        return 1
+    return 0 if tag == AREA_FOR_ACTIVITY.get(activity) else 2
+
+
 def _free_piece(world: World, resident: Resident, activity: str,
                 owner_first: bool = False) -> tuple[str, int] | None:
     """Pick a free interaction point; beds prefer their owner and skip other owners' beds."""
@@ -82,22 +99,42 @@ def _free_piece(world: World, resident: Resident, activity: str,
             continue
         if activity == "sleep" and piece.owner not in (None, resident.identifier):
             continue
+        if not world.reachable(resident, piece):
+            continue
         point = piece.free_point(definition)
         if point is not None:
             rank = 0 if owner_first and piece.owner == resident.identifier else 1
-            candidates.append((rank, abs(piece.point_x_milli(definition, point) - resident.x_milli),
+            candidates.append((rank, _area_rank(world, piece, activity),
+                               abs(piece.point_x_milli(definition, point) - resident.x_milli),
                                int(piece.identifier[1:]), piece.identifier, point))
     if not candidates:
         return None
     best = min(candidates)
-    return best[3], best[4]
+    return best[4], best[5]
 
 
 def _has_kind(world: World, resident: Resident, activity: str) -> bool:
     return any(definition.activity == activity for _piece, definition in world.in_zone(resident.zone))
 
 
+def _home_bed_elsewhere(world: World, resident: Resident) -> bool:
+    """Its own bed is across the crossing point, so going to sleep starts with walking home."""
+    target = world.crossing(resident.zone)
+    return target is not None and any(piece.owner == resident.identifier and piece.zone == target
+                                      for piece in world.furniture.values())
+
+
+def start_visit(world: World, resident: Resident, reason: str) -> None:
+    """Walk to the entrance; arriving there crosses into the linked zone."""
+    start(world, resident, "visit", reason)
+    entrance = world.zones[resident.zone].entrance
+    resident.activity.target_x = (entrance * CELL_PIXELS + CELL_PIXELS // 2) * 1000
+
+
 def start_rest(world: World, resident: Resident, reason: str) -> None:
+    if _home_bed_elsewhere(world, resident):
+        start_visit(world, resident, "going_home")
+        return
     found = _free_piece(world, resident, "sleep", owner_first=True)
     if found is None:
         start(world, resident, "nap", reason)      # resting is always possible
@@ -114,6 +151,15 @@ def start_meal(world: World, resident: Resident, reason: str) -> None:
         start(world, resident, "wait", "table_full", duration=WAIT_MS)
     else:
         start(world, resident, "snack", reason)    # basic food is always available
+
+
+def start_wash(world: World, resident: Resident, reason: str) -> None:
+    """A free bath tub when there is one; otherwise the pet tidies itself up where it stands."""
+    found = _free_piece(world, resident, "wash")
+    if found is not None:
+        start(world, resident, "wash", reason, *found)
+    else:
+        start(world, resident, "tidy", reason)
 
 
 def _station_for(world: World, resident: Resident, task) -> tuple[str, int] | str:
@@ -134,10 +180,11 @@ def _station_for(world: World, resident: Resident, task) -> tuple[str, int] | st
         point = piece.free_point(definition)
         if point is not None:
             distance = abs(piece.point_x_milli(definition, point) - resident.x_milli)
-            candidates.append((distance, int(piece.identifier[1:]), piece.identifier, point))
+            candidates.append((_area_rank(world, piece, "work"), distance, int(piece.identifier[1:]),
+                               piece.identifier, point))
     if candidates:
         best = min(candidates)
-        return best[2], best[3]
+        return best[3], best[4]
     if task.station is not None or any(definition.profession == recipe.profession
                                        for _piece, definition in world.in_zone(resident.zone)):
         return "station_busy"
@@ -166,6 +213,14 @@ def start_work(world: World, resident: Resident, reason: str) -> str | None:
     return blocked or "no_task"
 
 
+def _auto_recipe_available(world: World, recipe: Recipe) -> bool:
+    if not unlocked(world, recipe.unlock_level):
+        return False
+    if any(world.ledger.available(item) < count for item, count in recipe.inputs.items()):
+        return False
+    return not recipe.outputs or any(world.ledger.available(item) < AUTO_STOCK_LIMIT for item in recipe.outputs)
+
+
 def auto_task(world: World, resident: Resident) -> str | None:
     """A resident with nothing to do takes a job it can do here, without anyone setting it up.
 
@@ -179,7 +234,7 @@ def auto_task(world: World, resident: Resident) -> str | None:
     for recipe in world.catalog.recipes.values():
         if recipe.profession not in trades or resident.level(recipe.profession) < recipe.min_level:
             continue
-        if any(world.ledger.available(item) < count for item, count in recipe.inputs.items()):
+        if not _auto_recipe_available(world, recipe):
             continue
         rank = (PROFESSION_TRAITS.get(recipe.profession) in resident.traits, resident.level(recipe.profession),
                 recipe.min_level, recipe.coins + recipe.experience, recipe.identifier)
@@ -206,7 +261,7 @@ def refusal(world: World, resident: Resident, command: str) -> str | None:
     return None
 
 
-def _start_free(world: World, resident: Resident, reason: str = "free_time") -> None:
+def _free_choices(world: World, resident: Resident, reason: str) -> list[tuple[str, int]]:
     weights = dict(FREE_WEIGHTS)
     if reason == "cheer_up":
         weights["idle"] = 0
@@ -216,7 +271,21 @@ def _start_free(world: World, resident: Resident, reason: str = "free_time") -> 
     choices = [(kind, weight) for kind, weight in weights.items()
                if kind in ("wander", "idle") or (kind == "greet" and _greet_partner(world, resident))
                or (kind not in ("greet", "wander", "idle") and _free_piece(world, resident, kind) is not None)]
-    kind = world.rng.weighted(choices)
+    if world.crossing(resident.zone) is not None:
+        choices.append(("visit", VISIT_WEIGHT))
+    if _help_partner(world, resident) is not None:
+        choices.append(("help", HELP_WEIGHT))
+    return choices
+
+
+def _start_free(world: World, resident: Resident, reason: str = "free_time") -> None:
+    kind = world.rng.weighted(_free_choices(world, resident, reason))
+    if kind == "visit":
+        start_visit(world, resident, "visiting")
+        return
+    if kind == "help":
+        start_help(world, resident, _help_partner(world, resident))
+        return
     if kind == "greet" and start_greet(world, resident):
         return
     if kind in ("play", "relax"):
@@ -230,16 +299,20 @@ def _start_free(world: World, resident: Resident, reason: str = "free_time") -> 
 
 def _follow_command(world: World, resident: Resident, command: str) -> None:
     reason = refusal(world, resident, command)
+    if reason is None and command == "work":
+        reason = start_work(world, resident, "command")
+        if reason is None:
+            return
     if reason is not None:
-        resident.last_refusal = reason
         world.emit("refused", resident=resident.identifier, command=command, reason=reason)
         decide(world, resident)
+        resident.last_refusal = reason
     elif command == "sleep":
         start_rest(world, resident, "command")
     elif command == "eat":
         start_meal(world, resident, "command")
-    elif command == "work":
-        start_work(world, resident, "command")
+    elif command == "wash":
+        start_wash(world, resident, "command")
     else:
         found = _free_piece(world, resident, command)
         if found is None:
@@ -261,6 +334,8 @@ def _cared_for(world: World, resident: Resident, block: str) -> bool:
         start_rest(world, resident, "bedtime")
     elif block == "meal" and needs["fullness"] < 80:
         start_meal(world, resident, "mealtime")
+    elif needs["hygiene"] <= LOW_HYGIENE:
+        start_wash(world, resident, "grubby")
     elif needs["social"] <= LOW_SOCIAL and start_greet(world, resident):
         return True                        # walking over to say hello
     elif needs["mood"] <= LOW_MOOD:
@@ -287,7 +362,9 @@ def decide(world: World, resident: Resident) -> None:
         if why is None:
             return None
         if why not in ("no_task",):
+            _start_free(world, resident)
             resident.last_refusal = why
+            return None
     _start_free(world, resident)
 
 # ----- residents together -------------------------------------------------------------
@@ -335,6 +412,59 @@ def greet_arrived(world: World, resident: Resident) -> None:
         partner.facing = 1 if resident.x_milli > partner.x_milli else -1
 
 
+def helpers(world: World, worker: Resident) -> int:
+    """How many pets are lending this worker a hand right now (at most ``MAX_HELPERS`` count)."""
+    count = sum(1 for other in world.residents.values()
+                if other.activity is not None and other.activity.kind == "help"
+                and other.activity.phase == "using" and other.activity.partner == worker.identifier)
+    return min(MAX_HELPERS, count)
+
+
+def _help_partner(world: World, resident: Resident) -> Resident | None:
+    """The nearest pet in this zone working at a station that still has room for a helper."""
+    candidates = []
+    for other in world.residents.values():
+        activity = other.activity
+        if (other is resident or other.zone != resident.zone or other.parked or activity is None
+                or activity.kind != "work" or activity.phase != "using"):
+            continue
+        busy = sum(1 for r in world.residents.values()
+                   if r.activity is not None and r.activity.kind == "help" and r.activity.partner == other.identifier)
+        if busy < MAX_HELPERS:
+            candidates.append((abs(other.x_milli - resident.x_milli), other.identifier, other))
+    return min(candidates)[2] if candidates else None
+
+
+def start_help(world: World, resident: Resident, worker: Resident) -> None:
+    side = 1 if resident.x_milli < worker.x_milli else -1
+    start(world, resident, "help", "helping", duration=world.rng.randint(*HELP_MS))
+    resident.activity.target_x = max(0, worker.x_milli - side * 24000)
+    resident.activity.partner = worker.identifier
+
+
+def help_completed(world: World, resident: Resident, worker_id: str) -> None:
+    """A helper learns a little of the worker's trade and enjoys the company."""
+    worker = world.residents.get(worker_id)
+    task = world.tasks.get(worker.activity.task) if worker is not None and worker.activity is not None else None
+    if task is not None and task.recipe in world.catalog.recipes:
+        trade = world.catalog.recipes[task.recipe].profession
+        resident.skills[trade] = resident.skills.get(trade, 0) + 1
+    resident.needs["social"] = min(100, resident.needs["social"] + 8)
+    if worker is not None:
+        world.adjust_relation(resident.identifier, worker_id, 1)
+        world.emit("helped", resident=resident.identifier, partner=worker_id)
+
+
+def tag_completed(world: World, resident: Resident, partner_id: str | None) -> None:
+    """Both players of a game of tag enjoy it; the chaser records the friendship once."""
+    resident.needs["mood"] = min(100, resident.needs["mood"] + 8)
+    resident.needs["social"] = min(100, resident.needs["social"] + 10)
+    resident.needs["energy"] = max(0, resident.needs["energy"] - 3)
+    if partner_id is not None and partner_id in world.residents:
+        world.adjust_relation(resident.identifier, partner_id, 2)
+        world.emit("tagged", resident=resident.identifier, partner=partner_id)
+
+
 def greet_completed(world: World, resident: Resident, partner_id: str) -> None:
     partner = world.residents.get(partner_id)
     if partner is None:
@@ -366,6 +496,13 @@ def shared_completed(world: World, resident: Resident, piece_id: str | None) -> 
     piece = world.furniture.get(piece_id) if piece_id else None
     if piece is None:
         return
+    if resident.activity is not None and resident.activity.kind == "eat":
+        for user in piece.users.values():
+            partner = world.residents.get(user)
+            if user != resident.identifier and partner is not None and partner.activity is not None \
+                    and partner.activity.kind == "eat":
+                complete_wish(world, resident, "friend_meal")
+                complete_wish(world, partner, "friend_meal")
     for user in piece.users.values():
         key = "shared:" + world.pair(resident.identifier, user)
         if user == resident.identifier or world.social_ready.get(key, 0) > world.time_ms:

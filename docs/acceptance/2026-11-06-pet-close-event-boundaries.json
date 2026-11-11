@@ -1,0 +1,130 @@
+{
+  "product_test_commit": "69a3b6c1",
+  "unchanged_files": 752,
+  "cases": [
+    {
+      "action": "greet",
+      "close_outcome": "cancel_prepared",
+      "affection_delta": 1,
+      "completed_once": true,
+      "lease_retained_until_success": true,
+      "reopen_exact": true,
+      "post_close_mutations_refused": true,
+      "temporary_directory_removed": true
+    },
+    {
+      "action": "greet",
+      "close_outcome": "write_failure",
+      "affection_delta": 1,
+      "completed_once": true,
+      "lease_retained_until_success": true,
+      "reopen_exact": true,
+      "post_close_mutations_refused": true,
+      "temporary_directory_removed": true
+    },
+    {
+      "action": "pet",
+      "close_outcome": "cancel_prepared",
+      "affection_delta": 2,
+      "completed_once": true,
+      "lease_retained_until_success": true,
+      "reopen_exact": true,
+      "post_close_mutations_refused": true,
+      "temporary_directory_removed": true
+    },
+    {
+      "action": "pet",
+      "close_outcome": "write_failure",
+      "affection_delta": 2,
+      "completed_once": true,
+      "lease_retained_until_success": true,
+      "reopen_exact": true,
+      "post_close_mutations_refused": true,
+      "temporary_directory_removed": true
+    },
+    {
+      "action": "groom",
+      "close_outcome": "cancel_prepared",
+      "affection_delta": 3,
+      "completed_once": true,
+      "lease_retained_until_success": true,
+      "reopen_exact": true,
+      "post_close_mutations_refused": true,
+      "temporary_directory_removed": true
+    },
+    {
+      "action": "groom",
+      "close_outcome": "write_failure",
+      "affection_delta": 3,
+      "completed_once": true,
+      "lease_retained_until_success": true,
+      "reopen_exact": true,
+      "post_close_mutations_refused": true,
+      "temporary_directory_removed": true
+    },
+    {
+      "action": "feed",
+      "close_outcome": "cancel_prepared",
+      "affection_delta": 5,
+      "completed_once": true,
+      "lease_retained_until_success": true,
+      "reopen_exact": true,
+      "post_close_mutations_refused": true,
+      "temporary_directory_removed": true
+    },
+    {
+      "action": "feed",
+      "close_outcome": "write_failure",
+      "affection_delta": 5,
+      "completed_once": true,
+      "lease_retained_until_success": true,
+      "reopen_exact": true,
+      "post_close_mutations_refused": true,
+      "temporary_directory_removed": true
+    },
+    {
+      "action": "play",
+      "close_outcome": "cancel_prepared",
+      "affection_delta": 3,
+      "completed_once": true,
+      "lease_retained_until_success": true,
+      "reopen_exact": true,
+      "post_close_mutations_refused": true,
+      "temporary_directory_removed": true
+    },
+    {
+      "action": "play",
+      "close_outcome": "write_failure",
+      "affection_delta": 3,
+      "completed_once": true,
+      "lease_retained_until_success": true,
+      "reopen_exact": true,
+      "post_close_mutations_refused": true,
+      "temporary_directory_removed": true
+    }
+  ],
+  "reviewed_sources": [
+    "frontengine/show/pet/pet_profile_session.py",
+    "frontengine/user_setting/pet_profiles.py",
+    "frontengine/user_setting/storage_session.py"
+  ],
+  "limits": [
+    "Self-review and offscreen runtime evidence, not independent review.",
+    "Controlled event time and injected os.replace failure, not a physical disk outage.",
+    "Reopen uses a fresh storage owner in the same process; this is not a process crash test.",
+    "No claim of complete UI, event, or repository review."
+  ],
+  "related_tests": {
+    "files": [
+      "tests/unit_test/test_pet_profile_sessions.py",
+      "tests/unit_test/test_final_save_shutdown.py",
+      "tests/unit_test/test_owned_pet_profiles.py",
+      "tests/unit_test/test_storage_home_ownership.py"
+    ],
+    "passed": 48,
+    "seconds": 31.54,
+    "exit_code": 0,
+    "log": ".audit/pet-close-review-tests.log"
+  },
+  "audit_script": ".audit/audit_pet_close_events.py"
+}

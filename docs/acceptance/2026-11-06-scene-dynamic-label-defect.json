@@ -1,0 +1,53 @@
+{
+  "product_test_commit": "9eba3a44",
+  "status": "native dynamic label defect reproduced; fix pending",
+  "comparisons": 14,
+  "mismatches": [
+    {
+      "language": "Traditional_Chinese",
+      "control": "duration",
+      "actual": "Automatic",
+      "expected": "自動"
+    },
+    {
+      "language": "Traditional_Chinese",
+      "control": "parent_box",
+      "actual": "No parent",
+      "expected": "無群組"
+    }
+  ],
+  "scene_unchanged": true,
+  "undo_unchanged": true,
+  "runtime_closed": true,
+  "temporary_directory_removed": true,
+  "callback_errors": [],
+  "observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "child_exit": 1,
+    "observation_only": true
+  },
+  "source_cause": "duration specialValueText is translated once during construction; parent_box first item is translated only when selection rebuilds its items. Neither updates on language changes.",
+  "evidence_sha256": {
+    "result.json": "f78a6764f57a147a5392713baeb7c547b49317af6cc279564138c448e98cf100",
+    "observer.json": "d314eef80ba48b814556966ad9dda568266e019fdb594765f8c590f6d7313c65",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "limits": [
+    "Actual MainUI and native GL cube scene; labels read from existing widgets. No visual claim that both fields fit simultaneously in the scrolled inspector.",
+    "Rebuilding parent choices after selection changes requires regression coverage.",
+    "No full 3D tooling, OS input or independent review acceptance."
+  ]
+}

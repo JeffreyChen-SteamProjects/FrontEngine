@@ -1,0 +1,52 @@
+{
+  "product_test_commit": "d825c06c",
+  "passed": true,
+  "static_command": "python -m pyflakes frontengine/ exe/ tests/",
+  "static_exit": 0,
+  "static_file_counts": {
+    "frontengine": 502,
+    "exe": 4,
+    "tests": 248
+  },
+  "sphinx_command": "python -m sphinx -b html -W --keep-going docs/source .audit/sphinx-d825c06c",
+  "sphinx_exit": 0,
+  "warnings": 0,
+  "language_home_pages": {
+    "Eng": {
+      "html_sha256": "86be903e5c9aaa142ff369e87def779553103bf797a4c85a8f18cfbd885fcc57",
+      "currency_policy_present": true
+    },
+    "Zh": {
+      "html_sha256": "218a3c7ec14ab38637b0e89ac53a1d2237431f67facd85b083543fb8bc4429ea",
+      "currency_policy_present": true
+    },
+    "ZhCn": {
+      "html_sha256": "7ef070ef275bcfad05a246ae6beb708464b87eb6f3156145d34b032616ec7665",
+      "currency_policy_present": true
+    },
+    "De": {
+      "html_sha256": "b85eeb0449647a180d114ef8fc8c4f6c82d145226a676807928b078aab6382d5",
+      "currency_policy_present": true
+    },
+    "Fr": {
+      "html_sha256": "f16b9c4a569da439aade8b10c88a5083294ea4330005b843649fe6b752f6311f",
+      "currency_policy_present": true
+    },
+    "Ru": {
+      "html_sha256": "e917e233799870eaa334972c57d93779cc4fdab0d753d51553c2ca5da46d0ff6",
+      "currency_policy_present": true
+    },
+    "It": {
+      "html_sha256": "bcdf8c7afd52204c3c0a99d5297cee43a9361a55bfde2930f0b8f1861adb81a9",
+      "currency_policy_present": true
+    }
+  },
+  "product_test_source_unchanged": true,
+  "limits": [
+    "Static diagnostics and HTML build do not replace comprehensive code review, native UI, clean-machine installation or independent review."
+  ],
+  "evidence_sha256": {
+    "full-pyflakes-d825c06c.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sphinx-d825c06c.log": "6e0361af37353f6dc179912d1bee439ca9ba054df239b3442791e8805ef85da5"
+  }
+}

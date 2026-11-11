@@ -3,6 +3,12 @@ Bedienung
 
 .. image:: ../image/main/FrontEngine.png
 
+.. note::
+
+    Python 3.11+ wird unterstützt, außer 3.14.0 bis 3.14.4. Verwenden Sie für Python 3.14 die Version 3.14.5 oder neuer.
+
+    Ein nativer Qt-Absturz wurde unter Windows mit Python 3.14.4 reproduziert; frühere 3.14-Patchversionen sind vorsorglich ausgeschlossen. Erstellen Sie bestehende virtuelle Umgebungen mit einem kompatiblen Interpreter neu und verwenden Sie ihn auch für den Start aus dem Quellcode. EXE-Dateien mit einer ausgeschlossenen Python-Version müssen mit einem kompatiblen Interpreter neu gebaut werden. Ein Update des FrontEngine-Pakets aktualisiert Python nicht.
+
 FrontEngine legt Dinge über Ihren Bildschirm - ein Video, ein Bild, eine
 Webseite, etwas Text, ein Haustier - und lässt sie dort, während Sie
 weiterarbeiten. Jedes davon heißt Overlay. Sie können beliebig viele
@@ -30,8 +36,8 @@ Die meisten Seiten tragen dieselben wenigen Bedienelemente, und sie bedeuten
 * **Deckkraft** - wie viel vom Schreibtisch durchscheint. Overlays sind
   standardmäßig recht durchsichtig, damit sie über Ihrer Arbeit liegen statt
   sie zu verdecken.
-* **Zielbildschirm** - welcher Bildschirm. Auf *Nachfragen* gestellt, werden
-  Sie stattdessen jedes Mal gefragt.
+* **Zielbildschirm** - welcher Bildschirm. *Dieser Bildschirm* (die Vorgabe) ist der,
+  auf dem das FrontEngine-Fenster liegt; beim Start wird nicht nachgefragt.
 
   Bei mehr als einem Bildschirm gibt es zusätzlich **Über alle Bildschirme**: ein
   einzelnes Overlay über den gesamten Desktop statt eines je Bildschirm.
@@ -40,6 +46,8 @@ Die meisten Seiten tragen dieselben wenigen Bedienelemente, und sie bedeuten
   wirkt es wie ein Hintergrund statt wie etwas davor.
 * **Zuletzt verwendet** - vorher benutzte Dateien, damit Sie sie nicht wieder
   suchen müssen.
+
+Eine gewählte Datei wird sofort gezeigt, ebenso eine auf die Seite gezogene, und *Start* ohne Datei öffnet die Auswahl; ein leeres Text- oder Adressfeld wird markiert statt mit einem Warndialog gemeldet, und Enter darin startet.
 
 Overlays stehen nicht im Weg
 ============================
@@ -113,3 +121,7 @@ Wenn andere zusehen
 * :doc:`widgets` - Audio-Spektrum, Systemmonitor, aktuelle Wiedergabe, Notizen.
 
 Und :doc:`control_center`, um alles davon auf einmal zu befehligen.
+
+Beim Wechsel der Oberflächensprache werden die Zielmonitor-Optionen und der Platzhalter für zuletzt verwendete Dateien aktualisiert. Zielmonitore, Dateinamen, Pfade und Auswahlwerte bleiben unverändert. Dies gilt auch nach dem Neuladen der Dateiliste.
+
+Rückmeldungen zu Tierinteraktionen stehen über „Interaktion ausführen“ und damit nahe am Tastaturfokus. In schmalen Fenstern werden Abschnittstitel und Detailschaltflächen umgebrochen. Identitäts- und Interaktionsfelder behalten eine lesbare Mindestbreite und stehen bei Bedarf unter ihren Beschriftungen. Auswahl, Werte und Befehle bleiben erhalten.

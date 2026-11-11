@@ -1,0 +1,143 @@
+{
+  "revision": "fc3091881cd854d8b1d5c1342cebc4c621d5707c",
+  "harness": "tests/integration/overlay_mixed_dpi_native.py",
+  "harness_sha256": "ca73b3c89d049cb9674cdf28b7e171d32412ea92c7f5db5c4345f48d4cea4459",
+  "exit_code": 0,
+  "isolation": "Unique hidden Win32 desktop; owned widget movement only; no desktop input or desktop switch. Temporary settings directory.",
+  "scope": "ImageWidget software and GPU backends, 100% to 125% and return to 100%.",
+  "limitations": [
+    "Does not cover other overlay types, pet movement, physical disconnect, primary-screen changes or sleep/resume.",
+    "No before/after foreground or cursor measurements were collected by this probe."
+  ],
+  "screenshots": {
+    "gpu-0.png": "ee8b7c8fac31adb2af6392f5f9295cb4ac877f9027679e986bdf9f673e4ae7d0",
+    "gpu-1.png": "23d0d5186cf0e4c6320af0b66de23718e803e0ad7d5860900cc7accd421ab4ad",
+    "gpu-2.png": "ee8b7c8fac31adb2af6392f5f9295cb4ac877f9027679e986bdf9f673e4ae7d0",
+    "software-0.png": "ee8b7c8fac31adb2af6392f5f9295cb4ac877f9027679e986bdf9f673e4ae7d0",
+    "software-1.png": "23d0d5186cf0e4c6320af0b66de23718e803e0ad7d5860900cc7accd421ab4ad",
+    "software-2.png": "ee8b7c8fac31adb2af6392f5f9295cb4ac877f9027679e986bdf9f673e4ae7d0"
+  },
+  "observations": [
+    {
+      "requested_backend": "software",
+      "actual_backend": "software",
+      "target": "BenQ GW2486TC",
+      "screen": "BenQ GW2486TC",
+      "dpr": 1.0,
+      "geometry": [
+        800,
+        426,
+        320,
+        180
+      ],
+      "pixels": [
+        320,
+        180
+      ],
+      "center": "#ef602a",
+      "on_screen": true,
+      "passed": true
+    },
+    {
+      "requested_backend": "software",
+      "actual_backend": "software",
+      "target": "BenQ GW2490",
+      "screen": "BenQ GW2490",
+      "dpr": 1.25,
+      "geometry": [
+        2528,
+        154,
+        320,
+        180
+      ],
+      "pixels": [
+        400,
+        225
+      ],
+      "center": "#ef602a",
+      "on_screen": true,
+      "passed": true
+    },
+    {
+      "requested_backend": "software",
+      "actual_backend": "software",
+      "target": "BenQ GW2486TC",
+      "screen": "BenQ GW2486TC",
+      "dpr": 1.0,
+      "geometry": [
+        800,
+        426,
+        320,
+        180
+      ],
+      "pixels": [
+        320,
+        180
+      ],
+      "center": "#ef602a",
+      "on_screen": true,
+      "passed": true
+    },
+    {
+      "requested_backend": "gpu",
+      "actual_backend": "gpu",
+      "target": "BenQ GW2486TC",
+      "screen": "BenQ GW2486TC",
+      "dpr": 1.0,
+      "geometry": [
+        800,
+        426,
+        320,
+        180
+      ],
+      "pixels": [
+        320,
+        180
+      ],
+      "center": "#ef602a",
+      "on_screen": true,
+      "passed": true
+    },
+    {
+      "requested_backend": "gpu",
+      "actual_backend": "gpu",
+      "target": "BenQ GW2490",
+      "screen": "BenQ GW2490",
+      "dpr": 1.25,
+      "geometry": [
+        2528,
+        154,
+        320,
+        180
+      ],
+      "pixels": [
+        400,
+        225
+      ],
+      "center": "#ef602a",
+      "on_screen": true,
+      "passed": true
+    },
+    {
+      "requested_backend": "gpu",
+      "actual_backend": "gpu",
+      "target": "BenQ GW2486TC",
+      "screen": "BenQ GW2486TC",
+      "dpr": 1.0,
+      "geometry": [
+        800,
+        426,
+        320,
+        180
+      ],
+      "pixels": [
+        320,
+        180
+      ],
+      "center": "#ef602a",
+      "on_screen": true,
+      "passed": true
+    }
+  ],
+  "passed": true
+}

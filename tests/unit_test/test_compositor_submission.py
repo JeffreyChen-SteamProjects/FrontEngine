@@ -49,15 +49,33 @@ def test_software_widgets_schedule_nothing_extra():
         widget.close()
 
 
-def test_desktop_pets_always_paint_through_qt(tmp_path):
+def test_parent_paint_defers_and_coalesces_compositor_submission():
+    from PySide6.QtGui import QPaintEvent
+
+    widget = Animated()
+    try:
+        widget._compositor = Compositor()
+        widget.paintEvent(QPaintEvent(widget.rect()))
+        widget.paintEvent(QPaintEvent(widget.rect()))
+        assert widget._compositor.submissions == []
+        QCoreApplication.processEvents()
+        assert len(widget._compositor.submissions) == 1
+        assert widget._raster_signature[0] == widget._render_revision
+    finally:
+        widget._compositor = None
+        widget.close()
+
+
+def test_desktop_pets_always_paint_through_qt(tmp_path, lifetime_factory):
     """A pet moves its window every tick; the GPU compositor froze its frames while it moved."""
+    lifetime_factory()
     from PySide6.QtGui import QColor, QImage
 
     from frontengine.show.pet.desktop_pet import DesktopPetWidget
     image = QImage(32, 32, QImage.Format.Format_ARGB32)
     image.fill(QColor('red'))
     image.save(str(tmp_path / 'pet.png'))
-    pet = DesktopPetWidget(str(tmp_path / 'pet.png'), size=64, talk=False, sit_on_windows=False)
+    pet = DesktopPetWidget(size=64, talk=False, sit_on_windows=False)
     try:
         pet.set_render_backend('gpu')
         pet.show()

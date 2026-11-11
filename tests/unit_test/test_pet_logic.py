@@ -1,10 +1,10 @@
 """
 桌面寵物的純邏輯測試（不建立任何 widget，因此不需要 QApplication）：
-移動模型、心情／飽足／成長、台詞挑選、動作包掃描與音訊脈動換算。
+移動模型、心情／飽足／成長、台詞挑選與音訊脈動換算。
 
 Pure-logic tests for the desktop pet — no widgets are created, so no
-QApplication is needed: the motion model, mood/hunger/growth, chatter picking,
-pet-pack scanning and the audio pulse mapping.
+QApplication is needed: the motion model, mood/hunger/growth, chatter picking
+and the audio pulse mapping.
 """
 import random
 
@@ -12,7 +12,7 @@ from frontengine.show.pet.desktop_pet import (
     BEHAVIOUR_FLOOR, BEHAVIOUR_WANDER, PetGrowth, PetHunger, PetMood, PetMotion, PetTimeline,
     STATE_CLIMB, STATE_DRAG, STATE_FALL, STATE_IDLE, STATE_SLEEP, STATE_WALK, SURFACE_CEILING,
     SURFACE_FLOOR, SURFACE_LEFT, audio_pulse_scale, derive_visual_state, format_status,
-    message_bucket, nearest_peer, parse_timeline, pick_message, pop_due_reminders, scan_pet_pack,
+    message_bucket, nearest_peer, parse_timeline, pick_message, pop_due_reminders,
     size_for_level,
 )
 
@@ -242,21 +242,6 @@ def test_nearest_peer_picks_the_closest() -> None:
     assert peer == (3, 4)
     assert distance == 5
     assert nearest_peer((0, 0), []) == (None, float("inf"))
-
-
-# --- pet packs ------------------------------------------------------------
-def test_scan_pet_pack_maps_aliases(tmp_path) -> None:
-    (tmp_path / "run.png").write_bytes(b"x")
-    (tmp_path / "sit.gif").write_bytes(b"x")
-    (tmp_path / "notes.txt").write_bytes(b"x")
-    pack = scan_pet_pack(str(tmp_path))
-    # sit.gif is an idle alias and also serves the dedicated sit pose.
-    assert set(pack) == {STATE_WALK, STATE_IDLE, "sit"}
-
-
-def test_scan_pet_pack_tolerates_bad_input(tmp_path) -> None:
-    assert scan_pet_pack(str(tmp_path / "missing")) == {}
-    assert scan_pet_pack(str(tmp_path / "file.png")) == {}
 
 
 # --- audio pulse ----------------------------------------------------------

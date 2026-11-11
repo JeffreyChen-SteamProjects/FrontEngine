@@ -6,6 +6,8 @@ The focus page: dim everything except the window you are working in, and cover
 the parts of the screen that pull your eye away. Both pass clicks through, so
 what is covered still works.
 """
+from frontengine.ui.runtime_lifetime import owned_action
+from frontengine.ui.runtime_lifetime import OwnedWidgetList
 from typing import List
 
 from PySide6.QtCore import Qt
@@ -17,7 +19,13 @@ from frontengine.ui.page.layout_kit import SettingPage
 from frontengine.show.focus_shield.focus_shield_widget import (
     DimBackgroundWidget, DistractionMaskWidget,
 )
-from frontengine.ui.page.utils import build_target_monitor_combobox, coerce_int, resolve_preferred_monitor
+from frontengine.ui.page.utils import (
+    apply_target_monitor_state,
+    target_monitor_state,
+    build_target_monitor_combobox,
+    coerce_int,
+    resolve_preferred_monitor,
+)
 from frontengine.utils.focus_shield.focus_shield import (
     REGION_BOTTOM, REGION_BOTTOM_RIGHT, REGION_FULL, REGION_LEFT, REGION_RIGHT, REGION_TOP,
 )
@@ -29,13 +37,13 @@ from frontengine.utils.multi_language.retranslate import retranslator, tr
 class FocusSettingUI(SettingPage):
     """專注設定頁 / The focus settings page."""
 
-    def __init__(self):
+    def __init__(self, *, lifetime):
         front_engine_logger.info("[FocusSettingUI] Init")
         super().__init__("tab_focus_text", "page_subtitle_focus",
-                         "Focus", "Dim or cover whatever competes for your attention.")
+                         "Focus", "Dim or cover whatever competes for your attention.", lifetime=lifetime)
 
-        self.dim_widget_list: List[DimBackgroundWidget] = []
-        self.mask_widget_list: List[DistractionMaskWidget] = []
+        self.dim_widget_list: List[DimBackgroundWidget] = OwnedWidgetList(self.lifetime)
+        self.mask_widget_list: List[DistractionMaskWidget] = OwnedWidgetList(self.lifetime)
 
         # Dim background windows
         self.dim_label = tr(QLabel(), "focus_dim_label", "Dim background windows")
@@ -112,12 +120,14 @@ class FocusSettingUI(SettingPage):
         widgets.clear()
 
     # --- dim background --------------------------------------------------
+    @owned_action
     def toggle_dim(self) -> None:
         if self.dim_widget_list:
             self.stop_dim()
         else:
             self.start_dim()
 
+    @owned_action
     def start_dim(self) -> None:
         front_engine_logger.info("[FocusSettingUI] start_dim")
         self.stop_dim()
@@ -139,6 +149,7 @@ class FocusSettingUI(SettingPage):
         retranslator.set_text(
             self.dim_button, "focus_dim_start", "Dim the background")
 
+    @owned_action
     def _apply_dim_settings(self) -> None:
         for widget in self.dim_widget_list[:]:
             try:
@@ -147,12 +158,14 @@ class FocusSettingUI(SettingPage):
                 self.dim_widget_list.remove(widget)
 
     # --- distraction mask ------------------------------------------------
+    @owned_action
     def toggle_mask(self) -> None:
         if self.mask_widget_list:
             self.stop_mask()
         else:
             self.start_mask()
 
+    @owned_action
     def start_mask(self) -> None:
         front_engine_logger.info("[FocusSettingUI] start_mask")
         self.stop_mask()
@@ -176,6 +189,7 @@ class FocusSettingUI(SettingPage):
         retranslator.set_text(
             self.mask_button, "focus_mask_start", "Cover it up")
 
+    @owned_action
     def _apply_mask_settings(self) -> None:
         """區域或比例改變時，直接把已開啟的遮罩移到新位置。"""
         screen = self.target_screen()
@@ -197,7 +211,7 @@ class FocusSettingUI(SettingPage):
             "dim": self.dim_slider.value(),
             "mask_region": self.mask_region_combobox.currentData(),
             "mask_percent": self.mask_percent_slider.value(),
-            "target_monitor": self.target_monitor_combobox.currentText(),
+            "target_monitor": target_monitor_state(self.target_monitor_combobox),
         }
 
     def set_state(self, state: dict) -> None:
@@ -209,7 +223,4 @@ class FocusSettingUI(SettingPage):
             index = self.mask_region_combobox.findData(str(state["mask_region"]))
             if index >= 0:
                 self.mask_region_combobox.setCurrentIndex(index)
-        if state.get("target_monitor") is not None:
-            index = self.target_monitor_combobox.findText(str(state["target_monitor"]))
-            if index >= 0:
-                self.target_monitor_combobox.setCurrentIndex(index)
+        apply_target_monitor_state(self.target_monitor_combobox, state.get("target_monitor"))

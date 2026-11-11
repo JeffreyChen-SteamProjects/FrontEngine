@@ -1,39 +1,36 @@
 """
 Steam 創意工坊內容匯入：Steam 會把訂閱的項目下載到
 `steamapps/workshop/content/<appid>/<itemid>/`，這裡就掃那個資料夾，把每個
-項目辨識成「寵物動作包」或「預設集」，讓使用者訂閱後直接能用。
+項目辨識成場景、預設集或家園內容，讓使用者訂閱後直接能用。
 
 本模組保留免相依、唯讀的離線資料夾辨識；原生發布與同步由 Workshop 服務處理。
 
 Import Steam Workshop content. Steam downloads subscribed items to
 `steamapps/workshop/content/<appid>/<itemid>/`, so this scans that folder and
-recognises each item as a pet pack or a preset — subscribe in Steam, use it here.
+recognises each item as a scene, a preset or pet home content — subscribe in Steam, use it here.
+Sprite pet packs and picture folders are no longer recognised: pets are layered only.
 
 This remains the dependency-free, read-only offline folder recognizer.
 Native publishing and synchronization are handled by the separate Workshop service.
 """
 from __future__ import annotations
 
-import json
 import sys
 from pathlib import Path
 from typing import Dict, List, Optional
 
 from frontengine.utils.logging.loggin_instance import front_engine_logger
-from frontengine.utils.workshop.workshop_manifest import is_legacy_preset, read_manifest
+from frontengine.utils.workshop.workshop_manifest import is_legacy_preset, read_manifest, safe_path
 
 # FrontEngine 的 Steam App ID（商店頁 /app/2793470/）
 # FrontEngine's Steam App ID, from its store page.
 APP_ID = "2793470"
 
-KIND_PET_PACK = "pet_pack"
 KIND_PRESET = "preset"
-KIND_MEDIA = "media"
 KIND_SCENE = "scene"
+HOME_PACK_KINDS = ("home_furniture", "home_theme")     # a content pack folder as the entry
+KIND_HOME_BLUEPRINT = "home_blueprint"
 
-_PET_STATE_FILES = ("walk", "idle", "sleep", "climb", "fall", "drag")
-_IMAGE_SUFFIXES = (".gif", ".webp", ".png", ".jpg", ".jpeg")
-_MANIFEST_NAME = "pet.json"
 
 
 def default_library_paths() -> List[Path]:
@@ -71,8 +68,9 @@ def find_workshop_dir(app_id: str = APP_ID, extra_paths=()) -> Optional[Path]:
 
 def classify_item(folder) -> Optional[str]:
     """
-    判斷一個創意工坊項目是什麼：動作包（有 walk/idle… 圖或 pet.json）、
-    預設集（有 .json 預設檔）、單純媒體（只有圖片）。都不像則回傳 None。
+    判斷一個創意工坊項目是什麼：有 workshop.json 的依其種類，舊格式只認預設集（有 .json 預設檔）。
+    都不像則回傳 None。
+    What a Workshop item is: its workshop.json kind, or a legacy preset folder; None otherwise.
     """
     try:
         path = Path(folder)
@@ -84,30 +82,20 @@ def classify_item(folder) -> Optional[str]:
         names = [entry.name.lower() for entry in files]
     except (OSError, ValueError, UnicodeError):
         return None
-    if _MANIFEST_NAME in names:
-        return KIND_PET_PACK
-    stems = {Path(name).stem for name in names}
-    if stems & set(_PET_STATE_FILES):
-        return KIND_PET_PACK
+    if "pet.json" in names:         # a sprite pet pack: unsupported since pets are layered only
+        return None
     if any(entry.suffix.lower() == ".json" and is_legacy_preset(entry) for entry in files):
         return KIND_PRESET
-    if any(name.endswith(_IMAGE_SUFFIXES) for name in names):
-        return KIND_MEDIA
     return None
 
 
 def read_item_title(folder) -> str:
     """
-    取項目名稱：優先用動作包 pet.json 裡的 name，其次用資料夾名稱（項目 ID）。
+    取項目名稱：優先用 workshop.json 的標題，其次用資料夾名稱（項目 ID）。
     """
     try:
         if (Path(folder) / "workshop.json").exists():
             return read_manifest(Path(folder))["title"]
-        manifest = Path(folder) / _MANIFEST_NAME
-        if manifest.is_file():
-            data = json.loads(manifest.read_text(encoding="utf-8"))
-            if isinstance(data, dict) and isinstance(data.get("name"), str):
-                return data["name"]
     except (OSError, ValueError, TypeError):
         pass
     return Path(folder).name
@@ -139,6 +127,27 @@ def scan_workshop_items(content_dir) -> List[Dict[str, str]]:
     except OSError as error:
         front_engine_logger.warning(f"[workshop] scan failed: {error!r}")
     return items
+
+
+def home_pack_roots(content_dir) -> List[Path]:
+    """The pack folders of subscribed furniture and theme items; the pet home checks each one itself."""
+    roots = []
+    for item in scan_workshop_items(content_dir):
+        if item["kind"] in HOME_PACK_KINDS:
+            try:
+                roots.append(safe_path(Path(item["path"]), read_manifest(Path(item["path"]))["entry"]))
+            except (OSError, ValueError) as error:               # UnicodeError is a ValueError
+                front_engine_logger.warning(f"[workshop] home pack {item['id']}: {error}")
+    return roots
+
+
+def missing_requirements(item_path, installed: set) -> List[str]:
+    """The content packs a subscribed item needs that are not installed (from its manifest)."""
+    try:
+        manifest = read_manifest(Path(item_path))
+    except (OSError, ValueError):
+        return []
+    return [pack for pack in manifest.get("requires", []) if pack not in installed]
 
 
 def preset_files(item_path) -> List[str]:

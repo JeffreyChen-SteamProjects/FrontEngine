@@ -1,0 +1,194 @@
+{
+  "baseline_product": "7a4419dc",
+  "defect": "Sleep command loses its rest intent when a visit crosses into the owned-bed zone; a high-energy resident returns to free-time behavior.",
+  "before_native": {
+    "passed": false,
+    "events": [
+      {
+        "activity": "visit",
+        "kind": "activity",
+        "reason": "going_home",
+        "resident": "cd53a59142a7496d92090f3a38904067",
+        "time": 56478000
+      },
+      {
+        "kind": "moved_zone",
+        "resident": "cd53a59142a7496d92090f3a38904067",
+        "time": 56490400,
+        "zone": "z1"
+      },
+      {
+        "activity": "tidy",
+        "kind": "activity",
+        "reason": "grubby",
+        "resident": "cd53a59142a7496d92090f3a38904067",
+        "time": 56490600
+      },
+      {
+        "activity": "tidy",
+        "kind": "completed",
+        "resident": "cd53a59142a7496d92090f3a38904067",
+        "time": 56692600
+      },
+      {
+        "activity": "wander",
+        "kind": "activity",
+        "reason": "free_time",
+        "resident": "cd53a59142a7496d92090f3a38904067",
+        "time": 56693600
+      },
+      {
+        "activity": "wander",
+        "kind": "completed",
+        "resident": "cd53a59142a7496d92090f3a38904067",
+        "time": 56701200
+      },
+      {
+        "activity": "idle",
+        "kind": "activity",
+        "reason": "free_time",
+        "resident": "cd53a59142a7496d92090f3a38904067",
+        "time": 56702200
+      },
+      {
+        "activity": "idle",
+        "kind": "completed",
+        "resident": "cd53a59142a7496d92090f3a38904067",
+        "time": 56706800
+      },
+      {
+        "activity": "wander",
+        "kind": "activity",
+        "reason": "free_time",
+        "resident": "cd53a59142a7496d92090f3a38904067",
+        "time": 56707800
+      },
+      {
+        "activity": "wander",
+        "kind": "completed",
+        "resident": "cd53a59142a7496d92090f3a38904067",
+        "time": 56712600
+      },
+      {
+        "activity": "wander",
+        "kind": "activity",
+        "reason": "free_time",
+        "resident": "cd53a59142a7496d92090f3a38904067",
+        "time": 56713600
+      }
+    ],
+    "final_activity": "wander",
+    "energy": 56,
+    "error": "Traceback (most recent call last):\n  File \"D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-bubble-bounds\\.audit\\native_visit_command.py\", line 142, in <module>\n    assert resident.activity and resident.activity.kind == 'sleep'\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n"
+  },
+  "after_native": {
+    "passed": true,
+    "events": [
+      {
+        "activity": "visit",
+        "kind": "activity",
+        "reason": "going_home",
+        "resident": "cd53a59142a7496d92090f3a38904067",
+        "time": 56478000
+      },
+      {
+        "kind": "moved_zone",
+        "resident": "cd53a59142a7496d92090f3a38904067",
+        "time": 56490400,
+        "zone": "z1"
+      },
+      {
+        "activity": "sleep",
+        "kind": "activity",
+        "reason": "going_home",
+        "resident": "cd53a59142a7496d92090f3a38904067",
+        "time": 56490400
+      }
+    ],
+    "final_activity": "sleep",
+    "energy": 60,
+    "visit_event": {
+      "activity": "visit",
+      "kind": "activity",
+      "reason": "going_home",
+      "resident": "cd53a59142a7496d92090f3a38904067",
+      "time": 56478000
+    },
+    "crossing_event": {
+      "kind": "moved_zone",
+      "resident": "cd53a59142a7496d92090f3a38904067",
+      "time": 56490400,
+      "zone": "z1"
+    },
+    "bubble_rect": [
+      84.0,
+      71.4,
+      156.0,
+      20.0
+    ],
+    "simulation_steps": 67,
+    "sleep_furniture": "f2",
+    "bed_claim_preserved": true,
+    "actual_sleep_button": true,
+    "logical_zones_same_physical_screen": true,
+    "runtime_closed": true,
+    "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-stage-layout\\.audit\\profession-owned-fixed",
+    "saved_snapshot_sha256": "c471f2056e3bf47d41a8073e4a214f8eccec310f6c85a5f6088181f0c4b05172",
+    "scope": "Private native MainUI Sleep button, real domain travel and service publication, bounded strip bubble, owned-bed return. Injected simulation clock and two logical zones on one physical screen; not physical multi-monitor or OS input acceptance.",
+    "temporary_directory_removed": true
+  },
+  "cold_reopen": {
+    "passed": true,
+    "initial_snapshot_exact": true,
+    "profiles_exact": true,
+    "leases_reacquired": true,
+    "saved_exact": true,
+    "temporary_directory_removed": true
+  },
+  "observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "child_exit": 0,
+    "observation_only": true
+  },
+  "fix": "On an accepted crossing, the existing going_home activity reason continues through start_rest. Ordinary visits and failed crossings keep existing behavior. No signature or save format change.",
+  "tests": {
+    "red": "2 failed, 8 deselected in 4.09s; actual visit, expected sleep",
+    "green": "2 passed, 8 deselected in 1.67s",
+    "platforms_zones": "27 passed in 57.91s",
+    "life_automation_social": "44 passed in 3.84s",
+    "translations_progress_documentation": "54 passed in 3.21s",
+    "pyflakes": "Two changed Python files passed"
+  },
+  "limitations": [
+    "Injected simulation clock, one native resident, two logical zones on one physical screen.",
+    "Full regression, independent review, integration and physical monitor acceptance remain pending.",
+    "Travel activity is not persisted; cold reopen checks the existing saved world/profile contract, not resuming an in-flight command."
+  ],
+  "hashes": {
+    "frontengine\\utils\\pet_game\\simulation.py": "b73a7a822e5a7881f36dcf5a964d18c2853dad377ee2d78e1d22cb753f129938",
+    "tests\\unit_test\\test_pet_home_platforms.py": "6387a3edc9a6de0cdf448faa7f75b12fd9b6d064c9c9fc811c66780b841dc6bf",
+    ".audit\\native_visit_command.py": "ced24282a9e2005f5b01abea4cf06f67b92312c4637d39c25cc3325d88c45e2c",
+    ".audit\\cold_visit_event.py": "8036f53574ba6c68e74c48f86aaf30f11a824b3a274ca70d33059421352a85ec",
+    ".audit\\native-visit-command-after\\cold-result.json": "5bd41edb786e3fe553500e96167a938f64483ad3f1f564c603795a88e3110cbc",
+    ".audit\\native-visit-command-after\\observer.json": "108902181ee471ddb835401d5d799d056e70c9ac4aead7d271ce043e584e29a5",
+    ".audit\\native-visit-command-after\\profiles.json": "441028be467760ab4c3b505c11c19ae40543d5a17053043c46414e13e78b6863",
+    ".audit\\native-visit-command-after\\result.json": "12de044a6ff5d490b2d118cfa7b3ec4892fab6b0fd6d837dd8605c3dc17281fd",
+    ".audit\\native-visit-command-after\\shutdown-world.json": "81cf2bb3cb122e7d25ea34c8752a20f6611772d20cfe4f5f9b09b66d6cf5fe70",
+    ".audit\\native-visit-command-after\\returned-to-bed.png": "592c6a6ef211b2940a91d14603cb7f7b2bcfa26e8e6c224c1da847278eea06bc",
+    ".audit\\native-visit-command-after\\walking-home.png": "8e1679bc38f67da47c4d178a5f0deb5f7b84154ee48a33a76298dfc63365d0f3"
+  }
+}

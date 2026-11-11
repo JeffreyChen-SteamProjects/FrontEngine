@@ -156,6 +156,13 @@ QPushButton#primaryAction:pressed {{ background-color: {c['accent_pressed']}; }}
 QPushButton#primaryAction:disabled {{
     background-color: {c['surface_alt']}; color: {c['faint']}; border-color: {c['border']};
 }}
+QDialogButtonBox QPushButton:default {{
+    background-color: {c['accent']}; color: {c['on_accent']}; border: 1px solid {c['accent']}; font-weight: 700;
+}}
+QDialogButtonBox QPushButton:default:hover {{ background-color: {c['accent_hover']}; border-color: {c['accent_hover']}; }}
+QDialogButtonBox QPushButton:default:disabled {{
+    background-color: {c['surface_alt']}; color: {c['faint']}; border-color: {c['border']};
+}}
 QPushButton#primaryAction[tone="danger"], QPushButton[tone="danger"] {{
     background-color: transparent; color: {c['danger']}; border: 1px solid {c['danger']}; font-weight: 600;
 }}
@@ -279,6 +286,8 @@ QListView, QListWidget, QTreeView, QTreeWidget, QTableView, QTableWidget {{
     border: 1px solid {c['border']}; border-radius: {RADIUS}px; outline: 0;
     selection-background-color: {c['accent_soft']}; selection-color: {c['text']};
 }}
+QListView:focus, QListWidget:focus, QTreeView:focus, QTreeWidget:focus,
+QTableView:focus, QTableWidget:focus {{ border-color: {c['accent']}; }}
 QListView::item, QListWidget::item, QTreeView::item, QTreeWidget::item {{ padding: 4px 6px; border-radius: 4px; }}
 QListView::item:hover, QListWidget::item:hover, QTreeView::item:hover, QTreeWidget::item:hover {{
     background-color: {c['surface_alt']}; }}

@@ -147,14 +147,13 @@ def test_switching_to_a_name_that_does_not_exist_says_so() -> None:
 
 # --- the whole window -----------------------------------------------------
 @pytest.mark.parametrize("code", [code for _, code in LANGUAGES if code != "English"])
-def test_nothing_is_left_in_the_previous_language(code: str, tmp_path) -> None:
+def test_nothing_is_left_in_the_previous_language(code: str, tmp_path, make_main_window) -> None:
     """
     整個主視窗切過去之後，畫面上不該還留著英文。
     有控制項沒登記，這裡就會把它印出來。
     After the whole window switches, nothing on it should still be English.
     A widget nobody registered shows up here by name.
     """
-    from frontengine.ui.main_ui import FrontEngineMainUI
     from frontengine.ui.menu.language_menu import set_language
 
     settings = tmp_path / "user_setting.json"
@@ -162,7 +161,7 @@ def test_nothing_is_left_in_the_previous_language(code: str, tmp_path) -> None:
     original = os.getcwd()
     os.chdir(tmp_path)
     try:
-        window = FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)
+        window = make_main_window({"language": "English"})
         assert window.language_wrapper.language == "English"
         assert set_language(code, window) is True
 
@@ -193,13 +192,12 @@ def test_nothing_is_left_in_the_previous_language(code: str, tmp_path) -> None:
         language_wrapper.reset_language("English")
 
 
-def test_switching_leaves_the_user_alone(tmp_path) -> None:
+def test_switching_leaves_the_user_alone(tmp_path, make_main_window) -> None:
     """
     不用重開的意義就在這裡：開著的覆蓋層還在，各分頁的設定也沒被動到。
     This is the whole point of not restarting: open overlays stay open and the
     settings on each page are untouched.
     """
-    from frontengine.ui.main_ui import FrontEngineMainUI
     from frontengine.ui.menu.language_menu import set_language
 
     (tmp_path / "user_setting.json").write_text(
@@ -207,7 +205,7 @@ def test_switching_leaves_the_user_alone(tmp_path) -> None:
     original = os.getcwd()
     os.chdir(tmp_path)
     try:
-        window = FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)
+        window = make_main_window({"language": "English"})
         window.presentation_setting_ui.start_whiteboard()
         board = window.presentation_setting_ui.whiteboard_widget_list[0]
         window.text_setting_ui.opacity_slider.setValue(77)
@@ -224,9 +222,8 @@ def test_switching_leaves_the_user_alone(tmp_path) -> None:
         language_wrapper.reset_language("English")
 
 
-def test_the_translation_lands_where_you_can_see_it(tmp_path) -> None:
+def test_the_translation_lands_where_you_can_see_it(tmp_path, make_main_window) -> None:
     """抽查幾個實際控制項，而不是只看計數。"""
-    from frontengine.ui.main_ui import FrontEngineMainUI
     from frontengine.ui.menu.language_menu import set_language
 
     (tmp_path / "user_setting.json").write_text(
@@ -234,7 +231,7 @@ def test_the_translation_lands_where_you_can_see_it(tmp_path) -> None:
     original = os.getcwd()
     os.chdir(tmp_path)
     try:
-        window = FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)
+        window = make_main_window({"language": "English"})
         video = window.sidebar.page_index("tab_video_text")
         assert window.sidebar.page_label(video) == english_word_dict["tab_video_text"]
         set_language("Deutsch", window)
@@ -250,7 +247,7 @@ def test_the_translation_lands_where_you_can_see_it(tmp_path) -> None:
 
 
 def test_a_hint_that_depends_on_the_platform_binds_the_branch_it_chose(monkeypatch,
-                                                                      tmp_path) -> None:
+                                                                      tmp_path, make_main_window) -> None:
     """
     有些提示句取決於平台支不支援。登記的必須是實際選到的那個鍵——不然換語言時
     畫面會跳到另一個分支的句子，說的正好是相反的事。
@@ -259,7 +256,6 @@ def test_a_hint_that_depends_on_the_platform_binds_the_branch_it_chose(monkeypat
     language switch swaps in the other branch's sentence, which says the
     opposite of what is true.
     """
-    from frontengine.ui.main_ui import FrontEngineMainUI
     from frontengine.ui.menu.language_menu import set_language
     from frontengine.utils.virtual_camera import virtual_camera
 
@@ -269,7 +265,7 @@ def test_a_hint_that_depends_on_the_platform_binds_the_branch_it_chose(monkeypat
     original = os.getcwd()
     os.chdir(tmp_path)
     try:
-        window = FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)
+        window = make_main_window({"language": "English"})
         status = window.tools_setting_ui.virtual_camera_status
         assert status.text() == english_word_dict["tools_vcam_missing"]
 
@@ -284,13 +280,12 @@ def test_a_hint_that_depends_on_the_platform_binds_the_branch_it_chose(monkeypat
 
 
 # --- the in-app usage guide -----------------------------------------------
-def test_the_usage_guide_opens_from_the_help_menu(tmp_path) -> None:
+def test_the_usage_guide_opens_from_the_help_menu(tmp_path, make_main_window) -> None:
     """
     「使用說明」是第一次打開程式的人最先需要的，所以放在說明選單第一個。
     The usage guide is what someone opening this for the first time needs, so it
     sits first in the Help menu.
     """
-    from frontengine.ui.main_ui import FrontEngineMainUI
     from frontengine.ui.menu.help_menu import show_how_to_use
 
     (tmp_path / "user_setting.json").write_text(
@@ -298,7 +293,7 @@ def test_the_usage_guide_opens_from_the_help_menu(tmp_path) -> None:
     original = os.getcwd()
     os.chdir(tmp_path)
     try:
-        window = FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)
+        window = make_main_window({"language": "English"})
         entries = [action.text() for action in window.help_menu.actions() if action.text()]
         assert entries[0] == english_word_dict["how_to_use_action"]
 
@@ -316,9 +311,8 @@ def test_the_usage_guide_opens_from_the_help_menu(tmp_path) -> None:
         language_wrapper.reset_language("English")
 
 
-def test_the_usage_guide_follows_a_language_change(tmp_path) -> None:
+def test_the_usage_guide_follows_a_language_change(tmp_path, make_main_window) -> None:
     """開著的說明視窗也要跟著換語言，而不是留在原本那一種。"""
-    from frontengine.ui.main_ui import FrontEngineMainUI
     from frontengine.ui.menu.help_menu import show_how_to_use
     from frontengine.ui.menu.language_menu import set_language
 
@@ -327,7 +321,7 @@ def test_the_usage_guide_follows_a_language_change(tmp_path) -> None:
     original = os.getcwd()
     os.chdir(tmp_path)
     try:
-        window = FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)
+        window = make_main_window({"language": "English"})
         show_how_to_use(window)
         dialog = window.how_to_use_dialog
         assert dialog.windowTitle() == english_word_dict["how_to_use_title"]

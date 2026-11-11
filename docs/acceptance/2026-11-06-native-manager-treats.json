@@ -1,0 +1,800 @@
+{
+  "product_test_commit": "69a3b6c1",
+  "unchanged_source_test_files": 752,
+  "cases": [
+    {
+      "artifact_directory": ".audit\\native-treat-snack-valid",
+      "treat-completion": {
+        "treat": "snack",
+        "initial_fullness": 40,
+        "initial_mood": 40,
+        "neutral_taste_fixture": true,
+        "controlled_care_seconds": 2,
+        "completion_delta": {
+          "fullness": 30,
+          "mood": 12,
+          "affection": 5
+        },
+        "no_early_reward": true,
+        "repeat_unchanged": true,
+        "other_pet_unchanged": true,
+        "cooldown_text": "A little break before we do that again.",
+        "completed_profile": {
+          "id": "ad5b6ddcfa224a5ab5eb17c0aead0710",
+          "name": "Pet 3",
+          "mood": 52,
+          "fullness": 70,
+          "affection": 5,
+          "energy": 70,
+          "mode": "work",
+          "appearance": {
+            "character": null,
+            "equipped": {
+              "head": null,
+              "neck": null,
+              "body": null,
+              "back": null
+            },
+            "saved_outfits": []
+          },
+          "preferences": {
+            "auto_rest": true,
+            "allow_throw": true,
+            "allow_social": true,
+            "presentation": null,
+            "taste": {
+              "favorite": null,
+              "disliked": null
+            }
+          }
+        }
+      },
+      "result": {
+        "selected_pet_only": true,
+        "pet_completion_affection_delta": 2,
+        "work_mode_selected_only": true,
+        "cancel_feed_no_reward": true,
+        "hidden_pet_unchanged": true,
+        "hidden_feedback": "Start or show this pet before interacting.",
+        "tab_routes": [
+          {
+            "target": "primaryAction",
+            "tabs": 5
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 13
+          },
+          {
+            "target": "QListWidget",
+            "tabs": 2
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 14
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 4
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 22
+          },
+          {
+            "target": "QListWidget",
+            "tabs": 5
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 6
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 6
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 19
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 6
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 29
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 29
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 29
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 29
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 29
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          }
+        ],
+        "theme": "dark",
+        "language": "English",
+        "actual_window_size": [
+          900,
+          740
+        ],
+        "runtime_closed": true,
+        "temporary_directory_removed": true
+      },
+      "observer": {
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "child_exit": 0
+      },
+      "cold-result": {
+        "passed": true,
+        "initial_snapshot_exact": true,
+        "profiles_exact": true,
+        "leases_reacquired": true,
+        "saved_exact": true,
+        "temporary_directory_removed": true
+      }
+    },
+    {
+      "artifact_directory": ".audit\\native-treat-feast-valid",
+      "treat-completion": {
+        "treat": "feast",
+        "initial_fullness": 40,
+        "initial_mood": 40,
+        "neutral_taste_fixture": true,
+        "controlled_care_seconds": 2,
+        "completion_delta": {
+          "fullness": 45,
+          "mood": 8,
+          "affection": 6
+        },
+        "no_early_reward": true,
+        "repeat_unchanged": true,
+        "other_pet_unchanged": true,
+        "cooldown_text": "A little break before we do that again.",
+        "completed_profile": {
+          "id": "f7c3d23376854d37bc265c5b57293bc2",
+          "name": "Pet 3",
+          "mood": 48,
+          "fullness": 85,
+          "affection": 6,
+          "energy": 70,
+          "mode": "work",
+          "appearance": {
+            "character": null,
+            "equipped": {
+              "head": null,
+              "neck": null,
+              "body": null,
+              "back": null
+            },
+            "saved_outfits": []
+          },
+          "preferences": {
+            "auto_rest": true,
+            "allow_throw": true,
+            "allow_social": true,
+            "presentation": null,
+            "taste": {
+              "favorite": null,
+              "disliked": null
+            }
+          }
+        }
+      },
+      "result": {
+        "selected_pet_only": true,
+        "pet_completion_affection_delta": 2,
+        "work_mode_selected_only": true,
+        "cancel_feed_no_reward": true,
+        "hidden_pet_unchanged": true,
+        "hidden_feedback": "Start or show this pet before interacting.",
+        "tab_routes": [
+          {
+            "target": "primaryAction",
+            "tabs": 5
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 13
+          },
+          {
+            "target": "QListWidget",
+            "tabs": 2
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 14
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 4
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 22
+          },
+          {
+            "target": "QListWidget",
+            "tabs": 5
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 6
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 6
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 19
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 6
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 25
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 29
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 29
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 29
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 29
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          }
+        ],
+        "theme": "dark",
+        "language": "English",
+        "actual_window_size": [
+          900,
+          740
+        ],
+        "runtime_closed": true,
+        "temporary_directory_removed": true
+      },
+      "observer": {
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "child_exit": 0
+      },
+      "cold-result": {
+        "passed": true,
+        "initial_snapshot_exact": true,
+        "profiles_exact": true,
+        "leases_reacquired": true,
+        "saved_exact": true,
+        "temporary_directory_removed": true
+      }
+    },
+    {
+      "artifact_directory": ".audit\\native-treat-music-valid",
+      "treat-completion": {
+        "treat": "music",
+        "initial_fullness": 40,
+        "initial_mood": 40,
+        "neutral_taste_fixture": true,
+        "controlled_care_seconds": 2,
+        "completion_delta": {
+          "fullness": 15,
+          "mood": 20,
+          "affection": 5
+        },
+        "no_early_reward": true,
+        "repeat_unchanged": true,
+        "other_pet_unchanged": true,
+        "cooldown_text": "A little break before we do that again.",
+        "completed_profile": {
+          "id": "4e4a72302781444ea4a7807c4240ccaf",
+          "name": "Pet 3",
+          "mood": 60,
+          "fullness": 55,
+          "affection": 5,
+          "energy": 70,
+          "mode": "work",
+          "appearance": {
+            "character": null,
+            "equipped": {
+              "head": null,
+              "neck": null,
+              "body": null,
+              "back": null
+            },
+            "saved_outfits": []
+          },
+          "preferences": {
+            "auto_rest": true,
+            "allow_throw": true,
+            "allow_social": true,
+            "presentation": null,
+            "taste": {
+              "favorite": null,
+              "disliked": null
+            }
+          }
+        }
+      },
+      "result": {
+        "selected_pet_only": true,
+        "pet_completion_affection_delta": 2,
+        "work_mode_selected_only": true,
+        "cancel_feed_no_reward": true,
+        "hidden_pet_unchanged": true,
+        "hidden_feedback": "Start or show this pet before interacting.",
+        "tab_routes": [
+          {
+            "target": "primaryAction",
+            "tabs": 5
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 13
+          },
+          {
+            "target": "QListWidget",
+            "tabs": 2
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 14
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 4
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 22
+          },
+          {
+            "target": "QListWidget",
+            "tabs": 5
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 6
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 6
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 19
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 6
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 25
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 25
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 29
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 29
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 29
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          }
+        ],
+        "theme": "dark",
+        "language": "English",
+        "actual_window_size": [
+          900,
+          740
+        ],
+        "runtime_closed": true,
+        "temporary_directory_removed": true
+      },
+      "observer": {
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "child_exit": 0
+      },
+      "cold-result": {
+        "passed": true,
+        "initial_snapshot_exact": true,
+        "profiles_exact": true,
+        "leases_reacquired": true,
+        "saved_exact": true,
+        "temporary_directory_removed": true
+      }
+    },
+    {
+      "artifact_directory": ".audit\\native-treat-book-valid",
+      "treat-completion": {
+        "treat": "book",
+        "initial_fullness": 40,
+        "initial_mood": 40,
+        "neutral_taste_fixture": true,
+        "controlled_care_seconds": 2,
+        "completion_delta": {
+          "fullness": 20,
+          "mood": 6,
+          "affection": 4
+        },
+        "no_early_reward": true,
+        "repeat_unchanged": true,
+        "other_pet_unchanged": true,
+        "cooldown_text": "A little break before we do that again.",
+        "completed_profile": {
+          "id": "dbec4d8cdc5043f993fefb64ef444f66",
+          "name": "Pet 3",
+          "mood": 46,
+          "fullness": 60,
+          "affection": 4,
+          "energy": 70,
+          "mode": "work",
+          "appearance": {
+            "character": null,
+            "equipped": {
+              "head": null,
+              "neck": null,
+              "body": null,
+              "back": null
+            },
+            "saved_outfits": []
+          },
+          "preferences": {
+            "auto_rest": true,
+            "allow_throw": true,
+            "allow_social": true,
+            "presentation": null,
+            "taste": {
+              "favorite": null,
+              "disliked": null
+            }
+          }
+        }
+      },
+      "result": {
+        "selected_pet_only": true,
+        "pet_completion_affection_delta": 2,
+        "work_mode_selected_only": true,
+        "cancel_feed_no_reward": true,
+        "hidden_pet_unchanged": true,
+        "hidden_feedback": "Start or show this pet before interacting.",
+        "tab_routes": [
+          {
+            "target": "primaryAction",
+            "tabs": 5
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 13
+          },
+          {
+            "target": "QListWidget",
+            "tabs": 2
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 14
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 4
+          },
+          {
+            "target": "qt_tabwidget_tabbar",
+            "tabs": 22
+          },
+          {
+            "target": "QListWidget",
+            "tabs": 5
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "WrappingPushButton",
+            "tabs": 6
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 6
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 19
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 6
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 29
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 29
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 29
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 29
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          },
+          {
+            "target": "QComboBox",
+            "tabs": 29
+          },
+          {
+            "target": "QPushButton",
+            "tabs": 1
+          }
+        ],
+        "theme": "dark",
+        "language": "English",
+        "actual_window_size": [
+          900,
+          740
+        ],
+        "runtime_closed": true,
+        "temporary_directory_removed": true
+      },
+      "observer": {
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "child_exit": 0
+      },
+      "cold-result": {
+        "passed": true,
+        "initial_snapshot_exact": true,
+        "profiles_exact": true,
+        "leases_reacquired": true,
+        "saved_exact": true,
+        "temporary_directory_removed": true
+      }
+    }
+  ],
+  "scope": "Native MainUI widget-local keyboard operations on private Windows desktops; four neutral-taste built-in treats, cancel, completion, immediate cooldown refusal, selected-pet isolation, save and separate-process reopen.",
+  "limitations": [
+    "Synthetic 64x64 sprite and explicit two-second care advances. The inherited harness stops the debounce-save timer; it does not explicitly pause the care timer. The later treat-boundary report explicitly pauses care before its controlled advances.",
+    "English dark theme at requested 900x740 only for the four complete accepted runs.",
+    "Cooldown expiry and persistence of the cooldown clock are not tested.",
+    "No production artwork, OS input injection, mixed-DPI, independent review, or full-goal completion claim."
+  ],
+  "excluded_runs": {
+    "directories": [
+      ".audit/native-treat-snack",
+      ".audit/native-treat-feast"
+    ],
+    "reason": "Invalid audit fixture taste={} omitted required favorite/disliked keys. Save rejected; exact child processes stopped. Excluded from acceptance. Corrected fixture uses both keys with null values."
+  }
+}

@@ -15,13 +15,13 @@ from __future__ import annotations
 import ctypes
 from ctypes import wintypes
 import json
+import os
 from pathlib import Path
 import sys
 import tempfile
 import traceback
 
 from PySide6.QtCore import QTimer, Qt
-from PySide6.QtGui import QColor, QImage
 from PySide6.QtWidgets import QApplication
 
 WM_KEYDOWN, WM_KEYUP, WM_CHAR = 0x0100, 0x0101, 0x0102
@@ -59,25 +59,33 @@ def _offscreen(app, widget) -> None:
     widget.move(max(screen.geometry().right() for screen in app.screens()) + 1024, 0)
 
 
-def _sprite(folder: Path) -> str:
-    image = QImage(128, 128, QImage.Format.Format_ARGB32)
-    image.fill(QColor(240, 96, 42))
-    path = folder / 'pet.png'
-    image.save(str(path))
-    return str(path)
+def _dressed_pet(folder: Path, profiles, **options):
+    """A desktop pet wearing a built-in character: pets are layered only, so one without draws nothing."""
+    from frontengine.show.pet.asset_library import PetAssetLibrary
+    from frontengine.show.pet.desktop_pet import DesktopPetWidget
+    from frontengine.show.pet.inkside.library import install_builtin, VERSION
+    from frontengine.show.pet.wardrobe import WardrobeDraft
+    library = PetAssetLibrary(folder / 'library')
+    install_builtin(library, 'inkside-mochi', wardrobe=False)
+    pet = DesktopPetWidget(profiles=profiles, talk=False, sit_on_windows=False, asset_library=library, **options)
+    draft = WardrobeDraft(profiles, pet.profile_session.identifier, library.scan()[0])
+    draft.choose_character({'id': 'inkside-mochi', 'version': VERSION})
+    draft.apply(present=False)
+    return pet
 
 
 class Probe:
     def __init__(self, app, output: Path, folder: Path) -> None:
-        from frontengine.show.pet.desktop_pet import DesktopPetWidget
         from frontengine.ui.page.pet.pet_setting_ui import PetSettingUI
         from frontengine.user_setting.pet_profiles import PetProfiles
+        from frontengine.ui.runtime_lifetime import DefaultSettingsLifetime
         self.app, self.output = app, output
         self.result = {'status': 'failed', 'platform': app.platformName()}
         self.foreground, self.cursors = [], []
         profiles = PetProfiles({}, lambda: None)
-        self.pet = DesktopPetWidget(_sprite(folder), profiles=profiles, talk=False, sit_on_windows=False)
-        self.page = PetSettingUI()
+        self.pet = _dressed_pet(folder, profiles)
+        self.lifetime = DefaultSettingsLifetime.open()
+        self.page = PetSettingUI(lifetime=self.lifetime)
         self.page.profile_controls.profiles = profiles
         for widget in (self.pet, self.page):
             _offscreen(app, widget)
@@ -101,6 +109,7 @@ class Probe:
         _settle(self.app)
         assert self.page.isActiveWindow(), 'The probe page could not be activated on its desktop'
         hwnd = int(self.page.winId())
+        self._expand_profiles(hwnd)
         controls.selector.setFocus()
         visited = []
         for _ in range(150):
@@ -130,6 +139,24 @@ class Probe:
         assert recovered == [True], 'The overflow menu command did not run from the keyboard'
         self.result.update(keyboard_greet=True, keyboard_pet_command=True, keyboard_menu_command=True)
         self.finish()
+
+    def _expand_profiles(self, hwnd: int) -> None:
+        from frontengine.ui.page.layout_kit import Section
+        section = self.page.profile_controls.selector.parentWidget()
+        while section is not None and not isinstance(section, Section):
+            section = section.parentWidget()
+        assert section is not None, 'The identity controls have no section'
+        if section.content.isVisible():
+            return
+        for _ in range(150):
+            if self.page.focusWidget() is section.toggle_button:
+                break
+            self._tab(hwnd)
+        assert self.page.focusWidget() is section.toggle_button, 'Tab did not reach the identity section toggle'
+        _post_key(hwnd, VK_SPACE)
+        _settle(self.app)
+        assert self.page.profile_controls.selector.isVisible(), 'Space did not expand the identity section'
+        self.result['identity_section_keyboard_expanded'] = True
 
     def _menu_command(self, target) -> None:
         """Open the target's overflow menu with Space, walk to it with arrows, press Return."""
@@ -198,7 +225,8 @@ class Probe:
         self.pet.close()
         self.page.close()
         (self.output / 'result.json').write_text(json.dumps(self.result, indent=2), encoding='utf-8')
-        self.app.quit()
+        self.lifetime.finished.connect(self.app.quit)
+        self.lifetime.close()
 
 
 def main() -> int:
@@ -208,25 +236,31 @@ def main() -> int:
         return run_on_hidden_desktop(__file__, str(output))
     output.mkdir(parents=True, exist_ok=True)
     app = QApplication([])
+    app.setQuitOnLastWindowClosed(False)
     if app.platformName() != 'windows':
         raise RuntimeError('This probe requires the native Windows Qt platform')
     with tempfile.TemporaryDirectory(prefix='frontengine-native-input-') as folder:
-        probe = Probe(app, output, Path(folder))
-        probe.poll = QTimer()
-        probe.poll.timeout.connect(probe.observe)
-        probe.poll.start(50)
-        for step in ('keyboard',):
-            original = getattr(probe, step)
+        previous = os.getcwd()
+        os.chdir(folder)
+        try:
+            probe = Probe(app, output, Path(folder))
+            probe.poll = QTimer()
+            probe.poll.timeout.connect(probe.observe)
+            probe.poll.start(50)
+            for step in ('keyboard',):
+                original = getattr(probe, step)
 
-            def guarded(original=original):
-                try:
-                    original()
-                except Exception as error:  # every failure is reported in result.json
-                    probe.finish(error)
-            setattr(probe, step, guarded)
-        probe.observe()
-        probe.start()
-        app.exec()
+                def guarded(original=original):
+                    try:
+                        original()
+                    except Exception as error:  # every failure is reported in result.json
+                        probe.finish(error)
+                setattr(probe, step, guarded)
+            probe.observe()
+            probe.start()
+            app.exec()
+        finally:
+            os.chdir(previous)
     return 0 if probe.result['status'] == 'passed' else 1
 
 

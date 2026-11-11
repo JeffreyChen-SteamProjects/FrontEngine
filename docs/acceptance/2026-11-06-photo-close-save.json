@@ -1,0 +1,61 @@
+{
+  "base_commit": "cff9c023",
+  "initial_reproduction": {
+    "destination_created_after_dialog_destroyed": true,
+    "error": "libshiboken: Internal C++ object (PySide6.QtWidgets.QLabel) already deleted."
+  },
+  "red_cases": 6,
+  "related_tests": {
+    "passed": 53,
+    "seconds": 9.7,
+    "additional_photo_file_after_live_cancel_case": {
+      "passed": 12,
+      "seconds": 1.86
+    },
+    "note": "The 12-case photo run overlaps the 53-case run; counts are not additive."
+  },
+  "native": {
+    "existing_file_preserved": true,
+    "photo_closed_before_picker_return": true,
+    "entry": "widget-local save button Space",
+    "picker": "stubbed return closes and destroys photo before returning destination"
+  },
+  "observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "child_exit": 0
+  },
+  "cold_reopen": {
+    "passed": true,
+    "initial_snapshot_exact": true,
+    "profiles_exact": true,
+    "leases_reacquired": true,
+    "saved_exact": true,
+    "temporary_directory_removed": true
+  },
+  "runtime_closed": true,
+  "limits": [
+    "Native MainUI and real PNG writer; file-picker result injected to reproduce closure deterministically.",
+    "Covers closed/deleted photo dialog, not every owner preparation state or OS file picker interaction.",
+    "Full regression, independent review and integration pending."
+  ],
+  "closed_reentry": "All six close/reject/destroy cases also reject a later picker invocation and direct save_to request.",
+  "documentation": {
+    "updated_files": 17,
+    "checks_passed": 31,
+    "sphinx_warning_as_error": true,
+    "rendered_paragraphs_checked": 7
+  }
+}

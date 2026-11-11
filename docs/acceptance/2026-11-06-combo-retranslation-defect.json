@@ -1,0 +1,300 @@
+{
+  "product": "70275848",
+  "status": "reproduced; correction and regression pending",
+  "problem": "Quality, measuring mode and spectrum style choices retain construction-time English labels after language-menu changes despite existing translated keys.",
+  "native_mismatches": [
+    {
+      "language": "Traditional_Chinese",
+      "page": "tab_widgets_text",
+      "actual": [
+        "Bars",
+        "Ring"
+      ],
+      "expected": [
+        "\u9577\u689d",
+        "\u74b0\u5f62"
+      ]
+    },
+    {
+      "language": "Traditional_Chinese",
+      "page": "tab_tools_text",
+      "actual": [
+        "Colour picker",
+        "Pixel ruler",
+        "Protractor"
+      ],
+      "expected": [
+        "\u53d6\u8272\u5668",
+        "\u50cf\u7d20\u5c3a",
+        "\u91cf\u89d2\u5668"
+      ]
+    },
+    {
+      "language": "Traditional_Chinese",
+      "page": "tab_control_center_text",
+      "actual": [
+        "High",
+        "Balanced",
+        "Saver"
+      ],
+      "expected": [
+        "\u9ad8\u756b\u8cea",
+        "\u5e73\u8861",
+        "\u7701\u8cc7\u6e90"
+      ]
+    },
+    {
+      "language": "Simplified_Chinese",
+      "page": "tab_widgets_text",
+      "actual": [
+        "Bars",
+        "Ring"
+      ],
+      "expected": [
+        "\u957f\u6761",
+        "\u73af\u5f62"
+      ]
+    },
+    {
+      "language": "Simplified_Chinese",
+      "page": "tab_tools_text",
+      "actual": [
+        "Colour picker",
+        "Pixel ruler",
+        "Protractor"
+      ],
+      "expected": [
+        "\u53d6\u8272\u5668",
+        "\u50cf\u7d20\u5c3a",
+        "\u91cf\u89d2\u5668"
+      ]
+    },
+    {
+      "language": "Simplified_Chinese",
+      "page": "tab_control_center_text",
+      "actual": [
+        "High",
+        "Balanced",
+        "Saver"
+      ],
+      "expected": [
+        "\u9ad8",
+        "\u5e73\u8861",
+        "\u7701\u7535"
+      ]
+    },
+    {
+      "language": "Deutsch",
+      "page": "tab_widgets_text",
+      "actual": [
+        "Bars",
+        "Ring"
+      ],
+      "expected": [
+        "Balken",
+        "Ring"
+      ]
+    },
+    {
+      "language": "Deutsch",
+      "page": "tab_tools_text",
+      "actual": [
+        "Colour picker",
+        "Pixel ruler",
+        "Protractor"
+      ],
+      "expected": [
+        "Farbw\u00e4hler",
+        "Pixel-Lineal",
+        "Winkelmesser"
+      ]
+    },
+    {
+      "language": "Deutsch",
+      "page": "tab_control_center_text",
+      "actual": [
+        "High",
+        "Balanced",
+        "Saver"
+      ],
+      "expected": [
+        "Hoch",
+        "Ausgewogen",
+        "Sparsam"
+      ]
+    },
+    {
+      "language": "Russian",
+      "page": "tab_widgets_text",
+      "actual": [
+        "Bars",
+        "Ring"
+      ],
+      "expected": [
+        "\u0421\u0442\u043e\u043b\u0431\u0446\u044b",
+        "\u041a\u043e\u043b\u044c\u0446\u043e"
+      ]
+    },
+    {
+      "language": "Russian",
+      "page": "tab_tools_text",
+      "actual": [
+        "Colour picker",
+        "Pixel ruler",
+        "Protractor"
+      ],
+      "expected": [
+        "\u041f\u0438\u043f\u0435\u0442\u043a\u0430",
+        "\u041b\u0438\u043d\u0435\u0439\u043a\u0430 \u0432 \u043f\u0438\u043a\u0441\u0435\u043b\u044f\u0445",
+        "\u0422\u0440\u0430\u043d\u0441\u043f\u043e\u0440\u0442\u0438\u0440"
+      ]
+    },
+    {
+      "language": "Russian",
+      "page": "tab_control_center_text",
+      "actual": [
+        "High",
+        "Balanced",
+        "Saver"
+      ],
+      "expected": [
+        "\u0412\u044b\u0441\u043e\u043a\u043e\u0435",
+        "\u0421\u0431\u0430\u043b\u0430\u043d\u0441\u0438\u0440\u043e\u0432\u0430\u043d\u043d\u043e\u0435",
+        "\u042d\u043a\u043e\u043d\u043e\u043c\u043d\u043e\u0435"
+      ]
+    },
+    {
+      "language": "France",
+      "page": "tab_widgets_text",
+      "actual": [
+        "Bars",
+        "Ring"
+      ],
+      "expected": [
+        "Barres",
+        "Anneau"
+      ]
+    },
+    {
+      "language": "France",
+      "page": "tab_tools_text",
+      "actual": [
+        "Colour picker",
+        "Pixel ruler",
+        "Protractor"
+      ],
+      "expected": [
+        "Pipette",
+        "R\u00e8gle en pixels",
+        "Rapporteur"
+      ]
+    },
+    {
+      "language": "France",
+      "page": "tab_control_center_text",
+      "actual": [
+        "High",
+        "Balanced",
+        "Saver"
+      ],
+      "expected": [
+        "\u00c9lev\u00e9e",
+        "\u00c9quilibr\u00e9e",
+        "\u00c9conomie"
+      ]
+    },
+    {
+      "language": "Italy",
+      "page": "tab_widgets_text",
+      "actual": [
+        "Bars",
+        "Ring"
+      ],
+      "expected": [
+        "Barre",
+        "Anello"
+      ]
+    },
+    {
+      "language": "Italy",
+      "page": "tab_tools_text",
+      "actual": [
+        "Colour picker",
+        "Pixel ruler",
+        "Protractor"
+      ],
+      "expected": [
+        "Selettore di colore",
+        "Righello in pixel",
+        "Goniometro"
+      ]
+    },
+    {
+      "language": "Italy",
+      "page": "tab_control_center_text",
+      "actual": [
+        "High",
+        "Balanced",
+        "Saver"
+      ],
+      "expected": [
+        "Alta",
+        "Bilanciata",
+        "Risparmio"
+      ]
+    }
+  ],
+  "callback_errors": [],
+  "native_terminal_exit": 1,
+  "observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "child_exit": 1,
+    "observation_only": true
+  },
+  "root_cause": "Items are translated when added to QComboBox but not registered for subsequent retranslation.",
+  "source_files": [
+    "frontengine/ui/page/control_center/control_center_ui.py",
+    "frontengine/ui/page/tools/tools_setting_ui.py",
+    "frontengine/ui/page/widgets/widgets_setting_ui.py"
+  ],
+  "evidence_sha256": {
+    "Deutsch-900-tab_control_center_text.png": "a8f835eae67d15ede82b7ac451e21f2e80c6899b07356d24650699c8b8c4e48f",
+    "Deutsch-900-tab_tools_text.png": "d5db146d9d9e96ee131da64902779397d294b80271badb07f1b2fd544f7b53dd",
+    "Deutsch-900-tab_widgets_text.png": "3bb19fef3f2fcdcfffbc463aeab195c176647e6b55f0a1dcc2b18584eb150cb6",
+    "English-900-tab_control_center_text.png": "c976e3aa4b8e272a4e44341348768ccf6ef7ab9a7bce6cc2463d1f7e0428196f",
+    "English-900-tab_tools_text.png": "e9cebcbc3d05d525838ddd4394d5e7088e1ec42b4a057028b10b21f8dcf9950e",
+    "English-900-tab_widgets_text.png": "c6a856e09a4f39447e34b03c945552f864e7f593027c10eaadad5b084a5028f6",
+    "France-900-tab_control_center_text.png": "eaff38c8be3f64731487b205a22a33c9d8038da11a5ec1f9479c21c1a9725871",
+    "France-900-tab_tools_text.png": "310cf990f4bda0421df7f6b79c0d33b03fc3fd7f91af13b05045ecbb09223269",
+    "France-900-tab_widgets_text.png": "7fda216d7fff6e999dddc73352db66a89d8108b312a6317d125a12305db1a5ef",
+    "Italy-900-tab_control_center_text.png": "ebce043e72089ea5076afc5778e826042e7ebbb9ec258a9bdc1ea7c9c0808fa4",
+    "Italy-900-tab_tools_text.png": "6bc8187da9261c6b37db11890ac9f0e82609af3ec6fb18c7e8760c062cf76178",
+    "Italy-900-tab_widgets_text.png": "4207fe42db466ced77aa6e43e1dfc5bedee0ab99f0bb20a4106c86d0ccdf3741",
+    "observer.json": "d314eef80ba48b814556966ad9dda568266e019fdb594765f8c590f6d7313c65",
+    "result.json": "b27ee5d8828e30d75d6f13a255d7433b4bfb8715afb2717004bdac0fbc144eb1",
+    "routes.jsonl": "c6ee4eb9da98512ca4464000090b7b0bc3b33913b7dcf42cf0a378a1845d65eb",
+    "Russian-900-tab_control_center_text.png": "9fc7f722e52e4f7ac1fc08846b26e0fdfb096ce3e31964bcff1c544eba40859f",
+    "Russian-900-tab_tools_text.png": "082e520d47952e7d48e98ffbacdb6e07675caef955bdac6469838e5283e5a2d3",
+    "Russian-900-tab_widgets_text.png": "3768ee6a4aa04f172c49a2c722029d56aff6a4cd5de2473132f8dd567cb6ee65",
+    "Simplified_Chinese-900-tab_control_center_text.png": "7d1d6cce7896ac1fd3cc9620e68c23219d0b4af1eb7e8c519d846fc9e9247a67",
+    "Simplified_Chinese-900-tab_tools_text.png": "176a597febbb029c7a3c11e7364fd6bcebc67267decf2d068462a69bd5d0f873",
+    "Simplified_Chinese-900-tab_widgets_text.png": "457607c4b9da2f06bc118d3c6b0b648ab3df11e97360de826240e2d34141011d",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "Traditional_Chinese-900-tab_control_center_text.png": "eabc360403b19ee6396dbeae5097a8eb64e53b9f7d0f424befc7b99169aedbba",
+    "Traditional_Chinese-900-tab_tools_text.png": "95b56174e9dd78d3849d73de19554a3a30b6943d3f0a28f676d74e883bb27342",
+    "Traditional_Chinese-900-tab_widgets_text.png": "07b321ab69fba2ff96a4a5cb2ba2cbe142caf499f4e094b41c850ce499603f67"
+  }
+}

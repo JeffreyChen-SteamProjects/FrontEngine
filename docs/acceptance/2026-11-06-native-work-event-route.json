@@ -1,0 +1,95 @@
+{
+  "product_test_commit": "6a097aa0",
+  "native": {
+    "passed": true,
+    "settlement": {
+      "coins": 12,
+      "kind": "settled",
+      "recipe": "letter",
+      "resident": "143d28e1d998440bb4f04f6866fb2466",
+      "task": "t5",
+      "time": 1315400,
+      "transaction": "t5:u0"
+    },
+    "inbox_rows": [
+      {
+        "key": [
+          "settled",
+          "143d28e1d998440bb4f04f6866fb2466",
+          "letter",
+          null,
+          null,
+          12,
+          null,
+          "Event probe",
+          [
+            "pet_game_recipe_letter",
+            "Write a letter"
+          ]
+        ],
+        "event": {
+          "coins": 12,
+          "kind": "settled",
+          "recipe": "letter",
+          "resident": "143d28e1d998440bb4f04f6866fb2466",
+          "task": "t5",
+          "time": 1315400,
+          "transaction": "t5:u0",
+          "resident_name": "Event probe",
+          "recipe_label": [
+            "pet_game_recipe_letter",
+            "Write a letter"
+          ]
+        },
+        "count": 1,
+        "time": 1315400,
+        "category": "work"
+      }
+    ],
+    "inbox_texts": [
+      "Event probe 完成了寫一封信（+12）"
+    ],
+    "repeated_publish_no_duplicate": true,
+    "persisted_snapshot_equal": true,
+    "settlement_persisted_once": true,
+    "explicit_ticks": 577,
+    "runtime_closed": true,
+    "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-stage-layout\\.audit\\event-fixture",
+    "scope": "Native MainUI on private desktop; actual work simulation via explicit injected clock ticks, real service signals, Inbox and save. Global host starts, Workshop and lock query substituted; not normal-speed autonomous acceptance.",
+    "temporary_directory_removed": true
+  },
+  "review": {
+    "source_files_unchanged": 748,
+    "observer": {
+      "before": {
+        "foreground": 2558004,
+        "cursor": [
+          768,
+          432
+        ]
+      },
+      "after": {
+        "foreground": 2558004,
+        "cursor": [
+          768,
+          432
+        ]
+      },
+      "child_exit": 0,
+      "observation_only": true
+    },
+    "image_review": "Actually viewed settlement-inbox.png: one readable Traditional Chinese letter completion +12, unread1, toolbar separated from stage. Circular resident placeholder; not art readiness proof.",
+    "image_sha256": "7c4f671d68694e7bbdb6ef46dcda4a2b0a24503bdf336ab353d90c140c46ff86",
+    "scope": "One actual letter settlement routed through HomeService to native Inbox and manual save; injected clock, not normal speed; no post-close/restart event replay proof."
+  },
+  "harness_source": "import hashlib\nimport json\nimport logging\nimport os\nfrom pathlib import Path\nimport shutil\nimport sys\nimport tempfile\nimport traceback\nimport uuid\nfrom time import monotonic\n\nsys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'manual-work-feedback/.audit'))\nfrom complete_main_onboarding_native import observation\n\nROOT = Path(__file__).resolve().parents[1]\nsys.path.insert(0, str(ROOT))\nsys.path.insert(0, str(ROOT / 'tests/integration'))\nimport hidden_desktop\n\nsource = Path(sys.argv[1]).resolve()\noutput = Path(sys.argv[2]).resolve()\noutput.mkdir(parents=True, exist_ok=True)\nif not hidden_desktop.is_child(output):\n    assert not (output / 'result.json').exists(), 'Use a fresh output directory'\n    hidden_desktop.DESKTOP = f'FrontEngineColdReload{os.getpid()}_{uuid.uuid4().hex[:8]}'\n    before = observation()\n    code = hidden_desktop.run_on_hidden_desktop(__file__, str(source), str(output), timeout_ms=180000)\n    (output / 'observer.json').write_text(json.dumps({'before': before, 'after': observation(),\n        'child_exit': code, 'observation_only': True}, indent=2), encoding='utf-8')\n    raise SystemExit(code)\n\nos.environ['QT_QPA_PLATFORM'] = 'windows'\ncase = source.name\nresult = {'passed': False}\ntry:\n    with tempfile.TemporaryDirectory(prefix='fe-current-cold-reload-') as folder:\n        previous = Path.cwd()\n        os.chdir(folder)\n        try:\n            from PySide6.QtCore import QCoreApplication, QEvent\n            from PySide6.QtTest import QTest\n            from PySide6.QtWidgets import QApplication, QSizePolicy\n            from frontengine.ui.page.pet_game import home_page\n            from frontengine.utils.session_lock import session_lock\n            from frontengine.user_setting.user_setting_file import user_setting_dict\n            from frontengine.utils.pet_game import snapshot\n\n            home_page.workshop_pack_roots = lambda: []\n            session_lock.is_session_locked = lambda: False\n            app = QApplication([])\n            app.setQuitOnLastWindowClosed(False)\n            from frontengine.ui import main_ui\n            main_ui.CriticalExit.init_critical_exit = lambda self: None\n            main_ui.HotkeyService.start = lambda self: False\n            main_ui.AppProfileService.start = lambda self: None\n            main_ui.ShareWatchService.start = lambda self: None\n            window = main_ui.FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)\n            lifetime = window.lifetime\n            page = window.pet_home_ui\n            try:\n                from PySide6.QtGui import QGuiApplication\n                service = page.service\n                screen = QGuiApplication.primaryScreen()\n                area = screen.availableGeometry()\n                world = service.create_home(screen.name() or 'primary', area.x(), area.bottom(), 48, seed=5)\n                world.automatic = False\n                zone = next(iter(world.zones))\n                world.furnish(zone)\n                pet = service.profiles.create('Event probe')['id']\n                service.profiles.update(pet, {'mood': 80, 'fullness': 90, 'energy': 95})\n                assert service.adopt(pet, zone) == 'accepted'\n                status, task_id = service.run(lambda w: w.create_task('letter', pet))\n                assert status == 'accepted'\n                window.resize(1280, 960)\n                window.show()\n                page.refresh()\n                QTest.qWait(200)\n                service.timer.stop()\n                service.periodic.stop()\n                clock = [100.0]\n                service._clock = lambda: clock[0]\n                service._last = clock[0]\n                events = []\n                service.events_ready.connect(events.extend)\n                for steps in range(3000):\n                    clock[0] += 0.2\n                    service._tick()\n                    if task_id not in world.tasks:\n                        break\n                settled = [e for e in events if e['kind'] == 'settled' and e['task'] == task_id]\n                assert len(settled) == 1\n                rows = [e for e in page.inbox.entries if e['event'].get('task') == task_id and e['event']['kind'] == 'settled']\n                assert len(rows) == 1 and rows[0]['count'] == 1\n                transaction = settled[0]['transaction']\n                assert world.ledger.applied(transaction)\n                before = page.inbox.unread\n                service._publish()\n                service._publish()\n                assert page.inbox.unread == before\n                assert len([e for e in events if e['kind'] == 'settled' and e['task'] == task_id]) == 1\n                assert service.save_now()\n                stored = json.loads(service.store.path.read_text(encoding='utf-8'))\n                assert stored == snapshot.to_dict(world)\n                assert sum(e['id'] == transaction for e in stored['ledger']['journal']) == 1\n                service.pause('acceptance')\n                page.tabs.setCurrentIndex(page.tabs.keys().index('pet_home_inbox_section'))\n                page._scroll.ensureWidgetVisible(page.inbox.list)\n                QTest.qWait(200)\n                texts = [page.inbox.list.item(i).text() for i in range(page.inbox.list.count())]\n                assert any('Event probe' in text for text in texts)\n                assert not page.inbox.list.visibleRegion().isEmpty()\n                assert window.grab().save(str(output / 'settlement-inbox.png'))\n                result.update(settlement=settled[0], inbox_rows=rows, inbox_texts=texts,\n                    repeated_publish_no_duplicate=True, persisted_snapshot_equal=True,\n                    settlement_persisted_once=True, explicit_ticks=steps+1)\n            finally:\n                window.request_shutdown()\n                deadline = monotonic() + 120\n                while not lifetime.closed and monotonic() < deadline:\n                    QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)\n                    app.processEvents()\n                    QTest.qWait(10)\n                assert lifetime.closed, (lifetime.state, lifetime.error)\n            result.update(passed=True, runtime_closed=True, python=sys.version,\n                source=str(source),\n                scope='Native MainUI on private desktop; actual work simulation via explicit injected clock ticks, real service signals, Inbox and save. Global host starts, Workshop and lock query substituted; not normal-speed autonomous acceptance.')\n        finally:\n            logging.shutdown()\n            os.chdir(previous)\n    result['temporary_directory_removed'] = True\nexcept Exception:\n    result.update(passed=False, error=traceback.format_exc())\n(output / 'result.json').write_text(json.dumps(result, indent=2), encoding='utf-8')\nraise SystemExit(0 if result['passed'] else 1)\n",
+  "harness_sha256": "af5299b28a496923eb3a865dac4879f4ced477c173c668892711a53f7be5c11b",
+  "limits": [
+    "Single letter completion through simulation, service signal, native Inbox and explicit save_now.",
+    "Clock ticks injected; no normal-speed or automatic-save timing acceptance.",
+    "No cold-reopen, crash or all-event-family acceptance.",
+    "Resident circle placeholder is not artwork readiness evidence.",
+    "Independent review pending."
+  ]
+}

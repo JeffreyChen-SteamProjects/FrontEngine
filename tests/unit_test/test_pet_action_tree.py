@@ -97,11 +97,12 @@ def test_plain_floor_mode_only_walks_idles_and_sleeps():
     assert set(_picks(_floor_pet(behaviour=BEHAVIOUR_FLOOR))) <= {'walk', 'idle'}
 
 
-def test_cycling_all_actions_is_the_default_everywhere(tmp_path):
+def test_cycling_all_actions_is_the_default_everywhere(tmp_path, *, lifetime_factory):
     from frontengine.ui.page.pet.pet_setting_ui import PetSettingUI
     from frontengine.user_setting.pet_profile_schema import presentation_defaults
+    lifetime_factory()
     assert presentation_defaults()['behaviour'] == BEHAVIOUR_ACTIONS
-    page = PetSettingUI()
+    page = PetSettingUI(lifetime=lifetime_factory())
     try:
         assert page.behaviour_combobox.currentData() == BEHAVIOUR_ACTIONS
         assert page.customization_defaults()['behaviour'] == BEHAVIOUR_ACTIONS
@@ -112,9 +113,8 @@ def test_cycling_all_actions_is_the_default_everywhere(tmp_path):
 def test_a_summoned_pet_sets_off_walking_at_once(tmp_path):
     from frontengine.show.pet.desktop_pet import DesktopPetWidget
     from frontengine.user_setting.pet_profiles import PetProfiles
-    from test_pet_profile_sessions import _sprite
     for seed in range(8):
-        pet = DesktopPetWidget(_sprite(tmp_path), behaviour=BEHAVIOUR_ACTIONS, sit_on_windows=False,
+        pet = DesktopPetWidget(behaviour=BEHAVIOUR_ACTIONS, sit_on_windows=False,
                                profiles=PetProfiles({}, lambda: None))
         try:
             pet.motion._rng = random.Random(seed)
@@ -131,8 +131,7 @@ def test_a_summoned_pet_sets_off_walking_at_once(tmp_path):
 def test_a_pet_keeps_the_chosen_mode_through_its_own_presentation_defaults(tmp_path):
     from frontengine.show.pet.desktop_pet import DesktopPetWidget
     from frontengine.user_setting.pet_profiles import PetProfiles
-    from test_pet_profile_sessions import _sprite
-    pet = DesktopPetWidget(_sprite(tmp_path), behaviour=BEHAVIOUR_ACTIONS, sit_on_windows=False,
+    pet = DesktopPetWidget(behaviour=BEHAVIOUR_ACTIONS, sit_on_windows=False,
                            profiles=PetProfiles({}, lambda: None))
     try:
         pet._apply_customization()

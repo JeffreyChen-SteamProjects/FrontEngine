@@ -1,0 +1,122 @@
+{
+  "observations": [
+    {
+      "kind": "web",
+      "target": "BenQ GW2486TC",
+      "actual_screen": "BenQ GW2486TC",
+      "dpr": 1.0,
+      "logical_size": [
+        320,
+        180
+      ],
+      "pixels": [
+        320,
+        180
+      ],
+      "on_screen": true,
+      "file": "web-0.png",
+      "dom": {
+        "dpr": 1,
+        "width": 320,
+        "height": 180
+      },
+      "center": "#2474c4",
+      "passed": true
+    },
+    {
+      "kind": "web",
+      "target": "BenQ GW2490",
+      "actual_screen": "BenQ GW2490",
+      "dpr": 1.25,
+      "logical_size": [
+        320,
+        180
+      ],
+      "pixels": [
+        400,
+        225
+      ],
+      "on_screen": true,
+      "file": "web-1.png",
+      "dom": {
+        "dpr": 1.25,
+        "width": 320,
+        "height": 180
+      },
+      "center": "#2474c4",
+      "passed": true
+    },
+    {
+      "kind": "web",
+      "target": "BenQ GW2486TC",
+      "actual_screen": "BenQ GW2486TC",
+      "dpr": 1.0,
+      "logical_size": [
+        320,
+        180
+      ],
+      "pixels": [
+        320,
+        180
+      ],
+      "on_screen": true,
+      "file": "web-2.png",
+      "dom": {
+        "dpr": 1,
+        "width": 320,
+        "height": 180
+      },
+      "center": "#2474c4",
+      "passed": true
+    }
+  ],
+  "closed": [
+    {
+      "kind": "web",
+      "widget_deleted": true,
+      "player_stopped": null
+    }
+  ],
+  "errors": [],
+  "passed": true,
+  "scope": "Native owned local-HTML Web widget on hidden desktop; no external webpage or desktop input. Checks actual QWidget captures and JSON-serialized DOM data. Profile directory removed by parent after child exit. No fullscreen, input transparency or physical display reconfiguration.",
+  "source_head": "79bd15c834e7016ee0a9e59a6b354ce02081d132",
+  "observer": {
+    "exit_code": 0,
+    "profile_removed": true,
+    "source_unchanged": true,
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        2362,
+        117
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        2362,
+        117
+      ]
+    },
+    "observation_only": true,
+    "desktop": "FrontEngineVideoWebDpi_29a7b87d51cd"
+  },
+  "artifact_directory": ".audit\\web-dpi-79bd15c-v2",
+  "artifact_sha256": {
+    "harness.py": "6f9a79af17dd925573bce5ea2924b0428d240340b4650b2c199400be7b6fa85d",
+    "observer.json": "87480b3a538b170e10ae1a962409759302c9b2c6f33905c5d53c36f907e236fc",
+    "result.json": "a4cb5e7c05c60e30fb19392dacea4dded8c2bce12f0fd07d275c02355865acf4",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "web-0.png": "55ce1a49cbf2234db7aeb2d2bb9298be9c42312e2f9e3cc2a64f5173ad4240e0",
+    "web-1.png": "411298c03dc762feb78fd806635cf719b43d2477a224cca6d0e88df097d17bd1",
+    "web-2.png": "55ce1a49cbf2234db7aeb2d2bb9298be9c42312e2f9e3cc2a64f5173ad4240e0"
+  },
+  "fixture_sha256": "1633c7198fc5107267f965173b1cde0a2877c7ff7531e5d5744d6c75f69f3870",
+  "limitations": [
+    "Local static HTML only; no external page, form input, navigation or fullscreen acceptance.",
+    "No physical display configuration change or input transparency acceptance.",
+    "The earlier combined video/Web probe failed. Video decoded frames but QWidget captures were monochrome; video rendering remains unverified.",
+    "The Web probe serializes JavaScript results as JSON and removes its profile directory after the child process exits. No product source changed."
+  ]
+}

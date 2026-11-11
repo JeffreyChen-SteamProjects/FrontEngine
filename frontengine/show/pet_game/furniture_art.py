@@ -11,12 +11,30 @@ from pathlib import Path
 
 from PySide6.QtGui import QImage
 
+from frontengine.show.pet_game.themes import base_theme
+
 FOLDER = Path(__file__).resolve().parent / "furniture"
 ITEM_FOLDER = Path(__file__).resolve().parent / "items"
 # Where a pet using the piece rests, as a fraction of the picture's height above the floor:
 # a sleeping pet lies on the mattress, a relaxing one sits on the cushion.
-SURFACES = {"bed_basic": 0.42, "bed_cozy": 0.44, "armchair": 0.3}
+SURFACES = {"bed_basic": 0.42, "bed_cozy": 0.44, "armchair": 0.3, "cat_tree": 0.8, "climbing_wall": 0.86,
+            "futon": 0.3}
 _CACHE: dict[tuple[str, str], QImage | None] = {}
+# Content packs' pictures, already checked by content_pack: furniture id -> theme -> file.
+PACK_PICTURES: dict[str, dict[str, Path]] = {}
+
+
+def register_pack_pictures(pictures: dict[str, dict[str, Path]]) -> None:
+    PACK_PICTURES.update(pictures)
+    _CACHE.clear()
+
+
+def _candidates(theme: str, definition: str) -> list[Path]:
+    theme = base_theme(theme)                  # a pack theme uses its base theme's pictures
+    pack = PACK_PICTURES.get(definition)
+    if pack is not None:
+        return [path for path in (pack.get(theme), pack.get("warm_home")) if path is not None]
+    return [FOLDER / folder / f"{definition}.png" for folder in (theme, "warm_home")]
 
 
 def picture(theme: str, definition: str) -> QImage | None:
@@ -24,8 +42,7 @@ def picture(theme: str, definition: str) -> QImage | None:
     key = (theme, definition)
     if key not in _CACHE:
         image = None
-        for folder in (theme, "warm_home"):
-            path = FOLDER / folder / f"{definition}.png"
+        for path in _candidates(theme, definition):
             if path.is_file():
                 candidate = QImage(str(path))
                 if not candidate.isNull():

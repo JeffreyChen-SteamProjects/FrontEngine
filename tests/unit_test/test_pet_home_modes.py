@@ -5,23 +5,23 @@ from frontengine.show.pet_game.home_service import HomeService
 from frontengine.show.pet_game.home_strip import FRAME_MS
 from frontengine.ui.page.pet_game.home_page import MEETING_REASON, PetHomePage
 from frontengine.ui.page.pet_game.inbox_panel import category
-from frontengine.user_setting.pet_game_save import HomeSaveStore
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.utils.pet_game.catalog import builtin_catalog
 
 
 @pytest.fixture
-def page(tmp_path, monkeypatch):
+def page(tmp_path, monkeypatch, *, home_store_factory, lifetime_factory):
     from frontengine.user_setting.user_setting_file import user_setting_dict
+    lifetime_factory()
     for key, value in (("pet_home_running", False), ("pet_home_on_desktop", True), ("pet_home_mode", "normal"),
                        ("pet_home_auto_meeting", True), ("quality_tier", "high")):
         monkeypatch.setitem(user_setting_dict, key, value)
     for name in ("work", "needs", "life", "errors"):
         monkeypatch.setitem(user_setting_dict, "pet_home_notify_" + name, True)
-    service = HomeService(None, HomeSaveStore(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None))
-    widget = PetHomePage(service)
+    service = HomeService(None, home_store_factory(tmp_path, builtin_catalog()), PetProfiles({}, lambda: None))
+    widget = PetHomePage(service, lifetime=lifetime_factory())
     widget.create_home()
-    widget.residents.new_pet()
+    # creating a home with no pets brings a first one
     yield widget
     widget.shutdown()
 
@@ -61,6 +61,31 @@ def test_screen_sharing_borrows_meeting_mode_and_gives_it_back(page):
     assert page.mode == "focus"
 
 
+def test_settings_can_leave_meeting_without_the_hidden_strip(page):
+    from PySide6.QtCore import Qt
+    from PySide6.QtTest import QTest
+
+    page.set_mode('meeting')
+    assert all(not strip.isVisible() for strip in page.strip_list)
+    assert page.mode_combo.currentData() == 'meeting'
+    assert page.mode_combo.isEnabled()
+    QTest.keyClick(page.mode_combo, Qt.Key.Key_Home)
+    assert page.mode == 'normal'
+    assert page.service.running
+    assert all(strip.isVisible() for strip in page.strip_list)
+
+
+def test_settings_show_temporary_sharing_mode_without_overwriting_preference(page):
+    page.set_mode('focus')
+    page.sharing_changed(True)
+    assert page.mode_combo.currentData() == 'meeting'
+    assert not page.mode_combo.isEnabled()
+    assert page.mode == 'focus'
+    page.sharing_changed(False)
+    assert page.mode_combo.currentData() == 'focus'
+    assert page.mode_combo.isEnabled()
+
+
 def test_inbox_sorts_and_folds_everything_that_happened(page):
     world = page.service.world
     resident = next(iter(world.residents))
@@ -78,6 +103,78 @@ def test_inbox_sorts_and_folds_everything_that_happened(page):
     assert page.inbox.count.text() == "0 new"
 
 
+def test_inbox_history_follows_language_changes_and_keeps_repeat_counts(make_main_window):
+    from frontengine.ui.menu.language_menu import set_language
+    from frontengine.utils.multi_language.retranslate import translate
+
+    window = make_main_window()
+    assert set_language('English', window)
+    page = window.pet_home_ui
+    page.create_home()
+    page.service.pause('test')
+    world = page.service.world
+    resident = next(iter(world.residents.values()))
+    event = {'kind': 'settled', 'resident': resident.identifier, 'recipe': 'letter', 'coins': 12, 'time': 1000}
+    page.inbox.on_events([event, {**event, 'time': 2000}], world)
+    english = page.inbox.list.item(0).text()
+    try:
+        assert page.set_free_arranging(True)
+        assert set_language('France', window)
+        assert page.inbox.list.count() == 0
+        assert page.set_free_arranging(False)
+        recipe = world.catalog.recipes['letter']
+        expected = translate('pet_home_note_settled').format(
+            name=resident.name, recipe=translate(recipe.label_key, recipe.fallback), coins=12)
+        assert expected not in english
+        assert page.inbox.list.item(0).text() == expected + ' ' + translate('pet_home_note_times').format(count=2)
+        assert page.inbox.count.text() == translate('pet_home_inbox_unread').format(count=2)
+        page.inbox.on_events([{**event, 'time': 3000}], world)
+        assert page.inbox.list.count() == 1
+        assert page.inbox.entries[0]['count'] == 3
+    finally:
+        set_language('English', window)
+
+
+def test_inbox_history_keeps_names_and_rewards_from_when_the_event_arrived(page):
+    world = page.service.world
+    resident = next(iter(world.residents.values()))
+    resident.name = 'Original name'
+    event = {'kind': 'settled', 'resident': resident.identifier, 'recipe': 'letter', 'coins': 12, 'time': 1000}
+    page.inbox.on_events([event], world)
+    original = page.inbox.list.item(0).text()
+    resident.name = 'New name'
+    event['coins'] = 99
+    page.inbox.refresh_lists()
+    assert page.inbox.list.item(0).text() == original
+    assert 'Original name' in original
+    assert '(+12)' in original
+    page.inbox.on_events([{**event, 'coins': 24, 'time': 2000}], world)
+    assert page.inbox.list.count() == 2
+    assert 'New name' in page.inbox.list.item(0).text()
+    assert '(+24)' in page.inbox.list.item(0).text()
+
+
+@pytest.mark.parametrize('mark_read', [False, True])
+def test_paused_home_pending_list_follows_inbox_changes(page, mark_read):
+    from PySide6.QtCore import Qt
+    from PySide6.QtWidgets import QPushButton
+    from frontengine.utils.multi_language.retranslate import translate
+
+    page.service.pause('test')
+    assert not page.service.running
+    page.inbox.add_error('disk full', 1000)
+    if mark_read:
+        page.refresh()
+        button = next(button for button in page.inbox.section.findChildren(QPushButton)
+                      if button.text() == translate('pet_home_inbox_read'))
+        button.click()
+    keys = [page.pending_list.item(i).data(Qt.ItemDataRole.UserRole)
+            for i in range(page.pending_list.count())]
+    assert ('pet_home_inbox_section' in keys) is not mark_read
+    assert page.inbox.unread == (0 if mark_read else 1)
+    assert page.pending_box.isHidden() is mark_read
+
+
 @pytest.mark.parametrize("event, expected", [
     ({"kind": "settled"}, "work"), ({"kind": "interrupted", "reason": "tired"}, "needs"),
     ({"kind": "interrupted", "reason": "furniture_moved"}, None), ({"kind": "completed"}, None),
@@ -85,3 +182,68 @@ def test_inbox_sorts_and_folds_everything_that_happened(page):
 ])
 def test_only_meaningful_events_reach_the_inbox(event, expected):
     assert category(event) == expected
+
+
+def test_inbox_keeps_different_life_events_and_errors_distinct(page):
+    world = page.service.world
+    resident = next(iter(world.residents))
+    page.inbox.on_events([
+        {'kind': 'life_event', 'event': 'friend', 'resident': resident, 'time': 1000},
+        {'kind': 'life_event', 'event': 'skilled', 'resident': resident, 'time': 1000},
+        {'kind': 'life_event', 'event': 'skilled', 'resident': resident, 'time': 2000},
+    ], world)
+    assert page.inbox.list.count() == 2
+    assert page.inbox.entries[-1]['count'] == 2
+    page.inbox.add_error('disk full', 3000)
+    page.inbox.add_error('permission denied', 4000)
+    assert page.inbox.list.count() == 4
+    assert page.inbox.list.item(0).text() == 'permission denied'
+
+
+def test_inbox_does_not_fold_across_a_clock_reset(page):
+    page.inbox.add_error('disk full', 60000)
+    page.inbox.add_error('disk full', 0)
+    assert page.inbox.list.count() == 2
+
+
+def test_inbox_history_and_unread_belong_to_each_home_mode(page):
+    page.service.pause('test')
+    page.inbox.add_error('Managed notice', 1000)
+    managed_entries = list(page.inbox.entries)
+    managed_unread = page.inbox.unread
+    assert page.set_free_arranging(True)
+    assert page.inbox.entries == []
+    assert page.inbox.unread == 0
+    page.inbox.add_error('Before sandbox creation', 1000)
+    page.create_home()
+    assert page.inbox.entries == []
+    assert page.inbox.unread == 0
+    page.inbox.add_error('Sandbox notice', 1000)
+    sandbox_entries = list(page.inbox.entries)
+    sandbox_unread = page.inbox.unread
+    assert page.set_free_arranging(False)
+    assert page.inbox.entries == managed_entries
+    assert page.inbox.unread == managed_unread
+    page.inbox.mark_read()
+    assert page.set_free_arranging(True)
+    assert page.inbox.entries == sandbox_entries
+    assert page.inbox.unread == sandbox_unread
+    assert page.set_free_arranging(False)
+    assert page.inbox.unread == 0
+
+
+def test_failed_home_mode_switch_keeps_original_inbox(page, monkeypatch):
+    page.service.pause('test')
+    page.inbox.add_error('Managed notice', 1000)
+    assert page.set_free_arranging(True)
+    page.create_home()
+    page.inbox.add_error('Sandbox notice', 1000)
+    assert page.set_free_arranging(False)
+    with monkeypatch.context() as patch:
+        patch.setattr(page.service.store, '_write', lambda *_: (_ for _ in ()).throw(OSError('disk unavailable')))
+        assert not page.set_free_arranging(True)
+    assert page.service.mode == 'manage'
+    texts = [item['event'].get('text') for item in page.inbox.entries]
+    assert 'Managed notice' in texts
+    assert 'Sandbox notice' not in texts
+    assert any('disk unavailable' in str(text) for text in texts)

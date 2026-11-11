@@ -7,7 +7,7 @@ from frontengine.utils.plugins.plugin_loader import (
     ENTRY_NAME, discover_plugins, load_plugins, module_name_for, register_plugin_tabs,
 )
 from frontengine.utils.workshop.workshop_content import (
-    APP_ID, KIND_MEDIA, KIND_PET_PACK, KIND_PRESET, classify_item, default_library_paths,
+    APP_ID, KIND_PRESET, classify_item, default_library_paths,
     find_workshop_dir, preset_files, read_item_title, scan_workshop_items, workshop_content_dir,
 )
 
@@ -41,20 +41,15 @@ def test_default_library_paths_are_absolute() -> None:
 
 
 # --- item classification --------------------------------------------------
-def test_a_folder_with_state_sprites_is_a_pet_pack(tmp_path) -> None:
-    item = tmp_path / "123"
-    item.mkdir()
-    (item / "walk.png").write_bytes(b"x")
-    (item / "idle.png").write_bytes(b"x")
-    assert classify_item(item) == KIND_PET_PACK
-
-
-def test_a_folder_with_a_manifest_is_a_pet_pack(tmp_path) -> None:
-    item = tmp_path / "124"
-    item.mkdir()
-    (item / "pet.json").write_text('{"name": "Mochi"}', encoding="utf-8")
-    assert classify_item(item) == KIND_PET_PACK
-    assert read_item_title(item) == "Mochi"
+def test_old_sprite_pet_packs_and_picture_folders_are_no_longer_recognised(tmp_path) -> None:
+    """Pets are layered only: sprite packs (state pictures or pet.json) and picture folders are skipped."""
+    for name, files in (("123", ("walk.png", "idle.png")), ("124", ("pet.json",)), ("126", ("art.png",))):
+        item = tmp_path / name
+        item.mkdir()
+        for file in files:
+            (item / file).write_bytes(b"{}")
+        assert classify_item(item) is None, files
+        assert read_item_title(item) == name
 
 
 def test_a_folder_with_json_is_a_preset(tmp_path) -> None:
@@ -63,13 +58,6 @@ def test_a_folder_with_json_is_a_preset(tmp_path) -> None:
     (item / "my_scene.json").write_text("{}", encoding="utf-8")
     assert classify_item(item) == KIND_PRESET
     assert preset_files(item) == [str(item / "my_scene.json")]
-
-
-def test_a_folder_of_pictures_is_media(tmp_path) -> None:
-    item = tmp_path / "126"
-    item.mkdir()
-    (item / "art.png").write_bytes(b"x")
-    assert classify_item(item) == KIND_MEDIA
 
 
 def test_unrecognisable_items_are_skipped(tmp_path) -> None:
@@ -107,7 +95,7 @@ def test_scanning_lists_recognised_items(tmp_path) -> None:
 
     items = scan_workshop_items(content)
     kinds = {item["id"]: item["kind"] for item in items}
-    assert kinds == {"111": KIND_PET_PACK, "222": KIND_PRESET}
+    assert kinds == {"222": KIND_PRESET}       # 111 is an old sprite pet pack
     assert all(item["path"] for item in items)
 
 

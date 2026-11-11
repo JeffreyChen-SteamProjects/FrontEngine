@@ -24,10 +24,12 @@ from PySide6.QtCore import QObject, Qt, QTimer, Signal
 from frontengine.show.pet.pet_profile_session import PetProfileSession
 from frontengine.user_setting.pet_game_save import HomeSaveStore, LoadResult
 from frontengine.user_setting.pet_profiles import PetProfiles
+from frontengine.user_setting.storage_session import StorageBusy
 from frontengine.utils.logging.loggin_instance import front_engine_logger
+from frontengine.utils.multi_language.retranslate import translate
 from frontengine.utils.pet_game import simulation
 from frontengine.utils.pet_game.behaviour import cancel_activity
-from frontengine.utils.pet_game.world import World
+from frontengine.utils.pet_game.world import MODES, World
 
 TICK_MS = simulation.STEP_MS
 MAX_GAP_MS = 5000             # longer gaps are not simulated
@@ -38,6 +40,46 @@ _SAVE_EVENTS = {"settled", "placed", "arrived", "settle_failed"}
 _T = TypeVar("_T")
 
 
+SWITCHING = "switching"           # pause reason while one mode's home is swapped for the other
+
+
+class _ModePreparation:
+    def __init__(self, target: HomeSaveStore) -> None:
+        self.target = target
+        self.sessions: dict[str, PetProfileSession] = {}
+        self.tokens = []
+
+
+class _PreparedHomeClose:
+    def __init__(self, service: HomeService) -> None:
+        self.service = service
+        self.pets = []
+
+    def cancel(self) -> None:
+        service = self.service
+        if service._prepared_close is not self:
+            return
+        for pet in self.pets:
+            pet.cancel()
+        service._prepared_close = None
+        service.resume("closing")
+
+    def finalize(self) -> None:
+        service = self.service
+        if service._prepared_close is not self:
+            return
+        if service._executor is not None:
+            service._executor.shutdown(wait=True)
+        if isinstance(service.store, HomeSaveStore):
+            service.store._close_service(service)
+        for pet in self.pets:
+            pet.finalize()
+        service.sessions.clear()
+        service.save_timer.stop()
+        service._closed = True
+        service._prepared_close = None
+
+
 class HomeService(QObject):
     """Commands go through ``run``; views read ``world`` and listen to signals."""
 
@@ -46,6 +88,7 @@ class HomeService(QObject):
     save_failed = Signal(str)
     saved = Signal()
     running_changed = Signal(bool)
+    mode_changed = Signal(str)
     _written = Signal(object, int)      # emitted from the writer thread
 
     def __init__(self, parent: QObject | None, store: HomeSaveStore, profiles: PetProfiles,
@@ -54,39 +97,132 @@ class HomeService(QObject):
                  executor: Executor | None = None) -> None:
         super().__init__(parent)
         self.store, self.profiles = store, profiles
-        self.world: World | None = None
-        self.sessions: dict[str, PetProfileSession] = {}
-        self.pause_reasons: set[str] = {"stopped"}    # nothing runs until start()
-        self._clock = clock
-        self._session_factory = session_factory
-        self._last: float | None = None
-        self._dirty = False
-        self._closed = False
-        self._revision = 0
-        self._executor = executor      # None writes synchronously (tests)
-        self._future: Future | None = None
-        self._pending = False
-        self._written.connect(self._on_written, Qt.ConnectionType.QueuedConnection)
-        self.timer = QTimer(self)
-        self.timer.setInterval(TICK_MS)
-        self.timer.timeout.connect(self._tick)
-        self.save_timer = QTimer(self)
-        self.save_timer.setSingleShot(True)
-        self.save_timer.timeout.connect(self._save_soon)
-        self.periodic = QTimer(self)
-        self.periodic.setInterval(PERIODIC_SAVE_MS)
-        self.periodic.timeout.connect(self._periodic_save)
+        if isinstance(store, HomeSaveStore):
+            store._attach_service(self)
+        try:
+            self.world: World | None = None
+            self.sessions: dict[str, PetProfileSession] = {}
+            self._pending_mode: _ModePreparation | None = None
+            self.pause_reasons: set[str] = {"stopped"}    # nothing runs until start()
+            self._clock = clock
+            self._session_factory = session_factory
+            self._last: float | None = None
+            self._dirty = False
+            self._closed = False
+            self._prepared_close: _PreparedHomeClose | None = None
+            self._revision = 0
+            self._executor = executor      # None writes synchronously (tests)
+            self._future: Future | None = None
+            self._pending = False
+            self._written.connect(self._on_written, Qt.ConnectionType.QueuedConnection)
+            self.timer = QTimer(self)
+            self.timer.setInterval(TICK_MS)
+            self.timer.timeout.connect(self._tick)
+            self.save_timer = QTimer(self)
+            self.save_timer.setSingleShot(True)
+            self.save_timer.timeout.connect(self._save_soon)
+            self.periodic = QTimer(self)
+            self.periodic.setInterval(PERIODIC_SAVE_MS)
+            self.periodic.timeout.connect(self._periodic_save)
+        except BaseException:
+            if isinstance(store, HomeSaveStore):
+                store._detach_service(self)
+            raise
 
     # ----- opening ----------------------------------------------------------------
 
     def open(self) -> LoadResult:
         """Load the saved home without creating one; a protected save stays untouched."""
+        self._require_mutable()
         result = self.store.load()
         if result.world is not None:
             self._adopt_world(result.world)
         return result
 
+    @property
+    def mode(self) -> str:
+        return self.store.mode
+
+    def switch_mode(self, mode: str) -> LoadResult | None:
+        """Transfer modes only after target admission and old-state persistence succeed."""
+        self._require_mutable()
+        if mode == self.store.mode or mode not in MODES or not self._discard_pending_mode():
+            return None
+        self.pause(SWITCHING)
+        try:
+            target = self.store.for_mode(mode)
+            self._pending_mode = preparation = _ModePreparation(target)
+            target._attach_service(self)
+            result = target.load()
+            if self.world is not None:
+                for resident in self.world.residents.values():
+                    cancel_activity(self.world, resident, 'mode_switch')
+            if not self.save_now():
+                return None
+            for session in self.sessions.values():
+                token = session._prepare_close()
+                if token is None:
+                    return None
+                preparation.tokens.append(token)
+            next_sessions = self._stage_mode_sessions(result.world)
+            self._commit_mode(target, result.world, next_sessions, preparation.tokens)
+            self._pending_mode = None
+            self.mode_changed.emit(mode)
+            return result
+        except (OSError, ValueError, StorageBusy) as error:
+            self._failed(error)
+            return None
+        finally:
+            self._discard_pending_mode()
+            self.resume(SWITCHING)
+
+    def _stage_mode_sessions(self, world: World | None) -> dict[str, PetProfileSession]:
+        sessions = {}
+        for identifier in sorted(world.residents if world else ()):
+            if identifier in self.sessions:
+                sessions[identifier] = self.sessions[identifier]
+                continue
+            try:
+                session = self._session_factory(self, identifier, self.profiles)
+            except ValueError:
+                cancel_activity(world, world.residents[identifier], 'active_elsewhere')
+                world.residents[identifier].away = True
+                continue
+            session.pause()
+            self._pending_mode.sessions[identifier] = session
+            sessions[identifier] = session
+        return sessions
+
+    def _commit_mode(self, target: HomeSaveStore, world: World | None,
+                     sessions: dict[str, PetProfileSession], tokens: list) -> None:
+        old = self.store
+        old._close_service(self)
+        for token in tokens:
+            if token.session.identifier in sessions:
+                token.cancel()
+                token.session.pause()
+            else:
+                token.finalize()
+        self.store, self.world, self.sessions = target, world, sessions
+
+    def _discard_pending_mode(self) -> bool:
+        preparation = self._pending_mode
+        if preparation is None:
+            return True
+        for token in preparation.tokens:
+            token.cancel()
+        preparation.tokens.clear()
+        for identifier, session in list(preparation.sessions.items()):  # NOSONAR - the loop pops from the dict
+            if session.close():
+                preparation.sessions.pop(identifier)
+        if preparation.sessions:
+            return False
+        preparation.target._close_service(self)
+        self._pending_mode = None
+        return True
+
     def restore_backup(self) -> LoadResult:
+        self._require_mutable()
         result = self.store.restore_backup()
         if result.world is not None:
             self._adopt_world(result.world)
@@ -94,11 +230,15 @@ class HomeService(QObject):
         return result
 
     def create_home(self, screen: str, x: int, y: int, width_cells: int, seed: int | None = None,
-                    furnish: bool = False) -> World:
-        """Start a new home with the starter kit (set out at once with ``furnish``); never replaces one."""
+                    furnish: bool = False, home: str | None = None) -> World:
+        """Start a new home with the starter kit (set out at once with ``furnish``); never replaces one.
+
+        ``home`` fixes the home's identity (weather and commissions are seeded from it) for replays.
+        """
+        self._require_mutable()
         if self.world is not None:
             raise ValueError("A home is already open")
-        world = World(self.store.catalog, uuid.uuid4().hex, self.store.mode,
+        world = World(self.store.catalog, home or uuid.uuid4().hex, self.store.mode,
                       secrets.randbits(63) if seed is None else seed)
         zone = world.add_zone(screen, x, y, width_cells)
         if world.mode == "manage":
@@ -119,6 +259,7 @@ class HomeService(QObject):
 
     def retry_leases(self) -> list[str]:
         """Bring back parked residents whose identity is no longer live elsewhere."""
+        self._require_mutable()
         returned = []
         for identifier in sorted(self.world.residents if self.world else ()):
             if identifier not in self.sessions and self._lease(identifier):
@@ -141,38 +282,51 @@ class HomeService(QObject):
 
     def adopt(self, identifier: str, zone: str | None = None) -> str:
         """Move a saved pet into the home; the pet must not be live elsewhere."""
+        self._require_mutable()
         if self.world is None:
             return "no_home"
         if identifier in self.world.residents:
             return "duplicate"
-        if not self._lease(identifier):
+        if identifier not in self.sessions and not self._lease(identifier):
             return "active_elsewhere"
         target = zone or next(iter(self.world.zones))
         result = self.world.add_resident(self.sessions[identifier].state(), target)
         if result != "accepted":
-            self.sessions.pop(identifier).close()
+            if self.sessions[identifier].close():
+                self.sessions.pop(identifier)
             return result
         self.schedule_save()
         return result
 
     def release(self, identifier: str) -> str:
         """Move a resident out; its care values go back to the profile first."""
+        self._require_mutable()
         if self.world is None or identifier not in self.world.residents:
             return "unknown"
         if not self._mirror(identifier):
             return "save_failed"
-        result = self.world.remove_resident(identifier)
-        session = self.sessions.pop(identifier, None)
-        if session is not None and not session.close():
+        session = self.sessions.get(identifier)
+        token = session._prepare_close() if session is not None else None
+        if session is not None and token is None:
             return "save_failed"
+        result = self.world.remove_resident(identifier)
+        if token is not None:
+            if result == 'accepted':
+                token.finalize()
+                self.sessions.pop(identifier)
+            else:
+                token.cancel()
         self.schedule_save()
         return result
 
     def _mirror(self, identifier: str) -> bool:
-        """Copy home-owned care values into the profile through its single session."""
+        """Copy home-owned care values into the profile through its single session.
+
+        Free arranging is a playground: nothing done there reaches the pet's profile.
+        """
         session = self.sessions.get(identifier)
         resident = self.world.residents.get(identifier) if self.world else None
-        if session is None or resident is None:
+        if session is None or resident is None or self.world.sandbox:
             return True
         companion = session.companion
         companion.energy = resident.needs["energy"]
@@ -185,12 +339,17 @@ class HomeService(QObject):
 
     def run(self, command: Callable[[World], _T]) -> _T:
         """Apply one player command to the world and persist it soon."""
+        self._require_mutable()
         if self.world is None:
             raise ValueError("No home is open")
         result = command(self.world)
         self._publish()
         self.schedule_save()
         return result
+
+    def _require_mutable(self) -> None:
+        if self._closed or self._prepared_close is not None:
+            raise ValueError("Home is closing or closed")
 
     @property
     def running(self) -> bool:
@@ -210,7 +369,8 @@ class HomeService(QObject):
             self.pause_reasons.add(reason)
         else:
             self.pause_reasons.discard(reason)
-        should_run = self.world is not None and not self.pause_reasons and not self._closed
+        should_run = (self.world is not None and not self.pause_reasons
+                      and not self._closed and self._prepared_close is None)
         if should_run and not self.timer.isActive():
             self._last = self._clock()
             self.timer.start()
@@ -224,6 +384,8 @@ class HomeService(QObject):
             self.schedule_save()
 
     def _tick(self) -> None:
+        if self._closed or self._prepared_close is not None:
+            return
         now = self._clock()
         elapsed = int(round((now - self._last) * 1000)) if self._last is not None else 0
         self._last = now
@@ -245,7 +407,7 @@ class HomeService(QObject):
     def schedule_save(self) -> None:
         self._dirty = True
         self._revision += 1
-        if not self._closed:
+        if not self._closed and self._prepared_close is None:
             self.save_timer.start(SAVE_DELAY_MS)
 
     def _periodic_save(self) -> None:
@@ -254,6 +416,8 @@ class HomeService(QObject):
 
     def _save_soon(self) -> None:
         """Encode on the GUI thread, write on the worker; one write in flight, latest wins."""
+        if self._closed or self._prepared_close is not None:
+            return
         if self._executor is None:
             self.save_now()
             return
@@ -269,10 +433,13 @@ class HomeService(QObject):
             return
         revision = self._revision
         self._future = self._executor.submit(self.store.write_encoded, data)
-        self._future.add_done_callback(lambda future: self._written.emit(future.exception(), revision))
+        self._future.add_done_callback(lambda future: self._written.emit(future, revision))
 
-    def _on_written(self, error: object, revision: int) -> None:
+    def _on_written(self, future: Future, revision: int) -> None:
+        if future is not self._future:
+            return
         self._future = None
+        error = future.exception()
         if error is not None:
             self._failed(error)
         else:
@@ -288,20 +455,31 @@ class HomeService(QObject):
             self.save_timer.start(RETRY_MS)
 
     def _succeeded(self, revision: int) -> bool:
-        if revision == self._revision:
-            self._dirty = False
         mirrored = True
         for identifier in sorted(self.sessions):      # every profile, even after a failure
             mirrored = self._mirror(identifier) and mirrored
+        if not mirrored:
+            self._dirty = True
+            self._failed(translate("pet_profile_save_failed", "Could not save the latest pet state."))
+            return False
+        if revision == self._revision:
+            self._dirty = False
         self.saved.emit()
-        return mirrored
+        return True
 
     def save_now(self) -> bool:
         """Blocking save (shutdown, tests): home first, then profiles; failure keeps memory."""
+        if self._closed:
+            return True
         self.save_timer.stop()
-        if self._future is not None:
-            self._future.result()   # let the in-flight write finish first; its signal is ignored
-            self._future = None
+        future, self._future = self._future, None
+        self._pending = False
+        if future is not None:
+            try:
+                future.result()
+            except (OSError, ValueError) as error:
+                self._failed(error)
+                return False
         if self.world is None:
             return True
         revision = self._revision
@@ -316,20 +494,29 @@ class HomeService(QObject):
         """Stop time, cancel activities without rewards, save and release identities."""
         if self._closed:
             return True
-        self.timer.stop()
-        self.periodic.stop()
+        prepared = self._prepare_close()
+        if prepared is None:
+            return False
+        prepared.finalize()
+        return True
+
+    def _prepare_close(self) -> _PreparedHomeClose | None:
+        if self._closed or self._prepared_close is not None:
+            return None
+        if not self._discard_pending_mode():
+            return None
+        prepared = self._prepared_close = _PreparedHomeClose(self)
+        self.pause("closing")
         if self.world is not None:
             for identifier in sorted(self.world.residents):
                 cancel_activity(self.world, self.world.residents[identifier], "closing")
         if not self.save_now():
-            return False
+            prepared.cancel()
+            return None
         for identifier in sorted(self.sessions):
-            if not self.sessions[identifier].close():
-                return False
-            del self.sessions[identifier]
-        self._closed = True
-        self.save_timer.stop()
-        if self._executor is not None:
-            self._executor.shutdown(wait=True)
-        self.running_changed.emit(False)
-        return True
+            pet = self.sessions[identifier]._prepare_close()
+            if pet is None:
+                prepared.cancel()
+                return None
+            prepared.pets.append(pet)
+        return prepared

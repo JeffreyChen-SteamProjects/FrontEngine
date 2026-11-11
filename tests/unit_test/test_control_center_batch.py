@@ -31,7 +31,8 @@ class _StubPage:
         """場景頁的介面 / The scene page's interface."""
 
 
-def _control_center() -> ControlCenterUI:
+def _control_center(*, lifetime_factory) -> ControlCenterUI:
+    lifetime_factory()
     return ControlCenterUI(
         video_setting_ui=_StubPage("video_widget_list"),
         image_setting_ui=_StubPage("image_widget_list"),
@@ -42,12 +43,13 @@ def _control_center() -> ControlCenterUI:
         scene_setting_ui=_StubPage("scene_widget_list"),
         particle_setting_ui=_StubPage("particle_list"),
         redirect_output=False,
-    )
+     lifetime=lifetime_factory())
 
 
 @pytest.fixture(name="centre")
-def _centre() -> ControlCenterUI:
-    centre = _control_center()
+def _centre(*, lifetime_factory) -> ControlCenterUI:
+    lifetime_factory()
+    centre = _control_center(lifetime_factory=lifetime_factory)
     yield centre
     centre.close()
 
@@ -80,22 +82,26 @@ def test_rejected_close_remains_registered_and_keeps_cleanup_services(centre):
         ordinary.close()
 
 
-def test_main_shutdown_checks_each_pet_before_teardown():
+def test_main_shutdown_checks_each_pet_before_teardown(lifetime_factory):
     from types import SimpleNamespace
     from frontengine.ui.main_ui import FrontEngineMainUI
 
     calls, messages = [], []
-    first = SimpleNamespace(flush=lambda: calls.append('first') or False)
-    second = SimpleNamespace(flush=lambda: calls.append('second') or True)
+    first = SimpleNamespace(_prepare_close=lambda: calls.append('first'))
+    second = SimpleNamespace(_prepare_close=lambda: calls.append('second') or
+                             SimpleNamespace(cancel=lambda: calls.append('cancel')))
     widgets = [SimpleNamespace(profile_session=first), SimpleNamespace(profile_session=second),
                SimpleNamespace(profile_session=first)]
     owner = SimpleNamespace(control_center_ui=SimpleNamespace(all_overlays=lambda: widgets),
                             statusBar=lambda: SimpleNamespace(showMessage=messages.append))
-    assert not FrontEngineMainUI._flush_pet_profiles(owner)
-    assert calls == ['first', 'second']
+    assert FrontEngineMainUI._prepare_pet_profiles(owner) is None
+    assert calls == ['first', 'second', 'cancel']
     assert messages
+    owner.lifetime = lifetime_factory()
+    owner.children = lambda: []
+    owner.request_shutdown = lambda: FrontEngineMainUI.request_shutdown(owner)
     owner._shutdown_done = False
-    owner._flush_pet_profiles = lambda: False
+    owner._prepare_shutdown = lambda: None
     assert FrontEngineMainUI._shutdown(owner) is False
     assert not owner._shutdown_done
 
@@ -239,3 +245,47 @@ def test_a_dead_overlay_does_not_stop_the_batch(centre) -> None:
     centre.clear_all()
 
     assert registered == []
+
+
+def _desktop_pet(window, tmp_path):
+    from PySide6.QtGui import QColor, QPixmap
+    from frontengine.show.pet.desktop_pet import DesktopPetWidget
+    sprite = tmp_path / "sprite.png"
+    picture = QPixmap(48, 48)
+    picture.fill(QColor("#d3a231"))
+    assert picture.save(str(sprite))
+    pet = DesktopPetWidget(profiles=window.pet_setting_ui.profile_controls.profiles, talk=False,
+                           sit_on_windows=False)
+    window.pet_setting_ui.pet_list.append(pet)
+    pet.show()
+    return pet
+
+
+def test_close_all_in_the_real_window_closes_desktop_pets_and_frees_their_identity(make_main_window, tmp_path):
+    """Close all still reaches the pet page after it moved, and closing runs the pet's cleanup."""
+    from frontengine.show.pet.pet_profile_session import PetProfileSession
+    window = make_main_window()
+    pet = _desktop_pet(window, tmp_path)
+    profiles, identifier = window.pet_setting_ui.profile_controls.profiles, pet.profile_session.identifier
+    assert PetProfileSession.active(profiles, identifier) is not None
+    window.control_center_ui.clear_all()
+    assert window.pet_setting_ui.pet_list == []
+    assert PetProfileSession.active(profiles, identifier) is None
+
+
+def test_hide_and_show_all_reach_the_home_strip_and_desktop_pets_in_the_real_window(make_main_window, tmp_path):
+    window = make_main_window()
+    pet = _desktop_pet(window, tmp_path)
+    strip = QWidget()
+    strip.show()
+    window.pet_home_ui.strip_list.append(strip)
+    try:
+        window.control_center_ui.hide_all()
+        assert not strip.isVisible()
+        assert not pet.isVisible()
+        window.control_center_ui.show_all()
+        assert strip.isVisible()
+        assert pet.isVisible()
+    finally:
+        window.pet_home_ui.strip_list.remove(strip)
+        strip.close()

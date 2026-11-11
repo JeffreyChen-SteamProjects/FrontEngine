@@ -1,0 +1,139 @@
+{
+  "baseline": "dcf098e5",
+  "problem": "New pet and automatic first-pet creation let profile persistence exceptions escape Qt callbacks, leaving no retry error on the page.",
+  "change": "Report write failures through the existing translated save-error message, display validation errors, and finish refreshing an empty newly created home so New pet remains available.",
+  "red": "2 failed, 35 deselected in 6.68s; both callbacks leaked Profile storage unavailable.",
+  "green": "6 passed, 31 deselected in 68.77s, covering both creation entries and prior move-in/out refusal cases.",
+  "profile_limit": "Actual 256-profile boundary: 1 passed, 37 deselected in 10.58s; no callback exception or home change. Existing validation error text is displayed.",
+  "docs_checks": "54 passed in 3.22s",
+  "collected": 3263,
+  "native_before": {
+    "passed": false,
+    "callback_errors": [
+      {
+        "type": "FrontEngineJsonFileException",
+        "message": "Cannot save JSON file: Injected new-pet write failure"
+      }
+    ],
+    "failed_creation_rollback": true,
+    "error": "Traceback (most recent call last):\n  File \"D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-adopt-retry\\.audit\\native_new_pet_save_retry.py\", line 116, in <module>\n    assert not callbacks, callbacks\n           ^^^^^^^^^^^^^\nAssertionError: [{'type': 'FrontEngineJsonFileException', 'message': 'Cannot save JSON file: Injected new-pet write failure'}]\n"
+  },
+  "native_cases": {
+    "native-new-pet-save-after": {
+      "native": {
+        "passed": true,
+        "callback_errors": [],
+        "failed_creation_rollback": true,
+        "actual_new_pet_button": true,
+        "retry_created_exactly_one": true,
+        "error_reported_on_failure": true,
+        "selection_retained_on_failure": true,
+        "runtime_closed": true,
+        "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+        "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-stage-layout\\.audit\\profession-owned-fixed",
+        "saved_snapshot_sha256": "c471f2056e3bf47d41a8073e4a214f8eccec310f6c85a5f6088181f0c4b05172",
+        "scope": "Private native MainUI New pet button with a one-shot settings os.replace failure, callback exception capture and direct retry. No OS input or all storage faults.",
+        "temporary_directory_removed": true
+      },
+      "cold": {
+        "passed": true,
+        "initial_snapshot_exact": true,
+        "profiles_exact": true,
+        "leases_reacquired": true,
+        "saved_exact": true,
+        "temporary_directory_removed": true
+      },
+      "observer": {
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "child_exit": 0,
+        "observation_only": true
+      },
+      "sha256": {
+        "cold-result.json": "5bd41edb786e3fe553500e96167a938f64483ad3f1f564c603795a88e3110cbc",
+        "observer.json": "108902181ee471ddb835401d5d799d056e70c9ac4aead7d271ce043e584e29a5",
+        "profiles.json": "c0959e9f8274a25c7377fd71c3ddb58f9377768ee60cf7eb062141a37f379f25",
+        "result.json": "0792e3a9ffc6df7d507b1be5633f82f7bc4bb96ded69f2533a0f6857090933da",
+        "shutdown-world.json": "b21ac008f602a7ed23a65d74f16a316925accccc13a4ed6a28707a997b005ff9",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "native-first-pet-save-after": {
+      "native": {
+        "passed": true,
+        "actual_create_home_and_new_pet_buttons": true,
+        "callback_errors": [],
+        "first_pet_failure_reported": true,
+        "empty_home_ready_for_retry": true,
+        "retry_created_one_pet": true,
+        "starter_kit_not_duplicated": true,
+        "runtime_closed": true,
+        "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+        "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-stage-layout\\.audit\\profession-owned-fixed",
+        "saved_snapshot_sha256": "c471f2056e3bf47d41a8073e4a214f8eccec310f6c85a5f6088181f0c4b05172",
+        "scope": "Private native MainUI Create a home with empty saved profiles; first automatic pet settings replace fails once, then actual New pet retry. Callback capture, no OS input or all storage faults.",
+        "temporary_directory_removed": true
+      },
+      "cold": {
+        "passed": true,
+        "initial_snapshot_exact": true,
+        "profiles_exact": true,
+        "leases_reacquired": true,
+        "saved_exact": true,
+        "temporary_directory_removed": true
+      },
+      "observer": {
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "child_exit": 0,
+        "observation_only": true
+      },
+      "sha256": {
+        "cold-result.json": "5bd41edb786e3fe553500e96167a938f64483ad3f1f564c603795a88e3110cbc",
+        "observer.json": "108902181ee471ddb835401d5d799d056e70c9ac4aead7d271ce043e584e29a5",
+        "profiles.json": "74245466e01c02899f2924921f083878bc5c481350ea504e3516a55ef8a66830",
+        "result.json": "7d73756353a12dc02deb9b9e37bfca9db3618627185dfca56322160fb7f3e21c",
+        "shutdown-world.json": "eb3cae1c6fcf257fd05511d4c471816588c751964ff2b37662dcfbb3fc10c1d3",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "rendered_html_sha256": {
+    "Eng": "73ac8fdbbcb49b88a4efecd3fd995584b460e0b620f133415e655394996147de",
+    "Zh": "388c0a5dc519944bb53612bf144f8cdb5e367ba5da32fceea874fe3aaa49fe94",
+    "ZhCn": "211dc889b050cd0c9b9416e827d69a950a17b2e171b4b916f611daf87dd58873",
+    "De": "4f2868668161f94477ee80254a5b6c3cb00e6e9582ae285f186660acc258f0be",
+    "Fr": "fdba50c4b19780ed504706291111856ec76218a7f3bc28c925f0a5b0089024e5",
+    "Ru": "d059e63f7b0de04770351dccbba71bd91204d3b1bd4b283ecfc24e00cfd244ee",
+    "It": "5c8ded50b7799e4dafc816b29ba944efc20fa0c13c3d5068dbdb7178f8ec1ae4"
+  },
+  "limits": [
+    "Private native desktop, actual Qt buttons and one-shot settings replace failure; no OS input, all storage faults or full regression claim.",
+    "First-home native fixture removes copied home saves and starts with empty profiles; it is not a clean-machine install.",
+    "Independent review and integration remain pending."
+  ]
+}

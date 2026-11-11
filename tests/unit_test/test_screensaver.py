@@ -11,6 +11,7 @@ mouse. The point being pinned down is that it speaks only when the state
 changes: answering "should be on" every poll would reopen the overlay forever.
 """
 import pytest
+from PySide6.QtCore import QObject
 
 from frontengine.utils.screensaver.screensaver_service import (
     DEFAULT_IDLE_MINUTES, MAX_IDLE_MINUTES, MIN_IDLE_MINUTES, SOURCES, ScreensaverState,
@@ -138,6 +139,7 @@ def test_every_source_is_something_the_main_window_can_start():
     來源清單和主視窗的對照表必須一致。多一個沒對照的名稱，選了它就什麼都不會發生
     而且不會有任何錯誤——安靜地壞掉。
     """
+
     from frontengine.ui.main_ui import FrontEngineMainUI
 
     assert set(SOURCES) == set(FrontEngineMainUI._SCREENSAVER_SOURCES)
@@ -149,17 +151,18 @@ def test_the_dialog_offers_a_label_for_every_source():
     assert set(SOURCES) == set(SOURCE_LABEL_KEYS)
 
 
-class Sentinel:
+class Sentinel(QObject):
     """假裝是使用者自己開的覆蓋層，只記得自己有沒有被關掉。"""
 
     def __init__(self):
+        super().__init__()
         self.closed = False
 
     def close(self):
         self.closed = True
 
 
-def test_it_closes_only_what_it_opened(tmp_path, monkeypatch):
+def test_it_closes_only_what_it_opened(tmp_path, monkeypatch, make_main_window):
     """
     人回來時只能收掉螢幕保護自己放上去的。使用者在離開前開著的覆蓋層被一起關掉，
     是回到座位才會發現的那種災難，而且沒有任何錯誤訊息。
@@ -169,12 +172,11 @@ def test_it_closes_only_what_it_opened(tmp_path, monkeypatch):
     """
     import os
 
-    from frontengine.ui.main_ui import FrontEngineMainUI
 
     original = os.getcwd()
     os.chdir(tmp_path)
     try:
-        window = FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)
+        window = make_main_window({"language": "English"})
         page = window.video_setting_ui
 
         mine = Sentinel()
@@ -198,19 +200,18 @@ def test_it_closes_only_what_it_opened(tmp_path, monkeypatch):
         os.chdir(original)
 
 
-def test_a_page_with_nothing_set_up_is_never_started(tmp_path, monkeypatch):
+def test_a_page_with_nothing_set_up_is_never_started(tmp_path, monkeypatch, make_main_window):
     """
     沒選檔案就不要按開始。每個分頁在那個情況下都會跳 modal 訊息框，而螢幕保護
     正好在沒有人的時候啟動——那個框會擋在畫面上直到有人回來。
     """
     import os
 
-    from frontengine.ui.main_ui import FrontEngineMainUI
 
     original = os.getcwd()
     os.chdir(tmp_path)
     try:
-        window = FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)
+        window = make_main_window({"language": "English"})
         page = window.video_setting_ui
         page.ready_to_play = False
 

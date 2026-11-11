@@ -1,7 +1,9 @@
 """Explicit fixed-resolution preview and asynchronous virtual-camera output."""
 from __future__ import annotations
+from frontengine.ui.runtime_lifetime import captured_lifetime, owned_callback
+from shiboken6 import isValid
 
-from PySide6.QtCore import Qt, QTimer, QRunnable, QThreadPool, QObject, Signal
+from PySide6.QtCore import Qt, QTimer, QRunnable, QObject, Signal
 from PySide6.QtGui import QPixmap, QColor
 from PySide6.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QSpinBox, QPushButton, QColorDialog
 
@@ -36,8 +38,10 @@ class _OutputPreparation(QRunnable):
 class SceneOutputDialog(QDialog):
     """Close the snapshot before scene edits/extraction leases change underneath it."""
 
-    def __init__(self, document, parent=None, *, renderer=SceneRenderSession, sender_factory=FrameSender) -> None:
+    def __init__(self, document, parent=None, *, renderer=SceneRenderSession, sender_factory=FrameSender, lifetime=None) -> None:
         super().__init__(parent)
+        self.lifetime = lifetime or captured_lifetime(parent)
+        self.lifetime.adopt(self)
         self.document, self.renderer, self.sender_factory = document, renderer, sender_factory
         self.session, self.sender = None, None
         self.generation, self.preparing, self.send_after_prepare = 0, False, False
@@ -88,11 +92,12 @@ class SceneOutputDialog(QDialog):
             self.resolution.setEnabled(False)
             self.fps.setEnabled(False)
             retranslator.set_text(self.status, 'scene_action_loading')
-            QThreadPool.globalInstance().start(_OutputPreparation(
+            self.lifetime.submit(_OutputPreparation(
                 self.generation, self.document.scene.copy(), self.preparation_signals))
             return
         self._start_session(self.document.entries)
 
+    @owned_callback
     def _prepared(self, generation, document, models, error):
         if generation != self.generation or not self.preparing:
             return
@@ -110,6 +115,8 @@ class SceneOutputDialog(QDialog):
     def _start_session(self, data, models=None):
         try:
             kwargs = {'models': models} if models is not None else {}
+            if self.renderer is SceneRenderSession:
+                kwargs['lifetime'] = self.lifetime
             self.session = self.renderer(data, tuple(self.resolution.currentData()), self, **kwargs)
         except Exception as error:
             self.resolution.setEnabled(True)
@@ -137,6 +144,7 @@ class SceneOutputDialog(QDialog):
         width, height = self.resolution.currentData()
         sender = self.sender_factory(width, height, self.fps.value(), self)
         self.sender = sender
+        self.lifetime.register_pending(sender.thread.is_alive)
         sender.ready.connect(lambda device: self._ready(sender, device), Qt.ConnectionType.QueuedConnection)
         sender.failed.connect(lambda error: self._sender_failed(sender, error), Qt.ConnectionType.QueuedConnection)
         sender.finished.connect(lambda: self._finished(sender), Qt.ConnectionType.QueuedConnection)
@@ -145,11 +153,13 @@ class SceneOutputDialog(QDialog):
         sender.start()
         self._refresh()
 
+    @owned_callback
     def _ready(self, sender, device: str) -> None:
         if sender is self.sender:
             retranslator.forget(self.status)
             self.status.setText(translate('tools_vcam_sending').format(device=device))
 
+    @owned_callback
     def _sender_failed(self, sender, error: str) -> None:
         if sender is self.sender:
             self._error(error)
@@ -189,8 +199,10 @@ class SceneOutputDialog(QDialog):
             self.sender.submit(image_to_rgb(frame))
 
     def _background(self):
+        if not isValid(self) or not self.isVisible() or not self.lifetime.accepting:
+            return
         color = QColorDialog.getColor(self.background, self, translate('scene3d_output_background', 'Camera background'))
-        if color.isValid():
+        if isValid(self) and self.isVisible() and self.lifetime.accepting and color.isValid():
             self.background = color
 
     def _scene_changed(self, _entries: dict) -> None:

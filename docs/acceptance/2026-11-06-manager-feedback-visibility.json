@@ -1,0 +1,141 @@
+{
+  "product_test_commit": "825a6c41",
+  "interaction_result": {
+    "selected_pet_only": true,
+    "pet_completion_affection_delta": 2,
+    "work_mode_selected_only": true,
+    "cancel_feed_no_reward": true,
+    "hidden_pet_unchanged": true,
+    "hidden_feedback": "Start or show this pet before interacting.",
+    "tab_routes": [
+      {
+        "target": "primaryAction",
+        "tabs": 5
+      },
+      {
+        "target": "qt_tabwidget_tabbar",
+        "tabs": 13
+      },
+      {
+        "target": "QListWidget",
+        "tabs": 2
+      },
+      {
+        "target": "WrappingPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "qt_tabwidget_tabbar",
+        "tabs": 14
+      },
+      {
+        "target": "WrappingPushButton",
+        "tabs": 4
+      },
+      {
+        "target": "qt_tabwidget_tabbar",
+        "tabs": 22
+      },
+      {
+        "target": "QListWidget",
+        "tabs": 5
+      },
+      {
+        "target": "WrappingPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "WrappingPushButton",
+        "tabs": 6
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 1
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 6
+      },
+      {
+        "target": "QPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 19
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 6
+      },
+      {
+        "target": "QPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 25
+      },
+      {
+        "target": "QPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 29
+      },
+      {
+        "target": "QPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 29
+      },
+      {
+        "target": "QPushButton",
+        "tabs": 1
+      }
+    ],
+    "theme": "dark",
+    "language": "English",
+    "actual_window_size": [
+      900,
+      740
+    ],
+    "runtime_closed": true,
+    "temporary_directory_removed": true
+  },
+  "cold": {
+    "passed": true,
+    "initial_snapshot_exact": true,
+    "profiles_exact": true,
+    "leases_reacquired": true,
+    "saved_exact": true,
+    "temporary_directory_removed": true
+  },
+  "visibility_defect": {
+    "feedback_text": "Start or show this pet before interacting.",
+    "feedback_rect": [
+      49,
+      566,
+      554,
+      17
+    ],
+    "viewport_rect": [
+      652,
+      546
+    ],
+    "visible_height": 0,
+    "fully_visible": false
+  },
+  "original_image_inspected": "native-manager-interactions/manager-final.png",
+  "root_cause_candidate": "PetProfileControls places status below the interaction button and long hint; focus scrolling reveals the button but not the following status.",
+  "status": "reproduced-unfixed",
+  "limits": [
+    "Synthetic64x64sprite; no artwork or Puppet acceptance",
+    "Profile timers stopped; injected2second advances; not normal-speed care or OS gestures",
+    "Initial section focus set directly; interaction choices and actions use widget-local keyboard navigation",
+    "Independent review and full regression remain pending"
+  ]
+}

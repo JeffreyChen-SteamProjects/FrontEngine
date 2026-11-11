@@ -1,0 +1,221 @@
+{
+  "product_test_commit": "69a3b6c1",
+  "interaction_result": {
+    "selected_pet_only": true,
+    "pet_completion_affection_delta": 2,
+    "work_mode_selected_only": true,
+    "cancel_feed_no_reward": true,
+    "hidden_pet_unchanged": true,
+    "hidden_feedback": "Start or show this pet before interacting.",
+    "tab_routes": [
+      {
+        "target": "primaryAction",
+        "tabs": 5
+      },
+      {
+        "target": "qt_tabwidget_tabbar",
+        "tabs": 13
+      },
+      {
+        "target": "QListWidget",
+        "tabs": 2
+      },
+      {
+        "target": "WrappingPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "qt_tabwidget_tabbar",
+        "tabs": 14
+      },
+      {
+        "target": "WrappingPushButton",
+        "tabs": 4
+      },
+      {
+        "target": "qt_tabwidget_tabbar",
+        "tabs": 22
+      },
+      {
+        "target": "QListWidget",
+        "tabs": 5
+      },
+      {
+        "target": "WrappingPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "WrappingPushButton",
+        "tabs": 6
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 1
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 6
+      },
+      {
+        "target": "QPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 23
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 6
+      },
+      {
+        "target": "QPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 29
+      },
+      {
+        "target": "QPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 29
+      },
+      {
+        "target": "QPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 29
+      },
+      {
+        "target": "QPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 23
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 6
+      },
+      {
+        "target": "QPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 29
+      },
+      {
+        "target": "QSpinBox",
+        "tabs": 1
+      },
+      {
+        "target": "QSpinBox",
+        "tabs": 1
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 30
+      },
+      {
+        "target": "QPushButton",
+        "tabs": 3
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 29
+      },
+      {
+        "target": "QPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 29
+      },
+      {
+        "target": "QPushButton",
+        "tabs": 3
+      }
+    ],
+    "theme": "dark",
+    "language": "English",
+    "actual_window_size": [
+      900,
+      740
+    ],
+    "runtime_closed": true,
+    "temporary_directory_removed": true
+  },
+  "call_result": {
+    "selected_pet_only": true,
+    "requested_offset": [
+      -80,
+      -40
+    ],
+    "floor_ignores_vertical_offset": true,
+    "cancel_cleared_target_without_reward": true,
+    "native_timer_arrived": true,
+    "start_position": [
+      397,
+      687
+    ],
+    "arrival_position": [
+      358,
+      687
+    ],
+    "greeting_affection_delta": 1,
+    "repeat_greeting_cooldown": true
+  },
+  "observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "child_exit": 0
+  },
+  "cold": {
+    "passed": true,
+    "initial_snapshot_exact": true,
+    "profiles_exact": true,
+    "leases_reacquired": true,
+    "saved_exact": true,
+    "temporary_directory_removed": true
+  },
+  "limits": [
+    "Synthetic sprite, English dark900x740,current screen; no production-art or Puppet acceptance",
+    "Call movement uses native timer; care timers stopped and greeting completion advanced0.75s explicitly",
+    "Target setup uses current screen and controlled initial placement; no OS pointer input",
+    "Arrival follows existing pet-rectangle proximity threshold, not exact center equality",
+    "Independent review and full regression remain pending"
+  ],
+  "sha256": {
+    "call-result.json": "1a4a71f77e8cd7af3b1d0b8105458fdf888fc9a494733b6d39d227857f62332d",
+    "cold-result.json": "5bd41edb786e3fe553500e96167a938f64483ad3f1f564c603795a88e3110cbc",
+    "feedback-text-visibility.json": "c55c51d48476ad6692eb54498f417de6786350aafcb3b7a82dc628b53238352c",
+    "feedback-visibility.json": "33e63ce4cd0ad2264848ed3e48eb2fede029537f8465f5d7b759953ab970fd1d",
+    "observer.json": "2a689a216983485f51c03e4b2a63a0f1987f03f7adf42f973f92f921c1195c1f",
+    "profiles.json": "facf3387225eae7b9c63633088c09b2efce11ba85f5ec328988b10c9f8fcd6e0",
+    "result.json": "b9023ae96cd9e3486e9aba1e6f25aad6635d834ebe5a068823218987ed17e058",
+    "selection.json": "8c9b9b56727cede9d820b9d0c07e963ca7d30af8c25186d2b662dc7e679e59bb",
+    "shutdown-world.json": "adb19b61ed79b620773b6f5b55af55e7674a3b54d526d8b06e45e69c835ca1ba",
+    "widths.json": "2831197401cb3401e6d76875db4ad6baa39fb48e69351b380d11d780f2d98d56"
+  }
+}

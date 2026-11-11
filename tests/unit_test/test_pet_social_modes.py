@@ -4,14 +4,14 @@ import pytest
 from frontengine.show.pet.desktop_pet import DesktopPetWidget
 from frontengine.ui.page.pet.pet_setting_ui import PetSettingUI
 from frontengine.user_setting.pet_profiles import PetProfiles
-from test_pet_profile_sessions import _sprite
 
 
 @pytest.fixture
-def social_pets(tmp_path):
-    page = PetSettingUI()
+def social_pets(tmp_path, *, lifetime_factory):
+    lifetime_factory()
+    page = PetSettingUI(lifetime=lifetime_factory())
     profiles = PetProfiles({}, lambda: None)
-    pets = [DesktopPetWidget(_sprite(tmp_path), profiles=profiles, talk=False,
+    pets = [DesktopPetWidget(profiles=profiles, talk=False,
                              sit_on_windows=False) for _ in range(3)]
     page.pet_list.extend(pets)
     for index, pet in enumerate(pets):

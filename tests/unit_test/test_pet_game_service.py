@@ -3,7 +3,6 @@ import pytest
 
 from frontengine.show.pet.pet_profile_session import PetProfileSession
 from frontengine.show.pet_game.home_service import MAX_GAP_MS, HomeService
-from frontengine.user_setting.pet_game_save import HomeSaveStore
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.utils.pet_game.catalog import builtin_catalog
 
@@ -21,9 +20,9 @@ def profiles():
     return PetProfiles({}, lambda: None)
 
 
-def _service(tmp_path, profiles, clock=None, write=None) -> HomeService:
+def _service(tmp_path, profiles, clock=None, write=None, *, home_store_factory) -> HomeService:
     kwargs = {} if write is None else {"write": write}
-    store = HomeSaveStore(tmp_path, builtin_catalog(), **kwargs)
+    store = home_store_factory(tmp_path, builtin_catalog(), **kwargs)
     return HomeService(None, store, profiles, clock=clock or Clock())
 
 
@@ -39,22 +38,27 @@ def _furnish(service: HomeService) -> str:
     return zone
 
 
-def test_new_home_is_saved_and_reopens(tmp_path, profiles):
-    service = _service(tmp_path, profiles)
+def test_new_home_is_saved_and_reopens(tmp_path, profiles, *, home_store_factory):
+    service = _service(tmp_path, profiles, home_store_factory=home_store_factory)
     service.create_home("screen", 0, 900, 40, seed=3)
     assert (tmp_path / "pet-home.json").is_file()
     with pytest.raises(ValueError):
         service.create_home("screen", 0, 900, 40)
-    other = _service(tmp_path, profiles)
-    result = other.open()
-    assert result.status == "loaded"
-    assert other.world.home == service.world.home
-    assert other.world.ledger.coins == 10
+    assert service.store.load().status == "loaded"
+    assert service.shutdown()
+    other = _service(tmp_path, profiles, home_store_factory=home_store_factory)
+    try:
+        result = other.open()
+        assert result.status == "loaded"
+        assert other.world.home == service.world.home
+        assert other.world.ledger.coins == 10
+    finally:
+        other.shutdown()
 
 
-def test_time_advances_only_while_running_and_drops_long_gaps(tmp_path, profiles):
+def test_time_advances_only_while_running_and_drops_long_gaps(tmp_path, profiles, *, home_store_factory):
     clock = Clock()
-    service = _service(tmp_path, profiles, clock)
+    service = _service(tmp_path, profiles, clock, home_store_factory=home_store_factory)
     service.create_home("screen", 0, 900, 40, seed=3)
     start = service.world.time_ms
     _tick(service, clock, 1.0)
@@ -75,10 +79,10 @@ def test_time_advances_only_while_running_and_drops_long_gaps(tmp_path, profiles
     service.shutdown()
 
 
-def test_adopted_pet_uses_the_world_as_its_only_clock(tmp_path, profiles):
+def test_adopted_pet_uses_the_world_as_its_only_clock(tmp_path, profiles, *, home_store_factory):
     clock = Clock()
     record = profiles.create("Mochi")
-    service = _service(tmp_path, profiles, clock)
+    service = _service(tmp_path, profiles, clock, home_store_factory=home_store_factory)
     service.create_home("screen", 0, 900, 40, seed=3)
     _furnish(service)
     assert service.adopt(record["id"]) == "accepted"
@@ -98,10 +102,10 @@ def test_adopted_pet_uses_the_world_as_its_only_clock(tmp_path, profiles):
     assert PetProfileSession.active(profiles, record["id"]) is None
 
 
-def test_live_pet_cannot_move_in_twice(tmp_path, profiles):
+def test_live_pet_cannot_move_in_twice(tmp_path, profiles, *, home_store_factory):
     record = profiles.create("Mochi")
     live = PetProfileSession(None, record["id"], profiles)
-    service = _service(tmp_path, profiles)
+    service = _service(tmp_path, profiles, home_store_factory=home_store_factory)
     service.create_home("screen", 0, 900, 40, seed=3)
     assert service.adopt(record["id"]) == "active_elsewhere"
     assert record["id"] not in service.world.residents
@@ -111,15 +115,15 @@ def test_live_pet_cannot_move_in_twice(tmp_path, profiles):
     service.shutdown()
 
 
-def test_resident_live_elsewhere_is_away_until_released(tmp_path, profiles):
+def test_resident_live_elsewhere_is_away_until_released(tmp_path, profiles, *, home_store_factory):
     clock = Clock()
     record = profiles.create("Mochi")
-    service = _service(tmp_path, profiles, clock)
+    service = _service(tmp_path, profiles, clock, home_store_factory=home_store_factory)
     service.create_home("screen", 0, 900, 40, seed=3)
     service.adopt(record["id"])
     assert service.shutdown()
     live = PetProfileSession(None, record["id"], profiles)
-    reopened = _service(tmp_path, profiles, clock)
+    reopened = _service(tmp_path, profiles, clock, home_store_factory=home_store_factory)
     reopened.open()
     resident = reopened.world.residents[record["id"]]
     assert resident.away
@@ -128,21 +132,22 @@ def test_resident_live_elsewhere_is_away_until_released(tmp_path, profiles):
     reopened.start()
     for _ in range(100):
         _tick(reopened, clock, 0.2)
-    assert (dict(resident.needs), resident.x_milli) == before
+    assert before == (dict(resident.needs), resident.x_milli)
     live.close()
     assert reopened.retry_leases() == [record["id"]]
     assert not resident.away
     reopened.shutdown()
 
 
-def test_failed_save_keeps_memory_and_retries(tmp_path, profiles):
-    service = _service(tmp_path, profiles)
+def test_failed_save_keeps_memory_and_retries(tmp_path, profiles, *, home_store_factory):
+    service = _service(tmp_path, profiles, home_store_factory=home_store_factory)
     service.create_home("screen", 0, 900, 40, seed=3)
     failures = []
 
     def fail(path, data):
         raise OSError("disk full")
 
+    original_write = service.store._write
     service.store._write = fail
     service.save_failed.connect(failures.append)
     assert service.run(lambda world: world.buy("plant_pot", "b1")) == "insufficient_coins"
@@ -151,14 +156,14 @@ def test_failed_save_keeps_memory_and_retries(tmp_path, profiles):
     assert service.save_timer.isActive()
     assert service.world.ledger.coins == 10
     assert not service.shutdown()
-    service.store._write = HomeSaveStore(tmp_path, builtin_catalog())._write
+    service.store._write = original_write
     assert service.shutdown()
 
 
-def test_shutdown_pauses_work_without_paying_partial_units(tmp_path, profiles):
+def test_shutdown_pauses_work_without_paying_partial_units(tmp_path, profiles, *, home_store_factory):
     clock = Clock()
     record = profiles.create("Mochi")
-    service = _service(tmp_path, profiles, clock)
+    service = _service(tmp_path, profiles, clock, home_store_factory=home_store_factory)
     service.create_home("screen", 0, 900, 40, seed=3)
     service.world.automatic = False    # only the one letter below, no jobs or rewards taken by themselves
     _furnish(service)
@@ -168,7 +173,7 @@ def test_shutdown_pauses_work_without_paying_partial_units(tmp_path, profiles):
     for _ in range(200):
         _tick(service, clock, 0.2)
     assert service.shutdown()
-    reopened = _service(tmp_path, profiles)
+    reopened = _service(tmp_path, profiles, home_store_factory=home_store_factory)
     world = reopened.open().world
     task = next(iter(world.tasks.values()))
     assert task.state == "paused"
@@ -177,10 +182,10 @@ def test_shutdown_pauses_work_without_paying_partial_units(tmp_path, profiles):
     reopened.shutdown()
 
 
-def test_release_returns_care_values_to_the_profile(tmp_path, profiles):
+def test_release_returns_care_values_to_the_profile(tmp_path, profiles, *, home_store_factory):
     clock = Clock()
     record = profiles.create("Mochi")
-    service = _service(tmp_path, profiles, clock)
+    service = _service(tmp_path, profiles, clock, home_store_factory=home_store_factory)
     service.create_home("screen", 0, 900, 40, seed=3)
     service.adopt(record["id"])
     service.world.residents[record["id"]].needs["mood"] = 12
@@ -201,13 +206,13 @@ def _wait(condition, timeout: float = 5.0) -> None:
         time.sleep(0.005)
 
 
-def test_routine_saves_run_on_one_worker_and_coalesce(tmp_path, profiles):
+def test_routine_saves_run_on_one_worker_and_coalesce(tmp_path, profiles, *, home_store_factory):
     import threading
     from concurrent.futures import ThreadPoolExecutor
 
     gate = threading.Event()
     threads, writes = set(), []
-    store = HomeSaveStore(tmp_path, builtin_catalog())
+    store = home_store_factory(tmp_path, builtin_catalog())
     original = store._write
 
     def slow_write(path, data):
@@ -231,22 +236,23 @@ def test_routine_saves_run_on_one_worker_and_coalesce(tmp_path, profiles):
     assert threads == {next(iter(threads))}
     assert next(iter(threads)).startswith("home-save")
     assert saved == [threading.current_thread().name] * 2
-    reloaded = HomeSaveStore(tmp_path, builtin_catalog()).load().world
+    reloaded = store.load().world
     assert reloaded.ledger.coins == 20
     assert service.shutdown()
 
 
-def test_background_failure_is_reported_on_the_gui_thread(tmp_path, profiles):
+def test_background_failure_is_reported_on_the_gui_thread(tmp_path, profiles, *, home_store_factory):
     import threading
     from concurrent.futures import ThreadPoolExecutor
 
-    store = HomeSaveStore(tmp_path, builtin_catalog())
+    store = home_store_factory(tmp_path, builtin_catalog())
     service = HomeService(None, store, profiles, clock=Clock(), executor=ThreadPoolExecutor(1))
     service.create_home("screen", 0, 900, 40, seed=3)
 
     def fail(path, data):
         raise OSError("disk full")
 
+    original_write = store._write
     store._write = fail
     failures = []
     service.save_failed.connect(lambda text: failures.append((text, threading.current_thread().name)))
@@ -254,5 +260,5 @@ def test_background_failure_is_reported_on_the_gui_thread(tmp_path, profiles):
     _wait(lambda: failures)
     assert failures == [("disk full", threading.current_thread().name)]
     assert service.save_timer.isActive()
-    store._write = HomeSaveStore(tmp_path, builtin_catalog())._write
+    store._write = original_write
     assert service.shutdown()

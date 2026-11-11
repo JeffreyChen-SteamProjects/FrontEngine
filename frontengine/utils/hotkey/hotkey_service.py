@@ -52,6 +52,7 @@ class HotkeyService(QObject):
         self._bindings: Dict[str, str] = dict(bindings)
         self._listener: Optional[Any] = None
         self.reason = ''
+        self._stopping_listeners = []
 
     def start(self) -> bool:
         if sys.platform.startswith('linux'):
@@ -103,7 +104,12 @@ class HotkeyService(QObject):
         listener = self._listener
         self._listener = None
         if listener is not None:
+            self._stopping_listeners.append(listener)
             try:
                 listener.stop()
             except Exception as error:
                 front_engine_logger.warning(f"[HotkeyService] Stop error: {error!r}")
+
+    def pending(self) -> bool:
+        self._stopping_listeners[:] = [listener for listener in self._stopping_listeners if listener.is_alive()]
+        return bool(self._stopping_listeners)

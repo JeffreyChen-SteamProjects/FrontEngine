@@ -9,6 +9,28 @@ from frontengine.user_setting.pet_profile_schema import checked_profile, present
 from frontengine.user_setting.pet_profiles import PetProfiles
 
 
+@pytest.mark.parametrize('field', ['favorite', 'disliked', 'size', 'speed', 'volume',
+                                  'behaviour', 'chatter', 'motion'])
+def test_customization_fields_expose_their_visible_label_to_accessibility(field):
+    from PySide6.QtWidgets import QFormLayout
+    from accessibility_assertions import assert_named_by
+
+    profiles = PetProfiles({}, lambda: None)
+    record = profiles.create()
+    dialog = PetCustomizationDialog(profiles, record['id'])
+    try:
+        dialog.controls['use_defaults'].setChecked(False)
+        control = dialog.controls[field]
+        form = dialog.findChild(QFormLayout)
+        label = form.labelForField(control)
+        assert label.text()
+        assert_named_by(control, label)
+        label.setText('Updated ' + label.text())
+        assert_named_by(control, label)
+    finally:
+        dialog.close()
+
+
 def test_old_preferences_normalize_without_mutating_source():
     profiles = PetProfiles({}, lambda: None)
     record = profiles.create('Legacy')
@@ -142,8 +164,8 @@ def test_sprite_customization_applies_independently_and_survives_reopen(tmp_path
     settings = {}
     disk = JsonRepository(tmp_path / 'settings.json')
     profiles = PetProfiles(settings, lambda: disk.save(settings))
-    first = DesktopPetWidget(str(path), size=96, talk=False, profiles=profiles)
-    second = DesktopPetWidget(str(path), size=128, talk=False, profiles=profiles)
+    first = DesktopPetWidget(size=96, talk=False, profiles=profiles)
+    second = DesktopPetWidget(size=128, talk=False, profiles=profiles)
     identifier = first.profile_session.identifier
     dialog = PetCustomizationDialog(profiles, identifier)
     try:
@@ -163,7 +185,7 @@ def test_sprite_customization_applies_independently_and_survives_reopen(tmp_path
         assert second.profile_session.state()['preferences']['presentation'] is None
         first.close()
         reopened = PetProfiles(disk.load(), lambda: None)
-        restored = DesktopPetWidget(str(path), profiles=reopened, profile_id=identifier)
+        restored = DesktopPetWidget(profiles=reopened, profile_id=identifier)
         try:
             assert restored._base_size == 192
             assert restored.motion.speed == 7

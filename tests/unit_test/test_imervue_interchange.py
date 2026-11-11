@@ -75,7 +75,7 @@ def test_scene_package_round_trip_and_traversal_rejection(tmp_path):
 
 
 def test_reference_imervue_reader_round_trip(tmp_path):
-    reader = pytest.importorskip('Imervue.puppet.document_io')
+    reader = pytest.importorskip('rigora.puppet.document_io')
     from frontengine.utils.imervue.puppet_asset import validate_puppet
     path = write_puppet(tmp_path / 'tiny.puppet')
     document = reader.load_puppet(path)
@@ -113,8 +113,9 @@ def test_scene_package_canonicalizes_extraction_directory_alias(tmp_path, monkey
     assert not resource.exists()
 
 
-def test_puppet_pet_uses_reference_canvas_without_imervue_preferences(tmp_path):
-    pytest.importorskip('Imervue.puppet.document_io')
+def test_puppet_pet_uses_reference_canvas_without_imervue_preferences(tmp_path, lifetime_factory):
+    lifetime_factory()
+    pytest.importorskip('rigora.puppet.document_io')
     from frontengine.show.pet.puppet_pet import PuppetPetWidget
     path = write_puppet(tmp_path / 'tiny.puppet')
     pet = PuppetPetWidget(path, size=(64, 96))
@@ -137,9 +138,10 @@ def test_scene_puppet_does_not_enter_proxy_widget(tmp_path):
     assert manager.puppet_settings == []
 
 
-def test_pet_page_persists_puppet_script_in_preset():
+def test_pet_page_persists_puppet_script_in_preset(*, lifetime_factory):
     from frontengine.ui.page.pet.pet_setting_ui import PetSettingUI
-    page = PetSettingUI()
+    lifetime_factory()
+    page = PetSettingUI(lifetime=lifetime_factory())
     page.set_state({'pet_image_path': 'character.puppet', 'puppet_script': 'lines.petscript.json'})
     assert page.get_state()['puppet_script'] == 'lines.petscript.json'
     page.close()

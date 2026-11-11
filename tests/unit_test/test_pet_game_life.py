@@ -160,10 +160,12 @@ def test_dragging_and_parking_release_furniture_without_stopping_others():
     world.drag(PET, 10**9)
     assert world.residents[PET].x_milli < world.zones[zone].width_pixels * 1000
     assert world.park(PET, True) == "accepted"
-    frozen = dict(world.residents[PET].needs), world.residents[PET].x_milli
+    frozen_needs = dict(world.residents[PET].needs)
+    frozen_position = world.residents[PET].x_milli
     other_before = world.residents[other].x_milli, dict(world.residents[other].needs)
     _run(world, 2 * MINUTE)
-    assert (dict(world.residents[PET].needs), world.residents[PET].x_milli) == frozen
+    assert dict(world.residents[PET].needs) == frozen_needs
+    assert world.residents[PET].x_milli == frozen_position
     assert (world.residents[other].x_milli, dict(world.residents[other].needs)) != other_before
 
 
@@ -259,3 +261,26 @@ def test_resident_starts_at_the_entrance_in_zone_coordinates():
     world, zone = _home()
     world.add_resident(_profile(), zone)
     assert world.residents[PET].x_milli == CELL_PIXELS // 2 * 1000
+
+
+def test_queued_work_refusal_remains_visible_until_next_accepted_activity():
+    from frontengine.show.pet_game.captions import activity_text, result_text
+
+    world, _zone = _furnished()
+    resident = world.residents[PET]
+    resident.needs["energy"] = 26
+    resident.accumulators["energy"] = -59800
+    assert world.create_task("letter", PET)[0] == "accepted"
+    world.drain_events()
+    assert world.command(PET, "work") == "accepted"
+
+    simulation.step(world)
+    assert resident.needs["energy"] == 25
+    assert any(event["kind"] == "refused" and event["reason"] == "too_tired"
+               for event in world.drain_events())
+    assert result_text("too_tired") in activity_text(resident, world)
+
+    assert world.command(PET, "sleep") == "accepted"
+    simulation.step(world)
+    assert resident.activity.kind == "sleep"
+    assert result_text("too_tired") not in activity_text(resident, world)

@@ -20,6 +20,7 @@ from frontengine.user_setting.user_setting_file import user_setting_dict, write_
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import tr
+from frontengine.ui.dialog.dialog_kit import button_row, roomy
 from frontengine.utils.reminder.reminder_service import (
     DEFAULT_EVERY_MINUTES, KIND_AT, KIND_EVERY, normalize_reminder, normalize_reminders,
     parse_time_of_day,
@@ -70,10 +71,9 @@ class ReminderDialog(QDialog):
         self.button_box.accepted.connect(self.accept)
         self.button_box.rejected.connect(self.reject)
 
-        layout = QGridLayout(self)
+        layout = roomy(QGridLayout(self))
         layout.addWidget(self.table, 0, 0, 1, 2)
-        layout.addWidget(self.add_button, 1, 0)
-        layout.addWidget(self.remove_button, 1, 1)
+        layout.addWidget(button_row(self.add_button, self.remove_button), 1, 0, 1, 2)
         layout.addWidget(self.hint_label, 2, 0, 1, 2)
         layout.addWidget(self.button_box, 3, 0, 1, 2)
 

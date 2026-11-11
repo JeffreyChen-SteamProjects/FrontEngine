@@ -23,9 +23,11 @@ class BaseSceneSettingUI(QWidget):
     factory nor the scene-append logic has to be re-implemented per page.
     """
 
-    def __init__(self, script_ui: SceneManagerUI) -> None:
+    def __init__(self, script_ui: SceneManagerUI, *, lifetime) -> None:
         front_engine_logger.info(f"[{type(self).__name__}] Init | script_ui={script_ui}")
         super().__init__()
+        self.lifetime = lifetime
+        lifetime.adopt(self)
         self.script_ui = script_ui
         self.grid_layout = QGridLayout(self)
 

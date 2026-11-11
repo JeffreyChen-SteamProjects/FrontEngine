@@ -25,9 +25,11 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 os.chdir(tempfile.mkdtemp(prefix="fe-inventory-"))
 Path("user_setting.json").write_text(json.dumps({"language": "English"}), encoding="utf-8")
 
+from PySide6.QtCore import QEventLoop, QTimer  # noqa: E402
 from PySide6.QtWidgets import QApplication  # noqa: E402
 
 app = QApplication(sys.argv)
+app.setQuitOnLastWindowClosed(False)
 from shiboken6 import getCppPointer  # noqa: E402
 
 
@@ -133,7 +135,19 @@ text = ["# Entry inventory", "",
 for title, rows in sections:
     text += [f"## {title}", "", table(rows), ""]
 OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-OUTPUT.write_text("\n".join(text), encoding="utf-8")
+shutdown_loop = QEventLoop()
+shutdown_timeout = QTimer()
+shutdown_timeout.setSingleShot(True)
+shutdown_timeout.timeout.connect(shutdown_loop.quit)
+ui.lifetime.finished.connect(shutdown_loop.quit)
 ui.close()
+if not ui.lifetime.closed:
+    shutdown_timeout.start(120000)
+    shutdown_loop.exec()
+shutdown_timeout.stop()
+if not ui.lifetime.closed:
+    raise RuntimeError(f"Inventory runtime did not close: {ui.lifetime.state}, {ui.lifetime.error!r}")
+text += ["Runtime shutdown: CLOSED.", ""]
+OUTPUT.write_text("\n".join(text), encoding="utf-8")
 print(f"{OUTPUT}: {failed} failed")
 sys.exit(1 if failed else 0)

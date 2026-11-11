@@ -7,27 +7,31 @@
 
 画面文字：Tools → Read text 优先使用本机 OCR：Windows 的 Windows.Media.Ocr、macOS 的 Vision，或已安装且具有语言数据的 Tesseract 可执行文件。本机提取文字不需要云端同意或 ANTHROPIC_API_KEY；成功但没有文字时不会上传截图。翻译与提问只有在另行同意发送文字且提供密钥时，才会将识别文字发送至 Anthropic。本机失败后的截图回退需要独立的画面发送同意与密钥。结果会显示后端及错误，也能撤回同意。
 
-Puppet 宠物：安装可选的 puppet extra 与可用的 Imervue runtime，再于宠物页选择或拖入原始 Imervue .puppet v1 文件。已有图片与 sprite 宠物包仍可使用。Puppet 宠物使用 Imervue 画布、动作与表情，可复制或关闭，并支持 FrontEngine 覆盖层控制与预设集。可另选 .petscript.json 使用 Imervue 原有脚本引擎；FrontEngine pet.json 宠物包不是 puppet 文件。未知版本、不安全的归档路径与无效资源会在加载 runtime 前拒绝。
+Puppet 宠物：安装可用的 Rigora runtime，再于宠物页选择或拖入原始 Rigora .puppet v1 文件。Puppet 宠物使用 Rigora 画布、动作与表情，可复制或关闭，并支持 FrontEngine 覆盖层控制与预设集。可另选 .petscript.json 使用 Rigora 原有脚本引擎。未知版本、不安全的归档路径与无效资源会在加载 runtime 前拒绝。
 
-场景：场景页支持旧 entry mapping JSON、有版本的 frontengine.scene envelope，以及便携式 .fescene 包。PUPPET 项目可设置位置、大小、不透明度、有限数值参数，以及可选动作、表情与脚本。JSON 路径相对于场景文件解析。.fescene 包含引用媒体、原始 .puppet 与可选 .petscript.json，可移到其他电脑。导入会检查路径、符号链接、版本与解压上限。FrontEngine 场景保持为场景包；.puppet 保持为单一 Imervue 角色。
+场景：场景页支持旧 entry mapping JSON、有版本的 frontengine.scene envelope，以及便携式 .fescene 包。PUPPET 项目可设置位置、大小、不透明度、有限数值参数，以及可选动作、表情与脚本。JSON 路径相对于场景文件解析。.fescene 包含引用媒体、原始 .puppet 与可选 .petscript.json，可移到其他电脑。导入会检查路径、符号链接、版本与解压上限。FrontEngine 场景保持为场景包；.puppet 保持为单一 Rigora 角色。
 
 macOS：可选 macos extra 以 macOS 13+ 与公开 PyObjC framework 为基准。后端提供 ScreenCaptureKit 屏幕／窗口捕获与系统音频、麦克风捕获、Quartz 窗口几何、Accessibility 窗口布局与移动、CoreMIDI、媒体键及 F12 退出。屏幕录制、辅助功能与麦克风权限分别检查；请到系统设置 → 隐私与安全性，依提示重新启动。其他程序窗口的透明度／强制置顶、Space 指定，以及让其他程序捕获时排除覆盖层仍不可用。本 Windows 开发环境尚未验证 macOS 原生授权、硬件与性能。 Settings → macOS 权限与能力会逐项列出可用、不可用或不支持，并显示权限或安装原因。
 
 插件：启用加载不代表授权插件。plugin.json 或单文件 sidecar 声明版本、身份、入口与能力；Python import 前检查同意，授权绑定内容摘要。程序或声明改变就需重新同意；旧插件需明确完全信任。Settings → Revoke plugin grants 可撤销保存的授权；已在运行的程序需重新启动才能卸载。Python 插件仍具有完整应用程序权限，声明与同意不是操作系统沙箱。
 
-渲染：Settings → Overlay rendering 可选 Auto、GPU 或 Software，并查看实际后端。GPU 合成器以 OpenGL texture、shader 与 framebuffer 处理图层顺序、变换、不透明度与裁剪；初始化失败时回退软件并显示原因。已有 QPainter 内容仍可能先由 CPU 转成光栅图再上传；web／video／原生 widget 可能使用独立窗口。捕获与录制可能将 GPU 画面读回 CPU，这不代表零拷贝捕获或已测得性能提升。 场景 GPU 合成目前涵盖 IMAGE、GIF 与 TEXT；puppet 使用自己的 Imervue 窗口绘制。
+渲染：Settings → Overlay rendering 可选 Auto、GPU 或 Software，并查看实际后端。GPU 合成器以 OpenGL texture、shader 与 framebuffer 处理图层顺序、变换、不透明度与裁剪；初始化失败时回退软件并显示原因。已有 QPainter 内容仍可能先由 CPU 转成光栅图再上传；web／video／原生 widget 可能使用独立窗口。捕获与录制可能将 GPU 画面读回 CPU，这不代表零拷贝捕获或已测得性能提升。 场景 GPU 合成目前涵盖 IMAGE、GIF 与 TEXT；puppet 使用自己的 Rigora 窗口绘制。 覆盖层重绘会将合成器更新排到父窗口绘制完成后执行，切换后端或屏幕时也遵循此顺序。
 
-Windows OCR 的 WinRT 投影包包含于 FrontEngine 的一般 Windows 安装；请安装需要的 Windows 识别语言。Tesseract 的可执行文件与训练语言数据需单独安装。可选 puppet extra 会安装 Imervue>=1.0.90；macos extra 安装 macOS 13+ 的公开 PyObjC framework。请使用下列命令。docs/formats/ 提供 puppet、pet.json、petscript 与场景示例。
+Windows OCR 的 WinRT 投影包包含于 FrontEngine 的一般 Windows 安装；请安装需要的 Windows 识别语言。Tesseract 的可执行文件与训练语言数据需单独安装。macos extra 安装 macOS 13+ 的公开 PyObjC framework。请使用下列命令。docs/formats/ 提供 puppet、petscript 与场景示例。
+
+Rigora 目前为私有且尚未发布。请用以下命令从已授权的相邻 checkout 安装 GUI 运行环境，或安装可信本地 wheel 及其 GUI 依赖包。Rigora 公开发布前，FrontEngine 不提供 Puppet 包库 extra。现有 ``.puppet``、``.petscript.json``、宠物存档与场景保持兼容。
 
 .. code-block:: console
 
-    pip install "frontengine[puppet]"
+    pip install "../Rigora[gui]"
     pip install "frontengine[macos]"
 
 Workshop 内容声明采用版本化格式，使用前会验证；未知的元数据 JSON 不会被当作预设。预设包会拒绝不安全的归档路径、超出资源上限以及媒体文件名冲突。
 
-预设集 → 管理创意工坊打开 Steam 管理界面；场景与宠物页也有入口。Windows x64 需在线 Steam 客户端、App 2793470 会话及 steam_api64.dll。可发布已保存的 .fescene／场景 JSON、预设集 ZIP 或 sprite 宠物文件夹，附小于 1 MB 的 PNG/JPEG 预览。新项目默认为私人，更新核对所有者。上传显示进度与条款状态，保存 ID 供重试，隐藏窗口仍继续；中断后须在 Steam 确认结果。订阅先验证并复制到独立版本文件夹，本地修改冲突可选下载或本地版本。载入填入对应页面，播放从该页启动；预设集导入须用新名称。保留离线文件夹导入。Steam 打包时在 exe/build_exe.py 添加 --steam-runtime DLL路径，DLL 位于可执行文件旁（--onefile 亦同）；不包含 SDK 或开发用 steam_appid.txt。
+预设集 → 管理创意工坊打开 Steam 管理界面；场景与宠物页也有入口。Windows x64 需在线 Steam 客户端、App 2793470 会话及 steam_api64.dll。可发布已保存的 .fescene／场景 JSON 或预设集 ZIP，附小于 1 MB 的 PNG/JPEG 预览。Sprite 宠物包已不再发布或加载；已订阅的会显示为不支持。新项目默认为私人，更新核对所有者。上传显示进度与条款状态，保存 ID 供重试，隐藏窗口仍继续；中断后须在 Steam 确认结果。订阅先验证并复制到独立版本文件夹，本地修改冲突可选下载或本地版本。载入填入对应页面，播放从该页启动；预设集导入须用新名称。保留离线文件夹导入。Steam 打包时在 exe/build_exe.py 添加 --steam-runtime DLL路径，DLL 位于可执行文件旁（--onefile 亦同）；不包含 SDK 或开发用 steam_appid.txt。 宠物家园的家具包与主题从包文件夹发布（只复制 `pack.json`、缩略图与家具图），蓝图则从文件发布，并只用检查过的部分重新写出，宠物、名字、金币、聊天或设置都不会被带出去；蓝图用到的内容包会列在它的清单里。
 
 Windows 安装现在包含 winrt-Windows.Media.Control，让「正在播放」小工具通过 SMTC 显示歌名与演出者；旧 winsdk 仍作备选。无媒体会话时返回空结果，并保留现有音频程序名称备选。
 
 可执行文件构建会在编译前检查所有必要依赖与版本；请先在构建环境安装 requirements.txt。
+
+Workshop 管理窗口中，Tab 与 Shift+Tab 可在字段间移动，包括多行说明字段；Enter 在说明字段换行。选择来源或预览图时关闭管理窗口，返回的选择不会应用；输入预设集名称时关闭则不会启动该次导入。取消或重新打开管理窗口后可以重试。已开始的上传会在管理窗口关闭后继续。

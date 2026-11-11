@@ -1,0 +1,10 @@
+{
+  "product_test_commit": "20069297",
+  "collected": 3492,
+  "expected_passed": 3489,
+  "expected_skipped": 3,
+  "parent_queue_pid": 30088,
+  "source_files": 754,
+  "required_new_regressions": 10,
+  "status": "queued; full regression not yet run"
+}

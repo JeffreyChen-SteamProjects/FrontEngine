@@ -9,8 +9,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from frontengine.utils.pet_game.behaviour import (
-    URGENT_ENERGY, URGENT_FULLNESS, cancel_activity, decide, greet_arrived, greet_completed, release,
-    shared_completed, together,
+    LOW_HYGIENE, URGENT_ENERGY, URGENT_FULLNESS, cancel_activity, decide, greet_arrived, greet_completed, help_completed,
+    tag_completed,
+    helpers, release,
+    shared_completed, start_rest, together,
 )
 from frontengine.utils.pet_game import goals
 from frontengine.utils.pet_game.resident import PROFESSION_TRAITS
@@ -21,13 +23,17 @@ if TYPE_CHECKING:
     from frontengine.utils.pet_game.world import World
 
 STEP_MS = 200
+COME_WAIT_MS = 8000                 # how long a called pet waits where it was called to
 WALK_MILLI_PER_MS = 64           # 64 logical pixels per second
 MAX_ADVANCE_MS = 6 * 60 * 60 * 1000
-BASE_RATES = {"energy": -1, "fullness": -2, "mood": -1, "comfort": -1, "social": -1}
+BASE_RATES = {"energy": -1, "fullness": -2, "mood": -1, "comfort": -1, "social": -1, "hygiene": -1}
 LOW_COMFORT = 30                    # below this, discomfort wears on mood
 TOGETHER_SOCIAL = 20                # per minute while sharing a table or a toy box with others
 LIKED_WORK_MOOD = 2                 # per minute while doing work the pet likes
-FLOOR_RATES = {"nap": {"energy": 12, "mood": 0}, "snack": {"fullness": 30, "mood": 1}}
+FLOOR_RATES = {"nap": {"energy": 12, "mood": 0}, "snack": {"fullness": 30, "mood": 1},
+               "tidy": {"hygiene": 20, "mood": 0}}       # tidying itself up: slower than a bath tub
+PLAY_HYGIENE = -2                   # per minute while playing: games are messy
+WASH_MIN_MS = 10000
 # Mood while doing something that is not furniture-driven (absolute points/minute).
 ACTIVITY_MOOD = {"wander": 2, "eat": 5, "sleep": 1}
 HERB_MEAL_MOOD = 6                  # extra mood per minute when a meal uses herbs from storage
@@ -65,6 +71,8 @@ def _rates(world: World, resident: Resident) -> dict[str, int]:
     rates["comfort"] += world.comfort(resident.zone) // 5
     if resident.needs["comfort"] < LOW_COMFORT:
         rates["mood"] -= 1
+    if resident.needs["hygiene"] < LOW_HYGIENE:
+        rates["mood"] -= 1
     if "social" in resident.traits:
         rates["social"] -= 1
     activity = resident.activity
@@ -78,6 +86,8 @@ def _activity_rates(world: World, resident: Resident, rates: dict[str, int]) -> 
     activity = resident.activity
     if activity.kind in ACTIVITY_MOOD:
         rates["mood"] = ACTIVITY_MOOD[activity.kind]
+    if activity.kind in ("play", "tag"):
+        rates["hygiene"] = PLAY_HYGIENE
     if activity.kind in FLOOR_RATES:
         rates.update(FLOOR_RATES[activity.kind])
     elif activity.kind == "work":
@@ -134,10 +144,19 @@ def _walk(world: World, resident: Resident) -> None:
         resident.x_milli += reach * resident.facing
         return
     resident.x_milli = activity.target_x
+    if activity.kind == "visit":
+        resident.activity = None
+        crossed = world.cross(resident.identifier)
+        resident.decide_after_ms = world.time_ms
+        if crossed == "accepted" and activity.reason == "going_home":
+            start_rest(world, resident, "going_home")
+        return
     activity.phase = "using"
     activity.started_ms = world.time_ms
     if activity.until_ms is not None:
         activity.until_ms = max(activity.until_ms, world.time_ms + 1000)
+    if activity.kind == "come":               # called over: the wait starts once it is there
+        activity.until_ms = world.time_ms + COME_WAIT_MS
     if activity.task is not None:
         world.tasks[activity.task].state = "working"
     if activity.kind == "eat":
@@ -177,6 +196,8 @@ def _finished(world: World, resident: Resident) -> bool:
         return needs["energy"] >= 100 or (needs["energy"] >= 95 and not sleepy)
     if activity.kind in ("eat", "snack"):
         return needs["fullness"] >= 95 and world.time_ms - activity.started_ms >= 15000
+    if activity.kind in ("wash", "tidy"):
+        return needs["hygiene"] >= 95 and world.time_ms - activity.started_ms >= WASH_MIN_MS
     return activity.until_ms is None or world.time_ms >= activity.until_ms
 
 
@@ -190,7 +211,13 @@ def finish(world: World, resident: Resident, pause_ms: int = 1000) -> None:
     resident.decide_after_ms = world.time_ms + pause_ms
     if activity.kind == "greet" and activity.partner is not None:
         greet_completed(world, resident, activity.partner)
+    if activity.kind == "help" and activity.partner is not None:
+        help_completed(world, resident, activity.partner)
+    if activity.kind == "tag":
+        tag_completed(world, resident, activity.partner)
     world.emit("completed", resident=resident.identifier, activity=activity.kind)
+    if activity.kind == "play":
+        goals.complete_wish(world, resident, "play_time")
 
 
 def _work(world: World, resident: Resident) -> None:
@@ -206,6 +233,10 @@ def _work(world: World, resident: Resident) -> None:
         rate = rate * 11 // 10
     if PROFESSION_TRAITS[recipe.profession] in resident.traits:
         rate = rate * 11 // 10
+    piece = world.furniture.get(resident.activity.furniture or "")
+    if piece is not None:                       # each station level works a quarter faster
+        rate = rate * (3 + world.station_level(piece.definition)) // 4
+    rate = rate * (4 + helpers(world, resident)) // 4
     task.progress_ms += rate
     if task.progress_ms >= recipe.duration_ms:
         settle(world, resident, task)
@@ -219,7 +250,8 @@ def settle(world: World, resident: Resident, task) -> None:
         task.inputs_reserved = False
     items = {**{name: -amount for name, amount in recipe.inputs.items()}, **recipe.outputs}
     transaction = task.settlement_id()
-    result = world.ledger.apply(transaction, "work:" + recipe.identifier, recipe.coins, items)
+    coins = world.coin_amount(recipe.coins)
+    result = world.ledger.apply(transaction, "work:" + recipe.identifier, coins, items)
     if result not in ("accepted", "duplicate"):
         task.progress_ms = recipe.duration_ms - 1
         task.state = "paused"
@@ -230,7 +262,8 @@ def settle(world: World, resident: Resident, task) -> None:
         skills = resident.skills
         skills[recipe.profession] = skills.get(recipe.profession, 0) + recipe.experience
         world.emit("settled", resident=resident.identifier, task=task.identifier,
-                   recipe=recipe.identifier, coins=recipe.coins, transaction=transaction)
+                   recipe=recipe.identifier, coins=coins, transaction=transaction,
+                   station=resident.activity.furniture if resident.activity is not None else None)
     task.done += 1
     task.progress_ms = 0
     _after_unit(world, resident, task)

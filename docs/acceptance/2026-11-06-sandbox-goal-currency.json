@@ -1,0 +1,27 @@
+{
+  "date": "2026-11-06",
+  "issue": 71,
+  "status": "confirmed defect; fix pending",
+  "evidence": "Normal shutdown snapshot from native mode/create/Play acceptance",
+  "snapshot_sha256": "d6b8641510b48db96df9a845c0a5bc4cadba5bbea4ae3de5a4bcc08c5fa707d2",
+  "mode": "sandbox",
+  "ledger": {
+    "coins": 5,
+    "items": {},
+    "reserved": {},
+    "applied": [
+      "goal:move_in"
+    ],
+    "journal": [
+      {
+        "id": "goal:move_in",
+        "reason": "goal",
+        "coins": 5,
+        "items": {}
+      }
+    ]
+  },
+  "cause": "goals._automate calls claim for sandbox goals; claim applies goal.coins without a mode check.",
+  "contract": "README.md describes free arranging as having no costs and no coins.",
+  "limits": "Managed world and persistent profile isolation passed; this evidence concerns sandbox economy, not cross-mode leakage."
+}

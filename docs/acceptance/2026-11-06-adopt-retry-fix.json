@@ -1,0 +1,70 @@
+{
+  "baseline": "0b2f459e",
+  "problem": "Refused move-in selects a profile that is not a resident, replacing the current selection and disabling resident commands. Both saved-pet and new-pet actions selected unconditionally.",
+  "change": "Only accepted move-in changes the selected resident; service behavior and persistence format unchanged.",
+  "red": "3 failed, 32 deselected in 31.05s: active_elsewhere, full_saved and full_new each selected the nonresident UUID instead of the current resident UUID.",
+  "green": "5 passed, 30 deselected in 58.11s: three refusal cases, move-out retry, and existing first-loop success.",
+  "docs_checks": "54 passed in 3.63s",
+  "collected": 3260,
+  "rendered_html_sha256": {
+    "Eng": "8db62e9387647b489d9b9b914c80798d1d95308f04f16f82585cdab66f626fb8",
+    "Zh": "f9282f00853c564e077ce639bce8e778c406fb70527b6d0a5683dcc741a7657c",
+    "ZhCn": "71bbc6c7003ff2513af9e8756d4e76bd7658bc93ecf944680d6350d41e94128d",
+    "De": "faa444c88fb79f6bd61b69b02d2438136472c1a4d6336a31e6b5e9e1f14c7c76",
+    "Fr": "cad14e2da69a5454ad9565fcc2825fbf3cd256d78ccfb93138e40c27bc8308cc",
+    "Ru": "451cdcc7e30b6623e22b81027e7f8e34783f46b954c251978c8c4b77a3e4a65e",
+    "It": "294b6561f94c7e2b79a6ecb8e9083992bb7d24968ae32206893f149b9580ef2e"
+  },
+  "native_before": {
+    "passed": false,
+    "error": "Traceback (most recent call last):\n  File \"D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-release-retry\\.audit\\native_adopt_retry.py\", line 103, in <module>\n    assert observed == pet, ('Failed move-in selected nonresident', observed, pet)\n           ^^^^^^^^^^^^^^^\nAssertionError: ('Failed move-in selected nonresident', '8e510274c4ae4573a09e9a674ea4631a', 'cd53a59142a7496d92090f3a38904067')\n"
+  },
+  "native_after": {
+    "passed": true,
+    "actual_movein_button": true,
+    "refused_while_identity_owned": true,
+    "world_unchanged_on_refusal": true,
+    "selected_resident_retained": true,
+    "retry_after_lease_release": true,
+    "runtime_closed": true,
+    "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-stage-layout\\.audit\\profession-owned-fixed",
+    "saved_snapshot_sha256": "c471f2056e3bf47d41a8073e4a214f8eccec310f6c85a5f6088181f0c4b05172",
+    "scope": "Private native MainUI Move in button with an actual competing identity lease, followed by retry after lease release. No OS input or external desktop-pet window.",
+    "temporary_directory_removed": true
+  },
+  "cold_reopen": {
+    "passed": true,
+    "initial_snapshot_exact": true,
+    "profiles_exact": true,
+    "leases_reacquired": true,
+    "saved_exact": true,
+    "temporary_directory_removed": true
+  },
+  "observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "child_exit": 0,
+    "observation_only": true
+  },
+  "scope": "Private native desktop with actual Move in button and competing identity lease; full-capacity cases are offscreen tests. No physical input, external pet window, full regression, or independent review claim.",
+  "evidence_sha256": {
+    ".audit\\native_adopt_retry.py": "b6e2c0e168252e0616fa1bf181bbc4d58bdc671bf131a79f7834e133eb771050",
+    ".audit\\adopt-retry-red.log": "daaa4d2def6421f5dbdf2743590810500c3f6a4fa4ee42cd8cfbfcc226286fad",
+    ".audit\\adopt-retry-green.log": "0a9ad696730519d20d13f276d37181c74eea1dd4c79a64f2376cc03210fb8e13",
+    ".audit\\native-adopt-retry-after\\result.json": "7d48e3ca3f5c3d33ceddabf53c70eff71b8ca03b12079e51e063ae2fbc33ef46",
+    ".audit\\native-adopt-retry-after\\cold-result.json": "5bd41edb786e3fe553500e96167a938f64483ad3f1f564c603795a88e3110cbc"
+  }
+}

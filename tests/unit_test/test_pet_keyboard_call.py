@@ -88,9 +88,10 @@ def test_call_replacement_bounds_and_busy_preserve_current_interaction(social_pe
     assert not pet.isVisible() and pet._toy is None
 
 
-def test_puppet_busy_call_preserves_care(puppet):
+def test_puppet_busy_call_preserves_care(puppet, *, lifetime_factory):
     from frontengine.ui.page.pet.pet_setting_ui import PetSettingUI
-    page = PetSettingUI()
+    lifetime_factory()
+    page = PetSettingUI(lifetime=lifetime_factory())
     try:
         controls = call_controls(page, puppet)
         puppet.profile_session.request('groom')

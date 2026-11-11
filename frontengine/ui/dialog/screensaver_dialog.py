@@ -11,10 +11,11 @@ from PySide6.QtWidgets import (
     QCheckBox, QComboBox, QDialog, QDialogButtonBox, QGridLayout, QLabel, QSpinBox, QWidget,
 )
 
-from frontengine.user_setting.user_setting_file import user_setting_dict, write_user_setting
+from frontengine.user_setting.user_setting_file import (
+    replace_setting, user_setting_dict, write_user_setting,
+)
 from frontengine.utils.logging.loggin_instance import front_engine_logger
-from frontengine.utils.multi_language.language_wrapper import language_wrapper
-from frontengine.utils.multi_language.retranslate import tr
+from frontengine.utils.multi_language.retranslate import retranslator, tr, translate
 from frontengine.utils.screensaver.screensaver_service import (
     DEFAULT_SCREENSAVER, MAX_IDLE_MINUTES, MIN_IDLE_MINUTES, SOURCES, clamp_idle_minutes,
     normalize_source,
@@ -32,10 +33,6 @@ SOURCE_LABEL_KEYS = {
     "particle": ("tab_particle_text", "Particle"),
     "web": ("tab_web_text", "Web"),
 }
-
-
-def _t(key: str, fallback: str) -> str:
-    return language_wrapper.language_word_dict.get(key, fallback)
 
 
 def current_settings() -> Dict[str, Any]:
@@ -56,7 +53,7 @@ class ScreensaverDialog(QDialog):
     def __init__(self, parent: Optional[QWidget] = None) -> None:
         front_engine_logger.info("[ScreensaverDialog] Init")
         super().__init__(parent)
-        self.setWindowTitle(_t("screensaver_title", "Screensaver"))
+        retranslator.bind(self, "screensaver_title", "Screensaver", "setWindowTitle")
         settings = current_settings()
 
         self.enable_checkbox = tr(QCheckBox(), "screensaver_enable", "Show something when idle")
@@ -64,14 +61,16 @@ class ScreensaverDialog(QDialog):
 
         self.idle_label = tr(QLabel(), "screensaver_idle_minutes", "Idle for (minutes)")
         self.idle_spinbox = QSpinBox()
+        self.idle_label.setBuddy(self.idle_spinbox)
         self.idle_spinbox.setRange(MIN_IDLE_MINUTES, MAX_IDLE_MINUTES)
         self.idle_spinbox.setValue(settings["idle_minutes"])
 
         self.source_label = tr(QLabel(), "screensaver_source", "Show")
         self.source_combobox = QComboBox()
+        self.source_label.setBuddy(self.source_combobox)
         for name in SOURCES:
-            key, fallback = SOURCE_LABEL_KEYS[name]
-            self.source_combobox.addItem(_t(key, fallback), name)
+            self.source_combobox.addItem(translate(*SOURCE_LABEL_KEYS[name]), name)
+        retranslator.bind_call(self._retranslate_sources)
         index = self.source_combobox.findData(settings["source"])
         if index >= 0:
             self.source_combobox.setCurrentIndex(index)
@@ -82,6 +81,8 @@ class ScreensaverDialog(QDialog):
             "Nothing appears while the page has nothing to show. Moving the mouse or "
             "pressing a key takes it away again, and anything you opened yourself stays.")
         self.hint_label.setWordWrap(True)
+        self.status = QLabel()
+        self.status.setWordWrap(True)
 
         buttons = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
@@ -95,7 +96,14 @@ class ScreensaverDialog(QDialog):
         layout.addWidget(self.source_label, 2, 0)
         layout.addWidget(self.source_combobox, 2, 1)
         layout.addWidget(self.hint_label, 3, 0, 1, 2)
-        layout.addWidget(buttons, 4, 0, 1, 2)
+        layout.addWidget(self.status, 4, 0, 1, 2)
+        layout.addWidget(buttons, 5, 0, 1, 2)
+
+    def _retranslate_sources(self) -> None:
+        # Item data stays the stable source name; only the shown text changes.
+        for index in range(self.source_combobox.count()):
+            key, fallback = SOURCE_LABEL_KEYS[self.source_combobox.itemData(index)]
+            self.source_combobox.setItemText(index, translate(key, fallback))
 
     def collect(self) -> Dict[str, Any]:
         """把畫面上的選擇讀成設定。"""
@@ -106,8 +114,13 @@ class ScreensaverDialog(QDialog):
         }
 
     def accept(self) -> None:
-        user_setting_dict[SETTING_KEY] = self.collect()
-        write_user_setting()
-        front_engine_logger.info(
-            f"[ScreensaverDialog] saved | {user_setting_dict[SETTING_KEY]}")
+        settings = self.collect()
+        try:
+            replace_setting(user_setting_dict, SETTING_KEY, settings, write_user_setting)
+        except (OSError, ValueError) as error:
+            # The previous settings stay live and the choices stay on screen to retry.
+            self.status.setText(str(error))
+            return
+        self.status.clear()
+        front_engine_logger.info(f"[ScreensaverDialog] saved | {settings}")
         super().accept()

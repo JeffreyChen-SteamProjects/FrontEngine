@@ -1,14 +1,19 @@
+from frontengine.ui.runtime_lifetime import owned_action
+from frontengine.ui.runtime_lifetime import OwnedWidgetList
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
-    QLabel, QMessageBox, QSlider, QLineEdit, QPushButton, QCheckBox,
+    QLabel, QSlider, QLineEdit, QPushButton, QCheckBox,
     QComboBox, QPlainTextEdit,
 )
 
 from frontengine.show.web.webview import WebWidget
 from frontengine.ui.page.utils import (
     apply_checkbox_state,
+    ask_for_input,
     apply_combobox_text_state,
     apply_slider_state,
+    apply_target_monitor_state,
+    target_monitor_state,
     build_target_monitor_combobox,
     dispatch_to_monitors,
     resolve_preferred_monitor,
@@ -22,19 +27,19 @@ from frontengine.utils.web_url import next_page_index, normalize_web_url, parse_
 
 
 class WEBSettingUI(SettingPage):
-    def __init__(self):
+    def __init__(self, *, lifetime):
         front_engine_logger.info("[WEBSettingUI] Init")
         super().__init__("tab_web_text", "page_subtitle_web",
-                         "Web", "Keep a web page on top of everything else.")
+                         "Web", "Keep a web page on top of everything else.", lifetime=lifetime)
 
         # Init variable
-        self.web_widget_list = []
+        self.web_widget_list = OwnedWidgetList(self.lifetime)
         self.show_all_screen = False
         self.open_file = False
         self.enable_input = False
         # 網頁儀表板：一次開多個網址，一次只顯示一頁，可循環切換
         # Web dashboard: open several URLs at once, show one page at a time.
-        self.dashboard_widgets: list = []
+        self.dashboard_widgets: list = OwnedWidgetList(self.lifetime)
         self.dashboard_index = 0
 
         # Opacity setting
@@ -47,6 +52,7 @@ class WEBSettingUI(SettingPage):
 
         # WEB URL input
         self.web_url_input = QLineEdit()
+        self.web_url_input.returnPressed.connect(lambda: self.start_open_web_with_url())   # paste, Enter, open
 
         # Start url button
         self.start_button = tr(QPushButton(), "web_setting_open_url")
@@ -123,18 +129,22 @@ class WEBSettingUI(SettingPage):
         self.finish_body()
         self.set_footer(primary=self.start_button)
 
+    @owned_action
     def set_show_all_screen(self) -> None:
         front_engine_logger.info("[WEBSettingUI] set_show_all_screen")
         self.show_all_screen = self.show_on_all_screen_checkbox.isChecked()
 
+    @owned_action
     def set_open_file(self) -> None:
         front_engine_logger.info("[WEBSettingUI] set_open_file")
         self.open_file = self.open_local_html_checkbox.isChecked()
 
+    @owned_action
     def set_enable_input(self) -> None:
         front_engine_logger.info("[WEBSettingUI] set_enable_input")
         self.enable_input = self.enable_input_checkbox.isChecked()
 
+    @owned_action
     def _create_web_widget(self) -> WebWidget:
         front_engine_logger.info("[WEBSettingUI] _create_web_widget")
         url_text = self.web_url_input.text()
@@ -152,6 +162,7 @@ class WEBSettingUI(SettingPage):
         self.web_widget_list.append(web_widget)
         return web_widget
 
+    @owned_action
     def opacity_trick(self) -> None:
         front_engine_logger.info("[WEBSettingUI] opacity_trick")
         self.opacity_slider_value_label.setText(str(self.opacity_slider.value()))
@@ -161,6 +172,7 @@ class WEBSettingUI(SettingPage):
         """目前設定的儀表板網址清單 / The dashboard URLs as currently configured."""
         return parse_dashboard_urls(self.dashboard_edit.toPlainText())
 
+    @owned_action
     def start_dashboard(self) -> None:
         """
         一次開啟所有儀表板網址，但只顯示第一頁；其餘先隱藏，之後可循環切換。
@@ -185,6 +197,7 @@ class WEBSettingUI(SettingPage):
         self.dashboard_index = 0
         self._apply_dashboard_visibility()
 
+    @owned_action
     def _present_dashboard_widget(self, widget: WebWidget, monitor_index) -> None:
         """把儀表板頁面放到目標螢幕上（先建立後再依索引決定顯示哪一頁）。"""
         from PySide6.QtGui import QGuiApplication
@@ -195,6 +208,7 @@ class WEBSettingUI(SettingPage):
             widget.move(screens[monitor_index].availableGeometry().topLeft())
         widget.showFullScreen()
 
+    @owned_action
     def show_next_dashboard_page(self) -> None:
         """切換到下一頁（循環）；沒有儀表板時什麼都不做。"""
         if not self._alive_dashboard_widgets():
@@ -226,6 +240,7 @@ class WEBSettingUI(SettingPage):
             alive.append(widget)
         return alive
 
+    @owned_action
     def _apply_dashboard_visibility(self) -> None:
         """只顯示目前索引的那一頁。"""
         widgets = self._alive_dashboard_widgets()
@@ -247,7 +262,7 @@ class WEBSettingUI(SettingPage):
             "enable_input": self.enable_input_checkbox.isChecked(),
             "show_on_all_screen": self.show_on_all_screen_checkbox.isChecked(),
             "show_on_bottom": self.show_on_bottom_checkbox.isChecked(),
-            "target_monitor": self.target_monitor_combobox.currentText(),
+            "target_monitor": target_monitor_state(self.target_monitor_combobox),
             "zoom": self.zoom_combobox.currentText(),
             "refresh": self.refresh_combobox.currentText(),
             "dashboard": self.dashboard_edit.toPlainText(),
@@ -255,9 +270,9 @@ class WEBSettingUI(SettingPage):
 
     def set_state(self, state: dict) -> None:
         """把預設集的內容還原到這一頁的控制項上。"""
+        apply_target_monitor_state(self.target_monitor_combobox, state.get("target_monitor"))
         apply_slider_state(state, ((self.opacity_slider, "opacity"),))
         apply_combobox_text_state(state, (
-            (self.target_monitor_combobox, "target_monitor"),
             (self.zoom_combobox, "zoom"),
             (self.refresh_combobox, "refresh"),
         ))
@@ -279,6 +294,7 @@ class WEBSettingUI(SettingPage):
         if state.get("dashboard") is not None:
             self.dashboard_edit.setPlainText(str(state["dashboard"]))
 
+    @owned_action
     def start_open_web_with_url(self) -> None:
         front_engine_logger.info("[WEBSettingUI] start_open_web_with_url")
         if not self.web_url_input.text().strip():
@@ -287,9 +303,7 @@ class WEBSettingUI(SettingPage):
             # An empty URL opens a blank fullscreen click-through page: invisible,
             # unclickable, and only closable from the control center. Every other
             # page stops first; this one should too.
-            message_box = QMessageBox(self)
-            message_box.setText(language_wrapper.language_word_dict.get("not_prepare"))
-            message_box.exec()
+            ask_for_input(self.web_url_input)        # no dialog to dismiss: the field asks for the address
             return
 
         def present_on_monitor(widget: WebWidget, monitor, _idx: int) -> None:

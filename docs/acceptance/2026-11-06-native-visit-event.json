@@ -1,0 +1,107 @@
+{
+  "product": "7a4419dc",
+  "native": {
+    "passed": true,
+    "events": [
+      {
+        "activity": "visit",
+        "kind": "activity",
+        "reason": "going_home",
+        "resident": "cd53a59142a7496d92090f3a38904067",
+        "time": 56478000
+      },
+      {
+        "kind": "moved_zone",
+        "resident": "cd53a59142a7496d92090f3a38904067",
+        "time": 56490400,
+        "zone": "z1"
+      },
+      {
+        "activity": "sleep",
+        "kind": "activity",
+        "reason": "tired",
+        "resident": "cd53a59142a7496d92090f3a38904067",
+        "time": 56490600
+      }
+    ],
+    "visit_event": {
+      "activity": "visit",
+      "kind": "activity",
+      "reason": "going_home",
+      "resident": "cd53a59142a7496d92090f3a38904067",
+      "time": 56478000
+    },
+    "crossing_event": {
+      "kind": "moved_zone",
+      "resident": "cd53a59142a7496d92090f3a38904067",
+      "time": 56490400,
+      "zone": "z1"
+    },
+    "bubble_rect": [
+      84.0,
+      71.4,
+      156.0,
+      20.0
+    ],
+    "simulation_steps": 68,
+    "sleep_furniture": "f2",
+    "bed_claim_preserved": true,
+    "actual_sleep_button": true,
+    "logical_zones_same_physical_screen": true,
+    "runtime_closed": true,
+    "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\home-stage-layout\\.audit\\profession-owned-fixed",
+    "saved_snapshot_sha256": "c471f2056e3bf47d41a8073e4a214f8eccec310f6c85a5f6088181f0c4b05172",
+    "scope": "Private native MainUI Sleep button, real domain travel and service publication, bounded strip bubble, owned-bed return. Injected simulation clock and two logical zones on one physical screen; not physical multi-monitor or OS input acceptance.",
+    "temporary_directory_removed": true
+  },
+  "cold_reopen": {
+    "passed": true,
+    "initial_snapshot_exact": true,
+    "profiles_exact": true,
+    "leases_reacquired": true,
+    "saved_exact": true,
+    "temporary_directory_removed": true
+  },
+  "observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "child_exit": 0,
+    "observation_only": true
+  },
+  "stderr_empty": true,
+  "limitations": [
+    "Injected simulation clock, one managed resident, two logical zones on one physical screen.",
+    "No OS mouse or keyboard injection; no physical monitor hotplug, click-through, independent review, or full regression claim."
+  ],
+  "harness_corrections": [
+    "Initial added logical zone needed explicit strip synchronization because desktop was already enabled.",
+    "Profiles must be captured after save_now synchronizes resident state, not before saving.",
+    "Final gate waits for sleep phase using, not merely walking toward the bed.",
+    "Final harness retains valid final resident position without the unrelated edge-fixture restoration."
+  ],
+  "artifacts": {
+    ".audit\\native_visit_event.py": "027b042ffd7f3ec376fc71e9a5571d9f0c614afea0b39cd04881856853d33306",
+    ".audit\\cold_visit_event.py": "8036f53574ba6c68e74c48f86aaf30f11a824b3a274ca70d33059421352a85ec",
+    ".audit\\native-visit-event-final\\cold-result.json": "5bd41edb786e3fe553500e96167a938f64483ad3f1f564c603795a88e3110cbc",
+    ".audit\\native-visit-event-final\\observer.json": "108902181ee471ddb835401d5d799d056e70c9ac4aead7d271ce043e584e29a5",
+    ".audit\\native-visit-event-final\\profiles.json": "a2a28e30bde36e63a446e205924898ec4a501da592700598f18efa99d61a00bb",
+    ".audit\\native-visit-event-final\\result.json": "8921796c16c854b801f9c1c31f28a16172b681fd7b8c7b98973245ef911d8ef5",
+    ".audit\\native-visit-event-final\\shutdown-world.json": "9334f644545516ab3f8c85f341c600b9cdb8c0f07fecd51ba18f28cec4c3ec26",
+    ".audit\\native-visit-event-final\\returned-to-bed.png": "4b61aa308fafa75e92df4fca025ed11530c8680b300ff64fd838d9dbf9c49c8e",
+    ".audit\\native-visit-event-final\\walking-home.png": "f678fb8330266d2a4059c35434053f3a18c69e906b43863f2c2c30783953e8da"
+  },
+  "frozen_source_files_unchanged": 751
+}

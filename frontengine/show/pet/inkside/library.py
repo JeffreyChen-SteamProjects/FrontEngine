@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import tempfile
-from threading import Event
+from threading import Event, Lock
 from typing import Callable
 
 from frontengine.show.pet.inkside.assemble import build_character, build_garment, garment_identifier
@@ -76,15 +76,29 @@ def _template(identifier: str):
     raise ValueError(f'Unknown built-in character: {identifier}')
 
 
+# One built-in install at a time: a character card and the wardrobe can ask for the same pieces
+# together, and two installers of one piece collide on its folder.
+_INSTALLING = Lock()
+
+
 def install_builtin(library, identifier: str, cancel: Event | None = None,
-                    progress: Callable[[int, int], None] | None = None) -> int:
-    """Install one character and every wardrobe piece fitted to its body; return how many were new."""
-    template = _template(identifier)
-    cancel = cancel or Event()
+                    progress: Callable[[int, int], None] | None = None, *, wardrobe: bool = True) -> int:
+    """Install one character and, unless ``wardrobe`` is False, every wardrobe piece fitted to its body.
+
+    Returns how many pieces were new; an install already in progress elsewhere is waited for.
+    """
+    with _INSTALLING:
+        return _install(library, _template(identifier), cancel or Event(), progress, wardrobe)
+
+
+def _install(library, template, cancel: Event, progress, wardrobe: bool) -> int:
     wanted = [(template.ident, lambda folder: build_character(template, folder))]
-    wanted += [(garment_identifier(garment, template),
-                lambda folder, garment=garment: build_garment(garment, template, folder)) for garment in GARMENTS]
+    if wardrobe:
+        wanted += [(garment_identifier(garment, template),
+                    lambda folder, garment=garment: build_garment(garment, template, folder)) for garment in GARMENTS]
     missing = [(ident, build) for ident, build in wanted if not library.is_installed(ident, VERSION)]
+    if progress is not None:
+        progress(0, 2 * len(missing))
     with tempfile.TemporaryDirectory(prefix='frontengine-inkside-') as staging:
         sources = []
         for index, (ident, build) in enumerate(missing):
@@ -94,5 +108,8 @@ def install_builtin(library, identifier: str, cancel: Event | None = None,
             sources.append(build(Path(staging).resolve() / ident))
             if progress is not None:
                 progress(index + 1, 2 * len(missing))
-        library.install_many(sources, cancel=cancel)
+        def installed(done: int, total: int) -> None:
+            if progress is not None:
+                progress(len(missing) + done, len(missing) + total)
+        library.install_many(sources, cancel=cancel, progress=installed)
     return len(missing)

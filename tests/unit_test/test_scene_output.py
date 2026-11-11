@@ -128,9 +128,77 @@ def test_failed_device_reports_reason_and_closes():
     assert errors == ['Driver unavailable'] and camera.closed
 
 
-def test_output_dialog_scene_edits_reject_and_page_shutdown_stop_all_output(tmp_path):
+@pytest.mark.parametrize('closing', ['reject', 'close', 'destroy'])
+def test_output_background_discards_color_after_closure(tmp_path, monkeypatch, lifetime_factory, closing):
+    from PySide6.QtWidgets import QColorDialog
+    from shiboken6 import isValid
     from frontengine.ui.dialog.scene_output_dialog import SceneOutputDialog
     from frontengine.utils.scene_format.scene_editor_document import SceneEditorDocument
+
+    document = SceneEditorDocument()
+    document.reset(scene(tmp_path))
+    dialog = SceneOutputDialog(document, lifetime=lifetime_factory())
+    dialog.show()
+    before = QColor(dialog.background)
+    def choose(*_args):
+        if closing == 'close':
+            dialog.close()
+        else:
+            dialog.reject()
+        if closing == 'destroy':
+            dialog.deleteLater()
+            QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+        return QColor('magenta')
+    monkeypatch.setattr(QColorDialog, 'getColor', choose)
+    try:
+        dialog._background()
+        assert dialog.background == before
+        def unexpected(*_args):
+            pytest.fail('Closed output reopened its color picker')
+        monkeypatch.setattr(QColorDialog, 'getColor', unexpected)
+        dialog._background()
+    finally:
+        if isValid(dialog):
+            dialog.close()
+
+
+def test_output_background_cancel_reopen_retry_changes_sent_frame(tmp_path, monkeypatch, lifetime_factory):
+    from PySide6.QtWidgets import QColorDialog
+    from frontengine.ui.dialog.scene_output_dialog import SceneOutputDialog
+    from frontengine.utils.scene_format.scene_editor_document import SceneEditorDocument
+
+    document = SceneEditorDocument()
+    document.reset(scene(tmp_path))
+    camera = Camera()
+    def sender_factory(width, height, fps, parent):
+        return FrameSender(width, height, fps, parent, factory=lambda *_args: camera)
+    dialog = SceneOutputDialog(document, sender_factory=sender_factory, lifetime=lifetime_factory())
+    answers = iter([QColor(), QColor('magenta')])
+    monkeypatch.setattr(QColorDialog, 'getColor', lambda *_args: next(answers))
+    try:
+        dialog.show()
+        dialog._background()
+        assert dialog.background == QColor('black')
+        dialog.reject()
+        dialog.show()
+        dialog._background()
+        assert dialog.background == QColor('magenta')
+        dialog.send_camera()
+        wait(lambda: bool(camera.sent))
+        assert camera.sent[-1][-1, -1].tolist() == [255, 0, 255]
+        dialog.reject()
+        wait(lambda: camera.closed and not dialog.stopping_senders)
+        assert dialog.session is None
+        assert not dialog.timer.isActive()
+    finally:
+        dialog.close()
+        wait(lambda: not dialog.stopping_senders)
+
+
+def test_output_dialog_scene_edits_reject_and_page_shutdown_stop_all_output(tmp_path, *, lifetime_factory):
+    from frontengine.ui.dialog.scene_output_dialog import SceneOutputDialog
+    from frontengine.utils.scene_format.scene_editor_document import SceneEditorDocument
+    lifetime_factory()
     document = SceneEditorDocument()
     document.reset(scene(tmp_path))
     cameras = []
@@ -138,7 +206,7 @@ def test_output_dialog_scene_edits_reject_and_page_shutdown_stop_all_output(tmp_
         camera = Camera()
         cameras.append(camera)
         return FrameSender(width, height, fps, parent, factory=lambda *_args: camera)
-    dialog = SceneOutputDialog(document, sender_factory=sender_factory)
+    dialog = SceneOutputDialog(document, sender_factory=sender_factory, lifetime=lifetime_factory())
     dialog.show()
     dialog.start_preview()
     assert dialog.session is not None and not cameras

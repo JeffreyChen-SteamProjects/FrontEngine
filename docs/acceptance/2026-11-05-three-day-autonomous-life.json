@@ -1,0 +1,331 @@
+{
+  "result": {
+    "days": [
+      {
+        "elapsed_days": 1,
+        "coins": 315,
+        "completions": {
+          "00000000000000000000000000000001": {
+            "play": 17,
+            "relax": 8,
+            "greet": 13,
+            "wander": 57,
+            "idle": 28,
+            "help": 2,
+            "eat": 2,
+            "settled": 5,
+            "work": 5,
+            "sleep": 1,
+            "nap": 3,
+            "tidy": 1,
+            "wait": 16
+          },
+          "00000000000000000000000000000002": {
+            "wander": 56,
+            "idle": 31,
+            "greet": 13,
+            "settled": 4,
+            "work": 4,
+            "play": 19,
+            "wait": 6,
+            "eat": 3,
+            "relax": 9,
+            "help": 2,
+            "nap": 2,
+            "tidy": 1,
+            "sleep": 1
+          },
+          "00000000000000000000000000000003": {
+            "play": 16,
+            "greet": 19,
+            "wander": 75,
+            "idle": 48,
+            "relax": 13,
+            "eat": 3,
+            "settled": 2,
+            "work": 2,
+            "help": 2,
+            "sleep": 2,
+            "tidy": 1
+          },
+          "00000000000000000000000000000004": {
+            "relax": 11,
+            "wander": 53,
+            "greet": 15,
+            "play": 20,
+            "idle": 31,
+            "settled": 4,
+            "work": 4,
+            "help": 4,
+            "sleep": 2,
+            "eat": 1,
+            "tidy": 1,
+            "nap": 1,
+            "wait": 8
+          },
+          "00000000000000000000000000000005": {
+            "wander": 51,
+            "greet": 19,
+            "idle": 31,
+            "play": 21,
+            "help": 3,
+            "wait": 31,
+            "eat": 2,
+            "settled": 3,
+            "work": 3,
+            "relax": 7,
+            "nap": 2,
+            "tidy": 1
+          },
+          "00000000000000000000000000000006": {
+            "wander": 50,
+            "greet": 14,
+            "idle": 27,
+            "relax": 5,
+            "settled": 4,
+            "work": 4,
+            "sleep": 4,
+            "help": 4,
+            "play": 21,
+            "eat": 1,
+            "tidy": 1,
+            "wait": 13
+          }
+        }
+      },
+      {
+        "elapsed_days": 2,
+        "coins": 614,
+        "completions": {
+          "00000000000000000000000000000001": {
+            "wait": 32,
+            "wander": 48,
+            "play": 20,
+            "greet": 9,
+            "idle": 22,
+            "eat": 2,
+            "help": 6,
+            "relax": 13,
+            "settled": 3,
+            "work": 3,
+            "nap": 1,
+            "tidy": 1,
+            "sleep": 1
+          },
+          "00000000000000000000000000000002": {
+            "play": 21,
+            "wander": 44,
+            "idle": 24,
+            "greet": 11,
+            "relax": 9,
+            "settled": 5,
+            "work": 5,
+            "help": 6,
+            "eat": 3,
+            "sleep": 3,
+            "wait": 3,
+            "tidy": 1
+          },
+          "00000000000000000000000000000003": {
+            "wander": 50,
+            "idle": 32,
+            "relax": 9,
+            "greet": 10,
+            "settled": 5,
+            "work": 5,
+            "eat": 3,
+            "play": 13,
+            "sleep": 2,
+            "help": 5,
+            "nap": 1,
+            "tidy": 1,
+            "wait": 8
+          },
+          "00000000000000000000000000000004": {
+            "eat": 3,
+            "idle": 30,
+            "wander": 47,
+            "play": 18,
+            "settled": 6,
+            "work": 6,
+            "greet": 11,
+            "relax": 4,
+            "help": 2,
+            "wait": 12,
+            "nap": 1,
+            "sleep": 2,
+            "tidy": 1
+          },
+          "00000000000000000000000000000005": {
+            "wait": 21,
+            "wander": 49,
+            "play": 22,
+            "idle": 30,
+            "greet": 9,
+            "relax": 1,
+            "settled": 5,
+            "work": 5,
+            "eat": 2,
+            "help": 7,
+            "nap": 3,
+            "tidy": 1,
+            "sleep": 1
+          },
+          "00000000000000000000000000000006": {
+            "eat": 4,
+            "wander": 54,
+            "idle": 28,
+            "greet": 11,
+            "play": 26,
+            "help": 5,
+            "relax": 10,
+            "settled": 2,
+            "work": 2,
+            "sleep": 1,
+            "tidy": 1,
+            "nap": 1
+          }
+        }
+      },
+      {
+        "elapsed_days": 3,
+        "coins": 1013,
+        "completions": {
+          "00000000000000000000000000000001": {
+            "wait": 3,
+            "greet": 15,
+            "idle": 39,
+            "wander": 59,
+            "eat": 3,
+            "play": 18,
+            "relax": 8,
+            "help": 5,
+            "settled": 2,
+            "work": 2,
+            "nap": 1,
+            "tidy": 1,
+            "sleep": 1
+          },
+          "00000000000000000000000000000002": {
+            "wander": 53,
+            "idle": 23,
+            "play": 12,
+            "settled": 3,
+            "work": 3,
+            "eat": 2,
+            "relax": 9,
+            "help": 1,
+            "nap": 2,
+            "greet": 12,
+            "tidy": 1,
+            "wait": 21
+          },
+          "00000000000000000000000000000003": {
+            "play": 23,
+            "wander": 45,
+            "greet": 10,
+            "relax": 5,
+            "settled": 2,
+            "work": 2,
+            "help": 6,
+            "idle": 21,
+            "eat": 3,
+            "nap": 2,
+            "sleep": 3
+          },
+          "00000000000000000000000000000004": {
+            "eat": 2,
+            "greet": 11,
+            "idle": 28,
+            "wander": 50,
+            "settled": 4,
+            "work": 4,
+            "sleep": 3,
+            "help": 5,
+            "play": 13,
+            "relax": 10,
+            "tidy": 1,
+            "wait": 17
+          },
+          "00000000000000000000000000000005": {
+            "relax": 9,
+            "idle": 16,
+            "wander": 49,
+            "play": 19,
+            "help": 6,
+            "greet": 12,
+            "eat": 3,
+            "settled": 2,
+            "work": 2,
+            "sleep": 2,
+            "tidy": 1,
+            "nap": 1,
+            "wait": 10
+          },
+          "00000000000000000000000000000006": {
+            "play": 18,
+            "greet": 16,
+            "relax": 6,
+            "wander": 67,
+            "help": 2,
+            "settled": 3,
+            "work": 3,
+            "nap": 1,
+            "eat": 2,
+            "idle": 26,
+            "tidy": 1,
+            "sleep": 2
+          }
+        }
+      }
+    ],
+    "profession_settlements": {
+      "writing": 22,
+      "gardening": 24,
+      "crafting": 18
+    },
+    "settlement_count": 64,
+    "unique_settlement_count": 64,
+    "steps_checked": 54000,
+    "fingerprint": "36eb13c0be8a83dbafade433fb3d813ebbe0ee696eca09f3a9a8264fd5341a3d"
+  },
+  "exact_replay": true,
+  "limits": [
+    "Accelerated domain simulation, not native UI or normal-speed acceptance.",
+    "Setup grants furniture budget and 120 wood, then removes remaining coins; not a zero-inventory progression test.",
+    "One fixed seed and six assigned profession traits; no claim of every possible population.",
+    "Three-day finite execution cannot prove absence of every future deadlock.",
+    "Coins include ordinary automatic goal and commission rewards; this is not an isolated earnings measurement or proof of every profession tier."
+  ],
+  "product_commit": "1c24853",
+  "exit_code": 0,
+  "source_unchanged": true,
+  "source_count": 748,
+  "setup": {
+    "seed": 11,
+    "residents": 6,
+    "automatic": true,
+    "elapsed_game_days": 3,
+    "starting_coins_after_setup": 0,
+    "starting_wood": 120,
+    "furniture": [
+      "bed_basic",
+      "table_basic",
+      "desk_basic",
+      "toy_box",
+      "armchair",
+      "planter",
+      "workbench"
+    ],
+    "profession_traits": "Two residents each: green_thumb, bookish, handy"
+  },
+  "verified": [
+    "Every 200 ms step checks both directions of resident and furniture reservations, with no resident occupying two points.",
+    "Every step checks ledger material reservations equal the sum of inputs for reserving tasks, nonnegative coins and inventory, and needs within 0-100.",
+    "Each resident completes work, sleep or nap, and eating or snack during each of three elapsed game-day windows.",
+    "All three professions settle work; all 64 settlement IDs are unique.",
+    "A second run repeats the full 54000 steps; final snapshots and recorded counts are exactly equal."
+  ],
+  "harness_sha256": "2b32ef0b118ac3294fe39f4231af29ccae07c16dc9524885bd8b1d683bcb6f51",
+  "harness_source": "\"\"\"Three effective game days with automatic work and constrained furniture.\"\"\"\nfrom collections import Counter, defaultdict\nimport hashlib\nimport json\nfrom pathlib import Path\nimport sys\n\nROOT = Path(__file__).resolve().parents[1]\nsys.path.insert(0, str(ROOT))\nfrom frontengine.utils.pet_game import simulation, snapshot\nfrom frontengine.utils.pet_game.catalog import builtin_catalog\nfrom frontengine.utils.pet_game.resident import PROFESSION_TRAITS\nfrom frontengine.utils.pet_game.schedule import DAY_MS\nfrom frontengine.utils.pet_game.world import World\n\n\ndef setup():\n    world = World(builtin_catalog(), 'a' * 32, seed=11)\n    zone = world.add_zone('screen', 0, 900, 48)\n    world.grant_starter_kit()\n    assert world.ledger.apply('setup', 'acceptance setup', 1000, {'wood': 120}) == 'accepted'\n    world.furnish(zone)\n    for definition in ('toy_box', 'armchair', 'planter', 'workbench'):\n        assert world.buy_and_place(definition, zone, 'buy-' + definition) == 'accepted'\n    for index in range(6):\n        identifier = f'{index + 1:032x}'\n        assert world.add_resident({'id': identifier, 'name': f'Pet {index + 1}',\n                                  'mood': 60, 'fullness': 70, 'energy': 70, 'affection': 3}, zone) == 'accepted'\n        world.residents[identifier].traits = (list(PROFESSION_TRAITS.values())[index % 3],)\n    assert world.ledger.apply('empty-wallet', 'acceptance setup', -world.ledger.coins) == 'accepted'\n    assert world.ledger.coins == 0 and world.automatic\n    world.drain_events()\n    return world\n\n\ndef invariants(world):\n    holders = set()\n    for piece in world.furniture.values():\n        for point, identifier in piece.users.items():\n            assert identifier not in holders\n            holders.add(identifier)\n            activity = world.residents[identifier].activity\n            assert activity is not None and activity.furniture == piece.identifier and activity.point == point\n    for resident in world.residents.values():\n        assert all(0 <= value <= 100 for value in resident.needs.values())\n        activity = resident.activity\n        if activity is not None and activity.furniture is not None:\n            assert world.furniture[activity.furniture].users.get(activity.point) == resident.identifier\n    reserved = Counter()\n    for task in world.tasks.values():\n        if task.inputs_reserved:\n            reserved.update(world.catalog.recipes[task.recipe].inputs)\n    assert dict(reserved) == world.ledger.reserved\n    assert world.ledger.coins >= 0\n    assert all(quantity >= world.ledger.reserved.get(item, 0) >= 0 for item, quantity in world.ledger.items.items())\n\n\ndef run(label):\n    world = setup()\n    days = []\n    settlements = []\n    professions = Counter()\n    for day in range(3):\n        completions = defaultdict(Counter)\n        for _ in range(DAY_MS // simulation.STEP_MS):\n            simulation.step(world)\n            invariants(world)\n            for event in world.drain_events():\n                if event['kind'] == 'completed':\n                    completions[event['resident']][event['activity']] += 1\n                elif event['kind'] == 'settled':\n                    settlements.append(event['transaction'])\n                    professions[world.catalog.recipes[event['recipe']].profession] += 1\n                    completions[event['resident']]['settled'] += 1\n        row = {'elapsed_days': day + 1, 'coins': world.ledger.coins,\n               'completions': {key: dict(value) for key, value in sorted(completions.items())}}\n        days.append(row)\n        print(json.dumps({'run': label, **row}), flush=True)\n        for identifier in world.residents:\n            counts = completions[identifier]\n            assert counts['settled'] > 0, (day, identifier, counts)\n            assert counts['sleep'] + counts['nap'] > 0, (day, identifier, counts)\n            assert counts['eat'] + counts['snack'] > 0, (day, identifier, counts)\n    assert set(professions) == {'writing', 'crafting', 'gardening'}\n    assert len(settlements) == len(set(settlements))\n    assert world.ledger.coins > 0\n    payload = snapshot.to_dict(world)\n    result = {'days': days, 'profession_settlements': dict(professions),\n              'settlement_count': len(settlements), 'unique_settlement_count': len(set(settlements)),\n              'steps_checked': 3 * DAY_MS // simulation.STEP_MS,\n              'fingerprint': hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()}\n    return result, payload\n\n\nfirst, first_state = run('first')\nsecond, second_state = run('replay')\nassert first_state == second_state\nassert first == second\noutput = {'result': first, 'exact_replay': True,\n          'limits': ['Accelerated domain simulation, not native UI or normal-speed acceptance.',\n                     'Setup grants furniture budget and 120 wood, then removes remaining coins; not a zero-inventory progression test.',\n                     'One fixed seed and six assigned profession traits; no claim of every possible population.',\n                     'Three-day finite execution cannot prove absence of every future deadlock.']}\n(ROOT / '.audit/three-day-autonomy-result.json').write_text(json.dumps(output, indent=2), encoding='utf-8')\nprint(json.dumps({'exact_replay': True, 'result': first}), flush=True)\n"
+}

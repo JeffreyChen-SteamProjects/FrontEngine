@@ -1,0 +1,46 @@
+{
+  "passed": true,
+  "completed_tutorial_button_hidden": true,
+  "tutorial_list_retained": true,
+  "visible_goal_rows": 11,
+  "world_snapshot_equal": true,
+  "resident_profiles_persisted": true,
+  "leases_reacquired": true,
+  "residents": [
+    "0bf0532ff71943319555d3e270258e87",
+    "c6645937646e43fc90bb1b27a16e32e6"
+  ],
+  "ledger_coins": 78,
+  "runtime_closed": true,
+  "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+  "source": "D:\\Codes\\FrontEngine\\.audit\\worktrees\\ownership-integration\\.audit\\complete-onboarding-090b33f-930",
+  "saved_snapshot_sha256": "1addb3813899e25a1cc96bd99190d9c785ae662095515eada83cec7498729bf5",
+  "scope": "Fresh native Qt process on private desktop; copied captured settings; explicit lifetime; Workshop and session-lock boundary substitutions",
+  "temporary_directory_removed": true,
+  "source_parent_revision": "627c763",
+  "goals_panel_sha256": "271363240e7430fe190a0e17bd46bdec74b6836220af82f9987a8a5d7747ed50",
+  "harness_sha256": "7241919ae4450b27f901e08c3890ea76f3567b2ebf7772416afebf8c9b929ede",
+  "screenshot_sha256": "aa09b9fd21fcba4b5d526f98f1e4cb7c06f41fa8b9a85793fe3e791fbec21e67",
+  "observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        2362,
+        117
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        2362,
+        117
+      ]
+    },
+    "child_exit": 0,
+    "observation_only": true
+  },
+  "limitations": [
+    "Completed tutorial from the earlier actual onboarding save, opened in a standalone native PetHomePage.",
+    "Workshop discovery and lock query substituted; no new full onboarding, full MainUI or OS-offline acceptance."
+  ]
+}

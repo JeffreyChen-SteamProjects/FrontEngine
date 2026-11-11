@@ -9,6 +9,8 @@ import tempfile
 import unicodedata
 import uuid
 from pathlib import Path
+from contextlib import nullcontext
+from functools import wraps
 from typing import Callable
 
 MAX_SWATCHES = 512
@@ -37,15 +39,50 @@ def _identity(entry: dict) -> tuple[str, str]:
     return tuple(unicodedata.normalize("NFKC", entry[key]).casefold() for key in ("group", "name"))
 
 
+def _palette_operation(method):
+    @wraps(method)
+    def call(self, *args, **kwargs):
+        with self._owner._settings_transaction() if self._owner is not None else nullcontext():
+            if self._owner is not None:
+                self._entries, self._recent, self._load_errors = [], [], 0
+                self._load(self.settings.get(SETTING_KEY, {}))
+            return method(self, *args, **kwargs)
+    return call
+
+
 class ColorPalette:
     """Keep at most 512 named swatches and 50 distinct recent sampled colors."""
 
     def __init__(self, settings: dict, save: Callable[[], object]) -> None:
+        self._owner = None
         self.settings, self.save = settings, save
-        self.entries: list[dict] = []
-        self.recent: list[str] = []
-        self.load_errors = 0
+        self._entries: list[dict] = []
+        self._recent: list[str] = []
+        self._load_errors = 0
         self._load(settings.get(SETTING_KEY, {}))
+
+    @classmethod
+    def for_storage(cls, storage) -> ColorPalette:
+        """Capture the owner and refresh cached values inside each transaction."""
+        with storage._settings_transaction():
+            palette = cls(storage.settings, storage.save_settings)
+            palette._owner = storage
+            return palette
+
+    @property
+    @_palette_operation
+    def entries(self) -> list[dict]:
+        return copy.deepcopy(self._entries) if self._owner is not None else self._entries
+
+    @property
+    @_palette_operation
+    def recent(self) -> list[str]:
+        return list(self._recent) if self._owner is not None else self._recent
+
+    @property
+    @_palette_operation
+    def load_errors(self) -> int:
+        return self._load_errors
 
     def _validate_entry(self, entry: dict, existing: list[dict]) -> dict:
         if not isinstance(entry, dict):
@@ -62,29 +99,29 @@ class ColorPalette:
 
     def _load(self, state) -> None:
         if not isinstance(state, dict):
-            self.load_errors += 1
+            self._load_errors += 1
             return
         if (type(state.get("version", 1)) is not int or state.get("version", 1) != 1 or
                 state.get("format", "frontengine.palette") != "frontengine.palette"):
-            self.load_errors += 1
+            self._load_errors += 1
             return
         entries, recent = state.get("swatches", []), state.get("recent", [])
         if not isinstance(entries, list) or not isinstance(recent, list):
-            self.load_errors += 1
+            self._load_errors += 1
             return
         for entry in entries[:MAX_SWATCHES]:
             try:
-                self.entries.append(self._validate_entry(entry, self.entries))
+                self._entries.append(self._validate_entry(entry, self._entries))
             except ValueError:
-                self.load_errors += 1
-        self.load_errors += max(0, len(entries) - MAX_SWATCHES)
+                self._load_errors += 1
+        self._load_errors += max(0, len(entries) - MAX_SWATCHES)
         for value in recent[:MAX_RECENT]:
             try:
                 value = normalize_color(value)
-                if value not in self.recent:
-                    self.recent.append(value)
+                if value not in self._recent:
+                    self._recent.append(value)
             except ValueError:
-                self.load_errors += 1
+                self._load_errors += 1
 
     def _commit(self, entries: list[dict], recent: list[str]) -> None:
         state = {"format": "frontengine.palette", "version": 1,
@@ -99,36 +136,40 @@ class ColorPalette:
             else:
                 self.settings[SETTING_KEY] = previous
             raise
-        self.entries, self.recent = entries, recent
-        self.load_errors = 0
+        self._entries, self._recent = entries, recent
+        self._load_errors = 0
 
+    @_palette_operation
     def add(self, name: str, group: str, color: str) -> str:
         """Add a named swatch; duplicate names within a group are rejected."""
-        if len(self.entries) >= MAX_SWATCHES:
+        if len(self._entries) >= MAX_SWATCHES:
             raise ValueError("The palette contains 512 colors")
         entry = self._validate_entry({"id": uuid.uuid4().hex, "name": name, "group": group,
-                                      "color": color}, self.entries)
-        self._commit([*self.entries, entry], list(self.recent))
+                                      "color": color}, self._entries)
+        self._commit([*self._entries, entry], list(self._recent))
         return entry["id"]
 
+    @_palette_operation
     def update(self, identifier: str, name: str, group: str, color: str) -> None:
         """Validate all edited values before replacing the existing swatch."""
-        if not any(entry["id"] == identifier for entry in self.entries):
+        if not any(entry["id"] == identifier for entry in self._entries):
             raise ValueError("Swatch no longer exists")
-        others = [entry for entry in self.entries if entry["id"] != identifier]
+        others = [entry for entry in self._entries if entry["id"] != identifier]
         updated = self._validate_entry({"id": identifier, "name": name, "group": group, "color": color}, others)
-        self._commit([updated if entry["id"] == identifier else entry for entry in self.entries], list(self.recent))
+        self._commit([updated if entry["id"] == identifier else entry for entry in self._entries], list(self._recent))
 
+    @_palette_operation
     def remove(self, identifier: str) -> None:
         """Delete only the identified swatch; sampled recent colors remain reusable."""
-        self._commit([entry for entry in self.entries if entry["id"] != identifier], list(self.recent))
+        self._commit([entry for entry in self._entries if entry["id"] != identifier], list(self._recent))
 
+    @_palette_operation
     def sample(self, color: str) -> str:
         """Collect consecutive clicks, reusing an existing swatch for the same RGB."""
         color = normalize_color(color)
-        existing = next((entry for entry in self.entries if entry["color"] == color), None)
-        recent = [color, *[value for value in self.recent if value != color]][:MAX_RECENT]
-        entries = list(self.entries)
+        existing = next((entry for entry in self._entries if entry["color"] == color), None)
+        recent = [color, *[value for value in self._recent if value != color]][:MAX_RECENT]
+        entries = list(self._entries)
         if existing is None:
             if len(entries) >= MAX_SWATCHES:
                 raise ValueError("The palette contains 512 colors")
@@ -141,15 +182,16 @@ class ColorPalette:
         self._commit(entries, recent)
         return existing["id"]
 
+    @_palette_operation
     def export_text(self, format_name: str) -> str:
         """Export exact RGB values, making colliding CSS slugs distinct."""
         if format_name == "json":
             return json.dumps({"format": "frontengine.palette", "version": 1,
-                               "swatches": self.entries, "recent": self.recent}, ensure_ascii=False, indent=2) + "\n"
+                               "swatches": self._entries, "recent": self._recent}, ensure_ascii=False, indent=2) + "\n"
         if format_name != "css":
             raise ValueError("Choose CSS or JSON")
         used, lines = set(), [":root {"]
-        for entry in self.entries:
+        for entry in self._entries:
             label = "-".join(value for value in (entry["group"], entry["name"]) if value)
             ascii_name = unicodedata.normalize("NFKD", label).encode("ascii", "ignore").decode()
             base = re.sub(r"[^a-z0-9_-]+", "-", ascii_name.lower()).strip("-") or "color"
@@ -160,8 +202,11 @@ class ColorPalette:
             lines.append(f"  --{name}: {entry['color']};")
         return "\n".join([*lines, "}", ""])
 
+    @_palette_operation
     def export(self, target: Path, format_name: str) -> None:
         """Write next to the target and replace only after successful serialization."""
+        from frontengine.user_setting.storage_session import checked_export_destination
+        target = checked_export_destination(target)
         text = self.export_text(format_name)
         descriptor, temporary = tempfile.mkstemp(prefix=".palette-", dir=target.parent)
         try:

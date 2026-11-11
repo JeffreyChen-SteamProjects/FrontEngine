@@ -1,0 +1,51 @@
+{
+  "passed": true,
+  "source": "Reviewed cf0735c, integrated as b011d6e, four private docstrings removed",
+  "python": "3.14.5 (tags/v3.14.5:5607950, May 10 2026, 10:43:50) [MSC v.1944 64 bit (AMD64)]",
+  "native_platform": "windows",
+  "denied_final_write_preserved_file": true,
+  "same_home_and_pet_retained": true,
+  "prepared_renderers_retained": true,
+  "timers_resumed_on_refusal": true,
+  "retry_shutdown_succeeded": true,
+  "latest_pet_mode_persisted": true,
+  "workers_drained": true,
+  "scope": "Public MainUI close with actual final settings sharing denial; no storage ownership integration",
+  "observer": {
+    "before": {
+      "foreground": 133262,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 133262,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "child_exit": 0
+  },
+  "cold_reload": {
+    "passed": true,
+    "python": "3.14.5 (tags/v3.14.5:5607950, May 10 2026, 10:43:50) [MSC v.1944 64 bit (AMD64)]",
+    "source": "D:\\Codes\\FrontEngine\\.audit\\final-settings-native-publicclose",
+    "world_snapshot_equal": true,
+    "resident_profiles_persisted": true,
+    "leases_reacquired": true,
+    "residents": [
+      "2508d2de5a714504b4fa89f527a6bbdb"
+    ],
+    "ledger_coins": 30,
+    "scope": "Fresh process settings and world reload from copied captured files"
+  },
+  "raw_evidence": ".audit/final-settings-native-publicclose/",
+  "sha256": {
+    "frontengine/ui/main_ui.py": "4d41e7a49f89328b52e28b0b2d89502b7b3c0005c0d9ddc0438fb6e7eecc2556",
+    "frontengine/show/pet/pet_profile_session.py": "1d74eb07b69b4c4f4ecd4790b46ed05fec5363b182ec5362ef6d51c5ffd9c449",
+    "frontengine/show/pet_game/home_service.py": "290931b29b05a6d1a54779dc7e0927d74c0b1703b76943b7c941505bf44bf8e0",
+    "frontengine/ui/page/pet_game/home_page.py": "54344a59aee9210ee0481b337c6f9f366e459fc1d723736e75fde8ee9b5cd446"
+  }
+}

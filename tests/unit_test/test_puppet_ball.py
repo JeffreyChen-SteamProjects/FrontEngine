@@ -92,8 +92,9 @@ def test_ball_light_call_replace_each_other_and_busy_keeps_care(puppet, monkeypa
     assert puppet.profile_session.companion.action == 'feed'
 
 
-def test_puppet_ball_menu_and_keyboard_manager_entry(puppet, monkeypatch):
+def test_puppet_ball_menu_and_keyboard_manager_entry(puppet, monkeypatch, *, lifetime_factory):
     from frontengine.ui.page.pet.pet_setting_ui import PetSettingUI
+    lifetime_factory()
     prepare(puppet, monkeypatch)
 
     class Menu(QMenu):
@@ -105,7 +106,7 @@ def test_puppet_ball_menu_and_keyboard_manager_entry(puppet, monkeypatch):
     puppet.contextMenuEvent(QContextMenuEvent(QContextMenuEvent.Reason.Mouse, QPoint(10, 10), QPoint(10, 10)))
     assert puppet._target.marker.phase == 'flight'
     puppet.stop_toy()
-    page = PetSettingUI()
+    page = PetSettingUI(lifetime=lifetime_factory())
     try:
         controls = call_controls(page, puppet)
         QTest.keyClick(controls.interaction, Qt.Key.Key_Up)

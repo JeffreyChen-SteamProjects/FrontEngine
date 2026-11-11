@@ -12,7 +12,7 @@ from frontengine.show.pet.inkside.cast import TEMPLATES
 from frontengine.show.pet.inkside.garments import GARMENTS, OUTFITS
 from frontengine.show.pet.inkside.library import install_builtin, VERSION
 from frontengine.show.pet.layered_renderer import LayeredRenderer
-from frontengine.utils.pet_pack.layered import ACTIONS, SPRITE_ACTIONS, load_layered_asset, validate_outfit
+from frontengine.utils.pet_pack.layered import ACTIONS, OPTIONAL_ACTIONS, load_layered_asset, validate_outfit
 
 
 def _pixels(image: QImage) -> bytes:
@@ -41,7 +41,7 @@ def built(tmp_path_factory):
 
 def test_every_character_covers_every_action_and_part_choice(built):
     for character, _ in built.values():
-        assert set(ACTIONS) <= set(character.actions) <= set(ACTIONS) | set(SPRITE_ACTIONS)
+        assert set(ACTIONS) | set(OPTIONAL_ACTIONS) == set(character.actions)
         assert {'eyes', 'mouth'} <= set(character.variants)
         assert len(character.variants) >= 4
         for group, spec in character.variants.items():
@@ -147,7 +147,7 @@ def test_builtin_install_is_validated_and_idempotent(tmp_path):
     library = PetAssetLibrary(tmp_path / 'library')
     progress = []
     assert install_builtin(library, 'inkside-ink', progress=lambda done, total: progress.append(done)) == 1 + len(GARMENTS)
-    assert progress[-1] == 1 + len(GARMENTS)
+    assert progress == list(range(2 * (1 + len(GARMENTS)) + 1))
     assert install_builtin(library, 'inkside-ink') == 0
     catalog, errors = library.scan()
     assert errors == ()
@@ -156,25 +156,26 @@ def test_builtin_install_is_validated_and_idempotent(tmp_path):
         install_builtin(library, 'nobody')
 
 
-def _finish_jobs():
-    from PySide6.QtCore import QCoreApplication, QThreadPool
-    assert QThreadPool.globalInstance().waitForDone(120000)
+def _finish_jobs(lifetime):
+    from PySide6.QtCore import QCoreApplication
+    assert lifetime.pool().waitForDone(120000)
     QCoreApplication.processEvents()
 
 
-def test_wardrobe_installs_dresses_and_applies_a_builtin_character(tmp_path):
+def test_wardrobe_installs_dresses_and_applies_a_builtin_character(tmp_path, *, lifetime_factory):
     from frontengine.ui.dialog.pet_wardrobe import PetWardrobeDialog
     from frontengine.user_setting.pet_profiles import PetProfiles
 
+    lifetime_factory()
     profiles = PetProfiles({}, lambda: None)
     record = profiles.create('Mochi')
-    dialog = PetWardrobeDialog(profiles, record['id'], library=PetAssetLibrary(tmp_path / 'library'))
+    dialog = PetWardrobeDialog(profiles, record['id'], library=PetAssetLibrary(tmp_path / 'library'), lifetime=lifetime_factory())
     try:
         assert dialog.builtin.count() == len(TEMPLATES)
         dialog.builtin.setCurrentIndex(dialog.builtin.findData('inkside-mochi'))
         dialog._install_builtin()
         assert not dialog.builtin_button.isEnabled() and not dialog.install_button.isEnabled()
-        _finish_jobs()
+        _finish_jobs(dialog.lifetime)
         assert dialog._install_job is None and dialog.builtin_button.isEnabled()
         character = {'id': 'inkside-mochi', 'version': VERSION}
         dialog.character.setCurrentIndex(dialog.character.findData(character))
@@ -192,36 +193,38 @@ def test_wardrobe_installs_dresses_and_applies_a_builtin_character(tmp_path):
         dialog.close()
 
 
-def test_closing_the_wardrobe_cancels_a_builtin_install(tmp_path):
+def test_closing_the_wardrobe_cancels_a_builtin_install(tmp_path, *, lifetime_factory):
     from frontengine.ui.dialog.pet_wardrobe import PetWardrobeDialog
     from frontengine.user_setting.pet_profiles import PetProfiles
 
+    lifetime_factory()
     profiles = PetProfiles({}, lambda: None)
     record = profiles.create()
     library = PetAssetLibrary(tmp_path / 'library')
-    dialog = PetWardrobeDialog(profiles, record['id'], library=library)
+    dialog = PetWardrobeDialog(profiles, record['id'], library=library, lifetime=lifetime_factory())
     dialog._install_builtin()
     job = dialog._install_job
     dialog.reject()
     assert job.cancel.is_set()
-    _finish_jobs()
+    _finish_jobs(dialog.lifetime)
     assert library.scan()[0].assets('character') == ()
     assert not any(path.name.startswith('.install-') for path in (tmp_path / 'library').glob('*'))
 
 
-def test_builtin_part_and_garment_labels_follow_the_language(tmp_path):
+def test_builtin_part_and_garment_labels_follow_the_language(tmp_path, *, lifetime_factory):
     from frontengine.show.pet.inkside.labels import asset_label, label
     from frontengine.ui.dialog.pet_wardrobe import PetWardrobeDialog
     from frontengine.user_setting.pet_profiles import PetProfiles
     from frontengine.utils.multi_language.language_wrapper import language_wrapper
     from frontengine.utils.multi_language.retranslate import retranslator
 
+    lifetime_factory()
     library = PetAssetLibrary(tmp_path / 'library')
     install_builtin(library, 'inkside-moss')
     profiles = PetProfiles({}, lambda: None)
     record = profiles.create()
     original = language_wrapper.language
-    dialog = PetWardrobeDialog(profiles, record['id'], library=library)
+    dialog = PetWardrobeDialog(profiles, record['id'], library=library, lifetime=lifetime_factory())
     try:
         dialog.character.setCurrentIndex(dialog.character.findData({'id': 'inkside-moss', 'version': VERSION}))
         dialog._choose_character()
@@ -246,19 +249,23 @@ def test_builtin_part_and_garment_labels_follow_the_language(tmp_path):
 
 
 @pytest.mark.parametrize('ident', [template.ident for template in TEMPLATES])
-def test_sprite_walk_replaces_the_layered_walk_only_for_an_undressed_default_pet(built, ident):
+def test_every_home_pose_is_drawn_from_layers_dressed_or_not(built, ident):
     character, garments = built[ident]
-    assert {'walk_sprite', 'climb_sprite'} <= set(character.actions)
     bare = LayeredRenderer(character)
-    frames = {_pixels(bare.render('walk', index * 90)) for index in range(8)}
-    assert len(frames) == 8
-    assert _pixels(bare.render('walk', 0)) == _pixels(bare.render('walk_sprite', 0))
     dressed = LayeredRenderer(character, (next(iter(garments.values())),))
-    assert _pixels(dressed.render('walk', 0)) != _pixels(dressed.render('walk_sprite', 0))
+    sitting = _pixels(bare.render('sit', 0))
+    for pose in OPTIONAL_ACTIONS:
+        assert bare.has_action(pose), pose
+        assert dressed.has_action(pose), pose
+        moving = {_pixels(bare.render(pose, index * 150)) for index in range(8)}
+        assert len(moving) >= 2, pose
+        assert _pixels(dressed.render(pose, 0)) != _pixels(bare.render(pose, 0)), pose
+        if pose not in ('sit', 'watch'):
+            assert _pixels(bare.render(pose, 0)) != sitting, pose
     group, spec = next(iter(character.variants.items()))
     other = next(choice for choice in spec['choices'] if choice != spec['default'])
     varied = LayeredRenderer(character, variants={group: other})
-    assert _pixels(varied.render('walk', 0)) != _pixels(varied.render('walk_sprite', 0))
+    assert _pixels(varied.render('write', 0)) != _pixels(bare.render('write', 0))
 
 
 def test_builtin_install_works_when_the_temp_folder_is_reached_through_a_symlink(tmp_path, monkeypatch):

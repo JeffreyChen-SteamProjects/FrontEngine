@@ -1,0 +1,144 @@
+{
+  "source_revision": "9ed1b2d",
+  "recorded_utc": "2026-11-05T13:15:48.162662+00:00",
+  "wheel_verification": {
+    "source_revision": "9ed1b2d",
+    "wheel": "frontengine_dev-1.0.86-py3-none-any.whl",
+    "sha256": "9a0acd1544356b01b93c990c1cb1044dca580ed35a9462eaf56087efc9be7d70",
+    "python_files_equal": 502,
+    "pet_game_assets_equal": 149,
+    "installed_package_files_equal": 711,
+    "installed_python_set_equal": true,
+    "scope": "Existing isolated dependency environment, not fresh dependency resolution or clean-machine acceptance."
+  },
+  "installed_steps": [
+    {
+      "step": "install",
+      "exit": 0
+    },
+    {
+      "step": "pip-check",
+      "exit": 0
+    },
+    {
+      "step": "smoke",
+      "exit": 0
+    }
+  ],
+  "installed_smoke": {
+    "rendering_checks": [
+      {
+        "requested_backend": "auto",
+        "actual_backend": "software",
+        "red_then_blue": true,
+        "resized_pixels": [
+          280,
+          140
+        ],
+        "submitted_during_paint": false
+      },
+      {
+        "requested_backend": "gpu",
+        "actual_backend": "software",
+        "red_then_blue": true,
+        "resized_pixels": [
+          280,
+          140
+        ],
+        "submitted_during_paint": false
+      },
+      {
+        "requested_backend": "software",
+        "actual_backend": "software",
+        "red_then_blue": true,
+        "resized_pixels": [
+          280,
+          140
+        ],
+        "submitted_during_paint": false
+      }
+    ],
+    "overlay_checks": [
+      {
+        "backend": "auto",
+        "note_text_pixels": 520,
+        "toolbar_brightness_ratio": 1.0
+      },
+      {
+        "backend": "gpu",
+        "note_text_pixels": 520,
+        "toolbar_brightness_ratio": 1.0
+      },
+      {
+        "backend": "software",
+        "note_text_pixels": 520,
+        "toolbar_brightness_ratio": 1.0
+      }
+    ],
+    "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "prefix": "D:\\Codes\\FrontEngine\\.audit\\clean-front-integration-311",
+    "package": "D:\\Codes\\FrontEngine\\.audit\\clean-front-integration-311\\Lib\\site-packages\\frontengine\\__init__.py",
+    "qt": "6.12.0",
+    "snapshot_version": 8,
+    "residents": 1,
+    "furniture": 3,
+    "work_empty_state": true,
+    "cancel_selection": true,
+    "tutorial_skip_hidden": true,
+    "snapshot_equal_after_reopen": true,
+    "photo_saved": true,
+    "home_saved": true,
+    "same_app_reopened": true,
+    "closed": true,
+    "scope": "Current wheel reinstalled into existing isolated dependency environment, fresh temporary settings, Qt offscreen; OS key listeners, foreground watcher, share watcher, session lock and Workshop discovery replaced at boundary; no native device acceptance"
+  },
+  "responsive_repeat": {
+    "summary": "10 passed in 54.37s",
+    "failure_snapshot_created": false,
+    "scope": "Same test repeated ten times with its ordinary fixture teardown. Does not clear the prior full-suite failure."
+  },
+  "full_regression": {
+    "status": "Running when this report was written; no completion claim.",
+    "process": {
+      "pid": 45504,
+      "parent_pid": 45108,
+      "command": [
+        "D:\\Codes\\FrontEngine\\.audit\\test-runtime-3145\\Scripts\\python.exe",
+        "-m",
+        "pytest",
+        "-p",
+        "live_failure_reporter",
+        "-p",
+        "responsive_failure_probe",
+        "tests/",
+        "-q",
+        "--maxfail=5",
+        "-o",
+        "faulthandler_timeout=180",
+        "--junitxml=D:\\Codes\\FrontEngine\\.audit\\worktrees\\ownership-integration\\.audit\\full-regression-9ed1b2d\\junit.xml"
+      ]
+    },
+    "source_manifest_sha256": "39b6b263117b68b00d133ec72cce0c6ec5ff97338a5b8ed683b7d0331525197c",
+    "diagnostic": "On a responsive AssertionError, capture geometry/minimum widths before finally resets the language, then capture after five event passes and 100 ms. The original test failure is retained."
+  },
+  "artifacts_sha256": {
+    ".audit\\worktrees\\ownership-integration\\.audit\\integration-wheel-9ed1b2d-verification.json": "ec389b039f3a965d7488bc3bb9a5c3d8c5d07fda0d851190b77d08f149b106af",
+    ".audit\\worktrees\\ownership-integration\\.audit\\integration-wheel-9ed1b2d-build.log": "2b98f455caf60e79c3c37164da597c604e8d012167e1a44827a8fe56abe759d2",
+    ".audit\\worktrees\\ownership-integration\\.audit\\verify_wheel_9ed1b2d.py": "32b47be35d3332a17167d6494ecde366f5887eb8c19aa94aedfb9dac6987144a",
+    ".audit\\run_installed_9ed1b2d.py": "e3be61772d71cd288669b8a155051b457bab4b0b3386107fa602200c72d8a01a",
+    ".audit\\installed_9ed1b2d_smoke.py": "19d24d001a436d439db960aabed1e5738f8e2207623c4ba5063f2c549e184c27",
+    ".audit\\installed-9ed1b2d-exits.json": "6d262627993821ff2bca54f61414a5e61c84e018375046a27c68d3bc3dc451cd",
+    ".audit\\installed-9ed1b2d-smoke.json": "254dc89350bd90f3de5848f063e0ecf5d9003dc8cf06055a2c7bd59a86d6e2ad",
+    ".audit\\worktrees\\ownership-integration\\.audit\\responsive-repeated-9ed1b2d\\pytest.log": "74f2fbb406a23c83c98f53c60f967b9105bfe5aff7c6cf1e47dee8d22e25131a",
+    ".audit\\worktrees\\ownership-integration\\.audit\\responsive-repeated-9ed1b2d\\junit.xml": "2692653c7d115d5bab97772b6fdc0469bc4806c8e73f924139a81b8b589dcc8e",
+    ".audit\\worktrees\\ownership-integration\\.audit\\responsive_failure_probe.py": "76e395312d1b100478543bd17ca03ac488fd6d2a2c09de2cad3bf012af8e6c44",
+    ".audit\\worktrees\\ownership-integration\\.audit\\repeat_responsive_probe.py": "10a25b10de73d27f9221719e348dd6d0f7944b6b4a0d533aeafa83a7e740a540",
+    ".audit\\worktrees\\ownership-integration\\.audit\\run_full_regression_9ed1b2d.py": "6602cb0d3f1852233db3d2b344f6e289d603cb32b05451f095aaef3803510858"
+  },
+  "limitations": [
+    "Existing dependency environment was reused, not a fresh resolution or clean machine.",
+    "Qt offscreen uses software even for GPU preference; this is not native GPU acceptance.",
+    "OS listeners, session lock and Workshop discovery were substituted at boundaries.",
+    "No complete regression, independent review, published host-lifetime API or release is claimed."
+  ]
+}

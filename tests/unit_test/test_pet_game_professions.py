@@ -60,12 +60,15 @@ def test_crafting_uses_bought_wood_and_sells_the_toy():
     assert world.ledger.coins == coins + 24
 
 
-def test_building_furniture_needs_experience_and_lands_in_storage():
+def test_building_furniture_needs_experience_and_lands_in_storage(monkeypatch):
+    from frontengine.utils.pet_game import goals
     world, zone = _home()
     _station(world, zone, "workbench", 18)
     world.buy_item("wood", 4, "wood-1")
     assert world.create_task("stool", PET) == ("skill_too_low", None)
     world.residents[PET].skills["crafting"] = 40
+    assert world.create_task("stool", PET) == ("locked", None)          # stools open at home level 3
+    monkeypatch.setattr(goals, "home_level", lambda _world: 3)
     assert world.create_task("stool", PET)[0] == "accepted"
     _run(world, 7)
     assert world.stored("stool") == 1

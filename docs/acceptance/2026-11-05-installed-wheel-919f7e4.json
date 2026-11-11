@@ -1,0 +1,75 @@
+{
+  "source_head": "919f7e4",
+  "wheel": "frontengine_dev-1.0.86-py3-none-any.whl",
+  "verification": {
+    "sha256": "3c6e13e9d4272abbc01b96f7b764191bfea7076bc9dc5305f7d8416a071cf43d",
+    "python_files_equal": 502,
+    "pet_game_assets_equal": 149,
+    "installed_package_files_equal": 711,
+    "installed_python_set_equal": true,
+    "scope": "Existing isolated dependency environment, not a fresh dependency resolution or clean machine."
+  },
+  "steps": [
+    {
+      "step": "install",
+      "exit": 0
+    },
+    {
+      "step": "pip-check",
+      "exit": 0
+    },
+    {
+      "step": "smoke",
+      "exit": 0
+    }
+  ],
+  "installed_smoke": {
+    "overlay_checks": [
+      {
+        "backend": "auto",
+        "note_text_pixels": 520,
+        "toolbar_brightness_ratio": 1.0
+      },
+      {
+        "backend": "gpu",
+        "note_text_pixels": 520,
+        "toolbar_brightness_ratio": 1.0
+      },
+      {
+        "backend": "software",
+        "note_text_pixels": 520,
+        "toolbar_brightness_ratio": 1.0
+      }
+    ],
+    "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "prefix": "D:\\Codes\\FrontEngine\\.audit\\clean-front-integration-311",
+    "package": "D:\\Codes\\FrontEngine\\.audit\\clean-front-integration-311\\Lib\\site-packages\\frontengine\\__init__.py",
+    "qt": "6.12.0",
+    "snapshot_version": 8,
+    "residents": 1,
+    "furniture": 3,
+    "work_empty_state": true,
+    "cancel_selection": true,
+    "tutorial_skip_hidden": true,
+    "snapshot_equal_after_reopen": true,
+    "photo_saved": true,
+    "home_saved": true,
+    "same_app_reopened": true,
+    "closed": true,
+    "scope": "Current wheel reinstalled into existing isolated dependency environment, fresh temporary settings, Qt offscreen; OS key listeners, foreground watcher, share watcher, session lock and Workshop discovery replaced at boundary; no native device acceptance"
+  },
+  "artifact_sha256": {
+    "D:\\Codes\\FrontEngine\\.audit\\installed_919f7e4_smoke.py": "204314eee2716804597ee1df03a628ec4e76c518ab43bca23f7541d7ed4fda59",
+    "D:\\Codes\\FrontEngine\\.audit\\run_installed_919f7e4.py": "16db75d7eb3f6d12d96a66ffa4129b46140133f7fe5e1738c549e3491c7813f9",
+    "D:\\Codes\\FrontEngine\\.audit\\installed-919f7e4-smoke.json": "98b8e46916acf31c4145140e1c2093f4a8b63d4f824114241aa5c50e352aa8cd",
+    "D:\\Codes\\FrontEngine\\.audit\\installed-919f7e4-exits.json": "6d262627993821ff2bca54f61414a5e61c84e018375046a27c68d3bc3dc451cd",
+    "D:\\Codes\\FrontEngine\\.audit\\worktrees\\ownership-integration\\.audit\\integration-wheel-919f7e4-verification.json": "12bdc0e8072fc3097f00332aabc1629287547d9130d8ca7d593d9e8e4921e00b"
+  },
+  "limitations": [
+    "Existing isolated dependency environment reused with --no-deps --force-reinstall, not a fresh venv or dependency resolution.",
+    "Qt offscreen; OS listener/foreground/share/lock and Workshop boundaries substituted.",
+    "GPU preference in offscreen uses fallback; native GPU evidence is in the separate whiteboard report.",
+    "Published host lifecycle APIs and version floors remain unverified.",
+    "Concurrent full regression at source919f7e4 was still running when this packaging report was written; no full-suite success claim."
+  ]
+}

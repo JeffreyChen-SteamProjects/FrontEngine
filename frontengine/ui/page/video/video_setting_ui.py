@@ -1,13 +1,17 @@
+from frontengine.ui.runtime_lifetime import owned_action
+from frontengine.ui.runtime_lifetime import OwnedWidgetList
 from typing import Optional
 
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QSlider, QLabel, QPushButton, QMessageBox, QCheckBox
+from PySide6.QtWidgets import QSlider, QLabel, QPushButton, QCheckBox
 
 from frontengine.show.video.video_player import VideoWidget
 from frontengine.ui.dialog.choose_file_dialog import choose_video
 from frontengine.ui.page.layout_kit import SettingPage
 from frontengine.ui.page.utils import (
     build_recent_combobox,
+    apply_target_monitor_state,
+    target_monitor_state,
     build_target_monitor_combobox,
     coerce_int,
     dispatch_to_monitors,
@@ -25,13 +29,13 @@ from frontengine.utils.multi_language.retranslate import tr
 
 
 class VideoSettingUI(SettingPage):
-    def __init__(self):
+    def __init__(self, *, lifetime):
         front_engine_logger.info("[VideoSettingUI] Init")
         super().__init__("tab_video_text", "page_subtitle_video",
-                         "Video", "Play a video on top of everything else.")
+                         "Video", "Play a video on top of everything else.", lifetime=lifetime)
 
         # Init variable
-        self.video_widget_list = []
+        self.video_widget_list = OwnedWidgetList(self.lifetime)
         self.show_all_screen = False
         self.ready_to_play = False
         self.video_path: Optional[str] = None
@@ -116,10 +120,12 @@ class VideoSettingUI(SettingPage):
         self.finish_body()
         self.set_footer(primary=self.start_button, status=self.ready_label)
 
+    @owned_action
     def set_show_all_screen(self) -> None:
         front_engine_logger.info("[VideoSettingUI] set_show_all_screen")
         self.show_all_screen = self.show_on_all_screen_checkbox.isChecked()
 
+    @owned_action
     def _create_video_widget(self) -> VideoWidget:
         front_engine_logger.info("[VideoSettingUI] _create_video_widget")
         video_widget = VideoWidget(video_path=self.video_path)
@@ -132,11 +138,10 @@ class VideoSettingUI(SettingPage):
         self.video_widget_list.append(video_widget)
         return video_widget
 
+    @owned_action
     def start_play_video(self) -> None:
         if not self.video_path or not self.ready_to_play:
-            message_box = QMessageBox(self)
-            message_box.setText(language_wrapper.language_word_dict.get("not_prepare"))
-            message_box.exec()
+            self.choose_and_copy_file_to_cwd_video_dir_then_play()  # nothing chosen yet: choosing one shows it
             return
 
         front_engine_logger.info("[VideoSettingUI] start_play_video")
@@ -158,17 +163,20 @@ class VideoSettingUI(SettingPage):
             span_all_screens=resolve_span(self.target_monitor_combobox),
         )
 
+    @owned_action
     def choose_and_copy_file_to_cwd_video_dir_then_play(self) -> None:
         front_engine_logger.info("[VideoSettingUI] choose_and_copy_file_to_cwd_video_dir_then_play")
         self.ready_label.setText(language_wrapper.language_word_dict.get("Not Ready"))
         self.ready_to_play = False
-        self.video_path = choose_video(self)
+        self.video_path = self.lifetime.after_dialog(choose_video(self))
         if self.video_path:
             self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
             self.ready_to_play = True
             add_recent_file("video", self.video_path)
             reload_recent_combobox(self.recent_files_combobox, "video")
+            self.start_play_video()  # chosen means shown: no second click
 
+    @owned_action
     def _apply_recent_file(self, _index: int = 0) -> None:
         path = self.recent_files_combobox.currentData()
         self.recent_files_combobox.setCurrentIndex(0)
@@ -179,6 +187,7 @@ class VideoSettingUI(SettingPage):
         self.ready_to_play = True
         self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
 
+    @owned_action
     def _on_file_dropped(self, path: str) -> None:
         front_engine_logger.info(f"[VideoSettingUI] _on_file_dropped | path={path}")
         self.video_path = path
@@ -186,15 +195,19 @@ class VideoSettingUI(SettingPage):
         self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
         add_recent_file("video", path)
         reload_recent_combobox(self.recent_files_combobox, "video")
+        self.start_play_video()  # a dropped file is shown at once
 
+    @owned_action
     def opacity_trick(self) -> None:
         front_engine_logger.info("[VideoSettingUI] opacity_trick")
         self.opacity_slider_value_label.setText(str(self.opacity_slider.value()))
 
+    @owned_action
     def play_rate_trick(self) -> None:
         front_engine_logger.info("[VideoSettingUI] play_rate_trick")
         self.play_rate_slider_value_label.setText(str(self.play_rate_slider.value()))
 
+    @owned_action
     def volume_trick(self) -> None:
         front_engine_logger.info("[VideoSettingUI] volume_trick")
         self.volume_slider_value_label.setText(str(self.volume_slider.value()))
@@ -208,7 +221,7 @@ class VideoSettingUI(SettingPage):
             "fullscreen": self.fullscreen_checkbox.isChecked(),
             "show_on_all_screen": self.show_on_all_screen_checkbox.isChecked(),
             "show_on_bottom": self.show_on_bottom_checkbox.isChecked(),
-            "target_monitor": self.target_monitor_combobox.currentText(),
+            "target_monitor": target_monitor_state(self.target_monitor_combobox),
         }
 
     def set_state(self, state: dict) -> None:
@@ -232,7 +245,4 @@ class VideoSettingUI(SettingPage):
             self.show_all_screen = bool(state["show_on_all_screen"])
         if "show_on_bottom" in state:
             self.show_on_bottom_checkbox.setChecked(bool(state["show_on_bottom"]))
-        if state.get("target_monitor") is not None:
-            index = self.target_monitor_combobox.findText(str(state["target_monitor"]))
-            if index >= 0:
-                self.target_monitor_combobox.setCurrentIndex(index)
+        apply_target_monitor_state(self.target_monitor_combobox, state.get("target_monitor"))

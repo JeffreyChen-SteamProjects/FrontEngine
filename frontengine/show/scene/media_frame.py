@@ -1,4 +1,4 @@
-"""Bounded raster frames from Qt video/web and native Imervue rendering."""
+"""Bounded raster frames from Qt video/web and native Rigora rendering."""
 from __future__ import annotations
 
 from pathlib import Path

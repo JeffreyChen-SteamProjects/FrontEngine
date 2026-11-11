@@ -14,8 +14,8 @@ Menu Preimpostazioni
 * Esporta pacchetto (+contenuti) / Importa pacchetto (+contenuti) - lo stesso, ma
   con le immagini, i video e i suoni che usa, in uno zip.
 * Imposta come preimpostazione di avvio… - applicarla all'avvio di FrontEngine.
-* Importa contenuti Workshop… - installare preimpostazioni e pacchetti mascotte
-  a cui sei iscritto su Steam.
+* Importa contenuti Workshop… - installare le preimpostazioni a cui sei iscritto
+  su Steam.
 
 Menu Impostazioni
 
@@ -76,13 +76,19 @@ Menu Aiuto
 
 Plugin: abilitare il caricamento non autorizza un plugin. plugin.json o un sidecar per un singolo file dichiara versione, identità, punto d’ingresso e capacità; il consenso viene controllato prima dell’import Python e legato all’impronta del contenuto. Cambi a codice o dichiarazione richiedono nuovo consenso; i plugin vecchi richiedono fiducia completa esplicita. Impostazioni → Revoca autorizzazioni dei plugin elimina le approvazioni salvate; riavvia per scaricare il codice attivo. I plugin Python conservano tutti i privilegi dell’applicazione: dichiarazione e consenso non sono una sandbox del sistema operativo.
 
-Rendering: Impostazioni → Rendering delle sovrapposizioni offre Automatico, GPU o Software e mostra il backend effettivo. Il compositore GPU usa texture OpenGL, shader e framebuffer per ordine, trasformazioni, opacità e ritaglio; errori di inizializzazione passano al software con una motivazione. I contenuti QPainter possono ancora essere rasterizzati sulla CPU prima del caricamento; widget web/video/nativi possono usare finestre separate. Cattura e registrazione possono leggere i fotogrammi GPU sulla CPU. Non è una promessa di cattura senza copie o accelerazione misurata. La composizione GPU delle scene comprende attualmente IMAGE, GIF e TEXT; i puppet usano una propria finestra Imervue.
+Rendering: Impostazioni → Rendering delle sovrapposizioni offre Automatico, GPU o Software e mostra il backend effettivo. Il compositore GPU usa texture OpenGL, shader e framebuffer per ordine, trasformazioni, opacità e ritaglio; errori di inizializzazione passano al software con una motivazione. I contenuti QPainter possono ancora essere rasterizzati sulla CPU prima del caricamento; widget web/video/nativi possono usare finestre separate. Cattura e registrazione possono leggere i fotogrammi GPU sulla CPU. Non è una promessa di cattura senza copie o accelerazione misurata. La composizione GPU delle scene comprende attualmente IMAGE, GIF e TEXT; i puppet usano una propria finestra Rigora. Quando si ridisegna una sovrapposizione, il compositore viene aggiornato dopo il completamento del disegno della finestra principale, anche quando si cambia motore di rendering o monitor.
 
 :doc:`runtime_interoperability`
 
 Impostazioni → Permessi e capacità macOS elenca ogni funzione come disponibile, non disponibile o non supportata, indicando il motivo legato a permessi o installazione.
 
 Apri Comandi dal menu o premi Ctrl+K / Ctrl+Maiusc+P in FrontEngine. Cerca nella lingua attuale, nelle etichette inglesi o nei nomi stabili; frecce per selezionare, Invio per eseguire. Include navigazione, cattura, note, filtro, Workshop e azioni globali. Preset/qualità accettano un valore. Preferiti e ultimi 20 comandi restano dopo il riavvio; parametri e ricerche non vengono salvati.
+
+I nomi dei plugin non sostituiscono le voci delle pagine integrate.
+
+Anche le pagine dei plugin caricati compaiono nella ricerca dei comandi. Aprire un risultato torna alla pagina esistente e conserva i dati inseriti.
+
+Un nome esatto nella lingua attuale precede i preferiti e i comandi recenti. Modificare la ricerca seleziona il risultato migliore; aggiornare i preferiti o la lingua senza cambiare la ricerca mantiene il comando selezionato e il suo argomento.
 
 Le impostazioni sono raggruppate in schede: le azioni frequenti restano visibili e i comandi secondari si trovano in Altre azioni. Mostra impostazioni apre strumenti avanzati e messaggi. Nell’editor scene il canvas affianca le schede Proprietà, Anteprima e Animazione. Nelle finestre strette campi e controlli vanno a capo; l’azione inferiore resta visibile. La ricerca mostra preferiti e suggerimenti da tastiera. Un comando fallito conserva l’input per riprovare; selezionandone un altro si cancella il parametro precedente.
 
@@ -96,8 +102,22 @@ Impostazioni → Cronologia immagini è separatamente facoltativa e disattivata;
 
 Impostazioni → Cronologia e ricerca catture richiede attivazione separata; aprire non salva/riconosce. Solo catture esplicite di area da Strumenti, OCR locale nel worker senza appunti/cloud. Ricerca senza distinzione maiuscole; errori OCR mantengono immagine e motivo nel tooltip. Data locale esatta YYYY-MM-DD, campi vuoti per tutto. Copia, fissa, riferimenti, preferiti ed elimina. Opzione capture-history.sqlite3 accanto impostazioni: 10–200 catture / 8–128 MiB PNG, 16 MP/otto MiB ciascuna, database massimo 132 MiB più journal. Eliminare rimuove testo, svuotare anche preferiti, disattivare salvataggio elimina database. Solo ultima cattura in attesa; chiusura scarta attese/risultati senza aspettare OCR attivo.
 
-Impostazioni → Libreria risorse: immagini/GIF, cartelle animali sprite, texture .puppet e scene JSON/.fescene con anteprime statiche, tag, ricerca senza maiuscole e preferiti. Nessuna copia/eliminazione/esecuzione; dimenticare elimina catalogo. asset-library.json vicino impostazioni: 200 voci/un MiB, 32 tag da 40 caratteri; immagini 64 MiB/16 MP, archivi 256 MiB, scene 256 livelli. Scena statica con segnaposto media, Puppet prima texture. Riferimenti: scena attuale, preset locali attivi, JSON registrati (200 preset/16 MiB); percorsi mancanti conservati. Riposizionare controlla tipo e conferma riferimenti, modifica annullabile scena attuale, ripara JSON/preset scrivibili nello spazio locale e catalogo. Testo letterale, cronologia immutabile, pacchetti, scene esterne/Workshop protetti; copie importate locali possibili. Cambi concorrenti interrompono. 50 file/16 MiB con journal atomico .asset-relink.json; recupero prima del job, conflitti conservano journal. Lock OS .asset-library.lock protegge altre istanze. Worker differito decodifica/legge/scrive; chiusura annulla scritture in attesa e ripristina modifica scena non cambiata, ignora risultati tardivi. Riavviare riproduzione dopo cambio percorso.
+Impostazioni → Libreria risorse: immagini/GIF, texture .puppet e scene JSON/.fescene con anteprime statiche, tag, ricerca senza maiuscole e preferiti. Nessuna copia/eliminazione/esecuzione; dimenticare elimina catalogo. asset-library.json vicino impostazioni: 200 voci/un MiB, 32 tag da 40 caratteri; immagini 64 MiB/16 MP, archivi 256 MiB, scene 256 livelli. Scena statica con segnaposto media, Puppet prima texture. Riferimenti: scena attuale, preset locali attivi, JSON registrati (200 preset/16 MiB); percorsi mancanti conservati. Riposizionare controlla tipo e conferma riferimenti, modifica annullabile scena attuale, ripara JSON/preset scrivibili nello spazio locale e catalogo. Testo letterale, cronologia immutabile, pacchetti, scene esterne/Workshop protetti; copie importate locali possibili. Cambi concorrenti interrompono. 50 file/16 MiB con journal atomico .asset-relink.json; recupero prima del job, conflitti conservano journal. Lock OS .asset-library.lock protegge altre istanze. Worker differito decodifica/legge/scrive; chiusura annulla scritture in attesa e ripristina modifica scena non cambiata, ignora risultati tardivi. Riavviare riproduzione dopo cambio percorso.
 
 Aiuto → Capacità piattaforma legge prerequisiti/errori senza cattura/ascolto. Linux: pulseaudio-utils (parec), PulseAudio/PipeWire-Pulse, monitor uscita predefinito per spettro/reazione, microfono per labbra. Diversamente da picco Windows legge campioni reali; prima richiesta attiva avvia worker/figlio proprio, 2048 float puliti RAM, scaduti scartati, nessun file/invio. Stop/chiudi/esci termina solo figli propri senza join GUI, errori dispositivo/server/permesso visibili. Finestre/layout/topmost/monitor via python-xlib Linux, EWMH/XRandR fisico; opacità richiede compositor. X11 pynput richiede DISPLAY/accesso; posizionamento nativo Wayland e input globale non disponibili anche Xwayland, UI spiega/rifiuta ripristino, altre app Wayland non monitorate globalmente. Verifica protocollo su X11/Wayland isolati/Pulse virtuale; hardware audio/multimonitor Linux e Mac restano da verificare.
 
 Il misuratore arresta la propria cattura entro 1,25 secondi dalla fine dei campioni reattivi; un nuovo campione abilitato può riavviarla.
+
+Se le impostazioni del controllo remoto vengono chiuse durante la scelta del percorso di esportazione del certificato pubblico, la destinazione viene ignorata. Tale esportazione non crea certificati o file di output e non sovrascrive file esistenti. Annullando solo la selezione del file, è possibile riprovare nella finestra delle impostazioni ancora aperta.
+
+In Regole, Tab passa dalla tabella agli altri controlli; le frecce spostano la selezione tra le celle. Chiudere l’editor dell’azione di scena durante la scelta del file scarta il percorso. Chiudere Regole mentre l’editor della destinazione è aperto impedisce al risultato di modificare la regola. Annullare mantiene il valore precedente; riaprire l’editor per riprovare. Confermare la destinazione modifica la bozza. Confermare Regole per salvarla.
+
+Nell’editor del testo riconosciuto e nell’elenco delle preimpostazioni per la rotazione, Tab passa al controllo successivo e Maiusc+Tab torna indietro senza modificare il testo. Invio aggiunge ancora una nuova riga. La tastiera permette di raggiungere Copia o l’intervallo di rotazione, poi di chiudere o annullare. Annullare mantiene inalterate le impostazioni di rotazione salvate.
+
+Se il salvataggio delle impostazioni di rotazione non riesce, la finestra mostra l’errore e conserva le modifiche. Le impostazioni precedenti restano attive. Risolvi il problema e conferma di nuovo, oppure annulla per scartare le modifiche.
+
+L’elenco delle preimpostazioni e l’intervallo di rotazione usano le etichette visibili come nomi accessibili. I nomi seguono i cambi di lingua senza modificare le impostazioni.
+
+Le preimpostazioni pianificate mostrano etichette separate per ora e minuto. I campi della preimpostazione, dell’ora, del minuto, dell’inattività e della sorgente del salvaschermo usano le etichette visibili come nomi accessibili. I nomi seguono la lingua senza cambiare i valori selezionati.
+
+Se il salvataggio delle impostazioni del salvaschermo o delle preimpostazioni pianificate non riesce, la finestra mostra l’errore e mantiene le tue scelte. Le impostazioni precedenti restano attive. Risolvi il problema e conferma di nuovo per riprovare, oppure annulla per scartare le modifiche. Anche i nomi delle sorgenti del salvaschermo seguono la lingua senza cambiare la sorgente selezionata.

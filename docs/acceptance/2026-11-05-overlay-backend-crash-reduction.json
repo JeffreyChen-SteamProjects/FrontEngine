@@ -1,0 +1,245 @@
+{
+  "source_head": "919f7e4",
+  "status": "unresolved_reduced_reproduction",
+  "runs": [
+    {
+      "directory": ".audit\\mask-gpu-dpi-repeat",
+      "observer": {
+        "exit_code": 0,
+        "profile_removed": true,
+        "source_unchanged": true,
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            2070,
+            399
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            2070,
+            399
+          ]
+        },
+        "observation_only": true,
+        "desktop": "FrontEngineVideoWebDpi_d0879e5b6fbf"
+      },
+      "completed_cases": 18,
+      "passed_completed_cases": 18,
+      "full_run_passed": true,
+      "stage": {
+        "kind": "mask",
+        "backend": "gpu",
+        "index": 2,
+        "completed_widgets": 5
+      },
+      "artifact_sha256": {
+        "harness.py": "a1bd940038444f2ba5738228f798139eb9f5c498c2330fce80bf1d48af0cfa06",
+        "observer.json": "bc56f1056f7b24937e92bfdfa2f7e7e8c981cb97caeacb97fb88e5bd7fe2faa0",
+        "partial.json": "258da35d86ad1676f98da61a008f308ebe4e156d876536eed53970edd2b01be7",
+        "result.json": "bb85f6b88181e1dafb889055957b202d7e87b1cd1ae610d0a136c105092d99e1",
+        "stage.json": "8b6a45743d16d2e21f2b8d3a26ed7da832a85f6d6892aef11f69ca68f84dbcd8",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "directory": ".audit\\static-tools-dpi-native-trace",
+      "observer": {
+        "exit_code": 3221225477,
+        "profile_removed": true,
+        "source_unchanged": true,
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            2070,
+            399
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            2070,
+            399
+          ]
+        },
+        "observation_only": true,
+        "desktop": "FrontEngineVideoWebDpi_b4714fb9f7df"
+      },
+      "completed_cases": 29,
+      "passed_completed_cases": 29,
+      "full_run_passed": false,
+      "stage": {
+        "kind": "shortcuts",
+        "backend": "gpu",
+        "index": 2,
+        "completed_widgets": 9
+      },
+      "artifact_sha256": {
+        "harness.py": "79a9b1bebf109d315ad43afd1be8829681783747a83a17af582a4c988d59dec9",
+        "native-exceptions.jsonl": "2f5b7323225ebedf791271c37ffdbf2f5d69d1885ed661e7d5d5b16d697a6121",
+        "observer.json": "7c20e8b74f29a10865991d8e3be71b7da5b534aabdca526887e763eebcdf6310",
+        "partial.json": "1c1598f67033756f7c17d01da8c3892848c2774168d9d3fdf38803ce0371607a",
+        "stage.json": "56e6f2790fd5e1e53afe5aed99c89b5725a4528287b65c14cc83abe705c4be50",
+        "stderr.txt": "4604b63ac4c595568041fe95a9233bab00a25e2c0c0d03cb2ec55a255f22cc6f"
+      },
+      "native_exceptions": [
+        {
+          "code": "0xc0000005",
+          "module": "C:\\Windows\\System32\\DriverStore\\FileRepository\\amdogl.inf_amd64_dca60211d7f7de81\\atio6axx.dll",
+          "module_offset": "0x32d8580",
+          "operation": 8
+        }
+      ]
+    },
+    {
+      "directory": ".audit\\shortcut-gpu-fullscreen-repeat",
+      "observer": {
+        "exit_code": 0,
+        "profile_removed": true,
+        "source_unchanged": true,
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            2070,
+            399
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            2070,
+            399
+          ]
+        },
+        "observation_only": true,
+        "desktop": "FrontEngineVideoWebDpi_7f9a6d24760c"
+      },
+      "completed_cases": 30,
+      "passed_completed_cases": 30,
+      "full_run_passed": true,
+      "stage": {
+        "kind": "shortcuts",
+        "backend": "gpu",
+        "index": 2,
+        "completed_widgets": 9
+      },
+      "artifact_sha256": {
+        "harness.py": "eae2f5c873997cf4057ab65a08f66fed6aadb06e621d1e2596ab0f02a356475e",
+        "observer.json": "f4b0f83bc5a1af7d3ddc8d518639395a51821a1598402e22c9d3b684f08a1b91",
+        "partial.json": "2a4f6f70e7a801147c01ebeadf9ac686421623c18bf53c8274c963585b241a11",
+        "result.json": "9e2dd764635191f877abb385d7e10228cfd623f80100d9789aa177411ad4d8fe",
+        "stage.json": "56e6f2790fd5e1e53afe5aed99c89b5725a4528287b65c14cc83abe705c4be50",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "directory": ".audit\\shortcut-backend-alternating",
+      "observer": {
+        "exit_code": 3221225477,
+        "profile_removed": true,
+        "source_unchanged": true,
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            2070,
+            399
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            2070,
+            399
+          ]
+        },
+        "observation_only": true,
+        "desktop": "FrontEngineVideoWebDpi_e7272b4a792e"
+      },
+      "completed_cases": 10,
+      "passed_completed_cases": 10,
+      "full_run_passed": false,
+      "stage": {
+        "kind": "shortcuts",
+        "backend": "gpu",
+        "index": 1,
+        "completed_widgets": 3
+      },
+      "artifact_sha256": {
+        "harness.py": "28bf4f397f1c8827ba4f536cb68c8eeaadc8b78c64a55a7870c9d043f4df6608",
+        "native-exceptions.jsonl": "2f5b7323225ebedf791271c37ffdbf2f5d69d1885ed661e7d5d5b16d697a6121",
+        "observer.json": "00d614e7af13021fd29307fa1bf77bd4954363580c54cd2e006bbe4ae10b1562",
+        "partial.json": "456ad2a35d401bb8c58c9d092a71adae905d619dbacb056a032dc0b6e21b6077",
+        "stage.json": "718e4fb4b7bcc63dfa1b3724fb89c92516240485f27d16e7db7b90529fcfd11a",
+        "stderr.txt": "d1b9b4a7248c508099959260cb58063ed7289c1773ceb78479ee75afe54cbea5"
+      },
+      "native_exceptions": [
+        {
+          "code": "0xc0000005",
+          "module": "C:\\Windows\\System32\\DriverStore\\FileRepository\\amdogl.inf_amd64_dca60211d7f7de81\\atio6axx.dll",
+          "module_offset": "0x32d8580",
+          "operation": 8
+        }
+      ]
+    },
+    {
+      "directory": ".audit\\shortcut-backend-before-show",
+      "observer": {
+        "exit_code": 0,
+        "profile_removed": true,
+        "source_unchanged": true,
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            2070,
+            399
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            2070,
+            399
+          ]
+        },
+        "observation_only": true,
+        "desktop": "FrontEngineVideoWebDpi_b3ce315a798c"
+      },
+      "completed_cases": 30,
+      "passed_completed_cases": 30,
+      "full_run_passed": true,
+      "stage": {
+        "kind": "shortcuts",
+        "backend": "gpu",
+        "index": 2,
+        "completed_widgets": 9
+      },
+      "artifact_sha256": {
+        "harness.py": "dcf4a152c5e0f89ab8cd7703676f01f4befbb1f1c9ed3414824f4400ac8430c1",
+        "observer.json": "a70c6c4570b87bb0707a4870ff39ee1e4dcfaf0b89599813b4ef26275cf9beb2",
+        "partial.json": "1854463ef5da2778a7359e0175149807b4114f919ea8f56fd018ec6f0f4b1fa3",
+        "result.json": "275ae6756ebeae50bf523586b3618f32e50f28ab2e352b021755ba848af77782",
+        "stage.json": "56e6f2790fd5e1e53afe5aed99c89b5725a4528287b65c14cc83abe705c4be50",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "driver_file_version": "26.05.300126_e4d6776",
+  "interpretation": [
+    "Both traced crashes execute in atio6axx.dll at module offset0x32d8580. This identifies fault location, not root-cause ownership.",
+    "GPU-only mask and shortcut repetitions pass. Alternating software/GPU shortcut windows after show crashes.",
+    "Selecting the backend before show passes30cases. This comparison implicates live compositor replacement but is not a production fix or proof of safety.",
+    "No product changes; fullsuite source remains frozen."
+  ],
+  "full_suite_failure": {
+    "test": "tests/unit_test/test_pet_home_responsive.py::test_created_home_does_not_widen_the_whole_page",
+    "observed": "Russian shop at536px has horizontal scrollbar maximum10 instead of0",
+    "isolated_test": "1passed7.06s",
+    "isolated_module": "2passed11.37s",
+    "status": "Unresolved context/order/timing dependence; full suite still running."
+  },
+  "references": [
+    "https://doc.qt.io/qt-6.12/qopenglwidget.html",
+    "https://doc.qt.io/qt-6/qopenglcontext.html"
+  ]
+}

@@ -1,0 +1,108 @@
+{
+  "status": "partial",
+  "base": "16f289b8",
+  "problem": "Scene file selection could update a closed or destroyed action editor. An accepted action editor could then update a closed or destroyed Rules table.",
+  "change": "Check Qt validity and visibility at each modal boundary; delete the child action editor only when it still exists.",
+  "reproduction": {
+    "log": ".audit/rules-modal-red.log",
+    "result": "6 failed, 11 deselected in 4.05s",
+    "cases": "Scene load and start file pickers after rejection or destruction; accepted target editor after Rules rejection or destruction.",
+    "observed": "Closed fields changed or deleted QLineEdit/QTableWidget access raised RuntimeError."
+  },
+  "verification": {
+    "command": "D:/Codes/FrontEngine/.audit/host-runtime-612/Scripts/python.exe -m pytest tests/unit_test/test_scene_actions.py tests/unit_test/test_rule_diagnostics.py tests/unit_test/test_runtime_ownership.py -q",
+    "log": ".audit/rules-modal-green.log",
+    "exit_code": 0,
+    "passed": 56,
+    "seconds": 11.61,
+    "coverage": [
+      "Six closure cases ignore results and refuse subsequent modal entry.",
+      "Scene load and start pickers preserve values on cancellation and accept a new file after reopening.",
+      "Target cancellation preserves the rule; reopening and accepting updates only its target value, preserving screen selection, identity, conditions, priority and cooldown.",
+      "Existing scene execution ordering, diagnostics, save failure and runtime ownership checks pass."
+    ]
+  },
+  "limitations": [
+    "Offscreen Qt tests substitute file-picker results and the child editor exec loop.",
+    "Full regression, independent review and integration remain pending. Native evidence does not cover OS keyboard input or the real file picker.",
+    "No EXE was built."
+  ],
+  "keyboard_fix": {
+    "problem": "Tab cycled through table cells and could not reach the target button.",
+    "native_failure": ".audit/native-rules/focus-failure.json",
+    "red_test": ".audit/rules-tab-red.log",
+    "red_result": "1 failed, 20 deselected in 2.00s; target button did not receive focus.",
+    "change": "Set table.setTabKeyNavigation(False). Arrow keys retain cell navigation.",
+    "verification": "Tab reaches target controls without changing rules, and Right moves to the next cell."
+  },
+  "native": {
+    "directory": ".audit/native-rules-fixed",
+    "platform": "Windows private desktop, Traditional_Chinese, dark, 900x740 main window",
+    "entry": "Actual settings_menu._open_dialog with RulesDialog and real nested SceneActionDialog.exec; widget-local Tab/Space on target, browse and confirmation buttons. File picker returns substituted.",
+    "cases": {
+      "cases": [
+        {
+          "choice": "browse_close",
+          "passed": true
+        },
+        {
+          "choice": "parent_close",
+          "passed": true
+        },
+        {
+          "choice": "cancel",
+          "passed": true
+        },
+        {
+          "choice": "accept",
+          "passed": true
+        }
+      ],
+      "actual_settings_entry": true,
+      "real_nested_exec": true,
+      "stored_rules_unchanged": true
+    },
+    "observer": {
+      "before": {
+        "foreground": 2558004,
+        "cursor": [
+          768,
+          432
+        ]
+      },
+      "after": {
+        "foreground": 2558004,
+        "cursor": [
+          768,
+          432
+        ]
+      },
+      "child_exit": 0
+    },
+    "runtime_closed": true,
+    "temporary_directory_removed": true,
+    "stderr_empty": true,
+    "cold_home": {
+      "passed": true,
+      "initial_snapshot_exact": true,
+      "profiles_exact": true,
+      "leases_reacquired": true,
+      "saved_exact": true,
+      "temporary_directory_removed": true
+    }
+  },
+  "documentation": {
+    "files": 17,
+    "checks": "54 passed in 3.09s",
+    "sphinx": "HTML build with -W passed",
+    "rendered_paragraphs_exact": [
+      "Eng",
+      "Zh",
+      "ZhCn",
+      "De",
+      "Fr",
+      "Ru",
+      "It"
+    ]
+  }
+}

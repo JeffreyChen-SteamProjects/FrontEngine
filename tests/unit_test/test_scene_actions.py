@@ -87,8 +87,9 @@ def test_background_source_read_does_not_modify_shared_scene(tmp_path):
         read_scene_source(path)
 
 
-def test_layer_actions_update_pixels_document_and_undo_without_doubled_opacity(tmp_path):
-    page = SceneSettingUI()
+def test_layer_actions_update_pixels_document_and_undo_without_doubled_opacity(tmp_path, *, lifetime_factory):
+    lifetime_factory()
+    page = SceneSettingUI(lifetime=lifetime_factory())
     entries = _image_scene(tmp_path)
     page.visual_editor.document.reset(entries)
     page.scene.add_entry('reference', entries['reference'])
@@ -139,8 +140,9 @@ def test_native_instances_follow_each_monitor_origin_without_hiding_peers():
         manager.clear()
 
 
-def test_async_playback_failure_keeps_old_scene_and_receipts_wait_for_completion(tmp_path):
-    page = SceneSettingUI()
+def test_async_playback_failure_keeps_old_scene_and_receipts_wait_for_completion(tmp_path, *, lifetime_factory):
+    lifetime_factory()
+    page = SceneSettingUI(lifetime=lifetime_factory())
     page.actions.deleteLater()
     gate = Event()
     threads = []
@@ -160,7 +162,7 @@ def test_async_playback_failure_keeps_old_scene_and_receipts_wait_for_completion
     registry.register(Action('scene_start', 'label', 'Play', actions.request, True, True))
     rules = [{'label': 'Play', 'action': 'scene_start', 'value': 'source.json', 'when': {'apps': 'code'}}]
     service = RuleEngineService(lambda: rules, lambda: {'app': 'code'})
-    window = SimpleNamespace(action_registry=registry, rule_engine_service=service)
+    window = SimpleNamespace(action_registry=registry, rule_engine_service=service, lifetime=lifetime_factory())
     service.rule_fired.connect(lambda rule: FrontEngineMainUI._on_rule_fired(window, rule))
     try:
         service.poll_once()
@@ -177,8 +179,9 @@ def test_async_playback_failure_keeps_old_scene_and_receipts_wait_for_completion
         page.close()
 
 
-def test_latest_request_wins_and_stop_cleans_cancelled_package_results(tmp_path):
-    page = SceneSettingUI()
+def test_latest_request_wins_and_stop_cleans_cancelled_package_results(tmp_path, *, lifetime_factory):
+    lifetime_factory()
+    page = SceneSettingUI(lifetime=lifetime_factory())
     page.actions.deleteLater()
     gate, started = Event(), Event()
     results = []
@@ -220,8 +223,9 @@ def test_latest_request_wins_and_stop_cleans_cancelled_package_results(tmp_path)
     assert not resource.exists()
 
 
-def test_successful_scene_replacement_retains_control_center_lists(tmp_path):
-    page = SceneSettingUI()
+def test_successful_scene_replacement_retains_control_center_lists(tmp_path, *, lifetime_factory):
+    lifetime_factory()
+    page = SceneSettingUI(lifetime=lifetime_factory())
     page.visual_editor.document.reset(_image_scene(tmp_path))
     lists = [page.scene.widget_list, page.scene.view_list, page.scene.native_widgets]
     try:
@@ -237,6 +241,156 @@ def test_successful_scene_replacement_retains_control_center_lists(tmp_path):
         assert page.visual_editor.document.entries
     finally:
         page.close()
+
+
+@pytest.mark.parametrize('action', ['scene_load', 'scene_start'])
+@pytest.mark.parametrize('destroy', [False, True])
+def test_closed_scene_action_discards_browse_result(tmp_path, monkeypatch, action, destroy):
+    from PySide6.QtCore import QEvent
+    from PySide6.QtWidgets import QFileDialog
+    from shiboken6 import isValid
+    from frontengine.ui.dialog.scene_action_dialog import SceneActionDialog
+
+    dialog = SceneActionDialog(action, '', {})
+    dialog.show()
+    def browse(*_args, **_kwargs):
+        dialog.reject()
+        if destroy:
+            dialog.deleteLater()
+            QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+        return str(tmp_path / 'selected.fescene'), ''
+    monkeypatch.setattr(QFileDialog, 'getOpenFileName', browse)
+    try:
+        dialog._browse()
+        if isValid(dialog):
+            assert dialog.path.text() == ''
+        def unexpected(*_args, **_kwargs):
+            pytest.fail('Closed scene action reopened its picker')
+        monkeypatch.setattr(QFileDialog, 'getOpenFileName', unexpected)
+        dialog._browse()
+    finally:
+        if isValid(dialog):
+            dialog.close()
+
+
+@pytest.mark.parametrize('destroy', [False, True])
+def test_closed_rules_discards_target_dialog_result(monkeypatch, destroy):
+    from PySide6.QtCore import QEvent
+    from PySide6.QtWidgets import QDialog
+    from shiboken6 import isValid
+    from frontengine.ui.dialog.scene_action_dialog import SceneActionDialog
+    from frontengine.ui.dialog import rules_dialog as module
+
+    monkeypatch.setattr(module, 'current_rules', lambda: [])
+    rules = module.RulesDialog()
+    rules.add_row({'label':'Play', 'action':'scene_start', 'value':'{"screen":"all"}'})
+    rules.table.setCurrentCell(0, module._COLUMN_VALUE)
+    rules.show()
+    before = rules.rules()
+    def choose(dialog):
+        dialog.path.setText('new.fescene')
+        rules.reject()
+        if destroy:
+            rules.deleteLater()
+            QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+        return QDialog.DialogCode.Accepted
+    monkeypatch.setattr(SceneActionDialog, 'exec', choose)
+    try:
+        rules.choose_target()
+        if isValid(rules):
+            assert rules.rules() == before
+        def unexpected(*_args):
+            pytest.fail('Closed rules reopened a target editor')
+        monkeypatch.setattr(SceneActionDialog, 'exec', unexpected)
+        rules.choose_target()
+    finally:
+        if isValid(rules):
+            rules.close()
+
+
+@pytest.mark.parametrize('action', ['scene_load', 'scene_start'])
+def test_scene_action_browse_cancel_reopen_retry(tmp_path, monkeypatch, action):
+    from PySide6.QtWidgets import QFileDialog
+    from frontengine.ui.dialog.scene_action_dialog import SceneActionDialog
+
+    selected = tmp_path / 'selected.json'
+    selected.write_text('{}', encoding='utf-8')
+    choices = iter(['', str(selected)])
+    monkeypatch.setattr(QFileDialog, 'getOpenFileName', lambda *_args, **_kwargs: (next(choices), ''))
+    dialog = SceneActionDialog(action, '', {})
+    try:
+        dialog.show()
+        before = dialog.action_value()
+        dialog._browse()
+        assert dialog.action_value() == before
+        dialog.reject()
+        dialog.show()
+        dialog._browse()
+        assert scene_request(dialog.action_value())[0] == str(selected)
+    finally:
+        dialog.close()
+
+
+def test_rules_target_cancel_reopen_retry_preserves_other_fields(monkeypatch):
+    from frontengine.ui.dialog.scene_action_dialog import SceneActionDialog
+    from frontengine.ui.dialog import rules_dialog as module
+
+    monkeypatch.setattr(module, 'current_rules', lambda: [])
+    rules = module.RulesDialog()
+    rules.add_row({'label':'Play', 'action':'scene_start', 'value':'{"screen":"all"}',
+                   'priority':3, 'cooldown':60, 'when':{'apps':['example'], 'battery':True}})
+    rules.table.setCurrentCell(0, module._COLUMN_VALUE)
+    before = rules.rules()
+    choices = iter([False, True])
+    def choose(dialog):
+        dialog.path.setText('new.fescene')
+        dialog.screen.setCurrentIndex(dialog.screen.findData('all'))
+        if next(choices):
+            dialog.accept()
+        else:
+            dialog.reject()
+        return dialog.result()
+    monkeypatch.setattr(SceneActionDialog, 'exec', choose)
+    try:
+        rules.show()
+        rules.choose_target()
+        assert rules.rules() == before
+        rules.reject()
+        rules.show()
+        rules.choose_target()
+        after = rules.rules()
+        assert scene_request(after[0]['value']) == ('new.fescene', 'all')
+        after[0]['value'] = before[0]['value']
+        assert after == before
+    finally:
+        rules.close()
+
+
+def test_rules_table_tab_reaches_actions_without_changing_rules(monkeypatch):
+    from PySide6.QtCore import Qt
+    from PySide6.QtWidgets import QApplication
+    from frontengine.ui.dialog import rules_dialog as module
+
+    monkeypatch.setattr(module, 'current_rules', lambda: [])
+    rules = module.RulesDialog()
+    rules.add_row({'label':'Play', 'action':'scene_start', 'value':'{"screen":"all"}'})
+    try:
+        rules.show()
+        rules.activateWindow()
+        rules.table.setCurrentCell(0, 0)
+        rules.table.setFocus()
+        QCoreApplication.processEvents()
+        before = rules.rules()
+        QTest.keyClick(rules.table, Qt.Key.Key_Right)
+        assert rules.table.currentColumn() == 1
+        for _ in range(20):
+            if rules.target_button.hasFocus():
+                break
+            QTest.keyClick(QApplication.focusWidget(), Qt.Key.Key_Tab)
+        assert rules.target_button.hasFocus()
+        assert rules.rules() == before
+    finally:
+        rules.close()
 
 
 def test_target_picker_preserves_optional_scene_targets_and_generates_layer_values():
@@ -262,8 +416,9 @@ def test_target_picker_preserves_optional_scene_targets_and_generates_layer_valu
         rules.close()
 
 
-def test_layer_rules_wait_for_preceding_scene_and_failed_load_cannot_mutate_old_content(tmp_path):
-    page = SceneSettingUI()
+def test_layer_rules_wait_for_preceding_scene_and_failed_load_cannot_mutate_old_content(tmp_path, *, lifetime_factory):
+    lifetime_factory()
+    page = SceneSettingUI(lifetime=lifetime_factory())
     page.actions.deleteLater()
     gate = Event()
     entries = _image_scene(tmp_path)
@@ -294,8 +449,9 @@ def test_layer_rules_wait_for_preceding_scene_and_failed_load_cannot_mutate_old_
         page.close()
 
 
-def test_layers_after_superseding_scene_belong_to_latest_request(tmp_path):
-    page = SceneSettingUI()
+def test_layers_after_superseding_scene_belong_to_latest_request(tmp_path, *, lifetime_factory):
+    lifetime_factory()
+    page = SceneSettingUI(lifetime=lifetime_factory())
     page.actions.deleteLater()
     gate, started = Event(), Event()
     def reader(_path):

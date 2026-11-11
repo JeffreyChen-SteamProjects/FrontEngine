@@ -1,0 +1,172 @@
+{
+  "product_test_commit": "825a6c41",
+  "result": {
+    "created_home": true,
+    "cancelled_automatic_work": true,
+    "entered_and_escaped_arranging": true,
+    "tab_routes": [
+      {
+        "target": "primaryAction",
+        "tabs": 5
+      },
+      {
+        "target": "qt_tabwidget_tabbar",
+        "tabs": 13
+      },
+      {
+        "target": "QListWidget",
+        "tabs": 1
+      },
+      {
+        "target": "WrappingPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "qt_tabwidget_tabbar",
+        "tabs": 14
+      },
+      {
+        "target": "WrappingPushButton",
+        "tabs": 3
+      },
+      {
+        "target": "qt_tabwidget_tabbar",
+        "tabs": 22
+      },
+      {
+        "target": "QListWidget",
+        "tabs": 4
+      },
+      {
+        "target": "WrappingPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "WrappingPushButton",
+        "tabs": 6
+      },
+      {
+        "target": "WrappingPushButton",
+        "tabs": 1
+      },
+      {
+        "target": "QPushButton",
+        "tabs": 11
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 4
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 1
+      },
+      {
+        "target": "primaryAction",
+        "tabs": 27
+      },
+      {
+        "target": "QComboBox",
+        "tabs": 4
+      }
+    ],
+    "selection": {
+      "after_home": {
+        "row": 0,
+        "selected": 0,
+        "count": 1,
+        "focus": "QListWidget"
+      },
+      "after_down": {
+        "row": 0,
+        "selected": 0
+      },
+      "after_space": {
+        "row": 0,
+        "selected": 1
+      }
+    },
+    "final_focus": "WrappingPushButton",
+    "keyboard_commands": [
+      {
+        "command": "sleep",
+        "queue": [
+          "sleep"
+        ]
+      },
+      {
+        "command": "stop",
+        "queue": []
+      }
+    ],
+    "wardrobe_applied": {
+      "character": {
+        "id": "inkside-mochi",
+        "version": "2"
+      },
+      "head": {
+        "id": "inkside-mochi-party-hat",
+        "version": "2"
+      },
+      "cancel_preserved_applied": true,
+      "reopen_exact": true
+    },
+    "theme": "light",
+    "language": "Traditional_Chinese",
+    "requested_width": 900,
+    "actual_window_size": [
+      900,
+      740
+    ],
+    "runtime_closed": true,
+    "temporary_directory_removed": true
+  },
+  "observer": {
+    "before": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "after": {
+      "foreground": 2558004,
+      "cursor": [
+        768,
+        432
+      ]
+    },
+    "child_exit": 0
+  },
+  "cold": {
+    "passed": true,
+    "initial_snapshot_exact": true,
+    "profiles_exact": true,
+    "leases_reacquired": true,
+    "saved_exact": true,
+    "temporary_directory_removed": true
+  },
+  "original_image_inspected": "installation-progress.png",
+  "excluded_run": {
+    "folder": "native-wardrobe-progress-zh-light",
+    "reason": "Invalid language parameter TraditionalChinese; actual UI was English. Excluded from Chinese acceptance. Added assertion matching active language to requested language."
+  },
+  "prior_language_matrix_audit": "All 14 keyboard matrix results and two wardrobe cancel results used registered identifiers including Traditional_Chinese and Simplified_Chinese.",
+  "limits": [
+    "Traditional Chinese light and prior English dark only; not full language/theme matrix",
+    "Current DPI and 900x740 main window; no smaller-screen or screen-reader claim",
+    "Independent review and full regression remain pending"
+  ],
+  "sha256": {
+    "cold-result.json": "5bd41edb786e3fe553500e96167a938f64483ad3f1f564c603795a88e3110cbc",
+    "install-progress.json": "82bed0c18d16129d3cba9ed0325e368e836b2962b061f6c3a20865895c8df55e",
+    "observer.json": "2a689a216983485f51c03e4b2a63a0f1987f03f7adf42f973f92f921c1195c1f",
+    "profile-before.json": "266733bf34d558b860cc5ca450027847a4aa39af688693571e386159ddaec20f",
+    "profile-current.json": "266733bf34d558b860cc5ca450027847a4aa39af688693571e386159ddaec20f",
+    "profiles.json": "b6668ed4e94700b1f0e2ac15e3359cf2554fbee2d5e60e15cf42ad9d241d2f7d",
+    "progress-values.json": "b0b89ae86c3a3cabd975a803a5af12790c5f05ba373a765948e9b71b74764a6d",
+    "result.json": "bd73583afabd222eabb0795d9bd5e9748de2922a85d922a6e37f92a3378647dd",
+    "selection.json": "8c9b9b56727cede9d820b9d0c07e963ca7d30af8c25186d2b662dc7e679e59bb",
+    "shutdown-world.json": "1287899d16b3e61969d2a483ddaa69599e7026b98530f8b333ba62bb5a2cbcac"
+  }
+}

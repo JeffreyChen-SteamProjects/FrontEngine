@@ -1,14 +1,18 @@
+from frontengine.ui.runtime_lifetime import owned_action
+from frontengine.ui.runtime_lifetime import OwnedWidgetList
 from typing import Optional
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QGuiApplication, QPixmap
-from PySide6.QtWidgets import QSlider, QLabel, QPushButton, QMessageBox, QCheckBox, QComboBox
+from PySide6.QtWidgets import QSlider, QLabel, QPushButton, QCheckBox, QComboBox
 
 from frontengine.show.particle.particle_ui import ParticleOpenGLWidget
 from frontengine.ui.dialog.choose_file_dialog import choose_image
 from frontengine.ui.page.layout_kit import SettingPage
 from frontengine.ui.page.utils import (
     build_recent_combobox,
+    apply_target_monitor_state,
+    target_monitor_state,
     build_target_monitor_combobox,
     coerce_int,
     dispatch_to_monitors,
@@ -25,14 +29,14 @@ from frontengine.utils.multi_language.retranslate import tr
 
 
 class ParticleSettingUI(SettingPage):
-    def __init__(self):
+    def __init__(self, *, lifetime):
         front_engine_logger.info("[ParticleSettingUI] Init")
         super().__init__("tab_particle_text", "page_subtitle_particle",
-                         "Particle", "Snow, rain and other particle effects.")
+                         "Particle", "Snow, rain and other particle effects.", lifetime=lifetime)
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
 
         # Init variable
-        self.particle_list = []
+        self.particle_list = OwnedWidgetList(self.lifetime)
         self.show_all_screen = False
         self.ready_to_play = False
         self.image_path: Optional[str] = None
@@ -123,10 +127,12 @@ class ParticleSettingUI(SettingPage):
         self.finish_body()
         self.set_footer(primary=self.start_button, status=self.ready_label)
 
+    @owned_action
     def set_show_all_screen(self) -> None:
         front_engine_logger.info("[ParticleSettingUI] set_show_all_screen")
         self.show_all_screen = self.show_on_all_screen_checkbox.isChecked()
 
+    @owned_action
     def _create_particle_widget(self, screen_width: int = 1920, screen_height: int = 1080) -> ParticleOpenGLWidget:
         front_engine_logger.info("[ParticleSettingUI] _create_particle_widget")
         particle_widget = ParticleOpenGLWidget(
@@ -143,13 +149,13 @@ class ParticleSettingUI(SettingPage):
         self.particle_list.append(particle_widget)
         return particle_widget
 
+    @owned_action
     def start_play_particle(self) -> None:
         front_engine_logger.info("[ParticleSettingUI] start_play_particle")
         if not self.image_path or not self.ready_to_play:
-            message_box = QMessageBox(self)
-            message_box.setText(language_wrapper.language_word_dict.get("not_prepare"))
-            message_box.exec()
-            return
+            self.choose_and_copy_file_to_cwd_image_dir_then_play()  # nothing chosen yet: choose now, then go on
+            if not self.image_path or not self.ready_to_play:
+                return
 
         span = resolve_span(self.target_monitor_combobox)
 
@@ -181,17 +187,19 @@ class ParticleSettingUI(SettingPage):
             span_all_screens=resolve_span(self.target_monitor_combobox),
         )
 
+    @owned_action
     def choose_and_copy_file_to_cwd_image_dir_then_play(self) -> None:
         front_engine_logger.info("[ParticleSettingUI] choose_and_copy_file_to_cwd_image_dir_then_play")
         self.ready_label.setText(language_wrapper.language_word_dict.get("Not Ready"))
         self.ready_to_play = False
-        self.image_path = choose_image(self)
+        self.image_path = self.lifetime.after_dialog(choose_image(self))
         if self.image_path:
             self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
             self.ready_to_play = True
             add_recent_file("particle", self.image_path)
             reload_recent_combobox(self.recent_files_combobox, "particle")
 
+    @owned_action
     def _apply_recent_file(self, _index: int = 0) -> None:
         path = self.recent_files_combobox.currentData()
         self.recent_files_combobox.setCurrentIndex(0)
@@ -202,6 +210,7 @@ class ParticleSettingUI(SettingPage):
         self.ready_to_play = True
         self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
 
+    @owned_action
     def _on_file_dropped(self, path: str) -> None:
         front_engine_logger.info(f"[ParticleSettingUI] _on_file_dropped | path={path}")
         self.image_path = path
@@ -210,6 +219,7 @@ class ParticleSettingUI(SettingPage):
         add_recent_file("particle", path)
         reload_recent_combobox(self.recent_files_combobox, "particle")
 
+    @owned_action
     def opacity_trick(self) -> None:
         front_engine_logger.info("[ParticleSettingUI] opacity_trick")
         self.opacity_slider_value_label.setText(str(self.opacity_slider.value()))
@@ -223,7 +233,7 @@ class ParticleSettingUI(SettingPage):
             "count": self.particle_count_combobox.currentText(),
             "speed": self.particle_speed_combobox.currentText(),
             "show_on_all_screen": self.show_on_all_screen_checkbox.isChecked(),
-            "target_monitor": self.target_monitor_combobox.currentText(),
+            "target_monitor": target_monitor_state(self.target_monitor_combobox),
         }
 
     def set_state(self, state: dict) -> None:
@@ -247,7 +257,4 @@ class ParticleSettingUI(SettingPage):
         if "show_on_all_screen" in state:
             self.show_on_all_screen_checkbox.setChecked(bool(state["show_on_all_screen"]))
             self.show_all_screen = bool(state["show_on_all_screen"])
-        if state.get("target_monitor") is not None:
-            index = self.target_monitor_combobox.findText(str(state["target_monitor"]))
-            if index >= 0:
-                self.target_monitor_combobox.setCurrentIndex(index)
+        apply_target_monitor_state(self.target_monitor_combobox, state.get("target_monitor"))

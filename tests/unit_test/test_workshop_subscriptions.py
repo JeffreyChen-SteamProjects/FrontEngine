@@ -4,8 +4,7 @@ import json
 import time
 
 import pytest
-from PySide6.QtCore import QObject, Signal, QCoreApplication, QThreadPool
-from PySide6.QtGui import QImage
+from PySide6.QtCore import QObject, Signal, QCoreApplication
 
 from frontengine.utils.steam.steam_runtime import APP_ID, SteamEvent
 from frontengine.utils.workshop.workshop_cache import WorkshopCache
@@ -13,14 +12,23 @@ from frontengine.utils.workshop.workshop_jobs import WorkshopJobs
 from frontengine.utils.workshop.workshop_subscriptions import DownloadResult, InstalledResult, WorkshopSubscriptions
 
 
+PRESET = "scene.json"
+
+
+def _preset(folder, name: str) -> None:
+    (folder / PRESET).write_text(json.dumps({"__preset_name__": name, "image": {}}), encoding="utf-8")
+
+
+def _name(cache, version: dict) -> str:
+    return json.loads((cache.entry(version) / PRESET).read_text(encoding="utf-8"))["__preset_name__"]
+
+
 @pytest.fixture
 def installed(tmp_path):
+    """A legacy preset item: the folder shape that still installs without a workshop.json."""
     source = tmp_path / "steam" / "456"
     source.mkdir(parents=True)
-    image = QImage(16, 16, QImage.Format.Format_RGB32)
-    image.fill(0xff00ccff)
-    assert image.save(str(source / "walk.png"))
-    (source / "pet.json").write_text('{"name":"Pet"}', encoding="utf-8")
+    _preset(source, "first")
     return {"id": "456", "path": str(source), "state": 5, "timestamp": 10}, WorkshopCache(123, tmp_path / "cache")
 
 
@@ -28,33 +36,33 @@ def test_cache_copies_validated_content_without_mutating_steam(installed):
     item, cache = installed
     ready = cache.stage(item)
     assert ready["status"] == "ready"
-    assert ready["title"] == "Pet"
+    assert ready["title"] == "456"
     assert ready["path"] != item["path"]
     assert cache.current("456")["path"] == ready["path"]
-    assert (cache.entry(ready) / "walk.png").read_bytes() == (cache.entry(item) / "walk.png").read_bytes()
+    assert (cache.entry(ready) / PRESET).read_bytes() == (cache.entry(item) / PRESET).read_bytes()
     assert not list(cache.directory("456").glob(".download-*"))
 
 
 def test_updates_preserve_old_open_scene_version(installed):
     item, cache = installed
     first = cache.stage(item)
-    (cache.entry(item) / "pet.json").write_text('{"name":"Updated"}', encoding="utf-8")
+    _preset(cache.entry(item), "updated")
     second = cache.stage(item)
     assert first["path"] != second["path"]
     assert cache.entry(first).is_dir()
-    assert cache.current("456")["title"] == "Updated"
+    assert _name(cache, cache.current("456")) == "updated"
 
 
 def test_local_changes_create_conflict_until_explicit_activation(installed):
     item, cache = installed
     first = cache.stage(item)
-    (cache.entry(first) / "pet.json").write_text('{"name":"Local edit"}', encoding="utf-8")
-    (cache.entry(item) / "pet.json").write_text('{"name":"New download"}', encoding="utf-8")
+    _preset(cache.entry(first), "local edit")
+    _preset(cache.entry(item), "new download")
     candidate = cache.stage(item)
     assert candidate["status"] == "conflict"
-    assert cache.current("456")["title"] == "Local edit"
+    assert _name(cache, cache.current("456")) == "local edit"
     cache.activate(candidate)
-    assert cache.current("456")["title"] == "New download"
+    assert _name(cache, cache.current("456")) == "new download"
     assert cache.entry(first).is_dir()
 
 
@@ -166,14 +174,15 @@ def test_unsubscribed_content_is_not_reintroduced_by_late_worker(installed):
     subscriptions.stop()
 
 
-def test_worker_delivers_on_gui_thread_and_suppresses_shutdown_callbacks():
+def test_worker_delivers_on_gui_thread_and_suppresses_shutdown_callbacks(*, lifetime_factory):
     import threading
-    jobs = WorkshopJobs()
+    lifetime_factory()
+    jobs = WorkshopJobs(lifetime=lifetime_factory())
     main_thread = threading.get_ident()
     delivered = []
     jobs.completed.connect(lambda key, result: delivered.append((threading.get_ident(), result)))
     assert jobs.submit("first", lambda: threading.get_ident())
-    QThreadPool.globalInstance().waitForDone(3000)
+    jobs.pool.waitForDone(3000)
     deadline = time.monotonic() + 3
     while not delivered and time.monotonic() < deadline:
         QCoreApplication.processEvents()

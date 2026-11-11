@@ -1,4 +1,6 @@
 """The home runs itself: furniture sets itself out, pets take up work, rewards are collected."""
+import pytest
+
 from frontengine.utils.pet_game import behaviour, goals, simulation
 from frontengine.utils.pet_game.catalog import builtin_catalog
 from frontengine.utils.pet_game.schedule import HOUR_MS
@@ -116,3 +118,79 @@ def test_skipped_tutorials_stay_unclaimed():
     world.progress.next_check_ms = 0
     goals.update(world)
     assert not [event for event in world.drain_events() if event["kind"] == "goal_claimed"]
+
+
+@pytest.mark.parametrize("reason", ["waiting_materials", "no_station", "station_busy"])
+def test_blocked_work_reason_is_visible_until_work_resumes(reason):
+    from frontengine.show.pet_game.captions import activity_text, result_text
+
+    world, zone = _home(coins=500)
+    world.automatic = False
+    _pet(world, zone)
+    resident = world.residents[PET]
+    recipe = "toy" if reason == "waiting_materials" else "letter"
+    if reason == "waiting_materials":
+        assert world.buy_and_place("workbench", zone, "bench") == "accepted"
+    elif reason == "station_busy":
+        world.furnish(zone)
+        other = _pet(world, zone, "c" * 32)
+        assert world.create_task("letter", other)[0] == "accepted"
+        behaviour.decide(world, world.residents[other])
+        assert world.residents[other].activity.kind == "work"
+    assert world.create_task(recipe, PET)[0] == "accepted"
+
+    behaviour.decide(world, resident)
+    assert resident.activity.kind != "work"
+    assert result_text(reason) in activity_text(resident, world)
+
+    if reason == "waiting_materials":
+        world.ledger.apply("wood", "test", items={"wood": 2})
+    elif reason == "no_station":
+        world.furnish(zone)
+    else:
+        behaviour.cancel_activity(world, world.residents[other], "test")
+    behaviour.cancel_activity(world, resident, "test")
+    behaviour.decide(world, resident)
+    assert resident.activity.kind == "work"
+    assert result_text(reason) not in activity_text(resident, world)
+
+
+@pytest.mark.parametrize("reason", ["waiting_materials", "no_station", "station_busy"])
+def test_manual_work_reports_start_failure_and_can_retry(reason):
+    from frontengine.show.pet_game.captions import activity_text, result_text
+
+    world, zone = _home(coins=500)
+    world.automatic = False
+    world.time_ms = 0
+    _pet(world, zone)
+    resident = world.residents[PET]
+    recipe = "toy" if reason == "waiting_materials" else "letter"
+    if reason == "waiting_materials":
+        assert world.buy_and_place("workbench", zone, "bench") == "accepted"
+    elif reason == "station_busy":
+        world.furnish(zone)
+        other = _pet(world, zone, "c" * 32)
+        assert world.create_task("letter", other)[0] == "accepted"
+        assert behaviour.start_work(world, world.residents[other], "command") is None
+    assert world.create_task(recipe, PET)[0] == "accepted"
+    world.drain_events()
+    assert world.command(PET, "work") == "accepted"
+
+    simulation.step(world)
+    refused = [event for event in world.drain_events() if event["kind"] == "refused"]
+    assert [event["reason"] for event in refused] == [reason]
+    assert refused[0]["command"] == "work"
+    assert refused[0]["resident"] == PET
+    assert result_text(reason) in activity_text(resident, world)
+
+    if reason == "waiting_materials":
+        world.ledger.apply("wood", "test", items={"wood": 2})
+    elif reason == "no_station":
+        world.furnish(zone)
+    else:
+        behaviour.cancel_activity(world, world.residents[other], "test")
+    assert world.command(PET, "work") == "accepted"
+    simulation.step(world)
+    assert resident.activity.kind == "work"
+    assert result_text(reason) not in activity_text(resident, world)
+    assert not [event for event in world.drain_events() if event["kind"] == "refused"]

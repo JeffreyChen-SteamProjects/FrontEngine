@@ -1,12 +1,13 @@
 """Background scene preparation and GUI-thread scene/layer action dispatch."""
 from __future__ import annotations
+from frontengine.ui.runtime_lifetime import captured_lifetime, owned_callback
 
 from copy import deepcopy
 import json
 from pathlib import Path
 from threading import Event
 
-from PySide6.QtCore import QObject, QRunnable, QThreadPool, Qt, Signal
+from PySide6.QtCore import QObject, QRunnable, Qt, Signal
 from PySide6.QtGui import QGuiApplication, QImage
 
 from frontengine.show.scene.scene import SceneManager
@@ -46,57 +47,73 @@ def transition_frames(manager: SceneManager) -> dict[str, QImage]:
     return frames
 
 
-def prepare_playback(entries: dict, monitors: list, *, models=None) -> SceneManager:
+def prepare_playback(entries: dict, monitors: list, *, models=None, lifetime=None) -> SceneManager:
     """Build hidden playback; failures close every candidate and preserve the old scene."""
-    candidate = SceneManager()
+    candidate = SceneManager(lifetime=lifetime)
     try:
         if isinstance(entries, SceneDocument) and entries.mode == '3d':
-            if user_setting_dict.get('render_backend', 'auto') == 'software':
-                raise ValueError('3D scenes require OpenGL; select Auto or GPU in render settings')
-            from frontengine.show.scene.runtime3d import Scene3DRuntime
-            from frontengine.show.scene.view3d import Scene3DView, OffscreenScene3D
-            candidate.runtime3d = Scene3DRuntime(entries, models)
-            candidate.layer_settings = deepcopy(entries.entries)
-            for monitor in monitors:
-                factor = min(1, 1920/entries.canvas[0], 1080/entries.canvas[1])
-                size = tuple(max(16, round(value*factor)) for value in entries.canvas)
-                probe = OffscreenScene3D(candidate.runtime3d, size, monitor)
-                try:
-                    if probe.frame().isNull():
-                        raise RuntimeError('3D scene did not produce a first frame')
-                finally:
-                    probe.close()
-                view = Scene3DView(candidate.runtime3d)
-                candidate.view_list.append(view)
-                if monitor is not None:
-                    view.setScreen(monitor)
-                    view.move(monitor.availableGeometry().topLeft())
-                view.prime()
-            from frontengine.show.scene.screen_topology import SceneScreenTopology
-            targets = [monitor or QGuiApplication.primaryScreen() for monitor in monitors]
-            candidate.runtime3d.topology = SceneScreenTopology(candidate.runtime3d, targets, candidate.view_list)
-            return candidate
-        for key, entry in entries.items():
-            for field in ('file_path', 'text_file', 'script_path'):
-                if entry.get(field) and not Path(entry[field]).is_file():
-                    raise ValueError(f'Missing scene resource: {entry[field]}')
-            candidate.add_entry(key, entry)
-        for monitor in monitors:
-            candidate.open_native_widgets(monitor, show=False)
-            if not candidate.widget_list:
-                continue
-            view = (SceneCompositorView(candidate.graphic_scene, user_setting_dict.get('render_backend', 'auto'))
-                    if candidate.supports_composition() else ExtendGraphicView(candidate.graphic_scene))
-            candidate.view_list.append(view)
-            if monitor is not None:
-                view.setScreen(monitor)
-                view.move(monitor.availableGeometry().topLeft())
+            _prepare_3d(candidate, entries, monitors, models, lifetime)
+        else:
+            _prepare_2d(candidate, entries, monitors)
         return candidate
     except Exception as error:
         close_playback(candidate)
         if isinstance(error, (OSError, ValueError, RuntimeError)):
             raise
         raise RuntimeError(f'Cannot initialize scene playback: {error}') from error
+
+
+def _place(view, monitor) -> None:
+    if monitor is not None:
+        view.setScreen(monitor)
+        view.move(monitor.availableGeometry().topLeft())
+
+
+def _probe_3d(runtime, canvas, monitor) -> None:
+    """Render one offscreen frame first: a 3D scene that cannot draw is refused before it is shown."""
+    from frontengine.show.scene.view3d import OffscreenScene3D
+    factor = min(1, 1920/canvas[0], 1080/canvas[1])
+    size = tuple(max(16, round(value*factor)) for value in canvas)
+    probe = OffscreenScene3D(runtime, size, monitor)
+    try:
+        if probe.frame().isNull():
+            raise RuntimeError('3D scene did not produce a first frame')
+    finally:
+        probe.close()
+
+
+def _prepare_3d(candidate: SceneManager, document, monitors: list, models, lifetime) -> None:
+    if user_setting_dict.get('render_backend', 'auto') == 'software':
+        raise ValueError('3D scenes require OpenGL; select Auto or GPU in render settings')
+    from frontengine.show.scene.runtime3d import Scene3DRuntime
+    from frontengine.show.scene.screen_topology import SceneScreenTopology
+    from frontengine.show.scene.view3d import Scene3DView
+    candidate.runtime3d = Scene3DRuntime(document, models, lifetime=lifetime)
+    candidate.layer_settings = deepcopy(document.entries)
+    for monitor in monitors:
+        _probe_3d(candidate.runtime3d, document.canvas, monitor)
+        view = Scene3DView(candidate.runtime3d)
+        candidate.view_list.append(view)
+        _place(view, monitor)
+        view.prime()
+    targets = [monitor or QGuiApplication.primaryScreen() for monitor in monitors]
+    candidate.runtime3d.topology = SceneScreenTopology(candidate.runtime3d, targets, candidate.view_list)
+
+
+def _prepare_2d(candidate: SceneManager, entries: dict, monitors: list) -> None:
+    for key, entry in entries.items():
+        for field in ('file_path', 'text_file', 'script_path'):
+            if entry.get(field) and not Path(entry[field]).is_file():
+                raise ValueError(f'Missing scene resource: {entry[field]}')
+        candidate.add_entry(key, entry)
+    for monitor in monitors:
+        candidate.open_native_widgets(monitor, show=False)
+        if not candidate.widget_list:
+            continue
+        view = (SceneCompositorView(candidate.graphic_scene, user_setting_dict.get('render_backend', 'auto'))
+                if candidate.supports_composition() else ExtendGraphicView(candidate.graphic_scene))
+        candidate.view_list.append(view)
+        _place(view, monitor)
 
 
 class _SceneSignals(QObject):
@@ -128,6 +145,8 @@ class SceneActions(QObject):
 
     def __init__(self, page, *, reader=read_scene_source, builder=prepare_playback) -> None:
         super().__init__(page)
+        self.lifetime = captured_lifetime(page)
+        self.lifetime.adopt(self)
         self.page, self.reader, self.builder = page, reader, builder
         self.pending = None
         self.wanted = None
@@ -189,7 +208,7 @@ class SceneActions(QObject):
         signals.finished.connect(self._finished, Qt.ConnectionType.QueuedConnection)
         self.pending = {'request': request, 'cancel': cancel, 'signals': signals}
         function = (lambda: self.reader(path)) if path else lambda: PreparedScene(entries).prepare()
-        QThreadPool.globalInstance().start(_SceneRead(function, cancel, signals))
+        self.lifetime.submit(_SceneRead(function, cancel, signals))
         self.status_changed.emit('')
 
     def _monitors(self, selection: str | int) -> list:
@@ -202,6 +221,7 @@ class SceneActions(QObject):
             raise ValueError('The selected scene screen is unavailable')
         return [screens[selection]]
 
+    @owned_callback
     def _finished(self, prepared: PreparedScene | None, error: str) -> None:
         pending, self.pending = self.pending, None
         operation, _path, screen, load_only, _entries, current = pending['request']
@@ -230,8 +250,13 @@ class SceneActions(QObject):
         if current and prepared.document != self.page.visual_editor.document.scene:
             raise ValueError('The editor changed while scene playback was being prepared')
         data = prepared.document if prepared.document.mode == '3d' else prepared.entries
-        candidate = None if load_only else (self.builder(data, self._monitors(screen), models=prepared.models)
-                    if self.builder is prepare_playback else self.builder(data, self._monitors(screen)))
+        candidate = None
+        if not load_only:
+            monitors = self._monitors(screen)
+            if self.builder is prepare_playback:
+                candidate = self.builder(data, monitors, models=prepared.models, lifetime=self.lifetime)
+            else:
+                candidate = self.builder(data, monitors)
         manager = self.page.scene
         old_runtime = manager.runtime3d
         old_position = old_runtime.timeline.position if old_runtime is not None else 0

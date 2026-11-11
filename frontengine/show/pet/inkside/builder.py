@@ -23,7 +23,7 @@ from frontengine.show.pet.inkside.rig import Pose, timelines
 
 FORMAT = 'frontengine.layered-pet/1'
 # Version of every built-in asset; 2 added the home poses as whole-body frames.
-ASSET_VERSION = '2'
+ASSET_VERSION = '4'
 LICENSE = 'FrontEngine built-in INKSIDE artwork, generated from frontengine/show/pet/inkside (MIT)'
 CANVAS = 256
 _SCRATCH = 448
@@ -190,17 +190,10 @@ def manifest(identifier: str, name: str, kind: str, template: str, slots: list, 
     return data
 
 
-def sprite_timelines(sprites: dict) -> dict:
-    """``{action: (atlas, frame count, ms per frame)}`` as looping whole-body sprite poses."""
-    return {action: (True, [Pose(duration, sprite=(atlas, index)) for index in range(count)])
-            for action, (atlas, count, duration) in sprites.items()}
-
-
-def build_actions(writer: AssetWriter, base: dict, palette: dict, elements_for, nudge=None,
-                  sprites: dict | None = None) -> dict:
+def build_actions(writer: AssetWriter, base: dict, palette: dict, elements_for, nudge=None) -> dict:
     """Run every timeline through ``elements_for(pose) -> list[Element]``."""
     actions = {}
-    for action, (loop, poses) in {**timelines(), **sprite_timelines(sprites or {})}.items():
+    for action, (loop, poses) in timelines().items():
         frames = []
         for pose in poses:
             points = frame_points(base, pose, nudge)

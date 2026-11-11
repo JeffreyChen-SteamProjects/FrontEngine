@@ -1,0 +1,34 @@
+{
+  "source_base": "7bf6530",
+  "platform": "Windows",
+  "python": "3.14.5",
+  "tests": {
+    "passed": 141,
+    "skipped": 1,
+    "junit": ".audit/storage-foundation-tests.xml"
+  },
+  "new_foundation_cases": 14,
+  "unexecuted": [
+    "POSIX fork runtime",
+    "Linux native locking",
+    "macOS native locking"
+  ],
+  "verified": [
+    "real process exclusion and latest settings after graceful/crash release",
+    "same-process contention before settings read",
+    "Windows case aliases",
+    "independent roots and defaults",
+    "idle clients and active writes retain ownership",
+    "closed callbacks cannot alter successor settings",
+    "hardlinked managed files refused",
+    "write failures preserve ownership and previous file",
+    "metadata and read-access failures are typed and release initialization ownership"
+  ],
+  "integration": "Independent StorageSession only. Existing global facade, homes and UI still lack this gate.",
+  "review": "Two independent reviews; accepted after typed access-error and fork-test corrections.",
+  "sha256": {
+    "frontengine/user_setting/storage_session.py": "5d903b3895ea8d27440d4f9c9ee350105feab20f37055bb19f33ad269f4e932f",
+    "frontengine/user_setting/user_setting_file.py": "a7c138e3c40e57d68bb0c81ec4cc06533d10880193ea2ee315c25a14df936637",
+    "tests/unit_test/test_storage_session.py": "fabc96636666e003cc6a66911a43c72b2a27ecd55d7af45d734eb328461f85a9"
+  }
+}

@@ -1,0 +1,259 @@
+{
+  "product_test_commit": "a6d0c721",
+  "runs": [
+    {
+      "language": "English",
+      "theme": "dark",
+      "wardrobe_checks": [
+        {
+          "dismissal": "escape",
+          "dialog_destroyed": true,
+          "focus_returned": true,
+          "profile_world_and_disk_unchanged": true
+        },
+        {
+          "dismissal": "cancel_button",
+          "dialog_destroyed": true,
+          "focus_returned": true,
+          "profile_world_and_disk_unchanged": true
+        }
+      ],
+      "tab_routes": [
+        {
+          "target": "primaryAction",
+          "tabs": 5
+        },
+        {
+          "target": "qt_tabwidget_tabbar",
+          "tabs": 13
+        },
+        {
+          "target": "QListWidget",
+          "tabs": 2
+        },
+        {
+          "target": "WrappingPushButton",
+          "tabs": 1
+        },
+        {
+          "target": "qt_tabwidget_tabbar",
+          "tabs": 14
+        },
+        {
+          "target": "WrappingPushButton",
+          "tabs": 4
+        },
+        {
+          "target": "qt_tabwidget_tabbar",
+          "tabs": 22
+        },
+        {
+          "target": "QListWidget",
+          "tabs": 5
+        },
+        {
+          "target": "WrappingPushButton",
+          "tabs": 1
+        },
+        {
+          "target": "WrappingPushButton",
+          "tabs": 6
+        },
+        {
+          "target": "WrappingPushButton",
+          "tabs": 1
+        },
+        {
+          "target": "QCheckBox",
+          "tabs": 3
+        },
+        {
+          "target": "QLineEdit",
+          "tabs": 2
+        },
+        {
+          "target": "WrappingPushButton",
+          "tabs": 0
+        },
+        {
+          "target": "QCheckBox",
+          "tabs": 3
+        },
+        {
+          "target": "QLineEdit",
+          "tabs": 2
+        },
+        {
+          "target": "QPushButton",
+          "tabs": 10
+        }
+      ],
+      "cold_reload": {
+        "passed": true,
+        "initial_snapshot_exact": true,
+        "profiles_exact": true,
+        "leases_reacquired": true,
+        "saved_exact": true,
+        "temporary_directory_removed": true
+      },
+      "observer": {
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "child_exit": 0
+      },
+      "runtime_closed": true,
+      "temporary_directory_removed": true,
+      "evidence_sha256": {
+        "result.json": "23e742bd3d3f0e779ea65fcba03728c37be861cd56413ef883a31cd493074f5d",
+        "cold-result.json": "5bd41edb786e3fe553500e96167a938f64483ad3f1f564c603795a88e3110cbc",
+        "wardrobe-escape.png": "8cabd4b5954777ec47baee5eae8ea5eaf324a1296d1666b4b3a7a58b18d570d8",
+        "wardrobe-cancel_button.png": "8cabd4b5954777ec47baee5eae8ea5eaf324a1296d1666b4b3a7a58b18d570d8",
+        "shutdown-world.json": "4fdd6651f5e105d175e8f3d89dcffe361d19dade39834fda07891ddef8df146c",
+        "profiles.json": "47cf17de26cb6601d85b055dab363cdd68316299d8495dff635d985232d922b0"
+      }
+    },
+    {
+      "language": "Traditional_Chinese",
+      "theme": "light",
+      "wardrobe_checks": [
+        {
+          "dismissal": "escape",
+          "dialog_destroyed": true,
+          "focus_returned": true,
+          "profile_world_and_disk_unchanged": true
+        },
+        {
+          "dismissal": "cancel_button",
+          "dialog_destroyed": true,
+          "focus_returned": true,
+          "profile_world_and_disk_unchanged": true
+        }
+      ],
+      "tab_routes": [
+        {
+          "target": "primaryAction",
+          "tabs": 5
+        },
+        {
+          "target": "qt_tabwidget_tabbar",
+          "tabs": 13
+        },
+        {
+          "target": "QListWidget",
+          "tabs": 1
+        },
+        {
+          "target": "WrappingPushButton",
+          "tabs": 1
+        },
+        {
+          "target": "qt_tabwidget_tabbar",
+          "tabs": 14
+        },
+        {
+          "target": "WrappingPushButton",
+          "tabs": 3
+        },
+        {
+          "target": "qt_tabwidget_tabbar",
+          "tabs": 22
+        },
+        {
+          "target": "QListWidget",
+          "tabs": 4
+        },
+        {
+          "target": "WrappingPushButton",
+          "tabs": 1
+        },
+        {
+          "target": "WrappingPushButton",
+          "tabs": 6
+        },
+        {
+          "target": "WrappingPushButton",
+          "tabs": 1
+        },
+        {
+          "target": "QCheckBox",
+          "tabs": 3
+        },
+        {
+          "target": "QLineEdit",
+          "tabs": 2
+        },
+        {
+          "target": "WrappingPushButton",
+          "tabs": 0
+        },
+        {
+          "target": "QCheckBox",
+          "tabs": 3
+        },
+        {
+          "target": "QLineEdit",
+          "tabs": 2
+        },
+        {
+          "target": "QPushButton",
+          "tabs": 10
+        }
+      ],
+      "cold_reload": {
+        "passed": true,
+        "initial_snapshot_exact": true,
+        "profiles_exact": true,
+        "leases_reacquired": true,
+        "saved_exact": true,
+        "temporary_directory_removed": true
+      },
+      "observer": {
+        "before": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "after": {
+          "foreground": 2558004,
+          "cursor": [
+            768,
+            432
+          ]
+        },
+        "child_exit": 0
+      },
+      "runtime_closed": true,
+      "temporary_directory_removed": true,
+      "evidence_sha256": {
+        "result.json": "385739b4725f9a0b32337c525ac0207c9d6f872937c5406b8f7947ddc9f678cb",
+        "cold-result.json": "5bd41edb786e3fe553500e96167a938f64483ad3f1f564c603795a88e3110cbc",
+        "wardrobe-escape.png": "ff9d292c2a039948e8be2f327583340ac456fbcd4e35b87a46a9274521132157",
+        "wardrobe-cancel_button.png": "ff9d292c2a039948e8be2f327583340ac456fbcd4e35b87a46a9274521132157",
+        "shutdown-world.json": "2725bf5c395bd2e4b72df235fd468023f1407c5fcf8633ee5a43de4022736548",
+        "profiles.json": "50048e8ccd15def9e5daf20fa0ad20112670aa4f635f7e9e28dc9fd95edaf594"
+      }
+    }
+  ],
+  "frozen_source_files_unchanged": 752,
+  "visual_review": "Original English dark wardrobe screenshot shows mirror checked, unsaved Keyboard draft text, and Apply/Cancel buttons.",
+  "scope": "Actual resident Wardrobe button reached by Tab and activated by Space; preview mirror and name field modified via widget-local keys; Escape and keyboard Cancel each destroy dialog and restore launcher focus. Profiles/world and user_setting.json bytes unchanged before close; independent cold reload exact.",
+  "limits": [
+    "Default whole-image pet with no layered character installed, so no garment preview or appearance apply verification.",
+    "Two language/theme pairs at requested900x740, single current monitor; no full dialog layout or screen-reader acceptance.",
+    "Private native desktop, QTest widget events, host services substituted; no OS input."
+  ]
+}

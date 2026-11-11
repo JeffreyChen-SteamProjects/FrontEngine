@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+from shiboken6 import isValid
 
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import (
@@ -57,9 +58,11 @@ class SceneActionDialog(QDialog):
             self.error.setText(str(error))
 
     def _browse(self) -> None:
+        if not isValid(self) or not self.isVisible():
+            return
         path, _filter = QFileDialog.getOpenFileName(self, translate('rules_scene_path'),
                                                  filter='Scene (*.json *.fescene *.puppet)')
-        if path:
+        if isValid(self) and self.isVisible() and path:
             self.path.setText(path)
 
     def _layer_fields(self, value: str) -> None:

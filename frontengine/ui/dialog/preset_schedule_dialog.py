@@ -19,10 +19,11 @@ from PySide6.QtWidgets import (
 )
 
 from frontengine.user_setting.preset_repository import PresetRepository
-from frontengine.user_setting.user_setting_file import user_setting_dict, write_user_setting
+from frontengine.user_setting.user_setting_file import (
+    replace_setting, user_setting_dict, write_user_setting,
+)
 from frontengine.utils.logging.loggin_instance import front_engine_logger
-from frontengine.utils.multi_language.language_wrapper import language_wrapper
-from frontengine.utils.multi_language.retranslate import tr
+from frontengine.utils.multi_language.retranslate import retranslator, tr
 from frontengine.utils.preset_schedule.preset_schedule_service import (
     DEFAULT_PRESET_SCHEDULE, normalize_days,
 )
@@ -42,10 +43,6 @@ DAY_KEYS = (
 )
 
 
-def _t(key: str, fallback: str) -> str:
-    return language_wrapper.language_word_dict.get(key, fallback)
-
-
 def current_settings() -> Dict[str, Any]:
     """目前的排程設定（缺項目補預設值）。"""
     stored = user_setting_dict.get(SETTING_KEY)
@@ -63,7 +60,7 @@ class PresetScheduleDialog(QDialog):
     def __init__(self, parent: Optional[QWidget] = None, repository=None) -> None:
         front_engine_logger.info("[PresetScheduleDialog] Init")
         super().__init__(parent)
-        self.setWindowTitle(_t("preset_schedule_title", "Scheduled preset"))
+        retranslator.bind(self, "preset_schedule_title", "Scheduled preset", "setWindowTitle")
         settings = current_settings()
         self._repository = repository or PresetRepository()
 
@@ -72,6 +69,7 @@ class PresetScheduleDialog(QDialog):
 
         self.preset_label = tr(QLabel(), "preset_schedule_preset", "Preset")
         self.preset_combobox = QComboBox()
+        self.preset_label.setBuddy(self.preset_combobox)
         # 只列真的存在的預設集：讓人自己打名字的話，打錯了要等到排程觸發的那一刻
         # 才會發現什麼都沒發生。
         # Only presets that exist are listed: with a free-text name, a typo is
@@ -83,10 +81,14 @@ class PresetScheduleDialog(QDialog):
             self.preset_combobox.setCurrentIndex(index)
 
         self.time_label = tr(QLabel(), "preset_schedule_time", "At")
+        self.hour_label = tr(QLabel(), "preset_schedule_hour", "Hour")
         self.hour_spinbox = QSpinBox()
+        self.hour_label.setBuddy(self.hour_spinbox)
         self.hour_spinbox.setRange(0, 23)
         self.hour_spinbox.setValue(int(settings.get("hour", 9)) % 24)
+        self.minute_label = tr(QLabel(), "preset_schedule_minute", "Minute")
         self.minute_spinbox = QSpinBox()
+        self.minute_label.setBuddy(self.minute_spinbox)
         self.minute_spinbox.setRange(0, 59)
         self.minute_spinbox.setValue(int(settings.get("minute", 0)) % 60)
 
@@ -106,6 +108,8 @@ class PresetScheduleDialog(QDialog):
             "With no day ticked it runs every day. It fires once as the time passes, "
             "so starting FrontEngine after that time will not apply it late.")
         self.hint_label.setWordWrap(True)
+        self.status = QLabel()
+        self.status.setWordWrap(True)
 
         buttons = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
@@ -116,13 +120,16 @@ class PresetScheduleDialog(QDialog):
         layout.addWidget(self.enable_checkbox, 0, 0, 1, 3)
         layout.addWidget(self.preset_label, 1, 0)
         layout.addWidget(self.preset_combobox, 1, 1, 1, 2)
-        layout.addWidget(self.time_label, 2, 0)
-        layout.addWidget(self.hour_spinbox, 2, 1)
-        layout.addWidget(self.minute_spinbox, 2, 2)
-        layout.addWidget(self.days_label, 3, 0)
-        layout.addWidget(days_holder, 3, 1, 1, 2)
-        layout.addWidget(self.hint_label, 4, 0, 1, 3)
-        layout.addWidget(buttons, 5, 0, 1, 3)
+        layout.addWidget(self.time_label, 2, 0, 2, 1)
+        layout.addWidget(self.hour_label, 2, 1)
+        layout.addWidget(self.minute_label, 2, 2)
+        layout.addWidget(self.hour_spinbox, 3, 1)
+        layout.addWidget(self.minute_spinbox, 3, 2)
+        layout.addWidget(self.days_label, 4, 0)
+        layout.addWidget(days_holder, 4, 1, 1, 2)
+        layout.addWidget(self.hint_label, 5, 0, 1, 3)
+        layout.addWidget(self.status, 6, 0, 1, 3)
+        layout.addWidget(buttons, 7, 0, 1, 3)
 
     def _preset_names(self) -> List[str]:
         try:
@@ -143,8 +150,13 @@ class PresetScheduleDialog(QDialog):
         }
 
     def accept(self) -> None:
-        user_setting_dict[SETTING_KEY] = self.collect()
-        write_user_setting()
-        front_engine_logger.info(
-            f"[PresetScheduleDialog] saved | {user_setting_dict[SETTING_KEY]}")
+        settings = self.collect()
+        try:
+            replace_setting(user_setting_dict, SETTING_KEY, settings, write_user_setting)
+        except (OSError, ValueError) as error:
+            # The previous schedule stays live and the choices stay on screen to retry.
+            self.status.setText(str(error))
+            return
+        self.status.clear()
+        front_engine_logger.info(f"[PresetScheduleDialog] saved | {settings}")
         super().accept()

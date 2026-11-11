@@ -1,3 +1,4 @@
+from frontengine.ui.runtime_lifetime import owned_action
 from typing import Optional
 
 from PySide6.QtWidgets import QPushButton
@@ -9,8 +10,8 @@ from frontengine.utils.multi_language.retranslate import tr
 
 
 class GIFSceneSettingUI(BaseSceneSettingUI):
-    def __init__(self, script_ui: SceneManagerUI):
-        super().__init__(script_ui)
+    def __init__(self, script_ui: SceneManagerUI, *, lifetime):
+        super().__init__(script_ui, lifetime=lifetime)
         self.gif_image_path: Optional[str] = None
 
         opacity_label, self.opacity_value, self.opacity_slider = self._build_slider("Opacity", 1, 100, 20)
@@ -40,6 +41,7 @@ class GIFSceneSettingUI(BaseSceneSettingUI):
         self.grid_layout.addWidget(self.ready_label, 2, 1)
         self.grid_layout.addWidget(self.update_scene_button, 3, 0)
 
+    @owned_action
     def _update_scene(self) -> None:
         if not self.gif_image_path:
             self._warn_not_prepared()

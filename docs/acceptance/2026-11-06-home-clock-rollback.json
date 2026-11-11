@@ -1,0 +1,84 @@
+{
+  "product_test_commit": "6a097aa0",
+  "scope": "Deterministic offscreen HomeService clock and single-resident work acceptance; no operating-system clock mutation.",
+  "probes": [
+    {
+      "result": {
+        "passed": true,
+        "default_clock_is_monotonic": true,
+        "samples": [
+          {
+            "delta_seconds": 1.0,
+            "elapsed_world_ms": 1000
+          },
+          {
+            "delta_seconds": -3600.0,
+            "elapsed_world_ms": 1000
+          },
+          {
+            "delta_seconds": 0.0,
+            "elapsed_world_ms": 1000
+          },
+          {
+            "delta_seconds": 0.2,
+            "elapsed_world_ms": 1200
+          },
+          {
+            "delta_seconds": 5.001,
+            "elapsed_world_ms": 1200
+          },
+          {
+            "delta_seconds": 0.2,
+            "elapsed_world_ms": 1400
+          }
+        ],
+        "source_sha256": "172519c6a57d45b5b0938facb42e5f233e4b1c2ff6158b3563234af40fc63e97",
+        "scope": "Offscreen real HomeService with injected clock and temporary storage; no residents.",
+        "limitations": "Not native UI, actual OS clock change, suspend/resume, or resident settlement acceptance."
+      },
+      "harness_sha256": "af8886c6567e22fc72917765261174af6301d30dbd335fbfcca23afed6c22179",
+      "harness_source": "\"\"\"Isolated service clock probe; never changes the operating system clock.\"\"\"\nimport hashlib\nimport inspect\nimport json\nimport os\nfrom pathlib import Path\nimport sys\nimport tempfile\nimport time\n\nROOT = Path(__file__).resolve().parents[1]\nOUTPUT = ROOT / '.audit/clock-rollback-result.json'\nsys.path.insert(0, str(ROOT))\nos.environ['QT_QPA_PLATFORM'] = 'offscreen'\n\nwith tempfile.TemporaryDirectory(prefix='frontengine-clock-') as temporary:\n    previous = Path.cwd()\n    os.chdir(temporary)\n    from PySide6.QtWidgets import QApplication\n    from frontengine.show.pet_game.home_service import HomeService, MAX_GAP_MS\n    from frontengine.user_setting.storage_session import StorageSession\n    from frontengine.user_setting.pet_game_save import HomeSaveStore\n    from frontengine.user_setting.pet_profiles import PetProfiles\n    from frontengine.utils.pet_game.catalog import builtin_catalog\n\n    app = QApplication([])\n    assert inspect.signature(HomeService).parameters['clock'].default is time.monotonic\n    owner = StorageSession.open(Path(temporary) / 'settings')\n    store = HomeSaveStore(owner, builtin_catalog())\n    now = [100.0]\n    service = HomeService(None, store, PetProfiles({}, lambda: None), clock=lambda: now[0])\n    samples = []\n    try:\n        service.create_home('fixture', 0, 900, 40, seed=3)\n        service.start()\n        baseline = service.world.time_ms\n        # No Qt event processing: only the specified clock samples drive ticks.\n        for delta, expected in [(1.0, 1000), (-3600.0, 1000), (0.0, 1000),\n                                (0.2, 1200), ((MAX_GAP_MS + 1) / 1000, 1200),\n                                (0.2, 1400)]:\n            now[0] += delta\n            service._tick()\n            elapsed = service.world.time_ms - baseline\n            assert elapsed == expected, (delta, elapsed)\n            samples.append({'delta_seconds': delta, 'elapsed_world_ms': elapsed})\n        assert service.save_now()\n        assert service.shutdown()\n    finally:\n        service.shutdown()\n        store.close()\n        owner.close()\n        os.chdir(previous)\n\nsource = ROOT / 'frontengine/show/pet_game/home_service.py'\nOUTPUT.write_text(json.dumps({\n    'passed': True, 'default_clock_is_monotonic': True, 'samples': samples,\n    'source_sha256': hashlib.sha256(source.read_bytes()).hexdigest(),\n    'scope': 'Offscreen real HomeService with injected clock and temporary storage; no residents.',\n    'limitations': 'Not native UI, actual OS clock change, suspend/resume, or resident settlement acceptance.'\n}, indent=2) + '\\n', encoding='utf-8')\nprint(OUTPUT.read_text(encoding='utf-8'))\n"
+    },
+    {
+      "result": {
+        "passed": true,
+        "default_clock_is_monotonic": true,
+        "samples": [
+          {
+            "delta_seconds": -3600.0,
+            "snapshot_unchanged": true,
+            "progress_ms": 33200
+          },
+          {
+            "delta_seconds": 0.0,
+            "snapshot_unchanged": true,
+            "progress_ms": 33200
+          },
+          {
+            "delta_seconds": 5.001,
+            "snapshot_unchanged": true,
+            "progress_ms": 33200
+          },
+          {
+            "settlements": 1,
+            "transaction": "t5:u0",
+            "work_recovery_ticks": 434,
+            "ledger_stable_after_second_rollback": true
+          }
+        ],
+        "source_sha256": "172519c6a57d45b5b0938facb42e5f233e4b1c2ff6158b3563234af40fc63e97",
+        "scope": "Offscreen real HomeService with injected clock and temporary storage; one resident and one manual letter task.",
+        "limitations": "Not native UI, actual OS clock change, suspend/resume, or crash/restart acceptance; deterministic injected ticks only."
+      },
+      "harness_sha256": "e5ce5ec3753ebcd1772748e2d1fae3e77c1794ebc7421200107feb59cc30beb1",
+      "harness_source": "\"\"\"Isolated service clock probe; never changes the operating system clock.\"\"\"\nimport hashlib\nimport inspect\nimport json\nimport os\nfrom pathlib import Path\nimport sys\nimport tempfile\nimport time\n\nROOT = Path(__file__).resolve().parents[1]\nOUTPUT = ROOT / '.audit/clock-work-rollback-result.json'\nsys.path.insert(0, str(ROOT))\nos.environ['QT_QPA_PLATFORM'] = 'offscreen'\n\nwith tempfile.TemporaryDirectory(prefix='frontengine-clock-') as temporary:\n    previous = Path.cwd()\n    os.chdir(temporary)\n    from PySide6.QtWidgets import QApplication\n    from frontengine.show.pet_game.home_service import HomeService, MAX_GAP_MS\n    from frontengine.user_setting.storage_session import StorageSession\n    from frontengine.user_setting.pet_game_save import HomeSaveStore\n    from frontengine.user_setting.pet_profiles import PetProfiles\n    from frontengine.utils.pet_game.catalog import builtin_catalog\n\n    app = QApplication([])\n    assert inspect.signature(HomeService).parameters['clock'].default is time.monotonic\n    owner = StorageSession.open(Path(temporary) / 'settings')\n    store = HomeSaveStore(owner, builtin_catalog())\n    now = [100.0]\n    profiles = PetProfiles({}, lambda: None)\n    record = profiles.create('Clock probe')\n    service = HomeService(None, store, profiles, clock=lambda: now[0])\n    from frontengine.utils.pet_game.snapshot import to_dict\n    events = []\n    service.events_ready.connect(events.extend)\n    samples = []\n    try:\n        service.create_home('fixture', 0, 900, 40, seed=3)\n        world = service.world\n        world.automatic = False\n        zone = next(iter(world.zones))\n        for definition, cell in [('bed_basic', 2), ('table_basic', 7), ('desk_basic', 12)]:\n            assert service.run(lambda w, d=definition, c=cell: w.place(d, zone, c))[0] == 'accepted'\n        assert service.adopt(record['id']) == 'accepted'\n        status, task_id = service.run(lambda w: w.create_task('letter', record['id']))\n        assert status == 'accepted'\n        service.start()\n        def tick(delta):\n            now[0] += delta\n            service._tick()\n        for _ in range(200):\n            tick(0.2)\n        task = world.tasks[task_id]\n        assert task.progress_ms > 0\n        assert not any(e['kind'] == 'settled' for e in events)\n        for delta in [-3600.0, 0.0, (MAX_GAP_MS + 1) / 1000]:\n            before = to_dict(world)\n            tick(delta)\n            assert to_dict(world) == before\n            samples.append({'delta_seconds': delta, 'snapshot_unchanged': True,\n                            'progress_ms': task.progress_ms})\n        for steps in range(3000):\n            tick(0.2)\n            if task_id not in world.tasks:\n                break\n        assert task_id not in world.tasks, 'Task never completed after clock recovery'\n        settled = [e for e in events if e['kind'] == 'settled' and e['task'] == task_id]\n        assert len(settled) == 1\n        transaction = settled[0]['transaction']\n        assert world.ledger.applied(transaction)\n        assert len([e for e in world.ledger.journal if e['id'] == transaction]) == 1\n        after_settlement = world.ledger.to_dict()\n        tick(-3600.0)\n        for _ in range(200):\n            tick(0.2)\n        assert world.ledger.to_dict() == after_settlement\n        assert len([e for e in events if e['kind'] == 'settled' and e['task'] == task_id]) == 1\n        samples.append({'settlements': 1, 'transaction': transaction,\n                        'work_recovery_ticks': steps + 1, 'ledger_stable_after_second_rollback': True})\n        assert service.save_now()\n        assert service.shutdown()\n    finally:\n        service.shutdown()\n        store.close()\n        owner.close()\n        os.chdir(previous)\n\nsource = ROOT / 'frontengine/show/pet_game/home_service.py'\nOUTPUT.write_text(json.dumps({\n    'passed': True, 'default_clock_is_monotonic': True, 'samples': samples,\n    'source_sha256': hashlib.sha256(source.read_bytes()).hexdigest(),\n    'scope': 'Offscreen real HomeService with injected clock and temporary storage; one resident and one manual letter task.',\n    'limitations': 'Not native UI, actual OS clock change, suspend/resume, or crash/restart acceptance; deterministic injected ticks only.'\n}, indent=2) + '\\n', encoding='utf-8')\nprint(OUTPUT.read_text(encoding='utf-8'))\n"
+    }
+  ],
+  "limitations": [
+    "Injected clock ticks, not actual operating-system clock rollback or suspend/resume.",
+    "One manual letter task, not all recipes, automatic schedules or crash settlement phases.",
+    "Default monotonic source identity checked; system time was never changed.",
+    "Independent review remains pending."
+  ],
+  "probe_correction": "Initial empty-world probe assumed time started at zero; corrected to compare elapsed time against the actual initial world clock. No product changes."
+}

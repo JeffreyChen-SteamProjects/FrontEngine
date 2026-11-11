@@ -1,4 +1,4 @@
-"""Shared, localized care commands for sprite and native pet windows."""
+"""Shared, localized care commands for layered and native (Puppet) pet windows."""
 from PySide6.QtCore import QObject, Slot
 from PySide6.QtGui import QAction
 

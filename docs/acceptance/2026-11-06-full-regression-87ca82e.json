@@ -1,0 +1,68 @@
+{
+  "exit": 0,
+  "source_unchanged": true,
+  "source_count": 748,
+  "interpreter": "D:\\Codes\\FrontEngine\\.audit\\test-runtime-3145\\Scripts\\python.exe",
+  "product_test_commit": "87ca82e",
+  "total": 3167,
+  "passed": 3164,
+  "failed": 0,
+  "skipped": [
+    {
+      "module": "tests.unit_test.test_default_storage_binding",
+      "name": "test_forked_empty_default_registry_rejects_inherited_locked_mutex",
+      "reason": "Requires POSIX fork"
+    },
+    {
+      "module": "tests.unit_test.test_remote_tls",
+      "name": "test_private_key_and_directory_are_owner_only",
+      "reason": "POSIX permission semantics"
+    },
+    {
+      "module": "tests.unit_test.test_storage_session",
+      "name": "test_forked_child_cannot_use_or_release_parent_owner",
+      "reason": "Requires POSIX fork"
+    }
+  ],
+  "junit_suite_seconds": "1839.210",
+  "pytest_reported_seconds": 1840.43,
+  "required_cases": {
+    "visible_focus": [
+      "test_item_view_focus_is_visible_without_selection_or_resizing[QListView-light]",
+      "test_item_view_focus_is_visible_without_selection_or_resizing[QListView-dark]",
+      "test_item_view_focus_is_visible_without_selection_or_resizing[QListWidget-light]",
+      "test_item_view_focus_is_visible_without_selection_or_resizing[QListWidget-dark]",
+      "test_item_view_focus_is_visible_without_selection_or_resizing[QTreeView-light]",
+      "test_item_view_focus_is_visible_without_selection_or_resizing[QTreeView-dark]",
+      "test_item_view_focus_is_visible_without_selection_or_resizing[QTreeWidget-light]",
+      "test_item_view_focus_is_visible_without_selection_or_resizing[QTreeWidget-dark]",
+      "test_item_view_focus_is_visible_without_selection_or_resizing[QTableView-light]",
+      "test_item_view_focus_is_visible_without_selection_or_resizing[QTableView-dark]",
+      "test_item_view_focus_is_visible_without_selection_or_resizing[QTableWidget-light]",
+      "test_item_view_focus_is_visible_without_selection_or_resizing[QTableWidget-dark]"
+    ],
+    "accessible_name": [
+      "test_work_list_accessible_name_follows_language"
+    ],
+    "exact_page_search": [
+      "test_exact_page_name_enter_opens_matching_page[]",
+      "test_exact_page_name_enter_opens_matching_page[Control]"
+    ],
+    "plugin_search_and_collision": [
+      "test_registered_plugin_page_is_searchable_without_recreating_it[Example clock]",
+      "test_registered_plugin_page_is_searchable_without_recreating_it[tab_text_text]"
+    ]
+  },
+  "diagnostic_markers": [],
+  "evidence_sha256": {
+    "pytest.log": "dce17ed60f81da12213e2e755c6a85a34fa8b829b45307d1b06e7eb3f1d8f05d",
+    "junit.xml": "d49ebb61ce1fe4e7795da002a713c8eaf74d9eaab8e5c716a35c4f454acf54ee",
+    "source-manifest.json": "0c5c44a67eb561cc28b2ddbbdd49559f78b88341cf010b3636fe449707aa634e",
+    "result.json": "dfe34e45a451f3e73a3aa5b015cb06fd7087645ac1d0a904fc5df48a509ef4a1"
+  },
+  "limits": [
+    "Windows offscreen Qt suite; no native input, hardware or independent-review acceptance.",
+    "Documentation-only commits after the source baseline are not product changes.",
+    "Three expected POSIX-only cases were skipped; names and reasons were verified."
+  ]
+}

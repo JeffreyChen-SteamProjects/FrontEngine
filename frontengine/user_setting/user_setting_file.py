@@ -1,6 +1,6 @@
-from os import getcwd
+from copy import deepcopy
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 from frontengine.utils.json.json_repository import JsonRepository
 from frontengine.utils.preset_schedule.preset_schedule_service import DEFAULT_PRESET_SCHEDULE
@@ -34,7 +34,7 @@ default_hotkeys: Dict[str, str] = {
     "move_window_next_monitor": "<ctrl>+<shift>+<f3>",
 }
 
-user_setting_dict: Dict[str, Any] = {
+_DEFAULT_SETTINGS: Dict[str, Any] = {
     "language": "English",
     "theme": "system",
     "hotkeys": dict(default_hotkeys),
@@ -126,65 +126,98 @@ user_setting_dict: Dict[str, Any] = {
     "pet_timeline": [],
     # Whether the pet home was running when FrontEngine last closed
     "pet_home_running": False,
+    # Desktop pets come back on the next start (see user_setting/desktop_pets.py)
+    "pet_desktop_return": True,
+    "pet_desktop_pets": [],
 }
 
 
-def _repository() -> JsonRepository:
-    return JsonRepository(Path(getcwd()) / "user_setting.json")
+def default_settings() -> Dict[str, Any]:
+    """Return independent defaults without copying another live session's edits."""
+    return deepcopy(_DEFAULT_SETTINGS)
+
+
+user_setting_dict: Dict[str, Any] = default_settings()
 
 
 def write_user_setting() -> Path:
-    return _repository().save(user_setting_dict)
+    from frontengine.user_setting.default_storage import default_storage
+    return default_storage().save_settings()
+
+
+_ABSENT = object()
+
+
+def replace_setting(settings: Dict[str, Any], key: str, value: Any,
+                    write: Callable[[], Any]) -> None:
+    """Store one entry and save it; if saving fails, put back the previous entry.
+
+    Services read the live dictionary, so leaving the new value in place after a
+    failed write would apply settings that are not on disk. A missing entry is
+    removed again rather than restored as None. The write error is re-raised.
+    """
+    previous = settings.get(key, _ABSENT)
+    settings[key] = value
+    try:
+        write()
+    except BaseException:
+        if previous is _ABSENT:
+            settings.pop(key, None)
+        else:
+            settings[key] = previous
+        raise
 
 
 def read_user_setting() -> Path:
-    repo = _repository()
-    repo.load_into(user_setting_dict)
-    return repo.path
+    """Return the owned initial load without rebinding a live settings dictionary."""
+    from frontengine.user_setting.default_storage import default_storage
+    from frontengine.user_setting.storage_session import SETTINGS_NAME
+    storage = default_storage()
+    with storage._operation():
+        return storage._checked_path(SETTINGS_NAME)
 
 
 def is_stored(key: str) -> bool:
-    """
-    這個鍵是不是真的寫在設定檔裡（而不是這裡的預設值）。
-
-    載入是把檔案 merge 到預設值上，所以載入之後 `user_setting_dict` 分不出兩者。
-    「使用者從沒挑過語言」和「使用者挑了英文」要做的事不一樣，得問檔案本身。
-
-    Whether `key` is actually in the settings file rather than a default here.
-
-    Loading merges the file over the defaults, so afterwards `user_setting_dict`
-    cannot tell the two apart. "The user never chose a language" and "the user
-    chose English" call for different behaviour, so this asks the file itself.
-    """
-    repo = _repository()
-    if not repo.exists():
-        return False
-    data = repo.load()
-    return isinstance(data, dict) and key in data
+    """Check whether the key exists on disk under the current directory owner."""
+    from frontengine.user_setting.default_storage import default_storage
+    from frontengine.user_setting.storage_session import SETTINGS_NAME
+    storage = default_storage()
+    with storage._settings_transaction():
+        data = JsonRepository(storage._checked_path(SETTINGS_NAME)).load()
+        return isinstance(data, dict) and key in data
 
 
 def export_user_setting(destination: Path) -> Path:
-    """將目前所有設定寫出到指定路徑 / Write all current settings to `destination`."""
-    destination = Path(destination)
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    data = {key: value for key, value in user_setting_dict.items() if key != 'plugin_grants'}
-    return JsonRepository(destination).save(data)
+    """Export current settings without credentials or managed-file collisions."""
+    from frontengine.user_setting.default_storage import default_storage
+    from frontengine.user_setting.storage_session import checked_export_destination
+    storage = default_storage()
+    with storage._settings_transaction():
+        destination = checked_export_destination(destination)
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        data = {key: value for key, value in storage.settings.items() if key != 'plugin_grants'}
+        return JsonRepository(destination).save(data)
 
 
 def import_user_setting(source: Path) -> None:
-    """
-    從檔案匯入設定並合併、持久化。非 JSON 物件會丟出 ValueError。
-    Import settings from a file, merge them in, and persist. A non-object
-    document raises ValueError.
-    """
-    repo = JsonRepository(Path(source))
-    if not repo.exists():
-        raise FileNotFoundError(f"File not found: {source}")
-    data = repo.load()
-    if not isinstance(data, dict):
-        raise ValueError("Settings file must contain a JSON object")
-    user_setting_dict.update({key: value for key, value in data.items() if key != 'plugin_grants'})
-    write_user_setting()
+    """Merge an imported object atomically, retaining memory on save failure."""
+    from frontengine.user_setting.default_storage import default_storage
+    storage = default_storage()
+    with storage._settings_transaction():
+        repo = JsonRepository(Path(source))
+        if not repo.exists():
+            raise FileNotFoundError(f"File not found: {source}")
+        data = repo.load()
+        if not isinstance(data, dict):
+            raise ValueError("Settings file must contain a JSON object")
+        previous = dict(storage.settings)
+        storage.settings.update({key: value for key, value in data.items() if key != 'plugin_grants'})
+        try:
+            storage.save_settings()
+        except Exception:
+            storage.settings.clear()
+            storage.settings.update(previous)
+            raise
 
 
 def save_overlay_geometry(kind: str, x: int, y: int, width: int, height: int) -> None:
