@@ -41,7 +41,8 @@ def test_the_page_opens_with_the_cards_and_everything_else_folded(tmp_path, monk
         assert not hasattr(page.quick, "own_picture")            # pets are layered only: no picture card
         assert not hasattr(page, "choose_pack_button")
         assert not hasattr(page, "pack_editor_button")
-        assert page.quick.empty.isVisibleTo(page) and not page.quick.pets.isVisibleTo(page)
+        assert page.quick.empty.isVisibleTo(page)
+        assert not page.quick.pets.isVisibleTo(page)
         assert not page.quick.wardrobe_button.isEnabled()
     finally:
         _close(page)

@@ -67,6 +67,12 @@ def test_a_pack_adds_namespaced_furniture_with_its_pictures(tmp_path):
     (dict(furniture=[LAMP, LAMP]), "Duplicate"),
     (dict(furniture=[dict(SEAT, poses=["dance"])]), "poses"),
     (dict(furniture=[dict(LAMP, category="workstation")]), "profession"),
+    (dict(furniture=[dict(LAMP, width=True)]), "width"),
+    (dict(furniture=[dict(LAMP, width=1.0)]), "width"),
+    (dict(furniture=[dict(LAMP, width="1")]), "width"),
+    (dict(furniture=[dict(LAMP, width=0)]), "width"),
+    (dict(furniture=[dict(LAMP, width=9)]), "width"),
+    (dict(furniture=[dict(LAMP, price=False)]), "price"),
     (dict(furniture=[dict(LAMP, art="../../escape")]), "art"),
     (dict(name="x" * 200), "name"),
 ])

@@ -22,7 +22,8 @@ def test_the_collection_has_forty_five_pieces_and_every_new_one_is_drawn():
         assert 0 < definition.sell_back <= definition.price // 2 + 1
         for theme in THEMES:
             image = picture(theme, name)
-            assert image is not None and not image.isNull(), (theme, name)
+            assert image is not None, (theme, name)
+            assert not image.isNull(), (theme, name)
 
 
 def _home():

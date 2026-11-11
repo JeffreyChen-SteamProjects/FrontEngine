@@ -477,7 +477,8 @@ class HomeStrip(HomeView):
     def place_toolbar(self) -> None:
         """⌂ and the toolbar sit at the top of the strip, on the remembered side, clear of the taskbar."""
         opened = self.toolbar_open
-        self.toggle.setText(("‹" if self.dock == "left" else "›") if opened else ("›" if self.dock == "left" else "‹"))
+        points_left = opened == (self.dock == "left")
+        self.toggle.setText("‹" if points_left else "›")
         for widget in (*self.shortcut_buttons, self.info):
             widget.setVisible(opened)
         self.refresh_info()

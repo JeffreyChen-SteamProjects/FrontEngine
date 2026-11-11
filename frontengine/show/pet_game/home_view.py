@@ -482,6 +482,16 @@ class HomeView(QWidget):
             return
         super().mouseReleaseEvent(event)
 
+    def _select_furniture(self, point: QPointF, dragging: bool = False) -> bool:
+        for piece, definition in self.world.in_zone(self.zone):
+            bounds = self.piece_rect(piece, definition)
+            if bounds.contains(point):
+                if dragging:
+                    self._piece_drag = (piece.identifier, point.x() - bounds.left())
+                self.furniture_selected.emit(piece.identifier)
+                return True
+        return False
+
     def mousePressEvent(self, event: QMouseEvent) -> None:
         if self.world is None or self.zone not in self.world.zones or event.button() != Qt.MouseButton.LeftButton:
             super().mousePressEvent(event)
@@ -493,22 +503,15 @@ class HomeView(QWidget):
             self._painting = (cell, cell)
             self.update()
             return
-        if self.drag_enabled:
-            for piece, definition in self.world.in_zone(self.zone):
-                if self.piece_rect(piece, definition).contains(point):
-                    self._piece_drag = (piece.identifier, point.x() - self.piece_rect(piece, definition).left())
-                    self.furniture_selected.emit(piece.identifier)
-                    return
+        if self.drag_enabled and self._select_furniture(point, dragging=True):
+            return
         for resident in sorted(self.world.residents.values(), key=lambda item: item.identifier):
             if resident.zone == self.zone:
                 if self.resident_box(resident).adjusted(-3, -3, 3, 3).contains(point):
                     self.resident_selected.emit(resident.identifier)
                     return
-        if self.preview is None:
-            for piece, definition in self.world.in_zone(self.zone):
-                if self.piece_rect(piece, definition).contains(point):
-                    self.furniture_selected.emit(piece.identifier)
-                    return
+        if self.preview is None and self._select_furniture(point):
+            return
         cell = int(self.x_cell(point.x()))
         if 0 <= cell < self.world.zones[self.zone].width_cells:
             self.cell_clicked.emit(cell)

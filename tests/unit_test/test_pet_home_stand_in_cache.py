@@ -35,5 +35,6 @@ def test_the_same_stand_in_is_built_once_and_shared(monkeypatch):
         thread.join(120)
     _prepare(key, owner)
     assert builds == ["inkside-pip"]
-    assert len(delivered) == 4 and delivered[0] is not None
+    assert len(delivered) == 4
+    assert delivered[0] is not None
     assert all(renderer is delivered[0] for renderer in delivered)

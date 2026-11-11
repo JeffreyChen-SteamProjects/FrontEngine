@@ -1,3 +1,6 @@
+_SIZE_LABEL = 'Größe'
+
+
 germany_word_dict = {
     # Menüleiste
     "menu_bar_language": "Sprache auswählen",
@@ -46,7 +49,7 @@ germany_word_dict = {
     "presentation_zoom": "Zoom",
     "widgets_style": "Stil",
     "widgets_history": "Verlauf",
-    "focus_mask_size_label": "Größe",
+    "focus_mask_size_label": _SIZE_LABEL,
     "tools_mode": "Modus",
     "tools_action": "Aktion",
     "tools_fps": "Bilder pro Sekunde",
@@ -436,7 +439,7 @@ germany_word_dict = {
     # check
     # Haustier, intelligente Pause, Erinnerungen und Widgets
     "tab_pet_text": "Haustier",
-    "pet_size_label": "Größe",
+    "pet_size_label": _SIZE_LABEL,
     "pet_speed_label": "Geschwindigkeit",
     "pet_behaviour_label": "Verhalten",
     'pet_chatter_label': "Plaudern",
@@ -1703,7 +1706,7 @@ germany_word_dict = {
     "pet_game_wish_cozy_bed": "ein gemütliches Bett (eines aufstellen)",
     "pet_home_theme": "Thema",
     "pet_home_reduced_motion": "Bewegung reduzieren",
-    "pet_home_strip_size": "Größe",
+    "pet_home_strip_size": _SIZE_LABEL,
     "pet_home_strip_size_setting": "Größe auf dem Desktop",
     "pet_home_strip_size_hint": "Strg + Mausrad über einem Haustier oder Möbelstück auf dem Desktop ändert sie ebenfalls.",
     "pet_home_card_hint": "Doppelklick zum Streicheln · Rechtsklick für mehr",
