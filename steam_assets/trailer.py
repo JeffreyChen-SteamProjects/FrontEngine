@@ -126,8 +126,8 @@ class Recorder:
         self.video = QVideoFrameInput(video)
         self.session = QMediaCaptureSession()
         self.session.setVideoFrameInput(self.video)
-        self.recorder = QMediaRecorder()
-        self.session.setRecorder(self.recorder)
+        self.media_recorder = QMediaRecorder()
+        self.session.setRecorder(self.media_recorder)
         media = QMediaFormat(QMediaFormat.FileFormat.MPEG4)
         media.setVideoCodec(QMediaFormat.VideoCodec.H264)
         self.audio = None
@@ -140,25 +140,25 @@ class Recorder:
             self.audio = QAudioBufferInput(audio)
             self.session.setAudioBufferInput(self.audio)
             media.setAudioCodec(QMediaFormat.AudioCodec.AAC)
-            self.recorder.setAudioSampleRate(rate)
-            self.recorder.setAudioBitRate(192_000)
-        self.recorder.setMediaFormat(media)
-        self.recorder.setVideoResolution(QSize(WIDTH, HEIGHT))
-        self.recorder.setVideoFrameRate(FPS)
-        self.recorder.setVideoBitRate(VIDEO_BITRATE)
-        self.recorder.setQuality(QMediaRecorder.Quality.VeryHighQuality)
+            self.media_recorder.setAudioSampleRate(rate)
+            self.media_recorder.setAudioBitRate(192_000)
+        self.media_recorder.setMediaFormat(media)
+        self.media_recorder.setVideoResolution(QSize(WIDTH, HEIGHT))
+        self.media_recorder.setVideoFrameRate(FPS)
+        self.media_recorder.setVideoBitRate(VIDEO_BITRATE)
+        self.media_recorder.setQuality(QMediaRecorder.Quality.VeryHighQuality)
         out.parent.mkdir(parents=True, exist_ok=True)
         if out.exists():
             out.unlink()
-        self.recorder.setOutputLocation(QUrl.fromLocalFile(str(out)))
+        self.media_recorder.setOutputLocation(QUrl.fromLocalFile(str(out)))
         self.errors: list[str] = []
-        self.recorder.errorOccurred.connect(lambda _code, text: self.errors.append(text))
+        self.media_recorder.errorOccurred.connect(lambda _code, text: self.errors.append(text))
         self.sound, self.rate, self.channels = sound, rate, channels
         self.frame_bytes = 2 * channels
         self.sent_samples = 0
         self.fade: tuple[int, int] | None = None      # (first sample, length) of the closing fade
         self.frames = 0
-        self.recorder.record()
+        self.media_recorder.record()
 
     def fade_sound(self, seconds: float) -> None:
         """Fade the sound out over the next ``seconds``, with the closing fade to black.
@@ -209,13 +209,13 @@ class Recorder:
             chunk += bytes(count * self.frame_bytes - len(chunk))
             chunk = self._gain(chunk, self.sent_samples)
             buffer = QAudioBuffer(chunk, self.audio_format, int(self.sent_samples * 1_000_000 / self.rate))
-            self._wait(lambda: self.audio.sendAudioBuffer(buffer))
+            self._wait(lambda chunk_buffer=buffer: self.audio.sendAudioBuffer(chunk_buffer))
             self.sent_samples += count
 
     def close(self) -> None:
-        self.recorder.stop()
+        self.media_recorder.stop()
         deadline = time.monotonic() + 60
-        while self.recorder.recorderState() != QMediaRecorder.RecorderState.StoppedState:
+        while self.media_recorder.recorderState() != QMediaRecorder.RecorderState.StoppedState:
             if time.monotonic() > deadline:
                 raise RuntimeError("The recording did not finish")
             self.app.processEvents()
@@ -238,9 +238,11 @@ class Stills:
         self.frames += 1
 
     def fade_sound(self, seconds: float) -> None:
+        # Stills carry no sound, so there is nothing to fade.
         pass
 
     def close(self) -> None:
+        # Every still is written as it arrives; nothing is left open.
         pass
 
 
@@ -646,7 +648,7 @@ def furniture_span(page) -> tuple[float, float]:
 def ask_everyone(page, command: str) -> None:
     """What the pet menu's *Ask to* does, for every resident."""
     service = page.service
-    for identifier in list(service.world.residents):
+    for identifier in service.world.residents:
         service.run(lambda world, i=identifier: world.command(i, command))
 
 
