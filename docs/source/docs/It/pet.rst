@@ -3,7 +3,7 @@ Pagina Mascotte
 
 Un compagno che vive sulla scrivania.
 
-La pagina si apre con *La tua mascotta*: fai clic su uno dei personaggi integrati e una mascotta vestita così compare subito sul desktop. Sotto sono elencate le mascotte sul desktop con *Guardaroba*, *Riporta l’animale* e *Metti via* (un doppio clic ne riporta una); tutte le altre impostazioni restano chiuse finché non apri la loro sezione. Al primo avvio, senza ancora un animale né una casa, FrontEngine si apre su questa pagina.
+La pagina si apre con *La tua mascotta*: fai clic su uno dei personaggi integrati e una mascotta vestita così compare subito sul desktop. Sotto sono elencate le mascotte sul desktop con *Guardaroba*, *Riporta l’animale* e *Metti via* (un doppio clic ne riporta una); tutte le altre impostazioni restano chiuse finché non apri la loro sezione. Al primo avvio, senza ancora un animale né una casa, FrontEngine si apre su questa pagina. Per una mascotta senza personaggio, *Guardaroba* si apre già con il personaggio integrato con cui appare sul desktop, così vesti la stessa mascotta; nulla viene salvato fino ad *Applica*.
 
 * Ogni mascotte del desktop è un personaggio a livelli: un personaggio INKSIDE
   integrato o uno installato nel guardaroba. Immagini, GIF e cartelle di

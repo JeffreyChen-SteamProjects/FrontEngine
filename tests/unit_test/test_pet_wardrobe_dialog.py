@@ -412,3 +412,20 @@ def test_home_wardrobe_opens_wearing_the_character_the_home_draws(lifetime_facto
     finally:
         assert page.shutdown()
         page.close()
+
+
+def test_pet_page_wardrobe_opens_wearing_the_character_the_pet_is_spawned_as(lifetime_factory, monkeypatch):
+    from frontengine.show.pet.inkside import library as builtin_library
+    from frontengine.show.pet_game.resident_art import fallback_character
+    from frontengine.ui.page.pet.pet_setting_ui import PetSettingUI
+
+    monkeypatch.setattr(builtin_library, 'install_builtin', lambda *_args, **_kwargs: 0)
+    page = PetSettingUI(lifetime=lifetime_factory())
+    identifier = page.profile_controls.profiles.create('Saved pet')['id']
+    try:
+        page.profile_controls.wardrobe(identifier)
+        dialog = page.profile_controls._wardrobes[identifier]
+        assert dialog.builtin.currentData() == fallback_character(identifier)
+        assert dialog._stand_in == {'id': fallback_character(identifier), 'version': builtin_library.VERSION}
+    finally:
+        page.close()

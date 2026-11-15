@@ -26,7 +26,14 @@ def test_generation_keeps_its_owners_directory(action, lifetime_factory, tmp_pat
         page.close()
 
 
+def _skip_stand_in_install(monkeypatch):
+    """A pet without a character opens the wardrobe installing its stand-in; these tests only check paths."""
+    from frontengine.show.pet.inkside import library as builtin_library
+    monkeypatch.setattr(builtin_library, 'install_builtin', lambda *_args, **_kwargs: 0)
+
+
 def test_saved_pet_wardrobe_keeps_its_owners_directory(lifetime_factory, tmp_path, monkeypatch):
+    _skip_stand_in_install(monkeypatch)
     lifetime = lifetime_factory()
     owner_directory = lifetime.storage.directory
     page = PetSettingUI(lifetime=lifetime)
@@ -120,6 +127,7 @@ def test_home_files_keep_their_owners_directory(action, lifetime_factory, tmp_pa
 
 def test_home_wardrobe_keeps_its_owners_directory(lifetime_factory, tmp_path, monkeypatch):
     from frontengine.ui.page.pet_game.home_page import PetHomePage
+    _skip_stand_in_install(monkeypatch)
     lifetime = lifetime_factory()
     directory = lifetime.storage.directory
     page = PetHomePage(lifetime=lifetime)
