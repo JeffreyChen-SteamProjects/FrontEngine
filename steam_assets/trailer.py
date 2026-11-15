@@ -3,7 +3,7 @@ Record the pet home trailer from the real application.
 
 Run from the repository root::
 
-    .venv\Scripts\python.exe steam_assets/trailer.py [--out FILE] [--stills DIR]
+    .venv\Scripts\python.exe steam_assets/trailer.py [--out FILE] [--stills DIR] [--sound WAV]
 
 Nothing here is a mock-up. A fresh settings folder is made in a temporary directory, the real
 Pet home page is opened offscreen at 1920x1080, and a drawn pointer presses its real buttons and
@@ -12,8 +12,9 @@ the shop, and the clock. The home runs on a film clock instead of the wall clock
 is exactly 1/30 s of film however long it took to draw, and quiet stretches can run faster.
 
 The film is H.264 at 1920x1080 and 30 fps, written by Qt Multimedia (QVideoFrameInput into a
-QMediaRecorder), with the home's own ambient sound underneath. --stills writes a JPEG every half
-second instead, for checking a cut without encoding.
+QMediaRecorder). It has no sound unless --sound names a 16-bit PCM WAV (music, say), which is
+looped under the film and faded out with it. --stills writes a JPEG every half second instead,
+for checking a cut without encoding.
 """
 from __future__ import annotations
 
@@ -45,6 +46,7 @@ def _workspace() -> Path:
     return folder
 
 
+LAUNCH_DIR = Path.cwd()         # paths on the command line are relative to here, not the workspace
 WORKSPACE = _workspace()
 
 
@@ -115,31 +117,35 @@ def _use_film_clock() -> None:
 class Recorder:
     """Frames and sound into an MP4 through Qt Multimedia, waiting whenever the encoder is busy."""
 
-    def __init__(self, app: QApplication, out: Path, sound: bytes, rate: int, channels: int) -> None:
+    def __init__(self, app: QApplication, out: Path, sound: bytes | None = None, rate: int = 0,
+                 channels: int = 0) -> None:
+        """``sound`` is 16-bit PCM; without it the film has no sound track at all."""
         self.app = app
         video = QVideoFrameFormat(QSize(WIDTH, HEIGHT), QVideoFrameFormat.PixelFormat.Format_BGRA8888)
         video.setStreamFrameRate(FPS)
         self.video = QVideoFrameInput(video)
-        audio = QAudioFormat()
-        audio.setSampleRate(rate)
-        audio.setChannelCount(channels)
-        audio.setSampleFormat(QAudioFormat.SampleFormat.Int16)
-        self.audio_format = audio
-        self.audio = QAudioBufferInput(audio)
         self.session = QMediaCaptureSession()
         self.session.setVideoFrameInput(self.video)
-        self.session.setAudioBufferInput(self.audio)
         self.recorder = QMediaRecorder()
         self.session.setRecorder(self.recorder)
         media = QMediaFormat(QMediaFormat.FileFormat.MPEG4)
         media.setVideoCodec(QMediaFormat.VideoCodec.H264)
-        media.setAudioCodec(QMediaFormat.AudioCodec.AAC)
+        self.audio = None
+        if sound is not None:
+            audio = QAudioFormat()
+            audio.setSampleRate(rate)
+            audio.setChannelCount(channels)
+            audio.setSampleFormat(QAudioFormat.SampleFormat.Int16)
+            self.audio_format = audio
+            self.audio = QAudioBufferInput(audio)
+            self.session.setAudioBufferInput(self.audio)
+            media.setAudioCodec(QMediaFormat.AudioCodec.AAC)
+            self.recorder.setAudioSampleRate(rate)
+            self.recorder.setAudioBitRate(192_000)
         self.recorder.setMediaFormat(media)
         self.recorder.setVideoResolution(QSize(WIDTH, HEIGHT))
         self.recorder.setVideoFrameRate(FPS)
         self.recorder.setVideoBitRate(VIDEO_BITRATE)
-        self.recorder.setAudioSampleRate(rate)
-        self.recorder.setAudioBitRate(192_000)
         self.recorder.setQuality(QMediaRecorder.Quality.VeryHighQuality)
         out.parent.mkdir(parents=True, exist_ok=True)
         if out.exists():
@@ -160,7 +166,8 @@ class Recorder:
         The film's length is only known once it has been shot, so the soundtrack cannot carry its
         own fade-out: a fade baked into a fixed-length track ends up after the film has finished
         and the sound stops dead under the last black frame."""
-        self.fade = (self.sent_samples, max(1, int(seconds * self.rate)))
+        if self.audio is not None:
+            self.fade = (self.sent_samples, max(1, int(seconds * self.rate)))
 
     def _gain(self, chunk: bytes, first: int) -> bytes:
         if self.fade is None:
@@ -192,6 +199,8 @@ class Recorder:
         self._send_sound(self.frames / FPS)
 
     def _send_sound(self, until_s: float) -> None:
+        if self.audio is None:
+            return
         target = int(until_s * self.rate)
         while self.sent_samples < target:
             count = min(4096, target - self.sent_samples)
@@ -235,16 +244,17 @@ class Stills:
         pass
 
 
-def ambience(seconds: float) -> tuple[bytes, int, int]:
-    """The home's own daytime birdsong, looped and faded in, as the soundtrack.
+def soundtrack(path: Path, seconds: float) -> tuple[bytes, int, int]:
+    """A 16-bit PCM WAV, looped to ``seconds`` and faded in, as the soundtrack.
 
-    Longer than the film on purpose; the Recorder fades it out with the closing card."""
-    path = REPO / "frontengine" / "show" / "pet_game" / "ambience" / "day.wav"
+    No sound by default: the home's own ambience is birdsong by day and crickets by night, and
+    animal calls under a trailer were not wanted. Music can be given with --sound. The track is cut
+    longer than the film on purpose; the Recorder fades it out with the closing card."""
     with wave.open(str(path), "rb") as source:
         rate, channels, width = source.getframerate(), source.getnchannels(), source.getsampwidth()
         data = source.readframes(source.getnframes())
     if width != 2:
-        raise ValueError("Ambience must be 16-bit PCM")
+        raise ValueError("The soundtrack must be a 16-bit PCM WAV")
     import numpy as np
     samples = np.frombuffer(data, dtype=np.int16).reshape((-1, channels)).astype(np.float32)
     total = int(seconds * rate)
@@ -801,6 +811,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[1])
     parser.add_argument("--out", default=str(REPO / "steam_assets" / "trailer_pet_home.mp4"))
     parser.add_argument("--stills", default=None, help="write JPEG stills to this folder instead of a film")
+    parser.add_argument("--sound", default=None,
+                        help="a 16-bit PCM WAV to loop under the film; without it the film is silent")
     args = parser.parse_args()
 
     (WORKSPACE / "user_setting.json").write_text(json.dumps({"language": "English"}), encoding="utf-8")
@@ -825,16 +837,18 @@ def main() -> None:
     stage_page(app, page)
 
     logo = QImage(str(REPO / "steam_assets" / "library_logo_1280x720.png"))
+    out = LAUNCH_DIR / args.out
     if args.stills:
-        sink = Stills(Path(args.stills))
+        sink = Stills(LAUNCH_DIR / args.stills)
+    elif args.sound:
+        sink = Recorder(app, out, *soundtrack(LAUNCH_DIR / args.sound, PLANNED_SECONDS + 5))
     else:
-        sound, rate, channels = ambience(PLANNED_SECONDS + 5)
-        sink = Recorder(app, Path(args.out), sound, rate, channels)
+        sink = Recorder(app, out)
     film = Film(app, sink, page, logo)
     shoot(film, app)
     sink.close()
     seconds = sink.frames / FPS
-    print(f"{sink.frames} frames, {seconds:.1f} s" + ("" if args.stills else f" -> {args.out}"))
+    print(f"{sink.frames} frames, {seconds:.1f} s" + ("" if args.stills else f" -> {out}"))
     os._exit(0)      # the page's lifetime and save thread are not ours to wind down cleanly here
 
 
