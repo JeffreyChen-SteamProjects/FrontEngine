@@ -326,3 +326,89 @@ def test_builtin_progress_reaches_dialog_and_resets_after_completion(wardrobe, m
         release.set()
         dialog.lifetime.pool().waitForDone(5000)
         dialog.close()
+
+
+def _stand_in_source(tmp_path, identifier):
+    """A small layered character carrying a built-in's identity, so no real character is drawn."""
+    from frontengine.show.pet.inkside.library import VERSION
+    from test_pet_layered import make_asset, write
+
+    source = tmp_path / identifier
+    data = make_asset(source)
+    data['version'] = VERSION
+    write(source, data)
+    return source, {'id': identifier, 'version': VERSION}
+
+
+@pytest.mark.parametrize('installed', [True, False])
+def test_pet_without_a_character_opens_wearing_its_stand_in(tmp_path, monkeypatch, installed, *, lifetime_factory):
+    from PySide6.QtCore import QCoreApplication
+    from frontengine.show.pet.asset_library import PetAssetLibrary
+    from frontengine.show.pet.inkside import library as builtin_library
+    from frontengine.show.pet_game.resident_art import fallback_character
+    from frontengine.user_setting.pet_profiles import PetProfiles
+
+    profiles = PetProfiles({}, lambda: None)
+    record = profiles.create()
+    stand_in = fallback_character(record['id'])
+    source, reference = _stand_in_source(tmp_path, stand_in)
+    library = PetAssetLibrary(tmp_path / 'library')
+    if installed:
+        library.install(source)
+
+    def install(target, identifier, *_args, **_kwargs):
+        assert identifier == stand_in
+        if not installed:
+            target.install(source)
+        return 1
+
+    monkeypatch.setattr(builtin_library, 'install_builtin', install)
+    dialog = PetWardrobeDialog(profiles, record['id'], library=library, lifetime=lifetime_factory(),
+                               stand_in=stand_in)
+    try:
+        assert dialog.lifetime.pool().waitForDone(5000)
+        QCoreApplication.processEvents()
+        assert dialog.character.currentData() == reference
+        assert dialog.character.findData(None) < 0
+        assert dialog.draft.preview is not None
+        assert profiles.get(record['id']) == record            # nothing is saved before Apply
+        assert dialog.apply_changes()
+        assert profiles.get(record['id'])['appearance']['character'] == reference
+    finally:
+        dialog.close()
+
+
+def test_stand_in_never_replaces_a_character_the_pet_already_wears(wardrobe, monkeypatch, *, lifetime_factory):
+    from frontengine.show.pet.inkside.library import builtin_names
+
+    profiles, first, _, draft, character, _ = wardrobe
+    draft.choose_character(character)
+    draft.apply()
+    monkeypatch.setattr(PetWardrobeDialog, '_install_builtin',
+                        lambda _self: pytest.fail('A dressed pet installed a stand-in'))
+    dialog = PetWardrobeDialog(profiles, first['id'], library=CatalogLibrary(draft.catalog),
+                               lifetime=lifetime_factory(), stand_in=builtin_names()[0][0])
+    try:
+        assert dialog.draft.appearance['character'] == character
+    finally:
+        dialog.close()
+
+
+def test_home_wardrobe_opens_wearing_the_character_the_home_draws(lifetime_factory, monkeypatch):
+    from frontengine.show.pet.inkside import library as builtin_library
+    from frontengine.show.pet_game.resident_art import fallback_character
+    from frontengine.ui.page.pet_game.home_page import PetHomePage
+
+    monkeypatch.setattr(builtin_library, 'install_builtin', lambda *_args, **_kwargs: 0)
+    page = PetHomePage(lifetime=lifetime_factory())
+    page.create_home()
+    page.service.pause('test')
+    identifier = next(iter(page.service.world.residents))
+    try:
+        page.strip_action('wardrobe', identifier)
+        dialog = page.residents.wardrobes[identifier]
+        assert dialog.builtin.currentData() == fallback_character(identifier)
+        assert dialog._stand_in == {'id': fallback_character(identifier), 'version': builtin_library.VERSION}
+    finally:
+        assert page.shutdown()
+        page.close()
