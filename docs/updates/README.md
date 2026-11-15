@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261115-04 | 2026-11-15 | 寵物家園宣傳片、Steam 素材重出與公告補上家園 | #done #steam 桌面寵物／家園 | [2026-11](2026-11.md) |
 | U-20261115-03 | 2026-11-15 | 寵物頁的衣櫃按鈕也帶入寵物的內建角色 | #done #bugfix 桌面寵物 | [2026-11](2026-11.md) |
 | U-20261115-02 | 2026-11-15 | 衣櫃不再把匯出的 Puppet 資料夾當成壞掉的素材 | #done #bugfix 桌面寵物 | [2026-11](2026-11.md) |
 | U-20261115-01 | 2026-11-15 | 家園長條的寵物右鍵「衣櫃…」與「安排這隻寵物的工作…」會帶入該寵物 | #done #bugfix 桌面寵物／家園 | [2026-11](2026-11.md) |
@@ -459,6 +460,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 255 |
+| [2026-11.md](2026-11.md) | 2026-11 | 256 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

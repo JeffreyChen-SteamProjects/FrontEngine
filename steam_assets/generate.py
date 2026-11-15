@@ -13,26 +13,36 @@ r"""
 就好」那種偷懶。每種比例都是各自排版：橫式膠囊放得下一句副標，小膠囊只放得下名字
 （它會被縮到 120×45，副標在那個尺寸只是雜訊）。
 
-截圖是真的把程式渲染出來抓的，不是示意圖。
+截圖是真的把程式渲染出來抓的，不是示意圖。寵物家園的截圖與膠囊背景用的是
+trailer.py 同一套布景：暫存設定資料夾、四隻存好的寵物搬進新家、在電影時鐘上
+過了半天——畫的是真正的家園，不是插圖。
+The screenshots are rendered from the real application. The pet home pictures and
+the capsule backdrops share trailer.py's staging: a temporary settings folder, four
+saved pets moving into a new home, half a day on the film clock.
 """
+import json
 import os
 import sys
-import tempfile
 
-from PySide6.QtCore import QRect, QSize, Qt
-from PySide6.QtGui import (
+# trailer.py sets up the 1920x1080 offscreen screen and the temporary settings folder on import,
+# so it has to come before anything that touches Qt.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import trailer  # noqa: E402
+
+from PySide6.QtCore import QRect, QSize, Qt  # noqa: E402
+from PySide6.QtGui import (  # noqa: E402
     QColor, QFont, QIcon, QImage, QLinearGradient, QPainter, QRadialGradient,
 )
-from PySide6.QtWidgets import QApplication
+from PySide6.QtWidgets import QApplication  # noqa: E402
 
 # 相對於這個檔案定位，換一台機器 clone 下來一樣跑得動
 # Located relative to this file, so a fresh clone on another machine still runs
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(REPO, "steam_assets")
+OUT = os.path.abspath(sys.argv[1]) if len(sys.argv) > 1 else os.path.join(REPO, "steam_assets")
 
 NAME = "FrontEngine"
 TAGLINE = "Put anything on top of your screen"
-TAGLINE_LONG = "Overlays, a desktop pet, focus tools and presenting aids"
+TAGLINE_LONG = "Overlays, a desktop pet with a home of its own, focus tools and presenting aids"
 
 # 取自程式自己的 dark_amber 主題，商店頁和實際程式看起來才是同一個東西
 AMBER = QColor("#ffd740")
@@ -82,6 +92,27 @@ def fit_font(text, max_width, start_size, bold=True):
             return candidate
         size -= 1
     return font(8, bold)
+
+
+def home_backdrop(painter, width, height, home, text_top=True):
+    """
+    家園近景墊底，文字那一側壓深色漸層。家園是角色和家具，清楚的比模糊的好看；
+    模糊的設定頁截圖讀起來像破圖。
+    The pet home close-up as the backdrop, darkened on the side the text sits. The home is
+    characters and furniture, which read sharply; a blurred settings page reads as a fault.
+    """
+    scaled = home.scaled(QSize(width, height), Qt.AspectRatioMode.KeepAspectRatioByExpanding,
+                         Qt.TransformationMode.SmoothTransformation)
+    painter.drawImage((width - scaled.width()) // 2, height - scaled.height(), scaled)
+    shade = QLinearGradient(0, 0, 0, height)
+    if text_top:
+        shade.setColorAt(0.0, QColor(18, 20, 21, 245))
+        shade.setColorAt(0.42, QColor(18, 20, 21, 200))
+        shade.setColorAt(0.66, QColor(18, 20, 21, 0))
+    else:
+        shade.setColorAt(0.0, QColor(18, 20, 21, 0))
+        shade.setColorAt(1.0, QColor(18, 20, 21, 120))
+    painter.fillRect(0, 0, width, height, shade)
 
 
 def backdrop(painter, width, height, shot=None, scrim=0.82):
@@ -201,53 +232,60 @@ def compose(kind, width, height, icon, shot):
                          Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft, NAME)
 
     elif kind in ("header", "main"):
-        backdrop(painter, width, height, shot)
+        home_backdrop(painter, width, height, shot(width, height, 0.98))
+        # 名字和圖示同一列放在上方，下面留給家園。
+        # Icon and name share a row at the top; the lower part belongs to the home.
         margin = int(width * 0.055)
-        icon_size = int(height * 0.30)
-        draw_icon(painter, icon, margin, int(height * 0.16), icon_size)
-
-        painter.setFont(fit_font(NAME, width - margin * 2, height * 0.20))
+        icon_size = int(height * 0.20)
+        top = int(height * 0.08)
+        draw_icon(painter, icon, margin, top, icon_size)
+        text_left = margin + icon_size + int(height * 0.05)
+        painter.setFont(fit_font(NAME, width - text_left - margin, height * 0.17))
         painter.setPen(TEXT)
-        name_y = int(height * 0.16) + icon_size + int(height * 0.16)
-        painter.drawText(margin, name_y, NAME)
+        painter.drawText(QRect(text_left, top, width - text_left - margin, icon_size),
+                         Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft, NAME)
+        name_y = top + icon_size
 
-        accent_rule(painter, margin, name_y + int(height * 0.075), int(width * 0.13),
+        accent_rule(painter, margin, name_y + int(height * 0.04), int(width * 0.13),
                     max(3, int(height * 0.012)))
 
-        painter.setFont(font(height * 0.072, bold=False))
+        painter.setFont(font(height * 0.062, bold=False))
         painter.setPen(MUTED)
-        painter.drawText(QRect(margin, name_y + int(height * 0.135),
-                               width - margin * 2, int(height * 0.3)),
+        painter.drawText(QRect(margin, name_y + int(height * 0.08),
+                               width - margin * 2, int(height * 0.2)),
                          Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft
                          | Qt.TextFlag.TextWordWrap,
                          TAGLINE if kind == "header" else TAGLINE_LONG)
 
     elif kind in ("vertical", "library"):
-        backdrop(painter, width, height, shot, scrim=0.78)
+        # 文字在上半，家園在下半：直式膠囊的下方剛好放得下一整排寵物和家具。
+        # Text in the upper half, the home in the lower: a tall capsule has just the room
+        # below for a row of pets and furniture.
+        home_backdrop(painter, width, height, shot(width, height, 0.97))
         margin = int(width * 0.10)
-        icon_size = int(width * 0.30)
-        draw_icon(painter, icon, (width - icon_size) // 2, int(height * 0.20), icon_size)
+        icon_size = int(width * 0.26)
+        draw_icon(painter, icon, (width - icon_size) // 2, int(height * 0.08), icon_size)
 
         painter.setFont(fit_font(NAME, width - margin * 2, width * 0.145))
         painter.setPen(TEXT)
-        painter.drawText(QRect(0, int(height * 0.52), width, int(height * 0.14)),
+        painter.drawText(QRect(0, int(height * 0.32), width, int(height * 0.14)),
                          Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop, NAME)
 
-        # 底線要在文字下伸部之下。壓在 0.655 會直接切過「g」的尾巴。
-        # Below the descenders: at 0.655 the rule cuts straight through the tail
-        # of the "g".
-        accent_rule(painter, (width - int(width * 0.22)) // 2, int(height * 0.695),
+        # 底線要在文字下伸部之下，不然會切過「g」的尾巴。
+        # Below the descenders, or the rule cuts through the tail of the "g".
+        accent_rule(painter, (width - int(width * 0.22)) // 2, int(height * 0.475),
                     int(width * 0.22), max(3, int(height * 0.007)))
 
         painter.setFont(font(width * 0.052, bold=False))
         painter.setPen(MUTED)
-        painter.drawText(QRect(margin, int(height * 0.745), width - margin * 2, int(height * 0.22)),
+        painter.drawText(QRect(margin, int(height * 0.51), width - margin * 2, int(height * 0.16)),
                          Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop
                          | Qt.TextFlag.TextWordWrap, TAGLINE)
 
     elif kind == "hero":
-        # Hero 上面會疊 logo，所以不放任何文字，重點也要偏右
-        atmosphere(painter, width, height, icon, logo_safe=True)
+        # Hero 上面會疊 logo，所以不放任何文字；家園的重點偏右，讓出中左給 logo。
+        # Steam lays the logo over the hero, so no text here, and the home leans right of the logo.
+        home_backdrop(painter, width, height, shot(width, height, 0.94, 0.68), text_top=False)
 
     elif kind == "background":
         atmosphere(painter, width, height, icon, logo_safe=False)
@@ -317,33 +355,66 @@ def screenshots(icon_path):
     controls have a maximum width - right for using it - which at 1920 leaves the
     right two thirds empty and makes a poor store screenshot.
     """
-    import json
-
-    workspace = tempfile.mkdtemp()
-    os.chdir(workspace)
-    with open("user_setting.json", "w", encoding="utf-8") as handle:
-        json.dump({"language": "English", "theme": "dark_amber.xml"}, handle)
-    from qt_material import apply_stylesheet
-
     from frontengine.ui.main_ui import FrontEngineMainUI
     from frontengine.ui.style.app_style import apply_app_style
 
     window = FrontEngineMainUI(show_system_tray_ray=False, redirect_output=False)
-    apply_stylesheet(window, theme="dark_amber.xml")
-    apply_app_style(window, "dark_amber.xml")
+    apply_app_style(window, "dark", application=True)
     window.resize(1360, 900)
     window.show()
-    QApplication.processEvents()
+    application = QApplication.instance()
+    application.processEvents()
+
+    # The pet home first: staged like the trailer, then half a working day on the film clock.
+    home = window.pet_home_ui
+    trailer.stage_page(application, home)
+    window.page_stack.setCurrentWidget(home)
+    window.sidebar.select_page(window.page_stack.indexOf(home))
+    home.create_home()
+    trailer.wait_for_art(application, home)
+    presets = home.layout_panel.presets
+    presets.setCurrentIndex(presets.findData("cozy"))
+    home.layout_panel.apply_layout()
+    # Half a day or so, until a clear afternoon: rain streaks read as scratches on a capsule.
+    from frontengine.utils.pet_game.environment import weather
+    from frontengine.utils.pet_game.schedule import game_hour
+    trailer.run_home(application, home, 600)
+    for _ in range(200):
+        world = home.service.world
+        if weather(world.home, world.time_ms) == "clear" and 10 <= game_hour(world.time_ms) <= 16:
+            break
+        trailer.run_home(application, home, 60)
+    application.processEvents()
+
+    def save(name, image):
+        path = os.path.join(OUT, "screenshots", f"{name}_1920x1080.png")
+        image.save(path)
+        print(f"  screenshot: {os.path.basename(path)}  {image.width()}x{image.height()}")
+
+    save("01_pet_home", frame_shot(window.grab().toImage()))
+    save("02_pet_home_close", trailer.close_up_image(home.view, 3.0, trailer.home_center(home)))
+    save("03_pet_home_desktop", trailer.desktop_image(home))
+
+    def home_shot(width, height, floor_at, center_at=0.5):
+        """The home redrawn for one capsule size: the floor near the bottom, the pets in view."""
+        view = home.view
+        # Big enough that the pets read even on a 920x430 header, and never narrower than the picture.
+        # The furniture and pets fill only the lower third of the home drawing; its sky may be cropped.
+        scale = max(height * 1.25 / view.height(), width / view.width())
+        # A tall picture has room for only a few pieces: it shows the pets, a wide one the whole home.
+        middle = trailer.pets_center(home) if width < height else trailer.home_center(home)
+        center = middle + (0.5 - center_at) * width / scale
+        return trailer.close_up_image(view, scale, center, width, height, floor_at)
 
     pages = [
-        ("01_video", window.video_setting_ui),
-        ("02_pet", window.pet_setting_ui),
-        ("03_tools", window.tools_setting_ui),
-        ("04_presenting", window.presentation_setting_ui),
-        ("05_eye_care", window.screen_care_setting_ui),
-        ("06_widgets", window.widgets_setting_ui),
-        ("07_wallpaper", window.wallpaper_setting_ui),
-        ("08_control_center", window.control_center_ui),
+        ("04_video", window.video_setting_ui),
+        ("05_pet", window.pet_setting_ui),
+        ("06_tools", window.tools_setting_ui),
+        ("07_presenting", window.presentation_setting_ui),
+        ("08_eye_care", window.screen_care_setting_ui),
+        ("09_widgets", window.widgets_setting_ui),
+        ("10_wallpaper", window.wallpaper_setting_ui),
+        ("11_control_center", window.control_center_ui),
     ]
     shots = []
     for name, page in pages:
@@ -355,7 +426,7 @@ def screenshots(icon_path):
         framed.save(path)
         shots.append(framed)
         print(f"  screenshot: {os.path.basename(path)}  {framed.width()}x{framed.height()}")
-    return shots
+    return home_shot
 
 
 def main():
@@ -365,15 +436,18 @@ def main():
     # Keep the reference: garbage-collecting QApplication takes every later paint
     # call with it. Held through setApplicationName rather than an assert, because
     # -O strips asserts entirely and would take the reason for holding it too.
+    # English on purpose: the store's default language, and the page is read by everyone.
+    with open("user_setting.json", "w", encoding="utf-8") as handle:
+        json.dump({"language": "English"}, handle)
     application = QApplication([])
     application.setApplicationName(NAME)
+    trailer._use_film_clock()
     os.makedirs(os.path.join(OUT, "screenshots"), exist_ok=True)
     icon_path = os.path.join(REPO, "exe", "frontengine.ico")
     icon = QIcon(icon_path) if os.path.exists(icon_path) else None
 
     print("=== screenshots (rendered from the real application) ===")
-    shots = screenshots(icon_path)
-    hero_shot = shots[0] if shots else None
+    hero_shot = screenshots(icon_path)
 
     print("=== capsules ===")
     kinds = {
