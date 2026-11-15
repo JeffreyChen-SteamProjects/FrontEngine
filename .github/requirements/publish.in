@@ -5,7 +5,7 @@
 # nothing uploaded in the last week.)
 # The versions are the ones release.yml has named since 2026-07-26; the 1.0.81 release ran with them. Change
 # one here and regenerate; Dependabot does both when it proposes a newer release.
-build==1.4.2
+build==1.6.1
 twine==6.2.0
 # The build backend. The job runs `python -m build --no-isolation`, so the backend is this locked one and
 # not whatever is newest on PyPI when the job runs. It must satisfy `build-system.requires` in stable.toml,
