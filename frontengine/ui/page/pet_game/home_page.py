@@ -1067,6 +1067,7 @@ class PetHomePage(SettingPage):
             self.residents.wardrobe()
         elif action == "work":
             self._select_home_tab("pet_home_work_section")
+            self.work.show_resident(target)
         elif action == "follow":
             self.followed = target
             self._follow()

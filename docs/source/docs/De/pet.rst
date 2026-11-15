@@ -3,7 +3,7 @@ Haustier-Seite
 
 Ein Begleiter, der auf dem Desktop lebt.
 
-Die Seite beginnt mit *Ihr Haustier*: Ein Klick auf eine der eingebauten Figuren bringt sofort ein so gekleidetes Haustier auf den Desktop. Darunter stehen die Haustiere auf dem Desktop mit *Garderobe*, *Tier zurückholen* und *Wegräumen* (Doppelklick holt eines zurück); alle anderen Einstellungen bleiben eingeklappt, bis Sie ihren Abschnitt öffnen. Beim ersten Start, solange es weder Haustier noch Zuhause gibt, öffnet FrontEngine diese Seite.
+Die Seite beginnt mit *Ihr Haustier*: Ein Klick auf eine der eingebauten Figuren bringt sofort ein so gekleidetes Haustier auf den Desktop. Darunter stehen die Haustiere auf dem Desktop mit *Garderobe*, *Tier zurückholen* und *Wegräumen* (Doppelklick holt eines zurück); alle anderen Einstellungen bleiben eingeklappt, bis Sie ihren Abschnitt öffnen. Beim ersten Start, solange es weder Haustier noch Zuhause gibt, öffnet FrontEngine diese Seite. Bei einem Haustier ohne Figur öffnet *Garderobe* gleich mit der eingebauten Figur, als die es auf dem Desktop erscheint, man kleidet also dasselbe Haustier ein; gespeichert wird erst mit *Anwenden*.
 
 * Jedes Desktop-Haustier ist eine mehrschichtige Figur: eine eingebaute
   INKSIDE-Figur oder eine in der Garderobe installierte. Bilder, GIFs und

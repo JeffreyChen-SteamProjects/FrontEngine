@@ -121,3 +121,18 @@ def test_batch_progress_counts_only_published_assets(tmp_path, interruption):
         with pytest.raises(InterruptedError if interruption == 'cancel' else ValueError):
             library.install_many([body, hat], cancel=cancel, progress=progress)
         assert observed == [(1, 2)]
+
+
+def test_exported_puppets_folder_is_not_reported_as_a_broken_asset(tmp_path):
+    """Exported Puppet models share the library root under ``puppets``; the wardrobe must not list it as an error."""
+    from frontengine.show.pet.asset_library import PetAssetLibrary
+    from test_pet_layered import make_asset
+
+    library = PetAssetLibrary(tmp_path / 'library')
+    make_asset(tmp_path / 'cat')
+    library.install(tmp_path / 'cat')
+    (library.root / 'puppets').mkdir()
+    (library.root / 'puppets' / 'inkside-pip.puppet').write_bytes(b'model')
+    catalog, errors = library.scan()
+    assert errors == ()
+    assert len(catalog.assets('character')) == 1

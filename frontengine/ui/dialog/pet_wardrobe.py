@@ -24,7 +24,8 @@ from frontengine.ui.dialog.dialog_kit import button_row, roomy
 class PetWardrobeDialog(QDialog):
     """Stage clothes on a separate clock; the desktop changes only on Apply."""
 
-    def __init__(self, profiles, identifier, parent=None, library=None, *, lifetime=None) -> None:
+    def __init__(self, profiles, identifier, parent=None, library=None, *, lifetime=None,
+                 stand_in: str | None = None) -> None:
         super().__init__(parent)
         self.lifetime = lifetime or captured_lifetime(parent)
         self.lifetime.adopt(self)
@@ -154,10 +155,29 @@ class PetWardrobeDialog(QDialog):
         self._refresh_controls()
         self._attempt(self.draft.prepare_preview)
         retranslator.bind_call(self._retranslate_choices)
+        self._adding_new_clothes = False
+        self._stand_in = None
+        self.wear_stand_in(stand_in)
         if errors:
             self.status.setText('\n'.join((*errors, self.status.text())))
-        self._adding_new_clothes = False
         self.add_new_builtin_clothes()
+
+    @owned_action
+    def wear_stand_in(self, character: str | None) -> None:
+        """A pet with no character of its own opens wearing the built-in it is drawn as; Apply saves it."""
+        from frontengine.show.pet.inkside.library import VERSION
+        if character is None or self.draft.appearance['character'] is not None:
+            return
+        reference = {'id': character, 'version': VERSION}
+        if self.character.findData(reference) >= 0:
+            self._attempt(lambda: self.draft.choose_character(reference))
+            return
+        index = self.builtin.findData(character)
+        if index < 0:
+            return
+        self._stand_in = reference        # not installed yet: worn as soon as it is
+        self.builtin.setCurrentIndex(index)
+        self._install_builtin()
 
     def missing_builtin_clothes(self) -> str | None:
         """The pet's built-in character when clothes added in a later FrontEngine are not installed yet."""
@@ -250,7 +270,11 @@ class PetWardrobeDialog(QDialog):
     @owned_callback
     def _builtin_installed(self, error: str) -> None:
         self._installed(error)
+        stand_in, self._stand_in = self._stand_in, None
         if not error and not self._closed:
+            if stand_in is not None and self.draft.appearance['character'] is None:
+                self._attempt(lambda: self.draft.choose_character(stand_in))
+                return
             if self._adding_new_clothes:
                 self._adding_new_clothes = False
                 self.status.setText(translate('pet_wardrobe_new_clothes', 'New built-in clothes are ready to try on.'))

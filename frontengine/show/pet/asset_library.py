@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from hashlib import sha256
 from pathlib import Path
+import re
 import tempfile
 from threading import Event
 from typing import Callable
@@ -10,6 +11,8 @@ from typing import Callable
 from frontengine.show.pet.layered_renderer import LayeredRenderer
 from frontengine.show.pet.wardrobe import AssetCatalog
 from frontengine.utils.pet_pack.layered import check_sources, image_bounds, image_path, load_layered_asset
+
+_ASSET_FOLDER = re.compile(r'[0-9a-f]{64}')
 
 
 class PetAssetLibrary:
@@ -39,7 +42,9 @@ class PetAssetLibrary:
         for index, folder in enumerate(self.root.iterdir()):
             if index >= 512:
                 raise ValueError('Pet asset library exceeds 512 entries')
-            if folder.name.startswith('.install-'):
+            # Installed assets live in sha256-named folders; anything else (staging folders, the
+            # exported Puppet models under ``puppets``) shares the root but is not an asset.
+            if not _ASSET_FOLDER.fullmatch(folder.name):
                 continue
             try:
                 asset = load_layered_asset(folder)

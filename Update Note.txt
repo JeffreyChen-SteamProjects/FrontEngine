@@ -1,6 +1,6 @@
 [i]Everything released since 31 July 2026.[/i]
 
-Most of this update is about the desktop pet. It can now be dressed, looked after and played with, it remembers who it is between sessions, and six new characters come with it. Alongside that, scenes gained a visual editor with animation and 3D, FrontEngine can now publish to the Steam Workshop as well as import from it, and a long list of smaller tools arrived.
+Most of this update is about the desktop pet. It can now be dressed, looked after and played with, it remembers who it is between sessions, six new characters come with it, and your pets can now move into a home of their own that lives along the bottom of your screen. Alongside that, scenes gained a visual editor with animation and 3D, FrontEngine can now publish to the Steam Workshop as well as import from it, and a long list of smaller tools arrived.
 
 [hr][/hr]
 
@@ -31,6 +31,25 @@ Each pet is now its own saved identity, with a name, mood, fullness and affectio
 Pets can also be Imervue Puppet models, with their own reactions, petting, toys and photos; this needs the Imervue runtime. The six built-in characters can be exported as rigged Puppet models with Use built-in Puppet model. Puppet pets stroll on their own too, and now and then sit, play, groom, wave or celebrate in place.
 
 [b]Fixed:[/b] a walking pet's animation could freeze while it moved, so it seemed to slide across the screen. The frames now change as it walks. A pet standing on a window narrower than itself no longer shakes left and right. With monitors at different scaling, a pet moved to another monitor keeps its size and stays on that monitor.
+
+[hr][/hr]
+
+[h2]The pet home[/h2]
+
+The new Pet home page lets your saved pets move into a small home where they live on their own. Press [b]Create a home[/b] for a bed, a dining table, a writing desk and 10 home coins, and tick which pets move in. They arrive as themselves, with the same name, mood, closeness, look and wardrobe, and go back to the desktop just as they are when they move out. Nothing is created until you press the button, and every other tool works without a home.
+
+The home also lives on the desktop, as a transparent strip standing on the taskbar edge. Only the pets, the furniture and the small home button take the mouse; everything else clicks through to the windows behind, and the strip never takes focus. Click a pet for its card, drag it to move it, or right-click it to feed, pat or talk to it, groom it, play tag, call it over, take its photo, open its wardrobe or see its work. Ctrl and the mouse wheel make the strip smaller or larger.
+
+[list]
+[*][b]Work[/b]: pets write at the desk, garden at a planter and craft at a workbench during their working hours, and every finished piece pays home coins once. Workstations can be upgraded, free pets lend a hand, and double-clicking a daily commission sends the right pet to make what it still needs.
+[*][b]Furniture[/b]: 45 pieces, from a pet cushion to a bunk bed, a piano, an aquarium, a kotatsu and a telescope, drawn as outlined cartoon pictures in three themes. Arrange them with undo, paint living, work, leisure and dining areas, or apply one of four ready-made layouts.
+[*][b]Life[/b]: days and nights, four seasons with petals, leaves and snow, rain, comfort, cleanliness, friendships, personalities, small wishes, birthdays and twelve life moments. Ambient birdsong, crickets and rain are there if you turn them on.
+[*][b]Goals[/b]: a home level that rises as the home grows, ten getting-started goals, three commissions a day with no streaks to keep, and a collection guide with a photo album.
+[*][b]Calm by design[/b]: time passes only while the home is running, nothing counts down while FrontEngine is closed, and the Inbox collects news without ever popping up. Focus, Meeting and Power saver modes keep it quiet, and sharing your screen switches to Meeting by itself.
+[*][b]Sharing[/b]: copy a layout code, save the whole home as a blueprint to visit read-only, add furniture packs and themes from a folder, or get them from the Steam Workshop.
+[/list]
+
+The built-in characters have their own poses in the home, dressed or not: they sleep on the bed, eat at the table, write at the desk, water the planter, read, play the piano, paint and bathe. A pet with no character yet appears as one of the built-in characters, always the same one, and opening its wardrobe from the home or the Pet page starts on that character, so you dress the pet you clicked.
 
 [hr][/hr]
 

@@ -3,7 +3,7 @@ Pet Page
 
 A companion that lives on the desktop.
 
-The page opens with *Your pet*: click one of the built-in characters and a pet dressed as it appears on the desktop at once. Below, the pets on the desktop are listed with *Wardrobe*, *Bring pet back* and *Put away* (a double-click brings one back); every other setting is folded away until you open its section. A first start, with no pet and no home yet, opens on this page.
+The page opens with *Your pet*: click one of the built-in characters and a pet dressed as it appears on the desktop at once. Below, the pets on the desktop are listed with *Wardrobe*, *Bring pet back* and *Put away* (a double-click brings one back); every other setting is folded away until you open its section. A first start, with no pet and no home yet, opens on this page. Its *Wardrobe* opens a pet with no character yet on the built-in character it appears as on the desktop, so you dress that same pet; nothing is saved until *Apply*.
 
 * Every desktop pet is a layered character: a built-in INKSIDE character or one
   installed in the wardrobe. Pictures, GIFs and sprite-pack folders are not

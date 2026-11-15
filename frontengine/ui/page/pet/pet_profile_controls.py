@@ -257,13 +257,21 @@ class PetProfileControls:
         try:
             library = (getattr(owner, 'asset_library', None)
                        or PetAssetLibrary(self.lifetime.storage.directory / 'pet-assets'))
-            dialog = PetWardrobeDialog(self.profiles, identifier, self.page, library=library)
+            dialog = PetWardrobeDialog(self.profiles, identifier, self.page, library=library,
+                                       stand_in=self._stand_in(identifier))
         except (OSError, ValueError) as error:
             self.status.setText(str(error))
             return
         self._wardrobes[identifier] = dialog
         dialog.destroyed.connect(lambda: self._wardrobes.pop(identifier, None))
         dialog.show()
+
+    def _stand_in(self, identifier: str) -> str | None:
+        """The built-in a pet without a character is drawn and spawned as; the wardrobe opens wearing it."""
+        if self.profiles.look_for(identifier) is not None:      # a Puppet pet keeps its own model
+            return None
+        from frontengine.show.pet_game.resident_art import fallback_character
+        return fallback_character(identifier)
 
     @owned_action
     def export_selected(self) -> None:

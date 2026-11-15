@@ -181,11 +181,19 @@ class ResidentPanel:
             from frontengine.show.pet.asset_library import PetAssetLibrary
             from frontengine.ui.dialog.pet_wardrobe import PetWardrobeDialog
             library = PetAssetLibrary(self.lifetime.storage.directory / 'pet-assets')
-            dialog = PetWardrobeDialog(self.page.profiles, identifier, self.page, library=library)
+            dialog = PetWardrobeDialog(self.page.profiles, identifier, self.page, library=library,
+                                       stand_in=self._stand_in(identifier))
             dialog.destroyed.connect(lambda _obj=None, key=identifier: self.wardrobes.pop(key, None))
             self.wardrobes[identifier] = dialog
         dialog.show()
         dialog.raise_()
+
+    def _stand_in(self, identifier: str) -> str | None:
+        """The built-in the home draws this pet as when it has no look of its own; the wardrobe opens wearing it."""
+        if self.page.profiles.look_for(identifier) is not None:      # a Puppet pet shows its own portrait
+            return None
+        from frontengine.show.pet_game.resident_art import fallback_character
+        return fallback_character(identifier)
 
     @owned_action
     def release(self) -> None:
@@ -821,6 +829,20 @@ class WorkPanel:
         else:
             for row, (_identifier, _recipe, text) in enumerate(lines):
                 self.tasks.item(row).setText(text)
+        self._refresh_cancel()
+
+    def show_resident(self, identifier: str) -> None:
+        """Pick this pet's job in the list (the one still open first); none of its own leaves nothing picked."""
+        world = self.page.service.world
+        self.refresh_live()
+        jobs = [task for task in world.tasks.values() if task.resident == identifier] if world else []
+        jobs.sort(key=lambda task: (not task.open, int(task.identifier[1:])))
+        self.tasks.clearSelection()
+        self.tasks.setCurrentItem(None)
+        for row in range(self.tasks.count() if jobs else 0):
+            if self.tasks.item(row).data(ROLE_ID) == jobs[0].identifier:
+                self.tasks.setCurrentItem(self.tasks.item(row))
+                break
         self._refresh_cancel()
 
     def _refresh_cancel(self) -> None:

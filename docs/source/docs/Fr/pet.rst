@@ -3,7 +3,7 @@ Page Mascotte
 
 Un compagnon qui vit sur le bureau.
 
-La page s’ouvre sur *Votre mascotte* : cliquez sur un des personnages intégrés et une mascotte habillée comme lui apparaît aussitôt sur le bureau. En dessous, les mascottes du bureau sont listées avec *Garde-robe*, *Ramener l’animal* et *Ranger* (un double-clic en ramène une) ; tous les autres réglages restent repliés jusqu’à ce que vous ouvriez leur section. Au premier démarrage, sans animal ni maison, FrontEngine s'ouvre sur cette page.
+La page s’ouvre sur *Votre mascotte* : cliquez sur un des personnages intégrés et une mascotte habillée comme lui apparaît aussitôt sur le bureau. En dessous, les mascottes du bureau sont listées avec *Garde-robe*, *Ramener l’animal* et *Ranger* (un double-clic en ramène une) ; tous les autres réglages restent repliés jusqu’à ce que vous ouvriez leur section. Au premier démarrage, sans animal ni maison, FrontEngine s'ouvre sur cette page. Pour une mascotte sans personnage, *Garde-robe* s’ouvre déjà sur le personnage intégré sous lequel elle apparaît sur le bureau : vous habillez donc la même mascotte ; rien n’est enregistré avant *Appliquer*.
 
 * Chaque mascotte de bureau est un personnage en calques : un personnage INKSIDE
   intégré ou un personnage installé dans la garde-robe. Les images, les GIF et les
