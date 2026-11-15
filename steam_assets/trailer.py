@@ -32,7 +32,20 @@ VIDEO_BITRATE = 8_000_000        # about 70 s stays well under GitHub's 100 MB
 SOUND_VOLUME = 0.55
 
 
-WORKSPACE = Path(tempfile.mkdtemp(prefix="fe-trailer-"))
+def _workspace() -> Path:
+    """One fixed settings folder per script, emptied at the start of each run.
+
+    A fresh ``mkdtemp`` per run left a folder behind every time: the page's settings lock is still
+    held when the script ends, so it cannot clean up after itself. Reusing one name per script
+    keeps it to a single folder, and the trailer and the store art can still run side by side."""
+    import shutil
+    folder = Path(tempfile.gettempdir()) / f"frontengine-{Path(sys.argv[0]).stem or 'steam'}-staging"
+    shutil.rmtree(folder, ignore_errors=True)
+    folder.mkdir(parents=True, exist_ok=True)
+    return folder
+
+
+WORKSPACE = _workspace()
 
 
 def _offscreen_screen() -> None:
@@ -137,8 +150,27 @@ class Recorder:
         self.sound, self.rate, self.channels = sound, rate, channels
         self.frame_bytes = 2 * channels
         self.sent_samples = 0
+        self.fade: tuple[int, int] | None = None      # (first sample, length) of the closing fade
         self.frames = 0
         self.recorder.record()
+
+    def fade_sound(self, seconds: float) -> None:
+        """Fade the sound out over the next ``seconds``, with the closing fade to black.
+
+        The film's length is only known once it has been shot, so the soundtrack cannot carry its
+        own fade-out: a fade baked into a fixed-length track ends up after the film has finished
+        and the sound stops dead under the last black frame."""
+        self.fade = (self.sent_samples, max(1, int(seconds * self.rate)))
+
+    def _gain(self, chunk: bytes, first: int) -> bytes:
+        if self.fade is None:
+            return chunk
+        import numpy as np
+        start, length = self.fade
+        samples = np.frombuffer(chunk, dtype=np.int16).reshape((-1, self.channels)).astype(np.float32)
+        index = np.arange(first, first + len(samples), dtype=np.float32)
+        gain = np.clip(1.0 - (index - start) / length, 0.0, 1.0)
+        return (samples * gain[:, None]).astype(np.int16).tobytes()
 
     def _wait(self, send) -> None:
         deadline = time.monotonic() + 30
@@ -166,6 +198,7 @@ class Recorder:
             begin = self.sent_samples * self.frame_bytes
             chunk = self.sound[begin:begin + count * self.frame_bytes]
             chunk += bytes(count * self.frame_bytes - len(chunk))
+            chunk = self._gain(chunk, self.sent_samples)
             buffer = QAudioBuffer(chunk, self.audio_format, int(self.sent_samples * 1_000_000 / self.rate))
             self._wait(lambda: self.audio.sendAudioBuffer(buffer))
             self.sent_samples += count
@@ -195,12 +228,17 @@ class Stills:
             image.save(str(self.folder / f"{self.frames // FPS:03d}_{self.frames % FPS:02d}.jpg"), "JPG", 90)
         self.frames += 1
 
+    def fade_sound(self, seconds: float) -> None:
+        pass
+
     def close(self) -> None:
         pass
 
 
 def ambience(seconds: float) -> tuple[bytes, int, int]:
-    """The home's own daytime birdsong, looped and faded, as the soundtrack."""
+    """The home's own daytime birdsong, looped and faded in, as the soundtrack.
+
+    Longer than the film on purpose; the Recorder fades it out with the closing card."""
     path = REPO / "frontengine" / "show" / "pet_game" / "ambience" / "day.wav"
     with wave.open(str(path), "rb") as source:
         rate, channels, width = source.getframerate(), source.getnchannels(), source.getsampwidth()
@@ -212,9 +250,8 @@ def ambience(seconds: float) -> tuple[bytes, int, int]:
     total = int(seconds * rate)
     looped = np.resize(samples, (total, channels))
     envelope = np.ones(total, dtype=np.float32)
-    fade_in, fade_out = int(1.0 * rate), int(3.0 * rate)
+    fade_in = int(1.0 * rate)
     envelope[:fade_in] = np.linspace(0, 1, fade_in)
-    envelope[-fade_out:] = np.linspace(1, 0, fade_out)
     looped *= (envelope * SOUND_VOLUME)[:, None]
     return np.clip(looped, -32768, 32767).astype(np.int16).tobytes(), rate, channels
 
@@ -401,6 +438,16 @@ class Film:
         painter.end()
         return image
 
+    def pan(self, scale: float, start: float, end: float, seconds: float):
+        """A close-up whose camera glides from ``start`` to ``end`` (view pixels) over ``seconds``."""
+        view, count, state = self.page.view, max(1, round(seconds * FPS)), {"frame": 0}
+
+        def render() -> QImage:
+            k = ease(min(1.0, state["frame"] / count))
+            state["frame"] += 1
+            return close_up_image(view, scale, start + (end - start) * k)
+        return render
+
     def close_up(self, scale: float, center: float | None = None):
         """The home drawing redrawn larger (not an enlarged screenshot), centred on what is in it."""
         view = self.page.view
@@ -561,6 +608,79 @@ def home_center(page) -> float:
 
 # ----- the script -------------------------------------------------------------------------------
 
+# Pieces the built-in characters have a pose of their own for, set out with a gap between each so
+# every use can be seen. Free arranging has every piece, including those a new home has not
+# unlocked yet (piano, aquarium, fireplace...).
+SHOWROOM = ("bed_cozy", "bookshelf", "armchair", "tv_set", "fireplace", "piano", "easel", "aquarium",
+            "toy_box", "telescope", "wardrobe_closet", "kotatsu", "floor_lamp", "plant_pot")
+
+
+def furnish_showroom(page) -> None:
+    """Set the free-arranging home out like a showroom (setting the scene, as with the saved pets)."""
+    world, zone = page.service.world, page.zone
+    cell = 2                                  # cell 0 is the entrance
+    for name in SHOWROOM:
+        result, _piece = world.place(name, zone, cell)
+        if result != "accepted":
+            print(f"warning: {name} not placed ({result})")
+        cell += world.catalog.furniture[name].width + 1
+    page.refresh()
+
+
+def furniture_span(page) -> tuple[float, float]:
+    world, view = page.service.world, page.view
+    xs = [view.piece_rect(piece, definition).center().x() for piece, definition in world.in_zone(page.zone)]
+    return (min(xs), max(xs)) if xs else (0.0, float(view.width()))
+
+
+def ask_everyone(page, command: str) -> None:
+    """What the pet menu's *Ask to* does, for every resident."""
+    service = page.service
+    for identifier in list(service.world.residents):
+        service.run(lambda world, i=identifier: world.command(i, command))
+
+
+def furniture_interactions(film: Film, app: QApplication) -> None:
+    """Free arranging, then the pets using the pieces made for what they were asked to do."""
+    page, shot = film.page, film.page_shot
+    film.say("Free arranging: every piece of furniture, no costs")
+    film.top(shot, 0.0)
+    film.hold(0.6, shot, fade_in=True)
+    film.click(page.sandbox_button, shot)
+    # The free-arranging home starts empty; the same four pets move in.
+    movers = {page.newcomers.item(i).data(Qt.ItemDataRole.UserRole) for i in range(page.newcomers.count())
+              if page.newcomers.item(i).text() != "Spare"}
+    tick_movers(page, movers)
+    film.hold(0.6, shot)
+    film.click(page.create_button, shot)
+    furnish_showroom(page)
+    wait_for_art(app, page)
+    film.hold(1.6, shot)
+    film.say("")
+    film.hold(0.5, shot, fade_out=True)
+
+    # Off camera, the pets are asked to relax and given a moment to walk over.
+    ask_everyone(page, "relax")
+    run_home(app, page, 45)
+    left, right = furniture_span(page)
+    margin = WIDTH / 2 / 2.6
+    start, end = left + margin * 0.8, right - margin * 0.8
+    film.speed = 1.5
+    # Captions stay general: the pets' identities are new every run, so who picks which piece varies.
+    film.say("Ask them to relax or play, and each one picks a piece to use")
+    film.hold(6.0, film.pan(2.6, start, (start + end) / 2, 6.0), fade_in=True)
+    film.say("")
+    film.hold(0.5, film.pan(2.6, (start + end) / 2, (start + end) / 2, 0.5), fade_out=True)
+
+    ask_everyone(page, "play")
+    run_home(app, page, 45)
+    film.say("Every built-in character has a pose of its own for each piece")
+    film.hold(6.0, film.pan(2.6, (start + end) / 2, end, 6.0), fade_in=True)
+    film.say("")
+    film.hold(0.5, film.pan(2.6, end, end, 0.5), fade_out=True)
+    film.speed = 3.0
+
+
 def shoot(film: Film, app: QApplication) -> None:
     page = film.page
     shot = film.page_shot
@@ -612,6 +732,8 @@ def shoot(film: Film, app: QApplication) -> None:
     film.say("")
     film.hold(0.5, shot, fade_out=True)
 
+    furniture_interactions(film, app)
+
     film.say("Days, nights and weather")
     film.speed = 300.0          # a game day is one real hour: a whole day and night in twelve seconds
     lapse = film.close_up(2.4, home_center(page))
@@ -629,6 +751,7 @@ def shoot(film: Film, app: QApplication) -> None:
     film.say("Pet home. In FrontEngine now.")
     film.hold(3.5, film.card, fade_in=True)
     film.say("")
+    film.sink.fade_sound(1.5)       # the sound goes with the picture
     film.hold(1.5, film.card, fade_out=True)
 
 
@@ -637,7 +760,7 @@ def _tr(key: str, fallback: str) -> str:
     return language_wrapper.language_word_dict.get(key, fallback)
 
 
-PLANNED_SECONDS = 75
+PLANNED_SECONDS = 90          # the soundtrack is cut longer than the film and faded with it
 
 
 def stage_page(app: QApplication, page) -> None:
