@@ -81,14 +81,17 @@ def test_dependabot_waits_a_week_before_proposing_a_release():
     assert blocks and all(match and int(match.group(1)) >= 7 for match in days)
 
 
-def test_dependabot_watches_the_hash_locked_requirements():
-    # From "/" Dependabot does not look as deep as .github/requirements/, so
-    # the directory has to be named or its lock is never updated.
+def test_dependabot_leaves_the_hash_locked_requirements_alone():
+    # Dependabot regenerates .github/requirements/publish.txt without setuptools,
+    # the build backend the release job uses under --no-isolation, so each PR it
+    # opened there failed the lock checks below (#231, #232). The lock is updated
+    # by hand with the command publish.in names; from "/" Dependabot does not look
+    # that deep, so the directory just must not be named.
     text = (_ROOT / ".github" / "dependabot.yml").read_text(encoding="utf-8")
     blocks = re.split(r"^\s*-\s*package-ecosystem:", text, flags=re.MULTILINE)[1:]
     pip = next(block for block in blocks if block.split()[0].strip("\"'") == "pip")
     assert not re.search(r"^\s*directory:", pip, re.MULTILINE)
-    assert set(re.findall(r"^\s*-\s*\"(/[^\"]*)\"", pip, re.MULTILINE)) == {"/", "/.github/requirements"}
+    assert set(re.findall(r"^\s*-\s*\"(/[^\"]*)\"", pip, re.MULTILINE)) == {"/"}
 
 
 def _checkout_steps(path: Path) -> list[tuple[int, str]]:

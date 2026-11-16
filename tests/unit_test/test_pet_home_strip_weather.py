@@ -9,13 +9,17 @@ from frontengine.show.pet_game.strip_weather import paint_precipitation, precipi
 from frontengine.ui.page.pet_game.home_page import PetHomePage
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.utils.pet_game.catalog import builtin_catalog
-from frontengine.utils.pet_game.environment import DAY_MS, weather
+from frontengine.utils.pet_game.environment import DAY_MS, YEAR_DAYS, weather
 
 HOUR = DAY_MS // 24
+# Snow falls only in winter's 28 six-hour weather spans a year, each rainy with 1 chance in 5, so a
+# home (named at random by the fixture) has no snow at all in its first year about once in 500
+# runs. Four years make that about one in 10**11.
+SEARCH_YEARS = 4
 
 
 def _moment(home, kinds):
-    for hour in range(24 * 28):
+    for hour in range(24 * YEAR_DAYS * SEARCH_YEARS):
         time_ms = hour * HOUR + HOUR // 2
         if weather(home, time_ms) in kinds:
             return time_ms

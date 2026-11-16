@@ -6,12 +6,15 @@
 version: 2
 updates:
   - package-ecosystem: "pip" # See documentation for possible values
-    # Location of package manifests: the project's own at the root, and the
-    # hash-locked tool set the release job installs (publish.txt). Dependabot
-    # does not look that deep from the root, so the directory is named.
+    # Only the project's own manifests at the root. The hash-locked tool set the
+    # release job installs (.github/requirements/publish.txt) is left out on
+    # purpose: Dependabot regenerates that lock without setuptools, the backend
+    # the job builds with under --no-isolation, so every PR it opened there
+    # failed test_workflow_actions.py (#231, #232). That lock is updated by hand
+    # with the command publish.in names. From "/" Dependabot does not look as
+    # deep as .github/requirements, so leaving it unnamed is enough.
     directories:
       - "/"
-      - "/.github/requirements"
     # Work flows feature -> dev -> main and only the last step publishes, so
     # updates belong on dev; a PR opened against main just sits there.
     target-branch: "dev"
