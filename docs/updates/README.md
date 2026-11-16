@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261116-04 | 2026-11-16 | Dependabot 不再更新發佈工具的鎖定檔 | #done #ci #dependencies | [2026-11](2026-11.md) |
 | U-20261116-03 | 2026-11-16 | 發佈工具 build 升到 1.6.1（取代 Dependabot #232） | #done #ci #dependencies | [2026-11](2026-11.md) |
 | U-20261116-02 | 2026-11-16 | 天氣圖層測試偶發找不到雪 | #done #testing #flaky | [2026-11](2026-11.md) |
 | U-20261116-01 | 2026-11-16 | 處理 PR #302 的 SonarCloud 提示 | #done #quality | [2026-11](2026-11.md) |
@@ -465,6 +466,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 261 |
+| [2026-11.md](2026-11.md) | 2026-11 | 262 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
