@@ -412,6 +412,7 @@ def test_home_wardrobe_opens_wearing_the_character_the_home_draws(lifetime_facto
     finally:
         assert page.shutdown()
         page.close()
+        assert page.lifetime.pool().waitForDone(5000)
 
 
 def test_pet_page_wardrobe_opens_wearing_the_character_the_pet_is_spawned_as(lifetime_factory, monkeypatch):
@@ -429,3 +430,4 @@ def test_pet_page_wardrobe_opens_wearing_the_character_the_pet_is_spawned_as(lif
         assert dialog._stand_in == {'id': fallback_character(identifier), 'version': builtin_library.VERSION}
     finally:
         page.close()
+        assert page.lifetime.pool().waitForDone(5000)

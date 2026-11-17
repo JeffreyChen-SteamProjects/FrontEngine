@@ -1,0 +1,110 @@
+name: Windows executable
+
+# 只在發佈時建置：release.yml 發佈成功後呼叫這個 workflow，把 Nuitka 編出的
+# standalone 資料夾壓成 zip 附到那個版本的 GitHub release。每個 PR 都編一次太慢，
+# 所以不掛在 push / pull_request 上。workflow_dispatch 是手動重跑的逃生口：
+# 不給 tag 時只留下 artifact，不碰任何 release。
+#
+# steam_api64.dll 不放進去：它來自 Steamworks SDK，公開散布前要先確認授權；
+# Steam 版本來就由 Steamworks 上傳。沒有它，程式照樣能跑，只是沒有 Steam 功能。
+#
+# Built only on release: release.yml calls this after a successful publish, and
+# the Nuitka standalone folder is zipped onto that version's GitHub release.
+# Compiling on every PR would be far too slow, so there is no push or
+# pull_request trigger. workflow_dispatch is the escape hatch for a re-run:
+# without a tag it only leaves an artifact and touches no release.
+#
+# steam_api64.dll is left out: it comes from the Steamworks SDK, whose licence
+# has to be checked before distributing it publicly, and the Steam build is
+# uploaded through Steamworks anyway. Without it the program runs, minus Steam.
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: "Commit to build (the released one)"
+        type: string
+        required: true
+      tag:
+        description: "Release tag to attach the zip to"
+        type: string
+        required: true
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Branch, tag or commit to build"
+        type: string
+        required: true
+        default: "main"
+      tag:
+        description: "Release tag to attach the zip to (empty: artifact only)"
+        type: string
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    # The first run took 88 minutes, 86 of them compiling; about 3x that, under GitHub's 360.
+    timeout-minutes: 270
+    permissions:
+      contents: write  # attaches the zip to the release
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ inputs.ref }}
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+        with:
+          python-version: "3.13"
+
+      # build_exe.py refuses to compile when pyproject.toml's runtime requirements are
+      # missing, so this installs exactly those (requirements.txt mirrors them), packaging,
+      # which build_exe.py reads them with, and Nuitka as dev_requirements.txt names it.
+      # The Nuitka line is read from that file rather than copied here, so a Dependabot bump
+      # there reaches this build too.
+      - name: Install requirements and Nuitka
+        shell: pwsh
+        run: |
+          $nuitka = (Select-String -Path dev_requirements.txt -Pattern '^Nuitka\b' | Select-Object -First 1).Line
+          if (-not $nuitka) { throw "dev_requirements.txt names no Nuitka requirement" }
+          python -m pip install -r requirements.txt $nuitka.Trim() packaging
+
+      - name: Build with Nuitka
+        run: python exe/build_exe.py --output-dir build/nuitka
+
+      - name: Package the standalone folder
+        id: package
+        shell: pwsh
+        env:
+          REF: ${{ inputs.ref }}
+        run: |
+          $version = python -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])"
+          $folder = "build/nuitka/start_front_engine.dist"
+          if (-not (Test-Path "$folder/FrontEngine.exe")) { throw "FrontEngine.exe was not built" }
+          $name = "FrontEngine-$version-windows-x64.zip"
+          Compress-Archive -Path "$folder/*" -DestinationPath $name
+          "zip=$name" >> $env:GITHUB_OUTPUT
+          "::notice::Built $name ($([math]::Round((Get-Item $name).Length / 1MB)) MB) from $env:REF"
+
+      - name: Upload the zip as an artifact
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: windows-exe
+          path: ${{ steps.package.outputs.zip }}
+          retention-days: 30
+
+      - name: Attach the zip to the release
+        if: inputs.tag != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+          TAG: ${{ inputs.tag }}
+          ZIP: ${{ steps.package.outputs.zip }}
+        shell: pwsh
+        run: gh release upload $env:TAG $env:ZIP --clobber --repo $env:REPOSITORY

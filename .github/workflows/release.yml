@@ -17,7 +17,7 @@ on:
           - major
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: release
@@ -25,6 +25,8 @@ concurrency:
 
 jobs:
   release:
+    permissions:
+      contents: write
     # 發佈只在 `dev` 合併進 `main` 時發生。
     #
     # 以前是「任何 PR 合併進 main 就發佈」，於是每一個功能、每一次改文件都會多發
@@ -53,6 +55,9 @@ jobs:
        github.event.pull_request.head.ref == 'dev')
     runs-on: ubuntu-latest
     timeout-minutes: 70  # about 3x the slowest recent run, at least 15
+    outputs:
+      tag: ${{ steps.bump.outputs.tag }}
+      sha: ${{ steps.commit.outputs.sha }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
@@ -265,3 +270,19 @@ jobs:
           else
             echo "::warning::Could not fast-forward dev - it moved during the release. Run 'git push origin main:dev' once the two are reconciled."
           fi
+
+  # 發佈成功後才編 Windows 執行檔，附到同一個 release。它跑在自己的 job、自己的
+  # Windows 機器上，拿不到 PyPI token；編失敗不會讓已經上架的套件出問題，事後可以
+  # 用 windows-exe.yml 的 workflow_dispatch 帶 tag 重跑。
+  # The Windows executable is built only after a successful publish and attached
+  # to the same release. It runs in its own job on its own Windows runner, out of
+  # reach of the PyPI token; a failed build does not affect the published package
+  # and can be re-run from windows-exe.yml's workflow_dispatch with the tag.
+  windows-exe:
+    needs: release
+    permissions:
+      contents: write
+    uses: ./.github/workflows/windows-exe.yml
+    with:
+      ref: ${{ needs.release.outputs.sha }}
+      tag: ${{ needs.release.outputs.tag }}

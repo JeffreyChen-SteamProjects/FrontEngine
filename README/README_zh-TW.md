@@ -473,7 +473,7 @@ python -m pyflakes frontengine/ exe/ tests/
   pull request 一個功能,所有 CI 檢查都要是綠的。
 - **建置 Windows 執行檔**——`python exe/build_exe.py`
   (Nuitka;加上 `--onefile` 產生單一檔案)。
-  預設使用全部 CPU 核心編譯；`--jobs N` 限制並行工作數（降低記憶體用量），`--jobs -N` 保留 N 個核心不用。
+  預設使用全部 CPU 核心編譯；`--jobs N` 限制並行工作數（降低記憶體用量），`--jobs -N` 保留 N 個核心不用。每個 GitHub release 也會附上已建置好的 `FrontEngine-<版本>-windows-x64.zip`（standalone 資料夾，不含 `steam_api64.dll`）。
 - **說明文件(Documentation)**——Sphinx 原始碼在 `docs/` 裡,以全部七種
   語言發佈到 [Read the Docs](https://frontengine.readthedocs.io/en/latest/)。
 
