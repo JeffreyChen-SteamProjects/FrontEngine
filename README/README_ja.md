@@ -509,7 +509,7 @@ python -m pyflakes frontengine/ exe/ tests/
   に一機能、すべての CI チェックがグリーン。
 - **Windows 実行ファイルのビルド** — `python exe/build_exe.py`
   （Nuitka。単一ファイルにするには `--onefile` を追加）。
-  既定ではすべての CPU コアでコンパイルします。`--jobs N` で並列ジョブ数を制限（メモリ節約）、`--jobs -N` で N コアを空けておきます。
+  既定ではすべての CPU コアでコンパイルします。`--jobs N` で並列ジョブ数を制限（メモリ節約）、`--jobs -N` で N コアを空けておきます。各 GitHub リリースには、ビルド済みの `FrontEngine-<バージョン>-windows-x64.zip`（standalone フォルダー、`steam_api64.dll` は含みません）も添付されます。
 - **ドキュメント** — Sphinx ソースは `docs/` にあり、七つすべての言語で
   [Read the Docs](https://frontengine.readthedocs.io/en/latest/) に公開されて
   います。

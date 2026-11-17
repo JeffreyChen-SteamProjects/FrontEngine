@@ -499,7 +499,7 @@ qu'on puisse le tester avec une fausse.
   pull request, tous les contrôles CI au vert.
 - **Compiler l'exécutable Windows** — `python exe/build_exe.py`
   (Nuitka ; ajoutez `--onefile` pour un fichier unique).
-  Par défaut, la compilation utilise tous les cœurs du processeur ; `--jobs N` limite les tâches parallèles (moins de mémoire), `--jobs -N` laisse N cœurs libres.
+  Par défaut, la compilation utilise tous les cœurs du processeur ; `--jobs N` limite les tâches parallèles (moins de mémoire), `--jobs -N` laisse N cœurs libres. Chaque release GitHub contient aussi cette compilation toute prête, `FrontEngine-<version>-windows-x64.zip` (le dossier standalone, sans `steam_api64.dll`).
 - **Documentation** — les sources Sphinx dans `docs/`, publiées sur
   [Read the Docs](https://frontengine.readthedocs.io/en/latest/) dans les sept
   langues.

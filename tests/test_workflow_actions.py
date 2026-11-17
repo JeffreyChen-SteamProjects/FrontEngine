@@ -94,6 +94,22 @@ def test_dependabot_leaves_the_hash_locked_requirements_alone():
     assert set(re.findall(r"^\s*-\s*\"(/[^\"]*)\"", pip, re.MULTILINE)) == {"/"}
 
 
+def test_the_windows_executable_is_built_only_after_a_release():
+    # A Nuitka build takes far too long for every push or pull request, so windows-exe.yml has
+    # no such trigger: release.yml calls it once the release job has published, with the
+    # released commit and tag, and workflow_dispatch is only the manual escape hatch.
+    exe = (_ROOT / ".github" / "workflows" / "windows-exe.yml").read_text(encoding="utf-8")
+    on = exe.split("\non:", 1)[1].split("\npermissions:", 1)[0]
+    triggers = set(re.findall(r"^  ([a-z_]+):", on, re.MULTILINE))
+    assert triggers == {"workflow_call", "workflow_dispatch"}
+    jobs = dict(_jobs(_ROOT / ".github" / "workflows" / "release.yml"))
+    caller = jobs["windows-exe"]
+    assert re.search(r"^\s*needs:\s*release\s*$", caller, re.MULTILINE)
+    assert re.search(r"^\s*uses:\s*\./\.github/workflows/windows-exe\.yml\s*$", caller, re.MULTILINE)
+    assert "needs.release.outputs.sha" in caller and "needs.release.outputs.tag" in caller
+    assert "secrets" not in caller and "secrets.PYPI_API_TOKEN" not in exe
+
+
 def _checkout_steps(path: Path) -> list[tuple[int, str]]:
     """Return ``(line number, step text)`` for each ``actions/checkout`` step."""
     lines = path.read_text(encoding="utf-8").splitlines()
