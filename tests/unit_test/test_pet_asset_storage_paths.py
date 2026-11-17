@@ -47,6 +47,7 @@ def test_saved_pet_wardrobe_keeps_its_owners_directory(lifetime_factory, tmp_pat
         assert dialog.library.root == owner_directory / 'pet-assets'
     finally:
         page.close()
+        assert page.lifetime.pool().waitForDone(5000)
 
 
 def test_spawned_pet_reads_assets_from_its_owners_directory(lifetime_factory, tmp_path, monkeypatch, *,
@@ -142,3 +143,4 @@ def test_home_wardrobe_keeps_its_owners_directory(lifetime_factory, tmp_path, mo
     finally:
         assert page.shutdown()
         page.close()
+        assert page.lifetime.pool().waitForDone(5000)
