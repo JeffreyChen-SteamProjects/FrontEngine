@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261117-02 | 2026-11-17 | 執行檔建置跟著 dev_requirements.txt 的 Nuitka 版本 | #done #ci | [2026-11](2026-11.md) |
 | U-20261117-01 | 2026-11-17 | 發佈時自動建置 Windows 執行檔 | #done #ci #release | [2026-11](2026-11.md) |
 | U-20261116-04 | 2026-11-16 | Dependabot 不再更新發佈工具的鎖定檔 | #done #ci #dependencies | [2026-11](2026-11.md) |
 | U-20261116-03 | 2026-11-16 | 發佈工具 build 升到 1.6.1（取代 Dependabot #232） | #done #ci #dependencies | [2026-11](2026-11.md) |
@@ -467,6 +468,6 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11.md](2026-11.md) | 2026-11 | 263 |
+| [2026-11.md](2026-11.md) | 2026-11 | 264 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

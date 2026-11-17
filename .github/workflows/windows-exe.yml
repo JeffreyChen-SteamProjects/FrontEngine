@@ -64,10 +64,16 @@ jobs:
           python-version: "3.13"
 
       # build_exe.py refuses to compile when pyproject.toml's runtime requirements are
-      # missing, so this installs exactly those (requirements.txt mirrors them) plus Nuitka
-      # at the floor dev_requirements.txt sets, and packaging, which build_exe.py reads them with.
+      # missing, so this installs exactly those (requirements.txt mirrors them), packaging,
+      # which build_exe.py reads them with, and Nuitka as dev_requirements.txt names it.
+      # The Nuitka line is read from that file rather than copied here, so a Dependabot bump
+      # there reaches this build too.
       - name: Install requirements and Nuitka
-        run: python -m pip install -r requirements.txt "Nuitka>=4.3.4" packaging
+        shell: pwsh
+        run: |
+          $nuitka = (Select-String -Path dev_requirements.txt -Pattern '^Nuitka\b' | Select-Object -First 1).Line
+          if (-not $nuitka) { throw "dev_requirements.txt names no Nuitka requirement" }
+          python -m pip install -r requirements.txt $nuitka.Trim() packaging
 
       - name: Build with Nuitka
         run: python exe/build_exe.py --output-dir build/nuitka

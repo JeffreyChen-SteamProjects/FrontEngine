@@ -110,6 +110,17 @@ def test_the_windows_executable_is_built_only_after_a_release():
     assert "secrets" not in caller and "secrets.PYPI_API_TOKEN" not in exe
 
 
+def test_the_windows_executable_uses_the_nuitka_requirement_of_dev_requirements():
+    # Copying a version into the workflow drifts the moment Dependabot raises it in
+    # dev_requirements.txt, so the build reads that file's Nuitka line instead.
+    exe = (_ROOT / ".github" / "workflows" / "windows-exe.yml").read_text(encoding="utf-8")
+    code = "\n".join(line for line in exe.splitlines() if not line.lstrip().startswith("#"))
+    assert re.search(r"Select-String -Path dev_requirements\.txt -Pattern '\^Nuitka", code)
+    assert not re.search(r"(?i)nuitka\s*[<>=!~]=?\s*\d", code)
+    requirements = (_ROOT / "dev_requirements.txt").read_text(encoding="utf-8")
+    assert re.search(r"^Nuitka\b", requirements, re.MULTILINE)
+
+
 def _checkout_steps(path: Path) -> list[tuple[int, str]]:
     """Return ``(line number, step text)`` for each ``actions/checkout`` step."""
     lines = path.read_text(encoding="utf-8").splitlines()
