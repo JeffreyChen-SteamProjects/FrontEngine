@@ -106,8 +106,20 @@ def test_the_windows_executable_is_built_only_after_a_release():
     caller = jobs["windows-exe"]
     assert re.search(r"^\s*needs:\s*release\s*$", caller, re.MULTILINE)
     assert re.search(r"^\s*uses:\s*\./\.github/workflows/windows-exe\.yml\s*$", caller, re.MULTILINE)
-    assert "needs.release.outputs.sha" in caller and "needs.release.outputs.tag" in caller
-    assert "secrets" not in caller and "secrets.PYPI_API_TOKEN" not in exe
+    assert "needs.release.outputs.sha" in caller
+    assert "needs.release.outputs.tag" in caller
+    assert "secrets" not in caller
+    assert "secrets.PYPI_API_TOKEN" not in exe
+
+
+def test_release_write_permissions_are_scoped_to_jobs():
+    workflow = _ROOT / ".github" / "workflows" / "release.yml"
+    text = workflow.read_text(encoding="utf-8")
+    defaults = text.split("\njobs:", 1)[0]
+    assert re.search(r"^permissions:\n  contents: read$", defaults, re.MULTILINE)
+    jobs = dict(_jobs(workflow))
+    for name in ("release", "windows-exe"):
+        assert re.search(r"^    permissions:\n      contents: write$", jobs[name], re.MULTILINE)
 
 
 def test_the_windows_executable_uses_the_nuitka_requirement_of_dev_requirements():

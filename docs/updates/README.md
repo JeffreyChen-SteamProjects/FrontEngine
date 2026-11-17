@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261118-01 | 2026-11-18 | PR #305 發佈權限限縮與測試斷言修正 | #done #ci #security | [2026-11](2026-11.md) |
 | U-20261117-02 | 2026-11-17 | 執行檔建置跟著 dev_requirements.txt 的 Nuitka 版本 | #done #ci | [2026-11](2026-11.md) |
 | U-20261117-01 | 2026-11-17 | 發佈時自動建置 Windows 執行檔 | #done #ci #release | [2026-11](2026-11.md) |
 | U-20261116-04 | 2026-11-16 | Dependabot 不再更新發佈工具的鎖定檔 | #done #ci #dependencies | [2026-11](2026-11.md) |

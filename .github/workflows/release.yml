@@ -17,7 +17,7 @@ on:
           - major
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: release
@@ -25,6 +25,8 @@ concurrency:
 
 jobs:
   release:
+    permissions:
+      contents: write
     # 發佈只在 `dev` 合併進 `main` 時發生。
     #
     # 以前是「任何 PR 合併進 main 就發佈」，於是每一個功能、每一次改文件都會多發
