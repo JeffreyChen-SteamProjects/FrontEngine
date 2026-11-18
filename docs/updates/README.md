@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261118-04 | 2026-11-18 | 家園模擬加入「出門逛桌面」活動 | #done 桌面寵物／家園 | [2026-11-b](2026-11-b.md) |
 | U-20261118-03 | 2026-11-18 | 家園寵物預設變大 | #done 桌面寵物／家園 | [2026-11-b](2026-11-b.md) |
 | U-20261118-02 | 2026-11-18 | 衣櫃測試等待背景工作後才還原替身 | #done #testing #ci | [2026-11-b](2026-11-b.md) |
 | U-20261118-01 | 2026-11-18 | PR #305 發佈權限限縮與測試斷言修正 | #done #ci #security | [2026-11](2026-11.md) |
@@ -471,7 +472,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11-b.md](2026-11-b.md) | 2026-11 | 2 |
+| [2026-11-b.md](2026-11-b.md) | 2026-11 | 3 |
 | [2026-11.md](2026-11.md) | 2026-11 | 265 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

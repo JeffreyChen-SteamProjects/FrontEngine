@@ -69,6 +69,10 @@ class World:
         # Residents take jobs and rewards are collected by themselves. Runtime only, never saved:
         # tests of the bare mechanics switch it off.
         self.automatic = True
+        # Pets may go out onto the desktop in their free time. Runtime only, never saved: the page
+        # turns it on while a desktop strip is shown in normal mode and the setting allows it, so
+        # an outing is only ever chosen when there is somewhere to show it.
+        self.outings_allowed = False
         self.offline_zones: set[str] = set()     # zones whose screen is disconnected (runtime only)
         self._offline_parked: set[str] = set()
         self._interacted: dict[tuple[str, str], int] = {}     # (resident, kind) -> game time, runtime only
@@ -585,6 +589,32 @@ class World:
         if kind == "pat":
             resident.affection = min(MAX_AFFECTION, resident.affection + 1)
         self.emit("interacted", resident=identifier, interaction=kind)
+        return "accepted"
+
+    def set_outings(self, allowed: bool) -> list[str]:
+        """Allow or forbid desktop outings; forbidding calls every pet that is out back home.
+
+        Returns the residents whose outing ended, so the desktop can walk them back."""
+        self.outings_allowed = bool(allowed)
+        if self.outings_allowed:
+            return []
+        ended = []
+        for resident in self.residents.values():
+            if resident.activity is not None and resident.activity.kind == "outing":
+                cancel_activity(self, resident, "outing_ended")
+                resident.decide_after_ms = self.time_ms
+                ended.append(resident.identifier)
+        return ended
+
+    def call_home(self, identifier: str) -> str:
+        """End one pet's outing now, without a reward: the menu's *Come home*."""
+        resident = self.residents.get(identifier)
+        if resident is None:
+            return "unknown"
+        if resident.activity is None or resident.activity.kind != "outing":
+            return "not_out"
+        cancel_activity(self, resident, "called_home")
+        resident.decide_after_ms = self.time_ms
         return "accepted"
 
     def command(self, identifier: str, command: str) -> str:

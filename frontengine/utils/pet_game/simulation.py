@@ -35,7 +35,7 @@ FLOOR_RATES = {"nap": {"energy": 12, "mood": 0}, "snack": {"fullness": 30, "mood
 PLAY_HYGIENE = -2                   # per minute while playing: games are messy
 WASH_MIN_MS = 10000
 # Mood while doing something that is not furniture-driven (absolute points/minute).
-ACTIVITY_MOOD = {"wander": 2, "eat": 5, "sleep": 1}
+ACTIVITY_MOOD = {"wander": 2, "outing": 2, "eat": 5, "sleep": 1}
 HERB_MEAL_MOOD = 6                  # extra mood per minute when a meal uses herbs from storage
 SLOW_WORK_ENERGY = 30
 SLOW_WORK_MOOD = 20
