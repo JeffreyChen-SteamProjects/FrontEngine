@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261118-03 | 2026-11-18 | 家園寵物預設變大 | #done 桌面寵物／家園 | [2026-11-b](2026-11-b.md) |
 | U-20261118-02 | 2026-11-18 | 衣櫃測試等待背景工作後才還原替身 | #done #testing #ci | [2026-11-b](2026-11-b.md) |
 | U-20261118-01 | 2026-11-18 | PR #305 發佈權限限縮與測試斷言修正 | #done #ci #security | [2026-11](2026-11.md) |
 | U-20261117-02 | 2026-11-17 | 執行檔建置跟著 dev_requirements.txt 的 Nuitka 版本 | #done #ci | [2026-11](2026-11.md) |
@@ -470,7 +471,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11-b.md](2026-11-b.md) | 2026-11 | 1 |
-| [2026-11.md](2026-11.md) | 2026-11 | 264 |
+| [2026-11-b.md](2026-11-b.md) | 2026-11 | 2 |
+| [2026-11.md](2026-11.md) | 2026-11 | 265 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

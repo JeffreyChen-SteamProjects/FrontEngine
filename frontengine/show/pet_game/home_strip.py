@@ -33,7 +33,10 @@ from frontengine.user_setting.user_setting_file import user_setting_dict
 from frontengine.utils.pet_game.world import COMMANDS, INTERACTIONS
 from frontengine.utils.power_mode.power_mode import normalize_tier
 
-STRIP_HEIGHT = 150                    # at 100 %
+# At 100 %. Room for the tallest moment: a 128 px pet (four cells) resting on the climbing wall's
+# top (68 px up), with its name plate and a speech bubble above it. Only pets, furniture and the
+# buttons take the mouse, so the extra height covers nothing.
+STRIP_HEIGHT = 270
 SCALES = (75, 100, 125, 150, 200)     # strip sizes in percent; furniture, pets and height all follow
 DEFAULT_SCALE = 100
 FOLLOW_MARGIN = 0.25                  # scroll once the followed spot leaves the middle half of the screen

@@ -91,7 +91,9 @@ def test_a_dressed_pet_is_prepared_in_the_background_and_drawn(home):
     view.set_world(service.world, next(iter(service.world.zones)))
     view.resize(900, 170)
     box = view.resident_box(resident)
-    assert box.height() == pytest.approx(view.cell_width() * SPRITE_CELLS)
+    # Four cells tall, capped to the overview's room above the floor.
+    assert box.height() == pytest.approx(min(view.cell_width() * SPRITE_CELLS, view.sprite_room()))
+    assert box.top() >= view.caption_rect(resident).bottom()
     assert box.bottom() == pytest.approx(view._floor_y())
     view.grab()
 
