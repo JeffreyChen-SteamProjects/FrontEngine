@@ -21,6 +21,7 @@ from PySide6.QtGui import (
 from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QMenu, QToolButton, QToolTip
 
 from frontengine.show.pet_game.captions import card_text, dispatch_text, item_label, result_text
+from frontengine.show.pet_game.home_outing import OutingPet, windows_platforms
 from frontengine.show.pet_game.home_service import HomeService
 from frontengine.show.pet_game.home_view import HomeView
 from frontengine.show.pet_game.strip_weather import StripWeather
@@ -33,7 +34,10 @@ from frontengine.user_setting.user_setting_file import user_setting_dict
 from frontengine.utils.pet_game.world import COMMANDS, INTERACTIONS
 from frontengine.utils.power_mode.power_mode import normalize_tier
 
-STRIP_HEIGHT = 150                    # at 100 %
+# At 100 %. Room for the tallest moment: a 128 px pet (four cells) resting on the climbing wall's
+# top (68 px up), with its name plate and a speech bubble above it. Only pets, furniture and the
+# buttons take the mouse, so the extra height covers nothing.
+STRIP_HEIGHT = 270
 SCALES = (75, 100, 125, 150, 200)     # strip sizes in percent; furniture, pets and height all follow
 DEFAULT_SCALE = 100
 FOLLOW_MARGIN = 0.25                  # scroll once the followed spot leaves the middle half of the screen
@@ -115,6 +119,8 @@ class HomeStrip(HomeView):
         self.frame_timer.timeout.connect(self._ease_scroll)
         self.set_quality_tier(tier)
         self.bubbles: dict[str, tuple[str, float]] = {}     # resident -> (text, shown until)
+        self.outings: dict[str, OutingPet] = {}             # residents out on the desktop, and back on the way
+        self.outing_platforms = windows_platforms            # window tops to stand on; tests pass their own
         service.ticked.connect(self._stepped)
         service.events_ready.connect(self._events)
         self.set_world(service.world, zone)
@@ -212,6 +218,8 @@ class HomeStrip(HomeView):
         self.weather_layer.apply_layer()
         if visible:
             self.show()
+        for roamer in self.outings.values():
+            roamer.set_layer(layer)
 
     def set_quality_tier(self, tier: str) -> None:
         """Control Center quality tiers set the frame rate; the world speed never changes."""
@@ -228,6 +236,7 @@ class HomeStrip(HomeView):
         if world is self.world:
             return
         self._finish_pointer(commit=False)
+        self.close_outings()                  # the pets that were out belong to the other home
         self._before, self._after = {}, {}
         self.bubbles.clear()
         self.set_world(world, self.zone)
@@ -247,8 +256,63 @@ class HomeStrip(HomeView):
             self.place_toolbar()              # the glyph widens the button; never elide it
         self.refresh_info()
         self._scroll_goal = self._scroll_target()
+        self.sync_outings()
         self.update_mask()
         self.weather_layer.sync()
+
+    # ----- desktop outings --------------------------------------------------------------------
+
+    def sync_outings(self) -> None:
+        """A resident out on an outing roams the desktop in a window of its own; one whose outing has
+        ended walks back first. Only while the strip is shown and its character is ready."""
+        world = self.service.world
+        if world is None or not self.isVisible():
+            return
+        for resident in world.residents.values():
+            activity = resident.activity
+            out = (resident.zone == self.zone and activity is not None and activity.kind == "outing"
+                   and activity.phase == "using")
+            roamer = self.outings.get(resident.identifier)
+            if roamer is not None and not out:
+                roamer.go_home()
+            elif roamer is None and out:
+                self._send_out(resident)
+
+    def _send_out(self, resident) -> None:
+        size = self._sprite_size(resident)
+        if size is None:                       # character still loading: it stays drawn at home
+            return
+        box = self.resident_box(resident)
+        start = QPointF(self.mapToGlobal(QPoint(round(box.center().x()), round(box.bottom()))))
+        roamer = OutingPet(self, resident.identifier, size, start, clock=self._clock,
+                           platforms=self.outing_platforms)
+        roamer.closed.connect(self._outing_closed)
+        self.outings[resident.identifier] = roamer
+        roamer.show()
+        self.update_mask()
+
+    def _outing_closed(self, identifier: str) -> None:
+        self.outings.pop(identifier, None)
+        if not getattr(self, "_closing", False):
+            self.update_mask()
+            self.update()
+
+    def close_outings(self) -> None:
+        """Hidden or closed strips take their roaming pets with them at once."""
+        for roamer in list(self.outings.values()):
+            roamer.close()
+        self.outings.clear()
+
+    def is_out(self, identifier: str) -> bool:
+        return identifier in self.outings
+
+    def home_windows(self) -> list:
+        """This home's own windows, which a roaming pet must not mistake for ledges."""
+        return [self, self.weather_layer, *self.outings.values()]
+
+    def _paint_resident(self, painter, resident) -> None:
+        if not self.is_out(resident.identifier):
+            super()._paint_resident(painter, resident)
 
     def _weather_frame(self) -> None:
         if self.weather_layer.isVisible():
@@ -278,7 +342,7 @@ class HomeStrip(HomeView):
 
     def bubble_rect(self, resident) -> QRectF | None:
         bubble = self.bubbles.get(resident.identifier)
-        if self.quiet or bubble is None or bubble[1] < self._clock():
+        if self.quiet or bubble is None or bubble[1] < self._clock() or self.is_out(resident.identifier):
             return None
         if not QRectF(self.rect()).intersects(self.resident_box(resident)):
             return None
@@ -336,7 +400,7 @@ class HomeStrip(HomeView):
             region = region.united(self.piece_rect(piece, definition).toAlignedRect())
         reach = CELL_PIXELS            # covers the step a resident may take before the next mask
         for resident in world.residents.values():
-            if resident.zone == self.zone:
+            if resident.zone == self.zone and not self.is_out(resident.identifier):
                 box = self.caption_rect(resident).united(self.resident_box(resident))
                 bubble = self.bubble_rect(resident)
                 if bubble is not None:                     # painting is clipped to the mask too
@@ -567,7 +631,8 @@ class HomeStrip(HomeView):
     def _resident_at(self, point: QPointF) -> str | None:
         world = self.service.world
         for resident in sorted(world.residents.values(), key=lambda item: item.identifier):
-            if resident.zone == self.zone and self.resident_box(resident).adjusted(-4, -4, 4, 4).contains(point):
+            if resident.zone == self.zone and not self.is_out(resident.identifier) \
+                    and self.resident_box(resident).adjusted(-4, -4, 4, 4).contains(point):
                 return resident.identifier
         return None
 
@@ -783,6 +848,7 @@ class HomeStrip(HomeView):
     def hideEvent(self, event: QHideEvent) -> None:
         """Hidden (for example by Hide all) means paused, and the status says so."""
         self._finish_pointer(commit=False)
+        self.close_outings()
         super().hideEvent(event)
         self.weather_layer.sync()
         if not self.isVisible() and not getattr(self, "_closing", False):
@@ -793,6 +859,7 @@ class HomeStrip(HomeView):
         self._finish_pointer(commit=False)
         self._closing = True
         self.frame_timer.stop()
+        self.close_outings()
         self.weather_layer.close()
         for signal, slot in ((self.service.ticked, self._stepped), (self.service.events_ready, self._events)):
             try:

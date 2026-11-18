@@ -63,6 +63,38 @@ def test_everything_scales_with_the_size(page):
     assert strip.max_scroll() == 0
 
 
+class _Canvas:
+    """A character renderer stand-in: only its canvas matters for the size on screen."""
+
+    class character:
+        canvas = (100, 100)
+
+
+class _Art:
+    def renderer(self, _identifier):
+        return _Canvas()
+
+
+@pytest.mark.parametrize("percent", SCALES)
+def test_a_pet_stands_as_tall_as_a_desktop_pet_and_fits_on_the_highest_perch(page, monkeypatch, percent):
+    # 128 px at 100 %, the size a desktop pet starts at; it scales with the strip. Resting on
+    # the highest perch (the climbing wall's top), its name plate and bubble still fit inside.
+    from frontengine.show.pet_game.furniture_art import SURFACES
+    strip = _strip(page)
+    page.set_strip_scale(percent)
+    strip.art = _Art()
+    pet = _pet(strip)
+    catalog = strip.service.world.catalog
+    perch = max(strip.footprint_rect(0, catalog.furniture[name]).height() * surface
+                for name, surface in SURFACES.items())
+    monkeypatch.setattr(strip, "_rest_height", lambda _resident: perch)
+    box = strip.resident_box(pet)
+    assert box.height() == pytest.approx(128 * percent / 100)
+    caption = strip.caption_rect(pet)
+    assert caption.bottom() <= box.top()
+    assert caption.top() - 24 >= 0                       # where a bubble sits above the name
+
+
 def test_a_home_larger_than_its_screen_scrolls_to_keep_the_chosen_pet_in_view(page):
     strip = _strip(page)
     page.set_strip_scale(200)

@@ -27,7 +27,10 @@ COLORS = {"bed": "#7c9fd6", "table": "#c99a63", "workstation": "#8fb67a", "leisu
 FLOOR_HEIGHT = 16
 MIN_CELL = 20.0          # below this, furniture labels stop being readable
 MAX_CELL = 40.0
-SPRITE_CELLS = 2.2           # a character stands a little over two cells tall
+# A character stands four cells tall: 128 px on the desktop strip at 100 %, the size a desktop
+# pet starts at. Furniture keeps its size, so pets read larger than the pieces they use.
+SPRITE_CELLS = 4.0
+CAPTION_ROOM = 34            # the name plate and a margin above the tallest pet
 ZOOMS = (1.0, 1.25, 1.5, 2.0)
 TOOL_ICONS = {"writing": "✎", "gardening": "❀", "crafting": "⚒"}
 DONE_SECONDS = 4.0
@@ -35,7 +38,7 @@ AREA_COLORS = {"living": "#B8C7E6", "work": "#C9D9A5", "leisure": "#F2C6A8", "di
                "clear": "#D8D2C6"}
 GLYPHS = {"sleep": "Zz", "nap": "Zz", "eat": "~", "snack": "~", "work": "✎", "play": "♪",
           "relax": "☕", "wait": "…", "wander": "", "visit": "", "help": "🤝", "come": "", "tag": "🏃", "idle": "", "drag": "✋",
-          "wash": "≈", "tidy": "≈"}
+          "wash": "≈", "tidy": "≈", "outing": "↗"}
 
 
 def resident_color(identifier: str) -> QColor:
@@ -361,8 +364,15 @@ class HomeView(QWidget):
         if renderer is None:
             return None
         canvas_width, canvas_height = renderer.character.canvas
-        height = self.cell_width() * SPRITE_CELLS
+        height = min(self.cell_width() * SPRITE_CELLS, self.sprite_room())
         return canvas_width * height / canvas_height, height
+
+    def sprite_room(self) -> float:
+        """The tallest a pet may be drawn: the room above the floor, less the name plate.
+
+        The overview is a fixed 170 px band whose cells grow with zoom, so a pet four cells tall
+        would leave it; there it is capped. The desktop strip is tall enough not to cap."""
+        return max(16.0, self._floor_y() - CAPTION_ROOM)
 
     def resident_box(self, resident) -> QRectF:
         """Where the resident is drawn and clicked: its character standing on the floor, or the marker."""

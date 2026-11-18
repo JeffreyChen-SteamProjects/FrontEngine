@@ -62,6 +62,7 @@ REVEAL_FOLLOW_MS = 1500           # how long a shortcut keeps its tab in view wh
 DESKTOP_KEY = "pet_home_on_desktop"
 INTRO_KEY = "pet_home_intro_seen"
 MOTION_KEY = "pet_home_reduced_motion"
+OUTINGS_KEY = "pet_home_outings"              # pets may roam the desktop in their free time (on by default)
 SCALE_KEY = "pet_home_strip_scale"           # desktop strip size in percent (SCALES)
 AMBIENT_KEY = "pet_home_ambient"             # ambient sound on (off by default)
 AMBIENT_VOLUME_KEY = "pet_home_ambient_volume"   # 0-100, its own volume
@@ -495,6 +496,11 @@ class PetHomePage(SettingPage):
         self.motion_check.setChecked(user_setting_dict.get(MOTION_KEY) is True)
         self.motion_check.toggled.connect(self._motion_toggled)
         section.add_widget(self.motion_check)
+        self.outings_check = tr(QCheckBox(), "pet_home_outings",
+                                "Pets may leave the strip and roam the desktop in their free time")
+        self.outings_check.setChecked(user_setting_dict.get(OUTINGS_KEY, True) is not False)
+        self.outings_check.toggled.connect(self._outings_toggled)
+        section.add_widget(self.outings_check)
         self.scale_combo = QComboBox()
         for percent in SCALES:
             self.scale_combo.addItem(f"{percent}%", percent)
@@ -778,6 +784,7 @@ class PetHomePage(SettingPage):
             self.apply_mode()
         else:
             self.close_strip()
+        self.apply_outings()
 
     def _art_changed(self) -> None:
         """A character finished loading or changed outfit: redraw and refit the desktop input mask."""
@@ -823,6 +830,7 @@ class PetHomePage(SettingPage):
             strip.quiet = mode in ("focus", "meeting")
             strip.set_quality_tier(tier)
             strip.setVisible(mode != "meeting")
+        self.apply_outings()
         self._refresh_status()
 
     def sharing_changed(self, sharing: bool) -> None:
@@ -857,6 +865,36 @@ class PetHomePage(SettingPage):
         for view in (self.view, *self.strip_list):
             view.reduced_motion = reduced
             view.update()
+        self.apply_outings()
+
+    @owned_action
+    def _outings_toggled(self, checked: bool) -> None:
+        user_setting_dict[OUTINGS_KEY] = checked
+        self.apply_outings()
+
+    def outings_wanted(self) -> bool:
+        """Pets roam the desktop only where it can be seen and is welcome: the setting is on, a strip is
+        shown, the home is in normal mode (not focus, meeting, power saver or a shared screen) and
+        motion is not reduced."""
+        if not hasattr(self, "outings_check"):       # the page is still being built
+            return False
+        mode = getattr(self, "_effective_mode", None) or self.mode
+        return (self.service.world is not None and self.outings_check.isChecked()
+                and bool(self.strip_list) and all(strip.isVisible() for strip in self.strip_list)
+                and mode == "normal" and not self.motion_check.isChecked())
+
+    def apply_outings(self) -> None:
+        """Tell the world whether outings may start; turning them off calls the pets that are out home."""
+        world = self.service.world
+        wanted = self.outings_wanted()
+        if world is None or world.outings_allowed == wanted:
+            return
+        try:
+            self.service.run(lambda current: current.set_outings(wanted))
+        except ValueError:                    # the home is closing: nothing more starts anyway
+            return
+        for strip in self.strip_list:
+            strip.sync_outings()
 
     @owned_action
     def _hide_from_desktop(self) -> None:

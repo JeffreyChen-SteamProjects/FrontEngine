@@ -34,6 +34,11 @@ VISIT_WEIGHT = 1                 # free time over a crossing point into the link
 HELP_WEIGHT = 2                  # free time lending a hand to a pet at work
 MAX_HELPERS = 2                  # each helper adds a quarter to the worker's speed
 HELP_MS = (30000, 60000)
+# Free time out on the desktop: the pet leaves the strip and roams the screen like a desktop pet.
+# Only offered while the page allows it (world.outings_allowed), and short: a minute to three
+# of home time, so the home's own life (meals, sleep, work) is never long without it.
+OUTING_WEIGHT = 3
+OUTING_MS = (60_000, 180_000)
 AUTO_STOCK_LIMIT = 20            # automatic jobs stop making goods once storage holds this many
 TRAIT_WEIGHTS = {"playful": {"play": 3}, "quiet": {"relax": 3, "play": -2, "greet": -1},
                  "social": {"wander": 2, "greet": 3}}
@@ -275,6 +280,8 @@ def _free_choices(world: World, resident: Resident, reason: str) -> list[tuple[s
         choices.append(("visit", VISIT_WEIGHT))
     if _help_partner(world, resident) is not None:
         choices.append(("help", HELP_WEIGHT))
+    if world.outings_allowed and reason != "cheer_up":
+        choices.append(("outing", OUTING_WEIGHT))
     return choices
 
 
@@ -292,6 +299,9 @@ def _start_free(world: World, resident: Resident, reason: str = "free_time") -> 
         piece_id, point = _free_piece(world, resident, kind)
         low, high = world.definition(world.furniture[piece_id]).use_ms
         start(world, resident, kind, reason, piece_id, point, duration=world.rng.randint(low, high))
+    elif kind == "outing":
+        # It leaves from where it stands; the desktop shows it roaming until the time is up.
+        start(world, resident, "outing", reason, duration=world.rng.randint(*OUTING_MS))
     else:
         low, high = (4000, 10000) if kind == "wander" else (3000, 8000)
         start(world, resident, kind, reason, duration=world.rng.randint(low, high))
