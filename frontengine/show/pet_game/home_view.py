@@ -38,7 +38,7 @@ AREA_COLORS = {"living": "#B8C7E6", "work": "#C9D9A5", "leisure": "#F2C6A8", "di
                "clear": "#D8D2C6"}
 GLYPHS = {"sleep": "Zz", "nap": "Zz", "eat": "~", "snack": "~", "work": "✎", "play": "♪",
           "relax": "☕", "wait": "…", "wander": "", "visit": "", "help": "🤝", "come": "", "tag": "🏃", "idle": "", "drag": "✋",
-          "wash": "≈", "tidy": "≈"}
+          "wash": "≈", "tidy": "≈", "outing": "↗"}
 
 
 def resident_color(identifier: str) -> QColor:
