@@ -190,7 +190,7 @@ FrontEngine 是一個 PySide6 桌面**覆蓋層（overlay）框架**：把影片
 | `page/flow_layout.py` | 83 | `FlowLayout`：依可用寬度排列按鈕與勾選框，保留鍵盤順序，排除已隱藏控制項，並回報換行後的高度與最小尺寸；支援依寬度決定高度的控制項，讓長按鈕文字也能換行。 |
 | `page/wrapping_buttons.py` | 64 | `WrappingCheckBox` 與 `WrappingPushButton`：依可用寬度繪製完整換行文字，保留原生狀態、樣式、鍵盤與可及性文字；整個可見按鈕區皆可點擊。家園面板使用這些控制項。 |
 | `page/action_menu.py` | 49 | `ActionMenu`：以 QAction 代理既有 QPushButton 的操作，原按鈕由選單持有並隱藏。開啟選單與換語言時同步文字、圖示、勾選及可用狀態；執行仍走原按鈕的 callback。 |
-| `page/utils.py` | 374 | 分頁的共用行為：多螢幕分派（`dispatch_to_monitors`、`resolve_span`、`virtual_desktop_geometry`）；目標螢幕下拉選單第一項「這個螢幕」（data None）由 `resolve_preferred_monitor` 換成主視窗所在螢幕的索引，所以有下拉選單的分頁開始時不再跳出選螢幕對話框，只有沒有下拉選單的呼叫者才會走詢問流程；`ask_for_input` 讓空白的必填欄位取得焦點並顯示提示，取代警告對話框、最近使用檔案下拉選單、拖放檔案過濾器、以及一整組 `apply_*_state()`（把預設集載回控制項）。 |
+| `page/utils.py` | 420 | 分頁的共用行為：固定清單的下拉選單用 `add_translated_item(combo, key, fallback, data)` 加項目——文字登記到 retranslator 隨語言換，英文 fallback 存在 `ITEM_ID_ROLE` 當固定識別字，程式與預設集一律讀 `item_id()`、還原用 `select_item_id()`（先比識別字再比文字，舊預設集存的英文仍讀得回來）；`add_alignment_items` 是文字對齊的五個選項；多螢幕分派（`dispatch_to_monitors`、`resolve_span`、`virtual_desktop_geometry`）；目標螢幕下拉選單第一項「這個螢幕」（data None）由 `resolve_preferred_monitor` 換成主視窗所在螢幕的索引，所以有下拉選單的分頁開始時不再跳出選螢幕對話框，只有沒有下拉選單的呼叫者才會走詢問流程；`ask_for_input` 讓空白的必填欄位取得焦點並顯示提示，取代警告對話框、最近使用檔案下拉選單、拖放檔案過濾器、以及一整組 `apply_*_state()`（把預設集載回控制項）。 |
 
 #### 功能分頁（每頁都有 `get_state()` / `set_state()`，預設集就是靠這對方法存取）
 
@@ -298,7 +298,7 @@ HomeService owns its successfully attached store through shutdown. Mode preparat
 | 模組 | 行數 | 功用 |
 | --- | ---: | --- |
 | `multi_language/language_wrapper.py` | 70 | 語言註冊表與 `reset_language()`。 |
-| `multi_language/retranslate.py` | 171 | **即時換語言的核心**：`Retranslator` 記住「哪個控制項的文字來自哪個鍵」，換語言時原地重寫。`tr(widget, key, fallback)` 回傳 widget 本身，可直接寫在指派右邊。<br>⚠ 執行期會換字的按鈕要用 `retranslator.set_text`，用 `setText` 會讓換語言時狀態文字跳回初始值。 |
+| `multi_language/retranslate.py` | 171 | **即時換語言的核心**：`Retranslator` 記住「哪個控制項的文字來自哪個鍵」，換語言時原地重寫。`tr(widget, key, fallback)` 回傳 widget 本身，可直接寫在指派右邊。<br>⚠ 執行期會換字的按鈕要用 `retranslator.set_text`，用 `setText` 會讓換語言時狀態文字跳回初始值。<br>⚠ 下拉選單項目不要在建構時用 `language_word_dict.get` 填一次：那只會是建構當下的語言，換語言後留著舊字。固定清單用 `page/utils.add_translated_item`。 |
 | `multi_language/{english,traditional_chinese,simplified_chinese,germany,russian,france,italy}.py` | 676–686 | 七份語言字典。**鍵集合必須完全一致**，由 `test_translations.py` 守著。 |
 | `steam/steam_language.py` | 118 | 第一次啟動時讀 Steam 客戶端語言（Windows 讀登錄檔、其他平台從 `registry.vdf` 撈字串）。 |
 

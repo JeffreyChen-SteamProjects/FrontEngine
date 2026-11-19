@@ -21,6 +21,7 @@ from frontengine.show.screen_care.screen_filter import (
 )
 from frontengine.ui.page.layout_kit import SettingPage
 from frontengine.ui.page.utils import (
+    add_translated_item,
     apply_target_monitor_state,
     target_monitor_state,
     build_target_monitor_combobox,
@@ -109,8 +110,7 @@ class ScreenCareSettingUI(SettingPage):
                 (KIND_DEUTERANOPIA, "color_vision_deuteranopia", "Deuteranopia (green)"),
                 (KIND_TRITANOPIA, "color_vision_tritanopia", "Tritanopia (blue)"),
                 (KIND_ACHROMATOPSIA, "color_vision_achromatopsia", "Achromatopsia (none)")):
-            self.color_vision_combobox.addItem(
-                language_wrapper.language_word_dict.get(key, fallback), kind)
+            add_translated_item(self.color_vision_combobox, key, fallback, kind)
         self.color_vision_combobox.currentIndexChanged.connect(self._apply_color_vision_settings)
         self.color_vision_slider = QSlider(Qt.Orientation.Horizontal)
         self.color_vision_slider.setRange(0, 100)

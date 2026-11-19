@@ -29,6 +29,9 @@ from frontengine.show.presentation.keystroke_display import (
 from frontengine.show.presentation.magnifier import MagnifierWidget
 from frontengine.show.freeze.freeze_widget import FreezeWidget, capture_screen
 from frontengine.ui.page.utils import (
+    add_translated_item,
+    item_id,
+    select_item_id,
     apply_target_monitor_state,
     target_monitor_state,
     build_target_monitor_combobox,
@@ -67,12 +70,11 @@ class PresentationSettingUI(SettingPage):
         self.annotate_tool_combobox = QComboBox()
         for tool, fallback in ((TOOL_PEN, "Pen"), (TOOL_HIGHLIGHTER, "Highlighter"),
                                (TOOL_ERASER, "Eraser")):
-            self.annotate_tool_combobox.addItem(
-                language_wrapper.language_word_dict.get(f"annotate_tool_{tool}", fallback), tool)
+            add_translated_item(self.annotate_tool_combobox, f"annotate_tool_{tool}", fallback, tool)
         self.annotate_tool_combobox.currentIndexChanged.connect(self._apply_annotation_settings)
         self.annotate_color_combobox = QComboBox()
         for name, hex_value in PEN_COLORS:
-            self.annotate_color_combobox.addItem(name, hex_value)
+            add_translated_item(self.annotate_color_combobox, f"color_name_{name.lower()}", name, hex_value)
         self.annotate_color_combobox.currentIndexChanged.connect(self._apply_annotation_settings)
         self.annotate_width_slider = QSlider(Qt.Orientation.Horizontal)
         self.annotate_width_slider.setRange(1, 40)
@@ -105,9 +107,7 @@ class PresentationSettingUI(SettingPage):
                                 (POSITION_TOP, "Top centre"),
                                 (POSITION_BOTTOM_LEFT, "Bottom left"),
                                 (POSITION_BOTTOM_RIGHT, "Bottom right")):
-            self.keystroke_position_combobox.addItem(
-                language_wrapper.language_word_dict.get(f"keystroke_position_{place}", fallback),
-                place)
+            add_translated_item(self.keystroke_position_combobox, f"keystroke_position_{place}", fallback, place)
         self.keystroke_position_combobox.currentIndexChanged.connect(
             self._apply_keystroke_settings)
         self.keystroke_size_combobox = QComboBox()
@@ -522,7 +522,7 @@ class PresentationSettingUI(SettingPage):
     def get_state(self) -> dict:
         return {
             "annotate_tool": self.annotate_tool_combobox.currentData(),
-            "annotate_color": self.annotate_color_combobox.currentText(),
+            "annotate_color": item_id(self.annotate_color_combobox),
             "annotate_width": self.annotate_width_slider.value(),
             "cursor_ring": self.cursor_ring_checkbox.isChecked(),
             "cursor_ripple": self.cursor_ripple_checkbox.isChecked(),
@@ -552,8 +552,8 @@ class PresentationSettingUI(SettingPage):
         for combobox, key in ((self.annotate_tool_combobox, "annotate_tool"),
                               (self.keystroke_position_combobox, "keystroke_position")):
             self._select_by(combobox, state.get(key), "findData")
-        for combobox, key in ((self.annotate_color_combobox, "annotate_color"),
-                              (self.magnifier_zoom_combobox, "magnifier_zoom"),
+        select_item_id(self.annotate_color_combobox, state.get("annotate_color"))
+        for combobox, key in ((self.magnifier_zoom_combobox, "magnifier_zoom"),
                               (self.keystroke_size_combobox, "keystroke_size")):
             self._select_by(combobox, state.get(key), "findText")
         width = coerce_int(state.get("annotate_width"))

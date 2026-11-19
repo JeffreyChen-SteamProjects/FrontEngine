@@ -130,6 +130,8 @@ checks the seven trees stay page-consistent — details under "Environment notes
 - **`QTimer.singleShot(0, callback)` 從背景執行緒呼叫永遠不會觸發**（計時器建在沒有
   事件迴圈的那條執行緒上）。一定要用三參數版 `singleShot(0, context_qobject, callback)`。
 - **執行期會換字的按鈕要用 `retranslator.set_text`，不要用 `setText`**。
+- **下拉選單的固定項目用 `page/utils.add_translated_item`**，不要建構時用 `language_word_dict.get` 填一次（換語言後會留在舊語言）。程式與預設集讀 `item_id()`（英文識別字），不要讀 `currentText()`。
+- **選單、分頁、按鈕的文字裡的 `&` 會被 Qt 當成快速鍵記號吃掉**（「GIF & WebP」變成「GIF _WebP」），要顯示 `&` 就寫成 `&&`。
 - **關閉覆蓋層要先 `close()` 再清清單**：只丟 Python 參考不會跑 `closeEvent`。
 - **`QWidget::close()` 在 Qt 不是虛擬函式**：收尾邏輯要放在 `_shutdown()`。
 - **用絕對路徑跑暫存目錄裡的腳本時要設 `PYTHONPATH`**：`sys.path[0]` 是腳本所在目錄。

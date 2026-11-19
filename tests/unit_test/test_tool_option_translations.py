@@ -91,7 +91,9 @@ def test_scene_tab_labels_follow_language_without_replacing_pages(make_main_wind
     try:
         for index in [*range(len(LANGUAGES)), 0]:
             window.language_menu.actions()[index].trigger()
-            assert [tabs.tabText(i) for i in range(tabs.count())] == [translate(key) for key in keys]
+            # '&' is stored doubled so Qt shows it instead of reading it as a mnemonic.
+            assert [tabs.tabText(i) for i in range(tabs.count())] == \
+                [translate(key).replace("&", "&&") for key in keys]
             assert tabs.currentIndex() == selected_tab
             assert [tabs.widget(i) for i in range(tabs.count())] == widgets
             assert page.visual_editor.document.scene.envelope() == scene

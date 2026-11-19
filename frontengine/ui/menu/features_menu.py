@@ -59,6 +59,11 @@ CATEGORIES: tuple[tuple[str, str, tuple[Entry, ...]], ...] = (
 )
 
 
+def _literal(text: str) -> str:
+    """Show '&' as written: menus read it as a mnemonic, so "GIF & WebP" lost its ampersand."""
+    return text.replace("&", "&&")
+
+
 def entry_label(ui: FrontEngineMainUI, entry: Entry) -> str:
     if entry.kind == "page":
         return ui.sidebar.page_label(ui.sidebar.page_index(entry.target))
@@ -138,7 +143,7 @@ class FeaturesMenu(QMenu):
             return
         if entry.kind == "action" and entry.target not in self.ui.action_registry.actions:
             return
-        action = menu.addAction(entry_label(self.ui, entry), lambda e=entry: run_entry(self.ui, e))
+        action = menu.addAction(_literal(entry_label(self.ui, entry)), lambda e=entry: run_entry(self.ui, e))
         self.entries[action] = entry
 
     def _history_menu(self, key: str, fallback: str, history_key: str) -> None:
@@ -148,7 +153,7 @@ class FeaturesMenu(QMenu):
         submenu.setEnabled(bool(identifiers))
         for identifier in identifiers:
             action = registry.actions[identifier]
-            submenu.addAction(translate(action.label_key, action.fallback),
+            submenu.addAction(_literal(translate(action.label_key, action.fallback)),
                               lambda i=identifier: registry.invoke(i))
 
 

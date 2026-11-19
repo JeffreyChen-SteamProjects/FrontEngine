@@ -3,6 +3,7 @@ from PySide6.QtWidgets import QComboBox, QLabel, QLineEdit, QPushButton
 
 from frontengine.ui.page.scene_setting.scene_manager import SceneManagerUI
 from frontengine.ui.page.scene_setting.scene_page.base_scene_page import BaseSceneSettingUI
+from frontengine.ui.page.utils import add_alignment_items, item_id
 from frontengine.utils.multi_language.retranslate import tr
 
 
@@ -17,7 +18,7 @@ class TextSceneSettingUI(BaseSceneSettingUI):
 
         self.text_position_label = tr(QLabel(), "text_setting_choose_alignment")
         self.text_position_combobox = QComboBox()
-        self.text_position_combobox.addItems(["TopLeft", "TopRight", "BottomLeft", "BottomRight", "Center"])
+        add_alignment_items(self.text_position_combobox)
 
         self.update_scene_button = tr(QPushButton(), "scene_add_text")
         self.update_scene_button.clicked.connect(self._update_scene)
@@ -43,5 +44,5 @@ class TextSceneSettingUI(BaseSceneSettingUI):
             "text": self.line_edit.text(),
             "font_size": self.font_size_slider.value(),
             "opacity": self.opacity_slider.value(),
-            "alignment": self.text_position_combobox.currentText(),
+            "alignment": item_id(self.text_position_combobox),
         })

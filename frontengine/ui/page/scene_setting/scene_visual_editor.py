@@ -10,7 +10,7 @@ from PySide6.QtGui import QColor, QImageReader, QMovie, QPen, QFont, QShortcut, 
 from PySide6.QtWidgets import (
     QCheckBox, QDoubleSpinBox, QFileDialog, QGraphicsItem, QGraphicsObject,
     QGraphicsScene, QGraphicsView, QInputDialog, QListWidget, QStackedWidget, QComboBox,
-    QListWidgetItem, QMessageBox, QPushButton, QSplitter, QLabel, QTabWidget,
+    QListWidgetItem, QMessageBox, QPushButton, QSizePolicy, QSplitter, QLabel, QTabWidget,
 )
 
 from frontengine.ui.page.layout_kit import SettingPage
@@ -143,6 +143,8 @@ class SceneVisualEditor(SettingPage):
         self.viewport_stack = QStackedWidget()
         self.viewport_stack.addWidget(self.view)
         self.viewport_stack.addWidget(self.editor3d)
+        self.viewport_stack.currentChanged.connect(self._size_by_visible_viewport)
+        self._size_by_visible_viewport()
         retranslator.bind(self.view, "scene_visual_hint", setter="setToolTip")
         self.view.setMinimumSize(280, 320)
         self.layers = QListWidget()
@@ -152,7 +154,10 @@ class SceneVisualEditor(SettingPage):
         split = QSplitter()
         split.addWidget(self.layers)
         split.addWidget(self.viewport_stack)
+        split.setStretchFactor(0, 0)
         split.setStretchFactor(1, 1)
+        # The layer list stops at 180 px; any more left an empty gap beside it, taken from the canvas.
+        split.setSizes([150, 600])
         self._build_actions()
         self._build_workspace(split)
         self.three_d_page = SettingPage('scene3d_title', 'scene3d_hint', compact=True, lifetime=self.lifetime)
@@ -173,6 +178,21 @@ class SceneVisualEditor(SettingPage):
         self.canvas.selectionChanged.connect(self._canvas_selected)
         self.load_document(current_scene_document())
         self._show_properties()
+
+    def _size_by_visible_viewport(self, *_args) -> None:
+        """A stacked widget asks for the widest of all its pages, hidden ones included, so the
+        3D editor's controls made the 2D canvas need 1126 px and the page scroll sideways."""
+        if not hasattr(self, "_viewport_policies"):
+            self._viewport_policies = [self.viewport_stack.widget(index).sizePolicy()
+                                       for index in range(self.viewport_stack.count())]
+        current = self.viewport_stack.currentIndex()
+        for index, original in enumerate(self._viewport_policies):
+            page = self.viewport_stack.widget(index)
+            if index == current:
+                page.setSizePolicy(original)
+            else:
+                page.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Ignored)
+        self.viewport_stack.updateGeometry()
 
     def _build_workspace(self, canvas: QSplitter) -> None:
         """Keep the canvas alongside one inspector instead of stacked toolbars."""

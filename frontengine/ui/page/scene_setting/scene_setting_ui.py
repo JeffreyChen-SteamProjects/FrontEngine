@@ -13,6 +13,14 @@ from frontengine.utils.multi_language.retranslate import retranslator, tr
 from frontengine.ui.page.scene_setting.scene_actions import SceneActions
 
 
+class _LiteralTabs(QTabWidget):
+    """Tabs whose labels are shown as written: Qt reads '&' as a mnemonic, so "GIF & WebP"
+    came out as "GIF _WebP"."""
+
+    def setLiteralTabText(self, index: int, text: str) -> None:
+        self.setTabText(index, text.replace("&", "&&"))
+
+
 class SceneSettingUI(SettingPage):
     def __init__(self, *, lifetime):
         front_engine_logger.info("[SceneSettingUI] Init")
@@ -24,17 +32,17 @@ class SceneSettingUI(SettingPage):
         self.scene = SceneManager(lifetime=self.lifetime)
 
         # Tab
-        self.tab_widget = QTabWidget(self)
+        self.tab_widget = _LiteralTabs(self)
         self.scene_manager_ui = SceneManagerUI(self.scene)
         self.visual_editor = SceneVisualEditor(self.scene_manager_ui, lifetime=self.lifetime)
         visual_index = self.tab_widget.addTab(self.visual_editor, "")
-        retranslator.bind(self.tab_widget, "scene_visual_editor", "", "setTabText", visual_index)
+        retranslator.bind(self.tab_widget, "scene_visual_editor", "", "setLiteralTabText", visual_index)
         script_index = self.tab_widget.addTab(self.scene_manager_ui, "")
-        retranslator.bind(self.tab_widget, "scene_script", "", "setTabText", script_index)
+        retranslator.bind(self.tab_widget, "scene_script", "", "setLiteralTabText", script_index)
 
         for ui_class, label_key in SCENE_PAGE_REGISTRY:
             index = self.tab_widget.addTab(ui_class(self.scene_manager_ui, lifetime=self.lifetime), "")
-            retranslator.bind(self.tab_widget, label_key, "", "setTabText", index)
+            retranslator.bind(self.tab_widget, label_key, "", "setLiteralTabText", index)
 
         # 場景的子分頁留著：那是「這個場景裡有哪些東西」，和主導覽是不同層次的
         # 選擇，攤平反而看不出它們屬於同一個場景。

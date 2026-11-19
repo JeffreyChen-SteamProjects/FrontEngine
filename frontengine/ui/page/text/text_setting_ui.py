@@ -9,6 +9,10 @@ from PySide6.QtWidgets import QSlider, QLabel, QLineEdit, QPushButton, QCheckBox
 
 from frontengine.show.text.draw_text import TextWidget
 from frontengine.ui.page.utils import (
+    add_alignment_items,
+    add_translated_item,
+    item_id,
+    select_item_id,
     apply_checkbox_state,
     ask_for_input,
     apply_combobox_data_state,
@@ -104,13 +108,13 @@ class TextSettingUI(SettingPage):
         # Text position
         self.text_position_label = tr(QLabel(), "text_setting_choose_alignment")
         self.text_position_combobox = QComboBox()
-        self.text_position_combobox.addItems(["TopLeft", "TopRight", "BottomLeft", "BottomRight", "Center"])
+        add_alignment_items(self.text_position_combobox)
 
         # Text color
         self.text_color_label = tr(QLabel(), "text_color_label", "Color")
         self.text_color_combobox = QComboBox()
         for name, hex_value in _TEXT_COLORS:
-            self.text_color_combobox.addItem(name, hex_value)
+            add_translated_item(self.text_color_combobox, f"color_name_{name.lower()}", name, hex_value)
 
         # Font family
         self.font_family_label = tr(QLabel(), "font_family_label", "Font")
@@ -127,8 +131,8 @@ class TextSettingUI(SettingPage):
         self.outline_checkbox = tr(QCheckBox(), "outline_label", "Outline")
         self.outline_color_combobox = QComboBox()
         for name, hex_value in _TEXT_COLORS:
-            self.outline_color_combobox.addItem(name, hex_value)
-        self.outline_color_combobox.setCurrentText("White")
+            add_translated_item(self.outline_color_combobox, f"color_name_{name.lower()}", name, hex_value)
+        select_item_id(self.outline_color_combobox, "White")
 
         # Target monitor selector
         self.target_monitor_label = tr(QLabel(), "target_monitor_label", "Target monitor")
@@ -341,7 +345,7 @@ class TextSettingUI(SettingPage):
         front_engine_logger.info("[TextSettingUI] _create_text_widget")
         text_widget = TextWidget(
             text=self.line_edit.text(),
-            alignment=self.text_position_combobox.currentText()
+            alignment=item_id(self.text_position_combobox)
         )
         text_widget.set_font_variable(self.font_size_slider.value())
         text_widget.set_font_family(self.font_family_combobox.currentFont().family())
@@ -374,16 +378,16 @@ class TextSettingUI(SettingPage):
             "opacity": self.opacity_slider.value(),
             "font_size": self.font_size_slider.value(),
             "text": self.line_edit.text(),
-            "alignment": self.text_position_combobox.currentText(),
+            "alignment": item_id(self.text_position_combobox),
             "show_on_all_screen": self.show_on_all_screen_checkbox.isChecked(),
             "show_on_bottom": self.show_on_bottom_checkbox.isChecked(),
             "target_monitor": target_monitor_state(self.target_monitor_combobox),
-            "color": self.text_color_combobox.currentText(),
+            "color": item_id(self.text_color_combobox),
             "font_family": self.font_family_combobox.currentFont().family(),
             "marquee": self.marquee_checkbox.isChecked(),
             "marquee_speed": self.marquee_speed_combobox.currentText(),
             "outline": self.outline_checkbox.isChecked(),
-            "outline_color": self.outline_color_combobox.currentText(),
+            "outline_color": item_id(self.outline_color_combobox),
             "text_source": self.text_source_combobox.currentData(),
             "weather_location": self.weather_location_edit.text(),
             "text_file": self.file_path_edit.text(),
