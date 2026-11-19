@@ -16,6 +16,7 @@ from frontengine.show.pet.desktop_pet import (
 )
 from frontengine.show.pet.asset_library import PetAssetLibrary
 from frontengine.ui.dialog.choose_file_dialog import choose_pet, choose_wav_sound
+from frontengine.ui.style.app_style import mark_ink
 from frontengine.ui.page.utils import (
     apply_checkbox_state,
     apply_combobox_data_state,
@@ -59,6 +60,7 @@ class PetSettingUI(SettingPage):
         front_engine_logger.info("[PetSettingUI] Init")
         super().__init__("tab_pet_text", "page_subtitle_pet",
                          "Pet", "A companion that lives on your desktop.", lifetime=lifetime)
+        mark_ink(self)                         # the pet side of the app wears the INKSIDE ink look
 
         # Init variable
         self.pet_list: list = OwnedWidgetList(self.lifetime)

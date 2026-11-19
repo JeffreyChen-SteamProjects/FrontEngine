@@ -16,6 +16,7 @@ from frontengine.user_setting.pet_profile_schema import (
 )
 from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.utils.multi_language.retranslate import retranslator, tr
+from frontengine.ui.style.app_style import mark_ink
 from frontengine.utils.pet_companion.stats import TREAT_KINDS
 from frontengine.utils.work_lifetime import WorkLifetime
 
@@ -30,6 +31,7 @@ class PetCustomizationDialog(QDialog):
         if lifetime is not None:
             lifetime.require_live()
         super().__init__(parent)
+        mark_ink(self)
         self.lifetime = lifetime
         if lifetime is not None:
             lifetime.adopt(self)

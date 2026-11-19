@@ -15,6 +15,7 @@ from frontengine.show.pet.layered_playback import LayeredPlayback
 from frontengine.show.pet.wardrobe import WardrobeDraft, WardrobeError, asset_reference, garment_fit
 from frontengine.user_setting.pet_profile_schema import SLOTS
 from frontengine.utils.multi_language.retranslate import retranslator, tr, translate
+from frontengine.ui.style.app_style import mark_ink
 from frontengine.show.pet.inkside.labels import asset_label, label
 from frontengine.show.pet.inkside.library import builtin_names
 from frontengine.ui.dialog.pet_asset_install import PetAssetInstall, PetBuiltinInstall
@@ -27,6 +28,7 @@ class PetWardrobeDialog(QDialog):
     def __init__(self, profiles, identifier, parent=None, library=None, *, lifetime=None,
                  stand_in: str | None = None) -> None:
         super().__init__(parent)
+        mark_ink(self)
         self.lifetime = lifetime or captured_lifetime(parent)
         self.lifetime.adopt(self)
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
