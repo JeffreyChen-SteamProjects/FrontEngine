@@ -134,3 +134,17 @@ def test_bad_settings_fall_back() -> None:
     reminder = BreakReminder(work_minutes="soon", rest_seconds=None, now_provider=Clock())
     assert reminder.work_minutes == 20
     assert reminder.rest_seconds == 20
+
+def test_eye_care_layers_never_use_the_gpu_compositor() -> None:
+    """A full-screen see-through layer on the GPU path could come out black on some systems."""
+    from PySide6.QtWidgets import QApplication
+    from frontengine.show.screen_care.color_vision_widget import ColorVisionWidget
+    from frontengine.show.screen_care.screen_filter import ReadingRulerWidget, ScreenFilterWidget
+    for widget in (ScreenFilterWidget(), ReadingRulerWidget(), ColorVisionWidget()):
+        widget.set_render_backend('gpu')
+        widget.resize(40, 30)
+        widget.show()
+        QApplication.processEvents()
+        assert widget._compositor is None, type(widget).__name__
+        assert widget.render_backend == 'software'
+        widget.close()

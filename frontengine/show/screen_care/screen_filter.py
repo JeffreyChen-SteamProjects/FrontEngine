@@ -59,7 +59,27 @@ def ruler_band(cursor_y: int, height: int, band_height: int) -> Tuple[int, int]:
     return (top, top + band)
 
 
-class ScreenFilterWidget(BaseWidget):
+class ScreenCareOverlay(BaseWidget):
+    """
+    A whole-screen eye-care layer, always painted through Qt rather than the GPU compositor.
+
+    These windows cover a monitor exactly and are mostly transparent. On the GPU path that
+    transparency has to survive every step to the desktop compositor; on some systems it did
+    not, and the transparent pixels came out black - a 15 % warm filter turned the whole
+    screen black, at random depending on the GPU and driver state. The content is one flat
+    fill (two strips for the ruler), so the GPU gains nothing here.
+    """
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._requested_render_backend = 'software'
+
+    def set_render_backend(self, backend: str = 'auto') -> None:
+        """Eye-care layers stay on ordinary Qt painting; see the class note."""
+        self._requested_render_backend = 'software'
+
+
+class ScreenFilterWidget(ScreenCareOverlay):
     """整片色彩濾鏡：以指定顏色與濃度覆蓋螢幕，滑鼠事件穿透。"""
 
     def __init__(self, color: str = DEFAULT_FILTER_COLOR, strength: int = 15) -> None:
@@ -84,7 +104,7 @@ class ScreenFilterWidget(BaseWidget):
         painter.fillRect(self.rect(), self.filter_color)
 
 
-class ReadingRulerWidget(BaseWidget):
+class ReadingRulerWidget(ScreenCareOverlay):
     """
     閱讀尺：整片壓暗，只留一條跟著游標移動的亮帶，幫助視線定位。
     A reading ruler: the screen dims except for one band that tracks the cursor.
