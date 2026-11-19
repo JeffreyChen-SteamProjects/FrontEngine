@@ -208,6 +208,7 @@ traditional_chinese_word_dict = {
     "particle_setting_ui_play": "開始播放粒子",
     "particle_size": "粒子大小",
     "particle_count": "粒子數量",
+    "particle_gpu_unavailable": "粒子已停止：這個顯示卡驅動程式會把透明背景變成黑色。請更新顯示卡驅動程式後再試一次。",
     "particle_speed": "粒子速度",
     # Chat scene input
     "chat_scene_input_title": "輸入聊天內容",

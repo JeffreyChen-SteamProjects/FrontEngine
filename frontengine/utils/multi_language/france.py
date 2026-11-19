@@ -208,6 +208,7 @@ french_word_dict = {
     "particle_setting_ui_play": "Démarrer la lecture des particules",
     "particle_size": "Taille des particules",
     "particle_count": "Nombre de particules",
+    "particle_gpu_unavailable": "Particules arrêtées : ce pilote graphique rend l’arrière-plan transparent noir. Mettez à jour le pilote graphique et réessayez.",
     "particle_speed": "Vitesse des particules",
     # Chat scene input
     "chat_scene_input_title": "Entrer le contenu de la discussion",
