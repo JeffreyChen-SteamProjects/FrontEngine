@@ -120,6 +120,19 @@ def test_the_rounded_typeface_ships_and_is_left_out_for_simplified_chinese():
         page.close()
 
 
+def test_no_font_is_removed_while_the_process_runs():
+    """Removing a loaded font pulls it out from under every widget still drawing with it - under
+    offscreen on Windows it was the only family there was (progress.md #120). Fonts stay loaded."""
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[2]
+    offenders = [str(path.relative_to(root)) for folder in ("frontengine", "tests", "exe")
+                 for path in (root / folder).rglob("*.py")
+                 if re.search(r"remove(All)?ApplicationFonts?\b",
+                              path.read_text(encoding="utf-8", errors="replace"))
+                 and path.resolve() != Path(__file__).resolve()]
+    assert not offenders
+
+
 def test_pet_pages_and_dialogs_wear_the_ink_look_and_tools_do_not(make_main_window):
     from frontengine.ui.dialog.pet_photo import PetPhotoDialog
     window = make_main_window()

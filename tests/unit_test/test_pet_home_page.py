@@ -69,21 +69,13 @@ def test_work_list_accessible_name_follows_language(page):
         retranslator.apply()
 
 
-def test_styled_home_keeps_requested_width_in_every_language(page, request):
-    import os
-    from pathlib import Path
-    from PySide6.QtGui import QFontDatabase, QFontInfo
+def test_styled_home_keeps_requested_width_in_every_language(windows_arial, page):
+    from PySide6.QtGui import QFontInfo
     from PySide6.QtWidgets import QApplication
     from frontengine.ui.style.app_style import apply_app_style
     from frontengine.utils.multi_language.language_wrapper import language_wrapper
     from frontengine.utils.multi_language.retranslate import retranslator
 
-    font_file = Path(os.environ.get('WINDIR', 'C:/Windows')) / 'Fonts/arial.ttf'
-    if not font_file.is_file():
-        pytest.skip('Windows Arial regression fixture is unavailable')
-    identifier = QFontDatabase.addApplicationFont(str(font_file))
-    assert identifier >= 0
-    request.addfinalizer(lambda: QFontDatabase.removeApplicationFont(identifier))
     font = page.font()
     font.setFamily('Arial')
     page.setFont(font)
