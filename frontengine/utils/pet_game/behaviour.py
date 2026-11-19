@@ -300,11 +300,27 @@ def _start_free(world: World, resident: Resident, reason: str = "free_time") -> 
         low, high = world.definition(world.furniture[piece_id]).use_ms
         start(world, resident, kind, reason, piece_id, point, duration=world.rng.randint(low, high))
     elif kind == "outing":
-        # It leaves from where it stands; the desktop shows it roaming until the time is up.
-        start(world, resident, "outing", reason, duration=world.rng.randint(*OUTING_MS))
+        start_outing(world, resident, reason)
     else:
         low, high = (4000, 10000) if kind == "wander" else (3000, 8000)
         start(world, resident, kind, reason, duration=world.rng.randint(low, high))
+
+
+def start_outing(world: World, resident: Resident, reason: str) -> None:
+    """Leave from where it stands; the desktop shows it roaming until the time is up."""
+    start(world, resident, "outing", reason, duration=world.rng.randint(*OUTING_MS))
+
+
+def outing_refusal(world: World, resident: Resident) -> str | None:
+    """Why a pet cannot go out when asked, or None: outings are off, it is out already, or it needs
+    a meal or sleep first (it would only be called straight back)."""
+    if not world.outings_allowed:
+        return "outings_off"
+    if resident.activity is not None and resident.activity.kind == "outing":
+        return "already_out"
+    if resident.needs["energy"] <= URGENT_ENERGY or resident.needs["fullness"] <= URGENT_FULLNESS:
+        return "needs_care"
+    return None
 
 
 def _follow_command(world: World, resident: Resident, command: str) -> None:

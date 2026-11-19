@@ -153,6 +153,36 @@ def test_its_menu_starts_with_come_home(page):
     menu.close()
 
 
+def _strip_menu(strip, pet):
+    from PySide6.QtWidgets import QMenu
+    menu = QMenu(strip)
+    strip._resident_menu(menu, pet.identifier)
+    return menu
+
+
+def test_the_strip_menu_can_send_a_pet_out(page):
+    strip, pet = page.strip_list[0], _pet(page)
+    go_out = next(action for action in _strip_menu(strip, pet).actions() if action.text() == "Go out")
+    go_out.trigger()
+    assert pet.activity.kind == "outing"
+    from frontengine.utils.pet_game import simulation
+    simulation.advance(page.service.world, simulation.STEP_MS)    # one world step: under way
+    strip._stepped()
+    assert strip.is_out(pet.identifier)
+    roamer = strip.outings[pet.identifier]
+    assert "Go out" not in [action.text() for action in _strip_menu(strip, pet).actions()]
+    assert "Go out" not in [action.text() for action in roamer.menu(QPoint(0, 0)).actions()]
+
+
+def test_go_out_while_outings_are_off_says_why(page):
+    strip, pet = page.strip_list[0], _pet(page)
+    page.outings_check.setChecked(False)
+    strip._clock = lambda: 100.0
+    next(action for action in _strip_menu(strip, pet).actions() if action.text() == "Go out").trigger()
+    assert not strip.is_out(pet.identifier)
+    assert strip.bubbles[pet.identifier][0] == "Outings are off right now (setting, mode or reduced motion)."
+
+
 def test_hiding_the_strip_takes_the_roaming_pets_with_it(page):
     strip, pet = _send_out(page)
     roamer = strip.outings[pet.identifier]
