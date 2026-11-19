@@ -59,7 +59,17 @@ jobs:
         run: python -m compileall -q frontengine
 
       - name: Run unit tests
+        env:
+          FRONTENGINE_BREADCRUMB: ${{ runner.temp }}/retranslate-breadcrumb.txt
         run: python -X faulthandler -m pytest tests/ -q
+
+      # A native crash during a language switch (progress.md #120) leaves only a Python line in the
+      # faulthandler dump; the breadcrumb names the test, widget and key that was being updated.
+      - name: Show the last language-switch breadcrumb
+        if: failure()
+        env:
+          FRONTENGINE_BREADCRUMB: ${{ runner.temp }}/retranslate-breadcrumb.txt
+        run: python -c "import os, pathlib; p = pathlib.Path(os.environ['FRONTENGINE_BREADCRUMB']); print(p.read_text('utf-8', 'replace').strip() if p.exists() else 'No breadcrumb was written.')"
 
       # 啟動測試要用「這份 checkout 打包出來的套件」，不是 PyPI 上的版本。
       # 之前 dev_requirements 會裝下published 的 frontengine，而啟動腳本從自己的
@@ -101,9 +111,16 @@ jobs:
           python -m pip install -r dev_requirements.txt
           python -m pip install '.[macos]'
       - name: Compile and test
+        env:
+          FRONTENGINE_BREADCRUMB: ${{ runner.temp }}/retranslate-breadcrumb.txt
         run: |
           python -m compileall -q frontengine
           python -X faulthandler -m pytest tests/ -q
+      - name: Show the last language-switch breadcrumb
+        if: failure()
+        env:
+          FRONTENGINE_BREADCRUMB: ${{ runner.temp }}/retranslate-breadcrumb.txt
+        run: python -c "import os, pathlib; p = pathlib.Path(os.environ['FRONTENGINE_BREADCRUMB']); print(p.read_text('utf-8', 'replace').strip() if p.exists() else 'No breadcrumb was written.')"
       - name: Install built wheel
         run: |
           python -m build --wheel --outdir dist

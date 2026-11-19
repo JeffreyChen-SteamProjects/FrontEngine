@@ -16,6 +16,34 @@ import pytest
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 
+@pytest.fixture(scope="session", autouse=True)
+def _language_switch_breadcrumbs():
+    """With FRONTENGINE_BREADCRUMB naming a file, note each widget a language switch updates.
+
+    A native crash inside a setter (progress.md #120) kills the process before pytest can report
+    anything, and faulthandler shows only the Python line. Overwriting one small record before
+    every update, unbuffered, leaves the test, widget and key of the last one on disk; CI prints it
+    when the tests fail. Without the variable nothing is recorded."""
+    path = os.environ.get("FRONTENGINE_BREADCRUMB")
+    if not path:
+        yield
+        return
+    from frontengine.utils.multi_language import retranslate
+    handle = open(path, "wb", buffering=0)          # each write reaches the OS before the setter runs
+
+    def note(text: str) -> None:
+        record = f"{os.environ.get('PYTEST_CURRENT_TEST', '?')} | {text}"
+        handle.seek(0)
+        handle.write(record.encode("utf-8", "replace")[:1000].ljust(1024))
+
+    retranslate.breadcrumb = note
+    try:
+        yield
+    finally:
+        retranslate.breadcrumb = None
+        handle.close()
+
+
 @pytest.fixture(autouse=True)
 def _isolated_macos_frameworks(monkeypatch):
     """Unit tests never start native host capture/audio or request TCC permission."""

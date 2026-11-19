@@ -47,6 +47,82 @@ def test_a_bound_widget_follows_the_language() -> None:
     label.close()
 
 
+def test_a_breadcrumb_names_each_update_before_it_runs(monkeypatch) -> None:
+    """The hook the CI uses to find which widget a native crash happened in (progress.md #120)."""
+    from frontengine.utils.multi_language import retranslate
+    registry = Retranslator()
+    label = QLabel()
+    registry.bind(label, "tab_tools_text")
+    seen = []
+
+    class Composed:
+        def refresh(self):
+            seen.append("ran")
+    composed = Composed()
+    registry.bind_call(composed.refresh)
+    monkeypatch.setattr(retranslate, "breadcrumb", lambda text: seen.append(text))
+    registry.apply()
+    assert seen[0] == "PySide6.QtWidgets.QLabel.setText[] tab_tools_text"
+    assert seen[1].startswith("callback ") and seen[1].endswith("Composed.refresh")
+    assert seen[2] == "ran"                                   # noted before it runs, not after
+    monkeypatch.setattr(retranslate, "breadcrumb", None)
+    seen.clear()
+    registry.apply()
+    assert seen == ["ran"]                                    # nothing recorded in normal use
+    label.close()
+
+
+def test_a_breadcrumb_never_touches_a_deleted_owner(monkeypatch) -> None:
+    """With breadcrumbs on (as in CI), a callback whose widget is already deleted is still just
+    dropped. Naming it once used repr(), which raised on the deleted object before the guard."""
+    import shiboken6
+    from frontengine.utils.multi_language import retranslate
+
+    class Panel(QWidget):
+        def refresh(self):
+            self.setWindowTitle("x")
+
+    registry = Retranslator()
+    panel = Panel()
+    label = QLabel()
+    registry.bind_call(panel.refresh)
+    registry.bind(label, "tab_tools_text")
+    shiboken6.delete(panel)                      # gone in C++, the Python wrapper still referenced
+    seen = []
+    monkeypatch.setattr(retranslate, "breadcrumb", seen.append)
+    registry.apply()                             # must not raise
+    named = [text for text in seen if text.startswith("callback ") and text.endswith("Panel.refresh")]
+    assert len(named) == 1
+    assert label.text() == translate("tab_tools_text")
+    registry.apply()
+    assert seen.count(named[0]) == 1                            # dropped after the first time
+    label.close()
+
+
+def test_the_test_suite_writes_breadcrumbs_only_when_asked(tmp_path, monkeypatch) -> None:
+    """conftest's session hook: one overwritten record, readable after the process dies."""
+    import sys
+    from pathlib import Path
+    from frontengine.utils.multi_language import retranslate
+    root = Path(__file__).resolve().parents[1] / "conftest.py"
+    conftest = next(module for module in list(sys.modules.values())
+                    if getattr(module, "__file__", None) and Path(module.__file__).resolve() == root)
+    target = tmp_path / "crumb.txt"
+    monkeypatch.setenv("FRONTENGINE_BREADCRUMB", str(target))
+    previous = retranslate.breadcrumb
+    hook = conftest._language_switch_breadcrumbs.__wrapped__()
+    next(hook)
+    try:
+        retranslate.breadcrumb("first entry")
+        retranslate.breadcrumb("second")
+        record = target.read_bytes()
+        assert len(record) == 1024
+        assert record.decode("utf-8").rstrip().endswith("| second")      # overwritten, not appended
+    finally:
+        next(hook, None)
+        retranslate.breadcrumb = previous
+
+
 def test_a_toggling_button_follows_the_state_it_is_in() -> None:
     """
     會換字的按鈕要跟著「現在是哪個狀態」翻譯，而不是回到建構當下那一個。

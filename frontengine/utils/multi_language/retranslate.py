@@ -49,6 +49,11 @@ def translate(key: str, fallback: str = "") -> str:
 # What happened to one entry on a language change: rewritten, kept for later, or gone.
 _DONE, _KEEP, _DROP = "done", "keep", "drop"
 
+# Told which entry a language switch is about to update, or None (normal use). The test suite sets it
+# when FRONTENGINE_BREADCRUMB names a file, so a native crash inside a setter - which no RuntimeError
+# guard catches - leaves behind the widget and key it was updating (progress.md #120).
+breadcrumb: Optional[Callable[[str], None]] = None
+
 
 def _held(lifetime) -> str | None:
     """A retiring owner's entries wait while it prepares to close and are dropped once it retires."""
@@ -73,12 +78,23 @@ def _apply_entry(entry: list) -> str:
     method: Optional[Callable[..., Any]] = getattr(widget, setter, None)
     if method is None:
         return _DROP
+    if breadcrumb is not None:
+        breadcrumb(f"{type(widget).__module__}.{type(widget).__qualname__}.{setter}{list(args)} {key}")
     try:
         method(*args, translate(key, fallback))
     except RuntimeError:
         # 底層物件已被銷毀，這筆不用留 / The C++ object is gone.
         return _DROP
     return _DONE
+
+
+def _callback_name(callback: Any) -> str:
+    """A callback's name without touching the object it is bound to.
+
+    Its owner may already be gone: repr() of a bound method reprs that object, and on a deleted Qt
+    object that raises before the RuntimeError guard below is reached."""
+    function = getattr(callback, "__func__", callback)
+    return str(getattr(function, "__qualname__", None) or type(callback).__name__)
 
 
 def _apply_callback(entry: list) -> str:
@@ -90,6 +106,8 @@ def _apply_callback(entry: list) -> str:
     held = _held(lifetime)
     if held is not None:
         return held
+    if breadcrumb is not None:
+        breadcrumb("callback " + _callback_name(callback))
     try:
         callback()
     except RuntimeError:
