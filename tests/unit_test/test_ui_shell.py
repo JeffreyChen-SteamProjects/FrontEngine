@@ -5,6 +5,7 @@ from frontengine.ui.nav.shell import SHORTCUT_HINT, BrandMark, CommandSearchButt
 from frontengine.ui.nav.sidebar import KIND_GROUP, KIND_PAGE, ROLE_ICON, ROLE_KIND, NavigationSidebar
 from frontengine.ui.style import nav_icons
 from frontengine.ui.style.app_style import apply_app_style
+from frontengine.ui.style.tokens import DARK
 
 
 def test_every_icon_renders_in_both_tones():
@@ -46,7 +47,7 @@ def test_a_theme_change_redraws_icons_in_the_new_tone():
     apply_app_style(sidebar, "dark")
     after = _rows(sidebar)[1].icon().pixmap(18).toImage()
     assert before != after
-    assert sidebar._icon_colors()[1].lower() == "#f3eee3"
+    assert sidebar._icon_colors()[1].lower() == DARK["text"].lower()
 
 
 def test_folding_swaps_the_chevron():
