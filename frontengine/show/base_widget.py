@@ -17,6 +17,13 @@ class BaseWidget(QWidget):
     BaseWidget: Base class providing shared UI attributes and event handling
     """
 
+    # A layer that covers a whole monitor with a mostly see-through flat fill sets this, and is
+    # then always painted by Qt, never through the GPU compositor. On that path the transparency
+    # has to survive all the way to the desktop compositor; on some GPUs and drivers it did not,
+    # and the see-through pixels came out black - the whole screen went dark. A flat fill gains
+    # nothing from the GPU. Eye care and the focus dimmer use it.
+    software_only: bool = False
+
     def __init__(self, draw_location_x: int = 0, draw_location_y: int = 0):
         super().__init__()
         self.draw_location_x: int = draw_location_x
@@ -61,7 +68,8 @@ class BaseWidget(QWidget):
         self._render_revision = 0
         self._raster_cache = None
         self._raster_signature = None
-        self._requested_render_backend = user_setting_dict.get('render_backend', 'auto')
+        self._requested_render_backend = 'software' if self.software_only \
+            else user_setting_dict.get('render_backend', 'auto')
 
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
@@ -200,6 +208,9 @@ class BaseWidget(QWidget):
         """Compose the existing painter content as a texture; rasterization remains CPU work."""
         from frontengine.show.compositor import CompositorWidget
 
+        if self.software_only:
+            self._requested_render_backend = 'software'
+            return
         if self._compositor is not None:
             self._compositor.shutdown()
             self._compositor.deleteLater()

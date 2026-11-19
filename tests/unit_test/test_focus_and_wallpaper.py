@@ -78,6 +78,20 @@ def test_mask_respects_a_screen_offset() -> None:
     assert x == 1920 and y + height == 720
 
 
+def test_focus_layers_never_use_the_gpu_compositor() -> None:
+    """The dimmer covers the whole screen; on the GPU path it could turn the screen black."""
+    from PySide6.QtWidgets import QApplication
+    from frontengine.show.focus_shield.focus_shield_widget import DimBackgroundWidget, DistractionMaskWidget
+    for widget in (DimBackgroundWidget(), DistractionMaskWidget()):
+        widget.set_render_backend('gpu')
+        widget.resize(40, 30)
+        widget.show()
+        QApplication.processEvents()
+        assert widget._compositor is None, type(widget).__name__
+        assert widget.render_backend == 'software'
+        widget.close()
+
+
 # --- playlist -------------------------------------------------------------
 def test_interval_has_a_floor() -> None:
     assert clamp_interval(300) == 300

@@ -96,7 +96,7 @@ FrontEngine 是一個 PySide6 桌面**覆蓋層（overlay）框架**：把影片
 
 | 檔案 | 行數 | 功用 |
 | --- | ---: | --- |
-| `base_widget.py` | 278 | `BaseWidget(QWidget)`。定義覆蓋層的共同契約：不透明度（預設 0.2）、`WA_TranslucentBackground` + `WA_DeleteOnClose`、鎖定/點擊穿透、拖曳擺位、位置記憶、綠幕背景色、畫質檔位、`keep_in_capture`。子類別實作 `draw_content(painter)`。直接繪製時由 `paintEvent()` 開 painter；使用合成器時，`paintEvent()` 與 `update()` 共用單一待辦旗標，把圖層更新排到事件迴圈，避免在父視窗繪製期間重新進入合成器。 |
+| `base_widget.py` | 278 | `BaseWidget(QWidget)`。定義覆蓋層的共同契約：不透明度（預設 0.2）、`WA_TranslucentBackground` + `WA_DeleteOnClose`、鎖定/點擊穿透、拖曳擺位、位置記憶、綠幕背景色、畫質檔位、`keep_in_capture`、`software_only`（類別屬性：蓋滿螢幕的半透明單色層設為 True，一律用 Qt 一般繪製、`set_render_backend` 不建合成器；護眼層與專注的壓暗／遮罩使用）。子類別實作 `draw_content(painter)`。直接繪製時由 `paintEvent()` 開 painter；使用合成器時，`paintEvent()` 與 `update()` 共用單一待辦旗標，把圖層更新排到事件迴圈，避免在父視窗繪製期間重新進入合成器。 |
 | `window_helpers.py` | 68 | 覆蓋層視窗旗標的單一出處：`apply_overlay_window_flags()`（置頂/置底、無邊框、Tool、點擊穿透）、`set_overlay_locked()`、`load_overlay_icon()`。 |
 | `draggable_window.py` | 65 | `DraggableTopWindow`：無邊框置頂小視窗，可拖曳、雙擊或 Esc 關閉。釘選截圖與視窗複本的底座。 |
 | `overlay_factory.py` | 125 | Abstract Factory：把場景 JSON 的 `{kind, ...}` 轉成對應 widget（image/gif/sound/text/video/web）。`build_overlay(kind, setting)` 是唯一入口，欄位缺失會明確報錯（場景 JSON 是外部資料）。 |
@@ -152,9 +152,9 @@ FrontEngine 是一個 PySide6 桌面**覆蓋層（overlay）框架**：把影片
 
 | 檔案 | 行數 | 功用 |
 | --- | ---: | --- |
-| `screen_care/screen_filter.py` | 165 | `ScreenCareOverlay`（護眼層的共同基底：一律用 Qt 一般繪製，不走 GPU 合成器——全螢幕半透明層在部分 GPU 上透明處會變黑）、`ScreenFilterWidget`（整片色彩濾鏡）與 `ReadingRulerWidget`（閱讀亮帶跟著游標）。 |
+| `screen_care/screen_filter.py` | 165 | `ScreenCareOverlay`（護眼層的共同基底，設 `software_only`：不走 GPU 合成器——全螢幕半透明層在部分 GPU 上透明處會變黑）、`ScreenFilterWidget`（整片色彩濾鏡）與 `ReadingRulerWidget`（閱讀亮帶跟著游標）。 |
 | `screen_care/color_vision_widget.py` | 147 | 色覺模擬層：擷取畫面 → 套色覺缺陷矩陣 → 蓋回去；繼承 `ScreenCareOverlay`。 |
-| `focus_shield/focus_shield_widget.py` | 156 | `DimBackgroundWidget`（作用中視窗以外壓暗、會跟著切換）與 `DistractionMaskWidget`（蓋掉工作列／通知角落）。 |
+| `focus_shield/focus_shield_widget.py` | 156 | `DimBackgroundWidget`（作用中視窗以外壓暗、會跟著切換）與 `DistractionMaskWidget`（蓋掉工作列／通知角落）；兩者都設 `software_only`，不走 GPU 合成器。 |
 
 #### 簡報與教學
 
