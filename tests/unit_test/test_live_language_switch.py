@@ -72,6 +72,33 @@ def test_a_breadcrumb_names_each_update_before_it_runs(monkeypatch) -> None:
     label.close()
 
 
+def test_a_breadcrumb_never_touches_a_deleted_owner(monkeypatch) -> None:
+    """With breadcrumbs on (as in CI), a callback whose widget is already deleted is still just
+    dropped. Naming it once used repr(), which raised on the deleted object before the guard."""
+    import shiboken6
+    from frontengine.utils.multi_language import retranslate
+
+    class Panel(QWidget):
+        def refresh(self):
+            self.setWindowTitle("x")
+
+    registry = Retranslator()
+    panel = Panel()
+    label = QLabel()
+    registry.bind_call(panel.refresh)
+    registry.bind(label, "tab_tools_text")
+    shiboken6.delete(panel)                      # gone in C++, the Python wrapper still referenced
+    seen = []
+    monkeypatch.setattr(retranslate, "breadcrumb", seen.append)
+    registry.apply()                             # must not raise
+    named = [text for text in seen if text.startswith("callback ") and text.endswith("Panel.refresh")]
+    assert len(named) == 1
+    assert label.text() == translate("tab_tools_text")
+    registry.apply()
+    assert seen.count(named[0]) == 1                            # dropped after the first time
+    label.close()
+
+
 def test_the_test_suite_writes_breadcrumbs_only_when_asked(tmp_path, monkeypatch) -> None:
     """conftest's session hook: one overwritten record, readable after the process dies."""
     import sys

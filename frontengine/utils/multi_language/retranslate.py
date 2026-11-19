@@ -88,6 +88,15 @@ def _apply_entry(entry: list) -> str:
     return _DONE
 
 
+def _callback_name(callback: Any) -> str:
+    """A callback's name without touching the object it is bound to.
+
+    Its owner may already be gone: repr() of a bound method reprs that object, and on a deleted Qt
+    object that raises before the RuntimeError guard below is reached."""
+    function = getattr(callback, "__func__", callback)
+    return str(getattr(function, "__qualname__", None) or type(callback).__name__)
+
+
 def _apply_callback(entry: list) -> str:
     reference, lifetime = entry
     callback = reference()
@@ -98,7 +107,7 @@ def _apply_callback(entry: list) -> str:
     if held is not None:
         return held
     if breadcrumb is not None:
-        breadcrumb(f"callback {getattr(callback, '__qualname__', repr(callback))}")
+        breadcrumb("callback " + _callback_name(callback))
     try:
         callback()
     except RuntimeError:
