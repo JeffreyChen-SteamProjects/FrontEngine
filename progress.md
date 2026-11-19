@@ -156,3 +156,5 @@
 - [ ] #117 test_pet_home_shortcuts 在高負載下失敗。efaa362b 全套與三位審查者同時執行時三例失敗；單獨重跑兩次皆 16/16 通過。已排除三種機制（各自以拋棄式探針測試，均全數通過）：強制 0–300 次服務步進、把居民素材完成延到點擊之後、以注入時鐘在顯示後推進 0–240 分鐘模擬時間。失敗多為分頁列離開可視區，代表顯示後上方版面又變動；下一步在高負載下記錄捲動值與各區塊高度的時間序列再定位，確認前不改測試。2026-11-08 家具互動分支的寵物相關 1207 項在他人工作同時執行時另有兩項逾時失敗、單獨重跑皆通過：test_pet_home_art 的替身角色測試（安靜時約 26 秒，時限 60 秒）與 test_pet_control_interactions 的鍵盤回饋可見位置（650 寬度），新舊分支耗時相同，非本次修改造成，一併處理。
 
 - [ ] #118 審查順帶發現的既有問題（非本分支引入）：匯入設定會在居民工作階段存活時替換 pet_profiles，可能讓關閉永久被拒；Windows 登出時 Qt 6 不會送 closeEvent。
+
+- [ ] #120 語言切換偶發 access violation。CI run 44473454919（750ace1e，Windows smoke 3.12）在 test_pet_home_responsive 的 test_empty_home_fits_narrow_window_in_every_language 切換語言時整個程序崩潰，堆疊停在 retranslate._apply_entry 呼叫 setter（retranslate.py:77）；重跑同一工作通過，前一次相同崩潰是 2026-10-22 的 39759979909（feat/progress-expansion，另一個測試）。代表 retranslator 裡有一筆的弱參考還活著、底層 C++ 物件卻已釋放，而且 PySide 沒察覺，所以不是 `except RuntimeError` 接得住的那種。下一步：在切換語言前記錄每筆 entry 的型別與 `shiboken6.isValid`，找出是哪類控制項，再改成在它被 Qt 刪除時（`destroyed`）就移除登記。
