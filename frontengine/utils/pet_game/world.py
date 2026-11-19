@@ -10,7 +10,8 @@ from __future__ import annotations
 import re
 from collections import deque
 
-from frontengine.utils.pet_game.behaviour import auto_task, cancel_activity, refusal, start
+from frontengine.utils.pet_game.behaviour import (auto_task, cancel_activity, outing_refusal, refusal, start,
+                                                  start_outing)
 from frontengine.utils.pet_game.goals import Progress, unlocked
 from frontengine.utils.pet_game.catalog import (
     CELL_PIXELS, STARTER_COINS, STARTER_KIT, Catalog, FurnitureDefinition,
@@ -605,6 +606,22 @@ class World:
                 resident.decide_after_ms = self.time_ms
                 ended.append(resident.identifier)
         return ended
+
+    def go_out(self, identifier: str) -> str:
+        """The menu's *Go out*: leave for a desktop outing now, like any direct instruction."""
+        resident = self.residents.get(identifier)
+        if resident is None:
+            return "unknown"
+        if resident.parked or resident.away:
+            return "parked"
+        reason = outing_refusal(self, resident)
+        if reason is not None:
+            resident.last_refusal = reason
+            return reason
+        resident.commands.clear()
+        cancel_activity(self, resident, "command")
+        start_outing(self, resident, "command")
+        return "accepted"
 
     def call_home(self, identifier: str) -> str:
         """End one pet's outing now, without a reward: the menu's *Come home*."""

@@ -795,6 +795,8 @@ class HomeStrip(HomeView):
                            lambda k=kind: self._interact(resident, k))
         menu.addAction(translate("pet_home_call", "Come here"),
                        lambda: self._ask(resident, lambda world: world.call(resident, self._menu_x_milli)))
+        if not self.is_out(resident):              # a pet already out offers *Come home* instead
+            menu.addAction(translate("pet_home_go_out", "Go out"), lambda: self._go_out(resident))
         menu.addAction(translate("pet_home_tag", "Play tag"),
                        lambda: self._ask(resident, lambda world: world.play_tag(resident)))
         ask = menu.addMenu(translate("pet_home_ask", "Ask to"))
@@ -809,6 +811,11 @@ class HomeStrip(HomeView):
         result = self.service.run(change)
         if result != "accepted":
             self.bubbles[resident] = (result_text(result), self._clock() + BUBBLE_SECONDS)
+
+    def _go_out(self, resident: str) -> None:
+        """*Go out*: the world starts the outing, and the pet leaves the strip at once."""
+        self._ask(resident, lambda world: world.go_out(resident))
+        self.sync_outings()
 
     def _interact(self, resident: str, kind: str) -> None:
         result = self.service.run(lambda world: world.interact(resident, kind))

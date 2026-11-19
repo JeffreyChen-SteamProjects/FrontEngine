@@ -97,6 +97,39 @@ def test_commands_a_drag_and_urgent_needs_end_an_outing(monkeypatch, change):
         assert resident.activity is None or resident.activity.kind != "outing"
 
 
+def test_go_out_sends_a_pet_out_at_once_like_any_instruction():
+    world = _world()
+    world.set_outings(True)
+    resident = world.residents[PET]
+    resident.commands.append("sleep")
+    assert world.go_out(PET) == "accepted"
+    assert resident.activity.kind == "outing" and resident.activity.reason == "command"
+    assert resident.commands == []                         # a queued instruction gives way
+    assert OUTING_MS[0] <= resident.activity.until_ms - world.time_ms <= OUTING_MS[1]
+    simulation.advance(world, simulation.STEP_MS)
+    assert resident.activity.phase == "using"
+
+
+@pytest.mark.parametrize("case, code", [("off", "outings_off"), ("out", "already_out"),
+                                        ("hungry", "needs_care"), ("tired", "needs_care"),
+                                        ("unknown", "unknown"), ("parked", "parked")])
+def test_go_out_says_why_a_pet_stays_in(case, code):
+    world = _world()
+    world.set_outings(case != "off")
+    resident = world.residents[PET]
+    if case == "out":
+        world.go_out(PET)
+    elif case == "hungry":
+        resident.needs["fullness"] = 5
+    elif case == "tired":
+        resident.needs["energy"] = 5
+    elif case == "parked":
+        resident.parked = True
+    assert world.go_out("f" * 32 if case == "unknown" else PET) == code
+    if case not in ("out", "unknown", "parked"):
+        assert resident.activity is None or resident.activity.kind != "outing"
+
+
 def test_outings_are_never_saved(monkeypatch):
     world = _world()
     world.set_outings(True)
