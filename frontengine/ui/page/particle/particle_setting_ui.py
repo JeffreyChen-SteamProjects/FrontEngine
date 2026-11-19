@@ -10,6 +10,9 @@ from frontengine.show.particle.particle_ui import ParticleOpenGLWidget
 from frontengine.ui.dialog.choose_file_dialog import choose_image
 from frontengine.ui.page.layout_kit import SettingPage
 from frontengine.ui.page.utils import (
+    add_translated_item,
+    item_id,
+    select_item_id,
     build_recent_combobox,
     apply_target_monitor_state,
     target_monitor_state,
@@ -59,9 +62,8 @@ class ParticleSettingUI(SettingPage):
         # Direction
         self.choose_direction_label = tr(QLabel(), "choose_particle_direction")
         self.choose_direction_combobox = QComboBox()
-        self.choose_direction_combobox.addItems(
-            ["down", "up", "left", "right"]
-        )
+        for direction in ("down", "up", "left", "right"):
+            add_translated_item(self.choose_direction_combobox, f"particle_direction_{direction}", direction)
 
         # Particle size
         self.particle_size_label = tr(QLabel(), "particle_size")
@@ -138,7 +140,7 @@ class ParticleSettingUI(SettingPage):
         particle_widget = ParticleOpenGLWidget(
             pixmap=QPixmap(self.image_path),
             particle_size=int(self.particle_size_combobox.currentText()),
-            particle_direction=self.choose_direction_combobox.currentText(),
+            particle_direction=item_id(self.choose_direction_combobox),
             particle_count=int(self.particle_count_combobox.currentText()),
             opacity=float(self.opacity_slider.value()) / 100,
             screen_width=screen_width,
@@ -228,7 +230,7 @@ class ParticleSettingUI(SettingPage):
         return {
             "opacity": self.opacity_slider.value(),
             "image_path": self.image_path,
-            "direction": self.choose_direction_combobox.currentText(),
+            "direction": item_id(self.choose_direction_combobox),
             "size": self.particle_size_combobox.currentText(),
             "count": self.particle_count_combobox.currentText(),
             "speed": self.particle_speed_combobox.currentText(),
@@ -251,9 +253,7 @@ class ParticleSettingUI(SettingPage):
             (self.particle_speed_combobox, "speed"),
         ):
             if state.get(key) is not None:
-                index = combobox.findText(str(state[key]))
-                if index >= 0:
-                    combobox.setCurrentIndex(index)
+                select_item_id(combobox, state[key])
         if "show_on_all_screen" in state:
             self.show_on_all_screen_checkbox.setChecked(bool(state["show_on_all_screen"]))
             self.show_all_screen = bool(state["show_on_all_screen"])

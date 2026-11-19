@@ -120,3 +120,14 @@ def test_the_intro_shows_once(window):
     assert not page.intro_section.isHidden()
     page.dismiss_intro()
     assert page.intro_section.isHidden()
+
+def test_an_ampersand_in_a_label_is_shown_rather_than_read_as_a_mnemonic(window):
+    """Qt menus and tab bars read '&' as a shortcut marker: "GIF & WebP" came out as "GIF _WebP"."""
+    from frontengine.utils.multi_language.english import english_word_dict
+    label = english_word_dict["tab_gif_text"]
+    assert "&" in label
+    window.features_menu.rebuild()
+    texts = [action.text() for action in _actions(window.features_menu)]
+    assert label.replace("&", "&&") in texts and label not in texts
+    tabs = window.scene_setting_ui.tab_widget
+    assert label.replace("&", "&&") in [tabs.tabText(i) for i in range(tabs.count())]

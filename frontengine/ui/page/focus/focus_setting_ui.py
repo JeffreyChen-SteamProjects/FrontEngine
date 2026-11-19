@@ -20,6 +20,7 @@ from frontengine.show.focus_shield.focus_shield_widget import (
     DimBackgroundWidget, DistractionMaskWidget,
 )
 from frontengine.ui.page.utils import (
+    add_translated_item,
     apply_target_monitor_state,
     target_monitor_state,
     build_target_monitor_combobox,
@@ -30,7 +31,6 @@ from frontengine.utils.focus_shield.focus_shield import (
     REGION_BOTTOM, REGION_BOTTOM_RIGHT, REGION_FULL, REGION_LEFT, REGION_RIGHT, REGION_TOP,
 )
 from frontengine.utils.logging.loggin_instance import front_engine_logger
-from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import retranslator, tr
 
 
@@ -62,9 +62,7 @@ class FocusSettingUI(SettingPage):
             (REGION_TOP, "Top strip"), (REGION_LEFT, "Left edge"), (REGION_RIGHT, "Right edge"),
             (REGION_FULL, "Whole screen"),
         ):
-            self.mask_region_combobox.addItem(
-                language_wrapper.language_word_dict.get(f"focus_mask_region_{region}", fallback),
-                region)
+            add_translated_item(self.mask_region_combobox, f"focus_mask_region_{region}", fallback, region)
         self.mask_region_combobox.currentIndexChanged.connect(self._apply_mask_settings)
         self.mask_percent_slider = QSlider(Qt.Orientation.Horizontal)
         self.mask_percent_slider.setRange(1, 50)

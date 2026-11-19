@@ -274,6 +274,7 @@ class ToolsSettingUI(SettingPage):
         self._recording_detail = (0, 0.0, 0)
         retranslator.bind_call(self._update_recording_error)
         retranslator.bind_call(self._update_recording_detail)
+        retranslator.bind_call(self._retranslate_camera_placeholder)
         self.recorder.finished.connect(self._on_recording_stopped)
         self.recorder.completed.connect(self._on_recording_completed)
         self.recorder.failed.connect(self._on_recording_failed)
@@ -637,6 +638,13 @@ class ToolsSettingUI(SettingPage):
         if self.camera_device_combobox.count() == 0:
             self.camera_device_combobox.addItem(_t("tools_camera_none", "No camera found"), "")
         return self.camera_device_combobox.count()
+
+    def _retranslate_camera_placeholder(self) -> None:
+        """The list is refilled on every rescan, so the 'none found' entry is rewritten here
+        on a language switch rather than bound by index."""
+        combo = self.camera_device_combobox
+        if combo.count() == 1 and combo.itemData(0) == "":
+            combo.setItemText(0, _t("tools_camera_none", "No camera found"))
 
     # --- virtual camera ---------------------------------------------------
     @owned_action

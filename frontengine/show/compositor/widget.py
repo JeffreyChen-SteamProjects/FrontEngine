@@ -6,6 +6,13 @@ from PySide6.QtWidgets import QWidget
 from .layers import compose_frame
 
 
+def _alpha_bits(gl) -> int:
+    """Alpha bits of the context actually created (the requested format may differ)."""
+    context = gl.context()
+    surface_format = context.format() if context is not None else gl.format()
+    return surface_format.alphaBufferSize()
+
+
 class CompositorWidget(QWidget):
     backend_changed = Signal(str, str)
 
@@ -35,6 +42,8 @@ class CompositorWidget(QWidget):
         self.actual_backend = 'gpu'
         self.failure_reason = ''
         self.backend_changed.emit('gpu', '')
+        # Check the alpha channel once the context exists, outside initializeGL.
+        QTimer.singleShot(0, self, self._probe_gpu)
 
     def _fallback(self, reason: str) -> None:
         self.failure_reason = reason
@@ -46,8 +55,16 @@ class CompositorWidget(QWidget):
         self.update()
 
     def _probe_gpu(self) -> None:
-        if self._gl is not None and not self._gl.isValid():
+        if self._gl is None or self.failure_reason:      # no GPU path, or already fell back
+            return
+        if not self._gl.isValid():
             self._fallback('OpenGL context could not be created')
+        elif self._translucent_window() and _alpha_bits(self._gl) < 8:
+            # A context without alpha draws a see-through overlay's transparent pixels black.
+            self._fallback('OpenGL surface has no alpha channel')
+
+    def _translucent_window(self) -> bool:
+        return self.window().testAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
 
     def showEvent(self, event) -> None:
         super().showEvent(event)

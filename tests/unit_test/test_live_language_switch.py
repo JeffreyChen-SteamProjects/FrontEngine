@@ -22,7 +22,7 @@ import json
 import os
 
 import pytest
-from PySide6.QtWidgets import QCheckBox, QLabel, QMenu, QPushButton, QWidget
+from PySide6.QtWidgets import QCheckBox, QComboBox, QLabel, QMenu, QPushButton, QWidget
 
 from frontengine.ui.dialog.how_to_use_dialog import SECTIONS as HOW_TO_USE_SECTIONS
 from frontengine.ui.menu.language_menu import LANGUAGES
@@ -223,7 +223,7 @@ def test_switching_to_a_name_that_does_not_exist_says_so() -> None:
 
 # --- the whole window -----------------------------------------------------
 @pytest.mark.parametrize("code", [code for _, code in LANGUAGES if code != "English"])
-def test_nothing_is_left_in_the_previous_language(code: str, tmp_path, make_main_window) -> None:
+def test_nothing_is_left_in_the_previous_language(code: str, tmp_path, make_main_window, monkeypatch) -> None:
     """
     整個主視窗切過去之後，畫面上不該還留著英文。
     有控制項沒登記，這裡就會把它印出來。
@@ -234,6 +234,8 @@ def test_nothing_is_left_in_the_previous_language(code: str, tmp_path, make_main
 
     settings = tmp_path / "user_setting.json"
     settings.write_text(json.dumps({"language": "English"}), encoding="utf-8")
+    # No camera, as on CI: the "No camera found" entry stayed English. Faked so every machine checks it.
+    monkeypatch.setattr("frontengine.ui.page.tools.tools_setting_ui.list_cameras", lambda: [])
     original = os.getcwd()
     os.chdir(tmp_path)
     try:
@@ -255,6 +257,8 @@ def test_nothing_is_left_in_the_previous_language(code: str, tmp_path, make_main
         seen = [window.sidebar.item(i).text() for i in range(window.sidebar.count())]
         seen += [w.text() for w in window.findChildren(QPushButton)
                  + window.findChildren(QLabel) + window.findChildren(QCheckBox) if w.text()]
+        # Dropdown items too: lists filled once from the dictionary used to stay English.
+        seen += [combo.itemText(i) for combo in window.findChildren(QComboBox) for i in range(combo.count())]
         menus = window.menuBar().findChildren(QMenu)
         seen += [m.title() for m in menus]
         seen += [a.text() for m in menus for a in m.actions()
@@ -262,6 +266,37 @@ def test_nothing_is_left_in_the_previous_language(code: str, tmp_path, make_main
 
         left = sorted({text for text in seen if text in stale and text not in valid_now})
         assert not left, f"still in English after switching to {code}: {left}"
+        window.close()
+    finally:
+        os.chdir(original)
+        language_wrapper.reset_language("English")
+
+
+def test_translated_dropdowns_keep_english_values_for_presets_and_overlays(tmp_path, make_main_window) -> None:
+    """The text follows the language; what code and presets read stays the English identifier."""
+    from frontengine.ui.menu.language_menu import set_language
+    from frontengine.ui.page.utils import item_id, select_item_id
+
+    (tmp_path / "user_setting.json").write_text(json.dumps({"language": "English"}), encoding="utf-8")
+    original = os.getcwd()
+    os.chdir(tmp_path)
+    try:
+        window = make_main_window({"language": "English"})
+        text_page, particle = window.text_setting_ui, window.particle_setting_ui
+        assert select_item_id(text_page.text_position_combobox, "BottomRight")
+        assert select_item_id(text_page.text_color_combobox, "Red")
+        assert select_item_id(particle.choose_direction_combobox, "left")
+        assert set_language("Traditional_Chinese", window) is True
+        assert text_page.text_position_combobox.currentText() == "右下"
+        assert particle.choose_direction_combobox.currentText() == "向左"
+        state = text_page.get_state()
+        assert (state["alignment"], state["color"]) == ("BottomRight", "Red")
+        assert particle.get_state()["direction"] == "left"
+        assert item_id(window.web_setting_ui.refresh_combobox) == "Off"
+        # A preset saved before this change held the English text; it still restores.
+        text_page.set_state({"alignment": "TopLeft", "outline_color": "Black"})
+        assert item_id(text_page.text_position_combobox) == "TopLeft"
+        assert item_id(text_page.outline_color_combobox) == "Black"
         window.close()
     finally:
         os.chdir(original)

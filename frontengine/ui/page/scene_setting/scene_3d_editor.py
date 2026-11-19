@@ -1,5 +1,6 @@
 """3D viewport, transforms and scene controls integrated with the existing editor."""
 from __future__ import annotations
+from frontengine.ui.page.flow_layout import FlowLayout
 from frontengine.ui.runtime_lifetime import captured_lifetime, owned_callback
 
 from copy import deepcopy
@@ -58,7 +59,7 @@ class Scene3DEditor(QWidget):
         self.signals = _Signals()
         self.signals.finished.connect(self._prepared, Qt.ConnectionType.QueuedConnection)
         self.layout = QVBoxLayout(self)
-        row = QHBoxLayout()
+        row = FlowLayout(spacing=8)          # wraps, so the toolbar never widens the page
         self.tool, self.axis = QComboBox(), QComboBox()
         for value in ('move', 'rotate', 'scale'):
             self.tool.addItem('', value)
@@ -74,8 +75,9 @@ class Scene3DEditor(QWidget):
         # Keep the normal 2D window raster-only until a 3D context has been verified.
         self.viewport = None
         self.placeholder = tr(QLabel(), 'scene3d_requires_gl', '3D preview requires desktop OpenGL 3.3')
+        self.placeholder.setWordWrap(True)
         self.layout.addWidget(self.placeholder, 1)
-        row = QHBoxLayout()
+        row = FlowLayout(spacing=8)
         for key, fallback, callback in (('scene3d_focus', 'Focus selection', self.focus),
                 ('scene3d_reset_view', 'Reset view', self.reset_view), ('scene3d_apply_view', 'Use view as camera', self.apply_view),
                 ('scene3d_retry', 'Retry', lambda: self.load(self.document.scene, force=True))):

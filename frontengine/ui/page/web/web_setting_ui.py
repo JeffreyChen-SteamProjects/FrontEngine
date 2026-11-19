@@ -8,6 +8,8 @@ from PySide6.QtWidgets import (
 
 from frontengine.show.web.webview import WebWidget
 from frontengine.ui.page.utils import (
+    add_translated_item,
+    item_id,
     apply_checkbox_state,
     ask_for_input,
     apply_combobox_text_state,
@@ -84,8 +86,8 @@ class WEBSettingUI(SettingPage):
         # Auto refresh
         self.refresh_label = tr(QLabel(), "web_refresh_label", "Auto refresh")
         self.refresh_combobox = QComboBox()
-        _off = language_wrapper.language_word_dict.get("web_refresh_off", "Off")
-        for label, seconds in ((_off, 0), ("30s", 30), ("1m", 60), ("5m", 300), ("15m", 900)):
+        add_translated_item(self.refresh_combobox, "web_refresh_off", "Off", 0)
+        for label, seconds in (("30s", 30), ("1m", 60), ("5m", 300), ("15m", 900)):
             self.refresh_combobox.addItem(label, seconds)
 
         # Target monitor selector
@@ -264,7 +266,7 @@ class WEBSettingUI(SettingPage):
             "show_on_bottom": self.show_on_bottom_checkbox.isChecked(),
             "target_monitor": target_monitor_state(self.target_monitor_combobox),
             "zoom": self.zoom_combobox.currentText(),
-            "refresh": self.refresh_combobox.currentText(),
+            "refresh": item_id(self.refresh_combobox),
             "dashboard": self.dashboard_edit.toPlainText(),
         }
 

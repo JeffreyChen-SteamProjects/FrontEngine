@@ -18,6 +18,7 @@ from frontengine.show.pet.asset_library import PetAssetLibrary
 from frontengine.ui.dialog.choose_file_dialog import choose_pet, choose_wav_sound
 from frontengine.ui.style.app_style import mark_ink
 from frontengine.ui.page.utils import (
+    add_translated_item,
     apply_checkbox_state,
     apply_combobox_data_state,
     apply_combobox_text_state,
@@ -135,15 +136,10 @@ class PetSettingUI(SettingPage):
         self.behaviour_label = tr(QLabel(), "pet_behaviour_label", "Behaviour")
         self.behaviour_combobox = QComboBox()
         # First item is the default: the floor mode cycling through every action at random.
-        self.behaviour_combobox.addItem(
-            language_wrapper.language_word_dict.get("pet_behaviour_actions", "Cycle all actions (random)"),
-            BEHAVIOUR_ACTIONS)
-        self.behaviour_combobox.addItem(
-            language_wrapper.language_word_dict.get("pet_behaviour_floor", "Walk on floor"), BEHAVIOUR_FLOOR)
-        self.behaviour_combobox.addItem(
-            language_wrapper.language_word_dict.get("pet_behaviour_wander", "Free wander"), BEHAVIOUR_WANDER)
-        self.behaviour_combobox.addItem(
-            language_wrapper.language_word_dict.get("pet_behaviour_chase", "Chase cursor"), BEHAVIOUR_CHASE)
+        add_translated_item(self.behaviour_combobox, "pet_behaviour_actions", "Cycle all actions (random)", BEHAVIOUR_ACTIONS)
+        add_translated_item(self.behaviour_combobox, "pet_behaviour_floor", "Walk on floor", BEHAVIOUR_FLOOR)
+        add_translated_item(self.behaviour_combobox, "pet_behaviour_wander", "Free wander", BEHAVIOUR_WANDER)
+        add_translated_item(self.behaviour_combobox, "pet_behaviour_chase", "Chase cursor", BEHAVIOUR_CHASE)
 
         # Climb walls / ceiling (only meaningful in floor mode)
         self.climb_checkbox = tr(QCheckBox(), "pet_climb_label", "Climb walls")
@@ -191,11 +187,8 @@ class PetSettingUI(SettingPage):
             self.volume_combobox.addItem(label, value)
         self.volume_combobox.setCurrentText("100%")
         self.audio_source_combobox = QComboBox()
-        self.audio_source_combobox.addItem(
-            language_wrapper.language_word_dict.get("pet_audio_speakers", "Speakers"), "speakers")
-        self.audio_source_combobox.addItem(
-            language_wrapper.language_word_dict.get("pet_audio_microphone", "Microphone"),
-            "microphone")
+        add_translated_item(self.audio_source_combobox, "pet_audio_speakers", "Speakers", "speakers")
+        add_translated_item(self.audio_source_combobox, "pet_audio_microphone", "Microphone", "microphone")
         self.audio_react_checkbox = tr(QCheckBox(), "pet_audio_label", "React to audio")
         self.drop_hint_label = tr(QLabel(), "pet_drop_hint",
             "Tip: drop a file onto the pet to feed it, or a link to have it fetched.")

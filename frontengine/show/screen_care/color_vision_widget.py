@@ -19,7 +19,7 @@ import numpy
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QGuiApplication, QImage, QPainter, QPixmap
 
-from frontengine.show.base_widget import BaseWidget
+from frontengine.show.screen_care.screen_filter import ScreenCareOverlay
 from frontengine.utils.color_vision.color_vision import (
     KIND_DEUTERANOPIA, clamp_severity, normalize_kind, simulate_array,
 )
@@ -60,7 +60,7 @@ def array_to_image(pixels: numpy.ndarray) -> Optional[QImage]:
     return image.copy()
 
 
-class ColorVisionWidget(BaseWidget):
+class ColorVisionWidget(ScreenCareOverlay):
     """
     色覺模擬層。擷取函式可注入，所以不需要真的螢幕也測得到轉換流程。
     """

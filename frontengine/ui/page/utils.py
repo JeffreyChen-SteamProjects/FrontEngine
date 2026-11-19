@@ -385,15 +385,59 @@ def apply_checkbox_state(state: dict, pairs) -> None:
             checkbox.setChecked(bool(state[key]))
 
 
-def apply_combobox_text_state(state: dict, pairs) -> None:
-    """依顯示文字選取下拉選單的項目；找不到就保持原狀。"""
-    for combobox, key in pairs:
-        value = state.get(key)
-        if value is None:
-            continue
+# The role holding a translated item's fixed English identifier.
+ITEM_ID_ROLE = 257          # Qt.ItemDataRole.UserRole + 1
+
+
+def add_translated_item(combobox: QComboBox, key: str, fallback: str, data: object = None) -> int:
+    """
+    Add an item whose text follows the interface language, and return its index.
+
+    The English ``fallback`` is kept as the item's identifier (``item_id``), so code and saved
+    presets that used to read the visible text - "TopLeft", "White", "down" - still get the same
+    value after the text is translated. The text is registered with the retranslator, so a live
+    language switch rewrites it; text set once from the dictionary at construction stayed in
+    the language the window was built in. Only for fixed lists that are never cleared.
+    """
+    combobox.addItem(fallback, data)
+    index = combobox.count() - 1
+    combobox.setItemData(index, fallback, ITEM_ID_ROLE)
+    retranslator.bind(combobox, key, fallback, "setItemText", index)
+    return index
+
+
+TEXT_ALIGNMENTS = ("TopLeft", "TopRight", "BottomLeft", "BottomRight", "Center")
+
+
+def add_alignment_items(combobox: QComboBox) -> None:
+    """The text alignment choices; their identifiers are the values draw_text and scenes use."""
+    for alignment in TEXT_ALIGNMENTS:
+        add_translated_item(combobox, f"text_align_{alignment.lower()}", alignment)
+
+
+def item_id(combobox: QComboBox) -> str:
+    """The current item's fixed identifier, or its text for an item added without one."""
+    value = combobox.currentData(ITEM_ID_ROLE)
+    return value if isinstance(value, str) else combobox.currentText()
+
+
+def select_item_id(combobox: QComboBox, value: object) -> bool:
+    """Select by identifier, then by visible text (older presets); return whether it matched."""
+    if value is None:
+        return False
+    index = combobox.findData(str(value), ITEM_ID_ROLE)
+    if index < 0:
         index = combobox.findText(str(value))
-        if index >= 0:
-            combobox.setCurrentIndex(index)
+    if index < 0:
+        return False
+    combobox.setCurrentIndex(index)
+    return True
+
+
+def apply_combobox_text_state(state: dict, pairs) -> None:
+    """依識別字或顯示文字選取下拉選單的項目；找不到就保持原狀。"""
+    for combobox, key in pairs:
+        select_item_id(combobox, state.get(key))
 
 
 def apply_combobox_data_state(combobox: QComboBox, value: object) -> bool:

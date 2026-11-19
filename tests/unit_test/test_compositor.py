@@ -66,6 +66,63 @@ def test_invalid_native_context_automatically_falls_back_to_visible_software():
     widget.close()
 
 
+def _fake_gl(parent, alpha_bits):
+    from PySide6.QtCore import Signal
+    from PySide6.QtGui import QSurfaceFormat
+    from PySide6.QtWidgets import QWidget
+
+    class FakeGL(QWidget):
+        failed = Signal(str)
+
+        def cleanup(self):
+            pass
+
+        def isValid(self):
+            return True
+
+        def context(self):
+            return None
+
+        def format(self):
+            surface_format = QSurfaceFormat()
+            surface_format.setAlphaBufferSize(alpha_bits)
+            return surface_format
+
+    return FakeGL(parent)
+
+
+def test_a_context_without_alpha_falls_back_in_a_see_through_overlay():
+    """Transparent pixels on such a context came out black: a light filter blacked the screen."""
+    from PySide6.QtCore import Qt
+    from PySide6.QtWidgets import QWidget
+    from frontengine.show.compositor import CompositorWidget
+    window = QWidget()
+    window.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+    widget = CompositorWidget(window, backend='software')
+    widget._gl = _fake_gl(widget, 0)
+    widget._probe_gpu()
+    assert widget.actual_backend == 'software'
+    assert widget.failure_reason == 'OpenGL surface has no alpha channel'
+    assert widget._gl.isHidden()
+    window.close()
+
+
+def test_a_context_with_alpha_or_an_opaque_window_keeps_the_gpu():
+    from PySide6.QtCore import Qt
+    from PySide6.QtWidgets import QWidget
+    from frontengine.show.compositor import CompositorWidget
+    for translucent, alpha_bits in ((True, 8), (False, 0)):
+        window = QWidget()
+        window.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, translucent)
+        widget = CompositorWidget(window, backend='software')
+        widget._gl = _fake_gl(widget, alpha_bits)
+        widget._ready()
+        widget._probe_gpu()
+        assert widget.actual_backend == 'gpu', (translucent, alpha_bits)
+        assert widget.failure_reason == ''
+        window.close()
+
+
 def test_static_overlay_frame_is_cached_until_content_update():
     from frontengine.show.base_widget import BaseWidget
 
