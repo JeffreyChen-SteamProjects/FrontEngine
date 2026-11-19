@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from frontengine.ui.page.wrapping_buttons import WrappingCheckBox as QCheckBox, WrappingPushButton as QPushButton
 from frontengine.ui.runtime_lifetime import owned_action
+from frontengine.ui.style.app_style import mark_ink
 from frontengine.ui.runtime_lifetime import OwnedWidgetList
 
 from concurrent.futures import ThreadPoolExecutor
@@ -145,6 +146,7 @@ class PetHomePage(SettingPage):
     def __init__(self, service: HomeService | None = None, *, lifetime) -> None:
         super().__init__("pet_home_title", "pet_home_subtitle", "Pet home",
                          "Your pets live, work and rest in a small home of their own.", wide=True, lifetime=lifetime)
+        mark_ink(self)                         # the pet side of the app wears the INKSIDE ink look
         self.title_label.setWordWrap(True)
         self.service = service or default_service(self)
         self.profiles = self.service.profiles

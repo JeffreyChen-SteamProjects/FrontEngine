@@ -1,10 +1,13 @@
 """
 FrontEngine's own design tokens: two palettes and one spacing / type scale.
 
-The colours follow the built-in INKSIDE art - ink black, warm paper and one
-orange - so the window and the pets it shows read as one thing. Text on the
-orange accent is ink, not white: ink on that orange passes WCAG AA, white does
-not.
+Two looks share each palette. The tool pages are quiet: neutral greys, thin
+borders and small radii, close to a native Windows tool, with the INKSIDE
+orange used sparingly. The pet pages (``ink_*`` tokens, applied to widgets
+under ``inkStyle``) follow the built-in INKSIDE art instead - warm paper, even
+ink outlines and rounder corners, in a rounded typeface - so the window and the
+pets it shows read as one thing. Text on the orange accent is ink, not white:
+ink on that orange passes WCAG AA, white does not.
 
 Theme names: ``light``, ``dark`` and ``system`` (follow the operating system).
 Settings written by earlier versions hold qt-material file names such as
@@ -19,16 +22,17 @@ THEMES = ("system", "light", "dark")
 DEFAULT_THEME = "system"
 
 LIGHT: Dict[str, str] = {
-    "window": "#F6F1E7",          # page background: warm paper
-    "sidebar": "#EEE7D8",
-    "surface": "#FFFDF8",         # cards, inputs' surroundings
-    "surface_alt": "#F1EBDF",     # hover, alternate rows, secondary buttons
+    # Tool pages: quiet neutrals.
+    "window": "#F5F5F4",          # page background
+    "sidebar": "#EDEDEB",
+    "surface": "#FFFFFF",         # cards, inputs' surroundings
+    "surface_alt": "#F0F0EE",     # hover, alternate rows, secondary buttons
     "input": "#FFFFFF",
-    "border": "#DDD3C1",
-    "border_strong": "#BDB09A",
-    "text": "#171715",            # INKSIDE ink
-    "muted": "#6A6458",
-    "faint": "#9A9284",
+    "border": "#E1E1DF",
+    "border_strong": "#C2C2BF",
+    "text": "#1B1B1B",
+    "muted": "#5C5C5A",
+    "faint": "#8C8C89",
     "accent": "#F56A24",          # INKSIDE orange
     "accent_hover": "#FF7E3C",
     "accent_pressed": "#D9561A",
@@ -37,21 +41,29 @@ LIGHT: Dict[str, str] = {
     "danger": "#B9382A",
     "danger_soft": "#F6DCD6",
     "success": "#3D8A4C",
-    "tooltip": "#171715",
-    "on_tooltip": "#FFFDF8",
+    "tooltip": "#1B1B1B",
+    "on_tooltip": "#FFFFFF",
+    # Pet pages: INKSIDE ink on warm paper.
+    "ink_window": "#F4EEDF",      # paper
+    "ink_surface": "#FFFDF6",     # cards and controls
+    "ink_surface_alt": "#EFE6D2", # pressed, hover
+    "ink_line": "#171715",        # outlines
+    "ink_text": "#171715",        # INKSIDE ink
+    "ink_muted": "#5E584C",
+    "ink_selected_text": "#FFFDF6",   # text on a selected (ink-filled) tab
 }
 
 DARK: Dict[str, str] = {
-    "window": "#171614",
-    "sidebar": "#12110F",
-    "surface": "#211F1C",
-    "surface_alt": "#2B2925",
-    "input": "#1A1917",
-    "border": "#38352F",
-    "border_strong": "#565148",
-    "text": "#F3EEE3",            # INKSIDE paper
-    "muted": "#AAA294",
-    "faint": "#7A7368",
+    "window": "#1C1C1C",
+    "sidebar": "#171717",
+    "surface": "#242424",
+    "surface_alt": "#2D2D2D",
+    "input": "#1F1F1F",
+    "border": "#383838",
+    "border_strong": "#555555",
+    "text": "#F2F2F0",
+    "muted": "#ABABA8",
+    "faint": "#7A7A78",
     "accent": "#FF7A33",
     "accent_hover": "#FF915A",
     "accent_pressed": "#E8621C",
@@ -60,16 +72,33 @@ DARK: Dict[str, str] = {
     "danger": "#E2705F",
     "danger_soft": "#3E2522",
     "success": "#7CC08A",
-    "tooltip": "#F3EEE3",
-    "on_tooltip": "#171715",
+    "tooltip": "#F2F2F0",
+    "on_tooltip": "#1B1B1B",
+    # Pet pages at night: paper-coloured lines on dark ink.
+    "ink_window": "#1F1C17",
+    "ink_surface": "#2A2620",
+    "ink_surface_alt": "#353028",
+    "ink_line": "#F3EEE3",        # INKSIDE paper
+    "ink_text": "#F3EEE3",
+    "ink_muted": "#BFB6A6",
+    "ink_selected_text": "#1F1C17",
 }
 
 PALETTES = {"light": LIGHT, "dark": DARK}
 
 # One spacing and type scale for every page (pixels).
-RADIUS = 8
-RADIUS_SMALL = 6
-RADIUS_CARD = 12
+RADIUS = 6
+RADIUS_SMALL = 4
+RADIUS_CARD = 8
+# The pet pages' ink look: ink outlines, rounder corners and the bundled rounded typeface.
+INK_LINE = 2
+INK_RADIUS = 10
+INK_RADIUS_CARD = 14
+# jf open huninn (粉圓, SIL OFL 1.1): rounded, and it covers every character of the Traditional
+# Chinese interface. It lacks much of Simplified Chinese, so that language keeps the system font
+# rather than mixing two typefaces in one line.
+INK_FONT = "jf-openhuninn-2.1"
+INK_FONT_SKIPPED_FOR = ("Simplified_Chinese",)
 CONTROL_HEIGHT = 32
 FONT_SIZE = 13
 FONT_SMALL = 12

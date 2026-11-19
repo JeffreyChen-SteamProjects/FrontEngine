@@ -9,6 +9,7 @@ from PySide6.QtWidgets import (
 )
 
 from frontengine.utils.multi_language.retranslate import tr, translate
+from frontengine.ui.style.app_style import mark_ink
 
 
 def save_photo(image: QImage, destination: str | Path) -> None:
@@ -27,6 +28,7 @@ def save_photo(image: QImage, destination: str | Path) -> None:
 class PetPhotoDialog(QDialog):
     def __init__(self, snapshot: QImage, renderer=None, *, mirrored=False, parent=None):
         super().__init__(parent)
+        mark_ink(self)
         self._closed = False
         self.finished.connect(self._mark_closed)
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)

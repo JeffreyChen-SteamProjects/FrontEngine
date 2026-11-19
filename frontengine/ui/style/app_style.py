@@ -22,14 +22,16 @@ from PySide6.QtGui import QColor, QGuiApplication, QPalette
 from PySide6.QtCore import Qt
 
 from frontengine.ui.style.tokens import (CONTROL_HEIGHT, DEFAULT_THEME, FONT_SECTION, FONT_SIZE, FONT_SMALL,
-                                         FONT_TITLE, RADIUS, RADIUS_CARD, RADIUS_SMALL, palette_for,
+                                         FONT_TITLE, INK_FONT, INK_FONT_SKIPPED_FOR, INK_LINE, INK_RADIUS,
+                                         INK_RADIUS_CARD, RADIUS, RADIUS_CARD, RADIUS_SMALL, palette_for,
                                          resolve_theme)
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 
 ICONS = Path(__file__).resolve().parent / "icons"
+FONTS = Path(__file__).resolve().parent / "fonts"       # jf open huninn (SIL OFL 1.1), for the pet pages
 
 __all__ = ["DEFAULT_THEME", "apply_app_style", "build_stylesheet", "build_palette", "contrast_ratio",
-           "contrast_text", "current_theme"]
+           "contrast_text", "current_theme", "load_brand_fonts", "mark_ink"]
 
 
 def _rgb(color: str) -> tuple[int, int, int]:
@@ -332,6 +334,132 @@ QScrollBar::add-page, QScrollBar::sub-page {{ background: transparent; }}
 """
 
 
+INK = 'QWidget[inkStyle="true"]'        # the pet pages and their dialogs; see ``mark_ink``
+
+
+def _ink_page_rules(c: Dict[str, str]) -> str:
+    """The pet pages' frame: paper, ink text in the rounded typeface, cards outlined in ink.
+
+    Outlines are one even width: a thicker right and bottom edge (a stylesheet cannot offset a
+    shadow) left notches where Qt joins uneven edges on a rounded corner."""
+    edge = f"border: {INK_LINE}px solid {c['ink_line']};"
+    return f"""
+{INK}, {INK} QWidget#pageContent, {INK} QStackedWidget#pageBody, QDialog[inkStyle="true"] {{
+    background-color: {c['ink_window']}; }}
+{INK} QWidget {{ color: {c['ink_text']}; }}
+{INK} QLabel#pageTitle {{ font-size: {FONT_TITLE + 6}px; font-weight: 700; color: {c['ink_text']}; }}
+{INK} QLabel#pageSubtitle, {INK} QLabel#pageStatus {{ color: {c['ink_muted']}; }}
+{INK} QLabel#sectionHeader {{ font-size: {FONT_SECTION + 3}px; font-weight: 700; color: {c['ink_text']}; }}
+{INK} QLabel#homeStatus {{ font-size: 16px; font-weight: 700; }}
+{INK} QWidget#settingSection {{ background-color: {c['ink_surface']}; {edge} border-radius: {INK_RADIUS_CARD}px; }}
+{INK} QWidget#pageFooter {{ background-color: {c['ink_surface']}; border-top: {INK_LINE}px solid {c['ink_line']}; }}
+"""
+
+
+def _ink_control_rules(c: Dict[str, str], arrow_down: str) -> str:
+    """Buttons and inputs outlined in ink, check boxes, tabs and lists."""
+    outline = f"border: {INK_LINE}px solid {c['ink_line']}; border-radius: {INK_RADIUS}px;"
+    return f"""
+{INK} QPushButton, {INK} QToolButton#actionMenu {{
+    color: {c['ink_text']}; background-color: {c['ink_surface']}; {outline}
+    padding: 5px 12px; font-weight: 700; }}
+{INK} QPushButton:hover, {INK} QToolButton#actionMenu:hover {{ background-color: {c['ink_surface_alt']}; }}
+{INK} QPushButton:pressed, {INK} QToolButton#actionMenu:pressed {{ background-color: {c['accent_soft']}; }}
+{INK} QPushButton:focus, {INK} QToolButton#actionMenu:focus {{ border-color: {c['accent']}; }}
+{INK} QPushButton:checked {{ background-color: {c['accent_soft']}; }}
+{INK} QPushButton#primaryAction, {INK} QDialogButtonBox QPushButton:default {{
+    color: {c['on_accent']}; background-color: {c['accent']}; }}
+{INK} QPushButton#primaryAction:hover, {INK} QDialogButtonBox QPushButton:default:hover {{
+    background-color: {c['accent_hover']}; }}
+{INK} QPushButton:disabled, {INK} QToolButton#actionMenu:disabled, {INK} QPushButton#primaryAction:disabled {{
+    color: {c['ink_muted']}; background-color: {c['ink_window']}; border-color: {c['ink_muted']}; }}
+{INK} QLineEdit, {INK} QPlainTextEdit, {INK} QTextEdit, {INK} QSpinBox, {INK} QDoubleSpinBox, {INK} QComboBox,
+{INK} QTimeEdit, {INK} QDateTimeEdit {{ color: {c['ink_text']}; background-color: {c['ink_surface']}; {outline} }}
+{INK} QLineEdit:focus, {INK} QSpinBox:focus, {INK} QDoubleSpinBox:focus, {INK} QComboBox:focus,
+{INK} QPlainTextEdit:focus, {INK} QTextEdit:focus {{ border-color: {c['accent']}; }}
+{INK} QComboBox::down-arrow {{ image: {arrow_down}; width: 12px; height: 12px; }}
+{INK} QComboBox QAbstractItemView {{ color: {c['ink_text']}; background-color: {c['ink_surface']}; {outline} }}
+{INK} QCheckBox::indicator, {INK} QRadioButton::indicator {{
+    width: {18 - 2 * INK_LINE}px; height: {18 - 2 * INK_LINE}px;
+    border: {INK_LINE}px solid {c['ink_line']}; background-color: {c['ink_surface']}; }}
+{INK} QCheckBox::indicator {{ border-radius: 5px; }}
+{INK} QCheckBox::indicator:checked {{ background-color: {c['accent']}; border-color: {c['ink_line']}; }}
+{INK} QTabBar::tab {{
+    color: {c['ink_text']}; background-color: {c['ink_surface']}; {outline} padding: 8px 16px; margin: 0px 6px 6px 0px;
+    font-weight: 700; }}
+{INK} QTabBar::tab:selected {{ color: {c['ink_selected_text']}; background-color: {c['ink_line']}; }}
+{INK} QTabBar::tab:hover:!selected {{ background-color: {c['ink_surface_alt']}; }}
+{INK} QListView, {INK} QListWidget, {INK} QTreeView, {INK} QTreeWidget, {INK} QTableView, {INK} QTableWidget {{
+    color: {c['ink_text']}; background-color: {c['ink_surface']}; {outline} }}
+{INK} QListView:focus, {INK} QListWidget:focus, {INK} QTreeView:focus, {INK} QTreeWidget:focus,
+{INK} QTableView:focus, {INK} QTableWidget:focus {{ border-color: {c['accent']}; }}
+{INK} QProgressBar {{ color: {c['ink_text']}; background-color: {c['ink_surface']};
+    border: {INK_LINE}px solid {c['ink_line']}; border-radius: 8px; }}
+{INK} QProgressBar::chunk {{ background-color: {c['accent']}; border-radius: 5px; }}
+{INK} QSlider::handle:horizontal, {INK} QSlider::handle:vertical {{
+    background: {c['ink_surface']}; border: {INK_LINE}px solid {c['ink_line']}; }}
+"""
+
+
+def mark_ink(widget) -> None:
+    """Give a pet page or dialog the ink look: the ink rules match everything under it, and it
+    and its children use the rounded typeface while the language is one the typeface covers.
+
+    A plain QWidget subclass paints a stylesheet background only with WA_StyledBackground, so
+    without it the strip behind the page title stayed the tools' grey above the paper. The
+    typeface is set as the widget's font rather than in the stylesheet, so a language switch
+    changes just that font instead of rebuilding the whole stylesheet (which resized windows)."""
+    from frontengine.utils.multi_language.retranslate import retranslator
+    widget.setProperty("inkStyle", True)
+    widget.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+    load_brand_fonts()
+    helper = _InkFont(widget)
+    widget._ink_font = helper                 # held by the widget; the retranslator holds it weakly
+    helper.refresh()
+    retranslator.bind_call(helper.refresh)
+
+
+class _InkFont:
+    """Keeps one marked widget's typeface in step with the interface language."""
+
+    def __init__(self, widget) -> None:
+        import weakref
+        self._widget = weakref.ref(widget)
+        self.base = list(widget.font().families())
+
+    def refresh(self) -> None:
+        from frontengine.utils.multi_language.language_wrapper import language_wrapper
+        widget = self._widget()
+        if widget is None:
+            return
+        font = widget.font()
+        if language_wrapper.language in INK_FONT_SKIPPED_FOR:
+            font.setFamilies(self.base)
+        else:                                  # missing glyphs (⌂, ♥) fall back to the usual font
+            font.setFamilies([INK_FONT, *[family for family in self.base if family != INK_FONT]])
+        widget.setFont(font)
+
+
+_FONTS_LOADED = False
+
+
+def load_brand_fonts() -> list[str]:
+    """Register the bundled rounded typeface once; returns the families Qt now knows from it."""
+    global _FONTS_LOADED
+    from PySide6.QtGui import QFontDatabase
+    families: list[str] = []
+    if _FONTS_LOADED or QGuiApplication.instance() is None:
+        return families
+    _FONTS_LOADED = True
+    for path in sorted(FONTS.glob("*.ttf")):
+        identifier = QFontDatabase.addApplicationFont(str(path))
+        if identifier < 0:
+            front_engine_logger.warning(f"[app_style] could not load font {path.name}")
+            continue
+        families.extend(QFontDatabase.applicationFontFamilies(identifier))
+    return families
+
+
 def build_stylesheet(theme: str | None) -> str:
     """The whole stylesheet for a stored theme name (``system``, ``light``, ``dark`` or a legacy name)."""
     resolved = current_theme(theme)
@@ -344,7 +472,8 @@ QLabel:disabled {{ color: {colors['faint']}; }}
 """
     buttons = _button_rules(colors).replace("{arrow}", arrow_down)
     return (base + _shell_rules(colors) + buttons + _input_rules(colors, arrow_down, arrow_up)
-            + _choice_rules(colors) + _container_rules(colors))
+            + _choice_rules(colors) + _container_rules(colors)
+            + _ink_page_rules(colors) + _ink_control_rules(colors, arrow_down))
 
 
 def build_palette(theme: str | None) -> QPalette:
@@ -378,6 +507,7 @@ def apply_app_style(window, theme: str | None, application: bool = False) -> Non
     would otherwise paint the platform's white base inside a dark window.
     """
     try:
+        load_brand_fonts()
         palette = build_palette(theme)
         if application and QGuiApplication.instance() is not None:
             QGuiApplication.setPalette(palette)

@@ -68,6 +68,70 @@ def test_both_palettes_define_the_same_tokens_and_ink_reads_on_the_accent():
         assert app_style.contrast_ratio(colors["window"], colors["text"]) >= 7
         assert app_style.contrast_ratio(colors["surface"], colors["muted"]) >= 4.5
         assert app_style.contrast_ratio(colors["tooltip"], colors["on_tooltip"]) >= 7
+        # The pet pages' ink look reads as well as the tools do.
+        assert app_style.contrast_ratio(colors["ink_window"], colors["ink_text"]) >= 7
+        assert app_style.contrast_ratio(colors["ink_surface"], colors["ink_text"]) >= 7
+        assert app_style.contrast_ratio(colors["ink_surface"], colors["ink_muted"]) >= 4.5
+        assert app_style.contrast_ratio(colors["ink_line"], colors["ink_selected_text"]) >= 7
+        assert app_style.contrast_ratio(colors["ink_surface"], colors["ink_line"]) >= 3     # the outline shows
+
+
+@pytest.mark.parametrize("theme", ["light", "dark"])
+def test_ink_rules_reach_only_widgets_under_ink_style(theme):
+    """Every rule using an ink colour is scoped to inkStyle, so the tool pages keep the quiet look."""
+    sheet = app_style.build_stylesheet(theme)
+    colors = LIGHT if theme == "light" else DARK
+    ink_values = {colors[key].lower() for key in colors if key.startswith("ink_")}
+    tool_values = {value.lower() for key, value in colors.items() if not key.startswith("ink_")}
+    for rule in re.findall(r"([^{}]+)\{([^{}]*)\}", sheet):
+        selectors, body = rule
+        used = {color.lower() for color in re.findall(r"#[0-9a-fA-F]{6}\b", body)}
+        if used & (ink_values - tool_values):
+            for selector in selectors.split(","):
+                assert 'inkStyle="true"' in selector, selector.strip()
+
+
+def test_the_rounded_typeface_ships_and_is_left_out_for_simplified_chinese():
+    from frontengine.ui.style.tokens import INK_FONT
+    from frontengine.utils.multi_language.language_wrapper import language_wrapper
+    fonts = sorted(app_style.FONTS.glob("*.ttf"))
+    assert fonts and sorted(app_style.FONTS.glob("LICENSE*.txt"))
+    app_style.load_brand_fonts()
+    from PySide6.QtGui import QFontDatabase
+    assert INK_FONT in QFontDatabase.families()
+    from frontengine.utils.multi_language.retranslate import retranslator
+    previous = language_wrapper.language
+    page = QWidget()
+    child = QLineEdit(page)
+    try:
+        language_wrapper.reset_language("Traditional_Chinese")
+        app_style.mark_ink(page)
+        assert page.font().families()[0] == INK_FONT
+        assert child.font().families()[0] == INK_FONT                  # children inherit it
+        language_wrapper.reset_language("Simplified_Chinese")
+        retranslator.apply()                                          # what a language switch runs
+        assert INK_FONT not in page.font().families()                 # it lacks much of that script
+        language_wrapper.reset_language("Traditional_Chinese")
+        retranslator.apply()
+        assert page.font().families()[0] == INK_FONT
+        assert INK_FONT not in app_style.build_stylesheet("light")    # the stylesheet never names it
+    finally:
+        language_wrapper.reset_language(previous)
+        page.close()
+
+
+def test_pet_pages_and_dialogs_wear_the_ink_look_and_tools_do_not(make_main_window):
+    from frontengine.ui.dialog.pet_photo import PetPhotoDialog
+    window = make_main_window()
+    for page in (window.pet_home_ui, window.pet_setting_ui):
+        assert page.property("inkStyle") is True
+        assert page.testAttribute(Qt.WidgetAttribute.WA_StyledBackground)
+    for page in (window.tools_setting_ui, window.video_setting_ui, window.control_center_ui):
+        assert page.property("inkStyle") is not True
+    assert PetPhotoDialog.__init__.__code__.co_names.count("mark_ink") == 1
+    from frontengine.ui.dialog import pet_customization, pet_wardrobe
+    for module, name in ((pet_customization, "PetCustomizationDialog"), (pet_wardrobe, "PetWardrobeDialog")):
+        assert "mark_ink" in getattr(module, name).__init__.__code__.co_names
 
 
 @pytest.mark.parametrize("theme", ["light", "dark"])

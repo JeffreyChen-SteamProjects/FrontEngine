@@ -429,6 +429,10 @@ class SettingPage(QWidget):
 
         if status is not None:
             status.setObjectName("pageStatus")
+            if isinstance(status, QLabel):
+                # It wraps rather than holding the window at its full width: with the pet pages'
+                # wider rounded typeface, Italian "not ready" text kept a narrow window 3 px wider.
+                status.setWordWrap(True)
             layout.addWidget(status)
         layout.addStretch(1)
         for widget in extra or ():

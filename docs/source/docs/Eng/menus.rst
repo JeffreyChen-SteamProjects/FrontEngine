@@ -23,7 +23,7 @@ Settings menu
   opacity up and down, next dashboard page, lock, freeze the screen, the
   shortcut list, media play/pause, next and previous track, and moving the
   foreground window to the next monitor with its proportions kept.
-* Theme - follow the system, light or dark, in FrontEngine's own ink, paper and orange design.
+* Theme - follow the system, light or dark. Tool pages use a quiet, neutral design; the pet pages and their dialogs use the ink-and-paper look of the built-in characters with the rounded jf open huninn typeface (Simplified Chinese keeps the system font).
 * Scheduled day/night theme - a light theme by day and a dark one at night.
 * Start with the system - launch FrontEngine at login.
 * Restore last session - reopen what was on screen last time.
