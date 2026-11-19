@@ -95,8 +95,38 @@ def _qt_application():
     from PySide6.QtWidgets import QApplication
 
     application = QApplication.instance() or QApplication([])
+    _load_windows_arial()
     yield application
     _release_leftovers(application)
+
+
+# Font id of Windows' Arial while the session holds it, else None (no Windows font folder).
+_windows_arial_id = None
+
+
+def _load_windows_arial() -> None:
+    """Load Windows' Arial once for the whole session and never remove it.
+
+    The offscreen platform sees no system fonts on Windows: before this, the first Arial a test
+    added was the only family in the process, so every live widget drew with it, and removing it
+    again in that test's teardown pulled the font out from under all of them. A language switch
+    in the very next test died natively inside a setter (progress.md #120). Loaded here, the font
+    set never changes mid-session, and every test sees the font a real Windows machine has."""
+    global _windows_arial_id
+    font_file = os.path.join(os.environ.get("WINDIR", "C:/Windows"), "Fonts", "arial.ttf")
+    if sys.platform != "win32" or not os.path.isfile(font_file):
+        return
+    from PySide6.QtGui import QFontDatabase
+    identifier = QFontDatabase.addApplicationFont(font_file)
+    _windows_arial_id = identifier if identifier >= 0 else None
+
+
+@pytest.fixture
+def windows_arial():
+    """For tests that need Windows' Arial; skipped where the session could not load it."""
+    if _windows_arial_id is None:
+        pytest.skip("Windows Arial is unavailable")
+    return _windows_arial_id
 
 
 @pytest.fixture

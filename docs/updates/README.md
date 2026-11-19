@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261120-01 | 2026-11-20 | 語言切換崩潰：測試期間不再移除字型 | #bugfix #testing #ci | [2026-11-b](2026-11-b.md) |
 | U-20261119-06 | 2026-11-19 | 全介面檢查：下拉選單翻譯、場景頁橫向捲動、& 被吃掉 | #done #ui #i18n | [2026-11-b](2026-11-b.md) |
 | U-20261119-05 | 2026-11-19 | 護眼覆蓋層不再走 GPU 合成，避免整個螢幕變黑 | #fix #screen-care | [2026-11-b](2026-11-b.md) |
 | U-20261119-04 | 2026-11-19 | 介面改成兩種外觀：工具頁安靜、寵物頁墨與紙 | #done #ui | [2026-11-b](2026-11-b.md) |
@@ -479,7 +480,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11-b.md](2026-11-b.md) | 2026-11 | 10 |
+| [2026-11-b.md](2026-11-b.md) | 2026-11 | 11 |
 | [2026-11.md](2026-11.md) | 2026-11 | 265 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
