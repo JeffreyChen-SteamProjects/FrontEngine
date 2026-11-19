@@ -148,7 +148,8 @@ def test_content_section_reflows_and_settles_after_height_changes():
 def test_section_heading_wraps_without_losing_toggle_or_field_value(*, lifetime_factory):
     from PySide6.QtTest import QTest
     page = SettingPage('tab_pet_text', lifetime=lifetime_factory())
-    section = page.add_section(QLabel('More ways to add a pet'), collapsed=True)
+    # Long enough that heading and toggle cannot share 350 px in any font the suite may draw with.
+    section = page.add_section(QLabel('More ways to add a pet to your desktop'), collapsed=True)
     field = QLineEdit('Keep this value')
     section.add_row('Name', field)
     page.finish_body()
