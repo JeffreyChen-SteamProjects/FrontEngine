@@ -1,4 +1,8 @@
 """A narrow home page keeps its welcome text and creation controls readable."""
+import os
+from pathlib import Path
+
+import pytest
 from PySide6.QtCore import QPoint, Qt
 from PySide6.QtTest import QTest
 from PySide6.QtWidgets import QApplication, QLabel
@@ -7,18 +11,27 @@ from frontengine.ui.menu.language_menu import LANGUAGES, set_language
 from frontengine.ui.page.wrapping_buttons import WrappingCheckBox
 
 
-def test_created_home_fits_actual_narrow_window_with_arial(make_main_window, request):
-    import os
-    from pathlib import Path
-    import pytest
-    from PySide6.QtGui import QFontDatabase, QFontInfo
+@pytest.fixture
+def _arial():
+    """Windows' Arial loaded as an application font, and removed only after the window is gone.
+
+    Requested before make_main_window, so pytest tears the window down first. Removing the font in a
+    finalizer of the test itself ran before that teardown, freeing the font's data while the window
+    still drew with it - the prime suspect for a native crash in the next test (progress.md #120)."""
+    from PySide6.QtGui import QFontDatabase
 
     font_file = Path(os.environ.get('WINDIR', 'C:/Windows')) / 'Fonts/arial.ttf'
     if not font_file.is_file():
         pytest.skip('Windows Arial regression fixture is unavailable')
     identifier = QFontDatabase.addApplicationFont(str(font_file))
     assert identifier >= 0
-    request.addfinalizer(lambda: QFontDatabase.removeApplicationFont(identifier))
+    yield identifier
+    QFontDatabase.removeApplicationFont(identifier)
+
+
+def test_created_home_fits_actual_narrow_window_with_arial(_arial, make_main_window):
+    from PySide6.QtGui import QFontInfo
+
     window = make_main_window()
     font = window.font()
     font.setFamily('Arial')

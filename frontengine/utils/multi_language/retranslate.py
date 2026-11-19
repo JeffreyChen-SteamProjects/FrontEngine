@@ -49,6 +49,11 @@ def translate(key: str, fallback: str = "") -> str:
 # What happened to one entry on a language change: rewritten, kept for later, or gone.
 _DONE, _KEEP, _DROP = "done", "keep", "drop"
 
+# Told which entry a language switch is about to update, or None (normal use). The test suite sets it
+# when FRONTENGINE_BREADCRUMB names a file, so a native crash inside a setter - which no RuntimeError
+# guard catches - leaves behind the widget and key it was updating (progress.md #120).
+breadcrumb: Optional[Callable[[str], None]] = None
+
 
 def _held(lifetime) -> str | None:
     """A retiring owner's entries wait while it prepares to close and are dropped once it retires."""
@@ -73,6 +78,8 @@ def _apply_entry(entry: list) -> str:
     method: Optional[Callable[..., Any]] = getattr(widget, setter, None)
     if method is None:
         return _DROP
+    if breadcrumb is not None:
+        breadcrumb(f"{type(widget).__module__}.{type(widget).__qualname__}.{setter}{list(args)} {key}")
     try:
         method(*args, translate(key, fallback))
     except RuntimeError:
@@ -90,6 +97,8 @@ def _apply_callback(entry: list) -> str:
     held = _held(lifetime)
     if held is not None:
         return held
+    if breadcrumb is not None:
+        breadcrumb(f"callback {getattr(callback, '__qualname__', repr(callback))}")
     try:
         callback()
     except RuntimeError:
