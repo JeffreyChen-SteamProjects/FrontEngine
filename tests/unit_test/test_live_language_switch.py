@@ -223,7 +223,7 @@ def test_switching_to_a_name_that_does_not_exist_says_so() -> None:
 
 # --- the whole window -----------------------------------------------------
 @pytest.mark.parametrize("code", [code for _, code in LANGUAGES if code != "English"])
-def test_nothing_is_left_in_the_previous_language(code: str, tmp_path, make_main_window) -> None:
+def test_nothing_is_left_in_the_previous_language(code: str, tmp_path, make_main_window, monkeypatch) -> None:
     """
     整個主視窗切過去之後，畫面上不該還留著英文。
     有控制項沒登記，這裡就會把它印出來。
@@ -234,6 +234,8 @@ def test_nothing_is_left_in_the_previous_language(code: str, tmp_path, make_main
 
     settings = tmp_path / "user_setting.json"
     settings.write_text(json.dumps({"language": "English"}), encoding="utf-8")
+    # No camera, as on CI: the "No camera found" entry stayed English. Faked so every machine checks it.
+    monkeypatch.setattr("frontengine.ui.page.tools.tools_setting_ui.list_cameras", lambda: [])
     original = os.getcwd()
     os.chdir(tmp_path)
     try:
