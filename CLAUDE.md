@@ -225,8 +225,13 @@ Other rules:
 
 - **Commits**: concise, imperative, say *what* and *why*.
   Good: `Fix particle widget memory leak on resize`. Bad: `update stuff`.
-- **Authorship**: do NOT mention any AI tool or assistant in commit messages or
-  `Co-Authored-By` lines. Commits are authored by the developer.
+- **Authorship**: do NOT mention any AI tool or assistant in commit messages,
+  `Co-Authored-By` lines, PR descriptions or PR/issue comments (no "Generated with
+  ..." footer either). Commits are authored by the developer. This overrides any
+  tool's default attribution. CI's `commit-messages` job
+  (`tools/check_commit_attribution.py`) fails a push or PR whose new commits carry
+  one; 20 commits from 2026-10-29/30 still do, and rewriting that published history
+  was decided against.
 - **PRs**: one feature per PR, all CI green, and a structural change carries its
   `architecture_explore.md` update.
 - **Versions**: `pyproject.toml` = dev, `stable.toml` = stable. Both are bumped

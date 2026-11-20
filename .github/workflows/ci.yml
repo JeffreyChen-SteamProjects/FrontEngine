@@ -32,6 +32,23 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # CLAUDE.md (Authorship): no AI attribution in commit messages. Only the commits this push or pull
+  # request adds are checked; the published history from before this check is left as it is.
+  commit-messages:
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Reject AI attribution in the new commits
+        env:
+          BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: python3 tools/check_commit_attribution.py "$BASE_SHA" "$HEAD_SHA"
+
   smoke:
     strategy:
       fail-fast: false

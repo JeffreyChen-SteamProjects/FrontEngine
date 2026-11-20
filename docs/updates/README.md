@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261121-01 | 2026-11-21 | 移除 AI 署名並在 CI 擋下新的署名 | #done #ci | [2026-11-b](2026-11-b.md) |
 | U-20261120-03 | 2026-11-20 | 所有半透明覆蓋層都不再因 GPU 合成而變黑 | #fix #rendering | [2026-11-b](2026-11-b.md) |
 | U-20261120-02 | 2026-11-20 | 專注的壓暗背景也不再走 GPU 合成 | #fix #focus | [2026-11-b](2026-11-b.md) |
 | U-20261120-01 | 2026-11-20 | 語言切換崩潰：測試期間不再移除字型 | #bugfix #testing #ci | [2026-11-b](2026-11-b.md) |
@@ -482,7 +483,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11-b.md](2026-11-b.md) | 2026-11 | 13 |
+| [2026-11-b.md](2026-11-b.md) | 2026-11 | 14 |
 | [2026-11.md](2026-11.md) | 2026-11 | 265 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |
