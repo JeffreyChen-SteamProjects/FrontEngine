@@ -5,14 +5,16 @@ tool or assistant, neither in the message nor in a Co-Authored-By trailer. Twent
 2026-10-29/30 still carry one; rewriting the published history was decided against, so CI checks
 only what each push or pull request adds.
 
-    python tools/check_commit_attribution.py <base> <head>
+    python tools/check_commit_attribution.py <base sha> <head sha>
 
-A base of all zeros (a branch that did not exist before the push) checks the head commit alone.
+Both arguments must be commit hashes. A base of all zeros (a branch that did not exist before the
+push) checks the head commit alone.
 """
 from __future__ import annotations
 
 import re
-import subprocess
+import shutil
+import subprocess  # nosec B404 - only runs git, resolved to an absolute path, with a fixed argv
 import sys
 from typing import Callable, Dict, List
 
@@ -23,6 +25,7 @@ ATTRIBUTION = re.compile(
     re.IGNORECASE)
 
 _RECORD, _FIELD = "\x1e", "\x00"
+_SHA = re.compile(r"[0-9a-fA-F]{4,64}")
 
 
 def offending_lines(message: str) -> List[str]:
@@ -32,9 +35,12 @@ def offending_lines(message: str) -> List[str]:
 
 def commit_messages(base: str, head: str, run: Callable[[List[str]], str]) -> Dict[str, str]:
     """Message of every commit in base..head (head alone when base is all zeros), keyed by hash."""
+    for revision in (base, head):
+        if not _SHA.fullmatch(revision):
+            raise ValueError(f"not a commit hash: {revision!r}")
     revisions = [head, "-1"] if not base.strip("0") else [f"{base}..{head}"]
     # git expands %x00/%x1e itself; a raw NUL cannot travel in a command-line argument.
-    output = run(["git", "log", "--format=%H%x00%B%x1e", *revisions])
+    output = run(["log", "--format=%H%x00%B%x1e", *revisions])
     messages = {}
     for record in output.split(_RECORD):
         if _FIELD in record:
@@ -44,12 +50,16 @@ def commit_messages(base: str, head: str, run: Callable[[List[str]], str]) -> Di
 
 
 def _git(arguments: List[str]) -> str:
-    return subprocess.run(arguments, capture_output=True, text=True, encoding="utf-8",
-                          check=True, shell=False).stdout
+    """Run git with arguments built by commit_messages (validated hashes only)."""
+    git = shutil.which("git")
+    if git is None:
+        raise RuntimeError("git is not on PATH")
+    argv = [git, *arguments]
+    return subprocess.run(argv, capture_output=True, text=True, encoding="utf-8", check=True, shell=False).stdout  # nosec B603 # nosemgrep - absolute git path, argv of validated hashes, shell=False
 
 
 def main(argv: List[str], run: Callable[[List[str]], str] = _git) -> int:
-    if len(argv) != 2:
+    if len(argv) != 2 or not all(_SHA.fullmatch(value) for value in argv):
         print(__doc__)
         return 2
     found = {sha: lines for sha, message in commit_messages(*argv, run).items()
