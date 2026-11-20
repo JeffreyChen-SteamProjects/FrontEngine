@@ -4,13 +4,7 @@ from PySide6.QtGui import QGuiApplication, QPainter, QImage, QTransform
 from PySide6.QtWidgets import QWidget
 
 from .layers import compose_frame
-
-
-def _alpha_bits(gl) -> int:
-    """Alpha bits of the context actually created (the requested format may differ)."""
-    context = gl.context()
-    surface_format = context.format() if context is not None else gl.format()
-    return surface_format.alphaBufferSize()
+from .surface_check import see_through_problem
 
 
 class CompositorWidget(QWidget):
@@ -57,14 +51,9 @@ class CompositorWidget(QWidget):
     def _probe_gpu(self) -> None:
         if self._gl is None or self.failure_reason:      # no GPU path, or already fell back
             return
-        if not self._gl.isValid():
-            self._fallback('OpenGL context could not be created')
-        elif self._translucent_window() and _alpha_bits(self._gl) < 8:
-            # A context without alpha draws a see-through overlay's transparent pixels black.
-            self._fallback('OpenGL surface has no alpha channel')
-
-    def _translucent_window(self) -> bool:
-        return self.window().testAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        problem = see_through_problem(self._gl)
+        if problem:
+            self._fallback(problem)
 
     def showEvent(self, event) -> None:
         super().showEvent(event)

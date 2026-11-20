@@ -208,6 +208,7 @@ english_word_dict = {
     "particle_setting_ui_play": "Start play particle",
     "particle_size": "Particle size",
     "particle_count": "Particle count",
+    "particle_gpu_unavailable": "Particles stopped: this graphics driver turns the transparent background black. Update the graphics driver and try again.",
     "particle_speed": "Particle speed",
     # Chat scene input
     "chat_scene_input_title": "input chat content",

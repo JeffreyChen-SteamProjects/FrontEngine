@@ -208,6 +208,7 @@ italian_word_dict = {
     "particle_setting_ui_play": "Avvia la riproduzione delle particelle",
     "particle_size": "Dimensione delle particelle",
     "particle_count": "Numero di particelle",
+    "particle_gpu_unavailable": "Particelle interrotte: questo driver grafico rende nero lo sfondo trasparente. Aggiorna il driver grafico e riprova.",
     "particle_speed": "Velocità delle particelle",
     # Chat scene input
     "chat_scene_input_title": "Inserisci il contenuto della chat",

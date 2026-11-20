@@ -27,8 +27,7 @@ from frontengine.ui.page.utils import (
 )
 from frontengine.user_setting.user_setting_file import add_recent_file
 from frontengine.utils.logging.loggin_instance import front_engine_logger
-from frontengine.utils.multi_language.language_wrapper import language_wrapper
-from frontengine.utils.multi_language.retranslate import tr
+from frontengine.utils.multi_language.retranslate import retranslator, tr
 
 
 class ParticleSettingUI(SettingPage):
@@ -148,8 +147,19 @@ class ParticleSettingUI(SettingPage):
             particle_speed=float(self.particle_speed_combobox.currentText())
         )
         particle_widget.set_ui_window_flag()
+        particle_widget.failed.connect(self._particle_failed)
         self.particle_list.append(particle_widget)
         return particle_widget
+
+    def _set_status(self, key: str, fallback: str = "") -> None:
+        retranslator.set_text(self.ready_label, key, fallback)
+
+    def _particle_failed(self, reason: str) -> None:
+        """The field stopped itself rather than black out the screen; say so instead of nothing."""
+        front_engine_logger.warning(f"[ParticleSettingUI] particles stopped | {reason}")
+        self._set_status("particle_gpu_unavailable",
+                         "Particles stopped: this graphics driver turns the transparent "
+                         "background black. Update the graphics driver and try again.")
 
     @owned_action
     def start_play_particle(self) -> None:
@@ -192,11 +202,11 @@ class ParticleSettingUI(SettingPage):
     @owned_action
     def choose_and_copy_file_to_cwd_image_dir_then_play(self) -> None:
         front_engine_logger.info("[ParticleSettingUI] choose_and_copy_file_to_cwd_image_dir_then_play")
-        self.ready_label.setText(language_wrapper.language_word_dict.get("Not Ready"))
+        self._set_status("Not Ready")
         self.ready_to_play = False
         self.image_path = self.lifetime.after_dialog(choose_image(self))
         if self.image_path:
-            self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+            self._set_status("Ready")
             self.ready_to_play = True
             add_recent_file("particle", self.image_path)
             reload_recent_combobox(self.recent_files_combobox, "particle")
@@ -210,14 +220,14 @@ class ParticleSettingUI(SettingPage):
         front_engine_logger.info(f"[ParticleSettingUI] _apply_recent_file | path={path}")
         self.image_path = path
         self.ready_to_play = True
-        self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+        self._set_status("Ready")
 
     @owned_action
     def _on_file_dropped(self, path: str) -> None:
         front_engine_logger.info(f"[ParticleSettingUI] _on_file_dropped | path={path}")
         self.image_path = path
         self.ready_to_play = True
-        self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+        self._set_status("Ready")
         add_recent_file("particle", path)
         reload_recent_combobox(self.recent_files_combobox, "particle")
 
@@ -245,7 +255,7 @@ class ParticleSettingUI(SettingPage):
         if state.get("image_path"):
             self.image_path = state["image_path"]
             self.ready_to_play = True
-            self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+            self._set_status("Ready")
         for combobox, key in (
             (self.choose_direction_combobox, "direction"),
             (self.particle_size_combobox, "size"),

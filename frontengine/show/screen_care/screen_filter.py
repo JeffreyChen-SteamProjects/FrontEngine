@@ -63,20 +63,11 @@ class ScreenCareOverlay(BaseWidget):
     """
     A whole-screen eye-care layer, always painted through Qt rather than the GPU compositor.
 
-    These windows cover a monitor exactly and are mostly transparent. On the GPU path that
-    transparency has to survive every step to the desktop compositor; on some systems it did
-    not, and the transparent pixels came out black - a 15 % warm filter turned the whole
-    screen black, at random depending on the GPU and driver state. The content is one flat
-    fill (two strips for the ruler), so the GPU gains nothing here.
+    A 15 % warm filter on the GPU path turned the whole screen black on some systems; see
+    BaseWidget.software_only. The content is one flat fill (two strips for the ruler).
     """
 
-    def __init__(self) -> None:
-        super().__init__()
-        self._requested_render_backend = 'software'
-
-    def set_render_backend(self, backend: str = 'auto') -> None:
-        """Eye-care layers stay on ordinary Qt painting; see the class note."""
-        self._requested_render_backend = 'software'
+    software_only = True
 
 
 class ScreenFilterWidget(ScreenCareOverlay):

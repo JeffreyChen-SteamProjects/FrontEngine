@@ -211,6 +211,7 @@ russian_word_dict = {
     "particle_setting_ui_play": "Начать воспроизведение частиц",
     "particle_size": "Размер частицы",
     "particle_count": "Количество частиц",
+    "particle_gpu_unavailable": "Частицы остановлены: этот графический драйвер делает прозрачный фон чёрным. Обновите графический драйвер и попробуйте снова.",
     "particle_speed": "Скорость частицы",
     # Chat scene input
     "chat_scene_input_title": "Введите содержание чата",

@@ -123,6 +123,25 @@ def test_a_context_with_alpha_or_an_opaque_window_keeps_the_gpu():
         window.close()
 
 
+def test_surface_check_names_what_would_turn_a_see_through_window_black():
+    from PySide6.QtCore import Qt
+    from PySide6.QtWidgets import QWidget
+    from frontengine.show.compositor.surface_check import NO_ALPHA, NO_CONTEXT, see_through_problem
+    window = QWidget()
+    window.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+    opaque = QWidget()
+    try:
+        assert see_through_problem(_fake_gl(window, 0)) == NO_ALPHA
+        assert see_through_problem(_fake_gl(window, 8)) == ''
+        assert see_through_problem(_fake_gl(opaque, 0)) == ''       # nothing shows through
+        broken = _fake_gl(window, 8)
+        broken.isValid = lambda: False
+        assert see_through_problem(broken) == NO_CONTEXT
+    finally:
+        window.close()
+        opaque.close()
+
+
 def test_static_overlay_frame_is_cached_until_content_update():
     from frontengine.show.base_widget import BaseWidget
 

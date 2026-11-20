@@ -83,3 +83,47 @@ def test_desktop_pets_always_paint_through_qt(tmp_path, lifetime_factory):
         assert pet.render_backend == 'software'
     finally:
         pet.close()
+
+
+def test_auto_paints_a_see_through_overlay_without_the_gpu_compositor():
+    """On the GPU path a see-through overlay's transparent pixels could come out black."""
+    widget = Animated()
+    try:
+        widget.resize(40, 30)
+        widget.set_render_backend('auto')
+        widget.show()
+        QCoreApplication.processEvents()
+        assert widget._compositor is None
+        assert widget.render_backend == 'software'
+        widget.set_render_backend('gpu')                # the Overlay rendering menu still decides
+        assert widget._compositor is not None
+        widget.set_render_backend('auto')
+        assert widget._compositor is None
+    finally:
+        widget.close()
+
+
+def test_auto_takes_the_gpu_only_while_a_chroma_key_makes_the_window_opaque():
+    widget = Animated()
+    try:
+        widget.resize(40, 30)
+        widget.set_render_backend('auto')
+        widget.show()
+        widget.set_background_color('#00ff00')
+        assert widget._compositor is not None
+        widget.set_background_color(None)
+        assert widget._compositor is None
+    finally:
+        widget.close()
+
+
+def test_the_full_screen_selection_dimmer_shows_without_the_gpu_compositor():
+    from frontengine.show.capture.region_capture import RegionCaptureWidget
+    picker = RegionCaptureWidget()
+    try:
+        picker.resize(40, 30)
+        picker.show()
+        QCoreApplication.processEvents()
+        assert picker._compositor is None
+    finally:
+        picker.close()

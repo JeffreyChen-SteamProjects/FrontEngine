@@ -59,8 +59,11 @@ def active_window_rect() -> Optional[Tuple[int, int, int, int]]:
 class DimBackgroundWidget(BaseWidget):
     """
     背景變暗：只有作用中視窗保持原樣，其餘壓暗；視窗換了會自動跟上。
+    Covers the whole monitor with a see-through shade, so it never goes through the GPU
+    compositor: there the screen could turn black (BaseWidget.software_only).
     """
 
+    software_only = True
     REFRESH_MS = 250
 
     def __init__(self, dim: int = DEFAULT_DIM) -> None:
@@ -134,7 +137,10 @@ class DimBackgroundWidget(BaseWidget):
 class DistractionMaskWidget(BaseWidget):
     """
     干擾遮罩：把螢幕的某個區域（預設底部，正好蓋住工作列）以不透明色蓋掉。
+    A flat fill across the screen's width, painted by Qt like the dimmer.
     """
+
+    software_only = True
 
     def __init__(self, region: str = REGION_BOTTOM, percent: int = 6,
                  color: str = "#101010") -> None:

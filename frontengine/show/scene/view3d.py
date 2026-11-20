@@ -12,6 +12,7 @@ from PySide6.QtOpenGL import QOpenGLFramebufferObject, QOpenGLFramebufferObjectF
 from PySide6.QtOpenGLWidgets import QOpenGLWidget
 from PySide6.QtWidgets import QWidget, QVBoxLayout
 
+from frontengine.show.compositor.surface_check import see_through_problem
 from frontengine.show.window_helpers import apply_overlay_window_flags
 from .math3d import transform_matrix, euler_quaternion
 from .renderer3d import Scene3DRenderer
@@ -555,8 +556,12 @@ class Scene3DView(QWidget):
         try:
             self.show()
             frame = self.viewport.grabFramebuffer()
-            if frame.isNull() or not self.viewport.isValid() or self.viewport.error:
-                raise RuntimeError(self.viewport.error or '3D desktop viewport could not produce its first frame')
+            # A context without alpha draws this see-through window black across the whole
+            # screen; refuse it here, before the window is ever shown (surface_check).
+            problem = see_through_problem(self.viewport)
+            if frame.isNull() or not self.viewport.isValid() or self.viewport.error or problem:
+                raise RuntimeError(self.viewport.error or problem
+                                   or '3D desktop viewport could not produce its first frame')
         finally:
             self.hide()
             self.setAttribute(Qt.WidgetAttribute.WA_DontShowOnScreen, False)

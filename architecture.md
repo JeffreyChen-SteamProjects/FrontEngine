@@ -109,7 +109,9 @@ frontengine | python -m frontengine → main() → start_front_engine() → QApp
 ```
 feature page (ui/page/<kind>/) → dispatch_to_monitors() (ui/page/utils.py)
   → show/<kind> widget(s) on the chosen monitor(s)
-  → BaseWidget: direct paint → draw_content(); compositor paint/update → queued layer submission
+  → BaseWidget: direct paint → draw_content() (always for see-through windows on `auto` and for
+    `software_only` layers); compositor paint/update → queued layer submission (explicit `gpu`, or an
+    opaque chroma-key window)
   → page's widget list, registered via ControlCenterUI.register_overlay_source()
   → control center hides / closes / locks / re-tiers every overlay in one action
 ```

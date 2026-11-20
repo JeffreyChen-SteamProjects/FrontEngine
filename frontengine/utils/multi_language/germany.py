@@ -211,6 +211,7 @@ germany_word_dict = {
     "particle_setting_ui_play": "Partikelwiedergabe starten",
     "particle_size": "Partikelgröße",
     "particle_count": "Partikelanzahl",
+    "particle_gpu_unavailable": "Partikel gestoppt: Dieser Grafiktreiber macht den transparenten Hintergrund schwarz. Aktualisieren Sie den Grafiktreiber und versuchen Sie es erneut.",
     "particle_speed": "Partikelgeschwindigkeit",
     # Chat-Szenen-Eingabe
     "chat_scene_input_title": "Chat-Inhalt eingeben",

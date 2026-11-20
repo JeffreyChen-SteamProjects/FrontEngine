@@ -14,17 +14,23 @@ from OpenGL.GL import (
     glDisable, glEnable, glEnd, glGenTextures, glLoadIdentity, glMatrixMode, glOrtho,
     glTexCoord2f, glTexImage2D, glTexParameteri, glTranslatef, glVertex2f, glViewport,
 )
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import Qt, QTimer, Signal
 from PySide6.QtGui import QImage, QSurfaceFormat, QPixmap
 from PySide6.QtOpenGLWidgets import QOpenGLWidget
 
+from frontengine.show.compositor.surface_check import see_through_problem
 from frontengine.show.window_helpers import apply_overlay_window_flags, load_overlay_icon
+from frontengine.utils.logging.loggin_instance import front_engine_logger
 
 if sys.platform == "win32":
     import ctypes
 
 
 class ParticleOpenGLWidget(QOpenGLWidget):
+    # The context cannot draw this see-through window (surface_check): the reason, then it closes
+    # rather than leave the screen black behind a full-screen field.
+    failed = Signal(str)
+
     def __init__(self,
                  pixmap: QPixmap,
                  particle_size: int,
@@ -100,6 +106,8 @@ class ParticleOpenGLWidget(QOpenGLWidget):
         ctypes.windll.user32.SetWindowLongW(hwnd, GWL_EXSTYLE, style | WS_EX_LAYERED)
 
     def initializeGL(self):
+        # Checked once the context exists, outside initializeGL, like the GPU compositor.
+        QTimer.singleShot(0, self, self._check_surface)
         glDisable(GL_DEPTH_TEST)
         glDisable(GL_CULL_FACE)
         glEnable(GL_BLEND)
@@ -187,6 +195,15 @@ class ParticleOpenGLWidget(QOpenGLWidget):
         glOrtho(-1, 1, -1, 1, -1, 1)
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
+
+    def _check_surface(self) -> None:
+        problem = see_through_problem(self)
+        if not problem:
+            return
+        front_engine_logger.warning(f"[ParticleOpenGLWidget] stopped: {problem}")
+        self.timer.stop()
+        self.failed.emit(problem)
+        self.close()
 
     def set_ui_window_flag(self, show_on_bottom: bool = False) -> None:
         apply_overlay_window_flags(self, show_on_bottom=show_on_bottom)

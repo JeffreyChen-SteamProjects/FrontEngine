@@ -17,6 +17,13 @@ class BaseWidget(QWidget):
     BaseWidget: Base class providing shared UI attributes and event handling
     """
 
+    # A layer that covers a whole monitor with a mostly see-through flat fill sets this, and is
+    # then always painted by Qt, never through the GPU compositor. On that path the transparency
+    # has to survive all the way to the desktop compositor; on some GPUs and drivers it did not,
+    # and the see-through pixels came out black - the whole screen went dark. A flat fill gains
+    # nothing from the GPU. Eye care and the focus dimmer use it.
+    software_only: bool = False
+
     def __init__(self, draw_location_x: int = 0, draw_location_y: int = 0):
         super().__init__()
         self.draw_location_x: int = draw_location_x
@@ -61,7 +68,8 @@ class BaseWidget(QWidget):
         self._render_revision = 0
         self._raster_cache = None
         self._raster_signature = None
-        self._requested_render_backend = user_setting_dict.get('render_backend', 'auto')
+        self._requested_render_backend = 'software' if self.software_only \
+            else user_setting_dict.get('render_backend', 'auto')
 
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
@@ -111,6 +119,8 @@ class BaseWidget(QWidget):
             self.background_color = candidate if candidate.isValid() else None
         self.setAttribute(
             Qt.WidgetAttribute.WA_TranslucentBackground, self.background_color is None)
+        if self._requested_render_backend == 'auto' and self.isVisible():
+            self.set_render_backend('auto')     # see-through again: leave the GPU (see there)
         self.update()
 
     # --- drag to position (only while unlocked) --------------------------
@@ -197,17 +207,38 @@ class BaseWidget(QWidget):
         """Subclass hook that renders the widget content onto the shared painter."""
 
     def set_render_backend(self, backend: str = 'auto') -> None:
-        """Compose the existing painter content as a texture; rasterization remains CPU work."""
+        """Compose the existing painter content as a texture; rasterization remains CPU work.
+
+        'auto' paints a see-through overlay with plain Qt painting instead. The content is
+        rasterized on the CPU into one image either way, so the GPU only uploads and shows that
+        image - while in a see-through window the transparency has to survive all the way to the
+        desktop compositor, and on some GPUs and drivers it did not: the see-through pixels came
+        out black and a full-screen overlay blacked out the screen. Only an explicit 'gpu' (the
+        Overlay rendering menu) or an opaque window - a chroma-key background - takes the GPU."""
         from frontengine.show.compositor import CompositorWidget
 
-        if self._compositor is not None:
-            self._compositor.shutdown()
-            self._compositor.deleteLater()
+        if self.software_only:
+            self._requested_render_backend = 'software'
+            return
+        self._requested_render_backend = backend
+        self._drop_compositor()
+        if backend == 'auto' and self._see_through():
+            self.update()
+            return
         self._compositor = CompositorWidget(self, backend)
         self._compositor.setGeometry(self.rect())
         self._compositor.show()
         self._update_compositor()
         self.update()
+
+    def _see_through(self) -> bool:
+        return self.testAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+
+    def _drop_compositor(self) -> None:
+        if self._compositor is not None:
+            self._compositor.shutdown()
+            self._compositor.deleteLater()
+            self._compositor = None
 
     @property
     def render_backend(self) -> str:
