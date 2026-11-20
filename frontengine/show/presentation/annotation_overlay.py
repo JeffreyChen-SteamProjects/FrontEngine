@@ -30,6 +30,11 @@ DEFAULT_PEN_COLOR = "#ff3b30"
 MIN_WIDTH = 1
 MAX_WIDTH = 40
 
+# Windows hands a click on a fully transparent pixel of a see-through window to whatever is
+# underneath, so a clear drawing layer never saw the pen go down. Every pixel carries this
+# near-invisible alpha instead, and the eraser paints it back rather than clearing to nothing.
+CATCH_MOUSE_COLOR = QColor(0, 0, 0, 1)
+
 
 def clamp_width(value, fallback: int = 4) -> int:
     """把筆寬夾在可用範圍。"""
@@ -62,6 +67,10 @@ class AnnotationOverlay(BaseWidget):
     塗鴉層：滑鼠拖曳畫線，支援筆／螢光筆／橡皮擦、復原與全部清除。
     每一筆記成 (工具, 顏色, 線寬, 點清單)，因此復原與重繪都很單純。
     """
+
+    # A full-monitor see-through layer: on the GPU compositor the transparency could come out
+    # black on some drivers (see BaseWidget).
+    software_only = True
 
     def __init__(self, color: str = DEFAULT_PEN_COLOR, width: int = 4, tool: str = TOOL_PEN) -> None:
         front_engine_logger.info(f"[AnnotationOverlay] Init | tool={tool}, color={color}, width={width}")
@@ -144,6 +153,10 @@ class AnnotationOverlay(BaseWidget):
         super().mouseReleaseEvent(event)
 
     def draw_content(self, painter: QPainter) -> None:
+        # Full opacity for the whole layer: scaled by a lower opacity, the 1/255 catch alpha
+        # would round to 0 and the clicks would fall through again.
+        painter.setOpacity(1.0)
+        painter.fillRect(self.rect(), CATCH_MOUSE_COLOR)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         for stroke in self.strokes:
             points = stroke["points"]
@@ -151,7 +164,8 @@ class AnnotationOverlay(BaseWidget):
                 continue
             color, width = stroke_style(stroke["tool"], stroke["color"], stroke["width"])
             if stroke["tool"] == TOOL_ERASER:
-                painter.setCompositionMode(QPainter.CompositionMode.CompositionMode_Clear)
+                color = CATCH_MOUSE_COLOR
+                painter.setCompositionMode(QPainter.CompositionMode.CompositionMode_Source)
             else:
                 painter.setCompositionMode(QPainter.CompositionMode.CompositionMode_SourceOver)
             painter.setPen(QPen(color, width, Qt.PenStyle.SolidLine,

@@ -313,6 +313,10 @@ class WhiteboardWidget(BaseWidget):
             self.end_stroke()
         super().mouseReleaseEvent(event)
 
+    # The board covers the whole monitor with a translucent flat dim: on the GPU compositor the
+    # transparency could come out black on some drivers (see BaseWidget).
+    software_only = True
+
     def set_render_backend(self, backend: str = 'auto') -> None:
         """Keep the interactive toolbar above the composited canvas."""
         super().set_render_backend(backend)
