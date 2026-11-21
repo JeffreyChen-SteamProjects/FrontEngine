@@ -96,7 +96,7 @@ FrontEngine 是一個 PySide6 桌面**覆蓋層（overlay）框架**：把影片
 
 | 檔案 | 行數 | 功用 |
 | --- | ---: | --- |
-| `base_widget.py` | 278 | `BaseWidget(QWidget)`。定義覆蓋層的共同契約：不透明度（預設 0.2）、`WA_TranslucentBackground` + `WA_DeleteOnClose`、鎖定/點擊穿透、拖曳擺位、位置記憶、綠幕背景色、畫質檔位、`keep_in_capture`、`software_only`（類別屬性：蓋滿螢幕的半透明單色層設為 True，一律用 Qt 一般繪製、`set_render_backend` 不建合成器；護眼層與專注的壓暗／遮罩使用）。後端 `auto` 在半透明視窗（`WA_TranslucentBackground`）也用 Qt 一般繪製、不建合成器——內容本來就由 CPU 畫成一張圖，GPU 只多了透明處在部分驅動上變黑的風險；只有明確選 `gpu` 或綠幕背景讓視窗不透明時才建合成器，`set_background_color` 切換時重新判斷。子類別實作 `draw_content(painter)`。直接繪製時由 `paintEvent()` 開 painter；使用合成器時，`paintEvent()` 與 `update()` 共用單一待辦旗標，把圖層更新排到事件迴圈，避免在父視窗繪製期間重新進入合成器。 |
+| `base_widget.py` | 278 | `BaseWidget(QWidget)`。定義覆蓋層的共同契約：不透明度（預設 0.2）、`WA_TranslucentBackground` + `WA_DeleteOnClose`、鎖定/點擊穿透、拖曳擺位、位置記憶、綠幕背景色、畫質檔位、`keep_in_capture`、`software_only`（類別屬性：蓋滿螢幕的半透明單色層設為 True，一律用 Qt 一般繪製、`set_render_backend` 不建合成器；護眼層、專注的壓暗／遮罩、簡報的按鍵顯示／游標效果／塗鴉與白板使用）。後端 `auto` 在半透明視窗（`WA_TranslucentBackground`）也用 Qt 一般繪製、不建合成器——內容本來就由 CPU 畫成一張圖，GPU 只多了透明處在部分驅動上變黑的風險；只有明確選 `gpu` 或綠幕背景讓視窗不透明時才建合成器，`set_background_color` 切換時重新判斷。子類別實作 `draw_content(painter)`。直接繪製時由 `paintEvent()` 開 painter；使用合成器時，`paintEvent()` 與 `update()` 共用單一待辦旗標，把圖層更新排到事件迴圈，避免在父視窗繪製期間重新進入合成器。 |
 | `window_helpers.py` | 68 | 覆蓋層視窗旗標的單一出處：`apply_overlay_window_flags()`（置頂/置底、無邊框、Tool、點擊穿透）、`set_overlay_locked()`、`load_overlay_icon()`。 |
 | `draggable_window.py` | 65 | `DraggableTopWindow`：無邊框置頂小視窗，可拖曳、雙擊或 Esc 關閉。釘選截圖與視窗複本的底座。 |
 | `overlay_factory.py` | 125 | Abstract Factory：把場景 JSON 的 `{kind, ...}` 轉成對應 widget（image/gif/sound/text/video/web）。`build_overlay(kind, setting)` 是唯一入口，欄位缺失會明確報錯（場景 JSON 是外部資料）。 |
@@ -134,7 +134,7 @@ FrontEngine 是一個 PySide6 桌面**覆蓋層（overlay）框架**：把影片
 | 檔案 | 行數 | 功用 |
 | --- | ---: | --- |
 | `camera/camera_widget.py` | 192 | 攝影機畫面覆蓋層（方形／圓形／圓角、外框、鏡像）。影像來源可注入，測試不需真攝影機。 |
-| `canvas/whiteboard_widget.py` | 248 | 無限畫布白板：拖曳平移、滾輪縮放、筆畫以畫布座標保存、可存成圖片。 |
+| `canvas/whiteboard_widget.py` | 248 | 無限畫布白板：拖曳平移、滾輪縮放、筆畫以畫布座標保存、可存成圖片。設 \software_only\（全螢幕半透明壓暗，不走 GPU 合成器）。 |
 | `capture/region_capture.py` | 187 | 區域截圖框選層。含 `safe_capture_path()` 擋路徑穿越。擷取函式可注入。 |
 | `measure/measure_widget.py` | 239 | 量測層：取色器 / 像素尺 / 量角器三合一，共用同一層全螢幕覆蓋。 |
 | `pinned/pinned_image.py` | 103 | 把截下來的畫面釘在螢幕上，可拖曳縮放。 |
@@ -160,9 +160,9 @@ FrontEngine 是一個 PySide6 桌面**覆蓋層（overlay）框架**：把影片
 
 | 檔案 | 行數 | 功用 |
 | --- | ---: | --- |
-| `presentation/annotation_overlay.py` | 161 | 螢幕塗鴉：筆／螢光筆／橡皮擦、復原、全部清除。 |
-| `presentation/cursor_effects.py` | 173 | 游標亮環、點擊漣漪、聚光燈。 |
-| `presentation/keystroke_display.py` | 287 | 把剛按下的按鍵與滑鼠點擊顯示在角落（教學影片用），數秒後淡出。位置（四個角落／置中）、字級、要不要顯示滑鼠都可調；`panel_origin()` 是純算術，排版不必開視窗就驗得了。 |
+| `presentation/annotation_overlay.py` | 161 | 螢幕塗鴉：筆／螢光筆／橡皮擦、復原、全部清除。設 \software_only\。每個像素都帶 alpha 1 的 \CATCH_MOUSE_COLOR\（橡皮擦也是畫回這個色而不是清成全透明）——Windows 會把半透明視窗裡 alpha 0 的點擊交給底下的視窗，全透明的塗鴉層就收不到筆。 |
+| `presentation/cursor_effects.py` | 173 | 游標亮環、點擊漣漪、聚光燈。設 \software_only\（全螢幕半透明層）。 |
+| `presentation/keystroke_display.py` | 287 | 把剛按下的按鍵與滑鼠點擊顯示在角落（教學影片用），數秒後淡出。設 \software_only\（全螢幕半透明層）。位置（四個角落／置中）、字級、要不要顯示滑鼠都可調；`panel_origin()` 是純算術，排版不必開視窗就驗得了。 |
 | `presentation/magnifier.py` | 139 | 區域放大鏡：抓游標周圍畫面放大顯示。 |
 
 ---

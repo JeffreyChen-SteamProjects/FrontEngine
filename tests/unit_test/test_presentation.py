@@ -4,11 +4,11 @@ Pure-logic tests for the presenting tools: stroke styling, ripple animation,
 key formatting, and the magnifier's source rectangle.
 """
 from frontengine.show.presentation.annotation_overlay import (
-    DEFAULT_PEN_COLOR, MAX_WIDTH, MIN_WIDTH, TOOL_ERASER, TOOL_HIGHLIGHTER, TOOL_PEN, clamp_width,
-    stroke_style,
+    DEFAULT_PEN_COLOR, MAX_WIDTH, MIN_WIDTH, TOOL_ERASER, TOOL_HIGHLIGHTER, TOOL_PEN,
+    AnnotationOverlay, clamp_width, stroke_style,
 )
 from frontengine.show.presentation.cursor_effects import (
-    RIPPLE_STEPS, clamp_radius, ripple_alpha, ripple_radius,
+    RIPPLE_STEPS, CursorEffectWidget, clamp_radius, ripple_alpha, ripple_radius,
 )
 from frontengine.show.presentation.keystroke_display import (
     MAX_FONT_SIZE, MIN_FONT_SIZE, POSITION_BOTTOM, POSITION_BOTTOM_LEFT,
@@ -51,6 +51,42 @@ def test_eraser_is_wider_than_the_pen() -> None:
 def test_invalid_colour_falls_back() -> None:
     color, _width = stroke_style(TOOL_PEN, "not a colour", 4)
     assert color.name() == DEFAULT_PEN_COLOR
+
+
+def test_every_pixel_of_the_drawing_layer_catches_the_mouse() -> None:
+    """Windows passes a click on a fully transparent pixel through, so the pen never went down."""
+    from PySide6.QtCore import QPoint
+    overlay = AnnotationOverlay()
+    overlay.resize(60, 40)
+    overlay.opacity = 0.2       # a lowered opacity must not round the catch alpha down to 0
+    overlay.begin_stroke(QPoint(5, 20))
+    overlay.extend_stroke(QPoint(55, 20))
+    overlay.end_stroke()
+    overlay.set_tool(TOOL_ERASER)
+    overlay.begin_stroke(QPoint(30, 5))
+    overlay.extend_stroke(QPoint(30, 35))
+    overlay.end_stroke()
+    image = overlay._raster_content()
+    assert image.pixelColor(10, 20).alpha() == 255, "the pen stroke is drawn"
+    for x, y in ((2, 2), (58, 38), (30, 20)):     # untouched corners, and an erased spot
+        alpha = image.pixelColor(x, y).alpha()
+        assert 0 < alpha < 8, (x, y, alpha)
+    overlay.close()
+
+
+def test_full_screen_presenting_layers_never_use_the_gpu_compositor() -> None:
+    """They cover the whole monitor; on the GPU path the see-through pixels could come out black."""
+    from PySide6.QtWidgets import QApplication
+    from frontengine.show.canvas.whiteboard_widget import WhiteboardWidget
+    for widget in (KeystrokeDisplayWidget(), CursorEffectWidget(), AnnotationOverlay(),
+                   WhiteboardWidget()):
+        widget.set_render_backend('gpu')
+        widget.resize(40, 30)
+        widget.show()
+        QApplication.processEvents()
+        assert widget._compositor is None, type(widget).__name__
+        assert widget.render_backend == 'software'
+        widget.close()
 
 
 # --- cursor effects -------------------------------------------------------

@@ -53,6 +53,9 @@ class CursorEffectWidget(BaseWidget):
     """
 
     REFRESH_MS = 16
+    # A full-monitor see-through layer, and the spotlight is a flat dim over all of it: on the
+    # GPU compositor the transparency could come out black on some drivers (see BaseWidget).
+    software_only = True
 
     def __init__(self, ring: bool = True, ripple: bool = True, spotlight: bool = False,
                  color: str = DEFAULT_RING_COLOR, radius: int = DEFAULT_RING_RADIUS,
