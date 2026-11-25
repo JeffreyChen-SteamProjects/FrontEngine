@@ -247,7 +247,7 @@ class OverlayStatusBar(QWidget):
         super().__init__(parent)
         self.setObjectName("overlayStatus")
         self._overlays = overlays            # returns the live overlays, asked again every time
-        self.visible_count, self.hidden_count = 0, 0
+        self.visible_count, self.hidden_count, self.heard_count = 0, 0, 0
         self.text = QLabel()
         self.text.setObjectName("statusText")
         self.toggle_button, self.close_button = QPushButton(), QPushButton()
@@ -279,21 +279,23 @@ class OverlayStatusBar(QWidget):
 
     def refresh(self) -> None:
         """Count the overlays again and relabel only when something changed."""
-        visible = hidden = 0
+        visible = hidden = heard = 0
         seen = set()
         for overlay in self._overlays():
             if id(overlay) in seen:
                 continue
             seen.add(id(overlay))
             try:
-                if overlay.isVisible():
+                if getattr(overlay, "windowless", False):
+                    heard += 1                           # a sound: to close, not to show or hide
+                elif overlay.isVisible():
                     visible += 1
                 else:
                     hidden += 1
             except (RuntimeError, AttributeError):       # closed, or not a widget
                 continue
-        if (visible, hidden) != (self.visible_count, self.hidden_count):
-            self.visible_count, self.hidden_count = visible, hidden
+        if (visible, hidden, heard) != (self.visible_count, self.hidden_count, self.heard_count):
+            self.visible_count, self.hidden_count, self.heard_count = visible, hidden, heard
             self._retranslate()
 
     def _retranslate(self) -> None:
@@ -307,8 +309,8 @@ class OverlayStatusBar(QWidget):
         key, fallback = ("control_center_hide_all", "Hide all") if self.visible_count or not self.hidden_count \
             else ("control_center_show_all", "Show all")
         self.toggle_button.setText(translate(key, fallback))
-        for button in (self.toggle_button, self.close_button):
-            button.setEnabled(bool(self.visible_count or self.hidden_count))
+        self.toggle_button.setEnabled(bool(self.visible_count or self.hidden_count))
+        self.close_button.setEnabled(bool(self.visible_count or self.hidden_count or self.heard_count))
 
     def paintEvent(self, event) -> None:
         painter = QPainter(self)

@@ -234,12 +234,14 @@ class Scene3DViewport(QOpenGLWidget):
         """Under the objects, editing only: a ground and a grid on the plane the camera faces.
 
         A 3D scene starts as a camera and a light, and its background is transparent, so the
-        editor showed an empty panel that looked broken. The desktop and the output never have it."""
+        editor showed an empty panel that looked broken. The desktop and the output never have it.
+        A background the scene does have is laid over the ground, under the grid."""
         width, height = self.runtime.document.canvas
         scale, left, top = self._canvas_frame()
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         painter.fillRect(self.rect(), BACKDROP_COLOR)
+        painter.fillRect(self.rect(), QColor.fromRgbF(*self.runtime.document.background))
         for start, end, axis in grid_lines(data['vp']):
             segment = clip_segment(data['vp'] @ start, data['vp'] @ end)
             if segment is not None:

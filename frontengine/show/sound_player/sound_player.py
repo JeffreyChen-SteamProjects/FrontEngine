@@ -16,6 +16,8 @@ class SoundPlayer(QWidget):
     SoundPlayer: A custom widget for playing audio files
     """
 
+    windowless = True      # only heard: never shown, so never counted as hidden
+
     def __init__(self, sound_path: str):
         front_engine_logger.info(f"[SoundPlayer] Init | sound_path={sound_path}")
         super().__init__()

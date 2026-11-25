@@ -124,6 +124,33 @@ def test_without_exclusion_it_is_a_still_picture_taken_while_off_screen(monkeypa
         widget.close()
 
 
+def test_a_still_picture_is_taken_again_when_the_layer_is_shown_again(monkeypatch):
+    monkeypatch.setattr(color_vision_widget, "HIDE_SETTLE_MS", 1)
+    widget = ColorVisionWidget(KIND_DEUTERANOPIA)
+    seen = []
+
+    def grab(_rect):
+        seen.append(widget.isVisible())
+        pixmap = QPixmap(40, 30)
+        pixmap.fill(QColor(*GREEN))
+        return pixmap
+
+    widget.set_capture_boundary(lambda _widget, _excluded: False, lambda _handle: None)
+    widget.set_grabber(grab)
+    widget.setGeometry(QRect(0, 0, 40, 30))
+    try:
+        widget.start()
+        widget.hide()
+        QTest.qWait(50)
+        assert seen == [False]
+        widget.show()
+        assert _wait(lambda: len(seen) == 2 and widget.isVisible())
+        QTest.qWait(200)
+        assert seen == [False, False] and widget.isVisible()     # once, and not in a circle
+    finally:
+        widget.close()
+
+
 def test_the_picture_ignores_a_lowered_overlay_opacity():
     widget = ColorVisionWidget()
     widget.resize(10, 10)

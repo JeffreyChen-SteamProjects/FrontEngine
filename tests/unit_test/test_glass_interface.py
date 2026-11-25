@@ -280,12 +280,12 @@ def test_every_section_folds_from_its_heading_and_is_remembered(*, lifetime_fact
     QTest.mouseClick(first.title_label, Qt.MouseButton.LeftButton)
     _settle()
     assert not first.expanded and not first.content.isVisible() and first.height() < tall
-    assert user_setting_dict[FOLDED_KEY] == {"SettingPage:0": True}
+    assert user_setting_dict[FOLDED_KEY] == {"SettingPage/tab_video_text:0": True}
     page.close()
     again, reopened = _page(lifetime_factory)
     assert [section.expanded for section in reopened] == [False, True, True]
     QTest.mouseClick(reopened[0].toggle_button, Qt.MouseButton.LeftButton)
-    assert user_setting_dict[FOLDED_KEY] == {"SettingPage:0": False}
+    assert user_setting_dict[FOLDED_KEY] == {"SettingPage/tab_video_text:0": False}
     again.close()
 
 
@@ -296,6 +296,25 @@ def test_a_section_folded_by_default_stays_open_once_opened(*, lifetime_factory)
     again = SettingPage("tab_video_text", lifetime=lifetime_factory())
     assert again.add_section("section_options", "More", collapsed=True).expanded
     again.close()
+
+
+def test_folding_a_section_leaves_other_plain_pages_alone(*, lifetime_factory):
+    page, sections = _page(lifetime_factory)
+    sections[0].toggle_button.click()
+    page.close()
+    other = SettingPage("workshop_manage", lifetime=lifetime_factory())
+    assert other.add_section("section_options", "More").expanded
+    other.close()
+
+
+def test_the_tools_pages_less_used_sections_stay_open_once_opened(make_main_window):
+    page = make_main_window().tools_setting_ui
+    closed = [section for section in page._sections if not section.expanded]
+    assert len(closed) == 3
+    page.set_all_folded(False)
+    stored = dict(user_setting_dict[FOLDED_KEY])
+    again = make_main_window({FOLDED_KEY: stored}).tools_setting_ui
+    assert all(section.expanded for section in again._sections)
 
 
 def test_fold_all_leaves_an_always_open_section_alone(*, lifetime_factory):
@@ -319,7 +338,7 @@ def test_a_small_page_has_no_fold_all_and_damaged_settings_are_ignored(*, lifeti
     page, sections = _page(lifetime_factory, sections=2)
     assert page.fold_all_button is None and all(section.expanded for section in sections)
     sections[1].toggle_button.click()
-    assert user_setting_dict[FOLDED_KEY] == {"SettingPage:1": True}
+    assert user_setting_dict[FOLDED_KEY] == {"SettingPage/tab_video_text:1": True}
     page.close()
 
 
@@ -382,6 +401,58 @@ def test_the_sidebar_folds_to_a_rail_of_icons_with_names_as_tool_tips():
     assert not panel.compact and panel.sidebar.width() == SIDEBAR_WIDTH and panel.brand.name.isVisible()
     assert chosen == [True, False]
     panel.close()
+
+
+def test_the_rail_shows_every_page_and_never_folds_a_group():
+    sidebar = NavigationSidebar()
+    sidebar.add_group("nav_group_home", "Home")
+    sidebar.add_page("tab_video_text", 0, "Video", icon_name="video")
+    group = sidebar.add_group("nav_group_work", "Work")
+    page = sidebar.add_page("tab_image_text", 1, "Image", icon_name="image")
+    changed = []
+    sidebar.collapsed_changed.connect(changed.append)
+    sidebar.set_group_collapsed("nav_group_work", True)
+    assert page.isHidden()
+    sidebar.set_compact(True)
+    assert not page.isHidden()
+    sidebar.itemClicked.emit(group)
+    assert not page.isHidden() and changed == []
+    sidebar.set_compact(False)
+    assert page.isHidden() and sidebar.collapsed_groups() == ["nav_group_work"]
+    sidebar.set_compact(True)
+    sidebar.setCurrentItem(page)                     # picked on the rail: not hidden away on opening
+    sidebar.set_compact(False)
+    assert not page.isHidden()
+    sidebar.close()
+
+
+def test_a_playing_sound_is_neither_shown_nor_hidden(make_main_window):
+    from frontengine.show.sound_player.sound_player import SoundPlayer
+    assert SoundPlayer.windowless
+    window = make_main_window()
+    sound = QWidget()
+    sound.windowless = True
+    window.sound_player_setting_ui.sound_widget_list.append(sound)
+    bar = window.overlay_status
+    bar.refresh()
+    try:
+        assert (bar.visible_count, bar.hidden_count) == (0, 0)
+        assert not bar.toggle_button.isEnabled() and bar.close_button.isEnabled()
+    finally:
+        sound.close()
+        window.sound_player_setting_ui.sound_widget_list.clear()
+
+
+def test_a_wallpaper_on_the_network_is_never_touched(monkeypatch, tmp_path):
+    from pathlib import Path
+    monkeypatch.setenv("APPDATA", str(tmp_path))
+    remote = Path(r"\\server\share\wall.jpg")
+    assert backdrop_module.is_remote(remote) and not backdrop_module.is_remote(tmp_path / "wall.png")
+    copy = backdrop_module.local_wallpaper(remote)
+    assert copy.name == "TranscodedWallpaper" and tmp_path in copy.parents
+    assert backdrop_module.local_wallpaper(tmp_path / "wall.png") == tmp_path / "wall.png"
+    monkeypatch.delenv("APPDATA")
+    assert backdrop_module.local_wallpaper(remote) is None and backdrop_module.local_wallpaper(None) is None
 
 
 def test_a_narrow_window_folds_the_sidebar_by_itself_and_gives_it_back():

@@ -102,6 +102,7 @@ class ColorVisionWidget(ScreenCareOverlay):
         self._live: Optional[LiveSimulation] = None
         self._running = False
         self._retaking = False
+        self._own_show = False             # this show was asked for here, with a fresh picture
         self.frame_ready.connect(self._show_frame, Qt.ConnectionType.QueuedConnection)
         # 這一層是不透明的：它要蓋掉底下的畫面，而不是疊在上面
         # This layer is opaque - it replaces what is underneath rather than
@@ -147,7 +148,7 @@ class ColorVisionWidget(ScreenCareOverlay):
         self._running = True
         if not self.isVisible():
             self.refresh()
-            self.show()
+            self._show_fresh()
         if self._exclude(self, True) and self._start_live():
             return
         if self.simulated is None:
@@ -181,13 +182,25 @@ class ColorVisionWidget(ScreenCareOverlay):
 
     def showEvent(self, event) -> None:
         super().showEvent(event)
+        if not self._running or self._own_show:
+            return
         # Changing window flags (locking overlays) makes a new native window: exclude that one too,
         # and read through its handle.
-        if self._running and self._live is not None:
+        if self._live is not None:
             self._live.stop()
             self._live = None
-            if not (self._exclude(self, True) and self._start_live()):
-                front_engine_logger.warning("[ColorVisionWidget] the new window cannot be excluded")
+            if self._exclude(self, True) and self._start_live():
+                return
+            front_engine_logger.warning("[ColorVisionWidget] the new window cannot be excluded")
+        # Still mode: what it last photographed is whatever was on screen before it was hidden.
+        QTimer.singleShot(0, self, self.retake)
+
+    def _show_fresh(self) -> None:
+        self._own_show = True
+        try:
+            self.show()
+        finally:
+            self._own_show = False
 
     def _show_frame(self, frame: numpy.ndarray) -> None:
         if not self._running:
@@ -210,7 +223,7 @@ class ColorVisionWidget(ScreenCareOverlay):
         self._retaking = False
         self.refresh()
         if was_visible and self._running:
-            self.setVisible(True)
+            self._show_fresh()
 
     def refresh(self) -> None:
         """抓一次畫面、轉換、準備重畫。呼叫時這一層不能在畫面上，否則會拍到自己。

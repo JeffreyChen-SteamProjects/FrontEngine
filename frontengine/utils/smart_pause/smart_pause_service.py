@@ -15,6 +15,78 @@ from frontengine.utils.smart_pause.pause_rules import DEFAULT_RULES, pause_reaso
 _SHELL_WINDOW_CLASSES = {"WorkerW", "Progman", "Shell_TrayWnd", "Button"}
 
 
+# GetWindow / GetWindowLong / DwmGetWindowAttribute arguments
+_GW_HWNDNEXT, _GWL_EXSTYLE, _WS_EX_TOOLWINDOW, _DWMWA_CLOAKED = 2, -20, 0x00000080, 14
+_MAX_WINDOWS = 2000          # a bound on the walk down the window order
+
+
+def _is_own(user32, hwnd) -> bool:
+    import ctypes
+    from ctypes import wintypes
+
+    owner = wintypes.DWORD()
+    user32.GetWindowThreadProcessId(hwnd, ctypes.byref(owner))
+    return owner.value == os.getpid()
+
+
+def _is_tool(user32, hwnd) -> bool:
+    return bool(user32.GetWindowLongW(hwnd, _GWL_EXSTYLE) & _WS_EX_TOOLWINDOW)
+
+
+def _is_cloaked(hwnd) -> bool:
+    """On another virtual desktop, or a suspended Store program: visible by name only."""
+    import ctypes
+    from ctypes import wintypes
+
+    cloaked = wintypes.DWORD()
+    result = ctypes.windll.dwmapi.DwmGetWindowAttribute(
+        wintypes.HWND(hwnd), _DWMWA_CLOAKED, ctypes.byref(cloaked), ctypes.sizeof(cloaked))
+    return result == 0 and bool(cloaked.value)
+
+
+def _program_beneath(user32, hwnd) -> int:
+    """The program window right under one of FrontEngine's own layers, or 0."""
+    for _step in range(_MAX_WINDOWS):
+        hwnd = user32.GetWindow(hwnd, _GW_HWNDNEXT)
+        if not hwnd:
+            return 0
+        if not user32.IsWindowVisible(hwnd) or user32.IsIconic(hwnd):
+            continue
+        if _is_tool(user32, hwnd) or _is_cloaked(hwnd):
+            continue
+        return hwnd
+    return 0
+
+
+def _covers_its_monitor(user32, hwnd) -> bool:
+    import ctypes
+    from ctypes import wintypes
+
+    class MONITORINFO(ctypes.Structure):
+        _fields_ = [
+            ("cbSize", wintypes.DWORD),
+            ("rcMonitor", wintypes.RECT),
+            ("rcWork", wintypes.RECT),
+            ("dwFlags", wintypes.DWORD),
+        ]
+
+    window_rect = wintypes.RECT()
+    if not user32.GetWindowRect(hwnd, ctypes.byref(window_rect)):
+        return False
+    monitor = user32.MonitorFromWindow(hwnd, 2)  # MONITOR_DEFAULTTONEAREST
+    info = MONITORINFO()
+    info.cbSize = ctypes.sizeof(MONITORINFO)
+    if not user32.GetMonitorInfoW(monitor, ctypes.byref(info)):
+        return False
+    screen = info.rcMonitor
+    return (
+        window_rect.left <= screen.left
+        and window_rect.top <= screen.top
+        and window_rect.right >= screen.right
+        and window_rect.bottom >= screen.bottom
+    )
+
+
 def windows_fullscreen_detector() -> bool:
     """
     偵測前景視窗是否為全螢幕程式（例如遊戲）。僅在 Windows 有效，其餘平台
@@ -27,52 +99,25 @@ def windows_fullscreen_detector() -> bool:
         return False
     try:
         import ctypes
-        from ctypes import wintypes
 
         user32 = ctypes.windll.user32
         hwnd = user32.GetForegroundWindow()
         if not hwnd:
             return False
-
-        # FrontEngine's own full-screen layers (the drawing layer, the whiteboard, a region
+        # FrontEngine's own layers (the drawing layer and its toolbar, the whiteboard, a region
         # selection) take the mouse and so come to the foreground. They are not a program to stand
-        # aside for: counting them hid the drawing layer two seconds into a drawing.
-        owner = wintypes.DWORD()
-        user32.GetWindowThreadProcessId(hwnd, ctypes.byref(owner))
-        if owner.value == os.getpid():
-            return False
-
+        # aside for - counting them hid the drawing layer two seconds into a drawing - and they do
+        # not end the slide show they are used over either: what counts is the program beneath.
+        # The settings window is a window like any other: while it is in front, nothing is full screen.
+        if _is_own(user32, hwnd):
+            hwnd = _program_beneath(user32, hwnd) if _is_tool(user32, hwnd) else 0
+            if not hwnd or _is_own(user32, hwnd):
+                return False
         class_buffer = ctypes.create_unicode_buffer(256)
         user32.GetClassNameW(hwnd, class_buffer, 256)
         if class_buffer.value in _SHELL_WINDOW_CLASSES:
             return False
-
-        window_rect = wintypes.RECT()
-        if not user32.GetWindowRect(hwnd, ctypes.byref(window_rect)):
-            return False
-
-        monitor = user32.MonitorFromWindow(hwnd, 2)  # MONITOR_DEFAULTTONEAREST
-
-        class MONITORINFO(ctypes.Structure):
-            _fields_ = [
-                ("cbSize", wintypes.DWORD),
-                ("rcMonitor", wintypes.RECT),
-                ("rcWork", wintypes.RECT),
-                ("dwFlags", wintypes.DWORD),
-            ]
-
-        info = MONITORINFO()
-        info.cbSize = ctypes.sizeof(MONITORINFO)
-        if not user32.GetMonitorInfoW(monitor, ctypes.byref(info)):
-            return False
-
-        screen = info.rcMonitor
-        return (
-            window_rect.left <= screen.left
-            and window_rect.top <= screen.top
-            and window_rect.right >= screen.right
-            and window_rect.bottom >= screen.bottom
-        )
+        return _covers_its_monitor(user32, hwnd)
     except Exception as error:  # pragma: no cover - defensive Win32 boundary
         front_engine_logger.warning(f"[SmartPause] detector error: {error!r}")
         return False

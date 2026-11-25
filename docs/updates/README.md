@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261126-02 | 2026-11-26 | 未發布改動的程式碼審查：11 項修正 | #done #review | [2026-11-b](2026-11-b.md) |
 | U-20261126-01 | 2026-11-26 | Steam 商店圖、Workshop 圖與宣傳片改用玻璃疊層介面重產 | #done #steam | [2026-11-b](2026-11-b.md) |
 | U-20261125-03 | 2026-11-25 | 介面改為玻璃疊層（取代賽璐珞工作台） | #decision #ui | [2026-11-b](2026-11-b.md) |
 | U-20261125-02 | 2026-11-25 | 介面改為賽璐珞工作台，側欄／分區／頁首可收合 | #done #ui | [2026-11-b](2026-11-b.md) |
@@ -488,7 +489,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11-b.md](2026-11-b.md) | 2026-11 | 19 |
+| [2026-11-b.md](2026-11-b.md) | 2026-11 | 20 |
 | [2026-11.md](2026-11.md) | 2026-11 | 265 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

@@ -123,3 +123,40 @@ def test_a_hint_wider_than_the_screen_wraps_inside_it():
     draw_hint(painter, image.rect(), "Click the first arm, the corner, the second arm, then press Esc to finish")
     painter.end()
     assert all(image.pixelColor(x, y).alpha() == 0 for x in (0, 319) for y in range(0, 240, 10))
+
+
+def test_only_the_colour_picker_leaves_the_capture(monkeypatch):
+    from frontengine.utils.screen_privacy import capture_affinity
+    applied = []
+    monkeypatch.setattr(capture_affinity, "apply_to_widget", lambda _widget, excluded: applied.append(excluded) or True)
+    widget = MeasureWidget("ruler")
+    try:
+        widget.show()
+        assert applied[-1] is False and not widget.needs_capture_exclusion
+        widget.set_mode("color")
+        assert applied[-1] is True and widget.needs_capture_exclusion
+        widget.hidden_from_capture = True              # the control center's "Hide from capture"
+        widget.set_mode("angle")
+        assert applied[-1] is True and not widget.needs_capture_exclusion
+    finally:
+        widget.close()
+
+
+def test_a_picker_in_its_own_picture_takes_the_catch_colour_back_out(monkeypatch):
+    from PySide6.QtGui import QColor, QPixmap
+    from frontengine.utils.screen_privacy import capture_affinity
+    monkeypatch.setattr(capture_affinity, "apply_to_widget", lambda _widget, _excluded: False)
+    widget = MeasureWidget("color")
+
+    def grab(_rect):
+        pixmap = QPixmap(1, 1)
+        pixmap.fill(QColor(254, 127, 0))               # white, middle grey and black under alpha 1
+        return pixmap
+
+    widget.set_grabber(grab)
+    try:
+        assert widget.add_point(QPoint(1, 1)) == "#fe7f00"
+        widget.show()
+        assert widget.add_point(QPoint(1, 1)) in ("#ff8000", "#ff7f00")
+    finally:
+        widget.close()

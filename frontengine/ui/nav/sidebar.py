@@ -204,8 +204,21 @@ class NavigationSidebar(QListWidget):
             item = self.item(row)
             item.setSizeHint(self._row_size(item.data(ROLE_KIND)))
         current = self.currentItem()
+        if not compact and current is not None:          # picked on the rail, out of a folded group
+            self._collapsed.discard(current.data(ROLE_GROUP))
+        self._apply_groups()
         if current is not None:
             self.scrollToItem(current)
+
+    def _apply_groups(self) -> None:
+        """Hide the pages of folded groups. The rail shows every page: it has no captions to tell by."""
+        for row in range(self.count()):
+            item = self.item(row)
+            collapsed = item.data(ROLE_GROUP) in self._collapsed
+            if item.data(ROLE_KIND) == KIND_GROUP:
+                self._set_arrow(item, collapsed)
+            else:
+                item.setHidden(collapsed and not self.compact)
 
     # ----- folding groups ---------------------------------------------------------------
 
@@ -232,7 +245,7 @@ class NavigationSidebar(QListWidget):
                     item.setIcon(icon(item.data(ROLE_ICON) or "extension", *colors))
 
     def _toggle_if_group(self, item: QListWidgetItem) -> None:
-        if item is not None and item.data(ROLE_KIND) == KIND_GROUP:
+        if item is not None and item.data(ROLE_KIND) == KIND_GROUP and not self.compact:
             key = item.data(ROLE_GROUP)
             self.set_group_collapsed(key, key not in self._collapsed)
             self.collapsed_changed.emit(sorted(self._collapsed))
@@ -249,14 +262,7 @@ class NavigationSidebar(QListWidget):
             self._collapsed.add(key)
         else:
             self._collapsed.discard(key)
-        for row in range(self.count()):
-            item = self.item(row)
-            if item.data(ROLE_GROUP) != key:
-                continue
-            if item.data(ROLE_KIND) == KIND_GROUP:
-                self._set_arrow(item, collapsed)
-            else:
-                item.setHidden(collapsed)
+        self._apply_groups()
 
     def page_index(self, page_id: str) -> Optional[int]:
         """The current stack index of a stable page ID, or None."""

@@ -392,6 +392,9 @@ class SettingPage(QWidget):
         self._wide = wide or compact
         self._compact_page = compact
         self._sections: list[_SectionShell] = []
+        # What its folded sections are remembered under. The class alone will not do: the scene
+        # editor's inspectors and the Workshop window are plain SettingPages.
+        self._fold_name = f"{type(self).__name__}/{title_key}"
         self.fold_all_button: Optional[QPushButton] = None
         self._short = False
         self._page_layout = QVBoxLayout(self)
@@ -481,7 +484,7 @@ class SettingPage(QWidget):
     def _track(self, section: _SectionShell) -> None:
         index = len(self._sections)
         self._sections.append(section)
-        key = f"{type(self).__name__}:{index}"
+        key = f"{self._fold_name}:{index}"
         stored = user_setting_dict.get(FOLDED_KEY)
         if section.foldable and isinstance(stored, dict) and isinstance(stored.get(key), bool):
             section.set_folded(stored[key])
@@ -500,7 +503,7 @@ class SettingPage(QWidget):
             if not section.foldable:
                 continue
             section.set_folded(folded)
-            self._remember_fold(f"{type(self).__name__}:{index}", folded)
+            self._remember_fold(f"{self._fold_name}:{index}", folded)
 
     def _toggle_all(self) -> None:
         self.set_all_folded(any(section.expanded for section in self._sections if section.foldable))

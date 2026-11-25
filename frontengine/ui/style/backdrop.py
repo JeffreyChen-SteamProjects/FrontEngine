@@ -11,6 +11,8 @@ any picture (``BACKDROP_MIX``; ``test_glass_interface.py`` checks the extremes).
 """
 from __future__ import annotations
 
+import os
+import stat
 import sys
 from pathlib import Path
 from typing import Callable, Optional, Tuple
@@ -27,7 +29,10 @@ RENDERED = QSize(480, 270)       # blurred and stored; scaled smoothly to the wi
 BLUR_RADIUS = 34
 SATURATION = 1.45                # blurring greys colours out; this puts them back
 DARK_CEILING, LIGHT_FLOOR = 94.0, 180.0        # the brightness the wallpaper may reach in each theme
-MAX_FILE_BYTES = 128 * 1024 * 1024
+MAX_FILE_BYTES = 64 * 1024 * 1024
+_DRIVE_REMOTE = 4
+# Offline, or kept in the cloud until read (OneDrive): reading it would wait for a download.
+_NOT_HERE = 0x00001000 | 0x00040000 | 0x00400000
 _SPI_GETDESKWALLPAPER = 0x0073
 _LUMA = numpy.array([.2126, .7152, .0722], dtype=numpy.float32)
 
@@ -48,13 +53,36 @@ def desktop_wallpaper() -> Optional[Path]:
         return None
 
 
+def is_remote(path: Path) -> bool:
+    """On a network share or drive, where even asking about the file can wait for seconds."""
+    if str(path).startswith(("\\\\", "//")):
+        return True
+    if sys.platform != "win32" or not path.drive:
+        return False
+    try:  # pragma: no cover - Win32 boundary
+        import ctypes
+        return ctypes.WinDLL("kernel32").GetDriveTypeW(path.drive + "\\") == _DRIVE_REMOTE
+    except OSError:  # pragma: no cover
+        return False
+
+
+def local_wallpaper(path: Optional[Path]) -> Optional[Path]:
+    """The wallpaper where it can be read at once: Windows keeps its own copy of a remote one."""
+    if path is None or not is_remote(path):
+        return path
+    roaming = os.environ.get("APPDATA")
+    return Path(roaming) / "Microsoft" / "Windows" / "Themes" / "TranscodedWallpaper" if roaming else None
+
+
 def _stamp(path: Optional[Path]) -> Optional[tuple]:
     """What identifies this picture, or None when it cannot be used."""
     if path is None:
         return None
     try:
         status = path.stat()
-        if not path.is_file() or not 0 < status.st_size <= MAX_FILE_BYTES:
+        if not stat.S_ISREG(status.st_mode) or not 0 < status.st_size <= MAX_FILE_BYTES:
+            return None
+        if getattr(status, "st_file_attributes", 0) & _NOT_HERE:
             return None
     except OSError:
         return None
@@ -160,7 +188,7 @@ class Backdrop:
         """Look whether the wallpaper changed; True when the picture has to be painted again."""
         stamp = None
         if self.use_wallpaper:
-            path = self._wallpaper()
+            path = local_wallpaper(self._wallpaper())
             stamp = _stamp(path)
             if stamp is not None and stamp != self._sampled[0]:
                 self._sampled = (stamp, _sample(path))

@@ -1072,7 +1072,7 @@ class FrontEngineMainUI(QMainWindow):
             self.control_center_ui.stand_down()
             self._smart_pause_hid = True
         elif self._smart_pause_hid:
-            self.control_center_ui.show_all()
+            self.control_center_ui.stand_up()
             self._smart_pause_hid = False
 
     @owned_callback

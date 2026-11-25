@@ -171,16 +171,14 @@ class ToolsSettingUI(SettingPage):
         self._add_screen_text_section()
         self._add_record_section()
 
-        virtual_camera = self.add_section(self.virtual_camera_label)
-        virtual_camera.set_collapsible()
+        virtual_camera = self.add_section(self.virtual_camera_label, collapsed=True)
         virtual_camera.add_note("tools_vcam_note")
         virtual_camera.add_row("tools_fps", self.virtual_camera_fps_spinbox,
                                "Frames per second")
         virtual_camera.add_inline(self.virtual_camera_button)
         virtual_camera.add_widget(self.virtual_camera_status)
 
-        camera = self.add_section(self.camera_label)
-        camera.set_collapsible()
+        camera = self.add_section(self.camera_label, collapsed=True)
         camera.add_note("tools_camera_note")
         camera.add_row("tools_device", self.camera_device_combobox, "Device")
         camera.add_row("tools_shape", self.camera_shape_combobox, "Shape")
@@ -188,8 +186,7 @@ class ToolsSettingUI(SettingPage):
         camera.add_inline(self.camera_mirror_checkbox)
         camera.add_inline(self.camera_button)
 
-        windows = self.add_section(self.layout_label)
-        windows.set_collapsible()
+        windows = self.add_section(self.layout_label, collapsed=True)
         windows.add_note("tools_layout_note")
         windows.add_row("tools_name", self.layout_name_edit, "Name")
         windows.add_inline(self.layout_save_button)

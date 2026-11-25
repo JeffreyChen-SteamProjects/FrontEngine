@@ -113,6 +113,10 @@ class ControlCenterUI(SettingPage):
         self.low_power_button = self._create_button(
             "control_center_low_power_on", self.toggle_low_power)
         self._hidden_from_capture = False
+        # What hide_all and smart pause did, so that resuming gives back only what it took.
+        self._groups_hidden = False
+        self._stood_down: list = []
+        self._stand_down_hid_groups = False
         self.capture_button = self._create_button(
             "control_center_hide_from_capture", self.toggle_hide_from_capture)
         self.capture_button.setEnabled(capture_affinity.available())
@@ -394,27 +398,60 @@ class ControlCenterUI(SettingPage):
     def hide_all(self) -> None:
         """暫時隱藏所有覆蓋層 / Temporarily hide every overlay."""
         front_engine_logger.info("ControlCenterUI hide_all")
-        self.overlay_visibility_changed.emit(True)
+        self._forget_stand_down()
+        self._set_groups_hidden(True)
         self._for_each_overlay(lambda widget: widget.hide())
 
     @owned_action
     def stand_down(self) -> None:
         """Smart pause: hide every overlay except the tools in use (``stays_while_paused``)."""
         front_engine_logger.info("ControlCenterUI stand_down")
-        self.overlay_visibility_changed.emit(True)
+        self._forget_stand_down()
+        self._stand_down_hid_groups = not self._groups_hidden
+        self._set_groups_hidden(True)
 
         def apply(widget) -> None:
-            if not getattr(widget, "stays_while_paused", False):
+            if not getattr(widget, "stays_while_paused", False) and widget.isVisible():
                 widget.hide()
+                self._stood_down.append(widget)
 
         self._for_each_overlay(apply)
+
+    @owned_action
+    def stand_up(self) -> None:
+        """Smart pause is over: show again what ``stand_down`` hid, and nothing the user hid."""
+        front_engine_logger.info("ControlCenterUI stand_up")
+        hidden = {id(widget) for widget in self._stood_down}
+        groups = self._stand_down_hid_groups
+
+        def apply(widget) -> None:
+            if id(widget) in hidden:
+                widget.show()
+
+        self._for_each_overlay(apply)
+        self._forget_stand_down()
+        if groups:
+            self._set_groups_hidden(False)
+
+    def _forget_stand_down(self) -> None:
+        self._stood_down, self._stand_down_hid_groups = [], False
+
+    def _set_groups_hidden(self, hidden: bool) -> None:
+        self._groups_hidden = hidden
+        self.overlay_visibility_changed.emit(hidden)
 
     @owned_action
     def show_all(self) -> None:
         """重新顯示所有覆蓋層 / Re-show every overlay."""
         front_engine_logger.info("ControlCenterUI show_all")
-        self._for_each_overlay(lambda widget: widget.show())
-        self.overlay_visibility_changed.emit(False)
+        self._forget_stand_down()
+
+        def apply(widget) -> None:
+            if not getattr(widget, "windowless", False):
+                widget.show()
+
+        self._for_each_overlay(apply)
+        self._set_groups_hidden(False)
 
     @owned_action
     def set_mute_all(self, muted: bool) -> None:
@@ -528,6 +565,8 @@ class ControlCenterUI(SettingPage):
             if getattr(widget, "keep_in_capture", False):
                 capture_affinity.apply_to_widget(widget, False)
                 return
+            if hasattr(widget, "hidden_from_capture"):
+                widget.hidden_from_capture = self._hidden_from_capture
             if getattr(widget, "needs_capture_exclusion", False):
                 return          # it reads the screen: included, it would photograph itself
             if capture_affinity.apply_to_widget(widget, self._hidden_from_capture):
