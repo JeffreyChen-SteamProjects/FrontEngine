@@ -13,7 +13,7 @@ from PySide6.QtCore import QRect, Qt
 from PySide6.QtGui import QIcon, QImage, QPainter
 from PySide6.QtWidgets import QApplication
 
-from generate import AMBER, MUTED, TEXT, accent_rule, backdrop, draw_icon, fit_font
+from generate import ACCENT, MUTED, TEXT, accent_rule, backdrop, draw_icon, fit_font
 
 ROOT = Path(__file__).resolve().parent.parent
 OUTPUT = ROOT / "steam_assets" / "workshop"
@@ -44,19 +44,19 @@ def compose(width: int, height: int, icon: QIcon) -> QImage:
         backdrop(painter, width, height)
         if width == height:
             draw_icon(painter, icon, 204, 60, 104)
-            draw_label(painter, "FrontEngine", QRect(44, 196, 424, 80),
+            draw_label(painter, "FrontEngine", QRect(44, 178, 424, 100),
                        64, TEXT, centered=True)
-            draw_label(painter, "Workshop", QRect(44, 275, 424, 60),
-                       42, AMBER, centered=True)
+            draw_label(painter, "Workshop", QRect(44, 280, 424, 60),
+                       42, ACCENT, centered=True)
             accent_rule(painter, 202, 356, 108, 4)
             draw_label(painter, TAGLINE, QRect(44, 385, 424, 45),
                        25, MUTED, centered=True, bold=False)
         else:
             draw_icon(painter, icon, 50, 54, 108)
-            draw_label(painter, "FrontEngine", QRect(50, 182, 820, 90),
+            draw_label(painter, "FrontEngine", QRect(50, 164, 820, 116),
                        82, TEXT)
-            draw_label(painter, "Workshop", QRect(50, 267, 820, 50),
-                       36, AMBER)
+            draw_label(painter, "Workshop", QRect(50, 274, 820, 50),
+                       36, ACCENT)
             accent_rule(painter, 50, 331, 120, 5)
             draw_label(painter, TAGLINE, QRect(50, 354, 820, 40),
                        27, MUTED, bold=False)

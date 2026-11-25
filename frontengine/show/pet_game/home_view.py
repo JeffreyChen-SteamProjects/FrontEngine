@@ -14,8 +14,7 @@ from PySide6.QtGui import QColor, QFont, QMouseEvent, QPainter, QPaintEvent, QPe
 from PySide6.QtWidgets import QSizePolicy, QWidget
 
 from frontengine.show.pet_game.furniture_art import SURFACES, aspect, picture
-from frontengine.show.pet_game.themes import floor_color, paint_sky
-from frontengine.utils.pet_game.environment import daylight
+from frontengine.show.pet_game.themes import floor_color, paint_sky, sky_color
 from frontengine.utils.multi_language.retranslate import translate
 from frontengine.utils.pet_game.catalog import CELL_PIXELS, art_name
 from frontengine.utils.pet_game.world import World
@@ -350,7 +349,7 @@ class HomeView(QWidget):
         painter.setBrush(color)
         painter.drawRect(rect)
         if problem is not None:
-            painter.setPen(self.palette().text().color())
+            painter.setPen(self.ink())
             painter.drawText(QRectF(rect.left() - 60, 2, rect.width() + 120, 18), Qt.AlignmentFlag.AlignCenter,
                              translate("pet_home_problem_" + problem, problem))
 
@@ -438,10 +437,14 @@ class HomeView(QWidget):
         painter.drawText(box, Qt.AlignmentFlag.AlignCenter, caption)
 
     def ink(self) -> QColor:
-        """Text colour that stays readable on the sky: light at night, the palette's by day."""
-        if self.world is not None and daylight(self.world.time_ms) < 0.45:
-            return QColor(240, 240, 250)
-        return self.palette().text().color()
+        """Text colour that stays readable on the sky, whichever theme the window wears: the sky is
+        bright by day in the dark theme too, where the palette's own text is white."""
+        if self.world is None or self.zone not in self.world.zones:
+            return self.palette().text().color()
+        sky = sky_color(self.world.zones[self.zone].theme, self.world.time_ms, False)
+        light = sum(weight * (channel / 255) ** 2.2 for weight, channel in zip(
+            (.2126, .7152, .0722), (sky.red(), sky.green(), sky.blue())))
+        return QColor(14, 14, 14) if light > .19 else QColor(255, 255, 255)     # the higher contrast of the two
 
     def resident_radius(self) -> float:
         return max(7.0, self.cell_width() * 0.5)
