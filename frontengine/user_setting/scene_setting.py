@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from PySide6.QtWidgets import QFileDialog, QWidget
+from PySide6.QtWidgets import QFileDialog, QMessageBox, QWidget
 
 from frontengine.ui.dialog.choose_file_dialog import choose_file
 from frontengine.utils.json.json_repository import JsonRepository
@@ -93,8 +93,13 @@ def write_scene_file(parent_qt_instance: QWidget,
     if not file_path:
         return None
 
-    if Path(file_path).suffix.lower() == '.fescene':
-        save_package(current_scene_document(), file_path)
-    else:
-        JsonRepository(file_path).save(current_scene_document().envelope(Path(file_path).parent))
+    try:
+        if Path(file_path).suffix.lower() == '.fescene':
+            save_package(current_scene_document(), file_path)
+        else:
+            JsonRepository(file_path).save(current_scene_document().envelope(Path(file_path).parent))
+    except (OSError, ValueError) as error:
+        front_engine_logger.warning(f'[scene_setting] scene not saved: {error!r}')
+        QMessageBox.critical(parent_qt_instance, 'Scene Error', str(error))
+        return None
     return file_path

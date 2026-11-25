@@ -59,7 +59,10 @@ def parse_blueprint(text: object) -> tuple[list[Zone], list[tuple[int, str, int,
     """Validate a blueprint at the boundary; anything unexpected is rejected, never trusted."""
     if not isinstance(text, str) or len(text.encode("utf-8")) > MAX_BLUEPRINT_BYTES:
         raise ValueError("Blueprint too large")
-    data = json.loads(text)
+    try:
+        data = json.loads(text)
+    except RecursionError as error:
+        raise ValueError("JSON nested too deeply") from error
     if (not isinstance(data, dict) or set(data) != {"format", "version", "zones", "pieces"}
             or data["format"] != BLUEPRINT_FORMAT or data["version"] != BLUEPRINT_VERSION):
         raise ValueError("Not a FrontEngine home blueprint")

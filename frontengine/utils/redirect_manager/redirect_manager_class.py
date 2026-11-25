@@ -1,6 +1,7 @@
 import logging
 import queue
 import sys
+from functools import lru_cache
 
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 
@@ -46,6 +47,11 @@ class RedirectStdErr(logging.Handler):
         redirect_manager_instance.std_err_queue.put(self.format(record))
 
 
+@lru_cache(maxsize=1)
+def _handlers():
+    return RedirectStdOut(), RedirectStdErr()
+
+
 class RedirectManager:
     """Redirect all stdout/stderr and logging output to queues"""
 
@@ -59,8 +65,8 @@ class RedirectManager:
         """Redirect stdout/stderr and attach logging handlers"""
         front_engine_logger.info("RedirectManager set_redirect")
 
-        redirect_out = RedirectStdOut()
-        redirect_err = RedirectStdErr()
+        # One pair for good: a main window opened again must not add a second set of handlers.
+        redirect_out, redirect_err = _handlers()
 
         sys.stdout = redirect_out
         sys.stderr = redirect_err
@@ -79,13 +85,6 @@ class RedirectManager:
                 logger = logging.getLogger(name)
                 if redirect_err not in logger.handlers:
                     logger.addHandler(redirect_err)
-
-    @staticmethod
-    def restore_std() -> None:
-        """Restore original stdout/stderr"""
-        front_engine_logger.info("RedirectManager restore_std")
-        sys.stdout = sys.__stdout__
-        sys.stderr = sys.__stderr__
 
 
 redirect_manager_instance = RedirectManager()

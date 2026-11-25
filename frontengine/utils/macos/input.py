@@ -4,7 +4,7 @@ _MEDIA_CODES = {'media_play_pause': 16, 'media_next': 17, 'media_previous': 18}
 _FUNCTION_CODES = (122, 120, 99, 118, 96, 97, 98, 100, 101, 109, 103, 111,
                    105, 107, 113, 106, 64, 79, 80, 90)
 _LETTER_CODES = dict(zip('ASDFHGZXCVBQWERYT123465=97-80]OUIP[LJ\'K;\\,/NM.',
-                         range(48)))
+                         [*range(10), *range(11, 36), *range(37, 48)]))          # 10 is the ISO section key, 36 Return
 
 
 def send_media_key(action: str, backend=None) -> bool:

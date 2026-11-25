@@ -130,8 +130,9 @@ class _SceneRead(QRunnable):
         try:
             if not self.cancel.is_set():
                 result = self.function()
-        except (OSError, ValueError, RuntimeError, RecursionError) as exception:
-            error = str(exception)
+        except Exception as exception:  # any at all: unanswered, no later request would ever run
+            front_engine_logger.warning(f'[SceneActions] scene not readable: {exception!r}')
+            error = str(exception) or type(exception).__name__
         if self.cancel.is_set() and result is not None:
             result.close()
             result = None
@@ -189,6 +190,7 @@ class SceneActions(QObject):
     def _enqueue(self, path: str, screen, load_only: bool, entries, current: bool) -> DeferredAction:
         self._cancel_layers('Superseded by a newer scene request')
         operation = DeferredAction(self)
+        operation.editor_before = self.page.visual_editor.document.scene.copy()
         operation.finished.connect(lambda _success, _error: operation.deleteLater())
         if self.wanted is not None:
             self.wanted[0].finish(False, 'Superseded by a newer scene request')
@@ -233,7 +235,7 @@ class SceneActions(QObject):
             self.status_changed.emit(error)
         else:
             try:
-                self._adopt(prepared, screen, load_only, current)
+                self._adopt(prepared, screen, load_only, current, getattr(operation, 'editor_before', None))
             except (OSError, ValueError, RuntimeError) as exception:
                 prepared.close()
                 operation.finish(False, str(exception))
@@ -246,7 +248,7 @@ class SceneActions(QObject):
             self._cancel_layers('The preceding scene action did not complete')
         self._launch()
 
-    def _adopt(self, prepared: PreparedScene, screen, load_only: bool, current: bool) -> None:
+    def _adopt(self, prepared: PreparedScene, screen, load_only: bool, current: bool, editor_before=None) -> None:
         if current and prepared.document != self.page.visual_editor.document.scene:
             raise ValueError('The editor changed while scene playback was being prepared')
         data = prepared.document if prepared.document.mode == '3d' else prepared.entries
@@ -275,7 +277,11 @@ class SceneActions(QObject):
                 if old_playing or not current:
                     manager.runtime3d.timeline.play()
         if not current:
-            self.page.visual_editor.document.reset(prepared.document)
+            # Playing what is in the editor leaves its undo history alone, and so do edits made while the
+            # scene was loading: those are not in what is playing, and must not be thrown away for it.
+            document = self.page.visual_editor.document
+            if prepared.document != document.scene and (editor_before is None or document.scene == editor_before):
+                document.reset(prepared.document)
             previous, self.prepared = self.prepared, prepared
             if previous is not None:
                 previous.close()

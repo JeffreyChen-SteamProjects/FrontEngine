@@ -40,6 +40,10 @@ def overlay_key(widget: QWidget) -> str:
     return kind + ':' + widget.windowTitle()[:512]
 
 
+def covers_a_screen(rect: QRect) -> bool:
+    return any(screen.geometry() == rect for screen in QGuiApplication.screens())
+
+
 def unique_overlays(provider, excluded=None, *, unique_only: bool = True) -> list[tuple[str, QWidget]]:
     """Deduplicate live registered windows and reject fullscreen/scene/ambiguous entries."""
     windows, seen = [], set()
@@ -51,6 +55,8 @@ def unique_overlays(provider, excluded=None, *, unique_only: bool = True) -> lis
                 seen.add(id(widget))
                 if widget.isFullScreen() or getattr(widget, 'scene', None) is not None:
                     continue
+                if covers_a_screen(widget.geometry()):
+                    continue          # a filter or a drawing layer: it belongs to that whole monitor
                 if excluded and excluded(widget):
                     continue
                 windows.append((overlay_key(widget), widget))
@@ -58,6 +64,11 @@ def unique_overlays(provider, excluded=None, *, unique_only: bool = True) -> lis
                 continue
     counts = Counter(key for key, _ in windows)
     return [(key, widget) for key, widget in windows if not unique_only or counts[key] == 1][:200]
+
+
+def _overlap(work: tuple, rect: QRect) -> int:
+    shared = QRect(*work).intersected(rect)
+    return max(0, shared.width()) * max(0, shared.height())
 
 
 def placement(entry: dict, work: tuple, widget: QWidget) -> QRect:
@@ -192,9 +203,9 @@ class MonitorProfileService(QObject):
             entry = entries.get(name) if counts[name] == 1 else None
             if entry is None:
                 entry = {'size': [rect.width(), rect.height()], 'anchor': [0, 0], 'screen': ''}
-                screen = max(screens, key=lambda s: int(s.get('primary', False)))
                 if any(QRect(*s['work']).contains(rect) for s in screens):
                     continue
+                screen = max(screens, key=lambda s: (_overlap(s['work'], rect), int(s.get('primary', False))))
                 x, y, w, h = screen['work']
                 entry['anchor'] = [(rect.x() - x) / max(1, w), (rect.y() - y) / max(1, h)]
             else:

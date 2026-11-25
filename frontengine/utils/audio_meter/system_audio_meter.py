@@ -6,6 +6,7 @@ Native device/server errors and physical-hardware acceptance are separate.
 from __future__ import annotations
 
 import sys
+import time
 import uuid
 from typing import List, Optional, Tuple
 
@@ -361,14 +362,45 @@ class SystemAudioMeter:
         self._ok = False
 
 
-_meter_singleton: Optional[SystemAudioMeter] = None
+REOPEN_SECONDS = 5.0
+
+
+class ReopeningMeter:
+    """Keeps a meter on a device that comes and goes.
+
+    A meter is bound to the endpoint it was opened on: once headphones are plugged in it goes on
+    reading the speakers, and one opened without a device never reads anything. So while it is
+    silent it is opened afresh now and then."""
+
+    def __init__(self, factory, clock=time.monotonic) -> None:
+        self._factory, self._clock = factory, clock
+        self._meter, self._opened = None, 0.0
+
+    def level(self) -> Optional[float]:
+        now = self._clock()
+        if self._meter is None:
+            self._open(now)
+        value = self._meter.level()
+        if not value and now - self._opened >= REOPEN_SECONDS:
+            self.close()
+            self._open(now)
+            value = self._meter.level()
+        return value
+
+    def _open(self, now: float) -> None:
+        self._meter, self._opened = self._factory(), now
+
+    def close(self) -> None:
+        meter, self._meter = self._meter, None
+        if meter is not None:
+            meter.close()
+
+
+_meter_singleton = ReopeningMeter(lambda: SystemAudioMeter())
 
 
 def system_audio_level() -> Optional[float]:
     """便利函式：以單例電表回傳預設輸出裝置的峰值 0~1，或 None。"""
-    global _meter_singleton
     if sys.platform not in ('win32', 'darwin', 'linux'):
         return None
-    if _meter_singleton is None:
-        _meter_singleton = SystemAudioMeter()
     return _meter_singleton.level()

@@ -1021,6 +1021,8 @@ english_word_dict = {
     'rules_preview_hint': 'Preview only: matches shows current conditions; active means already triggered. No action runs and no edge is consumed.',
     'rules_history_hint': 'Last 200 trigger/cooldown/action receipts in this session; conditions and sampled context explain the result.',
     'rules_invalid_rows': 'Complete every named row. Priority must be -1000…1000, cooldown 0…86400 integer seconds; at most 200 rules.',
+    "reminder_invalid_rows": "Every reminder needs a time: a number of minutes, or a 24-hour time such as 09:30.",
+    "rules_invalid_times": "Days are Mon, Tue … (or 0-6, Monday first) and times 24-hour like 19:30. Leave a cell blank for any.",
     'rules_matched': 'Conditions match',
     'rules_unmatched': 'Conditions do not match',
     'rules_receipt_dispatched': 'Dispatched',

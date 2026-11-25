@@ -286,8 +286,8 @@ class OverlayStatusBar(QWidget):
                 continue
             seen.add(id(overlay))
             try:
-                if getattr(overlay, "windowless", False):
-                    heard += 1                           # a sound: to close, not to show or hide
+                if getattr(overlay, "windowless", False) or getattr(overlay, "held_back", False):
+                    heard += 1          # a sound, or a dashboard page not up now: to close, not to show or hide
                 elif overlay.isVisible():
                     visible += 1
                 else:

@@ -32,6 +32,7 @@ from frontengine.ui.dialog.screen_text_dialog import (
 )
 from frontengine.ui.dialog.color_palette_dialog import ColorPaletteDialog
 from frontengine.utils.measure.color_palette import ColorPalette
+from frontengine.ui.dialog.dialog_kit import save_or_tell
 from frontengine.ui.dialog.window_pin_dialog import WindowPinDialog
 from frontengine.ui.dialog.window_replica_dialog import WindowReplicaDialog
 from frontengine.user_setting.user_setting_file import user_setting_dict, write_user_setting
@@ -131,7 +132,7 @@ class ToolsSettingUI(SettingPage):
         # Window layouts: remember where the windows are and put them back later.
         self.layout_label = tr(QLabel(), "tools_layout_label", "Window layout")
         self.layout_name_edit = QLineEdit()
-        self.layout_name_edit.setPlaceholderText(_t("tools_layout_name", "Layout name"))
+        tr(self.layout_name_edit, "tools_layout_name", "Layout name", "setPlaceholderText")
         self.layout_save_button = tr(QPushButton(), "tools_layout_save", "Save layout")
         self.layout_save_button.clicked.connect(self.save_layout)
         self.layout_combobox = QComboBox()
@@ -184,7 +185,7 @@ class ToolsSettingUI(SettingPage):
         camera.add_row("tools_shape", self.camera_shape_combobox, "Shape")
         camera.add_row(self.camera_border_label, self.camera_border_spinbox)
         camera.add_inline(self.camera_mirror_checkbox)
-        camera.add_inline(self.camera_button)
+        camera.add_inline(self.camera_button, self.camera_refresh_button)
 
         windows = self.add_section(self.layout_label, collapsed=True)
         windows.add_note("tools_layout_note")
@@ -278,8 +279,7 @@ class ToolsSettingUI(SettingPage):
             retranslator.bind(self.screen_text_combobox, key, fallback, "setItemText",
                               self.screen_text_combobox.count() - 1)
         self.screen_text_input = QLineEdit()
-        self.screen_text_input.setPlaceholderText(
-            _t("tools_screen_text_input", "Language, or your question"))
+        tr(self.screen_text_input, "tools_screen_text_input", "Language, or your question", "setPlaceholderText")
         self.screen_text_input.setText(DEFAULT_LANGUAGE)
         self.screen_text_input_label = tr(QLabel(), "tools_screen_text_language", "Translate into")
         self._screen_text_action = ACTION_TRANSLATE
@@ -381,8 +381,10 @@ class ToolsSettingUI(SettingPage):
         status_key, status_fallback = (
             ("tools_vcam_ready", "Ready") if virtual_camera.available()
             else ("tools_vcam_missing", "Install pyvirtualcam and a virtual camera driver"))
-        self.virtual_camera_status = QLabel(_t(status_key, status_fallback))
-        retranslator.bind(self.virtual_camera_status, status_key, status_fallback)
+        self.virtual_camera_status = QLabel()
+        self._vcam_status = (status_key, status_fallback, {})
+        retranslator.bind_call(self._show_vcam_status)
+        self._show_vcam_status()
         self.virtual_camera_status.setWordWrap(True)
         self.virtual_camera_button.setEnabled(virtual_camera.available())
 
@@ -406,6 +408,8 @@ class ToolsSettingUI(SettingPage):
         self.camera_border_spinbox.setRange(0, 20)
         self.camera_border_spinbox.setValue(4)
         self.camera_border_spinbox.valueChanged.connect(self._apply_camera_settings)
+        self.camera_refresh_button = tr(QPushButton(), "window_replica_refresh", "Refresh")
+        self.camera_refresh_button.clicked.connect(lambda: self.reload_cameras())
         self.camera_button = tr(QPushButton(), "tools_camera_start", "Show camera")
         self.camera_button.clicked.connect(self.toggle_camera)
 
@@ -653,7 +657,11 @@ class ToolsSettingUI(SettingPage):
     @owned_action
     def open_pin_dialog(self) -> WindowPinDialog:
         """開視窗釘選對話框（關掉時會把釘過的視窗放開）。"""
-        self.pin_dialog = WindowPinDialog(self)
+        # One for good: it remembers which windows it pinned or faded, to let go of them at the end.
+        if self.pin_dialog is None or not isValid(self.pin_dialog):
+            self.pin_dialog = WindowPinDialog(self)
+        else:
+            self.pin_dialog.reload_windows()
         self.lifetime.after_dialog(self.pin_dialog.exec())
         return self.pin_dialog
 
@@ -694,9 +702,11 @@ class ToolsSettingUI(SettingPage):
         are usually plugged in while the app is already running, so the list has
         to be refreshable or they only appear after a restart.
         """
+        chosen = self.camera_device_combobox.currentData()
         self.camera_device_combobox.clear()
         for camera_id, description in list_cameras():
             self.camera_device_combobox.addItem(description, camera_id)
+        self.camera_device_combobox.setCurrentIndex(max(0, self.camera_device_combobox.findData(chosen)))
         if self.camera_device_combobox.count() == 0:
             self.camera_device_combobox.addItem(_t("tools_camera_none", "No camera found"), "")
         return self.camera_device_combobox.count()
@@ -736,22 +746,28 @@ class ToolsSettingUI(SettingPage):
         started = self.virtual_camera_feed.start(region, self.virtual_camera_fps_spinbox.value())
         if started:
             retranslator.set_text(self.virtual_camera_button, "tools_vcam_stop", "Stop sending")
-            self.virtual_camera_status.setText(
-                _t("tools_vcam_sending", "Sending to {device}").format(
-                    device=self.virtual_camera_feed.device_name()))
+            self._set_vcam_status("tools_vcam_sending", "Sending to {device}",
+                                  device=self.virtual_camera_feed.device_name())
         return started
 
     def stop_virtual_camera(self) -> None:
         self.virtual_camera_feed.stop()
         retranslator.set_text(self.virtual_camera_button, "tools_vcam_start", "Send an area")
-        self.virtual_camera_status.setText(_t("tools_vcam_ready", "Ready"))
+        self._set_vcam_status("tools_vcam_ready", "Ready")
 
     @owned_callback
     def _on_virtual_camera_failed(self, reason: str) -> None:
         """開不起來時照實說明，不要只是沒反應。"""
         front_engine_logger.warning(f"[ToolsSettingUI] virtual camera failed: {reason}")
-        self.virtual_camera_status.setText(
-            _t("tools_vcam_failed", "Could not start: {reason}").format(reason=reason))
+        self._set_vcam_status("tools_vcam_failed", "Could not start: {reason}", reason=reason)
+
+    def _set_vcam_status(self, key: str, fallback: str, **values) -> None:
+        self._vcam_status = (key, fallback, values)
+        self._show_vcam_status()
+
+    def _show_vcam_status(self) -> None:
+        key, fallback, values = self._vcam_status
+        self.virtual_camera_status.setText(_t(key, fallback).format(**values))
 
     # --- reading text on screen ------------------------------------------
     @owned_action
@@ -865,30 +881,15 @@ class ToolsSettingUI(SettingPage):
 
     @owned_callback
     def _present_screen_text_result(self, result) -> None:
-        ScreenTextDialog(parent=self, result=result).exec()
+        dialog = ScreenTextDialog(parent=self, result=result)
+        dialog.exec()
+        if isValid(dialog):
+            dialog.deleteLater()
 
     @owned_callback
     def _on_capture_failed(self, reason: str) -> None:
         QMessageBox.warning(self, _t('tab_tools_text', 'Tools'),
                             _t('tools_capture_failed', 'Capture failed: {reason}').format(reason=reason))
-
-    @owned_action
-    def show_screen_text(self, text) -> None:
-        """收到結果：切回 UI 執行緒再開視窗（回呼來自背景執行緒）。"""
-        self.last_screen_text = text
-        # 一定要傳 context 物件（self），否則計時器會被建在沒有事件迴圈的背景
-        # 執行緒上，永遠不會觸發，結果視窗根本不會打開。
-        # The context object (self) is essential: without it the timer is created
-        # on the worker thread, which has no event loop, so it never fires and
-        # the result window simply never opens.
-        QTimer.singleShot(0, self, lambda: self._present_screen_text(text))
-
-    @owned_action
-    def _present_screen_text(self, text):
-        dialog = ScreenTextDialog(
-            text or _t("tools_screen_text_empty", "Nothing came back."), self)
-        self.lifetime.after_dialog(dialog.exec())
-        return dialog
 
     # --- recording -------------------------------------------------------
     @owned_action
@@ -1000,8 +1001,8 @@ class ToolsSettingUI(SettingPage):
             return None
         layouts = dict(self.saved_layouts())
         layouts[name] = capture_layout()
-        user_setting_dict["window_layouts"] = layouts
-        write_user_setting()
+        if not save_or_tell(self, {"window_layouts": layouts}, write_user_setting):
+            return None
         front_engine_logger.info(
             f"[ToolsSettingUI] saved layout {name!r} with {len(layouts[name])} window(s)")
         self.reload_layouts()

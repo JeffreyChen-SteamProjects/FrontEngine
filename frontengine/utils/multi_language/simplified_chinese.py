@@ -1014,6 +1014,8 @@ simplified_chinese_word_dict = {
     'rules_preview_hint': '仅预览：matches 表示当前条件是否满足，active 表示已触发。不执行动作，也不消耗触发状态。',
     'rules_history_hint': '本会话最近 200 条触发／冷却／动作记录；可对照条件与当时环境确认原因。',
     'rules_invalid_rows': '请填完整每个已命名规则。优先数字须为 -1000…1000，冷却须为 0…86400 整数秒，最多 200 条。',
+    "reminder_invalid_rows": "每个提醒都要有时间：分钟数，或像 09:30 的 24 小时制时刻。",
+    "rules_invalid_times": "星期写成 Mon、Tue…（或 0-6，星期一是 0），时间写成 19:30 这样的 24 小时制。不限就留空。",
     'rules_matched': '符合条件',
     'rules_unmatched': '不符合条件',
     'rules_receipt_dispatched': '已派发',

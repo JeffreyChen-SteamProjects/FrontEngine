@@ -24,8 +24,8 @@ class _FileJob(QRunnable):
         result, error = None, ''
         try:
             result = self.function()
-        except (OSError, ValueError, RecursionError) as failure:
-            error = str(failure)
+        except Exception as failure:  # any at all: unanswered, the toolbar would stay disabled
+            error = str(failure) or type(failure).__name__
         try:
             self.result.done.emit(self.kind, result, error)
         except RuntimeError:

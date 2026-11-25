@@ -96,6 +96,7 @@ class WhiteboardWidget(BaseWidget):
         self.selected = set()
         self.select_mode = False
         self._move_origin = None
+        self._moved = False
         self._stroke: Optional[Dict[str, Any]] = None
         self._pan_origin: Optional[QPoint] = None
         apply_overlay_window_flags(self, show_on_bottom=False, allow_input=True)
@@ -266,9 +267,7 @@ class WhiteboardWidget(BaseWidget):
         before = to_canvas((point.x(), point.y()), self.offset, self.zoom)
         self.zoom = clamp_zoom(self.zoom * float(factor))
         after = to_screen(before, self.offset, self.zoom)
-        self.offset[0] += point.x() - after[0]
-        self.offset[1] += point.y() - after[1]
-        self.update()
+        self.pan(point.x() - after[0], point.y() - after[1])          # within the same bounds: past them it cannot be saved
         return self.zoom
 
     def reset_view(self) -> None:
@@ -285,8 +284,7 @@ class WhiteboardWidget(BaseWidget):
             if self.select_mode:
                 self.select_at(event.position().toPoint(), additive=bool(event.modifiers() & Qt.KeyboardModifier.ShiftModifier))
                 self._move_origin = event.position().toPoint() if self.selected else None
-                if self._move_origin is not None:
-                    self.document.checkpoint()
+                self._moved = False
             else:
                 self.begin_stroke(event.position().toPoint())
         elif event.button() == Qt.MouseButton.MiddleButton:
@@ -295,7 +293,10 @@ class WhiteboardWidget(BaseWidget):
 
     def mouseMoveEvent(self, event) -> None:
         point = event.position().toPoint()
-        if self._move_origin is not None:
+        if self._move_origin is not None and point != self._move_origin:
+            if not self._moved:
+                self._moved = True          # only a move is something to undo, not a click
+                self.document.checkpoint()
             self.move_selected(point.x()-self._move_origin.x(), point.y()-self._move_origin.y())
             self._move_origin = point
         elif self._pan_origin is not None:

@@ -24,8 +24,7 @@ from frontengine.ui.page.utils import (
 )
 from frontengine.user_setting.user_setting_file import add_recent_file
 from frontengine.utils.logging.loggin_instance import front_engine_logger
-from frontengine.utils.multi_language.language_wrapper import language_wrapper
-from frontengine.utils.multi_language.retranslate import tr
+from frontengine.utils.multi_language.retranslate import retranslator, tr
 
 
 class VideoSettingUI(SettingPage):
@@ -166,11 +165,11 @@ class VideoSettingUI(SettingPage):
     @owned_action
     def choose_and_copy_file_to_cwd_video_dir_then_play(self) -> None:
         front_engine_logger.info("[VideoSettingUI] choose_and_copy_file_to_cwd_video_dir_then_play")
-        self.ready_label.setText(language_wrapper.language_word_dict.get("Not Ready"))
+        retranslator.set_text(self.ready_label, "Not Ready")
         self.ready_to_play = False
         self.video_path = self.lifetime.after_dialog(choose_video(self))
         if self.video_path:
-            self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+            retranslator.set_text(self.ready_label, "Ready")
             self.ready_to_play = True
             add_recent_file("video", self.video_path)
             reload_recent_combobox(self.recent_files_combobox, "video")
@@ -185,14 +184,14 @@ class VideoSettingUI(SettingPage):
         front_engine_logger.info(f"[VideoSettingUI] _apply_recent_file | path={path}")
         self.video_path = path
         self.ready_to_play = True
-        self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+        retranslator.set_text(self.ready_label, "Ready")
 
     @owned_action
     def _on_file_dropped(self, path: str) -> None:
         front_engine_logger.info(f"[VideoSettingUI] _on_file_dropped | path={path}")
         self.video_path = path
         self.ready_to_play = True
-        self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+        retranslator.set_text(self.ready_label, "Ready")
         add_recent_file("video", path)
         reload_recent_combobox(self.recent_files_combobox, "video")
         self.start_play_video()  # a dropped file is shown at once
@@ -237,7 +236,7 @@ class VideoSettingUI(SettingPage):
         if state.get("video_path"):
             self.video_path = state["video_path"]
             self.ready_to_play = True
-            self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+            retranslator.set_text(self.ready_label, "Ready")
         if "fullscreen" in state:
             self.fullscreen_checkbox.setChecked(bool(state["fullscreen"]))
         if "show_on_all_screen" in state:

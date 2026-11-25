@@ -15,6 +15,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
 import json
+import re
 import uuid
 from copy import deepcopy
 from shiboken6 import isValid
@@ -26,12 +27,13 @@ from PySide6.QtWidgets import (
     QPlainTextEdit,
 )
 
+from frontengine.ui.dialog.preset_schedule_dialog import DAY_KEYS
 from frontengine.user_setting.user_setting_file import user_setting_dict, write_user_setting
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
-from frontengine.utils.multi_language.retranslate import tr, retranslator, translate
+from frontengine.utils.multi_language.retranslate import retranslator, tr, translate
 from frontengine.utils.rules.rule_engine import (
-    ACTION_APPLY_PRESET, ACTIONS, VALUE_ACTIONS, normalize_rule, normalize_rules,
+    ACTION_APPLY_PRESET, ACTIONS, VALUE_ACTIONS, normalize_rule, normalize_rules, parse_minute_of_day,
     RuleEngineService,
 )
 
@@ -68,6 +70,20 @@ def format_days(days: Any) -> str:
     return ",".join(_DAY_LETTERS[day] for day in days or () if 0 <= day <= 6)
 
 
+def _day_index(token: str) -> Optional[int]:
+    """One weekday as typed: a number, its English short form or its name in the current language."""
+    if token.isdigit():
+        return int(token) if int(token) <= 6 else None
+    for index, (key, fallback) in enumerate(DAY_KEYS):
+        if token[:3].lower() == _DAY_LETTERS[index].lower() or token.lower() == _t(key, fallback).lower():
+            return index
+    return None
+
+
+def _day_tokens(text: Any) -> List[str]:
+    return [token.strip() for token in re.split(r"[,;、，]", str(text or "")) if token.strip()]
+
+
 def parse_days(text: Any) -> List[int]:
     """
     把 "Mon,Tue" 或 "0,1" 解析成星期清單。兩種寫法都收：使用者會照著看到的
@@ -75,20 +91,8 @@ def parse_days(text: Any) -> List[int]:
     Parse "Mon,Tue" or "0,1" into weekdays. Both are accepted: people edit what
     they see, and people type numbers.
     """
-    days = []
-    for token in str(text or "").replace(";", ",").split(","):
-        item = token.strip()
-        if not item:
-            continue
-        if item.isdigit():
-            days.append(int(item))
-            continue
-        lowered = item[:3].lower()
-        for index, name in enumerate(_DAY_LETTERS):
-            if name.lower() == lowered:
-                days.append(index)
-                break
-    return days
+    days = [_day_index(token) for token in _day_tokens(text)]
+    return [day for day in days if day is not None]
 
 
 def format_minute(minute: Optional[int]) -> str:
@@ -282,7 +286,16 @@ class RulesDialog(QDialog):
                 rules.append(entry)
         return rules
 
+    def _has_bad_times(self, row: int) -> bool:
+        """A day or a time that does not read as one would quietly become "any"."""
+        times = [self._cell_text(row, column) for column in (_COLUMN_FROM, _COLUMN_TO)]
+        return any(time and parse_minute_of_day(time) is None for time in times) or any(
+            _day_index(token) is None for token in _day_tokens(self._cell_text(row, _COLUMN_DAYS)))
+
     def accept(self) -> None:
+        if any(self._has_bad_times(row) for row in range(self.table.rowCount())):
+            self.status.setText(translate('rules_invalid_times'))
+            return
         rules = self.rules()
         if self.table.rowCount() > 200 or any(
                 self._cell_text(row, _COLUMN_LABEL) and self._row_entry(row) is None

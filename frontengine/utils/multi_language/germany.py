@@ -1018,6 +1018,8 @@ germany_word_dict = {
     'rules_preview_hint': 'Nur Vorschau: matches zeigt erfüllte Bedingungen, active bereits ausgelöste Regeln. Keine Aktion oder Zustandsänderung.',
     'rules_history_hint': 'Letzte 200 Auslöser-/Abkling-/Aktionsbelege dieser Sitzung mit Bedingungen und erfasstem Kontext.',
     'rules_invalid_rows': 'Benannte Zeilen vollständig ausfüllen. Priorität -1000…1000, Abklingzeit 0…86400 ganze Sekunden; maximal 200 Regeln.',
+    "reminder_invalid_rows": "Jede Erinnerung braucht eine Zeit: eine Anzahl Minuten oder eine 24-Stunden-Zeit wie 09:30.",
+    "rules_invalid_times": "Tage sind Mon, Tue … (oder 0-6, Montag zuerst), Zeiten im 24-Stunden-Format wie 19:30. Für „beliebig“ das Feld leer lassen.",
     'rules_matched': 'Bedingungen erfüllt',
     'rules_unmatched': 'Bedingungen nicht erfüllt',
     'rules_receipt_dispatched': 'Übermittelt',

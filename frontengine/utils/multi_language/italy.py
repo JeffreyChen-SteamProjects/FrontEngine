@@ -1012,6 +1012,8 @@ italian_word_dict = {
     'rules_preview_hint': 'Solo anteprima: matches indica le condizioni attuali, active un’attivazione già avvenuta. Nessuna azione o transizione consumata.',
     'rules_history_hint': 'Ultimi 200 eventi di attivazione/attesa/azione della sessione, con condizioni e contesto rilevato.',
     'rules_invalid_rows': 'Completa ogni riga con nome. Priorità -1000…1000, attesa intera 0…86400 secondi; massimo 200 regole.',
+    "reminder_invalid_rows": "Ogni promemoria ha bisogno di un orario: un numero di minuti o un orario a 24 ore come 09:30.",
+    "rules_invalid_times": "I giorni sono Mon, Tue… (o 0-6, lunedì per primo) e gli orari a 24 ore come 19:30. Lascia vuoto per «qualsiasi».",
     'rules_matched': 'Condizioni soddisfatte',
     'rules_unmatched': 'Condizioni non soddisfatte',
     'rules_receipt_dispatched': 'Inviata',

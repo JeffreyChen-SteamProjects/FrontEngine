@@ -32,7 +32,7 @@ from frontengine.utils.logging.loggin_instance import front_engine_logger
 # 輪播支援的圖片副檔名 / Image extensions the slideshow accepts
 _SLIDESHOW_EXTENSIONS = (".png", ".jpg", ".jpeg", ".webp", ".bmp")
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
-from frontengine.utils.multi_language.retranslate import tr
+from frontengine.utils.multi_language.retranslate import retranslator, tr
 
 
 class ImageSettingUI(SettingPage):
@@ -51,6 +51,7 @@ class ImageSettingUI(SettingPage):
         # Slideshow state
         self.slideshow_folder: Optional[str] = None
         self._slideshow_paths: list = []
+        self._slideshow_widgets: list = []
         self._slideshow_index: int = 0
         self._slideshow_timer = QTimer(self)
         self._slideshow_timer.timeout.connect(self._advance_slideshow)
@@ -227,9 +228,9 @@ class ImageSettingUI(SettingPage):
         self.show_all_screen = self.show_on_all_screen_checkbox.isChecked()
 
     @owned_action
-    def _create_image_widget(self) -> ImageWidget:
+    def _create_image_widget(self, path: "str | None" = None) -> ImageWidget:
         front_engine_logger.info("[ImageSettingUI] _create_image_widget")
-        image_widget = ImageWidget(image_path=self.image_path)
+        image_widget = ImageWidget(image_path=path or self.image_path)
         image_widget.set_ui_variable(opacity=float(self.opacity_slider.value()) / 100)
         image_widget.set_ui_window_flag(self.show_on_bottom_checkbox.isChecked())
         self.image_widget_list.append(image_widget)
@@ -238,16 +239,27 @@ class ImageSettingUI(SettingPage):
     @owned_action
     def start_play_image(self) -> None:
         front_engine_logger.info("[ImageSettingUI] start_play_image")
-        # In slideshow mode, prime the first image from the chosen folder.
-        slideshow = self.slideshow_checkbox.isChecked() and self._prime_slideshow()
-        if not self.image_path or not self.ready_to_play:
+        # In slideshow mode, the first image of the chosen folder.
+        if self.slideshow_checkbox.isChecked() and self._prime_slideshow():
+            self._show(self._slideshow_paths[0], slideshow=True)
+        elif not self.image_path or not self.ready_to_play:
             self.choose_and_copy_file_to_cwd_image_dir_then_play()  # nothing chosen yet: choosing one shows it
-            return
+        else:
+            self._show(self.image_path)
+
+    def _show(self, path: str, *, slideshow: bool = False) -> None:
+        """Put one picture on screen; a slideshow's goes on changing, and only its own."""
+        shown = []
+
+        def create(_monitor):
+            widget = self._create_image_widget(path)
+            shown.append(widget)
+            return widget
 
         dispatch_to_monitors(
             parent=self,
             show_all_screen=self.show_all_screen,
-            factory=lambda _monitor: self._create_image_widget(),
+            factory=create,
             present_primary=lambda widget: show_on_primary_screen(widget, self.fullscreen_checkbox),
             present_on_monitor=lambda widget, monitor, _idx: show_on_selected_monitor(
                 widget, self.fullscreen_checkbox, monitor
@@ -256,6 +268,7 @@ class ImageSettingUI(SettingPage):
             span_all_screens=resolve_span(self.target_monitor_combobox),
         )
         if slideshow:
+            self._slideshow_widgets.extend(widget for widget in shown if widget is not None)
             self._slideshow_timer.start(self._slideshow_interval_ms())
 
     @owned_action
@@ -292,8 +305,6 @@ class ImageSettingUI(SettingPage):
 
             SystemRandom().shuffle(self._slideshow_paths)
         self._slideshow_index = 0
-        self.image_path = self._slideshow_paths[0]
-        self.ready_to_play = True
         return True
 
     @owned_action
@@ -304,32 +315,29 @@ class ImageSettingUI(SettingPage):
             return
         self._slideshow_index = (self._slideshow_index + 1) % len(self._slideshow_paths)
         next_path = self._slideshow_paths[self._slideshow_index]
-        for widget in self.image_widget_list[:]:
-            setter = getattr(widget, "set_image_path", None)
-            if setter is None:
-                continue
+        self._slideshow_widgets = [widget for widget in self._slideshow_widgets if widget in self.image_widget_list]
+        for widget in self._slideshow_widgets[:]:
             try:
-                setter(next_path)
+                widget.set_image_path(next_path)
             except RuntimeError:
-                try:
+                self._slideshow_widgets.remove(widget)
+                if widget in self.image_widget_list:
                     self.image_widget_list.remove(widget)
-                except ValueError:
-                    pass
-        if not self.image_widget_list:
+        if not self._slideshow_widgets:
             self._slideshow_timer.stop()
 
     @owned_action
     def choose_and_copy_file_to_cwd_image_dir_then_play(self) -> None:
         front_engine_logger.info("[ImageSettingUI] choose_and_copy_file_to_cwd_image_dir_then_play")
-        self.ready_label.setText(language_wrapper.language_word_dict.get("Not Ready"))
+        retranslator.set_text(self.ready_label, "Not Ready")
         self.ready_to_play = False
         self.image_path = self.lifetime.after_dialog(choose_image(self))
         if self.image_path:
-            self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+            retranslator.set_text(self.ready_label, "Ready")
             self.ready_to_play = True
             add_recent_file("image", self.image_path)
             reload_recent_combobox(self.recent_files_combobox, "image")
-            self.start_play_image()  # chosen means shown: no second click
+            self._show(self.image_path)  # chosen means shown: no second click
 
     @owned_action
     def _apply_recent_file(self, _index: int = 0) -> None:
@@ -340,17 +348,17 @@ class ImageSettingUI(SettingPage):
         front_engine_logger.info(f"[ImageSettingUI] _apply_recent_file | path={path}")
         self.image_path = path
         self.ready_to_play = True
-        self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+        retranslator.set_text(self.ready_label, "Ready")
 
     @owned_action
     def _on_file_dropped(self, path: str) -> None:
         front_engine_logger.info(f"[ImageSettingUI] _on_file_dropped | path={path}")
         self.image_path = path
         self.ready_to_play = True
-        self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+        retranslator.set_text(self.ready_label, "Ready")
         add_recent_file("image", path)
         reload_recent_combobox(self.recent_files_combobox, "image")
-        self.start_play_image()  # a dropped file is shown at once
+        self._show(path)  # a dropped file is shown at once
 
     @owned_action
     def opacity_trick(self) -> None:
@@ -365,6 +373,11 @@ class ImageSettingUI(SettingPage):
             "show_on_all_screen": self.show_on_all_screen_checkbox.isChecked(),
             "show_on_bottom": self.show_on_bottom_checkbox.isChecked(),
             "target_monitor": target_monitor_state(self.target_monitor_combobox),
+            "slideshow": self.slideshow_checkbox.isChecked(),
+            "slideshow_folder": self.slideshow_folder or "",
+            "slideshow_interval": self.slideshow_interval_combobox.currentText(),
+            "slideshow_shuffle": self.slideshow_shuffle_checkbox.isChecked(),
+            "slideshow_recursive": self.slideshow_recursive_checkbox.isChecked(),
         }
 
     def set_state(self, state: dict) -> None:
@@ -374,7 +387,7 @@ class ImageSettingUI(SettingPage):
         if state.get("image_path"):
             self.image_path = state["image_path"]
             self.ready_to_play = True
-            self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+            retranslator.set_text(self.ready_label, "Ready")
         if "fullscreen" in state:
             self.fullscreen_checkbox.setChecked(bool(state["fullscreen"]))
         if "show_on_all_screen" in state:
@@ -383,3 +396,11 @@ class ImageSettingUI(SettingPage):
         if "show_on_bottom" in state:
             self.show_on_bottom_checkbox.setChecked(bool(state["show_on_bottom"]))
         apply_target_monitor_state(self.target_monitor_combobox, state.get("target_monitor"))
+        for checkbox, key in ((self.slideshow_checkbox, "slideshow"),
+                              (self.slideshow_shuffle_checkbox, "slideshow_shuffle"),
+                              (self.slideshow_recursive_checkbox, "slideshow_recursive")):
+            if key in state:
+                checkbox.setChecked(bool(state[key]))
+        if isinstance(state.get("slideshow_folder"), str):
+            self.slideshow_folder = state["slideshow_folder"]
+        self.slideshow_interval_combobox.setCurrentText(str(state.get("slideshow_interval", "")))

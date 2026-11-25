@@ -2,12 +2,11 @@
 from __future__ import annotations
 
 import copy
-import math
 import os
 from pathlib import Path
 
 from frontengine.utils.imervue.puppet_asset import finite_parameters
-from frontengine.utils.scene_format.scene_animation import validate_animation
+from frontengine.utils.scene_format.scene_animation import is_finite, validate_animation
 
 SCENE_FORMAT = 'frontengine.scene'
 SCENE_VERSION = 1
@@ -19,8 +18,10 @@ def resolve_asset(value: str, base_dir: Path | None) -> str:
         raise ValueError('Scene asset path must be a nonempty string')
     path = Path(value)
     if base_dir is None:
-        return str(path)
+        return str(path) if path.is_absolute() else path.as_posix()          # the same file on every system
     root = Path(base_dir).resolve()
+    if "\\" in value and os.sep == "/" and not (root / path).exists():
+        path = Path(value.replace("\\", "/"))          # written by a version that stored it the Windows way
     resolved = (root / path).resolve()
     if not path.is_absolute() and not resolved.is_relative_to(root):
         raise ValueError('Relative scene asset is outside the scene directory')
@@ -72,7 +73,7 @@ def _validate_puppet_entry(entry: dict) -> None:
     for field in ('x', 'y', 'z', 'opacity'):
         if field in entry:
             value = entry[field]
-            if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
+            if isinstance(value, bool) or not isinstance(value, (int, float)) or not is_finite(value):
                 raise ValueError(f'PUPPET {field} must be finite')
     if not 0 <= entry.get('opacity', 100) <= 100:
         raise ValueError('PUPPET opacity must be between 0 and 100')

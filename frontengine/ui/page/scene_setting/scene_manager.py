@@ -103,8 +103,7 @@ class SceneManagerUI(QWidget):
             except ValueError as error:
                 QMessageBox.warning(self, "Scene Error", str(error))
                 return
-            scene_json.clear()
-            scene_json.update(entries)
+            adopt_scene_document(entries)          # the mode with it: 2D layers in a 3D scene cannot be opened
             self.renew_json_plain_text()
 
     def start_scene(self):
@@ -124,7 +123,10 @@ class SceneManagerUI(QWidget):
             screens = QGuiApplication.screens()
             selection = 'all' if self.show_all_screen else (
                 screens.index(monitors[0]) if monitors and monitors[0] in screens else 'primary')
-            self.actions.request_entries(scene, selection)
+            try:
+                self.actions.request_entries(scene, selection)
+            except ValueError as error:
+                QMessageBox.warning(self, "Scene Error", str(error))
             return
         self._add_scene_widgets(scene)
         for monitor in monitors:

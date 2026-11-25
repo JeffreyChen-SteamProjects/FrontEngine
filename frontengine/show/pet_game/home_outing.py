@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from time import monotonic
 
-from PySide6.QtCore import QPoint, QPointF, QRectF, Qt, QTimer, Signal
+from PySide6.QtCore import QEvent, QPoint, QPointF, QRectF, Qt, QTimer, Signal
 from PySide6.QtGui import QPainter
 from PySide6.QtWidgets import QMenu, QWidget
 
@@ -173,6 +173,15 @@ class OutingPet(QWidget):
         elif event.button() == Qt.MouseButton.RightButton:
             self.menu(event.globalPosition().toPoint())
 
+    def event(self, event) -> bool:
+        # The mouse was taken away mid-drag (a menu, the lock screen): no release will come.
+        if event.type() == QEvent.Type.UngrabMouse and getattr(self, "_press", None) is not None:
+            self._press = None
+            if self._dragging:
+                self._dragging = False
+                self.motion.throw(0.0, 0.0)
+        return super().event(event)
+
     def mouseMoveEvent(self, event) -> None:
         if self._press is None:
             return
@@ -217,6 +226,7 @@ class OutingPet(QWidget):
         strip._menu_x_milli = max(0, min(width * 1000 - 1, int(strip.x_cell(local.x()) * CELL_PIXELS * 1000)))
         strip._resident_menu(menu, identifier)
         self.last_menu = menu
+        menu.aboutToHide.connect(menu.deleteLater)
         menu.popup(where)
         return menu
 

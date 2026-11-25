@@ -3,9 +3,9 @@ from __future__ import annotations
 
 from copy import deepcopy
 from dataclasses import dataclass, field
-import math
 from pathlib import Path
 
+from .scene_animation import is_finite
 from .scene_document import SCENE_FORMAT, normalize_scene, scene_envelope
 
 MEDIA_TYPES = {'IMAGE', 'GIF', 'TEXT', 'VIDEO', 'WEB', 'PUPPET', 'SOUND'}
@@ -18,7 +18,7 @@ TRACKS = {'position': 3, 'rotation': 4, 'scale3d': 3, 'opacity': 1,
 
 
 def finite(value, label, low=-100000, high=100000):
-    if type(value) not in (float, int) or not math.isfinite(value) or not low <= value <= high:
+    if type(value) not in (float, int) or not is_finite(value) or not low <= value <= high:
         raise ValueError(f'{label} must be finite and within {low}–{high}')
     return value
 
@@ -131,7 +131,7 @@ def read_scene_document(data, base_dir: Path | None = None) -> SceneDocument:
         if entry.get('parent') is not None and (not isinstance(entry['parent'], str) or entry['parent'] not in entries or entry['parent'] == key):
             raise ValueError('Invalid scene parent')
         if kind == 'MODEL':
-            if Path(entry.get('file_path', '')).suffix.lower() not in ('.glb', '.gltf', '.obj'):
+            if not isinstance(entry.get('file_path'), str) or Path(entry['file_path']).suffix.lower() not in ('.glb', '.gltf', '.obj'):
                 raise ValueError('Choose a GLB, glTF or OBJ model')
             clip = entry.get('clip', {})
             if not isinstance(clip, dict) or set(clip) - {'index', 'start', 'rate', 'loop'}:

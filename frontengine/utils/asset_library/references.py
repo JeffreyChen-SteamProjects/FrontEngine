@@ -10,6 +10,8 @@ from pathlib import Path
 
 from frontengine.utils.asset_library.inspect import read_json, inspect_asset
 from frontengine.utils.asset_library.repository import AssetRepository, checked_assets
+from frontengine.utils.logging.loggin_instance import front_engine_logger
+from frontengine.utils.scene_format.scene_3d_document import read_scene_document
 from frontengine.utils.scene_format.scene_document import ASSET_FIELDS, normalize_scene
 from frontengine.utils.scene_format.scene_editor_document import validate_geometry
 from frontengine.user_setting.preset_history import checked_state
@@ -26,7 +28,7 @@ def _same(value, path: str, root: Path) -> bool:
 
 def rewrite_scene(document: dict, old: str, new: str, base: Path) -> tuple[dict, list[str]]:
     """Change exact path fields while preserving unknown scene metadata and relative peers."""
-    normalize_scene(document, base)
+    read_scene_document(document, base)
     result, locations = deepcopy(document), []
     entries = result['entries'] if result.get('format') == 'frontengine.scene' else result
     if len(entries) > 256:
@@ -36,7 +38,9 @@ def rewrite_scene(document: dict, old: str, new: str, base: Path) -> tuple[dict,
             if _same(entry.get(key), old, base):
                 entry[key] = new
                 locations.append(str(name) + '/' + key)
-    validate_geometry(normalize_scene(result, base))
+    read_scene_document(result, base)
+    if result.get('version') != 2:
+        validate_geometry(normalize_scene(result, base))
     return result, locations
 
 
@@ -138,12 +142,16 @@ def _reference_only(repository: AssetRepository, path: str, scene: dict) -> list
     for source, mode in _source_paths(repository):
         if not source.is_file():
             continue
-        document = read_json(source)
         total += source.stat().st_size
         if total > 16 * 1024 * 1024:
             raise ValueError('Reference scan exceeds sixteen MiB')
-        _rewritten, locations = (rewrite_preset(document, path, path, repository.root) if mode == 'preset'
-                                else rewrite_scene(document, path, path, source.parent))
+        try:
+            document = read_json(source)
+            _rewritten, locations = (rewrite_preset(document, path, path, repository.root) if mode == 'preset'
+                                    else rewrite_scene(document, path, path, source.parent))
+        except (OSError, ValueError, RecursionError) as error:
+            front_engine_logger.warning(f'[AssetLibrary] {source.name} not searched: {error}')
+            continue          # one unreadable file must not keep every other from being found
         if locations:
             result.append({'owner': str(source), 'locations': locations, 'writable': not protected(source, repository.root)})
     return result

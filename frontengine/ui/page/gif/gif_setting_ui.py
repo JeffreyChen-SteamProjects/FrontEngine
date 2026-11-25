@@ -24,8 +24,7 @@ from frontengine.ui.page.utils import (
 )
 from frontengine.user_setting.user_setting_file import add_recent_file
 from frontengine.utils.logging.loggin_instance import front_engine_logger
-from frontengine.utils.multi_language.language_wrapper import language_wrapper
-from frontengine.utils.multi_language.retranslate import tr
+from frontengine.utils.multi_language.retranslate import retranslator, tr
 
 
 class GIFSettingUI(SettingPage):
@@ -145,11 +144,11 @@ class GIFSettingUI(SettingPage):
     @owned_action
     def choose_and_copy_file_to_cwd_gif_dir_then_play(self) -> None:
         front_engine_logger.info("[GIFSettingUI] choose_and_copy_file_to_cwd_gif_dir_then_play")
-        self.ready_label.setText(language_wrapper.language_word_dict.get("Not Ready"))
+        retranslator.set_text(self.ready_label, "Not Ready")
         self.ready_to_play = False
         self.gif_image_path = self.lifetime.after_dialog(choose_gif(self))
         if self.gif_image_path:
-            self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+            retranslator.set_text(self.ready_label, "Ready")
             self.ready_to_play = True
             add_recent_file("gif", self.gif_image_path)
             reload_recent_combobox(self.recent_files_combobox, "gif")
@@ -164,14 +163,14 @@ class GIFSettingUI(SettingPage):
         front_engine_logger.info(f"[GIFSettingUI] _apply_recent_file | path={path}")
         self.gif_image_path = path
         self.ready_to_play = True
-        self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+        retranslator.set_text(self.ready_label, "Ready")
 
     @owned_action
     def _on_file_dropped(self, path: str) -> None:
         front_engine_logger.info(f"[GIFSettingUI] _on_file_dropped | path={path}")
         self.gif_image_path = path
         self.ready_to_play = True
-        self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+        retranslator.set_text(self.ready_label, "Ready")
         add_recent_file("gif", path)
         reload_recent_combobox(self.recent_files_combobox, "gif")
         self.start_play_gif()  # a dropped file is shown at once
@@ -207,7 +206,7 @@ class GIFSettingUI(SettingPage):
         if state.get("gif_image_path"):
             self.gif_image_path = state["gif_image_path"]
             self.ready_to_play = True
-            self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
+            retranslator.set_text(self.ready_label, "Ready")
         if "fullscreen" in state:
             self.fullscreen_checkbox.setChecked(bool(state["fullscreen"]))
         if "show_on_all_screen" in state:

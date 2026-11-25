@@ -7,7 +7,6 @@ from dataclasses import dataclass, field
 from io import BytesIO
 import json
 from pathlib import Path
-import shlex
 from urllib.parse import unquote, urlsplit
 
 import numpy as np
@@ -53,6 +52,45 @@ def _gltf(path):
     return data, model.binary_blob()
 
 
+_MAP_STATEMENTS = ('map_kd', 'map_ka', 'map_ks', 'map_d', 'map_bump', 'bump', 'norm')
+# How many values follow each texture option (at most, for the vectors).
+_MAP_OPTIONS = {'-blendu': 1, '-blendv': 1, '-cc': 1, '-clamp': 1, '-imfchan': 1, '-mm': 2, '-o': 3, '-s': 3,
+                '-t': 3, '-texres': 1, '-bm': 1, '-boost': 1, '-type': 1}
+
+
+def _statements(path):
+    """The keyword and the rest of each line of an OBJ or MTL file: names are not quoted there and may
+    hold spaces, apostrophes and the backslashes Windows exporters write."""
+    for line in path.read_text(encoding='utf-8-sig', errors='replace').splitlines():
+        keyword, _space, rest = line.strip().partition(' ')
+        if keyword and not keyword.startswith('#'):
+            yield keyword.lower(), rest.strip().strip('"').replace('\\', '/')
+
+
+def _material_files(directory, rest):
+    """One name with spaces in it, or several names."""
+    return [rest] if (directory / rest).is_file() else rest.split()
+
+
+def _texture_name(value):
+    words = value.split(' ')
+    while words and words[0] in _MAP_OPTIONS:
+        option, words = words[0], words[1:]
+        for _value in range(_MAP_OPTIONS[option]):
+            if len(words) > 1 and (option in ('-blendu', '-blendv', '-cc', '-clamp', '-imfchan', '-type')
+                                   or _is_number(words[0])):
+                words = words[1:]
+    return ' '.join(words).strip().strip('"')
+
+
+def _is_number(text):
+    try:
+        float(text)
+    except ValueError:
+        return False
+    return True
+
+
 def model_dependencies(path):
     """Return the complete local tree used by a model, preserving relative names."""
     path = Path(path).resolve()
@@ -64,19 +102,18 @@ def model_dependencies(path):
             if uri and not uri.startswith('data:'):
                 result.add(local_resource(path.parent, uri))
     elif path.suffix.lower() == '.obj':
-        for line in path.read_text(encoding='utf-8-sig').splitlines():
-            words = shlex.split(line, comments=True)
-            if words and words[0] == 'mtllib':
-                for name in words[1:]:
-                    material = local_resource(path.parent, name)
-                    result.add(material)
-                    for row in material.read_text(encoding='utf-8-sig').splitlines():
-                        tokens = shlex.split(row, comments=True)
-                        if tokens and tokens[0].lower() in ('map_kd', 'map_ka', 'map_ks', 'map_d', 'map_bump', 'bump', 'norm'):
-                            texture = local_resource(material.parent, tokens[-1])
-                            if not texture.is_relative_to(path.parent):
-                                raise ValueError('MTL texture is outside the model directory')
-                            result.add(texture)
+        for word, rest in _statements(path):
+            if word != 'mtllib' or not rest:
+                continue
+            for name in _material_files(path.parent, rest):
+                material = local_resource(path.parent, name)
+                result.add(material)
+                for row, value in _statements(material):
+                    if row in _MAP_STATEMENTS and value:
+                        texture = local_resource(material.parent, _texture_name(value))
+                        if not texture.is_relative_to(path.parent):
+                            raise ValueError('MTL texture is outside the model directory')
+                        result.add(texture)
     else:
         raise ValueError('Choose a GLB, glTF or OBJ model')
     if sum(p.stat().st_size for p in result) > MAX_MODEL_BYTES:

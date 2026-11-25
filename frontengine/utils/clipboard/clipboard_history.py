@@ -183,4 +183,5 @@ class ClipboardHistory:
 
     def load(self, entries: Any) -> None:
         """從儲存的資料還原。"""
-        self.entries = normalize_entries(entries)[: self.limit]
+        self.entries = normalize_entries(entries)
+        self._evict()          # pinned ones stay, past the limit too

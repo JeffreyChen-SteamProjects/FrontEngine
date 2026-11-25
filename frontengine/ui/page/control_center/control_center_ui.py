@@ -456,7 +456,7 @@ class ControlCenterUI(SettingPage):
         self._forget_stand_down()
 
         def apply(widget) -> None:
-            if not getattr(widget, "windowless", False):
+            if not getattr(widget, "windowless", False) and not getattr(widget, "held_back", False):
                 widget.show()
 
         self._for_each_overlay(apply)

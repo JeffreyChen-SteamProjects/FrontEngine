@@ -22,7 +22,7 @@ from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import tr
 from frontengine.utils.smart_pause.pause_rules import normalize_app_name
-from frontengine.ui.dialog.dialog_kit import button_row, roomy
+from frontengine.ui.dialog.dialog_kit import button_row, roomy, save_or_tell
 
 
 def _t(key: str, fallback: str) -> str:
@@ -109,7 +109,7 @@ class AppProfileDialog(QDialog):
 
     def accept(self) -> None:
         profiles = self.profiles()
-        user_setting_dict["app_profiles"] = profiles
-        write_user_setting()
+        if not save_or_tell(self, {"app_profiles": profiles}, write_user_setting):
+            return
         front_engine_logger.info(f"[AppProfileDialog] saved | {profiles}")
         super().accept()

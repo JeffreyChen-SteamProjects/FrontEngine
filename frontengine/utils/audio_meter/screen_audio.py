@@ -14,6 +14,7 @@ import sys
 
 from typing import Dict, Iterable, List, Optional, Tuple
 
+from frontengine.utils.audio_meter.system_audio_meter import ReopeningMeter
 from frontengine.utils.audio_meter.system_audio_meter import (
     SystemAudioMeter, list_output_devices, system_audio_level,
 )
@@ -90,7 +91,7 @@ class ScreenAudioMeters:
     """依裝置 ID 快取電表，並提供「綁定某螢幕音源」的取樣函式。"""
 
     def __init__(self) -> None:
-        self._meters: Dict[str, SystemAudioMeter] = {}
+        self._meters: Dict[str, ReopeningMeter] = {}
 
     def device_for_screen(self, screen) -> Optional[str]:
         """回傳該螢幕對應的輸出端點 ID；沒有對應者回傳 None。"""
@@ -102,7 +103,7 @@ class ScreenAudioMeters:
         """讀取指定端點的目前峰值（電表物件會重複使用）。"""
         meter = self._meters.get(device_id)
         if meter is None:
-            meter = SystemAudioMeter(device_id)
+            meter = ReopeningMeter(lambda: SystemAudioMeter(device_id))
             self._meters[device_id] = meter
         return meter.level()
 

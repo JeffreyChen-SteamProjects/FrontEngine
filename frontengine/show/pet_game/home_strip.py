@@ -26,7 +26,7 @@ from frontengine.show.pet_game.home_service import HomeService
 from frontengine.show.pet_game.home_view import HomeView
 from frontengine.show.pet_game.strip_weather import StripWeather
 from frontengine.show.pet_game.themes import NIGHT_TINT, floor_color, glyph, night_shade
-from frontengine.utils.multi_language.retranslate import translate
+from frontengine.utils.multi_language.retranslate import tr, translate
 from frontengine.utils.pet_game.catalog import CELL_PIXELS
 from frontengine.utils.pet_game.commission_work import dispatch
 from frontengine.utils.pet_game.simulation import STEP_MS
@@ -79,6 +79,7 @@ class HomeStrip(HomeView):
     quiet = False                          # focus mode: no bubbles and no cards
     closed = Signal()                      # at close time, before the deferred delete
     arrange_finished = Signal()            # the strip's own way out of arranging (it takes no keys)
+    running_requested = Signal(bool)       # Start / Pause from the home button's menu
     hide_requested = Signal()              # "Hide the home": the page unticks Show the home on the desktop
     overlay_lockable = False              # lock-all must not make the home unclickable
     overlay_remembers_geometry = False
@@ -450,7 +451,7 @@ class HomeStrip(HomeView):
     def _home_button(self) -> QToolButton:
         button = QToolButton(self)
         button.setText("⌂")
-        button.setToolTip(translate("tab_pet_home_text", "Pet home"))
+        tr(button, "tab_pet_home_text", "Pet home", "setToolTip")
         button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         button.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
         button.setStyleSheet("QToolButton { background: rgba(0,0,0,150); color: white; border-radius: 6px;"
@@ -476,7 +477,7 @@ class HomeStrip(HomeView):
         for key, fallback, action, target in TOOLBAR:
             button = QToolButton(bar)
             button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-            button.setText(translate(key, fallback))
+            tr(button, key, fallback)
             button.clicked.connect(lambda _checked=False, a=action, t=target: self.action_requested.emit(a, t))
             row.addWidget(button)
             self.shortcut_buttons.append(button)
@@ -491,7 +492,7 @@ class HomeStrip(HomeView):
         """Today's commissions; choosing one sends the best-suited pet to make what it still lacks."""
         button = QToolButton(bar)
         button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        button.setText(translate("pet_home_toolbar_commissions", "Commissions"))
+        tr(button, "pet_home_toolbar_commissions", "Commissions")
         button.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
         menu = QMenu(button)
         menu.aboutToShow.connect(lambda: self._fill_commission_menu(menu))
@@ -603,7 +604,7 @@ class HomeStrip(HomeView):
         menu.addAction(translate("pet_home_open", "Open Pet home"), self.open_requested.emit)
         running = self.service.running
         menu.addAction(translate("pet_home_pause" if running else "pet_home_start", "Pause" if running else "Start"),
-                       (lambda: self.service.pause("stopped")) if running else self.service.start)
+                       lambda: self.running_requested.emit(not running))
         other = "bottom" if self.layer == "top" else "top"
         menu.addAction(translate("pet_home_layer_to_" + other, "Move below windows" if other == "bottom"
                                  else "Move above windows"), lambda: self.layer_requested.emit(other))
@@ -786,6 +787,7 @@ class HomeStrip(HomeView):
         menu.addSeparator()
         menu.addAction(translate("pet_home_open", "Open Pet home"), self.open_requested.emit)
         self.last_menu = menu
+        menu.aboutToHide.connect(menu.deleteLater)
         menu.popup(where)
 
     def _resident_menu(self, menu: QMenu, resident: str) -> None:

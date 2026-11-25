@@ -14,7 +14,6 @@ from PySide6.QtWidgets import (
 
 from frontengine.user_setting.user_setting_file import (
     get_hotkey_action_map,
-    user_setting_dict,
     write_user_setting,
 )
 from frontengine.utils.hotkey.hotkey_service import is_valid_hotkey
@@ -22,7 +21,7 @@ from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 
 from frontengine.utils.actions.action_registry import ACTION_LABELS as _ACTION_LABELS
-from frontengine.ui.dialog.dialog_kit import roomy
+from frontengine.ui.dialog.dialog_kit import roomy, save_or_tell
 
 
 def _t(key: str, fallback: str) -> str:
@@ -97,12 +96,15 @@ class HotkeySettingsDialog(QDialog):
         """
         bindings: Dict[str, str] = {}
         invalid: List[str] = []
+        taken: Dict[frozenset, str] = {}          # two actions on one combination: only one would ever run
         for action, edit in self._edits.items():
             combo = edit.text().strip()
             if not combo:
                 bindings[action] = ""
                 continue
-            if is_valid_hotkey(combo):
+            keys = frozenset(combo.lower().split("+"))
+            if is_valid_hotkey(combo) and keys not in taken:
+                taken[keys] = action
                 bindings[action] = combo
             else:
                 invalid.append(action)
@@ -120,6 +122,6 @@ class HotkeySettingsDialog(QDialog):
             )
             return
         front_engine_logger.info(f"[HotkeySettingsDialog] save | bindings={bindings}")
-        user_setting_dict["hotkeys"] = bindings
-        write_user_setting()
+        if not save_or_tell(self, {"hotkeys": bindings}, write_user_setting):
+            return
         self.accept()

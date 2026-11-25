@@ -9,6 +9,7 @@ import tempfile
 import uuid
 from pathlib import Path
 
+from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.workshop.workshop_content import classify_item, preset_files, read_item_title
 from frontengine.utils.workshop.workshop_manifest import checked_tree, read_manifest, safe_path
 from frontengine.utils.workshop.workshop_package import validate_content
@@ -80,7 +81,12 @@ class WorkshopCache:
         candidate = {"id": published_id, "version": version, "hashes": hashes,
                      "timestamp": item.get("timestamp", 0), "kind": manifest["kind"],
                      "title": manifest["title"], "path": str(target), "status": "ready"}
-        current = self.current(published_id)
+        try:
+            current = self.current(published_id)
+        except (OSError, ValueError) as error:
+            # The version in use is damaged, or of a kind no longer supported: the new one replaces it.
+            front_engine_logger.warning(f"[WorkshopCache] {published_id}: {error}")
+            current = None
         if current and fingerprints(Path(current["path"])) != current["hashes"]:
             return {**candidate, "status": "conflict", "current_path": current["path"]}
         self.activate(candidate)

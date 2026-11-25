@@ -2,13 +2,13 @@
 from __future__ import annotations
 
 import copy
-import math
 import weakref
 
 from PySide6.QtCore import QObject, Signal
 from PySide6.QtGui import QUndoCommand, QUndoStack
 
 from frontengine.utils.scene_format.scene_document import normalize_scene
+from frontengine.utils.scene_format.scene_animation import is_finite
 from frontengine.utils.scene_format.scene_3d_document import SceneDocument, read_scene_document
 
 
@@ -19,7 +19,7 @@ def validate_geometry(entries: dict) -> dict:
             if key not in entry:
                 continue
             value = entry[key]
-            if isinstance(value, bool) or not isinstance(value, (float, int)) or not math.isfinite(value):
+            if isinstance(value, bool) or not isinstance(value, (float, int)) or not is_finite(value):
                 raise ValueError(f"Scene {key} must be finite")
             if key in ("width", "height") and not 16 <= value <= 8192:
                 raise ValueError("Scene dimensions must be between 16 and 8192")

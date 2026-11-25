@@ -12,15 +12,16 @@ from typing import Any, Dict, List, Optional
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
-    QAbstractItemView, QComboBox, QDialog, QDialogButtonBox, QGridLayout, QLabel, QPushButton,
+    QAbstractItemView, QComboBox, QDialog, QDialogButtonBox, QMessageBox, QGridLayout, QLabel, QPushButton,
     QTableWidget, QTableWidgetItem, QWidget,
 )
 
+from frontengine.utils.multi_language.retranslate import translate
 from frontengine.user_setting.user_setting_file import user_setting_dict, write_user_setting
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import tr
-from frontengine.ui.dialog.dialog_kit import button_row, roomy
+from frontengine.ui.dialog.dialog_kit import button_row, roomy, save_or_tell
 from frontengine.utils.reminder.reminder_service import (
     DEFAULT_EVERY_MINUTES, KIND_AT, KIND_EVERY, normalize_reminder, normalize_reminders,
     parse_time_of_day,
@@ -158,6 +159,10 @@ class ReminderDialog(QDialog):
         entry["at" if kind == KIND_AT else "minutes"] = value
         return normalize_reminder(entry)
 
+    def _named(self, row: int) -> bool:
+        item = self.table.item(row, _COLUMN_LABEL)
+        return item is not None and bool(item.text().strip())
+
     def reminders(self) -> List[Dict[str, Any]]:
         """目前表格上的提醒（格式不對的列會被略過）。"""
         reminders = []
@@ -168,8 +173,11 @@ class ReminderDialog(QDialog):
         return reminders
 
     def accept(self) -> None:
+        if any(self._named(row) and self._row_entry(row) is None for row in range(self.table.rowCount())):
+            QMessageBox.warning(self, self.windowTitle(), translate("reminder_invalid_rows"))
+            return
         reminders = self.reminders()
-        user_setting_dict["reminders"] = reminders
-        write_user_setting()
+        if not save_or_tell(self, {"reminders": reminders}, write_user_setting):
+            return
         front_engine_logger.info(f"[ReminderDialog] saved | {len(reminders)} reminder(s)")
         super().accept()

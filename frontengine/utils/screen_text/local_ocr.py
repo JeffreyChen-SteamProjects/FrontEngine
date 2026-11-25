@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import asyncio
 import importlib
-import shutil
 import subprocess
 import sys
 from dataclasses import dataclass
@@ -145,12 +144,19 @@ class VisionOcr:
             return "\n".join(lines)
 
 
+_TESSERACT_PATHS = (
+    r"C:\Program Files\Tesseract-OCR\tesseract.exe", r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe",
+    "/usr/bin/tesseract", "/usr/local/bin/tesseract", "/opt/homebrew/bin/tesseract",
+)
+
+
 class TesseractOcr:
     name = "Tesseract"
 
     def __init__(self, language: str = "eng", executable: Optional[str] = None,
                  runner: Callable = subprocess.run) -> None:
-        candidate = executable or shutil.which("tesseract")
+        # Only where it is installed: the search path takes in the current directory on Windows.
+        candidate = executable or next((path for path in _TESSERACT_PATHS if Path(path).is_file()), None)
         self.executable = str(Path(candidate).resolve()) if candidate else None
         self.language = language
         self._runner = runner
@@ -164,7 +170,8 @@ class TesseractOcr:
                              error="Install Tesseract and its recognition language data")
         try:
             response = self._runner([self.executable, "stdin", "stdout", "-l", self.language],
-                                    input=png_bytes, capture_output=True, shell=False, timeout=30)
+                                    input=png_bytes, capture_output=True, shell=False, timeout=30,
+                                    creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
             if response.returncode:
                 return OcrResult("error", backend=self.name,
                                  error=response.stderr.decode("utf-8", errors="replace").strip())

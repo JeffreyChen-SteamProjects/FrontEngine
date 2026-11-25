@@ -186,6 +186,7 @@ class PetHomePage(SettingPage):
         self.finish_body()
         self._connect()
         self.load_result = self.service.open()
+        self._find_offline_zones()
         if self.service.world is not None and user_setting_dict.get(RUNNING_KEY) is True:
             self.service.start()
         self.sync_strip()
@@ -254,20 +255,27 @@ class PetHomePage(SettingPage):
         result = self.service.run(lambda world: world.move_zone(zone, (screen.name() or "primary")[:128],
                                                                 area.x(), area.bottom(), width))
         self.report(result)
+        self._find_offline_zones()
         self.close_strip()
         self.sync_strip()
         self.refresh()
         return result
 
-    def screens_changed(self, *_args) -> None:
-        """A monitor came or went: zones on a missing screen wait, the rest carry on."""
+    def _find_offline_zones(self) -> None:
+        """Which zones' screens are not connected now; their pets wait, the others come back."""
         world = self.service.world
         if world is None:
             return
         names = {(screen.name() or "primary")[:128] for screen in self.screens()}
         offline = {key for key, zone in world.zones.items() if zone.screen not in names}
-        if offline != world.offline_zones:
+        if offline != world.offline_zones or world._offline_parked:
             self.service.run(lambda w: w.set_offline(offline))
+
+    def screens_changed(self, *_args) -> None:
+        """A monitor came or went: zones on a missing screen wait, the rest carry on."""
+        if self.service.world is None:
+            return
+        self._find_offline_zones()
         self.close_strip()
         self.sync_strip()
         self.refresh()
@@ -682,9 +690,17 @@ class PetHomePage(SettingPage):
                 moved += 1
         return moved
 
+    def saved_profiles(self) -> list[dict]:
+        """The saved pets; none, with the reason said, when the saved ones cannot be read."""
+        try:
+            return self.profiles.profiles()
+        except (OSError, ValueError) as error:
+            self.report_text(str(error))
+            return []
+
     def _refresh_newcomers(self, has_home: bool) -> None:
         living = set(self.service.world.residents) if has_home else set()
-        records = [] if has_home else [r for r in self.profiles.profiles() if r["id"] not in living]
+        records = [] if has_home else [r for r in self.saved_profiles() if r["id"] not in living]
         current = [self.newcomers.item(i).data(Qt.ItemDataRole.UserRole) for i in range(self.newcomers.count())]
         if current != [record["id"] for record in records]:
             self.newcomers.clear()
@@ -713,6 +729,10 @@ class PetHomePage(SettingPage):
         result = self.service.restore_backup()
         self.load_result = result
         self.report_text("" if result.world is not None else result.error)
+        self._find_offline_zones()
+        if result.world is not None and user_setting_dict.get(RUNNING_KEY) is True:
+            self.service.start()
+        self.sync_strip()
         self.refresh()
 
     @owned_action
@@ -769,6 +789,7 @@ class PetHomePage(SettingPage):
             strip.arrange_finished.connect(self._strip_done_arranging)
             strip.layer_requested.connect(self.choose_layer)
             strip.hide_requested.connect(self._hide_from_desktop)
+            strip.running_requested.connect(self._set_running)
             strip.furniture_selected.connect(lambda identifier, z=zone: self._strip_piece_selected(z, identifier))
             strip.piece_hovered.connect(self.layout_panel.drag_hover)
             strip.piece_dropped.connect(self.layout_panel.drop)
@@ -816,7 +837,6 @@ class PetHomePage(SettingPage):
         if mode not in HOME_MODES:
             return
         user_setting_dict[MODE_KEY] = mode
-        self._sharing_meeting = False
         self.apply_mode()
 
     @owned_action

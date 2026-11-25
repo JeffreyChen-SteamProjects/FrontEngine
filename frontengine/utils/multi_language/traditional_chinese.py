@@ -1021,6 +1021,8 @@ traditional_chinese_word_dict = {
     'rules_preview_hint': '僅預覽：matches 表示目前條件是否符合，active 表示已觸發。不執行動作，也不消耗觸發狀態。',
     'rules_history_hint': '本工作階段最近 200 筆觸發／冷卻／動作紀錄；可對照條件與當時環境確認原因。',
     'rules_invalid_rows': '請填妥每個已命名的規則。優先數字須為 -1000…1000，冷卻時間須為 0…86400 整數秒，最多 200 條。',
+    "reminder_invalid_rows": "每個提醒都要有時間：分鐘數，或像 09:30 的 24 小時制時刻。",
+    "rules_invalid_times": "星期寫成 Mon、Tue…（或 0-6，星期一是 0），時間寫成 19:30 這樣的 24 小時制。不限就留空。",
     'rules_matched': '符合條件',
     'rules_unmatched': '不符合條件',
     'rules_receipt_dispatched': '已派送',

@@ -29,7 +29,7 @@ FIELDS_BY_VERSION = {1: FIELDS_V1, 2: FIELDS_V2, 3: FIELDS, 4: FIELDS, 5: FIELDS
 ZONE_DEFAULTS = {4: ("areas", []), 5: ("link", None)}     # fields zones gained in that version
 _PAIR = re.compile(r"[0-9a-f]{32}\|[0-9a-f]{32}")
 MAX_TIME_MS = 10 ** 13
-MAX_DORMANT = 200
+MAX_DORMANT = MAX_FURNITURE + MAX_TASKS          # everything a home may hold can go dormant at once
 _FLAGS = 64
 
 
@@ -135,6 +135,8 @@ def from_dict(data: object, catalog: Catalog) -> World:
     world.furniture = _unique([Furniture.from_dict(raw, catalog) for raw in pieces], "furniture")
     world.residents = _unique([Resident.from_dict(raw) for raw in _list(data, "residents", MAX_RESIDENTS)],
                               "resident")
+    # Pets are only ever parked because their screen is away, which is found out again every time.
+    world._offline_parked = {key for key, resident in world.residents.items() if resident.parked}
     world.tasks = _unique([Task.from_dict(raw, catalog) for raw in tasks], "task")
     world.ledger = Ledger.from_dict(data["ledger"])
     world.ledger.coins = world.coin_amount(world.ledger.coins)

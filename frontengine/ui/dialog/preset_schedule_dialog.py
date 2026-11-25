@@ -54,6 +54,13 @@ def current_settings() -> Dict[str, Any]:
     return settings
 
 
+def _number(value: Any, default: int) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError, OverflowError):
+        return default
+
+
 class PresetScheduleDialog(QDialog):
     """設定哪幾天、幾點，自動套用哪一個預設集。"""
 
@@ -76,7 +83,11 @@ class PresetScheduleDialog(QDialog):
         # discovered when the schedule fires and nothing happens.
         for name in self._preset_names():
             self.preset_combobox.addItem(name, name)
-        index = self.preset_combobox.findData(settings.get("preset"))
+        chosen = settings.get("preset")
+        if chosen and self.preset_combobox.findData(chosen) < 0:
+            # Deleted or renamed since: kept, or changing only the time would pick another.
+            self.preset_combobox.addItem(str(chosen), chosen)
+        index = self.preset_combobox.findData(chosen)
         if index >= 0:
             self.preset_combobox.setCurrentIndex(index)
 
@@ -85,12 +96,12 @@ class PresetScheduleDialog(QDialog):
         self.hour_spinbox = QSpinBox()
         self.hour_label.setBuddy(self.hour_spinbox)
         self.hour_spinbox.setRange(0, 23)
-        self.hour_spinbox.setValue(int(settings.get("hour", 9)) % 24)
+        self.hour_spinbox.setValue(_number(settings.get("hour"), 9) % 24)
         self.minute_label = tr(QLabel(), "preset_schedule_minute", "Minute")
         self.minute_spinbox = QSpinBox()
         self.minute_label.setBuddy(self.minute_spinbox)
         self.minute_spinbox.setRange(0, 59)
-        self.minute_spinbox.setValue(int(settings.get("minute", 0)) % 60)
+        self.minute_spinbox.setValue(_number(settings.get("minute"), 0) % 60)
 
         self.days_label = tr(QLabel(), "preset_schedule_days", "On")
         self.day_checkboxes: List[QCheckBox] = []

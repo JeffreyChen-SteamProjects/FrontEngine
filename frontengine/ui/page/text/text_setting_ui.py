@@ -159,8 +159,7 @@ class TextSettingUI(SettingPage):
         # 天氣地點（只有天氣來源會用到）/ Weather location (only used by the weather source)
         self.weather_location_label = tr(QLabel(), "weather_location_label", "Weather city")
         self.weather_location_edit = QLineEdit()
-        self.weather_location_edit.setPlaceholderText(
-            language_wrapper.language_word_dict.get("weather_location_hint", "e.g. Taipei"))
+        tr(self.weather_location_edit, "weather_location_hint", "e.g. Taipei", "setPlaceholderText")
 
         self.file_path_edit = QLineEdit()
         self.file_field_combo = QComboBox()

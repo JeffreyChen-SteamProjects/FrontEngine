@@ -82,5 +82,8 @@ class BaseSceneSettingUI(QWidget):
         message_box.exec()
 
     def _append_scene(self, payload: Dict[str, Any]) -> None:
-        scene_json[str(len(scene_json))] = payload
+        index = len(scene_json)
+        while str(index) in scene_json:          # a layer removed in the editor leaves its number free
+            index += 1
+        scene_json[str(index)] = payload
         self.script_ui.renew_json_plain_text()

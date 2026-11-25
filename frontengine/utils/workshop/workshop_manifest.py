@@ -111,7 +111,11 @@ def read_manifest(root: Path) -> dict:
     path = safe_path(root, "workshop.json")
     if path.stat().st_size > MAX_MANIFEST_BYTES:
         raise ValueError("Workshop manifest exceeds its size limit")
-    return validate_manifest(json.loads(path.read_text(encoding="utf-8")), root)
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except RecursionError as error:
+        raise ValueError("Workshop manifest is nested too deeply") from error
+    return validate_manifest(value, root)
 
 
 def is_legacy_preset(path: Path) -> bool:
@@ -124,5 +128,5 @@ def is_legacy_preset(path: Path) -> bool:
         data = json.loads(path.read_text(encoding="utf-8"))
         return isinstance(data, dict) and "format" not in data and (
             not data or "__preset_name__" in data or bool(PRESET_KEYS.intersection(data)))
-    except (OSError, ValueError, UnicodeError):
+    except (OSError, ValueError, UnicodeError, RecursionError):
         return False

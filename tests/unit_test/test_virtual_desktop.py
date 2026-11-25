@@ -30,15 +30,21 @@ class FakeOverlay(QWidget):
         self._handle = handle
         self.hidden_times = 0
         self.shown_times = 0
+        self._shown = True
+
+    def isVisible(self) -> bool:  # noqa: N802 - Qt's own spelling
+        return self._shown
 
     def winId(self):  # noqa: N802 - Qt's own spelling
         return self._handle
 
     def hide(self) -> None:
         self.hidden_times += 1
+        self._shown = False
 
     def show(self) -> None:
         self.shown_times += 1
+        self._shown = True
 
 
 def on_desktops(*present):

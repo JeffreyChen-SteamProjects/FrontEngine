@@ -173,11 +173,14 @@ class WallpaperSettingUI(SettingPage):
 
     @owned_action
     def _show_folder_for_monitor(self) -> None:
-        empty = language_wrapper.language_word_dict.get(
-            "wallpaper_no_folder", _NO_FOLDER)
         monitor = self.current_monitor()
-        self.folder_label.setText(self.folders.get(monitor) or empty)
-        self.quiet_folder_label.setText(self.quiet_folders.get(monitor) or empty)
+        for label, folders in ((self.folder_label, self.folders), (self.quiet_folder_label, self.quiet_folders)):
+            folder = folders.get(monitor)
+            if folder:
+                retranslator.forget(label)
+                label.setText(folder)
+            else:
+                retranslator.set_text(label, "wallpaper_no_folder", _NO_FOLDER)
 
     def build_playlist(self, monitor: int) -> Playlist:
         """依該螢幕的（一般時段）資料夾建立播放清單。"""

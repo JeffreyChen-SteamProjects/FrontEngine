@@ -73,6 +73,8 @@ class SceneManager:
         proxy.setZValue(setting.get('z', 0))
         proxy.setVisible(setting.get('visible', True))
         widget = proxy.widget()
+        if widget is not None and ('width' in setting or 'height' in setting):
+            widget.resize(int(setting.get('width', widget.width())), int(setting.get('height', widget.height())))
         if widget is not None and hasattr(widget, 'set_active'):
             widget.set_active(bool(getattr(self.graphic_scene, '_media_view_owners', set()))
                               and setting.get('visible', True))

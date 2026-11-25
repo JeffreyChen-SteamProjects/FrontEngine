@@ -190,6 +190,13 @@ class World:
         resident.zone = zone
         entrance = self.zones[zone].entrance
         resident.x_milli = (entrance * CELL_PIXELS + CELL_PIXELS // 2) * 1000
+        waiting = zone in self.offline_zones
+        if waiting and not resident.parked:
+            self.park(identifier, True)
+            self._offline_parked.add(identifier)
+        elif not waiting and identifier in self._offline_parked:
+            self.park(identifier, False)
+            self._offline_parked.discard(identifier)
         self.emit("moved_zone", resident=identifier, zone=zone)
         return "accepted"
 

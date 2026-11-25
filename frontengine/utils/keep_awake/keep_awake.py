@@ -38,9 +38,9 @@ ES_DISPLAY_REQUIRED = 0x00000002
 # outside input reaches it.
 _HELPERS = {
     "darwin": ["/usr/bin/caffeinate", "-dimsu"],
-    "linux": ["systemd-inhibit", "--what=idle:sleep",
+    "linux": ["/usr/bin/systemd-inhibit", "--what=idle:sleep",
               "--who=FrontEngine", "--why=Overlay on screen", "--mode=block",
-              "sleep", "infinity"],
+              "/usr/bin/sleep", "infinity"],
 }
 
 

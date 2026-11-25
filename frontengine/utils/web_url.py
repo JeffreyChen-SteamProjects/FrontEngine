@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from typing import Optional
 from urllib.parse import parse_qs, urlparse
 
@@ -90,4 +91,14 @@ def normalize_web_url(url: str) -> str:
             f"https://www.youtube.com/embed/{video_id}"
             f"?autoplay=1&mute=1&loop=1&playlist={video_id}"
         )
-    return stripped
+    return _with_scheme(stripped)
+
+
+def _with_scheme(url: str) -> str:
+    """An address as people type it: without a scheme the page would come up blank, over everything."""
+    if re.match(r"[a-z][a-z0-9+.-]*:(?!\d)", url, re.IGNORECASE) or any(space in url for space in " \t"):
+        return url
+    host = re.split(r"[/?#:]", url, maxsplit=1)[0].lower()
+    if host == "localhost" or re.fullmatch(r"[\d.]+", host):
+        return f"http://{url}"
+    return f"https://{url}" if "." in host else url

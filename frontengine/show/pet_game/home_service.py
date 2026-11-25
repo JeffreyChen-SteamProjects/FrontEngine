@@ -80,6 +80,27 @@ class _PreparedHomeClose:
         service._prepared_close = None
 
 
+RETURN_CHECK_MS = 5000          # between looks for pets that were live elsewhere
+
+
+def _take_in(world: World, resident, session: PetProfileSession) -> None:
+    """The pet comes under the home's care with what it was outside: the profile is where a desktop pet
+    keeps its care, and the home's copy is as old as the day the pet left. Affection is never lost, even
+    if the last mirroring into the profile failed. Free arranging keeps its own values."""
+    try:
+        profile = session.state()
+    except (OSError, ValueError, KeyError):
+        return
+    resident.name = profile.get("name", resident.name)
+    if world.sandbox:
+        return
+    resident.affection = max(resident.affection, int(profile.get("affection", 0)))
+    for need, key in (("energy", "energy"), ("fullness", "fullness"), ("mood", "mood")):
+        value = profile.get(key)
+        if isinstance(value, (int, float)) and not isinstance(value, bool):
+            resident.needs[need] = max(0, min(100, int(value)))
+
+
 class HomeService(QObject):
     """Commands go through ``run``; views read ``world`` and listen to signals."""
 
@@ -124,6 +145,10 @@ class HomeService(QObject):
             self.periodic = QTimer(self)
             self.periodic.setInterval(PERIODIC_SAVE_MS)
             self.periodic.timeout.connect(self._periodic_save)
+            self.returns = QTimer(self)
+            self.returns.setInterval(RETURN_CHECK_MS)
+            self.returns.timeout.connect(self._look_for_returns)
+            self.returns.start()
         except BaseException:
             if isinstance(store, HomeSaveStore):
                 store._detach_service(self)
@@ -191,6 +216,7 @@ class HomeService(QObject):
             session.pause()
             self._pending_mode.sessions[identifier] = session
             sessions[identifier] = session
+            _take_in(world, world.residents[identifier], session)
         return sessions
 
     def _commit_mode(self, target: HomeSaveStore, world: World | None,
@@ -253,7 +279,9 @@ class HomeService(QObject):
         self.world = world
         for identifier in sorted(world.residents):
             resident = world.residents[identifier]
-            if not self._lease(identifier):
+            if self._lease(identifier):
+                _take_in(world, resident, self.sessions[identifier])
+            else:
                 cancel_activity(world, resident, "active_elsewhere")
                 resident.away = True
 
@@ -262,17 +290,28 @@ class HomeService(QObject):
         self._require_mutable()
         returned = []
         for identifier in sorted(self.world.residents if self.world else ()):
-            if identifier not in self.sessions and self._lease(identifier):
-                self.world.residents[identifier].away = False
+            if identifier not in self.sessions and self._lease(identifier, quiet=True):
+                resident = self.world.residents[identifier]
+                _take_in(self.world, resident, self.sessions[identifier])
+                resident.away = False
                 returned.append(identifier)
         return returned
 
-    def _lease(self, identifier: str) -> bool:
+    def _look_for_returns(self) -> None:
+        """A pet that was live elsewhere is let back in once it no longer is."""
+        if self.world is None or self._closed or self._prepared_close is not None or self._pending_mode is not None:
+            return
+        if any(resident.away for resident in self.world.residents.values()) and self.retry_leases():
+            self._publish()
+            self.schedule_save()
+
+    def _lease(self, identifier: str, quiet: bool = False) -> bool:
         """Hold the identity like a desktop pet would; never start its care timer."""
         try:
             session = self._session_factory(self, identifier, self.profiles)
         except ValueError as error:
-            front_engine_logger.warning(f"[PetHome] resident {identifier} unavailable: {error}")
+            log = front_engine_logger.debug if quiet else front_engine_logger.warning
+            log(f"[PetHome] resident {identifier} unavailable: {error}")
             return False
         session.pause()
         self.sessions[identifier] = session
@@ -326,7 +365,13 @@ class HomeService(QObject):
         """
         session = self.sessions.get(identifier)
         resident = self.world.residents.get(identifier) if self.world else None
-        if session is None or resident is None or self.world.sandbox:
+        if session is None or resident is None:
+            return True
+        try:
+            resident.name = session.profiles.get(identifier)["name"]          # renamed since
+        except (OSError, ValueError, KeyError, TypeError, AttributeError):
+            pass
+        if self.world.sandbox:
             return True
         companion = session.companion
         companion.energy = resident.needs["energy"]

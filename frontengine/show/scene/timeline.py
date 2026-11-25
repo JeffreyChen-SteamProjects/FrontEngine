@@ -43,6 +43,8 @@ class SceneTimeline(QObject):
         elif self.previewing:
             self.position = min(self.position, self.duration)
             self._anchor = self.clock() - self.position
+            if self.active and self.requested and self.duration > 0 and not self.timer.isActive():
+                self.timer.start()          # the first keyframes came while it was already playing
             self._apply()
 
     def _state(self, state: str) -> None:

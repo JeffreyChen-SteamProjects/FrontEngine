@@ -19,6 +19,7 @@ from PySide6.QtWidgets import (
     QCheckBox, QDialog, QDialogButtonBox, QGridLayout, QLabel, QLineEdit, QWidget,
 )
 
+from frontengine.ui.dialog.dialog_kit import save_or_tell
 from frontengine.user_setting.user_setting_file import user_setting_dict, write_user_setting
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
@@ -98,7 +99,7 @@ class ScreenPrivacyDialog(QDialog):
 
     def accept(self) -> None:
         settings = self.settings()
-        user_setting_dict[SETTING_KEY] = settings
-        write_user_setting()
+        if not save_or_tell(self, {SETTING_KEY: settings}, write_user_setting):
+            return
         front_engine_logger.info(f"[ScreenPrivacyDialog] saved | {settings}")
         super().accept()

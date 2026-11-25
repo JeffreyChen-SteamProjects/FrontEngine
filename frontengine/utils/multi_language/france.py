@@ -1012,6 +1012,8 @@ french_word_dict = {
     'rules_preview_hint': 'Aperçu seul : matches indique les conditions actuelles, active un déclenchement déjà effectué. Aucune action ni transition consommée.',
     'rules_history_hint': 'Les 200 derniers déclenchements/délais/actions de cette session, avec conditions et contexte observé.',
     'rules_invalid_rows': 'Complétez chaque ligne nommée. Priorité -1000…1000, délai entier de 0…86400 secondes ; 200 règles maximum.',
+    "reminder_invalid_rows": "Chaque rappel a besoin d’une heure : un nombre de minutes ou une heure sur 24 h comme 09:30.",
+    "rules_invalid_times": "Les jours sont Mon, Tue… (ou 0-6, lundi en premier) et les heures sur 24 h comme 19:30. Laissez vide pour « tous ».",
     'rules_matched': 'Conditions remplies',
     'rules_unmatched': 'Conditions non remplies',
     'rules_receipt_dispatched': 'Envoyée',

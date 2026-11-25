@@ -34,7 +34,7 @@ from frontengine.ui.page.layout_kit import SettingPage
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import retranslator, tr
-from frontengine.utils.now_playing.now_playing import now_playing
+from frontengine.utils.now_playing.now_playing import BackgroundNowPlaying
 from frontengine.user_setting.user_setting_file import (
     import_waits_for_restart, user_setting_dict, write_user_setting,
 )
@@ -336,7 +336,7 @@ class WidgetsSettingUI(SettingPage):
     @owned_action
     def start_now_playing(self) -> None:
         front_engine_logger.info("[WidgetsSettingUI] start_now_playing")
-        widget = NowPlayingWidget(now_playing)
+        widget = NowPlayingWidget(BackgroundNowPlaying())
         widget.set_ui_window_flag(show_on_bottom=False)
         screen = QGuiApplication.primaryScreen()
         if screen is not None:
