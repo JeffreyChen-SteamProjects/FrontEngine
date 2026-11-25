@@ -22,7 +22,7 @@ FrontEngine 是一個 PySide6 桌面**覆蓋層（overlay）框架**：把影片
   | 進入方式 | 位置 |
   | --- | --- |
   | 命令列 `frontengine` | `pyproject.toml [project.scripts]` → `frontengine.ui.main_ui:main` |
-  | `python -m frontengine` | `frontengine/__main__.py` → `main()`（支援 `--preset` / `--data-dir` / `--debug`） |
+  | `python -m frontengine` | `frontengine/__main__.py` → `main()`（支援 `--preset` / `--debug`；開機自啟另帶 `--autostart`） |
   | 程式內嵌 | `frontengine.start_front_engine()` |
   | 打包執行檔 | `exe/start_front_engine.py`，由 `exe/build_exe.py`（Nuitka）建置 |
 
@@ -382,7 +382,7 @@ HomeService owns its successfully attached store through shutdown. Mode preparat
 | `break_reminder/break_reminder.py` | 104 | 20-20-20 護眼休息狀態機。 |
 | `focus_timer/focus_timer.py` | 112 | 番茄鐘狀態機（專注 → 休息 → 長休息）。 |
 | `keep_awake/keep_awake.py` | 154 | 阻止螢幕睡著：Windows `SetThreadExecutionState`、macOS `caffeinate`、Linux `systemd-inhibit`。 |
-| `autostart/autostart_service.py` | 172 | 開機自啟（命令帶 `--data-dir`，舊登錄由 `refresh()` 補上）：Windows 寫 HKCU Run、Linux 放 XDG autostart、macOS 放 LaunchAgent。 |
+| `autostart/autostart_service.py` | 172 | 開機自啟（命令帶 `--autostart`，資料目錄記在使用者設定資料夾的 `FrontEngine/autostart.json`，不放在登錄或命令裡；舊登錄由 `refresh()` 補上）：Windows 寫 HKCU Run、Linux 放 XDG autostart、macOS 放 LaunchAgent。 |
 | `playlist/playlist.py` | 140 | 桌布播放清單（循環、隨機不重複）與依時段切換清單。 |
 | `text_source/text_source.py` | 190 | 動態文字來源：時鐘、日期、倒數、碼表、系統負載、天氣，含樣板 `{key}` 套用。 |
 | `weather/weather_service.py` | 205 | Open-Meteo 免金鑰天氣（只送座標），背景更新 + 10 分鐘快取。`FORECAST_FIELDS` 同 `SAMPLE_FIELDS`，宣告樣板可用的欄位。 |
@@ -606,7 +606,7 @@ Cancellation tombstones count toward the 500-record limit and prevent stale impo
 
 `utils/linux` provides explicit X11/Wayland session policy, EWMH/python-xlib window list/physical-frame geometry/pin/move, compositing-manager-gated opacity and physical XRandR work areas. Native Wayland arbitrary-window control/global pynput input/profile positioning are rejected with concrete reasons, not described as global Xwayland support. Linux-only python-xlib dependency aligns requirements and both manifests. PulseCapture launches fixed distro parec paths on one worker, default output monitor or microphone, one sanitized 2048-float memory frame; lazy PulseMeter construction does not start disabled reactive audio. Stop handles spawning races, kills only own child, worker reaps; shared captures stop on MainUI shutdown and join only through GUI-polled barrier. WASAPI peak-only behavior unchanged; Linux meter requires real audio samples, explicit docs distinction. LoopbackSpectrum/SystemAudioMeter/MicrophoneMeter route Linux to this adapter. platform_info/capabilities.py and Help platform_capabilities_dialog display read-only prerequisites/original failure reasons without enabling capture/listeners. Protocol acceptance uses isolated Linux display/audio servers; physical Mac/Linux audio/multi-monitor acceptance remains separate.
 
-- Windows entry `exe/start_front_engine.py` delegates normal startup to the published main_ui.main CLI (--preset/--data-dir/--debug). Explicit --verify-scene-build FIXTURES REPORT calls the fixed exe/scene_build_acceptance.py probe with isolated temporary settings and local seven-type inputs (tests/integration/scene_build_fixtures.py). It verifies compiled native media/editor/export/cleanup and writes bounded owned screenshots/report, never supplied Python scripts. Fixture generation optionally needs PyAV; native Puppet acceptance needs the optional runtime in the build environment. Installed Pillow decoder plugins and Rigora package data are included by build_exe.py.
+- Windows entry `exe/start_front_engine.py` delegates normal startup to the published main_ui.main CLI (--preset/--debug). Explicit --verify-scene-build FIXTURES REPORT calls the fixed exe/scene_build_acceptance.py probe with isolated temporary settings and local seven-type inputs (tests/integration/scene_build_fixtures.py). It verifies compiled native media/editor/export/cleanup and writes bounded owned screenshots/report, never supplied Python scripts. Fixture generation optionally needs PyAV; native Puppet acceptance needs the optional runtime in the build environment. Installed Pillow decoder plugins and Rigora package data are included by build_exe.py.
 
 
 ## Companion state and active sessions
