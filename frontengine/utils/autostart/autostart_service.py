@@ -10,6 +10,8 @@ the content builders are pure so they can be tested on any platform.
 """
 from __future__ import annotations
 
+import json
+import os
 import sys
 from pathlib import Path
 from typing import List, Optional
@@ -36,9 +38,10 @@ def launch_command() -> List[str]:
     回傳能重新啟動本程式的命令：打包成執行檔時就是執行檔本身，
     否則以目前的直譯器執行 `-m frontengine`。
     The command that relaunches the app: the packaged executable, otherwise the
-    current interpreter running ``-m frontengine``. It names the data directory:
-    settings live in the directory the app runs in, and the session starts
-    programs in one of its own (System32, the home directory, ``/``).
+    current interpreter running ``-m frontengine``. ``--autostart`` sends it to
+    the data directory recorded when this was switched on: settings live in the
+    directory the app runs in, and the session starts programs in one of its own
+    (System32, the home directory, ``/``).
     """
     if getattr(sys, "frozen", False):
         program = [sys.executable]
@@ -46,7 +49,39 @@ def launch_command() -> List[str]:
         program = [str(Path(sys.argv[0]).resolve())]
     else:
         program = [sys.executable, "-m", "frontengine"]
-    return program + ["--data-dir", str(Path.cwd())]
+    return program + [AUTOSTART_FLAG]
+
+
+AUTOSTART_FLAG = "--autostart"
+
+
+def record_path() -> Path:
+    """Where the data directory for a start with the session is kept: the user's own settings folder."""
+    if sys.platform == "win32":
+        base = Path(os.environ.get("APPDATA") or Path.home() / "AppData" / "Roaming")
+    elif sys.platform == "darwin":
+        base = Path.home() / "Library" / "Application Support"
+    else:
+        base = Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config")
+    return base / "FrontEngine" / "autostart.json"
+
+
+def remember_directory(directory: Path) -> None:
+    path = record_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps({"directory": str(Path(directory).resolve())}), encoding="utf-8")
+
+
+def recorded_directory() -> Optional[Path]:
+    """The data directory recorded with the autostart entry, when it is still a directory."""
+    try:
+        value = json.loads(record_path().read_text(encoding="utf-8")).get("directory")
+    except (OSError, ValueError, AttributeError, RecursionError):
+        return None
+    if not isinstance(value, str) or not value:
+        return None
+    directory = Path(value)
+    return directory if directory.is_absolute() and directory.is_dir() else None
 
 
 def is_compiled() -> bool:
@@ -121,6 +156,8 @@ def set_enabled(enabled: bool) -> bool:
     """
     front_engine_logger.info(f"[autostart] set_enabled | enabled={enabled}")
     try:
+        if enabled:
+            remember_directory(Path.cwd())
         if sys.platform == "win32":
             return _set_windows(enabled)
         return _set_file(enabled)
@@ -130,7 +167,7 @@ def set_enabled(enabled: bool) -> bool:
 
 
 def refresh() -> None:
-    """Rewrite an entry from before it named the data directory; leave any other alone."""
+    """Rewrite an entry from before it went back to the data directory; leave any other alone."""
     if sys.platform == "win32":
         current = _read_windows_run_value()
     else:
@@ -139,7 +176,7 @@ def refresh() -> None:
             current = path.read_text(encoding="utf-8") if path is not None and path.is_file() else None
         except (OSError, ValueError):
             current = None
-    if current is not None and "--data-dir" not in current:
+    if current is not None and AUTOSTART_FLAG not in current:
         set_enabled(True)
 
 

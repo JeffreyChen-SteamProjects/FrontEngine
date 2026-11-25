@@ -185,9 +185,8 @@ class BaseWidget(QWidget):
         """Take on the tier and the low power already chosen; the control center told the others."""
         if self.quality_tier != DEFAULT_TIER:
             self.apply_quality_tier()
-        set_low_power = getattr(self, "set_low_power", None)
-        if set_low_power is not None and user_setting_dict.get("low_power"):
-            set_low_power(True)
+        if user_setting_dict.get("low_power") and hasattr(self, "set_low_power"):
+            self.set_low_power(True)
 
     def restore_saved_geometry(self) -> None:
         """若這類覆蓋層有記住的位置就套用（使用者拖曳過才會有）。"""

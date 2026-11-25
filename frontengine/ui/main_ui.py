@@ -1672,13 +1672,13 @@ def main() -> None:
         "--debug", action="store_true", help="Enable debug auto-close timer"
     )
     parser.add_argument(
-        "--data-dir", default=None, help="Directory with the settings and presets (default: the current one)"
+        autostart_service.AUTOSTART_FLAG, action="store_true",
+        help="Started with the session: run in the data directory recorded when that was switched on"
     )
     # Ignore unknown args so Qt's own flags don't break parsing.
     args, _unknown = parser.parse_known_args()
-    if args.data_dir:
-        try:
-            os.chdir(args.data_dir)
-        except OSError as error:
-            parser.error(f"--data-dir: {error}")
+    if args.autostart:
+        directory = autostart_service.recorded_directory()
+        if directory is not None:
+            os.chdir(directory)
     start_front_engine(debug=args.debug, preset=args.preset)

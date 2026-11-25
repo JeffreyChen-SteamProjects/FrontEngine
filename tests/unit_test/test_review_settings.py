@@ -195,13 +195,22 @@ def test_an_overlay_takes_on_the_chosen_tier(monkeypatch):
         overlay.close()
 
 
-def test_the_autostart_entry_names_the_data_directory(tmp_path, monkeypatch):
-    monkeypatch.chdir(tmp_path)
-    command = autostart_service.launch_command()
-    assert command[-2:] == ["--data-dir", str(tmp_path)]
+def test_starting_with_the_session_goes_back_to_the_data_directory(tmp_path, monkeypatch):
+    monkeypatch.setattr(autostart_service, "record_path", lambda: tmp_path / "config" / "autostart.json")
+    data = tmp_path / "data"
+    data.mkdir()
+    monkeypatch.chdir(data)
+    assert autostart_service.launch_command()[-1] == "--autostart"
+    assert autostart_service.recorded_directory() is None
+    monkeypatch.setattr(autostart_service.sys, "platform", "linux")
+    monkeypatch.setattr(autostart_service, "autostart_path", lambda: tmp_path / "entry.desktop")
+    assert autostart_service.set_enabled(True)
+    assert autostart_service.recorded_directory() == data.resolve()
+    (tmp_path / "config" / "autostart.json").write_text("[" * 60000, encoding="utf-8")
+    assert autostart_service.recorded_directory() is None
     written = []
     monkeypatch.setattr(autostart_service, "set_enabled", written.append)
-    for value, rewritten in (("python -m frontengine", True), ("python -m frontengine --data-dir x", False), (None, False)):
+    for value, rewritten in (("python -m frontengine", True), ("python -m frontengine --autostart", False), (None, False)):
         written.clear()
         monkeypatch.setattr(autostart_service.sys, "platform", "win32")
         monkeypatch.setattr(autostart_service, "_read_windows_run_value", lambda value=value: value)
@@ -209,6 +218,18 @@ def test_the_autostart_entry_names_the_data_directory(tmp_path, monkeypatch):
         assert written == ([True] if rewritten else [])
     assert "100%%" in autostart_service.desktop_entry_text(["/home/me/100%/python"])
 
+
+def test_the_main_entry_moves_to_the_recorded_directory(tmp_path, monkeypatch):
+    from frontengine.ui import main_ui
+    started, moved = [], []
+    monkeypatch.setattr(main_ui, "start_front_engine", lambda **named: started.append(named))
+    monkeypatch.setattr(main_ui.os, "chdir", moved.append)
+    monkeypatch.setattr(autostart_service, "recorded_directory", lambda: tmp_path)
+    monkeypatch.setattr(main_ui.sys, "argv", ["frontengine", "--autostart"])
+    main_ui.main()
+    monkeypatch.setattr(main_ui.sys, "argv", ["frontengine"])
+    main_ui.main()
+    assert moved == [tmp_path] and len(started) == 2
 
 def test_preset_names_of_any_language_stay_apart(tmp_path):
     repository = PresetRepository(tmp_path)
