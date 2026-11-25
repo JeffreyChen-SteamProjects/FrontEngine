@@ -18,6 +18,7 @@ from PySide6.QtCore import QPoint, QPointF, QRectF, Qt, QTimer, Signal
 from PySide6.QtGui import QPainter
 from PySide6.QtWidgets import QMenu, QWidget
 
+from frontengine.utils.screen_privacy import capture_affinity
 from frontengine.show.pet.desktop_pet import (BEHAVIOUR_ACTIONS, POSE_STATES, SURFACE_FLOOR, PetMotion,
                                               windows_platforms)
 from frontengine.utils.multi_language.retranslate import translate
@@ -143,6 +144,10 @@ class OutingPet(QWidget):
         self.update()
 
     # ----- drawing --------------------------------------------------------------------------
+
+    def showEvent(self, event) -> None:
+        super().showEvent(event)
+        capture_affinity.follow(self)
 
     def paintEvent(self, _event) -> None:
         renderer = self.strip.art.renderer(self.identifier) if self.strip.art is not None else None

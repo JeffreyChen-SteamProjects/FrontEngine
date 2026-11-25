@@ -274,4 +274,5 @@ class RegionCaptureWidget(BaseWidget):
         painter.fillRect(rect, Qt.GlobalColor.transparent)
         painter.setCompositionMode(QPainter.CompositionMode.CompositionMode_SourceOver)
         painter.setPen(QPen(QColor(_EDGE_COLOR), 2))
-        painter.drawRect(rect)
+        # Outside the selection, whose screen is grabbed with this layer still on it.
+        painter.drawRect(rect.adjusted(-2, -2, 1, 1))

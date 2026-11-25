@@ -187,6 +187,11 @@ class ScreenCareSettingUI(SettingPage):
         widgets.clear()
 
     # --- colour filter ---------------------------------------------------
+    def stop_overlays(self) -> None:
+        """Every overlay was closed from outside: offer to start them again."""
+        for stop in (self.stop_filter, self.stop_ruler, self.stop_color_vision):
+            stop()
+
     @owned_action
     def toggle_filter(self) -> None:
         """開關色彩濾鏡。"""

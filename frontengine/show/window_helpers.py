@@ -5,6 +5,8 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QIcon
 from PySide6.QtWidgets import QWidget
 
+from frontengine.utils.screen_privacy import capture_affinity
+
 # Windows hands a click on a fully transparent pixel of a see-through window to whatever is
 # underneath, so a clear layer never gets the mouse. A layer that takes the mouse fills itself with
 # this near-invisible alpha instead.
@@ -63,6 +65,7 @@ def set_overlay_locked(widget: QWidget, locked: bool) -> bool:
     # Changing window flags hides the window, so show it again if it was visible.
     if was_visible:
         widget.show()
+        capture_affinity.follow(widget)          # a new window, so included again
     return True
 
 

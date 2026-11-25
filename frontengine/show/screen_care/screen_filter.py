@@ -18,6 +18,7 @@ from PySide6.QtGui import QColor, QCursor, QPainter
 
 from frontengine.show.base_widget import BaseWidget
 from frontengine.utils.logging.loggin_instance import front_engine_logger
+from frontengine.utils.power_mode.power_mode import tier_interval
 
 # 常用的護眼色片（名稱 -> HEX）；暖色調光最常見，其餘給視覺壓力／閱讀障礙使用。
 # Common eye-comfort tints. Warm dimming is the usual pick; the rest help with
@@ -123,7 +124,12 @@ class ReadingRulerWidget(ScreenCareOverlay):
     def start_following(self, interval_ms: int = REFRESH_MS) -> None:
         """開始跟隨游標 / Start tracking the cursor."""
         self.follow_cursor()
-        self._timer.start(max(10, int(interval_ms)))
+        self._interval_ms = max(10, int(interval_ms))
+        self._timer.start(tier_interval(self._interval_ms, self.quality_tier))
+
+    def apply_quality_tier(self) -> None:
+        if self._timer.isActive():
+            self._timer.start(tier_interval(self._interval_ms, self.quality_tier))
 
     def set_band(self, band_height: Optional[int] = None, strength: Optional[int] = None) -> None:
         """調整亮帶高度或壓暗程度。"""

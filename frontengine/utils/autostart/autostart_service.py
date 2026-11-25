@@ -35,12 +35,23 @@ def launch_command() -> List[str]:
     """
     回傳能重新啟動本程式的命令：打包成執行檔時就是執行檔本身，
     否則以目前的直譯器執行 `-m frontengine`。
-    The command that relaunches the app: the frozen executable when packaged,
-    otherwise the current interpreter running ``-m frontengine``.
+    The command that relaunches the app: the packaged executable, otherwise the
+    current interpreter running ``-m frontengine``. It names the data directory:
+    settings live in the directory the app runs in, and the session starts
+    programs in one of its own (System32, the home directory, ``/``).
     """
     if getattr(sys, "frozen", False):
-        return [sys.executable]
-    return [sys.executable, "-m", "frontengine"]
+        program = [sys.executable]
+    elif is_compiled():
+        program = [str(Path(sys.argv[0]).resolve())]
+    else:
+        program = [sys.executable, "-m", "frontengine"]
+    return program + ["--data-dir", str(Path.cwd())]
+
+
+def is_compiled() -> bool:
+    """Whether this is the Nuitka build, which does not set ``sys.frozen``."""
+    return "__compiled__" in globals()
 
 
 def quote_command(command: List[str]) -> str:
@@ -58,7 +69,7 @@ def desktop_entry_text(command: List[str], app_name: str = APP_NAME) -> str:
         "[Desktop Entry]\n"
         "Type=Application\n"
         f"Name={app_name}\n"
-        f"Exec={quote_command(command)}\n"
+        f"Exec={quote_command(command).replace('%', '%%')}\n"       # % starts a field code there
         "X-GNOME-Autostart-enabled=true\n"
         "Terminal=false\n"
     )
@@ -116,6 +127,20 @@ def set_enabled(enabled: bool) -> bool:
     except (OSError, ValueError) as error:
         front_engine_logger.warning(f"[autostart] failed: {error!r}")
         return False
+
+
+def refresh() -> None:
+    """Rewrite an entry from before it named the data directory; leave any other alone."""
+    if sys.platform == "win32":
+        current = _read_windows_run_value()
+    else:
+        path = autostart_path()
+        try:
+            current = path.read_text(encoding="utf-8") if path is not None and path.is_file() else None
+        except (OSError, ValueError):
+            current = None
+    if current is not None and "--data-dir" not in current:
+        set_enabled(True)
 
 
 def _set_file(enabled: bool) -> bool:

@@ -2,10 +2,12 @@
 from __future__ import annotations
 
 from contextlib import contextmanager, nullcontext
+from datetime import datetime
 from functools import wraps
 import errno
 import os
 from pathlib import Path
+import shutil
 import stat
 from threading import RLock
 from typing import TYPE_CHECKING, Iterator
@@ -189,6 +191,8 @@ class StorageSession:
         self._operations = 0
         self._uses: set[_Use] = set()
         self._settings: dict = {}
+        # Settings an import replaced while the pages still show the old ones (see import_waits_for_restart).
+        self.imported_keys: set[str] = set()
         self._profiles: PetProfiles | None = None
         self._home_claims: dict[str, _HomeUse] = {}
 
@@ -222,9 +226,20 @@ class StorageSession:
             if isinstance(error.__cause__, OSError):
                 raise StorageUnavailable(f"Cannot read settings {path}: {error.__cause__}") from error
             front_engine_logger.warning(f"[StorageSession] unreadable {path}: {error}")
+            self._keep_damaged(path)
             return
         if isinstance(data, dict):
-            self._settings.update(data)
+            from frontengine.user_setting.user_setting_file import checked_settings
+            self._settings.update(checked_settings(data))
+
+    @staticmethod
+    def _keep_damaged(path: Path) -> None:
+        """Put a copy aside: the next save replaces the file with defaults, notes and all."""
+        stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+        try:
+            shutil.copy2(path, path.with_name(f"{path.stem}.damaged-{stamp}{path.suffix}"))
+        except OSError as error:
+            front_engine_logger.warning(f"[StorageSession] damaged settings not kept: {error}")
 
     @property
     def directory(self) -> Path:

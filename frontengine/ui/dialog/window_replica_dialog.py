@@ -46,13 +46,14 @@ class WindowReplicaDialog(QDialog):
     """列出目前的視窗，讓使用者挑一個做成即時複本。"""
 
     def __init__(self, parent: Optional[QWidget] = None, lister=None,
-                 replica_factory=WindowReplicaWidget) -> None:
+                 replica_factory=WindowReplicaWidget, replicas: Optional[list] = None) -> None:
         front_engine_logger.info("[WindowReplicaDialog] Init")
         super().__init__(parent)
         self.setWindowTitle(_t("window_replica_title", "Replicate a window"))
         self._lister = lister or window_pin.list_windows
         self._replica_factory = replica_factory
-        self.replica_widget_list: List[WindowReplicaWidget] = []
+        # The page's own list when it opened this: replicas outlive the dialog.
+        self.replica_widget_list: List[WindowReplicaWidget] = [] if replicas is None else replicas
 
         self.window_list = QListWidget()
         self.window_list.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)

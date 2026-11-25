@@ -118,6 +118,11 @@ class FocusSettingUI(SettingPage):
         widgets.clear()
 
     # --- dim background --------------------------------------------------
+    def stop_overlays(self) -> None:
+        """Every overlay was closed from outside: offer to start them again."""
+        for stop in (self.stop_dim, self.stop_mask):
+            stop()
+
     @owned_action
     def toggle_dim(self) -> None:
         if self.dim_widget_list:

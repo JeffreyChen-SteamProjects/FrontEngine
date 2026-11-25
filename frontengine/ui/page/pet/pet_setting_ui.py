@@ -31,7 +31,7 @@ from frontengine.ui.page.utils import (
     resolve_preferred_monitor,
 )
 from frontengine.user_setting.desktop_pets import PETS_KEY, RETURN_KEY, checked_returning, desktop_record
-from frontengine.user_setting.user_setting_file import add_recent_file, user_setting_dict
+from frontengine.user_setting.user_setting_file import add_recent_file, import_waits_for_restart, user_setting_dict
 from frontengine.utils.audio_meter.microphone_meter import microphone_level
 from frontengine.utils.audio_meter.screen_audio import audio_level_provider_for_screen
 from frontengine.utils.pet_chat.pet_chat_service import PetChatService
@@ -358,7 +358,8 @@ class PetSettingUI(SettingPage):
 
     def remember_desktop_pets(self) -> None:
         """Record which pets are on the desktop now, so the next start brings them back."""
-        user_setting_dict[PETS_KEY] = desktop_record(self.pet_list)
+        if not import_waits_for_restart(PETS_KEY):
+            user_setting_dict[PETS_KEY] = desktop_record(self.pet_list)
 
     @owned_action
     def bring_pets_back(self) -> int:

@@ -45,7 +45,7 @@ REFRESH_INTERVALS_MS: Dict[str, int] = {
     SOURCE_COUNTDOWN: 1000,
     SOURCE_STOPWATCH: 1000,
     SOURCE_SYSTEM: 2000,
-    SOURCE_WEATHER: 600000,
+    SOURCE_WEATHER: 15000,      # reads a cache: the service asks the network every ten minutes
 }
 
 

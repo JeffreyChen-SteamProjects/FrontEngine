@@ -13,6 +13,7 @@ from PySide6.QtGui import (
 from PySide6.QtMultimedia import QSoundEffect
 from PySide6.QtWidgets import QApplication, QMenu, QWidget
 
+from frontengine.utils.screen_privacy import capture_affinity
 from frontengine.show.base_widget import BaseWidget
 from frontengine.show.window_helpers import apply_overlay_window_flags
 from frontengine.user_setting.user_setting_file import user_setting_dict
@@ -482,6 +483,10 @@ class SpeechBubble(QWidget):
     def reposition(self, anchor: QWidget) -> None:
         geo = anchor.frameGeometry()
         self.move(geo.center().x() - self.width() // 2, geo.top() - self.height() - 6)
+
+    def showEvent(self, event) -> None:
+        super().showEvent(event)
+        capture_affinity.follow(self)
 
     def paintEvent(self, event) -> None:
         painter = QPainter(self)

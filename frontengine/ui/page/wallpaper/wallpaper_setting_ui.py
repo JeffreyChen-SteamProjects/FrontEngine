@@ -29,6 +29,7 @@ from frontengine.utils.multi_language.retranslate import retranslator, tr
 # The English fallback shared by several call sites, seen only when a
 # translation is missing.
 _NO_FOLDER = "No folder chosen"
+VIDEO_RETRY_MS = 1000          # between videos that will not play
 
 from frontengine.utils.playlist.playlist import (
     Playlist, ScheduledPlaylists, clamp_interval, collect_media,
@@ -236,7 +237,8 @@ class WallpaperSettingUI(SettingPage):
             screen = screens[monitor]
             widget.setScreen(screen)
             widget.setGeometry(screen.geometry())
-            widget.set_media(playlist.next())
+            widget.media_failed.connect(lambda widget=widget, monitor=monitor: self._skip_failed(monitor, widget))
+            self._show_next(widget, playlist)
             widget.set_audio_level_provider(audio_level_provider_for_screen(screen, lifetime=self.lifetime))
             widget.set_audio_react(self.react_checkbox.isChecked(),
                                    self.react_strength_slider.value())
@@ -268,6 +270,22 @@ class WallpaperSettingUI(SettingPage):
         retranslator.set_text(
             self.start_button, "wallpaper_start", "Start wallpaper")
 
+    @staticmethod
+    def _show_next(widget: WallpaperWidget, playlist: Playlist) -> bool:
+        """The next file of the list that can be shown: one that cannot must not leave the screen bare."""
+        for _attempt in range(len(playlist)):
+            item = playlist.next()
+            if item and widget.set_media(item):
+                return True
+        return False
+
+    @owned_action
+    def _skip_failed(self, monitor: int, widget: WallpaperWidget) -> None:
+        """A video that turned out not to play: on with the list, but never in a circle of failures."""
+        playlist = self.playlist_for_now(monitor)
+        if playlist is not None and len(playlist) > 1 and self.wallpaper_widgets.get(monitor) is widget:
+            QTimer.singleShot(VIDEO_RETRY_MS, widget, lambda: self._show_next(widget, playlist))
+
     @owned_action
     def advance_all(self) -> None:
         """每個螢幕各自換到「此刻該用的清單」的下一張。"""
@@ -276,9 +294,7 @@ class WallpaperSettingUI(SettingPage):
             if playlist is None or not len(playlist):
                 continue
             try:
-                nxt = playlist.next()
-                if nxt:
-                    widget.set_media(nxt)
+                self._show_next(widget, playlist)
             except RuntimeError:
                 self.wallpaper_widgets.pop(monitor, None)
 

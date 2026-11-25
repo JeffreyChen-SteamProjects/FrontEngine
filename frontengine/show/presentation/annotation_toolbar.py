@@ -13,6 +13,7 @@ from PySide6.QtCore import QPoint, Qt
 from PySide6.QtGui import QColor, QPainter, QPen
 from PySide6.QtWidgets import QHBoxLayout, QPushButton, QWidget
 
+from frontengine.utils.screen_privacy import capture_affinity
 from frontengine.utils.multi_language.retranslate import retranslator, tr
 
 if TYPE_CHECKING:
@@ -135,6 +136,10 @@ class AnnotationToolbar(QWidget):
     def mouseReleaseEvent(self, event) -> None:
         self._drag = None
         event.accept()
+
+    def showEvent(self, event) -> None:
+        super().showEvent(event)
+        capture_affinity.follow(self)
 
     def paintEvent(self, event) -> None:
         painter = QPainter(self)

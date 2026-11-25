@@ -135,7 +135,7 @@ def test_only_the_colour_picker_leaves_the_capture(monkeypatch):
         assert applied[-1] is False and not widget.needs_capture_exclusion
         widget.set_mode("color")
         assert applied[-1] is True and widget.needs_capture_exclusion
-        widget.hidden_from_capture = True              # the control center's "Hide from capture"
+        monkeypatch.setattr(capture_affinity, "_hidden", True)       # the control center's "Hide from capture"
         widget.set_mode("angle")
         assert applied[-1] is True and not widget.needs_capture_exclusion
     finally:

@@ -115,17 +115,18 @@ def test_main_window_registers_every_additional_overlay_list(centre) -> None:
         'screen_care_setting_ui': ('filter_widget_list', 'ruler_widget_list',
                                   'break_overlay_list', 'color_vision_widget_list'),
         'presentation_setting_ui': ('annotation_widget_list', 'cursor_widget_list',
-                                   'keystroke_widget_list', 'magnifier_widget_list', 'whiteboard_widget_list'),
+                                   'keystroke_widget_list', 'magnifier_widget_list', 'whiteboard_widget_list',
+                                   'freeze_widget_list'),
         'focus_setting_ui': ('dim_widget_list', 'mask_widget_list'),
         'widgets_setting_ui': ('spectrum_widget_list', 'monitor_widget_list',
                               'now_playing_widget_list', 'note_widget_list', 'todo_widget_list'),
         'tools_setting_ui': ('measure_widget_list', 'capture_widget_list', 'camera_widget_list',
-                            'pinned_widget_list', 'ocr_widget_list'),
+                            'pinned_widget_list', 'ocr_widget_list', 'replica_widget_list'),
         'image_setting_ui': ('board_widget_list',), 'web_setting_ui': ('dashboard_widgets',),
     }
     owner, sentinels = SimpleNamespace(control_center_ui=centre), []
     for page, attributes in names.items():
-        namespace = SimpleNamespace()
+        namespace = SimpleNamespace(stop_overlays=lambda: None, keep_open_notes=lambda: None)
         for attribute in attributes:
             marker = object()
             sentinels.append(marker)

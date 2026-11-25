@@ -74,7 +74,6 @@ class MeasureWidget(BaseWidget):
     stays_while_paused = True
     # A see-through full-screen layer: never through the GPU compositor (see BaseWidget).
     software_only = True
-    hidden_from_capture = False        # what the control center asked for, kept for mode changes
 
     # Esc: the layer covers the settings window, so it offers its own way out.
     finish_requested = Signal()
@@ -109,7 +108,7 @@ class MeasureWidget(BaseWidget):
         return self.mode == MODE_COLOR
 
     def _apply_capture_exclusion(self) -> None:
-        excluded = capture_affinity.apply_to_widget(self, self.needs_capture_exclusion or self.hidden_from_capture)
+        excluded = capture_affinity.apply_to_widget(self, self.needs_capture_exclusion or capture_affinity.hidden())
         self._reads_itself = self.needs_capture_exclusion and not excluded
 
     def showEvent(self, event) -> None:

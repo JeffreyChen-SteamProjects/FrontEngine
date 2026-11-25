@@ -89,6 +89,12 @@ class OwnedWidgetList(list):
     def append(self, widget):
         self.lifetime.adopt(widget)
         super().append(widget)
+        self._announce(widget)
+
+    def _announce(self, widget):
+        added = getattr(self.lifetime, 'overlay_added', None)
+        if added is not None:
+            added.emit(widget)
 
     def extend(self, widgets):
         for widget in widgets:
@@ -97,12 +103,14 @@ class OwnedWidgetList(list):
     def insert(self, index, widget):
         self.lifetime.adopt(widget)
         super().insert(index, widget)
+        self._announce(widget)
 
 
 class WorkLifetime(QObject):
     """A host-held default generation; retire only after domain saves and closes."""
     finished = Signal()
     failed = Signal(object)
+    overlay_added = Signal(object)          # a page opened one: what was set for all of them is for it too
 
     def __init__(self):
         super().__init__()

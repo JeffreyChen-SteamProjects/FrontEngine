@@ -569,7 +569,7 @@ Windows 安装现在包含 winrt-Windows.Media.Control，让「正在播放」�
 
 音频反应停止采样后，电表会在 1.25 秒内停止自己的采集；重新启用采样可再次启动。
 
-Windows 封装共用 Python CLI 的 --preset 和 --debug。原生封装验收前，在构建环境安装可选 Rigora 运行时（包含 Pillow 动态解码插件及已安装 Rigora 的包数据）。用 `py tests/integration/scene_build_fixtures.py FIXTURES --puppet SAMPLE.puppet` 生成本地合成素材（生成视频另需 PyAV）。在原生桌面运行 `FrontEngine.exe --verify-scene-build FIXTURES REPORT`，REPORT 必须是新目录。固定验收以临时目录隔离设置、保持预览静音，只建立自己的场景／编辑器窗口，验证七种类型、旧／版本化 JSON、导出再加载、GIF 动画、网页交互、撤销重做、暂停恢复和清理，写入 result.json 和预览 PNG 后退出；不执行传入的 Python 测试脚本。请检查报告及退出码，缺少运行时或原生渲染会明确失败。
+Windows 封装共用 Python CLI 的 --preset, --data-dir 和 --debug。原生封装验收前，在构建环境安装可选 Rigora 运行时（包含 Pillow 动态解码插件及已安装 Rigora 的包数据）。用 `py tests/integration/scene_build_fixtures.py FIXTURES --puppet SAMPLE.puppet` 生成本地合成素材（生成视频另需 PyAV）。在原生桌面运行 `FrontEngine.exe --verify-scene-build FIXTURES REPORT`，REPORT 必须是新目录。固定验收以临时目录隔离设置、保持预览静音，只建立自己的场景／编辑器窗口，验证七种类型、旧／版本化 JSON、导出再加载、GIF 动画、网页交互、撤销重做、暂停恢复和清理，写入 result.json 和预览 PNG 后退出；不执行传入的 Python 测试脚本。请检查报告及退出码，缺少运行时或原生渲染会明确失败。
 
 在宠物页面选择身份后打开“自定义宠物”，或从该宠物菜单打开。每个身份可独立设置大小（16–512）、速度（1–20）、地面／漫游／追逐行为、爬墙、坐在窗口上、对话气泡、音量（0–100）、打字时安静、自动休息、抛掷和社交偏好。“使用页面默认值”会继承页面的显示与行为设置；克隆及导入保留各自的设置。“应用”先以原子写入保存，再更新正在运行的宠物。“取消”不更改设置；“恢复默认值”须再按“应用”才生效。保存失败或编辑冲突时保留草稿。Puppet 会禁用不支持的控件，显示与行为设置中仅应用大小、对话气泡及打字时安静。原生换装控件与分层美术仍未完成。
 

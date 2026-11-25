@@ -2015,4 +2015,5 @@ russian_word_dict = {
     "pet_home_visit_needs_packs": "Нужные наборы контента: {packs}",
     "pet_home_no_packs": "Наборов мебели нет. Положите папку набора в папку наборов и перезапустите.",
     "runtime_shutdown_failed": "Не удалось завершить закрытие: {error}",
+    "start_failed": "Не удалось запустить FrontEngine: {reason}",
 }

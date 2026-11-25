@@ -22,7 +22,7 @@ FrontEngine 是一個 PySide6 桌面**覆蓋層（overlay）框架**：把影片
   | 進入方式 | 位置 |
   | --- | --- |
   | 命令列 `frontengine` | `pyproject.toml [project.scripts]` → `frontengine.ui.main_ui:main` |
-  | `python -m frontengine` | `frontengine/__main__.py` → `main()`（支援 `--preset` / `--debug`） |
+  | `python -m frontengine` | `frontengine/__main__.py` → `main()`（支援 `--preset` / `--data-dir` / `--debug`） |
   | 程式內嵌 | `frontengine.start_front_engine()` |
   | 打包執行檔 | `exe/start_front_engine.py`，由 `exe/build_exe.py`（Nuitka）建置 |
 
@@ -147,7 +147,7 @@ FrontEngine 是一個 PySide6 桌面**覆蓋層（overlay）框架**：把影片
 | `shortcuts/shortcut_sheet.py` | 152 | 快速鍵速查表，把目前綁定畫在畫面中央、點擊穿透。 |
 | `monitor/monitor_widget.py` | 341 | `SystemMonitorWidget`（CPU／記憶體／磁碟／電池／網路上下行折線圖，使用者挑要顯示哪幾條）與 `NowPlayingWidget`（正在播放）。折線分百分比與速率兩種：百分比縱軸固定 0~100，速率跟著視窗內最大值並有下限。資料來源皆可注入。 |
 | `spectrum/spectrum_widget.py` | 167 | 音訊頻譜（長條／環形），含平滑與慢慢落下的峰值。 |
-| `wallpaper/wallpaper_widget.py` | 169 | 桌布層：位於所有視窗底下，可播圖片／動圖，可隨系統音量脈動。 |
+| `wallpaper/wallpaper_widget.py` | 169 | 桌布層：位於所有視窗底下，可播圖片／動圖／影片（無聲循環，播不了時發 `media_failed`），可隨系統音量脈動。 |
 
 #### 護眼與專注
 
@@ -348,7 +348,7 @@ HomeService owns its successfully attached store through shutdown. Mode preparat
 | `window_pin/window_layout.py` | 146 | 記下目前所有視窗位置，之後一鍵擺回去。 |
 | `window_pin/monitor_move.py` | 268 | 把前景視窗搬到下一個螢幕，並保留相對位置（Windows 內建的 Win+Shift+方向鍵只會整個貼過去）。幾何全部是純函式，螢幕以 `(x, y, w, h)` 傳入；判斷「目前在哪一台」是比重疊面積而不是看左上角。**螢幕矩形取 Win32 實體像素**，不能用 Qt 的邏輯像素——`SetWindowPos` 用實體像素，混合 DPI 下兩者差 25%（實機 100%+125% 量到 1536 vs 1920）。跨 DPI 時 Windows 會在我們之後再依比例放大視窗（維持視覺大小，是對的），所以落地後要再夾回螢幕內一次。僅 Windows。 |
 | `window_replica/dwm_thumbnail.py` | 232 | DWM 縮圖：另一個視窗的即時複本（含裁切比例與等比縮放）。 |
-| `screen_privacy/capture_affinity.py` | 123 | `WDA_EXCLUDEFROMCAPTURE`：把視窗排除在螢幕擷取之外（自己看得到、對方看不到）。 |
+| `screen_privacy/capture_affinity.py` | 123 | `WDA_EXCLUDEFROMCAPTURE`：把視窗排除在螢幕擷取之外（自己看得到、對方看不到）。`set_hidden()` 記住「分享隱藏」是否開著，覆蓋層顯示時呼叫 `follow()` 跟上。 |
 | `virtual_desktop/virtual_desktop.py` | 306 | 把覆蓋層綁在開啟它的虛擬桌面：切走隱藏、切回還原。只用**有文件的** `IVirtualDesktopManager`（每桌不同桌布要靠未公開介面，那會隨 Windows 版本壞掉）。`DesktopVisibility` 是純邏輯：只還原自己藏過的，並在覆蓋層關閉後忘掉 handle（handle 會被回收再配給別的視窗）。探測「不知道」時一律不動，否則沒有這個 API 的機器會把全部覆蓋層藏掉。實機量過：切到另一個虛擬桌面確實回傳 False、服務確實藏起來、切回來確實還原；**不認識的 handle 回傳 True 而非錯誤**（安全方向，關掉的覆蓋層不會被誤藏）。僅 Windows。 |
 | `screen_privacy/share_watch.py` | 142 | 偵測會議程式是否開著（以視窗標題比對，要求字界），狀態改變時發訊號。 |
 | `measure/measure.py` | 116 | 量測的純計算：色碼格式（hex/rgb/hsl/css var）、距離、三點夾角。 |
@@ -372,7 +372,7 @@ HomeService owns its successfully attached store through shutdown. Mode preparat
 | --- | ---: | --- |
 | `rules/rule_engine.py` | 331 | 條件式規則：「當 <條件> 成立時，做 <動作>」。條件可組合（星期＋時段＋前景程式＋全螢幕＋電池＋閒置），動作對應到既有能力（套用預設集／隱藏／顯示／關閉／畫質）。**邊緣觸發**：只在「不成立 → 成立」那一刻執行一次，否則每次輪詢都會重套預設集、把使用者手動改的蓋掉。既有的四套排程沒有被取代，這裡補的是它們之間的組合。 |
 | `smart_pause/pause_rules.py` | 104 | 暫停規則的純判斷：全螢幕／電池／指定程式；程式名稱正規化。 |
-| `smart_pause/smart_pause_service.py` | 183 | 週期性檢查上述三件事，狀態改變時發 `pause_changed`。全螢幕偵測會排除本程式自己的視窗（塗鴉層收滑鼠，會成為前景全螢幕視窗）。主視窗收到後呼叫控制中心的 `stand_down()`。 |
+| `smart_pause/smart_pause_service.py` | 183 | 週期性檢查上述三件事，狀態改變時發 `pause_changed`。前景是本程式的工具層（塗鴉、框選…）時看它底下的程式；設定視窗在前景就不算全螢幕。主視窗收到後呼叫控制中心的 `stand_down()`，解除時 `stand_up()` 只還原它收起的。 |
 | `app_profile/app_profile_service.py` | 102 | 前景程式換到有設定的程式時，發出要套用的預設集名稱。 |
 | `preset_schedule/preset_schedule_service.py` | 147 | 每天在指定時間套用預設集，用「跨越目標分鐘」偵測，一天只觸發一次。 |
 | `theme_schedule/theme_schedule_service.py` | 97 | 依時間切換日／夜主題。 |
@@ -382,7 +382,7 @@ HomeService owns its successfully attached store through shutdown. Mode preparat
 | `break_reminder/break_reminder.py` | 104 | 20-20-20 護眼休息狀態機。 |
 | `focus_timer/focus_timer.py` | 112 | 番茄鐘狀態機（專注 → 休息 → 長休息）。 |
 | `keep_awake/keep_awake.py` | 154 | 阻止螢幕睡著：Windows `SetThreadExecutionState`、macOS `caffeinate`、Linux `systemd-inhibit`。 |
-| `autostart/autostart_service.py` | 172 | 開機自啟：Windows 寫 HKCU Run、Linux 放 XDG autostart、macOS 放 LaunchAgent。 |
+| `autostart/autostart_service.py` | 172 | 開機自啟（命令帶 `--data-dir`，舊登錄由 `refresh()` 補上）：Windows 寫 HKCU Run、Linux 放 XDG autostart、macOS 放 LaunchAgent。 |
 | `playlist/playlist.py` | 140 | 桌布播放清單（循環、隨機不重複）與依時段切換清單。 |
 | `text_source/text_source.py` | 190 | 動態文字來源：時鐘、日期、倒數、碼表、系統負載、天氣，含樣板 `{key}` 套用。 |
 | `weather/weather_service.py` | 205 | Open-Meteo 免金鑰天氣（只送座標），背景更新 + 10 分鐘快取。`FORECAST_FIELDS` 同 `SAMPLE_FIELDS`，宣告樣板可用的欄位。 |
@@ -606,7 +606,7 @@ Cancellation tombstones count toward the 500-record limit and prevent stale impo
 
 `utils/linux` provides explicit X11/Wayland session policy, EWMH/python-xlib window list/physical-frame geometry/pin/move, compositing-manager-gated opacity and physical XRandR work areas. Native Wayland arbitrary-window control/global pynput input/profile positioning are rejected with concrete reasons, not described as global Xwayland support. Linux-only python-xlib dependency aligns requirements and both manifests. PulseCapture launches fixed distro parec paths on one worker, default output monitor or microphone, one sanitized 2048-float memory frame; lazy PulseMeter construction does not start disabled reactive audio. Stop handles spawning races, kills only own child, worker reaps; shared captures stop on MainUI shutdown and join only through GUI-polled barrier. WASAPI peak-only behavior unchanged; Linux meter requires real audio samples, explicit docs distinction. LoopbackSpectrum/SystemAudioMeter/MicrophoneMeter route Linux to this adapter. platform_info/capabilities.py and Help platform_capabilities_dialog display read-only prerequisites/original failure reasons without enabling capture/listeners. Protocol acceptance uses isolated Linux display/audio servers; physical Mac/Linux audio/multi-monitor acceptance remains separate.
 
-- Windows entry `exe/start_front_engine.py` delegates normal startup to the published main_ui.main CLI (--preset/--debug). Explicit --verify-scene-build FIXTURES REPORT calls the fixed exe/scene_build_acceptance.py probe with isolated temporary settings and local seven-type inputs (tests/integration/scene_build_fixtures.py). It verifies compiled native media/editor/export/cleanup and writes bounded owned screenshots/report, never supplied Python scripts. Fixture generation optionally needs PyAV; native Puppet acceptance needs the optional runtime in the build environment. Installed Pillow decoder plugins and Rigora package data are included by build_exe.py.
+- Windows entry `exe/start_front_engine.py` delegates normal startup to the published main_ui.main CLI (--preset/--data-dir/--debug). Explicit --verify-scene-build FIXTURES REPORT calls the fixed exe/scene_build_acceptance.py probe with isolated temporary settings and local seven-type inputs (tests/integration/scene_build_fixtures.py). It verifies compiled native media/editor/export/cleanup and writes bounded owned screenshots/report, never supplied Python scripts. Fixture generation optionally needs PyAV; native Puppet acceptance needs the optional runtime in the build environment. Installed Pillow decoder plugins and Rigora package data are included by build_exe.py.
 
 
 ## Companion state and active sessions

@@ -111,6 +111,25 @@ def apply_to_widget(widget: Optional[QWidget], excluded: bool) -> bool:
     return set_excluded_from_capture(handle, excluded)
 
 
+_hidden = False          # "Hide from capture" is on: overlays shown from now on leave the capture too
+
+
+def set_hidden(hidden: bool) -> None:
+    """Whether overlays are hidden from capture now; ``follow`` gives it to the ones shown later."""
+    global _hidden
+    _hidden = bool(hidden)
+
+
+def hidden() -> bool:
+    return _hidden
+
+
+def follow(widget: Optional[QWidget]) -> None:
+    """Leave the capture if overlays do, for a widget just shown: a new window starts out included."""
+    if _hidden and not getattr(widget, "keep_in_capture", False):
+        apply_to_widget(widget, True)
+
+
 def apply_to_widgets(widgets: Optional[Iterable[QWidget]], excluded: bool) -> int:
     """對一批 widget 套用，回傳成功的數量。"""
     applied = 0

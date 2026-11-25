@@ -168,3 +168,6 @@ steam_sdk
 **/pet-album/
 **/pet-home-packs/
 **/pet-home-looks/
+
+# Directory ownership lock, written while FrontEngine runs
+.frontengine-owner.lock

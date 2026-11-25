@@ -1,13 +1,14 @@
 from abc import abstractmethod
 from typing import Optional
 
-from PySide6.QtCore import Qt, QTimer
-from PySide6.QtGui import QColor, QImage, QPainter
+from PySide6.QtCore import QRect, Qt, QTimer
+from PySide6.QtGui import QColor, QGuiApplication, QImage, QPainter
 from PySide6.QtWidgets import QWidget
 
 from frontengine.show.window_helpers import apply_overlay_window_flags, load_overlay_icon
 from frontengine.user_setting.user_setting_file import get_overlay_geometry, save_overlay_geometry, user_setting_dict
 from frontengine.utils.logging.loggin_instance import front_engine_logger
+from frontengine.utils.screen_privacy import capture_affinity
 from frontengine.utils.power_mode.power_mode import DEFAULT_TIER, normalize_tier, tier_render_scale
 
 
@@ -59,7 +60,7 @@ class BaseWidget(QWidget):
         self.background_color: Optional[QColor] = None
         # 畫質檔位：影響更新頻率上限與算圖縮放（見 utils/power_mode）
         # Quality tier: caps the refresh rate and scales rendering (see utils/power_mode).
-        self.quality_tier: str = DEFAULT_TIER
+        self.quality_tier: str = normalize_tier(user_setting_dict.get("quality_tier"))
         # 分享畫面時要不要一起藏起來。遮蔽用的覆蓋層要留在畫面上——
         # 那正是它存在的理由，藏了就等於沒遮。
         # Whether this hides along with the others while sharing. A masking
@@ -68,6 +69,7 @@ class BaseWidget(QWidget):
         self.keep_in_capture: bool = False
         self._drag_origin = None
         self._geometry_restored = False
+        self._joined = False
         self._compositor = None
         self._compositor_pending = False
         self._render_revision = 0
@@ -156,6 +158,8 @@ class BaseWidget(QWidget):
         if not self.overlay_remembers_geometry:
             return
         geometry = self.geometry()
+        if any(screen.geometry() == geometry for screen in QGuiApplication.screens()):
+            return          # a layer over a whole monitor has no place of its own to remember
         front_engine_logger.info(
             f"{self.__class__.__name__} remember_geometry | {geometry.x()},{geometry.y()} "
             f"{geometry.width()}x{geometry.height()}"
@@ -165,6 +169,10 @@ class BaseWidget(QWidget):
 
     def showEvent(self, event) -> None:
         super().showEvent(event)
+        capture_affinity.follow(self)
+        if not self._joined:
+            self._joined = True
+            self._join()
         if self._compositor is None and self._requested_render_backend in ('auto', 'gpu'):
             self.set_render_backend(self._requested_render_backend)
         if not self._geometry_restored:
@@ -172,6 +180,14 @@ class BaseWidget(QWidget):
             # 顯示流程結束後再套用，避免和 showFullScreen 打架
             # Applied after the show completes so it does not fight showFullScreen.
             QTimer.singleShot(0, self.restore_saved_geometry)
+
+    def _join(self) -> None:
+        """Take on the tier and the low power already chosen; the control center told the others."""
+        if self.quality_tier != DEFAULT_TIER:
+            self.apply_quality_tier()
+        set_low_power = getattr(self, "set_low_power", None)
+        if set_low_power is not None and user_setting_dict.get("low_power"):
+            set_low_power(True)
 
     def restore_saved_geometry(self) -> None:
         """若這類覆蓋層有記住的位置就套用（使用者拖曳過才會有）。"""
@@ -188,7 +204,13 @@ class BaseWidget(QWidget):
                 # "show on all screens" presents each one). Dragging it back to a
                 # remembered rect would pile every screen's overlay onto one spot.
                 return
-            self.setGeometry(*saved)
+            place = QRect(*saved)
+            screens = [screen.geometry() for screen in QGuiApplication.screens()]
+            if any(area == self.geometry() or area == place for area in screens):
+                return          # covers a whole monitor: which one is the caller's choice
+            if not any(area.intersects(place) for area in screens):
+                return          # remembered on a monitor that is gone
+            self.setGeometry(place)
         except RuntimeError:  # pragma: no cover - widget closed mid-callback
             return
 

@@ -110,9 +110,12 @@ class ControlCenterUI(SettingPage):
         # Overlay sources registered by the other pages: wallpaper, focus, screen care, presenting.
         self._extra_overlay_sources: list = []
         self._cleanup_callbacks: list = []
+        self._before_close_callbacks: list = []
         self.low_power_button = self._create_button(
             "control_center_low_power_on", self.toggle_low_power)
         self._hidden_from_capture = False
+        capture_affinity.set_hidden(False)
+        lifetime.connect_owned(lifetime.overlay_added, self._join_the_others)
         # What hide_all and smart pause did, so that resuming gives back only what it took.
         self._groups_hidden = False
         self._stood_down: list = []
@@ -262,6 +265,8 @@ class ControlCenterUI(SettingPage):
         - they stayed on screen.
         """
         front_engine_logger.info("ControlCenterUI clear_all")
+        for callback in self._before_close_callbacks:
+            callback()
         retained = set()
         def close_overlay(widget):
             if widget.close() is False:
@@ -298,6 +303,10 @@ class ControlCenterUI(SettingPage):
         just costs for nothing.
         """
         self._cleanup_callbacks.append(callback)
+
+    def register_before_close(self, callback: Callable[[], None]) -> None:
+        """Something to save before every overlay is closed at once."""
+        self._before_close_callbacks.append(callback)
 
     def all_overlays(self) -> list:
         """
@@ -548,6 +557,16 @@ class ControlCenterUI(SettingPage):
             "control_center_low_power_off" if self._low_power else "control_center_low_power_on",
             "Low power off" if self._low_power else "Low power on",)
 
+    def _join_the_others(self, widget) -> None:
+        """An overlay just opened takes on what "mute all" and "hide from capture" set."""
+        try:
+            if self._muted and hasattr(widget, "set_muted"):
+                widget.set_muted(True)
+            if getattr(widget, "isVisible", bool)():
+                capture_affinity.follow(widget)
+        except RuntimeError:          # gone already
+            return
+
     @owned_action
     def set_hide_from_capture(self, hidden: bool) -> int:
         """
@@ -558,6 +577,7 @@ class ControlCenterUI(SettingPage):
         alone, since a mask is meant to be seen.
         """
         self._hidden_from_capture = bool(hidden)
+        capture_affinity.set_hidden(hidden)
         applied = 0
 
         def apply(widget) -> None:
@@ -565,8 +585,6 @@ class ControlCenterUI(SettingPage):
             if getattr(widget, "keep_in_capture", False):
                 capture_affinity.apply_to_widget(widget, False)
                 return
-            if hasattr(widget, "hidden_from_capture"):
-                widget.hidden_from_capture = self._hidden_from_capture
             if getattr(widget, "needs_capture_exclusion", False):
                 return          # it reads the screen: included, it would photograph itself
             if capture_affinity.apply_to_widget(widget, self._hidden_from_capture):

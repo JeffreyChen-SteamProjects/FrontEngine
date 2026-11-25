@@ -101,8 +101,10 @@ class ExtendSystemTray(QSystemTrayIcon):
         Close the application
         """
         front_engine_logger.info("[ExtendSystemTray] close_all")
-        self.setVisible(False)
-        self.main_window.close()
+        # Only a close that goes through takes the icon away: refused - something could not be saved -
+        # it may be the one way back to the window.
+        if self.main_window.close() is not False:
+            self.setVisible(False)
 
     def clicked(self, reason: QSystemTrayIcon.ActivationReason) -> None:
         """

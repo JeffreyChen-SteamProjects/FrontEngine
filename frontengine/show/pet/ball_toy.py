@@ -4,6 +4,7 @@ from time import monotonic
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QPainter, QPen
 from PySide6.QtWidgets import QWidget
+from frontengine.utils.screen_privacy import capture_affinity
 from frontengine.utils.multi_language.retranslate import tr
 
 
@@ -37,6 +38,10 @@ class BallToy(QWidget):
         left, top, right, bottom = self.motion.bounds
         self.xpos = max(left, min(self.xpos, right - self.width()))
         self.ypos = max(top, min(self.ypos, bottom - self.height()))
+
+    def showEvent(self, event) -> None:
+        super().showEvent(event)
+        capture_affinity.follow(self)
 
     def paintEvent(self, event):
         painter = QPainter(self)

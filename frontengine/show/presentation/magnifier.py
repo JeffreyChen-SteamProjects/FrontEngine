@@ -15,6 +15,7 @@ from PySide6.QtGui import QColor, QCursor, QGuiApplication, QPainter, QPixmap
 
 from frontengine.show.base_widget import BaseWidget
 from frontengine.utils.logging.loggin_instance import front_engine_logger
+from frontengine.utils.power_mode.power_mode import tier_interval
 
 MIN_ZOOM = 1.25
 MAX_ZOOM = 8.0
@@ -84,7 +85,12 @@ class MagnifierWidget(BaseWidget):
 
     def start_following(self, interval_ms: int = REFRESH_MS) -> None:
         self.refresh()
-        self._timer.start(max(16, int(interval_ms)))
+        self._interval_ms = max(16, int(interval_ms))
+        self._timer.start(tier_interval(self._interval_ms, self.quality_tier))
+
+    def apply_quality_tier(self) -> None:
+        if self._timer.isActive():
+            self._timer.start(tier_interval(self._interval_ms, self.quality_tier))
 
     @staticmethod
     def _grab_screen(rect: QRect) -> Optional[QPixmap]:
@@ -100,7 +106,8 @@ class MagnifierWidget(BaseWidget):
         screen = QGuiApplication.screenAt(rect.center()) or QGuiApplication.primaryScreen()
         if screen is None:
             return None
-        return screen.grabWindow(0, rect.x(), rect.y(), rect.width(), rect.height())
+        origin = screen.geometry().topLeft()        # grabWindow counts from the screen's own corner
+        return screen.grabWindow(0, rect.x() - origin.x(), rect.y() - origin.y(), rect.width(), rect.height())
 
     def screen_bounds(self, position=None) -> Tuple[int, int, int, int]:
         """游標所在螢幕的範圍（沒給座標就用放大鏡自己那一台）。"""

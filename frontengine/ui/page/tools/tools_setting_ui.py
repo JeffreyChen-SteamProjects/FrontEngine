@@ -115,8 +115,8 @@ class ToolsSettingUI(SettingPage):
         self.last_capture: Optional[QPixmap] = None
         self.capture_editor = None
         self.ocr_widget_list = OwnedWidgetList(self.lifetime)
+        self.replica_widget_list = OwnedWidgetList(self.lifetime)
         self.pin_dialog: Optional[WindowPinDialog] = None
-        self.replica_dialog: Optional[WindowReplicaDialog] = None
 
     def _build_window_row(self) -> None:
         self.pin_button = tr(QPushButton(), "tools_pin_window", "Pin a window...")
@@ -410,6 +410,11 @@ class ToolsSettingUI(SettingPage):
         self.camera_button.clicked.connect(self.toggle_camera)
 
     # --- measuring -------------------------------------------------------
+    def stop_overlays(self) -> None:
+        """Every overlay was closed from outside: offer to start them again."""
+        for stop in (self.stop_measure, self.stop_camera, self.close_replicas):
+            stop()
+
     @owned_action
     def toggle_measure(self) -> None:
         if self.measure_widget_list:
@@ -655,17 +660,23 @@ class ToolsSettingUI(SettingPage):
     @owned_action
     def open_replica_dialog(self) -> WindowReplicaDialog:
         """開視窗複本對話框（關掉主程式時會把開過的複本收乾淨）。"""
-        self.replica_dialog = WindowReplicaDialog(self)
-        self.lifetime.after_dialog(self.replica_dialog.exec())
-        return self.replica_dialog
+        dialog = WindowReplicaDialog(self, replicas=self.replica_widget_list)
+        self.lifetime.after_dialog(dialog.exec())
+        dialog.deleteLater()
+        return dialog
 
     def close_replicas(self) -> None:
         """關掉開過的視窗複本（主程式關閉時呼叫）。"""
-        if self.replica_dialog is not None:
+        self._close_widgets(self.replica_widget_list)
+
+    @staticmethod
+    def _close_widgets(widgets: list) -> None:
+        for widget in widgets[:]:
             try:
-                self.replica_dialog.close_all()
+                widget.close()
             except RuntimeError:
-                self.replica_dialog = None
+                pass
+        widgets.clear()
 
     def release_pinned_windows(self) -> None:
         """把釘過的別人視窗放開（主程式關閉時呼叫）。"""
@@ -767,7 +778,7 @@ class ToolsSettingUI(SettingPage):
     def start_live_ocr(self) -> RegionCaptureWidget | None:
         """Select one fixed screen region for a manual-first, locally recognized OCR window."""
         if len(self.ocr_widget_list) >= 4:
-            self.ocr_widget_list = [widget for widget in self.ocr_widget_list if not widget.closed]
+            self.ocr_widget_list[:] = [widget for widget in self.ocr_widget_list if not widget.closed]
         if len(self.ocr_widget_list) >= 4:
             self._on_capture_failed(_t('live_ocr_limit', 'Close an OCR window before opening another (maximum four).'))
             return None

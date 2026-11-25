@@ -31,7 +31,7 @@
 
 場景 → 場景獨立輸出可將目前編輯器場景預覽為固定 640×480、1280×720 或 1920×1080 像素，不受桌面位置、遮擋及 DPI 影響。開始預覽不開啟攝影機；送至虛擬攝影機才會明確使用選用 pyvirtualcam 與已安裝相容驅動。裝置啟動、傳送及關閉由單一背景工作執行，僅保留最新待送 RGB 影格，裝置較慢時略過中間影格。輸出靜音且不含音訊。圖片／GIF／文字及原生影片／網頁／Puppet 依圖層順序合成，音訊圖層不可見。Puppet 需要選用執行環境及原生 OpenGL；媒體或裝置不可用時顯示原因。支援最多 256 圖層、八個原生媒體來源，圖層點陣圖總計 1600 萬像素。停止、Escape、關閉對話框／程式或編輯場景都會釋放渲染器並請求關閉攝影機；場景編輯後須重新啟動。舊素材讀取會在場景封包租期釋放前停止。
 
-Windows 封裝共用 Python CLI 的 --preset 與 --debug。原生封裝驗收前，於建置環境安裝選用 Rigora 執行期（包含 Pillow 動態解碼外掛及已安裝 Rigora 的套件資料）。用 ``py tests/integration/scene_build_fixtures.py FIXTURES --puppet SAMPLE.puppet`` 產生本機合成素材（產生影片另需 PyAV）。在原生桌面執行 ``FrontEngine.exe --verify-scene-build FIXTURES REPORT``，REPORT 必須是新目錄。固定驗收以暫存目錄隔離設定、保持預覽靜音，只建立自己的場景／編輯器視窗，驗證七種類型、舊／版本化 JSON、匯出再載入、GIF 動畫、網頁互動、復原重做、暫停恢復與清理，寫入 result.json 及預覽 PNG 後退出；不執行傳入的 Python 測試腳本。請檢查報告及退出碼，缺少執行期或原生渲染會明確失敗。
+Windows 封裝共用 Python CLI 的 --preset, --data-dir 與 --debug。原生封裝驗收前，於建置環境安裝選用 Rigora 執行期（包含 Pillow 動態解碼外掛及已安裝 Rigora 的套件資料）。用 ``py tests/integration/scene_build_fixtures.py FIXTURES --puppet SAMPLE.puppet`` 產生本機合成素材（產生影片另需 PyAV）。在原生桌面執行 ``FrontEngine.exe --verify-scene-build FIXTURES REPORT``，REPORT 必須是新目錄。固定驗收以暫存目錄隔離設定、保持預覽靜音，只建立自己的場景／編輯器視窗，驗證七種類型、舊／版本化 JSON、匯出再載入、GIF 動畫、網頁互動、復原重做、暫停恢復與清理，寫入 result.json 及預覽 PNG 後退出；不執行傳入的 Python 測試腳本。請檢查報告及退出碼，缺少執行期或原生渲染會明確失敗。
 
 3D 場景編輯與播放
 =================

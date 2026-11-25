@@ -21,7 +21,7 @@ from frontengine.utils.power_mode.power_mode import (
 def test_launch_command_uses_this_interpreter() -> None:
     command = launch_command()
     assert command[0] == sys.executable
-    assert command[1:] == ["-m", "frontengine"] or getattr(sys, "frozen", False)
+    assert command[1:3] == ["-m", "frontengine"] or getattr(sys, "frozen", False)
 
 
 def test_quote_command_quotes_paths_with_spaces() -> None:

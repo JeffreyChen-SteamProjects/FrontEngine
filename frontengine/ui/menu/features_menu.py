@@ -75,9 +75,7 @@ def entry_label(ui: FrontEngineMainUI, entry: Entry) -> str:
 
 def open_page(ui: FrontEngineMainUI, page_id: str) -> bool:
     """Bring the window back on a page chosen by its stable ID."""
-    ui.showNormal()
-    ui.raise_()
-    ui.activateWindow()
+    ui.bring_to_front()
     return ui.sidebar.select_page_id(page_id)
 
 

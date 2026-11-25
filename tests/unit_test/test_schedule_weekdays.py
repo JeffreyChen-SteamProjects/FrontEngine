@@ -116,7 +116,7 @@ def test_a_skipped_day_does_not_break_the_next_one():
     now["value"] = SATURDAY.replace(hour=9, minute=0)
     service.poll_once()
     assert fired == []
-    assert service._prev_minutes == 9 * 60
+    assert (service._previous.hour, service._previous.minute) == (9, 0)
 
 
 def test_the_dialog_offers_exactly_seven_days():

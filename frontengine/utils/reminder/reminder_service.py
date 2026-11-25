@@ -115,7 +115,7 @@ class ReminderTracker:
         self._last_seen.clear()
 
     def _key(self, reminder: Dict[str, Any]) -> str:
-        return f"{reminder['kind']}:{reminder['label']}"
+        return f"{reminder['kind']}:{reminder['label']}:{reminder.get('at') or reminder.get('minutes')}"
 
     def _due_every(self, reminder: Dict[str, Any], now: datetime, key: str) -> bool:
         last = self._last_fired.get(key)
@@ -154,9 +154,12 @@ class ReminderTracker:
         now = self._now()
         due: List[str] = []
         for reminder in normalize_reminders(self._config_provider()):
-            if not reminder["enabled"]:
-                continue
             key = self._key(reminder)
+            if not reminder["enabled"]:
+                # Off: time goes by for it all the same, or switching it on would make up for it.
+                self._last_seen[key] = now
+                self._last_fired.pop(key, None)
+                continue
             fired = (self._due_every(reminder, now, key) if reminder["kind"] == KIND_EVERY
                      else self._due_at(reminder, now, key))
             if fired:

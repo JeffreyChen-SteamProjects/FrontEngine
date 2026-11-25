@@ -63,19 +63,17 @@ def _coerce_int(value: Any, default: int, modulo: int) -> int:
         return default
 
 
-def _crossed(previous: int, target: int, current: int) -> bool:
+def _crossed(previous: datetime, now: datetime, target: int) -> bool:
     """
-    上次輪詢到這次之間，有沒有經過 target 這一分鐘（全部以「午夜起算的分鐘數」表示）。
-    午夜會讓分鐘數從 1439 掉回 0，直接寫 previous < target <= current 的話，
-    排在 00:00 的預設集永遠等不到——沒有哪個 previous 會小於 0。
-    Whether the target minute was passed between the previous poll and this one,
-    all counted as minutes since midnight. Midnight drops the count from 1439
-    back to 0, so a plain `previous < target <= current` can never be satisfied
-    for a preset scheduled at 00:00: no previous value is below zero.
+    上次輪詢到這次之間，有沒有經過 target 這一分鐘（午夜起算的分鐘數）。
+    用完整的日期時間比：只看分鐘數的話，時鐘倒退（冬令時間、改時區）會被當成
+    跨過午夜而在凌晨誤觸發。
+    Whether the target minute lies between the previous poll and this one. Whole
+    datetimes, not minutes of the day: by those a clock turned back - the end of
+    daylight saving, a change of time zone - looked like midnight and fired.
     """
-    if previous <= current:
-        return previous < target <= current
-    return target > previous or target <= current
+    moment = now.replace(hour=target // 60, minute=target % 60, second=0, microsecond=0)
+    return previous < moment <= now
 
 
 class PresetScheduleService(QObject):
@@ -99,7 +97,7 @@ class PresetScheduleService(QObject):
         super().__init__(parent)
         self._config_provider = config_provider
         self._now_provider = now_provider or datetime.now
-        self._prev_minutes: Optional[int] = None
+        self._previous: Optional[datetime] = None
         self._timer = QTimer(self)
         self._timer.setInterval(max(1000, int(interval_ms)))
         self._timer.timeout.connect(self._poll)
@@ -117,28 +115,27 @@ class PresetScheduleService(QObject):
         try:
             config = self._config_provider() or {}
             if not config.get("enabled"):
-                self._prev_minutes = None  # reset so re-enabling never instant-fires
+                self._previous = None  # reset so re-enabling never instant-fires
                 return
             preset = config.get("preset")
             if not isinstance(preset, str) or not preset.strip():
                 return
             now = self._now_provider()
             target = _coerce_int(config.get("hour"), 9, 24) * 60 + _coerce_int(config.get("minute"), 0, 60)
-            current = now.hour * 60 + now.minute
             # 不該跑的日子仍要記下目前時間，否則隔天第一次輪詢會把「上次」當成
             # 未知而錯過當天的觸發點。
             # Days that do not run still record the current minute: otherwise the
             # first poll of the next day has no previous value and misses the
             # crossing entirely.
             if not runs_today(config, now.weekday()):
-                self._prev_minutes = current
+                self._previous = now
                 return
         except Exception as error:  # pragma: no cover - defensive boundary
             front_engine_logger.warning(f"[PresetSchedule] poll error: {error!r}")
             return
-        previous = self._prev_minutes
-        self._prev_minutes = current
-        if previous is not None and _crossed(previous, target, current):
+        previous = self._previous
+        self._previous = now
+        if previous is not None and _crossed(previous, now, target):
             front_engine_logger.info(f"[PresetSchedule] fire | preset={preset}")
             self.preset_due.emit(preset.strip())
 

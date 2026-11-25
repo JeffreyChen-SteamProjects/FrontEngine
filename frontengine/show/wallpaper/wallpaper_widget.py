@@ -13,8 +13,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Optional
 
-from PySide6.QtCore import QRect, Qt, QTimer
+from PySide6.QtCore import QRect, Qt, QTimer, QUrl, Signal
 from PySide6.QtGui import QMovie, QPainter, QPixmap
+from PySide6.QtMultimedia import QMediaPlayer, QVideoSink
 
 from frontengine.show.base_widget import BaseWidget
 from frontengine.utils.audio_meter.audio_envelope import AudioEnvelope
@@ -22,6 +23,7 @@ from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.power_mode.power_mode import tier_interval
 
 _ANIMATED_SUFFIXES = (".gif", ".webp")
+_VIDEO_SUFFIXES = (".mp4", ".webm", ".avi")
 MIN_REACT_SCALE = 1.0
 MAX_REACT_SCALE = 1.25
 
@@ -49,6 +51,7 @@ class WallpaperWidget(BaseWidget):
     """
 
     REACT_INTERVAL_MS = 33
+    media_failed = Signal()          # a video the system cannot play, found out after it was accepted
 
     def __init__(self, media_path: str = "", audio_react: bool = False,
                  react_strength: int = 100) -> None:
@@ -59,6 +62,8 @@ class WallpaperWidget(BaseWidget):
         self.media_path: Optional[Path] = None
         self._movie: Optional[QMovie] = None
         self._pixmap: Optional[QPixmap] = None
+        self._player: Optional[QMediaPlayer] = None
+        self._sink: Optional[QVideoSink] = None
         self.audio_react = bool(audio_react)
         self.react_strength = max(0, min(100, int(react_strength)))
         self.scale = MIN_REACT_SCALE
@@ -79,18 +84,21 @@ class WallpaperWidget(BaseWidget):
             movie = QMovie(str(path))
             if not movie.isValid():
                 return False
-            self._stop_movie()
+            self._stop_media()
             self._movie = movie
             self._pixmap = None
-            movie.frameChanged.connect(self.update)
+            movie.frameChanged.connect(lambda _frame: self.update())      # it passes the frame number
             movie.start()
+        elif path.suffix.lower() in _VIDEO_SUFFIXES:
+            self._stop_media()
+            self._pixmap = None
+            self._play_video(path)
         else:
             pixmap = QPixmap(str(path))
             if pixmap.isNull():
                 return False
-            self._stop_movie()
+            self._stop_media()
             self._pixmap = pixmap
-            self._movie = None
         self.media_path = path
         self.update()
         return True
@@ -140,10 +148,47 @@ class WallpaperWidget(BaseWidget):
             self.scale = react_scale(self._envelope.push(level), self.react_strength)
         self.update()
 
-    def _stop_movie(self) -> None:
+    def _play_video(self, path: Path) -> None:
+        """Loop a video without sound; its frames are painted like any other picture."""
+        player, sink = QMediaPlayer(self), QVideoSink(self)
+        player.setVideoSink(sink)
+        player.setLoops(QMediaPlayer.Loops.Infinite)
+        sink.videoFrameChanged.connect(self._show_frame)
+        player.errorOccurred.connect(self._video_failed)
+        player.setSource(QUrl.fromLocalFile(str(path)))
+        self._player, self._sink = player, sink
+        player.play()
+
+    def _show_frame(self, frame) -> None:
+        image = frame.toImage()
+        if not image.isNull():
+            self._pixmap = QPixmap.fromImage(image)
+            self.update()
+
+    def _video_failed(self, _error, text: str) -> None:
+        front_engine_logger.warning(f"[WallpaperWidget] video {self.media_path}: {text}")
+        self.media_failed.emit()
+
+    def showEvent(self, event) -> None:
+        super().showEvent(event)
+        if self._player is not None:
+            self._player.play()
+
+    def hideEvent(self, event) -> None:
+        if self._player is not None:
+            self._player.pause()
+        super().hideEvent(event)
+
+    def _stop_media(self) -> None:
         if self._movie is not None:
             self._movie.stop()
             self._movie = None
+        if self._player is not None:
+            player, sink, self._player, self._sink = self._player, self._sink, None, None
+            player.stop()
+            player.setVideoSink(None)
+            player.deleteLater()
+            sink.deleteLater()
 
     def current_pixmap(self) -> Optional[QPixmap]:
         if self._movie is not None:
@@ -175,5 +220,5 @@ class WallpaperWidget(BaseWidget):
             close()
         if self._react_timer.isActive():
             self._react_timer.stop()
-        self._stop_movie()
+        self._stop_media()
         super().closeEvent(event)

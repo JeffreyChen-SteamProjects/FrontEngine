@@ -3,15 +3,20 @@ from __future__ import annotations
 import copy
 import json
 import re
+import shutil
+import unicodedata
 import zipfile
 from os import getcwd
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from frontengine.utils.exception.exceptions import FrontEngineJsonFileException
 from frontengine.utils.json.json_repository import JsonRepository
+from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.user_setting.preset_history import PresetHistory, checked_state
 
-_FILENAME_SAFE = re.compile(r"[^A-Za-z0-9_\- ]+")
+_FILENAME_SAFE = re.compile(r"[^\w\- ]+")        # letters and digits of any language
+_DEVICE_NAMES = frozenset({"con", "prn", "aux", "nul"} | {f"{port}{n}" for port in ("com", "lpt") for n in range(1, 10)})
 # 打包時媒體檔在 zip 內的資料夾前綴
 # In-archive folder prefix for bundled media files.
 _MEDIA_PREFIX = "media/"
@@ -23,10 +28,10 @@ def _default_dir() -> Path:
 
 
 def _sanitize(name: str) -> str:
-    sanitized = _FILENAME_SAFE.sub("_", name).strip().strip("_")
+    sanitized = _FILENAME_SAFE.sub("_", unicodedata.normalize("NFC", name)).strip().strip("_")
     if not sanitized:
         raise ValueError("Preset name must contain at least one safe character")
-    return sanitized
+    return f"{sanitized}_preset" if sanitized.casefold() in _DEVICE_NAMES else sanitized
 
 
 class PresetRepository:
@@ -60,7 +65,11 @@ class PresetRepository:
         self._dir.mkdir(parents=True, exist_ok=True)
         history = self.history(name)
         if self.exists(name):
-            history.snapshot(self.load(name))
+            try:
+                history.snapshot(self.load(name))
+            except (FrontEngineJsonFileException, ValueError) as error:
+                # Damaged: there is nothing to keep, and refusing would make it impossible to replace.
+                front_engine_logger.warning(f"[PresetRepository] old {name!r} not kept: {error}")
         identifier, created = history.snapshot(data)
         payload: Dict[str, Any] = {"__preset_name__": name}
         payload.update(data)
@@ -117,7 +126,9 @@ class PresetRepository:
         Read a preset document from an arbitrary location, validate it is a
         JSON object, and store it under the presets directory. The preset
         name is taken from the reserved "__preset_name__" key when present,
-        otherwise from the file stem. Returns the stored preset name.
+        otherwise from the file stem. Returns the stored preset name: a
+        preset of yours by that name is never replaced, the import gets a
+        number - unless it is the same preset, imported again.
         """
         source = Path(source)
         repo = JsonRepository(source)
@@ -129,8 +140,26 @@ class PresetRepository:
         raw_name = data.get("__preset_name__")
         name = raw_name if isinstance(raw_name, str) and raw_name.strip() else source.stem
         payload = {key: value for key, value in data.items() if key != "__preset_name__"}
+        if self._holds(name, payload):
+            return _sanitize(name)
+        name = self._free_name(name)
         self.save(name, payload)
         return _sanitize(name)
+
+    def _holds(self, name: str, payload: Dict[str, Any]) -> bool:
+        """Whether the preset stored under this name already says the same."""
+        try:
+            return self.exists(name) and self.load(name) == payload
+        except (OSError, ValueError):
+            return False
+
+    def _free_name(self, name: str) -> str:
+        if not self.exists(name):
+            return name
+        number = 2
+        while self.exists(f"{name} {number}"):
+            number += 1
+        return f"{name} {number}"
 
     def export_package(self, name: str, destination: Path) -> Path:
         """
@@ -187,24 +216,37 @@ class PresetRepository:
             if len(media_names) != len(set(media_names)):
                 raise ValueError("Preset package contains colliding media filenames")
             document = _read_package_preset(archive)
-            name = _package_name(document, source)
-            media_dir = self._dir / "media" / _sanitize(name)
-            media_dir.mkdir(parents=True, exist_ok=True)
-            _extract_media(archive, media_dir)
-
-        _rewrite_media_paths(document, media_dir)
-        payload = {key: value for key, value in document.items() if key != "__preset_name__"}
-        self.save(name, payload)
+            # A name and a media folder of its own: another preset may be using the files in an old one.
+            name = self._free_name(_package_name(document, source))
+            media_dir = self._free_media_dir(name)
+            media_dir.mkdir(parents=True)
+            try:
+                _extract_media(archive, media_dir)
+                _rewrite_media_paths(document, media_dir)
+                payload = {key: value for key, value in document.items() if key != "__preset_name__"}
+                self.save(name, payload)
+            except BaseException:
+                shutil.rmtree(media_dir, ignore_errors=True)
+                raise
         return _sanitize(name)
+
+    def _free_media_dir(self, name: str) -> Path:
+        base, number = self._dir / "media" / _sanitize(name), 2
+        folder = base
+        while folder.exists():
+            folder = base.with_name(f"{base.name} {number}")
+            number += 1
+        return folder
 
     @staticmethod
     def _unique_media_name(filename: str, used: set) -> str:
         """避免 zip 內媒體檔名衝突 / Disambiguate colliding media filenames."""
-        if filename not in used:
+        taken = {name.casefold() for name in used}         # import compares this way, as Windows does
+        if filename.casefold() not in taken:
             return filename
         stem, suffix = Path(filename).stem, Path(filename).suffix
         index = 1
-        while f"{stem}_{index}{suffix}" in used:
+        while f"{stem}_{index}{suffix}".casefold() in taken:
             index += 1
         return f"{stem}_{index}{suffix}"
 
