@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261125-02 | 2026-11-25 | 介面改為賽璐珞工作台，側欄／分區／頁首可收合 | #done #ui | [2026-11-b](2026-11-b.md) |
 | U-20261125-01 | 2026-11-25 | 塗鴉消失、色覺模擬跳色、工具頁說明、3D 編輯器 | #fix #presentation #eye-care #tools #scene | [2026-11-b](2026-11-b.md) |
 | U-20261121-02 | 2026-11-21 | 簡報的按鍵顯示不再讓螢幕變黑、塗鴉收得到滑鼠 | #fix #presentation | [2026-11-b](2026-11-b.md) |
 | U-20261121-01 | 2026-11-21 | 移除 AI 署名並在 CI 擋下新的署名 | #done #ci | [2026-11-b](2026-11-b.md) |
@@ -485,7 +486,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11-b.md](2026-11-b.md) | 2026-11 | 16 |
+| [2026-11-b.md](2026-11-b.md) | 2026-11 | 17 |
 | [2026-11.md](2026-11.md) | 2026-11 | 265 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

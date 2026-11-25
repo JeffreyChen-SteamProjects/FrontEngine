@@ -114,6 +114,11 @@ checks the seven trees stay page-consistent — details under "Environment notes
   樣式是自有設計系統：顏色與尺寸只在 `ui/style/tokens.py`（亮／暗兩組色票），
   `ui/style/app_style.py` 由它產生整份樣式表與 QPalette，樣式表裡不寫色碼
   （`test_design_system.py` 會擋）。勾選、箭頭等圖示是 `ui/style/icons/` 的 SVG。
+  樣式表畫不出來的（疊放卡片、頁首釘條、光桌格點）在 `ui/style/cel.py`；亮暗要用
+  `cel.tone_of()` 問，不要看元件自己的 palette（樣式表背景會改寫它）。
+- **頁面會把 `width`／`height` 拿去當欄位名**（場景的 Puppet 子分頁就是），共用基底
+  在 `resizeEvent` 等原生回呼裡要用事件的尺寸；回呼裡丟例外會讓行程原生當機，
+  而且 faulthandler 只會指到 `processEvents`。
 - 測試：headless（`QT_QPA_PLATFORM=offscreen`），用 `py` 不用 `python`。
   repo 內：`py -m pytest tests/ -q`。
 - **改 UI 後要一併更新 docs/**。Sphinx 文件樹有七種語言（Eng / Zh / ZhCn / De /

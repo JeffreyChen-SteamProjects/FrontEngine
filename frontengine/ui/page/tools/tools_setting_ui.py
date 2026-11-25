@@ -258,6 +258,7 @@ class ToolsSettingUI(SettingPage):
         self.palette_button.clicked.connect(self.open_palette)
         self.palette_status = QLabel()
         self.palette_status.setWordWrap(True)
+        self.palette_status.hide()
 
     def _build_capture_row(self) -> None:
         self.capture_label = tr(QLabel(), "tools_capture_label", "Region capture")
@@ -476,7 +477,12 @@ class ToolsSettingUI(SettingPage):
         try:
             write_user_setting()
         except OSError as error:
-            self.palette_status.setText(str(error))
+            self._show_palette_status(str(error))
+
+    def _show_palette_status(self, text: str) -> None:
+        """An error, or nothing; empty it takes no room in the section."""
+        self.palette_status.setText(text)
+        self.palette_status.setVisible(bool(text))
 
     @owned_callback
     def _record_palette_color(self, color: str) -> None:
@@ -484,9 +490,9 @@ class ToolsSettingUI(SettingPage):
             return
         try:
             self.palette.sample(color)
-            self.palette_status.clear()
+            self._show_palette_status("")
         except (OSError, ValueError) as error:
-            self.palette_status.setText(str(error))
+            self._show_palette_status(str(error))
         if self.palette_dialog is not None:
             self.palette_dialog.refresh()
 

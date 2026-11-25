@@ -293,6 +293,7 @@ class PetHomePage(SettingPage):
         """The stage: what is happening in the home, its controls, and the home itself."""
         section = self.stage = self.add_content_section("pet_home_status_section", "Home")
         section.title_label.hide()             # the page title already says it
+        section.set_foldable(False)            # the home itself: no heading, always open
         self.status = QLabel()
         self.status.setObjectName("homeStatus")
         self.status.setWordWrap(True)

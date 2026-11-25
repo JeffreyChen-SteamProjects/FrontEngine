@@ -1,13 +1,18 @@
 """
 FrontEngine's own design tokens: two palettes and one spacing / type scale.
 
-Two looks share each palette. The tool pages are quiet: neutral greys, thin
-borders and small radii, close to a native Windows tool, with the INKSIDE
-orange used sparingly. The pet pages (``ink_*`` tokens, applied to widgets
-under ``inkStyle``) follow the built-in INKSIDE art instead - warm paper, even
-ink outlines and rounder corners, in a rounded typeface - so the window and the
-pets it shows read as one thing. Text on the orange accent is ink, not white:
-ink on that orange passes WCAG AA, white does not.
+The look is an animator's cel desk. FrontEngine stacks layers over the desktop
+the way cels are stacked over a background, so the window borrows that desk: a
+light table with a non-photo-blue field guide, cards drawn as stacked cels with
+an ink outline, a peg bar across the top of every page, and a dark rack of index
+tabs on the left. Each sidebar group has its own spot ink (``spot_*``), which
+colours its peg bar, its tabs and the sheet behind its cards; the INKSIDE orange
+stays the colour of the one primary action.
+
+The pet pages (``ink_*`` tokens, applied to widgets under ``inkStyle``) keep the
+warm paper of the built-in INKSIDE art, so the window and the pets it shows read
+as one thing. Text on the orange accent is ink, not white: ink on that orange
+passes WCAG AA, white does not.
 
 Theme names: ``light``, ``dark`` and ``system`` (follow the operating system).
 Settings written by earlier versions hold qt-material file names such as
@@ -22,17 +27,18 @@ THEMES = ("system", "light", "dark")
 DEFAULT_THEME = "system"
 
 LIGHT: Dict[str, str] = {
-    # Tool pages: quiet neutrals.
-    "window": "#F5F5F4",          # page background
-    "sidebar": "#EDEDEB",
-    "surface": "#FFFFFF",         # cards, inputs' surroundings
-    "surface_alt": "#F0F0EE",     # hover, alternate rows, secondary buttons
+    # The light table and the cels on it.
+    "window": "#E9EFF1",          # page background: the table
+    "field": "#BBD8E4",           # non-photo blue: the field guide printed on it
+    "surface": "#FDFEFE",         # cards, inputs' surroundings
+    "surface_alt": "#EDF2F4",     # hover, alternate rows, secondary buttons
     "input": "#FFFFFF",
-    "border": "#E1E1DF",
-    "border_strong": "#C2C2BF",
-    "text": "#1B1B1B",
-    "muted": "#5C5C5A",
-    "faint": "#8C8C89",
+    "line": "#1B1F22",            # the ink outline of cels, tabs and the peg bar
+    "border": "#C6D2D7",
+    "border_strong": "#8497A0",
+    "text": "#14181B",
+    "muted": "#4A575E",
+    "faint": "#77868D",
     "accent": "#F56A24",          # INKSIDE orange
     "accent_hover": "#FF7E3C",
     "accent_pressed": "#D9561A",
@@ -40,9 +46,21 @@ LIGHT: Dict[str, str] = {
     "on_accent": "#171715",
     "danger": "#B9382A",
     "danger_soft": "#F6DCD6",
-    "success": "#3D8A4C",
-    "tooltip": "#1B1B1B",
+    "success": "#2F7F45",
+    "tooltip": "#1B1F22",
     "on_tooltip": "#FFFFFF",
+    # The rack of index tabs; dark in both themes.
+    "rail": "#1B1F22",
+    "rail_hover": "#2C3338",
+    "rail_text": "#F1F5F6",
+    "rail_muted": "#A9B8BF",
+    # One spot ink per sidebar group.
+    "spot_home": "#F56A24",
+    "spot_screen": "#3FA7D6",
+    "spot_desktop": "#59B36E",
+    "spot_work": "#9A7BE0",
+    "spot_control": "#E6B52C",
+    "spot_other": "#93A4AC",
     # Pet pages: INKSIDE ink on warm paper.
     "ink_window": "#F4EEDF",      # paper
     "ink_surface": "#FFFDF6",     # cards and controls
@@ -54,16 +72,17 @@ LIGHT: Dict[str, str] = {
 }
 
 DARK: Dict[str, str] = {
-    "window": "#1C1C1C",
-    "sidebar": "#171717",
-    "surface": "#242424",
-    "surface_alt": "#2D2D2D",
-    "input": "#1F1F1F",
-    "border": "#383838",
-    "border_strong": "#555555",
-    "text": "#F2F2F0",
-    "muted": "#ABABA8",
-    "faint": "#7A7A78",
+    "window": "#16191C",
+    "field": "#25333A",
+    "surface": "#1F2428",
+    "surface_alt": "#2A3136",
+    "input": "#191D20",
+    "line": "#7F9099",
+    "border": "#374147",
+    "border_strong": "#566570",
+    "text": "#F0F3F4",
+    "muted": "#A9B5BA",
+    "faint": "#75838A",
     "accent": "#FF7A33",
     "accent_hover": "#FF915A",
     "accent_pressed": "#E8621C",
@@ -72,8 +91,18 @@ DARK: Dict[str, str] = {
     "danger": "#E2705F",
     "danger_soft": "#3E2522",
     "success": "#7CC08A",
-    "tooltip": "#F2F2F0",
-    "on_tooltip": "#1B1B1B",
+    "tooltip": "#F0F3F4",
+    "on_tooltip": "#16191C",
+    "rail": "#0E1113",
+    "rail_hover": "#20272B",
+    "rail_text": "#EDF1F2",
+    "rail_muted": "#93A2A9",
+    "spot_home": "#FF7A33",
+    "spot_screen": "#3E9CC7",
+    "spot_desktop": "#4FA364",
+    "spot_work": "#8E70D6",
+    "spot_control": "#CFA024",
+    "spot_other": "#788A93",
     # Pet pages at night: paper-coloured lines on dark ink.
     "ink_window": "#1F1C17",
     "ink_surface": "#2A2620",
@@ -86,10 +115,19 @@ DARK: Dict[str, str] = {
 
 PALETTES = {"light": LIGHT, "dark": DARK}
 
+# Sidebar group key -> its spot ink. Unknown groups (plugins) use spot_other.
+GROUP_SPOTS = {"nav_group_home": "spot_home", "nav_group_on_screen": "spot_screen",
+               "nav_group_desktop": "spot_desktop", "nav_group_work": "spot_work",
+               "nav_group_control": "spot_control"}
+DEFAULT_SPOT = "spot_other"
+
 # One spacing and type scale for every page (pixels).
-RADIUS = 6
-RADIUS_SMALL = 4
-RADIUS_CARD = 8
+RADIUS = 7
+RADIUS_SMALL = 5
+RADIUS_CARD = 12
+CEL_LINE = 2            # the outline of a cel
+CEL_OFFSET = 5          # how far the sheet behind a cel shows
+PEG_BAR_HEIGHT = 20
 # The pet pages' ink look: ink outlines, rounder corners and the bundled rounded typeface.
 INK_LINE = 2
 INK_RADIUS = 10

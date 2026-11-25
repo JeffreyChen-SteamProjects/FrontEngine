@@ -8,7 +8,8 @@ home, previews, colour swatches).
 
 Colours never appear here as literals: everything comes from the light or dark
 token set, so the two themes cannot drift apart. Indicator images (check mark,
-arrows) are small SVGs shipped in ``icons/``.
+arrows, switches) are small SVGs shipped in ``icons/``. What a stylesheet cannot
+draw - stacked cels, the peg bar, the light table - is painted by ``cel.py``.
 
 ``apply_app_style(window, theme)`` styles one top-level window and everything
 parented to it. Overlays are separate top-level windows and keep their own look.
@@ -21,9 +22,10 @@ from typing import Dict
 from PySide6.QtGui import QColor, QGuiApplication, QPalette
 from PySide6.QtCore import Qt
 
-from frontengine.ui.style.tokens import (CONTROL_HEIGHT, DEFAULT_THEME, FONT_SECTION, FONT_SIZE, FONT_SMALL,
+from frontengine.ui.style.cel import THEME_PROPERTY
+from frontengine.ui.style.tokens import (CEL_LINE, CONTROL_HEIGHT, DEFAULT_THEME, FONT_SECTION, FONT_SIZE, FONT_SMALL,
                                          FONT_TITLE, INK_FONT, INK_FONT_SKIPPED_FOR, INK_LINE, INK_RADIUS,
-                                         INK_RADIUS_CARD, RADIUS, RADIUS_CARD, RADIUS_SMALL, palette_for,
+                                         RADIUS, RADIUS_SMALL, palette_for,
                                          resolve_theme)
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 
@@ -31,7 +33,7 @@ ICONS = Path(__file__).resolve().parent / "icons"
 FONTS = Path(__file__).resolve().parent / "fonts"       # jf open huninn (SIL OFL 1.1), for the pet pages
 
 __all__ = ["DEFAULT_THEME", "apply_app_style", "build_stylesheet", "build_palette", "contrast_ratio",
-           "contrast_text", "current_theme", "load_brand_fonts", "mark_ink"]
+           "contrast_text", "current_theme", "load_brand_fonts", "mark_ink", "use_brand_font"]
 
 
 def _rgb(color: str) -> tuple[int, int, int]:
@@ -86,44 +88,40 @@ def current_theme(name: str | None) -> str:
 
 
 def _shell_rules(c: Dict[str, str]) -> str:
-    """The window frame: sidebar, brand, command search, page header and footer."""
+    """The window frame: the rack of tabs, command search, page header and footer."""
+    rail_button = f"color: {c['rail_muted']}; background-color: {c['rail_hover']}; border: 1px solid {c['rail_hover']};"
     return f"""
 QMainWindow, QDialog {{ background-color: {c['window']}; color: {c['text']}; }}
-QWidget#navigationPanel {{ background-color: {c['sidebar']}; border-right: 1px solid {c['border']}; }}
-QLabel#appBrand {{ color: {c['text']}; font-size: 17px; font-weight: 700; }}
-QPushButton#commandSearch {{
-    color: {c['muted']}; background-color: {c['surface']}; border: 1px solid {c['border']};
-    border-radius: {RADIUS}px; text-align: left; padding: 0px; font-weight: 400; min-height: 34px;
+QWidget#navigationPanel {{ background-color: {c['rail']}; border-right: {CEL_LINE}px solid {c['line']}; }}
+QWidget#navInset, QWidget#brandMark {{ background: transparent; border: none; }}
+QLabel#appBrand {{ color: {c['rail_text']}; font-size: 18px; font-weight: 700; }}
+QPushButton#commandSearch, QPushButton#foldButton {{
+    {rail_button} border-radius: {RADIUS}px; text-align: left; padding: 0px; font-weight: 400; min-height: 32px;
 }}
-QPushButton#commandSearch:hover {{ border-color: {c['accent']}; }}
-QLabel#commandSearchCaption {{ color: {c['muted']}; }}
+QPushButton#foldButton {{ background-color: transparent; border-color: transparent; }}
+QPushButton#commandSearch:hover, QPushButton#foldButton:hover {{
+    background-color: {c['rail_hover']}; border-color: {c['rail_muted']};
+}}
+QPushButton#commandSearch:focus, QPushButton#foldButton:focus {{ border-color: {c['accent']}; }}
+QLabel#commandSearchCaption, QLabel#foldCaption {{ color: {c['rail_muted']}; }}
 QLabel#shortcutHint {{
-    color: {c['faint']}; font-size: 11px; border: 1px solid {c['border']}; border-radius: 4px; padding: 0px 5px;
+    color: {c['rail_muted']}; font-size: 11px; border: 1px solid {c['rail_muted']}; border-radius: 4px;
+    padding: 0px 5px;
 }}
-QWidget#brandMark {{ background: transparent; }}
-QListWidget#navSidebar {{ background-color: {c['sidebar']}; border: none; outline: 0; padding: 0px; }}
-QListWidget#navSidebar::item {{
-    color: {c['muted']}; padding: 6px 10px; margin: 1px 0px; border: none; border-radius: {RADIUS}px;
-}}
-QListWidget#navSidebar::item:hover {{ background-color: {c['surface_alt']}; color: {c['text']}; }}
-QListWidget#navSidebar::item:selected, QListWidget#navSidebar::item:selected:active,
-QListWidget#navSidebar::item:selected:!active {{
-    background-color: {c['accent_soft']}; color: {c['text']}; font-weight: 600;
-}}
-QListWidget#navSidebar::item:disabled {{
-    color: {c['faint']}; background: transparent; padding: 14px 10px 4px 10px; font-size: 11px; font-weight: 700;
-}}
+QListWidget#navSidebar {{ background: transparent; border: none; outline: 0; padding: 0px; }}
+QListWidget#navSidebar::item {{ background: transparent; border: none; padding: 0px; margin: 0px; }}
+QListWidget#navSidebar QScrollBar:vertical {{ width: 5px; margin: 0px; }}
+QListWidget#navSidebar QScrollBar::handle:vertical {{ background: {c['rail_hover']}; border-radius: 2px; }}
+QListWidget#navSidebar QScrollBar::handle:vertical:hover {{ background: {c['rail_muted']}; }}
 QWidget#pageHeader {{ background-color: transparent; border: none; }}
 QLabel#pageTitle {{ font-size: {FONT_TITLE}px; font-weight: 700; color: {c['text']}; }}
 QLabel#pageSubtitle {{ font-size: {FONT_SIZE}px; color: {c['muted']}; }}
-QWidget#pageFooter {{ background-color: {c['surface']}; border-top: 1px solid {c['border']}; }}
+QWidget#pageFooter {{ background-color: {c['surface']}; border-top: {CEL_LINE}px solid {c['line']}; }}
 QLabel#pageStatus {{ color: {c['muted']}; }}
-QStackedWidget#pageBody, QWidget#pageContent {{ background-color: {c['window']}; }}
+QStackedWidget#pageBody {{ background-color: {c['window']}; }}
 QWidget[settingPage="true"] {{ background-color: {c['window']}; }}
 QLabel#sectionHeader {{ color: {c['text']}; font-size: {FONT_SECTION}px; font-weight: 700; padding-top: 2px; }}
-QWidget#settingSection {{
-    background-color: {c['surface']}; border: 1px solid {c['border']}; border-radius: {RADIUS_CARD}px;
-}}
+QWidget#settingSection {{ background: transparent; border: none; }}
 QLabel#sectionNote {{ color: {c['muted']}; }}
 QWidget#sectionContent, QWidget#inlineActions, QWidget#pageColumn {{ background: transparent; border: none; }}
 QLabel#homeStatus {{ font-size: 15px; font-weight: 600; color: {c['text']}; }}
@@ -136,11 +134,12 @@ QWidget#homeTabPage, QWidget#emptyHome {{ background: transparent; }}
 def _button_rules(c: Dict[str, str]) -> str:
     return f"""
 QPushButton, QToolButton#actionMenu {{
-    color: {c['text']}; background-color: {c['surface_alt']}; border: 1px solid {c['border']};
-    border-radius: {RADIUS}px; padding: 5px 14px; min-height: {CONTROL_HEIGHT - 12}px; font-weight: 500;
+    color: {c['text']}; background-color: {c['surface']}; border: 1px solid {c['line']};
+    border-radius: {RADIUS}px; padding: 5px 14px; min-height: {CONTROL_HEIGHT - 12}px; font-weight: 600;
 }}
-QPushButton:hover, QToolButton#actionMenu:hover {{ border-color: {c['border_strong']}; }}
-QPushButton:pressed, QToolButton#actionMenu:pressed {{ background-color: {c['border']}; }}
+QPushButton:hover, QToolButton#actionMenu:hover {{ background-color: {c['surface_alt']}; }}
+QPushButton:pressed, QToolButton#actionMenu:pressed {{ background-color: {c['border']}; padding-top: 6px;
+    padding-bottom: 4px; }}
 QPushButton:focus, QToolButton#actionMenu:focus {{ border-color: {c['accent']}; }}
 QPushButton:checked {{ background-color: {c['accent_soft']}; border-color: {c['accent']}; }}
 QPushButton:disabled, QToolButton#actionMenu:disabled {{
@@ -151,10 +150,11 @@ QToolButton#actionMenu::menu-indicator {{
     image: {{arrow}}; subcontrol-origin: padding; subcontrol-position: center right; right: 8px;
 }}
 QPushButton#primaryAction {{
-    background-color: {c['accent']}; color: {c['on_accent']}; border: 1px solid {c['accent']};
-    font-weight: 700; padding: 8px 24px;
+    background-color: {c['accent']}; color: {c['on_accent']}; border: {CEL_LINE}px solid {c['on_accent']};
+    border-radius: {RADIUS + 2}px; font-weight: 700; padding: 7px 24px;
 }}
-QPushButton#primaryAction:hover {{ background-color: {c['accent_hover']}; border-color: {c['accent_hover']}; }}
+QPushButton#primaryAction:hover {{ background-color: {c['accent_hover']}; }}
+QPushButton#primaryAction:focus {{ border-color: {c['text']}; }}
 QPushButton#primaryAction:pressed {{ background-color: {c['accent_pressed']}; }}
 QPushButton#primaryAction:disabled {{
     background-color: {c['surface_alt']}; color: {c['faint']}; border-color: {c['border']};
@@ -167,7 +167,7 @@ QDialogButtonBox QPushButton:default:disabled {{
     background-color: {c['surface_alt']}; color: {c['faint']}; border-color: {c['border']};
 }}
 QPushButton#primaryAction[tone="danger"], QPushButton[tone="danger"] {{
-    background-color: transparent; color: {c['danger']}; border: 1px solid {c['danger']}; font-weight: 600;
+    background-color: {c['surface']}; color: {c['danger']}; border: 1px solid {c['danger']}; font-weight: 600;
 }}
 QPushButton#primaryAction[tone="danger"]:hover, QPushButton[tone="danger"]:hover {{
     background-color: {c['danger_soft']};
@@ -187,13 +187,13 @@ def _input_rules(c: Dict[str, str], arrow_down: str, arrow_up: str) -> str:
              "QDateEdit, QKeySequenceEdit"
     return f"""
 {fields} {{
-    color: {c['text']}; background-color: {c['input']}; border: 1px solid {c['border']};
+    color: {c['text']}; background-color: {c['input']}; border: 1px solid {c['border_strong']};
     border-radius: {RADIUS}px; padding: 4px 10px; min-height: {CONTROL_HEIGHT - 10}px;
     selection-background-color: {c['accent']}; selection-color: {c['on_accent']};
 }}
 QPlainTextEdit, QTextEdit {{ padding: 6px 8px; }}
 QLineEdit:hover, QSpinBox:hover, QDoubleSpinBox:hover, QComboBox:hover, QPlainTextEdit:hover,
-QTextEdit:hover, QTimeEdit:hover, QDateTimeEdit:hover {{ border-color: {c['border_strong']}; }}
+QTextEdit:hover, QTimeEdit:hover, QDateTimeEdit:hover {{ border-color: {c['line']}; }}
 QLineEdit:focus, QSpinBox:focus, QDoubleSpinBox:focus, QComboBox:focus, QPlainTextEdit:focus,
 QTextEdit:focus, QTimeEdit:focus, QDateTimeEdit:focus, QKeySequenceEdit:focus {{ border-color: {c['accent']}; }}
 QLineEdit:disabled, QSpinBox:disabled, QDoubleSpinBox:disabled, QComboBox:disabled, QPlainTextEdit:disabled,
@@ -223,43 +223,46 @@ QDateEdit::down-arrow {{ image: {arrow_down}; width: 10px; height: 10px; }}
 """
 
 
-def _choice_rules(c: Dict[str, str]) -> str:
-    """Check boxes, radio buttons, sliders and progress bars."""
+def _switch(state: str, theme: str) -> str:
+    return _icon(f"switch-{state}-{theme}.svg")
+
+
+def _choice_rules(c: Dict[str, str], theme: str) -> str:
+    """Switches (check boxes), radio buttons, sliders and progress bars."""
     return f"""
 QCheckBox, QRadioButton {{ color: {c['text']}; spacing: 8px; background: transparent; }}
 QCheckBox:disabled, QRadioButton:disabled {{ color: {c['faint']}; }}
-QCheckBox::indicator, QRadioButton::indicator {{
-    width: 16px; height: 16px; border: 1px solid {c['border_strong']}; background-color: {c['input']};
+QCheckBox::indicator {{ width: 34px; height: 20px; border: none; background: transparent;
+    image: {_switch('off', theme)}; }}
+QCheckBox::indicator:checked {{ image: {_switch('on', theme)}; }}
+QCheckBox::indicator:indeterminate {{ image: {_switch('mixed', theme)}; }}
+QCheckBox::indicator:disabled {{ image: {_switch('off-disabled', theme)}; }}
+QCheckBox::indicator:checked:disabled {{ image: {_switch('on-disabled', theme)}; }}
+QCheckBox:focus {{ color: {c['accent_pressed']}; }}
+QRadioButton::indicator {{
+    width: 16px; height: 16px; border: 1px solid {c['border_strong']}; border-radius: 9px;
+    background-color: {c['input']};
 }}
-QCheckBox::indicator {{ border-radius: 4px; }}
-QRadioButton::indicator {{ border-radius: 9px; }}
-QCheckBox::indicator:hover, QRadioButton::indicator:hover {{ border-color: {c['accent']}; }}
-QCheckBox::indicator:checked {{ background-color: {c['accent']}; border-color: {c['accent']}; image: {_icon('check.svg')}; }}
-QCheckBox::indicator:indeterminate {{
-    background-color: {c['accent']}; border-color: {c['accent']}; image: {_icon('partial.svg')};
-}}
+QRadioButton::indicator:hover {{ border-color: {c['accent']}; }}
 QRadioButton::indicator:checked {{
     border-color: {c['accent']};
     background-color: qradialgradient(cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5,
         stop:0 {c['on_accent']}, stop:0.32 {c['on_accent']}, stop:0.42 {c['accent']}, stop:1 {c['accent']});
 }}
-QCheckBox::indicator:disabled, QRadioButton::indicator:disabled {{
-    background-color: {c['surface_alt']}; border-color: {c['border']};
-}}
-QCheckBox::indicator:checked:disabled {{ background-color: {c['border_strong']}; border-color: {c['border_strong']}; }}
+QRadioButton::indicator:disabled {{ background-color: {c['surface_alt']}; border-color: {c['border']}; }}
 QSlider {{ background: transparent; min-height: 22px; }}
-QSlider::groove:horizontal {{ height: 4px; background: {c['border']}; border-radius: 2px; }}
-QSlider::sub-page:horizontal {{ background: {c['accent']}; border-radius: 2px; }}
+QSlider::groove:horizontal {{ height: 6px; background: {c['border']}; border-radius: 3px; }}
+QSlider::sub-page:horizontal {{ background: {c['accent']}; border-radius: 3px; }}
 QSlider::handle:horizontal {{
-    width: 16px; height: 16px; margin: -7px 0px; border-radius: 9px;
-    background: {c['surface']}; border: 2px solid {c['accent']};
+    width: 10px; height: 20px; margin: -9px 0px; border-radius: 5px;
+    background: {c['surface']}; border: 2px solid {c['line']};
 }}
 QSlider::handle:horizontal:hover {{ background: {c['accent_soft']}; }}
-QSlider::groove:vertical {{ width: 4px; background: {c['border']}; border-radius: 2px; }}
-QSlider::add-page:vertical {{ background: {c['accent']}; border-radius: 2px; }}
+QSlider::groove:vertical {{ width: 6px; background: {c['border']}; border-radius: 3px; }}
+QSlider::add-page:vertical {{ background: {c['accent']}; border-radius: 3px; }}
 QSlider::handle:vertical {{
-    width: 16px; height: 16px; margin: 0px -7px; border-radius: 9px;
-    background: {c['surface']}; border: 2px solid {c['accent']};
+    width: 20px; height: 10px; margin: 0px -9px; border-radius: 5px;
+    background: {c['surface']}; border: 2px solid {c['line']};
 }}
 QSlider::sub-page:horizontal:disabled, QSlider::add-page:vertical:disabled {{ background: {c['border_strong']}; }}
 QSlider::handle:disabled {{ border-color: {c['border_strong']}; }}
@@ -274,15 +277,16 @@ QProgressBar::chunk {{ background-color: {c['accent']}; border-radius: 6px; }}
 def _container_rules(c: Dict[str, str]) -> str:
     """Tabs, item views, group boxes, menus, tool tips and scroll bars."""
     return f"""
-QTabWidget::pane {{ border: 1px solid {c['border']}; border-radius: {RADIUS + 2}px; top: -1px;
+QTabWidget::pane {{ border: 1px solid {c['line']}; border-radius: {RADIUS + 2}px; top: -1px;
     background-color: {c['surface']}; }}
 QTabBar {{ background: transparent; }}
 QTabBar::tab {{
-    color: {c['muted']}; background: transparent; padding: 8px 14px; margin-right: 2px;
-    border: none; border-bottom: 2px solid transparent;
+    color: {c['muted']}; background: {c['surface_alt']}; padding: 7px 14px; margin: 4px 4px 0px 0px;
+    border: 1px solid {c['border_strong']}; border-top-left-radius: {RADIUS}px; border-top-right-radius: {RADIUS}px;
 }}
-QTabBar::tab:hover {{ color: {c['text']}; }}
-QTabBar::tab:selected {{ color: {c['text']}; border-bottom-color: {c['accent']}; font-weight: 600; }}
+QTabBar::tab:hover {{ color: {c['text']}; background: {c['surface']}; }}
+QTabBar::tab:selected {{ color: {c['text']}; background: {c['surface']}; border-color: {c['line']};
+    border-bottom-color: {c['surface']}; margin-top: 0px; padding-bottom: 11px; font-weight: 700; }}
 QTabWidget#sceneInspector QTabBar::tab {{ min-width: 54px; padding: 10px 8px; }}
 QListView, QListWidget, QTreeView, QTreeWidget, QTableView, QTableWidget {{
     color: {c['text']}; background-color: {c['surface']}; alternate-background-color: {c['surface_alt']};
@@ -309,11 +313,10 @@ QGroupBox::title {{ subcontrol-origin: margin; left: 12px; padding: 0px 4px; col
     font-weight: 600; }}
 QFrame[frameShape="4"], QFrame[frameShape="5"] {{ color: {c['border']}; }}
 QSplitter::handle {{ background-color: {c['border']}; }}
-QMenuBar {{ background-color: {c['window']}; color: {c['text']}; border-bottom: 1px solid {c['border']};
-    padding: 2px 6px; }}
+QMenuBar {{ background-color: {c['rail']}; color: {c['rail_muted']}; border: none; padding: 2px 6px; }}
 QMenuBar::item {{ background: transparent; padding: 6px 10px; border-radius: {RADIUS_SMALL}px; }}
-QMenuBar::item:selected, QMenuBar::item:pressed {{ background-color: {c['surface_alt']}; }}
-QMenu {{ color: {c['text']}; background-color: {c['surface']}; border: 1px solid {c['border']};
+QMenuBar::item:selected, QMenuBar::item:pressed {{ background-color: {c['rail_hover']}; color: {c['rail_text']}; }}
+QMenu {{ color: {c['text']}; background-color: {c['surface']}; border: 1px solid {c['line']};
     border-radius: {RADIUS}px; padding: 6px; }}
 QMenu::item {{ padding: 7px 28px 7px 12px; border-radius: {RADIUS_SMALL}px; }}
 QMenu::item:selected {{ background-color: {c['accent_soft']}; color: {c['text']}; }}
@@ -324,7 +327,6 @@ QMenu::indicator:checked {{ image: {_icon('check.svg')}; background-color: {c['a
 QToolTip {{ color: {c['on_tooltip']}; background-color: {c['tooltip']}; border: none; border-radius: 6px;
     padding: 5px 8px; }}
 QScrollArea {{ background: transparent; border: none; }}
-QScrollArea > QWidget > QWidget#pageContent {{ background-color: {c['window']}; }}
 QScrollBar:vertical {{ width: 8px; background: transparent; margin: 2px 0px; }}
 QScrollBar:horizontal {{ height: 8px; background: transparent; margin: 0px 2px; }}
 QScrollBar::handle:vertical {{ background: {c['border_strong']}; border-radius: 4px; min-height: 28px; }}
@@ -343,16 +345,14 @@ def _ink_page_rules(c: Dict[str, str]) -> str:
 
     Outlines are one even width: a thicker right and bottom edge (a stylesheet cannot offset a
     shadow) left notches where Qt joins uneven edges on a rounded corner."""
-    edge = f"border: {INK_LINE}px solid {c['ink_line']};"
     return f"""
-{INK}, {INK} QWidget#pageContent, {INK} QStackedWidget#pageBody, QDialog[inkStyle="true"] {{
+{INK}, {INK} QStackedWidget#pageBody, QDialog[inkStyle="true"] {{
     background-color: {c['ink_window']}; }}
 {INK} QWidget {{ color: {c['ink_text']}; }}
 {INK} QLabel#pageTitle {{ font-size: {FONT_TITLE + 6}px; font-weight: 700; color: {c['ink_text']}; }}
 {INK} QLabel#pageSubtitle, {INK} QLabel#pageStatus {{ color: {c['ink_muted']}; }}
 {INK} QLabel#sectionHeader {{ font-size: {FONT_SECTION + 3}px; font-weight: 700; color: {c['ink_text']}; }}
 {INK} QLabel#homeStatus {{ font-size: 16px; font-weight: 700; }}
-{INK} QWidget#settingSection {{ background-color: {c['ink_surface']}; {edge} border-radius: {INK_RADIUS_CARD}px; }}
 {INK} QWidget#pageFooter {{ background-color: {c['ink_surface']}; border-top: {INK_LINE}px solid {c['ink_line']}; }}
 """
 
@@ -380,12 +380,10 @@ def _ink_control_rules(c: Dict[str, str], arrow_down: str) -> str:
 {INK} QPlainTextEdit:focus, {INK} QTextEdit:focus {{ border-color: {c['accent']}; }}
 {INK} QComboBox::down-arrow {{ image: {arrow_down}; width: 12px; height: 12px; }}
 {INK} QComboBox QAbstractItemView {{ color: {c['ink_text']}; background-color: {c['ink_surface']}; {outline} }}
-{INK} QCheckBox::indicator, {INK} QRadioButton::indicator {{
+{INK} QRadioButton::indicator {{
     width: {18 - 2 * INK_LINE}px; height: {18 - 2 * INK_LINE}px;
     border: {INK_LINE}px solid {c['ink_line']}; background-color: {c['ink_surface']}; }}
-{INK} QCheckBox::indicator {{ border-radius: 5px; }}
-{INK} QCheckBox::indicator:checked {{ background-color: {c['accent']}; border-color: {c['ink_line']}; }}
-{INK} QTabBar::tab {{
+{INK} QTabBar::tab, {INK} QTabBar::tab:selected {{
     color: {c['ink_text']}; background-color: {c['ink_surface']}; {outline} padding: 8px 16px; margin: 0px 6px 6px 0px;
     font-weight: 700; }}
 {INK} QTabBar::tab:selected {{ color: {c['ink_selected_text']}; background-color: {c['ink_line']}; }}
@@ -410,9 +408,15 @@ def mark_ink(widget) -> None:
     without it the strip behind the page title stayed the tools' grey above the paper. The
     typeface is set as the widget's font rather than in the stylesheet, so a language switch
     changes just that font instead of rebuilding the whole stylesheet (which resized windows)."""
-    from frontengine.utils.multi_language.retranslate import retranslator
     widget.setProperty("inkStyle", True)
     widget.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+    use_brand_font(widget)
+
+
+def use_brand_font(widget) -> None:
+    """Draw the widget (a heading, or a pet page and everything on it) in the rounded typeface
+    while the language is one it covers."""
+    from frontengine.utils.multi_language.retranslate import retranslator
     load_brand_fonts()
     helper = _InkFont(widget)
     widget._ink_font = helper                 # held by the widget; the retranslator holds it weakly
@@ -473,7 +477,7 @@ QLabel:disabled {{ color: {colors['faint']}; }}
 """
     buttons = _button_rules(colors).replace("{arrow}", arrow_down)
     return (base + _shell_rules(colors) + buttons + _input_rules(colors, arrow_down, arrow_up)
-            + _choice_rules(colors) + _container_rules(colors)
+            + _choice_rules(colors, resolved) + _container_rules(colors)
             + _ink_page_rules(colors) + _ink_control_rules(colors, arrow_down))
 
 
@@ -510,6 +514,7 @@ def apply_app_style(window, theme: str | None, application: bool = False) -> Non
     try:
         load_brand_fonts()
         palette = build_palette(theme)
+        window.setProperty(THEME_PROPERTY, current_theme(theme))
         if application and QGuiApplication.instance() is not None:
             QGuiApplication.setPalette(palette)
         window.setPalette(palette)

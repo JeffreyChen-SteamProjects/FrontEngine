@@ -8,14 +8,14 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Type
 
 from PySide6.QtCore import QByteArray, QTimer
-from PySide6.QtGui import QGuiApplication, QIcon, Qt, QAction, QKeySequence
+from PySide6.QtGui import QGuiApplication, QIcon, Qt, QAction, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QMainWindow, QApplication, QGridLayout, QHBoxLayout, QStackedWidget, QStyle,
-    QMenuBar, QWidget, QMessageBox, QVBoxLayout, QLayout,
+    QMenuBar, QWidget, QMessageBox, QLayout,
 )
 
 from frontengine.ui.nav.sidebar import NavigationSidebar
-from frontengine.ui.nav.shell import BrandMark, CommandSearchButton
+from frontengine.ui.nav.shell import FOLD_SHORTCUT, NavigationPanel
 from frontengine.ui.style.app_style import apply_app_style
 from frontengine.ui.style.tokens import normalise_theme
 
@@ -189,20 +189,18 @@ class FrontEngineMainUI(QMainWindow):
         central_layout = QHBoxLayout(central)
         central_layout.setContentsMargins(0, 0, 0, 0)
         central_layout.setSpacing(0)
-        navigation = QWidget(self)
-        navigation.setObjectName("navigationPanel")
-        navigation_layout = QVBoxLayout(navigation)
-        navigation_layout.setContentsMargins(12, 20, 12, 12)
-        navigation_layout.setSpacing(14)
-        self.brand = BrandMark()
-        navigation_layout.addWidget(self.brand)
-        self.command_search_button = CommandSearchButton()
+        self.navigation = NavigationPanel(self.sidebar, self)
+        self.brand = self.navigation.brand
+        self.command_search_button = self.navigation.search
         retranslator.bind(self.command_search_button.caption, "command_palette_title")
         retranslator.bind(self.command_search_button, "command_palette_search", setter="setToolTip")
         self.lifetime.connect_owned(self.command_search_button.clicked, self.open_command_palette)
-        navigation_layout.addWidget(self.command_search_button)
-        navigation_layout.addWidget(self.sidebar, 1)
-        central_layout.addWidget(navigation)
+        self.navigation.set_chosen(user_setting_dict.get("sidebar_compact") is True)
+        self.lifetime.connect_owned(self.navigation.compact_changed, self._remember_sidebar_compact)
+        fold_shortcut = QShortcut(QKeySequence(FOLD_SHORTCUT), self)
+        fold_shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
+        self.lifetime.connect_owned(fold_shortcut.activated, self.navigation.toggle)
+        central_layout.addWidget(self.navigation)
         central_layout.addWidget(self.page_stack, 1)
         self.setCentralWidget(central)
 
@@ -667,7 +665,9 @@ class FrontEngineMainUI(QMainWindow):
             self.sidebar.add_group(group_key, group_fallback)
             for widget, lang_key, icon_name in entries:
                 index = self.page_stack.addWidget(widget)
-                self.sidebar.add_page(lang_key, index, icon_name=icon_name)
+                paper = "ink_window" if widget.property("inkStyle") else "window"
+                self.sidebar.add_page(lang_key, index, icon_name=icon_name, paper=paper)
+                widget.set_identity(icon_name, group_key)
                 self.command_pages.append((widget, lang_key, index))
 
         # 外掛註冊的分頁自成一組，使用者才看得出哪些不是內建的
@@ -683,6 +683,14 @@ class FrontEngineMainUI(QMainWindow):
             if isinstance(group, str):
                 self.sidebar.set_group_collapsed(group, True)
         self.lifetime.connect_owned(self.sidebar.collapsed_changed, self._remember_collapsed_groups)
+
+    @owned_callback
+    def _remember_sidebar_compact(self, compact: bool) -> None:
+        user_setting_dict["sidebar_compact"] = compact
+
+    def resizeEvent(self, event) -> None:
+        super().resizeEvent(event)
+        self.navigation.set_window_width(self.width())
 
     @owned_callback
     def _remember_collapsed_groups(self, groups: list) -> None:

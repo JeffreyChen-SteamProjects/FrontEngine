@@ -64,7 +64,8 @@ class SceneSettingUI(SettingPage):
         self.play_button.clicked.connect(self.scene_manager_ui.start_scene)
         self.stop_button = tr(QPushButton(), 'rules_action_scene_stop', 'Stop scene')
         self.stop_button.clicked.connect(self.close_scene)
-        self.set_footer(primary=self.play_button, status=self.action_status, extra=(output_button, self.stop_button))
+        self.add_header_action(output_button)
+        self.set_footer(primary=self.play_button, status=self.action_status, extra=(self.stop_button,))
         self.actions.status_changed.connect(self._action_status)
         self._action_status('')
 
