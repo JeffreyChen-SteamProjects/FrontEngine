@@ -59,7 +59,12 @@ class SceneSettingUI(SettingPage):
         self.scene_manager_ui.templates_requested.connect(self.open_templates)
         self.action_status = QLabel()
         self.action_status.setWordWrap(True)
-        self.set_footer(primary=output_button, status=self.action_status)
+        # Playing on the desktop is what a scene is for; it used to be reachable only from the Script tab.
+        self.play_button = tr(QPushButton(), 'scene_start', 'Start scene')
+        self.play_button.clicked.connect(self.scene_manager_ui.start_scene)
+        self.stop_button = tr(QPushButton(), 'rules_action_scene_stop', 'Stop scene')
+        self.stop_button.clicked.connect(self.close_scene)
+        self.set_footer(primary=self.play_button, status=self.action_status, extra=(output_button, self.stop_button))
         self.actions.status_changed.connect(self._action_status)
         self._action_status('')
 

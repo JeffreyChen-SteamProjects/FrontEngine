@@ -24,6 +24,11 @@ class BaseWidget(QWidget):
     # nothing from the GPU. Eye care and the focus dimmer use it.
     software_only: bool = False
 
+    # A tool the user is working with right now (drawing, measuring, pointing at things) sets this:
+    # smart pause then leaves it on screen. Those tools are used over full-screen programs - a slide
+    # show above all - so standing down for one took them away mid-use.
+    stays_while_paused: bool = False
+
     def __init__(self, draw_location_x: int = 0, draw_location_y: int = 0):
         super().__init__()
         self.draw_location_x: int = draw_location_x

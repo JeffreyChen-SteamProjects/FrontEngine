@@ -398,6 +398,18 @@ class ControlCenterUI(SettingPage):
         self._for_each_overlay(lambda widget: widget.hide())
 
     @owned_action
+    def stand_down(self) -> None:
+        """Smart pause: hide every overlay except the tools in use (``stays_while_paused``)."""
+        front_engine_logger.info("ControlCenterUI stand_down")
+        self.overlay_visibility_changed.emit(True)
+
+        def apply(widget) -> None:
+            if not getattr(widget, "stays_while_paused", False):
+                widget.hide()
+
+        self._for_each_overlay(apply)
+
+    @owned_action
     def show_all(self) -> None:
         """重新顯示所有覆蓋層 / Re-show every overlay."""
         front_engine_logger.info("ControlCenterUI show_all")
@@ -516,6 +528,8 @@ class ControlCenterUI(SettingPage):
             if getattr(widget, "keep_in_capture", False):
                 capture_affinity.apply_to_widget(widget, False)
                 return
+            if getattr(widget, "needs_capture_exclusion", False):
+                return          # it reads the screen: included, it would photograph itself
             if capture_affinity.apply_to_widget(widget, self._hidden_from_capture):
                 applied += 1
 

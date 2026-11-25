@@ -152,28 +152,28 @@ class ToolsSettingUI(SettingPage):
         # Eight unrelated tools. Flattened into one grid, the measuring settings
         # looked as if recording used them too; they have nothing to do with
         # each other.
-        measure = self.add_section(self.measure_label)
+        # Each section opens with what it is for; the three with several steps (measuring, reading,
+        # recording) also say how, and the explanation follows the mode, action or format chosen.
+        measure = self._measure_section = self.add_section(self.measure_label)
+        measure.add_note("tools_measure_note")
         measure.add_row("tools_mode", self.measure_mode_combobox, "Mode")
+        self.measure_help = measure.add_note("tools_measure_help_color")
         measure.add_row(self.color_format_label, self.color_format_combobox)
         measure.add_inline(self.measure_button, self.palette_collect, self.palette_button)
+        measure.add_note("tools_palette_note")
         measure.add_widget(self.palette_status)
 
         capture = self.add_section(self.capture_label)
+        capture.add_note("tools_capture_note")
         capture.add_actions(self.capture_button, self.capture_copy_button,
                            self.capture_pin_button, self.capture_edit_button)
 
-        screen_text = self.add_section(self.screen_text_label)
-        screen_text.set_collapsible()
-        screen_text.add_row("tools_action", self.screen_text_combobox, "Action")
-        screen_text.add_widget(self.screen_text_input)
-        self.live_ocr_button = tr(QPushButton(), 'live_ocr_title')
-        self.live_ocr_button.clicked.connect(self.start_live_ocr)
-        screen_text.add_actions(self.screen_text_button, self.live_ocr_button)
-
+        self._add_screen_text_section()
         self._add_record_section()
 
         virtual_camera = self.add_section(self.virtual_camera_label)
         virtual_camera.set_collapsible()
+        virtual_camera.add_note("tools_vcam_note")
         virtual_camera.add_row("tools_fps", self.virtual_camera_fps_spinbox,
                                "Frames per second")
         virtual_camera.add_inline(self.virtual_camera_button)
@@ -181,6 +181,7 @@ class ToolsSettingUI(SettingPage):
 
         camera = self.add_section(self.camera_label)
         camera.set_collapsible()
+        camera.add_note("tools_camera_note")
         camera.add_row("tools_device", self.camera_device_combobox, "Device")
         camera.add_row("tools_shape", self.camera_shape_combobox, "Shape")
         camera.add_row(self.camera_border_label, self.camera_border_spinbox)
@@ -189,10 +190,46 @@ class ToolsSettingUI(SettingPage):
 
         windows = self.add_section(self.layout_label)
         windows.set_collapsible()
+        windows.add_note("tools_layout_note")
         windows.add_row("tools_name", self.layout_name_edit, "Name")
         windows.add_inline(self.layout_save_button)
         windows.add_row("tools_saved", self.layout_combobox, "Saved")
         windows.add_actions(self.layout_restore_button, self.pin_button, self.replica_button)
+        self._explain_measure_mode()
+        self._explain_screen_text_action()
+        self._explain_record_format()
+
+    @owned_action
+    def _add_screen_text_section(self) -> None:
+        section = self._screen_text_section = self.add_section(self.screen_text_label)
+        section.add_note("tools_screen_text_note")
+        section.add_row("tools_action", self.screen_text_combobox, "Action")
+        self.screen_text_help = section.add_note("tools_screen_text_help_extract")
+        section.add_row(self.screen_text_input_label, self.screen_text_input)
+        self.live_ocr_button = tr(QPushButton(), 'live_ocr_title')
+        self.live_ocr_button.clicked.connect(self.start_live_ocr)
+        section.add_inline(self.screen_text_button, self.live_ocr_button)
+        section.add_note("tools_live_ocr_note")
+
+    def _explain_measure_mode(self) -> None:
+        mode = self.measure_mode_combobox.currentData()
+        retranslator.set_text(self.measure_help, f"tools_measure_help_{mode}")
+        self._measure_section.set_row_visible(self.color_format_combobox, mode == MODE_COLOR)
+
+    def _explain_screen_text_action(self) -> None:
+        """The box below the action is a language, a question, or not needed at all; each keeps its text."""
+        action = self.screen_text_combobox.currentData()
+        if action != self._screen_text_action:
+            self._screen_text_values[self._screen_text_action] = self.screen_text_input.text()
+            self._screen_text_action = action
+            self.screen_text_input.setText(self._screen_text_values.get(action, ""))
+        retranslator.set_text(self.screen_text_help, f"tools_screen_text_help_{action}")
+        retranslator.set_text(self.screen_text_input_label, "tools_screen_text_question"
+                              if action == ACTION_ASK else "tools_screen_text_language")
+        self._screen_text_section.set_row_visible(self.screen_text_input, action != ACTION_EXTRACT)
+
+    def _explain_record_format(self) -> None:
+        retranslator.set_text(self.record_format_help, f"tools_record_help_{self.record_format.currentData()}")
 
     # --- construction helpers -------------------------------------------
     def _build_measure_row(self) -> None:
@@ -205,6 +242,7 @@ class ToolsSettingUI(SettingPage):
             retranslator.bind(self.measure_mode_combobox, key, fallback, "setItemText",
                               self.measure_mode_combobox.count() - 1)
         self.measure_mode_combobox.currentIndexChanged.connect(self._apply_measure_settings)
+        self.measure_mode_combobox.currentIndexChanged.connect(self._explain_measure_mode)
         self.color_format_label = tr(QLabel(), "tools_color_format", "Copy colour as")
         self.color_format_combobox = QComboBox()
         for value, label in ((FORMAT_HEX, "#rrggbb"), (FORMAT_RGB, "rgb(r, g, b)"),
@@ -245,6 +283,10 @@ class ToolsSettingUI(SettingPage):
         self.screen_text_input.setPlaceholderText(
             _t("tools_screen_text_input", "Language, or your question"))
         self.screen_text_input.setText(DEFAULT_LANGUAGE)
+        self.screen_text_input_label = tr(QLabel(), "tools_screen_text_language", "Translate into")
+        self._screen_text_action = ACTION_TRANSLATE
+        self._screen_text_values = {ACTION_TRANSLATE: DEFAULT_LANGUAGE}
+        self.screen_text_combobox.currentIndexChanged.connect(self._explain_screen_text_action)
         self.screen_text_button = tr(QPushButton(), "tools_screen_text_start", "Read an area")
         self.screen_text_button.clicked.connect(self.start_screen_text)
 
@@ -284,16 +326,21 @@ class ToolsSettingUI(SettingPage):
     @owned_action
     def _add_record_section(self) -> None:
         section = self.add_section(self.record_label)
+        section.add_note("tools_record_note")
+        section.add_note("tools_record_help")
         section.add_row('tools_record_format', self.record_format)
+        self.record_format_help = section.add_note("tools_record_help_gif")
         section.add_row('tools_fps', self.record_fps_spinbox)
-        section.add_row('tools_seconds', self.record_seconds_spinbox)
+        section.add_row('tools_record_max_seconds', self.record_seconds_spinbox)
         section.add_inline(self.record_camera_checkbox)
+        section.add_note("tools_record_camera_note")
         section.add_inline(self.record_button, self.record_pause, self.record_cancel)
         section.add_widget(self.record_status)
 
     @owned_action
     def _record_format_changed(self, _index: int) -> None:
         self.record_seconds_spinbox.setMaximum(3600 if self.record_format.currentData() == 'avi' else 120)
+        self._explain_record_format()
 
     @owned_action
     def _toggle_record_pause(self) -> None:
@@ -382,6 +429,7 @@ class ToolsSettingUI(SettingPage):
         if screen is not None:
             widget.setGeometry(screen.geometry())
         widget.color_sampled.connect(self._record_palette_color)
+        widget.finish_requested.connect(self.stop_measure)
         widget.setMouseTracking(True)
         widget.show()
         self.measure_widget_list.append(widget)
@@ -658,7 +706,7 @@ class ToolsSettingUI(SettingPage):
     def start_virtual_camera(self):
         """框一塊畫面，放開滑鼠後把那塊持續送進虛擬攝影機。"""
         front_engine_logger.info("[ToolsSettingUI] start_virtual_camera")
-        picker = RegionCaptureWidget()
+        picker = RegionCaptureWidget(prompt_key="region_prompt_camera")
         picker.finish = _virtual_camera_region_picker(self, picker)
         screen = QGuiApplication.primaryScreen()
         if screen is not None:
@@ -701,7 +749,8 @@ class ToolsSettingUI(SettingPage):
         without it: this is the only feature that sends screen content off the
         machine.
         """
-        picker = RegionCaptureWidget(on_captured=lambda pixmap, rect: self._read_capture(pixmap))
+        picker = RegionCaptureWidget(on_captured=lambda pixmap, rect: self._read_capture(pixmap),
+                                     prompt_key="region_prompt_text")
         picker.failed.connect(self._on_capture_failed)
         screen = QGuiApplication.primaryScreen()
         if screen is not None:
@@ -719,7 +768,8 @@ class ToolsSettingUI(SettingPage):
         if len(self.ocr_widget_list) >= 4:
             self._on_capture_failed(_t('live_ocr_limit', 'Close an OCR window before opening another (maximum four).'))
             return None
-        picker = RegionCaptureWidget(on_captured=lambda pixmap, rect: self._live_ocr_selected(picker, rect))
+        picker = RegionCaptureWidget(on_captured=lambda pixmap, rect: self._live_ocr_selected(picker, rect),
+                                     prompt_key="region_prompt_live_ocr")
         picker.failed.connect(self._on_capture_failed)
         screen = QGuiApplication.primaryScreen()
         if screen is not None:
@@ -838,7 +888,7 @@ class ToolsSettingUI(SettingPage):
     def start_recording(self) -> RegionCaptureWidget:
         """先框一塊範圍，放開滑鼠後就從那塊開始錄。"""
         front_engine_logger.info("[ToolsSettingUI] start_recording")
-        picker = RegionCaptureWidget()
+        picker = RegionCaptureWidget(prompt_key="region_prompt_record")
         picker.finish = _recording_region_picker(self, picker)
         screen = QGuiApplication.primaryScreen()
         if screen is not None:

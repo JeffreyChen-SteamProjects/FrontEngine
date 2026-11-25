@@ -14,11 +14,14 @@ from PySide6.QtCore import QPoint, QRect, Qt, Signal
 from PySide6.QtGui import QColor, QFont, QGuiApplication, QPainter, QPen
 
 from frontengine.show.base_widget import BaseWidget
-from frontengine.show.window_helpers import apply_overlay_window_flags
+from frontengine.show.overlay_hint import draw_hint
+from frontengine.show.window_helpers import CATCH_MOUSE_COLOR, apply_overlay_window_flags
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.measure.measure import (
     FORMAT_HEX, angle_at, format_color, measurement_text,
 )
+from frontengine.utils.multi_language.retranslate import translate
+from frontengine.utils.screen_privacy import capture_affinity
 
 MODE_COLOR = "color"
 MODE_RULER = "ruler"
@@ -62,6 +65,15 @@ class MeasureWidget(BaseWidget):
 
     color_sampled = Signal(str)
 
+    stays_while_paused = True
+    # A see-through full-screen layer: never through the GPU compositor (see BaseWidget).
+    software_only = True
+    # The colour picker reads the screen; included in the picture, this layer tints what it reads.
+    needs_capture_exclusion = True
+
+    # Esc: the layer covers the settings window, so it offers its own way out.
+    finish_requested = Signal()
+
     def __init__(self, mode: str = MODE_COLOR, color_format: str = FORMAT_HEX) -> None:
         front_engine_logger.info(f"[MeasureWidget] Init | mode={mode}")
         super().__init__()
@@ -82,6 +94,19 @@ class MeasureWidget(BaseWidget):
         self._font.setPointSize(11)
         apply_overlay_window_flags(self, show_on_bottom=False, allow_input=True)
         self.setCursor(Qt.CursorShape.CrossCursor)
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+
+    def showEvent(self, event) -> None:
+        super().showEvent(event)
+        capture_affinity.apply_to_widget(self, True)
+        self.activateWindow()
+        self.setFocus(Qt.FocusReason.OtherFocusReason)
+
+    def keyPressEvent(self, event) -> None:
+        if event.key() == Qt.Key.Key_Escape:
+            self.finish_requested.emit()
+        else:
+            super().keyPressEvent(event)
 
     @staticmethod
     def _default_grabber(rect: QRect):
@@ -125,8 +150,7 @@ class MeasureWidget(BaseWidget):
                 self.picked_color = color
                 self.readout = self.color_text(color)
         elif self.mode == MODE_RULER and len(self.points) == 1:
-            self.readout = measurement_text(
-                (self.points[0].x(), self.points[0].y()), (point.x(), point.y()))
+            self.readout = self._ruler_text(self.points[0], point)
         self.update()
 
     def add_point(self, point: QPoint) -> Optional[str]:
@@ -163,10 +187,14 @@ class MeasureWidget(BaseWidget):
         self.update()
         return self.readout
 
+    def _ruler_text(self, start: QPoint, end: QPoint) -> str:
+        """Width, height and distance in real screen pixels, whatever the display scaling."""
+        ratio = self.devicePixelRatioF()
+        return measurement_text((start.x() * ratio, start.y() * ratio), (end.x() * ratio, end.y() * ratio))
+
     def _finish_measurement(self) -> str:
         if self.mode == MODE_RULER:
-            start, end = self.points[0], self.points[1]
-            return measurement_text((start.x(), start.y()), (end.x(), end.y()))
+            return self._ruler_text(self.points[0], self.points[1])
         first, vertex, second = self.points[0], self.points[1], self.points[2]
         degrees = angle_at((vertex.x(), vertex.y()), (first.x(), first.y()),
                            (second.x(), second.y()))
@@ -197,7 +225,12 @@ class MeasureWidget(BaseWidget):
 
     # --- painting --------------------------------------------------------
     def draw_content(self, painter: QPainter) -> None:
+        # Full opacity: scaled by a lower one, the catch alpha would round to 0 and the clicks
+        # would fall through to the program underneath.
+        painter.setOpacity(1.0)
+        painter.fillRect(self.rect(), CATCH_MOUSE_COLOR)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
+        draw_hint(painter, self.rect(), translate(f"measure_prompt_{self.mode}"))
         if self.mode == MODE_COLOR:
             self._draw_swatch(painter)
         else:

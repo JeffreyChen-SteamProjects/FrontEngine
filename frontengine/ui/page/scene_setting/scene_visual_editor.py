@@ -225,7 +225,6 @@ class SceneVisualEditor(SettingPage):
         self.scene_mode.addItem('2D', '2d')
         self.scene_mode.addItem('3D', '3d')
         self.scene_mode.currentIndexChanged.connect(self._change_mode)
-        section.add_inline(self.scene_mode)
         media = (self._button("scene_add_image", lambda: self._add_media("IMAGE")),
                  self._button("scene_add_gif", lambda: self._add_media("GIF")),
                  self._button("scene_add_text", self._add_text))
@@ -241,9 +240,6 @@ class SceneVisualEditor(SettingPage):
         alignment = tuple(self._button("scene_align_" + direction,
             lambda checked=False, value=direction: self._align(value))
             for direction in ("left", "center", "right", "top", "middle", "bottom"))
-        section.add_inline(ActionMenu(media + native, "ui_add_layer"),
-                           ActionMenu(editing, "ui_edit_layers"),
-                           ActionMenu(alignment, "ui_align_layers"))
         buttons = []
         for kind in ('MODEL', 'PLANE', 'CUBE', 'SPHERE', 'CAMERA', 'LIGHT', 'GROUP'):
             button = tr(QPushButton(), 'scene3d_add_'+kind.lower(), 'Add '+kind.title())
@@ -251,7 +247,10 @@ class SceneVisualEditor(SettingPage):
             buttons.append(button)
         self.add_3d_menu = ActionMenu(tuple(buttons), 'scene3d_add')
         self.add_3d_menu.setVisible(False)
-        section.add_inline(self.add_3d_menu)
+        # One wrapping row: three stacked rows pushed the viewport below the visible part of the page.
+        section.add_inline(self.scene_mode, self.add_3d_menu, ActionMenu(media + native, "ui_add_layer"),
+                           ActionMenu(editing, "ui_edit_layers"),
+                           ActionMenu(alignment, "ui_align_layers"))
 
     def _build_properties(self) -> None:
         section = self.properties_page.add_section("scene_layer_properties")

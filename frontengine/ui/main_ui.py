@@ -998,13 +998,14 @@ class FrontEngineMainUI(QMainWindow):
     def _on_smart_pause_changed(self, paused: bool, reason: str) -> None:
         """
         智慧暫停回呼：規則成立時隱藏覆蓋層，規則解除時還原（僅還原本服務
-        自己隱藏的部分，避免覆蓋使用者手動操作）。
+        自己隱藏的部分，避免覆蓋使用者手動操作）。正在使用的工具不收。
         Smart-pause callback: hide the overlays while a rule holds and restore
-        them when it lifts — only restoring what this service hid.
+        them when it lifts — only restoring what this service hid. Tools in use
+        (``stays_while_paused``) stay on screen.
         """
         front_engine_logger.info(f"[MainUI] smart pause | paused={paused}, reason={reason or '-'}")
         if paused:
-            self.control_center_ui.hide_all()
+            self.control_center_ui.stand_down()
             self._smart_pause_hid = True
         elif self._smart_pause_hid:
             self.control_center_ui.show_all()

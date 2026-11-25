@@ -242,6 +242,10 @@ class PresentationSettingUI(SettingPage):
             self.annotate_color_combobox.currentData(), self.annotate_width_slider.value(),
             self.annotate_tool_combobox.currentData())
         widget.set_annotation_window_flag()
+        widget.finish_requested.connect(self.stop_annotation)
+        widget.tool_changed.connect(lambda tool: self._select_by(self.annotate_tool_combobox, tool, "findData"))
+        widget.color_changed.connect(
+            lambda color: self._select_by(self.annotate_color_combobox, color, "findData"))
         self.annotation_widget_list.append(widget)
         self._present(widget)
         retranslator.set_text(

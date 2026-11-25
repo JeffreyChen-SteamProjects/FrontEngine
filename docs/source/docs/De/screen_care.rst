@@ -11,3 +11,5 @@ Augenschutz-Seite
 * Auf allen Bildschirmen / Zielbildschirm - wie sonst auch.
 
 Diese Overlays lassen Klicks durch, alles darunter funktioniert weiter.
+
+Die Simulation des Farbensehens flackert nicht mehr, und ihre Farben verschieben sich nicht. Unter Windows ist die Ebene von der Bildschirmaufnahme ausgenommen und folgt dem Bildschirm aus einem Hintergrundthread, wobei nur Geändertes neu gezeichnet wird; Bildschirmfotos und Freigaben zeigen sie daher nicht. Wo das nicht geht, ist sie ein Standbild vom Start oder von der letzten Änderung einer Einstellung.

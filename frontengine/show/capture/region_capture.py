@@ -15,8 +15,10 @@ from PySide6.QtCore import QPoint, QRect, Qt, QTimer, Signal
 from PySide6.QtGui import QColor, QGuiApplication, QPainter, QPen, QPixmap
 
 from frontengine.show.base_widget import BaseWidget
+from frontengine.show.overlay_hint import draw_hint
 from frontengine.show.window_helpers import apply_overlay_window_flags
 from frontengine.utils.logging.loggin_instance import front_engine_logger
+from frontengine.utils.multi_language.retranslate import translate
 
 MIN_CAPTURE_SIZE = 4
 _DIM_COLOR = QColor(0, 0, 0, 110)
@@ -63,10 +65,14 @@ class RegionCaptureWidget(BaseWidget):
 
     failed = Signal(str)
 
+    stays_while_paused = True
+
     def __init__(self, on_captured: Optional[Callable[[QPixmap, QRect], None]] = None,
-                 native_capture_factory=None) -> None:
+                 native_capture_factory=None, prompt_key: str = "region_prompt_capture") -> None:
         front_engine_logger.info("[RegionCaptureWidget] Init")
         super().__init__()
+        # What to drag over and how to get out, shown until the drag starts.
+        self.prompt_key = prompt_key
         self.opacity = 1.0
         self.overlay_lockable = False
         # 框選的拖曳就是選取範圍本身。讓基底也跟著搬視窗的話，事件座標會跟著
@@ -91,6 +97,18 @@ class RegionCaptureWidget(BaseWidget):
         self._capture_timer.timeout.connect(self._poll_native_capture)
         apply_overlay_window_flags(self, show_on_bottom=False, allow_input=True)
         self.setCursor(Qt.CursorShape.CrossCursor)
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+
+    def showEvent(self, event) -> None:
+        super().showEvent(event)
+        self.activateWindow()
+        self.setFocus(Qt.FocusReason.OtherFocusReason)
+
+    def keyPressEvent(self, event) -> None:
+        if event.key() == Qt.Key.Key_Escape:
+            self.close()
+        else:
+            super().keyPressEvent(event)
 
     @staticmethod
     def _default_grabber(rect: QRect):  # pragma: no cover - needs a real screen
@@ -248,6 +266,7 @@ class RegionCaptureWidget(BaseWidget):
         rect = self.selection()
         painter.fillRect(self.rect(), _DIM_COLOR)
         if rect is None or rect.isEmpty():
+            draw_hint(painter, self.rect(), translate(self.prompt_key))
             return
         # 框內回復原本亮度，框線標出範圍
         # Clear the selection back to full brightness and outline it.

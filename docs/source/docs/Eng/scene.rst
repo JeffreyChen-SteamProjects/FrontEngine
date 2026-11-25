@@ -122,3 +122,5 @@ Scene script and media sub-tab labels also follow the interface language without
 The 3D editor’s Automatic duration and No parent labels follow interface-language changes. Duration values and parent relationships stay unchanged, including after selecting another object and returning.
 
 Closing scene output while choosing a camera background discards the returned color and stops the preview. Cancelling only the color picker preserves the current color and keeps the preview running. Reopen scene output to choose a new color. Previewing does not open a camera.
+
+The Scene page has Start scene and Stop scene at the bottom of every tab. In the 3D editor the viewport stands on a dark ground with a grid, so an empty scene and the direction you are looking in are visible; the grid never appears on the desktop or in the output. An empty scene says to add a 3D object.

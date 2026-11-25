@@ -810,3 +810,11 @@ A lista de predefinições de sinalização e o intervalo de rotação usam seus
 As predefinições agendadas mostram rótulos separados para hora e minuto. Os campos de predefinição, hora, minuto, tempo ocioso e origem do protetor de tela usam os rótulos visíveis como nomes acessíveis. Os nomes acompanham o idioma sem mudar os valores selecionados.
 
 Se falhar ao salvar as configurações do protetor de tela ou das predefinições agendadas, a janela mostra o erro e mantém suas escolhas. As configurações anteriores continuam ativas. Corrija o problema e confirme novamente para tentar outra vez, ou cancele para descartar as alterações. Os nomes das origens do protetor de tela também acompanham o idioma sem mudar a origem selecionada.
+
+Enquanto você desenha na tela, uma barra sobre o próprio desenho oferece caneta, marca-texto, borracha, cores, desfazer, limpar e terminar; arraste a borda esquerda para afastá-la. Esc também termina e Ctrl+Z desfaz. A pausa inteligente não confunde mais as camadas em tela cheia do FrontEngine com um programa em tela cheia e deixa na tela as ferramentas em uso (desenho, quadro branco, efeitos do cursor, teclas pressionadas, lupa, tela congelada, medição, seleção de área e simulação de visão de cores), então um desenho não some mais pela metade.
+
+A simulação de visão de cores não pisca mais nem deixa suas cores se deslocarem. No Windows a camada fica fora da captura de tela e acompanha a tela a partir de uma thread em segundo plano, redesenhando só o que mudou; por isso capturas e compartilhamento de tela não a mostram. Onde isso não é possível, ela é uma imagem parada, feita ao iniciar e ao mudar uma configuração.
+
+Cada seção da página Ferramentas começa dizendo para que ela serve. Medir, Ler texto e Gravar área também explicam cada passo, conforme o modo, a ação ou o formato escolhido. A camada em tela cheia que elas abrem diz o que fazer e Esc a fecha. Medir agora recebe os cliques no Windows, a régua conta pixels reais em qualquer escala de exibição, e Ler texto guarda separadamente o idioma da tradução e a sua pergunta.
+
+A página Cena traz iniciar e parar a cena no rodapé de cada aba. No editor 3D a vista fica sobre um fundo escuro com grade, então dá para ver uma cena vazia e a direção do olhar; a grade nunca aparece na área de trabalho nem na saída. Uma cena vazia sugere adicionar um objeto 3D.

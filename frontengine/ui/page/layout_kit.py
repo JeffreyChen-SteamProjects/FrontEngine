@@ -203,6 +203,18 @@ class Section(_SectionShell):
         self._form.addRow(caption, _cap_width(control))
         return control
 
+    def add_note(self, key: str, fallback: str = "") -> QLabel:
+        """A paragraph saying what the section is for or how to use it."""
+        note = tr(QLabel(), key, fallback)
+        note.setObjectName("sectionNote")
+        note.setWordWrap(True)
+        self._form.addRow(note)
+        return note
+
+    def set_row_visible(self, control: QWidget, visible: bool) -> None:
+        """Show or hide one row, label included."""
+        self._form.setRowVisible(control, visible)
+
     def add_slider_row(self, label: "str | QLabel", slider: QWidget, value_label: QWidget,
                        fallback: str = "") -> QWidget:
         """

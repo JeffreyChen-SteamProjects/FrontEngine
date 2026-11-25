@@ -170,6 +170,7 @@ class KeystrokeDisplayWidget(BaseWidget):
     # Covers the whole monitor and is see-through everywhere but one small panel: on the GPU
     # compositor the transparency could come out black on some drivers (see BaseWidget).
     software_only = True
+    stays_while_paused = True
 
     def __init__(self, hold_seconds: float = DEFAULT_HOLD_SECONDS, font_size: int = 28,
                  color: str = "#ffffff", background: str = "#000000",

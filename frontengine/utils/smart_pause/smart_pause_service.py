@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import sys
 from typing import Callable, Optional
 
@@ -31,6 +32,14 @@ def windows_fullscreen_detector() -> bool:
         user32 = ctypes.windll.user32
         hwnd = user32.GetForegroundWindow()
         if not hwnd:
+            return False
+
+        # FrontEngine's own full-screen layers (the drawing layer, the whiteboard, a region
+        # selection) take the mouse and so come to the foreground. They are not a program to stand
+        # aside for: counting them hid the drawing layer two seconds into a drawing.
+        owner = wintypes.DWORD()
+        user32.GetWindowThreadProcessId(hwnd, ctypes.byref(owner))
+        if owner.value == os.getpid():
             return False
 
         class_buffer = ctypes.create_unicode_buffer(256)

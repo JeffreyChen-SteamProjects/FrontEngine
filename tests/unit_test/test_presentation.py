@@ -74,6 +74,75 @@ def test_every_pixel_of_the_drawing_layer_catches_the_mouse() -> None:
     overlay.close()
 
 
+def test_undo_clear_and_live_strokes_repaint_from_the_finished_layer() -> None:
+    from PySide6.QtCore import QPoint
+    overlay = AnnotationOverlay()
+    overlay.resize(80, 60)
+    for y in (10, 30):
+        overlay.begin_stroke(QPoint(5, y))
+        overlay.extend_stroke(QPoint(75, y))
+        overlay.end_stroke()
+    assert overlay._raster_content().pixelColor(40, 30).alpha() == 255
+    assert overlay.undo() is True
+    image = overlay._raster_content()
+    assert image.pixelColor(40, 30).alpha() < 8 and image.pixelColor(40, 10).alpha() == 255
+    overlay.begin_stroke(QPoint(5, 50))             # still under the pen: drawn live
+    overlay.extend_stroke(QPoint(75, 50))
+    assert overlay._raster_content().pixelColor(40, 50).alpha() == 255
+    overlay.end_stroke()
+    assert overlay._raster_content().pixelColor(40, 50).alpha() == 255
+    overlay.clear()
+    assert overlay._raster_content().pixelColor(40, 10).alpha() < 8
+    overlay.close()
+
+
+def test_letting_go_of_another_button_does_not_end_the_stroke() -> None:
+    from PySide6.QtCore import QEvent, QPointF, Qt
+    from PySide6.QtGui import QMouseEvent
+    overlay = AnnotationOverlay()
+    overlay.resize(200, 160)
+
+    def mouse(kind, x, button, buttons):
+        point = QPointF(x, 20)
+        return QMouseEvent(kind, point, point, button, buttons, Qt.KeyboardModifier.NoModifier)
+
+    left, right, none = Qt.MouseButton.LeftButton, Qt.MouseButton.RightButton, Qt.MouseButton.NoButton
+    overlay.mousePressEvent(mouse(QEvent.Type.MouseButtonPress, 10, left, left))
+    overlay.mouseMoveEvent(mouse(QEvent.Type.MouseMove, 40, none, left))
+    overlay.mouseReleaseEvent(mouse(QEvent.Type.MouseButtonRelease, 40, right, left))
+    overlay.mouseMoveEvent(mouse(QEvent.Type.MouseMove, 90, none, left))
+    overlay.mouseReleaseEvent(mouse(QEvent.Type.MouseButtonRelease, 90, left, none))
+    assert len(overlay.strokes) == 1 and len(overlay.strokes[0]["points"]) == 3
+    overlay.close()
+
+
+def test_the_layer_offers_its_own_way_out_and_tool_choice() -> None:
+    """It covers the settings window, so the page's Stop button is out of reach while drawing."""
+    from PySide6.QtCore import Qt
+    from PySide6.QtTest import QTest
+    overlay = AnnotationOverlay()
+    overlay.resize(1200, 700)
+    overlay.show()
+    finished, tools, colors = [], [], []
+    overlay.finish_requested.connect(lambda: finished.append(True))
+    overlay.tool_changed.connect(tools.append)
+    overlay.color_changed.connect(colors.append)
+    toolbar = overlay.toolbar
+    toolbar.place()
+    assert overlay.rect().contains(toolbar.geometry())
+    toolbar.tool_buttons[TOOL_ERASER].click()
+    assert overlay.tool == TOOL_ERASER and toolbar.tool_buttons[TOOL_ERASER].isChecked()
+    toolbar.swatches["#34c759"].click()             # a colour puts the pen back in the hand
+    assert overlay.pen_color == "#34c759" and overlay.tool == TOOL_PEN
+    assert tools == [TOOL_ERASER, TOOL_PEN] and colors == ["#34c759"]
+    QTest.mouseClick(toolbar, Qt.MouseButton.LeftButton, pos=toolbar.rect().center())
+    assert overlay.strokes == []                    # pressing the toolbar never draws
+    QTest.keyClick(overlay, Qt.Key.Key_Escape)
+    toolbar.finish_button.click()
+    assert finished == [True, True]
+    overlay.close()
+
+
 def test_full_screen_presenting_layers_never_use_the_gpu_compositor() -> None:
     """They cover the whole monitor; on the GPU path the see-through pixels could come out black."""
     from PySide6.QtWidgets import QApplication

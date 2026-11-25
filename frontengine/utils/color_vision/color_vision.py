@@ -98,7 +98,7 @@ def simulate_array(pixels: numpy.ndarray, kind, severity=1.0) -> numpy.ndarray:
         return numpy.asarray(pixels)
     matrix = matrix_for(kind, severity)
     converted = data[:, :, :3] @ matrix.T
-    return numpy.clip(converted, 0, 255).astype(numpy.uint8)
+    return numpy.clip(converted + 0.5, 0, 255).astype(numpy.uint8)      # rounded like simulate_rgb
 
 
 def distinguishable(first: Sequence[int], second: Sequence[int], kind,

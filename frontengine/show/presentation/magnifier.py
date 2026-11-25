@@ -53,6 +53,8 @@ class MagnifierWidget(BaseWidget):
 
     REFRESH_MS = 60
 
+    stays_while_paused = True
+
     def __init__(self, zoom: float = DEFAULT_ZOOM, size: int = DEFAULT_SIZE) -> None:
         front_engine_logger.info(f"[MagnifierWidget] Init | zoom={zoom}, size={size}")
         super().__init__()

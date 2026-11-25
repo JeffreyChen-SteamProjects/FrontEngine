@@ -14,8 +14,44 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout
 
 from frontengine.show.compositor.surface_check import see_through_problem
 from frontengine.show.window_helpers import apply_overlay_window_flags
+from frontengine.utils.multi_language.retranslate import translate
 from .math3d import transform_matrix, euler_quaternion
 from .renderer3d import Scene3DRenderer
+
+
+# The editor's floor grid (world units) and ground.
+GRID_CELLS = 10
+GRID_COLOR = QColor(255, 255, 255, 46)
+GRID_AXIS_COLOR = QColor(255, 253, 246, 150)
+BACKDROP_COLOR = QColor('#23262C')
+NEAR_W = 1e-3
+EDGE_ON = .15       # below this much downward view the floor grid would be a single line
+
+
+def grid_lines(view_projection):
+    """(start, end, is_axis) grid lines in world space, on the floor or, seen edge-on, the wall behind it."""
+    inverse = np.linalg.inv(view_projection)
+    near, far = inverse @ [0, 0, -1, 1], inverse @ [0, 0, 1, 1]
+    direction = far[:3]/far[3]-near[:3]/near[3]
+    direction = np.abs(direction/max(np.linalg.norm(direction), 1e-9))
+    across, along = (0, 2) if direction[1] >= EDGE_ON else (0, 1) if direction[2] >= direction[0] else (1, 2)
+    for index in range(-GRID_CELLS, GRID_CELLS+1):
+        for fixed, free in ((across, along), (along, across)):
+            start, end = np.array([0., 0, 0, 1]), np.array([0., 0, 0, 1])
+            start[fixed] = end[fixed] = index
+            start[free], end[free] = -GRID_CELLS, GRID_CELLS
+            yield start, end, index == 0
+
+
+def clip_segment(start, end):
+    """Two clip-space points as normalised device (x, y) ends, cut at the camera plane; None when behind it."""
+    if start[3] <= NEAR_W and end[3] <= NEAR_W:
+        return None
+    if start[3] <= NEAR_W or end[3] <= NEAR_W:
+        ratio = (NEAR_W-start[3])/(end[3]-start[3])
+        cut = start+(end-start)*ratio
+        start, end = (cut, end) if start[3] <= NEAR_W else (start, cut)
+    return tuple((point[0]/point[3], point[1]/point[3]) for point in (start, end))
 
 
 def surface_format():
@@ -156,7 +192,13 @@ class Scene3DViewport(QOpenGLWidget):
             render_height = max(1, round(height*self.runtime.render_scale))
             blend = min(1, self.runtime.timeline.position/self.transition_seconds)
             transitioning = not self.previous_frame.isNull() and blend < 1
-            if transitioning or self.runtime.render_scale < 1:
+            if self.editing:
+                # The small editing viewport stays at full resolution: the scene goes over its backdrop.
+                self.previous_frame, self.transition_fbo = QImage(), None
+                self._paint_backdrop(data)
+                self.renderer.render(self.runtime, width, height, self.defaultFramebufferObject(), selected=self.selected,
+                                     data=data, clear_color=False)
+            elif transitioning or self.runtime.render_scale < 1:
                 if self.transition_fbo is None or self.transition_fbo.size() != QSize(render_width, render_height):
                     fmt = QOpenGLFramebufferObjectFormat()
                     fmt.setAttachment(QOpenGLFramebufferObject.Attachment.CombinedDepthStencil)
@@ -182,6 +224,34 @@ class Scene3DViewport(QOpenGLWidget):
         except Exception as error:
             self._fail(error)
 
+    def _canvas_frame(self):
+        """Scale and top-left corner of the scene canvas inside this viewport."""
+        width, height = self.runtime.document.canvas
+        scale = min(self.width()/width, self.height()/height)
+        return scale, (self.width()-width*scale)/2, (self.height()-height*scale)/2
+
+    def _paint_backdrop(self, data):
+        """Under the objects, editing only: a ground and a grid on the plane the camera faces.
+
+        A 3D scene starts as a camera and a light, and its background is transparent, so the
+        editor showed an empty panel that looked broken. The desktop and the output never have it."""
+        width, height = self.runtime.document.canvas
+        scale, left, top = self._canvas_frame()
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.fillRect(self.rect(), BACKDROP_COLOR)
+        for start, end, axis in grid_lines(data['vp']):
+            segment = clip_segment(data['vp'] @ start, data['vp'] @ end)
+            if segment is not None:
+                painter.setPen(QPen(GRID_AXIS_COLOR if axis else GRID_COLOR, 1.6 if axis else 1))
+                painter.drawLine(*(QPointF(left+(x+1)*width*scale/2, top+(1-y)*height*scale/2) for x, y in segment))
+        if not data['draws']:
+            painter.setPen(GRID_AXIS_COLOR)
+            painter.drawText(self.rect().adjusted(24, 24, -24, -24),
+                             Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop | Qt.TextFlag.TextWordWrap,
+                             translate('scene3d_empty_hint', 'Nothing to show yet: add a 3D object above.'))
+        painter.end()
+
     def _paint_gizmo(self, data):
         self.gizmo_axes = []
         if not self.selected or self.selected[0] not in self.runtime.document.entries:
@@ -194,8 +264,7 @@ class Scene3DViewport(QOpenGLWidget):
         matrix = world_matrices(self.runtime.document.entries)[self.selected[0]]
         origin = matrix[:3, 3]
         width, height = self.runtime.document.canvas
-        scale = min(self.width()/width, self.height()/height)
-        left, top = (self.width()-width*scale)/2, (self.height()-height*scale)/2
+        scale, left, top = self._canvas_frame()
         def project(point):
             clip = data['vp'] @ [*point, 1]
             if clip[3] <= 0:

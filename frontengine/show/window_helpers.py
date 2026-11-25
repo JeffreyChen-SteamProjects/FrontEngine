@@ -2,8 +2,13 @@ import os
 from pathlib import Path
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QColor, QIcon
 from PySide6.QtWidgets import QWidget
+
+# Windows hands a click on a fully transparent pixel of a see-through window to whatever is
+# underneath, so a clear layer never gets the mouse. A layer that takes the mouse fills itself with
+# this near-invisible alpha instead.
+CATCH_MOUSE_COLOR = QColor(0, 0, 0, 1)
 
 _OVERLAY_BASE_FLAGS = (
     Qt.WindowType.WindowTransparentForInput

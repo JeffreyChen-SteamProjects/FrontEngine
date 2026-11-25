@@ -124,6 +124,7 @@ QLabel#sectionHeader {{ color: {c['text']}; font-size: {FONT_SECTION}px; font-we
 QWidget#settingSection {{
     background-color: {c['surface']}; border: 1px solid {c['border']}; border-radius: {RADIUS_CARD}px;
 }}
+QLabel#sectionNote {{ color: {c['muted']}; }}
 QWidget#sectionContent, QWidget#inlineActions, QWidget#pageColumn {{ background: transparent; border: none; }}
 QLabel#homeStatus {{ font-size: 15px; font-weight: 600; color: {c['text']}; }}
 QTabWidget#homeTabs::pane {{ border: none; background: transparent; top: 0px; }}

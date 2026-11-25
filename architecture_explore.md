@@ -96,7 +96,7 @@ FrontEngine 是一個 PySide6 桌面**覆蓋層（overlay）框架**：把影片
 
 | 檔案 | 行數 | 功用 |
 | --- | ---: | --- |
-| `base_widget.py` | 278 | `BaseWidget(QWidget)`。定義覆蓋層的共同契約：不透明度（預設 0.2）、`WA_TranslucentBackground` + `WA_DeleteOnClose`、鎖定/點擊穿透、拖曳擺位、位置記憶、綠幕背景色、畫質檔位、`keep_in_capture`、`software_only`（類別屬性：蓋滿螢幕的半透明單色層設為 True，一律用 Qt 一般繪製、`set_render_backend` 不建合成器；護眼層、專注的壓暗／遮罩、簡報的按鍵顯示／游標效果／塗鴉與白板使用）。後端 `auto` 在半透明視窗（`WA_TranslucentBackground`）也用 Qt 一般繪製、不建合成器——內容本來就由 CPU 畫成一張圖，GPU 只多了透明處在部分驅動上變黑的風險；只有明確選 `gpu` 或綠幕背景讓視窗不透明時才建合成器，`set_background_color` 切換時重新判斷。子類別實作 `draw_content(painter)`。直接繪製時由 `paintEvent()` 開 painter；使用合成器時，`paintEvent()` 與 `update()` 共用單一待辦旗標，把圖層更新排到事件迴圈，避免在父視窗繪製期間重新進入合成器。 |
+| `base_widget.py` | 278 | `BaseWidget(QWidget)`。定義覆蓋層的共同契約：不透明度（預設 0.2）、`WA_TranslucentBackground` + `WA_DeleteOnClose`、鎖定/點擊穿透、拖曳擺位、位置記憶、綠幕背景色、畫質檔位、`keep_in_capture`、`software_only`（類別屬性：蓋滿螢幕的半透明單色層設為 True，一律用 Qt 一般繪製、`set_render_backend` 不建合成器；護眼層、專注的壓暗／遮罩、簡報的按鍵顯示／游標效果／塗鴉與白板使用）。後端 `auto` 在半透明視窗（`WA_TranslucentBackground`）也用 Qt 一般繪製、不建合成器——內容本來就由 CPU 畫成一張圖，GPU 只多了透明處在部分驅動上變黑的風險；只有明確選 `gpu` 或綠幕背景讓視窗不透明時才建合成器，`set_background_color` 切換時重新判斷。子類別實作 `draw_content(painter)`。直接繪製時由 `paintEvent()` 開 painter；使用合成器時，`paintEvent()` 與 `update()` 共用單一待辦旗標，把圖層更新排到事件迴圈，避免在父視窗繪製期間重新進入合成器。 類別屬性 `stays_while_paused`：正在操作的工具（塗鴉、白板、游標效果、按鍵顯示、放大鏡、凍結、量測、框選、色覺模擬）設 True，智慧暫停不收它們。 |
 | `window_helpers.py` | 68 | 覆蓋層視窗旗標的單一出處：`apply_overlay_window_flags()`（置頂/置底、無邊框、Tool、點擊穿透）、`set_overlay_locked()`、`load_overlay_icon()`。 |
 | `draggable_window.py` | 65 | `DraggableTopWindow`：無邊框置頂小視窗，可拖曳、雙擊或 Esc 關閉。釘選截圖與視窗複本的底座。 |
 | `overlay_factory.py` | 125 | Abstract Factory：把場景 JSON 的 `{kind, ...}` 轉成對應 widget（image/gif/sound/text/video/web）。`build_overlay(kind, setting)` 是唯一入口，欄位缺失會明確報錯（場景 JSON 是外部資料）。 |
@@ -135,8 +135,9 @@ FrontEngine 是一個 PySide6 桌面**覆蓋層（overlay）框架**：把影片
 | --- | ---: | --- |
 | `camera/camera_widget.py` | 192 | 攝影機畫面覆蓋層（方形／圓形／圓角、外框、鏡像）。影像來源可注入，測試不需真攝影機。 |
 | `canvas/whiteboard_widget.py` | 248 | 無限畫布白板：拖曳平移、滾輪縮放、筆畫以畫布座標保存、可存成圖片。設 \software_only\（全螢幕半透明壓暗，不走 GPU 合成器）。 |
-| `capture/region_capture.py` | 187 | 區域截圖框選層。含 `safe_capture_path()` 擋路徑穿越。擷取函式可注入。 |
-| `measure/measure_widget.py` | 239 | 量測層：取色器 / 像素尺 / 量角器三合一，共用同一層全螢幕覆蓋。 |
+| `capture/region_capture.py` | 222 | 區域截圖框選層。`prompt_key` 決定開始拖曳前顯示的提示（截圖／錄影／讀字／OCR 浮窗／虛擬攝影機各一），Esc 取消。含 `safe_capture_path()` 擋路徑穿越。擷取函式可注入。 |
+| `measure/measure_widget.py` | 285 | 量測層：取色器 / 像素尺 / 量角器三合一，共用同一層全螢幕覆蓋。整層填 `CATCH_MOUSE_COLOR` 才收得到點擊、設 `software_only`、排除在擷取之外（取色才不會讀到自己）；`finish_requested`（Esc）由工具頁收掉。像素尺以實際螢幕像素計算。 |
+| `overlay_hint.py` | 50 | 全螢幕工具等待滑鼠時顯示的一行操作提示（量測與框選共用）。 |
 | `pinned/pinned_image.py` | 103 | 把截下來的畫面釘在螢幕上，可拖曳縮放。 |
 | `replica/replica_widget.py` | 113 | 視窗複本：顯示另一個視窗的即時畫面（底層是 DWM 縮圖）。 |
 | `freeze/freeze_widget.py` | 93 | 凍結畫面：把某螢幕當下的樣子拍下來鋪滿蓋上（簡報時定格）。 |
@@ -153,14 +154,15 @@ FrontEngine 是一個 PySide6 桌面**覆蓋層（overlay）框架**：把影片
 | 檔案 | 行數 | 功用 |
 | --- | ---: | --- |
 | `screen_care/screen_filter.py` | 165 | `ScreenCareOverlay`（護眼層的共同基底，設 `software_only`：不走 GPU 合成器——全螢幕半透明層在部分 GPU 上透明處會變黑）、`ScreenFilterWidget`（整片色彩濾鏡）與 `ReadingRulerWidget`（閱讀亮帶跟著游標）。 |
-| `screen_care/color_vision_widget.py` | 147 | 色覺模擬層：擷取畫面 → 套色覺缺陷矩陣 → 蓋回去；繼承 `ScreenCareOverlay`。 |
+| `screen_care/color_vision_widget.py` | 245 | 色覺模擬層；繼承 `ScreenCareOverlay`。Windows：視窗排除在擷取之外（`needs_capture_exclusion`，控制中心不會把它改回來），由 `utils/color_vision/live_simulation.py` 的背景執行緒擷取與轉換，從不藏起自己。其他平台：靜止畫面，只在開始與改設定時藏起、等合成器、拍一張。擷取與排除都可注入。 |
 | `focus_shield/focus_shield_widget.py` | 156 | `DimBackgroundWidget`（作用中視窗以外壓暗、會跟著切換）與 `DistractionMaskWidget`（蓋掉工作列／通知角落）；兩者都設 `software_only`，不走 GPU 合成器。 |
 
 #### 簡報與教學
 
 | 檔案 | 行數 | 功用 |
 | --- | ---: | --- |
-| `presentation/annotation_overlay.py` | 161 | 螢幕塗鴉：筆／螢光筆／橡皮擦、復原、全部清除。設 \software_only\。每個像素都帶 alpha 1 的 \CATCH_MOUSE_COLOR\（橡皮擦也是畫回這個色而不是清成全透明）——Windows 會把半透明視窗裡 alpha 0 的點擊交給底下的視窗，全透明的塗鴉層就收不到筆。 |
+| `presentation/annotation_overlay.py` | 275 | 螢幕塗鴉：筆／螢光筆／橡皮擦、復原、全部清除。設 `software_only` 與 `stays_while_paused`。每個像素都帶 alpha 1 的 `CATCH_MOUSE_COLOR`（定義在 `window_helpers.py`；橡皮擦也是畫回這個色而不是清成全透明）——Windows 會把半透明視窗裡 alpha 0 的點擊交給底下的視窗，全透明的塗鴉層就收不到筆。畫完的筆畫存成一張圖，只重畫正在畫的那一筆與它的範圍。Esc／工具列發 `finish_requested`，由簡報頁收掉。 |
+| `presentation/annotation_toolbar.py` | 160 | 塗鴉層上的工具列（子元件）：工具、顏色、復原、清除、結束，可拖開。固定一種外觀，不跟主題走（`show/` 不依賴 `ui/`）。 |
 | `presentation/cursor_effects.py` | 173 | 游標亮環、點擊漣漪、聚光燈。設 \software_only\（全螢幕半透明層）。 |
 | `presentation/keystroke_display.py` | 287 | 把剛按下的按鍵與滑鼠點擊顯示在角落（教學影片用），數秒後淡出。設 \software_only\（全螢幕半透明層）。位置（四個角落／置中）、字級、要不要顯示滑鼠都可調；`panel_origin()` 是純算術，排版不必開視窗就驗得了。 |
 | `presentation/magnifier.py` | 139 | 區域放大鏡：抓游標周圍畫面放大顯示。 |
@@ -349,6 +351,8 @@ HomeService owns its successfully attached store through shutdown. Mode preparat
 | `screen_privacy/share_watch.py` | 142 | 偵測會議程式是否開著（以視窗標題比對，要求字界），狀態改變時發訊號。 |
 | `measure/measure.py` | 116 | 量測的純計算：色碼格式（hex/rgb/hsl/css var）、距離、三點夾角。 |
 | `color_vision/color_vision.py` | 113 | 色覺模擬矩陣（紅／綠／藍色盲、全色盲）與「這兩色還分得出來嗎」。 |
+| `color_vision/live_simulation.py` | 115 | 色覺模擬的背景執行緒：`FrameSimulator` 只轉換有變動的列、沒變就不交付；`LiveSimulation` 擷取→轉換→交付，`stop()` 會等執行緒結束。 |
+| `color_vision/screen_source.py` | 125 | 以 GDI 讀取某個視窗底下的桌面（實體像素，來自 `GetWindowRect`，混合 DPI 不必換算）；非 Windows 回傳 None。 |
 | `focus_shield/focus_shield.py` | 93 | 專注遮罩的純幾何：螢幕扣掉作用中視窗的四塊矩形、依區域與比例算遮罩矩形。 |
 
 #### 擷取與輸出
@@ -366,7 +370,7 @@ HomeService owns its successfully attached store through shutdown. Mode preparat
 | --- | ---: | --- |
 | `rules/rule_engine.py` | 331 | 條件式規則：「當 <條件> 成立時，做 <動作>」。條件可組合（星期＋時段＋前景程式＋全螢幕＋電池＋閒置），動作對應到既有能力（套用預設集／隱藏／顯示／關閉／畫質）。**邊緣觸發**：只在「不成立 → 成立」那一刻執行一次，否則每次輪詢都會重套預設集、把使用者手動改的蓋掉。既有的四套排程沒有被取代，這裡補的是它們之間的組合。 |
 | `smart_pause/pause_rules.py` | 104 | 暫停規則的純判斷：全螢幕／電池／指定程式；程式名稱正規化。 |
-| `smart_pause/smart_pause_service.py` | 174 | 週期性檢查上述三件事，狀態改變時發 `pause_changed`。 |
+| `smart_pause/smart_pause_service.py` | 183 | 週期性檢查上述三件事，狀態改變時發 `pause_changed`。全螢幕偵測會排除本程式自己的視窗（塗鴉層收滑鼠，會成為前景全螢幕視窗）。主視窗收到後呼叫控制中心的 `stand_down()`。 |
 | `app_profile/app_profile_service.py` | 102 | 前景程式換到有設定的程式時，發出要套用的預設集名稱。 |
 | `preset_schedule/preset_schedule_service.py` | 147 | 每天在指定時間套用預設集，用「跨越目標分鐘」偵測，一天只觸發一次。 |
 | `theme_schedule/theme_schedule_service.py` | 97 | 依時間切換日／夜主題。 |

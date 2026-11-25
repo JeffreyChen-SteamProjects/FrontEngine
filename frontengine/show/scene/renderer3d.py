@@ -217,7 +217,8 @@ class Scene3DRenderer:
         GL.glBindVertexArray(0)
         GL.glUseProgram(0)
 
-    def render(self, runtime, width, height, framebuffer, camera=None, selected=(), data=None, framebuffer_copies=1):
+    def render(self, runtime, width, height, framebuffer, camera=None, selected=(), data=None, framebuffer_copies=1,
+               clear_color=True):
         if not self.program:
             raise RuntimeError('3D renderer is not initialized')
         if width*height > 16_777_216:
@@ -228,7 +229,7 @@ class Scene3DRenderer:
         background = runtime.document.background
         GL.glClearColor(background[0]*background[3], background[1]*background[3], background[2]*background[3], background[3])
         GL.glDepthMask(True)
-        GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
+        GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT if clear_color else GL.GL_DEPTH_BUFFER_BIT)
         canvas = runtime.document.canvas
         scale = min(width/canvas[0], height/canvas[1])
         viewport = (round((width-canvas[0]*scale)/2), round((height-canvas[1]*scale)/2),

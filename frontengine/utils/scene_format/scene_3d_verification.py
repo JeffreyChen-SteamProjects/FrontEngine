@@ -106,7 +106,10 @@ def verify_native_scene():
                         template_surface.close()
                     template_runtime.close()
             from frontengine.ui.page.scene_setting.scene_setting_ui import SceneSettingUI
-            page = SceneSettingUI()
+            from frontengine.ui.runtime_lifetime import DefaultSettingsLifetime
+            # The caller runs this in a temporary folder, so this owns throwaway settings.
+            lifetime = DefaultSettingsLifetime.open()
+            page = SceneSettingUI(lifetime=lifetime)
             page.setAttribute(Qt.WidgetAttribute.WA_DontShowOnScreen)
             page.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
             page.resize(1280, 800)
@@ -158,7 +161,13 @@ def verify_native_scene():
                 require(output.runtime3d.timeline.timer.interval() == 250, 'Low-power clock was not applied to output')
             finally:
                 page.close()
-                app.processEvents()
+                page.deleteLater()
+                lifetime.close()
+                deadline = time.monotonic()+15
+                while not lifetime.closed and time.monotonic() < deadline:
+                    app.processEvents()
+                    time.sleep(.005)
+            require(lifetime.closed, 'The scene page did not release its settings')
             return {'platform': app.platformName(), 'gl_version': version, 'renderer': renderer,
                               'offscreen': [first.width(), first.height()], 'desktop': [frame.width(), frame.height()],
                               'transparent': True, 'animated': True, 'transaction_primed': True,

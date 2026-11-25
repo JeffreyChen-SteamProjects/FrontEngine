@@ -12,3 +12,5 @@ Page Confort visuel
 
 Ces calques laissent passer les clics : tout ce qui est dessous continue de
 fonctionner.
+
+La simulation de vision des couleurs ne scintille plus et ses couleurs ne dérivent plus. Sous Windows, le calque est exclu de la capture d’écran et suit l’écran depuis un fil d’arrière-plan, en ne redessinant que ce qui a changé ; les captures et le partage d’écran ne le montrent donc pas. Ailleurs, c’est une image fixe, prise au démarrage et à chaque changement de réglage.

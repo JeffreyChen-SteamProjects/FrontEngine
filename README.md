@@ -787,3 +787,11 @@ The signage preset list and rotation interval expose their visible labels as acc
 Scheduled presets show separate Hour and Minute labels. The preset, hour, minute, screensaver idle duration and source fields expose their visible labels as accessibility names, which follow language changes without changing the selected values.
 
 If saving the screensaver or scheduled preset settings fails, the dialog shows the error and keeps your choices. The previous settings remain active. Correct the problem and confirm again to retry, or cancel to discard your changes. The screensaver source names also follow language changes without changing the selected source.
+
+While you draw on the screen, a toolbar on the drawing itself offers the pen, highlighter, eraser, colours, Undo, Clear and Finish; drag it aside by its left edge. Esc also finishes, and Ctrl+Z undoes. Smart pause no longer counts FrontEngine’s own full-screen layers as a full-screen program, and it leaves the tools you are using on screen (drawing, whiteboard, cursor effects, keystroke display, magnifier, frozen screen, measuring, region selection and colour-vision simulation), so a drawing no longer disappears halfway.
+
+Colour-vision simulation no longer flickers or lets its colours drift. On Windows the layer is excluded from screen capture and follows the screen from a background thread, repainting only what changed; screenshots and screen sharing therefore do not show it. Where that is not possible it is a still picture, taken when it starts and when you change a setting.
+
+Every section of the Tools page opens with what the tool is for. Measure, Read text and Record area also explain each step, and the explanation follows the mode, action or format you choose. The full-screen layer they open says what to do, and Esc leaves it. Measuring now receives its clicks on Windows, the ruler counts real screen pixels at any display scaling, and Read text keeps the translation language and your question apart.
+
+The Scene page has Start scene and Stop scene at the bottom of every tab. In the 3D editor the viewport stands on a dark ground with a grid, so an empty scene and the direction you are looking in are visible; the grid never appears on the desktop or in the output. An empty scene says to add a 3D object.
