@@ -23,7 +23,7 @@ from .renderer3d import Scene3DRenderer
 GRID_CELLS = 10
 GRID_COLOR = QColor(255, 255, 255, 46)
 GRID_AXIS_COLOR = QColor(255, 253, 246, 150)
-BACKDROP_COLOR = QColor('#23262C')
+BACKDROP_COLOR = QColor('#0F2833')
 NEAR_W = 1e-3
 EDGE_ON = .15       # below this much downward view the floor grid would be a single line
 

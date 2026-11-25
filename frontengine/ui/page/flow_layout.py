@@ -6,8 +6,10 @@ from PySide6.QtWidgets import QLabel, QLayout, QLayoutItem, QWidget
 class FlowLayout(QLayout):
     """Lay controls out at their natural size, moving overflow to the next line."""
 
-    def __init__(self, parent: QWidget | None = None, spacing: int = 16, *, centred: bool = False) -> None:
+    def __init__(self, parent: QWidget | None = None, spacing: int = 16, *, centred: bool = False,
+                 last_at_end: bool = False) -> None:
         self._items: list[QLayoutItem] = []
+        self._last_at_end = last_at_end  # the last control goes to the row's far edge
         self._centred = centred         # centre each control in its row: a switch beside taller buttons
         super().__init__(parent)
         self.setContentsMargins(0, 0, 0, 0)
@@ -80,7 +82,7 @@ class FlowLayout(QLayout):
                 size.setHeight(max(item.minimumSize().height(), item.heightForWidth(size.width())))
             if x > area.x() and x + size.width() > area.x() + area.width():
                 if not measure_only:
-                    self._place(row, line_height)
+                    self._place(row, line_height, area.right())
                 row = []
                 x = area.x()
                 y += line_height + self.spacing()
@@ -89,7 +91,7 @@ class FlowLayout(QLayout):
             x += size.width() + self.spacing()
             line_height = max(line_height, size.height())
         if not measure_only:
-            self._place(row, line_height)
+            self._place(row, line_height, area.right())
         return y + line_height - rect.y() + bottom
 
     @staticmethod
@@ -104,8 +106,10 @@ class FlowLayout(QLayout):
         margins = label.contentsMargins()
         return widest + margins.left() + margins.right() + 2 * (label.margin() + max(0, label.indent())) + 4
 
-    def _place(self, row: list[tuple[QLayoutItem, QRect]], height: int) -> None:
-        for item, rect in row:
+    def _place(self, row: list[tuple[QLayoutItem, QRect]], height: int, right: int) -> None:
+        for index, (item, rect) in enumerate(row):
             if self._centred:
                 rect.translate(0, (height - rect.height()) // 2)
+            if self._last_at_end and index == len(row) - 1 and item is self._items[-1]:
+                rect.moveRight(max(rect.right(), right))
             item.setGeometry(rect)

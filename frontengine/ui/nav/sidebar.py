@@ -8,7 +8,7 @@
 清單項目不是 QWidget，沒辦法交給 retranslator 的 bind() 用弱參考持有，所以改用
 bind_call() 這個逃生口——換語言時整份重寫一次。
 
-The left-hand navigation: the pages as a grouped rack of index tabs.
+The left-hand navigation: the pages as a grouped list on a glass panel.
 
 Sixteen tabs in one row grew scroll arrows as soon as the window narrowed, and
 sixteen words side by side gave no clue which belonged together. As a sidebar it
@@ -19,9 +19,8 @@ List items are not QWidgets, so the retranslator cannot hold them weakly through
 bind(); this uses the bind_call() escape hatch and rewrites the lot on a
 language change.
 
-The rack is dark in both themes and painted by its own delegate: the selected
-page is a tab of the page's own paper that runs into the page, edged in the
-spot ink of its group. ``set_compact`` folds it to a rail of icons.
+Rows are painted by their own delegate: the selected page is a solid pill.
+``set_compact`` folds the list to a rail of icons.
 """
 from __future__ import annotations
 
@@ -31,14 +30,14 @@ from PySide6.QtCore import QEvent, QRect, QRectF, QSize, Qt, Signal
 from PySide6.QtGui import QColor, QFont, QIcon, QPainter, QPen
 from PySide6.QtWidgets import QListWidget, QListWidgetItem, QStyle, QStyledItemDelegate
 
-from frontengine.ui.style.cel import index_tab, spot_for_group, tone_of
+from frontengine.ui.style.glass import tone_of
 from frontengine.ui.style.nav_icons import ICON_SIZE, icon
 from frontengine.ui.style.tokens import palette_for
 from frontengine.utils.multi_language.retranslate import retranslator, translate
 
-SIDEBAR_WIDTH = 220
-RAIL_WIDTH = 62                        # folded: icons only
-ROW_HEIGHT, GROUP_HEIGHT, RAIL_GROUP_HEIGHT = 34, 32, 18
+SIDEBAR_WIDTH = 196
+RAIL_WIDTH = 46                        # folded: icons only
+ROW_HEIGHT, GROUP_HEIGHT, RAIL_GROUP_HEIGHT = 36, 30, 14
 
 # 群組標題與分頁列用 UserRole 區分，樣式與點擊行為都看這個值。
 # Group headings and page rows are told apart by this UserRole value, which
@@ -50,73 +49,59 @@ ROLE_PAGE_INDEX = Qt.ItemDataRole.UserRole + 1
 ROLE_PAGE_ID = Qt.ItemDataRole.UserRole + 2
 ROLE_GROUP = Qt.ItemDataRole.UserRole + 3     # the group key a page row belongs to
 ROLE_ICON = Qt.ItemDataRole.UserRole + 4      # nav_icons name of a page row
-ROLE_PAPER = Qt.ItemDataRole.UserRole + 5    # the token of the page's own background
 KIND_GROUP = "group"
 KIND_PAGE = "page"
 
 
 class NavigationDelegate(QStyledItemDelegate):
-    """Draws the rack: group headings, page tabs, and the same folded to icons."""
+    """Draws the list: quiet group captions, pages with the selected one on a pill, and the rail."""
 
     def paint(self, painter: QPainter, option, index) -> None:
         sidebar = self.parent()
         colors = palette_for(tone_of(sidebar))
-        spot = QColor(colors[spot_for_group(index.data(ROLE_GROUP))])
         painter.save()
         painter.setRenderHints(QPainter.RenderHint.Antialiasing | QPainter.RenderHint.SmoothPixmapTransform)
-        painter.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
         if index.data(ROLE_KIND) == KIND_GROUP:
-            self._paint_group(painter, option, index, colors, spot, sidebar.compact)
+            self._paint_group(painter, option, index, colors, sidebar.compact)
         else:
-            self._paint_page(painter, option, index, colors, spot, sidebar.compact)
+            self._paint_page(painter, option, index, colors, sidebar.compact)
         painter.restore()
 
     @staticmethod
-    def _paint_group(painter, option, index, colors, spot, compact: bool) -> None:
-        rect = QRectF(option.rect)
+    def _text(painter, rect: QRect, text: str) -> None:
+        painter.drawText(rect, Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft,
+                         painter.fontMetrics().elidedText(text, Qt.TextElideMode.ElideRight, rect.width()))
+
+    def _paint_group(self, painter, option, index, colors, compact: bool) -> None:
         if compact:
-            painter.setPen(QPen(spot, 3, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap))
-            middle = rect.center()
+            middle = QRectF(option.rect).center()
+            painter.setPen(QPen(QColor(colors["well_edge"]), 1.5))
             painter.drawLine(int(middle.x()) - 9, int(middle.y()), int(middle.x()) + 9, int(middle.y()))
             return
-        painter.setPen(Qt.PenStyle.NoPen)
-        painter.setBrush(spot)
-        painter.drawEllipse(QRectF(rect.left() + 10, rect.center().y() - 1, 7, 7))
         font = QFont(option.font)
         font.setPixelSize(11)
-        font.setBold(True)
         painter.setFont(font)
         hovered = bool(option.state & QStyle.StateFlag.State_MouseOver)
-        painter.setPen(QColor(colors["rail_text" if hovered else "rail_muted"]))
-        text = QRect(option.rect).adjusted(25, 6, -30, 0)
-        painter.drawText(text, Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft,
-                         painter.fontMetrics().elidedText(index.data(Qt.ItemDataRole.DisplayRole),
-                                                          Qt.TextElideMode.ElideRight, text.width()))
+        painter.setPen(QColor(colors["text" if hovered else "muted"]))
+        self._text(painter, QRect(option.rect).adjusted(14, 8, -30, 0), index.data(Qt.ItemDataRole.DisplayRole))
         chevron = index.data(Qt.ItemDataRole.DecorationRole)
         if chevron is not None:
-            chevron.paint(painter, QRect(option.rect.right() - 26, option.rect.center().y() - 4, 14, 14))
+            chevron.paint(painter, QRect(option.rect.right() - 28, option.rect.center().y() - 3, 14, 14))
 
-    @staticmethod
-    def _paint_page(painter, option, index, colors, spot, compact: bool) -> None:
+    def _paint_page(self, painter, option, index, colors, compact: bool) -> None:
         selected = bool(option.state & QStyle.StateFlag.State_Selected)
         hovered = bool(option.state & QStyle.StateFlag.State_MouseOver)
-        tab = QRectF(option.rect).adjusted(4, 2, 0, -2)
-        if selected:
+        pill = QRectF(option.rect).adjusted(1, 2, -1, -2)
+        if selected or hovered:
             painter.setPen(Qt.PenStyle.NoPen)
-            painter.setBrush(QColor(colors[index.data(ROLE_PAPER) or "window"]))
-            painter.drawPath(index_tab(tab))
-            painter.setBrush(spot)
-            painter.drawRoundedRect(QRectF(tab.left() + 5, tab.top() + 7, 4, tab.height() - 14), 2, 2)
-        elif hovered:
-            painter.setPen(Qt.PenStyle.NoPen)
-            painter.setBrush(QColor(colors["rail_hover"]))
-            painter.drawRoundedRect(tab.adjusted(0, 0, -8, 0), 8, 8)
+            painter.setBrush(QColor(colors["pill" if selected else "glass_hover"]))
+            painter.drawRoundedRect(pill, pill.height() / 2, pill.height() / 2)
         if option.state & QStyle.StateFlag.State_HasFocus and not selected:
-            painter.setPen(QPen(spot, 2))
+            painter.setPen(QPen(QColor(colors["accent_line"]), 1.5))
             painter.setBrush(Qt.BrushStyle.NoBrush)
-            painter.drawRoundedRect(tab.adjusted(1, 1, -9, -1), 8, 8)
+            painter.drawRoundedRect(pill.adjusted(1, 1, -1, -1), pill.height() / 2, pill.height() / 2)
         size = ICON_SIZE.width()
-        left = option.rect.center().x() - size // 2 + 2 if compact else int(tab.left()) + 17
+        left = option.rect.center().x() - size // 2 + 1 if compact else option.rect.left() + 14
         mark = index.data(Qt.ItemDataRole.DecorationRole)
         if mark is not None:
             mark.paint(painter, QRect(left, option.rect.center().y() - size // 2 + 1, size, size),
@@ -124,13 +109,11 @@ class NavigationDelegate(QStyledItemDelegate):
         if compact:
             return
         font = QFont(option.font)
-        font.setBold(selected)
+        font.setWeight(QFont.Weight.DemiBold if selected else QFont.Weight.Normal)
         painter.setFont(font)
-        painter.setPen(QColor(colors["text"] if selected else colors["rail_text"] if hovered else colors["rail_muted"]))
-        text = QRect(option.rect).adjusted(int(tab.left()) + 17 + size + 10 - option.rect.left(), 0, -10, 0)
-        painter.drawText(text, Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft,
-                         painter.fontMetrics().elidedText(index.data(Qt.ItemDataRole.DisplayRole),
-                                                          Qt.TextElideMode.ElideRight, text.width()))
+        painter.setPen(QColor(colors["on_pill" if selected else "text"]))
+        self._text(painter, QRect(option.rect).adjusted(14 + size + 11, 0, -12, 0),
+                   index.data(Qt.ItemDataRole.DisplayRole))
 
 
 class NavigationSidebar(QListWidget):
@@ -145,9 +128,6 @@ class NavigationSidebar(QListWidget):
         self.compact = False
         self.setFixedWidth(SIDEBAR_WIDTH)
         self.setMouseTracking(True)
-        # Only so the scroll bar sits on the left: the selected tab has to run into the page on the
-        # right. The delegate lays every row out left to right itself.
-        self.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
         self.setItemDelegate(NavigationDelegate(self))
         self.setFrameShape(QListWidget.Shape.NoFrame)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -180,10 +160,8 @@ class NavigationSidebar(QListWidget):
         return item
 
     def add_page(self, title_key: str, page_index: int, fallback: str = "",
-                 page_id: Optional[str] = None, icon_name: str = "extension",
-                 paper: str = "window") -> QListWidgetItem:
-        """加一列分頁。page_index 對應 QStackedWidget 裡的索引；page_id 預設為語言鍵；
-        paper 是這一頁的底色，選到時頁籤用同一個顏色。"""
+                 page_id: Optional[str] = None, icon_name: str = "extension") -> QListWidgetItem:
+        """加一列分頁。page_index 對應 QStackedWidget 裡的索引；page_id 預設為語言鍵。"""
         item = QListWidgetItem(translate(title_key, fallback))
         item.setData(ROLE_KIND, KIND_PAGE)
         item.setToolTip(item.text())
@@ -191,7 +169,6 @@ class NavigationSidebar(QListWidget):
         item.setData(ROLE_PAGE_ID, page_id or title_key)
         item.setData(ROLE_GROUP, self._group)
         item.setData(ROLE_ICON, icon_name)
-        item.setData(ROLE_PAPER, paper)
         item.setIcon(icon(icon_name, *self._icon_colors()))
         item.setSizeHint(self._row_size(KIND_PAGE))
         self.addItem(item)
@@ -233,9 +210,9 @@ class NavigationSidebar(QListWidget):
     # ----- folding groups ---------------------------------------------------------------
 
     def _icon_colors(self) -> tuple[str, str]:
-        """The rack's muted ink for rows, the page's ink for the selected row, in the current theme."""
+        """Text colour for rows, the pill's own text colour for the selected one, in the current theme."""
         colors = palette_for(tone_of(self))
-        return colors["rail_muted"], colors["text"]
+        return colors["text"], colors["on_pill"]
 
     def _set_arrow(self, item: QListWidgetItem, collapsed: bool) -> None:
         """A small chevron in the theme's muted ink (the platform arrows vanish on a dark sidebar)."""

@@ -429,6 +429,20 @@ def _build_theme_menu(ui: "FrontEngineMainUI", menu) -> None:
         group.addAction(action)
         submenu.addAction(action)
         ui.theme_actions[name] = action
+    submenu.addSeparator()
+    key, fallback = "settings_menu_wallpaper_backdrop", "Background from the desktop wallpaper"
+    backdrop = QAction(_t(key, fallback), submenu)
+    retranslator.bind(backdrop, key, fallback)
+    backdrop.setCheckable(True)
+    backdrop.setChecked(user_setting_dict.get("wallpaper_backdrop") is not False)
+    backdrop.toggled.connect(lambda use: _choose_backdrop(ui, use))
+    submenu.addAction(backdrop)
+    ui.wallpaper_backdrop_action = backdrop
+
+
+def _choose_backdrop(ui: "FrontEngineMainUI", use: bool) -> None:
+    ui.set_wallpaper_backdrop(use)
+    write_user_setting()
 
 
 def _choose_theme(ui: "FrontEngineMainUI", theme: str) -> None:

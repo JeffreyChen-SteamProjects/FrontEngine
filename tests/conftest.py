@@ -71,6 +71,13 @@ def _never_read_the_real_workshop_folder(monkeypatch):
     monkeypatch.setattr(home_page, "workshop_pack_roots", lambda: [])
 
 
+@pytest.fixture(autouse=True)
+def _never_read_the_real_wallpaper(monkeypatch):
+    """The window's backdrop would take the developer's own wallpaper; tests use the built-in one."""
+    from frontengine.ui.style import backdrop
+    monkeypatch.setattr(backdrop, "desktop_wallpaper", lambda: None)
+
+
 @pytest.fixture(scope="session", autouse=True)
 def _run_from_temporary_directory():
     """整個測試 session 在暫存目錄下執行 / Run the session from a temp directory."""

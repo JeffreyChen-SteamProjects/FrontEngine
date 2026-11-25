@@ -23,7 +23,7 @@ Menü „Einstellungen“
   Bildschirm einfrieren, die Kürzelliste sowie Medien abspielen/pausieren,
   nächster und vorheriger Titel sowie das Verschieben des Vordergrundfensters
   auf den nächsten Bildschirm unter Beibehaltung seiner Proportionen.
-* Design - wie das System, hell oder dunkel. Werkzeugseiten sind ein Trickfilm-Folientisch mit einer Schmuckfarbe je Gruppe der Seitenleiste; die Haustierseiten und ihre Dialoge tragen den Tinte-und-Papier-Stil der eingebauten Figuren mit der runden Schrift jf open huninn (vereinfachtes Chinesisch behält die Systemschrift).
+* Design - wie das System, hell oder dunkel. Das Fenster ist geschichtetes Glas über einer unscharfen Kopie des Desktopbilds oder, wenn „Hintergrund vom Desktopbild“ im selben Menü aus ist, über einem eingebauten Bild; die Haustierseiten und ihre Dialoge haben einen warmen Ton und die runde Schrift jf open huninn (vereinfachtes Chinesisch behält die Systemschrift).
 * Tag-/Nacht-Design nach Zeitplan - tagsüber hell, nachts dunkel.
 * Mit dem System starten - FrontEngine bei der Anmeldung starten.
 * Letzte Sitzung wiederherstellen - wieder öffnen, was zuletzt zu sehen war.

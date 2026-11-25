@@ -10,9 +10,9 @@ from PySide6.QtCore import QRect, QRectF, Qt
 from PySide6.QtGui import QColor, QFont, QPainter
 
 _PADDING_X, _PADDING_Y, _TOP = 22, 12, 36
-_BACKGROUND = QColor(23, 23, 21, 235)
-_TEXT = QColor("#FFFDF6")
-_ACCENT = QColor("#F56A24")
+_BACKGROUND = QColor(14, 36, 48, 232)
+_TEXT = QColor("#F4F8FA")
+_ACCENT = QColor("#FFC691")
 
 
 def hint_rect(painter: QPainter, area: QRect, text: str) -> QRect:
@@ -36,9 +36,9 @@ def draw_hint(painter: QPainter, area: QRect, text: str) -> None:
     rect = hint_rect(painter, area, text)
     painter.setPen(Qt.PenStyle.NoPen)
     painter.setBrush(_BACKGROUND)
-    painter.drawRoundedRect(QRectF(rect), 12, 12)
+    painter.drawRoundedRect(QRectF(rect), min(22, rect.height() / 2), min(22, rect.height() / 2))
     painter.setBrush(_ACCENT)
-    painter.drawRoundedRect(QRectF(rect.x() + 8, rect.y() + 10, 4, rect.height() - 20), 2, 2)
+    painter.drawEllipse(QRectF(rect.x() + 10, rect.center().y() - 2, 6, 6))
     painter.setPen(_TEXT)
     painter.drawText(rect, Qt.AlignmentFlag.AlignCenter | Qt.TextFlag.TextWordWrap, text)
     painter.restore()

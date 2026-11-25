@@ -24,7 +24,7 @@ Menu Impostazioni
   blocco, fermo immagine, elenco scorciatoie e riproduci/pausa, traccia
   successiva e precedente, e lo spostamento della finestra in primo piano sullo
   schermo successivo mantenendone le proporzioni.
-* Tema - segui il sistema, chiaro o scuro. Le pagine degli strumenti sono un tavolo da acetati per animazione, con un inchiostro per ogni gruppo della barra laterale; le pagine delle mascotte e le loro finestre usano lo stile inchiostro e carta dei personaggi integrati, con il carattere arrotondato jf open huninn (il cinese semplificato mantiene il carattere di sistema).
+* Tema - segui il sistema, chiaro o scuro. La finestra è fatta di vetri sovrapposti su una copia sfocata dello sfondo del desktop o, se nello stesso menu «Sfondo dal desktop» è disattivato, su un’immagine integrata; le pagine delle mascotte e le loro finestre usano una tinta calda e il carattere arrotondato jf open huninn (il cinese semplificato mantiene il carattere di sistema).
 * Tema giorno/notte programmato - chiaro di giorno, scuro di notte.
 * Avvia con il sistema - aprire FrontEngine all'accesso.
 * Ripristina l'ultima sessione - riaprire ciò che c'era sullo schermo.

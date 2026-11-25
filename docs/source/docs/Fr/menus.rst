@@ -24,7 +24,7 @@ Menu Réglages
   verrouillage, le gel de l'écran, la liste des raccourcis, ainsi que
   lecture/pause, piste suivante et précédente, et le déplacement de la fenêtre
   active vers l'écran suivant en conservant ses proportions.
-* Thème - suivre le système, clair ou sombre. Les pages d'outils sont une table à cellulos d'animateur, avec une encre par groupe de la barre latérale ; les pages des mascottes et leurs fenêtres adoptent le style encre et papier des personnages intégrés, avec la police arrondie jf open huninn (le chinois simplifié garde la police système).
+* Thème - suivre le système, clair ou sombre. La fenêtre est faite de verre superposé sur une copie floue du fond d'écran, ou sur une image intégrée si « Arrière-plan d’après le fond d’écran » est désactivé dans le même menu ; les pages des mascottes et leurs fenêtres ont une teinte chaude et la police arrondie jf open huninn (le chinois simplifié garde la police système).
 * Thème jour/nuit programmé - clair le jour, sombre la nuit.
 * Lancer au démarrage du système - ouvrir FrontEngine à l'ouverture de session.
 * Restaurer la dernière session - rouvrir ce qui était affiché la dernière fois.

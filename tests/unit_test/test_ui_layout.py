@@ -2,7 +2,7 @@
 import re
 
 import pytest
-from PySide6.QtCore import QCoreApplication
+from PySide6.QtCore import QCoreApplication, QRect
 from PySide6.QtGui import QGuiApplication, QPalette
 from PySide6.QtWidgets import QApplication, QComboBox, QPushButton
 
@@ -131,7 +131,10 @@ def test_no_page_paints_a_white_platform_background_in_the_dark_theme(make_main_
         for index in range(window.page_stack.count()):
             window.sidebar.select_page(index)
             QCoreApplication.processEvents()
-            image = window.page_stack.grab().toImage()
+            # The page alone is see-through, so it is cut out of the whole window: the backdrop counts,
+            # the sidebar's bright pill does not.
+            corner = window.page_stack.mapTo(window, window.page_stack.rect().topLeft())
+            image = window.grab(QRect(corner, window.page_stack.size())).toImage()
             bright = _solid_bright_share(image)
             assert bright < 0.005, (type(window.page_stack.widget(index)).__name__, bright)
     finally:

@@ -22,28 +22,25 @@ controls stop growing at a readable width, and the primary action sits in a
 fixed footer looking different from everything else. A page now describes which
 fields it has and not how to arrange them.
 
-Every page wears the cel desk (``ui/style/cel.py``): a peg bar in its group's
-spot ink, its icon on a tile, and cards drawn as stacked cels on the light table.
-Every section folds from its heading and the window remembers which were folded.
+A page is transparent: the window's backdrop shows through, and each section is a
+glass panel on it (``ui/style/glass.py``). Every section folds from its heading and
+the window remembers which were folded.
 """
 from __future__ import annotations
 
 from typing import Iterable, Optional
 
 from PySide6.QtCore import QEvent, QRectF, QSize, QTimer, Qt, Signal
-from PySide6.QtGui import QColor, QPainter
+from PySide6.QtGui import QPainter
 from PySide6.QtWidgets import (
-    QComboBox, QFormLayout, QFrame, QGraphicsDropShadowEffect, QGridLayout, QHBoxLayout, QLabel, QLayout, QLineEdit,
+    QComboBox, QFormLayout, QFrame, QGridLayout, QHBoxLayout, QLabel, QLayout, QLineEdit,
     QPlainTextEdit, QPushButton, QScrollArea, QSizePolicy, QSlider, QTextEdit, QToolButton,
     QVBoxLayout, QWidget,
 )
 
-from frontengine.ui.style.app_style import use_brand_font
-from frontengine.ui.style.cel import (
-    GROUP_PROPERTY, colors_of, paint_cel, paint_icon_tile, paint_light_table, paint_peg_bar, set_hand, spot_of,
-)
-from frontengine.ui.style.nav_icons import icon, pixmap
-from frontengine.ui.style.tokens import CEL_OFFSET, PEG_BAR_HEIGHT
+from frontengine.ui.style.glass import colors_of, paint_panel, set_hand
+from frontengine.ui.style.nav_icons import icon
+from frontengine.ui.style.tokens import SHADOW_DEPTH
 from frontengine.user_setting.user_setting_file import user_setting_dict
 from frontengine.utils.multi_language.retranslate import retranslator, tr
 from frontengine.ui.page.action_menu import ActionMenu
@@ -67,10 +64,9 @@ _WIDE_CONTROLS = (QComboBox, QSlider, QLineEdit, QPlainTextEdit, QTextEdit)
 # Russian words run longer than the English ones, hence the headroom.
 LABEL_MIN_WIDTH = 148
 
-PAGE_MARGINS = (28, 16, 28, 0)
-FOOTER_MARGINS = (28, 12, 28, 14)
-ICON_TILE = 46
-# A page shorter than this drops its subtitle and icon tile, so the controls keep the room.
+PAGE_MARGINS = (24, 14, 24, 0)
+FOOTER_MARGINS = (24, 6, 24, 8)
+# A page shorter than this drops its subtitle, so the controls keep the room.
 SHORT_PAGE = 520
 FOLD_ALL_FROM = 3                      # pages with this many sections offer "fold all"
 FOLDED_KEY = "folded_sections"         # user setting: "PageClass:index" of the sections folded by hand
@@ -79,7 +75,7 @@ FOLDED_KEY = "folded_sections"         # user setting: "PageClass:index" of the 
 # Pages that show a large canvas (the pet home, the scene editor) opt out with wide=True.
 CONTENT_MAX_WIDTH = 960
 ROW_SPACING = 14
-SECTION_SPACING = 16
+SECTION_SPACING = 8       # beside the room each panel keeps for its own shadow
 
 
 def _form_label(label: "str | QLabel", fallback: str = "") -> QLabel:
@@ -114,35 +110,26 @@ def _cap_width(widget: QWidget) -> QWidget:
     return widget
 
 
-def hard_shadow(widget: QWidget) -> QGraphicsDropShadowEffect:
-    """The ink block under the primary button: no blur, straight down."""
-    effect = QGraphicsDropShadowEffect(widget)
-    effect.setBlurRadius(0)
-    effect.setOffset(0, 3)
-    effect.setColor(QColor(colors_of(widget)["on_accent"]))
-    return effect
-
-
 class _SectionShell(QWidget):
     """
     一組相關欄位，帶一個小標題。標題用 objectName 上樣式，不在這裡寫死顏色。
-    A group of related fields under a small heading, drawn as a cel. The heading
-    folds the section; the palette comes from the design tokens, never literals.
+    A group of related fields under a small heading, on its own glass panel. The
+    heading folds the section; the palette comes from the design tokens, never literals.
     """
 
     fold_changed = Signal(bool)            # folded or opened by the user
     foldable = True
 
     def __init__(self, title: "str | QLabel", fallback: str = "",
-                 parent: Optional[QWidget] = None, *, stacked: bool = True):
+                 parent: Optional[QWidget] = None, *, nested: bool = False):
         super().__init__(parent)
         self.setObjectName("settingSection")
-        self._stacked = stacked
+        self._nested = nested
         self._labelled_toggle = False
-        offset = CEL_OFFSET if stacked else 0
+        side, shadow = (16, 0) if nested else (22, SHADOW_DEPTH)
         self._column_layout = QVBoxLayout(self)
-        self._column_layout.setContentsMargins(20, 14, 20 + offset, 16 + offset)
-        self._column_layout.setSpacing(14)
+        self._column_layout.setContentsMargins(side, 14, side, 18 + shadow)
+        self._column_layout.setSpacing(12)
 
         # 標題也可以是分頁已經有的標籤。像護眼頁那種「一個功能一組設定」的頁面，
         # 功能名稱本來就翻譯好了，拿來當分區標題就不必再開新的語言鍵。
@@ -153,10 +140,9 @@ class _SectionShell(QWidget):
         self.title_label.setObjectName("sectionHeader")
         self.title_label.setWordWrap(True)
         self.title_label.setIndent(0)              # lines up with the fields below it
-        use_brand_font(self.title_label)
         set_hand(self.title_label)
         self.title_label.installEventFilter(self)
-        heading = FlowLayout(spacing=8)
+        heading = FlowLayout(spacing=8, last_at_end=True)      # the chevron sits at the right edge
         heading.addWidget(self.title_label)
         self.toggle_button = QToolButton()
         self.toggle_button.setObjectName("sectionToggle")
@@ -229,87 +215,15 @@ class _SectionShell(QWidget):
 
     def paintEvent(self, event) -> None:
         painter = QPainter(self)
-        paint_cel(painter, QRectF(self.rect()), colors_of(self), spot_of(self), stacked=self._stacked,
-                  ink=_is_ink(self))
-
-
-def _is_ink(widget: Optional[QWidget]) -> bool:
-    while widget is not None:
-        if widget.property("inkStyle"):
-            return True
-        widget = widget.parentWidget()
-    return False
-
-
-class PageBanner(QWidget):
-    """The top of a page: the peg bar in the group's spot ink, then icon, title and one line."""
-
-    def __init__(self, peg_bar: bool, parent: Optional[QWidget] = None) -> None:
-        super().__init__(parent)
-        self.setObjectName("pageHeader")
-        self._peg_bar = peg_bar
-
-    @property
-    def top(self) -> int:
-        return PEG_BAR_HEIGHT if self._peg_bar else 0
-
-    def paintEvent(self, event) -> None:
-        painter = QPainter(self)
-        colors = colors_of(self)
-        painter.fillRect(self.rect(), QColor(colors["window"]))
-        if self._peg_bar:
-            paint_peg_bar(painter, QRectF(0, 0, self.width(), PEG_BAR_HEIGHT), colors, spot_of(self))
-
-    def changeEvent(self, event) -> None:
-        super().changeEvent(event)
-        if event.type() == QEvent.Type.PaletteChange:
-            self.update()
-
-
-class IconTile(QWidget):
-    """A page's sidebar icon in ink on a tile of its group's spot ink."""
-
-    def __init__(self, parent: Optional[QWidget] = None) -> None:
-        super().__init__(parent)
-        self.name = ""
-        self.setFixedSize(ICON_TILE, ICON_TILE)
-        self.hide()
-
-    def set_icon(self, name: str) -> None:
-        self.name = name
-        self.setVisible(bool(name))
-        self.update()
-
-    def paintEvent(self, event) -> None:
-        painter = QPainter(self)
-        colors = colors_of(self)
-        paint_icon_tile(painter, QRectF(self.rect()), colors, spot_of(self))
-        if self.name:
-            size = 26
-            painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform)
-            painter.drawPixmap((self.width() - size) // 2, (self.height() - size) // 2,
-                               pixmap(self.name, colors["on_accent"], size))
-
-
-class LightTable(QWidget):
-    """The scrolling body of a page, printed with the field guide."""
-
-    def __init__(self, parent: Optional[QWidget] = None) -> None:
-        super().__init__(parent)
-        self.setObjectName("pageContent")
-
-    def paintEvent(self, event) -> None:
-        painter = QPainter(self)
-        painter.setClipRect(event.rect())
-        paint_light_table(painter, QRectF(event.rect()), colors_of(self))
+        paint_panel(painter, QRectF(self.rect()), colors_of(self), nested=self._nested)
 
 
 class ContentSection(_SectionShell):
     """Stack full-width content without the sizing rules of a two-column form."""
 
     def __init__(self, title: "str | QLabel", fallback: str = "",
-                 parent: Optional[QWidget] = None, *, stacked: bool = True):
-        super().__init__(title, fallback, parent, stacked=stacked)
+                 parent: Optional[QWidget] = None, *, nested: bool = False):
+        super().__init__(title, fallback, parent, nested=nested)
         self._contents = QVBoxLayout(self.content)
         self._contents.setContentsMargins(0, 0, 0, 0)
         self._contents.setSpacing(ROW_SPACING)
@@ -324,8 +238,8 @@ class Section(_SectionShell):
     """Align labeled controls and wrap their labels when the form narrows."""
 
     def __init__(self, title: "str | QLabel", fallback: str = "",
-                 parent: Optional[QWidget] = None, *, stacked: bool = True):
-        super().__init__(title, fallback, parent, stacked=stacked)
+                 parent: Optional[QWidget] = None, *, nested: bool = False):
+        super().__init__(title, fallback, parent, nested=nested)
         self._form = QFormLayout(self.content)
         self._form.setContentsMargins(0, 0, 0, 0)
         self._form.setHorizontalSpacing(14)
@@ -484,15 +398,14 @@ class SettingPage(QWidget):
         self._page_layout.setContentsMargins(0, 0, 0, 0)
         self._page_layout.setSpacing(0)
 
-        header = self.banner = PageBanner(not compact)
+        header = self.banner = QWidget()
+        header.setObjectName("pageHeader")
         header_outer = QHBoxLayout(header)
-        header_outer.setContentsMargins(PAGE_MARGINS[0], PAGE_MARGINS[1] + header.top, PAGE_MARGINS[2], 14)
+        header_outer.setContentsMargins(PAGE_MARGINS[0], PAGE_MARGINS[1], PAGE_MARGINS[2], 12)
         header_inner = self._column(header_outer)
         self._header_row = QHBoxLayout(header_inner)
         self._header_row.setContentsMargins(0, 0, 0, 0)
         self._header_row.setSpacing(16)
-        self.icon_tile = IconTile()
-        self._header_row.addWidget(self.icon_tile, 0, Qt.AlignmentFlag.AlignVCenter)
         header_layout = QVBoxLayout()
         header_layout.setSpacing(2)
         self._header_row.addLayout(header_layout, 1)
@@ -502,7 +415,6 @@ class SettingPage(QWidget):
 
         self.title_label = tr(QLabel(), title_key, title_fallback)
         self.title_label.setObjectName("pageTitle")
-        use_brand_font(self.title_label)
         header_layout.addWidget(self.title_label)
 
         self.subtitle_label: Optional[QLabel] = None
@@ -519,7 +431,8 @@ class SettingPage(QWidget):
         self._scroll.setFrameShape(QFrame.Shape.NoFrame)
         self._scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
 
-        body = LightTable()
+        body = QWidget()
+        body.setObjectName("pageContent")
         body_outer = QHBoxLayout(body)
         body_outer.setContentsMargins(PAGE_MARGINS[0], 12, PAGE_MARGINS[2], 20)
         if compact:
@@ -528,6 +441,9 @@ class SettingPage(QWidget):
         self._body_layout.setContentsMargins(0, 0, 0, 0)
         self._body_layout.setSpacing(SECTION_SPACING)
         self._scroll.setWidget(body)
+        # A scroll area fills both with the window colour; the backdrop has to show through.
+        body.setAutoFillBackground(False)
+        self._scroll.viewport().setAutoFillBackground(False)
         self._page_layout.addWidget(self._scroll, 1)
 
         self._footer: Optional[QWidget] = None
@@ -546,13 +462,6 @@ class SettingPage(QWidget):
         outer.addStretch(1)
         return column
 
-    def set_identity(self, icon_name: str, group: str) -> None:
-        """Wear the sidebar entry's icon and its group's spot ink."""
-        self.setProperty(GROUP_PROPERTY, group)
-        self.icon_tile.set_icon(icon_name)
-        self.icon_tile.setVisible(not self._short)
-        self.update()
-
     def resizeEvent(self, event) -> None:
         super().resizeEvent(event)
         # Only when the page crosses the limit, and after this layout pass: changing what is visible
@@ -566,7 +475,6 @@ class SettingPage(QWidget):
         """A short page keeps its height for the controls."""
         if self.subtitle_label is not None:
             self.subtitle_label.setVisible(not self._short)
-        self.icon_tile.setVisible(bool(self.icon_tile.name) and not self._short)
 
     # ----- folding sections ---------------------------------------------------------------
 
@@ -620,7 +528,7 @@ class SettingPage(QWidget):
 
     def add_section(self, title: "str | QLabel", fallback: str = "", *, collapsed: bool = False) -> Section:
         """加一個分區並回傳它，欄位往回傳的物件上加。標題可傳語言鍵或現成標籤。"""
-        section = Section(title, fallback, stacked=not self._compact_page)
+        section = Section(title, fallback, nested=self._compact_page)
         if collapsed:
             section.set_collapsible()
         self._body_layout.addWidget(section)
@@ -629,7 +537,7 @@ class SettingPage(QWidget):
 
     def add_content_section(self, title: "str | QLabel", fallback: str = "") -> ContentSection:
         """Group full-width content in a vertically stacked card."""
-        section = ContentSection(title, fallback, stacked=not self._compact_page)
+        section = ContentSection(title, fallback, nested=self._compact_page)
         self._body_layout.addWidget(section)
         self._track(section)
         return section
@@ -681,7 +589,6 @@ class SettingPage(QWidget):
             layout.addWidget(widget)
         if primary is not None:
             primary.setObjectName("primaryAction")
-            primary.setGraphicsEffect(hard_shadow(primary))
             primary.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
             layout.addWidget(primary)
 

@@ -7,15 +7,17 @@ from os import getcwd
 from pathlib import Path
 from typing import Any, Dict, Optional, Type
 
-from PySide6.QtCore import QByteArray, QTimer
-from PySide6.QtGui import QGuiApplication, QIcon, Qt, QAction, QKeySequence, QShortcut
+from PySide6.QtCore import QByteArray, QEvent, QTimer
+from PySide6.QtGui import QGuiApplication, QIcon, QPainter, Qt, QAction, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QMainWindow, QApplication, QGridLayout, QHBoxLayout, QStackedWidget, QStyle,
-    QMenuBar, QWidget, QMessageBox, QLayout,
+    QMenuBar, QWidget, QMessageBox, QLayout, QVBoxLayout,
 )
 
 from frontengine.ui.nav.sidebar import NavigationSidebar
-from frontengine.ui.nav.shell import FOLD_SHORTCUT, NavigationPanel
+from frontengine.ui.nav.shell import FOLD_SHORTCUT, NavigationPanel, OverlayStatusBar
+from frontengine.ui.style.backdrop import Backdrop
+from frontengine.ui.style.glass import tone_of
 from frontengine.ui.style.app_style import apply_app_style
 from frontengine.ui.style.tokens import normalise_theme
 
@@ -116,6 +118,10 @@ def tray_can_restore_window(window: Any) -> bool:
                 and tray is not None and tray.isVisible())
 
 
+# A window shorter than this gives the overlay status bar's height to the page.
+STATUS_BAR_FROM_HEIGHT = 560
+
+
 class FrontEngineMainUI(QMainWindow):
     """
     FrontEngine 主視窗
@@ -180,6 +186,8 @@ class FrontEngineMainUI(QMainWindow):
 
         # 主介面：左側導覽 + 右側頁面堆疊
         # Main interface: navigation on the left, the page stack on the right
+        self.backdrop = Backdrop()
+        self.backdrop.set_use_wallpaper(user_setting_dict.get("wallpaper_backdrop") is not False)
         self.sidebar = NavigationSidebar(self)
         self.page_stack = QStackedWidget(self)
         self.page_stack.setObjectName("pageBody")
@@ -201,7 +209,18 @@ class FrontEngineMainUI(QMainWindow):
         fold_shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
         self.lifetime.connect_owned(fold_shortcut.activated, self.navigation.toggle)
         central_layout.addWidget(self.navigation)
-        central_layout.addWidget(self.page_stack, 1)
+        content = QVBoxLayout()
+        content.setContentsMargins(0, 0, 0, 0)
+        content.setSpacing(0)
+        content.addWidget(self.page_stack, 1)
+        self.overlay_status = OverlayStatusBar(self._live_overlays)
+        status_row = QHBoxLayout()
+        status_row.setContentsMargins(24, 4, 24, 0)
+        status_row.addWidget(self.overlay_status)
+        content.addLayout(status_row)
+        central_layout.addLayout(content, 1)
+        self.lifetime.connect_owned(self.overlay_status.toggle_requested, self._toggle_overlays)
+        self.lifetime.connect_owned(self.overlay_status.close_requested, self._close_overlays)
         self.setCentralWidget(central)
 
         # 各功能頁面初始化
@@ -665,9 +684,7 @@ class FrontEngineMainUI(QMainWindow):
             self.sidebar.add_group(group_key, group_fallback)
             for widget, lang_key, icon_name in entries:
                 index = self.page_stack.addWidget(widget)
-                paper = "ink_window" if widget.property("inkStyle") else "window"
-                self.sidebar.add_page(lang_key, index, icon_name=icon_name, paper=paper)
-                widget.set_identity(icon_name, group_key)
+                self.sidebar.add_page(lang_key, index, icon_name=icon_name)
                 self.command_pages.append((widget, lang_key, index))
 
         # 外掛註冊的分頁自成一組，使用者才看得出哪些不是內建的
@@ -690,7 +707,46 @@ class FrontEngineMainUI(QMainWindow):
 
     def resizeEvent(self, event) -> None:
         super().resizeEvent(event)
-        self.navigation.set_window_width(self.width())
+        self.navigation.set_window_width(event.size().width())
+        # After this layout pass, and only while the bar lives: a short window keeps its height for the page.
+        room = event.size().height() >= STATUS_BAR_FROM_HEIGHT
+        bar = self.overlay_status
+        QTimer.singleShot(0, bar, lambda: bar.setVisible(room))
+
+    def paintEvent(self, event) -> None:
+        painter = QPainter(self)
+        painter.setClipRect(event.rect())
+        self.backdrop.paint(painter, self.rect(), tone_of(self), self.devicePixelRatioF())
+
+    def changeEvent(self, event) -> None:
+        super().changeEvent(event)
+        # Coming back to the window is when a changed wallpaper is noticed.
+        if event.type() == QEvent.Type.ActivationChange and hasattr(self, "backdrop") \
+                and self.isActiveWindow() and self.backdrop.refresh():
+            self.update()
+
+    def set_wallpaper_backdrop(self, use: bool) -> None:
+        """Blur the desktop wallpaper behind the window, or use the built-in picture."""
+        user_setting_dict["wallpaper_backdrop"] = bool(use)
+        if self.backdrop.set_use_wallpaper(use):
+            self.update()
+
+    def _live_overlays(self) -> list:
+        centre = getattr(self, "control_center_ui", None)
+        return centre.all_overlays() if centre is not None else []
+
+    @owned_callback
+    def _toggle_overlays(self, hide: bool) -> None:
+        if hide:
+            self.control_center_ui.hide_all()
+        else:
+            self.control_center_ui.show_all()
+        self.overlay_status.refresh()
+
+    @owned_callback
+    def _close_overlays(self) -> None:
+        self.control_center_ui.clear_all()
+        self.overlay_status.refresh()
 
     @owned_callback
     def _remember_collapsed_groups(self, groups: list) -> None:

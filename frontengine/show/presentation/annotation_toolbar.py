@@ -18,16 +18,17 @@ from frontengine.utils.multi_language.retranslate import retranslator, tr
 if TYPE_CHECKING:
     from frontengine.show.presentation.annotation_overlay import AnnotationOverlay
 
-# One look whatever the app theme: it floats over arbitrary screen content. The INKSIDE inks.
-INK, PAPER, PAPER_PRESSED, ACCENT, MUTED = "#171715", "#FFFDF6", "#EFE6D2", "#F56A24", "#5E584C"
-LINE, RADIUS = 2, 14
+# One look whatever the app theme: it floats over arbitrary screen content. Smoked glass, dark
+# enough for white text over anything.
+TEXT, SMOKE, EDGE, HOVER, PILL, ON_PILL = "#F4F8FA", "#E80E2430", "#66FFFFFF", "#33FFFFFF", "#F4F8FA", "#12303E"
+ACCENT, ON_ACCENT, MUTED = "#FFC691", "#33210F", "#93A9B4"
 STYLE = f"""
-QPushButton {{ color: {INK}; background: {PAPER}; border: {LINE}px solid transparent; border-radius: 9px;
-    padding: 6px 12px; font-size: 13px; font-weight: 600; }}
-QPushButton:hover {{ background: {PAPER_PRESSED}; }}
-QPushButton:checked {{ color: {PAPER}; background: {INK}; }}
-QPushButton#finishDrawing {{ background: {ACCENT}; border-color: {INK}; }}
-QToolTip {{ color: {PAPER}; background: {INK}; border: none; padding: 4px 8px; }}
+QPushButton {{ color: {TEXT}; background: transparent; border: none; border-radius: 15px;
+    padding: 7px 14px; font-size: 13px; font-weight: 500; }}
+QPushButton:hover {{ background: {HOVER}; }}
+QPushButton:checked {{ color: {ON_PILL}; background: {PILL}; }}
+QPushButton#finishDrawing {{ color: {ON_ACCENT}; background: {ACCENT}; font-weight: 600; }}
+QToolTip {{ color: {ON_PILL}; background: {PILL}; border: none; padding: 4px 8px; }}
 """
 
 GRIP_WIDTH = 22
@@ -49,10 +50,10 @@ class ColorSwatch(QPushButton):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         if self.isChecked():
-            painter.setPen(QPen(QColor(INK), 2))
+            painter.setPen(QPen(QColor(TEXT), 2))
             painter.setBrush(Qt.BrushStyle.NoBrush)
             painter.drawEllipse(self.rect().adjusted(2, 2, -2, -2))
-        painter.setPen(QPen(QColor(INK), 1))
+        painter.setPen(QPen(QColor(EDGE), 1))
         painter.setBrush(self.color)
         painter.drawEllipse(self.rect().adjusted(5, 5, -5, -5))
 
@@ -70,7 +71,7 @@ class AnnotationToolbar(QWidget):
         self._drag: Optional[QPoint] = None
         self._moved = False
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(GRIP_WIDTH, 8, 12, 8)
+        layout.setContentsMargins(GRIP_WIDTH + 10, 8, 10, 8)
         layout.setSpacing(8)
         self.tool_buttons: Dict[str, QPushButton] = {}
         for tool in TOOLS:
@@ -138,13 +139,12 @@ class AnnotationToolbar(QWidget):
     def paintEvent(self, event) -> None:
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        painter.setPen(QPen(QColor(INK), LINE))
-        painter.setBrush(QColor(PAPER))
-        half = LINE / 2
-        painter.drawRoundedRect(self.rect().toRectF().adjusted(half, half, -half, -half),
-                                RADIUS, RADIUS)
+        painter.setPen(QPen(QColor(EDGE), 1))
+        painter.setBrush(QColor(SMOKE))
+        box = self.rect().toRectF().adjusted(.5, .5, -.5, -.5)
+        painter.drawRoundedRect(box, box.height() / 2, box.height() / 2)
         painter.setPen(Qt.PenStyle.NoPen)
         painter.setBrush(QColor(MUTED))
         for row in range(3):
             for column in range(2):
-                painter.drawEllipse(7 + column * 6, self.height() // 2 - 8 + row * 7, 3, 3)
+                painter.drawEllipse(16 + column * 6, self.height() // 2 - 8 + row * 7, 3, 3)
