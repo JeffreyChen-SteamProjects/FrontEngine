@@ -94,6 +94,32 @@ def test_the_main_window_theme_reaches_self_painted_widgets():
         QGuiApplication.setPalette(before)
 
 
+def _solid_bright_share(image):
+    """How much of the image is filled with bright colour, in 8 x 8 blocks.
+
+    Single pixels on a grid counted the pet pages' 2 px paper-coloured outlines: whether a row of
+    samples happened to land on one moved the same page between 1 % and 8 %. A background fills
+    whole blocks; a line or a letter does not."""
+    blocks = [(x, y) for y in range(0, image.height() - 8, 8) for x in range(0, image.width() - 8, 8)]
+    solid = sum(1 for x, y in blocks
+                if all(image.pixelColor(x + across, y + down).lightness() > 200
+                       for across in (0, 3, 7) for down in (0, 3, 7)))
+    return solid / len(blocks)
+
+
+def test_a_white_background_is_told_from_outlines():
+    from PySide6.QtGui import QColor, QImage, QPainter
+    image = QImage(400, 400, QImage.Format.Format_RGB32)
+    image.fill(QColor(DARK["window"]))
+    painter = QPainter(image)
+    for y in range(0, 400, 16):                        # outlines on every second sampled row
+        painter.fillRect(0, y, 400, 2, QColor("white"))
+    assert _solid_bright_share(image) == 0
+    painter.fillRect(0, 0, 400, 20, QColor("white"))   # a 20 px strip of platform white
+    painter.end()
+    assert _solid_bright_share(image) > 0.005
+
+
 def test_no_page_paints_a_white_platform_background_in_the_dark_theme(make_main_window):
     """Every page drawn in the dark theme stays dark apart from its text and art (R5 sweep)."""
     before = QGuiApplication.palette()
@@ -106,9 +132,7 @@ def test_no_page_paints_a_white_platform_background_in_the_dark_theme(make_main_
             window.sidebar.select_page(index)
             QCoreApplication.processEvents()
             image = window.page_stack.grab().toImage()
-            samples = [image.pixelColor(x, y).lightness() for y in range(0, image.height(), 8)
-                       for x in range(0, image.width(), 8)]
-            bright = sum(1 for value in samples if value > 200) / len(samples)
-            assert bright < 0.05, (type(window.page_stack.widget(index)).__name__, bright)
+            bright = _solid_bright_share(image)
+            assert bright < 0.005, (type(window.page_stack.widget(index)).__name__, bright)
     finally:
         QGuiApplication.setPalette(before)
