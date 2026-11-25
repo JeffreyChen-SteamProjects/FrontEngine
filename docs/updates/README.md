@@ -58,6 +58,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | ID | Date | Title | Tags | Batch |
 |---|---|---|---|---|
+| U-20261126-05 | 2026-11-26 | 全專案審查：桌面寵物與場景檔案讀寫的修正，審查結束 | #done #review | [2026-11-b](2026-11-b.md) |
 | U-20261126-04 | 2026-11-26 | 全專案審查：平台服務、功能頁、家園與場景的修正 | #done #review | [2026-11-b](2026-11-b.md) |
 | U-20261126-03 | 2026-11-26 | 全專案審查：主視窗、設定與覆蓋層的修正 | #done #review | [2026-11-b](2026-11-b.md) |
 | U-20261126-02 | 2026-11-26 | 未發布改動的程式碼審查：11 項修正 | #done #review | [2026-11-b](2026-11-b.md) |
@@ -491,7 +492,7 @@ In the same commit: delete the item from `progress.md`, add a `#done` entry here
 
 | File | Period | Entries |
 |---|---|---:|
-| [2026-11-b.md](2026-11-b.md) | 2026-11 | 22 |
+| [2026-11-b.md](2026-11-b.md) | 2026-11 | 23 |
 | [2026-11.md](2026-11.md) | 2026-11 | 265 |
 | [2026-10.md](2026-10.md) | 2026-10 | 129 |
 | [2026-09.md](2026-09.md) | 2026-09 | 11 |

@@ -820,3 +820,11 @@ Cada seção da página Ferramentas começa dizendo para que ela serve. Medir, L
 A página Cena traz iniciar e parar a cena no rodapé de cada aba. No editor 3D a vista fica sobre um fundo escuro com grade, então dá para ver uma cena vazia e a direção do olhar; a grade nunca aparece na área de trabalho nem na saída. Uma cena vazia sugere adicionar um objeto 3D.
 
 A janela se recolhe. O botão no pé da barra lateral, ou Ctrl+B, a reduz a uma coluna de ícones; uma janela estreita a recolhe sozinha e a abre de novo ao alargar. Cada seção se recolhe pelo título, e páginas com várias seções têm um botão para recolher ou abrir todas; as duas escolhas são lembradas. Numa janela baixa, o cabeçalho dispensa o subtítulo. Uma barra de status no pé de cada página diz quantas sobreposições há na tela e permite ocultar, mostrar ou fechar todas. A imagem atrás da janela é o seu papel de parede, lido neste computador e desfocado; desative em *Configurações → Tema*.
+
+Identidades → Excluir identidade esquece para sempre um pet salvo, após confirmação; se estiver na tela ou morando na casa, guarde-o ou mude-o antes. Um pet volta da área de trabalho para a casa com o afeto que ganhou. “Acalmar ao digitar” faz parte das predefinições, e um personagem incluído escolhido para um pet não veste mais outro.
+
+Uma pasta de papéis de parede pode conter imagens, GIF ou WebP animados e vídeos (MP4, WebM, AVI): os vídeos se repetem sem som, pausam quando ocultos, e um arquivo que não pode ser mostrado é pulado.
+
+Câmera → Atualizar lista as câmeras conectadas depois que a página foi aberta. A régua e o transferidor aparecem em gravações e no compartilhamento de tela; só o conta-gotas fica fora da captura.
+
+Um user_setting.json danificado não impede mais o início: o FrontEngine usa os padrões e mantém o arquivo antigo ao lado como user_setting.damaged-<hora>.json. As configurações exportadas não incluem o histórico da área de transferência, e notas, pets e posição da janela importados sobrevivem ao reinício pedido. Uma predefinição importada nunca substitui a sua: recebe um número. Os nomes aceitam qualquer idioma.

@@ -13,3 +13,5 @@ A wallpaper sits below every window, so it never gets in the way.
 * Quiet hours - between the two times given, switch to the Quiet folder
   instead, for something calmer while you work.
 * Start wallpaper / Next wallpaper - begin, or move on now.
+
+Wallpaper folders may hold pictures, animated GIF or WebP files and videos (MP4, WebM, AVI): videos loop without sound, pause while hidden, and a file that cannot be shown is skipped.

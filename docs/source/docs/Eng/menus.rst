@@ -119,3 +119,5 @@ The signage preset list and rotation interval expose their visible labels as acc
 Scheduled presets show separate Hour and Minute labels. The preset, hour, minute, screensaver idle duration and source fields expose their visible labels as accessibility names, which follow language changes without changing the selected values.
 
 If saving the screensaver or scheduled preset settings fails, the dialog shows the error and keeps your choices. The previous settings remain active. Correct the problem and confirm again to retry, or cancel to discard your changes. The screensaver source names also follow language changes without changing the selected source.
+
+A damaged user_setting.json no longer keeps FrontEngine from starting: it runs on the defaults and keeps the old file beside it as user_setting.damaged-<time>.json. Exported settings leave out clipboard history, and imported notes, desktop pets and window position survive the restart they ask for. Imported presets never replace one of yours: the import gets a number. Preset names may use any language.

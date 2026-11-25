@@ -60,3 +60,5 @@ Nella tavolozza, Tab e Maiusc+Tab spostano il focus tra la tabella e gli altri c
 Il consenso cloud per il testo riconosciuto e per le schermate resta separato. Chiudere la finestra di origine durante la richiesta di consenso scarta la risposta, senza autorizzare né ripetere la richiesta. Chiudere la pagina Strumenti in quel momento conserva il testo precedente senza aprire un risultato. Se la pagina resta aperta, No mostra il risultato originale e Sì ripete una volta la richiesta originale.
 
 Ogni sezione della pagina Strumenti inizia spiegando a cosa serve. Misura, Leggi il testo e Registrazione di un’area spiegano anche ogni passaggio, secondo la modalità, l’azione o il formato scelti. Il livello a schermo intero che aprono dice cosa fare ed Esc lo chiude. La misura ora riceve i clic su Windows, il righello conta i veri pixel dello schermo con qualsiasi ridimensionamento e Leggi il testo tiene separate la lingua di traduzione e la domanda.
+
+Fotocamera → Aggiorna elenca le fotocamere collegate dopo l’apertura della pagina. Righello e goniometro restano nelle registrazioni e nella condivisione; solo il contagocce è escluso dalla cattura.

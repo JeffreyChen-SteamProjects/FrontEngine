@@ -7,7 +7,7 @@ import pytest
 from PySide6.QtCore import QPoint, QPointF, Qt
 from PySide6.QtGui import QColor, QImage
 from PySide6.QtTest import QTest
-from PySide6.QtWidgets import QMessageBox, QWidget
+from PySide6.QtWidgets import QMessageBox
 
 from frontengine.show.scene.model_asset import model_dependencies
 from frontengine.show.scene.timeline import SceneTimeline
@@ -169,14 +169,31 @@ def test_a_time_being_typed_is_left_alone(page, monkeypatch):
     editor.runtime = None
 
 
-def test_a_scene_that_cannot_be_saved_says_so(monkeypatch, tmp_path):
+def test_a_scene_that_cannot_be_saved_says_so(page, monkeypatch, tmp_path):
     told = []
     monkeypatch.setattr(QMessageBox, "critical", staticmethod(lambda *arguments: told.append(arguments[-1])))
     monkeypatch.setattr(scene_setting.QFileDialog, "getSaveFileName", lambda *_a, **_k: (str(tmp_path / "a.fescene"), ""))
     scene_setting.adopt_scene_document({"a": {"type": "IMAGE", "file_path": str(tmp_path / "gone.png")}})
-    parent = QWidget()
-    assert scene_setting.write_scene_file(parent) is None and len(told) == 1
-    scene_setting.adopt_scene_document({})
+    scene_setting.write_scene_file(page.scene_manager_ui)
+    assert _until(lambda: told)
+    scene_setting.adopt_scene_document({"a": {"type": "TEXT", "text": "x"}})
+    scene_setting.write_scene_file(page.scene_manager_ui)
+    assert _until((tmp_path / "a.fescene").is_file) and len(told) == 1
+
+
+def test_a_scene_file_is_opened_off_the_gui_thread_and_a_bad_one_says_so(page, monkeypatch, tmp_path):
+    from frontengine.ui.page.scene_setting import scene_manager
+    told = []
+    monkeypatch.setattr(QMessageBox, "critical", staticmethod(lambda *arguments: told.append(arguments[-1])))
+    save_package({"opened": {"type": "TEXT", "text": "x"}}, tmp_path / "good.fescene")
+    monkeypatch.setattr(scene_manager, "choose_scene_file", lambda _ui: str(tmp_path / "good.fescene"))
+    page.scene_manager_ui.update_scene_json()
+    assert "opened" not in scene_json                    # still being read
+    assert _until(lambda: "opened" in scene_json) and "opened" in page.scene_manager_ui.json_plaintext.toPlainText()
+    (tmp_path / "bad.json").write_text("{", encoding="utf-8")
+    monkeypatch.setattr(scene_manager, "choose_scene_file", lambda _ui: str(tmp_path / "bad.json"))
+    page.scene_manager_ui.update_scene_json()
+    assert _until(lambda: told) and "opened" in scene_json
 
 
 def test_a_package_names_its_files_the_same_on_every_system(tmp_path):

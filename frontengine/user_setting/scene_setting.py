@@ -3,17 +3,22 @@ import json
 from pathlib import Path
 from typing import Any, Dict, Optional
 
+from PySide6.QtCore import QObject, QRunnable, Qt, Signal
 from PySide6.QtWidgets import QFileDialog, QMessageBox, QWidget
+
+from shiboken6 import isValid
 
 from frontengine.ui.dialog.choose_file_dialog import choose_file
 from frontengine.utils.json.json_repository import JsonRepository
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
+from frontengine.utils.work_lifetime import captured_lifetime
 from frontengine.utils.scene_format.scene_package import load_package, save_package
 from frontengine.utils.scene_format.scene_3d_document import SceneDocument, read_scene_document
 
 scene_json: Dict[str, Any] = {}
 _package_leases: list = []
+_writes: set = set()          # what saves under way report through, kept until they have
 _scene_document = SceneDocument()
 
 
@@ -61,25 +66,43 @@ def release_scene_packages() -> None:
     _package_leases.clear()
 
 
-def choose_scene_json(
-    trigger_ui: QWidget,
-    file_filter: str = 'Scene / Puppet (*.json *.fescene *.puppet)',
-    extensions: Optional[list[str]] = None,
-) -> Optional[str]:
-    front_engine_logger.info("choose_scene_json")
-
-    file_path = choose_file(
+def choose_scene_file(trigger_ui: QWidget) -> Optional[str]:
+    """Which scene file to open, or None; reading it is the caller's."""
+    front_engine_logger.info("choose_scene_file")
+    return choose_file(
         trigger_ui=trigger_ui,
-        file_filter=file_filter,
-        extensions=extensions or ['.json', '.fescene', '.puppet'],
+        file_filter='Scene / Puppet (*.json *.fescene *.puppet)',
+        extensions=['.json', '.fescene', '.puppet'],
         warning_message=language_wrapper.language_word_dict.get("scene_choose_message_box"),
     )
 
-    if not file_path:
-        return None
 
-    load_scene_file(file_path)
-    return file_path
+class _WriteSignals(QObject):
+    finished = Signal(str)
+
+
+class _SceneWrite(QRunnable):
+    """Save a snapshot of the scene off the GUI thread: a package is compressed with all its media."""
+
+    def __init__(self, document: SceneDocument, path: str) -> None:
+        super().__init__()
+        self.document, self.path, self.signals = document, path, _WriteSignals()
+
+    def run(self) -> None:
+        error = ''
+        try:
+            save_scene_document(self.document, self.path)
+        except Exception as failure:  # any at all: unsaid, the user believes it was saved
+            front_engine_logger.warning(f'[scene_setting] scene not saved: {failure!r}')
+            error = str(failure) or type(failure).__name__
+        self.signals.finished.emit(error)
+
+
+def save_scene_document(document: SceneDocument, path: str) -> None:
+    if Path(path).suffix.lower() == '.fescene':
+        save_package(document, path)
+    else:
+        JsonRepository(path).save(document.envelope(Path(path).parent))
 
 
 def write_scene_file(parent_qt_instance: QWidget,
@@ -93,13 +116,14 @@ def write_scene_file(parent_qt_instance: QWidget,
     if not file_path:
         return None
 
-    try:
-        if Path(file_path).suffix.lower() == '.fescene':
-            save_package(current_scene_document(), file_path)
-        else:
-            JsonRepository(file_path).save(current_scene_document().envelope(Path(file_path).parent))
-    except (OSError, ValueError) as error:
-        front_engine_logger.warning(f'[scene_setting] scene not saved: {error!r}')
-        QMessageBox.critical(parent_qt_instance, 'Scene Error', str(error))
-        return None
+    job = _SceneWrite(current_scene_document(), file_path)
+
+    def done(error: str) -> None:
+        _writes.discard(job.signals)
+        if error and isValid(parent_qt_instance):
+            QMessageBox.critical(parent_qt_instance, 'Scene Error', error)
+
+    job.signals.finished.connect(done, Qt.ConnectionType.QueuedConnection)
+    _writes.add(job.signals)
+    captured_lifetime(parent_qt_instance).submit(job)
     return file_path

@@ -13,3 +13,5 @@ Un fond d'écran se place sous toutes les fenêtres : il ne gêne donc jamais.
 * Heures calmes - entre les deux heures indiquées, passer au dossier « calme »,
   pour quelque chose de plus sobre pendant le travail.
 * Démarrer le fond d'écran / Fond d'écran suivant.
+
+Un dossier de fond d’écran peut contenir des images, des GIF ou WebP animés et des vidéos (MP4, WebM, AVI) : les vidéos tournent en boucle sans son, se mettent en pause une fois masquées, et un fichier impossible à afficher est passé.

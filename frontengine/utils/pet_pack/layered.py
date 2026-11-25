@@ -167,6 +167,8 @@ def _layer(value, root: Path, checked: dict) -> Layer:
         if not isinstance(variant, list) or len(variant) != 2:
             raise ValueError('Layer variant needs a group and choice')
         variant = tuple(_token(item) for item in variant)
+    if not isinstance(value['image'], str):
+        raise ValueError('Layer image must be a file name')
     if value['image'] not in checked:
         # Many frames reuse one image; it is validated once per load against a
         # single listing of the folder. Anything not listed gets the full check,
@@ -257,7 +259,10 @@ def load_layered_asset(folder: str | Path) -> LayeredAsset:
         raw = stream.read(1024 * 1024 + 1)
     if len(raw) > 1024 * 1024:
         raise ValueError('Layered manifest exceeds 1 MiB')
-    data = json.loads(raw.decode('utf-8-sig'))
+    try:
+        data = json.loads(raw.decode('utf-8-sig'))
+    except RecursionError as error:
+        raise ValueError('Layered manifest is nested too deeply') from error
     _fields(data, {'format', 'id', 'version', 'name', 'kind', 'template', 'canvas',
                    'slots', 'actions', 'license'} | (set(data).intersection({'palette', 'variants'}) if isinstance(data, dict) else set()), 'layered asset')
     if data['format'] != 'frontengine.layered-pet/1' or data['kind'] not in ('character', 'garment'):

@@ -797,3 +797,11 @@ Every section of the Tools page opens with what the tool is for. Measure, Read t
 The Scene page has Start scene and Stop scene at the bottom of every tab. In the 3D editor the viewport stands on a dark ground with a grid, so an empty scene and the direction you are looking in are visible; the grid never appears on the desktop or in the output. An empty scene says to add a 3D object.
 
 The window folds. The button at the bottom of the sidebar, or Ctrl+B, folds the sidebar to a rail of icons; a narrow window folds it by itself and opens it again when it widens. Every section folds from its heading, and pages with several sections have a Fold all / Open all button; both choices are remembered. On a short window the page header gives up its subtitle. A status bar at the bottom of every page says how many overlays are on screen and hides, shows or closes them all. The picture behind the window is your desktop wallpaper, read on this computer and blurred; *Settings → Theme → Background from the desktop wallpaper* turns that off.
+
+Pet identities → Delete identity forgets a saved pet for good, after asking; a pet on screen or living in the home has to be put away or moved out first. A pet comes back from the desktop to the home with the affection it earned. “Settle while typing” is part of presets, and a built-in character chosen for one pet no longer dresses another.
+
+Wallpaper folders may hold pictures, animated GIF or WebP files and videos (MP4, WebM, AVI): videos loop without sound, pause while hidden, and a file that cannot be shown is skipped.
+
+Camera → Refresh lists cameras plugged in since the page was opened. The ruler and the protractor stay in recordings and screen sharing; only the colour picker leaves the capture.
+
+A damaged user_setting.json no longer keeps FrontEngine from starting: it runs on the defaults and keeps the old file beside it as user_setting.damaged-<time>.json. Exported settings leave out clipboard history, and imported notes, desktop pets and window position survive the restart they ask for. Imported presets never replace one of yours: the import gets a number. Preset names may use any language.

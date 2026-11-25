@@ -59,3 +59,5 @@ In the color palette, Tab and Shift+Tab move between the table and other control
 Cloud consent for recognized text and screenshots remains separate. Closing the source window while a consent prompt is open discards its answer; it does not grant consent or retry the request. Closing the Tools page during that prompt also preserves the previous text without opening a result window. With the page still open, No displays the original result and Yes retries the original request once.
 
 Every section of the Tools page opens with what the tool is for. Measure, Read text and Record area also explain each step, and the explanation follows the mode, action or format you choose. The full-screen layer they open says what to do, and Esc leaves it. Measuring now receives its clicks on Windows, the ruler counts real screen pixels at any display scaling, and Read text keeps the translation language and your question apart.
+
+Camera → Refresh lists cameras plugged in since the page was opened. The ruler and the protractor stay in recordings and screen sharing; only the colour picker leaves the capture.

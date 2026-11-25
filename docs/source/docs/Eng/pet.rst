@@ -144,3 +144,5 @@ If the pet-photo window closes while a save location is being chosen, the return
 Closing the wardrobe while choosing an asset folder or color discards the returned choice. It starts no installation and makes no color change. Later picker requests from that closed wardrobe are also ignored.
 
 Dinner with friends occurs when at least three residents are eating in the same area. Residents eating in separate areas do not count as one gathering. The event is recorded at most once per home day, including after saving and reopening the home.
+
+Pet identities → Delete identity forgets a saved pet for good, after asking; a pet on screen or living in the home has to be put away or moved out first. A pet comes back from the desktop to the home with the affection it earned. “Settle while typing” is part of presets, and a built-in character chosen for one pet no longer dresses another.

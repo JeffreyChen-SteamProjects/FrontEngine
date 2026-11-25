@@ -5,7 +5,7 @@ from hashlib import sha256
 from pathlib import Path
 import re
 import tempfile
-from threading import Event
+from threading import Event, Lock
 from typing import Callable
 
 from frontengine.show.pet.layered_renderer import LayeredRenderer
@@ -13,6 +13,17 @@ from frontengine.show.pet.wardrobe import AssetCatalog
 from frontengine.utils.pet_pack.layered import check_sources, image_bounds, image_path, load_layered_asset
 
 _ASSET_FOLDER = re.compile(r'[0-9a-f]{64}')
+
+
+# A built-in character is 44 assets per version, and versions stay so that older looks keep working.
+MAX_ASSETS = 4096
+_loaded: dict = {}          # folder -> (what it looked like, the checked asset)
+_loaded_lock = Lock()
+
+
+def _signature(manifest: Path) -> tuple:
+    status = manifest.stat()
+    return status.st_mtime_ns, status.st_size
 
 
 class PetAssetLibrary:
@@ -39,21 +50,33 @@ class PetAssetLibrary:
         if not self.root.exists():
             return AssetCatalog(()), ()
         assets, errors = [], []
-        for index, folder in enumerate(self.root.iterdir()):
-            if index >= 512:
-                raise ValueError('Pet asset library exceeds 512 entries')
+        for folder in self.root.iterdir():
+            if len(assets) + len(errors) >= MAX_ASSETS:
+                raise ValueError(f'Pet asset library exceeds {MAX_ASSETS} entries')
             # Installed assets live in sha256-named folders; anything else (staging folders, the
             # exported Puppet models under ``puppets``) shares the root but is not an asset.
             if not _ASSET_FOLDER.fullmatch(folder.name):
                 continue
             try:
-                asset = load_layered_asset(folder)
-                if folder.name != self._folder(asset):
-                    raise ValueError('Installed asset identity does not match its folder')
-                assets.append(asset)
+                assets.append(self._loaded(folder))
             except (OSError, ValueError) as error:
                 errors.append(f'{folder.name}: {error}')
         return AssetCatalog(tuple(assets)), tuple(errors)
+
+    def _loaded(self, folder: Path):
+        """One installed asset, read and checked again only when its folder or manifest changed: a
+        character comes with dozens of garments, and every pet on screen looks through all of them."""
+        signature = (folder.stat().st_mtime_ns, _signature(folder / 'layered-pet.json'))
+        with _loaded_lock:
+            known = _loaded.get(folder)
+        if known is not None and known[0] == signature:
+            return known[1]
+        asset = load_layered_asset(folder)
+        if folder.name != self._folder(asset):
+            raise ValueError('Installed asset identity does not match its folder')
+        with _loaded_lock:
+            _loaded[folder] = (signature, asset)
+        return asset
 
     def is_installed(self, identifier: str, version: str) -> bool:
         return (self.root / sha256((identifier + '\0' + version).encode('utf-8')).hexdigest()).exists()
@@ -68,7 +91,7 @@ class PetAssetLibrary:
         # scans once up front instead of once per asset.
         if not scanned:
             self.scan()
-        if sum(1 for _ in self.root.iterdir()) >= 512:
+        if sum(1 for folder in self.root.iterdir() if _ASSET_FOLDER.fullmatch(folder.name)) >= MAX_ASSETS:
             raise ValueError('Pet asset library is full')
         target = self.root / self._folder(asset)
         if target.exists():

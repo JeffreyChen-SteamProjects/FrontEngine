@@ -1,4 +1,7 @@
-"""A cancellable asset-install job with GUI-thread result delivery."""
+"""Cancellable asset-install jobs with GUI-thread result delivery.
+
+Every job answers, whatever went wrong: a dialog waiting for one that never does can install nothing more.
+"""
 from threading import Event
 
 from PySide6.QtCore import QObject, QRunnable, Signal
@@ -19,8 +22,8 @@ class PetAssetInstall(QRunnable):
         error = ''
         try:
             self.library.install(self.source, cancel=self.cancel)
-        except (OSError, ValueError) as failure:
-            error = str(failure)
+        except Exception as failure:
+            error = str(failure) or type(failure).__name__
         self.signals.finished.emit(error)
 
 
@@ -36,7 +39,7 @@ class PuppetExport(QRunnable):
         from frontengine.show.pet.inkside.puppet_export import export_puppet
         try:
             model, script = export_puppet(self.identifier, self.folder)
-        except (OSError, ValueError) as failure:
+        except Exception as failure:
             self.signals.finished.emit('', '', str(failure))
             return
         self.signals.finished.emit(str(model), str(script), '')
@@ -64,8 +67,8 @@ class PetBuiltinInstall(QRunnable):
         error = ''
         try:
             install_builtin(self.library, self.identifier, self.cancel, self.signals.progress.emit)
-        except (OSError, ValueError) as failure:
-            error = str(failure)
+        except Exception as failure:
+            error = str(failure) or type(failure).__name__
         self.signals.finished.emit(error)
 
 
@@ -99,8 +102,8 @@ class PetBuiltinCharacter(QRunnable):
         if not self.cancel.is_set():
             try:
                 install_builtin(self.library, self.identifier, self.cancel)
-            except (OSError, ValueError) as failure:      # the wardrobe installs it again when opened
-                error = str(failure)
+            except Exception as failure:      # the wardrobe installs it again when opened
+                error = str(failure) or type(failure).__name__
         self.signals.wardrobe.emit(error)
 
     def _character(self) -> bool:
@@ -109,7 +112,7 @@ class PetBuiltinCharacter(QRunnable):
             install_builtin(self.library, self.identifier, self.cancel, wardrobe=False)
             catalog, _errors = self.library.scan()
             catalog.resolve({'id': self.identifier, 'version': VERSION}, 'character')
-        except (OSError, ValueError) as failure:
+        except Exception as failure:
             self.signals.finished.emit(self.identifier, str(failure))
             return False
         self.signals.finished.emit(self.identifier, '')

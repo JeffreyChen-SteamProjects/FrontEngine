@@ -796,3 +796,11 @@ Cada sección de la página Herramientas empieza diciendo para qué sirve. Medir
 La página Escena ofrece iniciar y detener la escena al pie de cada pestaña. En el editor 3D la vista tiene un fondo oscuro con una cuadrícula, así que se ven una escena vacía y hacia dónde miras; la cuadrícula nunca aparece en el escritorio ni en la salida. Una escena vacía invita a añadir un objeto 3D.
 
 La ventana se pliega. El botón al pie de la barra lateral, o Ctrl+B, la reduce a una columna de iconos; una ventana estrecha la pliega sola y la vuelve a abrir al ensancharse. Cada sección se pliega desde su título, y las páginas con varias secciones tienen un botón para plegar o abrir todas; ambas elecciones se recuerdan. En una ventana baja, la cabecera prescinde de su subtítulo. Una barra de estado al pie de cada página indica cuántas superposiciones hay en pantalla y permite ocultarlas, mostrarlas o cerrarlas todas. La imagen tras la ventana es tu fondo de escritorio, leído en este equipo y desenfocado; se desactiva en *Configuración → Tema*.
+
+Identidades → Eliminar identidad olvida para siempre una mascota guardada, tras preguntar; si está en pantalla o vive en la casa, primero hay que guardarla o mudarla. Una mascota vuelve del escritorio a la casa con el afecto que ganó. «Calmarse al escribir» forma parte de los preajustes, y un personaje incluido elegido para una mascota ya no viste a otra.
+
+Una carpeta de fondos puede contener imágenes, GIF o WebP animados y vídeos (MP4, WebM, AVI): los vídeos se repiten sin sonido, se pausan al ocultarse y un archivo que no se puede mostrar se salta.
+
+Cámara → Actualizar muestra las cámaras conectadas después de abrir la página. La regla y el transportador aparecen en grabaciones y al compartir pantalla; solo el cuentagotas queda fuera de la captura.
+
+Un user_setting.json dañado ya no impide arrancar: FrontEngine usa los valores predeterminados y conserva el archivo anterior al lado como user_setting.damaged-<hora>.json. Los ajustes exportados no incluyen el historial del portapapeles, y las notas, mascotas y posición de ventana importadas sobreviven al reinicio. Un preajuste importado nunca reemplaza uno tuyo: recibe un número. Los nombres admiten cualquier idioma.

@@ -13,3 +13,5 @@ Uno sfondo sta sotto ogni finestra, quindi non è mai d'intralcio.
 * Ore di quiete - fra i due orari indicati passa alla cartella «quiete», per
   qualcosa di più sobrio mentre si lavora.
 * Avvia lo sfondo / Sfondo successivo.
+
+Una cartella di sfondi può contenere immagini, GIF o WebP animati e video (MP4, WebM, AVI): i video girano in loop senza audio, si fermano quando sono nascosti e un file che non si può mostrare viene saltato.

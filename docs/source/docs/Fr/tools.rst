@@ -60,3 +60,5 @@ Dans la palette de couleurs, Tab et Maj+Tab déplacent le focus entre le tableau
 Les autorisations cloud pour le texte reconnu et les captures restent distinctes. Fermer la fenêtre source pendant la demande ignore la réponse, sans accorder d’autorisation ni relancer la requête. Fermer la page Outils à ce moment conserve le texte précédent sans ouvrir de résultat. Si la page reste ouverte, Non affiche le résultat initial et Oui relance une fois la requête initiale.
 
 Chaque section de la page Outils commence par dire à quoi sert l’outil. Mesurer, Lire du texte et Enregistrement de zone expliquent en plus chaque étape, selon le mode, l’action ou le format choisi. Le calque plein écran qu’ils ouvrent dit quoi faire et Échap le quitte. La mesure reçoit désormais ses clics sous Windows, la règle compte de vrais pixels quelle que soit la mise à l’échelle, et Lire du texte garde séparément la langue de traduction et votre question.
+
+Caméra → Actualiser liste les caméras branchées depuis l’ouverture de la page. La règle et le rapporteur restent dans les enregistrements et le partage d’écran ; seule la pipette quitte la capture.

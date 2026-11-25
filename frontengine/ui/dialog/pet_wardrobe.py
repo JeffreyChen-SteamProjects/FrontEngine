@@ -279,10 +279,19 @@ class PetWardrobeDialog(QDialog):
                 return
             if self._adding_new_clothes:
                 self._adding_new_clothes = False
+                self._upgrade_look()
                 self.status.setText(translate('pet_wardrobe_new_clothes', 'New built-in clothes are ready to try on.'))
                 return
             self.status.setText(translate('pet_wardrobe_builtin_done',
                                           'Built-in character ready. Choose it under Character.'))
+
+    def _upgrade_look(self) -> None:
+        """A look saved with an older built-in version takes the current one: the clothes just installed
+        fit only that. Apply saves it, like anything else tried on here."""
+        from frontengine.show.pet.inkside.library import upgrade_builtin
+        upgraded = upgrade_builtin(self.draft.appearance)
+        if upgraded is not None:
+            self._attempt(lambda: self.draft.replace_appearance(upgraded))
 
     @Slot(str)
     @owned_callback

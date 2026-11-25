@@ -1,9 +1,12 @@
 """Local identity selection and portable single-pet state management."""
 from pathlib import Path
 
+from shiboken6 import isValid
+
+from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.ui.runtime_lifetime import owned_action, owned_callback
 
-from PySide6.QtWidgets import QComboBox, QFileDialog, QLabel, QLineEdit, QPushButton, QSpinBox, QSizePolicy
+from PySide6.QtWidgets import QComboBox, QFileDialog, QLabel, QLineEdit, QMessageBox, QPushButton, QSpinBox, QSizePolicy
 
 from frontengine.show.pet.pet_profile_session import PetProfileSession
 from frontengine.utils.multi_language.retranslate import retranslator, tr, translate
@@ -24,6 +27,7 @@ class PetProfileControls:
         self.status = QLabel()
         self.status.setWordWrap(True)
         self.rename = tr(QPushButton(), 'pet_profile_rename')
+        self.delete_button = tr(QPushButton(), 'pet_profile_delete')
         self.export = tr(QPushButton(), 'pet_profile_export')
         self.import_button = tr(QPushButton(), 'pet_profile_import')
         self.refresh_button = tr(QPushButton(), 'pet_profile_refresh')
@@ -50,7 +54,7 @@ class PetProfileControls:
         section.add_row(tr(QLabel(), 'pet_profile_select'), self.selector)
         section.add_row(tr(QLabel(), 'pet_profile_name'), self.name)
         section.add_actions(self.rename, self.export, self.import_button, self.refresh_button, self.customize_button)
-        section.add_actions(self.wardrobe_button, self.recover_button)
+        section.add_actions(self.wardrobe_button, self.recover_button, self.delete_button)
         section.add_row(tr(QLabel(), 'pet_interact_label', 'Interaction'), self.interaction)
         section.add_row(tr(QLabel(), 'pet_call_horizontal', 'Left / right (px)'), self.call_x)
         section.add_row(tr(QLabel(), 'pet_call_vertical', 'Up / down (px)'), self.call_y)
@@ -71,6 +75,7 @@ class PetProfileControls:
         self.selector.currentIndexChanged.connect(self._selected)
         self.rename.clicked.connect(self.rename_selected)
         self.export.clicked.connect(self.export_selected)
+        self.delete_button.clicked.connect(self.delete_selected)
         self.import_button.clicked.connect(self.import_save)
         self.refresh_button.clicked.connect(self.refresh)
         self.customize_button.clicked.connect(lambda: self.customize())
@@ -113,6 +118,7 @@ class PetProfileControls:
     def _selected(self, *_args) -> None:
         identifier = self.selector.currentData()
         self.rename.setEnabled(identifier is not None)
+        self.delete_button.setEnabled(identifier is not None)
         self.export.setEnabled(identifier is not None)
         self.customize_button.setEnabled(identifier is not None)
         self.wardrobe_button.setEnabled(identifier is not None)
@@ -162,6 +168,40 @@ class PetProfileControls:
             self.refresh(selected=identifier)
         except (OSError, ValueError, KeyError) as error:
             self.status.setText(str(error))
+
+    @owned_action
+    def delete_selected(self) -> None:
+        """Forget the selected identity, after asking; never one whose pet is on screen or at home."""
+        identifier = self.selector.currentData()
+        if identifier is None:
+            return
+        if PetProfileSession.active(self.profiles, identifier) is not None:
+            self.status.setText(translate('pet_profile_delete_active'))
+            return
+        answer = self.page.lifetime.after_dialog(QMessageBox.question(
+            self.page, translate('pet_profile_delete'),
+            translate('pet_profile_delete_confirm').format(name=self.name.text())))
+        if answer != QMessageBox.StandardButton.Yes:
+            return
+        try:
+            self.profiles.delete(identifier)
+        except (OSError, ValueError) as error:
+            self.status.setText(str(error))
+            return
+        self.refresh()
+        self.page.quick.refresh()
+
+    def forget_unused(self, identifier: str) -> None:
+        """Take back an identity made for a pet that could not be put on screen."""
+        if PetProfileSession.active(self.profiles, identifier) is not None:
+            return
+        try:
+            self.profiles.delete(identifier)
+        except (OSError, ValueError) as error:
+            front_engine_logger.warning(f'[PetProfileControls] {identifier} stays: {error}')
+
+    def open_wardrobes(self) -> list:
+        return [dialog for dialog in self._wardrobes.values() if isValid(dialog)]
 
     @owned_action
     def recover_selected(self) -> None:

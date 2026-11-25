@@ -147,3 +147,5 @@ Se la finestra della foto si chiude durante la scelta della destinazione, il per
 Chiudere il guardaroba durante la scelta di una cartella o di un colore scarta il risultato. Non viene avviata alcuna installazione e il colore non cambia. Anche le successive richieste di selezione del guardaroba chiuso vengono ignorate.
 
 La cena tra amici si verifica quando almeno tre abitanti mangiano nella stessa zona. I pasti in zone separate non contano come un unico incontro. L’evento viene registrato al massimo una volta per giorno della casa, anche dopo il salvataggio e la riapertura.
+
+Identità → Elimina identità rimuove per sempre un animale salvato, dopo la conferma; se è sullo schermo o nella casa va prima riposto o fatto uscire. Dal desktop un animale torna a casa con l’affetto guadagnato. «Fermo mentre scrivi» fa parte dei preset, e un personaggio incluso scelto per un animale non ne veste più un altro.
