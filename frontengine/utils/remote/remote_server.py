@@ -144,7 +144,7 @@ class _TLSHTTPServer(ThreadingHTTPServer):
         exclusive = getattr(socket, "SO_EXCLUSIVEADDRUSE", None)
         if exclusive is not None:
             self.socket.setsockopt(socket.SOL_SOCKET, exclusive, 1)
-        super().server_bind()
+        super().server_bind()  # NOSONAR - the socket is wrapped in TLS once bound (RemoteServer.start)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

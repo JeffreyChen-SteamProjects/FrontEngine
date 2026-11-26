@@ -100,5 +100,5 @@ def _with_scheme(url: str) -> str:
         return url
     host = re.split(r"[/?#:]", url, maxsplit=1)[0].lower()
     if host == "localhost" or re.fullmatch(r"[\d.]+", host):
-        return f"http://{url}"
+        return f"http://{url}"  # NOSONAR - this machine or the local network: such devices rarely serve HTTPS
     return f"https://{url}" if "." in host else url
