@@ -91,4 +91,5 @@ class EmptyHome(QWidget):
 def make_tab_ready(section) -> None:
     """A section shown as a tab already has its title on the tab itself."""
     section.title_label.hide()
+    section.set_foldable(False)
     section.setAttribute(Qt.WidgetAttribute.WA_StyledBackground)

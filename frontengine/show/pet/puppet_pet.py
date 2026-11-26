@@ -75,6 +75,9 @@ class PuppetPetWidget(DraggableTopWindow):
         self.script = script
         self.canvas.hit_area_triggered.connect(self._hit_area)
         self.bubble = QLabel(self)
+        self._bubble_timer = QTimer(self)
+        self._bubble_timer.setSingleShot(True)
+        self._bubble_timer.timeout.connect(self.bubble.hide)
         self.bubble.setStyleSheet('color:white;background:rgba(30,30,30,190);padding:6px;border-radius:6px')
         self.bubble.hide()
         layout = QVBoxLayout(self)
@@ -216,7 +219,7 @@ class PuppetPetWidget(DraggableTopWindow):
         self.bubble.move(4, 4)
         self.bubble.raise_()
         self.bubble.show()
-        QTimer.singleShot(4000, self.bubble, self.bubble.hide)
+        self._bubble_timer.start(4000)          # over again: an earlier line must not cut this one short
 
     def set_settled(self, settled: bool) -> None:
         self._settled = bool(settled)

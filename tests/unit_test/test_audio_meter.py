@@ -202,7 +202,8 @@ def test_default_level_uses_the_meter_without_opening_native_capture(monkeypatch
 
     monkeypatch.setattr(system_audio_meter, 'sys', SimpleNamespace(platform=platform))
     monkeypatch.setattr(system_audio_meter, 'SystemAudioMeter', Meter)
-    monkeypatch.setattr(system_audio_meter, '_meter_singleton', None)
+    monkeypatch.setattr(system_audio_meter, '_meter_singleton',
+                        system_audio_meter.ReopeningMeter(lambda: system_audio_meter.SystemAudioMeter()))
     assert system_audio_level() == 0.25
     assert system_audio_level() == 0.25
     assert calls == ['open']

@@ -23,7 +23,7 @@ Settings menu
   opacity up and down, next dashboard page, lock, freeze the screen, the
   shortcut list, media play/pause, next and previous track, and moving the
   foreground window to the next monitor with its proportions kept.
-* Theme - follow the system, light or dark. Tool pages use a quiet, neutral design; the pet pages and their dialogs use the ink-and-paper look of the built-in characters with the rounded jf open huninn typeface (Simplified Chinese keeps the system font).
+* Theme - follow the system, light or dark. The window is layered glass over a blurred copy of the desktop wallpaper, or a built-in picture when *Background from the desktop wallpaper* in the same menu is off; the pet pages and their dialogs use a warm tint and the rounded jf open huninn typeface (Simplified Chinese keeps the system font).
 * Scheduled day/night theme - a light theme by day and a dark one at night.
 * Start with the system - launch FrontEngine at login.
 * Restore last session - reopen what was on screen last time.
@@ -119,3 +119,5 @@ The signage preset list and rotation interval expose their visible labels as acc
 Scheduled presets show separate Hour and Minute labels. The preset, hour, minute, screensaver idle duration and source fields expose their visible labels as accessibility names, which follow language changes without changing the selected values.
 
 If saving the screensaver or scheduled preset settings fails, the dialog shows the error and keeps your choices. The previous settings remain active. Correct the problem and confirm again to retry, or cancel to discard your changes. The screensaver source names also follow language changes without changing the selected source.
+
+A damaged user_setting.json no longer keeps FrontEngine from starting: it runs on the defaults and keeps the old file beside it as user_setting.damaged-<time>.json. Exported settings leave out clipboard history, and imported notes, desktop pets and window position survive the restart they ask for. Imported presets never replace one of yours: the import gets a number. Preset names may use any language.

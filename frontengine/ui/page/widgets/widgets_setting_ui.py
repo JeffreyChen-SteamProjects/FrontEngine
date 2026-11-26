@@ -15,7 +15,7 @@ the page says so, so nobody runs it unaware.
 """
 from frontengine.ui.runtime_lifetime import owned_action
 from frontengine.ui.runtime_lifetime import OwnedWidgetList
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import (
@@ -34,8 +34,10 @@ from frontengine.ui.page.layout_kit import SettingPage
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import retranslator, tr
-from frontengine.utils.now_playing.now_playing import now_playing
-from frontengine.user_setting.user_setting_file import user_setting_dict, write_user_setting
+from frontengine.utils.now_playing.now_playing import BackgroundNowPlaying
+from frontengine.user_setting.user_setting_file import (
+    import_waits_for_restart, user_setting_dict, write_user_setting,
+)
 
 
 def _t(key: str, fallback: str) -> str:
@@ -68,6 +70,11 @@ class WidgetsSettingUI(SettingPage):
         self.monitor_widget_list: List[SystemMonitorWidget] = OwnedWidgetList(self.lifetime)
         self.now_playing_widget_list: List[NowPlayingWidget] = OwnedWidgetList(self.lifetime)
         self.note_widget_list: List[StickyNoteWidget] = OwnedWidgetList(self.lifetime)
+        # Notes put away all at once this session; whether any note was used in it; and what an import
+        # brought, which waits for the next start (see save_notes).
+        self._kept_notes: List[Dict] = []
+        self._notes_used = False
+        self._imported_notes: Optional[List[Dict]] = None
         self.todo_widget_list, self.todo_service, self.todo_dialog = OwnedWidgetList(self.lifetime), None, None
         self.capture = LoopbackSpectrum(DEFAULT_BANDS)
         self.lifetime.register_pending(self.capture.pending)
@@ -329,7 +336,7 @@ class WidgetsSettingUI(SettingPage):
     @owned_action
     def start_now_playing(self) -> None:
         front_engine_logger.info("[WidgetsSettingUI] start_now_playing")
-        widget = NowPlayingWidget(now_playing)
+        widget = NowPlayingWidget(BackgroundNowPlaying())
         widget.set_ui_window_flag(show_on_bottom=False)
         screen = QGuiApplication.primaryScreen()
         if screen is not None:
@@ -349,11 +356,17 @@ class WidgetsSettingUI(SettingPage):
         self.now_playing_widget_list.clear()
         retranslator.set_text(self.now_playing_button, "widgets_now_playing_start", "Show now playing")
 
+    def stop_overlays(self) -> None:
+        """Every overlay was closed from outside: stop what fed them and offer to start them again."""
+        for stop in (self.stop_spectrum, self.stop_monitor, self.stop_now_playing):
+            stop()
+
     # --- sticky notes ----------------------------------------------------
     @owned_action
     def add_note(self, text: str = "") -> StickyNoteWidget:
         """開一張新的便利貼。"""
         front_engine_logger.info("[WidgetsSettingUI] add_note")
+        self._notes_used = True
         note = StickyNoteWidget(text)
         screen = QGuiApplication.primaryScreen()
         if screen is not None:
@@ -366,29 +379,49 @@ class WidgetsSettingUI(SettingPage):
 
     def close_notes(self) -> None:
         """收掉所有便利貼（收之前先把內容存起來）。"""
-        self.save_notes()
+        self.keep_open_notes()
         for note in self.note_widget_list[:]:
             try:
                 note.close()
             except RuntimeError:
                 pass
         self.note_widget_list.clear()
+        self.save_notes()
 
     def save_notes(self) -> List[Dict]:
-        """把目前的便利貼內容與位置寫進設定。"""
+        """把目前的便利貼內容與位置寫進設定。
+        Open notes and the ones put away this session. With no note used this session, what is stored
+        stays: "Reopen my notes" may simply be off."""
+        states = self._kept_notes + self._open_note_states()
+        stored = user_setting_dict.get("sticky_notes")
+        stored = stored if isinstance(stored, list) else []
+        if import_waits_for_restart("sticky_notes"):
+            if self._imported_notes is None:
+                self._imported_notes = list(stored)
+            states = self._imported_notes + states
+        elif not states and not self._notes_used:
+            return stored
+        user_setting_dict["sticky_notes"] = states
+        write_user_setting()
+        return states
+
+    def _open_note_states(self) -> List[Dict]:
         states = []
         for note in self.note_widget_list[:]:
             try:
                 states.append(note_state(note))
             except RuntimeError:
                 self.note_widget_list.remove(note)
-        user_setting_dict["sticky_notes"] = states
-        write_user_setting()
         return states
+
+    def keep_open_notes(self) -> None:
+        """The open notes are about to be closed all at once - put away, not thrown away."""
+        self._kept_notes += self._open_note_states()
 
     @owned_action
     def restore_saved_notes(self) -> List[StickyNoteWidget]:
         """把上次的便利貼開回來（只有在使用者選擇要還原時才會被呼叫）。"""
+        self._notes_used = True
         notes = restore_notes(user_setting_dict.get("sticky_notes"), self.note_widget_list)
         for note in notes:
             note.show()

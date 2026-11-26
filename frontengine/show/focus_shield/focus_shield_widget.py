@@ -56,6 +56,16 @@ def active_window_rect() -> Optional[Tuple[int, int, int, int]]:
         return None
 
 
+def to_logical(rect: Tuple[int, int, int, int], origin: Tuple[int, int], ratio: float) -> Tuple[int, int, int, int]:
+    """A physical rectangle in Qt's logical coordinates, for the screen at ``origin``.
+
+    Qt leaves each screen's corner where Windows has it and scales only what is inside, so a
+    rectangle is scaled from that corner, not from the corner of the desktop."""
+    x, y, width, height = rect
+    return (round(origin[0] + (x - origin[0]) / ratio), round(origin[1] + (y - origin[1]) / ratio),
+            round(width / ratio), round(height / ratio))
+
+
 class DimBackgroundWidget(BaseWidget):
     """
     背景變暗：只有作用中視窗保持原樣，其餘壓暗；視窗換了會自動跟上。
@@ -107,8 +117,7 @@ class DimBackgroundWidget(BaseWidget):
         if sys.platform == 'darwin':
             # Quartz and Qt both use global display points on macOS.
             return rect
-        ratio = self.devicePixelRatio() or 1.0
-        return tuple(int(round(value / ratio)) for value in rect)
+        return to_logical(rect, self.screen_rect()[:2], self.devicePixelRatioF() or 1.0)
 
     def refresh(self) -> None:
         """重新計算要壓暗的區塊。"""

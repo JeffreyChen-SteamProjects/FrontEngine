@@ -41,8 +41,35 @@ def key_name(key) -> str:
     for attribute in ("char", "name"):
         value = getattr(key, attribute, None)
         if value:
-            return str(value)
+            return _typed_letter(key, str(value)) if attribute == "char" else str(value)
     return str(key).replace("Key.", "").strip("'")
+
+
+def _typed_letter(key, char: str) -> str:
+    """With Ctrl held Windows reports a control character: say which key it was instead."""
+    if len(char) != 1 or ord(char) >= 32:
+        return char
+    code = getattr(key, "vk", None)
+    if isinstance(code, int) and 0x30 <= code <= 0x5A:
+        return chr(code).lower()
+    letter = chr(ord(char) + 96)
+    return letter if "a" <= letter <= "z" else char
+
+
+# Virtual key codes by pynput's names, to ask Windows what is really down.
+_MODIFIER_CODES = {"ctrl": 0x11, "ctrl_l": 0xA2, "ctrl_r": 0xA3, "alt": 0x12, "alt_l": 0xA4, "alt_r": 0xA5,
+                   "alt_gr": 0xA5, "shift": 0x10, "shift_l": 0xA0, "shift_r": 0xA1, "cmd": 0x5B, "cmd_l": 0x5B,
+                   "cmd_r": 0x5C}
+
+
+def modifier_is_down(name: str) -> bool:
+    """Whether a modifier thought to be held still is. Win+L and Ctrl+Alt+Del let go on another desktop,
+    where no release is heard."""
+    code = _MODIFIER_CODES.get(name)
+    if sys.platform != "win32" or code is None:
+        return True
+    import ctypes
+    return bool(ctypes.windll.user32.GetAsyncKeyState(code) & 0x8000)
 
 
 def is_modifier(name: str) -> bool:
@@ -96,6 +123,7 @@ class InputWatchService(QObject):
         self._keyboard_listener: Optional[Any] = None
         self._mouse_listener: Optional[Any] = None
         self._held: List[str] = []
+        self._still_down = modifier_is_down
 
     @staticmethod
     def available() -> bool:
@@ -145,6 +173,7 @@ class InputWatchService(QObject):
             if name not in self._held:
                 self._held.append(name)
             return
+        self._held = [held for held in self._held if self._still_down(held)]
         self.key_pressed.emit(combo_with_modifiers(name, self._held))
 
     def _on_release(self, key) -> None:

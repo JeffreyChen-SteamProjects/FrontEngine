@@ -11,7 +11,7 @@ from PySide6.QtGui import QImage, QImageReader, QPainter, QColor, QFont
 from frontengine.utils.imervue.puppet_asset import validate_puppet, checked_members
 from frontengine.utils.scene_format.scene_package import load_package
 from frontengine.utils.scene_format.scene_editor_document import validate_geometry
-from frontengine.utils.scene_format.scene_document import normalize_scene
+from frontengine.utils.scene_format.scene_3d_document import OBJECT_TYPES, SceneDocument, read_scene_document
 
 IMAGE_SUFFIXES = {'.png', '.jpg', '.jpeg', '.webp', '.bmp', '.gif'}
 
@@ -62,13 +62,13 @@ def read_scene(path: Path) -> tuple[dict, object]:
     if path.suffix.lower() == '.fescene':
         entries, lease = load_package(path)
     else:
-        entries = normalize_scene(read_json(path), path.parent)
+        entries = read_scene_document(read_json(path), path.parent)
     try:
+        entries = entries.entries if isinstance(entries, SceneDocument) else entries
         entries = validate_geometry(entries)
         if len(entries) > 256:
             raise ValueError('Asset scene exceeds 256 layers')
-        allowed = {'IMAGE', 'GIF', 'TEXT', 'VIDEO', 'WEB', 'SOUND', 'PUPPET'}
-        if any(entry.get('type') not in allowed for entry in entries.values()):
+        if any(entry.get('type') not in OBJECT_TYPES for entry in entries.values()):
             raise ValueError('Asset scene contains an unsupported layer type')
         return entries, lease
     except Exception:

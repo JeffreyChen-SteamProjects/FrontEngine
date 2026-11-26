@@ -14,11 +14,14 @@ from PySide6.QtCore import QPoint, QRect, Qt, Signal
 from PySide6.QtGui import QColor, QFont, QGuiApplication, QPainter, QPen
 
 from frontengine.show.base_widget import BaseWidget
-from frontengine.show.window_helpers import apply_overlay_window_flags
+from frontengine.show.overlay_hint import draw_hint, hint_rect
+from frontengine.show.window_helpers import CATCH_MOUSE_COLOR, apply_overlay_window_flags
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.measure.measure import (
     FORMAT_HEX, angle_at, format_color, measurement_text,
 )
+from frontengine.utils.multi_language.retranslate import translate
+from frontengine.utils.screen_privacy import capture_affinity
 
 MODE_COLOR = "color"
 MODE_RULER = "ruler"
@@ -55,12 +58,25 @@ def grab_pixel_color(grabber, point: QPoint) -> Optional[QColor]:
     return image.pixelColor(0, 0)
 
 
+def without_catch_color(color: QColor) -> QColor:
+    """Undo the near-invisible black this layer lays over the screen to take the mouse."""
+    keep = 255 - CATCH_MOUSE_COLOR.alpha()
+    return QColor(*(min(255, round(channel * 255 / keep)) for channel in (color.red(), color.green(), color.blue())))
+
+
 class MeasureWidget(BaseWidget):
     """
     量測覆蓋層。螢幕擷取函式可注入（測試用假的），所以整個互動流程都測得到。
     """
 
     color_sampled = Signal(str)
+
+    stays_while_paused = True
+    # A see-through full-screen layer: never through the GPU compositor (see BaseWidget).
+    software_only = True
+
+    # Esc: the layer covers the settings window, so it offers its own way out.
+    finish_requested = Signal()
 
     def __init__(self, mode: str = MODE_COLOR, color_format: str = FORMAT_HEX) -> None:
         front_engine_logger.info(f"[MeasureWidget] Init | mode={mode}")
@@ -77,11 +93,35 @@ class MeasureWidget(BaseWidget):
         self.cursor_point = QPoint(0, 0)
         self.picked_color: Optional[QColor] = None
         self.readout: str = ""
+        self._reads_itself = False         # on screen and in its own picture: exclusion is unavailable
         self._grabber = self._default_grabber
         self._font = QFont()
         self._font.setPointSize(11)
         apply_overlay_window_flags(self, show_on_bottom=False, allow_input=True)
         self.setCursor(Qt.CursorShape.CrossCursor)
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+
+    @property
+    def needs_capture_exclusion(self) -> bool:
+        """The colour picker reads the screen; included in the picture, this layer tints what it reads.
+        The ruler and the protractor read nothing, and belong in a recording."""
+        return self.mode == MODE_COLOR
+
+    def _apply_capture_exclusion(self) -> None:
+        excluded = capture_affinity.apply_to_widget(self, self.needs_capture_exclusion or capture_affinity.hidden())
+        self._reads_itself = self.needs_capture_exclusion and not excluded
+
+    def showEvent(self, event) -> None:
+        super().showEvent(event)
+        self._apply_capture_exclusion()
+        self.activateWindow()
+        self.setFocus(Qt.FocusReason.OtherFocusReason)
+
+    def keyPressEvent(self, event) -> None:
+        if event.key() == Qt.Key.Key_Escape:
+            self.finish_requested.emit()
+        else:
+            super().keyPressEvent(event)
 
     @staticmethod
     def _default_grabber(rect: QRect):
@@ -96,7 +136,11 @@ class MeasureWidget(BaseWidget):
 
     def set_mode(self, mode: str) -> None:
         """換模式並清掉上一輪的量測。"""
-        self.mode = normalize_mode(mode)
+        mode = normalize_mode(mode)
+        if mode != self.mode:
+            self.mode = mode
+            if self.isVisible():
+                self._apply_capture_exclusion()
         self.reset()
 
     def set_color_format(self, color_format: str) -> None:
@@ -115,18 +159,24 @@ class MeasureWidget(BaseWidget):
         """把顏色排成使用者選的格式。"""
         return format_color((color.red(), color.green(), color.blue()), self.color_format)
 
+    def _sample(self, point: QPoint) -> Optional[QColor]:
+        """The colour under the cursor, without the catch colour when this layer is in the picture."""
+        color = grab_pixel_color(self._grabber, point)
+        if color is None or not self._reads_itself:
+            return color
+        return without_catch_color(color)
+
     # --- interaction -----------------------------------------------------
     def track_cursor(self, point: QPoint) -> None:
         """游標移動：取色模式會即時更新色塊。"""
         self.cursor_point = QPoint(point)
         if self.mode == MODE_COLOR:
-            color = grab_pixel_color(self._grabber, point)
+            color = self._sample(point)
             if color is not None:
                 self.picked_color = color
                 self.readout = self.color_text(color)
         elif self.mode == MODE_RULER and len(self.points) == 1:
-            self.readout = measurement_text(
-                (self.points[0].x(), self.points[0].y()), (point.x(), point.y()))
+            self.readout = self._ruler_text(self.points[0], point)
         self.update()
 
     def add_point(self, point: QPoint) -> Optional[str]:
@@ -137,7 +187,7 @@ class MeasureWidget(BaseWidget):
         text to show - and copy - comes back once there are enough.
         """
         if self.mode == MODE_COLOR:
-            color = grab_pixel_color(self._grabber, point)
+            color = self._sample(point)
             if color is None:
                 return None
             self.picked_color = color
@@ -163,10 +213,14 @@ class MeasureWidget(BaseWidget):
         self.update()
         return self.readout
 
+    def _ruler_text(self, start: QPoint, end: QPoint) -> str:
+        """Width, height and distance in real screen pixels, whatever the display scaling."""
+        ratio = self.devicePixelRatioF()
+        return measurement_text((start.x() * ratio, start.y() * ratio), (end.x() * ratio, end.y() * ratio))
+
     def _finish_measurement(self) -> str:
         if self.mode == MODE_RULER:
-            start, end = self.points[0], self.points[1]
-            return measurement_text((start.x(), start.y()), (end.x(), end.y()))
+            return self._ruler_text(self.points[0], self.points[1])
         first, vertex, second = self.points[0], self.points[1], self.points[2]
         degrees = angle_at((vertex.x(), vertex.y()), (first.x(), first.y()),
                            (second.x(), second.y()))
@@ -197,7 +251,15 @@ class MeasureWidget(BaseWidget):
 
     # --- painting --------------------------------------------------------
     def draw_content(self, painter: QPainter) -> None:
+        # Full opacity: scaled by a lower one, the catch alpha would round to 0 and the clicks
+        # would fall through to the program underneath.
+        painter.setOpacity(1.0)
+        painter.fillRect(self.rect(), CATCH_MOUSE_COLOR)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
+        # In its own picture, the banner would be what the picker reads: out of the cursor's way then.
+        banner = hint_rect(painter, self.rect(), translate(f"measure_prompt_{self.mode}"))
+        if not (self._reads_itself and banner.adjusted(-40, -40, 40, 40).contains(self.cursor_point)):
+            draw_hint(painter, self.rect(), translate(f"measure_prompt_{self.mode}"))
         if self.mode == MODE_COLOR:
             self._draw_swatch(painter)
         else:

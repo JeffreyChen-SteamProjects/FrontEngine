@@ -196,6 +196,8 @@ class SceneMediaFrame(BaseWidget):
             state = QWebEnginePage.LifecycleState.Active if active else QWebEnginePage.LifecycleState.Frozen
             self.host.page().setLifecycleState(state)
         if active:
+            if not self.host.isVisible():          # closed after being interacted with: off the screen again
+                self.host.setAttribute(Qt.WidgetAttribute.WA_DontShowOnScreen, True)
             self.host.show()
 
     def interact(self) -> None:

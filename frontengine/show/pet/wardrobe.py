@@ -111,6 +111,10 @@ class WardrobeDraft:
         self._stage(self.appearance)
         return self.preview
 
+    def replace_appearance(self, appearance: dict) -> None:
+        """Stage a whole look, such as this one brought to the current built-in version."""
+        self._stage(copy.deepcopy(appearance))
+
     def choose_character(self, reference: dict | None) -> None:
         """Changing body explicitly starts a bare outfit; saved outfits remain intact."""
         candidate = self.appearance

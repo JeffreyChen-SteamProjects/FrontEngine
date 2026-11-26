@@ -93,7 +93,7 @@ class ResidentPanel:
         world = self.page.service.world
         self.profiles.clear()
         living = set(world.residents) if world else set()
-        for record in self.page.profiles.profiles():
+        for record in self.page.saved_profiles():
             if record["id"] not in living:
                 self.profiles.addItem(record["name"], record["id"])
         selected = self.page.selected_resident
@@ -536,10 +536,15 @@ class LayoutPanel:
                                      error=str(error))
             return None
         dialog = BlueprintVisit(world, missing, source.stem, self.page)
-        dialog.finished.connect(lambda _code, d=dialog: self.visits.remove(d) if d in self.visits else None)
+        dialog.finished.connect(lambda _code, d=dialog: self._end_visit(d))
         self.visits.append(dialog)
         dialog.show()
         return dialog
+
+    def _end_visit(self, dialog) -> None:
+        if dialog in self.visits:
+            self.visits.remove(dialog)
+        dialog.deleteLater()          # with the visited home's own world and view
 
     @owned_action
     def drag_hover(self, identifier: str, cell: int) -> None:

@@ -164,8 +164,11 @@ class WindowFollowService(QObject):
             if width <= 0 or height <= 0:
                 raise ValueError('Target size is invalid')
             anchor = ((overlay[0]-x)/width, (overlay[1]-y)/height)
+            old = self.bindings.get(id(widget))
+            taken_away = old is not None and old.hidden_by_target          # with its old target, not by the user
+            wanted = old.desired_visible if taken_away else widget.isVisible()
             self.unbind(widget, restore=False)
-            self.bindings[id(widget)] = FollowBinding(weakref.ref(widget), identity, anchor, widget.isVisible())
+            self.bindings[id(widget)] = FollowBinding(weakref.ref(widget), identity, anchor, wanted, taken_away)
             widget.installEventFilter(self)
             if widget not in self.connected:
                 self.connected.add(widget)

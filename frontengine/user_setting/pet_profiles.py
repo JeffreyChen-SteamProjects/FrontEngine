@@ -147,6 +147,14 @@ class PetProfiles:
         return copy.deepcopy(record)
 
     @_profile_operation
+    def delete(self, identifier: str) -> None:
+        """Forget a saved identity for good; the caller makes sure the pet is not live."""
+        data = self._read()
+        if data["records"].pop(identifier, None) is None:
+            raise ValueError("Saved pet identity was not found")
+        self._commit(data)
+
+    @_profile_operation
     def export_profile(self, identifier: str, destination: Path) -> None:
         """Atomically export this pet only, without its asset files or other settings."""
         from frontengine.user_setting.storage_session import checked_export_destination

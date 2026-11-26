@@ -20,6 +20,10 @@ class InstalledResult(c.Structure):
     _fields_ = [("app_id", U32), ("item_id", U64), ("legacy_content", U64), ("manifest_id", U64)]
 
 
+def _edition(item: dict) -> tuple:
+    return item.get("timestamp"), item.get("path")
+
+
 class WorkshopSubscriptions(QObject):
     changed = Signal(object)
     failed = Signal(str)
@@ -31,6 +35,8 @@ class WorkshopSubscriptions(QObject):
         self.items = {}
         self.downloads = set()
         self.queue = deque()
+        self.validated = {}          # id -> (timestamp, path) last staged without fault: no need to hash it again
+        self._staging = {}
         self.jobs.completed.connect(self._ready)
         self.jobs.failed.connect(self._failed)
         service.event_received.connect(self._event)
@@ -67,12 +73,16 @@ class WorkshopSubscriptions(QObject):
                 else:
                     self.items[key].update(status="failed", error="Steam rejected the download")
         elif item["path"]:
+            known = self.items.get(key)
+            if known is not None and known.get("status") == "ready" and self.validated.get(key) == _edition(item):
+                return
             self.items.setdefault(key, {**item, "status": "validating", "title": key})
             self.queue.append(dict(item))
 
     def _fill_queue(self) -> None:
         while self.queue and len(self.jobs.pending) < 2:
             item = self.queue.popleft()
+            self._staging[item["id"]] = _edition(item)
             self.jobs.submit(item["id"], lambda value=item: self.cache.stage(value))
 
     def _event(self, event) -> None:
@@ -97,6 +107,7 @@ class WorkshopSubscriptions(QObject):
     def _ready(self, key: str, item: dict) -> None:
         if key in self.items:
             self.items[key] = item
+            self.validated[key] = self._staging.pop(key, None)
             self.changed.emit(list(self.items.values()))
         self._fill_queue()
 

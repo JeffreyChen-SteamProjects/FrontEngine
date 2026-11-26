@@ -7,15 +7,17 @@ from os import getcwd
 from pathlib import Path
 from typing import Any, Dict, Optional, Type
 
-from PySide6.QtCore import QByteArray, QTimer
-from PySide6.QtGui import QGuiApplication, QIcon, Qt, QAction, QKeySequence
+from PySide6.QtCore import QByteArray, QEvent, QTimer
+from PySide6.QtGui import QGuiApplication, QIcon, QPainter, Qt, QAction, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QMainWindow, QApplication, QGridLayout, QHBoxLayout, QStackedWidget, QStyle,
-    QMenuBar, QWidget, QMessageBox, QVBoxLayout, QLayout,
+    QMenuBar, QWidget, QMessageBox, QLayout, QVBoxLayout,
 )
 
 from frontengine.ui.nav.sidebar import NavigationSidebar
-from frontengine.ui.nav.shell import BrandMark, CommandSearchButton
+from frontengine.ui.nav.shell import FOLD_SHORTCUT, NavigationPanel, OverlayStatusBar
+from frontengine.ui.style.backdrop import Backdrop
+from frontengine.ui.style.glass import tone_of
 from frontengine.ui.style.app_style import apply_app_style
 from frontengine.ui.style.tokens import normalise_theme
 
@@ -49,12 +51,14 @@ from frontengine.ui.page.wallpaper.wallpaper_setting_ui import WallpaperSettingU
 from frontengine.ui.page.web.web_setting_ui import WEBSettingUI
 from frontengine.ui.page.widgets.widgets_setting_ui import WidgetsSettingUI
 from frontengine.user_setting.user_setting_file import (
+    import_waits_for_restart,
     get_hotkey_bindings,
     is_stored,
     read_user_setting,
     user_setting_dict,
     write_user_setting,
 )
+from frontengine.utils.autostart import autostart_service
 from frontengine.utils.steam.steam_language import steam_language
 from frontengine.utils.workshop.workshop_service import WorkshopService
 from frontengine.utils.critical_exit.critical_exit import CriticalExit
@@ -114,6 +118,10 @@ def tray_can_restore_window(window: Any) -> bool:
     return bool(ExtendSystemTray.isSystemTrayAvailable()
                 and getattr(window, "show_system_tray_ray", False)
                 and tray is not None and tray.isVisible())
+
+
+# A window shorter than this gives the overlay status bar's height to the page.
+STATUS_BAR_FROM_HEIGHT = 560
 
 
 class FrontEngineMainUI(QMainWindow):
@@ -180,6 +188,8 @@ class FrontEngineMainUI(QMainWindow):
 
         # 主介面：左側導覽 + 右側頁面堆疊
         # Main interface: navigation on the left, the page stack on the right
+        self.backdrop = Backdrop()
+        self.backdrop.set_use_wallpaper(user_setting_dict.get("wallpaper_backdrop") is not False)
         self.sidebar = NavigationSidebar(self)
         self.page_stack = QStackedWidget(self)
         self.page_stack.setObjectName("pageBody")
@@ -189,21 +199,30 @@ class FrontEngineMainUI(QMainWindow):
         central_layout = QHBoxLayout(central)
         central_layout.setContentsMargins(0, 0, 0, 0)
         central_layout.setSpacing(0)
-        navigation = QWidget(self)
-        navigation.setObjectName("navigationPanel")
-        navigation_layout = QVBoxLayout(navigation)
-        navigation_layout.setContentsMargins(12, 20, 12, 12)
-        navigation_layout.setSpacing(14)
-        self.brand = BrandMark()
-        navigation_layout.addWidget(self.brand)
-        self.command_search_button = CommandSearchButton()
+        self.navigation = NavigationPanel(self.sidebar, self)
+        self.brand = self.navigation.brand
+        self.command_search_button = self.navigation.search
         retranslator.bind(self.command_search_button.caption, "command_palette_title")
         retranslator.bind(self.command_search_button, "command_palette_search", setter="setToolTip")
         self.lifetime.connect_owned(self.command_search_button.clicked, self.open_command_palette)
-        navigation_layout.addWidget(self.command_search_button)
-        navigation_layout.addWidget(self.sidebar, 1)
-        central_layout.addWidget(navigation)
-        central_layout.addWidget(self.page_stack, 1)
+        self.navigation.set_chosen(user_setting_dict.get("sidebar_compact") is True)
+        self.lifetime.connect_owned(self.navigation.compact_changed, self._remember_sidebar_compact)
+        fold_shortcut = QShortcut(QKeySequence(FOLD_SHORTCUT), self)
+        fold_shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
+        self.lifetime.connect_owned(fold_shortcut.activated, self.navigation.toggle)
+        central_layout.addWidget(self.navigation)
+        content = QVBoxLayout()
+        content.setContentsMargins(0, 0, 0, 0)
+        content.setSpacing(0)
+        content.addWidget(self.page_stack, 1)
+        self.overlay_status = OverlayStatusBar(self._live_overlays)
+        status_row = QHBoxLayout()
+        status_row.setContentsMargins(24, 4, 24, 0)
+        status_row.addWidget(self.overlay_status)
+        content.addLayout(status_row)
+        central_layout.addLayout(content, 1)
+        self.lifetime.connect_owned(self.overlay_status.toggle_requested, self._toggle_overlays)
+        self.lifetime.connect_owned(self.overlay_status.close_requested, self._close_overlays)
         self.setCentralWidget(central)
 
         # 各功能頁面初始化
@@ -479,9 +498,7 @@ class FrontEngineMainUI(QMainWindow):
 
     def _open_pet_home(self) -> None:
         """The desktop home's button brings the main window back on the Pet home page."""
-        self.showNormal()
-        self.raise_()
-        self.activateWindow()
+        self.bring_to_front()
         self.sidebar.select_page_id("tab_pet_home_text")
 
     def _register_extra_overlays(self) -> None:
@@ -497,7 +514,7 @@ class FrontEngineMainUI(QMainWindow):
                                            "break_overlay_list", "color_vision_widget_list")),
             (self.presentation_setting_ui, ("annotation_widget_list", "cursor_widget_list",
                                             "keystroke_widget_list", "magnifier_widget_list",
-                                            "whiteboard_widget_list")),
+                                            "whiteboard_widget_list", "freeze_widget_list")),
             (self.focus_setting_ui, ("dim_widget_list", "mask_widget_list")),
         )
         for page, attributes in sources:
@@ -517,12 +534,16 @@ class FrontEngineMainUI(QMainWindow):
         # After a batch close nothing is listening, so drop the global input hook.
         self.control_center_ui.register_cleanup(
             self.presentation_setting_ui.release_input_watch)
+        self.control_center_ui.register_before_close(self.widgets_setting_ui.keep_open_notes)
+        for page in (self.widgets_setting_ui, self.presentation_setting_ui, self.screen_care_setting_ui,
+                     self.focus_setting_ui, self.tools_setting_ui):
+            self.control_center_ui.register_cleanup(page.stop_overlays)
         for attribute in ("spectrum_widget_list", "monitor_widget_list",
                           "now_playing_widget_list", "note_widget_list", "todo_widget_list"):
             self.control_center_ui.register_overlay_source(
                 lambda attribute=attribute: getattr(self.widgets_setting_ui, attribute, []))
         for attribute in ("measure_widget_list", "capture_widget_list", "camera_widget_list",
-                          "pinned_widget_list", "ocr_widget_list"):
+                          "pinned_widget_list", "ocr_widget_list", "replica_widget_list"):
             self.control_center_ui.register_overlay_source(
                 lambda attribute=attribute: getattr(self.tools_setting_ui, attribute, []))
         # 參考圖板也要進控制中心，否則「全部關閉」關不掉它
@@ -679,10 +700,58 @@ class FrontEngineMainUI(QMainWindow):
                 self._add_plugin_tab(widget_name, widget)
 
         self.sidebar.select_page(0)
-        for group in user_setting_dict.get("sidebar_collapsed_groups") or []:
+        collapsed = user_setting_dict.get("sidebar_collapsed_groups")
+        for group in collapsed if isinstance(collapsed, list) else []:
             if isinstance(group, str):
                 self.sidebar.set_group_collapsed(group, True)
         self.lifetime.connect_owned(self.sidebar.collapsed_changed, self._remember_collapsed_groups)
+
+    @owned_callback
+    def _remember_sidebar_compact(self, compact: bool) -> None:
+        user_setting_dict["sidebar_compact"] = compact
+
+    def resizeEvent(self, event) -> None:
+        super().resizeEvent(event)
+        self.navigation.set_window_width(event.size().width())
+        # After this layout pass, and only while the bar lives: a short window keeps its height for the page.
+        room = event.size().height() >= STATUS_BAR_FROM_HEIGHT
+        bar = self.overlay_status
+        QTimer.singleShot(0, bar, lambda: bar.setVisible(room))
+
+    def paintEvent(self, event) -> None:
+        painter = QPainter(self)
+        painter.setClipRect(event.rect())
+        self.backdrop.paint(painter, self.rect(), tone_of(self), self.devicePixelRatioF())
+
+    def changeEvent(self, event) -> None:
+        super().changeEvent(event)
+        # Coming back to the window is when a changed wallpaper is noticed.
+        if event.type() == QEvent.Type.ActivationChange and hasattr(self, "backdrop") \
+                and self.isActiveWindow() and self.backdrop.refresh():
+            self.update()
+
+    def set_wallpaper_backdrop(self, use: bool) -> None:
+        """Blur the desktop wallpaper behind the window, or use the built-in picture."""
+        user_setting_dict["wallpaper_backdrop"] = bool(use)
+        if self.backdrop.set_use_wallpaper(use):
+            self.update()
+
+    def _live_overlays(self) -> list:
+        centre = getattr(self, "control_center_ui", None)
+        return centre.all_overlays() if centre is not None else []
+
+    @owned_callback
+    def _toggle_overlays(self, hide: bool) -> None:
+        if hide:
+            self.control_center_ui.hide_all()
+        else:
+            self.control_center_ui.show_all()
+        self.overlay_status.refresh()
+
+    @owned_callback
+    def _close_overlays(self) -> None:
+        self.control_center_ui.clear_all()
+        self.overlay_status.refresh()
 
     @owned_callback
     def _remember_collapsed_groups(self, groups: list) -> None:
@@ -738,6 +807,8 @@ class FrontEngineMainUI(QMainWindow):
         self.control_center_ui.set_low_power(bool(user_setting_dict.get('low_power', False)))
         if not self._restore_window_geometry():
             self.showMaximized()
+        if self.signage_service.running and current_signage_settings().get("hide_window", True):
+            self._hide_for_signage()
 
     def _restore_window_geometry(self) -> bool:
         """
@@ -763,6 +834,8 @@ class FrontEngineMainUI(QMainWindow):
 
     def _save_window_geometry(self) -> None:
         """將目前視窗大小/位置寫入設定 / Persist the current window geometry."""
+        if import_waits_for_restart("window_geometry"):
+            return
         encoded = bytes(self.saveGeometry().toBase64().data()).decode("ascii")
         user_setting_dict["window_geometry"] = encoded
         user_setting_dict["window_maximized"] = self.isMaximized()
@@ -910,9 +983,10 @@ class FrontEngineMainUI(QMainWindow):
         self.menu_bar.addAction(action)
         self.command_palette_action = action
 
-    def _open_command_page(self, index: int) -> None:
-        self.showNormal()
-        self.sidebar.select_page(index)
+    def bring_to_front(self) -> None:
+        """Show the window the way it was left: a maximised one stays maximised."""
+        self.setWindowState(self.windowState() & ~Qt.WindowState.WindowMinimized)
+        self.show()
         self.raise_()
         self.activateWindow()
 
@@ -998,16 +1072,17 @@ class FrontEngineMainUI(QMainWindow):
     def _on_smart_pause_changed(self, paused: bool, reason: str) -> None:
         """
         智慧暫停回呼：規則成立時隱藏覆蓋層，規則解除時還原（僅還原本服務
-        自己隱藏的部分，避免覆蓋使用者手動操作）。
+        自己隱藏的部分，避免覆蓋使用者手動操作）。正在使用的工具不收。
         Smart-pause callback: hide the overlays while a rule holds and restore
-        them when it lifts — only restoring what this service hid.
+        them when it lifts — only restoring what this service hid. Tools in use
+        (``stays_while_paused``) stay on screen.
         """
         front_engine_logger.info(f"[MainUI] smart pause | paused={paused}, reason={reason or '-'}")
         if paused:
-            self.control_center_ui.hide_all()
+            self.control_center_ui.stand_down()
             self._smart_pause_hid = True
         elif self._smart_pause_hid:
-            self.control_center_ui.show_all()
+            self.control_center_ui.stand_up()
             self._smart_pause_hid = False
 
     @owned_callback
@@ -1380,6 +1455,8 @@ class FrontEngineMainUI(QMainWindow):
             prepared = None
         if prepared is None:
             self.lifetime.cancel_prepare()
+            if getattr(self, 'system_tray', None) is not None and not self.isVisible():
+                self.bring_to_front()          # the reason is in its status bar
             return CloseDisposition.REFUSED
         self._shutdown_done = True
         if self.main_app is not None:
@@ -1439,8 +1516,9 @@ class FrontEngineMainUI(QMainWindow):
         self.scene_setting_ui.close_scene()
 
 
-    def close(self) -> None:
-        self.request_shutdown()
+    def close(self) -> bool:
+        """Ask to shut down; False when refused, with the reason in the status bar."""
+        return self._shutdown()
 
     def _retirement_failed(self, error) -> None:
         self.statusBar().showMessage(translate('runtime_shutdown_failed').format(error=error))
@@ -1452,9 +1530,6 @@ class FrontEngineMainUI(QMainWindow):
         self.shutdown_finished.emit()
         if application is not None:
             application.exit(0)
-
-    def _request_exit(self) -> None:
-        self.request_shutdown()
 
     def _abort_construction(self) -> None:
         for child in self.children():
@@ -1538,6 +1613,13 @@ class FrontEngineMainUI(QMainWindow):
         self.request_shutdown()
 
 
+def _tell_start_failed(reason: str) -> None:
+    if QGuiApplication.platformName() == "offscreen":
+        return
+    QMessageBox.critical(None, "FrontEngine", translate("start_failed", "FrontEngine could not start: {reason}").format(
+        reason=reason))
+
+
 def start_front_engine(debug: bool = False, preset: Optional[str] = None) -> None:
     """
     啟動 FrontEngine 主程式
@@ -1553,10 +1635,16 @@ def start_front_engine(debug: bool = False, preset: Optional[str] = None) -> Non
         from frontengine.show.scene.view3d import surface_format
         QSurfaceFormat.setDefaultFormat(surface_format())
     main_app = QApplication(sys.argv)
+    if QGuiApplication.platformName() != "offscreen":
+        autostart_service.refresh()
     try:
         window = FrontEngineMainUI(main_app=main_app, debug=debug)
     except (StorageInUse, StorageUnavailable, MainRuntimeInUse) as error:
-        print(str(error), file=sys.stderr)
+        front_engine_logger.error(f"[FrontEngineMainUI] cannot start: {error!r}")
+        # The packaged build has no console: without this, starting it twice does nothing at all.
+        if sys.stderr is not None:
+            print(str(error), file=sys.stderr)
+        _tell_start_failed(str(error))
         raise SystemExit(1) from error
     if preset:
         apply_named_preset(window, preset)
@@ -1583,6 +1671,14 @@ def main() -> None:
     parser.add_argument(
         "--debug", action="store_true", help="Enable debug auto-close timer"
     )
+    parser.add_argument(
+        autostart_service.AUTOSTART_FLAG, action="store_true",
+        help="Started with the session: run in the data directory recorded when that was switched on"
+    )
     # Ignore unknown args so Qt's own flags don't break parsing.
     args, _unknown = parser.parse_known_args()
+    if args.autostart:
+        directory = autostart_service.recorded_directory()
+        if directory is not None:
+            os.chdir(directory)
     start_front_engine(debug=args.debug, preset=args.preset)

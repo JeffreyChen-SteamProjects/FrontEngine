@@ -44,6 +44,7 @@ class SceneLayerItem(QGraphicsObject):
         self.editor, self.key, self.entry = editor, key, entry
         size = entry.get('size', (320, 480)) if entry.get('type') == 'PUPPET' else (320, 180)
         self.width, self.height = float(entry.get("width", size[0])), float(entry.get("height", size[1]))
+        self.shown_size = (self.width, self.height)          # an entry without one plays at its own size
         self.image = None
         self.movie = None
         self.resizing = False
@@ -225,7 +226,6 @@ class SceneVisualEditor(SettingPage):
         self.scene_mode.addItem('2D', '2d')
         self.scene_mode.addItem('3D', '3d')
         self.scene_mode.currentIndexChanged.connect(self._change_mode)
-        section.add_inline(self.scene_mode)
         media = (self._button("scene_add_image", lambda: self._add_media("IMAGE")),
                  self._button("scene_add_gif", lambda: self._add_media("GIF")),
                  self._button("scene_add_text", self._add_text))
@@ -241,9 +241,6 @@ class SceneVisualEditor(SettingPage):
         alignment = tuple(self._button("scene_align_" + direction,
             lambda checked=False, value=direction: self._align(value))
             for direction in ("left", "center", "right", "top", "middle", "bottom"))
-        section.add_inline(ActionMenu(media + native, "ui_add_layer"),
-                           ActionMenu(editing, "ui_edit_layers"),
-                           ActionMenu(alignment, "ui_align_layers"))
         buttons = []
         for kind in ('MODEL', 'PLANE', 'CUBE', 'SPHERE', 'CAMERA', 'LIGHT', 'GROUP'):
             button = tr(QPushButton(), 'scene3d_add_'+kind.lower(), 'Add '+kind.title())
@@ -251,7 +248,10 @@ class SceneVisualEditor(SettingPage):
             buttons.append(button)
         self.add_3d_menu = ActionMenu(tuple(buttons), 'scene3d_add')
         self.add_3d_menu.setVisible(False)
-        section.add_inline(self.add_3d_menu)
+        # One wrapping row: three stacked rows pushed the viewport below the visible part of the page.
+        section.add_inline(self.scene_mode, self.add_3d_menu, ActionMenu(media + native, "ui_add_layer"),
+                           ActionMenu(editing, "ui_edit_layers"),
+                           ActionMenu(alignment, "ui_align_layers"))
 
     def _build_properties(self) -> None:
         section = self.properties_page.add_section("scene_layer_properties")
@@ -501,7 +501,12 @@ class SceneVisualEditor(SettingPage):
         for checkbox, key, default in ((self.locked, "locked", False), (self.visible, "visible", True)):
             checkbox.setEnabled(entry is not None and not self.timeline.previewing)
             checkbox.setChecked(entry.get(key, default) if entry else default)
+        self._shown_properties = self._property_values()
         self.editor3d.select(keys)
+
+    def _property_values(self) -> dict:
+        return {**{name: field.value() for name, field in self.fields.items()},
+                "locked": self.locked.isChecked(), "visible": self.visible.isChecked()}
 
     @owned_action
     def _apply_properties(self) -> None:
@@ -509,9 +514,12 @@ class SceneVisualEditor(SettingPage):
             return
         keys = self._selected_keys()
         if len(keys) == 1:
-            changes = {name: field.value() for name, field in self.fields.items()}
-            changes.update(locked=self.locked.isChecked(), visible=self.visible.isChecked())
-            self.document.update(keys[0], changes)
+            # Only what was changed: the rest shows defaults the layer may not have.
+            changes = {name: value for name, value in self._property_values().items()
+                       if value != self._shown_properties.get(name)}
+            if changes:
+                self._shown_properties.update(changes)
+                self.document.update(keys[0], changes)
 
     @owned_action
     def commit_canvas(self) -> None:
@@ -520,7 +528,10 @@ class SceneVisualEditor(SettingPage):
         after = copy.deepcopy(self.document.entries)
         for item in self.canvas.items():
             if item.isSelected() and not item.entry.get("locked"):
-                after[item.key].update(x=item.pos().x(), y=item.pos().y(), width=item.width, height=item.height)
+                if (item.pos().x(), item.pos().y()) != (item.entry.get("x", 0), item.entry.get("y", 0)):
+                    after[item.key].update(x=item.pos().x(), y=item.pos().y())
+                if (item.width, item.height) != item.shown_size:
+                    after[item.key].update(width=item.width, height=item.height)
         self.document.replace(after, "Move / resize layers")
 
     @owned_action

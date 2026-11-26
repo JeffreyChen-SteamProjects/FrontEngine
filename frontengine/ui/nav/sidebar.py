@@ -8,7 +8,7 @@
 清單項目不是 QWidget，沒辦法交給 retranslator 的 bind() 用弱參考持有，所以改用
 bind_call() 這個逃生口——換語言時整份重寫一次。
 
-The left-hand navigation: the pages as a grouped list.
+The left-hand navigation: the pages as a grouped list on a glass panel.
 
 Sixteen tabs in one row grew scroll arrows as soon as the window narrowed, and
 sixteen words side by side gave no clue which belonged together. As a sidebar it
@@ -18,20 +18,26 @@ one more line in a list.
 List items are not QWidgets, so the retranslator cannot hold them weakly through
 bind(); this uses the bind_call() escape hatch and rewrites the lot on a
 language change.
+
+Rows are painted by their own delegate: the selected page is a solid pill.
+``set_compact`` folds the list to a rail of icons.
 """
 from __future__ import annotations
 
 from typing import List, Optional, Tuple
 
-from PySide6.QtCore import QEvent, QSize, Qt, Signal
-from PySide6.QtGui import QPalette
-from PySide6.QtWidgets import QListWidget, QListWidgetItem
+from PySide6.QtCore import QEvent, QRect, QRectF, QSize, Qt, Signal
+from PySide6.QtGui import QColor, QFont, QIcon, QPainter, QPen
+from PySide6.QtWidgets import QListWidget, QListWidgetItem, QStyle, QStyledItemDelegate
 
+from frontengine.ui.style.glass import tone_of
 from frontengine.ui.style.nav_icons import ICON_SIZE, icon
 from frontengine.ui.style.tokens import palette_for
 from frontengine.utils.multi_language.retranslate import retranslator, translate
 
-SIDEBAR_WIDTH = 216
+SIDEBAR_WIDTH = 196
+RAIL_WIDTH = 46                        # folded: icons only
+ROW_HEIGHT, GROUP_HEIGHT, RAIL_GROUP_HEIGHT = 36, 30, 14
 
 # 群組標題與分頁列用 UserRole 區分，樣式與點擊行為都看這個值。
 # Group headings and page rows are told apart by this UserRole value, which
@@ -47,6 +53,69 @@ KIND_GROUP = "group"
 KIND_PAGE = "page"
 
 
+class NavigationDelegate(QStyledItemDelegate):
+    """Draws the list: quiet group captions, pages with the selected one on a pill, and the rail."""
+
+    def paint(self, painter: QPainter, option, index) -> None:
+        sidebar = self.parent()
+        colors = palette_for(tone_of(sidebar))
+        painter.save()
+        painter.setRenderHints(QPainter.RenderHint.Antialiasing | QPainter.RenderHint.SmoothPixmapTransform)
+        if index.data(ROLE_KIND) == KIND_GROUP:
+            self._paint_group(painter, option, index, colors, sidebar.compact)
+        else:
+            self._paint_page(painter, option, index, colors, sidebar.compact)
+        painter.restore()
+
+    @staticmethod
+    def _text(painter, rect: QRect, text: str) -> None:
+        painter.drawText(rect, Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft,
+                         painter.fontMetrics().elidedText(text, Qt.TextElideMode.ElideRight, rect.width()))
+
+    def _paint_group(self, painter, option, index, colors, compact: bool) -> None:
+        if compact:
+            middle = QRectF(option.rect).center()
+            painter.setPen(QPen(QColor(colors["well_edge"]), 1.5))
+            painter.drawLine(int(middle.x()) - 9, int(middle.y()), int(middle.x()) + 9, int(middle.y()))
+            return
+        font = QFont(option.font)
+        font.setPixelSize(11)
+        painter.setFont(font)
+        hovered = bool(option.state & QStyle.StateFlag.State_MouseOver)
+        painter.setPen(QColor(colors["text" if hovered else "muted"]))
+        self._text(painter, QRect(option.rect).adjusted(14, 8, -30, 0), index.data(Qt.ItemDataRole.DisplayRole))
+        chevron = index.data(Qt.ItemDataRole.DecorationRole)
+        if chevron is not None:
+            chevron.paint(painter, QRect(option.rect.right() - 28, option.rect.center().y() - 3, 14, 14))
+
+    def _paint_page(self, painter, option, index, colors, compact: bool) -> None:
+        selected = bool(option.state & QStyle.StateFlag.State_Selected)
+        hovered = bool(option.state & QStyle.StateFlag.State_MouseOver)
+        pill = QRectF(option.rect).adjusted(1, 2, -1, -2)
+        if selected or hovered:
+            painter.setPen(Qt.PenStyle.NoPen)
+            painter.setBrush(QColor(colors["pill" if selected else "glass_hover"]))
+            painter.drawRoundedRect(pill, pill.height() / 2, pill.height() / 2)
+        if option.state & QStyle.StateFlag.State_HasFocus and not selected:
+            painter.setPen(QPen(QColor(colors["accent_line"]), 1.5))
+            painter.setBrush(Qt.BrushStyle.NoBrush)
+            painter.drawRoundedRect(pill.adjusted(1, 1, -1, -1), pill.height() / 2, pill.height() / 2)
+        size = ICON_SIZE.width()
+        left = option.rect.center().x() - size // 2 + 1 if compact else option.rect.left() + 14
+        mark = index.data(Qt.ItemDataRole.DecorationRole)
+        if mark is not None:
+            mark.paint(painter, QRect(left, option.rect.center().y() - size // 2 + 1, size, size),
+                       Qt.AlignmentFlag.AlignCenter, QIcon.Mode.Selected if selected else QIcon.Mode.Normal)
+        if compact:
+            return
+        font = QFont(option.font)
+        font.setWeight(QFont.Weight.DemiBold if selected else QFont.Weight.Normal)
+        painter.setFont(font)
+        painter.setPen(QColor(colors["on_pill" if selected else "text"]))
+        self._text(painter, QRect(option.rect).adjusted(14 + size + 11, 0, -12, 0),
+                   index.data(Qt.ItemDataRole.DisplayRole))
+
+
 class NavigationSidebar(QListWidget):
     """分組的分頁清單，選到某一頁時送出 page_requested。"""
 
@@ -56,7 +125,10 @@ class NavigationSidebar(QListWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setObjectName("navSidebar")
+        self.compact = False
         self.setFixedWidth(SIDEBAR_WIDTH)
+        self.setMouseTracking(True)
+        self.setItemDelegate(NavigationDelegate(self))
         self.setFrameShape(QListWidget.Shape.NoFrame)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setVerticalScrollMode(QListWidget.ScrollMode.ScrollPerPixel)
@@ -82,7 +154,7 @@ class NavigationSidebar(QListWidget):
         item.setFlags(Qt.ItemFlag.ItemIsEnabled)
         self._group = title_key
         self._set_arrow(item, False)
-        item.setSizeHint(QSize(SIDEBAR_WIDTH, 34))
+        item.setSizeHint(self._row_size(KIND_GROUP))
         self.addItem(item)
         self._labels.append((item, title_key, fallback))
         return item
@@ -98,7 +170,7 @@ class NavigationSidebar(QListWidget):
         item.setData(ROLE_GROUP, self._group)
         item.setData(ROLE_ICON, icon_name)
         item.setIcon(icon(icon_name, *self._icon_colors()))
-        item.setSizeHint(QSize(SIDEBAR_WIDTH, 36))
+        item.setSizeHint(self._row_size(KIND_PAGE))
         self.addItem(item)
         self._labels.append((item, title_key, fallback))
         return item
@@ -114,13 +186,46 @@ class NavigationSidebar(QListWidget):
                 return True
         return False
 
+    # ----- folding to a rail -------------------------------------------------------------
+
+    def _row_size(self, kind: str) -> QSize:
+        width = RAIL_WIDTH if self.compact else SIDEBAR_WIDTH
+        if kind == KIND_PAGE:
+            return QSize(width, ROW_HEIGHT)
+        return QSize(width, RAIL_GROUP_HEIGHT if self.compact else GROUP_HEIGHT)
+
+    def set_compact(self, compact: bool) -> None:
+        """Fold to a rail of icons (names stay as tool tips), or open again."""
+        if compact == self.compact:
+            return
+        self.compact = compact
+        self.setFixedWidth(RAIL_WIDTH if compact else SIDEBAR_WIDTH)
+        for row in range(self.count()):
+            item = self.item(row)
+            item.setSizeHint(self._row_size(item.data(ROLE_KIND)))
+        current = self.currentItem()
+        if not compact and current is not None:          # picked on the rail, out of a folded group
+            self._collapsed.discard(current.data(ROLE_GROUP))
+        self._apply_groups()
+        if current is not None:
+            self.scrollToItem(current)
+
+    def _apply_groups(self) -> None:
+        """Hide the pages of folded groups. The rail shows every page: it has no captions to tell by."""
+        for row in range(self.count()):
+            item = self.item(row)
+            collapsed = item.data(ROLE_GROUP) in self._collapsed
+            if item.data(ROLE_KIND) == KIND_GROUP:
+                self._set_arrow(item, collapsed)
+            else:
+                item.setHidden(collapsed and not self.compact)
+
     # ----- folding groups ---------------------------------------------------------------
 
     def _icon_colors(self) -> tuple[str, str]:
-        """Muted ink for rows, full ink for the selected row, in the current theme's tokens."""
-        tone = "dark" if self.palette().color(QPalette.ColorRole.Window).lightness() < 128 else "light"
-        colors = palette_for(tone)
-        return colors["muted"], colors["text"]
+        """Text colour for rows, the pill's own text colour for the selected one, in the current theme."""
+        colors = palette_for(tone_of(self))
+        return colors["text"], colors["on_pill"]
 
     def _set_arrow(self, item: QListWidgetItem, collapsed: bool) -> None:
         """A small chevron in the theme's muted ink (the platform arrows vanish on a dark sidebar)."""
@@ -140,7 +245,7 @@ class NavigationSidebar(QListWidget):
                     item.setIcon(icon(item.data(ROLE_ICON) or "extension", *colors))
 
     def _toggle_if_group(self, item: QListWidgetItem) -> None:
-        if item is not None and item.data(ROLE_KIND) == KIND_GROUP:
+        if item is not None and item.data(ROLE_KIND) == KIND_GROUP and not self.compact:
             key = item.data(ROLE_GROUP)
             self.set_group_collapsed(key, key not in self._collapsed)
             self.collapsed_changed.emit(sorted(self._collapsed))
@@ -157,14 +262,7 @@ class NavigationSidebar(QListWidget):
             self._collapsed.add(key)
         else:
             self._collapsed.discard(key)
-        for row in range(self.count()):
-            item = self.item(row)
-            if item.data(ROLE_GROUP) != key:
-                continue
-            if item.data(ROLE_KIND) == KIND_GROUP:
-                self._set_arrow(item, collapsed)
-            else:
-                item.setHidden(collapsed)
+        self._apply_groups()
 
     def page_index(self, page_id: str) -> Optional[int]:
         """The current stack index of a stable page ID, or None."""

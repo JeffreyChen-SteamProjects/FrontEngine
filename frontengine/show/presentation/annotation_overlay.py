@@ -10,11 +10,12 @@ from __future__ import annotations
 
 from typing import List, Optional, Tuple
 
-from PySide6.QtCore import QPoint, Qt
-from PySide6.QtGui import QColor, QPainter, QPen
+from PySide6.QtCore import QPoint, QRect, Qt, Signal
+from PySide6.QtGui import QColor, QImage, QKeySequence, QPainter, QPainterPath, QPen
 
 from frontengine.show.base_widget import BaseWidget
-from frontengine.show.window_helpers import apply_overlay_window_flags
+from frontengine.show.presentation.annotation_toolbar import AnnotationToolbar
+from frontengine.show.window_helpers import CATCH_MOUSE_COLOR, apply_overlay_window_flags
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 
 TOOL_PEN = "pen"
@@ -29,11 +30,6 @@ PEN_COLORS = (
 DEFAULT_PEN_COLOR = "#ff3b30"
 MIN_WIDTH = 1
 MAX_WIDTH = 40
-
-# Windows hands a click on a fully transparent pixel of a see-through window to whatever is
-# underneath, so a clear drawing layer never saw the pen go down. Every pixel carries this
-# near-invisible alpha instead, and the eraser paints it back rather than clearing to nothing.
-CATCH_MOUSE_COLOR = QColor(0, 0, 0, 1)
 
 
 def clamp_width(value, fallback: int = 4) -> int:
@@ -62,6 +58,32 @@ def stroke_style(tool: str, color: str, width: int) -> Tuple[QColor, int]:
     return (pen_color, stroke_width)
 
 
+def stroke_path(points: List[QPoint]) -> QPainterPath:
+    """One path through the points: drawn as a single stroke, a highlighter stays evenly
+    translucent instead of darkening where two segments overlap."""
+    path = QPainterPath(points[0])
+    for point in points[1:]:
+        path.lineTo(point)
+    return path
+
+
+def paint_stroke(painter: QPainter, stroke: dict) -> None:
+    """Paint one recorded stroke; the eraser paints the catch colour back rather than clearing."""
+    points = stroke["points"]
+    if len(points) < 2:
+        return
+    color, width = stroke_style(stroke["tool"], stroke["color"], stroke["width"])
+    mode = QPainter.CompositionMode.CompositionMode_SourceOver
+    if stroke["tool"] == TOOL_ERASER:
+        color, mode = CATCH_MOUSE_COLOR, QPainter.CompositionMode.CompositionMode_Source
+    painter.setCompositionMode(mode)
+    painter.setPen(QPen(color, width, Qt.PenStyle.SolidLine,
+                        Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin))
+    painter.setBrush(Qt.BrushStyle.NoBrush)
+    painter.drawPath(stroke_path(points))
+    painter.setCompositionMode(QPainter.CompositionMode.CompositionMode_SourceOver)
+
+
 class AnnotationOverlay(BaseWidget):
     """
     塗鴉層：滑鼠拖曳畫線，支援筆／螢光筆／橡皮擦、復原與全部清除。
@@ -71,6 +93,14 @@ class AnnotationOverlay(BaseWidget):
     # A full-monitor see-through layer: on the GPU compositor the transparency could come out
     # black on some drivers (see BaseWidget).
     software_only = True
+    # Drawing over a full-screen slide show is what this layer is for.
+    stays_while_paused = True
+
+    # The on-screen toolbar changed a setting (tool, colour): the page follows.
+    tool_changed = Signal(str)
+    color_changed = Signal(str)
+    # Esc or the toolbar's button: the layer covers the settings window, so it offers its own way out.
+    finish_requested = Signal()
 
     def __init__(self, color: str = DEFAULT_PEN_COLOR, width: int = 4, tool: str = TOOL_PEN) -> None:
         front_engine_logger.info(f"[AnnotationOverlay] Init | tool={tool}, color={color}, width={width}")
@@ -89,7 +119,12 @@ class AnnotationOverlay(BaseWidget):
         self.pen_width = clamp_width(width)
         self.strokes: List[dict] = []
         self._current: Optional[dict] = None
+        # Finished strokes, painted once; only the stroke under the pen is drawn live.
+        self._finished: Optional[QImage] = None
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.setCursor(Qt.CursorShape.CrossCursor)
+        self.toolbar = AnnotationToolbar(self)
 
     def set_annotation_window_flag(self) -> None:
         """塗鴉需要接收滑鼠，所以不使用點擊穿透。"""
@@ -98,17 +133,32 @@ class AnnotationOverlay(BaseWidget):
     def set_tool(self, tool: str) -> None:
         if tool in TOOLS:
             self.tool = tool
+            self.toolbar.refresh()
+
+    def choose_tool(self, tool: str) -> None:
+        """A tool picked on the toolbar."""
+        self.set_tool(tool)
+        self.tool_changed.emit(self.tool)
+
+    def choose_color(self, color: str) -> None:
+        """A colour picked on the toolbar; an eraser in hand becomes a pen again."""
+        self.set_pen(color=color)
+        self.color_changed.emit(color)
+        if self.tool == TOOL_ERASER:
+            self.choose_tool(TOOL_PEN)
 
     def set_pen(self, color: Optional[str] = None, width: Optional[int] = None) -> None:
         if color is not None:
             self.pen_color = color
         if width is not None:
             self.pen_width = clamp_width(width)
+        self.toolbar.refresh()
 
     def clear(self) -> None:
         """清掉所有筆畫 / Wipe every stroke."""
         self.strokes = []
         self._current = None
+        self._finished = None
         self.update()
 
     def undo(self) -> bool:
@@ -116,6 +166,8 @@ class AnnotationOverlay(BaseWidget):
         if not self.strokes:
             return False
         self.strokes.pop()
+        self._current = None
+        self._finished = None
         self.update()
         return True
 
@@ -127,16 +179,30 @@ class AnnotationOverlay(BaseWidget):
         self.strokes.append(self._current)
 
     def extend_stroke(self, point: QPoint) -> None:
-        if self._current is not None:
-            self._current["points"].append(point)
-            self.update()
+        if self._current is None:
+            return
+        points = self._current["points"]
+        points.append(point)
+        _color, width = stroke_style(self._current["tool"], self._current["color"], self._current["width"])
+        margin = width // 2 + 3
+        # The last two segments: their join is redrawn when a new one is added.
+        region = QRect(points[-1], points[-1])
+        for earlier in points[-3:-1]:
+            region = region.united(QRect(earlier, earlier))
+        self.update(region.adjusted(-margin, -margin, margin, margin))
 
     def end_stroke(self) -> None:
         # 只有一個點的筆畫畫不出線，直接丟掉
         # A single-point stroke draws nothing; drop it.
-        if self._current is not None and len(self._current["points"]) < 2:
-            self.strokes.remove(self._current)
-            self.update()
+        if self._current is not None:
+            if len(self._current["points"]) < 2:
+                self.strokes.remove(self._current)
+                self.update()
+            elif self._finished is not None:
+                painter = QPainter(self._finished)
+                painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+                paint_stroke(painter, self._current)
+                painter.end()
         self._current = None
 
     def mousePressEvent(self, event) -> None:
@@ -149,27 +215,53 @@ class AnnotationOverlay(BaseWidget):
         super().mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event) -> None:
-        self.end_stroke()
+        # Another button let go while the left one still draws must not cut the stroke short.
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.end_stroke()
         super().mouseReleaseEvent(event)
+
+    def keyPressEvent(self, event) -> None:
+        if event.key() == Qt.Key.Key_Escape:
+            self.finish_requested.emit()
+        elif event.matches(QKeySequence.StandardKey.Undo):
+            self.undo()
+        else:
+            super().keyPressEvent(event)
+
+    def showEvent(self, event) -> None:
+        super().showEvent(event)
+        self.activateWindow()            # so Esc and Ctrl+Z reach this layer, not the program below
+        self.setFocus(Qt.FocusReason.OtherFocusReason)
+
+    def resizeEvent(self, event) -> None:
+        super().resizeEvent(event)
+        self._finished = None
+        self.toolbar.place()
+
+    def _finished_strokes(self) -> QImage:
+        """Every finished stroke over the catch colour, rebuilt after undo, clear, resize or a DPI change."""
+        ratio = self.devicePixelRatioF()
+        width, height = max(1, round(self.width() * ratio)), max(1, round(self.height() * ratio))
+        cached = self._finished
+        if cached is not None and (cached.width(), cached.height()) == (width, height):
+            return cached
+        image = QImage(width, height, QImage.Format.Format_ARGB32_Premultiplied)
+        image.setDevicePixelRatio(ratio)
+        image.fill(CATCH_MOUSE_COLOR)
+        painter = QPainter(image)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        for stroke in self.strokes:
+            if stroke is not self._current:
+                paint_stroke(painter, stroke)
+        painter.end()
+        self._finished = image
+        return image
 
     def draw_content(self, painter: QPainter) -> None:
         # Full opacity for the whole layer: scaled by a lower opacity, the 1/255 catch alpha
         # would round to 0 and the clicks would fall through again.
         painter.setOpacity(1.0)
-        painter.fillRect(self.rect(), CATCH_MOUSE_COLOR)
+        painter.drawImage(QPoint(0, 0), self._finished_strokes())
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        for stroke in self.strokes:
-            points = stroke["points"]
-            if len(points) < 2:
-                continue
-            color, width = stroke_style(stroke["tool"], stroke["color"], stroke["width"])
-            if stroke["tool"] == TOOL_ERASER:
-                color = CATCH_MOUSE_COLOR
-                painter.setCompositionMode(QPainter.CompositionMode.CompositionMode_Source)
-            else:
-                painter.setCompositionMode(QPainter.CompositionMode.CompositionMode_SourceOver)
-            painter.setPen(QPen(color, width, Qt.PenStyle.SolidLine,
-                                Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin))
-            for start, end in zip(points, points[1:]):
-                painter.drawLine(start, end)
-        painter.setCompositionMode(QPainter.CompositionMode.CompositionMode_SourceOver)
+        if self._current is not None:
+            paint_stroke(painter, self._current)

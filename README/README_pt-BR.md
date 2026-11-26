@@ -350,7 +350,7 @@ você acioná-lo.
 | **Pausa inteligente** | Recolha as sobreposições enquanto um aplicativo em tela cheia estiver rodando, enquanto a máquina estiver na bateria, ou enquanto um aplicativo nomeado estiver em foco. *(Ligada por padrão, para a regra de tela cheia.)* |
 | **Perfis de aplicativo** | Aplique uma predefinição quando você mudar para um determinado aplicativo. |
 | **Agenda de predefinições** | Aplique uma predefinição em dias da semana escolhidos, em um horário definido. |
-| **Tema** | Seguir o sistema, ou sempre claro ou escuro (*Configurações → Tema*). As páginas de ferramentas têm um design calmo e neutro, com o laranja dos personagens integrados como único destaque; as páginas dos pets (Lar dos pets, Pet e as janelas de guarda-roupa, personalização e foto) usam o estilo de tinta e papel desses personagens, com contornos de tinta e a fonte arredondada jf open huninn (o chinês simplificado mantém a fonte do sistema). Configurações de versões anteriores mantêm a aparência clara ou escura que tinham. |
+| **Tema** | Seguir o sistema, ou sempre claro ou escuro (*Configurações → Tema*). A janela é de vidro em camadas: painéis translúcidos sobre uma cópia desfocada do papel de parede, com um único destaque quente para a ação principal; as páginas dos pets (Lar dos pets, Pet e as janelas de guarda-roupa, personalização e foto) usam um tom quente e a fonte arredondada jf open huninn (o chinês simplificado mantém a fonte do sistema). Configurações de versões anteriores mantêm a aparência clara ou escura que tinham. |
 | **Agenda de tema** | Alterne entre um tema de dia e um de noite pelo relógio. |
 | **Modo sinalização** | Alterne uma lista de predefinições em um temporizador com a janela principal guardada, para uma máquina deixada em execução como display. |
 | **Protetor de tela** | Após um limite de inatividade, exiba o vídeo / imagem / GIF / partícula / página web que você escolheu, e retire-o quando você voltar. |
@@ -810,3 +810,21 @@ A lista de predefinições de sinalização e o intervalo de rotação usam seus
 As predefinições agendadas mostram rótulos separados para hora e minuto. Os campos de predefinição, hora, minuto, tempo ocioso e origem do protetor de tela usam os rótulos visíveis como nomes acessíveis. Os nomes acompanham o idioma sem mudar os valores selecionados.
 
 Se falhar ao salvar as configurações do protetor de tela ou das predefinições agendadas, a janela mostra o erro e mantém suas escolhas. As configurações anteriores continuam ativas. Corrija o problema e confirme novamente para tentar outra vez, ou cancele para descartar as alterações. Os nomes das origens do protetor de tela também acompanham o idioma sem mudar a origem selecionada.
+
+Enquanto você desenha na tela, uma barra sobre o próprio desenho oferece caneta, marca-texto, borracha, cores, desfazer, limpar e terminar; arraste a borda esquerda para afastá-la. Esc também termina e Ctrl+Z desfaz. A pausa inteligente não confunde mais as camadas em tela cheia do FrontEngine com um programa em tela cheia e deixa na tela as ferramentas em uso (desenho, quadro branco, efeitos do cursor, teclas pressionadas, lupa, tela congelada, medição, seleção de área e simulação de visão de cores), então um desenho não some mais pela metade.
+
+A simulação de visão de cores não pisca mais nem deixa suas cores se deslocarem. No Windows a camada fica fora da captura de tela e acompanha a tela a partir de uma thread em segundo plano, redesenhando só o que mudou; por isso capturas e compartilhamento de tela não a mostram. Onde isso não é possível, ela é uma imagem parada, feita ao iniciar e ao mudar uma configuração.
+
+Cada seção da página Ferramentas começa dizendo para que ela serve. Medir, Ler texto e Gravar área também explicam cada passo, conforme o modo, a ação ou o formato escolhido. A camada em tela cheia que elas abrem diz o que fazer e Esc a fecha. Medir agora recebe os cliques no Windows, a régua conta pixels reais em qualquer escala de exibição, e Ler texto guarda separadamente o idioma da tradução e a sua pergunta.
+
+A página Cena traz iniciar e parar a cena no rodapé de cada aba. No editor 3D a vista fica sobre um fundo escuro com grade, então dá para ver uma cena vazia e a direção do olhar; a grade nunca aparece na área de trabalho nem na saída. Uma cena vazia sugere adicionar um objeto 3D.
+
+A janela se recolhe. O botão no pé da barra lateral, ou Ctrl+B, a reduz a uma coluna de ícones; uma janela estreita a recolhe sozinha e a abre de novo ao alargar. Cada seção se recolhe pelo título, e páginas com várias seções têm um botão para recolher ou abrir todas; as duas escolhas são lembradas. Numa janela baixa, o cabeçalho dispensa o subtítulo. Uma barra de status no pé de cada página diz quantas sobreposições há na tela e permite ocultar, mostrar ou fechar todas. A imagem atrás da janela é o seu papel de parede, lido neste computador e desfocado; desative em *Configurações → Tema*.
+
+Identidades → Excluir identidade esquece para sempre um pet salvo, após confirmação; se estiver na tela ou morando na casa, guarde-o ou mude-o antes. Um pet volta da área de trabalho para a casa com o afeto que ganhou. “Acalmar ao digitar” faz parte das predefinições, e um personagem incluído escolhido para um pet não veste mais outro.
+
+Uma pasta de papéis de parede pode conter imagens, GIF ou WebP animados e vídeos (MP4, WebM, AVI): os vídeos se repetem sem som, pausam quando ocultos, e um arquivo que não pode ser mostrado é pulado.
+
+Câmera → Atualizar lista as câmeras conectadas depois que a página foi aberta. A régua e o transferidor aparecem em gravações e no compartilhamento de tela; só o conta-gotas fica fora da captura.
+
+Um user_setting.json danificado não impede mais o início: o FrontEngine usa os padrões e mantém o arquivo antigo ao lado como user_setting.damaged-<hora>.json. As configurações exportadas não incluem o histórico da área de transferência, e notas, pets e posição da janela importados sobrevivem ao reinício pedido. Uma predefinição importada nunca substitui a sua: recebe um número. Os nomes aceitam qualquer idioma.

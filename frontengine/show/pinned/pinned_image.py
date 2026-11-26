@@ -73,12 +73,14 @@ class PinnedImageWidget(DraggableTopWindow):
         self.zoom = 1.0
         self.setWindowOpacity(max(0.1, min(1.0, opacity_percent / 100.0)))
 
-        base = (self.pixmap.width(), self.pixmap.height())
+        base = self.base_size()
         front_engine_logger.info(f"[PinnedImageWidget] Init | size={base}")
         self.resize(*zoom_size(base, 1.0))
 
     def base_size(self) -> Tuple[int, int]:
-        return (self.pixmap.width(), self.pixmap.height())
+        """The picture's size on screen: a capture of a scaled display has more pixels than that."""
+        size = self.pixmap.deviceIndependentSize()
+        return (round(size.width()), round(size.height()))
 
     def apply_zoom(self, zoom: float) -> None:
         """套用縮放倍率並跟著改變視窗大小。"""

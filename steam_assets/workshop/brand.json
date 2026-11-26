@@ -18,32 +18,32 @@
       "role": "landscape_brand",
       "width": 920,
       "height": 430,
-      "bytes": 39995,
-      "sha256": "ae5f6b57fd59f217d56a8fa22aad5b9d743d3249c0678904c6bf3c05420636df"
+      "bytes": 47533,
+      "sha256": "e04df7b77a62f0d7ec0da9a425302c7481516acd7424dc7fb6e0d16d81147c8b"
     },
     {
       "file": "workshop_brand_landscape.jpg",
       "role": "landscape_brand",
       "width": 920,
       "height": 430,
-      "bytes": 30511,
-      "sha256": "a6e5fb95c6d95e19614b6aa382c4166a242677c46725789adf08afe4b7dbe417"
+      "bytes": 32465,
+      "sha256": "fa9b8ed4189dbc8f1d202124c1d3c05bb57d1f60f2819d9b29bfadc8d1517563"
     },
     {
       "file": "workshop_preview_square.png",
       "role": "square_preview",
       "width": 512,
       "height": 512,
-      "bytes": 36614,
-      "sha256": "30510863a7493cfb6e40ecea1029db1b1e90538f3e6e2af60c0d6d34c5cccfe6"
+      "bytes": 40372,
+      "sha256": "6c951dd58a904e853fb1b2147c256916d8198aeca170b7584fe6ae98fcf34aec"
     },
     {
       "file": "workshop_preview_square.jpg",
       "role": "square_preview",
       "width": 512,
       "height": 512,
-      "bytes": 27687,
-      "sha256": "d178a4e8cdb827e14a6ea910a6b6e0d9bc3cafa9ac19ee43ba72c1bd06210cde"
+      "bytes": 27051,
+      "sha256": "317e8ca159f9af996606d4984c23ff57d9ac1977773f793067c7a8e44d7da1f8"
     }
   ],
   "descriptions": {

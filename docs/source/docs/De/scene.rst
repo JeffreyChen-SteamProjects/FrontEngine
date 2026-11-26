@@ -40,3 +40,5 @@ Auch die Beschriftungen der Unterregister für Szenenskript und Medien folgen de
 Die Beschriftungen für automatische Dauer und fehlendes übergeordnetes Objekt im 3D-Editor folgen der Oberflächensprache. Dauerwerte und Eltern-Kind-Beziehungen bleiben unverändert, auch nach dem Wechsel zu einem anderen Objekt und zurück.
 
 Wird die Szenenausgabe während der Auswahl einer Kamerahintergrundfarbe geschlossen, wird die Auswahl verworfen und die Vorschau gestoppt. Wird nur die Farbauswahl abgebrochen, bleiben die aktuelle Farbe und die laufende Vorschau erhalten. Öffnen Sie die Szenenausgabe erneut, um eine andere Farbe auszuwählen. Die Vorschau öffnet keine Kamera.
+
+Die Szenenseite hat unten auf jedem Reiter „Szene starten“ und „Szene stoppen“. Im 3D-Editor steht die Ansicht auf dunklem Grund mit Raster, sodass eine leere Szene und die Blickrichtung erkennbar sind; auf dem Desktop und in der Ausgabe erscheint das Raster nie. Eine leere Szene weist darauf hin, ein 3D-Objekt hinzuzufügen.

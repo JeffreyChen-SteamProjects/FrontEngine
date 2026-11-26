@@ -128,6 +128,7 @@ def dispatch(world: World, index: int) -> Dispatch:
         return Dispatch(result, planned.resident, planned.recipe, planned.units)
     resident = world.residents[planned.resident]
     if refusal(world, resident, "work") is None:
+        world._focus_owned.discard(planned.resident)          # asked for by the player now: ending focus leaves it
         if "work" not in resident.commands:          # queued: what it is doing now is never cut short
             resident.commands.append("work")
     else:

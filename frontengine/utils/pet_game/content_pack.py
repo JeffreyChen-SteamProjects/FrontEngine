@@ -171,6 +171,14 @@ def _theme(raw: object, pack: str) -> ThemeDefinition:
                            _color(raw["floor"]), _color(raw["day"]), _color(raw["night"]))
 
 
+def parsed(text: str) -> object:
+    """JSON from outside; nested deep enough it raises an error no caller expects."""
+    try:
+        return json.loads(text)
+    except RecursionError as error:
+        raise ValueError("JSON nested too deeply") from error
+
+
 def _manifest(root: Path) -> dict:
     """The pack's manifest: format, version, fields and an id equal to the folder name."""
     if root.is_symlink() or not root.is_dir():
@@ -179,7 +187,7 @@ def _manifest(root: Path) -> dict:
     manifest = root / MANIFEST
     if not _inside(root, manifest) or manifest.stat().st_size > MAX_MANIFEST_BYTES:
         raise ValueError("Missing or oversized pack.json")
-    data = json.loads(manifest.read_text(encoding="utf-8"))
+    data = parsed(manifest.read_text(encoding="utf-8"))
     if (not isinstance(data, dict) or not _PACK_FIELDS <= set(data) <= _PACK_FIELDS | _OPTIONAL_PACK_FIELDS
             or data["format"] != PACK_FORMAT or data["version"] != PACK_VERSION):
         raise ValueError("Not a FrontEngine home pack (format, version or fields)")

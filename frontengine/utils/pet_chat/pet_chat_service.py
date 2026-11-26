@@ -20,6 +20,7 @@ from frontengine.utils.logging.loggin_instance import front_engine_logger
 API_KEY_ENV = "ANTHROPIC_API_KEY"
 MODEL = "claude-opus-5"
 MAX_TOKENS = 300
+REQUEST_SECONDS = 30.0          # the app waits for a request under way before it can close
 HISTORY_LIMIT = 10
 
 # 寵物的個性與回話規則；刻意要求極短，因為回覆會顯示在頭上的對話泡泡裡。
@@ -111,7 +112,7 @@ class PetChatService:
         try:
             import anthropic
 
-            self._client = anthropic.Anthropic(api_key=key)
+            self._client = anthropic.Anthropic(api_key=key, timeout=REQUEST_SECONDS, max_retries=1)
         except Exception as error:  # pragma: no cover - optional dependency
             front_engine_logger.warning(f"[PetChatService] anthropic unavailable: {error!r}")
             self._client = None
@@ -157,12 +158,21 @@ class PetChatService:
             )
         except Exception as error:
             front_engine_logger.warning(f"[PetChatService] request failed: {error!r}")
+            self._take_back(text)
             return None
         answer = reply_text(response)
         if answer:
             self.history.append({"role": "assistant", "content": answer})
             self.history = trim_history(self.history)
+        else:
+            self._take_back(text)
         return answer
+
+    def _take_back(self, text: str) -> None:
+        """A question without an answer is not part of the conversation: kept, it went along with every
+        later one, refused ones included."""
+        if self.history and self.history[-1] == {"role": "user", "content": text}:
+            self.history.pop()
 
     def ask_async(self, message: str, on_reply: Callable[[Optional[str]], None]) -> None:
         """在背景執行緒問一句，完成後以回覆呼叫 on_reply（UI 不會被卡住）。"""

@@ -171,7 +171,7 @@ def test_main_palette_shortcut_opens_and_page_command_routes(monkeypatch, lifeti
     window.scene_setting_ui = SimpleNamespace(open_templates=Mock())
     window.open_workshop = Mock()
     window.open_command_palette = MethodType(FrontEngineMainUI.open_command_palette, window)
-    window._open_command_page = MethodType(FrontEngineMainUI._open_command_page, window)
+    window.bring_to_front = MethodType(FrontEngineMainUI.bring_to_front, window)
     FrontEngineMainUI._setup_command_palette(window)
     window.show()
     window.activateWindow()

@@ -333,7 +333,7 @@ switch it on.
 | **Smart pause** | Stand the overlays down while a fullscreen app runs, while the machine is on battery, or while a named app has focus. *(On by default, for the fullscreen rule.)* |
 | **App profiles** | Apply a preset when you switch to a given app. |
 | **Preset schedule** | Apply a preset on chosen weekdays at a set time. |
-| **Theme** | Follow the system, or always light or dark (*Settings → Theme*). The tool pages use a quiet, neutral design with the orange of the built-in characters as the only accent; the pet pages (Pet home, Pet and their wardrobe, customisation and photo dialogs) use the ink-and-paper look of those characters, with ink outlines and the rounded jf open huninn typeface (Simplified Chinese keeps the system font, which covers it). Settings from earlier versions keep the light or dark look they had. |
+| **Theme** | Follow the system, or always light or dark (*Settings → Theme*). The window is layered glass: translucent panels over a blurred copy of the desktop wallpaper, with one warm accent for the main action; the pet pages (Pet home, Pet and their wardrobe, customisation and photo dialogs) use a warm tint and the rounded jf open huninn typeface (Simplified Chinese keeps the system font, which covers it). Settings from earlier versions keep the light or dark look they had. |
 | **Theme schedule** | Switch between a day and a night theme by the clock. |
 | **Signage mode** | Rotate a list of presets on a timer with the main window put away, for a machine left running as a display. |
 | **Screensaver** | After an idle threshold, bring up the video / image / GIF / particle / web page you chose, and take it down when you come back. |
@@ -787,3 +787,21 @@ The signage preset list and rotation interval expose their visible labels as acc
 Scheduled presets show separate Hour and Minute labels. The preset, hour, minute, screensaver idle duration and source fields expose their visible labels as accessibility names, which follow language changes without changing the selected values.
 
 If saving the screensaver or scheduled preset settings fails, the dialog shows the error and keeps your choices. The previous settings remain active. Correct the problem and confirm again to retry, or cancel to discard your changes. The screensaver source names also follow language changes without changing the selected source.
+
+While you draw on the screen, a toolbar on the drawing itself offers the pen, highlighter, eraser, colours, Undo, Clear and Finish; drag it aside by its left edge. Esc also finishes, and Ctrl+Z undoes. Smart pause no longer counts FrontEngine’s own full-screen layers as a full-screen program, and it leaves the tools you are using on screen (drawing, whiteboard, cursor effects, keystroke display, magnifier, frozen screen, measuring, region selection and colour-vision simulation), so a drawing no longer disappears halfway.
+
+Colour-vision simulation no longer flickers or lets its colours drift. On Windows the layer is excluded from screen capture and follows the screen from a background thread, repainting only what changed; screenshots and screen sharing therefore do not show it. Where that is not possible it is a still picture, taken when it starts and when you change a setting.
+
+Every section of the Tools page opens with what the tool is for. Measure, Read text and Record area also explain each step, and the explanation follows the mode, action or format you choose. The full-screen layer they open says what to do, and Esc leaves it. Measuring now receives its clicks on Windows, the ruler counts real screen pixels at any display scaling, and Read text keeps the translation language and your question apart.
+
+The Scene page has Start scene and Stop scene at the bottom of every tab. In the 3D editor the viewport stands on a dark ground with a grid, so an empty scene and the direction you are looking in are visible; the grid never appears on the desktop or in the output. An empty scene says to add a 3D object.
+
+The window folds. The button at the bottom of the sidebar, or Ctrl+B, folds the sidebar to a rail of icons; a narrow window folds it by itself and opens it again when it widens. Every section folds from its heading, and pages with several sections have a Fold all / Open all button; both choices are remembered. On a short window the page header gives up its subtitle. A status bar at the bottom of every page says how many overlays are on screen and hides, shows or closes them all. The picture behind the window is your desktop wallpaper, read on this computer and blurred; *Settings → Theme → Background from the desktop wallpaper* turns that off.
+
+Pet identities → Delete identity forgets a saved pet for good, after asking; a pet on screen or living in the home has to be put away or moved out first. A pet comes back from the desktop to the home with the affection it earned. “Settle while typing” is part of presets, and a built-in character chosen for one pet no longer dresses another.
+
+Wallpaper folders may hold pictures, animated GIF or WebP files and videos (MP4, WebM, AVI): videos loop without sound, pause while hidden, and a file that cannot be shown is skipped.
+
+Camera → Refresh lists cameras plugged in since the page was opened. The ruler and the protractor stay in recordings and screen sharing; only the colour picker leaves the capture.
+
+A damaged user_setting.json no longer keeps FrontEngine from starting: it runs on the defaults and keeps the old file beside it as user_setting.damaged-<time>.json. Exported settings leave out clipboard history, and imported notes, desktop pets and window position survive the restart they ask for. Imported presets never replace one of yours: the import gets a number. Preset names may use any language.

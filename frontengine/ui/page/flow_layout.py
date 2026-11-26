@@ -1,13 +1,16 @@
 """Wrap small groups of controls while preserving their keyboard order."""
 from PySide6.QtCore import QPoint, QRect, QSize, Qt
-from PySide6.QtWidgets import QLayout, QLayoutItem, QWidget
+from PySide6.QtWidgets import QLabel, QLayout, QLayoutItem, QWidget
 
 
 class FlowLayout(QLayout):
     """Lay controls out at their natural size, moving overflow to the next line."""
 
-    def __init__(self, parent: QWidget | None = None, spacing: int = 16) -> None:
+    def __init__(self, parent: QWidget | None = None, spacing: int = 16, *, centred: bool = False,
+                 last_at_end: bool = False) -> None:
         self._items: list[QLayoutItem] = []
+        self._last_at_end = last_at_end  # the last control goes to the row's far edge
+        self._centred = centred         # centre each control in its row: a switch beside taller buttons
         super().__init__(parent)
         self.setContentsMargins(0, 0, 0, 0)
         self.setSpacing(spacing)
@@ -68,19 +71,45 @@ class FlowLayout(QLayout):
         left, top, right, bottom = self.getContentsMargins()
         area = rect.adjusted(left, top, -right, -bottom)
         x, y, line_height = area.x(), area.y(), 0
+        row: list[tuple[QLayoutItem, QRect]] = []
         for item in self._items:
             if item.isEmpty():
                 continue
             size = item.sizeHint().expandedTo(item.minimumSize())
             if item.hasHeightForWidth():
+                size.setWidth(max(size.width(), self._one_line(item)))
                 size.setWidth(max(item.minimumSize().width(), min(size.width(), area.width())))
                 size.setHeight(max(item.minimumSize().height(), item.heightForWidth(size.width())))
             if x > area.x() and x + size.width() > area.x() + area.width():
+                if not measure_only:
+                    self._place(row, line_height, area.right())
+                row = []
                 x = area.x()
                 y += line_height + self.spacing()
                 line_height = 0
-            if not measure_only:
-                item.setGeometry(QRect(QPoint(x, y), size))
+            row.append((item, QRect(QPoint(x, y), size)))
             x += size.width() + self.spacing()
             line_height = max(line_height, size.height())
+        if not measure_only:
+            self._place(row, line_height, area.right())
         return y + line_height - rect.y() + bottom
+
+    @staticmethod
+    def _one_line(item: QLayoutItem) -> int:
+        """A wrapping caption's width on one line; its own size hint wraps it to a block even
+        where the row has room."""
+        label = item.widget()
+        if not isinstance(label, QLabel) or not label.wordWrap():
+            return 0
+        metrics = label.fontMetrics()
+        widest = max((metrics.horizontalAdvance(line) for line in label.text().splitlines()), default=0)
+        margins = label.contentsMargins()
+        return widest + margins.left() + margins.right() + 2 * (label.margin() + max(0, label.indent())) + 4
+
+    def _place(self, row: list[tuple[QLayoutItem, QRect]], height: int, right: int) -> None:
+        for index, (item, rect) in enumerate(row):
+            if self._centred:
+                rect.translate(0, (height - rect.height()) // 2)
+            if self._last_at_end and index == len(row) - 1 and item is self._items[-1]:
+                rect.moveRight(max(rect.right(), right))
+            item.setGeometry(rect)

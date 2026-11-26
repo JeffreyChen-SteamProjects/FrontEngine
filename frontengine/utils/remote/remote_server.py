@@ -23,6 +23,7 @@ import json
 import secrets
 import socket
 import ssl
+import sys
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -135,6 +136,15 @@ for(const name of actions){
 
 class _TLSHTTPServer(ThreadingHTTPServer):
     daemon_threads = True
+    # On Windows "reuse" means sharing a port someone is listening on, and who gets the phone's
+    # request - token included - is then up to the system.
+    allow_reuse_address = sys.platform != "win32"
+
+    def server_bind(self):
+        exclusive = getattr(socket, "SO_EXCLUSIVEADDRUSE", None)
+        if exclusive is not None:
+            self.socket.setsockopt(socket.SOL_SOCKET, exclusive, 1)
+        super().server_bind()  # NOSONAR - the socket is wrapped in TLS once bound (RemoteServer.start)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

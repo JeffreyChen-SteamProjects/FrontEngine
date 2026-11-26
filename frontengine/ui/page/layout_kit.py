@@ -21,18 +21,27 @@ The rules live here instead: sections carry a title, label columns line up,
 controls stop growing at a readable width, and the primary action sits in a
 fixed footer looking different from everything else. A page now describes which
 fields it has and not how to arrange them.
+
+A page is transparent: the window's backdrop shows through, and each section is a
+glass panel on it (``ui/style/glass.py``). Every section folds from its heading and
+the window remembers which were folded.
 """
 from __future__ import annotations
 
 from typing import Iterable, Optional
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QEvent, QRectF, QSize, QTimer, Qt, Signal
+from PySide6.QtGui import QPainter
 from PySide6.QtWidgets import (
     QComboBox, QFormLayout, QFrame, QGridLayout, QHBoxLayout, QLabel, QLayout, QLineEdit,
     QPlainTextEdit, QPushButton, QScrollArea, QSizePolicy, QSlider, QTextEdit, QToolButton,
     QVBoxLayout, QWidget,
 )
 
+from frontengine.ui.style.glass import colors_of, paint_panel, set_hand
+from frontengine.ui.style.nav_icons import icon
+from frontengine.ui.style.tokens import SHADOW_DEPTH
+from frontengine.user_setting.user_setting_file import user_setting_dict
 from frontengine.utils.multi_language.retranslate import retranslator, tr
 from frontengine.ui.page.action_menu import ActionMenu
 from frontengine.ui.page.flow_layout import FlowLayout
@@ -55,14 +64,18 @@ _WIDE_CONTROLS = (QComboBox, QSlider, QLineEdit, QPlainTextEdit, QTextEdit)
 # Russian words run longer than the English ones, hence the headroom.
 LABEL_MIN_WIDTH = 148
 
-PAGE_MARGINS = (28, 22, 28, 0)
-FOOTER_MARGINS = (28, 14, 28, 18)
+PAGE_MARGINS = (24, 14, 24, 0)
+FOOTER_MARGINS = (24, 6, 24, 8)
+# A page shorter than this drops its subtitle, so the controls keep the room.
+SHORT_PAGE = 520
+FOLD_ALL_FROM = 3                      # pages with this many sections offer "fold all"
+FOLDED_KEY = "folded_sections"         # user setting: "PageClass:index" of the sections folded by hand
 # Settings read as one centred column: on a wide window the cards stop at this
 # width instead of stretching into a band of empty space right of the controls.
 # Pages that show a large canvas (the pet home, the scene editor) opt out with wide=True.
 CONTENT_MAX_WIDTH = 960
 ROW_SPACING = 14
-SECTION_SPACING = 16
+SECTION_SPACING = 8       # beside the room each panel keeps for its own shadow
 
 
 def _form_label(label: "str | QLabel", fallback: str = "") -> QLabel:
@@ -100,18 +113,23 @@ def _cap_width(widget: QWidget) -> QWidget:
 class _SectionShell(QWidget):
     """
     一組相關欄位，帶一個小標題。標題用 objectName 上樣式，不在這裡寫死顏色。
-    A group of related fields under a small heading. The heading is styled by
-    objectName rather than hard-coded colours here.
+    A group of related fields under a small heading, on its own glass panel. The
+    heading folds the section; the palette comes from the design tokens, never literals.
     """
 
+    fold_changed = Signal(bool)            # folded or opened by the user
+    foldable = True
+
     def __init__(self, title: "str | QLabel", fallback: str = "",
-                 parent: Optional[QWidget] = None):
+                 parent: Optional[QWidget] = None, *, nested: bool = False):
         super().__init__(parent)
         self.setObjectName("settingSection")
-        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground)
+        self._nested = nested
+        self._labelled_toggle = False
+        side, shadow = (16, 0) if nested else (22, SHADOW_DEPTH)
         self._column_layout = QVBoxLayout(self)
-        self._column_layout.setContentsMargins(20, 18, 20, 20)
-        self._column_layout.setSpacing(18)
+        self._column_layout.setContentsMargins(side, 14, side, 18 + shadow)
+        self._column_layout.setSpacing(12)
 
         # 標題也可以是分頁已經有的標籤。像護眼頁那種「一個功能一組設定」的頁面，
         # 功能名稱本來就翻譯好了，拿來當分區標題就不必再開新的語言鍵。
@@ -121,15 +139,19 @@ class _SectionShell(QWidget):
         self.title_label = title if isinstance(title, QLabel) else tr(QLabel(), title, fallback)
         self.title_label.setObjectName("sectionHeader")
         self.title_label.setWordWrap(True)
-        heading = FlowLayout(spacing=8)
+        self.title_label.setIndent(0)              # lines up with the fields below it
+        set_hand(self.title_label)
+        self.title_label.installEventFilter(self)
+        heading = FlowLayout(spacing=8, last_at_end=True)      # the chevron sits at the right edge
         heading.addWidget(self.title_label)
         self.toggle_button = QToolButton()
         self.toggle_button.setObjectName("sectionToggle")
-        self.toggle_button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
+        self.toggle_button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonIconOnly)
+        self.toggle_button.setIconSize(QSize(14, 14))
         self.toggle_button.setCheckable(True)
         self.toggle_button.setChecked(True)
-        self.toggle_button.hide()
         self.toggle_button.toggled.connect(self._set_expanded)
+        self.toggle_button.clicked.connect(lambda: self.fold_changed.emit(not self.expanded))
         heading.addWidget(self.toggle_button)
         self._column_layout.addLayout(heading)
 
@@ -137,24 +159,71 @@ class _SectionShell(QWidget):
         self.content.setObjectName("sectionContent")
         self._column_layout.addWidget(self.content)
 
+        self._set_expanded(True)
+        if not self.title_label.text():
+            self.set_foldable(False)                   # no heading, nothing to fold by
+
+    @property
+    def expanded(self) -> bool:
+        return self.toggle_button.isChecked()
+
+    def set_foldable(self, foldable: bool) -> None:
+        """A section that is always open: the first thing a page is for."""
+        self.foldable = foldable
+        self.toggle_button.setVisible(foldable)
+        if foldable:
+            set_hand(self.title_label)
+        else:
+            self.title_label.unsetCursor()
+
     def set_collapsible(self, collapsed: bool = True) -> None:
-        """Keep less-used settings available behind an explicit details toggle."""
-        self.toggle_button.show()
+        """A section of less-used settings: folded to start with, its toggle spelled out."""
+        self._labelled_toggle = True
+        self.toggle_button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
         self.toggle_button.setChecked(not collapsed)
         self._set_expanded(not collapsed)
 
+    def set_folded(self, folded: bool) -> None:
+        """Fold or open without counting as the user's own choice."""
+        self.toggle_button.setChecked(not folded)
+
     def _set_expanded(self, expanded: bool) -> None:
         self.content.setVisible(expanded)
-        self.toggle_button.setArrowType(Qt.ArrowType.DownArrow if expanded else Qt.ArrowType.RightArrow)
-        retranslator.set_text(self.toggle_button, "ui_hide_details" if expanded else "ui_show_details")
+        key = "ui_hide_details" if expanded else "ui_show_details"
+        retranslator.forget(self.toggle_button)
+        retranslator.bind(self.toggle_button, key)
+        retranslator.bind(self.toggle_button, key, "", "setToolTip")
+        retranslator.bind(self.toggle_button, key, "", "setAccessibleName")
+        self._refresh_chevron()
+
+    def _refresh_chevron(self) -> None:
+        name = "chevron-down" if self.expanded else "chevron-right"
+        self.toggle_button.setIcon(icon(name, colors_of(self)["muted"]))
+
+    def eventFilter(self, watched, event) -> bool:
+        """The whole heading folds, not only its small chevron."""
+        if watched is self.title_label and self.foldable and event.type() == QEvent.Type.MouseButtonRelease \
+                and event.button() == Qt.MouseButton.LeftButton:
+            self.toggle_button.click()
+        return super().eventFilter(watched, event)
+
+    def changeEvent(self, event) -> None:
+        super().changeEvent(event)
+        if event.type() == QEvent.Type.PaletteChange and hasattr(self, "content"):
+            self._refresh_chevron()
+            self.update()
+
+    def paintEvent(self, event) -> None:
+        painter = QPainter(self)
+        paint_panel(painter, QRectF(self.rect()), colors_of(self), nested=self._nested)
 
 
 class ContentSection(_SectionShell):
     """Stack full-width content without the sizing rules of a two-column form."""
 
     def __init__(self, title: "str | QLabel", fallback: str = "",
-                 parent: Optional[QWidget] = None):
-        super().__init__(title, fallback, parent)
+                 parent: Optional[QWidget] = None, *, nested: bool = False):
+        super().__init__(title, fallback, parent, nested=nested)
         self._contents = QVBoxLayout(self.content)
         self._contents.setContentsMargins(0, 0, 0, 0)
         self._contents.setSpacing(ROW_SPACING)
@@ -169,8 +238,8 @@ class Section(_SectionShell):
     """Align labeled controls and wrap their labels when the form narrows."""
 
     def __init__(self, title: "str | QLabel", fallback: str = "",
-                 parent: Optional[QWidget] = None):
-        super().__init__(title, fallback, parent)
+                 parent: Optional[QWidget] = None, *, nested: bool = False):
+        super().__init__(title, fallback, parent, nested=nested)
         self._form = QFormLayout(self.content)
         self._form.setContentsMargins(0, 0, 0, 0)
         self._form.setHorizontalSpacing(14)
@@ -188,7 +257,7 @@ class Section(_SectionShell):
         """Keep frequent actions visible and put secondary commands in a menu."""
         holder = QWidget()
         holder.setObjectName("inlineActions")
-        row = FlowLayout(holder, spacing=10)
+        row = FlowLayout(holder, spacing=10, centred=True)
         for button in buttons[:prominent]:
             row.addWidget(button)
         if buttons[prominent:]:
@@ -202,6 +271,18 @@ class Section(_SectionShell):
         caption.setBuddy(control)
         self._form.addRow(caption, _cap_width(control))
         return control
+
+    def add_note(self, key: str, fallback: str = "") -> QLabel:
+        """A paragraph saying what the section is for or how to use it."""
+        note = tr(QLabel(), key, fallback)
+        note.setObjectName("sectionNote")
+        note.setWordWrap(True)
+        self._form.addRow(note)
+        return note
+
+    def set_row_visible(self, control: QWidget, visible: bool) -> None:
+        """Show or hide one row, label included."""
+        self._form.setRowVisible(control, visible)
 
     def add_slider_row(self, label: "str | QLabel", slider: QWidget, value_label: QWidget,
                        fallback: str = "") -> QWidget:
@@ -250,7 +331,7 @@ class Section(_SectionShell):
         """Small controls share a row and wrap when the page is narrow."""
         holder = QWidget()
         holder.setObjectName("inlineActions")
-        row = FlowLayout(holder)
+        row = FlowLayout(holder, centred=True)
         for widget in widgets:
             row.addWidget(widget)
         self._form.addRow(holder)
@@ -309,20 +390,27 @@ class SettingPage(QWidget):
         lifetime.adopt(self)
         self.setProperty("settingPage", True)
         self._wide = wide or compact
+        self._compact_page = compact
+        self._sections: list[_SectionShell] = []
+        # What its folded sections are remembered under. The class alone will not do: the scene
+        # editor's inspectors and the Workshop window are plain SettingPages.
+        self._fold_name = f"{type(self).__name__}/{title_key}"
+        self.fold_all_button: Optional[QPushButton] = None
+        self._short = False
         self._page_layout = QVBoxLayout(self)
         self._page_layout.setContentsMargins(0, 0, 0, 0)
         self._page_layout.setSpacing(0)
 
-        header = QWidget()
+        header = self.banner = QWidget()
         header.setObjectName("pageHeader")
         header_outer = QHBoxLayout(header)
-        header_outer.setContentsMargins(*PAGE_MARGINS[:2], PAGE_MARGINS[2], 16)
+        header_outer.setContentsMargins(PAGE_MARGINS[0], PAGE_MARGINS[1], PAGE_MARGINS[2], 12)
         header_inner = self._column(header_outer)
         self._header_row = QHBoxLayout(header_inner)
         self._header_row.setContentsMargins(0, 0, 0, 0)
         self._header_row.setSpacing(16)
         header_layout = QVBoxLayout()
-        header_layout.setSpacing(4)
+        header_layout.setSpacing(2)
         self._header_row.addLayout(header_layout, 1)
         self._header_actions = QHBoxLayout()
         self._header_actions.setSpacing(8)
@@ -349,13 +437,16 @@ class SettingPage(QWidget):
         body = QWidget()
         body.setObjectName("pageContent")
         body_outer = QHBoxLayout(body)
-        body_outer.setContentsMargins(PAGE_MARGINS[0], 4, PAGE_MARGINS[2], 20)
+        body_outer.setContentsMargins(PAGE_MARGINS[0], 12, PAGE_MARGINS[2], 20)
         if compact:
             body_outer.setContentsMargins(12, 12, 12, 12)
         self._body_layout = QVBoxLayout(self._column(body_outer))
         self._body_layout.setContentsMargins(0, 0, 0, 0)
         self._body_layout.setSpacing(SECTION_SPACING)
         self._scroll.setWidget(body)
+        # A scroll area fills both with the window colour; the backdrop has to show through.
+        body.setAutoFillBackground(False)
+        self._scroll.viewport().setAutoFillBackground(False)
         self._page_layout.addWidget(self._scroll, 1)
 
         self._footer: Optional[QWidget] = None
@@ -374,6 +465,65 @@ class SettingPage(QWidget):
         outer.addStretch(1)
         return column
 
+    def resizeEvent(self, event) -> None:
+        super().resizeEvent(event)
+        # Only when the page crosses the limit, and after this layout pass: changing what is visible
+        # from inside a resize re-entered the layout it was part of.
+        # The event's own size: a page may use the name "height" for one of its fields.
+        if (event.size().height() < SHORT_PAGE) != self._short:
+            self._short = not self._short
+            QTimer.singleShot(0, self, self._fit_height)
+
+    def _fit_height(self) -> None:
+        """A short page keeps its height for the controls."""
+        if self.subtitle_label is not None:
+            self.subtitle_label.setVisible(not self._short)
+
+    # ----- folding sections ---------------------------------------------------------------
+
+    def _track(self, section: _SectionShell) -> None:
+        index = len(self._sections)
+        self._sections.append(section)
+        key = f"{self._fold_name}:{index}"
+        stored = user_setting_dict.get(FOLDED_KEY)
+        if section.foldable and isinstance(stored, dict) and isinstance(stored.get(key), bool):
+            section.set_folded(stored[key])
+        section.fold_changed.connect(lambda folded, name=key: self._remember_fold(name, folded))
+
+    def _remember_fold(self, key: str, folded: bool) -> None:
+        stored = user_setting_dict.get(FOLDED_KEY)
+        stored = dict(stored) if isinstance(stored, dict) else {}
+        stored[key] = folded
+        user_setting_dict[FOLDED_KEY] = stored
+        self._refresh_fold_all()
+
+    def set_all_folded(self, folded: bool) -> None:
+        """Fold or open every section of this page, as the user's own choice."""
+        for index, section in enumerate(self._sections):
+            if not section.foldable:
+                continue
+            section.set_folded(folded)
+            self._remember_fold(f"{self._fold_name}:{index}", folded)
+
+    def _toggle_all(self) -> None:
+        self.set_all_folded(any(section.expanded for section in self._sections if section.foldable))
+
+    def _refresh_fold_all(self) -> None:
+        if self.fold_all_button is None:
+            return
+        folding = any(section.expanded for section in self._sections if section.foldable)
+        retranslator.set_text(self.fold_all_button, "ui_fold_all" if folding else "ui_unfold_all",
+                              "Fold all" if folding else "Open all")
+
+    def _offer_fold_all(self) -> None:
+        if self.fold_all_button is not None or self._compact_page or len(self._sections) < FOLD_ALL_FROM:
+            return
+        self.fold_all_button = QPushButton()
+        self.fold_all_button.setObjectName("foldAll")
+        self.fold_all_button.clicked.connect(self._toggle_all)
+        self._header_actions.insertWidget(0, self.fold_all_button, 0, Qt.AlignmentFlag.AlignBottom)
+        self._refresh_fold_all()
+
     def add_header_action(self, widget: QWidget) -> QWidget:
         """A page-level action beside the title (help, reset, open a related window)."""
         self._header_actions.addWidget(widget, 0, Qt.AlignmentFlag.AlignBottom)
@@ -381,16 +531,18 @@ class SettingPage(QWidget):
 
     def add_section(self, title: "str | QLabel", fallback: str = "", *, collapsed: bool = False) -> Section:
         """加一個分區並回傳它，欄位往回傳的物件上加。標題可傳語言鍵或現成標籤。"""
-        section = Section(title, fallback)
+        section = Section(title, fallback, nested=self._compact_page)
         if collapsed:
             section.set_collapsible()
         self._body_layout.addWidget(section)
+        self._track(section)
         return section
 
     def add_content_section(self, title: "str | QLabel", fallback: str = "") -> ContentSection:
         """Group full-width content in a vertically stacked card."""
-        section = ContentSection(title, fallback)
+        section = ContentSection(title, fallback, nested=self._compact_page)
         self._body_layout.addWidget(section)
+        self._track(section)
         return section
 
     def add_body_widget(self, widget: QWidget, stretch: int = 0) -> QWidget:
@@ -407,6 +559,7 @@ class SettingPage(QWidget):
         controls were exactly this missing.
         """
         self._body_layout.addStretch(1)
+        self._offer_fold_all()
 
     def set_footer(self, primary: Optional[QWidget] = None,
                    status: Optional[QWidget] = None,

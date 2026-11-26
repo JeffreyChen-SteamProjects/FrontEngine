@@ -170,6 +170,7 @@ class KeystrokeDisplayWidget(BaseWidget):
     # Covers the whole monitor and is see-through everywhere but one small panel: on the GPU
     # compositor the transparency could come out black on some drivers (see BaseWidget).
     software_only = True
+    stays_while_paused = True
 
     def __init__(self, hold_seconds: float = DEFAULT_HOLD_SECONDS, font_size: int = 28,
                  color: str = "#ffffff", background: str = "#000000",
@@ -179,7 +180,7 @@ class KeystrokeDisplayWidget(BaseWidget):
         self.opacity = 1.0
         self.hold_seconds = max(0.2, float(hold_seconds))
         self.text_color = QColor(color) if QColor(color).isValid() else QColor("#ffffff")
-        self.background_color = QColor(background) if QColor(background).isValid() else QColor("#000000")
+        self.panel_color = QColor(background) if QColor(background).isValid() else QColor("#000000")
         self.font_size = clamp_font_size(font_size)
         self.position = normalize_position(position)
         self.show_mouse = bool(show_mouse)
@@ -203,7 +204,7 @@ class KeystrokeDisplayWidget(BaseWidget):
         if color is not None and QColor(color).isValid():
             self.text_color = QColor(color)
         if background is not None and QColor(background).isValid():
-            self.background_color = QColor(background)
+            self.panel_color = QColor(background)
         if position is not None:
             self.position = normalize_position(position)
         self.update()
@@ -276,7 +277,7 @@ class KeystrokeDisplayWidget(BaseWidget):
         origin = panel_origin(self.position, (width, height),
                               (self.width(), self.height()), self.PADDING)
         box = QRect(origin[0], origin[1], width, height)
-        background = QColor(self.background_color)
+        background = QColor(self.panel_color)
         background.setAlpha(170)
         painter.setPen(Qt.PenStyle.NoPen)
         painter.setBrush(background)

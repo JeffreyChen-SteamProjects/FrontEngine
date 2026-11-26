@@ -20,7 +20,9 @@ from PySide6.QtOpenGLWidgets import QOpenGLWidget
 
 from frontengine.show.compositor.surface_check import see_through_problem
 from frontengine.show.window_helpers import apply_overlay_window_flags, load_overlay_icon
+from frontengine.user_setting.user_setting_file import user_setting_dict
 from frontengine.utils.logging.loggin_instance import front_engine_logger
+from frontengine.utils.power_mode.power_mode import normalize_tier, scaled_interval, tier_interval
 
 if sys.platform == "win32":
     import ctypes
@@ -91,10 +93,25 @@ class ParticleOpenGLWidget(QOpenGLWidget):
 
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_particles)
-        self.timer.start(16)
+        self.quality_tier = normalize_tier(user_setting_dict.get("quality_tier"))
+        self.low_power = bool(user_setting_dict.get("low_power"))
+        self._start_timer()
 
         if sys.platform == "win32":
             QTimer.singleShot(0, self.apply_winapi)
+
+    def _start_timer(self) -> None:
+        self.timer.start(tier_interval(scaled_interval(16, self.low_power), self.quality_tier))
+
+    def set_quality_tier(self, tier: str) -> None:
+        self.quality_tier = normalize_tier(tier)
+        if self.timer.isActive():
+            self._start_timer()
+
+    def set_low_power(self, enabled: bool) -> None:
+        self.low_power = bool(enabled)
+        if self.timer.isActive():
+            self._start_timer()
 
     def apply_winapi(self):
         if sys.platform != "win32":

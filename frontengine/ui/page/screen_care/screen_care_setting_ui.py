@@ -145,6 +145,7 @@ class ScreenCareSettingUI(SettingPage):
         breaks.add_inline(self.break_button)
 
         vision = self.add_section(self.color_vision_label)
+        vision.add_note("color_vision_note")
         vision.add_row("screen_care_type", self.color_vision_combobox, "Type")
         vision.add_row("screen_care_strength", self.color_vision_slider, "Strength")
         vision.add_inline(self.color_vision_button)
@@ -186,6 +187,11 @@ class ScreenCareSettingUI(SettingPage):
         widgets.clear()
 
     # --- colour filter ---------------------------------------------------
+    def stop_overlays(self) -> None:
+        """Every overlay was closed from outside: offer to start them again."""
+        for stop in (self.stop_filter, self.stop_ruler, self.stop_color_vision):
+            stop()
+
     @owned_action
     def toggle_filter(self) -> None:
         """開關色彩濾鏡。"""
@@ -323,9 +329,10 @@ class ScreenCareSettingUI(SettingPage):
             widget = ColorVisionWidget(self.color_vision_combobox.currentData(),
                                        self.color_vision_slider.value() / 100.0)
             widget.set_ui_window_flag(show_on_bottom=False)
-            self._present(widget, screen)
-            widget.start()
+            widget.setScreen(screen)
+            widget.setGeometry(screen.geometry())
             self.color_vision_widget_list.append(widget)
+            widget.start()          # takes its first picture before it appears
         retranslator.set_text(
             self.color_vision_button, "color_vision_stop", "Stop simulating")
 

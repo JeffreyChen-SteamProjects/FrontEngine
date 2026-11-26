@@ -105,6 +105,7 @@ class _Prepare(QRunnable):
         _deliver(self.owner_ref, self.identifier, self.key, (renderer, self.appearance, upgraded))
 
 
+LOOK_SECONDS = 1.0          # how long a saved look is taken as read
 FALLBACK_PREFIX = "fallback:"
 # Stand-ins never change, so each is built once per process and shared by every pet drawn as it:
 # building one takes seconds, and every home (and every test) used to build its own again.
@@ -191,6 +192,8 @@ class ResidentArt(QObject):
         self.closed = False
         self._renderers: dict[str, tuple[str, object]] = {}
         self._pending: set[str] = set()
+        self._looks: dict[str, tuple] = {}             # identifier -> session, its renderer, when, appearance
+        self._portraits: dict[str, tuple] = {}
         self._unusable: set[str] = set()          # own looks that failed to load: the stand-in it is
         self._started = monotonic()
         self.prepared.connect(self._adopt, Qt.ConnectionType.QueuedConnection)
@@ -199,13 +202,40 @@ class ResidentArt(QObject):
         lifetime.register_stop(self.shutdown)
 
     def _appearance(self, identifier: str) -> dict | None:
+        """The pet's saved look. Reading it checks every saved profile, and this is asked several times
+        per pet and frame, so an answer holds until the look changes or a second has passed."""
         session = self.service.sessions.get(identifier)
         if session is None:
             return None
+        live, now = getattr(session, "appearance_renderer", None), monotonic()
+        known = self._looks.get(identifier)
+        if known is not None and known[0] is session and known[1] is live and now - known[2] < LOOK_SECONDS:
+            return known[3]
         try:
-            return session.state()["appearance"]
+            appearance = session.state()["appearance"]
         except (OSError, ValueError, KeyError):
-            return None
+            appearance = None
+        self._looks[identifier] = (session, live, now, appearance)
+        return appearance
+
+    def _look_for(self, identifier: str):
+        """The recorded portrait and when its file last changed, or None; held like ``_appearance``."""
+        now = monotonic()
+        known = self._portraits.get(identifier)
+        if known is not None and now - known[0] < LOOK_SECONDS:
+            return known[1]
+        look = self.service.profiles.look_for(identifier)
+        try:
+            found = None if look is None else (look, look[1].stat().st_mtime_ns)
+        except OSError:
+            found = None
+        self._portraits[identifier] = (now, found)
+        return found
+
+    def forget_looks(self) -> None:
+        """Something changed a pet's look: ask again."""
+        self._looks.clear()
+        self._portraits.clear()
 
     def renderer(self, identifier: str):
         """The ready renderer for this resident's outfit, or a built-in stand-in; None while loading."""
@@ -233,13 +263,10 @@ class ResidentArt(QObject):
 
     def _picture(self, identifier: str):
         """The Puppet portrait when one is recorded and loads; else the stand-in."""
-        look = self.service.profiles.look_for(identifier)
-        if look is None:
+        found = self._look_for(identifier)
+        if found is None:
             return self._fallback(identifier)
-        try:
-            stamp = look[1].stat().st_mtime_ns
-        except OSError:
-            return self._fallback(identifier)
+        look, stamp = found
         key = f"{PICTURE_PREFIX}{look[0]}:{look[1]}:{stamp}"
         if key in self._unusable:
             return self._fallback(identifier)
@@ -272,6 +299,7 @@ class ResidentArt(QObject):
     def _adopt(self, identifier: str, key: str, result) -> None:
         if self.closed:
             return
+        self.forget_looks()
         renderer, expected, upgraded = result
         self._pending.discard(key)
         if key.startswith(PICTURE_PREFIX) and renderer is None:

@@ -35,6 +35,8 @@ from PySide6.QtGui import (  # noqa: E402
 )
 from PySide6.QtWidgets import QApplication  # noqa: E402
 
+from frontengine.ui.style.tokens import DARK as DARK_TOKENS  # noqa: E402
+
 # 相對於這個檔案定位，換一台機器 clone 下來一樣跑得動
 # Located relative to this file, so a fresh clone on another machine still runs
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -44,12 +46,14 @@ NAME = "FrontEngine"
 TAGLINE = "Put anything on top of your screen"
 TAGLINE_LONG = "Overlays, a desktop pet with a home of its own, focus tools and presenting aids"
 
-# 取自程式自己的 dark_amber 主題，商店頁和實際程式看起來才是同一個東西
-AMBER = QColor("#ffd740")
-DARK = QColor("#1b1d1f")
-DARKER = QColor("#121415")
+# 取自程式自己的暗色主題（ui/style/tokens.py），商店頁和實際程式看起來才是同一個東西
+# The application's own dark theme, so the store page and the program look like one thing.
+ACCENT = QColor(DARK_TOKENS["accent"])
+DARK = QColor("#12303e")
+DARKER = QColor("#0a1d27")
+SCRIM = (8, 26, 35)             # what is laid over a picture so text reads on it
 TEXT = QColor("#ffffff")
-MUTED = QColor(255, 255, 255, 165)
+MUTED = QColor(255, 255, 255, 215)
 
 # (檔名, 寬, 高) — 全部依 Steamworks 規格
 CAPSULES = [
@@ -106,12 +110,13 @@ def home_backdrop(painter, width, height, home, text_top=True):
     painter.drawImage((width - scaled.width()) // 2, height - scaled.height(), scaled)
     shade = QLinearGradient(0, 0, 0, height)
     if text_top:
-        shade.setColorAt(0.0, QColor(18, 20, 21, 245))
-        shade.setColorAt(0.42, QColor(18, 20, 21, 200))
-        shade.setColorAt(0.66, QColor(18, 20, 21, 0))
+        shade.setColorAt(0.0, QColor(*SCRIM, 245))
+        # Dark to below the tagline, which sits lower on a portrait capsule.
+        shade.setColorAt(0.56 if height > width else 0.52, QColor(*SCRIM, 215))
+        shade.setColorAt(0.66, QColor(*SCRIM, 0))
     else:
-        shade.setColorAt(0.0, QColor(18, 20, 21, 0))
-        shade.setColorAt(1.0, QColor(18, 20, 21, 120))
+        shade.setColorAt(0.0, QColor(*SCRIM, 0))
+        shade.setColorAt(1.0, QColor(*SCRIM, 120))
     painter.fillRect(0, 0, width, height, shade)
 
 
@@ -136,12 +141,12 @@ def backdrop(painter, width, height, shot=None, scrim=0.82):
         x = (width - scaled.width()) // 2
         y = (height - scaled.height()) // 2
         painter.drawImage(x, y, scaled)
-        painter.fillRect(0, 0, width, height, QColor(18, 20, 21, int(255 * scrim)))
+        painter.fillRect(0, 0, width, height, QColor(*SCRIM, int(255 * scrim)))
 
     # 底部再壓一道，文字落在深色上
     fade = QLinearGradient(0, height * 0.45, 0, height)
-    fade.setColorAt(0.0, QColor(18, 20, 21, 0))
-    fade.setColorAt(1.0, QColor(18, 20, 21, 235))
+    fade.setColorAt(0.0, QColor(*SCRIM, 0))
+    fade.setColorAt(1.0, QColor(*SCRIM, 235))
     painter.fillRect(0, int(height * 0.45), width, int(height * 0.55) + 1, fade)
 
 
@@ -167,17 +172,17 @@ def atmosphere(painter, width, height, icon, logo_safe=True):
     and neither can be read.
     """
     gradient = QLinearGradient(0, 0, width, height)
-    gradient.setColorAt(0.0, QColor("#16181a"))
-    gradient.setColorAt(0.55, QColor("#1d2023"))
-    gradient.setColorAt(1.0, QColor("#0d0f10"))
+    gradient.setColorAt(0.0, QColor("#0f2833"))
+    gradient.setColorAt(0.55, QColor("#153846"))
+    gradient.setColorAt(1.0, QColor("#081820"))
     painter.fillRect(0, 0, width, height, gradient)
 
     # 柔光：放在右側三分之一，和 logo 的位置錯開
     glow_x = width * (0.74 if logo_safe else 0.5)
     glow = QRadialGradient(glow_x, height * 0.45, max(width, height) * 0.55)
-    glow.setColorAt(0.0, QColor(255, 215, 64, 46))
-    glow.setColorAt(0.45, QColor(255, 215, 64, 16))
-    glow.setColorAt(1.0, QColor(255, 215, 64, 0))
+    glow.setColorAt(0.0, QColor(255, 198, 145, 46))
+    glow.setColorAt(0.45, QColor(255, 198, 145, 16))
+    glow.setColorAt(1.0, QColor(255, 198, 145, 0))
     painter.fillRect(0, 0, width, height, glow)
 
     # 巨大但很淡的圖示當浮水印
@@ -193,8 +198,8 @@ def atmosphere(painter, width, height, icon, logo_safe=True):
 
     # 底部壓一道，Steam 疊上去的文字才讀得出來
     fade = QLinearGradient(0, height * 0.55, 0, height)
-    fade.setColorAt(0.0, QColor(13, 15, 16, 0))
-    fade.setColorAt(1.0, QColor(13, 15, 16, 200))
+    fade.setColorAt(0.0, QColor(*SCRIM, 0))
+    fade.setColorAt(1.0, QColor(*SCRIM, 200))
     painter.fillRect(0, int(height * 0.55), width, int(height * 0.45) + 1, fade)
 
 
@@ -207,7 +212,7 @@ def draw_icon(painter, icon, x, y, size):
 
 
 def accent_rule(painter, x, y, width, height=4):
-    painter.fillRect(QRect(x, y, width, height), AMBER)
+    painter.fillRect(QRect(x, y, width, height), ACCENT)
 
 
 def compose(kind, width, height, icon, shot):
@@ -284,8 +289,10 @@ def compose(kind, width, height, icon, shot):
 
     elif kind == "hero":
         # Hero 上面會疊 logo，所以不放任何文字；家園的重點偏右，讓出中左給 logo。
-        # Steam lays the logo over the hero, so no text here, and the home leans right of the logo.
-        home_backdrop(painter, width, height, shot(width, height, 0.94, 0.68), text_top=False)
+        # Steam lays the logo over the hero, so no text here, and the home leans right of the logo: it
+        # is furnished from its left end, so it is shown mirrored.
+        home_backdrop(painter, width, height,
+                      shot(width, height, 0.94, 0.32).flipped(Qt.Orientation.Horizontal), text_top=False)
 
     elif kind == "background":
         atmosphere(painter, width, height, icon, logo_safe=False)
@@ -302,8 +309,8 @@ def frame_shot(shot, width=1920, height=1080):
     painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform, True)
 
     gradient = QLinearGradient(0, 0, width, height)
-    gradient.setColorAt(0.0, QColor("#202325"))
-    gradient.setColorAt(1.0, QColor("#0e1011"))
+    gradient.setColorAt(0.0, QColor("#1a4252"))
+    gradient.setColorAt(1.0, QColor("#081820"))
     painter.fillRect(0, 0, width, height, gradient)
 
     margin = 70
@@ -379,11 +386,13 @@ def screenshots(icon_path):
     from frontengine.utils.pet_game.environment import weather
     from frontengine.utils.pet_game.schedule import game_hour
     trailer.run_home(application, home, 600)
-    for _ in range(200):
+    for _ in range(2000):
         world = home.service.world
-        if weather(world.home, world.time_ms) == "clear" and 10 <= game_hour(world.time_ms) <= 16:
+        if weather(world.home, world.time_ms) == "clear" and 10 <= game_hour(world.time_ms) <= 16                 and trailer.settled_at_home(home):
             break
-        trailer.run_home(application, home, 60)
+        trailer.run_home(application, home, 10)
+    else:
+        print("warning: the pets never settled at home on a clear day")
     application.processEvents()
 
     def save(name, image):
@@ -398,13 +407,18 @@ def screenshots(icon_path):
     def home_shot(width, height, floor_at, center_at=0.5):
         """The home redrawn for one capsule size: the floor near the bottom, the pets in view."""
         view = home.view
-        # Big enough that the pets read even on a 920x430 header, and never narrower than the picture.
-        # The furniture and pets fill only the lower third of the home drawing; its sky may be cropped.
-        scale = max(height * 1.25 / view.height(), width / view.width())
+        # Big enough that the pets read even on a 920x430 header, small enough that their ears stay
+        # below the words, and never narrower than the picture. The sky may be cropped.
+        scale = max(height * (1.0 if width > height else 0.85) / view.height(), width / view.width())
         # A tall picture has room for only a few pieces: it shows the pets, a wide one the whole home.
         middle = trailer.pets_center(home) if width < height else trailer.home_center(home)
         center = middle + (0.5 - center_at) * width / scale
-        return trailer.close_up_image(view, scale, center, width, height, floor_at)
+        # No names on a capsule: they land among its own words.
+        view._paint_resident = view._paint_body
+        try:
+            return trailer.close_up_image(view, scale, center, width, height, floor_at)
+        finally:
+            del view._paint_resident
 
     pages = [
         ("04_video", window.video_setting_ui),
@@ -436,9 +450,10 @@ def main():
     # Keep the reference: garbage-collecting QApplication takes every later paint
     # call with it. Held through setApplicationName rather than an assert, because
     # -O strips asserts entirely and would take the reason for holding it too.
-    # English on purpose: the store's default language, and the page is read by everyone.
+    # English on purpose: the store's default language, and the page is read by everyone. The
+    # settings also keep the picture behind the window to the built-in one (see trailer.SETTINGS).
     with open("user_setting.json", "w", encoding="utf-8") as handle:
-        json.dump({"language": "English"}, handle)
+        json.dump(trailer.SETTINGS, handle)
     application = QApplication([])
     application.setApplicationName(NAME)
     trailer._use_film_clock()

@@ -24,7 +24,7 @@ Menu Impostazioni
   blocco, fermo immagine, elenco scorciatoie e riproduci/pausa, traccia
   successiva e precedente, e lo spostamento della finestra in primo piano sullo
   schermo successivo mantenendone le proporzioni.
-* Tema - segui il sistema, chiaro o scuro. Le pagine degli strumenti hanno un design calmo e neutro; le pagine delle mascotte e le loro finestre usano lo stile inchiostro e carta dei personaggi integrati, con il carattere arrotondato jf open huninn (il cinese semplificato mantiene il carattere di sistema).
+* Tema - segui il sistema, chiaro o scuro. La finestra è fatta di vetri sovrapposti su una copia sfocata dello sfondo del desktop o, se nello stesso menu «Sfondo dal desktop» è disattivato, su un’immagine integrata; le pagine delle mascotte e le loro finestre usano una tinta calda e il carattere arrotondato jf open huninn (il cinese semplificato mantiene il carattere di sistema).
 * Tema giorno/notte programmato - chiaro di giorno, scuro di notte.
 * Avvia con il sistema - aprire FrontEngine all'accesso.
 * Ripristina l'ultima sessione - riaprire ciò che c'era sullo schermo.
@@ -121,3 +121,5 @@ L’elenco delle preimpostazioni e l’intervallo di rotazione usano le etichett
 Le preimpostazioni pianificate mostrano etichette separate per ora e minuto. I campi della preimpostazione, dell’ora, del minuto, dell’inattività e della sorgente del salvaschermo usano le etichette visibili come nomi accessibili. I nomi seguono la lingua senza cambiare i valori selezionati.
 
 Se il salvataggio delle impostazioni del salvaschermo o delle preimpostazioni pianificate non riesce, la finestra mostra l’errore e mantiene le tue scelte. Le impostazioni precedenti restano attive. Risolvi il problema e conferma di nuovo per riprovare, oppure annulla per scartare le modifiche. Anche i nomi delle sorgenti del salvaschermo seguono la lingua senza cambiare la sorgente selezionata.
+
+Un user_setting.json danneggiato non impedisce più l’avvio: FrontEngine usa i valori predefiniti e conserva il vecchio file accanto come user_setting.damaged-<ora>.json. Le impostazioni esportate non contengono la cronologia degli appunti, e note, animali e posizione della finestra importati sopravvivono al riavvio richiesto. Un preset importato non sostituisce mai uno tuo: riceve un numero. I nomi dei preset possono usare qualsiasi lingua.

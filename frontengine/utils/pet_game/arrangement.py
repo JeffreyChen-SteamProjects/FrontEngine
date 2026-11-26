@@ -120,7 +120,10 @@ def decode_layout(text: str, catalog) -> list[tuple[str, int, bool]]:
     """Validate a pasted layout code at the boundary; anything unexpected is rejected, not trusted."""
     if not isinstance(text, str) or len(text) > MAX_LAYOUT_TEXT:
         raise ValueError("Layout code too large")
-    data = json.loads(text)
+    try:
+        data = json.loads(text)
+    except RecursionError as error:
+        raise ValueError("JSON nested too deeply") from error
     if not isinstance(data, dict) or data.get("format") != LAYOUT_FORMAT or data.get("version") != 1:
         raise ValueError("Not a FrontEngine home layout")
     pieces = data.get("pieces")

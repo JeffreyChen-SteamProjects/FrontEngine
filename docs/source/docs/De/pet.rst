@@ -148,3 +148,5 @@ Wird das Fotofenster während der Wahl des Speicherorts geschlossen, wird der zu
 Wird die Garderobe während der Ordner- oder Farbauswahl geschlossen, wird die zurückgegebene Auswahl verworfen. Es startet keine Installation und keine Farbe wird geändert. Weitere Auswahlaufrufe der geschlossenen Garderobe werden ebenfalls ignoriert.
 
 Das Ereignis „Abendessen mit Freunden“ tritt auf, wenn mindestens drei Bewohner im selben Bereich essen. Mahlzeiten in getrennten Bereichen zählen nicht als gemeinsames Treffen. Das Ereignis wird höchstens einmal pro Heimtag erfasst, auch nach dem Speichern und erneuten Öffnen.
+
+Haustier-Identitäten → Identität löschen entfernt ein gespeichertes Haustier nach Rückfrage endgültig; eines auf dem Bildschirm oder im Zuhause muss vorher weggeräumt werden oder ausziehen. Vom Desktop kommt ein Haustier mit der dort erworbenen Zuneigung ins Zuhause zurück. „Beim Tippen still halten“ gehört zu den Voreinstellungen, und eine für ein Haustier gewählte Figur kleidet kein anderes mehr ein.

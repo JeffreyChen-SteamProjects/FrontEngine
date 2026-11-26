@@ -9,7 +9,7 @@ from frontengine.utils.screen_privacy.capture_affinity import (
     is_excluded_from_capture, set_excluded_from_capture,
 )
 from frontengine.utils.screen_privacy.share_watch import (
-    DEFAULT_SHARING_APPS, ShareWatchService, running_app_names, sharing_app_running,
+    DEFAULT_SHARING_APPS, ShareWatchService, sharing_app_running,
 )
 
 
@@ -38,11 +38,6 @@ def test_an_empty_list_falls_back_to_the_usual_suspects() -> None:
 def test_a_meeting_in_a_browser_tab_is_caught_by_the_title() -> None:
     # 標題比對的用意就在這裡：瀏覽器裡開的會議，執行檔名是 chrome
     assert sharing_app_running("meet", ["Meet - abc-defg-hij - Google Chrome"]) == "meet"
-
-
-def test_window_names_are_normalized_and_deduplicated() -> None:
-    names = running_app_names(lambda: [(1, "Zoom Meeting"), (2, "Zoom Meeting"), (3, "Code")])
-    assert names == ["zoom meeting", "code"]
 
 
 # --- the watcher ----------------------------------------------------------

@@ -327,7 +327,7 @@ class Scene3DEditor(QWidget):
         self.status.setText(str(error))
 
     def _refresh(self):
-        if self.runtime:
+        if self.runtime and not self.position.hasFocus():          # not under the fingers of someone typing
             self.position.setValue(self.runtime.timeline.position)
         if self.viewport:
             self.viewport.update()
@@ -395,8 +395,12 @@ class Scene3DEditor(QWidget):
             self.clip_start.setValue(clip.get('start', 0))
             self.clip_rate.setValue(clip.get('rate', 1))
             self.clip_loop.setChecked(clip.get('loop', True))
+            self.shown = {name: spin.value() for name, spin in self.fields.items()}
         finally:
             self.syncing = False
+
+    def _edited(self, name):
+        return self.fields[name].value() != getattr(self, 'shown', {}).get(name)
 
     def _apply(self):
         if self.syncing or len(self.selected) != 1:
@@ -405,8 +409,15 @@ class Scene3DEditor(QWidget):
         entry = self.document.entries[key]
         if entry.get('locked'):
             return
-        transform = {group: [self.fields[group+'_'+axis].value() for axis in 'xyz'] for group in ('position', 'rotation', 'scale')}
-        transform['rotation'] = euler_quaternion(transform['rotation'])
+        # A field left as it was shown keeps the exact value behind it, not the rounded one on display.
+        before = entry.get('transform', {})
+        transform = {}
+        for group, default in (('position', [0, 0, 0]), ('scale', [1, 1, 1])):
+            transform[group] = [self.fields[f'{group}_{axis}'].value() if self._edited(f'{group}_{axis}') else old
+                                for axis, old in zip('xyz', before.get(group, default))]
+        transform['rotation'] = before.get('rotation', [0, 0, 0, 1])
+        if any(self._edited(f'rotation_{axis}') for axis in 'xyz'):
+            transform['rotation'] = euler_quaternion([self.fields[f'rotation_{axis}'].value() for axis in 'xyz'])
         changes = {'transform': transform, 'parent': self.parent_box.currentData()}
         if changes['parent'] is None:
             changes['parent'] = None

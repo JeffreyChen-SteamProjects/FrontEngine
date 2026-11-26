@@ -22,7 +22,6 @@ from frontengine.ui.page.utils import (
     resolve_span,
 )
 from frontengine.utils.logging.loggin_instance import front_engine_logger
-from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import tr
 from frontengine.ui.page.layout_kit import SettingPage
 from frontengine.utils.web_url import next_page_index, normalize_web_url, parse_dashboard_urls
@@ -97,9 +96,8 @@ class WEBSettingUI(SettingPage):
         # Dashboard: one URL per line, shown one page at a time
         self.dashboard_label = tr(QLabel(), "web_dashboard_label", "Dashboard URLs")
         self.dashboard_edit = QPlainTextEdit()
-        self.dashboard_edit.setPlaceholderText(
-            language_wrapper.language_word_dict.get(
-                "web_dashboard_hint", "One URL per line; lines starting with # are ignored."))
+        tr(self.dashboard_edit, "web_dashboard_hint", "One URL per line; lines starting with # are ignored.",
+           "setPlaceholderText")
         self.dashboard_edit.setMaximumHeight(90)
         self.dashboard_start_button = tr(QPushButton(), "web_dashboard_start", "Start dashboard")
         self.dashboard_start_button.clicked.connect(self.start_dashboard)
@@ -147,13 +145,15 @@ class WEBSettingUI(SettingPage):
         self.enable_input = self.enable_input_checkbox.isChecked()
 
     @owned_action
-    def _create_web_widget(self) -> WebWidget:
+    def _create_web_widget(self, url: "str | None" = None) -> WebWidget:
+        """The page typed in, or ``url``: a dashboard's addresses are never local files."""
         front_engine_logger.info("[WEBSettingUI] _create_web_widget")
-        url_text = self.web_url_input.text()
-        if not self.open_file:
-            # Turn YouTube links into an autoplay embed; other URLs unchanged.
+        is_file = self.open_file and url is None
+        url_text = self.web_url_input.text() if url is None else url
+        if not is_file:
+            # Turn YouTube links into an autoplay embed and complete a bare address.
             url_text = normalize_web_url(url_text)
-        web_widget = WebWidget(url_text, is_file=self.open_file)
+        web_widget = WebWidget(url_text, is_file=is_file)
         web_widget.set_ui_variable(float(self.opacity_slider.value()) / 100)
         web_widget.set_ui_window_flag(
             enable_input=self.enable_input,
@@ -187,15 +187,10 @@ class WEBSettingUI(SettingPage):
         if not urls:
             return
         monitor_index = resolve_preferred_monitor(self.target_monitor_combobox)
-        original_url = self.web_url_input.text()
-        try:
-            for url in urls:
-                self.web_url_input.setText(url)
-                widget = self._create_web_widget()
-                self.dashboard_widgets.append(widget)
-                self._present_dashboard_widget(widget, monitor_index)
-        finally:
-            self.web_url_input.setText(original_url)
+        for url in urls:
+            widget = self._create_web_widget(url)
+            self.dashboard_widgets.append(widget)
+            self._present_dashboard_widget(widget, monitor_index)
         self.dashboard_index = 0
         self._apply_dashboard_visibility()
 
@@ -250,7 +245,8 @@ class WEBSettingUI(SettingPage):
             return
         self.dashboard_index = self.dashboard_index % len(widgets)
         for index, widget in enumerate(widgets):
-            if index == self.dashboard_index:
+            widget.held_back = index != self.dashboard_index          # not for "show all" to show
+            if not widget.held_back:
                 widget.show()
                 widget.raise_()
             else:

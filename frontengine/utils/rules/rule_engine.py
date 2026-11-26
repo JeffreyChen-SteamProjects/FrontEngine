@@ -89,12 +89,12 @@ def in_time_window(minute: int, start: Optional[int], end: Optional[int]) -> boo
     因為「睡前」這種時段本來就跨午夜——不支援的話那個情境就寫不出來。
     Whether the minute falls in [start, end), wrapping past midnight: "late
     evening" genuinely crosses midnight, and without wrapping it cannot be
-    expressed at all.
+    expressed at all. Only a start runs to midnight; only an end runs from it.
     """
     if start is None and end is None:
         return True
-    if start is None or end is None:
-        return True
+    start = 0 if start is None else start
+    end = 1440 if end is None else end
     if start == end:
         return True
     if start < end:

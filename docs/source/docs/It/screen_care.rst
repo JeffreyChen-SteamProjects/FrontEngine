@@ -12,3 +12,5 @@ Pagina Comfort visivo
 
 Questi overlay lasciano passare i clic: tutto ciò che sta sotto continua a
 funzionare.
+
+La simulazione della visione dei colori non sfarfalla più e i suoi colori non cambiano da soli. Su Windows il livello è escluso dalla cattura dello schermo e segue lo schermo da un thread in background, ridisegnando solo ciò che cambia; per questo le catture e la condivisione dello schermo non lo mostrano. Altrove è un’immagine fissa, presa all’avvio e a ogni cambio di impostazione.

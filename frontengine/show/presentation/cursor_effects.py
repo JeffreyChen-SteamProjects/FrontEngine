@@ -15,6 +15,7 @@ from PySide6.QtGui import QColor, QCursor, QPainter, QRadialGradient
 
 from frontengine.show.base_widget import BaseWidget
 from frontengine.utils.logging.loggin_instance import front_engine_logger
+from frontengine.utils.power_mode.power_mode import tier_interval
 
 DEFAULT_RING_COLOR = "#ffcc00"
 DEFAULT_RING_RADIUS = 28
@@ -56,6 +57,7 @@ class CursorEffectWidget(BaseWidget):
     # A full-monitor see-through layer, and the spotlight is a flat dim over all of it: on the
     # GPU compositor the transparency could come out black on some drivers (see BaseWidget).
     software_only = True
+    stays_while_paused = True
 
     def __init__(self, ring: bool = True, ripple: bool = True, spotlight: bool = False,
                  color: str = DEFAULT_RING_COLOR, radius: int = DEFAULT_RING_RADIUS,
@@ -110,7 +112,12 @@ class CursorEffectWidget(BaseWidget):
     def start_following(self, interval_ms: int = REFRESH_MS) -> None:
         """開始跟隨游標。"""
         self.tick()
-        self._timer.start(max(8, int(interval_ms)))
+        self._interval_ms = max(8, int(interval_ms))
+        self._timer.start(tier_interval(self._interval_ms, self.quality_tier))
+
+    def apply_quality_tier(self) -> None:
+        if self._timer.isActive():
+            self._timer.start(tier_interval(self._interval_ms, self.quality_tier))
 
     def add_ripple(self, point: Optional[QPoint] = None) -> None:
         """在指定位置（預設為目前游標）加一圈點擊漣漪。"""

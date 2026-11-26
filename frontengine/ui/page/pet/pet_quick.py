@@ -37,6 +37,7 @@ class PetQuickStart:
     def __init__(self, page) -> None:
         self.page = page
         section = page.add_section("pet_quick_title", "Your pet")
+        section.set_foldable(False)            # what the page is for: always open
         hint = tr(QLabel(), "pet_quick_hint", "Click a character to put it on your desktop.")
         hint.setWordWrap(True)
         section.add_widget(hint)

@@ -114,6 +114,9 @@ def lookup_city(city: str, opener=urllib.request.urlopen) -> Optional[Tuple[floa
     return parse_geocode(fetch_json(build_geocode_url(city), opener=opener))
 
 
+RETRY_SECONDS = 60          # after a request that failed
+
+
 class WeatherService:
     """
     快取式天氣來源：current() 立即回傳最後一次的結果，過期時才在背景執行緒更新，
@@ -129,7 +132,8 @@ class WeatherService:
         self.cache_seconds = max(60, int(cache_seconds))
         self._opener = opener
         self._values: Dict[str, object] = {}
-        self._fetched_at = 0.0
+        self._fetched_at: Optional[float] = None
+        self._tried_at: Optional[float] = None
         self._lock = threading.Lock()
         self._refreshing = False
 
@@ -139,12 +143,14 @@ class WeatherService:
             self.latitude = float(latitude)
             self.longitude = float(longitude)
             self._values = {}
-            self._fetched_at = 0.0
+            self._fetched_at = self._tried_at = None
 
     def current(self) -> Dict[str, object]:
         """回傳目前的天氣欄位；過期時順便觸發一次背景更新。"""
         with self._lock:
-            expired = (time.monotonic() - self._fetched_at) > self.cache_seconds
+            now = time.monotonic()          # since boot: not a time of day, and small after a restart
+            expired = (self._fetched_at is None or now - self._fetched_at > self.cache_seconds) \
+                and (self._tried_at is None or now - self._tried_at > RETRY_SECONDS)
             values = dict(self._values)
         if expired:
             self.refresh_async()
@@ -156,6 +162,7 @@ class WeatherService:
             if self._refreshing:
                 return
             self._refreshing = True
+            self._tried_at = time.monotonic()
         thread = threading.Thread(target=self._refresh, name="frontengine-weather", daemon=True)
         thread.start()
 
@@ -180,6 +187,9 @@ class WeatherService:
                 build_forecast_url(latitude, longitude, unit), opener=self._opener)
             values = parse_forecast(payload) if payload else {}
             with self._lock:
+                if (latitude, longitude, unit) != (self.latitude, self.longitude, self.unit):
+                    self._tried_at = None          # the place was changed meanwhile: that one's weather
+                    return
                 if values.get("temperature") is None:
                     return
                 self._values = values

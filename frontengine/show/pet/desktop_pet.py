@@ -13,6 +13,7 @@ from PySide6.QtGui import (
 from PySide6.QtMultimedia import QSoundEffect
 from PySide6.QtWidgets import QApplication, QMenu, QWidget
 
+from frontengine.utils.screen_privacy import capture_affinity
 from frontengine.show.base_widget import BaseWidget
 from frontengine.show.window_helpers import apply_overlay_window_flags
 from frontengine.user_setting.user_setting_file import user_setting_dict
@@ -34,7 +35,7 @@ PetGrowth = _care_stats.PetGrowth
 FOOD_EFFECTS = _care_stats.FOOD_EFFECTS
 from frontengine.utils.audio_meter.audio_envelope import AudioEnvelope
 from frontengine.utils.logging.loggin_instance import front_engine_logger
-from frontengine.utils.power_mode.power_mode import scaled_interval
+from frontengine.utils.power_mode.power_mode import scaled_interval, tier_interval
 from frontengine.utils.platform_info.platform_info import (
     idle_seconds as platform_idle_seconds,
     read_battery as platform_read_battery,
@@ -455,8 +456,13 @@ def size_for_level(base_size: int, level: int) -> int:
 
 
 
+_BUBBLE_FLAGS = int(Qt.AlignmentFlag.AlignCenter | Qt.TextFlag.TextWordWrap)
+
+
 class SpeechBubble(QWidget):
     """寵物頭上的小對話泡泡，數秒後自動消失 / A small speech bubble that auto-hides."""
+
+    MAX_WIDTH = 260
 
     def __init__(self) -> None:
         super().__init__()
@@ -471,8 +477,10 @@ class SpeechBubble(QWidget):
 
     def show_message(self, text: str, anchor: QWidget, duration_ms: int = 4000) -> None:
         self._text = text
-        width = min(260, QFontMetrics(self._font).horizontalAdvance(text) + 28)
-        self.resize(max(60, width), 44)
+        metrics = QFontMetrics(self._font)
+        width = max(60, min(self.MAX_WIDTH, metrics.horizontalAdvance(text) + 28))
+        wrapped = metrics.boundingRect(QRect(0, 0, width - 18, 4000), _BUBBLE_FLAGS, text)
+        self.resize(width, max(44, wrapped.height() + 14))
         self.reposition(anchor)
         self.show()
         self.raise_()
@@ -481,7 +489,19 @@ class SpeechBubble(QWidget):
 
     def reposition(self, anchor: QWidget) -> None:
         geo = anchor.frameGeometry()
-        self.move(geo.center().x() - self.width() // 2, geo.top() - self.height() - 6)
+        x, y = geo.center().x() - self.width() // 2, geo.top() - self.height() - 6
+        screen = anchor.screen()
+        if screen is not None:          # a pet on the ceiling or at an edge still says it on screen
+            area = screen.availableGeometry()
+            if y < area.top():
+                y = geo.bottom() + 6
+            x = max(area.left(), min(x, area.right() - self.width() + 1))
+            y = max(area.top(), min(y, area.bottom() - self.height() + 1))
+        self.move(x, y)
+
+    def showEvent(self, event) -> None:
+        super().showEvent(event)
+        capture_affinity.follow(self)
 
     def paintEvent(self, event) -> None:
         painter = QPainter(self)
@@ -494,7 +514,7 @@ class SpeechBubble(QWidget):
         painter.setFont(self._font)
         painter.drawText(
             rect.adjusted(8, 2, -8, -2),
-            int(Qt.AlignmentFlag.AlignCenter | Qt.TextFlag.TextWordWrap),
+            _BUBBLE_FLAGS,
             self._text,
         )
 
@@ -577,6 +597,8 @@ class PetMotion:
         """BEHAVIOUR_ACTIONS is the floor mode with every action picked at random, so floor checks hold."""
         self.random_actions = value == BEHAVIOUR_ACTIONS
         self._behaviour = BEHAVIOUR_FLOOR if self.random_actions else value
+        if self._behaviour != BEHAVIOUR_FLOOR:          # no floor to stand on, and no wall to hang from
+            self.surface, self._airborne, self.on_platform = SURFACE_FLOOR, False, False
 
     @property
     def mode(self) -> str:
@@ -700,6 +722,10 @@ class PetMotion:
         )
         if airborne:
             return self._step_fall(left, top, right, bottom, floor_y)
+        if self.follow_target_x is not None and self.surface != SURFACE_FLOOR:
+            self.surface, self._airborne = SURFACE_FLOOR, True          # lets go of the wall to follow
+            self.vx, self.vy = 0.0, 0.0
+            return self._step_fall(left, top, right, bottom, floor_y)
         if self.follow_target_x is not None:
             return self._step_follow(left, top, right, bottom, floor_y)
         if self.on_platform:
@@ -777,7 +803,9 @@ class PetMotion:
             if crossed and over_it and (land_feet is None or platform_y < land_feet):
                 land_feet = float(platform_y)
                 land_span = (float(platform_left), float(platform_right))
-        if prev_feet <= bottom <= new_feet and (land_feet is None or bottom < land_feet):
+        # At or below the floor, wherever it started: let go over the taskbar, or grown in mid-fall, its
+        # feet are past the floor already and would never cross it.
+        if new_feet >= bottom and (land_feet is None or bottom < land_feet):
             return (float(bottom), None)
         return (land_feet, land_span)
 
@@ -1079,7 +1107,6 @@ class DesktopPetWidget(BaseWidget):
 
         # Speech bubbles / chatter / mood
         self._talk = bool(talk)
-        self._moved = False
         self._chatter_rng = _random_module.SystemRandom()
         self._mood = self.companion.mood
         self._hunger = self.companion.hunger
@@ -1432,7 +1459,14 @@ class DesktopPetWidget(BaseWidget):
         """省電模式：把移動更新拉慢（畫面較不順，但省電）。"""
         self._low_power = bool(enabled)
         if self._timer.isActive():
-            self._timer.start(scaled_interval(self._tick_interval_ms, self._low_power))
+            self._timer.start(self._tick_ms())
+
+    def apply_quality_tier(self) -> None:
+        if self._timer.isActive():
+            self._timer.start(self._tick_ms())
+
+    def _tick_ms(self) -> int:
+        return tier_interval(scaled_interval(self._tick_interval_ms, self._low_power), self.quality_tier)
 
     def start_moving(self, bounds: Tuple[int, int, int, int], interval_ms: int = 33) -> None:
         front_engine_logger.info(f"[DesktopPetWidget] start_moving | bounds={bounds}")
@@ -1444,7 +1478,7 @@ class DesktopPetWidget(BaseWidget):
         # A freshly summoned pet sets off walking at once instead of rolling its first action.
         self.motion.wake()
         self._tick_interval_ms = max(10, int(interval_ms))
-        self._timer.start(scaled_interval(self._tick_interval_ms, self._low_power))
+        self._timer.start(self._tick_ms())
         self._schedule_chatter()
         self._reminder_timer.start(10000)
         if self._timeline_start is None:
@@ -1675,9 +1709,6 @@ class DesktopPetWidget(BaseWidget):
         self.resize(new_size, new_size)
         self.motion.width = new_size
         self.motion.height = new_size
-
-    def _persist_mood(self) -> None:
-        self.profile_session.schedule()
 
     def add_reminder(self, text: str, minutes: int) -> None:
         """在 minutes 分鐘後提醒 text / Remind `text` in `minutes` minutes."""
@@ -2078,7 +2109,10 @@ class DesktopPetWidget(BaseWidget):
                     velocity = self._last_move_delta if self.companion.preferences["allow_throw"] else (0, 0)
                     self.motion.throw(*velocity)
             else:
-                self._interaction_feedback(self.profile_session.request("greet"))
+                result = self.profile_session.request("greet")
+                if result == "accepted":
+                    self._play_sound()
+                self._interaction_feedback(result)
         super().mouseReleaseEvent(event)
 
     def leaveEvent(self, event) -> None:
@@ -2103,6 +2137,8 @@ class DesktopPetWidget(BaseWidget):
         for timer, remaining in self._hidden_timers:
             timer.start(remaining if timer.isSingleShot() else timer.interval())
         self._hidden_timers = []
+        if self._timer.isActive():
+            self._timer.start(self._tick_ms())          # changed while hidden, maybe
         if not self._welcomed:
             self._welcome()
         self.profile_session.changed.emit()

@@ -10,6 +10,8 @@ the content builders are pure so they can be tested on any platform.
 """
 from __future__ import annotations
 
+import json
+import os
 import sys
 from pathlib import Path
 from typing import List, Optional
@@ -35,12 +37,56 @@ def launch_command() -> List[str]:
     """
     回傳能重新啟動本程式的命令：打包成執行檔時就是執行檔本身，
     否則以目前的直譯器執行 `-m frontengine`。
-    The command that relaunches the app: the frozen executable when packaged,
-    otherwise the current interpreter running ``-m frontengine``.
+    The command that relaunches the app: the packaged executable, otherwise the
+    current interpreter running ``-m frontengine``. ``--autostart`` sends it to
+    the data directory recorded when this was switched on: settings live in the
+    directory the app runs in, and the session starts programs in one of its own
+    (System32, the home directory, ``/``).
     """
     if getattr(sys, "frozen", False):
-        return [sys.executable]
-    return [sys.executable, "-m", "frontengine"]
+        program = [sys.executable]
+    elif is_compiled():
+        program = [str(Path(sys.argv[0]).resolve())]
+    else:
+        program = [sys.executable, "-m", "frontengine"]
+    return program + [AUTOSTART_FLAG]
+
+
+AUTOSTART_FLAG = "--autostart"
+
+
+def record_path() -> Path:
+    """Where the data directory for a start with the session is kept: the user's own settings folder."""
+    if sys.platform == "win32":
+        base = Path(os.environ.get("APPDATA") or Path.home() / "AppData" / "Roaming")
+    elif sys.platform == "darwin":
+        base = Path.home() / "Library" / "Application Support"
+    else:
+        base = Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config")
+    return base / "FrontEngine" / "autostart.json"
+
+
+def remember_directory(directory: Path) -> None:
+    path = record_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps({"directory": str(Path(directory).resolve())}), encoding="utf-8")
+
+
+def recorded_directory() -> Optional[Path]:
+    """The data directory recorded with the autostart entry, when it is still a directory."""
+    try:
+        value = json.loads(record_path().read_text(encoding="utf-8")).get("directory")
+    except (OSError, ValueError, AttributeError, RecursionError):
+        return None
+    if not isinstance(value, str) or not value:
+        return None
+    directory = Path(value)
+    return directory if directory.is_absolute() and directory.is_dir() else None
+
+
+def is_compiled() -> bool:
+    """Whether this is the Nuitka build, which does not set ``sys.frozen``."""
+    return "__compiled__" in globals()
 
 
 def quote_command(command: List[str]) -> str:
@@ -58,7 +104,7 @@ def desktop_entry_text(command: List[str], app_name: str = APP_NAME) -> str:
         "[Desktop Entry]\n"
         "Type=Application\n"
         f"Name={app_name}\n"
-        f"Exec={quote_command(command)}\n"
+        f"Exec={quote_command(command).replace('%', '%%')}\n"       # % starts a field code there
         "X-GNOME-Autostart-enabled=true\n"
         "Terminal=false\n"
     )
@@ -110,12 +156,28 @@ def set_enabled(enabled: bool) -> bool:
     """
     front_engine_logger.info(f"[autostart] set_enabled | enabled={enabled}")
     try:
+        if enabled:
+            remember_directory(Path.cwd())
         if sys.platform == "win32":
             return _set_windows(enabled)
         return _set_file(enabled)
     except (OSError, ValueError) as error:
         front_engine_logger.warning(f"[autostart] failed: {error!r}")
         return False
+
+
+def refresh() -> None:
+    """Rewrite an entry from before it went back to the data directory; leave any other alone."""
+    if sys.platform == "win32":
+        current = _read_windows_run_value()
+    else:
+        path = autostart_path()
+        try:
+            current = path.read_text(encoding="utf-8") if path is not None and path.is_file() else None
+        except (OSError, ValueError):
+            current = None
+    if current is not None and AUTOSTART_FLAG not in current:
+        set_enabled(True)
 
 
 def _set_file(enabled: bool) -> bool:

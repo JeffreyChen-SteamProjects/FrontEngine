@@ -23,6 +23,7 @@ from frontengine.utils.platform_info.platform_info import read_battery
 _ERROR_INSUFFICIENT_BUFFER = 122
 _MAX_INTERFACE_NAME_LEN = 256
 _MAXLEN_PHYSADDR = 8
+_FILTER_INTERFACE = 0x02          # MIB_IF_ROW2: a filter driver listing its adapter again
 _IF_TYPE_SOFTWARE_LOOPBACK = 24
 # 電池快取秒數。macOS 的讀數要開一個 pmset 子行程，而監控覆蓋層是每秒取樣的；
 # 電量不會秒秒在變，快取讓每秒取樣不會每秒 fork 一次。
@@ -301,98 +302,96 @@ class SystemStats:
             return None
         now = time.monotonic()
         previous = self._previous_network
-        self._previous_network = (counters[0], counters[1], now)
+        self._previous_network = (counters, now)
         if previous is None:
             return (None, None)
-        elapsed = now - previous[2]
-        return (
-            rate_per_second(previous[0], counters[0], elapsed, counter_bits=64),
-            rate_per_second(previous[1], counters[1], elapsed, counter_bits=64),
-        )
+        elapsed = now - previous[1]
+        if elapsed <= 0:
+            return (None, None)
+        received, sent = network_delta(previous[0], counters)
+        return (received / elapsed, sent / elapsed)
 
     def _network_counters(self):
+        """Interface -> (received, sent) bytes since it came up, or None."""
         if sys.platform == "win32":
             return self._network_counters_windows()
         return self._network_counters_proc()
 
     @staticmethod
     def _network_counters_windows():
-        """加總所有非回送介面的收送位元組（GetIfTable）。"""
+        """Every real interface's counters, by GetIfTable2: 64 bits wide, unlike GetIfTable's, which
+        come round again every 4 GiB. Filter drivers list the same adapter a second time."""
         try:
             import ctypes
 
-            class _MibIfRow(ctypes.Structure):
-                _fields_ = [
-                    ("wszName", ctypes.c_wchar * _MAX_INTERFACE_NAME_LEN),
-                    ("dwIndex", ctypes.c_uint32),
-                    ("dwType", ctypes.c_uint32),
-                    ("dwMtu", ctypes.c_uint32),
-                    ("dwSpeed", ctypes.c_uint32),
-                    ("dwPhysAddrLen", ctypes.c_uint32),
-                    ("bPhysAddr", ctypes.c_ubyte * _MAXLEN_PHYSADDR),
-                    ("dwAdminStatus", ctypes.c_uint32),
-                    ("dwOperStatus", ctypes.c_uint32),
-                    ("dwLastChange", ctypes.c_uint32),
-                    ("dwInOctets", ctypes.c_uint32),
-                    ("dwInUcastPkts", ctypes.c_uint32),
-                    ("dwInNUcastPkts", ctypes.c_uint32),
-                    ("dwInDiscards", ctypes.c_uint32),
-                    ("dwInErrors", ctypes.c_uint32),
-                    ("dwInUnknownProtos", ctypes.c_uint32),
-                    ("dwOutOctets", ctypes.c_uint32),
-                    ("dwOutUcastPkts", ctypes.c_uint32),
-                    ("dwOutNUcastPkts", ctypes.c_uint32),
-                    ("dwOutDiscards", ctypes.c_uint32),
-                    ("dwOutErrors", ctypes.c_uint32),
-                    ("dwOutQLen", ctypes.c_uint32),
-                    ("dwDescrLen", ctypes.c_uint32),
-                    ("bDescr", ctypes.c_ubyte * 256),
-                ]
-
-            iphlpapi = ctypes.windll.iphlpapi
-            size = ctypes.c_uint32(0)
-            if iphlpapi.GetIfTable(None, ctypes.byref(size), False) != _ERROR_INSUFFICIENT_BUFFER:
+            table = ctypes.c_void_p()
+            iphlpapi = ctypes.WinDLL("iphlpapi")
+            iphlpapi.GetIfTable2.argtypes = [ctypes.POINTER(ctypes.c_void_p)]
+            iphlpapi.FreeMibTable.argtypes = [ctypes.c_void_p]
+            if iphlpapi.GetIfTable2(ctypes.byref(table)) != 0 or not table.value:
                 return None
-            buffer = ctypes.create_string_buffer(size.value)
-            if iphlpapi.GetIfTable(buffer, ctypes.byref(size), False) != 0:
-                return None
-            count = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_uint32))[0]
-            # 從緩衝區位址往後跳過開頭的計數欄位，再當成 row 陣列讀。
-            # 用 addressof + 位移比把 byref 的結果丟給 cast 明確得多。
-            # Step past the leading count field by address and read the rest as
-            # rows. addressof plus an offset is far clearer than handing cast
-            # the result of byref.
-            rows = ctypes.cast(
-                ctypes.addressof(buffer)  # NOSONAR - a char array is a ctypes instance
-                + ctypes.sizeof(ctypes.c_uint32),
-                ctypes.POINTER(_MibIfRow))
-            received = sent = 0
-            for index in range(count):
-                row = rows[index]
-                if row.dwType == _IF_TYPE_SOFTWARE_LOOPBACK:
-                    continue
-                received += row.dwInOctets
-                sent += row.dwOutOctets
-            return (received, sent)
+            try:
+                count = ctypes.c_uint32.from_address(table.value).value
+                row_type = _interface_row()
+                rows = (row_type * count).from_address(table.value + 8)          # rows are aligned to 8 bytes
+                return {row.InterfaceLuid: (row.InOctets, row.OutOctets) for row in rows
+                        if row.Type != _IF_TYPE_SOFTWARE_LOOPBACK and not row.Flags & _FILTER_INTERFACE}
+            finally:
+                iphlpapi.FreeMibTable(table)
         except Exception as error:  # pragma: no cover - Win32 boundary
-            front_engine_logger.debug(f"[SystemStats] GetIfTable failed: {error!r}")
+            front_engine_logger.debug(f"[SystemStats] GetIfTable2 failed: {error!r}")
             return None
 
     @staticmethod
     def _network_counters_proc():
         try:
-            received = sent = 0
+            counters = {}
             with open("/proc/net/dev", "r", encoding="utf-8") as handle:
                 for line in handle.readlines()[2:]:
                     name, _, rest = line.partition(":")
                     if name.strip() == "lo":
                         continue
                     fields = rest.split()
-                    received += int(fields[0])
-                    sent += int(fields[8])
-            return (received, sent)
+                    counters[name.strip()] = (int(fields[0]), int(fields[8]))
+            return counters
         except (OSError, IndexError, ValueError):
             return None
+
+
+def network_delta(previous: dict, current: dict) -> tuple:
+    """Bytes received and sent in between, over the interfaces present both times.
+
+    One that went away or started over (a VPN, Wi-Fi switched off) counts for nothing rather than
+    making the total run backwards."""
+    received = sent = 0
+    for name, (now_in, now_out) in current.items():
+        before = previous.get(name)
+        if before is not None and now_in >= before[0] and now_out >= before[1]:
+            received += now_in - before[0]
+            sent += now_out - before[1]
+    return received, sent
+
+
+def _interface_row():
+    """MIB_IF_ROW2, as far as the octet counters and padded to its size."""
+    import ctypes
+
+    class Row(ctypes.Structure):
+        _fields_ = [
+            ("InterfaceLuid", ctypes.c_uint64), ("InterfaceIndex", ctypes.c_uint32),
+            ("InterfaceGuid", ctypes.c_ubyte * 16), ("Alias", ctypes.c_uint16 * 257),
+            ("Description", ctypes.c_uint16 * 257), ("PhysicalAddressLength", ctypes.c_uint32),
+            ("PhysicalAddress", ctypes.c_ubyte * 32), ("PermanentPhysicalAddress", ctypes.c_ubyte * 32),
+            ("Mtu", ctypes.c_uint32), ("Type", ctypes.c_uint32), ("TunnelType", ctypes.c_uint32),
+            ("MediaType", ctypes.c_uint32), ("PhysicalMediumType", ctypes.c_uint32),
+            ("AccessType", ctypes.c_uint32), ("DirectionType", ctypes.c_uint32), ("Flags", ctypes.c_ubyte),
+            ("OperStatus", ctypes.c_uint32), ("AdminStatus", ctypes.c_uint32),
+            ("MediaConnectState", ctypes.c_uint32), ("NetworkGuid", ctypes.c_ubyte * 16),
+            ("ConnectionType", ctypes.c_uint32), ("TransmitLinkSpeed", ctypes.c_uint64),
+            ("ReceiveLinkSpeed", ctypes.c_uint64), ("InOctets", ctypes.c_uint64),
+            ("InRest", ctypes.c_uint64 * 8), ("OutOctets", ctypes.c_uint64), ("OutRest", ctypes.c_uint64 * 8),
+        ]
+    return Row
 
 
 _stats_singleton: Optional[SystemStats] = None

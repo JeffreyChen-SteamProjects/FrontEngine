@@ -23,7 +23,7 @@ Menü „Einstellungen“
   Bildschirm einfrieren, die Kürzelliste sowie Medien abspielen/pausieren,
   nächster und vorheriger Titel sowie das Verschieben des Vordergrundfensters
   auf den nächsten Bildschirm unter Beibehaltung seiner Proportionen.
-* Design - wie das System, hell oder dunkel. Werkzeugseiten haben ein ruhiges, neutrales Design; die Haustierseiten und ihre Dialoge tragen den Tinte-und-Papier-Stil der eingebauten Figuren mit der runden Schrift jf open huninn (vereinfachtes Chinesisch behält die Systemschrift).
+* Design - wie das System, hell oder dunkel. Das Fenster ist geschichtetes Glas über einer unscharfen Kopie des Desktopbilds oder, wenn „Hintergrund vom Desktopbild“ im selben Menü aus ist, über einem eingebauten Bild; die Haustierseiten und ihre Dialoge haben einen warmen Ton und die runde Schrift jf open huninn (vereinfachtes Chinesisch behält die Systemschrift).
 * Tag-/Nacht-Design nach Zeitplan - tagsüber hell, nachts dunkel.
 * Mit dem System starten - FrontEngine bei der Anmeldung starten.
 * Letzte Sitzung wiederherstellen - wieder öffnen, was zuletzt zu sehen war.
@@ -120,3 +120,5 @@ Die Signage-Preset-Liste und das Wechselintervall verwenden ihre sichtbaren Besc
 Geplante Presets zeigen getrennte Beschriftungen für Stunde und Minute. Preset, Stunde, Minute sowie Leerlaufdauer und Quelle des Bildschirmschoners verwenden ihre sichtbaren Beschriftungen als barrierefreie Namen. Diese folgen dem Sprachwechsel, ohne die ausgewählten Werte zu ändern.
 
 Schlägt das Speichern der Einstellungen für Bildschirmschoner oder geplante Presets fehl, zeigt der Dialog den Fehler an und behält Ihre Auswahl. Die bisherigen Einstellungen bleiben aktiv. Beheben Sie das Problem und bestätigen Sie erneut, um es noch einmal zu versuchen, oder brechen Sie ab, um die Änderungen zu verwerfen. Die Quellennamen des Bildschirmschoners folgen außerdem dem Sprachwechsel, ohne die gewählte Quelle zu ändern.
+
+Eine beschädigte user_setting.json verhindert den Start nicht mehr: FrontEngine läuft mit den Vorgaben und behält die alte Datei daneben als user_setting.damaged-<Zeit>.json. Exportierte Einstellungen enthalten keinen Zwischenablageverlauf, und importierte Notizen, Desktop-Haustiere und die Fensterposition überstehen den nötigen Neustart. Importierte Voreinstellungen ersetzen nie eine eigene, sie erhalten eine Nummer. Namen dürfen jede Sprache verwenden.

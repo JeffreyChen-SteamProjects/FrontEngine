@@ -229,4 +229,4 @@ class ImageCompareDialog(QDialog):
         self._request, self._paths = None, ()
         self._items.clear()
         self.scene.clear()
-        super().closeEvent(event)
+        event.accept()          # QDialog's own would call reject(), which closes: it never got closed

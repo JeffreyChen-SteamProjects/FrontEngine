@@ -11,7 +11,7 @@ from frontengine.ui.runtime_lifetime import OwnedWidgetList
 from typing import List, Optional
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QGuiApplication
+from PySide6.QtGui import QCursor, QGuiApplication
 from PySide6.QtWidgets import (
     QFileDialog,
     QCheckBox, QComboBox, QLabel, QPushButton, QSlider,
@@ -226,6 +226,12 @@ class PresentationSettingUI(SettingPage):
         if not self.keystroke_widget_list and not self.cursor_widget_list:
             self.input_watch.stop()
 
+    def stop_overlays(self) -> None:
+        """Every overlay was closed from outside: offer to start them again."""
+        for stop in (self.stop_annotation, self.stop_cursor_effects, self.stop_keystrokes, self.stop_magnifier,
+                     self.stop_whiteboard, self.unfreeze):
+            stop()
+
     # --- annotation ------------------------------------------------------
     @owned_action
     def toggle_annotation(self) -> None:
@@ -242,6 +248,10 @@ class PresentationSettingUI(SettingPage):
             self.annotate_color_combobox.currentData(), self.annotate_width_slider.value(),
             self.annotate_tool_combobox.currentData())
         widget.set_annotation_window_flag()
+        widget.finish_requested.connect(self.stop_annotation)
+        widget.tool_changed.connect(lambda tool: self._select_by(self.annotate_tool_combobox, tool, "findData"))
+        widget.color_changed.connect(
+            lambda color: self._select_by(self.annotate_color_combobox, color, "findData"))
         self.annotation_widget_list.append(widget)
         self._present(widget)
         retranslator.set_text(
@@ -369,12 +379,12 @@ class PresentationSettingUI(SettingPage):
                 self.keystroke_widget_list.remove(widget)
 
     @owned_action
-    def _on_mouse_clicked(self, x: int, y: int) -> None:
-        from PySide6.QtCore import QPoint
-
+    def _on_mouse_clicked(self, _x: int, _y: int) -> None:
+        # The hook reports physical pixels and the overlay counts in logical ones; Qt knows the cursor.
+        cursor = QCursor.pos()
         for widget in self.cursor_widget_list[:]:
             try:
-                widget.add_ripple(QPoint(int(x) - widget.x(), int(y) - widget.y()))
+                widget.add_ripple(cursor - widget.pos())
             except RuntimeError:
                 self.cursor_widget_list.remove(widget)
 
@@ -494,10 +504,21 @@ class PresentationSettingUI(SettingPage):
         front_engine_logger.info("[PresentationSettingUI] start_whiteboard")
         board = WhiteboardWidget(self.annotate_color_combobox.currentData(),
                                  self.annotate_width_slider.value(), lifetime=self.lifetime)
+        board.destroyed.connect(lambda: self._forget_whiteboard(board))
         self._present(board)
         self.whiteboard_widget_list.append(board)
         retranslator.set_text(
             self.whiteboard_button, "whiteboard_stop", "Close whiteboard")
+
+    def _forget_whiteboard(self, board) -> None:
+        """Closed by Escape on the board itself: the button must not go on offering to close it."""
+        if board in self.whiteboard_widget_list:
+            self.whiteboard_widget_list.remove(board)
+        if not self.whiteboard_widget_list:
+            try:
+                retranslator.set_text(self.whiteboard_button, "whiteboard_start", "Whiteboard")
+            except RuntimeError:          # the page went first
+                return
 
     def stop_whiteboard(self) -> None:
         self._close_all(self.whiteboard_widget_list)

@@ -24,7 +24,7 @@ Menu Réglages
   verrouillage, le gel de l'écran, la liste des raccourcis, ainsi que
   lecture/pause, piste suivante et précédente, et le déplacement de la fenêtre
   active vers l'écran suivant en conservant ses proportions.
-* Thème - suivre le système, clair ou sombre. Les pages d'outils ont un design calme et neutre ; les pages des mascottes et leurs fenêtres adoptent le style encre et papier des personnages intégrés, avec la police arrondie jf open huninn (le chinois simplifié garde la police système).
+* Thème - suivre le système, clair ou sombre. La fenêtre est faite de verre superposé sur une copie floue du fond d'écran, ou sur une image intégrée si « Arrière-plan d’après le fond d’écran » est désactivé dans le même menu ; les pages des mascottes et leurs fenêtres ont une teinte chaude et la police arrondie jf open huninn (le chinois simplifié garde la police système).
 * Thème jour/nuit programmé - clair le jour, sombre la nuit.
 * Lancer au démarrage du système - ouvrir FrontEngine à l'ouverture de session.
 * Restaurer la dernière session - rouvrir ce qui était affiché la dernière fois.
@@ -123,3 +123,5 @@ La liste des préréglages d’affichage et l’intervalle de rotation utilisent
 Les préréglages planifiés affichent des libellés distincts pour l’heure et les minutes. Le préréglage, l’heure, les minutes, la durée d’inactivité et la source de l’économiseur d’écran utilisent leurs libellés visibles comme noms accessibles. Ces noms suivent la langue sans changer les valeurs sélectionnées.
 
 Si l’enregistrement des réglages de l’économiseur d’écran ou des préréglages planifiés échoue, la fenêtre affiche l’erreur et conserve vos choix. Les réglages précédents restent actifs. Corrigez le problème puis confirmez à nouveau pour réessayer, ou annulez pour abandonner les modifications. Les noms des sources de l’économiseur d’écran suivent aussi la langue sans changer la source sélectionnée.
+
+Un user_setting.json abîmé n’empêche plus le démarrage : FrontEngine utilise les valeurs par défaut et garde l’ancien fichier à côté, sous user_setting.damaged-<heure>.json. Les réglages exportés omettent l’historique du presse-papiers, et les notes, animaux de bureau et position de fenêtre importés survivent au redémarrage demandé. Un préréglage importé ne remplace jamais l’un des vôtres, il reçoit un numéro ; les noms acceptent toutes les langues.

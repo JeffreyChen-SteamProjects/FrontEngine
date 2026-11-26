@@ -6,7 +6,7 @@ from PySide6.QtWidgets import QWidget, QGridLayout, QPlainTextEdit, QPushButton,
 
 from frontengine.show.scene.extend_graphic_view import ExtendGraphicView
 from frontengine.ui.page.utils import create_monitor_selection_dialog
-from frontengine.user_setting.scene_setting import choose_scene_json, write_scene_file, scene_json
+from frontengine.user_setting.scene_setting import choose_scene_file, write_scene_file, scene_json
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.retranslate import tr
 from frontengine.utils.scene_format.scene_3d_document import SceneDocument, read_scene_document
@@ -103,8 +103,7 @@ class SceneManagerUI(QWidget):
             except ValueError as error:
                 QMessageBox.warning(self, "Scene Error", str(error))
                 return
-            scene_json.clear()
-            scene_json.update(entries)
+            adopt_scene_document(entries)          # the mode with it: 2D layers in a 3D scene cannot be opened
             self.renew_json_plain_text()
 
     def start_scene(self):
@@ -124,7 +123,10 @@ class SceneManagerUI(QWidget):
             screens = QGuiApplication.screens()
             selection = 'all' if self.show_all_screen else (
                 screens.index(monitors[0]) if monitors and monitors[0] in screens else 'primary')
-            self.actions.request_entries(scene, selection)
+            try:
+                self.actions.request_entries(scene, selection)
+            except ValueError as error:
+                QMessageBox.warning(self, "Scene Error", str(error))
             return
         self._add_scene_widgets(scene)
         for monitor in monitors:
@@ -230,17 +232,20 @@ class SceneManagerUI(QWidget):
             return False
 
     def update_scene_json(self):
+        """Open a scene file. It is read off the GUI thread - a package can hold hundreds of megabytes -
+        and goes into the editor once it has proved readable."""
         front_engine_logger.info("[SceneManagerUI] update_scene_json")
-        try:
-            choose_scene_json(self)
-        except (OSError, ValueError) as error:
-            # 選到壞掉或讀不到的場景檔。不接住的話畫面完全沒反應，
-            # 使用者只會覺得那個按鈕壞了。
-            # A scene file that is corrupt or unreadable. Uncaught, nothing at all
-            # happens on screen and the button just looks broken.
-            QMessageBox.critical(self, "Scene Error", f"Cannot read that scene file: {error}")
+        path = choose_scene_file(self)
+        if not path:
             return
-        self.renew_json_plain_text()
+        operation = self.actions.request(json.dumps({"path": path}), load_only=True)
+        operation.finished.connect(self._scene_read)
+
+    def _scene_read(self, success: bool, error: str) -> None:
+        if not success:
+            # 選到壞掉或讀不到的場景檔。不說的話畫面完全沒反應，使用者只會覺得那個按鈕壞了。
+            # A scene file that is corrupt or unreadable. Unsaid, the button just looks broken.
+            QMessageBox.critical(self, "Scene Error", f"Cannot read that scene file: {error}")
 
     def renew_json_plain_text(self):
         front_engine_logger.info("[SceneManagerUI] renew_json_plain_text")

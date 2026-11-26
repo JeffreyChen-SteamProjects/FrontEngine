@@ -40,3 +40,5 @@ Anche le etichette delle sottoschede dello script della scena e dei contenuti mu
 Le indicazioni di durata automatica e assenza di un oggetto padre nell’editor 3D seguono la lingua dell’interfaccia. Durata e relazioni tra oggetti restano invariate, anche dopo aver selezionato un altro oggetto ed essere tornati al precedente.
 
 Chiudere l’uscita della scena durante la scelta del colore di sfondo della videocamera scarta il colore e arresta l’anteprima. Annullare solo la scelta del colore mantiene il colore attuale e lascia attiva l’anteprima. Riaprire l’uscita della scena per scegliere un altro colore. L’anteprima non apre una videocamera.
+
+La pagina Scena offre avvio e arresto della scena in fondo a ogni scheda. Nell’editor 3D la vista ha uno sfondo scuro con una griglia, così si vedono una scena vuota e la direzione dello sguardo; la griglia non compare mai sul desktop né nell’output. Una scena vuota invita ad aggiungere un oggetto 3D.

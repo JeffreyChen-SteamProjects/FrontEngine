@@ -29,7 +29,8 @@ from frontengine.utils.midi.midi_input import available as midi_available, list_
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import tr
 from frontengine.utils.remote.remote_server import ALLOWED_ACTIONS
-from frontengine.ui.dialog.dialog_kit import button_row, roomy
+from frontengine.utils.actions.action_registry import ACTION_LABELS
+from frontengine.ui.dialog.dialog_kit import button_row, roomy, save_or_tell
 
 MIDI_KEY = "midi_bindings"
 REMOTE_KEY = "phone_remote"
@@ -65,6 +66,7 @@ class RemoteControlDialog(QDialog):
         self._remote = remote
         self._midi = midi
         self._learning = False
+        self._learned = False          # Learn opened the MIDI device
 
         # 記住進來時的狀態，按取消要能回到這裡
         # The state on entry, so Cancel has something to go back to.
@@ -217,19 +219,31 @@ class RemoteControlDialog(QDialog):
         self.certificate_label.setText(self.certificate_status())
 
     # --- MIDI bindings ---------------------------------------------------
+    def _listen(self, device: Any) -> None:
+        """Open this MIDI device, instead of any other that is open; None closes it."""
+        if self._midi is None:
+            return
+        self._midi.stop()
+        if device is not None and device >= 0:
+            self._midi.start(device)
+
     def add_row(self, control: str = "", action: str = "") -> None:
         """加一列綁定。"""
         row = self.table.rowCount()
         self.table.insertRow(row)
         self.table.setItem(row, 0, QTableWidgetItem(str(control)))
         combobox = QComboBox()
-        combobox.addItems(list(ALLOWED_ACTIONS))
+        for name in ALLOWED_ACTIONS:
+            key, fallback = ACTION_LABELS.get(name, ("", name.replace("_", " ")))
+            combobox.addItem(_t(key, fallback) if key else fallback, name)
         if action in ALLOWED_ACTIONS:
-            combobox.setCurrentText(action)
+            combobox.setCurrentIndex(combobox.findData(action))
         self.table.setCellWidget(row, 1, combobox)
 
     def start_learning(self) -> None:
         """按下之後，下一個收到的 MIDI 訊息就會變成新的一列。"""
+        self._learned = True
+        self._listen(self.midi_device())          # it only listens by itself once there are bindings
         self._learning = True
         self.learn_button.setText(_t("remote_midi_listening", "Press a control..."))
 
@@ -260,7 +274,7 @@ class RemoteControlDialog(QDialog):
             item = self.table.item(row, 0)
             combobox = self.table.cellWidget(row, 1)
             control = item.text().strip() if item else ""
-            action = combobox.currentText() if combobox else ""
+            action = combobox.currentData() if combobox else ""
             if control and action in ALLOWED_ACTIONS:
                 bindings[control] = action
         return bindings
@@ -272,15 +286,18 @@ class RemoteControlDialog(QDialog):
     def accept(self) -> None:
         bindings = self.bindings()
         enabled = self.remote_checkbox.isChecked()
-        user_setting_dict[REMOTE_KEY] = {"enabled": bool(enabled)}
-        user_setting_dict[MIDI_KEY] = bindings
-        user_setting_dict["midi_device"] = self.midi_device()
-        write_user_setting()
+        device = self.midi_device()
+        if not save_or_tell(self, {REMOTE_KEY: {"enabled": bool(enabled)}, MIDI_KEY: bindings,
+                                   "midi_device": device}, write_user_setting):
+            return
         self._apply_remote(enabled)
+        self._listen(device if bindings else None)
         front_engine_logger.info(f"[RemoteControlDialog] saved | {len(bindings)} binding(s)")
         super().accept()
 
     def reject(self) -> None:
         """取消：把伺服器恢復成打開這個對話框之前的狀態。"""
         self._apply_remote(self._remote_was_enabled)
+        if self._learned:
+            self._listen((user_setting_dict.get("midi_device") or 0) if current_bindings() else None)
         super().reject()

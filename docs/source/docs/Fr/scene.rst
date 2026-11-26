@@ -40,3 +40,5 @@ Les libellés des sous-onglets de script de scène et de médias suivent aussi l
 Les indications de durée automatique et d’absence de parent dans l’éditeur 3D suivent la langue de l’interface. La durée et les relations parent-enfant restent inchangées, même après avoir sélectionné un autre objet puis être revenu.
 
 Fermer la sortie de scène pendant le choix de la couleur de fond de la caméra ignore cette couleur et arrête l’aperçu. Annuler uniquement le sélecteur de couleur conserve la couleur actuelle et laisse l’aperçu actif. Rouvrez la sortie de scène pour choisir une autre couleur. L’aperçu n’ouvre pas de caméra.
+
+La page Scène propose de démarrer et d’arrêter la scène en bas de chaque onglet. Dans l’éditeur 3D, la vue repose sur un fond sombre avec une grille : une scène vide et la direction du regard restent visibles ; la grille n’apparaît ni sur le bureau ni dans la sortie. Une scène vide invite à ajouter un objet 3D.

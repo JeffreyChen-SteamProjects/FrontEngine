@@ -12,3 +12,5 @@ Eye Care Page
 * Show on all screen / Target monitor - as elsewhere.
 
 These overlays pass clicks through, so everything underneath keeps working.
+
+Colour-vision simulation no longer flickers or lets its colours drift. On Windows the layer is excluded from screen capture and follows the screen from a background thread, repainting only what changed; screenshots and screen sharing therefore do not show it. Where that is not possible it is a still picture, taken when it starts and when you change a setting.

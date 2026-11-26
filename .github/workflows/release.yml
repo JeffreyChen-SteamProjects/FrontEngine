@@ -19,12 +19,13 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: release
-  cancel-in-progress: false
-
 jobs:
   release:
+    # On the job, so only runs that publish take the place: on the workflow, closing any other pull
+    # request against main replaced - cancelled - a release waiting its turn.
+    concurrency:
+      group: release
+      cancel-in-progress: false
     permissions:
       contents: write
     # 發佈只在 `dev` 合併進 `main` 時發生。

@@ -94,7 +94,7 @@ class ShortcutSheetWidget(BaseWidget):
         self.font_size = max(10, int(font_size))
         self.text_color = QColor("#ffffff")
         self.key_color = QColor("#ffd740")
-        self.background_color = QColor(0, 0, 0, 210)
+        self.panel_color = QColor(0, 0, 0, 210)
 
     def sizeHint(self):  # pragma: no cover - Qt geometry
         screen = QApplication.primaryScreen()
@@ -104,7 +104,7 @@ class ShortcutSheetWidget(BaseWidget):
         return available.size() / 2
 
     def draw_content(self, painter: QPainter) -> None:
-        painter.fillRect(self.rect(), self.background_color)
+        painter.fillRect(self.rect(), self.panel_color)
 
         title_font = QFont()
         title_font.setPixelSize(int(self.font_size * 1.3))

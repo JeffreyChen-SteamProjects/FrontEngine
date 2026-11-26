@@ -50,6 +50,8 @@ def capture_screen(screen: Optional[QScreen]) -> QPixmap:
 class FreezeWidget(QWidget):
     """一張靜止的螢幕畫面，鋪滿目標螢幕。"""
 
+    stays_while_paused = True      # frozen on purpose, usually over a full-screen program
+
     def __init__(self, pixmap: QPixmap, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)

@@ -14,6 +14,7 @@ older winsdk installations remain supported as a fallback.
 from __future__ import annotations
 
 import sys
+import threading
 from typing import Optional
 
 from frontengine.utils.logging.loggin_instance import front_engine_logger
@@ -229,3 +230,35 @@ def now_playing() -> Optional[str]:
     目前正在播放的一行說明；SMTC 優先，退回「哪個程式在出聲」，都沒有就 None。
     """
     return smtc_now_playing() or format_now_playing(None, None, audio_session_app()) or None
+
+
+class BackgroundNowPlaying:
+    """Answers at once with the last reading and takes the next one on a thread of its own: asking the
+    player is a call into another process, and a hung one held up every overlay with it."""
+
+    def __init__(self, provider=None) -> None:
+        self._provider = provider or now_playing
+        self._value: Optional[str] = None
+        self._thread: Optional[threading.Thread] = None
+
+    def __call__(self) -> Optional[str]:
+        if self._thread is None or not self._thread.is_alive():
+            self._thread = threading.Thread(target=self._ask, name="frontengine-now-playing", daemon=True)
+            self._thread.start()
+        return self._value
+
+    def _ask(self) -> None:
+        try:
+            self._value = self._provider()
+        except Exception as error:  # pragma: no cover - defensive around providers
+            front_engine_logger.debug(f"[NowPlaying] {error!r}")
+            self._value = None
+        finally:
+            _leave_com()
+
+
+def _leave_com() -> None:
+    """This thread joined COM for the reading and is about to end."""
+    if sys.platform == "win32":
+        import ctypes
+        ctypes.windll.ole32.CoUninitialize()

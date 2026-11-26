@@ -15,6 +15,7 @@ from __future__ import annotations
 from typing import Optional
 
 from frontengine.show.draggable_window import DraggableTopWindow
+from PySide6.QtCore import QEvent, QTimer
 from PySide6.QtGui import QColor, QPainter
 from PySide6.QtWidgets import QWidget
 
@@ -77,7 +78,8 @@ class WindowReplicaWidget(DraggableTopWindow):
         return True
 
     def _refresh(self) -> None:
-        self.thumbnail.update(self.width(), self.height(),
+        ratio = self.devicePixelRatioF()          # DWM counts in physical pixels
+        self.thumbnail.update(round(self.width() * ratio), round(self.height() * ratio),
                               opacity=int(self.opacity_percent * 255 / 100),
                               source_rect=crop_rect(self.thumbnail.source_size(), self.crop))
 
@@ -93,6 +95,11 @@ class WindowReplicaWidget(DraggableTopWindow):
     def resizeEvent(self, event) -> None:
         super().resizeEvent(event)
         self._refresh()
+
+    def event(self, event) -> bool:
+        if event.type() == QEvent.Type.DevicePixelRatioChange:
+            QTimer.singleShot(0, self, self._refresh)
+        return super().event(event)
 
     def paintEvent(self, event) -> None:
         # DWM 把縮圖合成上來之前，先鋪一層不透明底色。少了這一步，來源還沒畫上來的

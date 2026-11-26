@@ -147,6 +147,10 @@ def wanted_poses(definition: FurnitureDefinition) -> tuple[str, ...]:
     return definition.poses or ACTIVITY_POSES.get(definition.activity or "", ())
 
 
+# What a pet stays at a piece for, until it is full of it.
+FILLED_BY = {"sleep": "energy", "eat": "fullness", "wash": "hygiene"}
+
+
 def check_furniture(definition: FurnitureDefinition) -> None:
     """Reject definitions the simulation could not honour."""
     _check_identifier(definition.identifier)
@@ -157,6 +161,9 @@ def check_furniture(definition: FurnitureDefinition) -> None:
         raise ValueError("Furniture with an activity needs interaction points")
     if definition.activity is not None and definition.activity not in ACTIVITIES:
         raise ValueError("Unknown furniture activity")
+    need = FILLED_BY.get(definition.activity)
+    if need is not None and definition.effects.get(need, 0) <= 0:
+        raise ValueError(f"A place to {definition.activity} must restore {need}")      # or a pet never gets up
     if set(definition.effects) - set(NEEDS) or not all(
             _is_int(rate, -600, 600) for rate in definition.effects.values()):
         raise ValueError("Invalid furniture effects")
@@ -228,9 +235,12 @@ class Catalog:
         return name in self.items
 
     def sell_price(self, name: str) -> int:
+        """What a thing sells for; nothing when the pack it came from is gone."""
         if name.startswith(FURNITURE_PREFIX):
-            return self.furniture[name.removeprefix(FURNITURE_PREFIX)].sell_back
-        return self.items[name].sell_price
+            piece = self.furniture.get(name.removeprefix(FURNITURE_PREFIX))
+            return piece.sell_back if piece is not None else 0
+        item = self.items.get(name)
+        return item.sell_price if item is not None else 0
 
     def _reject_loops(self) -> None:
         """No chain of recipes may turn an item back into itself (no endless conversion loop)."""

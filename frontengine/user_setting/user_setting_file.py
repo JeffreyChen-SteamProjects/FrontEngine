@@ -1,8 +1,11 @@
 from copy import deepcopy
+from math import isfinite
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
+from frontengine.utils.exception.exceptions import FrontEngineJsonFileException
 from frontengine.utils.json.json_repository import JsonRepository
+from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.preset_schedule.preset_schedule_service import DEFAULT_PRESET_SCHEDULE
 from frontengine.utils.theme_schedule.theme_schedule_service import DEFAULT_THEME_SCHEDULE
 
@@ -146,6 +149,8 @@ def write_user_setting() -> Path:
 
 
 _ABSENT = object()
+# Grants are tied to this machine; clipboard history is whatever was copied, passwords included.
+_NOT_SHARED = frozenset({"plugin_grants", "clipboard_entries"})
 
 
 def replace_setting(settings: Dict[str, Any], key: str, value: Any,
@@ -183,19 +188,46 @@ def is_stored(key: str) -> bool:
     from frontengine.user_setting.storage_session import SETTINGS_NAME
     storage = default_storage()
     with storage._settings_transaction():
-        data = JsonRepository(storage._checked_path(SETTINGS_NAME)).load()
+        try:
+            data = JsonRepository(storage._checked_path(SETTINGS_NAME)).load()
+        except FrontEngineJsonFileException:
+            return False               # damaged: the app runs on the defaults
         return isinstance(data, dict) and key in data
 
 
+def checked_settings(data: Dict[str, Any]) -> Dict[str, Any]:
+    """The entries of a settings document that have the type their setting has.
+
+    A hand-edited or foreign file must not stop the app from starting; entries this version does not
+    know are kept, since a newer one may."""
+    checked = {}
+    for key, value in data.items():
+        if key in _DEFAULT_SETTINGS and not _same_kind(value, _DEFAULT_SETTINGS[key]):
+            front_engine_logger.warning(f"[UserSetting] ignored {key}: {type(value).__name__}")
+            continue
+        checked[key] = value
+    return checked
+
+
+def _same_kind(value: Any, default: Any) -> bool:
+    if default is None:
+        return True
+    if isinstance(default, bool):
+        return isinstance(value, bool)
+    if isinstance(default, (int, float)):
+        return isinstance(value, (int, float)) and not isinstance(value, bool) and isfinite(value)
+    return isinstance(value, type(default))
+
+
 def export_user_setting(destination: Path) -> Path:
-    """Export current settings without credentials or managed-file collisions."""
+    """Export current settings without credentials, copied text or managed-file collisions."""
     from frontengine.user_setting.default_storage import default_storage
     from frontengine.user_setting.storage_session import checked_export_destination
     storage = default_storage()
     with storage._settings_transaction():
         destination = checked_export_destination(destination)
         destination.parent.mkdir(parents=True, exist_ok=True)
-        data = {key: value for key, value in storage.settings.items() if key != 'plugin_grants'}
+        data = {key: value for key, value in storage.settings.items() if key not in _NOT_SHARED}
         return JsonRepository(destination).save(data)
 
 
@@ -211,13 +243,24 @@ def import_user_setting(source: Path) -> None:
         if not isinstance(data, dict):
             raise ValueError("Settings file must contain a JSON object")
         previous = dict(storage.settings)
-        storage.settings.update({key: value for key, value in data.items() if key != 'plugin_grants'})
+        imported = {key: value for key, value in checked_settings(data).items() if key not in _NOT_SHARED}
+        storage.settings.update(imported)
         try:
             storage.save_settings()
         except Exception:
             storage.settings.clear()
             storage.settings.update(previous)
             raise
+        storage.imported_keys.update(imported)
+
+
+def import_waits_for_restart(key: str) -> bool:
+    """Whether this entry was imported and the pages still show what was there before.
+
+    Closing writes what is on screen back; doing that now would undo the import the user was told
+    to restart for."""
+    from frontengine.user_setting.default_storage import default_storage
+    return key in default_storage().imported_keys
 
 
 def save_overlay_geometry(kind: str, x: int, y: int, width: int, height: int) -> None:

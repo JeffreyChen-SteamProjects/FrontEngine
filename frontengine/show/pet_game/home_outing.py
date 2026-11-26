@@ -14,10 +14,11 @@ from __future__ import annotations
 
 from time import monotonic
 
-from PySide6.QtCore import QPoint, QPointF, QRectF, Qt, QTimer, Signal
+from PySide6.QtCore import QEvent, QPoint, QPointF, QRectF, Qt, QTimer, Signal
 from PySide6.QtGui import QPainter
 from PySide6.QtWidgets import QMenu, QWidget
 
+from frontengine.utils.screen_privacy import capture_affinity
 from frontengine.show.pet.desktop_pet import (BEHAVIOUR_ACTIONS, POSE_STATES, SURFACE_FLOOR, PetMotion,
                                               windows_platforms)
 from frontengine.utils.multi_language.retranslate import translate
@@ -144,6 +145,10 @@ class OutingPet(QWidget):
 
     # ----- drawing --------------------------------------------------------------------------
 
+    def showEvent(self, event) -> None:
+        super().showEvent(event)
+        capture_affinity.follow(self)
+
     def paintEvent(self, _event) -> None:
         renderer = self.strip.art.renderer(self.identifier) if self.strip.art is not None else None
         if renderer is None:
@@ -167,6 +172,15 @@ class OutingPet(QWidget):
             self._delta = QPointF()
         elif event.button() == Qt.MouseButton.RightButton:
             self.menu(event.globalPosition().toPoint())
+
+    def event(self, event) -> bool:
+        # The mouse was taken away mid-drag (a menu, the lock screen): no release will come.
+        if event.type() == QEvent.Type.UngrabMouse and getattr(self, "_press", None) is not None:
+            self._press = None
+            if self._dragging:
+                self._dragging = False
+                self.motion.throw(0.0, 0.0)
+        return super().event(event)
 
     def mouseMoveEvent(self, event) -> None:
         if self._press is None:
@@ -212,6 +226,7 @@ class OutingPet(QWidget):
         strip._menu_x_milli = max(0, min(width * 1000 - 1, int(strip.x_cell(local.x()) * CELL_PIXELS * 1000)))
         strip._resident_menu(menu, identifier)
         self.last_menu = menu
+        menu.aboutToHide.connect(menu.deleteLater)
         menu.popup(where)
         return menu
 

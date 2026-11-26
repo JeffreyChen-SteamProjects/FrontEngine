@@ -74,9 +74,14 @@ from PySide6.QtGui import (QColor, QFont, QImage, QLinearGradient, QPainter, QPa
 from PySide6.QtMultimedia import (QAudioBuffer, QAudioBufferInput, QAudioFormat,  # noqa: E402
                                   QMediaCaptureSession, QMediaFormat, QMediaRecorder, QVideoFrame,
                                   QVideoFrameFormat, QVideoFrameInput)
-from PySide6.QtWidgets import QApplication, QWidget  # noqa: E402
+from PySide6.QtWidgets import QApplication, QVBoxLayout, QWidget  # noqa: E402
 
 # ----- film timing ------------------------------------------------------------------------------
+
+# English, the store's language; and never the wallpaper of the machine that renders: these
+# pictures are published, so the window stands on FrontEngine's own built-in one. Pets stay home:
+# one roaming the desktop is a window moved by the wall clock, which the film clock cannot hold.
+SETTINGS = {"language": "English", "theme": "dark", "wallpaper_backdrop": False, "pet_home_outings": False}
 
 FADE_S = 0.6
 CAPTION_FADE_S = 0.4
@@ -84,7 +89,7 @@ POINTER_SCALE = 1.6
 PAGE_SCALE = 1.5
 CAPTION_PX = 46
 CAPTION_COLOR = QColor("#fff4dc")
-ACCENT = QColor("#ff7a3d")
+ACCENT = QColor("#ffc691")
 
 
 class FilmClock:
@@ -327,6 +332,24 @@ def ease(t: float) -> float:
 
 # ----- the film ---------------------------------------------------------------------------------
 
+class Stage(QWidget):
+    """The film's window: the page on the backdrop the real main window paints."""
+
+    def __init__(self, page: QWidget) -> None:
+        super().__init__()
+        from frontengine.ui.style.backdrop import Backdrop
+        self.backdrop = Backdrop()
+        self.backdrop.set_use_wallpaper(False)
+        page.setParent(self)
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(page)
+
+    def paintEvent(self, event) -> None:
+        painter = QPainter(self)
+        self.backdrop.paint(painter, self.rect(), "dark", self.devicePixelRatioF())
+
+
 class Film:
     """Owns the page, the clock and the output; each shot calls ``frame`` once per 1/30 s."""
 
@@ -446,7 +469,7 @@ class Film:
         painter.setRenderHint(QPainter.RenderHint.TextAntialiasing, True)
         painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform, True)
         painter.scale(PAGE_SCALE, PAGE_SCALE)
-        self.page.render(painter, QPoint(0, 0))
+        self.page.window().render(painter, QPoint(0, 0))
         painter.end()
         return image
 
@@ -537,8 +560,8 @@ def card_image(logo: QImage) -> QImage:
     painter = QPainter(image)
     painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform, True)
     gradient = QLinearGradient(0, 0, WIDTH, HEIGHT)
-    gradient.setColorAt(0, QColor("#1d1a17"))
-    gradient.setColorAt(1, QColor("#0f0d0c"))
+    gradient.setColorAt(0, QColor("#153846"))
+    gradient.setColorAt(1, QColor("#081820"))
     painter.fillRect(0, 0, WIDTH, HEIGHT, gradient)
     logo = logo.scaledToWidth(int(WIDTH * 0.42), Qt.TransformationMode.SmoothTransformation)
     painter.drawImage(QPointF((WIDTH - logo.width()) / 2, HEIGHT * 0.36 - logo.height() / 2), logo)
@@ -604,6 +627,17 @@ def pets_center(page) -> float:
     world, view = page.service.world, page.view
     xs = sorted(view.resident_center(r).x() for r in world.residents.values()) if world else []
     return xs[len(xs) // 2] if xs else view.width() / 2
+
+
+def settled_at_home(page) -> bool:
+    """Every pet well inside the furniture, close enough together for one picture to hold them all
+    and far enough apart to be told from each other."""
+    left, right = furniture_span(page)
+    span = right - left
+    xs = sorted(page.view.resident_center(r).x() for r in page.service.world.residents.values())
+    return (bool(xs) and left + span * .05 <= xs[0] and xs[-1] <= right - span * .05
+            and xs[-1] - xs[0] <= span * .72
+            and all(after - before >= span * .07 for before, after in zip(xs, xs[1:])))
 
 
 def home_center(page) -> float:
@@ -817,7 +851,7 @@ def main() -> None:
                         help="a 16-bit PCM WAV to loop under the film; without it the film is silent")
     args = parser.parse_args()
 
-    (WORKSPACE / "user_setting.json").write_text(json.dumps({"language": "English"}), encoding="utf-8")
+    (WORKSPACE / "user_setting.json").write_text(json.dumps(SETTINGS), encoding="utf-8")
 
     app = QApplication([])
     app.setApplicationName("FrontEngine")
@@ -833,9 +867,10 @@ def main() -> None:
     from frontengine.ui.page.pet_game.home_page import PetHomePage
 
     page = PetHomePage(lifetime=lifetime)
-    apply_app_style(page, "dark", application=True)
-    page.resize(int(WIDTH / PAGE_SCALE), int(HEIGHT / PAGE_SCALE))
-    page.show()
+    stage = Stage(page)
+    apply_app_style(stage, "dark", application=True)
+    stage.resize(int(WIDTH / PAGE_SCALE), int(HEIGHT / PAGE_SCALE))
+    stage.show()
     stage_page(app, page)
 
     logo = QImage(str(REPO / "steam_assets" / "library_logo_1280x720.png"))

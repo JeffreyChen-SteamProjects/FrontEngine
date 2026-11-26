@@ -65,7 +65,7 @@ def test_live_pet_states_close_flush_and_resume_independently(tmp_path):
         first.feed()
         first.profile_session.advance(2)
         second._mood.decay(15)
-        second._persist_mood()
+        second.profile_session.schedule()
         assert first.profile_session.timer.isActive()
         first.close()
         second.close()

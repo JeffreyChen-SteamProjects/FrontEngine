@@ -21,7 +21,7 @@ from typing import Any, Callable, Dict, List, Optional
 from PySide6.QtCore import QObject, QTimer, Signal
 
 from frontengine.utils.logging.loggin_instance import front_engine_logger
-from frontengine.utils.smart_pause.pause_rules import normalize_app_name, parse_app_list
+from frontengine.utils.smart_pause.pause_rules import parse_app_list
 from frontengine.utils.window_pin.window_pin import list_windows
 
 # 常見的會議／串流程式，當作預設值；使用者可以自己改
@@ -29,22 +29,6 @@ from frontengine.utils.window_pin.window_pin import list_windows
 DEFAULT_SHARING_APPS = ("zoom", "teams", "ms-teams", "discord", "obs64", "obs",
                         "slack", "webex", "gotomeeting")
 DEFAULT_INTERVAL_MS = 3000
-
-
-def running_app_names(lister: Optional[Callable[[], List]] = None) -> List[str]:
-    """
-    目前有視窗的程式名稱（正規化過）。用視窗列舉而不是列舉所有程序：
-    看得見的視窗才可能被分享，也不需要更高的權限。
-    The normalized names of apps that currently have a window. Window
-    enumeration rather than a full process list: only visible windows can be
-    shared, and it needs no extra privileges.
-    """
-    names = []
-    for _handle, title in (lister or list_windows)() or []:
-        name = normalize_app_name(title)
-        if name and name not in names:
-            names.append(name)
-    return names
 
 
 def sharing_app_running(watched: Any, window_titles: List[str]) -> Optional[str]:

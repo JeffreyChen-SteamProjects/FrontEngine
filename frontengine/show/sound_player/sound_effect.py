@@ -15,6 +15,8 @@ class SoundEffectWidget(QWidget):
     SoundEffectWidget: A custom widget for playing sound effects
     """
 
+    windowless = True      # only heard: never shown, so never counted as hidden
+
     def __init__(self, sound_path: str):
         front_engine_logger.info(f"[SoundEffectWidget] Init | sound_path={sound_path}")
         super().__init__()

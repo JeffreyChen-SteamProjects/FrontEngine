@@ -217,7 +217,7 @@ class DesktopVisibility:
             if on_current is None:
                 continue
             if not on_current:
-                if handle not in self._hidden:
+                if handle not in self._hidden and getattr(widget, "isVisible", lambda: True)():
                     self._hidden.append(handle)
                     to_hide.append(widget)
             elif handle in self._hidden:

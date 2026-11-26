@@ -8,6 +8,7 @@ from __future__ import annotations
 import sys
 from typing import List, Optional, Tuple
 
+from frontengine.utils.audio_meter.system_audio_meter import ReopeningMeter
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.audio_meter.system_audio_meter import (
     _DEVICE_STATE_ACTIVE, _IID_IAudioMeterInformation, _collect_devices,
@@ -147,14 +148,11 @@ class MicrophoneMeter:
         self._ok = False
 
 
-_meter_singleton: Optional[MicrophoneMeter] = None
+_meter_singleton = ReopeningMeter(lambda: MicrophoneMeter())
 
 
 def microphone_level() -> Optional[float]:
     """便利函式：以共用電表回傳預設麥克風的峰值 0~1，或 None。"""
-    global _meter_singleton
     if sys.platform not in ('win32', 'darwin', 'linux'):
         return None
-    if _meter_singleton is None:
-        _meter_singleton = MicrophoneMeter()
     return _meter_singleton.level()

@@ -43,8 +43,9 @@ class FocusCompanions:
     @staticmethod
     def _owned(participant) -> bool:
         session = participant.pet.profile_session
-        return (not session._closed and session.mode_revision == participant.revision
-                and session.companion.action is None)
+        # Its mode is still the one set here. What it is doing this moment does not matter: a pet being
+        # groomed as the session ends would otherwise stay at work for good.
+        return not session._closed and session.mode_revision == participant.revision
 
     def transition(self, phase: str, completed: int) -> None:
         if phase not in ('focus', 'break', 'long_break'):

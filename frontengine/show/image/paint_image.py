@@ -42,9 +42,14 @@ class ImageWidget(BaseWidget):
         if not (path.exists() and path.is_file()):
             front_engine_logger.warning(f"[ImageWidget] set_image_path skip invalid: {path}")
             return False
+        image = QImage(str(path))
+        if image.isNull():
+            front_engine_logger.warning(f"[ImageWidget] set_image_path skip unreadable: {path}")
+            return False
         self.image_path = path
-        self.image = QImage(str(path))
-        self.resize(self.image.size())
+        self.image = image
+        if not self.isFullScreen():
+            self.resize(image.size())
         self.update()
         return True
 

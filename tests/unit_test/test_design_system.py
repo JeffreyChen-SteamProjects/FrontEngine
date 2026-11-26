@@ -68,27 +68,8 @@ def test_both_palettes_define_the_same_tokens_and_ink_reads_on_the_accent():
         assert app_style.contrast_ratio(colors["window"], colors["text"]) >= 7
         assert app_style.contrast_ratio(colors["surface"], colors["muted"]) >= 4.5
         assert app_style.contrast_ratio(colors["tooltip"], colors["on_tooltip"]) >= 7
-        # The pet pages' ink look reads as well as the tools do.
-        assert app_style.contrast_ratio(colors["ink_window"], colors["ink_text"]) >= 7
-        assert app_style.contrast_ratio(colors["ink_surface"], colors["ink_text"]) >= 7
-        assert app_style.contrast_ratio(colors["ink_surface"], colors["ink_muted"]) >= 4.5
-        assert app_style.contrast_ratio(colors["ink_line"], colors["ink_selected_text"]) >= 7
-        assert app_style.contrast_ratio(colors["ink_surface"], colors["ink_line"]) >= 3     # the outline shows
-
-
-@pytest.mark.parametrize("theme", ["light", "dark"])
-def test_ink_rules_reach_only_widgets_under_ink_style(theme):
-    """Every rule using an ink colour is scoped to inkStyle, so the tool pages keep the quiet look."""
-    sheet = app_style.build_stylesheet(theme)
-    colors = LIGHT if theme == "light" else DARK
-    ink_values = {colors[key].lower() for key in colors if key.startswith("ink_")}
-    tool_values = {value.lower() for key, value in colors.items() if not key.startswith("ink_")}
-    for rule in re.findall(r"([^{}]+)\{([^{}]*)\}", sheet):
-        selectors, body = rule
-        used = {color.lower() for color in re.findall(r"#[0-9a-fA-F]{6}\b", body)}
-        if used & (ink_values - tool_values):
-            for selector in selectors.split(","):
-                assert 'inkStyle="true"' in selector, selector.strip()
+        assert app_style.contrast_ratio(colors["pill"], colors["on_pill"]) >= 7             # the selected page
+        assert app_style.contrast_ratio(colors["surface"], colors["accent_line"]) >= 3      # focus shows
 
 
 def test_the_rounded_typeface_ships_and_is_left_out_for_simplified_chinese():
@@ -156,7 +137,7 @@ def test_stylesheet_styles_every_control_from_the_tokens_only(theme):
                      "QPushButton#primaryAction", "QListWidget#navSidebar", "QWidget#settingSection"):
         assert selector in sheet, selector
     tokens = {value.lower() for value in (LIGHT if theme == "light" else DARK).values()}
-    literals = {color.lower() for color in re.findall(r"#[0-9a-fA-F]{6}\b", sheet)}
+    literals = {color.lower() for color in re.findall(r"#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6})\b", sheet)}
     assert literals <= tokens, literals - tokens
     other = DARK if theme == "light" else LIGHT
     assert other["window"].lower() not in literals

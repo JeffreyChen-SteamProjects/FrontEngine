@@ -149,3 +149,5 @@ Si la fenêtre photo se ferme pendant le choix de l’emplacement, le chemin ret
 Fermer la garde-robe pendant le choix d’un dossier ou d’une couleur annule le résultat retourné. Aucune installation ne démarre et aucune couleur ne change. Les demandes ultérieures de sélection de cette garde-robe fermée sont aussi ignorées.
 
 Le dîner entre amis se déclenche lorsque trois habitants au moins mangent dans la même zone. Des repas dans des zones séparées ne constituent pas une même réunion. Cet événement est enregistré au plus une fois par jour du foyer, même après sauvegarde et réouverture.
+
+Identités → Supprimer l’identité retire définitivement un animal enregistré, après confirmation ; s’il est à l’écran ou dans la maison, il faut d’abord le ranger ou le faire déménager. Un animal revient du bureau à la maison avec l’affection qu’il y a gagnée. « Rester tranquille pendant la frappe » fait partie des préréglages, et un personnage intégré choisi pour un animal n’en habille plus un autre.

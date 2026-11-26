@@ -152,6 +152,6 @@ class PresetVersionsDialog(QDialog):
 
     def closeEvent(self, event) -> None:
         if self.cancel_preview():
-            super().closeEvent(event)
+            event.accept()          # QDialog's own would call reject(), which closes: it never got closed
         else:
             event.ignore()

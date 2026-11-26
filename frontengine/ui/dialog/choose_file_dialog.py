@@ -71,7 +71,7 @@ def choose_gif(trigger_ui: QWidget) -> Optional[str]:
     """選擇 GIF 或 WebP 檔案 / Choose GIF or WebP file"""
     return choose_file(
         trigger_ui,
-        file_filter="GIF WEBP (*.gif;*.webp)",
+        file_filter="GIF WEBP (*.gif *.webp)",
         extensions=[_GIF, _WEBP],
         warning_message=language_wrapper.language_word_dict.get("gif_setting_message_box")
     )
@@ -81,8 +81,8 @@ def choose_image(trigger_ui: QWidget) -> Optional[str]:
     """選擇圖片檔案 / Choose image file"""
     return choose_file(
         trigger_ui,
-        file_filter="Images (*.png;*.jpg;*.webp)",
-        extensions=[".png", ".jpg", _WEBP],
+        file_filter="Images (*.png *.jpg *.jpeg *.webp *.bmp)",
+        extensions=[".png", ".jpg", ".jpeg", _WEBP, ".bmp"],
         warning_message=language_wrapper.language_word_dict.get("image_setting_message_box")
     )
 
@@ -101,7 +101,7 @@ def choose_player_sound(trigger_ui: QWidget) -> Optional[str]:
     """選擇音樂檔案 (mp3/mp4/wav) / Choose audio file"""
     return choose_file(
         trigger_ui,
-        file_filter="Sound (*.mp4;*.mp3;*.wav)",
+        file_filter="Sound (*.mp4 *.mp3 *.wav)",
         extensions=[".mp3", ".mp4", ".wav"],
         warning_message=language_wrapper.language_word_dict.get("sound_player_setting_message_box_sound")
     )
@@ -121,7 +121,7 @@ def choose_video(trigger_ui: QWidget) -> Optional[str]:
     """選擇影片檔案 (mp4) / Choose video file"""
     return choose_file(
         trigger_ui,
-        file_filter="Video (*.mp4;)",
+        file_filter="Video (*.mp4)",
         extensions=[".mp4"],
         warning_message=language_wrapper.language_word_dict.get("video_setting_message_box")
     )

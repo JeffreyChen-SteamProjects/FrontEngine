@@ -9,6 +9,14 @@ MAX_KEYFRAMES = 128
 MAX_ANIMATION_SECONDS = 3600
 
 
+def is_finite(number) -> bool:
+    """``math.isfinite`` for numbers out of a file: an integer too long to be a float is not one either."""
+    try:
+        return math.isfinite(number)
+    except OverflowError:
+        return False
+
+
 def validate_animation(value: object) -> list[dict]:
     """Reject ambiguous times, unknown channels and nonfinite external values."""
     if not isinstance(value, list) or len(value) > MAX_KEYFRAMES:
@@ -20,7 +28,7 @@ def validate_animation(value: object) -> list[dict]:
         if not any(channel in frame for channel in CHANNELS):
             raise ValueError('Animation keyframe needs a position or opacity')
         stamp = frame.get('time')
-        if type(stamp) not in (int, float) or not math.isfinite(stamp) or not 0 <= stamp <= MAX_ANIMATION_SECONDS:
+        if type(stamp) not in (int, float) or not is_finite(stamp) or not 0 <= stamp <= MAX_ANIMATION_SECONDS:
             raise ValueError('Animation time must be finite and within 0–3600 seconds')
         if stamp <= previous:
             raise ValueError('Animation times must be unique and increasing')
@@ -31,7 +39,7 @@ def validate_animation(value: object) -> list[dict]:
             if channel not in frame:
                 continue
             number = frame[channel]
-            if type(number) not in (int, float) or not math.isfinite(number):
+            if type(number) not in (int, float) or not is_finite(number):
                 raise ValueError('Animation values must be finite numbers')
             low, high = (0, 100) if channel == 'opacity' else (-100000, 100000)
             if not low <= number <= high:

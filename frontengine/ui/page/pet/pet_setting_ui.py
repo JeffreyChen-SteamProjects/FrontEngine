@@ -31,7 +31,7 @@ from frontengine.ui.page.utils import (
     resolve_preferred_monitor,
 )
 from frontengine.user_setting.desktop_pets import PETS_KEY, RETURN_KEY, checked_returning, desktop_record
-from frontengine.user_setting.user_setting_file import add_recent_file, user_setting_dict
+from frontengine.user_setting.user_setting_file import add_recent_file, import_waits_for_restart, user_setting_dict
 from frontengine.utils.audio_meter.microphone_meter import microphone_level
 from frontengine.utils.audio_meter.screen_audio import audio_level_provider_for_screen
 from frontengine.utils.pet_chat.pet_chat_service import PetChatService
@@ -118,6 +118,7 @@ class PetSettingUI(SettingPage):
         self._wardrobe_installs = []     # characters already on the desktop whose wardrobe still installs
         # The built-in character a new pet is dressed as (Use built-in character, a card), or None.
         self._chosen_character: str | None = None
+        self._chosen_for: str | None = None          # the identity selected when it was chosen
         self.ready_label = tr(QLabel(), "Not Ready")
 
         # Size
@@ -325,14 +326,17 @@ class PetSettingUI(SettingPage):
     @owned_action
     def _spawn_pet(self, clone_source: dict | None = None, *, source_pet=None) -> None:
         """建立、顯示並開始移動一隻寵物（供 Start 與右鍵複製共用）。"""
+        created = None
         try:
             identifier = self.profile_controls.selector.currentData()
             if clone_source is not None:
-                identifier = self.profile_controls.profiles.create(source=clone_source)['id']
+                identifier = created = self.profile_controls.profiles.create(source=clone_source)['id']
             self._spawn_profile_pet(identifier, source_pet=source_pet)
             self.profile_controls.refresh()
         except (OSError, ValueError, RuntimeError) as error:
             self.profile_controls.status.setText(str(error))
+            if created is not None:          # an identity for a pet that never came
+                self.profile_controls.forget_unused(created)
 
     @contextmanager
     def _until_tracked(self, pet):
@@ -358,7 +362,8 @@ class PetSettingUI(SettingPage):
 
     def remember_desktop_pets(self) -> None:
         """Record which pets are on the desktop now, so the next start brings them back."""
-        user_setting_dict[PETS_KEY] = desktop_record(self.pet_list)
+        if not import_waits_for_restart(PETS_KEY):
+            user_setting_dict[PETS_KEY] = desktop_record(self.pet_list)
 
     @owned_action
     def bring_pets_back(self) -> int:
@@ -443,13 +448,17 @@ class PetSettingUI(SettingPage):
         """
         if source_pet is not None:
             return None
-        if not returning and self._chosen_character is not None:
+        # A built-in chosen while another identity was selected is not a choice for this one.
+        meant = self._chosen_for == identifier
+        if not returning and self._chosen_character is not None and (meant or identifier is None):
             return self._chosen_character
         if identifier is not None:
             record = self.profile_controls.profiles.get(identifier)     # an unknown identity fails here
             own = (record.get('appearance') or {}).get('character')
             if own is not None and self._resolves(own):
                 return None
+            if not returning and self._chosen_character is not None:
+                return self._chosen_character
             from frontengine.show.pet_game.resident_art import fallback_character
             return fallback_character(identifier)
         return self.builtin_character.currentData()
@@ -580,6 +589,7 @@ class PetSettingUI(SettingPage):
 
     def _choose_character(self, identifier: str) -> None:
         self._chosen_character = identifier
+        self._chosen_for = self.profile_controls.selector.currentData()
         self.pet_image_path = None
         self.puppet_script_path = None
         self.ready_to_play = True
@@ -824,6 +834,8 @@ class PetSettingUI(SettingPage):
         self._waiting = []
         for job in (*self._installing.values(), *self._wardrobe_installs):
             job.cancel.set()
+        for dialog in self.profile_controls.open_wardrobes():
+            dialog.reject()          # drawing a whole wardrobe would hold up closing
 
     @owned_action
     def _apply_recent_file(self, _index: int = 0) -> None:
@@ -878,6 +890,7 @@ class PetSettingUI(SettingPage):
             "tag": self.tag_checkbox.isChecked(),
             "speech": self.speech_checkbox.isChecked(),
             "chat": self.chat_checkbox.isChecked(),
+            "settle_typing": self.settle_typing_checkbox.isChecked(),
             "focus_minutes": self.focus_minutes_combobox.currentText(),
             "break_minutes": self.break_minutes_combobox.currentText(),
         }
@@ -903,7 +916,10 @@ class PetSettingUI(SettingPage):
             (self.tag_checkbox, "tag"),
             (self.speech_checkbox, "speech"),
             (self.chat_checkbox, "chat"),
+            (self.settle_typing_checkbox, "settle_typing"),
         ))
+        if "settle_typing" in state:
+            self._on_settle_typing_toggled()
 
     def _restore_media(self, state: dict) -> None:
         """還原 Puppet 模型與音效的路徑；舊預設集裡的圖片或動作包不再使用。
@@ -915,7 +931,8 @@ class PetSettingUI(SettingPage):
             self.ready_label.setText(language_wrapper.language_word_dict.get("Ready"))
         if state.get("sound"):
             self.pet_sound_path = str(state["sound"])
-        self.puppet_script_path = state.get('puppet_script') or None
+        script = state.get('puppet_script')
+        self.puppet_script_path = script if isinstance(script, str) and script else None
 
     @staticmethod
     def _behaviour_from(state: dict):

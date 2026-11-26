@@ -180,6 +180,8 @@ def _interrupted_by_need(world: World, resident: Resident) -> bool:
     needs = resident.needs
     if activity.kind in ("sleep", "nap", "eat", "snack"):
         return False
+    if activity.kind == "wait" and needs["energy"] > URGENT_ENERGY:
+        return False          # waiting for a place at the table is what a hungry pet is doing about it
     if needs["energy"] <= URGENT_ENERGY or needs["fullness"] <= URGENT_FULLNESS:
         cancel = "tired" if needs["energy"] <= URGENT_ENERGY else "hungry"
         cancel_activity(world, resident, cancel)

@@ -71,9 +71,12 @@ def composite_inset(base: QPixmap, inset: Optional[QPixmap]) -> QPixmap:
     """
     if inset is None or inset.isNull() or base.isNull():
         return base
-    width = max(1, int(base.width() * _INSET_SHARE))
+    # Pixel for pixel: a capture of a scaled display would otherwise be painted on in logical units.
+    result, inset = QPixmap(base), QPixmap(inset)
+    result.setDevicePixelRatio(1)
+    inset.setDevicePixelRatio(1)
+    width = max(1, int(result.width() * _INSET_SHARE))
     scaled = inset.scaledToWidth(width, Qt.TransformationMode.SmoothTransformation)
-    result = QPixmap(base)
     painter = QPainter(result)
     painter.drawPixmap(result.width() - scaled.width() - _INSET_MARGIN,
                        result.height() - scaled.height() - _INSET_MARGIN, scaled)

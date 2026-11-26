@@ -21,11 +21,12 @@ def read_json(json_file_path: str) -> Optional[Any]:
         if not (file_path.exists() and file_path.is_file()):
             return None
         try:
-            with open(file_path, "r", encoding="utf-8") as read_file:
+            # utf-8-sig: Notepad writes a byte order mark in front.
+            with open(file_path, "r", encoding="utf-8-sig") as read_file:
                 return json.loads(read_file.read())
         except OSError as error:
             raise FrontEngineJsonFileException(f"{cant_find_json_error}: {error}") from error
-        except json.JSONDecodeError as error:
+        except (json.JSONDecodeError, UnicodeDecodeError, RecursionError) as error:
             # 檔案在，是內容壞了。講「找不到檔案」只會把人帶去找錯地方。
             # The file is there, its contents are not. Saying "cannot find" sends
             # the reader looking in the wrong place.

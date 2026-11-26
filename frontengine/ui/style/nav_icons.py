@@ -46,6 +46,7 @@ SHAPES = {
                '<circle cx="19" cy="8" r="2" S/>',
     "extension": '<path d="M9 4.5a2 2 0 1 1 4 0V6h4v4h1.5a2 2 0 1 1 0 4H17v5H6v-4H4.5a2 2 0 1 1 0-4H6V6h3z" S/>',
     "chevron-down": '<path d="m8 10 4 4 4-4" S/>',
+    "chevron-left": '<path d="m14 8-4 4 4 4" S/>',
     "chevron-right": '<path d="m10 8 4 4-4 4" S/>',
     "search": '<circle cx="11" cy="11" r="6.5" S/><path d="m16 16 4.5 4.5" S/>',
 }

@@ -13,3 +13,5 @@ Ein Hintergrund liegt unter allen Fenstern und steht damit nie im Weg.
 * Ruhezeiten - zwischen den beiden angegebenen Zeiten den Ruhe-Ordner nehmen,
   für etwas Ruhigeres während der Arbeit.
 * Hintergrund starten / Nächster Hintergrund.
+
+Hintergrundordner dürfen Bilder, animierte GIF- oder WebP-Dateien und Videos (MP4, WebM, AVI) enthalten: Videos laufen ohne Ton in Schleife, pausieren, solange sie ausgeblendet sind, und was sich nicht anzeigen lässt, wird übersprungen.

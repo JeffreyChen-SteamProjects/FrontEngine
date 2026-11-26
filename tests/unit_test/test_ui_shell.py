@@ -47,7 +47,7 @@ def test_a_theme_change_redraws_icons_in_the_new_tone():
     apply_app_style(sidebar, "dark")
     after = _rows(sidebar)[1].icon().pixmap(18).toImage()
     assert before != after
-    assert sidebar._icon_colors()[1].lower() == DARK["text"].lower()
+    assert sidebar._icon_colors()[1].lower() == DARK["on_pill"].lower()
 
 
 def test_folding_swaps_the_chevron():

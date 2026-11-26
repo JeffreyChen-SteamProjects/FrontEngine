@@ -13,6 +13,7 @@ from PySide6.QtWidgets import (
     QCheckBox, QDialog, QDialogButtonBox, QGridLayout, QLabel, QLineEdit, QWidget,
 )
 
+from frontengine.ui.dialog.dialog_kit import save_or_tell
 from frontengine.user_setting.user_setting_file import user_setting_dict, write_user_setting
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
@@ -81,7 +82,7 @@ class SmartPauseDialog(QDialog):
     def accept(self) -> None:
         """寫回設定；服務每次輪詢都會重讀，不需要重啟。"""
         rules = self.rules()
-        user_setting_dict["smart_pause_rules"] = rules
-        write_user_setting()
+        if not save_or_tell(self, {"smart_pause_rules": rules}, write_user_setting):
+            return
         front_engine_logger.info(f"[SmartPauseDialog] saved | {rules}")
         super().accept()

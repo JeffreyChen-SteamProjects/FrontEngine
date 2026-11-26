@@ -32,6 +32,7 @@ from frontengine.ui.dialog.screen_text_dialog import (
 )
 from frontengine.ui.dialog.color_palette_dialog import ColorPaletteDialog
 from frontengine.utils.measure.color_palette import ColorPalette
+from frontengine.ui.dialog.dialog_kit import save_or_tell
 from frontengine.ui.dialog.window_pin_dialog import WindowPinDialog
 from frontengine.ui.dialog.window_replica_dialog import WindowReplicaDialog
 from frontengine.user_setting.user_setting_file import user_setting_dict, write_user_setting
@@ -115,8 +116,8 @@ class ToolsSettingUI(SettingPage):
         self.last_capture: Optional[QPixmap] = None
         self.capture_editor = None
         self.ocr_widget_list = OwnedWidgetList(self.lifetime)
+        self.replica_widget_list = OwnedWidgetList(self.lifetime)
         self.pin_dialog: Optional[WindowPinDialog] = None
-        self.replica_dialog: Optional[WindowReplicaDialog] = None
 
     def _build_window_row(self) -> None:
         self.pin_button = tr(QPushButton(), "tools_pin_window", "Pin a window...")
@@ -131,7 +132,7 @@ class ToolsSettingUI(SettingPage):
         # Window layouts: remember where the windows are and put them back later.
         self.layout_label = tr(QLabel(), "tools_layout_label", "Window layout")
         self.layout_name_edit = QLineEdit()
-        self.layout_name_edit.setPlaceholderText(_t("tools_layout_name", "Layout name"))
+        tr(self.layout_name_edit, "tools_layout_name", "Layout name", "setPlaceholderText")
         self.layout_save_button = tr(QPushButton(), "tools_layout_save", "Save layout")
         self.layout_save_button.clicked.connect(self.save_layout)
         self.layout_combobox = QComboBox()
@@ -152,47 +153,81 @@ class ToolsSettingUI(SettingPage):
         # Eight unrelated tools. Flattened into one grid, the measuring settings
         # looked as if recording used them too; they have nothing to do with
         # each other.
-        measure = self.add_section(self.measure_label)
+        # Each section opens with what it is for; the three with several steps (measuring, reading,
+        # recording) also say how, and the explanation follows the mode, action or format chosen.
+        measure = self._measure_section = self.add_section(self.measure_label)
+        measure.add_note("tools_measure_note")
         measure.add_row("tools_mode", self.measure_mode_combobox, "Mode")
+        self.measure_help = measure.add_note("tools_measure_help_color")
         measure.add_row(self.color_format_label, self.color_format_combobox)
         measure.add_inline(self.measure_button, self.palette_collect, self.palette_button)
+        measure.add_note("tools_palette_note")
         measure.add_widget(self.palette_status)
 
         capture = self.add_section(self.capture_label)
+        capture.add_note("tools_capture_note")
         capture.add_actions(self.capture_button, self.capture_copy_button,
                            self.capture_pin_button, self.capture_edit_button)
 
-        screen_text = self.add_section(self.screen_text_label)
-        screen_text.set_collapsible()
-        screen_text.add_row("tools_action", self.screen_text_combobox, "Action")
-        screen_text.add_widget(self.screen_text_input)
-        self.live_ocr_button = tr(QPushButton(), 'live_ocr_title')
-        self.live_ocr_button.clicked.connect(self.start_live_ocr)
-        screen_text.add_actions(self.screen_text_button, self.live_ocr_button)
-
+        self._add_screen_text_section()
         self._add_record_section()
 
-        virtual_camera = self.add_section(self.virtual_camera_label)
-        virtual_camera.set_collapsible()
+        virtual_camera = self.add_section(self.virtual_camera_label, collapsed=True)
+        virtual_camera.add_note("tools_vcam_note")
         virtual_camera.add_row("tools_fps", self.virtual_camera_fps_spinbox,
                                "Frames per second")
         virtual_camera.add_inline(self.virtual_camera_button)
         virtual_camera.add_widget(self.virtual_camera_status)
 
-        camera = self.add_section(self.camera_label)
-        camera.set_collapsible()
+        camera = self.add_section(self.camera_label, collapsed=True)
+        camera.add_note("tools_camera_note")
         camera.add_row("tools_device", self.camera_device_combobox, "Device")
         camera.add_row("tools_shape", self.camera_shape_combobox, "Shape")
         camera.add_row(self.camera_border_label, self.camera_border_spinbox)
         camera.add_inline(self.camera_mirror_checkbox)
-        camera.add_inline(self.camera_button)
+        camera.add_inline(self.camera_button, self.camera_refresh_button)
 
-        windows = self.add_section(self.layout_label)
-        windows.set_collapsible()
+        windows = self.add_section(self.layout_label, collapsed=True)
+        windows.add_note("tools_layout_note")
         windows.add_row("tools_name", self.layout_name_edit, "Name")
         windows.add_inline(self.layout_save_button)
         windows.add_row("tools_saved", self.layout_combobox, "Saved")
         windows.add_actions(self.layout_restore_button, self.pin_button, self.replica_button)
+        self._explain_measure_mode()
+        self._explain_screen_text_action()
+        self._explain_record_format()
+
+    @owned_action
+    def _add_screen_text_section(self) -> None:
+        section = self._screen_text_section = self.add_section(self.screen_text_label)
+        section.add_note("tools_screen_text_note")
+        section.add_row("tools_action", self.screen_text_combobox, "Action")
+        self.screen_text_help = section.add_note("tools_screen_text_help_extract")
+        section.add_row(self.screen_text_input_label, self.screen_text_input)
+        self.live_ocr_button = tr(QPushButton(), 'live_ocr_title')
+        self.live_ocr_button.clicked.connect(self.start_live_ocr)
+        section.add_inline(self.screen_text_button, self.live_ocr_button)
+        section.add_note("tools_live_ocr_note")
+
+    def _explain_measure_mode(self) -> None:
+        mode = self.measure_mode_combobox.currentData()
+        retranslator.set_text(self.measure_help, f"tools_measure_help_{mode}")
+        self._measure_section.set_row_visible(self.color_format_combobox, mode == MODE_COLOR)
+
+    def _explain_screen_text_action(self) -> None:
+        """The box below the action is a language, a question, or not needed at all; each keeps its text."""
+        action = self.screen_text_combobox.currentData()
+        if action != self._screen_text_action:
+            self._screen_text_values[self._screen_text_action] = self.screen_text_input.text()
+            self._screen_text_action = action
+            self.screen_text_input.setText(self._screen_text_values.get(action, ""))
+        retranslator.set_text(self.screen_text_help, f"tools_screen_text_help_{action}")
+        retranslator.set_text(self.screen_text_input_label, "tools_screen_text_question"
+                              if action == ACTION_ASK else "tools_screen_text_language")
+        self._screen_text_section.set_row_visible(self.screen_text_input, action != ACTION_EXTRACT)
+
+    def _explain_record_format(self) -> None:
+        retranslator.set_text(self.record_format_help, f"tools_record_help_{self.record_format.currentData()}")
 
     # --- construction helpers -------------------------------------------
     def _build_measure_row(self) -> None:
@@ -205,6 +240,7 @@ class ToolsSettingUI(SettingPage):
             retranslator.bind(self.measure_mode_combobox, key, fallback, "setItemText",
                               self.measure_mode_combobox.count() - 1)
         self.measure_mode_combobox.currentIndexChanged.connect(self._apply_measure_settings)
+        self.measure_mode_combobox.currentIndexChanged.connect(self._explain_measure_mode)
         self.color_format_label = tr(QLabel(), "tools_color_format", "Copy colour as")
         self.color_format_combobox = QComboBox()
         for value, label in ((FORMAT_HEX, "#rrggbb"), (FORMAT_RGB, "rgb(r, g, b)"),
@@ -220,6 +256,7 @@ class ToolsSettingUI(SettingPage):
         self.palette_button.clicked.connect(self.open_palette)
         self.palette_status = QLabel()
         self.palette_status.setWordWrap(True)
+        self.palette_status.hide()
 
     def _build_capture_row(self) -> None:
         self.capture_label = tr(QLabel(), "tools_capture_label", "Region capture")
@@ -242,9 +279,12 @@ class ToolsSettingUI(SettingPage):
             retranslator.bind(self.screen_text_combobox, key, fallback, "setItemText",
                               self.screen_text_combobox.count() - 1)
         self.screen_text_input = QLineEdit()
-        self.screen_text_input.setPlaceholderText(
-            _t("tools_screen_text_input", "Language, or your question"))
+        tr(self.screen_text_input, "tools_screen_text_input", "Language, or your question", "setPlaceholderText")
         self.screen_text_input.setText(DEFAULT_LANGUAGE)
+        self.screen_text_input_label = tr(QLabel(), "tools_screen_text_language", "Translate into")
+        self._screen_text_action = ACTION_TRANSLATE
+        self._screen_text_values = {ACTION_TRANSLATE: DEFAULT_LANGUAGE}
+        self.screen_text_combobox.currentIndexChanged.connect(self._explain_screen_text_action)
         self.screen_text_button = tr(QPushButton(), "tools_screen_text_start", "Read an area")
         self.screen_text_button.clicked.connect(self.start_screen_text)
 
@@ -284,16 +324,21 @@ class ToolsSettingUI(SettingPage):
     @owned_action
     def _add_record_section(self) -> None:
         section = self.add_section(self.record_label)
+        section.add_note("tools_record_note")
+        section.add_note("tools_record_help")
         section.add_row('tools_record_format', self.record_format)
+        self.record_format_help = section.add_note("tools_record_help_gif")
         section.add_row('tools_fps', self.record_fps_spinbox)
-        section.add_row('tools_seconds', self.record_seconds_spinbox)
+        section.add_row('tools_record_max_seconds', self.record_seconds_spinbox)
         section.add_inline(self.record_camera_checkbox)
+        section.add_note("tools_record_camera_note")
         section.add_inline(self.record_button, self.record_pause, self.record_cancel)
         section.add_widget(self.record_status)
 
     @owned_action
     def _record_format_changed(self, _index: int) -> None:
         self.record_seconds_spinbox.setMaximum(3600 if self.record_format.currentData() == 'avi' else 120)
+        self._explain_record_format()
 
     @owned_action
     def _toggle_record_pause(self) -> None:
@@ -336,8 +381,10 @@ class ToolsSettingUI(SettingPage):
         status_key, status_fallback = (
             ("tools_vcam_ready", "Ready") if virtual_camera.available()
             else ("tools_vcam_missing", "Install pyvirtualcam and a virtual camera driver"))
-        self.virtual_camera_status = QLabel(_t(status_key, status_fallback))
-        retranslator.bind(self.virtual_camera_status, status_key, status_fallback)
+        self.virtual_camera_status = QLabel()
+        self._vcam_status = (status_key, status_fallback, {})
+        retranslator.bind_call(self._show_vcam_status)
+        self._show_vcam_status()
         self.virtual_camera_status.setWordWrap(True)
         self.virtual_camera_button.setEnabled(virtual_camera.available())
 
@@ -361,10 +408,17 @@ class ToolsSettingUI(SettingPage):
         self.camera_border_spinbox.setRange(0, 20)
         self.camera_border_spinbox.setValue(4)
         self.camera_border_spinbox.valueChanged.connect(self._apply_camera_settings)
+        self.camera_refresh_button = tr(QPushButton(), "window_replica_refresh", "Refresh")
+        self.camera_refresh_button.clicked.connect(lambda: self.reload_cameras())
         self.camera_button = tr(QPushButton(), "tools_camera_start", "Show camera")
         self.camera_button.clicked.connect(self.toggle_camera)
 
     # --- measuring -------------------------------------------------------
+    def stop_overlays(self) -> None:
+        """Every overlay was closed from outside: offer to start them again."""
+        for stop in (self.stop_measure, self.stop_camera, self.close_replicas):
+            stop()
+
     @owned_action
     def toggle_measure(self) -> None:
         if self.measure_widget_list:
@@ -382,6 +436,7 @@ class ToolsSettingUI(SettingPage):
         if screen is not None:
             widget.setGeometry(screen.geometry())
         widget.color_sampled.connect(self._record_palette_color)
+        widget.finish_requested.connect(self.stop_measure)
         widget.setMouseTracking(True)
         widget.show()
         self.measure_widget_list.append(widget)
@@ -428,7 +483,12 @@ class ToolsSettingUI(SettingPage):
         try:
             write_user_setting()
         except OSError as error:
-            self.palette_status.setText(str(error))
+            self._show_palette_status(str(error))
+
+    def _show_palette_status(self, text: str) -> None:
+        """An error, or nothing; empty it takes no room in the section."""
+        self.palette_status.setText(text)
+        self.palette_status.setVisible(bool(text))
 
     @owned_callback
     def _record_palette_color(self, color: str) -> None:
@@ -436,9 +496,9 @@ class ToolsSettingUI(SettingPage):
             return
         try:
             self.palette.sample(color)
-            self.palette_status.clear()
+            self._show_palette_status("")
         except (OSError, ValueError) as error:
-            self.palette_status.setText(str(error))
+            self._show_palette_status(str(error))
         if self.palette_dialog is not None:
             self.palette_dialog.refresh()
 
@@ -597,24 +657,34 @@ class ToolsSettingUI(SettingPage):
     @owned_action
     def open_pin_dialog(self) -> WindowPinDialog:
         """開視窗釘選對話框（關掉時會把釘過的視窗放開）。"""
-        self.pin_dialog = WindowPinDialog(self)
+        # One for good: it remembers which windows it pinned or faded, to let go of them at the end.
+        if self.pin_dialog is None or not isValid(self.pin_dialog):
+            self.pin_dialog = WindowPinDialog(self)
+        else:
+            self.pin_dialog.reload_windows()
         self.lifetime.after_dialog(self.pin_dialog.exec())
         return self.pin_dialog
 
     @owned_action
     def open_replica_dialog(self) -> WindowReplicaDialog:
         """開視窗複本對話框（關掉主程式時會把開過的複本收乾淨）。"""
-        self.replica_dialog = WindowReplicaDialog(self)
-        self.lifetime.after_dialog(self.replica_dialog.exec())
-        return self.replica_dialog
+        dialog = WindowReplicaDialog(self, replicas=self.replica_widget_list)
+        self.lifetime.after_dialog(dialog.exec())
+        dialog.deleteLater()
+        return dialog
 
     def close_replicas(self) -> None:
         """關掉開過的視窗複本（主程式關閉時呼叫）。"""
-        if self.replica_dialog is not None:
+        self._close_widgets(self.replica_widget_list)
+
+    @staticmethod
+    def _close_widgets(widgets: list) -> None:
+        for widget in widgets[:]:
             try:
-                self.replica_dialog.close_all()
+                widget.close()
             except RuntimeError:
-                self.replica_dialog = None
+                pass
+        widgets.clear()
 
     def release_pinned_windows(self) -> None:
         """把釘過的別人視窗放開（主程式關閉時呼叫）。"""
@@ -632,9 +702,11 @@ class ToolsSettingUI(SettingPage):
         are usually plugged in while the app is already running, so the list has
         to be refreshable or they only appear after a restart.
         """
+        chosen = self.camera_device_combobox.currentData()
         self.camera_device_combobox.clear()
         for camera_id, description in list_cameras():
             self.camera_device_combobox.addItem(description, camera_id)
+        self.camera_device_combobox.setCurrentIndex(max(0, self.camera_device_combobox.findData(chosen)))
         if self.camera_device_combobox.count() == 0:
             self.camera_device_combobox.addItem(_t("tools_camera_none", "No camera found"), "")
         return self.camera_device_combobox.count()
@@ -658,7 +730,7 @@ class ToolsSettingUI(SettingPage):
     def start_virtual_camera(self):
         """框一塊畫面，放開滑鼠後把那塊持續送進虛擬攝影機。"""
         front_engine_logger.info("[ToolsSettingUI] start_virtual_camera")
-        picker = RegionCaptureWidget()
+        picker = RegionCaptureWidget(prompt_key="region_prompt_camera")
         picker.finish = _virtual_camera_region_picker(self, picker)
         screen = QGuiApplication.primaryScreen()
         if screen is not None:
@@ -674,22 +746,28 @@ class ToolsSettingUI(SettingPage):
         started = self.virtual_camera_feed.start(region, self.virtual_camera_fps_spinbox.value())
         if started:
             retranslator.set_text(self.virtual_camera_button, "tools_vcam_stop", "Stop sending")
-            self.virtual_camera_status.setText(
-                _t("tools_vcam_sending", "Sending to {device}").format(
-                    device=self.virtual_camera_feed.device_name()))
+            self._set_vcam_status("tools_vcam_sending", "Sending to {device}",
+                                  device=self.virtual_camera_feed.device_name())
         return started
 
     def stop_virtual_camera(self) -> None:
         self.virtual_camera_feed.stop()
         retranslator.set_text(self.virtual_camera_button, "tools_vcam_start", "Send an area")
-        self.virtual_camera_status.setText(_t("tools_vcam_ready", "Ready"))
+        self._set_vcam_status("tools_vcam_ready", "Ready")
 
     @owned_callback
     def _on_virtual_camera_failed(self, reason: str) -> None:
         """開不起來時照實說明，不要只是沒反應。"""
         front_engine_logger.warning(f"[ToolsSettingUI] virtual camera failed: {reason}")
-        self.virtual_camera_status.setText(
-            _t("tools_vcam_failed", "Could not start: {reason}").format(reason=reason))
+        self._set_vcam_status("tools_vcam_failed", "Could not start: {reason}", reason=reason)
+
+    def _set_vcam_status(self, key: str, fallback: str, **values) -> None:
+        self._vcam_status = (key, fallback, values)
+        self._show_vcam_status()
+
+    def _show_vcam_status(self) -> None:
+        key, fallback, values = self._vcam_status
+        self.virtual_camera_status.setText(_t(key, fallback).format(**values))
 
     # --- reading text on screen ------------------------------------------
     @owned_action
@@ -701,7 +779,8 @@ class ToolsSettingUI(SettingPage):
         without it: this is the only feature that sends screen content off the
         machine.
         """
-        picker = RegionCaptureWidget(on_captured=lambda pixmap, rect: self._read_capture(pixmap))
+        picker = RegionCaptureWidget(on_captured=lambda pixmap, rect: self._read_capture(pixmap),
+                                     prompt_key="region_prompt_text")
         picker.failed.connect(self._on_capture_failed)
         screen = QGuiApplication.primaryScreen()
         if screen is not None:
@@ -715,11 +794,12 @@ class ToolsSettingUI(SettingPage):
     def start_live_ocr(self) -> RegionCaptureWidget | None:
         """Select one fixed screen region for a manual-first, locally recognized OCR window."""
         if len(self.ocr_widget_list) >= 4:
-            self.ocr_widget_list = [widget for widget in self.ocr_widget_list if not widget.closed]
+            self.ocr_widget_list[:] = [widget for widget in self.ocr_widget_list if not widget.closed]
         if len(self.ocr_widget_list) >= 4:
             self._on_capture_failed(_t('live_ocr_limit', 'Close an OCR window before opening another (maximum four).'))
             return None
-        picker = RegionCaptureWidget(on_captured=lambda pixmap, rect: self._live_ocr_selected(picker, rect))
+        picker = RegionCaptureWidget(on_captured=lambda pixmap, rect: self._live_ocr_selected(picker, rect),
+                                     prompt_key="region_prompt_live_ocr")
         picker.failed.connect(self._on_capture_failed)
         screen = QGuiApplication.primaryScreen()
         if screen is not None:
@@ -801,30 +881,15 @@ class ToolsSettingUI(SettingPage):
 
     @owned_callback
     def _present_screen_text_result(self, result) -> None:
-        ScreenTextDialog(parent=self, result=result).exec()
+        dialog = ScreenTextDialog(parent=self, result=result)
+        dialog.exec()
+        if isValid(dialog):
+            dialog.deleteLater()
 
     @owned_callback
     def _on_capture_failed(self, reason: str) -> None:
         QMessageBox.warning(self, _t('tab_tools_text', 'Tools'),
                             _t('tools_capture_failed', 'Capture failed: {reason}').format(reason=reason))
-
-    @owned_action
-    def show_screen_text(self, text) -> None:
-        """收到結果：切回 UI 執行緒再開視窗（回呼來自背景執行緒）。"""
-        self.last_screen_text = text
-        # 一定要傳 context 物件（self），否則計時器會被建在沒有事件迴圈的背景
-        # 執行緒上，永遠不會觸發，結果視窗根本不會打開。
-        # The context object (self) is essential: without it the timer is created
-        # on the worker thread, which has no event loop, so it never fires and
-        # the result window simply never opens.
-        QTimer.singleShot(0, self, lambda: self._present_screen_text(text))
-
-    @owned_action
-    def _present_screen_text(self, text):
-        dialog = ScreenTextDialog(
-            text or _t("tools_screen_text_empty", "Nothing came back."), self)
-        self.lifetime.after_dialog(dialog.exec())
-        return dialog
 
     # --- recording -------------------------------------------------------
     @owned_action
@@ -838,7 +903,7 @@ class ToolsSettingUI(SettingPage):
     def start_recording(self) -> RegionCaptureWidget:
         """先框一塊範圍，放開滑鼠後就從那塊開始錄。"""
         front_engine_logger.info("[ToolsSettingUI] start_recording")
-        picker = RegionCaptureWidget()
+        picker = RegionCaptureWidget(prompt_key="region_prompt_record")
         picker.finish = _recording_region_picker(self, picker)
         screen = QGuiApplication.primaryScreen()
         if screen is not None:
@@ -936,8 +1001,8 @@ class ToolsSettingUI(SettingPage):
             return None
         layouts = dict(self.saved_layouts())
         layouts[name] = capture_layout()
-        user_setting_dict["window_layouts"] = layouts
-        write_user_setting()
+        if not save_or_tell(self, {"window_layouts": layouts}, write_user_setting):
+            return None
         front_engine_logger.info(
             f"[ToolsSettingUI] saved layout {name!r} with {len(layouts[name])} window(s)")
         self.reload_layouts()
