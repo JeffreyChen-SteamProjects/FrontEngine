@@ -778,7 +778,7 @@ english_word_dict = {
     "how_to_use_shared_title": "Settings every page shares",
     "how_to_use_shared_body": "Opacity decides how much of the desktop shows through. Target monitor chooses the screen, or asks each time. Show on all screens puts a copy on each monitor, and Show on all window bottom drops it beneath your windows so it behaves like a backdrop rather than something in front.",
     "how_to_use_clicks_title": "Overlays do not get in the way",
-    "how_to_use_clicks_body": "Clicks pass straight through an overlay to whatever is underneath, so the window below keeps working normally. The two exceptions are the pet and the drawing layer on the Presenting page, which need the mouse to do what they do.",
+    "how_to_use_clicks_body": "Clicks pass straight through most overlays to whatever is underneath, so the window below keeps working normally. A few need the mouse to do what they do: the pet, the drawing layer on the Presenting page, sticky notes and scenes. A playing scene is maximized, so it takes the clicks for the whole screen until you close it or choose Lock overlays in the Control Center.",
     "how_to_use_control_title": "Managing several at once",
     "how_to_use_control_body": "The Control Center reaches every overlay, whichever page opened it: hide them for a moment, mute them, lock them so they stop moving, or lower the quality when the battery matters. Unlock them first if you want to drag one somewhere else - it remembers where you dropped it.",
     "how_to_use_escape_title": "Clearing the screen",

@@ -769,7 +769,7 @@ italian_word_dict = {
     "how_to_use_shared_title": "Le impostazioni comuni a tutte le pagine",
     "how_to_use_shared_body": "L'opacità decide quanto traspare la scrivania. Lo schermo di destinazione sceglie il monitor, o lo chiede ogni volta. «Mostra su tutti gli schermi» ne mette una copia per monitor, e «Mostra sotto tutte le finestre» lo infila sotto le tue finestre, così si comporta da sfondo anziché da qualcosa davanti.",
     "how_to_use_clicks_title": "Gli overlay non danno fastidio",
-    "how_to_use_clicks_body": "I clic passano attraverso l'overlay fino a ciò che sta sotto, quindi la finestra sottostante continua a funzionare normalmente. Le due eccezioni sono la mascotte e il livello di disegno nella pagina Presentazione, che del mouse hanno bisogno per fare quello che fanno.",
+    "how_to_use_clicks_body": "I clic passano attraverso la maggior parte degli overlay fino a ciò che sta sotto, quindi la finestra sottostante continua a funzionare normalmente. Alcuni hanno bisogno del mouse per fare quello che fanno: la mascotte, il livello di disegno nella pagina Presentazione, i foglietti adesivi e le scene. Una scena in riproduzione è ingrandita, quindi riceve i clic di tutto lo schermo finché non la chiudi o scegli «Blocca gli overlay» nel Centro di controllo.",
     "how_to_use_control_title": "Gestirne diversi insieme",
     "how_to_use_control_body": "Il Centro di controllo raggiunge ogni overlay, da qualunque pagina sia stato aperto: nasconderli un momento, silenziarli, bloccarli perché smettano di muoversi, o abbassare la qualità quando conta la batteria. Per spostarne uno sbloccalo prima: si ricorda dove lo hai lasciato.",
     "how_to_use_escape_title": "Liberare lo schermo",

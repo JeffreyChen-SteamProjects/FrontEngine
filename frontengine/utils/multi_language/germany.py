@@ -775,7 +775,7 @@ germany_word_dict = {
     "how_to_use_shared_title": "Einstellungen, die jede Seite teilt",
     "how_to_use_shared_body": "Die Deckkraft bestimmt, wie viel vom Schreibtisch durchscheint. Der Zielbildschirm wählt den Monitor oder fragt jedes Mal nach. „Auf allen Bildschirmen zeigen“ legt je Monitor eine Kopie an, und „Unter allen Fenstern zeigen“ schiebt es unter Ihre Fenster, sodass es wie ein Hintergrund wirkt statt wie etwas davor.",
     "how_to_use_clicks_title": "Overlays stehen nicht im Weg",
-    "how_to_use_clicks_body": "Klicks gehen glatt durch ein Overlay hindurch auf das, was darunter liegt; das Fenster darunter funktioniert also weiter wie gewohnt. Die beiden Ausnahmen sind das Haustier und die Zeichenebene auf der Seite „Präsentieren“, die die Maus brauchen, um überhaupt etwas zu tun.",
+    "how_to_use_clicks_body": "Klicks gehen bei den meisten Overlays glatt hindurch auf das, was darunter liegt; das Fenster darunter funktioniert also weiter wie gewohnt. Einige brauchen die Maus, um überhaupt etwas zu tun: das Haustier, die Zeichenebene auf der Seite „Präsentieren“, Notizzettel und Szenen. Eine laufende Szene ist maximiert und nimmt deshalb die Klicks für den ganzen Bildschirm an, bis Sie sie schließen oder im Kontrollzentrum „Overlays sperren“ wählen.",
     "how_to_use_control_title": "Mehrere auf einmal verwalten",
     "how_to_use_control_body": "Das Kontrollzentrum erreicht jedes Overlay, gleich von welcher Seite geöffnet: kurz ausblenden, stummschalten, sperren, damit sie sich nicht mehr bewegen, oder die Qualität senken, wenn der Akku zählt. Zum Verschieben zuerst entsperren - wo Sie es ablegen, merkt es sich.",
     "how_to_use_escape_title": "Den Bildschirm frei räumen",

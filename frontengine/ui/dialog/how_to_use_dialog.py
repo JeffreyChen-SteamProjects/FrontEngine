@@ -44,10 +44,12 @@ SECTIONS: List[Tuple[str, str, str, str]] = [
      "so it behaves like a backdrop rather than something in front."),
     ("how_to_use_clicks_title", "Overlays do not get in the way",
      "how_to_use_clicks_body",
-     "Clicks pass straight through an overlay to whatever is underneath, so the "
-     "window below keeps working normally. The two exceptions are the pet and "
-     "the drawing layer on the Presenting page, which need the mouse to do what "
-     "they do."),
+     "Clicks pass straight through most overlays to whatever is underneath, so "
+     "the window below keeps working normally. A few need the mouse to do what "
+     "they do: the pet, the drawing layer on the Presenting page, sticky notes "
+     "and scenes. A playing scene is maximized, so it takes the clicks for the "
+     "whole screen until you close it or choose Lock overlays in the Control "
+     "Center."),
     ("how_to_use_control_title", "Managing several at once",
      "how_to_use_control_body",
      "The Control Center reaches every overlay, whichever page opened it: hide "
