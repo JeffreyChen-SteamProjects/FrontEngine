@@ -37,6 +37,16 @@ class GifWidget(BaseWidget):
         self.speed = speed
         self.movie.setSpeed(self.speed)
 
+    def set_active(self, active: bool) -> None:
+        """
+        Scene playback pauses and resumes the animation with the scene timeline.
+        A movie that never started or was stopped stays stopped: setPaused(False)
+        would otherwise start it again.
+        """
+        if self.movie.state() == QMovie.MovieState.NotRunning:
+            return
+        self.movie.setPaused(not active)
+
     def closeEvent(self, event) -> None:
         # 關掉之後還在解碼就是白燒 CPU，畫面早就不見了
         # A movie still decoding after the overlay is gone is pure wasted CPU.

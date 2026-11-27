@@ -215,3 +215,49 @@ def test_two_views_keep_source_active_until_last_hidden():
     second.close()
     manager.clear()
     assert source.closed
+
+
+def _run_events(milliseconds):
+    from PySide6.QtCore import QEventLoop, QTimer
+    loop = QEventLoop()
+    QTimer.singleShot(milliseconds, loop.quit)
+    loop.exec()
+
+
+def test_paused_scene_holds_gif_frames_and_layer_edits_keep_media_paused(tmp_path):
+    from PIL import Image
+    from PySide6.QtGui import QMovie
+    from frontengine.show.scene.scene import SceneManager
+    from frontengine.show.scene.compositor_view import SceneCompositorView
+    path = tmp_path / 'moving.gif'
+    frames = [Image.new('RGB', (16, 16), color) for color in ('red', 'green', 'blue')]
+    frames[0].save(path, save_all=True, append_images=frames[1:], duration=20, loop=0)
+    manager = SceneManager()
+    gif_entry = {'type': 'GIF', 'file_path': str(path), 'opacity': 100, 'width': 16, 'height': 16}
+    manager.add_entry('gif', gif_entry)
+    sound = PreviewSource({'type': 'SOUND'}, preview=True)
+    sound_entry = {'type': 'SOUND', 'file_path': str(path), 'x': 0, 'y': 0}
+    proxy = manager.graphic_scene.addWidget(sound)
+    proxy.setData(0, 'sound')
+    proxy.setData(1, dict(sound_entry))
+    manager.widget_list.append(proxy)
+    manager.layer_settings['sound'] = dict(sound_entry)
+    movie = manager.widget_list[0].widget().movie
+    view = SceneCompositorView(manager.graphic_scene, 'software')
+    view.show()
+    try:
+        assert sound.active and movie.state() == QMovie.MovieState.Running
+        view.timeline.pause()
+        assert not sound.active and movie.state() == QMovie.MovieState.Paused
+        changes = []
+        movie.frameChanged.connect(changes.append)
+        manager.synchronize_layers({'gif': {**gif_entry, 'x': 25}, 'sound': {**sound_entry, 'x': 25}})
+        _run_events(200)
+        assert changes == [] and not sound.active and movie.state() == QMovie.MovieState.Paused
+        view.timeline.play()
+        assert sound.active and movie.state() == QMovie.MovieState.Running
+        _run_events(200)
+        assert changes
+    finally:
+        view.close()
+        manager.clear()

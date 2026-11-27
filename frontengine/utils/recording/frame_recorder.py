@@ -173,6 +173,14 @@ class FrameRecorder(QObject):
         now = self._clock() if self._paused_at is None else self._paused_at
         return now - self._paused_duration
 
+    def _cutoff_stamp(self) -> float:
+        """
+        End of the clip on the effective timeline, never past the scheduled cutoff.
+        A timer tick that arrives late reads the clock after the deadline; handing
+        that to the AVI writer would exceed its one-hour limit and discard the clip.
+        """
+        return min(self._effective_stamp(), self._started_at + self.max_seconds)
+
     def pause(self) -> bool:
         """Stop region capture without finalizing; exclude paused wall time."""
         if self.state != 'recording':
@@ -242,7 +250,7 @@ class FrameRecorder(QObject):
         self._stop_native_capture()
         if self.state in ('recording', 'paused') and self._writer is not None:
             self._timer.stop()
-            stamp = self._effective_stamp()
+            stamp = self._cutoff_stamp()
             self._elapsed = max(0, stamp - self._started_at)
             self._set_state('finalizing')
             self._writer.stop(stamp)

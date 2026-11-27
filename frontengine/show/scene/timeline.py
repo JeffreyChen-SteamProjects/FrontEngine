@@ -11,6 +11,19 @@ from PySide6.QtCore import QObject, QTimer, Signal
 from frontengine.utils.scene_format.scene_animation import animation_duration, sample_animation, validate_animation
 
 
+def scene_media_should_play(scene, visible: bool) -> bool:
+    """
+    One playback rule for scene media (sound, video, GIF): a view must own the
+    scene, the layer must be visible and the shared timeline must not be paused.
+    Layer edits and timeline changes both ask here, so an edit never restarts
+    media that the user paused.
+    """
+    owners = getattr(scene, '_media_view_owners', set())
+    timeline = getattr(scene, '_scene_timeline', None)
+    paused = timeline is not None and timeline.state == 'paused'
+    return bool(owners) and bool(visible) and not paused
+
+
 class SceneTimeline(QObject):
     """Preview/playback use the same interpolation; pauses never advance time."""
 
