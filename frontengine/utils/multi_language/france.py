@@ -257,6 +257,7 @@ french_word_dict = {
     "preset_menu_export_package": "Exporter un paquet (+médias)…",
     "preset_menu_import_package": "Importer un paquet (+médias)…",
     "preset_export_package_title": "Exporter un paquet",
+    "preset_package_too_large": "Ce paquet dépasserait {members} fichiers ou {megabytes} Mio et ne pourrait pas être réimporté. Rien n'a été écrit.",
     "preset_import_package_title": "Importer un paquet",
     "preset_package_filter": "Paquets de préréglages (*.zip)",
     "preset_overwrite_confirm": "Le préréglage « {name} » existe déjà. Le remplacer ?",

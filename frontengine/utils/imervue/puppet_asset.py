@@ -8,14 +8,24 @@ import zipfile
 from pathlib import Path, PurePosixPath
 
 MAX_ARCHIVE_BYTES = 256 * 1024 * 1024
+MAX_ARCHIVE_MEMBERS = 4096
 MAX_JSON_BYTES = 8 * 1024 * 1024
 MEDIA_TYPE = 'application/vnd.imervue.puppet+zip'
 
 
+class ArchiveBudgetError(ValueError):
+    """An archive holds more members or uncompressed bytes than the importers accept."""
+
+
+def check_archive_budget(members: int, total_bytes: int) -> None:
+    """The one budget every archive reader here enforces; writers check it before writing."""
+    if members > MAX_ARCHIVE_MEMBERS or total_bytes > MAX_ARCHIVE_BYTES:
+        raise ArchiveBudgetError('Archive exceeds its resource limit')
+
+
 def checked_members(archive: zipfile.ZipFile) -> dict[str, zipfile.ZipInfo]:
     entries = archive.infolist()
-    if len(entries) > 4096 or sum(item.file_size for item in entries) > MAX_ARCHIVE_BYTES:
-        raise ValueError('Archive exceeds its resource limit')
+    check_archive_budget(len(entries), sum(item.file_size for item in entries))
     members = {}
     for item in entries:
         name = item.filename

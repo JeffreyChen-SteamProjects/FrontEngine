@@ -257,6 +257,7 @@ italian_word_dict = {
     "preset_menu_export_package": "Esporta pacchetto (+contenuti)…",
     "preset_menu_import_package": "Importa pacchetto (+contenuti)…",
     "preset_export_package_title": "Esporta pacchetto",
+    "preset_package_too_large": "Questo pacchetto supererebbe {members} file o {megabytes} MiB e non potrebbe essere reimportato. Non è stato scritto nulla.",
     "preset_import_package_title": "Importa pacchetto",
     "preset_package_filter": "Pacchetti di preimpostazioni (*.zip)",
     "preset_overwrite_confirm": "La preimpostazione «{name}» esiste già. Sovrascriverla?",

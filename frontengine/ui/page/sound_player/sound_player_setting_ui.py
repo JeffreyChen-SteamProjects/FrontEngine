@@ -9,7 +9,7 @@ from frontengine.show.sound_player.sound_effect import SoundEffectWidget
 from frontengine.show.sound_player.sound_player import SoundPlayer
 from frontengine.ui.dialog.choose_file_dialog import choose_player_sound, choose_wav_sound
 from frontengine.ui.page.layout_kit import SettingPage
-from frontengine.ui.page.utils import coerce_int
+from frontengine.ui.page.utils import coerce_int, preset_media_path
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.language_wrapper import language_wrapper
 from frontengine.utils.multi_language.retranslate import retranslator, tr, translate
@@ -145,14 +145,20 @@ class SoundPlayerSettingUI(SettingPage):
             "player_sound_path": self.player_sound_path,
         }
 
+    def _set_wav_path(self, path: Optional[str]) -> None:
+        """Point the page at a preset's file, or clear it when the preset stored none."""
+        self.wav_sound_path = path
+        self.wav_ready_to_play = path is not None
+        retranslator.set_text(self.wav_ready_label, "Ready" if path else _NOT_READY)
+
     def set_state(self, state: dict) -> None:
         volume = coerce_int(state.get("volume"))
         if volume is not None:
             self.volume_slider.setValue(volume)
-        if state.get("wav_sound_path"):
-            self.wav_sound_path = state["wav_sound_path"]
-            self.wav_ready_to_play = True
-            retranslator.set_text(self.wav_ready_label, "Ready")
-        if state.get("player_sound_path"):
-            self.player_sound_path = state["player_sound_path"]
-            retranslator.set_text(self.player_ready_label, "Ready")
+        present, path = preset_media_path(state, "wav_sound_path")
+        if present:
+            self._set_wav_path(path)
+        present, path = preset_media_path(state, "player_sound_path")
+        if present:
+            self.player_sound_path = path
+            retranslator.set_text(self.player_ready_label, "Ready" if path else _NOT_READY)

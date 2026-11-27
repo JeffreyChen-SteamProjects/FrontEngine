@@ -257,6 +257,7 @@ traditional_chinese_word_dict = {
     "preset_menu_export_package": "匯出打包（含媒體）...",
     "preset_menu_import_package": "匯入打包（含媒體）...",
     "preset_export_package_title": "匯出打包",
+    "preset_package_too_large": "這個封包會超過 {members} 個檔案或 {megabytes} MiB，匯出後將無法再匯入，因此沒有寫入任何檔案。",
     "preset_import_package_title": "匯入打包",
     "preset_package_filter": "預設集打包 (*.zip)",
     "preset_overwrite_confirm": "預設集「{name}」已存在，要覆蓋嗎？",

@@ -257,6 +257,7 @@ english_word_dict = {
     "preset_menu_export_package": "Export package (+media)...",
     "preset_menu_import_package": "Import package (+media)...",
     "preset_export_package_title": "Export package",
+    "preset_package_too_large": "This package would hold more than {members} files or {megabytes} MiB, so it could not be imported again. Nothing was written.",
     "preset_import_package_title": "Import package",
     "preset_package_filter": "Preset packages (*.zip)",
     "preset_overwrite_confirm": "Preset '{name}' already exists. Overwrite?",

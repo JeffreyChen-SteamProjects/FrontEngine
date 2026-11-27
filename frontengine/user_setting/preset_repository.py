@@ -2,15 +2,18 @@ from __future__ import annotations
 
 import copy
 import json
+import os
 import re
 import shutil
+import tempfile
 import unicodedata
 import zipfile
 from os import getcwd
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from frontengine.utils.exception.exceptions import FrontEngineJsonFileException
+from frontengine.utils.imervue.puppet_asset import check_archive_budget, checked_members
 from frontengine.utils.json.json_repository import JsonRepository
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.user_setting.preset_history import PresetHistory, checked_state
@@ -21,6 +24,24 @@ _DEVICE_NAMES = frozenset({"con", "prn", "aux", "nul"} | {f"{port}{n}" for port 
 # In-archive folder prefix for bundled media files.
 _MEDIA_PREFIX = "media/"
 _PRESET_MEMBER = "preset.json"
+# Fields that hold a media file the user picked, per preset page. Only these are
+# packed on export and rewritten on import; every other string (overlay text,
+# labels, URLs, live data-source files) travels unchanged.
+_PORTABLE_MEDIA_FIELDS: Dict[str, Tuple[str, ...]] = {
+    "video": ("video_path",),
+    "image": ("image_path",),
+    "gif": ("gif_image_path",),
+    "sound": ("wav_sound_path", "player_sound_path"),
+    "particle": ("image_path",),
+    "pet": ("pet_image_path", "puppet_script", "sound"),
+}
+
+
+def _portable_fields(page: str, section: Dict[str, Any]) -> Tuple[str, ...]:
+    """The media fields of one preset section; the web page's only when it opens a local file."""
+    if page == "web":
+        return ("url",) if section.get("open_file") is True else ()
+    return _PORTABLE_MEDIA_FIELDS.get(page, ())
 
 
 def _default_dir() -> Path:
@@ -164,10 +185,13 @@ class PresetRepository:
     def export_package(self, name: str, destination: Path) -> Path:
         """
         將預設集連同其引用的媒體檔打包成 .zip，方便攜帶分享。
-        Bundle a preset and the media files it references into a portable
-        .zip. Media paths inside the archived preset are rewritten to
-        ``media/<filename>``. Raises FileNotFoundError when the preset is
-        missing.
+        Bundle a preset and the media files its pages picked into a portable
+        .zip. Only the fields in ``_PORTABLE_MEDIA_FIELDS`` are packed, and
+        their paths inside the archived preset are rewritten to
+        ``media/<filename>``. The package must fit the budget import enforces
+        (ArchiveBudgetError otherwise, raised before anything is written); it
+        is written beside the target and then replaces it in one step.
+        Raises FileNotFoundError when the preset is missing.
         """
         source = self._path_for(name)
         if not source.exists():
@@ -175,26 +199,14 @@ class PresetRepository:
         document = json.loads(source.read_text(encoding="utf-8"))
         if not isinstance(document, dict):
             raise ValueError("Preset file must contain a JSON object")
-
-        rewritten = copy.deepcopy(document)
-        media_map: Dict[str, str] = {}  # archive name -> original path
-        used_names: set = set()
-        for section in rewritten.values():
-            if not isinstance(section, dict):
-                continue
-            for key, value in tuple(section.items()):
-                if isinstance(value, str) and value and Path(value).is_file():
-                    archive_name = self._unique_media_name(Path(value).name, used_names)
-                    used_names.add(archive_name)
-                    media_map[archive_name] = value
-                    section[key] = f"{_MEDIA_PREFIX}{archive_name}"
-
+        rewritten, media_map = _bundle_media(document)
+        preset_bytes = json.dumps(rewritten, indent=4).encode("utf-8")
+        media_bytes = sum(Path(original).stat().st_size for original in media_map.values())
+        check_archive_budget(1 + len(media_map), len(preset_bytes) + media_bytes)
+        # destination is where the user pointed a native Save dialog, not remote input.
         destination = Path(destination)
         destination.parent.mkdir(parents=True, exist_ok=True)
-        with zipfile.ZipFile(destination, "w", zipfile.ZIP_DEFLATED) as archive:
-            archive.writestr(_PRESET_MEMBER, json.dumps(rewritten, indent=4))
-            for archive_name, original in media_map.items():
-                archive.write(original, f"{_MEDIA_PREFIX}{archive_name}")
+        _write_package(destination, preset_bytes, media_map)
         return destination
 
     def import_package(self, source: Path) -> str:
@@ -209,7 +221,6 @@ class PresetRepository:
         if not source.exists() or not zipfile.is_zipfile(source):
             raise ValueError(f"Not a valid preset package: {source}")
         with zipfile.ZipFile(source, "r") as archive:
-            from frontengine.utils.imervue.puppet_asset import checked_members
             checked_members(archive)
             media_names = [Path(item.filename).name.casefold() for item in archive.infolist()
                            if item.filename.startswith(_MEDIA_PREFIX) and not item.is_dir()]
@@ -251,6 +262,40 @@ class PresetRepository:
         return f"{stem}_{index}{suffix}"
 
 
+def _bundle_media(document: Dict[str, Any]) -> Tuple[Dict[str, Any], Dict[str, str]]:
+    """Copy the preset with its portable media paths rewritten; map archive name -> original path."""
+    rewritten = copy.deepcopy(document)
+    media_map: Dict[str, str] = {}
+    for page, section in rewritten.items():
+        if not isinstance(section, dict):
+            continue
+        for key in _portable_fields(page, section):
+            value = section.get(key)
+            if isinstance(value, str) and value and Path(value).is_file():
+                archive_name = PresetRepository._unique_media_name(Path(value).name, set(media_map))
+                media_map[archive_name] = value
+                section[key] = f"{_MEDIA_PREFIX}{archive_name}"
+    return rewritten, media_map
+
+
+def _write_package(destination: Path, preset_bytes: bytes, media_map: Dict[str, str]) -> None:
+    """Write the package beside the target, re-check the budget, then atomically replace the target."""
+    handle, temporary_name = tempfile.mkstemp(prefix=f".{destination.name}.", suffix=".tmp", dir=destination.parent)
+    os.close(handle)
+    temporary = Path(temporary_name)
+    try:
+        with zipfile.ZipFile(temporary, "w", zipfile.ZIP_DEFLATED) as archive:
+            archive.writestr(_PRESET_MEMBER, preset_bytes)
+            for archive_name, original in media_map.items():
+                archive.write(original, f"{_MEDIA_PREFIX}{archive_name}")
+        with zipfile.ZipFile(temporary) as archive:
+            checked_members(archive)                  # a media file may have grown while it was packed
+        os.replace(temporary, destination)
+    except BaseException:
+        temporary.unlink(missing_ok=True)
+        raise
+
+
 def _read_package_preset(archive: zipfile.ZipFile) -> Dict[str, Any]:
     """讀出封包裡的 preset.json；缺檔或格式不對就擲出 ValueError。"""
     try:
@@ -289,10 +334,12 @@ def _extract_media(archive: zipfile.ZipFile, media_dir: Path) -> Dict[str, Path]
 
 
 def _rewrite_media_paths(document: Dict[str, Any], media_dir: Path) -> None:
-    """把預設集裡的 media/ 相對路徑改寫成解開後的實際位置。"""
-    for section in document.values():
+    """把預設集裡的 media/ 相對路徑改寫成解開後的實際位置。
+    Only the portable media fields are rewritten; text that merely starts with media/ stays as it is."""
+    for page, section in document.items():
         if not isinstance(section, dict):
             continue
-        for key, value in tuple(section.items()):
+        for key in _portable_fields(page, section):
+            value = section.get(key)
             if isinstance(value, str) and value.startswith(_MEDIA_PREFIX):
                 section[key] = str(media_dir / Path(value).name)

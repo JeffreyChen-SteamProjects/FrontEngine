@@ -260,6 +260,7 @@ germany_word_dict = {
     "preset_menu_export_package": "Paket exportieren (+Medien) …",
     "preset_menu_import_package": "Paket importieren (+Medien) …",
     "preset_export_package_title": "Paket exportieren",
+    "preset_package_too_large": "Dieses Paket würde mehr als {members} Dateien oder {megabytes} MiB enthalten und ließe sich nicht wieder importieren. Es wurde nichts geschrieben.",
     "preset_import_package_title": "Paket importieren",
     "preset_package_filter": "Voreinstellungs-Pakete (*.zip)",
     "preset_overwrite_confirm": "Voreinstellung „{name}“ existiert bereits. Überschreiben?",

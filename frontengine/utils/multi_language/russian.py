@@ -260,6 +260,7 @@ russian_word_dict = {
     "preset_menu_export_package": "Экспортировать пакет (+файлы)…",
     "preset_menu_import_package": "Импортировать пакет (+файлы)…",
     "preset_export_package_title": "Экспорт пакета",
+    "preset_package_too_large": "Пакет содержал бы больше {members} файлов или {megabytes} МиБ и его нельзя было бы снова импортировать. Ничего не записано.",
     "preset_import_package_title": "Импорт пакета",
     "preset_package_filter": "Пакеты пресетов (*.zip)",
     "preset_overwrite_confirm": "Пресет «{name}» уже существует. Перезаписать?",

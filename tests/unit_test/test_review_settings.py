@@ -253,10 +253,11 @@ def test_an_import_never_replaces_a_preset_or_its_media(tmp_path):
     for number in (1, 2):
         package = tmp_path / f"{number}.zip"
         with zipfile.ZipFile(package, "w") as archive:
-            archive.writestr("preset.json", json.dumps({"__preset_name__": "Pack", "page": {"file": "media/bg.png"}}))
+            archive.writestr("preset.json", json.dumps({"__preset_name__": "Pack",
+                                                        "image": {"image_path": "media/bg.png"}}))
             archive.writestr("media/bg.png", f"picture {number}")
         name = repository.import_package(package)
-        media[number] = Path(repository.load(name)["page"]["file"])
+        media[number] = Path(repository.load(name)["image"]["image_path"])
     assert media[1].read_text() == "picture 1" and media[2].read_text() == "picture 2"
 
 
@@ -267,10 +268,11 @@ def test_an_exported_package_can_be_imported_again(tmp_path):
         (tmp_path / folder).mkdir()
         files.append(tmp_path / folder / name)
         files[-1].write_text(folder)
-    repository.save("Two", {"a": {"file": str(files[0])}, "b": {"file": str(files[1])}})
+    repository.save("Two", {"video": {"video_path": str(files[0])}, "image": {"image_path": str(files[1])}})
     package = repository.export_package("Two", tmp_path / "two.zip")
     stored = repository.load(repository.import_package(package))
-    assert [Path(stored[key]["file"]).read_text() for key in "ab"] == ["m1", "m2"]
+    paths = [stored["video"]["video_path"], stored["image"]["image_path"]]
+    assert [Path(path).read_text() for path in paths] == ["m1", "m2"]
 
 
 def test_a_damaged_last_session_can_be_replaced(tmp_path):

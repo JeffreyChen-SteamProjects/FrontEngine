@@ -257,6 +257,7 @@ simplified_chinese_word_dict = {
     "preset_menu_export_package": "汇出打包(含素材)…",
     "preset_menu_import_package": "汇入打包(含素材)…",
     "preset_export_package_title": "汇出打包",
+    "preset_package_too_large": "这个打包会超过 {members} 个文件或 {megabytes} MiB，汇出后将无法再汇入，因此没有写入任何文件。",
     "preset_import_package_title": "汇入打包",
     "preset_package_filter": "预设打包 (*.zip)",
     "preset_overwrite_confirm": "预设「{name}」已存在，要覆盖吗?",
