@@ -20,7 +20,7 @@ from frontengine.show.base_widget import BaseWidget
 from frontengine.utils.focus_shield.focus_shield import (
     REGION_BOTTOM, clamp_percent, mask_rect, surrounding_rects,
 )
-from frontengine.utils.logging.loggin_instance import front_engine_logger
+from frontengine.utils.logging.loggin_instance import FailureOnce, front_engine_logger
 
 DEFAULT_DIM = 45
 
@@ -83,6 +83,7 @@ class DimBackgroundWidget(BaseWidget):
         self.dim = clamp_percent(dim, DEFAULT_DIM)
         self.shaded: List[Tuple[int, int, int, int]] = []
         self._window_provider = active_window_rect
+        self._window_failures = FailureOnce("DimBackgroundWidget", "active window lookup")
         self._timer = QTimer(self)
         self._timer.timeout.connect(self.refresh)
 
@@ -123,7 +124,9 @@ class DimBackgroundWidget(BaseWidget):
         """重新計算要壓暗的區塊。"""
         try:
             active = self._window_provider()
-        except Exception:  # pragma: no cover - defensive around providers
+            self._window_failures.recovered()
+        except Exception as error:  # a provider may fail at any poll; the shade must keep running
+            self._window_failures.failed(error)
             active = None
         active = self._to_logical(active)
         rects = surrounding_rects(self.screen_rect(), active)

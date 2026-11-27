@@ -20,7 +20,7 @@ from PySide6.QtGui import QColor, QPainter
 
 from frontengine.show.base_widget import BaseWidget
 from frontengine.utils.audio_meter.spectrum_analyzer import DEFAULT_BANDS, SpectrumSmoother, clamp_bands
-from frontengine.utils.logging.loggin_instance import front_engine_logger
+from frontengine.utils.logging.loggin_instance import FailureOnce, front_engine_logger
 from frontengine.utils.power_mode.power_mode import tier_interval
 
 STYLE_BARS = "bars"
@@ -74,6 +74,7 @@ class SpectrumWidget(BaseWidget):
         self.opacity = 0.85
         self.smoother = SpectrumSmoother(self.band_count)
         self._provider = None
+        self._level_failures = FailureOnce("SpectrumWidget", "level sampling")
         self._timer = QTimer(self)
         self._timer.timeout.connect(self.refresh)
 
@@ -114,7 +115,9 @@ class SpectrumWidget(BaseWidget):
         if self._provider is not None:
             try:
                 values = self._provider()
-            except Exception:  # pragma: no cover - defensive around providers
+                self._level_failures.recovered()
+            except Exception as error:  # a provider may fail at any poll; the bars fall back
+                self._level_failures.failed(error)
                 values = None
         self.smoother.push(values)
         self.update()

@@ -20,6 +20,7 @@ import os
 import warnings
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
+from typing import Callable, Optional
 
 # 只調自己這個 logger 的層級。動 root logger 會把 DEBUG 強加給任何
 # `import frontengine` 的程式，連帶它用的每一個第三方套件。
@@ -128,3 +129,30 @@ class FrontEngineLoggingHandler(RotatingFileHandler):
 # The file is opened on the first record, never at import.
 file_handler = FrontEngineLoggingHandler(delay=True)
 front_engine_logger.addHandler(file_handler)
+
+
+class FailureOnce:
+    """Log a periodic sampler's failure when it starts, not on every poll.
+
+    A timer that polls a provider every few hundred milliseconds would flood the
+    log if every failure were written, and writing none hides why the overlay
+    stopped following. The first failure is logged with its type and message;
+    later ones stay quiet until a successful sample resets it, so a failure
+    after a recovery is logged again.
+    """
+
+    def __init__(self, source: str, what: str, log: Optional[Callable[[str], None]] = None) -> None:
+        self.source, self.what = source, what
+        self._log = log
+        self.failing = False
+
+    def failed(self, error: BaseException) -> None:
+        if self.failing:
+            return
+        self.failing = True
+        log = self._log or front_engine_logger.warning     # looked up per call, so tests can patch it
+        log(f"[{self.source}] {self.what} failed, the overlay degrades until it recovers: "
+            f"{type(error).__name__}: {error}")
+
+    def recovered(self) -> None:
+        self.failing = False
