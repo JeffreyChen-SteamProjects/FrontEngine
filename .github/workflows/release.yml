@@ -72,73 +72,18 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Bump version in stable.toml / pyproject.toml
+      # A rerun after PyPI took the upload but the GitHub release failed used to bump once more and
+      # publish a second version. A release is finished only once its tag exists, so the planner
+      # finishes an untagged version instead of bumping: already on PyPI, it rebuilds the commit
+      # that bumped to it and creates the missing release there; never uploaded, it releases that
+      # version from main. Only a tagged version is bumped, and never onto an existing tag or PyPI
+      # version. tools/release_plan.py documents the three modes (bump, resume, republish).
+      - name: Plan the release (bump, or finish the unfinished one)
         id: bump
         shell: bash
         env:
           BUMP_TYPE: ${{ inputs.bump || 'patch' }}
-        run: |
-          python - <<'PY'
-          import os, pathlib, re
-
-          bump_type = os.environ.get("BUMP_TYPE", "patch").lower()
-          if bump_type not in {"patch", "minor", "major"}:
-              raise SystemExit(f"Invalid bump type: {bump_type}")
-
-          stable = pathlib.Path("stable.toml")
-          text = stable.read_text(encoding="utf-8")
-          match = re.search(r'^version\s*=\s*"(\d+)\.(\d+)\.(\d+)"', text, re.MULTILINE)
-          if not match:
-              raise SystemExit("No semver version line found in stable.toml")
-          major, minor, patch = (int(x) for x in match.groups())
-
-          if bump_type == "major":
-              major, minor, patch = major + 1, 0, 0
-          elif bump_type == "minor":
-              minor, patch = minor + 1, 0
-          else:
-              patch += 1
-          new_version = f"{major}.{minor}.{patch}"
-
-          stable.write_text(
-              re.sub(
-                  r'(^version\s*=\s*)"\d+\.\d+\.\d+"',
-                  rf'\1"{new_version}"',
-                  text,
-                  count=1,
-                  flags=re.MULTILINE,
-              ),
-              encoding="utf-8",
-          )
-
-          pyproject = pathlib.Path("pyproject.toml")
-          if pyproject.exists():
-              pp_text = pyproject.read_text(encoding="utf-8")
-              pyproject.write_text(
-                  re.sub(
-                      r'(^version\s*=\s*)"\d+\.\d+\.\d+"',
-                      rf'\1"{new_version}"',
-                      pp_text,
-                      count=1,
-                      flags=re.MULTILINE,
-                  ),
-                  encoding="utf-8",
-              )
-
-          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fh:
-              fh.write(f"version={new_version}\n")
-              fh.write(f"tag=v{new_version}\n")
-          print(f"::notice::Bumped to {new_version} ({bump_type})")
-          PY
-
-      - name: Check if tag already exists
-        id: tag_check
-        shell: bash
-        run: |
-          if git rev-parse "refs/tags/${{ steps.bump.outputs.tag }}" >/dev/null 2>&1; then
-            echo "Tag ${{ steps.bump.outputs.tag }} already exists — aborting to avoid republishing."
-            exit 1
-          fi
+        run: python tools/release_plan.py "$BUMP_TYPE"
 
       # 推版本號會和「同時被合併的其他 PR」搶 main。之前五個 PR 在 36 秒內合併，
       # 這一步就被 `cannot lock ref 'refs/heads/main'` 打掉、整個發佈失敗。
@@ -151,7 +96,18 @@ jobs:
       - name: Commit version bump to main
         id: commit
         shell: bash
+        env:
+          MODE: ${{ steps.bump.outputs.mode }}
+          PLANNED_SHA: ${{ steps.bump.outputs.sha }}
         run: |
+          # Finishing an unfinished version: its bump commit exists already. Build and tag the
+          # commit the planner chose (what PyPI holds, for resume) and push nothing.
+          if [ "${MODE}" != "bump" ]; then
+            git checkout --detach "${PLANNED_SHA}"
+            echo "sha=${PLANNED_SHA}" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add stable.toml pyproject.toml
@@ -224,12 +180,16 @@ jobs:
           name: dist-${{ steps.bump.outputs.version }}
           path: dist/
           retention-days: 90
+          overwrite: true  # a rerun of this run uploads the same name again
 
+      # --skip-existing: when finishing an unfinished version, PyPI may hold some or all of its
+      # files already; those are skipped and only the missing ones go up. A bump never reaches
+      # here with a version PyPI has, because the planner refuses it.
       - name: Twine upload to PyPI
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-        run: python -m twine upload --non-interactive dist/*
+        run: python -m twine upload --non-interactive --skip-existing dist/*
 
       # 標籤要綁在剛才推上去的那個 commit，不能綁 main。綁 main 的話，發佈期間又有
       # PR 合併進來，標籤就會落在後來的 commit 上——v1.0.58 就是這樣指到一個
@@ -237,10 +197,16 @@ jobs:
       # Tag the commit that was just pushed, not main. With `--target main`, a PR
       # merged while the release runs moves the tag onto a later commit: that is
       # how v1.0.58 ended up on a commit that is not what 1.0.58 shipped.
+      # A release that gh created before failing on its assets is completed, not created twice.
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          if gh release view "${{ steps.bump.outputs.tag }}" >/dev/null 2>&1; then
+            echo "::notice::Release ${{ steps.bump.outputs.tag }} exists; attaching its distributions."
+            gh release upload "${{ steps.bump.outputs.tag }}" dist/* --clobber
+            exit 0
+          fi
           gh release create "${{ steps.bump.outputs.tag }}" \
             dist/* \
             --title "${{ steps.meta.outputs.name }} ${{ steps.bump.outputs.version }}" \

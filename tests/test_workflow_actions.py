@@ -122,6 +122,33 @@ def test_release_write_permissions_are_scoped_to_jobs():
         assert re.search(r"^    permissions:\n      contents: write$", jobs[name], re.MULTILINE)
 
 
+def _release_steps() -> dict[str, str]:
+    """Return ``{step name: step text}`` for the steps of release.yml's release job."""
+    body = dict(_jobs(_ROOT / ".github" / "workflows" / "release.yml"))["release"]
+    parts = re.split(r"^      - (?=name:|uses:)", body, flags=re.MULTILINE)[1:]
+    return {re.match(r"(?:name|uses):\s*(.*)", part).group(1).strip(): part for part in parts}
+
+
+def test_a_release_rerun_finishes_the_unfinished_version_instead_of_bumping_again():
+    # A rerun after PyPI took the upload but gh release create failed used to bump once more and
+    # publish a second version. The planner decides bump / resume / republish; only a bump commits,
+    # and the upload and release steps tolerate what the first attempt already did.
+    steps = _release_steps()
+    plan = steps["Plan the release (bump, or finish the unfinished one)"]
+    assert re.search(r"^\s*id:\s*bump\s*$", plan, re.MULTILINE)
+    assert re.search(r'^\s*run:\s*python tools/release_plan\.py "\$BUMP_TYPE"\s*$', plan, re.MULTILINE)
+    assert (_ROOT / "tools" / "release_plan.py").is_file()
+    commit = steps["Commit version bump to main"]
+    skip = commit.index('if [ "${MODE}" != "bump" ]; then')
+    assert skip < commit.index("git commit") and "steps.bump.outputs.sha" in commit
+    assert 'git checkout --detach "${PLANNED_SHA}"' in commit[skip:commit.index("git commit")]
+    assert "--skip-existing" in steps["Twine upload to PyPI"]
+    release = steps["Create GitHub release"]
+    assert release.index("gh release view") < release.index("gh release create")
+    assert re.search(r"^\s*overwrite:\s*true\b", steps["Upload distributions artifact"], re.MULTILINE)
+    assert not any("re.sub(" in step for step in steps.values())
+
+
 def test_the_windows_executable_uses_the_nuitka_requirement_of_dev_requirements():
     # Copying a version into the workflow drifts the moment Dependabot raises it in
     # dev_requirements.txt, so the build reads that file's Nuitka line instead.
