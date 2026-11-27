@@ -22,6 +22,7 @@ determined attacker, and it never hides the window from the person at the desk.
 from __future__ import annotations
 
 import sys
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Iterable, Optional
 
 from frontengine.utils.logging.loggin_instance import front_engine_logger
@@ -109,6 +110,34 @@ def apply_to_widget(widget: Optional[QWidget], excluded: bool) -> bool:
     except (RuntimeError, ValueError):  # pragma: no cover - widget torn down
         return False
     return set_excluded_from_capture(handle, excluded)
+
+
+@dataclass(frozen=True)
+class CaptureReport:
+    """How one pass of the capture policy went over the overlays on screen.
+
+    Only shown overlays that the policy applies to are counted: masks that stay in
+    the capture and overlays that must stay excluded are left out.
+    """
+    hidden: bool
+    supported: bool
+    succeeded: int = 0
+    failed: int = 0
+
+    @property
+    def eligible(self) -> int:
+        return self.succeeded + self.failed
+
+    @property
+    def outcome(self) -> str:
+        """One of ``unsupported``, ``none``, ``all``, ``partial`` or ``failed``."""
+        if not self.supported:
+            return "unsupported"
+        if self.eligible == 0:
+            return "none"
+        if self.failed == 0:
+            return "all"
+        return "failed" if self.succeeded == 0 else "partial"
 
 
 _hidden = False          # "Hide from capture" is on: overlays shown from now on leave the capture too

@@ -165,6 +165,35 @@ def test_tesseract_reports_missing_language_without_shell_execution(tmp_path):
     assert commands[0][1]["shell"] is False
 
 
+@pytest.mark.parametrize("platform", ["win32", "darwin", "linux", "freebsd14"])
+def test_tesseract_candidates_are_absolute_for_their_platform(platform):
+    from pathlib import PurePosixPath, PureWindowsPath
+    from frontengine.utils.screen_text.local_ocr import tesseract_candidates
+
+    flavour = PureWindowsPath if platform == "win32" else PurePosixPath
+    candidates = tesseract_candidates(platform)
+    assert candidates and all(flavour(path).is_absolute() for path in candidates)
+
+
+@pytest.mark.parametrize("platform", ["win32", "linux"])
+def test_tesseract_probes_only_its_own_platforms_paths(platform, monkeypatch):
+    from frontengine.utils.screen_text import local_ocr
+
+    probed = []
+
+    class Probe:
+        def __init__(self, path):
+            self.path = str(path)
+
+        def is_file(self):
+            probed.append(self.path)
+            return False
+    monkeypatch.setattr(local_ocr, "Path", Probe)
+    assert local_ocr.TesseractOcr(platform=platform).executable is None
+    assert probed == list(local_ocr.tesseract_candidates(platform))
+    assert all(path.startswith("C:\\") == (platform == "win32") for path in probed)
+
+
 def test_revoked_consent_prevents_cloud_send_even_after_request_is_prepared():
     granted = [True]
     def key():

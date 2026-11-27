@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (
     QComboBox, QLabel, QPushButton, QScrollArea, QTextEdit, QWidget,
 )
 
+from frontengine.show.toast.toast_widget import show_toast
 from frontengine.show.window_helpers import set_overlay_locked
 from frontengine.ui.color.global_color import error_color, output_color
 from frontengine.ui.page.gif.gif_setting_ui import GIFSettingUI
@@ -22,11 +23,37 @@ from frontengine.ui.page.action_menu import ActionMenu
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.retranslate import retranslator, tr, translate
 from frontengine.utils.screen_privacy import capture_affinity
+from frontengine.utils.screen_privacy.capture_affinity import CaptureReport
 from frontengine.utils.virtual_desktop import virtual_desktop
 from frontengine.utils.power_mode.power_mode import (
     TIER_BALANCED, TIER_HIGH, TIER_SAVER, normalize_tier,
 )
 from frontengine.utils.redirect_manager.redirect_manager_class import redirect_manager_instance
+
+
+# What a capture pass tells the user, by outcome; sharing adds the cases manual hiding never toasts.
+_CAPTURE_MESSAGES = {
+    "all": ("screen_privacy_toast", "Overlays hidden from screen capture"),
+    "partial": ("screen_privacy_toast_partial",
+                "Only {succeeded} of {eligible} overlays could be hidden from screen capture"),
+    "failed": ("screen_privacy_toast_failed", "Overlays could not be hidden from screen capture"),
+    "none": ("screen_privacy_toast_none", "Screen sharing detected: no overlays are open to hide"),
+    "unsupported": ("screen_privacy_toast_unsupported",
+                    "Screen sharing detected, but this system cannot hide overlays from capture"),
+}
+
+
+def capture_report_message(report: CaptureReport, sharing: bool = True) -> str:
+    """The toast for a capture pass: claims success only when every shown overlay took it."""
+    outcome = report.outcome
+    if not sharing and outcome in ("none", "unsupported"):
+        return ""
+    key, fallback = _CAPTURE_MESSAGES[outcome]
+    values = {"succeeded": report.succeeded, "eligible": report.eligible}
+    try:
+        return translate(key, fallback).format(**values)
+    except (IndexError, KeyError, ValueError):
+        return fallback.format(**values)
 
 
 class ControlCenterUI(SettingPage):
@@ -113,7 +140,10 @@ class ControlCenterUI(SettingPage):
         self._before_close_callbacks: list = []
         self.low_power_button = self._create_button(
             "control_center_low_power_on", self.toggle_low_power)
-        self._hidden_from_capture = False
+        self._hidden_from_capture = False       # either of the two below
+        self._capture_manual = False            # the user's own "Hide from capture"
+        self._capture_auto = False              # meeting detection asked for it
+        self._capture_toast = None
         capture_affinity.set_hidden(False)
         lifetime.connect_owned(lifetime.overlay_added, self._join_the_others)
         # What hide_all and smart pause did, so that resuming gives back only what it took.
@@ -568,46 +598,71 @@ class ControlCenterUI(SettingPage):
             return
 
     @owned_action
-    def set_hide_from_capture(self, hidden: bool) -> int:
+    def set_hide_from_capture(self, hidden: bool) -> CaptureReport:
         """
         分享畫面時把覆蓋層藏起來（自己看得到、對方看不到）。標了
         keep_in_capture 的覆蓋層不會被藏——遮蔽層本來就是要被看到的。
         Hide the overlays from screen capture: still visible here, blank for the
         people you are sharing with. Overlays marked keep_in_capture are left
         alone, since a mask is meant to be seen.
+        This is the user's own choice; meeting detection asks separately through
+        set_auto_hide_from_capture, and either one keeps the overlays excluded.
         """
-        self._hidden_from_capture = bool(hidden)
+        self._capture_manual = bool(hidden)
+        report = self._apply_capture_policy()
+        retranslator.set_text(
+            self.capture_button,
+            "control_center_show_in_capture" if self._capture_manual
+            else "control_center_hide_from_capture",
+            "Show in capture" if self._capture_manual else "Hide from capture")
+        return report
+
+    @owned_action
+    def set_auto_hide_from_capture(self, hidden: bool) -> CaptureReport:
+        """Meeting detection's request; ending it leaves a manual choice to hide in place."""
+        self._capture_auto = bool(hidden)
+        return self._apply_capture_policy()
+
+    def _apply_capture_policy(self) -> CaptureReport:
+        """Give every overlay the combined capture policy and count how the shown ones took it."""
+        hidden = self._capture_manual or self._capture_auto
+        self._hidden_from_capture = hidden
         capture_affinity.set_hidden(hidden)
-        applied = 0
+        counts = {True: 0, False: 0}
 
         def apply(widget) -> None:
-            nonlocal applied
             if getattr(widget, "keep_in_capture", False):
                 capture_affinity.apply_to_widget(widget, False)
                 return
             if getattr(widget, "needs_capture_exclusion", False):
                 return          # it reads the screen: included, it would photograph itself
-            if capture_affinity.apply_to_widget(widget, self._hidden_from_capture):
-                applied += 1
+            visible = getattr(widget, "isVisible", None)
+            shown = visible() if callable(visible) else True    # a deleted widget raises: pruned
+            took = bool(capture_affinity.apply_to_widget(widget, hidden))
+            if shown:
+                counts[took] += 1
 
         self._for_each_overlay(apply)
+        report = CaptureReport(hidden, capture_affinity.available(), counts[True], counts[False])
         front_engine_logger.info(
-            f"ControlCenterUI set_hide_from_capture | hidden={hidden}, applied={applied}")
-        retranslator.set_text(
-            self.capture_button,
-            "control_center_show_in_capture" if self._hidden_from_capture
-            else "control_center_hide_from_capture",
-            "Show in capture" if self._hidden_from_capture else "Hide from capture")
-        return applied
+            f"ControlCenterUI capture policy | manual={self._capture_manual}, auto={self._capture_auto}, "
+            f"succeeded={report.succeeded}, failed={report.failed}, supported={report.supported}")
+        return report
 
     @owned_action
     def toggle_hide_from_capture(self) -> None:
         """切換分享時是否隱藏覆蓋層。"""
-        self.set_hide_from_capture(not self._hidden_from_capture)
+        report = self.set_hide_from_capture(not self._capture_manual)
+        if report is not None and report.hidden and report.outcome in ("partial", "failed"):
+            self._capture_toast = show_toast(capture_report_message(report, sharing=False))
 
     @property
     def hidden_from_capture(self) -> bool:
         return self._hidden_from_capture
+
+    @property
+    def hidden_from_capture_by_user(self) -> bool:
+        return self._capture_manual
 
     @owned_action
     def toggle_low_power(self) -> None:

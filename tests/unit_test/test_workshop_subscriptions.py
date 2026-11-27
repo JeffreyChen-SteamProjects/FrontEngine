@@ -206,3 +206,52 @@ def test_cache_index_cannot_escape_version_root(installed):
     index.write_text(json.dumps({"version": "../outside", "hashes": {}}), encoding="utf-8")
     with pytest.raises(ValueError, match="Unsafe"):
         cache.current("456")
+
+
+class OneJobPerItem(FakeJobs):
+    """Mirrors WorkshopJobs: a second job for an item that is still running is refused."""
+
+    def submit(self, key, function):
+        if key in self.pending:
+            return False
+        self.pending[key] = function
+        return True
+
+    def finish(self, key):
+        self.completed.emit(key, self.pending.pop(key)())
+
+
+def test_a_version_arriving_mid_validation_is_validated_after_the_old_job(installed):
+    item, cache = installed
+    service, jobs = Service(item), OneJobPerItem()
+    subscriptions = WorkshopSubscriptions(service, cache, jobs=jobs)
+    subscriptions.refresh()
+    first = jobs.pending.pop("456")()            # version 1 is read before version 2 lands
+    _preset(cache.entry(item), "second")
+    item["timestamp"] = 11
+    subscriptions.refresh()                      # version 2 observed while version 1 still runs
+    jobs.completed.emit("456", first)
+    assert subscriptions.validated["456"] == (10, item["path"])
+    assert "456" in jobs.pending and subscriptions.items["456"]["status"] == "validating"
+    jobs.finish("456")
+    assert subscriptions.validated["456"] == (11, item["path"])
+    assert _name(cache, subscriptions.items["456"]) == "second"
+    subscriptions.refresh()
+    assert not jobs.pending
+    subscriptions.stop()
+
+
+def test_a_failed_old_job_still_validates_the_newer_version(installed):
+    item, cache = installed
+    service, jobs = Service(item), OneJobPerItem()
+    subscriptions = WorkshopSubscriptions(service, cache, jobs=jobs)
+    subscriptions.refresh()
+    item["timestamp"] = 11
+    subscriptions.refresh()
+    jobs.pending.pop("456")
+    jobs.failed.emit("456", "copy interrupted")
+    assert "456" in jobs.pending
+    jobs.finish("456")
+    assert subscriptions.validated["456"] == (11, item["path"])
+    assert subscriptions.items["456"]["status"] == "ready"
+    subscriptions.stop()

@@ -13,9 +13,11 @@ truth if the second write fails.
 """
 from __future__ import annotations
 
+import json
 import secrets
 import uuid
 from concurrent.futures import Executor, Future
+from dataclasses import replace
 from time import monotonic
 from typing import Callable, TypeVar
 
@@ -27,7 +29,7 @@ from frontengine.user_setting.pet_profiles import PetProfiles
 from frontengine.user_setting.storage_session import StorageBusy
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.multi_language.retranslate import translate
-from frontengine.utils.pet_game import simulation
+from frontengine.utils.pet_game import simulation, snapshot
 from frontengine.utils.pet_game.behaviour import cancel_activity
 from frontengine.utils.pet_game.world import MODES, World
 
@@ -81,6 +83,24 @@ class _PreparedHomeClose:
 
 
 RETURN_CHECK_MS = 5000          # between looks for pets that were live elsewhere
+
+
+def _cancel_all(world: World, reason: str) -> None:
+    for resident in world.residents.values():
+        cancel_activity(world, resident, reason)
+
+
+def _detached_copy(world: World) -> World:
+    """A copy sharing nothing mutable with ``world``: the saved state (the JSON round trip saving
+    uses) plus the runtime activities and reservations that cancelling them changes."""
+    copy = snapshot.from_dict(json.loads(json.dumps(snapshot.to_dict(world))), world.catalog)
+    for identifier, resident in world.residents.items():
+        if resident.activity is not None and identifier in copy.residents:
+            copy.residents[identifier].activity = replace(resident.activity)
+    for identifier, piece in world.furniture.items():
+        if identifier in copy.furniture:
+            copy.furniture[identifier].users = dict(piece.users)
+    return copy
 
 
 def _take_in(world: World, resident, session: PetProfileSession) -> None:
@@ -179,10 +199,7 @@ class HomeService(QObject):
             self._pending_mode = preparation = _ModePreparation(target)
             target._attach_service(self)
             result = target.load()
-            if self.world is not None:
-                for resident in self.world.residents.values():
-                    cancel_activity(self.world, resident, 'mode_switch')
-            if not self.save_now():
+            if not self._save_departure('mode_switch'):
                 return None
             for session in self.sessions.values():
                 token = session._prepare_close()
@@ -200,6 +217,18 @@ class HomeService(QObject):
         finally:
             self._discard_pending_mode()
             self.resume(SWITCHING)
+
+    def _save_departure(self, reason: str) -> bool:
+        """Save the home as it is left (activities cancelled); the live world changes only once saved."""
+        world = self.world
+        if world is None:
+            return self.save_now()
+        departing = _detached_copy(world)
+        _cancel_all(departing, reason)
+        if not self._save_world(departing):
+            return False
+        _cancel_all(world, reason)
+        return True
 
     def _stage_mode_sessions(self, world: World | None) -> dict[str, PetProfileSession]:
         sessions = {}
@@ -514,6 +543,10 @@ class HomeService(QObject):
 
     def save_now(self) -> bool:
         """Blocking save (shutdown, tests): home first, then profiles; failure keeps memory."""
+        return self._save_world(self.world)
+
+    def _save_world(self, world: World | None) -> bool:
+        """Blocking save of ``world`` (the live one or a prepared copy of it)."""
         if self._closed:
             return True
         self.save_timer.stop()
@@ -525,11 +558,11 @@ class HomeService(QObject):
             except (OSError, ValueError) as error:
                 self._failed(error)
                 return False
-        if self.world is None:
+        if world is None:
             return True
         revision = self._revision
         try:
-            self.store.save(self.world)
+            self.store.save(world)
         except (OSError, ValueError) as error:
             self._failed(error)
             return False

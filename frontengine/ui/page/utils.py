@@ -369,6 +369,26 @@ def coerce_int(value: object) -> Optional[int]:
     except (TypeError, ValueError):
         return None
 
+
+def preset_media_path(state: dict, key: str) -> tuple[bool, Optional[str]]:
+    """
+    Read a media-path field from a preset section.
+
+    Returns ``(False, None)`` when the key is missing (an older preset) or holds
+    something that is not a path, so the page keeps its current file;
+    ``(True, None)`` when the preset explicitly stored no file, so the page must
+    clear it; and ``(True, path)`` otherwise.
+    """
+    if key not in state:
+        return False, None
+    value = state[key]
+    if value is None or value == "":
+        return True, None
+    if isinstance(value, str):
+        return True, value
+    front_engine_logger.warning(f"[preset] ignoring malformed {key!r}: {type(value).__name__}")
+    return False, None
+
 # --- 還原預設集的共用小工具 / shared preset-restoring helpers ---------------
 # 每個分頁的 set_state 幾乎都是同一段話重複很多次：「設定裡有這個鍵，就把值
 # 放進這個控制項」。把它抽出來之後，各頁只剩下「哪個控制項配哪個鍵」的表格，

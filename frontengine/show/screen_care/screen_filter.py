@@ -17,7 +17,7 @@ from PySide6.QtCore import QRect, QTimer
 from PySide6.QtGui import QColor, QCursor, QPainter
 
 from frontengine.show.base_widget import BaseWidget
-from frontengine.utils.logging.loggin_instance import front_engine_logger
+from frontengine.utils.logging.loggin_instance import FailureOnce, front_engine_logger
 from frontengine.utils.power_mode.power_mode import tier_interval
 
 # 常用的護眼色片（名稱 -> HEX）；暖色調光最常見，其餘給視覺壓力／閱讀障礙使用。
@@ -114,6 +114,7 @@ class ReadingRulerWidget(ScreenCareOverlay):
         self.opacity = 1.0  # the dimming lives in the fill colour's alpha
         self.cursor_y = 0
         self._cursor_provider = lambda: QCursor.pos().y()
+        self._cursor_failures = FailureOnce("ReadingRulerWidget", "cursor lookup")
         self._timer = QTimer(self)
         self._timer.timeout.connect(self.follow_cursor)
 
@@ -143,7 +144,9 @@ class ReadingRulerWidget(ScreenCareOverlay):
         """把亮帶移到游標所在的高度（位置沒變就不重繪）。"""
         try:
             position = int(self._cursor_provider())
-        except Exception:  # pragma: no cover - defensive around injected providers
+            self._cursor_failures.recovered()
+        except Exception as error:  # a provider may fail at any poll; the ruler stays where it is
+            self._cursor_failures.failed(error)
             return
         local_y = position - self.y()
         if local_y == self.cursor_y:

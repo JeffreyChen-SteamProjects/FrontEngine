@@ -14,6 +14,7 @@ from frontengine.ui.page.utils import (
     target_monitor_state,
     build_target_monitor_combobox,
     coerce_int,
+    preset_media_path,
     dispatch_to_monitors,
     enable_file_drop,
     reload_recent_combobox,
@@ -196,6 +197,12 @@ class GIFSettingUI(SettingPage):
             "target_monitor": target_monitor_state(self.target_monitor_combobox),
         }
 
+    def _set_media_path(self, path: Optional[str]) -> None:
+        """Point the page at a preset's file, or clear it when the preset stored none."""
+        self.gif_image_path = path
+        self.ready_to_play = path is not None
+        retranslator.set_text(self.ready_label, "Ready" if path else "Not Ready")
+
     def set_state(self, state: dict) -> None:
         opacity = coerce_int(state.get("opacity"))
         if opacity is not None:
@@ -203,10 +210,9 @@ class GIFSettingUI(SettingPage):
         speed = coerce_int(state.get("speed"))
         if speed is not None:
             self.speed_slider.setValue(speed)
-        if state.get("gif_image_path"):
-            self.gif_image_path = state["gif_image_path"]
-            self.ready_to_play = True
-            retranslator.set_text(self.ready_label, "Ready")
+        present, path = preset_media_path(state, "gif_image_path")
+        if present:
+            self._set_media_path(path)
         if "fullscreen" in state:
             self.fullscreen_checkbox.setChecked(bool(state["fullscreen"]))
         if "show_on_all_screen" in state:

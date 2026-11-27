@@ -158,3 +158,45 @@ def test_recording_ui_avi_duration_pause_resume_cancel_restores_controls(tmp_pat
     finally:
         page.recorder.close()
         page.close()
+
+
+def _read_avi_frames(path):
+    data = path.read_bytes()
+    assert data[:4] == b'RIFF' and struct.unpack_from('<I', data, 4)[0] == len(data) - 8
+    frames = struct.unpack_from('<I', data, data.index(b'avih') + 24)[0]
+    index, movi = data.index(b'idx1'), data.index(b'movi')
+    assert struct.unpack_from('<I', data, index + 4)[0] == frames * 16
+    images = []
+    for entry in (0, frames - 1):
+        _, _, offset, length = struct.unpack_from('<4sIII', data, index + 8 + entry * 16)
+        images.append(QImage.fromData(data[movi + offset + 8:movi + offset + 8 + length], 'JPG'))
+    return frames, images
+
+
+@pytest.mark.parametrize('schedule', [
+    [('tick', 1800), ('tick', 3600)],
+    [('tick', 1800), ('tick', 3600.05)],
+    [('pause', 1000), ('resume', 5000), ('tick', 7600.05)],
+], ids=['on-the-hour', 'one-tick-late', 'pause-and-resume'])
+def test_one_hour_avi_auto_stop_keeps_the_clip(tmp_path, schedule):
+    now = [0.0]
+    recorder = FrameRecorder(clock=lambda: now[0])
+    pixmap = QPixmap(4, 4)
+    pixmap.fill(QColor('red'))
+    recorder.set_grabber(lambda _rect: pixmap)
+    errors = []
+    recorder.failed.connect(errors.append)
+    target = tmp_path / 'hour.avi'
+    assert recorder.start(QRect(0, 0, 4, 4), target, fps=1, max_seconds=3600)
+    for action, moment in schedule:
+        now[0] = moment
+        {'tick': recorder.capture_frame, 'pause': recorder.pause, 'resume': recorder.resume}[action]()
+    assert recorder.state == 'finalizing'
+    wait(lambda: not recorder.busy)
+    assert errors == [] and recorder.result_path == str(target)
+    assert recorder.elapsed_seconds == pytest.approx(3600)
+    frames, images = _read_avi_frames(target)
+    assert frames == 3600
+    assert all(not image.isNull() and image.pixelColor(1, 1).red() > 240 for image in images)
+    assert not list(tmp_path.glob('*.part'))
+    recorder.close()

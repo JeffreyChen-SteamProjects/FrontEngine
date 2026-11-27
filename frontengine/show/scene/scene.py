@@ -5,6 +5,7 @@ from PySide6.QtWidgets import QGraphicsProxyWidget
 
 from frontengine.show.overlay_factory import build_overlay
 from frontengine.show.scene.extend_graphic_scene import ExtendGraphicScene
+from frontengine.show.scene.timeline import scene_media_should_play
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 
 
@@ -76,8 +77,7 @@ class SceneManager:
         if widget is not None and ('width' in setting or 'height' in setting):
             widget.resize(int(setting.get('width', widget.width())), int(setting.get('height', widget.height())))
         if widget is not None and hasattr(widget, 'set_active'):
-            widget.set_active(bool(getattr(self.graphic_scene, '_media_view_owners', set()))
-                              and setting.get('visible', True))
+            widget.set_active(scene_media_should_play(self.graphic_scene, setting.get('visible', True)))
         if widget is not None and hasattr(widget, 'set_ui_variable'):
             widget.set_ui_variable(setting.get('opacity', 100 if setting.get('type') == 'PUPPET' else 20) / 100)
             widget.update()

@@ -19,7 +19,7 @@ from PySide6.QtMultimedia import QMediaPlayer, QVideoSink
 
 from frontengine.show.base_widget import BaseWidget
 from frontengine.utils.audio_meter.audio_envelope import AudioEnvelope
-from frontengine.utils.logging.loggin_instance import front_engine_logger
+from frontengine.utils.logging.loggin_instance import FailureOnce, front_engine_logger
 from frontengine.utils.power_mode.power_mode import tier_interval
 
 _ANIMATED_SUFFIXES = (".gif", ".webp")
@@ -68,6 +68,7 @@ class WallpaperWidget(BaseWidget):
         self.react_strength = max(0, min(100, int(react_strength)))
         self.scale = MIN_REACT_SCALE
         self._level_provider = None
+        self._level_failures = FailureOnce("WallpaperWidget", "audio level sampling")
         self._envelope = AudioEnvelope()
         self._react_timer = QTimer(self)
         self._react_timer.timeout.connect(self._update_scale)
@@ -139,7 +140,9 @@ class WallpaperWidget(BaseWidget):
             return
         try:
             level = self._level_provider()
-        except Exception:  # pragma: no cover - defensive around providers
+            self._level_failures.recovered()
+        except Exception as error:  # a provider may fail at any poll; the wallpaper stops reacting
+            self._level_failures.failed(error)
             level = None
         if level is None:
             self.scale = MIN_REACT_SCALE

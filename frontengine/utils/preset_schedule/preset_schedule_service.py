@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional
+from datetime import date, datetime
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from PySide6.QtCore import QObject, QTimer, Signal
 
@@ -98,6 +98,10 @@ class PresetScheduleService(QObject):
         self._config_provider = config_provider
         self._now_provider = now_provider or datetime.now
         self._previous: Optional[datetime] = None
+        # Local date of the last firing per schedule (preset, minute of day). A clock
+        # turned back - the end of daylight saving, a manual correction - crosses the
+        # target minute a second time on the same date; this keeps that day to one run.
+        self._last_fired: Dict[Tuple[str, int], date] = {}
         self._timer = QTimer(self)
         self._timer.setInterval(max(1000, int(interval_ms)))
         self._timer.timeout.connect(self._poll)
@@ -136,8 +140,19 @@ class PresetScheduleService(QObject):
         previous = self._previous
         self._previous = now
         if previous is not None and _crossed(previous, now, target):
-            front_engine_logger.info(f"[PresetSchedule] fire | preset={preset}")
-            self.preset_due.emit(preset.strip())
+            self._fire_once_per_day(preset.strip(), target, now.date())
+
+    def _fire_once_per_day(self, preset: str, target: int, today: date) -> None:
+        """Emit unless this schedule already fired on this local date."""
+        schedule_id = (preset, target)
+        if self._last_fired.get(schedule_id) == today:
+            front_engine_logger.info(f"[PresetSchedule] already fired today | preset={preset}")
+            return
+        # Only today's records can still suppress anything; older ones are dropped.
+        self._last_fired = {key: day for key, day in self._last_fired.items() if day == today}
+        self._last_fired[schedule_id] = today
+        front_engine_logger.info(f"[PresetSchedule] fire | preset={preset}")
+        self.preset_due.emit(preset)
 
     def poll_once(self) -> None:
         """Run a single poll immediately (used by tests)."""

@@ -7,7 +7,7 @@ import numpy
 from frontengine.show.compositor import CompositorWidget, Layer
 from frontengine.show.compositor.layers import compose_frame
 from frontengine.show.window_helpers import apply_overlay_window_flags
-from frontengine.show.scene.timeline import SceneTimeline
+from frontengine.show.scene.timeline import SceneTimeline, scene_media_should_play
 from frontengine.user_setting.user_setting_file import user_setting_dict
 from frontengine.utils.power_mode.power_mode import normalize_tier, tier_interval, scaled_interval
 
@@ -153,11 +153,10 @@ class SceneCompositorView(QWidget):
         self._timeline_state(self.timeline.state)
 
     def _timeline_state(self, _state: str) -> None:
-        owners = getattr(self.scene, '_media_view_owners', set())
         for proxy in self.scene.items():
             widget = proxy.widget() if hasattr(proxy, 'widget') else None
             if widget is not None and hasattr(widget, 'set_active'):
-                widget.set_active(bool(owners) and proxy.isVisible() and self.timeline.state != 'paused')
+                widget.set_active(scene_media_should_play(self.scene, proxy.isVisible()))
 
     def begin_transition(self, previous: QImage, seconds: float = .5) -> None:
         """Crossfade a bounded outgoing snapshot; no old native resources survive."""

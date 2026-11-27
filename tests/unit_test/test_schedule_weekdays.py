@@ -152,3 +152,39 @@ def test_the_dialog_collects_what_was_ticked(tmp_path, monkeypatch):
     assert collected["hour"] == 18
     assert collected["minute"] == 30
     assert collected["days"] == [0, 4]
+
+
+def _run(service, moments, now):
+    for moment in moments:
+        now["value"] = moment
+        service.poll_once()
+
+
+def test_a_clock_turned_back_fires_once_that_day_and_normally_the_next():
+    """The DST rollback repeats 01:00-02:00; 01:30 must not apply the preset twice."""
+    rollback = datetime(2026, 11, 1, 1, 29)
+    now = {"value": rollback}
+    config = {"enabled": True, "preset": "Night", "hour": 1, "minute": 30, "days": []}
+    service = make_service(config, lambda: now["value"])
+    fired = []
+    service.preset_due.connect(fired.append)
+    _run(service, [rollback.replace(minute=m) for m in (29, 30, 0, 29, 30)], now)
+    assert fired == ["Night"]
+    following = datetime(2026, 11, 2, 1, 29)
+    _run(service, [following, following.replace(minute=30)], now)
+    assert fired == ["Night", "Night"]
+
+
+def test_a_different_schedule_still_fires_on_the_same_day():
+    """The record is per schedule: moving the time to later today is honoured."""
+    day = datetime(2026, 11, 1, 8, 59)
+    now = {"value": day}
+    config = {"enabled": True, "preset": "Work", "hour": 9, "minute": 0, "days": []}
+    service = make_service(config, lambda: now["value"])
+    fired = []
+    service.preset_due.connect(fired.append)
+    _run(service, [day, day.replace(hour=9, minute=0)], now)
+    config["minute"] = 30
+    _run(service, [day.replace(hour=9, minute=29), day.replace(hour=9, minute=30)], now)
+    assert fired == ["Work", "Work"]
+    assert len(service._last_fired) == 2

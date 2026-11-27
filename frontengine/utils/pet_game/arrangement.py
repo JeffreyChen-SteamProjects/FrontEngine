@@ -13,13 +13,16 @@ from copy import deepcopy
 from typing import TYPE_CHECKING
 
 from frontengine.utils.pet_game.goals import unlocked
+from frontengine.utils.pet_game.layout import MAX_FURNITURE
 
 if TYPE_CHECKING:
     from frontengine.utils.pet_game.world import World
 
 LAYOUT_FORMAT = "frontengine.home-layout"
-MAX_LAYOUT_PIECES = 64
-MAX_LAYOUT_TEXT = 16 * 1024
+# Paste accepts everything copy can produce: one zone can hold every piece a home may have.
+MAX_LAYOUT_PIECES = MAX_FURNITURE
+_MAX_PIECE_TEXT = 64          # ["<48-character id>",1000,false], is the longest compact entry
+MAX_LAYOUT_TEXT = 1024 + MAX_LAYOUT_PIECES * _MAX_PIECE_TEXT
 HISTORY_LIMIT = 30
 
 # Ready-made layouts for a home at least 24 cells wide (the entrance is cell 0).

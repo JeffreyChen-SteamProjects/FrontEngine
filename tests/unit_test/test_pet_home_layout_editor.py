@@ -157,6 +157,43 @@ def test_layout_codes_round_trip_and_reject_anything_else():
             arrangement.decode_layout(bad, CATALOG)
 
 
+def _crowded_zone(count):
+    """A free-arranging room holding ``count`` one-cell pieces, several deep per cell when needed."""
+    world, zone = _world(width=160, mode="sandbox")
+    names = sorted(name for name, definition in CATALOG.furniture.items() if definition.width == 1)
+    for name in names:
+        for cell in range(160):
+            if len(world.furniture) == count:
+                return world, zone
+            world.place(name, zone, cell)
+    assert len(world.furniture) == count
+    return world, zone
+
+
+@pytest.mark.parametrize("count", [64, 65, arrangement.MAX_LAYOUT_PIECES])
+def test_every_copyable_layout_can_be_pasted_back(count):
+    world, zone = _crowded_zone(count)
+    code = arrangement.encode_layout(world, zone)
+    assert len(arrangement.decode_layout(code, CATALOG)) == count
+    assert arrangement.decode_layout(code, CATALOG) == arrangement.layout_of(world, zone)
+
+
+def test_paste_limits_cover_the_longest_code_copy_can_make():
+    from types import SimpleNamespace
+    from frontengine.utils.pet_game.layout import MAX_FURNITURE
+    longest = "a" * 48
+    catalog = SimpleNamespace(furniture={longest: None})
+    pieces = [[longest, 1000, False]] * MAX_FURNITURE
+    code = json.dumps({"format": arrangement.LAYOUT_FORMAT, "version": 1, "pieces": pieces}, separators=(",", ":"))
+    assert arrangement.MAX_LAYOUT_PIECES == MAX_FURNITURE
+    assert len(code) <= arrangement.MAX_LAYOUT_TEXT
+    assert len(arrangement.decode_layout(code, catalog)) == MAX_FURNITURE
+    too_many = json.dumps({"format": arrangement.LAYOUT_FORMAT, "version": 1,
+                           "pieces": [["bed_basic", 1, False]] * (MAX_FURNITURE + 1)})
+    with pytest.raises(ValueError, match="pieces"):
+        arrangement.decode_layout(too_many, CATALOG)
+
+
 def test_every_ready_made_layout_fits_and_reports_its_cost():
     for name, pieces in arrangement.PRESETS.items():
         world, zone = _world(width=24, coins=5000)

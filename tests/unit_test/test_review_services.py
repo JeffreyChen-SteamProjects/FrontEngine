@@ -1,11 +1,12 @@
 """Platform services, pages and dialogs: what the whole-project review found."""
+import contextlib
 import socket
 import sys
 import threading
 from types import SimpleNamespace
 
 import pytest
-from PySide6.QtCore import QRect, Qt
+from PySide6.QtCore import QObject, QRect, Qt, Signal
 from PySide6.QtGui import QColor, QGuiApplication, QImage, QPixmap
 from PySide6.QtTest import QTest
 from PySide6.QtWidgets import QMessageBox, QTableWidgetItem, QWidget
@@ -489,3 +490,95 @@ def test_an_overlay_bound_anew_while_its_old_target_hid_it_comes_back():
     service.unbind(widget)
     assert widget.isVisible()
     widget.close()
+
+
+class _FakeClipboard(QObject):
+    """Stands in for the system clipboard, so the test never reads what the developer copied."""
+    dataChanged = Signal()
+
+    def __init__(self):
+        super().__init__()
+        self.value = ""
+
+    def text(self):
+        return self.value
+
+
+def _refuse_saving(monkeypatch):
+    from frontengine.ui import main_ui
+
+    told = []
+
+    def refuse():
+        raise OSError("disk full")
+    monkeypatch.setattr(main_ui, "write_user_setting", refuse)
+    monkeypatch.setattr(main_ui, "show_toast", lambda message, *rest, **named: told.append(message))
+    return told
+
+
+def test_turning_clipboard_recording_off_stops_it_even_if_the_save_fails(make_main_window, monkeypatch):
+    from frontengine.utils.clipboard import clipboard_watcher as watcher_module
+
+    fake = _FakeClipboard()
+    monkeypatch.setattr(watcher_module, "QGuiApplication", SimpleNamespace(clipboard=lambda: fake))
+    window = make_main_window()
+    window.set_clipboard_history(True)
+    fake.value = "kept"
+    fake.dataChanged.emit()
+    recorded = len(window.clipboard_history.to_list())
+    told = _refuse_saving(monkeypatch)
+    try:
+        with contextlib.suppress(OSError):
+            window.set_clipboard_history(False)
+        fake.value = "copied after turning it off"
+        fake.dataChanged.emit()
+        assert len(window.clipboard_history.to_list()) == recorded == 1
+        assert window.clipboard_watcher.running is False
+        assert user_setting_dict["clipboard_history"] is False
+        assert told and "next launch" in told[0]
+    finally:
+        window.clipboard_watcher.stop()
+
+
+def test_turning_usage_tracking_off_stops_it_even_if_the_save_fails(make_main_window, monkeypatch):
+    window = make_main_window()
+    window.usage_service.start()
+    told = _refuse_saving(monkeypatch)
+    try:
+        with contextlib.suppress(OSError):
+            window.set_usage_tracking(False)
+        assert window.usage_service.running is False
+        assert told and "next launch" in told[0]
+    finally:
+        window.usage_service.stop()
+
+
+def test_a_slideshow_folder_alone_is_enough_for_the_screensaver(make_main_window, tmp_path, monkeypatch):
+    window = make_main_window()
+    page = window.image_setting_ui
+    folder = tmp_path / "show"
+    folder.mkdir()
+    first = _picture(folder / "1.png", "red")
+    page.slideshow_folder = str(folder)
+    page.slideshow_checkbox.setChecked(True)
+    shown, asked = [], []
+    monkeypatch.setattr(page, "_show", lambda path, slideshow=False: shown.append((path, slideshow)))
+    monkeypatch.setattr(page, "choose_and_copy_file_to_cwd_image_dir_then_play", lambda: asked.append(True))
+    assert page.ready_to_play is False
+    window._start_screensaver("image")
+    page._slideshow_timer.stop()
+    assert shown == [(first, True)] and asked == []
+
+
+def test_an_empty_slideshow_folder_leaves_the_screensaver_idle(make_main_window, tmp_path, monkeypatch):
+    window = make_main_window()
+    page = window.image_setting_ui
+    folder = tmp_path / "empty"
+    folder.mkdir()
+    page.slideshow_folder = str(folder)
+    page.slideshow_checkbox.setChecked(True)
+    started = []
+    monkeypatch.setattr(page, "start_play_image", lambda: started.append(True))
+    assert page.has_playable_source() is False
+    window._start_screensaver("image")
+    assert started == []

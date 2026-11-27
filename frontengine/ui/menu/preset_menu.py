@@ -8,6 +8,7 @@ from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QFileDialog, QInputDialog, QMessageBox
 
 from frontengine.user_setting.preset_repository import PresetRepository
+from frontengine.utils.imervue.puppet_asset import MAX_ARCHIVE_BYTES, MAX_ARCHIVE_MEMBERS, ArchiveBudgetError
 from frontengine.utils.workshop.workshop_content import (
     KIND_PRESET, find_workshop_dir, preset_files, scan_workshop_items,
 )
@@ -34,6 +35,14 @@ _PRESET_PAGES = (
 
 def _t(key: str, fallback: str) -> str:
     return language_wrapper.language_word_dict.get(key, fallback)
+
+
+def package_too_large_text() -> str:
+    """The export error for a package the import side would refuse, with the shared limits filled in."""
+    return _t("preset_package_too_large",
+              "This package would hold more than {members} files or {megabytes} MiB, so it could not be "
+              "imported again. Nothing was written.").format(
+        members=MAX_ARCHIVE_MEMBERS, megabytes=MAX_ARCHIVE_BYTES // (1024 * 1024))
 
 
 def _collect_state(ui: "FrontEngineMainUI") -> dict:
@@ -332,6 +341,9 @@ def _export_package_action(ui: "FrontEngineMainUI") -> Callable[[], None]:
             return
         try:
             PresetRepository().export_package(preset, Path(destination))
+        except ArchiveBudgetError:
+            QMessageBox.warning(ui, title, package_too_large_text())
+            return
         except (OSError, ValueError) as error:
             QMessageBox.warning(ui, title, str(error))
             return

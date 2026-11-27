@@ -28,7 +28,7 @@ def test_snapshot_payload_round_trip(tmp_path, preview, kind):
         save_package({"image": {"type": "IMAGE", "file_path": str(preview)}}, source)
     elif kind == "preset":
         repository = PresetRepository(tmp_path / "presets")
-        repository.save("Test", {"image": {"file_path": str(preview)}})
+        repository.save("Test", {"image": {"image_path": str(preview)}})
         source = repository.export_package("Test", tmp_path / "preset.zip")
     output = tmp_path / "snapshot"
     manifest = create_snapshot(kind, source, "My content", preview, output)

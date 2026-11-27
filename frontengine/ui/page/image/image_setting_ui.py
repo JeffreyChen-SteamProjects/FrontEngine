@@ -17,6 +17,7 @@ from frontengine.ui.page.utils import (
     target_monitor_state,
     build_target_monitor_combobox,
     coerce_int,
+    preset_media_path,
     dispatch_to_monitors,
     enable_file_drop,
     list_media_files,
@@ -236,6 +237,22 @@ class ImageSettingUI(SettingPage):
         self.image_widget_list.append(image_widget)
         return image_widget
 
+    def has_playable_source(self) -> bool:
+        """Whether start_play_image would show a picture without asking for one."""
+        if self.slideshow_checkbox.isChecked() and self._slideshow_has_images():
+            return True
+        return bool(self.image_path and self.ready_to_play)
+
+    def _slideshow_has_images(self) -> bool:
+        """Whether the chosen slideshow folder holds a picture; reads the folder, changes nothing."""
+        if not self.slideshow_folder:
+            return False
+        return bool(list_media_files(
+            self.slideshow_folder,
+            _SLIDESHOW_EXTENSIONS,
+            recursive=self.slideshow_recursive_checkbox.isChecked(),
+        ))
+
     @owned_action
     def start_play_image(self) -> None:
         front_engine_logger.info("[ImageSettingUI] start_play_image")
@@ -380,14 +397,19 @@ class ImageSettingUI(SettingPage):
             "slideshow_recursive": self.slideshow_recursive_checkbox.isChecked(),
         }
 
+    def _set_media_path(self, path: Optional[str]) -> None:
+        """Point the page at a preset's file, or clear it when the preset stored none."""
+        self.image_path = path
+        self.ready_to_play = path is not None
+        retranslator.set_text(self.ready_label, "Ready" if path else "Not Ready")
+
     def set_state(self, state: dict) -> None:
         opacity = coerce_int(state.get("opacity"))
         if opacity is not None:
             self.opacity_slider.setValue(opacity)
-        if state.get("image_path"):
-            self.image_path = state["image_path"]
-            self.ready_to_play = True
-            retranslator.set_text(self.ready_label, "Ready")
+        present, path = preset_media_path(state, "image_path")
+        if present:
+            self._set_media_path(path)
         if "fullscreen" in state:
             self.fullscreen_checkbox.setChecked(bool(state["fullscreen"]))
         if "show_on_all_screen" in state:
