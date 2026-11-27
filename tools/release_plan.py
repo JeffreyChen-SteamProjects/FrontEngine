@@ -140,8 +140,8 @@ def _git(arguments: List[str]) -> str:
     git = next((path for path in _GIT_CANDIDATES if Path(path).is_file()), None)
     if git is None:
         raise RuntimeError("git not found at a known absolute path")
-    return subprocess.run([git, *arguments], capture_output=True, text=True, encoding="utf-8",
-                          check=True, shell=False).stdout  # nosec B603 # nosemgrep - fixed git path, fixed argv
+    argv = [git, *arguments]
+    return subprocess.run(argv, capture_output=True, text=True, encoding="utf-8", check=True, shell=False).stdout  # nosec B603 # nosemgrep - fixed absolute git path, argv built in this module, shell=False
 
 
 def plan(kind: str, root: Path, run: GitRunner = _git, published: PyPILookup = pypi_has) -> ReleasePlan:

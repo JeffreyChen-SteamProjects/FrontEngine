@@ -1,3 +1,4 @@
+import ctypes  # stdlib everywhere; only ExStyleApi.native(), Windows-only, touches WinDLL
 import random
 import sys
 from dataclasses import dataclass
@@ -25,9 +26,6 @@ from frontengine.show.window_helpers import apply_overlay_window_flags, load_ove
 from frontengine.user_setting.user_setting_file import user_setting_dict
 from frontengine.utils.logging.loggin_instance import front_engine_logger
 from frontengine.utils.power_mode.power_mode import normalize_tier, scaled_interval, tier_interval
-
-if sys.platform == "win32":
-    import ctypes
 
 GWL_EXSTYLE = -20
 WS_EX_LAYERED = 0x80000
