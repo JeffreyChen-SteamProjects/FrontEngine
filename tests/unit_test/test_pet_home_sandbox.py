@@ -81,7 +81,10 @@ def test_leaving_cancels_activities_and_remembers_the_mode(page):
 
 def test_a_failed_save_keeps_the_current_home(page, monkeypatch):
     page.create_home()
-    monkeypatch.setattr(page.service, "save_now", lambda: False)
+    def full_disk(_path, _data):
+        raise OSError("disk full")
+
+    monkeypatch.setattr(page.service.store, "_write", full_disk)
     assert not page.set_free_arranging(True)
     assert page.service.mode == "manage"
     assert page.service.world is not None

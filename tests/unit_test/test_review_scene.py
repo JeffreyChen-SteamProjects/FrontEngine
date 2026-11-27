@@ -327,7 +327,7 @@ def test_unchanged_workshop_content_is_not_staged_again():
     service.backend = SimpleNamespace(initialized=True, subscribed_items=lambda: [dict(item)])
     subscriptions = WorkshopSubscriptions(service, SimpleNamespace(stage=lambda _item: None), jobs=jobs)
     subscriptions.refresh()
-    jobs.completed.emit("456", {"id": "456", "status": "ready", "path": "cache"})
+    jobs.completed.emit("456", ((10, "somewhere"), {"id": "456", "status": "ready", "path": "cache"}))
     subscriptions.refresh()
     subscriptions.refresh()
     assert jobs.submitted == ["456"]

@@ -36,7 +36,8 @@ class WorkshopSubscriptions(QObject):
         self.downloads = set()
         self.queue = deque()
         self.validated = {}          # id -> (timestamp, path) last staged without fault: no need to hash it again
-        self._staging = {}
+        self._running = {}           # id -> edition the accepted job is processing
+        self._latest = {}            # id -> newest installed item observed, for rescheduling after a job
         self.jobs.completed.connect(self._ready)
         self.jobs.failed.connect(self._failed)
         service.event_received.connect(self._event)
@@ -52,6 +53,7 @@ class WorkshopSubscriptions(QObject):
             installed = self.service.backend.subscribed_items()
             subscribed = {item["id"] for item in installed}
             self.items = {key: value for key, value in self.items.items() if key in subscribed}
+            self._latest = {key: value for key, value in self._latest.items() if key in subscribed}
             self.downloads.intersection_update(subscribed)
             self.queue.clear()
             for item in installed:
@@ -73,6 +75,7 @@ class WorkshopSubscriptions(QObject):
                 else:
                     self.items[key].update(status="failed", error="Steam rejected the download")
         elif item["path"]:
+            self._latest[key] = dict(item)
             known = self.items.get(key)
             if known is not None and known.get("status") == "ready" and self.validated.get(key) == _edition(item):
                 return
@@ -82,8 +85,18 @@ class WorkshopSubscriptions(QObject):
     def _fill_queue(self) -> None:
         while self.queue and len(self.jobs.pending) < 2:
             item = self.queue.popleft()
-            self._staging[item["id"]] = _edition(item)
-            self.jobs.submit(item["id"], lambda value=item: self.cache.stage(value))
+            key, edition = item["id"], _edition(item)
+            if key in self.jobs.pending:
+                continue  # One job per item; _reschedule picks up the newest edition when it finishes.
+            self._running[key] = edition
+            self.jobs.submit(key, lambda value=item, done=edition: (done, self.cache.stage(value)))
+
+    def _reschedule(self, key: str, processed) -> None:
+        """Queue the newest observed edition again when the finished job handled an older one."""
+        latest = self._latest.get(key)
+        if latest is not None and _edition(latest) != processed:
+            self.items[key].update(status="validating")
+            self.queue.append(dict(latest))
 
     def _event(self, event) -> None:
         structure = {3405: InstalledResult, 3406: DownloadResult}.get(event.callback)
@@ -104,16 +117,21 @@ class WorkshopSubscriptions(QObject):
         # Re-query flags/locations rather than trusting an event-provided filesystem path.
         self.refresh()
 
-    def _ready(self, key: str, item: dict) -> None:
+    def _ready(self, key: str, result: tuple) -> None:
+        self._running.pop(key, None)
         if key in self.items:
+            processed, item = result
             self.items[key] = item
-            self.validated[key] = self._staging.pop(key, None)
+            self.validated[key] = processed
+            self._reschedule(key, processed)
             self.changed.emit(list(self.items.values()))
         self._fill_queue()
 
     def _failed(self, key: str, error: str) -> None:
+        processed = self._running.pop(key, None)
         if key in self.items:
             self.items[key].update(status="invalid", error=error)
+            self._reschedule(key, processed)
             self.changed.emit(list(self.items.values()))
         self._fill_queue()
 
