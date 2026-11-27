@@ -1,5 +1,7 @@
 import random
 import sys
+from dataclasses import dataclass
+from typing import Callable, Optional
 
 # 明確列出用到的 OpenGL 名稱。星號匯入會讓靜態檢查完全看不出哪些名字存在，
 # 也就是說整個檔案的「未定義名稱」檢查等於失效。
@@ -26,6 +28,53 @@ from frontengine.utils.power_mode.power_mode import normalize_tier, scaled_inter
 
 if sys.platform == "win32":
     import ctypes
+
+GWL_EXSTYLE = -20
+WS_EX_LAYERED = 0x80000
+
+
+@dataclass(frozen=True)
+class ExStyleApi:
+    """The four Win32 calls an extended-style update needs; tests pass fakes."""
+    get_long: Callable[[int, int], int]
+    set_long: Callable[[int, int, int], int]
+    set_last_error: Callable[[int], object]
+    get_last_error: Callable[[], int]
+
+    @classmethod
+    def native(cls) -> "ExStyleApi":
+        """user32 with use_last_error, through the pointer-sized calls where they exist (64-bit)."""
+        user32 = ctypes.WinDLL("user32", use_last_error=True)
+        get_long = getattr(user32, "GetWindowLongPtrW", None) or user32.GetWindowLongW
+        set_long = getattr(user32, "SetWindowLongPtrW", None) or user32.SetWindowLongW
+        get_long.argtypes, get_long.restype = (ctypes.c_void_p, ctypes.c_int), ctypes.c_ssize_t
+        set_long.argtypes = (ctypes.c_void_p, ctypes.c_int, ctypes.c_ssize_t)
+        set_long.restype = ctypes.c_ssize_t
+        return cls(get_long, set_long, ctypes.set_last_error, ctypes.get_last_error)
+
+
+def add_layered_style(hwnd: int, api: ExStyleApi) -> bool:
+    """OR ``WS_EX_LAYERED`` into the window's extended style, keeping every bit already set.
+
+    A read of 0 is ambiguous: a window may have no extended style, or the call failed. Only the
+    last error tells them apart, so it is cleared first. After a failed read nothing is written,
+    because writing ``0 | WS_EX_LAYERED`` would drop ``WS_EX_TRANSPARENT`` and with it the
+    click-through the overlay flags set.
+    """
+    api.set_last_error(0)
+    style = api.get_long(hwnd, GWL_EXSTYLE)
+    if style == 0 and api.get_last_error():
+        front_engine_logger.warning(
+            f"[ParticleOpenGLWidget] extended style unreadable (error {api.get_last_error()}); left as is")
+        return False
+    if style & WS_EX_LAYERED:
+        return True
+    api.set_last_error(0)
+    if api.set_long(hwnd, GWL_EXSTYLE, style | WS_EX_LAYERED) == 0 and api.get_last_error():
+        front_engine_logger.warning(
+            f"[ParticleOpenGLWidget] extended style not written (error {api.get_last_error()})")
+        return False
+    return True
 
 
 class ParticleOpenGLWidget(QOpenGLWidget):
@@ -113,14 +162,13 @@ class ParticleOpenGLWidget(QOpenGLWidget):
         if self.timer.isActive():
             self._start_timer()
 
-    def apply_winapi(self):
-        if sys.platform != "win32":
-            return
-        hwnd = int(self.winId())
-        GWL_EXSTYLE = -20
-        WS_EX_LAYERED = 0x80000
-        style = ctypes.windll.user32.GetWindowLongW(hwnd, GWL_EXSTYLE)
-        ctypes.windll.user32.SetWindowLongW(hwnd, GWL_EXSTYLE, style | WS_EX_LAYERED)
+    def apply_winapi(self, api: Optional[ExStyleApi] = None) -> bool:
+        """Make the window layered on Windows; ``api`` replaces user32 in tests."""
+        if api is None:
+            if sys.platform != "win32":
+                return False
+            api = ExStyleApi.native()
+        return add_layered_style(int(self.winId()), api)
 
     def initializeGL(self):
         # Checked once the context exists, outside initializeGL, like the GPU compositor.
