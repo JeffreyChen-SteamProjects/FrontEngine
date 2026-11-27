@@ -32,7 +32,7 @@ from frontengine.ui.menu.preset_menu import (
     save_last_session,
 )
 from frontengine.ui.menu.settings_menu import build_settings_menu
-from frontengine.ui.page.control_center.control_center_ui import ControlCenterUI
+from frontengine.ui.page.control_center.control_center_ui import ControlCenterUI, capture_report_message
 from frontengine.ui.page.focus.focus_setting_ui import FocusSettingUI
 from frontengine.ui.page.gif.gif_setting_ui import GIFSettingUI
 from frontengine.ui.page.image.image_setting_ui import ImageSettingUI
@@ -578,6 +578,9 @@ class FrontEngineMainUI(QMainWindow):
         if source == "web":
             field = getattr(page, "web_url_input", None)
             return bool(field is not None and field.text().strip())
+        has_source = getattr(page, "has_playable_source", None)
+        if callable(has_source):
+            return bool(has_source())
         return bool(getattr(page, "ready_to_play", False))
 
     def _start_screensaver(self, source: str) -> None:
@@ -1155,12 +1158,10 @@ class FrontEngineMainUI(QMainWindow):
         """
         front_engine_logger.info(
             f"[MainUI] screen sharing={sharing}" + (f" | {match}" if match else ""))
-        self.control_center_ui.set_hide_from_capture(sharing)
+        report = self.control_center_ui.set_auto_hide_from_capture(sharing)
         self.pet_home_ui.sharing_changed(sharing)
-        if sharing:
-            self._last_toast = show_toast(
-                language_wrapper.language_word_dict.get(
-                    "screen_privacy_toast", "Overlays hidden from screen capture"))
+        if sharing and report is not None:
+            self._last_toast = show_toast(capture_report_message(report, sharing=True))
 
     @owned_callback
     def _show_reminder(self, label: str) -> None:
@@ -1180,23 +1181,48 @@ class FrontEngineMainUI(QMainWindow):
         else:
             user_setting_dict["clipboard_entries"] = []
 
-    def set_usage_tracking(self, enabled: bool) -> None:
-        """開關使用時間統計並記住選擇。"""
-        user_setting_dict["usage_tracking"] = bool(enabled)
-        write_user_setting()
+    def set_usage_tracking(self, enabled: bool) -> bool:
+        """
+        開關使用時間統計並記住選擇。
+        Stopping takes effect before the choice is saved, so a failed write cannot keep
+        sampling going; True when the choice was saved.
+        """
+        if not enabled:
+            self.usage_service.stop()
+        saved = self._remember_collection_choice("usage_tracking", enabled)
         if enabled:
             self.usage_service.start()
-        else:
-            self.usage_service.stop()
+        return saved
 
-    def set_clipboard_history(self, enabled: bool) -> None:
-        """開關剪貼簿歷史紀錄並記住選擇。"""
-        user_setting_dict["clipboard_history"] = bool(enabled)
-        write_user_setting()
+    def set_clipboard_history(self, enabled: bool) -> bool:
+        """
+        開關剪貼簿歷史紀錄並記住選擇。
+        Stopping takes effect before the choice is saved, so a failed write cannot keep
+        the watcher reading the clipboard; True when the choice was saved.
+        """
+        if not enabled:
+            self.clipboard_watcher.stop()
+        saved = self._remember_collection_choice("clipboard_history", enabled)
         if enabled:
             self.clipboard_watcher.start()
-        else:
-            self.clipboard_watcher.stop()
+        return saved
+
+    def _remember_collection_choice(self, key: str, enabled: bool) -> bool:
+        """
+        Keep the choice in the live settings and save it; on a failed write tell the user
+        that this session follows the choice but the next launch may not.
+        """
+        user_setting_dict[key] = bool(enabled)
+        try:
+            write_user_setting()
+        except (OSError, TypeError, ValueError) as error:
+            front_engine_logger.warning(f"[MainUI] could not save {key}={bool(enabled)}: {error!r}")
+            self._last_toast = show_toast(translate(
+                "settings_choice_not_saved",
+                "Applied for now, but the choice could not be saved: "
+                "the next launch may still use the previous setting"))
+            return False
+        return True
 
     def refresh_rule_services(self) -> None:
         """

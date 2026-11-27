@@ -237,6 +237,22 @@ class ImageSettingUI(SettingPage):
         self.image_widget_list.append(image_widget)
         return image_widget
 
+    def has_playable_source(self) -> bool:
+        """Whether start_play_image would show a picture without asking for one."""
+        if self.slideshow_checkbox.isChecked() and self._slideshow_has_images():
+            return True
+        return bool(self.image_path and self.ready_to_play)
+
+    def _slideshow_has_images(self) -> bool:
+        """Whether the chosen slideshow folder holds a picture; reads the folder, changes nothing."""
+        if not self.slideshow_folder:
+            return False
+        return bool(list_media_files(
+            self.slideshow_folder,
+            _SLIDESHOW_EXTENSIONS,
+            recursive=self.slideshow_recursive_checkbox.isChecked(),
+        ))
+
     @owned_action
     def start_play_image(self) -> None:
         front_engine_logger.info("[ImageSettingUI] start_play_image")

@@ -4,6 +4,8 @@
 Pure-logic tests for screen-sharing privacy: what counts as sharing, and why a
 masking overlay must not be hidden along with the rest.
 """
+import pytest
+
 from frontengine.utils.screen_privacy.capture_affinity import (
     WDA_EXCLUDEFROMCAPTURE, WDA_NONE, available, apply_to_widget, apply_to_widgets,
     is_excluded_from_capture, set_excluded_from_capture,
@@ -140,3 +142,145 @@ def test_an_ordinary_overlay_does_not_ask_to_stay() -> None:
     toast = ToastWidget("hello")
     assert toast.keep_in_capture is False
     toast.close()
+
+
+# --- the capture policy behind the control center -------------------------
+def _fake_affinity(monkeypatch, refuse=(), supported=True):
+    """Record what each overlay was told; the overlays in ``refuse`` never take it."""
+    from frontengine.utils.screen_privacy import capture_affinity
+
+    told = {}
+
+    def apply(widget, excluded):
+        if any(widget is refused for refused in refuse) or not supported:
+            return False
+        told[id(widget)] = excluded
+        return True
+    monkeypatch.setattr(capture_affinity, "apply_to_widget", apply)
+    monkeypatch.setattr(capture_affinity, "available", lambda: supported)
+    return told
+
+
+def _shown_overlay(window):
+    from PySide6.QtWidgets import QWidget
+
+    widget = QWidget()
+    widget.show()
+    window.image_setting_ui.image_widget_list.append(widget)
+    return widget
+
+
+def _tear_down(window, widgets):
+    window.control_center_ui.set_auto_hide_from_capture(False)
+    window.control_center_ui.set_hide_from_capture(False)
+    for widget in widgets:
+        widget.close()
+    window.image_setting_ui.image_widget_list.clear()
+
+
+def _toasts(monkeypatch):
+    from frontengine.ui import main_ui
+    from frontengine.ui.page.control_center import control_center_ui
+
+    shown = []
+    monkeypatch.setattr(main_ui, "show_toast", lambda message, *rest, **named: shown.append(message))
+    monkeypatch.setattr(control_center_ui, "show_toast", lambda message, *rest, **named: shown.append(message))
+    return shown
+
+
+def test_a_meeting_ending_keeps_the_users_own_hide(make_main_window, monkeypatch) -> None:
+    from frontengine.utils.screen_privacy import capture_affinity
+
+    told = _fake_affinity(monkeypatch)
+    window = make_main_window()
+    _toasts(monkeypatch)
+    centre = window.control_center_ui
+    existing = _shown_overlay(window)
+    later = None
+    try:
+        centre.set_hide_from_capture(True)
+        window._on_sharing_changed(True, "zoom")
+        window._on_sharing_changed(False, "")
+        assert told[id(existing)] is True
+        assert centre.hidden_from_capture and capture_affinity.hidden()
+        assert centre.capture_button.text() == "Show in capture"
+        later = _shown_overlay(window)
+        assert told[id(later)] is True, "an overlay opened after the meeting is still hidden"
+        centre.set_hide_from_capture(False)
+        assert told[id(existing)] is False and told[id(later)] is False
+    finally:
+        _tear_down(window, [existing] + ([later] if later else []))
+
+
+def test_a_meeting_alone_hides_and_then_releases_the_overlays(make_main_window, monkeypatch) -> None:
+    told = _fake_affinity(monkeypatch)
+    window = make_main_window()
+    _toasts(monkeypatch)
+    existing = _shown_overlay(window)
+    try:
+        window._on_sharing_changed(True, "zoom")
+        assert told[id(existing)] is True
+        assert window.control_center_ui.capture_button.text() == "Hide from capture"
+        window._on_sharing_changed(False, "")
+        assert told[id(existing)] is False and not window.control_center_ui.hidden_from_capture
+    finally:
+        _tear_down(window, [existing])
+
+
+def test_the_capture_report_names_each_outcome() -> None:
+    from frontengine.utils.screen_privacy.capture_affinity import CaptureReport
+
+    assert CaptureReport(True, False, 0, 0).outcome == "unsupported"
+    assert CaptureReport(True, True, 0, 0).outcome == "none"
+    assert CaptureReport(True, True, 2, 0).outcome == "all"
+    assert CaptureReport(True, True, 1, 1).outcome == "partial"
+    assert CaptureReport(True, True, 0, 2).outcome == "failed"
+    assert CaptureReport(True, True, 1, 2).eligible == 3
+
+
+@pytest.mark.parametrize("open_count, refused, supported, expected", [
+    (2, 0, True, "Overlays hidden from screen capture"),
+    (2, 1, True, "Only 1 of 2 overlays could be hidden from screen capture"),
+    (2, 2, True, "Overlays could not be hidden from screen capture"),
+    (0, 0, True, "Screen sharing detected: no overlays are open to hide"),
+    (1, 0, False, "Screen sharing detected, but this system cannot hide overlays from capture"),
+])
+def test_the_sharing_toast_claims_only_what_took_effect(
+        make_main_window, monkeypatch, open_count, refused, supported, expected) -> None:
+    window = make_main_window()
+    overlays = [_shown_overlay(window) for _ in range(open_count)]
+    _fake_affinity(monkeypatch, refuse=overlays[:refused], supported=supported)
+    shown = _toasts(monkeypatch)
+    try:
+        window._on_sharing_changed(True, "zoom")
+        assert shown == [expected]
+    finally:
+        _tear_down(window, overlays)
+
+
+def test_hiding_by_hand_says_so_when_an_overlay_refuses(make_main_window, monkeypatch) -> None:
+    window = make_main_window()
+    overlays = [_shown_overlay(window), _shown_overlay(window)]
+    _fake_affinity(monkeypatch, refuse=overlays[:1])
+    shown = _toasts(monkeypatch)
+    try:
+        window.control_center_ui.toggle_hide_from_capture()
+        assert shown == ["Only 1 of 2 overlays could be hidden from screen capture"]
+        window.control_center_ui.toggle_hide_from_capture()
+        assert len(shown) == 1, "showing them in the capture again needs no warning"
+    finally:
+        _tear_down(window, overlays)
+
+
+def test_hiding_by_hand_stays_quiet_when_every_overlay_took_it(make_main_window, monkeypatch) -> None:
+    window = make_main_window()
+    overlays = [_shown_overlay(window)]
+    _fake_affinity(monkeypatch)
+    shown = _toasts(monkeypatch)
+    try:
+        report = window.control_center_ui.set_hide_from_capture(True)
+        window.control_center_ui.toggle_hide_from_capture()
+        window.control_center_ui.toggle_hide_from_capture()
+        assert (report.succeeded, report.failed) == (1, 0) and shown == []
+    finally:
+        _tear_down(window, overlays)
