@@ -144,19 +144,29 @@ class VisionOcr:
             return "\n".join(lines)
 
 
-_TESSERACT_PATHS = (
-    r"C:\Program Files\Tesseract-OCR\tesseract.exe", r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe",
-    "/usr/bin/tesseract", "/usr/local/bin/tesseract", "/opt/homebrew/bin/tesseract",
-)
+# Grouped by platform so every candidate is absolute where it is probed: on Windows "/usr/bin/..."
+# is relative to the current drive, and elsewhere "C:\..." is a file name in the current directory.
+_TESSERACT_PATHS = {
+    "win32": (r"C:\Program Files\Tesseract-OCR\tesseract.exe",
+              r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe"),
+    "darwin": ("/opt/homebrew/bin/tesseract", "/usr/local/bin/tesseract", "/usr/bin/tesseract"),
+    "posix": ("/usr/bin/tesseract", "/usr/local/bin/tesseract"),
+}
+
+
+def tesseract_candidates(platform: str = sys.platform) -> tuple[str, ...]:
+    """The fixed absolute paths Tesseract is looked for at on ``platform``."""
+    return _TESSERACT_PATHS.get(platform, _TESSERACT_PATHS["posix"])
 
 
 class TesseractOcr:
     name = "Tesseract"
 
     def __init__(self, language: str = "eng", executable: Optional[str] = None,
-                 runner: Callable = subprocess.run) -> None:
+                 runner: Callable = subprocess.run, platform: str = sys.platform) -> None:
         # Only where it is installed: the search path takes in the current directory on Windows.
-        candidate = executable or next((path for path in _TESSERACT_PATHS if Path(path).is_file()), None)
+        candidate = executable or next(
+            (path for path in tesseract_candidates(platform) if Path(path).is_file()), None)
         self.executable = str(Path(candidate).resolve()) if candidate else None
         self.language = language
         self._runner = runner
