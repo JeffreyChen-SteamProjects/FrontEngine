@@ -32,6 +32,7 @@ from collections import deque
 from datetime import date
 from pathlib import Path
 from time import perf_counter_ns
+from typing import Callable, NamedTuple
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 from PySide6 import __version__ as pyside_version  # noqa: E402
@@ -82,54 +83,89 @@ def build(residents: int, furniture: int):
     return world, zone
 
 
-def measure_load(residents: int, furniture: int, folder: Path) -> dict:
+class Sizes(NamedTuple):
+    """How much each measurement runs; the defaults are the plan's, tests pass tiny ones."""
+    warm_steps: int = WARM_STEPS
+    measure_steps: int = MEASURE_STEPS
+    encodes: int = 30
+    commands: int = 100
+    frames: int = 120
+    long_marks: tuple[int, int, int] = (WARM_STEPS, LONG_STEPS, LONGER_STEPS)
+
+
+def _timed(action: Callable[[int], object], count: int) -> list[int]:
+    """Nanoseconds each of ``count`` calls of ``action(number)`` took."""
+    samples = []
+    for number in range(count):
+        started = perf_counter_ns()
+        action(number)
+        samples.append(perf_counter_ns() - started)
+    return samples
+
+
+def _steps(world, count: int) -> list[int]:
+    from frontengine.utils.pet_game import simulation
+
+    def step(_number: int) -> None:
+        simulation.step(world)
+        world.drain_events()
+    return _timed(step, count)
+
+
+def _close(service, store, storage) -> None:
+    """Close in dependency order: the service saves and lets go of the store, then the session."""
+    try:
+        if service is not None and not service.shutdown():
+            raise RuntimeError("the home service did not shut down")
+        if store is not None:
+            store.close()
+    finally:
+        storage.close()
+
+
+def _measure_home(world, zone, folder: Path, sizes: Sizes) -> dict:
+    """Save encoding, command feedback and strip frames against a home stored in ``folder``."""
     from frontengine.show.pet_game.home_service import HomeService
     from frontengine.show.pet_game.home_strip import HomeStrip
     from frontengine.user_setting.pet_game_save import HomeSaveStore
     from frontengine.user_setting.pet_profiles import PetProfiles
-    from frontengine.utils.pet_game import simulation
+    from frontengine.user_setting.storage_session import StorageSession
+    storage = StorageSession.open(folder)
+    store = service = None
+    try:
+        store = HomeSaveStore(storage, world.catalog)
+        encodes = _timed(lambda _number: store.encode(world), sizes.encodes)
+        service = HomeService(None, store, PetProfiles({}, lambda: None))
+        service.world = world
+        first = next(iter(world.residents))
+        feedback = _timed(lambda number: service.run(
+            lambda w: w.command(first, ("eat", "play", "stop", "sleep")[number % 4])), sizes.commands)
+        strip = HomeStrip(service, zone)
+        frames = _timed(lambda _number: strip.grab(), sizes.frames)
+        strip.close()
+        save_bytes = len(store.encode(world))
+    finally:
+        _close(service, store, storage)
+    return {"operation_feedback": _percentiles(feedback), "save_encode": _percentiles(encodes),
+            "strip_frame": _percentiles(frames), "save_bytes": save_bytes}
+
+
+def measure_load(residents: int, furniture: int, folder: Path, sizes: Sizes = Sizes()) -> dict:
     tracemalloc.start()
-    before = tracemalloc.get_traced_memory()[0]
-    world, zone = build(residents, furniture)
-    for _ in range(WARM_STEPS):
-        simulation.step(world)
-        world.drain_events()
-    steps = []
-    for _ in range(MEASURE_STEPS):
-        started = perf_counter_ns()
-        simulation.step(world)
-        world.drain_events()
-        steps.append(perf_counter_ns() - started)
-    data_mb = (tracemalloc.get_traced_memory()[0] - before) / 2 ** 20
-    store = HomeSaveStore(folder, world.catalog)
-    encodes = []
-    for _ in range(30):
-        started = perf_counter_ns()
-        store.encode(world)
-        encodes.append(perf_counter_ns() - started)
-    service = HomeService(None, store, PetProfiles({}, lambda: None))
-    service.world = world
-    first = next(iter(world.residents))
-    feedback = []
-    for number in range(100):
-        started = perf_counter_ns()
-        service.run(lambda w, n=number: w.command(first, ("eat", "play", "stop", "sleep")[n % 4]))
-        feedback.append(perf_counter_ns() - started)
-    strip = HomeStrip(service, zone)
-    frames = []
-    for _ in range(120):
-        started = perf_counter_ns()
-        strip.grab()
-        frames.append(perf_counter_ns() - started)
-    strip.close()
-    tracemalloc.stop()
+    try:
+        before = tracemalloc.get_traced_memory()[0]
+        world, zone = build(residents, furniture)
+        _steps(world, sizes.warm_steps)
+        steps = _steps(world, sizes.measure_steps)
+        data_mb = (tracemalloc.get_traced_memory()[0] - before) / 2 ** 20
+        home = _measure_home(world, zone, folder, sizes)
+    finally:
+        tracemalloc.stop()
     return {"residents": residents, "furniture": len(world.furniture), "world_step": _percentiles(steps),
-            "operation_feedback": _percentiles(feedback), "save_encode": _percentiles(encodes),
-            "strip_frame": _percentiles(frames), "game_data_mb": round(data_mb, 2),
-            "save_bytes": len(store.encode(world))}
+            **home, "game_data_mb": round(data_mb, 2)}
 
 
-def measure_long(residents: int, furniture: int) -> dict:
+def measure_long(residents: int, furniture: int, marks: tuple[int, int, int] = Sizes().long_marks) -> dict:
     """Step cost and traced memory of the world at game minute 10, two hours and four hours.
 
     Only the world is traced: the timing window is a bounded deque, so the
@@ -140,19 +176,19 @@ def measure_long(residents: int, furniture: int) -> dict:
     window: deque[int] = deque(maxlen=3000)
     tracemalloc.start()
     base = tracemalloc.get_traced_memory()[0]
-    marks = {}
-    for number in range(1, LONGER_STEPS + 1):
+    recorded = {}
+    for number in range(1, marks[-1] + 1):
         started = perf_counter_ns()
         simulation.step(world)
         world.drain_events()
         window.append(perf_counter_ns() - started)
-        if number in (WARM_STEPS, LONG_STEPS, LONGER_STEPS):
-            marks[number] = {"memory_mb": round((tracemalloc.get_traced_memory()[0] - base) / 2 ** 20, 4),
-                             "step": _percentiles(list(window))}
+        if number in marks:
+            recorded[number] = {"memory_mb": round((tracemalloc.get_traced_memory()[0] - base) / 2 ** 20, 4),
+                                "step": _percentiles(list(window))}
     tracemalloc.stop()
-    early, late = marks[WARM_STEPS]["memory_mb"], marks[LONG_STEPS]["memory_mb"]
-    return {"residents": residents, "furniture": furniture, "at_10_min": marks[WARM_STEPS],
-            "at_2_hours": marks[LONG_STEPS], "at_4_hours": marks[LONGER_STEPS],
+    early, late = recorded[marks[0]]["memory_mb"], recorded[marks[1]]["memory_mb"]
+    return {"residents": residents, "furniture": furniture, "at_10_min": recorded[marks[0]],
+            "at_2_hours": recorded[marks[1]], "at_4_hours": recorded[marks[2]],
             "memory_growth_percent": round((late - early) / max(early, 1e-6) * 100, 2),
             "bounded_histories": {"ledger_ids": len(world.ledger._applied), "journal": len(world.ledger.journal),
                                   "life_events": len(world.progress.events), "stats": len(world.progress.stats)}}
@@ -163,11 +199,9 @@ def results_file() -> Path:
     return BENCHMARK_DOCS / f"{date.today():%Y-%m-%d}-pet-home.json"
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--save", action="store_true", help="write docs/benchmarks/<today>-pet-home.json")
-    args = parser.parse_args()
-    app = QApplication.instance() or QApplication(sys.argv)
+def collect(app: QApplication, loads: tuple[tuple[int, int], ...] = LOADS, long_load: tuple[int, int] = (6, 60),
+            sizes: Sizes = Sizes()) -> dict:
+    """The whole report: machine, every load, the long run and the budget verdict on the middle load."""
     screen = app.primaryScreen()
     report = {"machine": {"platform": platform.platform(), "processor": platform.processor(),
                           "cpus": os.cpu_count(), "python": sys.version.split()[0], "pyside": pyside_version,
@@ -176,10 +210,10 @@ def main() -> int:
                           "renderer": "software (offscreen grab)"},
               "budget": BUDGET, "loads": [], "long": None}
     with tempfile.TemporaryDirectory() as folder:
-        for residents, furniture in LOADS:
-            report["loads"].append(measure_load(residents, furniture, Path(folder)))
-    report["long"] = measure_long(6, 60)
-    middle = report["loads"][1]
+        for residents, furniture in loads:
+            report["loads"].append(measure_load(residents, furniture, Path(folder), sizes))
+    report["long"] = measure_long(*long_load, sizes.long_marks)
+    middle = report["loads"][len(loads) // 2]
     report["within_budget"] = {
         "tick_p95_ms": middle["world_step"]["p95_ms"] <= BUDGET["tick_p95_ms"],
         "feedback_p95_ms": middle["operation_feedback"]["p95_ms"] <= BUDGET["feedback_p95_ms"],
@@ -187,6 +221,14 @@ def main() -> int:
     }
     # The plan treats more than 10% growth between minute 10 and hour 2 as something to investigate.
     report["investigate_memory_growth"] = report["long"]["memory_growth_percent"] > 10
+    return report
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--save", action="store_true", help="write docs/benchmarks/<today>-pet-home.json")
+    args = parser.parse_args()
+    report = collect(QApplication.instance() or QApplication(sys.argv))
     text = json.dumps(report, indent=2)
     if args.save:
         results_file().write_text(text + "\n", encoding="utf-8")
