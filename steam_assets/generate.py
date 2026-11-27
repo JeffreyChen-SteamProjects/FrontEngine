@@ -40,7 +40,21 @@ from frontengine.ui.style.tokens import DARK as DARK_TOKENS  # noqa: E402
 # 相對於這個檔案定位，換一台機器 clone 下來一樣跑得動
 # Located relative to this file, so a fresh clone on another machine still runs
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT = os.path.abspath(sys.argv[1]) if len(sys.argv) > 1 else os.path.join(REPO, "steam_assets")
+
+
+def output_folder(argv: list[str], launch_dir: "os.PathLike[str] | str", default: str) -> str:
+    """The folder the assets go to: the first argument, or ``default`` without one.
+
+    A relative argument is read against ``launch_dir``, the folder the script was started in:
+    importing trailer has already moved the process into its staging folder, so the current
+    directory is the wrong base by now. An absolute argument is kept as given.
+    """
+    if not argv:
+        return default
+    return os.path.abspath(os.path.join(os.fspath(launch_dir), argv[0]))
+
+
+OUT = output_folder(sys.argv[1:], trailer.LAUNCH_DIR, os.path.join(REPO, "steam_assets"))
 
 NAME = "FrontEngine"
 TAGLINE = "Put anything on top of your screen"
